@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<string name="message_error">Error: %s</string>
+	<string name="message_error_createdir">Cannot create %s</string>
+	<string name="message_error_multitouch">Multitouch is not supported by your device</string>
+	<string name="message_error_audio">Cannot initialize audio. Please, restart the song</string>
+	<string name="message_error_sdcard">External storage is not mounted</string>
+	<string name="message_error_sdcardread">External storage is read only</string>
+	<string name="message_error_open">Cannot open %s</string>
+	<string name="message_error_mapmode">Invalid map mode: %s</string>
+	<string name="message_error_connect">Cannot connect to server</string>
+	<string name="message_error_connectlimit">Reached limit of connection errors</string>
+	<string name="message_error_download">Cannot download %s</string>
+
+	<string name="message_standardplayer">Switching to standard player</string>
+	<string name="message_connecting">Connecting to server...</string>
+	<string name="message_downloaded">%s downloaded!</string>
+
+	<string name="message_lib_update">Updating library...</string>
+	<string name="message_lib_caching">Caching library... It may take few minutes</string>
+	<string name="message_lib_complete">Caching complete. Found %d beatmaps</string>
+	<string name="message_lib_cleared">Cache cleared</string>
+	<string name="message_lib_importing">Importing beatmap...</string>
+	<string name="message_lib_importing_several">Found %s archived beatmaps. Importing...</string>
+	<string name="message_lib_imported">\"%s\" has been imported!</string>
+
+	<string name="message_extension_not_found">No extension app found.</string>
+	<string name="message_open_beatmap_in_extension">Open beatmap in extension</string>
+
+	<string name="dialog_playername_title">Enter player name</string>
+	<string name="dialog_playername_message">Enter your name. It will be used for scoring.</string>
+	<string name="dialog_ok">Ok</string>
+	<string name="dialog_cancel">Cancel</string>
+	<string name="dialog_search_title">Search</string>
+	<string name="dialog_search_message">Enter search query</string>
+	<string name="dialog_register">Register</string>
+
+	<string name="dialog_delete_pp_title">Reset your pp?</string>
+	<string name="dialog_delete_pp_make_sure">Really?</string>
+	<string name="dialog_delete_pp_deleted">PP reset</string>
+
+	<string name="favorite_folder">Folder:</string>
+	<string name="favorite_default">Default</string>
+	<string name="favorite_select">Select</string>
+	<string name="favorite_delete">Delete Folder</string>
+	<string name="favorite_add">Add</string>
+	<string name="favorite_remove">Remove</string>
+	<string name="favorite_new_folder">Create new folder</string>
+	<string name="favorite_warning_on_delete_default">you can\'t delete default folder</string>
+	<string name="favorite_ensure">Are you sure?</string>
+	<string name="favorite_manage">Manage Beatmap folder</string>
+
+	<string name="menu_score" formatted="false">Score: %s (%dx)</string>
+	<string name="menu_creator">Creator: %s</string>
+	<string name="menu_mod_back">Back</string>
+	<string name="menu_mod_title">Mod selection</string>
+	<string name="menu_mod_multiplier" formatted="false">Score %.2fx</string>
+	<string name="menu_mod_reset">Reset all mods</string>
+
+	<string name="menu_properties_title">Song properties</string>
+	<string name="menu_properties_offset">Song offset:</string>
+	<string name="menu_properties_tofavs">Add to favorites</string>
+	<string name="menu_properties_fromfavs">Remove from favorites</string>
+	<string name="menu_properties_delete">Delete map</string>
+	<string name="menu_properties_delete_confirm">Are you sure?</string>
+
+	<string name="menu_deletescore_title">Delete selected score</string>
+	<string name="menu_deletescore_delete">Delete</string>
+	<string name="menu_deletescore_delete_confirm">Are you sure?</string>
+	<string name="menu_deletescore_delete_success">Delete score success!</string>
+
+	<string name="menu_search_title">Search options</string>
+	<string name="menu_search_filter">Search for:</string>
+	<string name="menu_search_sort">Sort by:</string>
+	<string name="menu_search_sort_title">Title</string>
+	<string name="menu_search_sort_date">Date</string>
+	<string name="menu_search_sort_creator">Creator</string>
+	<string name="menu_search_sort_artist">Artist</string>
+	<string name="menu_search_favsenabled">Favorites only: enabled</string>
+	<string name="menu_search_favsdisabled">Favorites only: disabled</string>
+
+	<string name="downloader_page" formatted="false">Page %d of %d</string>
+	<string name="downloader_nomaps">No beatmaps found</string>
+
+	<string name="hint_login">Login</string>
+	<string name="hint_password">Password</string>
+	<string name="hint_confirm">Confirm password</string>
+	<string name="hint_email">E-mail</string>
+
+	<string name="replay_invalid">Cannot load replay</string>
+	<string name="replay_cantdownload">Cannot download replay</string>
+	<string name="replay_wrongmap">Replay doesn\'t match the map</string>
+	<string name="replay_corrupted">Replay file is corrupted</string>
+
+	<string name="online_registration">Registration</string>
+	<string name="online_registration_process">Registering...</string>
+	<string name="online_loadrecord">Loading record details...</string>
+	<string name="online_invlogin">Invalid login</string>
+	<string name="online_invpassword">Password should be 4-32 characters</string>
+	<string name="online_invconfirm">Passwords don\'t match</string>
+	<string name="online_invemail">Invaild e-mail</string>
+	<string name="online_regcomplete">Registration complete. Restart app to login</string>
+
+	<!-- Color Picker -->
+	<string name="dialog_color_picker">Color Picker</string>
+	<string name="press_color_to_apply">Press on Color to apply</string>
+
+	<string name="network_not_connected">网络连接失败，请检查网络设置</string>
+	<string name="xml_parser_failed">数据解析异常</string>
+	<string name="io_exception_error">文件流异常</string>
+	<string name="http_status_code_error">网络异常，错误码：%d</string>
+	<string name="http_exception_error">网络异常，请求超时</string>
+	<string name="socket_exception_error">网络异常，读取数据超时</string>
+
+	<string name="binfoStr1" formatted="false">Length: %s BPM: %s Combo: %d</string>
+	<string name="binfoStr2" formatted="false">Circles: %d Sliders: %d Spinners: %d (MapId: %d)</string>
+
+	<!-- Color -->
+	<color name="notify_title_color">#fff</color>
+
+	<!-- Crash -->
+	<string name="crash">Sorry, abnormal program will now exit.</string>
+	<string name="app_run_code_error">Fatal error encountered</string>
+	<string name="osu_parser_error">The difficulty parsing error</string>
+	<string name="require_storage_permission">Game wont run without storage permission, please enable it manually</string>
+
+	<string name="update_dialog_title">New Version Available</string>
+	<string name="update_dialog_button_confirm">Update Now</string>
+	<string name="update_dialog_button_later">Later</string>
+	<string name="update_info_checking">Checking for updates, please wait</string>
+	<string name="update_info_runs_latest">You are running the latest version</string>
+
+	<string name="test_ed_storyboard">View storyboard (experiment)</string>
+
+	<string name="mod_precise_is_unrank_now">MOD_PRECISE is unrank now</string>
+
+
+	<!-- new data after 1.6.7(beta1) -->
+    <string name="beta_checking_upgrade">Checking Upgrade...</string>
+	<string name="beta_check_upgrade_error">Failed to check new version, try again later</string>
+	<string name="beta_you_are_the_latest_version">You are already using the latest version</string>
+	<string name="beta_downloading">Downloading</string>
+	<string name="beta_click_to_view">Click to view</string>
+	<string name="beta_click_to_install">Install</string>
+	<string name="beta_click_to_retry">Retry</string>
+	<string name="beta_click_to_continue">Continue</string>
+	<string name="beta_download_success">Download successful</string>
+	<string name="beta_download_error">Download failed</string>
+	<string name="beta_have_new_version">New version available</string>
+    <string name="menu_map_updatable">Update beatmap</string>
+    <string name="message_loading_skin">Applying new skin</string>
+
+
+	<string name="message_error_dir_not_found">Directory is not found</string>
+
+	<string name="message_update_hint">Long press to update</string>
+	<string name="message_update_download_success">Update Successful!</string>
+	<string name="message_update_download_fail">Update fail, try again later</string>
+	<string name="message_update_ppy_unavailable">This map can not be downloaded on ppy\n\n</string>
+
+</resources>

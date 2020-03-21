@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/frgDialogStyleBackground"
+    android:id="@+id/frg_background">
+
+
+    <LinearLayout
+        android:id="@+id/fullLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_alignParentBottom="true"
+                android:background="@drawable/shadow"
+                android:rotation="180" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:layout_alignParentBottom="true"
+                android:background="@drawable/shadow"
+                android:rotation="180" />
+
+            <RelativeLayout
+                android:id="@+id/showMoreButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true">
+
+                <View
+                    android:layout_width="150dp"
+                    android:layout_height="25dp"
+                    android:background="#99E63E8C" />
+
+                <com.edlplan.ui.TriangleEffectView
+                    android:layout_width="150dp"
+                    android:layout_height="25dp"
+                    android:alpha="0.5" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="@string/menu_properties_title"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+        </RelativeLayout>
+
+
+        <LinearLayout
+            android:id="@+id/optionBody"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/frgBodyBackgroundLight"
+            android:clickable="true"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="5dp"
+                    android:background="@color/triangleBackground" />
+
+                <com.edlplan.ui.TriangleEffectView
+                    android:layout_width="match_parent"
+                    android:layout_height="5dp" />
+            </RelativeLayout>
+
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="20dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="2dp"
+                        android:layout_marginRight="5dp"
+                        android:text="@string/menu_properties_offset" />
+
+                    <EditText
+                        android:id="@+id/offsetBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="#FFFFFFFF"
+                        android:ems="5"
+                        android:text="0"
+                        android:inputType="numberSigned" />
+
+                </LinearLayout>
+
+                <CheckBox
+                    android:id="@+id/addToFav"
+                    android:layout_marginLeft="-5dp"
+                    android:text="@string/menu_properties_tofavs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <RelativeLayout
+                    android:id="@+id/manageFavButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <View
+                        android:layout_width="150dp"
+                        android:layout_height="25dp"
+                        android:background="#99E63E8C" />
+
+                    <com.edlplan.ui.TriangleEffectView
+                        android:layout_width="150dp"
+                        android:layout_height="25dp"
+                        android:alpha="0.5" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="@string/favorite_manage"
+                        android:textColor="#FFFFFFFF"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_marginTop="30dp"
+                    android:id="@+id/deleteBeatmap"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <View
+                        android:layout_width="150dp"
+                        android:layout_height="25dp"
+                        android:background="#FF0000" />
+
+                    <com.edlplan.ui.TriangleEffectView
+                        android:layout_width="150dp"
+                        android:layout_height="25dp"
+                        android:alpha="0.5" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="@string/menu_properties_delete"
+                        android:textColor="#FFFFFFFF"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</RelativeLayout>

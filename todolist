@@ -1,0 +1,54 @@
+* 设置隐藏navbar
+* DT
+* 皮肤
+纯黑背景（dim）
+注意DT之后的release！
+
+
+* 四维
+- beatmap支持中文名
+* GC优化，大heap
+* dt的ar缩圈
+* spinner
+* 几个mod不能共存
+* loading慢
+
+* dim转盘后变回100
+* 去掉原来的播放器
+* 多语言
+- 1 2...以外的音效支持
+- 可以自定义背景
+* 爆音是float问题，无解了
+
+加载榜单改为异步实现
+雪月花skystar
+overtune
+使用自定义背景是时候禁用透明
+修改滑条生成算法
+
+视频背景
+透明滑条
+多线程读文件
+滑条尾
+comboburst无法自定义
+击打延迟指针
+默认背景颜色
+nc beat
+fail background
+pc账号登陆
+判定修改之前:重写按键逻辑, miss范围外摇动note
+
+分辨率还是改回854*480吧。。。承担不了720p的分辨率 m(-_-)m
+透明滑条:
+IEntity转手动绘制 -> GameScene Camera恢复视口
+
+卡顿基本因为GameObjectListener, 限制非首个object不获取点击状态好了
+
+音效addition叠加
+spinner淡入的时候不能转
+target小于23要覆盖
+NetIOUtils
+spriteBatch其实是gen一堆vertex array, 然后一次draw?
+create directory /Songs mkdirs
+视频!!
+图片隐写
