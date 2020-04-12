@@ -20,12 +20,14 @@ import java.util.List;
 import java.util.Locale;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
+import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class ScoreMenuFragment extends BaseFragment {
 
     private int scoreId;
+    private SongMenu menu;
 
     public ScoreMenuFragment() {
         setDismissOnBackgroundClick(true);
@@ -76,6 +78,32 @@ public class ScoreMenuFragment extends BaseFragment {
                 }
             }
         });
+        findViewById(R.id.deleteReplay).setOnClickListener(v -> {
+            ConfirmDialogFragment confirm = new ConfirmDialogFragment();
+            confirm.showForResult(isAccepted -> {
+                if (isAccepted) {
+                    List<OsuDroidReplay> replays = OdrDatabase.get().getReplayById(scoreId);
+                    if (replays.size() == 0) {
+                        return;
+                    } else {
+                        try {
+                            if (OdrDatabase.get().deleteReplay(scoreId) == 0) {
+                                throw new Exception();
+                            }
+                            menu.reloadScoreBroad();
+
+                            findViewById(R.id.deleteReplay).setVisibility(View.GONE);
+                            Snackbar.make(v, getResources().getString(R.string.menu_deletescore_delete_success), Snackbar.LENGTH_SHORT)
+                                    .show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            // TODO: 添加字符串资源
+                            Toast.makeText(v.getContext(), "Failed to delete replay!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            });
+        });
         playOnLoadAnim();
     }
 
@@ -119,7 +147,8 @@ public class ScoreMenuFragment extends BaseFragment {
     }
 
 
-    public void show(int scoreId) {
+    public void show(SongMenu menu, int scoreId) {
+        this.menu = menu;
         this.scoreId = scoreId;
         show();
     }

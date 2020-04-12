@@ -137,4 +137,8 @@ public class OdrDatabase {
         return replays;
     }
 
+    public int deleteReplay(int id){
+        return database.delete("scores", "id = ?", new String[]{String.valueOf(id)});
+    }
+
 }

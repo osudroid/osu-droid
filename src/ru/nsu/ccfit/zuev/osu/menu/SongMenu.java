@@ -1167,7 +1167,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void showDeleteScoreMenu(int scoreId) {
-        (new ScoreMenuFragment()).show(scoreId);
+        (new ScoreMenuFragment()).show(SongMenu.this, scoreId);
         //ScorePropsMenu.getInstance().setSongMenu(SongMenu.this);
         //ScorePropsMenu.getInstance().setScoreId(scoreId);
         //scene.setChildScene(ScorePropsMenu.getInstance().getScene(), false, true, true);

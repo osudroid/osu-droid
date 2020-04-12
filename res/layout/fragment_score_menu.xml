@@ -122,6 +122,31 @@
                         android:textStyle="bold" />
                 </RelativeLayout>
 
+                <RelativeLayout
+                    android:id="@+id/deleteReplay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp">
+
+                    <View
+                        android:layout_width="150dp"
+                        android:layout_height="25dp"
+                        android:background="#99E63E8C" />
+
+                    <com.edlplan.ui.TriangleEffectView
+                        android:layout_width="150dp"
+                        android:layout_height="25dp"
+                        android:alpha="0.5" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="@string/menu_deletescore_delete"
+                        android:textColor="#FFFFFFFF"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+
             </LinearLayout>
 
 
