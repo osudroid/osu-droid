@@ -31,6 +31,12 @@ android {
     }
 
     useLibrary 'org.apache.http.legacy'
+
+    lintOptions {
+        abortOnError true
+        ignoreWarnings true
+        disable 'ExpiredTargetSdkVersion'
+    }
 }
 
 dependencies {

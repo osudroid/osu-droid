@@ -204,7 +204,7 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 			ActivityUtils.keepScreenOn(this);
 		} else {
 			final PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
-			this.mWakeLock = pm.newWakeLock(pWakeLockOptions.getFlag() | PowerManager.ON_AFTER_RELEASE, "AndEngine");
+			this.mWakeLock = pm.newWakeLock(pWakeLockOptions.getFlag() | PowerManager.ON_AFTER_RELEASE, "andengine:AndEngine");
 			try {
 				this.mWakeLock.acquire();
 			} catch (final SecurityException e) {
