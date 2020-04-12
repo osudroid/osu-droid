@@ -144,7 +144,7 @@ public class MainActivity extends BaseGameActivity implements
         Config.setTextureQuality(1);
         final PowerManager manager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = manager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
-                "osu!");
+                "osudroid:osu");
 
         Camera mCamera = new SmoothCamera(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT(), 0, 1800, 1);
@@ -584,7 +584,7 @@ public class MainActivity extends BaseGameActivity implements
 
                     if (wakeLock == null) {
                         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-                        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MainActivity");
+                        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "osudroid:MainActivity");
                     }
                     wakeLock.acquire();
 
