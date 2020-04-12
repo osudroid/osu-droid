@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Locale;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -86,10 +85,14 @@ public class ScoreMenuFragment extends BaseFragment {
                         return;
                     } else {
                         try {
-                            OdrDatabase.get().deleteReplay(scoreId);
+                            if (OdrDatabase.get().deleteReplay(scoreId) == 0) {
+                                Snackbar.make(v, "Failed to delete replay!", Snackbar.LENGTH_SHORT)
+                                        .show();
+                            } else {
+                                Snackbar.make(v, getResources().getString(R.string.menu_deletescore_delete_success), Snackbar.LENGTH_SHORT)
+                                        .show();
+                            }
                             ScoreMenuFragment.this.dismiss();
-                            Snackbar.make(v, getResources().getString(R.string.menu_deletescore_delete_success), Snackbar.LENGTH_SHORT)
-                                    .show();
                         } catch (Exception e) {
                             e.printStackTrace();
                             // TODO: 添加字符串资源
