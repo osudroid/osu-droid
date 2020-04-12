@@ -82,7 +82,7 @@ android {
             zipAlignEnabled true
             minifyEnabled true
             proguardFile 'proguard.cfg'
-            signingConfig signingConfigs.release
+            //signingConfig signingConfigs.release
         }
     }
 
