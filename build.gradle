@@ -49,7 +49,7 @@ android {
         }
     }
 
-    signingConfigs {
+    /*signingConfigs {
         release {
             try {
                 storeFile file('release.jks')
@@ -60,7 +60,7 @@ android {
                 throw new InvalidUserDataException('You should define KEYSTORE_PASSWORD and KEY_PASSWORD in gradle.properties.')
             }
         }
-    }
+    }*/
 
     buildTypes {
         debug {
@@ -82,7 +82,7 @@ android {
             zipAlignEnabled true
             minifyEnabled true
             proguardFile 'proguard.cfg'
-            signingConfig signingConfigs.release
+            //signingConfig signingConfigs.release
         }
     }
 
