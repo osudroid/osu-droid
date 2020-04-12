@@ -84,7 +84,13 @@ public class MainScene implements IUpdateHandler {
     private ChangeableText musicInfoText;
     //    private ArrayList<BeatmapInfo> beatmaps;
     private Random random = new Random();
-    private Rectangle[] spectrum = new Rectangle[120];
+
+    private Rectangle[] spectrum1 = new Rectangle[120];
+    private Rectangle[] spectrum2 = new Rectangle[120];
+    private Rectangle[] spectrum3 = new Rectangle[120];
+    private Rectangle[] spectrum4 = new Rectangle[120];
+    private Rectangle[] spectrum5 = new Rectangle[120];
+
     private float[] peakLevel = new float[120];
     private float[] peakDownRate = new float[120];
     private float[] peakAlpha = new float[120];
@@ -289,7 +295,7 @@ public class MainScene implements IUpdateHandler {
 
         final Text author = new Text(10, 530, ResourceManager
                 .getInstance().getFont("font"),
-                "osu!droid by Pesets&neico\nosu! is \u00a9 peppy 2007-2019") {
+                "osu!droid is in Development\n osu!droid by Pesets&neico\nosu! is \u00a9 peppy 2007-2020") {
 
 
             @Override
@@ -464,13 +470,42 @@ public class MainScene implements IUpdateHandler {
             final float pX = Config.getRES_WIDTH() / 2;
             final float pY = Config.getRES_HEIGHT() / 2;
 
-            spectrum[i] = new Rectangle(pX, pY, 260, 10);
-            spectrum[i].setRotationCenter(0, 5);
-            spectrum[i].setScaleCenter(0, 5);
-            spectrum[i].setRotation(-220 + i * 3f);
-            spectrum[i].setAlpha(0.0f);
+            spectrum1[i] = new Rectangle(pX, pY, 260, 10);
+            spectrum1[i].setRotationCenter(0, 0);
+            spectrum1[i].setScaleCenter(0, 0);
+            spectrum1[i].setRotation(72 + i * 3f);
+            spectrum1[i].setAlpha(0.0f);
+            scene.attachChild(spectrum1[i]);
 
-            scene.attachChild(spectrum[i]);
+            spectrum2[i] = new Rectangle(pX, pY, 260, 10);
+            spectrum2[i].setRotationCenter(0, 0);
+            spectrum2[i].setScaleCenter(0, 0);
+            spectrum2[i].setRotation(144 + i * 3f);
+            spectrum2[i].setAlpha(0.0f);
+            scene.attachChild(spectrum2[i]);
+
+            spectrum3[i] = new Rectangle(pX, pY, 260, 10);
+            spectrum3[i].setRotationCenter(0, 0);
+            spectrum3[i].setScaleCenter(0, 0);
+            spectrum3[i].setRotation(216 + i * 3f);
+            spectrum3[i].setAlpha(0.0f);
+            scene.attachChild(spectrum3[i]);
+
+            spectrum4[i] = new Rectangle(pX, pY, 260, 10);
+            spectrum4[i].setRotationCenter(0, 0);
+            spectrum4[i].setScaleCenter(0, 0);
+            spectrum4[i].setRotation(288 + i * 3f);
+            spectrum4[i].setAlpha(0.0f);
+            scene.attachChild(spectrum4[i]);
+
+
+            spectrum5[i] = new Rectangle(pX, pY, 260, 10);
+            spectrum5[i].setRotationCenter(0, 0);
+            spectrum5[i].setScaleCenter(0, 0);
+            spectrum5[i].setRotation(360 + i * 3f);
+            spectrum5[i].setAlpha(0.0f);
+            scene.attachChild(spectrum5[i]);
+
         }
 
         LibraryManager.getInstance().loadLibraryCache((Activity) context, false);
@@ -757,10 +792,27 @@ public class MainScene implements IUpdateHandler {
     public void onUpdate(final float pSecondsElapsed) {
         beatPassTime += pSecondsElapsed * 1000f;
         if (isOnExitAnim) {
-            for (Rectangle specRectangle : spectrum) {
+            for (Rectangle specRectangle : spectrum1) {
                 specRectangle.setWidth(0);
                 specRectangle.setAlpha(0);
             }
+            for (Rectangle specRectangle : spectrum2) {
+                specRectangle.setWidth(0);
+                specRectangle.setAlpha(0);
+            }
+            for (Rectangle specRectangle : spectrum3) {
+                specRectangle.setWidth(0);
+                specRectangle.setAlpha(0);
+            }
+            for (Rectangle specRectangle : spectrum4) {
+                specRectangle.setWidth(0);
+                specRectangle.setAlpha(0);
+            }
+            for (Rectangle specRectangle : spectrum5) {
+                specRectangle.setWidth(0);
+                specRectangle.setAlpha(0);
+            }
+
             return;
         }
 
@@ -772,8 +824,20 @@ public class MainScene implements IUpdateHandler {
         if (doMenuShow == true && isMenuShowed == false) {
             logo.registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, EaseExponentialOut.getInstance()));
             logoOverlay.registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, EaseExponentialOut.getInstance()));
-            for (int i = 0; i < spectrum.length; i++) {
-                spectrum[i].registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2, Config.getRES_WIDTH() / 3, EaseExponentialOut.getInstance()));
+            for (int i = 0; i < spectrum1.length; i++) {
+                spectrum1[i].registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2, Config.getRES_WIDTH() / 3, EaseExponentialOut.getInstance()));
+            }
+            for (int i = 0; i < spectrum2.length; i++) {
+                spectrum2[i].registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2, Config.getRES_WIDTH() / 3, EaseExponentialOut.getInstance()));
+            }
+            for (int i = 0; i < spectrum3.length; i++) {
+                spectrum3[i].registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2, Config.getRES_WIDTH() / 3, EaseExponentialOut.getInstance()));
+            }
+            for (int i = 0; i < spectrum4.length; i++) {
+                spectrum4[i].registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2, Config.getRES_WIDTH() / 3, EaseExponentialOut.getInstance()));
+            }
+            for (int i = 0; i < spectrum5.length; i++) {
+                spectrum5[i].registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2, Config.getRES_WIDTH() / 3, EaseExponentialOut.getInstance()));
             }
             play.registerEntityModifier(new ParallelEntityModifier(
                     new MoveXModifier(0.5f, menuBarX - 100, menuBarX, EaseElasticOut.getInstance()),
@@ -808,8 +872,20 @@ public class MainScene implements IUpdateHandler {
                         EaseBounceOut.getInstance()));
                 logoOverlay.registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2,
                         EaseBounceOut.getInstance()));
-                for (int i = 0; i < spectrum.length; i++) {
-                    spectrum[i].registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3, Config.getRES_WIDTH() / 2, EaseBounceOut.getInstance()));
+                for (int i = 0; i < spectrum1.length; i++) {
+                    spectrum1[i].registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3, Config.getRES_WIDTH() / 2, EaseBounceOut.getInstance()));
+                }
+                for (int i = 0; i < spectrum2.length; i++) {
+                    spectrum2[i].registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3, Config.getRES_WIDTH() / 2, EaseBounceOut.getInstance()));
+                }
+                for (int i = 0; i < spectrum3.length; i++) {
+                    spectrum3[i].registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3, Config.getRES_WIDTH() / 2, EaseBounceOut.getInstance()));
+                }
+                for (int i = 0; i < spectrum4.length; i++) {
+                    spectrum4[i].registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3, Config.getRES_WIDTH() / 2, EaseBounceOut.getInstance()));
+                }
+                for (int i = 0; i < spectrum5.length; i++) {
+                    spectrum5[i].registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3, Config.getRES_WIDTH() / 2, EaseBounceOut.getInstance()));
                 }
                 isMenuShowed = false;
                 doMenuShow = false;
@@ -902,7 +978,7 @@ public class MainScene implements IUpdateHandler {
                     float peak = 0;
                     int rightBound = (int) Math.pow(2., i * 9. / (windowSize - 1));
                     if (rightBound <= leftBound) rightBound = leftBound + 1;
-                    if (rightBound > 511) rightBound = 511;
+                    if (rightBound > 72) rightBound = 72;
 
                     for (; leftBound < rightBound; leftBound++) {
                         if (peak < fft[1 + leftBound])
@@ -911,7 +987,7 @@ public class MainScene implements IUpdateHandler {
 
                     float initialAlpha = 0.4f;
                     float gradient = 20;
-                    float currPeakLevel = peak * 500;
+                    float currPeakLevel = peak * 750;
 
                     if (currPeakLevel > peakLevel[i]) {
                         peakLevel[i] = currPeakLevel;
@@ -923,14 +999,43 @@ public class MainScene implements IUpdateHandler {
                         peakAlpha[i] = Math.max(peakAlpha[i] - initialAlpha / gradient, 0f);
                     }
 
-                    spectrum[i].setWidth(250f + peakLevel[i]);
-                    spectrum[i].setAlpha(peakAlpha[i]);
+                    spectrum1[i].setWidth(250f + peakLevel[i]);
+                    spectrum1[i].setAlpha(peakAlpha[i]);
+
+                    spectrum2[i].setWidth(250f + peakLevel[i]);
+                    spectrum2[i].setAlpha(peakAlpha[i]);
+
+                    spectrum3[i].setWidth(250f + peakLevel[i]);
+                    spectrum3[i].setAlpha(peakAlpha[i]);
+
+                    spectrum4[i].setWidth(250f + peakLevel[i]);
+                    spectrum4[i].setAlpha(peakAlpha[i]);
+
+                    spectrum5[i].setWidth(250f + peakLevel[i]);
+                    spectrum5[i].setAlpha(peakAlpha[i]);
                 }
             } else {
-                for (Rectangle specRectangle : spectrum) {
+                for (Rectangle specRectangle : spectrum1) {
                     specRectangle.setWidth(0);
                     specRectangle.setAlpha(0);
                 }
+                for (Rectangle specRectangle : spectrum2) {
+                    specRectangle.setWidth(0);
+                    specRectangle.setAlpha(0);
+                }
+                for (Rectangle specRectangle : spectrum3) {
+                    specRectangle.setWidth(0);
+                    specRectangle.setAlpha(0);
+                }
+                for (Rectangle specRectangle : spectrum4) {
+                    specRectangle.setWidth(0);
+                    specRectangle.setAlpha(0);
+                }
+                for (Rectangle specRectangle : spectrum5) {
+                    specRectangle.setWidth(0);
+                    specRectangle.setAlpha(0);
+                }
+
                 if (!doChange && !doStop && GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getPosition() >= GlobalManager.getInstance().getSongService().getLength()) {
                     musicControl(MusicOption.NEXT);
                 }
