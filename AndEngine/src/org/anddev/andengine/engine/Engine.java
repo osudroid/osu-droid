@@ -36,6 +36,7 @@ import org.anddev.andengine.sensor.orientation.OrientationSensorOptions;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.constants.TimeConstants;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -360,7 +361,8 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		}
 	}
 
-	@Override
+	@SuppressLint("ClickableViewAccessibility")
+    @Override
 	public boolean onTouch(final View pView, final MotionEvent pSurfaceMotionEvent) {
 		if(this.mRunning) {
 			final boolean handled = this.mTouchController.onHandleMotionEvent(pSurfaceMotionEvent);
@@ -536,145 +538,6 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 	protected long calculateNanosecondsElapsed(final long pNow, final long pLastTick) {
 		return pNow - pLastTick;
-	}
-
-	public boolean enableVibrator(final Context pContext) {
-		this.mVibrator = (Vibrator) pContext.getSystemService(Context.VIBRATOR_SERVICE);
-		return this.mVibrator != null;
-	}
-
-	public void vibrate(final long pMilliseconds) throws IllegalStateException {
-		if(this.mVibrator != null) {
-			this.mVibrator.vibrate(pMilliseconds);
-		} else {
-			throw new IllegalStateException("You need to enable the Vibrator before you can use it!");
-		}
-	}
-
-	public void vibrate(final long[] pPattern, final int pRepeat) throws IllegalStateException {
-		if(this.mVibrator != null) {
-			this.mVibrator.vibrate(pPattern, pRepeat);
-		} else {
-			throw new IllegalStateException("You need to enable the Vibrator before you can use it!");
-		}
-	}
-
-	public void enableLocationSensor(final Context pContext, final ILocationListener pLocationListener, final LocationSensorOptions pLocationSensorOptions) {
-		this.mLocationListener = pLocationListener;
-
-		final LocationManager locationManager = (LocationManager) pContext.getSystemService(Context.LOCATION_SERVICE);
-		final String locationProvider = locationManager.getBestProvider(pLocationSensorOptions, pLocationSensorOptions.isEnabledOnly());
-		// TODO locationProvider can be null, in that case return false. Successful case should return true.
-		locationManager.requestLocationUpdates(locationProvider, pLocationSensorOptions.getMinimumTriggerTime(), pLocationSensorOptions.getMinimumTriggerDistance(), this);
-
-		this.onLocationChanged(locationManager.getLastKnownLocation(locationProvider));
-	}
-
-	public void disableLocationSensor(final Context pContext) {
-		final LocationManager locationManager = (LocationManager) pContext.getSystemService(Context.LOCATION_SERVICE);
-		locationManager.removeUpdates(this);
-	}
-
-	/**
-	 * @see {@link Engine#enableAccelerometerSensor(Context, IAccelerometerListener, AccelerometerSensorOptions)}
-	 */
-	public boolean enableAccelerometerSensor(final Context pContext, final IAccelerometerListener pAccelerometerListener) {
-		return this.enableAccelerometerSensor(pContext, pAccelerometerListener, new AccelerometerSensorOptions(SENSORDELAY_DEFAULT));
-	}
-
-	/**
-	 * @return <code>true</code> when the sensor was successfully enabled, <code>false</code> otherwise.
-	 */
-	public boolean enableAccelerometerSensor(final Context pContext, final IAccelerometerListener pAccelerometerListener, final AccelerometerSensorOptions pAccelerometerSensorOptions) {
-		final SensorManager sensorManager = (SensorManager) pContext.getSystemService(Context.SENSOR_SERVICE);
-		if(this.isSensorSupported(sensorManager, Sensor.TYPE_ACCELEROMETER)) {
-			this.mAccelerometerListener = pAccelerometerListener;
-
-			if(this.mAccelerometerData == null) {
-				final Display display = ((WindowManager) pContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-				final int displayRotation = display.getOrientation();
-				this.mAccelerometerData = new AccelerometerData(displayRotation);
-			}
-
-			this.registerSelfAsSensorListener(sensorManager, Sensor.TYPE_ACCELEROMETER, pAccelerometerSensorOptions.getSensorDelay());
-
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-
-	/**
-	 * @return <code>true</code> when the sensor was successfully disabled, <code>false</code> otherwise.
-	 */
-	public boolean disableAccelerometerSensor(final Context pContext) {
-		final SensorManager sensorManager = (SensorManager) pContext.getSystemService(Context.SENSOR_SERVICE);
-		if(this.isSensorSupported(sensorManager, Sensor.TYPE_ACCELEROMETER)) {
-			this.unregisterSelfAsSensorListener(sensorManager, Sensor.TYPE_ACCELEROMETER);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * @see {@link Engine#enableOrientationSensor(Context, IOrientationListener, OrientationSensorOptions)}
-	 */
-	public boolean enableOrientationSensor(final Context pContext, final IOrientationListener pOrientationListener) {
-		return this.enableOrientationSensor(pContext, pOrientationListener, new OrientationSensorOptions(SENSORDELAY_DEFAULT));
-	}
-
-	/**
-	 * @return <code>true</code> when the sensor was successfully enabled, <code>false</code> otherwise.
-	 */
-	public boolean enableOrientationSensor(final Context pContext, final IOrientationListener pOrientationListener, final OrientationSensorOptions pOrientationSensorOptions) {
-		final SensorManager sensorManager = (SensorManager) pContext.getSystemService(Context.SENSOR_SERVICE);
-		if(this.isSensorSupported(sensorManager, Sensor.TYPE_ACCELEROMETER) && this.isSensorSupported(sensorManager, Sensor.TYPE_MAGNETIC_FIELD)) {
-			this.mOrientationListener = pOrientationListener;
-
-			if(this.mOrientationData == null) {
-				final Display display = ((WindowManager) pContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-				final int displayRotation = display.getOrientation();
-				this.mOrientationData = new OrientationData(displayRotation);
-			}
-
-			this.registerSelfAsSensorListener(sensorManager, Sensor.TYPE_ACCELEROMETER, pOrientationSensorOptions.getSensorDelay());
-			this.registerSelfAsSensorListener(sensorManager, Sensor.TYPE_MAGNETIC_FIELD, pOrientationSensorOptions.getSensorDelay());
-
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-
-	/**
-	 * @return <code>true</code> when the sensor was successfully disabled, <code>false</code> otherwise.
-	 */
-	public boolean disableOrientationSensor(final Context pContext) {
-		final SensorManager sensorManager = (SensorManager) pContext.getSystemService(Context.SENSOR_SERVICE);
-		if(this.isSensorSupported(sensorManager, Sensor.TYPE_ACCELEROMETER) && this.isSensorSupported(sensorManager, Sensor.TYPE_MAGNETIC_FIELD)) {
-			this.unregisterSelfAsSensorListener(sensorManager, Sensor.TYPE_ACCELEROMETER);
-			this.unregisterSelfAsSensorListener(sensorManager, Sensor.TYPE_MAGNETIC_FIELD);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	private boolean isSensorSupported(final SensorManager pSensorManager, final int pType) {
-		return pSensorManager.getSensorList(pType).size() > 0;
-	}
-
-	private void registerSelfAsSensorListener(final SensorManager pSensorManager, final int pType, final SensorDelay pSensorDelay) {
-		final Sensor sensor = pSensorManager.getSensorList(pType).get(0);
-		pSensorManager.registerListener(this, sensor, pSensorDelay.getDelay());
-	}
-
-	private void unregisterSelfAsSensorListener(final SensorManager pSensorManager, final int pType) {
-		final Sensor sensor = pSensorManager.getSensorList(pType).get(0);
-		pSensorManager.unregisterListener(this, sensor);
 	}
 
 	// ===========================================================
