@@ -27,7 +27,6 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class ScoreMenuFragment extends BaseFragment {
 
     private int scoreId;
-    private SongMenu menu;
 
     public ScoreMenuFragment() {
         setDismissOnBackgroundClick(true);
@@ -90,8 +89,6 @@ public class ScoreMenuFragment extends BaseFragment {
                             if (OdrDatabase.get().deleteReplay(scoreId) == 0) {
                                 throw new Exception();
                             }
-                            menu.reloadScoreBroad();
-
                             findViewById(R.id.deleteReplay).setVisibility(View.GONE);
                             Snackbar.make(v, getResources().getString(R.string.menu_deletescore_delete_success), Snackbar.LENGTH_SHORT)
                                     .show();
@@ -147,8 +144,7 @@ public class ScoreMenuFragment extends BaseFragment {
     }
 
 
-    public void show(SongMenu menu, int scoreId) {
-        this.menu = menu;
+    public void show(int scoreId) {
         this.scoreId = scoreId;
         show();
     }

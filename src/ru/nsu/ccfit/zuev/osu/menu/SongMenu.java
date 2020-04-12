@@ -7,6 +7,7 @@ import android.os.Process;
 
 import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.favorite.FavoriteLibrary;
+import com.edlplan.replay.OdrDatabase;
 import com.edlplan.ui.fragment.PropsMenuFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
 
@@ -1167,7 +1168,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void showDeleteScoreMenu(int scoreId) {
-        (new ScoreMenuFragment()).show(SongMenu.this, scoreId);
+        OdrDatabase.get().setMenu(SongMenu.this);
+        (new ScoreMenuFragment()).show(scoreId);
         //ScorePropsMenu.getInstance().setSongMenu(SongMenu.this);
         //ScorePropsMenu.getInstance().setScoreId(scoreId);
         //scene.setChildScene(ScorePropsMenu.getInstance().getScene(), false, true, true);

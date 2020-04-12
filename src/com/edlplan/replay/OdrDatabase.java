@@ -8,11 +8,15 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
+
 public class OdrDatabase {
 
     private static OdrDatabase odrDatabase;
 
     private SQLiteDatabase database;
+
+    private SongMenu menu;
 
     public OdrDatabase(File file) {
         database = SQLiteDatabase.openDatabase(file.getAbsolutePath(), null, 0);
@@ -137,8 +141,15 @@ public class OdrDatabase {
         return replays;
     }
 
-    public int deleteReplay(int id){
-        return database.delete("scores", "id = ?", new String[]{String.valueOf(id)});
+    public int deleteReplay(int id) {
+        int result = database.delete("scores", "id = ?", new String[]{String.valueOf(id)});
+        if (menu != null) {
+            menu.reloadScoreBroad();
+        }
+        return result;
     }
 
+    public void setMenu(SongMenu menu) {
+        this.menu = menu;
+    }
 }
