@@ -16,7 +16,7 @@ public class OdrDatabase {
 
     private SQLiteDatabase database;
 
-    private SongMenu menu;
+    private Runnable onDatabaseChangedListener;
 
     public OdrDatabase(File file) {
         database = SQLiteDatabase.openDatabase(file.getAbsolutePath(), null, 0);
@@ -147,13 +147,13 @@ public class OdrDatabase {
         }
 
         int result = database.delete("scores", "id = ?", new String[]{String.valueOf(id)});
-        if (menu != null) {
-            menu.reloadScoreBroad();
+        if (onDatabaseChangedListener != null) {
+            onDatabaseChangedListener.run();
         }
         return result;
     }
 
-    public void setMenu(SongMenu menu) {
-        this.menu = menu;
+    public void setOnDatabaseChangedListener(Runnable listener) {
+        this.onDatabaseChangedListener = listener;
     }
 }

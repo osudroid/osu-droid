@@ -1168,7 +1168,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void showDeleteScoreMenu(int scoreId) {
-        OdrDatabase.get().setMenu(SongMenu.this);
+        OdrDatabase.get().setOnDatabaseChangedListener(() -> {
+            this.reloadScoreBroad();
+        });
         (new ScoreMenuFragment()).show(scoreId);
         //ScorePropsMenu.getInstance().setSongMenu(SongMenu.this);
         //ScorePropsMenu.getInstance().setScoreId(scoreId);
