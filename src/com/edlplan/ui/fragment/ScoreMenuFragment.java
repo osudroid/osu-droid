@@ -89,7 +89,7 @@ public class ScoreMenuFragment extends BaseFragment {
                             if (OdrDatabase.get().deleteReplay(scoreId) == 0) {
                                 throw new Exception();
                             }
-                            findViewById(R.id.deleteReplay).setVisibility(View.GONE);
+                            ScoreMenuFragment.this.dismiss();
                             Snackbar.make(v, getResources().getString(R.string.menu_deletescore_delete_success), Snackbar.LENGTH_SHORT)
                                     .show();
                         } catch (Exception e) {

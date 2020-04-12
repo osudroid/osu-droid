@@ -142,6 +142,10 @@ public class OdrDatabase {
     }
 
     public int deleteReplay(int id) {
+        if (!available()) {
+            return 0;
+        }
+
         int result = database.delete("scores", "id = ?", new String[]{String.valueOf(id)});
         if (menu != null) {
             menu.reloadScoreBroad();
