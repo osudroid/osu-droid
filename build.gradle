@@ -107,7 +107,7 @@ android {
     lintOptions {
         abortOnError true
         ignoreWarnings true
-        disable 'MissingTranslation'
+        disable 'MissingTranslation', 'ExpiredTargetSdkVersion', 'ProtectedPermissions', 'AppLinkUrlError'
     }
 }
 
