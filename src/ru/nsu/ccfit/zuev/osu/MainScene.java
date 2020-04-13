@@ -1145,5 +1145,13 @@ public class MainScene implements IUpdateHandler {
         }
     }
 
+    public void show() {
+        GlobalManager.getInstance().getSongService().setGaming(false);
+        GlobalManager.getInstance().getEngine().setScene(getScene());
+        if (GlobalManager.getInstance().getSelectedTrack() != null) {
+            setBeatmap(GlobalManager.getInstance().getSelectedTrack().getBeatmap());
+        }
+    }
+
     public enum MusicOption {PREV, PLAY, PAUSE, STOP, NEXT, SYNC}
 }

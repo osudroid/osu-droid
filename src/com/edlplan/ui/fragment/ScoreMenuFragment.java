@@ -76,6 +76,31 @@ public class ScoreMenuFragment extends BaseFragment {
                 }
             }
         });
+        findViewById(R.id.deleteReplay).setOnClickListener(v -> {
+            ConfirmDialogFragment confirm = new ConfirmDialogFragment();
+            confirm.showForResult(isAccepted -> {
+                if (isAccepted) {
+                    List<OsuDroidReplay> replays = OdrDatabase.get().getReplayById(scoreId);
+                    if (replays.size() == 0) {
+                        return;
+                    } else {
+                        try {
+                            if (OdrDatabase.get().deleteReplay(scoreId) == 0) {
+                                Snackbar.make(v, "Failed to delete replay!", Snackbar.LENGTH_SHORT)
+                                        .show();
+                            } else {
+                                Snackbar.make(v, getResources().getString(R.string.menu_deletescore_delete_success), Snackbar.LENGTH_SHORT)
+                                        .show();
+                            }
+                            ScoreMenuFragment.this.dismiss();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(v.getContext(), "Failed to delete replay!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            });
+        });
         playOnLoadAnim();
     }
 

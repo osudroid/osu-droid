@@ -14,6 +14,8 @@ public class OdrDatabase {
 
     private SQLiteDatabase database;
 
+    private Runnable onDatabaseChangedListener;
+
     public OdrDatabase(File file) {
         database = SQLiteDatabase.openDatabase(file.getAbsolutePath(), null, 0);
     }
@@ -137,4 +139,19 @@ public class OdrDatabase {
         return replays;
     }
 
+    public int deleteReplay(int id) {
+        if (!available()) {
+            return 0;
+        }
+
+        int result = database.delete("scores", "id = ?", new String[]{String.valueOf(id)});
+        if (onDatabaseChangedListener != null) {
+            onDatabaseChangedListener.run();
+        }
+        return result;
+    }
+
+    public void setOnDatabaseChangedListener(Runnable listener) {
+        this.onDatabaseChangedListener = listener;
+    }
 }
