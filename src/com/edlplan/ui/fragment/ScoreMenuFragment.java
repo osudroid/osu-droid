@@ -95,7 +95,6 @@ public class ScoreMenuFragment extends BaseFragment {
                             ScoreMenuFragment.this.dismiss();
                         } catch (Exception e) {
                             e.printStackTrace();
-                            // TODO: 添加字符串资源
                             Toast.makeText(v.getContext(), "Failed to delete replay!", Toast.LENGTH_SHORT).show();
                         }
                     }

@@ -184,6 +184,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         SongMenuPool.getInstance().init();
         FilterMenu.getInstance().loadConfig(context);
         ModMenu.getInstance().reload();
+        bindDataBaseChangedListener();
 
         scene.attachChild(backLayer);
         scene.attachChild(frontLayer);
@@ -364,6 +365,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         }
                         if (moved == false) {
                             backButton.setScale(1f);
+                            unbindDataBaseChangedListener();
                             GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
                             GlobalManager.getInstance().getSongService().setGaming(false);
                             GlobalManager.getInstance().getMainScene().setBeatmap(selectedTrack.getBeatmap());
@@ -413,6 +415,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         }
                         if (moved == false) {
                             backButton.setScale(1f);
+                            unbindDataBaseChangedListener();
                             GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
                             GlobalManager.getInstance().getSongService().setGaming(false);
                             GlobalManager.getInstance().getMainScene().setBeatmap(selectedTrack.getBeatmap());
@@ -1098,6 +1101,16 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public void unload() {
     }
 
+    public void bindDataBaseChangedListener(){
+        OdrDatabase.get().setOnDatabaseChangedListener(() -> {
+            this.reloadScoreBroad();
+        });
+    }
+
+    public void unbindDataBaseChangedListener(){
+        OdrDatabase.get().setOnDatabaseChangedListener(null);
+    }
+
     public void setY(final float y) {
         velocityY = 0;
         camY = y;
@@ -1168,9 +1181,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void showDeleteScoreMenu(int scoreId) {
-        OdrDatabase.get().setOnDatabaseChangedListener(() -> {
-            this.reloadScoreBroad();
-        });
         (new ScoreMenuFragment()).show(scoreId);
         //ScorePropsMenu.getInstance().setSongMenu(SongMenu.this);
         //ScorePropsMenu.getInstance().setScoreId(scoreId);
