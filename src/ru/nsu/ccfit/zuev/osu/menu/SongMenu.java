@@ -366,10 +366,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         if (moved == false) {
                             backButton.setScale(1f);
                             back();
-//                            unbindDataBaseChangedListener();
-//                            GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
-//                            GlobalManager.getInstance().getSongService().setGaming(false);
-//                            GlobalManager.getInstance().getMainScene().setBeatmap(selectedTrack.getBeatmap());
                         }
                         return true;
                     }
@@ -417,9 +413,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         if (moved == false) {
                             backButton.setScale(1f);
                             back();
-//                            GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
-//                            GlobalManager.getInstance().getSongService().setGaming(false);
-//                            GlobalManager.getInstance().getMainScene().setBeatmap(selectedTrack.getBeatmap());
                         }
                         return true;
                     }
@@ -740,24 +733,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public void onUpdate(final float pSecondsElapsed) {
         secPassed += pSecondsElapsed;
-//        if (GlobalManager.getInstance().getSongService() != null) {
-//            synchronized (musicMutex) {
-//                if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING && GlobalManager.getInstance().getSongService().getVolume() < 1) {
-//                    float vol = Math.min(1, GlobalManager.getInstance().getSongService().getVolume() + 0.01f);
-//                    GlobalManager.getInstance().getSongService().setVolume(vol);
-//                }
-//            }
-//        }
-//
-//        if (bg != null) {
-//            synchronized (backgroundMutex) {
-//                if (bg != null && bg.getRed() < 1) {
-//                    final float col = Math
-//                            .min(1, bg.getRed() + pSecondsElapsed);
-//                    bg.setColor(col, col, col);
-//                }
-//            }
-//        }
         increaseVolume();
         increaseBackgroundLuminance(pSecondsElapsed);
 
@@ -787,23 +762,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             velocityY = 0;
         }
 
-//        if (selectedItem != null) {
-//            if (selectedItem.percentAppeared < 1) {
-//                selectedItem.percentAppeared += 2 * pSecondsElapsed;
-//            } else {
-//                selectedItem.percentAppeared = 1;
-//            }
-//            selectedItem.update(pSecondsElapsed);
-//        }
         expandSelectedItem(pSecondsElapsed);
 
         board.update(pSecondsElapsed);
-//        scrollbar.setPosition(camY + Config.getRES_HEIGHT() / 2, oy);
-//        if (Math.abs(velocityY) > Utils.toRes(500)) {
-//            scrollbar.setVisible(true);
-//        } else {
-//            scrollbar.setVisible(false);
-//        }
         updateScrollbar(camY + Config.getRES_HEIGHT() / 2, oy);
     }
 

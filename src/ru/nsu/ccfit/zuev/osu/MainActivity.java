@@ -718,11 +718,6 @@ public class MainActivity extends BaseGameActivity implements
 
                 //SongMenu 界面按返回按钮（系统按钮）
                 GlobalManager.getInstance().getSongMenu().back();
-//                GlobalManager.getInstance().getSongService().setGaming(false);
-//                GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
-//                if (GlobalManager.getInstance().getSelectedTrack() != null) {
-//                    GlobalManager.getInstance().getMainScene().setBeatmap(GlobalManager.getInstance().getSelectedTrack().getBeatmap());
-//                }
             } else {
 
                 if (GlobalManager.getInstance().getEngine().getScene() instanceof LoadingScreen.LoadingScene) {
