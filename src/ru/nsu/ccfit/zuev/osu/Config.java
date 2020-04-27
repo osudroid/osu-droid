@@ -43,7 +43,6 @@ public class Config {
     private static int skipOffset = 0;
     private static boolean doubleSound = true;
     private static boolean showFPS = false;
-    private static int textureQuality = 1;
     private static int metronomeSwitch = 1;
     private static boolean useNativePlayer = true;
     private static float backgroundBrightness = 1;
@@ -52,12 +51,12 @@ public class Config {
     private static int pauseOffset = 0;
     private static boolean sliderBorders = true;
     private static boolean complexAnimations = true;
-    private static boolean multitouch = true;
     private static boolean playMusicPreview = false;
     private static String localUsername = "";
     private static boolean showCursor = false;
     private static boolean accurateSlider = true;
-    private static float scaleMultiplier = 0;
+    // 从1.6.7开始固定HitCircle的缩放比例，不再随手机尺寸变化
+    private static float scaleMultiplier = (float) ((11 - 5.2450170716245195) / 5);
     private static boolean hideNaviBar = false;
     private static boolean showScoreboard = true;
     private static boolean enablePP = true;
@@ -101,7 +100,6 @@ public class Config {
         comboburst = prefs.getBoolean("comboburst", false);
         corovans = prefs.getBoolean("images", false);
         showFPS = prefs.getBoolean("fps", false);
-        textureQuality = prefs.getBoolean("lowtextures", false) ? 2 : 1;
         errorMeter = Integer.parseInt(prefs.getString("errormeter", "0"));
         spinnerStyle = Integer.parseInt(prefs.getString("spinnerstyle", "0"));
         showFirstApproachCircle = prefs.getBoolean("showfirstapproachcircle", false);
@@ -194,7 +192,6 @@ public class Config {
         doubleSound = prefs.getBoolean("doublesound", true);
         useNativePlayer = prefs.getBoolean("nativeplayer", true);
         // beatmaps
-        DELETE_OSZ = prefs.getBoolean("deleteosz", true);
         SCAN_DOWNLOAD = prefs.getBoolean("scandownload", false);
         forceRomanized = prefs.getBoolean("forceromanized", false);
         beatmapPath = prefs.getString("directory", corePath + "Songs/");
@@ -416,14 +413,6 @@ public class Config {
         RES_HEIGHT = rES_HEIGHT;
     }
 
-    public static boolean isDELETE_OSZ() {
-        return DELETE_OSZ;
-    }
-
-    public static void setDELETE_OSZ(final boolean dELETE_OSZ) {
-        DELETE_OSZ = dELETE_OSZ;
-    }
-
     public static boolean isSCAN_DOWNLOAD() {
         return SCAN_DOWNLOAD;
     }
@@ -450,10 +439,6 @@ public class Config {
 
     public static int getTextureQuality() {
         return 1;
-    }
-
-    public static void setTextureQuality(final int textureQuality) {
-        Config.textureQuality = textureQuality;
     }
 
     public static boolean isUseNativePlayer() {
@@ -494,14 +479,6 @@ public class Config {
 
     public static void setComplexAnimations(final boolean complexAnimations) {
         Config.complexAnimations = complexAnimations;
-    }
-
-    public static boolean isMultitouch() {
-        return multitouch;
-    }
-
-    public static void setMultitouch(final boolean multitouch) {
-        Config.multitouch = multitouch;
     }
 
     public static int getOggOffset() {

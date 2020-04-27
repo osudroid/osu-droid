@@ -25,7 +25,6 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -34,12 +33,12 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
+import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.ui.ActivityOverlay;
 import com.tencent.bugly.Bugly;
 import com.umeng.analytics.MobclickAgent;
 
 import org.anddev.andengine.engine.Engine;
-import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
@@ -47,17 +46,19 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.util.FPSLogger;
 import org.anddev.andengine.extension.input.touch.controller.MultiTouch;
 import org.anddev.andengine.extension.input.touch.controller.MultiTouchController;
-import org.anddev.andengine.extension.input.touch.exception.MultiTouchException;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 import org.anddev.andengine.sensor.accelerometer.AccelerometerData;
 import org.anddev.andengine.sensor.accelerometer.IAccelerometerListener;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
 import org.anddev.andengine.util.Debug;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
@@ -76,8 +77,8 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class MainActivity extends BaseGameActivity implements
-        IAccelerometerListener {
+public class MainActivity extends BaseGameActivity implements IAccelerometerListener {
+
     public static SongService songService;
     public ServiceConnection connection;
     public BroadcastReceiver onNotifyButtonClick;
@@ -87,104 +88,153 @@ public class MainActivity extends BaseGameActivity implements
     private IntentFilter filter;
     private boolean willReplay = false;
 
+    @Override
     public Engine onLoadEngine() {
+        GlobalManager.getInstance().setMainActivity(this);
+        initialBuglySDK();
         checkPermissions();
-//        Debug.setDebugLevel(Debug.DebugLevel.NONE);
         Config.loadConfig(this);
         StringTable.setContext(this);
         ToastLogger.init(this);
         SyncTaskManager.getInstance().init(this);
         InputManager.setContext(this);
-        // Shape.setUseDither(Config.isUseDither());
-        File dir = new File(Config.getBeatmapPath());
-        // Creating Osu directory if it doesn't exist
-        if (dir.exists() == false) {
-            if (dir.mkdirs() == false) {
-                Config.setBeatmapPath(Config.getCorePath() + "Songs/");
-                dir = new File(Config.getBeatmapPath());
-                if (dir.exists() == false && dir.mkdirs() == false) {
-                    ToastLogger.showText(StringTable.format(
-                            R.string.message_error_createdir, dir.getPath()),
-                            true);
-                } else {
-                    final SharedPreferences prefs = PreferenceManager
-                            .getDefaultSharedPreferences(this);
-                    final SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString("directory", dir.getPath());
-                    editor.commit();
-                }
+        OnlineManager.getInstance().Init(getApplicationContext());
+        setupOsuDroidDirectory();
+        initialWakeLock();
 
-            }
-            final File nomedia = new File(dir.getParentFile(), ".nomedia");
-            try {
-                nomedia.createNewFile();
-            } catch (final IOException e) {
-                Debug.e("LibraryManager: " + e.getMessage(), e);
-            }
+        final EngineOptions opt = loadEngineOptions();
+        final Engine engine = new Engine(opt);
+        setupMultiTouchFeature(engine);
+        GlobalManager.getInstance().setEngine(engine);
+        return engine;
+    }
+
+    private void setupMultiTouchFeature(Engine engine) {
+        if (MultiTouch.isSupported(this)) {
+            engine.setTouchController(new MultiTouchController());
+        } else {
+            ToastLogger.showText(
+                    StringTable.get(R.string.message_error_multitouch),
+                    false);
         }
+    }
 
-        final File skinDir = new File(Config.getCorePath() + "/Skin");
-        // Creating Osu/Skin directory if it doesn't exist
-        if (skinDir.exists() == false) {
-            skinDir.mkdirs();
-        }
+    private EngineOptions loadEngineOptions() {
+        return new EngineOptions(
+                true, null,
+                new RatioResolutionPolicy(Config.getRES_WIDTH(), Config.getRES_HEIGHT()),
+                new SmoothCamera(0, 0,
+                        Config.getRES_WIDTH(), Config.getRES_HEIGHT(),
+                        0, 1800, 1)
+        ){{
+            setNeedsMusic(true);
+            setNeedsSound(true);
+            getRenderOptions().disableExtensionVertexBufferObjects();
+            getTouchOptions().enableRunOnUpdateThread();
+        }};
+    }
 
+    private void initialWakeLock() {
+        final PowerManager manager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = manager != null ? manager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
+                "osudroid:osu") : null;
+    }
+
+    private void initialBuglySDK() {
         // 初始化BuglySDK
         Bugly.init(getApplicationContext(), "d1e89e4311", false);
-        OnlineManager.getInstance().Init(getApplicationContext());
+    }
 
-        final DisplayMetrics dm = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(dm);
-/*        final double screenSize = Math.sqrt(Utils.sqr(dm.widthPixels / dm.xdpi)
-                + Utils.sqr(dm.heightPixels / dm.ydpi));*/
-        double screenInches = Math.sqrt(Math.pow(dm.heightPixels, 2) + Math.pow(dm.widthPixels, 2)) / (dm.density * 160.0f);
-        Debug.i("screen inches: " + screenInches);
-        Config.setScaleMultiplier((float) ((11 - 5.2450170716245195) / 5));
+    private void setupOsuDroidDirectory() {
+        checkSongsDir();
+        checkSkinDir();
+    }
 
-        Config.setTextureQuality(1);
-        final PowerManager manager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = manager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
-                "osudroid:osu");
-
-        Camera mCamera = new SmoothCamera(0, 0, Config.getRES_WIDTH(),
-                Config.getRES_HEIGHT(), 0, 1800, 1);
-        final EngineOptions opt = new EngineOptions(true,
-                null, new RatioResolutionPolicy(
-                Config.getRES_WIDTH(), Config.getRES_HEIGHT()),
-                mCamera);
-        opt.setNeedsMusic(true);
-        opt.setNeedsSound(true);
-        opt.getRenderOptions().disableExtensionVertexBufferObjects();
-        opt.getTouchOptions().enableRunOnUpdateThread();
-        final Engine engine = new Engine(opt);
-
-        if (Config.isMultitouch()) {
-            try {
-                if (MultiTouch.isSupported(this)) {
-                    engine.setTouchController(new MultiTouchController());
-                } else {
-                    ToastLogger.showText(
-                            StringTable.get(R.string.message_error_multitouch),
-                            false);
-                }
-            } catch (final MultiTouchException e) {
-                ToastLogger.showText(
-                        StringTable.get(R.string.message_error_multitouch),
-                        false);
+    private void checkSongsDir() {
+        File dir = new File(Config.getBeatmapPath());
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                dir = resetSongsDir();
             }
+            createNomediaFile(dir);
         }
-        GlobalManager.getInstance().setCamera(mCamera);
-        GlobalManager.getInstance().setEngine(engine);
-        GlobalManager.getInstance().setMainActivity(this);
-        return GlobalManager.getInstance().getEngine();
+    }
+
+    // Creating Osu/Skin directory if it doesn't exist
+    private void checkSkinDir() {
+        final File skinDir = new File(Config.getCorePath() + "/Skin");
+        if (!skinDir.exists()) {
+            skinDir.mkdirs();
+        }
+    }
+
+    private File resetSongsDir() {
+        Config.setBeatmapPath(Config.getCorePath() + "Songs/");
+        File dir = new File(Config.getBeatmapPath());
+        if (!(dir.exists() || dir.mkdirs())) {
+            ToastLogger.showText(StringTable.format(
+                    R.string.message_error_createdir, dir.getPath()),
+                    true);
+            // Songs文件夹创建失败，检查权限后重试
+            checkPermissions();
+            if (!(dir.exists() || dir.mkdirs())) {
+                // 完全无法创建文件夹时直接抛出异常，退出
+                // TODO: 在一个新的Activity中显示错误信息
+                throw new RuntimeException("Unable to start the game");
+            }
+        } else {
+            final SharedPreferences prefs = PreferenceManager
+                    .getDefaultSharedPreferences(this);
+            final Editor editor = prefs.edit();
+            editor.putString("directory", dir.getPath());
+            editor.commit();
+        }
+        return dir;
+    }
+
+    private void createNomediaFile(File dir) {
+        try {
+            new File(dir.getParentFile(), ".nomedia").createNewFile();
+        } catch (final IOException e) {
+            Debug.e("LibraryManager: " + e.getMessage(), e);
+        }
     }
 
     private void initPreferences() {
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
-        if (prefs.getString("playername", "").equals("")) {
+        initialOfflineUserName(prefs);
+
+        // TODO 确认是否是无效的代码
+        /*if (!prefs.getBoolean("qualitySet", false)) {
+            // 这里又是啥迷惑行为
             final SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean("qualitySet", true);
+            final DisplayMetrics dm = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(dm);
+
+            if (dm.densityDpi > DisplayMetrics.DENSITY_MEDIUM) {
+                editor.putBoolean("lowtextures", false);
+            } else {
+                editor.putBoolean("lowtextures", false);
+            }
+            editor.commit();
+        }*/
+        /*if (!prefs.getBoolean("onlineSet", false)) {
+
+            Editor editor = prefs.edit();
+            editor.putBoolean("onlineSet", true);
+            editor.commit();
+            //TODO removed auto registration at first launch
+            *//*OnlineInitializer initializer = new OnlineInitializer(this);
+			initializer.createInitDialog();*//*
+        }*/
+    }
+
+    private void initialOfflineUserName(SharedPreferences prefs) {
+        if (prefs.getString("playername", "").equals("")) {
+            final Editor editor = prefs.edit();
             editor.putString("playername", "Guest");
             editor.commit();
 
@@ -199,52 +249,20 @@ public class MainActivity extends BaseGameActivity implements
             alert.setView(input);
 
             alert.setPositiveButton(StringTable.get(R.string.dialog_ok),
-                    new DialogInterface.OnClickListener() {
-
-                        public void onClick(final DialogInterface dialog,
-                                            final int whichButton) {
-                            final String value = input.getText().toString();
-                            editor.putString("playername", value);
-                            editor.commit();
-                        }
+                    (dialog, whichButton) -> {
+                        final String value = input.getText().toString();
+                        editor.putString("playername", value);
+                        editor.commit();
                     });
 
             alert.show();
         }
-
-        if (prefs.getBoolean("qualitySet", false) == false) {
-            final SharedPreferences.Editor editor = prefs.edit();
-            editor.putBoolean("qualitySet", true);
-            final DisplayMetrics dm = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(dm);
-
-            if (dm.densityDpi > DisplayMetrics.DENSITY_MEDIUM) {
-                editor.putBoolean("lowtextures", false);
-            } else {
-                editor.putBoolean("lowtextures", false);
-            }
-            editor.commit();
-        }
-
-        if (prefs.getBoolean("onlineSet", false) == false) {
-
-            Editor editor = prefs.edit();
-            editor.putBoolean("onlineSet", true);
-            editor.commit();
-
-            //TODO removed auto registration at first launch
-            /*OnlineInitializer initializer = new OnlineInitializer(this);
-			initializer.createInitDialog();*/
-        }
     }
 
     public void onLoadResources() {
-        Config.setTextureQuality(1);
         ResourceManager.getInstance().Init(mEngine, this);
         ResourceManager.getInstance().loadHighQualityAsset("logo", "logo.png");
         ResourceManager.getInstance().loadHighQualityAsset("play", "play.png");
-        //ResourceManager.getInstance().loadHighQualityAsset("multiplayer", "multiplayer.png");
-        //ResourceManager.getInstance().loadHighQualityAsset("solo", "solo.png");
         ResourceManager.getInstance().loadHighQualityAsset("exit", "exit.png");
         ResourceManager.getInstance().loadHighQualityAsset("options", "options.png");
         ResourceManager.getInstance().loadHighQualityAsset("star", "gfx/star.png");
@@ -260,30 +278,26 @@ public class MainActivity extends BaseGameActivity implements
                 || (bg = new File(Config.getSkinPath() + "menu-background.jpg")).exists()) {
             ResourceManager.getInstance().loadHighQualityFile("menu-background", bg);
         }
-        // ResourceManager.getInstance().loadHighQualityAsset("exit", "exit.png");
         ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
         ResourceManager.getInstance().loadFont("smallFont", null, 21, Color.WHITE);
         ResourceManager.getInstance().loadStrokeFont("strokeFont", null, 36, Color.BLACK, Color.WHITE);
 
         BassAudioPlayer.initDevice();
-
     }
 
     public Scene onLoadScene() {
-        GlobalManager.getInstance().getEngine().registerUpdateHandler(new FPSLogger(1f));
+        if (BuildConfig.DEBUG){
+            GlobalManager.getInstance().getEngine().registerUpdateHandler(new FPSLogger(1f));
+        }
         return new SplashScene().getScene();
     }
 
     public void onLoadComplete() {
         new AsyncTaskLoader().execute(new OsuAsyncCallback() {
             public void run() {
-                /*
-                 * StartingMapManager mgr = new
-                 * StartingMapManager(OsuActivity.this); mgr.copyStartingMaps();
-                 */
                 GlobalManager.getInstance().init();
                 GlobalManager.getInstance().setLoadingProgress(50);
-                checkNewBeatmaps();
+                checkBeatmapAndReplay();
                 if (!LibraryManager.getInstance().loadLibraryCache(MainActivity.this, true)) {
                     LibraryManager.getInstance().scanLibrary(MainActivity.this);
                     System.gc();
@@ -318,7 +332,8 @@ public class MainActivity extends BaseGameActivity implements
                 mRenderSurfaceView,
                 new RelativeLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT){{
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                ) {{
                     addRule(RelativeLayout.CENTER_IN_PARENT);
                 }});
 
@@ -339,7 +354,7 @@ public class MainActivity extends BaseGameActivity implements
         ActivityOverlay.initial(this, frameLayout.getId());
     }
 
-    public void checkNewBeatmaps() {
+    public void checkBeatmapAndReplay() {
         GlobalManager.getInstance().setInfo("Checking new maps...");
         final File mainDir = new File(Config.getCorePath());
         if (beatmapToAdd != null) {
@@ -348,132 +363,122 @@ public class MainActivity extends BaseGameActivity implements
                 ToastLogger.showText(
                         StringTable.get(R.string.message_lib_importing),
                         false);
-                if (OSZParser.parseOSZ(MainActivity.this, beatmapToAdd)) {
-                    String folderName = beatmapToAdd.substring(0, beatmapToAdd.length() - 4);
+                loadBeatmapToAdd(beatmapToAdd);
+            } else if (file.getName().endsWith(".odr")) {
+                willReplay = true;
+            }
+        } else if (mainDir.exists() && mainDir.isDirectory()) {
+            checkNewBeatmaps(mainDir);
+        }
+    }
+
+    private void checkNewBeatmaps(File mainDir) {
+        final List<String> beatmaps = searchAllOszToImport(mainDir);
+
+        if (beatmaps.size() > 0) {
+            ToastLogger.showText(StringTable.format(
+                    R.string.message_lib_importing_several,
+                    beatmaps.size()), false);
+            for (final String s : beatmaps) {
+                if (OSZParser.parseOSZ(MainActivity.this, s, true)) {
+                    String folderName = s.substring(0, s.length() - 4);
                     // We have imported the beatmap!
                     ToastLogger.showText(
                             StringTable.format(R.string.message_lib_imported, folderName),
                             true);
                 }
-                LibraryManager.getInstance().sort();
-                LibraryManager.getInstance().savetoCache(MainActivity.this);
-            } else if (file.getName().endsWith(".odr")) {
-                willReplay = true;
             }
-        } else if (mainDir.exists() && mainDir.isDirectory()) {
-            File[] filelist = mainDir.listFiles();
-            final ArrayList<String> beatmaps = new ArrayList<String>();
-            for (final File file : filelist) {
-                if (file.isFile()
-                        && file.getName().endsWith(".osz")
-                        || file.getName().endsWith(".zip")) {
-                    beatmaps.add(file.getPath());
-                }
-            }
-
-            File beatmapDir = new File(Config.getBeatmapPath());
-            if (beatmapDir.exists()
-                    && beatmapDir.isDirectory()) {
-                filelist = beatmapDir.listFiles();
-                for (final File file : filelist) {
-                    if (file.isFile()
-                            && file.getName().endsWith(".osz")
-                            || file.getName().endsWith(".zip")) {
-                        beatmaps.add(file.getPath());
-                    }
-                }
-            }
-
-            File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            if (Config.isSCAN_DOWNLOAD()
-                    && downloadDir.exists()
-                    && downloadDir.isDirectory()) {
-                filelist = downloadDir.listFiles();
-                for (final File file : filelist) {
-                    if (file.isFile()
-                            && file.getName().endsWith(".osz")) {
-                        beatmaps.add(file.getPath());
-                    }
-                }
-            }
-
-            if (beatmaps.size() > 0) {
-                final boolean deleteOsz = Config.isDELETE_OSZ();
-                Config.setDELETE_OSZ(true);
-                ToastLogger.showText(StringTable.format(
-                        R.string.message_lib_importing_several,
-                        beatmaps.size()), false);
-                for (final String s : beatmaps) {
-                    if (OSZParser.parseOSZ(MainActivity.this, s)) {
-                        String folderName = s.substring(0, s.length() - 4);
-                        // We have imported the beatmap!
-                        ToastLogger.showText(
-                                StringTable.format(R.string.message_lib_imported, folderName),
-                                true);
-                    }
-                }
-                Config.setDELETE_OSZ(deleteOsz);
-
-                LibraryManager.getInstance().sort();
-                LibraryManager.getInstance().savetoCache(
-                        MainActivity.this);
-            }
+            LibraryManager.getInstance().sort();
+            LibraryManager.getInstance().savetoCache(MainActivity.this);
         }
+    }
+
+    @NotNull
+    private List<String> searchAllOszToImport(File mainDir) {
+        List<String> beatmaps = new ArrayList<>(searchFiles(mainDir, ".*\\.(osz|zip)"));
+
+        File beatmapDir = new File(Config.getBeatmapPath());
+        if (beatmapDir.exists() && beatmapDir.isDirectory()) {
+            beatmaps.addAll(searchFiles(beatmapDir, ".*\\.(osz|zip)"));
+        }
+
+        File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        if (Config.isSCAN_DOWNLOAD() && downloadDir.exists() && downloadDir.isDirectory()) {
+            beatmaps.addAll(searchFiles(downloadDir, ".*\\.(osz)"));
+        }
+        return beatmaps;
+    }
+
+    private List<String> searchFiles(File dir, String reg) {
+        return SmartIterator.ofArray(dir.listFiles(f -> f.isFile() && f.getName().matches(reg)))
+        .applyFunction(File::getAbsolutePath)
+        .collectAllAsList();
+    }
+
+    private void loadBeatmapToAdd(String beatmapToAdd) {
+        if (OSZParser.parseOSZ(MainActivity.this, beatmapToAdd, true)) {
+            String folderName = beatmapToAdd.substring(0, beatmapToAdd.length() - 4);
+            // We have imported the beatmap!
+            ToastLogger.showText(
+                    StringTable.format(R.string.message_lib_imported, folderName),
+                    true);
+        }
+        LibraryManager.getInstance().sort();
+        LibraryManager.getInstance().savetoCache(MainActivity.this);
     }
 
     @Override
     protected void onCreate(Bundle pSavedInstanceState) {
         super.onCreate(pSavedInstanceState);
+
         if (BuildConfig.DEBUG) {
-            //Toast.makeText(this,"this is debug version",Toast.LENGTH_LONG).show();
-            try {
-                File d = new File(Environment.getExternalStorageDirectory(), "osu!droid/Log");
-                if (!d.exists()) d.mkdirs();
-                File f = new File(d, "rawlog.txt");
-                if (!f.exists()) f.createNewFile();
-                Runtime.getRuntime().exec("logcat -f " + (f.getAbsolutePath()));
-            } catch (IOException e) {
-            }
+            exportDebugLog();
         }
         if (Config.isHideNaviBar()) {
-            if (Build.VERSION.SDK_INT >= 11) {
-                // BEGIN_INCLUDE (get_current_ui_flags)
-                // The UI options currently enabled are represented by a bitfield.
-                // getSystemUiVisibility() gives us that bitfield.
-                int uiOptions = this.getWindow().getDecorView().getSystemUiVisibility();
-                int newUiOptions = uiOptions;
-                // END_INCLUDE (get_current_ui_flags)
-                // BEGIN_INCLUDE (toggle_ui_flags)
-                boolean isImmersiveModeEnabled =
-                        ((uiOptions | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) == uiOptions);
-
-                // Navigation bar hiding:  Backwards compatible to ICS.
-                if (Build.VERSION.SDK_INT >= 14) {
-                    newUiOptions ^= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-                }
-
-                // Status bar hiding: Backwards compatible to Jellybean
-                if (Build.VERSION.SDK_INT >= 16) {
-                    newUiOptions ^= View.SYSTEM_UI_FLAG_FULLSCREEN;
-                }
-
-                // Immersive mode: Backward compatible to KitKat.
-                // Note that this flag doesn't do anything by itself, it only augments the behavior
-                // of HIDE_NAVIGATION and FLAG_FULLSCREEN.  For the purposes of this sample
-                // all three flags are being toggled together.
-                // Note that there are two immersive mode UI flags, one of which is referred to as "sticky".
-                // Sticky immersive mode differs in that it makes the navigation and status bars
-                // semi-transparent, and the UI flag does not get cleared when the user interacts with
-                // the screen.
-                if (Build.VERSION.SDK_INT >= 18) {
-                    newUiOptions ^= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-                }
-
-                this.getWindow().getDecorView().setSystemUiVisibility(newUiOptions);
-                //END_INCLUDE (set_ui_flags)
-            }
+            setUiOptions();
         }
         onBeginBindService();
+    }
+
+    private void exportDebugLog() {
+        //Toast.makeText(this,"this is debug version",Toast.LENGTH_LONG).show();
+        try {
+            File d = new File(Environment.getExternalStorageDirectory(), "osu!droid/Log");
+            if (!d.exists()) d.mkdirs();
+            File f = new File(d, "rawlog.txt");
+            if (!f.exists()) f.createNewFile();
+            Runtime.getRuntime().exec("logcat -f " + (f.getAbsolutePath()));
+        } catch (IOException e) {
+
+        }
+    }
+
+    private void setUiOptions() {
+        int newUiOptions = this.getWindow().getDecorView().getSystemUiVisibility();
+
+        // Navigation bar hiding:  Backwards compatible to ICS.
+        if (Build.VERSION.SDK_INT >= 14) {
+            newUiOptions ^= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+        }
+
+        // Status bar hiding: Backwards compatible to Jellybean
+        if (Build.VERSION.SDK_INT >= 16) {
+            newUiOptions ^= View.SYSTEM_UI_FLAG_FULLSCREEN;
+        }
+
+        // Immersive mode: Backward compatible to KitKat.
+        // Note that this flag doesn't do anything by itself, it only augments the behavior
+        // of HIDE_NAVIGATION and FLAG_FULLSCREEN.  For the purposes of this sample
+        // all three flags are being toggled together.
+        // Note that there are two immersive mode UI flags, one of which is referred to as "sticky".
+        // Sticky immersive mode differs in that it makes the navigation and status bars
+        // semi-transparent, and the UI flag does not get cleared when the user interacts with
+        // the screen.
+        if (Build.VERSION.SDK_INT >= 19) {
+            newUiOptions ^= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        }
+
+        this.getWindow().getDecorView().setSystemUiVisibility(newUiOptions);
     }
 
     public void onCreateNotifyReceiver() {
@@ -511,7 +516,6 @@ public class MainActivity extends BaseGameActivity implements
                 public void onServiceDisconnected(ComponentName name) {
 
                 }
-
             };
 
             bindService(new Intent(MainActivity.this, SongService.class), connection, BIND_AUTO_CREATE);
@@ -525,7 +529,6 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     protected void onStart() {
-//		this.enableAccelerometerSensor(this);
         if (getIntent().getAction() != null
                 && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
             if (ContentResolver.SCHEME_FILE.equals(getIntent().getData().getScheme())) {
@@ -579,27 +582,21 @@ public class MainActivity extends BaseGameActivity implements
         if (GlobalManager.getInstance().getMainScene() != null) {
             BeatmapInfo beatmapInfo = GlobalManager.getInstance().getMainScene().beatmapInfo;
             if (songService != null && beatmapInfo != null && !songService.isGaming() && !songService.isSettingMenu()) {
-                if (Build.VERSION.SDK_INT > 10) {
-                    songService.showNotifyPanel();
+                songService.showNotifyPanel();
 
-                    if (wakeLock == null) {
-                        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-                        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "osudroid:MainActivity");
-                    }
-                    wakeLock.acquire();
-
-                    if (beatmapInfo.getArtistUnicode() != null && beatmapInfo.getTitleUnicode() != null) {
-                        songService.updateTitleText(beatmapInfo.getTitleUnicode(), beatmapInfo.getArtistUnicode());
-                    } else if (beatmapInfo.getArtist() != null && beatmapInfo.getTitle() != null) {
-                        songService.updateTitleText(beatmapInfo.getTitle(), beatmapInfo.getArtist());
-                    } else {
-                        songService.updateTitleText("QAQ I cant load info", " ");
-                    }
-                    songService.updateCoverImage(beatmapInfo.getTrack(0).getBackground());
-                    songService.updateStatus();
-                } else {
-                    songService.stop();
+                if (wakeLock != null) {
+                    wakeLock.acquire(10*60*1000L /*10 minutes*/);
                 }
+
+                if (beatmapInfo.getArtistUnicode() != null && beatmapInfo.getTitleUnicode() != null) {
+                    songService.updateTitleText(beatmapInfo.getTitleUnicode(), beatmapInfo.getArtistUnicode());
+                } else if (beatmapInfo.getArtist() != null && beatmapInfo.getTitle() != null) {
+                    songService.updateTitleText(beatmapInfo.getTitle(), beatmapInfo.getArtist());
+                } else {
+                    songService.updateTitleText("QAQ I cant load info", " ");
+                }
+                songService.updateCoverImage(beatmapInfo.getTrack(0).getBackground());
+                songService.updateStatus();
             } else {
                 if (songService != null) {
                     songService.pause();

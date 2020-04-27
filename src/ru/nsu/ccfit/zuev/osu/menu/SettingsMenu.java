@@ -84,14 +84,10 @@ public class SettingsMenu extends PreferenceActivity {
             }
         });
         final Preference register = findPreference("registerAcc");
-        register.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-
-
-            public boolean onPreferenceClick(Preference preference) {
-                OnlineInitializer initializer = new OnlineInitializer(SettingsMenu.this);
-                initializer.createInitDialog();
-                return true;
-            }
+        register.setOnPreferenceClickListener(preference -> {
+            OnlineInitializer initializer = new OnlineInitializer(SettingsMenu.this);
+            initializer.createInitDialog();
+            return true;
         });
         //final Preference downloadExtension = findPreference("downloadExtension");
         //downloadExtension.setOnPreferenceClickListener(preference -> EdExtensionHelper.downloadExtension());

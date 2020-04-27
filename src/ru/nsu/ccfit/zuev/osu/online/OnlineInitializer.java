@@ -117,12 +117,11 @@ public class OnlineInitializer implements View.OnClickListener {
 
                 //Save changes
                 Editor editor = prefs.edit();
-                if (prefs.getBoolean("onlineSet", false) == false || success) {
+                if (success) {
                     editor.putBoolean("stayOnline", success);
                     editor.putString("onlineUsername", username);
                     editor.putString("onlinePassword", password);
                 }
-                editor.putBoolean("onlineSet", true);
                 editor.commit();
                 if (success) {
                     ToastLogger.showTextId(R.string.online_regcomplete, true);

@@ -28,8 +28,7 @@ public class OSZParser {
      * Parse an *.osz file. Location of decompressed files depends of settings
      * and storage availability.
      */
-    public static boolean parseOSZ(final Activity activity,
-                                   final String filename) {
+    public static boolean parseOSZ(Activity activity, String filename, boolean deleteOsz) {
         final File osz = new File(filename);
         ZipInputStream istream;
 
@@ -107,7 +106,7 @@ public class OSZParser {
         }
 
         // And trying to delete .osz
-        if (Config.isDELETE_OSZ()) {
+        if (deleteOsz) {
             osz.delete();
         }
 

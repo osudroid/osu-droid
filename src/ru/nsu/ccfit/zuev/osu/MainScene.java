@@ -205,7 +205,7 @@ public class MainScene implements IUpdateHandler {
                     new AsyncTaskLoader().execute(new OsuAsyncCallback() {
                         public void run() {
                             GlobalManager.getInstance().getEngine().setScene(new LoadingScreen().getScene());
-                            GlobalManager.getInstance().getMainActivity().checkNewBeatmaps();
+                            GlobalManager.getInstance().getMainActivity().checkBeatmapAndReplay();
                             if (!LibraryManager.getInstance().loadLibraryCache(GlobalManager.getInstance().getMainActivity(), false)) {
                                 LibraryManager.getInstance().scanLibrary(GlobalManager.getInstance().getMainActivity());
                             }

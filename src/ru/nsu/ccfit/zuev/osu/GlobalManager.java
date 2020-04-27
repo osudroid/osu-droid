@@ -92,11 +92,7 @@ public class GlobalManager {
     }
 
     public Camera getCamera() {
-        return camera;
-    }
-
-    public void setCamera(Camera camera) {
-        this.camera = camera;
+        return this.engine.getCamera();
     }
 
     public GameScene getGameScene() {
