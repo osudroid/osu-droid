@@ -858,6 +858,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
         if (mod.contains(GameMod.MOD_HARDROCK)) {
             ar *= 1.4f;
+            if(ar > 10) {
+                ar = 10;
+            }
             od *= 1.4f;
             cs += 1f;
             hp *= 1.4f;
@@ -884,7 +887,22 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             beatmapInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
             dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
         }
-
+        //added by hao1637
+        if (mod.contains(GameMod.MOD_REALLYEASY)) {
+            ar -= 0.5f;
+            if(mod.contains(GameMod.MOD_DOUBLETIME) | mod.contains(GameMod.MOD_NIGHTCORE)){
+                ar -= 0.5f;
+            }
+            od *= 0.5f;
+            cs -= 1f;
+            hp *= 0.5f;
+            dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
+        }
+        if (mod.contains(GameMod.MOD_SMALLCIRCLE)) {
+            cs += 4f;
+            dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+        }
+        //
         SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
         String binfoStr = String.format(StringTable.get(R.string.binfoStr1), sdf.format(length),
@@ -893,9 +911,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         beatmapInfo.setText(binfoStr);
 
         final StringBuilder dimensionStringBuilder = new StringBuilder();
-        ar = Math.min(10.f, ar);
-        od = Math.min(10.f, od);
-        cs = Math.min(10.f, cs);
+        ar = Math.min(13.f, ar);
+        od = Math.min(11.f, od);
+        cs = Math.min(15.f, cs);
         hp = Math.min(10.f, hp);
 
         if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)) {
@@ -905,7 +923,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 4 / 3), 2);
             od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 4 / 3), 2);
         }
-
         dimensionStringBuilder.append("AR: ").append(GameHelper.Round(ar, 2)).append(" ")
                 .append("OD: ").append(GameHelper.Round(od, 2)).append(" ")
                 .append("CS: ").append(GameHelper.Round(cs, 2)).append(" ")

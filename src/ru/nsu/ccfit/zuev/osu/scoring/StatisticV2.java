@@ -120,10 +120,10 @@ public class StatisticV2 implements Serializable {
             mult *= 0;
         }
         if (mod.contains(GameMod.MOD_RELAX)) {
-            mult *= 0;
+            mult *= 0.001f;
         }
         if (mod.contains(GameMod.MOD_AUTOPILOT)) {
-            mult *= 0;
+            mult *= 0.001f;
         }
         if (mod.contains(GameMod.MOD_EASY)) {
             mult *= 0.5f;
@@ -457,6 +457,14 @@ public class StatisticV2 implements Serializable {
         if (mod.contains(GameMod.MOD_PRECISE)) {
             s += "s";
         }
+        //added by hao1637
+        if (mod.contains(GameMod.MOD_SMALLCIRCLE)) {
+            s += "m";
+        }
+        if (mod.contains(GameMod.MOD_REALLYEASY)) {
+            s += "l";
+        }
+        //
         return s;
     }
 
@@ -496,7 +504,14 @@ public class StatisticV2 implements Serializable {
                     break;
                 case 's':
                     mod.add(GameMod.MOD_PRECISE);
-                    break;
+                    break;    
+                //added by hao1637
+                case 'm':
+                    mod.add(GameMod.MOD_SMALLCIRCLE);
+                    break;    
+                case 'l':
+                    mod.add(GameMod.MOD_REALLYEASY);
+                    break;    
             }
         }
     }

@@ -11,8 +11,9 @@ public enum GameMod {
     MOD_DOUBLETIME("dt"),
     MOD_NIGHTCORE("nc"),
     MOD_HALFTIME("ht"),
-    MOD_PRECISE("pr");
-
+    MOD_PRECISE("pr"),
+    MOD_SMALLCIRCLE("sc"),
+    MOD_REALLYEASY("re");
     public final String shortName;
 
     GameMod(String shortName) {

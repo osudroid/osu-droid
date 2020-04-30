@@ -414,6 +414,21 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GameHelper.setTimeMultiplier(1f);
         }
 
+        //added by hao1637
+        if (ModMenu.getInstance().getMod().contains(GameMod.MOD_REALLYEASY)) {
+            scale += 0.125f;
+            drain *= 0.5f;
+            overallDifficulty *= 0.5f;
+            approachRate = (float) ((ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME) || ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE))?
+            (GameHelper.ar2ms(rawApproachRate - 1f) / 1000f):(GameHelper.ar2ms(rawApproachRate - 0.5f) / 1000f));
+        }
+
+        if (ModMenu.getInstance().getMod().contains(GameMod.MOD_SMALLCIRCLE)) {
+            scale -= (float) ((Config.getRES_HEIGHT() / 480.0f) * (4 * 4.48)
+            * 2 / GameObjectSize.BASE_OBJECT_SIZE);
+        }
+        //
+
         GameHelper.setRelaxMod(ModMenu.getInstance().getMod().contains(GameMod.MOD_RELAX));
         GameHelper.setAutopilotMod(ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTOPILOT));
         GameHelper.setAuto(ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO));
@@ -550,11 +565,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 replay.countMarks(overallDifficulty);
         } else if (!OnlineManager.getInstance().isStayOnline() && !Config.isSaveReplays()) {
             replay = null;
-        } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO) ||
+        } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO)) {
+            replay = null;
+        }
+        /*
+        else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO) ||
                 ModMenu.getInstance().getMod().contains(GameMod.MOD_RELAX) ||
                 ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTOPILOT)) {
             replay = null;
         }
+         */
         //TODO fix replays ^^
         // replay = null;
 
@@ -1020,7 +1040,40 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             effectOffset += 25;
             timeOffset += 0.25f;
         }
-
+        if (stat.getMod().contains(GameMod.MOD_SMALLCIRCLE)) {
+            final GameEffect effect = GameObjectPool.getInstance().getEffect(
+                    "selection-mod-smallcircle");
+            effect.init(
+                    mgScene,
+                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
+                            .toRes(130)),
+                    scale,
+                    new SequenceEntityModifier(ModifierFactory
+                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
+                            .newDelayModifier(2 - timeOffset),
+                            new ParallelEntityModifier(ModifierFactory
+                                    .newFadeOutModifier(0.5f), ModifierFactory
+                                    .newScaleModifier(0.5f, 1, 1.5f))));
+            effectOffset += 25;
+            timeOffset += 0.25f;
+        }
+        if (stat.getMod().contains(GameMod.MOD_REALLYEASY)) {
+            final GameEffect effect = GameObjectPool.getInstance().getEffect(
+                    "selection-mod-reallyeasy");
+            effect.init(
+                    mgScene,
+                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
+                            .toRes(130)),
+                    scale,
+                    new SequenceEntityModifier(ModifierFactory
+                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
+                            .newDelayModifier(2 - timeOffset),
+                            new ParallelEntityModifier(ModifierFactory
+                                    .newFadeOutModifier(0.5f), ModifierFactory
+                                    .newScaleModifier(0.5f, 1, 1.5f))));
+            effectOffset += 25;
+            timeOffset += 0.25f;
+        }
         kiai = false;
         kiaiRect = new Rectangle(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT());
@@ -1925,11 +1978,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void playSound(final String name, final int sampleSet, final int addition) {
-        if (addition > 0 && !name.equals("hitnormal")) {
+        if (addition > 0 && !name.equals("hitnormal") && addition < Constants.SAMPLE_PREFIX.length) {
             playSound(Constants.SAMPLE_PREFIX[addition], name);
             return;
         }
-        if (sampleSet > 0) {
+        if (sampleSet > 0 && sampleSet < Constants.SAMPLE_PREFIX.length) {
             playSound(Constants.SAMPLE_PREFIX[sampleSet], name);
         } else {
             playSound(soundTimingPoint.getHitSound(), name);
