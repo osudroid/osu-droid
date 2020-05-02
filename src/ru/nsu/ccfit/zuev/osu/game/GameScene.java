@@ -1925,11 +1925,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void playSound(final String name, final int sampleSet, final int addition) {
-        if (addition > 0 && !name.equals("hitnormal")) {
+        if (addition > 0 && !name.equals("hitnormal") && addition < Constants.SAMPLE_PREFIX.length) {
             playSound(Constants.SAMPLE_PREFIX[addition], name);
             return;
         }
-        if (sampleSet > 0) {
+        if (sampleSet > 0 && sampleSet < Constants.SAMPLE_PREFIX.length) {
             playSound(Constants.SAMPLE_PREFIX[sampleSet], name);
         } else {
             playSound(soundTimingPoint.getHitSound(), name);
