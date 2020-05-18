@@ -133,7 +133,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                     result += "PR,";
                     break;
                 case 'l':
-                    result += "rEZ,";
+                    result += "REZ,";
                     break;
                 case 'm':
                     result += "SC,";
