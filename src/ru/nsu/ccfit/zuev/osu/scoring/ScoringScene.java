@@ -415,10 +415,7 @@ public class ScoringScene {
                 || stat.getMod().contains(GameMod.MOD_REALLYEASY)) {
                     ToastLogger.showText(StringTable.get(R.string.mod_precise_is_unrank_now), true);
                 }
-                else if(stat.getMod().contains(GameMod.MOD_RELAX) || stat.getMod().contains(GameMod.MOD_AUTOPILOT)){
-                    
-                } 
-                else {
+                else if(!stat.getMod().contains(GameMod.MOD_RELAX) && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)){
                     SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
                             OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy());
                     sendingPanel.setPosition(Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));
