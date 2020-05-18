@@ -108,18 +108,22 @@ public class ModMenu implements IModSwitcher {
         addButton(offset + offsetGrowth * 0, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-easy", GameMod.MOD_EASY);
         addButton(offset + offsetGrowth * 1, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-nofail", GameMod.MOD_NOFAIL);
         addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-halftime", GameMod.MOD_HALFTIME);
+        addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-reallyeasy", GameMod.MOD_REALLYEASY);
 
         //line 2
         addButton(offset + offsetGrowth * 0, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hardrock", GameMod.MOD_HARDROCK);
         addButton(offset + offsetGrowth * 1, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-doubletime", GameMod.MOD_DOUBLETIME);
         addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-nightcore", GameMod.MOD_NIGHTCORE);
         addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hidden", GameMod.MOD_HIDDEN);
+        addButton(offset + offsetGrowth * 4, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-smallcircle", GameMod.MOD_SMALLCIRCLE);
 
         //line 3
         addButton(offset + offsetGrowth * 0, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax", GameMod.MOD_RELAX);
         addButton(offset + offsetGrowth * 1, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax2", GameMod.MOD_AUTOPILOT);
-        addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-autoplay", GameMod.MOD_AUTO);
-        addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-precise", GameMod.MOD_PRECISE);
+        addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-suddendeath", GameMod.MOD_SUDDENDEATH);
+        addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-perfect", GameMod.MOD_PERFECT);
+        addButton(offset + offsetGrowth * 4, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-autoplay", GameMod.MOD_AUTO);
+        addButton(offset + offsetGrowth * 5, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-precise", GameMod.MOD_PRECISE);
 
 
         final TextButton resetText = new TextButton(ResourceManager
@@ -194,10 +198,10 @@ public class ModMenu implements IModSwitcher {
             mult *= 0;
         }
         if (mod.contains(GameMod.MOD_RELAX)) {
-            mult *= 0;
+            mult *= 0.001f;
         }
         if (mod.contains(GameMod.MOD_AUTOPILOT)) {
-            mult *= 0;
+            mult *= 0.001f;
         }
         if (mod.contains(GameMod.MOD_EASY)) {
             mult *= 0.5f;
@@ -219,6 +223,9 @@ public class ModMenu implements IModSwitcher {
         }
         if (mod.contains(GameMod.MOD_HALFTIME)) {
             mult *= 0.3f;
+        }
+        if (mod.contains(GameMod.MOD_REALLYEASY)) {
+            mult *= 0.4f;
         }
 
         multiplierText.setText(StringTable.format(R.string.menu_mod_multiplier,
@@ -273,6 +280,18 @@ public class ModMenu implements IModSwitcher {
             } else if (flag.equals(GameMod.MOD_HALFTIME)) {
                 mod.remove(GameMod.MOD_DOUBLETIME);
                 mod.remove(GameMod.MOD_NIGHTCORE);
+                modsRemoved = true;
+            } else if (flag.equals(GameMod.MOD_SUDDENDEATH)) {
+                mod.remove(GameMod.MOD_NOFAIL);
+                mod.remove(GameMod.MOD_PERFECT);
+                modsRemoved = true;
+            } else if (flag.equals(GameMod.MOD_PERFECT)) {
+                mod.remove(GameMod.MOD_NOFAIL);
+                mod.remove(GameMod.MOD_SUDDENDEATH);
+                modsRemoved = true;
+            } else if (flag.equals(GameMod.MOD_NOFAIL)) {
+                mod.remove(GameMod.MOD_PERFECT);
+                mod.remove(GameMod.MOD_SUDDENDEATH);
                 modsRemoved = true;
             }
             if (modsRemoved) {

@@ -66,6 +66,9 @@ public class Statistic implements Serializable {
         if (mod.contains(GameMod.MOD_HALFTIME)) {
             mult *= 0.3f;
         }
+        if (mod.contains(GameMod.MOD_REALLYEASY)) {
+            mult *= 0.4f;
+        }
         return (int) (totalScore * mult);
     }
 
@@ -91,6 +94,9 @@ public class Statistic implements Serializable {
         }
         if (mod.contains(GameMod.MOD_HALFTIME)) {
             mult *= 0.3f;
+        }
+        if (mod.contains(GameMod.MOD_REALLYEASY)) {
+            mult *= 0.4f;
         }
         return (int) (totalScore * mult);
     }

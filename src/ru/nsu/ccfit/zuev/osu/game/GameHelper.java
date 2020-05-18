@@ -39,6 +39,8 @@ public class GameHelper {
     private static boolean nightCore = false;
     private static boolean halfTime = false;
     private static boolean autopilotMod = false;
+    private static boolean suddenDeath = false;
+    private static boolean perfect = false;
     private static boolean useReplay;
     private static boolean isKiai = false;
     private static boolean auto = false;
@@ -388,6 +390,22 @@ public class GameHelper {
 
     public static void setDoubleTime(final boolean doubleTime) {
         GameHelper.doubleTime = doubleTime;
+    }
+
+    public static boolean isSuddenDeath() {
+        return suddenDeath;
+    }
+
+    public static void setSuddenDeath(final boolean suddenDeath) {
+        GameHelper.suddenDeath = suddenDeath;
+    }
+
+    public static boolean isPerfect() {
+        return perfect;
+    }
+
+    public static void setPerfect(final boolean perfect) {
+        GameHelper.perfect = perfect;
     }
 
     public static boolean isUseReplay() {

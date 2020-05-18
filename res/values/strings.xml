@@ -133,8 +133,8 @@
 
 	<string name="test_ed_storyboard">View storyboard (experiment)</string>
 
-	<string name="mod_precise_is_unrank_now">MOD_PRECISE is unrank now</string>
-
+	<!-- <string name="mod_precise_is_unrank_now">MOD_PRECISE is unrank now</string>-->
+	<string name="mods_sdpfprscrez_is_unrank_now">MOD:SD/PF/PR/SC/REZ is unrank now</string>
 
 	<!-- new data after 1.6.7(beta1) -->
     <string name="beta_checking_upgrade">Checking Upgrade...</string>
