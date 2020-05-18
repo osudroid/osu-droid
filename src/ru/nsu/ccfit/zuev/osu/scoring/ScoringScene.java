@@ -341,6 +341,16 @@ public class ScoringScene {
                     .getInstance().getTexture("selection-mod-nofail"));
             modX -= Utils.toRes(30);
             scene.attachChild(modSprite);
+        } else if (stat.getMod().contains(GameMod.MOD_SUDDENDEATH)) {
+            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
+                    .getInstance().getTexture("selection-mod-suddendeath"));
+            modX -= Utils.toRes(30);
+            scene.attachChild(modSprite);
+        } else if (stat.getMod().contains(GameMod.MOD_PERFECT)) {
+            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
+                    .getInstance().getTexture("selection-mod-perfect"));
+            modX -= Utils.toRes(30);
+            scene.attachChild(modSprite);
         }
         if (stat.getMod().contains(GameMod.MOD_AUTO)) {
             final Sprite modSprite = new Sprite(modX, modY, ResourceManager
@@ -381,13 +391,34 @@ public class ScoringScene {
             modX -= Utils.toRes(30);
             scene.attachChild(modSprite);
         }
-
+        //added by hao1637
+        if (stat.getMod().contains(GameMod.MOD_REALLYEASY)) {
+            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
+                    .getInstance().getTexture("selection-mod-reallyeasy"));
+            modX -= Utils.toRes(30);
+            scene.attachChild(modSprite);
+        }
+        if (stat.getMod().contains(GameMod.MOD_SMALLCIRCLE)) {
+            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
+                    .getInstance().getTexture("selection-mod-smallcircle"));
+            modX -= Utils.toRes(30);
+            scene.attachChild(modSprite);
+        }
+        //
         if (track != null && mapMD5 != null) {
             if (stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
                     OnlineManager.getInstance().isReadyToSend()) {
-                if (stat.getMod().contains(GameMod.MOD_PRECISE)) {
+                if (stat.getMod().contains(GameMod.MOD_PRECISE)
+                || stat.getMod().contains(GameMod.MOD_SUDDENDEATH) 
+                || stat.getMod().contains(GameMod.MOD_PERFECT)
+                || stat.getMod().contains(GameMod.MOD_SMALLCIRCLE)
+                || stat.getMod().contains(GameMod.MOD_REALLYEASY)) {
                     ToastLogger.showText(StringTable.get(R.string.mod_precise_is_unrank_now), true);
-                } else {
+                }
+                else if(stat.getMod().contains(GameMod.MOD_RELAX) || stat.getMod().contains(GameMod.MOD_AUTOPILOT)){
+                    
+                } 
+                else {
                     SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
                             OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy());
                     sendingPanel.setPosition(Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));
