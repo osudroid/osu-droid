@@ -889,6 +889,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
         //added by hao1637
         if (mod.contains(GameMod.MOD_REALLYEASY)) {
+            if(mod.contains(GameMod.MOD_EASY)){
+                ar *= 2f;
+            }
             ar -= 0.5f;
             if(mod.contains(GameMod.MOD_DOUBLETIME) | mod.contains(GameMod.MOD_NIGHTCORE)){
                 ar -= 0.5f;
