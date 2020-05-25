@@ -419,8 +419,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             scale += 0.125f;
             drain *= 0.5f;
             overallDifficulty *= 0.5f;
-            approachRate = (float) ((ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME) || ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE))?
-            (GameHelper.ar2ms(rawApproachRate - 1f) / 1000f):(GameHelper.ar2ms(rawApproachRate - 0.5f) / 1000f));
+            if(ModMenu.getInstance().getMod().contains(GameMod.MOD_HARDROCK)){
+                approachRate = (float) ((ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME) || ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE))?
+                (GameHelper.ar2ms(Math.min(1.4f * rawApproachRate, 10f) - 1f) / 1000f):(GameHelper.ar2ms(Math.min(1.4f * rawApproachRate, 10f) - 0.5f) / 1000f));
+            }
+            else{
+                approachRate = (float) ((ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME) || ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE))?
+                (GameHelper.ar2ms(rawApproachRate - 1f) / 1000f):(GameHelper.ar2ms(rawApproachRate - 0.5f) / 1000f));
+            }
         }
 
         if (ModMenu.getInstance().getMod().contains(GameMod.MOD_SMALLCIRCLE)) {
