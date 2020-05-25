@@ -42,6 +42,7 @@ import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Iterator;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -2089,11 +2090,24 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return false;
         }
         if (activeObjects.isEmpty()
-                || Math.abs(object.getHitTime()
-                - activeObjects.peek().getHitTime()) > 0.001f) {
+                || (getLastTobeclickObject() != null 
+                && Math.abs(object.getHitTime()
+                - getLastTobeclickObject().getHitTime()) > 0.001f)) {
             return false;
         }
         return cursors[index].mousePressed;
+    }
+
+    private GameObject getLastTobeclickObject(){
+        Iterator iterator = activeObjects.iterator();
+        while(iterator.hasNext()){
+            GameObject note = (GameObject)iterator.next();
+            if(note instanceof HitCircle)return note;
+            if(note instanceof Slider){
+                if(((Slider)note).startHit() == false)return note;
+            }
+        }
+        return null;
     }
 
     @Override

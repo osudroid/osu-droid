@@ -340,6 +340,10 @@ public class Slider extends GameObject {
 //		}
     }
 
+    public boolean startHit(){
+        return startHit;
+    }
+
     private void initTrack() {
         final TextureRegion tex = startCircle.getTextureRegion();
         final PointF startPos = new PointF(path.points.get(0).x
