@@ -202,6 +202,9 @@
 
     <string name="opt_fix_frame_offset_title">Fix a random offset.</string>
     <string name="opt_fix_frame_offset_summary">Try to fix the offset between input time and frame time.</string>
+    
+    <string name="opt_remove_sliderlock_spinnerlock_title">Remove slider lock and spinner lock</string>
+    <string name="opt_remove_sliderlock_spinnerlock_summary">Try to remove slider lock and spinner lock. 2b style is playable now.</string>
 
     <string name="opt_enable_extension_title">Enable extension</string>
 

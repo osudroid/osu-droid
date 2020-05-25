@@ -2089,10 +2089,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (stat.getMod().contains(GameMod.MOD_AUTO)) {
             return false;
         }
-        if (activeObjects.isEmpty()
-                || (getLastTobeclickObject() != null 
-                && Math.abs(object.getHitTime()
-                - getLastTobeclickObject().getHitTime()) > 0.001f)) {
+        if(Config.isRemoveSliderLock()){
+            GameObject lastObject = getLastTobeclickObject();
+            if(activeObjects.isEmpty()
+                || (lastObject != null && Math.abs(object.getHitTime() - lastObject.getHitTime()) > 0.001f)) {
+                return false;
+            }
+        }
+        else if (activeObjects.isEmpty()
+            || Math.abs(object.getHitTime()
+            - activeObjects.peek().getHitTime()) > 0.001f) {
             return false;
         }
         return cursors[index].mousePressed;
