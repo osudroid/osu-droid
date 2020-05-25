@@ -103,7 +103,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                     result += "Auto,";
                     break;
                 case 'x':
-                    result += "RE,";
+                    result += "Relax,";
                     break;
                 case 'p':
                     result += "AP,";
@@ -131,6 +131,18 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                     break;
                 case 's':
                     result += "PR,";
+                    break;
+                case 'l':
+                    result += "REZ,";
+                    break;
+                case 'm':
+                    result += "SC,";
+                    break;
+                case 'u':
+                    result += "SD,";
+                    break;
+                case 'f':
+                    result += "PF,";
                     break;
             }
         }

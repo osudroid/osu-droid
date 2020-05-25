@@ -120,10 +120,10 @@ public class StatisticV2 implements Serializable {
             mult *= 0;
         }
         if (mod.contains(GameMod.MOD_RELAX)) {
-            mult *= 0;
+            mult *= 0.001f;
         }
         if (mod.contains(GameMod.MOD_AUTOPILOT)) {
-            mult *= 0;
+            mult *= 0.001f;
         }
         if (mod.contains(GameMod.MOD_EASY)) {
             mult *= 0.5f;
@@ -145,6 +145,9 @@ public class StatisticV2 implements Serializable {
         }
         if (mod.contains(GameMod.MOD_HALFTIME)) {
             mult *= 0.3f;
+        }
+        if (mod.contains(GameMod.MOD_REALLYEASY)) {
+            mult *= 0.4f;
         }
         return (int) (totalScore * mult);
     }
@@ -171,6 +174,9 @@ public class StatisticV2 implements Serializable {
         }
         if (mod.contains(GameMod.MOD_HALFTIME)) {
             mult *= 0.3f;
+        }
+        if (mod.contains(GameMod.MOD_REALLYEASY)) {
+            mult *= 0.4f;
         }
         return (int) (totalScore * mult);
     }
@@ -457,6 +463,18 @@ public class StatisticV2 implements Serializable {
         if (mod.contains(GameMod.MOD_PRECISE)) {
             s += "s";
         }
+        if (mod.contains(GameMod.MOD_SMALLCIRCLE)) {
+            s += "m";
+        }
+        if (mod.contains(GameMod.MOD_REALLYEASY)) {
+            s += "l";
+        }
+        if (mod.contains(GameMod.MOD_PERFECT)) {
+            s += "f";
+        }
+        if (mod.contains(GameMod.MOD_SUDDENDEATH)) {
+            s += "u";
+        }
         return s;
     }
 
@@ -496,7 +514,20 @@ public class StatisticV2 implements Serializable {
                     break;
                 case 's':
                     mod.add(GameMod.MOD_PRECISE);
-                    break;
+                    break;    
+                //added by hao1637
+                case 'm':
+                    mod.add(GameMod.MOD_SMALLCIRCLE);
+                    break;    
+                case 'l':
+                    mod.add(GameMod.MOD_REALLYEASY);
+                    break;    
+                case 'u':
+                    mod.add(GameMod.MOD_SUDDENDEATH);
+                    break;    
+                case 'f':
+                    mod.add(GameMod.MOD_PERFECT);
+                    break;   
             }
         }
     }

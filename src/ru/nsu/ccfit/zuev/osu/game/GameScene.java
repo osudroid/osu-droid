@@ -159,6 +159,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private ComboBurst comboBurst;
     private VideoSprite mVideo = null;
     private Sprite[] ScoreBoardSprite;
+    private int failcount = 0;
 
     private StoryboardSprite storyboardSprite;
 
@@ -414,6 +415,20 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GameHelper.setTimeMultiplier(1f);
         }
 
+        if (ModMenu.getInstance().getMod().contains(GameMod.MOD_REALLYEASY)) {
+            scale += 0.125f;
+            drain *= 0.5f;
+            overallDifficulty *= 0.5f;
+            approachRate = (float) ((ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME) || ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE))?
+            (GameHelper.ar2ms(rawApproachRate - 1f) / 1000f):(GameHelper.ar2ms(rawApproachRate - 0.5f) / 1000f));
+        }
+
+        if (ModMenu.getInstance().getMod().contains(GameMod.MOD_SMALLCIRCLE)) {
+            scale -= (float) ((Config.getRES_HEIGHT() / 480.0f) * (4 * 4.48)
+            * 2 / GameObjectSize.BASE_OBJECT_SIZE);
+        }
+        //
+
         GameHelper.setRelaxMod(ModMenu.getInstance().getMod().contains(GameMod.MOD_RELAX));
         GameHelper.setAutopilotMod(ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTOPILOT));
         GameHelper.setAuto(ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO));
@@ -550,11 +565,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 replay.countMarks(overallDifficulty);
         } else if (!OnlineManager.getInstance().isStayOnline() && !Config.isSaveReplays()) {
             replay = null;
-        } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO) ||
+        } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO)) {
+            replay = null;
+        }
+        /*
+        else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO) ||
                 ModMenu.getInstance().getMod().contains(GameMod.MOD_RELAX) ||
                 ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTOPILOT)) {
             replay = null;
         }
+         */
         //TODO fix replays ^^
         // replay = null;
 
@@ -621,7 +641,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         mgScene.setBackgroundEnabled(false);
         fgScene.setBackgroundEnabled(false);
         isFirst = true;
-
+        failcount = 0;
         final LoadingScreen screen = new LoadingScreen();
         engine.setScene(screen.getScene());
 
@@ -644,6 +664,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
             }
         });
+        ResourceManager.getInstance().getSound("failsound").stop();
     }
 
     private void prepareScene() {
@@ -707,6 +728,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setHidden(stat.getMod().contains(GameMod.MOD_HIDDEN));
         GameHelper.setRelaxMod(stat.getMod().contains(GameMod.MOD_RELAX));
         GameHelper.setAutopilotMod(stat.getMod().contains(GameMod.MOD_AUTOPILOT));
+        GameHelper.setSuddenDeath(stat.getMod().contains(GameMod.MOD_SUDDENDEATH));
+        GameHelper.setPerfect(stat.getMod().contains(GameMod.MOD_PERFECT));
         difficultyHelper = stat.getMod().contains(GameMod.MOD_PRECISE) ?
                 DifficultyHelper.HighDifficulty : DifficultyHelper.StdDifficulty;
         GameHelper.setDifficultyHelper(difficultyHelper);
@@ -1020,7 +1043,74 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             effectOffset += 25;
             timeOffset += 0.25f;
         }
-
+        if (stat.getMod().contains(GameMod.MOD_SUDDENDEATH)) {
+            final GameEffect effect = GameObjectPool.getInstance().getEffect(
+                    "selection-mod-suddendeath");
+            effect.init(
+                    mgScene,
+                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
+                            .toRes(130)),
+                    scale,
+                    new SequenceEntityModifier(ModifierFactory
+                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
+                            .newDelayModifier(2 - timeOffset),
+                            new ParallelEntityModifier(ModifierFactory
+                                    .newFadeOutModifier(0.5f), ModifierFactory
+                                    .newScaleModifier(0.5f, 1, 1.5f))));
+            effectOffset += 25;
+            timeOffset += 0.25f;
+        }
+        else if (stat.getMod().contains(GameMod.MOD_PERFECT)) {
+            final GameEffect effect = GameObjectPool.getInstance().getEffect(
+                    "selection-mod-perfect");
+            effect.init(
+                    mgScene,
+                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
+                            .toRes(130)),
+                    scale,
+                    new SequenceEntityModifier(ModifierFactory
+                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
+                            .newDelayModifier(2 - timeOffset),
+                            new ParallelEntityModifier(ModifierFactory
+                                    .newFadeOutModifier(0.5f), ModifierFactory
+                                    .newScaleModifier(0.5f, 1, 1.5f))));
+            effectOffset += 25;
+            timeOffset += 0.25f;
+        }
+        if (stat.getMod().contains(GameMod.MOD_SMALLCIRCLE)) {
+            final GameEffect effect = GameObjectPool.getInstance().getEffect(
+                    "selection-mod-smallcircle");
+            effect.init(
+                    mgScene,
+                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
+                            .toRes(130)),
+                    scale,
+                    new SequenceEntityModifier(ModifierFactory
+                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
+                            .newDelayModifier(2 - timeOffset),
+                            new ParallelEntityModifier(ModifierFactory
+                                    .newFadeOutModifier(0.5f), ModifierFactory
+                                    .newScaleModifier(0.5f, 1, 1.5f))));
+            effectOffset += 25;
+            timeOffset += 0.25f;
+        }
+        if (stat.getMod().contains(GameMod.MOD_REALLYEASY)) {
+            final GameEffect effect = GameObjectPool.getInstance().getEffect(
+                    "selection-mod-reallyeasy");
+            effect.init(
+                    mgScene,
+                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
+                            .toRes(130)),
+                    scale,
+                    new SequenceEntityModifier(ModifierFactory
+                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
+                            .newDelayModifier(2 - timeOffset),
+                            new ParallelEntityModifier(ModifierFactory
+                                    .newFadeOutModifier(0.5f), ModifierFactory
+                                    .newScaleModifier(0.5f, 1, 1.5f))));
+            effectOffset += 25;
+            timeOffset += 0.25f;
+        }
         kiai = false;
         kiaiRect = new Rectangle(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT());
@@ -1236,7 +1326,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     && stat.getMod().contains(GameMod.MOD_RELAX) == false
                     && stat.getMod().contains(GameMod.MOD_AUTOPILOT) == false
                     && stat.getMod().contains(GameMod.MOD_AUTO) == false) {
-                gameover();
+                if(stat.getMod().contains(GameMod.MOD_EASY) && failcount < 3){
+                    failcount++;
+                    stat.changeHp(1f);
+                }
+                else{
+                    gameover();
+                }
                 return;
             }
         }
@@ -1699,7 +1795,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             comboWasMissed = true;
             stat.registerHit(0, false, false);
             if (writeReplay) replay.addObjectScore(objectId, Replay.RESULT_0);
-
+            if(GameHelper.isPerfect()){
+                gameover();
+                restartGame();
+            }
+            if(GameHelper.isSuddenDeath())stat.changeHp(-1.0f);
             return "hit0";
         }
 
@@ -1709,6 +1809,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (writeReplay) replay.addObjectScore(objectId, Replay.RESULT_50);
             scoreName = "hit50";
             comboWas100 = true;
+            if(GameHelper.isPerfect()){
+                gameover();
+                restartGame();
+            }
         } else if (score == 100) {
             comboWas100 = true;
             if (writeReplay) replay.addObjectScore(objectId, Replay.RESULT_100);
@@ -1718,6 +1822,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             } else {
                 stat.registerHit(100, false, false);
                 scoreName = "hit100";
+            }
+            if(GameHelper.isPerfect()){
+                gameover();
+                restartGame();
             }
         } else if (score == 300) {
             if (writeReplay) replay.addObjectScore(objectId, Replay.RESULT_300);
@@ -2140,6 +2248,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private void createHitEffect(final PointF pos, final String name, RGBColor color) {
         final GameEffect effect = GameObjectPool.getInstance().getEffect(name);
         if (name.equals("hit0")) {
+            if(GameHelper.isSuddenDeath()){
+                effect.init(
+                    mgScene,
+                    pos,
+                    scale * 3,
+                    new SequenceEntityModifier(ModifierFactory
+                            .newFadeInModifier(0.15f), ModifierFactory
+                            .newDelayModifier(0.35f), ModifierFactory
+                            .newFadeOutModifier(0.25f)));
+                return;
+            }
             effect.init(
                     mgScene,
                     pos,
