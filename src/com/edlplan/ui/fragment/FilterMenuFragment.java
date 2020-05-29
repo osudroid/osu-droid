@@ -109,6 +109,12 @@ public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
             case Date:
                 s = R.string.menu_search_sort_date;
                 break;
+            case Stars:
+                s = R.string.menu_search_sort_stars;
+                break;
+            case Length:
+                s = R.string.menu_search_sort_length;
+                break;
             default:
                 s = R.string.menu_search_sort_creator;
                 break;

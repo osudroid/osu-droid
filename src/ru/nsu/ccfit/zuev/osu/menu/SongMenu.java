@@ -106,6 +106,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private int mapState;
     private AnimSprite scoringSwitcher = null;
     private AsyncTask<OsuAsyncCallback, Integer, Boolean> boardTask;
+    private GroupType groupType = GroupType.MapSet;
 
     public SongMenu() {
     }
@@ -675,6 +676,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                           final boolean favsOnly, Set<String> limit) {
         if (order.equals(sortOrder) == false) {
             sortOrder = order;
+            tryReloadMenuItems(sortOrder);
             sort();
         }
         if (filter == null || filterText.equals(filter)) {
@@ -721,6 +723,14 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         final Long int1 = i1.getBeatmap().getDate();
                         final Long int2 = i2.getBeatmap().getDate();
                         return int2.compareTo(int1);
+                    case Stars:
+                        final float float1 = i1.getFirstTrack().getDifficulty();
+                        final float float2 = i2.getFirstTrack().getDifficulty();
+                        return (float2 < float1) ? -1:((float2 == float1) ? 0 : 1);
+                    case Length:
+                        final Long length1 = i1.getFirstTrack().getMusicLength();
+                        final Long length2 = i2.getFirstTrack().getMusicLength();
+                        return length2.compareTo(length1);
                     default:
                         s1 = i1.getBeatmap().getTitle();
                         s2 = i2.getBeatmap().getTitle();
@@ -1277,6 +1287,65 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public enum SortOrder {
-        Title, Artist, Creator, Date
+        Title, Artist, Creator, Date, Stars, Length
+    }
+
+    public enum GroupType {
+        MapSet, SingleDiff
+    }
+
+    private void tryReloadMenuItems(SortOrder order){
+        switch(order){
+            case Title:
+                reloadMenuItems(GroupType.MapSet);
+                break;
+            case Artist:
+                reloadMenuItems(GroupType.MapSet);
+                break;
+            case Creator:
+                reloadMenuItems(GroupType.MapSet);
+                break;
+            case Date:
+                reloadMenuItems(GroupType.MapSet);
+                break;
+            case Stars:
+                reloadMenuItems(GroupType.SingleDiff);
+                break;
+            case Length:
+                reloadMenuItems(GroupType.SingleDiff);
+                break;
+        }
+    }
+
+    private void reloadMenuItems(GroupType type) {
+        if (groupType.equals(type) == true) {
+            return;
+        } else {
+            float oy = 10;
+            for (MenuItem item : items) {
+                item.removeFromScene();
+            }
+            items.clear();
+            switch (type) {
+                case MapSet:
+                    for (final BeatmapInfo i : LibraryManager.getInstance().getLibrary()) {
+                        final MenuItem item = new MenuItem(this, i, 400, oy);
+                        items.add(item);
+                        item.attachToScene(scene, backLayer);
+                        oy += item.getHeight();
+                    }
+                    break;
+                case SingleDiff:
+                    for (final BeatmapInfo i : LibraryManager.getInstance().getLibrary()) {
+                        for (int j = 0; j < i.getCount(); j++) {
+                            final MenuItem item = new MenuItem(this, i, 400, oy, j);
+                            items.add(item);
+                            item.attachToScene(scene, backLayer);
+                            oy += item.getHeight();
+                        }
+                    }
+                    break;
+            }
+        }
     }
 }

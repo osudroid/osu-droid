@@ -39,6 +39,7 @@ public class MenuItem {
     private boolean favorite;
     private boolean deleted = false;
     private Entity layer = null;
+    private int trackid = -1;
 
     public MenuItem(final MenuItemListener listener, final BeatmapInfo info,
                     final float x, final float y) {
@@ -57,6 +58,29 @@ public class MenuItem {
 
         final BeatmapProperties props = PropertiesLibrary.getInstance()
                 .getProperties(info.getPath());
+        if (props != null && props.isFavorite()) {
+            favorite = true;
+        } else {
+            favorite = false;
+        }
+
+    }
+
+    public MenuItem(final MenuItemListener listener, final BeatmapInfo info,
+                    final float x, final float y, int id) {
+        this.listener = new WeakReference<MenuItemListener>(listener);
+        beatmap = info;
+        trackDir = ScoreLibrary.getTrackDir(beatmap.getPath());
+        bgHeight = ResourceManager.getInstance()
+                .getTexture("menu-button-background").getHeight()
+                - Utils.toRes(25);
+//        titleStr = (beatmap.getArtistUnicode() == null ? beatmap.getArtist() : beatmap.getArtistUnicode()) + " - "
+//                + (beatmap.getTitleUnicode() == null ? beatmap.getTitle() : beatmap.getTitleUnicode());
+        titleStr = beatmap.getArtist() + " - " + beatmap.getTitle();
+        creatorStr = StringTable.format(R.string.menu_creator, beatmap.getCreator());
+        trackSprites = new MenuItemTrack[1];
+        trackid = id;
+        final BeatmapProperties props = PropertiesLibrary.getInstance().getProperties(info.getPath());
         if (props != null && props.isFavorite()) {
             favorite = true;
         } else {
@@ -203,6 +227,10 @@ public class MenuItem {
         builder.append(beatmap.getSource());
         builder.append(' ');
         builder.append(beatmap.getTracks().get(0).getBeatmapSetID());
+        for (TrackInfo track : beatmap.getTracks()) {
+            builder.append(' ');
+            builder.append(track.getMode());
+        }
         filterText = filter;
         boolean canVisible = true;
         final String lowerText = builder.toString().toLowerCase();
@@ -359,18 +387,30 @@ public class MenuItem {
     }
 
     private void initTracks() {
-        for (int i = 0; i < trackSprites.length; i++) {
-            trackSprites[i] = SongMenuPool.getInstance().newTrack();
-            trackSprites[i].setItem(this);
-            trackSprites[i].setTrack(beatmap.getTrack(i), beatmap);
-            beatmap.getTrack(i).setBeatmap(beatmap);
-            if (trackSprites[i].hasParent() == false) {
-                layer.attachChild(trackSprites[i]);
+        if (trackid == -1){
+            for (int i = 0; i < trackSprites.length; i++) {
+                trackSprites[i] = SongMenuPool.getInstance().newTrack();
+                trackSprites[i].setItem(this);
+                trackSprites[i].setTrack(beatmap.getTrack(i), beatmap);
+                beatmap.getTrack(i).setBeatmap(beatmap);
+                if (trackSprites[i].hasParent() == false) {
+                    layer.attachChild(trackSprites[i]);
+                }
+                scene.registerTouchArea(trackSprites[i]);
+                trackSprites[i].setVisible(true);
             }
-            scene.registerTouchArea(trackSprites[i]);
-            trackSprites[i].setVisible(true);
         }
-
+        else{
+            trackSprites[0] = SongMenuPool.getInstance().newTrack();
+            trackSprites[0].setItem(this);
+            trackSprites[0].setTrack(beatmap.getTrack(trackid), beatmap);
+            beatmap.getTrack(trackid).setBeatmap(beatmap);
+            if (trackSprites[0].hasParent() == false) {
+                layer.attachChild(trackSprites[0]);
+            }
+            scene.registerTouchArea(trackSprites[0]);
+            trackSprites[0].setVisible(true);
+        }
     }
 
     public boolean isFavorite() {
@@ -394,5 +434,21 @@ public class MenuItem {
                 tr.update(dt);
             }
         }
+    }
+
+    public TrackInfo getFirstTrack(){
+        return beatmap.getTrack((trackid > 0)? trackid : 0);
+    }
+
+    public void removeFromScene() {
+        if (scene == null) {
+            return;
+        }
+        if (selected) {
+            deselect();
+        }
+        freeBackground();
+        visible = false;
+        scene = null;
     }
 }
