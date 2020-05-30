@@ -112,11 +112,11 @@ public class AiModtpDifficulty {
         int i = 0;
         for(tpHitObject hitObject : tpHitObjects){
             if(i >= 2){
-                PointF v1 = new PointF(prev2.normPosStart().x - prev1.normPosEnd().x,
-                    prev2.normPosStart().y - prev1.normPosEnd().y);
-                PointF v2 = new PointF(hitObject.normPosStart().x - prev1.normPosEnd().x,
-                    hitObject.normPosStart().y - prev1.normPosEnd().y);
-                double dot = v1.x * v2.x - v1.y * v2.y;
+                PointF v1 = new PointF(prev2.getNormPosStart().x - prev1.getNormPosEnd().x,
+                    prev2.getNormPosStart().y - prev1.getNormPosEnd().y);
+                PointF v2 = new PointF(hitObject.getNormPosStart().x - prev1.getNormPosEnd().x,
+                    hitObject.getNormPosStart().y - prev1.getNormPosEnd().y);
+                double dot = v1.x * v2.x + v1.y * v2.y;
                 double det = v1.x * v2.y - v1.y * v2.x;
                 hitObject.angle = Math.abs(Math.atan2(det, dot));
             } 

@@ -36,13 +36,14 @@ public class tpHitObject implements Comparable<tpHitObject> {
     public double d_distance = 0.0;
     public double angle = 0.0;
 
-    private final static double MIN_SPEED_BONUS = 75.0;
-    private final static double MAX_SPEED_BONUS = 45.0;
+    private final static double MIN_SPEED_BONUS = 75.0; // ~200BPM
+    private final static double MAX_SPEED_BONUS = 45.0; // ~330BPM
     private final static double ANGLE_BONUS_SCALE = 90.0;
     private final static double AIM_TIMING_THRESHOLD = 107;
     private final static double SPEED_ANGLE_BONUS_BEGIN = 5 * Math.PI / 6;
     private final static double AIM_ANGLE_BONUS_BEGIN = Math.PI / 3;
     private final static double CIRCLESIZE_BUFF_THRESHOLD = 30.0;
+	private final static double SPEED_BALANCING_FACTOR = 40;
 
     public tpHitObject(HitObject BaseHitObject, float CircleRadius) {
         this.BaseHitObject = BaseHitObject;
@@ -63,11 +64,11 @@ public class tpHitObject implements Comparable<tpHitObject> {
         }
     }
 
-    public PointF normPosStart(){
+    public PointF getNormPosStart(){
         return NormalizedStartPosition;
     }
 
-    public PointF normPosEnd(){
+    public PointF getNormPosEnd(){
         return NormalizedEndPosition;
     }
 
@@ -170,7 +171,6 @@ public class tpHitObject implements Comparable<tpHitObject> {
         Strains[Type.value()] = PreviousHitObject.Strains[Type.value()] * Decay + Addition;
     }
 
-
     public double DistanceTo(tpHitObject other) {
         // Scale the distance by circle size.
         return Math.sqrt(Math.pow((NormalizedStartPosition.x - other.NormalizedEndPosition.x), 2) +
@@ -216,7 +216,7 @@ public class tpHitObject implements Comparable<tpHitObject> {
                 double speed_bonus = 1.0;
                 if (delta_time < MIN_SPEED_BONUS) {
                     speed_bonus +=
-                        Math.pow((MIN_SPEED_BONUS - delta_time) / 40.0, 2);
+                        Math.pow((MIN_SPEED_BONUS - delta_time) / SPEED_BALANCING_FACTOR, 2);
                 }
                 angle_bonus = 1.0;
                 if (!Double.isNaN(angle) && angle < SPEED_ANGLE_BONUS_BEGIN) {
