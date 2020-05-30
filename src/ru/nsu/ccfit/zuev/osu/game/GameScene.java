@@ -2108,7 +2108,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         Iterator iterator = activeObjects.iterator();
         while(iterator.hasNext()){
             GameObject note = (GameObject)iterator.next();
-            if((note.startHit() == false)return note;
+            if(note.isStartHit() == false)return note;
         }
         return null;
     }

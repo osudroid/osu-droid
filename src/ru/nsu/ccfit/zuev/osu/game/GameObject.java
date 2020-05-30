@@ -44,7 +44,7 @@ public abstract class GameObject {
         this.id = id;
     }
 
-    public boolean startHit(){
+    public boolean isStartHit(){
         return startHit;
     }
 }
