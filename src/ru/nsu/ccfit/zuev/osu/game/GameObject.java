@@ -8,7 +8,7 @@ public abstract class GameObject {
     protected float hitTime = 0;
     protected int id = -1;
     protected ReplayObjectData replayData = null;
-    protected boolean startHit;
+    protected boolean startHit = false;
 
     public ReplayObjectData getReplayData() {
         return replayData;
