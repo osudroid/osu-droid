@@ -90,6 +90,7 @@ public class Spinner extends GameObject {
         this.addition = 0;
         this.stat = stat;
         this.totalTime = time;
+        startHit = true;
         clear = false;
         if(totalTime <= 0f) clear = true;
         bonusScore = null;

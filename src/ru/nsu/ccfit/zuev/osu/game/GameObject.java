@@ -8,6 +8,7 @@ public abstract class GameObject {
     protected float hitTime = 0;
     protected int id = -1;
     protected ReplayObjectData replayData = null;
+    protected boolean startHit;
 
     public ReplayObjectData getReplayData() {
         return replayData;
@@ -41,5 +42,9 @@ public abstract class GameObject {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public boolean startHit(){
+        return startHit;
     }
 }

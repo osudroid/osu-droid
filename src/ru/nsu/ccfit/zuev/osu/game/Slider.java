@@ -57,7 +57,6 @@ public class Slider extends GameObject {
     private float scale;
     private int repeatCount;
     private boolean reverse;
-    private boolean startHit;
     private int[] soundId = new int[3];
     private int[] sampleSet = new int[3];
     private int[] addition = new int[3];
@@ -338,10 +337,6 @@ public class Slider extends GameObject {
 //		} else {
 //			initTrack();
 //		}
-    }
-
-    public boolean startHit(){
-        return startHit;
     }
 
     private void initTrack() {
