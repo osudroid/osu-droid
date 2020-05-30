@@ -889,6 +889,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
         //added by hao1637
         if (mod.contains(GameMod.MOD_REALLYEASY)) {
+            if(mod.contains(GameMod.MOD_EASY)){
+                ar *= 2f;
+            }
             ar -= 0.5f;
             if(mod.contains(GameMod.MOD_DOUBLETIME) | mod.contains(GameMod.MOD_NIGHTCORE)){
                 ar -= 0.5f;
@@ -908,6 +911,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         String binfoStr = String.format(StringTable.get(R.string.binfoStr1), sdf.format(length),
                 (bpm_min == bpm_max ? GameHelper.Round(bpm_min, 1) : GameHelper.Round(bpm_min, 1) + "-" + GameHelper.Round(bpm_max, 1)),
                 track.getMaxCombo());
+        if(length > 3600 * 1000){
+            sdf = new SimpleDateFormat("HH:mm:ss");
+            sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
+            binfoStr = String.format(StringTable.get(R.string.binfoStr1), sdf.format(length),
+                (bpm_min == bpm_max ? GameHelper.Round(bpm_min, 1) : GameHelper.Round(bpm_min, 1) + "-" + GameHelper.Round(bpm_max, 1)),
+                track.getMaxCombo());
+        }
         beatmapInfo.setText(binfoStr);
 
         final StringBuilder dimensionStringBuilder = new StringBuilder();
