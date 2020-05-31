@@ -220,7 +220,6 @@ public class HitCircle extends GameObject {
             }
             listener.registerAccuracy(signAcc);
             passedTime = -1;
-            //startHit = true;
             // Remove circle and register hit in update thread
             float finalSignAcc = signAcc;
             SyncTaskManager.getInstance().run(() -> {
