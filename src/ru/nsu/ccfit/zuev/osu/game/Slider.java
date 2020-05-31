@@ -57,7 +57,6 @@ public class Slider extends GameObject {
     private float scale;
     private int repeatCount;
     private boolean reverse;
-    private boolean startHit;
     private int[] soundId = new int[3];
     private int[] sampleSet = new int[3];
     private int[] addition = new int[3];
@@ -66,6 +65,7 @@ public class Slider extends GameObject {
     private int ticksGot;
     private int ticksTotal;
     private int currentTick;
+    private double tickInterval;
 
     private AnimSprite ball;
     private Sprite followcircle;
@@ -279,13 +279,20 @@ public class Slider extends GameObject {
         scene.attachChild(endCircle, 0);
 
         // Ticks
-        final int tickcount = (int) (maxTime * GameHelper.getTickRate() / GameHelper.getSliderTickLength());
+        //TODO: fix silder ticks bug
+        //if(timing.getBeatLength() < 1/1000 || timing.getBeatLength() > 1000000){
+            tickInterval = GameHelper.getSliderTickLength();
+        //}
+        //else{
+        //    tickInterval = timing.getBeatLength() * speedMultiplier;
+        //}
+        final int tickcount = (int) (maxTime * GameHelper.getTickRate() / tickInterval);
         ticks.clear();
         for (int i = 1; i <= tickcount; i++) {
             final Sprite tick = SpritePool.getInstance().getCenteredSprite(
                     "sliderscorepoint",
-                    getPercentPosition(i * GameHelper.getSliderTickLength()
-                            / (maxTime * GameHelper.getTickRate()), null));
+                    getPercentPosition((float)(i * tickInterval
+                            / (maxTime * GameHelper.getTickRate())), null));
             tick.setScale(scale);
             tick.setAlpha(0);
             ticks.add(tick);
@@ -338,10 +345,6 @@ public class Slider extends GameObject {
 //		} else {
 //			initTrack();
 //		}
-    }
-
-    public boolean startHit(){
-        return startHit;
     }
 
     private void initTrack() {
@@ -1137,8 +1140,8 @@ public class Slider extends GameObject {
                 / timing.getBeatLength()));
         // Some magic with slider ticks. If it'll crash it's not my fault ^_^"
         while (ticks.size() > 0 && percentage < 1 - 0.02f / maxTime
-                && tickTime * GameHelper.getTickRate() > GameHelper.getSliderTickLength()) {
-            tickTime -= GameHelper.getSliderTickLength() / GameHelper.getTickRate();
+                && tickTime * GameHelper.getTickRate() > tickInterval) {
+            tickTime -= tickInterval / GameHelper.getTickRate();
             if (followcircle.getAlpha() > 0 && replayData == null ||
                     replayData != null && replayData.tickSet.get(tickIndex)) {
                 Utils.playHitSound(listener, 16);
