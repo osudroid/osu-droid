@@ -49,23 +49,29 @@ android {
         }
     }
 
-    /*signingConfigs {
-        release {
+    signingConfigs {
+        debug {
             try {
-                storeFile file('release.jks')
-                storePassword KEYSTORE_PASSWORD
-                keyAlias 'dgsrz.com'
-                keyPassword KEY_PASSWORD
+                storeFile file('debug.jks')
+                storePassword "debug.dgsrz.com"
+                keyAlias 'debug.github.dgsrz.com'
+                keyPassword 'debug.github.dgsrz.com'
             } catch (ignored) {
                 throw new InvalidUserDataException('You should define KEYSTORE_PASSWORD and KEY_PASSWORD in gradle.properties.')
             }
         }
-    }*/
+    }
 
     buildTypes {
         debug {
             resValue "string", "app_name", "osu!droid-debug"
             applicationIdSuffix '.debug'
+        }
+
+        debugGithubRelease {
+            matchingFallbacks = ['debug']
+            debuggable true
+            signingConfig signingConfigs.debug
         }
 
         debugEdrows {
