@@ -723,6 +723,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         final Long int1 = i1.getBeatmap().getDate();
                         final Long int2 = i2.getBeatmap().getDate();
                         return int2.compareTo(int1);
+                    case Bpm:
+                        final float bpm1 = i1.getFirstTrack().getBpmMax();
+                        final float bpm2 = i2.getFirstTrack().getBpmMax();
+                        return (bpm2 < bpm1) ? -1:((bpm2 == bpm1) ? 0 : 1);
                     case Stars:
                         final float float1 = i1.getFirstTrack().getDifficulty();
                         final float float2 = i2.getFirstTrack().getDifficulty();
@@ -1287,7 +1291,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public enum SortOrder {
-        Title, Artist, Creator, Date, Stars, Length
+        Title, Artist, Creator, Date, Bpm, Stars, Length
     }
 
     public enum GroupType {
@@ -1308,6 +1312,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             case Date:
                 reloadMenuItems(GroupType.MapSet);
                 break;
+            case Bpm:
+                reloadMenuItems(GroupType.MapSet);
+                break;
             case Stars:
                 reloadMenuItems(GroupType.SingleDiff);
                 break;
@@ -1321,6 +1328,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (groupType.equals(type) == true) {
             return;
         } else {
+            groupType = type;
             float oy = 10;
             for (MenuItem item : items) {
                 item.removeFromScene();

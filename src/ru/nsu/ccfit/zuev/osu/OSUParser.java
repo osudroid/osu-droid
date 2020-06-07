@@ -149,7 +149,19 @@ public class OSUParser {
                         - Float.parseFloat(pars[1]);
             }
         }
-
+        //get first no inherited timingpoint
+        for (final String tempString : data.getData("TimingPoints")) {
+            String[] tmpdata = tempString.split("[,]");
+            if(Float.parseFloat(tmpdata[1]) > 0){
+                float offset = Float.parseFloat(tmpdata[0]);
+                float bpm = 60000.0f / Float.parseFloat(tmpdata[1]);
+                float speed = 1.0f;
+                TimingPoint timing = new TimingPoint(bpm, offset, speed);
+                currentTimingPoint = timing;
+                break;
+            }
+        }
+        //load all timingpoint
         for (final String tempString : data.getData("TimingPoints")) {
             if (timingPoints == null) {
                 timingPoints = new ArrayList<TimingPoint>();
@@ -159,7 +171,7 @@ public class OSUParser {
             float bpm = Float.parseFloat(tmpdata[1]);
             float speed = 1.0f;
             boolean inherited = false;
-            if (bpm < 0 && timingPoints.size() > 0) {
+            if (bpm < 0) {
                 inherited = true;
                 speed = -100.0f / bpm;
                 bpm = currentTimingPoint.getBpm();
@@ -180,10 +192,8 @@ public class OSUParser {
             }
             track.setBpmMin(track.getBpmMin() != Float.MAX_VALUE ? Math.min(track.getBpmMin(), bpm) : bpm);
             track.setBpmMax(track.getBpmMax() != 0 ? Math.max(track.getBpmMax(), bpm) : bpm);
-
             timingPoints.add(timing);
         }
-
         final ArrayList<String> hitObjectss = data.getData("HitObjects");
         if (hitObjectss.size() <= 0) {
             return false;

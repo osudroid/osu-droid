@@ -119,6 +119,11 @@ public class Slider extends GameObject {
         //if (Config.isUseSuperSlider()) {
         //	path = SupportSliderPath.parseDroidLinePath(pos, data, length);
         //} else {
+            if(length < 0){
+                path = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
+                data.split("[|]"), 0, offset);
+            }
+            else
         path = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
                 data.split("[|]"), length, offset);
         //}
@@ -136,6 +141,10 @@ public class Slider extends GameObject {
         double scoringDistance = GameHelper.getSpeed() * speedMultiplier;
         double velocity = scoringDistance / timingPoint.getBeatLength();
         double spanDuration = length / velocity;
+
+        if(length <= 0){
+            spanDuration = 0;
+        }
 		/*System.out.println("vel  " + velocity);
 		System.out.println("span " + spanDuration);
 		System.out.println("sm   " + speedMultiplier);

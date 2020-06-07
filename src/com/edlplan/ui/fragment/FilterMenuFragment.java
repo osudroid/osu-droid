@@ -109,6 +109,9 @@ public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
             case Date:
                 s = R.string.menu_search_sort_date;
                 break;
+            case Bpm:
+                s = R.string.menu_search_sort_bpm;
+                break;
             case Stars:
                 s = R.string.menu_search_sort_stars;
                 break;

@@ -243,8 +243,13 @@ public class MenuItem {
                 String opt = matcher.group(2);
                 String value = matcher.group(3);
                 boolean vis = false;
-                for (TrackInfo track : beatmap.getTracks()) {
-                    vis |= visibleTrack(track, key, opt, value);
+                if(trackid < 0){
+                    for (TrackInfo track : beatmap.getTracks()) {
+                        vis |= visibleTrack(track, key, opt, value);
+                    }
+                }
+                else{
+                    vis |= visibleTrack(beatmap.getTrack(trackid), key, opt, value);
                 }
                 canVisible &= vis;
             } else {

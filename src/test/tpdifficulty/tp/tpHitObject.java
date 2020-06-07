@@ -40,8 +40,8 @@ public class tpHitObject implements Comparable<tpHitObject> {
     private final static double MAX_SPEED_BONUS = 45.0; // ~330BPM
     private final static double ANGLE_BONUS_SCALE = 90.0;
     private final static double AIM_TIMING_THRESHOLD = 107;
-    private final static double SPEED_ANGLE_BONUS_BEGIN = 5 * Math.PI / 6;
-    private final static double AIM_ANGLE_BONUS_BEGIN = Math.PI / 3;
+    private final static double SPEED_ANGLE_BONUS_BEGIN = 5 * Math.PI / 6; //if angle < this, buff speed
+    private final static double AIM_ANGLE_BONUS_BEGIN = Math.PI / 3; //if angle > this, buff aim
     private final static double CIRCLESIZE_BUFF_THRESHOLD = 30.0;
 	private final static double SPEED_BALANCING_FACTOR = 40;
 
@@ -59,6 +59,16 @@ public class tpHitObject implements Comparable<tpHitObject> {
         if (BaseHitObject.getType() == HitObjectType.Slider) {
             PointF endPos = ((Slider) BaseHitObject).getPoss().get(((Slider) BaseHitObject).getPoss().size() - 1);
             NormalizedEndPosition = new PointF(endPos.x * ScalingFactor, endPos.y * ScalingFactor);
+            
+            float approxFollowCircleRadius = CircleRadius * 3;
+            float sliderLength = (float)Math.sqrt(Math.pow((NormalizedStartPosition.x - NormalizedEndPosition.x), 2) +
+            Math.pow((NormalizedStartPosition.y - NormalizedEndPosition.y), 2));
+            if(sliderLength > approxFollowCircleRadius){
+                LazySliderLengthFirst = sliderLength - approxFollowCircleRadius;
+            }
+            if(sliderLength > approxFollowCircleRadius * 2){
+                LazySliderLengthSubsequent = sliderLength - approxFollowCircleRadius * 2;
+            }
         } else {
             NormalizedEndPosition = new PointF(BaseHitObject.getPos().x * ScalingFactor, BaseHitObject.getPos().y * ScalingFactor);
         }
