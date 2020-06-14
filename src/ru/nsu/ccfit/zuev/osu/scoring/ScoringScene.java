@@ -383,6 +383,11 @@ public class ScoringScene {
                     .getInstance().getTexture("selection-mod-halftime"));
             modX -= Utils.toRes(30);
             scene.attachChild(modSprite);
+        } else if (stat.getMod().contains(GameMod.MOD_SPEEDUP)) {
+            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
+                    .getInstance().getTexture("selection-mod-speedup"));
+            modX -= Utils.toRes(30);
+            scene.attachChild(modSprite);
         }
 
         if (stat.getMod().contains(GameMod.MOD_PRECISE)) {
@@ -412,7 +417,8 @@ public class ScoringScene {
                 || stat.getMod().contains(GameMod.MOD_SUDDENDEATH) 
                 || stat.getMod().contains(GameMod.MOD_PERFECT)
                 || stat.getMod().contains(GameMod.MOD_SMALLCIRCLE)
-                || stat.getMod().contains(GameMod.MOD_REALLYEASY)) {
+                || stat.getMod().contains(GameMod.MOD_REALLYEASY)
+                || stat.getMod().contains(GameMod.MOD_SPEEDUP)) {
                     //ToastLogger.showText(StringTable.get(R.string.mod_precise_is_unrank_now), true);
                     ToastLogger.showText(StringTable.get(R.string.mods_sdpfprscrez_is_unrank_now), true);
                 }

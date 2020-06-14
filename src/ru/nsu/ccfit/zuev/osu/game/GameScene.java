@@ -383,6 +383,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setDoubleTime(false);
         GameHelper.setNightCore(false);
         GameHelper.setHalfTime(false);
+        GameHelper.setSpeedUp(false);
 
         GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_NONE);
         if (ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME)) {
@@ -403,6 +404,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             music.setDecoderMultiplier(75);*/
             timeMultiplier = 0.75f;
             GameHelper.setHalfTime(true);
+        } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_SPEEDUP)) {
+            GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_SU);
+            timeMultiplier = 1.25f;
+            GameHelper.setSpeedUp(true);
         }
 
         if (ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME) || ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE)) {
@@ -413,6 +418,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 //            approachRate = approachRate * 4 / 3;
 //            overallDifficulty = (float) GameHelper.ms2od(GameHelper.od2ms(overallDifficulty) * 4 / 3);
             GameHelper.setTimeMultiplier(4 / 3f);
+        } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_SPEEDUP)) {
+            GameHelper.setTimeMultiplier(3 / 4f);
         } else {
             GameHelper.setTimeMultiplier(1f);
         }
@@ -421,7 +428,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             scale += 0.125f;
             drain *= 0.5f;
             overallDifficulty *= 0.5f;
-            approachRate = (float) ((ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME) || ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE))?
+            approachRate = (float) ((ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME) || ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE) || ModMenu.getInstance().getMod().contains(GameMod.MOD_SPEEDUP))?
             (GameHelper.ar2ms(rawApproachRate - 1f) / 1000f):(GameHelper.ar2ms(rawApproachRate - 0.5f) / 1000f));
         }
 
@@ -726,6 +733,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setHardrock(stat.getMod().contains(GameMod.MOD_HARDROCK));
         GameHelper.setDoubleTime(stat.getMod().contains(GameMod.MOD_DOUBLETIME));
         GameHelper.setNightCore(stat.getMod().contains(GameMod.MOD_NIGHTCORE));
+        GameHelper.setSpeedUp(stat.getMod().contains(GameMod.MOD_SPEEDUP));
         GameHelper.setHalfTime(stat.getMod().contains(GameMod.MOD_HALFTIME));
         GameHelper.setHidden(stat.getMod().contains(GameMod.MOD_HIDDEN));
         GameHelper.setRelaxMod(stat.getMod().contains(GameMod.MOD_RELAX));
@@ -997,6 +1005,23 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (stat.getMod().contains(GameMod.MOD_NIGHTCORE)) {
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-nightcore");
+            effect.init(
+                    mgScene,
+                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
+                            .toRes(130)),
+                    scale,
+                    new SequenceEntityModifier(ModifierFactory
+                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
+                            .newDelayModifier(2 - timeOffset),
+                            new ParallelEntityModifier(ModifierFactory
+                                    .newFadeOutModifier(0.5f), ModifierFactory
+                                    .newScaleModifier(0.5f, 1, 1.5f))));
+            effectOffset += 25;
+            timeOffset += 0.25f;
+        }
+        if (stat.getMod().contains(GameMod.MOD_SPEEDUP)) {
+            final GameEffect effect = GameObjectPool.getInstance().getEffect(
+                    "selection-mod-speedup");
             effect.init(
                     mgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
@@ -1750,7 +1775,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         cursorSprites = null;
 
         if (GlobalManager.getInstance().getSongService() != null) {
-            if (stat.getMod().contains(GameMod.MOD_NIGHTCORE) || stat.getMod().contains(GameMod.MOD_DOUBLETIME) || stat.getMod().contains(GameMod.MOD_HALFTIME)) {
+            if (stat.getMod().contains(GameMod.MOD_NIGHTCORE) || stat.getMod().contains(GameMod.MOD_DOUBLETIME) 
+                || stat.getMod().contains(GameMod.MOD_HALFTIME) || stat.getMod().contains(GameMod.MOD_SPEEDUP)){
                 GlobalManager.getInstance().getSongService().stop();
                 GlobalManager.getInstance().getSongService().preLoad(filePath);
                 GlobalManager.getInstance().getSongService().play();
@@ -1913,6 +1939,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 ResourceManager.getInstance().getCustomSound("combobreak", 1)
                         .play();
             }
+            if(GameHelper.isSuddenDeath())stat.changeHp(-1.0f);
             stat.registerHit(0, true, false);
             return;
         }

@@ -229,6 +229,9 @@
 
     <string name="opt_particles_title">Particle effects</string>
     <string name="opt_particles_summary">Show particle-based effects like cursor trail</string>
+	
+	<string name="opt_long_trail_title">Long cursor trail</string>
+    <string name="opt_long_trail_summary">Show longer cursor trail, if Particle effects is on</string>
 
     <string name="opt_bgbrightness_title">Background brightness</string>
     <string name="opt_bgbrightness_summary">Change the brightness of the background image</string>

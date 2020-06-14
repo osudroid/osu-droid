@@ -73,6 +73,8 @@
             android:title="@string/opt_hitlighting_title" android:defaultValue="false"/>
         <CheckBoxPreference android:key="particles" android:summary="@string/opt_particles_summary"
             android:title="@string/opt_particles_title" android:defaultValue="false"/>
+		<CheckBoxPreference android:key="longTrail" android:summary="@string/opt_long_trail_summary"
+            android:title="@string/opt_long_trail_title" android:defaultValue="false"/>
         <CheckBoxPreference android:key="dither" android:title="@string/opt_dither_title"
             android:summary="@string/opt_dither_summary" android:defaultValue="true"/>
         <CheckBoxPreference android:key="superSlider" android:summary="@string/opt_superSlider_summary"
