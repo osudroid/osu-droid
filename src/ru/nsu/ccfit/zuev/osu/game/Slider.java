@@ -119,6 +119,7 @@ public class Slider extends GameObject {
         //if (Config.isUseSuperSlider()) {
         //	path = SupportSliderPath.parseDroidLinePath(pos, data, length);
         //} else {
+            //fixed negative length silder bug
             if(length < 0){
                 path = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
                 data.split("[|]"), 0, offset);
@@ -141,7 +142,7 @@ public class Slider extends GameObject {
         double scoringDistance = GameHelper.getSpeed() * speedMultiplier;
         double velocity = scoringDistance / timingPoint.getBeatLength();
         double spanDuration = length / velocity;
-
+        //fixed negative length silder bug
         if(length <= 0){
             spanDuration = 0;
         }
@@ -288,13 +289,11 @@ public class Slider extends GameObject {
         scene.attachChild(endCircle, 0);
 
         // Ticks
-        //TODO: fix silder ticks bug
-        //if(timing.getBeatLength() < 1/1000 || timing.getBeatLength() > 1000000){
+        //Try to fix silder ticks bug
+        tickInterval = timing.getBeatLength() * speedMultiplier;
+        if(tickInterval == Float.NaN || tickInterval < GameHelper.getSliderTickLength() / 1000){
             tickInterval = GameHelper.getSliderTickLength();
-        //}
-        //else{
-        //    tickInterval = timing.getBeatLength() * speedMultiplier;
-        //}
+        }
         final int tickcount = (int) (maxTime * GameHelper.getTickRate() / tickInterval);
         ticks.clear();
         for (int i = 1; i <= tickcount; i++) {
