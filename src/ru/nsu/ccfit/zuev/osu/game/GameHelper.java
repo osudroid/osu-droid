@@ -33,6 +33,7 @@ public class GameHelper {
     private static float timeMultiplier = 0;
     private static RGBColor sliderColor = new RGBColor();
     private static boolean hidden = false;
+    private static boolean flashLight = false;
     private static boolean hardrock = false;
     private static boolean relaxMod = false;
     private static boolean doubleTime = false;
@@ -369,6 +370,13 @@ public class GameHelper {
         GameHelper.hidden = hidden;
     }
 
+    public static boolean isFlashLight() {
+        return flashLight;
+    }
+
+    public static void setFlashLight(final boolean flashLight) {
+        GameHelper.flashLight = flashLight;
+    }
     public static boolean isHalfTime() {
         return halfTime;
     }

@@ -1174,6 +1174,9 @@ public class Slider extends GameObject {
         ball.setPosition(ballpos.x - ball.getWidth() / 2,
                 ballpos.y - ball.getHeight() / 2);
         ball.setRotation(ballAngle);
+        if (GameHelper.isAuto() && GameHelper.isFlashLight()) {
+            listener.setFlashLightsPosition(ballpos.x, ballpos.y);
+        }
         // If we got 100% time, finishing slider
         if (percentage >= 1) {
             over();

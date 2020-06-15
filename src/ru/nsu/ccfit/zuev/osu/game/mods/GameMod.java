@@ -13,6 +13,7 @@ public enum GameMod {
     MOD_HALFTIME("ht"),
     MOD_SUDDENDEATH("sd"),
     MOD_PERFECT("pf"),
+    MOD_FLASHLIGHT("fl"),
     MOD_PRECISE("pr"),
     MOD_SMALLCIRCLE("sc"),
     MOD_REALLYEASY("re"),

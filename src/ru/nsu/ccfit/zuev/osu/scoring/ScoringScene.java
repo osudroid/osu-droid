@@ -336,6 +336,13 @@ public class ScoringScene {
             modX -= Utils.toRes(30);
             scene.attachChild(modSprite);
         }
+
+        if (stat.getMod().contains(GameMod.MOD_FLASHLIGHT)) {
+            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
+                    .getInstance().getTexture("selection-mod-flashlight"));
+            modX -= Utils.toRes(30);
+            scene.attachChild(modSprite);
+        }
         if (stat.getMod().contains(GameMod.MOD_NOFAIL)) {
             final Sprite modSprite = new Sprite(modX, modY, ResourceManager
                     .getInstance().getTexture("selection-mod-nofail"));

@@ -137,6 +137,9 @@ public class StatisticV2 implements Serializable {
         if (mod.contains(GameMod.MOD_HIDDEN)) {
             mult *= 1.06f;
         }
+        if (mod.contains(GameMod.MOD_FLASHLIGHT)) {
+            mult *= 1.12f;
+        }
         if (mod.contains(GameMod.MOD_DOUBLETIME)) {
             mult *= 1.12f;
         }
@@ -168,6 +171,9 @@ public class StatisticV2 implements Serializable {
         }
         if (mod.contains(GameMod.MOD_HIDDEN)) {
             mult *= 1.06f;
+        }
+        if (mod.contains(GameMod.MOD_FLASHLIGHT)) {
+            mult *= 1.12f;
         }
         if (mod.contains(GameMod.MOD_DOUBLETIME)) {
             mult *= 1.12f;
@@ -288,6 +294,9 @@ public class StatisticV2 implements Serializable {
         for (final GameMod m : mod) {
             switch (m) {
                 case MOD_HIDDEN:
+                    isH = true;
+                    break forcycle;
+                case MOD_FLASHLIGHT:
                     isH = true;
                     break forcycle;
                 default:
@@ -457,6 +466,9 @@ public class StatisticV2 implements Serializable {
         if (mod.contains(GameMod.MOD_HIDDEN)) {
             s += "h";
         }
+        if (mod.contains(GameMod.MOD_FLASHLIGHT)) {
+            s += "i";
+        }
         if (mod.contains(GameMod.MOD_DOUBLETIME)) {
             s += "d";
         }
@@ -511,6 +523,9 @@ public class StatisticV2 implements Serializable {
                     break;
                 case 'h':
                     mod.add(GameMod.MOD_HIDDEN);
+                    break;
+                case 'i':
+                    mod.add(GameMod.MOD_FLASHLIGHT);
                     break;
                 case 'd':
                     mod.add(GameMod.MOD_DOUBLETIME);
