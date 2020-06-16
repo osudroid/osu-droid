@@ -914,8 +914,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 ar *= 2f;
             }
             ar -= 0.5f;
-            if(mod.contains(GameMod.MOD_DOUBLETIME) | mod.contains(GameMod.MOD_NIGHTCORE) | mod.contains(GameMod.MOD_SPEEDUP)){
+            if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
                 ar -= 0.5f;
+            } else if (mod.contains(GameMod.MOD_SPEEDUP)){
+                ar -= 0.25f;
             }
             od *= 0.5f;
             cs -= 1f;
@@ -954,8 +956,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 4 / 3), 2);
             od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 4 / 3), 2);
         } else if (mod.contains(GameMod.MOD_SPEEDUP)) {
-            ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 3 / 4), 2);
-            od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 3 / 4), 2);
+            ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 4 / 5), 2);
+            od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 4 / 5), 2);
         }
         dimensionStringBuilder.append("AR: ").append(GameHelper.Round(ar, 2)).append(" ")
                 .append("OD: ").append(GameHelper.Round(od, 2)).append(" ")

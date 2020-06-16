@@ -422,7 +422,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 //            overallDifficulty = (float) GameHelper.ms2od(GameHelper.od2ms(overallDifficulty) * 4 / 3);
             GameHelper.setTimeMultiplier(4 / 3f);
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_SPEEDUP)) {
-            GameHelper.setTimeMultiplier(3 / 4f);
+            GameHelper.setTimeMultiplier(4 / 5f);
         } else {
             GameHelper.setTimeMultiplier(1f);
         }
