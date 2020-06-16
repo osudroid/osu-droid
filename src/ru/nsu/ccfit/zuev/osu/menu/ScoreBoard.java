@@ -120,6 +120,9 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 case 'h':
                     result += "HD,";
                     break;
+                case 'i':
+                    result += "FL,";
+                    break;
                 case 'd':
                     result += "DT,";
                     break;

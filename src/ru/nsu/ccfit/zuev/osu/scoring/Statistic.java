@@ -57,6 +57,9 @@ public class Statistic implements Serializable {
         if (mod.contains(GameMod.MOD_HIDDEN)) {
             mult *= 1.06f;
         }
+        if (mod.contains(GameMod.MOD_FLASHLIGHT)) {
+            mult *= 1.12f;
+        }
         if (mod.contains(GameMod.MOD_DOUBLETIME)) {
             mult *= 1.12f;
         }
@@ -88,6 +91,9 @@ public class Statistic implements Serializable {
         }
         if (mod.contains(GameMod.MOD_HIDDEN)) {
             mult *= 1.06f;
+        }
+        if (mod.contains(GameMod.MOD_FLASHLIGHT)) {
+            mult *= 1.12f;
         }
         if (mod.contains(GameMod.MOD_DOUBLETIME)) {
             mult *= 1.12f;

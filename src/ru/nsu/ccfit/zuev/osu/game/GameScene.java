@@ -1322,21 +1322,23 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         
         if(GameHelper.isFlashLight()){
-            if (mainCursorId < 0){
-                int i = 0;
-                for (final Cursor c : cursors) {
-                    if (c.mousePressed == true) {
-                        mainCursorId = i;
-                        flashlightSprite.setPosition(c.mousePos.x, c.mousePos.y);
-                        flashlightSprite.setShowing(true);
-                        break;
+            if (GameHelper.isAuto() == false) {
+                if (mainCursorId < 0){
+                    int i = 0;
+                    for (final Cursor c : cursors) {
+                        if (c.mousePressed == true) {
+                            mainCursorId = i;
+                            flashlightSprite.setPosition(c.mousePos.x, c.mousePos.y);
+                            flashlightSprite.setShowing(true);
+                            break;
+                        }
+                        ++i;
                     }
-                    ++i;
+                } else if(cursors[mainCursorId].mouseDown == false){
+                    mainCursorId = -1;
+                } else if(cursors[mainCursorId].mouseDown == true){
+                    flashlightSprite.setPosition(cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y);
                 }
-            } else if(cursors[mainCursorId].mouseDown == false){
-                mainCursorId = -1;
-            } else if(cursors[mainCursorId].mouseDown == true){
-                flashlightSprite.setPosition(cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y);
             }
             flashlightSprite.update(dt, stat.getCombo());
         }
@@ -1937,7 +1939,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (GameHelper.isAuto()) {
                 flashlightSprite.setPosition(pos.x, pos.y);
             }
-           else {
+            else {
                int nearestCursorId = getNearestCursorId(pos.x, pos.y);
                if (nearestCursorId >= 0) {
                    mainCursorId = nearestCursorId;
@@ -2503,6 +2505,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 cursorDistance = dx * dx + dy * dy;
                 if(cursorDistance < distance){
                     id = i;
+                    distance = cursorDistance;
                 }
             }
             ++i;
