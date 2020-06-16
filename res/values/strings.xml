@@ -77,6 +77,9 @@
 	<string name="menu_search_sort_date">Date</string>
 	<string name="menu_search_sort_creator">Creator</string>
 	<string name="menu_search_sort_artist">Artist</string>
+	<string name="menu_search_sort_bpm">Bpm</string>
+	<string name="menu_search_sort_stars">Stars</string>
+	<string name="menu_search_sort_length">Length</string>
 	<string name="menu_search_favsenabled">Favorites only: enabled</string>
 	<string name="menu_search_favsdisabled">Favorites only: disabled</string>
 

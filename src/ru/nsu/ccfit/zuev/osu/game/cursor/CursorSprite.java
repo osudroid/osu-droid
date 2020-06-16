@@ -33,13 +33,25 @@ public class CursorSprite extends Entity {
             particleOffsetY = -tex.getHeight() / 2;
 
             emitter = new PointParticleEmitter(particleOffsetX, particleOffsetY);
-            particles = new ParticleSystem(emitter, 40, 40, 30, tex);
+            //构造粒子系统，40,40,30分别是最低粒子生成率、最高粒子生成率、粒子数上限
+            //particles = new ParticleSystem(emitter, 40, 40, 30, tex);
+            if (Config.isUseLongTrail()) {
+                particles = new ParticleSystem(emitter, 60, 60, 120, tex);
+                particles.addParticleModifier(new ExpireModifier(0.5f));
+                particles.addParticleModifier(new AlphaModifier(1.0f, 0.0f, 0f, 0.5f));
+            }
+            else{
+                particles = new ParticleSystem(emitter, 30, 30, 30, tex);
+                particles.addParticleModifier(new ExpireModifier(0.25f));
+                particles.addParticleModifier(new AlphaModifier(1.0f, 0.0f, 0f, 0.25f));
+            }
             particles.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 
             particles.addParticleInitializer(new ScaleInitializer(csize));
-
-            particles.addParticleModifier(new ExpireModifier(0.25f));
-            particles.addParticleModifier(new AlphaModifier(1.0f, 0.0f, 0f, 0.25f));
+            //设置粒子消失时间
+            //particles.addParticleModifier(new ExpireModifier(0.25f));
+            //设置粒子透明度变化
+            //particles.addParticleModifier(new AlphaModifier(1.0f, 0.0f, 0f, 0.25f));
 
             particles.setParticlesSpawnEnabled(false);
         }

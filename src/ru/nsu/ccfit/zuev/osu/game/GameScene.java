@@ -42,6 +42,7 @@ import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Iterator;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -68,6 +69,7 @@ import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
 import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.game.cursor.Cursor;
 import ru.nsu.ccfit.zuev.osu.game.cursor.CursorSprite;
+import ru.nsu.ccfit.zuev.osu.game.cursor.FlashLightSprite;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
@@ -145,6 +147,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private float distToNextObject;
     private float timeMultiplier = 1.0f;
     private CursorSprite[] cursorSprites;
+    private FlashLightSprite flashlightSprite;
+    private int mainCursorId = -1;
     private Replay replay;
     private boolean replaying;
     private String replayFile;
@@ -160,6 +164,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private VideoSprite mVideo = null;
     private Sprite[] ScoreBoardSprite;
     private int failcount = 0;
+    private float lastObjectHitTime = 0;
 
     private StoryboardSprite storyboardSprite;
 
@@ -381,6 +386,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setDoubleTime(false);
         GameHelper.setNightCore(false);
         GameHelper.setHalfTime(false);
+        GameHelper.setSpeedUp(false);
 
         GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_NONE);
         if (ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME)) {
@@ -401,6 +407,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             music.setDecoderMultiplier(75);*/
             timeMultiplier = 0.75f;
             GameHelper.setHalfTime(true);
+        } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_SPEEDUP)) {
+            GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_SU);
+            timeMultiplier = 1.25f;
+            GameHelper.setSpeedUp(true);
         }
 
         if (ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME) || ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE)) {
@@ -411,6 +421,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 //            approachRate = approachRate * 4 / 3;
 //            overallDifficulty = (float) GameHelper.ms2od(GameHelper.od2ms(overallDifficulty) * 4 / 3);
             GameHelper.setTimeMultiplier(4 / 3f);
+        } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_SPEEDUP)) {
+            GameHelper.setTimeMultiplier(3 / 4f);
         } else {
             GameHelper.setTimeMultiplier(1f);
         }
@@ -419,13 +431,25 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             scale += 0.125f;
             drain *= 0.5f;
             overallDifficulty *= 0.5f;
-            if(ModMenu.getInstance().getMod().contains(GameMod.MOD_HARDROCK)){
-                approachRate = (float) ((ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME) || ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE))?
-                (GameHelper.ar2ms(Math.min(1.4f * rawApproachRate, 10f) - 1f) / 1000f):(GameHelper.ar2ms(Math.min(1.4f * rawApproachRate, 10f) - 0.5f) / 1000f));
+            if (ModMenu.getInstance().getMod().contains(GameMod.MOD_HARDROCK)){
+                if (ModMenu.getInstance().getMod().contains(GameMod.MOD_SPEEDUP)){
+                    approachRate = (float)(GameHelper.ar2ms(Math.min(1.4f * rawApproachRate, 10f) - 0.75f) / 1000f);
+                } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME) 
+                           || ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE)){
+                    approachRate = (float)(GameHelper.ar2ms(Math.min(1.4f * rawApproachRate, 10f) - 1f) / 1000f);
+                } else {
+                    approachRate = (float)(GameHelper.ar2ms(Math.min(1.4f * rawApproachRate, 10f) - 0.5f) / 1000f);
+                }
             }
-            else{
-                approachRate = (float) ((ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME) || ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE))?
-                (GameHelper.ar2ms(rawApproachRate - 1f) / 1000f):(GameHelper.ar2ms(rawApproachRate - 0.5f) / 1000f));
+            else {
+                if (ModMenu.getInstance().getMod().contains(GameMod.MOD_SPEEDUP)){
+                    approachRate = (float)(GameHelper.ar2ms(rawApproachRate - 0.75f) / 1000f);
+                } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME) 
+                           || ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE)){
+                    approachRate = (float)(GameHelper.ar2ms(rawApproachRate - 1f) / 1000f);
+                } else {
+                    approachRate = (float)(GameHelper.ar2ms(rawApproachRate - 0.5f) / 1000f);
+                }
             }
         }
 
@@ -511,7 +535,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         comboNum = -1;
         // if (combos.size() > 1) comboNum = 1;
         currentComboNum = 0;
-
+        lastObjectHitTime = 0;
         final String defSound = beatmapData.getData("General", "SampleSet");
         if (defSound.equals("Soft")) {
             TimingPoint.setDefaultSound("soft");
@@ -648,6 +672,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         fgScene.setBackgroundEnabled(false);
         isFirst = true;
         failcount = 0;
+        mainCursorId = -1;
         final LoadingScreen screen = new LoadingScreen();
         engine.setScene(screen.getScene());
 
@@ -730,8 +755,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setHardrock(stat.getMod().contains(GameMod.MOD_HARDROCK));
         GameHelper.setDoubleTime(stat.getMod().contains(GameMod.MOD_DOUBLETIME));
         GameHelper.setNightCore(stat.getMod().contains(GameMod.MOD_NIGHTCORE));
+        GameHelper.setSpeedUp(stat.getMod().contains(GameMod.MOD_SPEEDUP));
         GameHelper.setHalfTime(stat.getMod().contains(GameMod.MOD_HALFTIME));
         GameHelper.setHidden(stat.getMod().contains(GameMod.MOD_HIDDEN));
+        GameHelper.setFlashLight(stat.getMod().contains(GameMod.MOD_FLASHLIGHT));
         GameHelper.setRelaxMod(stat.getMod().contains(GameMod.MOD_RELAX));
         GameHelper.setAutopilotMod(stat.getMod().contains(GameMod.MOD_AUTOPILOT));
         GameHelper.setSuddenDeath(stat.getMod().contains(GameMod.MOD_SUDDENDEATH));
@@ -745,6 +772,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             cursors[i].mouseDown = false;
             cursors[i].mousePressed = false;
             cursors[i].mouseOldDown = false;
+        }
+        if(GameHelper.isFlashLight()){
+            flashlightSprite = new FlashLightSprite();
+            flashlightSprite.setShowing(false);
+            fgScene.attachChild(flashlightSprite);
         }
 
         comboWas100 = false;
@@ -1001,6 +1033,23 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (stat.getMod().contains(GameMod.MOD_NIGHTCORE)) {
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-nightcore");
+            effect.init(
+                    mgScene,
+                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
+                            .toRes(130)),
+                    scale,
+                    new SequenceEntityModifier(ModifierFactory
+                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
+                            .newDelayModifier(2 - timeOffset),
+                            new ParallelEntityModifier(ModifierFactory
+                                    .newFadeOutModifier(0.5f), ModifierFactory
+                                    .newScaleModifier(0.5f, 1, 1.5f))));
+            effectOffset += 25;
+            timeOffset += 0.25f;
+        }
+        if (stat.getMod().contains(GameMod.MOD_SPEEDUP)) {
+            final GameEffect effect = GameObjectPool.getInstance().getEffect(
+                    "selection-mod-speedup");
             effect.init(
                     mgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
@@ -1289,6 +1338,26 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 c.mousePressed = false;
             }
         }
+        
+        if(GameHelper.isFlashLight()){
+            if (mainCursorId < 0){
+                int i = 0;
+                for (final Cursor c : cursors) {
+                    if (c.mousePressed == true) {
+                        mainCursorId = i;
+                        flashlightSprite.setPosition(c.mousePos.x, c.mousePos.y);
+                        flashlightSprite.setShowing(true);
+                        break;
+                    }
+                    ++i;
+                }
+            } else if(cursors[mainCursorId].mouseDown == false){
+                mainCursorId = -1;
+            } else if(cursors[mainCursorId].mouseDown == true){
+                flashlightSprite.setPosition(cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y);
+            }
+            flashlightSprite.update(dt, stat.getCombo());
+        }
 
         while (timingPoints.isEmpty() == false
                 && timingPoints.peek().getTime() <= secPassed + approachRate) {
@@ -1311,14 +1380,23 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     && breakPeriods.peek().getStart() <= secPassed) {
                 gameStarted = false;
                 breakAnimator.init(breakPeriods.peek().getLength());
+                if(GameHelper.isFlashLight()){
+                    mainCursorId = -1;
+                    flashlightSprite.setShowing(false);
+                }
                 scorebar.setVisible(false);
                 breakPeriods.poll();
             }
         }
-
+        if(breakAnimator.isBreak() == true && GameHelper.isFlashLight()){
+            mainCursorId = -1;
+            flashlightSprite.setShowing(false);
+        }
         if (breakAnimator.isOver()) {
             gameStarted = true;
-            scorebar.setVisible(true);
+            if(GameHelper.isFlashLight()){
+                mainCursorId = -1;
+            }
         }
 
         if (gameStarted) {
@@ -1408,6 +1486,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         for (final GameObject obj : passiveObjects) {
             obj.update(dt);
+        }
+
+        GameObject lastObject = getLastTobeclickObject();
+        if (lastObject != null) {
+            lastObjectHitTime = getLastTobeclickObject().getHitTime();
         }
 
         for (final GameObject obj : activeObjects) {
@@ -1749,7 +1832,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         cursorSprites = null;
 
         if (GlobalManager.getInstance().getSongService() != null) {
-            if (stat.getMod().contains(GameMod.MOD_NIGHTCORE) || stat.getMod().contains(GameMod.MOD_DOUBLETIME) || stat.getMod().contains(GameMod.MOD_HALFTIME)) {
+            if (stat.getMod().contains(GameMod.MOD_NIGHTCORE) || stat.getMod().contains(GameMod.MOD_DOUBLETIME) 
+                || stat.getMod().contains(GameMod.MOD_HALFTIME) || stat.getMod().contains(GameMod.MOD_SPEEDUP)){
                 GlobalManager.getInstance().getSongService().stop();
                 GlobalManager.getInstance().getSongService().preLoad(filePath);
                 GlobalManager.getInstance().getSongService().play();
@@ -1867,7 +1951,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             short sacc = (short) (acc * 1000);
             replay.addObjectResult(id, sacc, null);
         }
-
+        if(GameHelper.isFlashLight()){
+            if (GameHelper.isAuto()) {
+                flashlightSprite.setPosition(pos.x, pos.y);
+            }
+           else {
+               int nearestCursorId = getNearestCursorId(pos.x, pos.y);
+               if (nearestCursorId >= 0) {
+                   mainCursorId = nearestCursorId;
+                   flashlightSprite.setPosition(cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y);
+               }
+           }
+        }
+        
         //(30 - overallDifficulty) / 100f
         if (accuracy > difficultyHelper.hitWindowFor50(overallDifficulty) || forcedScore == Replay.RESULT_0) {
             createHitEffect(pos, "hit0", color);
@@ -1912,6 +2008,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 ResourceManager.getInstance().getCustomSound("combobreak", 1)
                         .play();
             }
+            if(GameHelper.isSuddenDeath())stat.changeHp(-1.0f);
             stat.registerHit(0, true, false);
             return;
         }
@@ -1962,7 +2059,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             stat.registerHit(score, false, false);
             return;
         }
-
+        //TODO: 让fl手电筒在auto mod下移到屏幕中央
+        //if (GameHelper.isAuto() && GameHelper.isFlashLight()) {
+        //    flashlightSprite.setPosition(res, pos.getY());
+        //}
         if (replay != null && !replaying) {
             short acc = (short) (totalScore * 4);
             switch (score) {
@@ -2094,12 +2194,27 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (stat.getMod().contains(GameMod.MOD_AUTO)) {
             return false;
         }
-        if (activeObjects.isEmpty()
-                || Math.abs(object.getHitTime()
-                - activeObjects.peek().getHitTime()) > 0.001f) {
+        if(Config.isRemoveSliderLock()){
+            if(activeObjects.isEmpty()
+                || Math.abs(object.getHitTime() - lastObjectHitTime) > 0.001f) {
+                return false;
+            }
+        }
+        else if (activeObjects.isEmpty()
+            || Math.abs(object.getHitTime()
+            - activeObjects.peek().getHitTime()) > 0.001f) {
             return false;
         }
         return cursors[index].mousePressed;
+    }
+
+    private GameObject getLastTobeclickObject(){
+        Iterator iterator = activeObjects.iterator();
+        while(iterator.hasNext()){
+            GameObject note = (GameObject)iterator.next();
+            if(note.isStartHit() == false)return note;
+        }
+        return null;
     }
 
     @Override
@@ -2390,5 +2505,26 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         }
 
+    }
+
+    public void setFlashLightsPosition(float pX, float pY){
+        flashlightSprite.setPosition(pX, pY);
+    }
+
+    public int getNearestCursorId(float pX, float pY){
+        float distance = Float.POSITIVE_INFINITY, cursorDistance, dx, dy;
+        int id = -1, i = 0;
+        for (Cursor c : cursors) {
+            if(c.mouseDown == true || c.mousePressed == true || c.mouseOldDown == true){
+                dx = c.mousePos.x - pX;
+                dy = c.mousePos.y - pY;
+                cursorDistance = dx * dx + dy * dy;
+                if(cursorDistance < distance){
+                    id = i;
+                }
+            }
+            ++i;
+        }
+        return id;
     }
 }

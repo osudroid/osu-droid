@@ -74,11 +74,13 @@ public class Config {
     private static boolean hitLighting = false;
     private static boolean useDither = true;
     private static boolean useParticles = false;
+    private static boolean useLongTrail = false;
     private static boolean useCustomComboColors = false;
     private static RGBColor[] comboColors;
     private static boolean forceRomanized = false;
 
     private static boolean fixFrameOffset = true;
+    private static boolean removeSliderLock = false;
 
     private static float cursorSize = 1;
 
@@ -212,7 +214,7 @@ public class Config {
         enablePP = false;//prefs.getBoolean("enablePP",true);
 
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
-
+        removeSliderLock = prefs.getBoolean("removeSliderLock", true);
         //Init
         onlineDeviceID = prefs.getString("installID", null);
         if (onlineDeviceID == null) {
@@ -245,6 +247,7 @@ public class Config {
         hitLighting = prefs.getBoolean("hitlighting", hitLighting);
         useDither = prefs.getBoolean("dither", useDither);
         useParticles = prefs.getBoolean("particles", useParticles);
+        useLongTrail = prefs.getBoolean("longTrail", useLongTrail);
         useCustomComboColors = prefs.getBoolean("useCustomColors", useCustomComboColors);
         comboColors = new RGBColor[4];
         for (int i = 1; i <= 4; i++) {
@@ -294,6 +297,10 @@ public class Config {
 
     public static boolean isFixFrameOffset() {
         return fixFrameOffset;
+    }
+
+    public static boolean isRemoveSliderLock() {
+        return removeSliderLock;
     }
 
     public static boolean isEnableExtension() {
@@ -642,6 +649,14 @@ public class Config {
 
     public static void setUseParticles(boolean useParticles) {
         Config.useParticles = useParticles;
+    }
+
+    public static boolean isUseLongTrail() {
+        return useLongTrail;
+    }
+
+    public static void setUseLongTrail(boolean useLongTrail) {
+        Config.useLongTrail = useLongTrail;
     }
 
     public static String getSkinPath() {

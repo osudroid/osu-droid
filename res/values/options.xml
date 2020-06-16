@@ -202,6 +202,9 @@
 
     <string name="opt_fix_frame_offset_title">Fix a random offset.</string>
     <string name="opt_fix_frame_offset_summary">Try to fix the offset between input time and frame time.</string>
+    
+    <string name="opt_remove_sliderlock_spinnerlock_title">Remove slider lock and spinner lock</string>
+    <string name="opt_remove_sliderlock_spinnerlock_summary">Try to remove slider lock and spinner lock. 2b style is playable now.</string>
 
     <string name="opt_enable_extension_title">Enable extension</string>
 
@@ -226,6 +229,9 @@
 
     <string name="opt_particles_title">Particle effects</string>
     <string name="opt_particles_summary">Show particle-based effects like cursor trail</string>
+	
+	<string name="opt_long_trail_title">Long cursor trail</string>
+    <string name="opt_long_trail_summary">Show longer cursor trail, if Particle effects is on</string>
 
     <string name="opt_bgbrightness_title">Background brightness</string>
     <string name="opt_bgbrightness_summary">Change the brightness of the background image</string>

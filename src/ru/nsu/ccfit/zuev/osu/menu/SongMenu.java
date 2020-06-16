@@ -106,6 +106,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private int mapState;
     private AnimSprite scoringSwitcher = null;
     private AsyncTask<OsuAsyncCallback, Integer, Boolean> boardTask;
+    private GroupType groupType = GroupType.MapSet;
 
     public SongMenu() {
     }
@@ -675,6 +676,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                           final boolean favsOnly, Set<String> limit) {
         if (order.equals(sortOrder) == false) {
             sortOrder = order;
+            tryReloadMenuItems(sortOrder);
             sort();
         }
         if (filter == null || filterText.equals(filter)) {
@@ -721,6 +723,18 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         final Long int1 = i1.getBeatmap().getDate();
                         final Long int2 = i2.getBeatmap().getDate();
                         return int2.compareTo(int1);
+                    case Bpm:
+                        final float bpm1 = i1.getFirstTrack().getBpmMax();
+                        final float bpm2 = i2.getFirstTrack().getBpmMax();
+                        return (bpm2 < bpm1) ? -1:((bpm2 == bpm1) ? 0 : 1);
+                    case Stars:
+                        final float float1 = i1.getFirstTrack().getDifficulty();
+                        final float float2 = i2.getFirstTrack().getDifficulty();
+                        return (float2 < float1) ? -1:((float2 == float1) ? 0 : 1);
+                    case Length:
+                        final Long length1 = i1.getFirstTrack().getMusicLength();
+                        final Long length2 = i2.getFirstTrack().getMusicLength();
+                        return length2.compareTo(length1);
                     default:
                         s1 = i1.getBeatmap().getTitle();
                         s2 = i2.getBeatmap().getTitle();
@@ -880,6 +894,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             beatmapInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
             dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
         }
+        if (mod.contains(GameMod.MOD_SPEEDUP)) {
+            bpm_max *= 1.25f;
+            bpm_min *= 1.25f;
+            length *= 4 / 5f;
+            beatmapInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+            dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+        }
         if (mod.contains(GameMod.MOD_HALFTIME)) {
             bpm_max *= 0.75f;
             bpm_min *= 0.75f;
@@ -893,7 +914,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 ar *= 2f;
             }
             ar -= 0.5f;
-            if(mod.contains(GameMod.MOD_DOUBLETIME) | mod.contains(GameMod.MOD_NIGHTCORE)){
+            if(mod.contains(GameMod.MOD_DOUBLETIME) | mod.contains(GameMod.MOD_NIGHTCORE) | mod.contains(GameMod.MOD_SPEEDUP)){
                 ar -= 0.5f;
             }
             od *= 0.5f;
@@ -932,6 +953,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         } else if (mod.contains(GameMod.MOD_HALFTIME)) {
             ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 4 / 3), 2);
             od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 4 / 3), 2);
+        } else if (mod.contains(GameMod.MOD_SPEEDUP)) {
+            ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 3 / 4), 2);
+            od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 3 / 4), 2);
         }
         dimensionStringBuilder.append("AR: ").append(GameHelper.Round(ar, 2)).append(" ")
                 .append("OD: ").append(GameHelper.Round(od, 2)).append(" ")
@@ -1287,6 +1311,69 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public enum SortOrder {
-        Title, Artist, Creator, Date
+        Title, Artist, Creator, Date, Bpm, Stars, Length
+    }
+
+    public enum GroupType {
+        MapSet, SingleDiff
+    }
+
+    private void tryReloadMenuItems(SortOrder order){
+        switch(order){
+            case Title:
+                reloadMenuItems(GroupType.MapSet);
+                break;
+            case Artist:
+                reloadMenuItems(GroupType.MapSet);
+                break;
+            case Creator:
+                reloadMenuItems(GroupType.MapSet);
+                break;
+            case Date:
+                reloadMenuItems(GroupType.MapSet);
+                break;
+            case Bpm:
+                reloadMenuItems(GroupType.MapSet);
+                break;
+            case Stars:
+                reloadMenuItems(GroupType.SingleDiff);
+                break;
+            case Length:
+                reloadMenuItems(GroupType.SingleDiff);
+                break;
+        }
+    }
+
+    private void reloadMenuItems(GroupType type) {
+        if (groupType.equals(type) == true) {
+            return;
+        } else {
+            groupType = type;
+            float oy = 10;
+            for (MenuItem item : items) {
+                item.removeFromScene();
+            }
+            items.clear();
+            switch (type) {
+                case MapSet:
+                    for (final BeatmapInfo i : LibraryManager.getInstance().getLibrary()) {
+                        final MenuItem item = new MenuItem(this, i, 400, oy);
+                        items.add(item);
+                        item.attachToScene(scene, backLayer);
+                        oy += item.getHeight();
+                    }
+                    break;
+                case SingleDiff:
+                    for (final BeatmapInfo i : LibraryManager.getInstance().getLibrary()) {
+                        for (int j = 0; j < i.getCount(); j++) {
+                            final MenuItem item = new MenuItem(this, i, 400, oy, j);
+                            items.add(item);
+                            item.attachToScene(scene, backLayer);
+                            oy += item.getHeight();
+                        }
+                    }
+                    break;
+            }
+        }
     }
 }

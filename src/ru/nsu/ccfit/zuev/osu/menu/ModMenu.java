@@ -115,7 +115,9 @@ public class ModMenu implements IModSwitcher {
         addButton(offset + offsetGrowth * 1, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-doubletime", GameMod.MOD_DOUBLETIME);
         addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-nightcore", GameMod.MOD_NIGHTCORE);
         addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hidden", GameMod.MOD_HIDDEN);
-        addButton(offset + offsetGrowth * 4, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-smallcircle", GameMod.MOD_SMALLCIRCLE);
+        addButton(offset + offsetGrowth * 4, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-flashlight", GameMod.MOD_FLASHLIGHT);
+        addButton(offset + offsetGrowth * 5, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-smallcircle", GameMod.MOD_SMALLCIRCLE);
+        addButton(offset + offsetGrowth * 6, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-speedup", GameMod.MOD_SPEEDUP);
 
         //line 3
         addButton(offset + offsetGrowth * 0, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax", GameMod.MOD_RELAX);
@@ -215,11 +217,17 @@ public class ModMenu implements IModSwitcher {
         if (mod.contains(GameMod.MOD_HIDDEN)) {
             mult *= 1.06f;
         }
+        if (mod.contains(GameMod.MOD_FLASHLIGHT)) {
+            mult *= 1.12f;
+        }
         if (mod.contains(GameMod.MOD_DOUBLETIME)) {
             mult *= 1.12f;
         }
         if (mod.contains(GameMod.MOD_NIGHTCORE)) {
             mult *= 1.12f;
+        }
+        if (mod.contains(GameMod.MOD_SPEEDUP)) {
+            mult *= 1.06f;
         }
         if (mod.contains(GameMod.MOD_HALFTIME)) {
             mult *= 0.3f;
@@ -272,14 +280,22 @@ public class ModMenu implements IModSwitcher {
             } else if (flag.equals(GameMod.MOD_DOUBLETIME)) {
                 mod.remove(GameMod.MOD_NIGHTCORE);
                 mod.remove(GameMod.MOD_HALFTIME);
+                mod.remove(GameMod.MOD_SPEEDUP);
                 modsRemoved = true;
             } else if (flag.equals(GameMod.MOD_NIGHTCORE)) {
                 mod.remove(GameMod.MOD_DOUBLETIME);
+                mod.remove(GameMod.MOD_HALFTIME);
+                mod.remove(GameMod.MOD_SPEEDUP);
+                modsRemoved = true;
+            } else if (flag.equals(GameMod.MOD_SPEEDUP)){
+                mod.remove(GameMod.MOD_DOUBLETIME);
+                mod.remove(GameMod.MOD_NIGHTCORE);
                 mod.remove(GameMod.MOD_HALFTIME);
                 modsRemoved = true;
             } else if (flag.equals(GameMod.MOD_HALFTIME)) {
                 mod.remove(GameMod.MOD_DOUBLETIME);
                 mod.remove(GameMod.MOD_NIGHTCORE);
+                mod.remove(GameMod.MOD_SPEEDUP);
                 modsRemoved = true;
             } else if (flag.equals(GameMod.MOD_SUDDENDEATH)) {
                 mod.remove(GameMod.MOD_NOFAIL);

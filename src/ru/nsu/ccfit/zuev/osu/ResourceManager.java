@@ -98,6 +98,8 @@ public class ResourceManager {
         loadTexture("ranking_unknown", "ranking_unknown.png", false);
         loadTexture("ranking_unsubmitted", "ranking_unsubmitted.png", false);
         loadTexture("ranking_nextpage", "ranking_nextpage.png", false);
+        
+        loadTexture("flashlight_cursor", "flashlight_cursor.png", false);
         if (textures.containsKey("lighting") == false)
             textures.put("lighting", null);
 //		textures.put("fail-background", null);

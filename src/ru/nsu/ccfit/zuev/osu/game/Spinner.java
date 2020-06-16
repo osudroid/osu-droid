@@ -83,13 +83,16 @@ public class Spinner extends GameObject {
         rotations = 0;
         this.scene = scene;
         needRotations = rps * time;
+        if(time < 0.05f) needRotations = 0.1f;
         this.listener = listener;
         this.soundId = sound;
         this.sampleSet = 0;
         this.addition = 0;
         this.stat = stat;
         this.totalTime = time;
+        startHit = true;
         clear = false;
+        if(totalTime <= 0f) clear = true;
         bonusScore = null;
         score = 1;
         ResourceManager.getInstance().checkSpinnerTextures();
@@ -196,6 +199,10 @@ public class Spinner extends GameObject {
         }
         float percentfill = (Math.abs(rotations) + fullrotations)
                 / needRotations;
+        if(needRotations <= 0.1f){
+            clear = true;
+            percentfill = 1;
+        }
         if (percentfill > 0.9f) {
             score = 50;
         }

@@ -144,6 +144,9 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 case 'f':
                     result += "PF,";
                     break;
+                case 'b':
+                    result += "SU,";
+                    break;
             }
         }
         if (result.length() == 0) {
