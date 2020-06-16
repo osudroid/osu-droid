@@ -1396,6 +1396,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         if (breakAnimator.isOver()) {
             gameStarted = true;
+            scorebar.setVisible(true);
             if(GameHelper.isFlashLight()){
                 mainCursorId = -1;
             }
