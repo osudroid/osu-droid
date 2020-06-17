@@ -1958,6 +1958,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if(GameHelper.isFlashLight()){
             if (GameHelper.isAuto()) {
                 flashlightSprite.setPosition(pos.x, pos.y);
+                flashlightSprite.setShowing(true);
             }
             else {
                int nearestCursorId = getNearestCursorId(pos.x, pos.y);
@@ -2048,6 +2049,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     if(GameHelper.isFlashLight()){
                         if (GameHelper.isAuto()) {
                             flashlightSprite.setPosition(end.x, end.y);
+                            flashlightSprite.setShowing(true);
                         }
                         else {
                            int nearestCursorId = getNearestCursorId(end.x, end.y);
@@ -2077,8 +2079,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             stat.registerHit(score, false, false);
             return;
         }
-        if (GameHelper.isAuto() && GameHelper.isFlashLight()) {
+        if (GameHelper.isFlashLight()) {
             flashlightSprite.setShowing(true);
+            if(GameHelper.isAuto()){
+                flashlightSprite.setPosition(Constants.MAP_WIDTH / 2, Constants.MAP_HEIGHT / 2);
+            }
         }
         if (replay != null && !replaying) {
             short acc = (short) (totalScore * 4);
