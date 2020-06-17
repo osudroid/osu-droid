@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 import android.os.SystemClock;
+import lt.ekgame.beatmap_analyzer.beatmap.HitObject;
 
 import com.dgsrz.bancho.game.sprite.VideoSprite;
 import com.edlplan.ext.EdExtensionHelper;
@@ -1344,7 +1345,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (mainCursorId < 0){
                     int i = 0;
                     for (final Cursor c : cursors) {
-                        if (c.mousePressed == true) {
+                        if (c.mousePressed == true && isFirstObjectsNear(c.mousePos)) {
                             mainCursorId = i;
                             flashlightSprite.setPosition(c.mousePos.x, c.mousePos.y);
                             flashlightSprite.setShowing(true);
@@ -1963,8 +1964,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                if (nearestCursorId >= 0) {
                    mainCursorId = nearestCursorId;
                    flashlightSprite.setPosition(cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y);
-               }
-           }
+                   flashlightSprite.setShowing(true);
+                }
+            }
         }
         
         //(30 - overallDifficulty) / 100f
@@ -2043,6 +2045,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             switch (type) {
                 case GameObjectListener.SLIDER_START:
                     createBurstEffectSliderStart(end, color);
+                    if(GameHelper.isFlashLight()){
+                        if (GameHelper.isAuto()) {
+                            flashlightSprite.setPosition(end.x, end.y);
+                        }
+                        else {
+                           int nearestCursorId = getNearestCursorId(end.x, end.y);
+                           if (nearestCursorId >= 0) {
+                               mainCursorId = nearestCursorId;
+                               flashlightSprite.setPosition(cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y);
+                               flashlightSprite.setShowing(true);
+                           }
+                       }
+                    }
                     break;
                 case GameObjectListener.SLIDER_END:
                     createBurstEffectSliderEnd(end, color);
@@ -2062,10 +2077,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             stat.registerHit(score, false, false);
             return;
         }
-        //TODO: 让fl手电筒在auto mod下移到屏幕中央
-        //if (GameHelper.isAuto() && GameHelper.isFlashLight()) {
-        //    flashlightSprite.setPosition(res, pos.getY());
-        //}
+        if (GameHelper.isAuto() && GameHelper.isFlashLight()) {
+            flashlightSprite.setShowing(true);
+        }
         if (replay != null && !replaying) {
             short acc = (short) (totalScore * 4);
             switch (score) {
@@ -2530,5 +2544,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             ++i;
         }
         return id;
+    }
+
+    private boolean isFirstObjectsNear(PointF pos){
+        if (activeObjects.isEmpty()) {
+            return true;
+        }
+        if (activeObjects.peek() instanceof Spinner || activeObjects.peek() instanceof Slider) {
+            return true;
+        }
+        else if (Utils.squaredDistance(pos, activeObjects.peek().getPos()) < 180f * 180f) {
+            return true;
+        }
+        return false;
     }
 }

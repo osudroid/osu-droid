@@ -29,7 +29,7 @@ public class HitCircle extends GameObject {
     private int sampleSet;
     private int addition;
     private String externalSound;
-    private PointF pos;
+    //private PointF pos;
     private float radius;
     private float passedTime;
     private float time;

@@ -114,6 +114,7 @@ public class Slider extends GameObject {
         this.scene = scene;
         this.timing = timing;
         this.scale = scale;
+        this.pos = pos;
         passedTime = -time;
         preTime = time;
         //if (Config.isUseSuperSlider()) {

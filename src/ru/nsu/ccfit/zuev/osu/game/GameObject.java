@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
+import android.graphics.PointF;
+
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayObjectData;
 
 public abstract class GameObject {
@@ -9,6 +11,7 @@ public abstract class GameObject {
     protected int id = -1;
     protected ReplayObjectData replayData = null;
     protected boolean startHit = false;
+    protected PointF pos = new PointF();
 
     public ReplayObjectData getReplayData() {
         return replayData;
@@ -47,4 +50,6 @@ public abstract class GameObject {
     public boolean isStartHit(){
         return startHit;
     }
+
+    public PointF getPos() {return pos;};
 }
