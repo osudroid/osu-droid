@@ -732,11 +732,22 @@ public class MainActivity extends BaseGameActivity implements
                 if (GlobalManager.getInstance().getEngine().getScene() instanceof LoadingScreen.LoadingScene) {
                     return true;
                 }
-
-                GlobalManager.getInstance().getMainScene().exit();
-                if (wakeLock != null && wakeLock.isHeld()) {
-                    wakeLock.release();
-                }
+                
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(R.string.dialog_exit_message);
+                builder.setPositiveButton(R.string.dialog_exit_yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        GlobalManager.getInstance().getMainScene().exit();
+                        if(wakeLock != null && wakeLock.isHeld()) {
+                            wakeLock.release();
+                        }
+                    }
+                });
+                builder.setNegativeButton(R.string.dialog_exit_no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        return true;
+                    }
+                });
             }
             return true;
         }
