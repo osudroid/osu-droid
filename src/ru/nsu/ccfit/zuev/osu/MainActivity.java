@@ -745,7 +745,6 @@ public class MainActivity extends BaseGameActivity implements
                 });
                 builder.setNegativeButton(R.string.dialog_exit_no, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        return true;
                     }
                 });
             }
