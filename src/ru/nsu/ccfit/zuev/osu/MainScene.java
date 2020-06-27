@@ -1065,20 +1065,24 @@ public class MainScene implements IUpdateHandler {
     }
 
     public void showExitDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(GlobalManager.getInstance().getMainActivity());
-        builder.setMessage("Are you sure you want to exit the game?");
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                exit();
-                PowerManager.WakeLock wakeLock = GlobalManager.getInstance().getMainActivity().getWakeLock();
-                if (wakeLock != null && wakeLock.isHeld()) {
-                    wakeLock.release();
-                }
+        GlobalManager.getInstance().getMainActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(GlobalManager.getInstance().getMainActivity());
+                builder.setMessage("Are you sure you want to exit the game?");
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        exit();
+                        PowerManager.WakeLock wakeLock = GlobalManager.getInstance().getMainActivity().getWakeLock();
+                        if (wakeLock != null && wakeLock.isHeld()) {
+                            wakeLock.release();
+                        }
+                    }
+                });
+                builder.setNegativeButton("No", null);
+                builder.show();
             }
         });
-        builder.setNegativeButton("No", null);
-        builder.show();
     }
 
     public void exit() {
