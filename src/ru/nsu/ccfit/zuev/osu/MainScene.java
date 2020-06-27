@@ -1,11 +1,14 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Build;
+import android.os.PowerManager;
 import android.util.Log;
 
 import com.umeng.analytics.MobclickAgent;
@@ -278,7 +281,7 @@ public class MainScene implements IUpdateHandler {
                     }
                     setColor(1, 1, 1);
 
-                    exit();
+                    showExitDialog();
 
                     return true;
                 }
@@ -1059,6 +1062,23 @@ public class MainScene implements IUpdateHandler {
                 bpmLength = firstTimingPoint.getBeatLength() * 1000f;
             }
         }
+    }
+
+    public void showExitDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(GlobalManager.getInstance().getMainActivity());
+        builder.setMessage("Are you sure you want to exit the game?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                exit();
+                PowerManager.WakeLock wakeLock = GlobalManager.getInstance().getMainActivity().getWakeLock();
+                if (wakeLock != null && wakeLock.isHeld()) {
+                    wakeLock.release();
+                }
+            }
+        });
+        builder.setNegativeButton("No", null);
+        builder.show();
     }
 
     public void exit() {

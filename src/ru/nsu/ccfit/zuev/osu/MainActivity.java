@@ -421,6 +421,10 @@ public class MainActivity extends BaseGameActivity implements
         }
     }
 
+    public PowerManager.WakeLock getWakeLock() {
+        return wakeLock;
+    }
+
     @Override
     protected void onCreate(Bundle pSavedInstanceState) {
         super.onCreate(pSavedInstanceState);
@@ -732,21 +736,8 @@ public class MainActivity extends BaseGameActivity implements
                 if (GlobalManager.getInstance().getEngine().getScene() instanceof LoadingScreen.LoadingScene) {
                     return true;
                 }
-                
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage(R.string.dialog_exit_message);
-                builder.setPositiveButton(R.string.dialog_exit_yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        GlobalManager.getInstance().getMainScene().exit();
-                        if(wakeLock != null && wakeLock.isHeld()) {
-                            wakeLock.release();
-                        }
-                    }
-                });
-                builder.setNegativeButton(R.string.dialog_exit_no, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
+
+                GlobalManager.getInstance().getMainScene().showExitDialog();
             }
             return true;
         }

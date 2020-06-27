@@ -36,10 +36,6 @@
 	<string name="dialog_search_message">Enter search query</string>
 	<string name="dialog_register">Register</string>
 
-	<string name="dialog_exit_message">Are you sure you want to exit the game?</string>
-	<string name="dialog_exit_yes">Yes</string>
-	<string name="dialog_exit_no">No</string>
-
 	<string name="dialog_delete_pp_title">Reset your pp?</string>
 	<string name="dialog_delete_pp_make_sure">Really?</string>
 	<string name="dialog_delete_pp_deleted">PP reset</string>
