@@ -86,7 +86,7 @@ public class MainActivity extends BaseGameActivity implements
     private SaveServiceObject saveServiceObject;
     private IntentFilter filter;
     private boolean willReplay = false;
-    private boolean activityVisible = true;
+    private static boolean activityVisible = true;
 
     public Engine onLoadEngine() {
         checkPermissions();
