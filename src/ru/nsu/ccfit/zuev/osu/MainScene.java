@@ -73,6 +73,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 /**
  * Created by Fuuko on 2015/4/24.
@@ -1068,8 +1069,8 @@ public class MainScene implements IUpdateHandler {
         GlobalManager.getInstance().getMainActivity().runOnUiThread(new Runnable() {
             public void run() {
                 AlertDialog.Builder builder = new AlertDialog.Builder(GlobalManager.getInstance().getMainActivity());
-                builder.setMessage("Are you sure you want to exit the game?");
-                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                builder.setMessage(R.string.dialog_exit_message);
+                builder.setPositiveButton(R.string.dialog_exit_yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         exit();
@@ -1079,7 +1080,7 @@ public class MainScene implements IUpdateHandler {
                         }
                     }
                 });
-                builder.setNegativeButton("No", null);
+                builder.setNegativeButton(R.string.dialog_exit_no, null);
                 builder.show();
             }
         });
