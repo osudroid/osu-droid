@@ -36,7 +36,7 @@ def getReleaseVersionName() {
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 29
     buildToolsVersion '28.0.3'
 
     defaultConfig {

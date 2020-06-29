@@ -41,7 +41,8 @@ public class LibraryManager {
     }
 
     public File getLibraryCacheFile() {
-        return new File(Config.getBeatmapPath(), String.format("library.%s.dat", VERSION));
+        // sorry for the janky code
+        return new File(GlobalManager.getInstance().getMainActivity().getFilesDir(), String.format("library.%s.dat", VERSION));
     }
     
     public boolean isReadStoragePermissionGranted(final Activity thisActivity) {

@@ -1,13 +1,10 @@
 package ru.nsu.ccfit.zuev.audio.serviceAudio;
 
-
-import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -16,7 +13,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -355,10 +351,7 @@ public class SongService extends Service {
     }
 
     public boolean isRunningForeground() {
-        ActivityManager activityManager = (ActivityManager) getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
-        ComponentName componentName = activityManager.getRunningTasks(1).get(0).topActivity;
-        String currentPackageName = componentName.getPackageName();
-        return (!TextUtils.isEmpty(currentPackageName) && currentPackageName.equals(getPackageName()));
+        return MainActivity.isActivityVisible();
     }
 
     public class ReturnBindObject extends Binder {
