@@ -86,6 +86,7 @@ public class MainActivity extends BaseGameActivity implements
     private SaveServiceObject saveServiceObject;
     private IntentFilter filter;
     private boolean willReplay = false;
+    private boolean activityVisible = true;
 
     public Engine onLoadEngine() {
         checkPermissions();
@@ -425,6 +426,10 @@ public class MainActivity extends BaseGameActivity implements
         return wakeLock;
     }
 
+    public static boolean isActivityVisible() {
+        return activityVisible;
+    }
+
     @Override
     protected void onCreate(Bundle pSavedInstanceState) {
         super.onCreate(pSavedInstanceState);
@@ -569,6 +574,7 @@ public class MainActivity extends BaseGameActivity implements
                 }
             }
         }
+        activityVisible = true;
         MobclickAgent.onResume(this);
     }
 
@@ -610,7 +616,14 @@ public class MainActivity extends BaseGameActivity implements
                 }
             }
         }
+        activityVisible = false;
         MobclickAgent.onPause(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        activityVisible = false;
     }
 
     @Override
