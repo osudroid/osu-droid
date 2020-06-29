@@ -106,6 +106,8 @@
 	<string name="online_invemail">Invaild e-mail</string>
 	<string name="online_regcomplete">Registration complete. Restart app to login</string>
 
+	<string name="userpanel_not_online">You are not online. Please log in or check your internet connection.</string>
+
 	<!-- Color Picker -->
 	<string name="dialog_color_picker">Color Picker</string>
 	<string name="press_color_to_apply">Press on Color to apply</string>
