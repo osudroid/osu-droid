@@ -57,11 +57,7 @@ public class MenuItem {
 
         final BeatmapProperties props = PropertiesLibrary.getInstance()
                 .getProperties(info.getPath());
-        if (props != null && props.isFavorite()) {
-            favorite = true;
-        } else {
-            favorite = false;
-        }
+        favorite = props != null && props.isFavorite();
 
     }
 
@@ -112,8 +108,8 @@ public class MenuItem {
                 freeBackground();
             }
         }
-        if (selected == false) {
-            if (visible == true && background == null
+        if (!selected) {
+            if (visible && background == null
                     && y < Config.getRES_HEIGHT() && y > -bgHeight) {
                 initBackground();
                 background.setPosition(x, y);

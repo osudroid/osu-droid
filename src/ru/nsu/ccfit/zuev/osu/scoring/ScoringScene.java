@@ -96,7 +96,7 @@ public class ScoringScene {
         final int x = 0, y = 100;
         final TextureRegion panelr = ResourceManager.getInstance().getTexture(
                 "ranking-panel");
-        final Sprite panel = new Sprite(0 + x, 0 + y, Utils.toRes(panelr.getWidth() * 0.9f),
+        final Sprite panel = new Sprite(x, y, Utils.toRes(panelr.getWidth() * 0.9f),
                 Utils.toRes(panelr.getHeight() * 0.9f), panelr);
         scene.attachChild(panel);
 
@@ -416,7 +416,7 @@ public class ScoringScene {
                     //ToastLogger.showText(StringTable.get(R.string.mod_precise_is_unrank_now), true);
                     ToastLogger.showText(StringTable.get(R.string.mods_sdpfprscrez_is_unrank_now), true);
                 }
-                else if(!stat.getMod().contains(GameMod.MOD_RELAX) && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)){
+                else if(!stat.getMod().contains(GameMod.MOD_RELAX) && !stat.getMod().contains(GameMod.MOD_AUTOPILOT) && track.getDifficulty() >= 1f){
                     SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
                             OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy());
                     sendingPanel.setPosition(Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));

@@ -1,27 +1,65 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Looper;
+import android.widget.Toast;
+
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.primitive.Rectangle;
+import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
+import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.HorizontalAlign;
 
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
+import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.helper.StringTable;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class OnlinePanel extends Entity {
+public class OnlinePanel extends Entity implements Scene.IOnAreaTouchListener {
     Entity onlineLayer = new Entity();
     Entity messageLayer = new Entity();
     Entity frontLayer = new Entity();
+
+    public Rectangle rect;
 
     ChangeableText rankText, nameText, scoreText, accText;
     ChangeableText messageText, submessageText;
     Sprite avatar = null;
 
     public OnlinePanel() {
-        Rectangle rect = new Rectangle(0, 0, Utils.toRes(410), Utils.toRes(110));
+        rect = new Rectangle(0, 0, Utils.toRes(410), Utils.toRes(110)) {
+            @Override
+            public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
+                                         float pTouchAreaLocalX, float pTouchAreaLocalY) {
+                if(pSceneTouchEvent.isActionDown()) {
+                    if(OnlineManager.getInstance().isStayOnline()) {
+                        final Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                                Uri.parse("http://ops.dgsrz.com/profile.php?uid=" + OnlineManager.getInstance().getUserId()));
+                        GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                        return true;
+                    } else {
+                        final Context context = GlobalManager.getInstance().getMainActivity();
+                        new Thread() {
+                            public void run() {
+                                Looper.prepare();
+                                Toast.makeText(context, StringTable.get(R.string.user_panel_offline), Toast.LENGTH_SHORT).show();
+                                Looper.loop();
+                            }
+                        }.start();
+                        return false;
+                    }
+                }
+                return false;
+            }
+        };
         rect.setColor(0.2f, 0.2f, 0.2f, 0.5f);
         attachChild(rect);
 
@@ -113,6 +151,17 @@ public class OnlinePanel extends Entity {
         Debug.i("Avatar is set!");
         avatar = new Sprite(0, 0, Utils.toRes(110), Utils.toRes(110), tex);
         frontLayer.attachChild(avatar);
+    }
+
+    @Override
+    public void onAttached() {
+        super.onAttached();
+    }
+
+    @Override
+    public boolean onAreaTouched(TouchEvent pSceneTouchEvent, Scene.ITouchArea pTouchArea, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+        rect.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX, pTouchAreaLocalY);
+        return false;
     }
 
 }

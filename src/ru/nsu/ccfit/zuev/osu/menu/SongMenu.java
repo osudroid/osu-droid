@@ -69,8 +69,8 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class SongMenu implements IUpdateHandler, MenuItemListener,
         IScrollBarListener {
-    private final static Boolean musicMutex = new Boolean(true);
-    private final Boolean backgroundMutex = new Boolean(true);
+    private final static Boolean musicMutex = Boolean.TRUE;
+    private final Boolean backgroundMutex = Boolean.TRUE;
     public Scene scene;
     public Entity frontLayer = new Entity();
     SortOrder sortOrder = SortOrder.Title;
@@ -85,7 +85,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private MenuItem selectedItem = null;
     private TrackInfo selectedTrack;
     private Sprite bg = null;
-    private Boolean bgLoaded = new Boolean(false);
+    private Boolean bgLoaded = Boolean.FALSE;
     private String bgName = "";
     private ScoreBoard board;
     private Float touchY = null;
@@ -102,7 +102,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private ChangeableText trackInfo, mapper, beatmapInfo, beatmapInfo2, dimensionInfo;
     private boolean isSelectComplete = true;
     private OnlineMapInfo ppy = null;
-    private HashMap<Integer, String> mapStateHashmap = new HashMap<Integer, String>();
+    private HashMap<Integer, String> mapStateHashmap = new HashMap<>();
     private int mapState;
     private AnimSprite scoringSwitcher = null;
     private AsyncTask<OsuAsyncCallback, Integer, Boolean> boardTask;
@@ -178,7 +178,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         camY = 0;
         velocityY = 0;
         selectedItem = null;
-        items = new ArrayList<MenuItem>();
+        items = new ArrayList<>();
         selectedTrack = null;
         bgLoaded = true;
         SongMenuPool.getInstance().init();
@@ -363,7 +363,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         if (selectedTrack == null) {
                             return true;
                         }
-                        if (moved == false) {
+                        if (!moved) {
                             backButton.setScale(1f);
                             back();
                         }
@@ -410,7 +410,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         if (selectedTrack == null) {
                             return true;
                         }
-                        if (moved == false) {
+                        if (!moved) {
                             backButton.setScale(1f);
                             back();
                         }
@@ -446,7 +446,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
                 if (pSceneTouchEvent.isActionUp()) {
                     setFrame(0);
-                    if (moved == false) {
+                    if (!moved) {
                         velocityY = 0;
                         ModMenu.getInstance().show(SongMenu.this, selectedTrack);
                     }
@@ -482,7 +482,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 if (pSceneTouchEvent.isActionUp()) {
 
                     setFrame(0);
-                    if (moved == false) {
+                    if (!moved) {
                         velocityY = 0;
 
                         FilterMenu.getInstance().showMenu(SongMenu.this);
@@ -518,10 +518,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
                 if (pSceneTouchEvent.isActionUp()) {
                     setFrame(0);
-                    if (isSelectComplete == false) {
+                    if (!isSelectComplete) {
                         return true;
                     }
-                    if (moved == false) {
+                    if (!moved) {
                         velocityY = 0;
                         if (items.size() <= 1) {
                             return true;
@@ -535,9 +535,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                                 index = (index + 1) % items.size();
                                 if (index == oldIndex)
                                     return true;
-                            } while (items.get(index).isVisible() == false);
+                            } while (!items.get(index).isVisible());
                         }
-                        if (items.get(index).isVisible() == false) {
+                        if (!items.get(index).isVisible()) {
                             return true;
                         }
                         if (selectedItem == items.get(index)) {
@@ -620,7 +620,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 @Override
                 public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
                                              float pTouchAreaLocalX, float pTouchAreaLocalY) {
-                    if (pSceneTouchEvent.isActionDown() == false) return false;
+                    if (!pSceneTouchEvent.isActionDown()) return false;
                     board.cancleLoadAvatar();
                     toggleScoringSwitcher();
                     return true;
@@ -673,7 +673,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public void setFilter(final String filter, final SortOrder order,
                           final boolean favsOnly, Set<String> limit) {
-        if (order.equals(sortOrder) == false) {
+        if (!order.equals(sortOrder)) {
             sortOrder = order;
             sort();
         }
@@ -690,7 +690,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         for (final MenuItem item : items) {
             item.applyFilter(lowerFilter, favsOnly, limit);
         }
-        if (selectedItem != null && selectedItem.isVisible() == false) {
+        if (selectedItem != null && !selectedItem.isVisible()) {
             selectedItem = null;
             selectedTrack = null;
         }
@@ -699,7 +699,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void sort() {
-        if (sortOrder.equals(FilterMenu.getInstance().getOrder()) == false) {
+        if (!sortOrder.equals(FilterMenu.getInstance().getOrder())) {
             sortOrder = FilterMenu.getInstance().getOrder();
         }
         Collections.sort(items, new Comparator<MenuItem>() {
@@ -972,7 +972,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }).start();
         if (selectedTrack == track) {
             synchronized (bgLoaded) {
-                if (bgLoaded == false) {
+                if (!bgLoaded) {
                     return;
                 }
             }

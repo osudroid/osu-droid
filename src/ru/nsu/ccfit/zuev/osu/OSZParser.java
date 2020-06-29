@@ -34,7 +34,7 @@ public class OSZParser {
         ZipInputStream istream;
 
         // Checking if we can use SD card for storage
-        if (canUseSD() == false) {
+        if (!canUseSD()) {
             return false;
         }
 
@@ -63,7 +63,7 @@ public class OSZParser {
                 final File entryFile = new File(folderFile, entry.getName());
                 if (entryFile.getParent() != null) {
                     final File entryFolder = new File(entryFile.getParent());
-                    if (entryFolder.exists() == false) {
+                    if (!entryFolder.exists()) {
                         if (entryFolder.mkdirs()) {
                             list.add(entryFile);
                         }

@@ -17,7 +17,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 public class OnlineScoring {
     private static final int attemptCount = 5;
     private static OnlineScoring instance = null;
-    private Boolean onlineMutex = new Boolean(false);
+    private Boolean onlineMutex = Boolean.FALSE;
     private OnlinePanel panel = null;
     private OnlinePanel secondPanel = null;
     private boolean avatarLoaded = false;
@@ -37,7 +37,7 @@ public class OnlineScoring {
     }
 
     public OnlinePanel createSecondPanel() {
-        if (OnlineManager.getInstance().isStayOnline() == false)
+        if (!OnlineManager.getInstance().isStayOnline())
             return null;
         secondPanel = new OnlinePanel();
         secondPanel.setInfo();
@@ -69,7 +69,7 @@ public class OnlineScoring {
     }
 
     public void login() {
-        if (OnlineManager.getInstance().isStayOnline() == false)
+        if (!OnlineManager.getInstance().isStayOnline())
             return;
         avatarLoaded = false;
         new AsyncTaskLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new OsuAsyncCallback() {
@@ -117,7 +117,7 @@ public class OnlineScoring {
     }
 
     public void startPlay(final TrackInfo track, final String hash) {
-        if (OnlineManager.getInstance().isStayOnline() == false)
+        if (!OnlineManager.getInstance().isStayOnline())
             return;
         new AsyncTaskLoader().execute(new OsuAsyncCallback() {
 
@@ -150,9 +150,9 @@ public class OnlineScoring {
     }
 
     public void sendRecord(final StatisticV2 record, final SendingPanel panel, final String replay) {
-        if (OnlineManager.getInstance().isStayOnline() == false)
+        if (!OnlineManager.getInstance().isStayOnline())
             return;
-        if (OnlineManager.getInstance().isReadyToSend() == false)
+        if (!OnlineManager.getInstance().isReadyToSend())
             return;
 
         Debug.i("Sending score");

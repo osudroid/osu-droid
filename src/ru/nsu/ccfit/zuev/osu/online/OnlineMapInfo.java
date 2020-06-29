@@ -108,7 +108,7 @@ public class OnlineMapInfo {
         }
     */
     private int ppyGetBeatmapsFromHash() {
-        final String url = ppyAPI + "beatmaps?k=" + this.key + "&h=" + MD5Calcuator.getFileMD5(new File(map.getFilename()));
+        final String url = ppyAPI + "beatmaps?k=" + key + "&h=" + MD5Calcuator.getFileMD5(new File(map.getFilename()));
         if (saveJSON(url)) {
             try {
                 if (correctkey)
@@ -144,7 +144,7 @@ public class OnlineMapInfo {
     }
 
     public int getBeatmapsStateFromHash(TrackInfo t) {
-        this.map = t;
+        map = t;
         update = null;
         updateNeccessary = false;
         // 0"No connection", 1"ranking_disabled", 2"ranking_ranked", 3"ranking_latest" , 4"ranking_loved", 5"ranking_unsubmitted", 6"ranking_download", 7"ranking_unknown"

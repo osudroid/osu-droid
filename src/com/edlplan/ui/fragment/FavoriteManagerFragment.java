@@ -2,10 +2,10 @@ package com.edlplan.ui.fragment;
 
 import android.animation.Animator;
 import android.graphics.Color;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.OrientationHelper;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.OrientationHelper;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +44,7 @@ public class FavoriteManagerFragment extends BaseFragment {
         setDismissOnBackgroundClick(true);
         GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
         ((RecyclerView) findViewById(R.id.main_recycler_view)).setLayoutManager(layoutManager);
-        layoutManager.setOrientation(OrientationHelper.VERTICAL);
+        layoutManager.setOrientation(RecyclerView.VERTICAL);
 
         Button newFolder = findViewById(R.id.new_folder);
         newFolder.setOnClickListener(v -> {
@@ -245,9 +245,7 @@ public class FavoriteManagerFragment extends BaseFragment {
             });
 
             if (position == 0) {
-                holder.button1.setOnClickListener(view -> {
-                    ToastLogger.showText(StringTable.get(R.string.favorite_warning_on_delete_default), false);
-                });
+                holder.button1.setOnClickListener(view -> ToastLogger.showText(StringTable.get(R.string.favorite_warning_on_delete_default), false));
                 holder.button2.setOnClickListener(view -> {
                 });
             }
@@ -316,9 +314,7 @@ public class FavoriteManagerFragment extends BaseFragment {
             });
 
             if (position == 0) {
-                holder.button1.setOnClickListener(view -> {
-                    ToastLogger.showText(StringTable.get(R.string.favorite_warning_on_delete_default), false);
-                });
+                holder.button1.setOnClickListener(view -> ToastLogger.showText(StringTable.get(R.string.favorite_warning_on_delete_default), false));
             }
         }
     }

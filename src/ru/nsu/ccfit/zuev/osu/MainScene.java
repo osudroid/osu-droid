@@ -1,11 +1,13 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Build;
+import android.os.PowerManager;
 import android.util.Log;
 
 import com.umeng.analytics.MobclickAgent;
@@ -70,6 +72,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 /**
  * Created by Fuuko on 2015/4/24.
@@ -157,10 +160,10 @@ public class MainScene implements IUpdateHandler {
                 if (pSceneTouchEvent.isActionUp()) {
                     Debug.i("logo up");
                     Debug.i("doMenuShow " + doMenuShow + " isMenuShowed " + isMenuShowed + " showPassTime " + showPassTime);
-                    if (doMenuShow == true && isMenuShowed == true) {
+                    if (doMenuShow && isMenuShowed) {
                         showPassTime = 20000;
                     }
-                    if (doMenuShow == false && isMenuShowed == false && logo.getX() == (Config.getRES_WIDTH() - logo.getWidth()) / 2) {
+                    if (!doMenuShow && !isMenuShowed && logo.getX() == (Config.getRES_WIDTH() - logo.getWidth()) / 2) {
                         doMenuShow = true;
                         showPassTime = 0;
                     }
@@ -278,7 +281,7 @@ public class MainScene implements IUpdateHandler {
                     }
                     setColor(1, 1, 1);
 
-                    exit();
+                    showExitDialog();
 
                     return true;
                 }
@@ -660,6 +663,7 @@ public class MainScene implements IUpdateHandler {
             final OnlinePanel panel = OnlineScoring.getInstance().getPanel();
             panel.setPosition(5, 5);
             scene.attachChild(panel);
+            scene.registerTouchArea(panel.rect);
         }
 
         OnlineScoring.getInstance().login();
@@ -769,11 +773,11 @@ public class MainScene implements IUpdateHandler {
             offset = 0;
         }
 
-        if (doMenuShow == true && isMenuShowed == false) {
+        if (doMenuShow && !isMenuShowed) {
             logo.registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, EaseExponentialOut.getInstance()));
             logoOverlay.registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, EaseExponentialOut.getInstance()));
-            for (int i = 0; i < spectrum.length; i++) {
-                spectrum[i].registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2, Config.getRES_WIDTH() / 3, EaseExponentialOut.getInstance()));
+            for (Rectangle rectangle : spectrum) {
+                rectangle.registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2, Config.getRES_WIDTH() / 3, EaseExponentialOut.getInstance()));
             }
             play.registerEntityModifier(new ParallelEntityModifier(
                     new MoveXModifier(0.5f, menuBarX - 100, menuBarX, EaseElasticOut.getInstance()),
@@ -790,7 +794,7 @@ public class MainScene implements IUpdateHandler {
             isMenuShowed = true;
         }
 
-        if (doMenuShow == true && isMenuShowed == true) {
+        if (doMenuShow && isMenuShowed) {
             if (showPassTime > 10000f) {
                 scene.unregisterTouchArea(play);
                 scene.unregisterTouchArea(options);
@@ -808,8 +812,8 @@ public class MainScene implements IUpdateHandler {
                         EaseBounceOut.getInstance()));
                 logoOverlay.registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2,
                         EaseBounceOut.getInstance()));
-                for (int i = 0; i < spectrum.length; i++) {
-                    spectrum[i].registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3, Config.getRES_WIDTH() / 2, EaseBounceOut.getInstance()));
+                for (Rectangle rectangle : spectrum) {
+                    rectangle.registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3, Config.getRES_WIDTH() / 2, EaseBounceOut.getInstance()));
                 }
                 isMenuShowed = false;
                 doMenuShow = false;
@@ -958,7 +962,7 @@ public class MainScene implements IUpdateHandler {
                 musicInfoText = new ChangeableText(Utils.toRes(Config.getRES_WIDTH() - 500), Utils.toRes(3),
                         ResourceManager.getInstance().getFont("font"), "None...", HorizontalAlign.RIGHT, 35);
             }
-            if (beatmapInfo.getArtistUnicode() != null && beatmapInfo.getTitleUnicode() != null && Config.isForceRomanized() == false) {
+            if (beatmapInfo.getArtistUnicode() != null && beatmapInfo.getTitleUnicode() != null && !Config.isForceRomanized()) {
                 musicInfoText.setText(beatmapInfo.getArtistUnicode() + " - " + beatmapInfo.getTitleUnicode(), true);
             } else if (beatmapInfo.getArtist() != null && beatmapInfo.getTitle() != null) {
                 musicInfoText.setText(beatmapInfo.getArtist() + " - " + beatmapInfo.getTitle(), true);
@@ -1008,13 +1012,8 @@ public class MainScene implements IUpdateHandler {
 
                             @Override
                             public void onModifierFinished(IModifier<IEntity> pModifier, final IEntity pItem) {
-                                GlobalManager.getInstance().getMainActivity().runOnUpdateThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        // TODO Auto-generated method stub
-                                        pItem.detachSelf();
-                                    }
-                                });
+                                // TODO Auto-generated method stub
+                                GlobalManager.getInstance().getMainActivity().runOnUpdateThread(pItem::detachSelf);
                             }
                         }));
                         lastBackground = background;
@@ -1044,12 +1043,12 @@ public class MainScene implements IUpdateHandler {
             if (parser.openFile()) {
                 beatmapData = parser.readData();
 
-                timingPoints = new LinkedList<TimingPoint>();
+                timingPoints = new LinkedList<>();
                 currentTimingPoint = null;
                 for (final String s : beatmapData.getData("TimingPoints")) {
                     final TimingPoint tp = new TimingPoint(s.split("[,]"), currentTimingPoint);
                     timingPoints.add(tp);
-                    if (tp.wasInderited() == false || currentTimingPoint == null) {
+                    if (!tp.wasInderited() || currentTimingPoint == null) {
                         currentTimingPoint = tp;
                     }
                 }
@@ -1059,6 +1058,22 @@ public class MainScene implements IUpdateHandler {
                 bpmLength = firstTimingPoint.getBeatLength() * 1000f;
             }
         }
+    }
+
+    public void showExitDialog() {
+        GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(GlobalManager.getInstance().getMainActivity());
+            builder.setMessage(R.string.dialog_exit_message);
+            builder.setPositiveButton(R.string.dialog_exit_yes, (dialog, which) -> {
+                exit();
+                PowerManager.WakeLock wakeLock = GlobalManager.getInstance().getMainActivity().getWakeLock();
+                if(wakeLock != null && wakeLock.isHeld()) {
+                    wakeLock.release();
+                }
+            });
+            builder.setNegativeButton(R.string.dialog_exit_no, null);
+            builder.show();
+        });
     }
 
     public void exit() {

@@ -36,13 +36,7 @@ public class OnlineInitializer implements View.OnClickListener {
         Button btn = (Button) registerDialog.findViewById(R.id.register_btn);
         if (btn != null) btn.setOnClickListener(this);
         btn = (Button) registerDialog.findViewById(R.id.cancel_btn);
-        if (btn != null) btn.setOnClickListener(new View.OnClickListener() {
-
-
-            public void onClick(View v) {
-                registerDialog.dismiss();
-            }
-        });
+        if (btn != null) btn.setOnClickListener(v -> registerDialog.dismiss());
 
         registerDialog.show();
     }
@@ -61,7 +55,7 @@ public class OnlineInitializer implements View.OnClickListener {
         final TextView errorText = (TextView) registerDialog.findViewById(R.id.register_error_text);
         errorText.setText("");
 
-        if (username.matches("^\\w{3,16}$") == false) {
+        if (!username.matches("^\\w{3,16}$")) {
             ToastLogger.showTextId(R.string.online_invlogin, true);
             return;
         }
@@ -69,11 +63,11 @@ public class OnlineInitializer implements View.OnClickListener {
             ToastLogger.showTextId(R.string.online_invpassword, true);
             return;
         }
-        if (password.equals(confirm_password) == false) {
+        if (!password.equals(confirm_password)) {
             ToastLogger.showTextId(R.string.online_invconfirm, true);
             return;
         }
-        if (email.matches("^[\\w.-_]+@[\\w.-_]+$") == false) {
+        if (!email.matches("^[\\w.-_]+@[\\w.-_]+$")) {
             ToastLogger.showTextId(R.string.online_invemail, true);
             return;
         }
@@ -102,22 +96,18 @@ public class OnlineInitializer implements View.OnClickListener {
             }
 
             public void onComplete() {
-                activity.runOnUiThread(new Runnable() {
-
-
-                    public void run() {
-                        pdialog.dismiss();
-                        if (success)
-                            registerDialog.dismiss();
-                        errorText.setText(resultMessage);
-                    }
+                activity.runOnUiThread(() -> {
+                    pdialog.dismiss();
+                    if (success)
+                        registerDialog.dismiss();
+                    errorText.setText(resultMessage);
                 });
                 final SharedPreferences prefs = PreferenceManager
                         .getDefaultSharedPreferences(activity);
 
                 //Save changes
                 Editor editor = prefs.edit();
-                if (prefs.getBoolean("onlineSet", false) == false || success) {
+                if (!prefs.getBoolean("onlineSet", false) || success) {
                     editor.putBoolean("stayOnline", success);
                     editor.putString("onlineUsername", username);
                     editor.putString("onlinePassword", password);

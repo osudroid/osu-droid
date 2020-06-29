@@ -41,7 +41,7 @@ public class ScrollBar {
 
     public void setVisible(final boolean vis) {
         barRectangle.setVisible(vis);
-        if (vis == true && visible == false) {
+        if (vis && !visible) {
             final IEntity parent = barRectangle.getParent();
             parent.detachChild(barRectangle);
             parent.attachChild(barRectangle);

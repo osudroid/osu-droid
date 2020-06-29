@@ -98,7 +98,7 @@ public class OnlineManager {
             return null;
         }
 
-        if (response.get(0).equals("SUCCESS") == false) {
+        if (!response.get(0).equals("SUCCESS")) {
             if (response.size() >= 2) {
                 failMessage = response.get(1);
             } else
@@ -159,7 +159,7 @@ public class OnlineManager {
     }
 
     boolean tryToLogIn() throws OnlineManagerException {
-        if (logIn(username, password) == false) {
+        if (!logIn(username, password)) {
             stayOnline = false;
             return false;
         }
@@ -431,6 +431,10 @@ public class OnlineManager {
 
     public String getUsername() {
         return username;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     public String getPassword() {

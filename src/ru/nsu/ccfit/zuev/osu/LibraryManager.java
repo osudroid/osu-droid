@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.app.Activity;
-import android.support.v4.app.ActivityCompat;
+import androidx.core.app.ActivityCompat;
 import android.Manifest;
 
 import org.anddev.andengine.util.Debug;
@@ -41,7 +41,7 @@ public class LibraryManager {
     }
 
     public File getLibraryCacheFile() {
-        return new File(Config.getBeatmapPath(), String.format("library.%s.dat", VERSION));
+        return new File(GlobalManager.getInstance().getMainActivity().getFilesDir(), String.format("library.%s.dat", VERSION));
     }
     
     public boolean isReadStoragePermissionGranted(final Activity thisActivity) {
