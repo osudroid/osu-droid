@@ -8,7 +8,6 @@ import android.widget.Toast;
 
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.input.touch.TouchEvent;
@@ -16,13 +15,12 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.HorizontalAlign;
 
-import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class OnlinePanel extends Entity implements Scene.IOnAreaTouchListener {
+public class OnlinePanel extends Entity {
     Entity onlineLayer = new Entity();
     Entity messageLayer = new Entity();
     Entity frontLayer = new Entity();
@@ -36,26 +34,28 @@ public class OnlinePanel extends Entity implements Scene.IOnAreaTouchListener {
     public OnlinePanel() {
         rect = new Rectangle(0, 0, Utils.toRes(410), Utils.toRes(110)) {
             @Override
-            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
-                if(pSceneTouchEvent.isActionDown()) {
-                    if(OnlineManager.getInstance().isStayOnline()) {
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+                if (pSceneTouchEvent.isActionDown()) {
+                    final Context context = GlobalManager.getInstance().getMainActivity().getApplicationContext();
+                    boolean avatarLoad = OnlineScoring.getInstance().isAvatarLoaded();
+
+                    if (avatarLoad && OnlineManager.getInstance().isStayOnline()) {
                         final Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://ops.dgsrz.com/profile.php?uid="
                                 + OnlineManager.getInstance().getUserId()));
                         GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
                         return true;
                     } else {
-                        final Context context = GlobalManager.getInstance().getMainActivity().getApplicationContext();
                         new Thread() {
                             public void run() {
                                 Looper.prepare();
-                                Toast.makeText(context, R.string.userpanel_not_online, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, avatarLoad || OnlineManager.getInstance().isStayOnline() ?
+                                        R.string.userpanel_logging_in : R.string.userpanel_not_online, Toast.LENGTH_SHORT).show();
                                 Looper.loop();
                             }
                         }.start();
                         return false;
                     }
                 }
-
                 return false;
             }
         };
@@ -150,10 +150,5 @@ public class OnlinePanel extends Entity implements Scene.IOnAreaTouchListener {
         Debug.i("Avatar is set!");
         avatar = new Sprite(0, 0, Utils.toRes(110), Utils.toRes(110), tex);
         frontLayer.attachChild(avatar);
-    }
-
-    @Override
-    public boolean onAreaTouched(TouchEvent pSceneTouchEvent, Scene.ITouchArea pTouchArea, float pTouchAreaLocalX, float pTouchAreaLocalY) {
-        return false;
     }
 }
