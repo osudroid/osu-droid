@@ -908,7 +908,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 - Utils.toRes(95), "0000x", 1.5f);
         comboText.changeText(new StringBuilder("0****"));
         scoreText = new GameScoreText(Config.getRES_WIDTH()
-                - scoreDigitTex.getWidth() * 7.25f, 0, "00000000", 0.9f);
+                - scoreDigitTex.getWidth() * 7.25f, 0, "0000000000", 0.9f);
         comboText.attachToScene(fgScene);
         accText.attachToScene(fgScene);
         scoreText.attachToScene(fgScene);
@@ -1478,8 +1478,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         while (strBuilder.length() < 8) {
             strBuilder.insert(0, '0');
         }
-        scoreText.changeText(strBuilder);
+        int scoreTextOffset = 0;
+        while (strBuilder.length() < 10) {
+            strBuilder.insert(0, '*');
+            scoreTextOffset++;
+        }
 
+        scoreText.setPosition(Config.getRES_WIDTH()
+                - ResourceManager.getInstance().getTexture("score-0").getWidth() * (9.25f - scoreTextOffset), 0);
+        scoreText.changeText(strBuilder);
         if (comboBurst != null) {
             if (stat.getCombo() == 0) {
                 comboBurst.breakCombo();
@@ -2533,7 +2540,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         flashlightSprite.setPosition(pX, pY);
     }
 
-    public int getNearestCursorId(float pX, float pY){
+    private int getNearestCursorId(float pX, float pY){
         float distance = Float.POSITIVE_INFINITY, cursorDistance, dx, dy;
         int id = -1, i = 0;
         for (Cursor c : cursors) {

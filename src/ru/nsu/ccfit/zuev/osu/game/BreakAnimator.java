@@ -98,7 +98,7 @@ public class BreakAnimator extends GameObject {
         if (showMark) {
             final TextureRegion zeroRect = ResourceManager.getInstance()
                     .getTexture("score-0");
-            mark = new Sprite(Config.getRES_WIDTH() - zeroRect.getWidth() * 9,
+            mark = new Sprite(Config.getRES_WIDTH() - zeroRect.getWidth() * 11,
                     Utils.toRes(5), ResourceManager.getInstance().getTexture(
                     "ranking-" + stat.getMark() + "-small"));
             mark.setScale(1.2f);

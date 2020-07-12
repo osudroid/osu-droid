@@ -279,10 +279,17 @@ public class StatisticV2 implements Serializable {
             scoreHash = random.nextInt(1313) | 3455;
             return;
         }
-        totalScore += amount;
-        if (combo) {
-            totalScore += (amount * currentCombo * diffModifier) / 25;
+        //如果分数溢出或分数满了
+        if (totalScore + (amount * currentCombo * diffModifier) / 25 + amount < 0 || totalScore == Integer.MAX_VALUE){
+            totalScore = Integer.MAX_VALUE;
         }
+        else{
+            totalScore += amount;
+            if (combo) {
+                totalScore += (amount * currentCombo * diffModifier) / 25;
+            }
+        }
+        
         scoreHash = SecurityUtils.getHigh16Bits(totalScore);
     }
 
@@ -538,8 +545,7 @@ public class StatisticV2 implements Serializable {
                     break;
                 case 's':
                     mod.add(GameMod.MOD_PRECISE);
-                    break;    
-                //added by hao1637
+                    break;
                 case 'm':
                     mod.add(GameMod.MOD_SMALLCIRCLE);
                     break;    
