@@ -664,6 +664,7 @@ public class MainScene implements IUpdateHandler {
             final OnlinePanel panel = OnlineScoring.getInstance().getPanel();
             panel.setPosition(5, 5);
             scene.attachChild(panel);
+            scene.registerTouchArea(panel.rect);
         }
 
         OnlineScoring.getInstance().login();
