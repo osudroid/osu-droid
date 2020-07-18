@@ -328,7 +328,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
 
             public void onComplete() {
                 isCancled = false;
-                if (Utils.isWifi(context))
+                if (Utils.isWifi(context) || Config.getLoadAvatar())
                     loadAvatar();
             }
 
