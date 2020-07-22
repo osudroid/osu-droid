@@ -79,6 +79,7 @@ public class Config {
     private static boolean forceRomanized = false;
 
     private static boolean fixFrameOffset = true;
+    private static boolean removeSliderLock = false;
 
     private static float cursorSize = 1;
 
@@ -212,7 +213,7 @@ public class Config {
         enablePP = false;//prefs.getBoolean("enablePP",true);
 
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
-
+        removeSliderLock = prefs.getBoolean("removeSliderLock", true);
         //Init
         onlineDeviceID = prefs.getString("installID", null);
         if (onlineDeviceID == null) {
@@ -294,6 +295,10 @@ public class Config {
 
     public static boolean isFixFrameOffset() {
         return fixFrameOffset;
+    }
+
+    public static boolean isRemoveSliderLock() {
+        return removeSliderLock;
     }
 
     public static boolean isEnableExtension() {

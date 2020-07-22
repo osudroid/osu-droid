@@ -61,6 +61,7 @@ public class HitCircle extends GameObject {
         this.time = time;
         this.isFirstNote = isFirstNote;
         passedTime = 0;
+        startHit = false;
         kiai = GameHelper.isKiai();
         color.set(r, g, b);
 
@@ -219,7 +220,6 @@ public class HitCircle extends GameObject {
             }
             listener.registerAccuracy(signAcc);
             passedTime = -1;
-
             // Remove circle and register hit in update thread
             float finalSignAcc = signAcc;
             SyncTaskManager.getInstance().run(() -> {
