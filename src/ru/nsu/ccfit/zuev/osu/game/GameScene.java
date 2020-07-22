@@ -1405,10 +1405,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         for (final GameObject obj : passiveObjects) {
             obj.update(dt);
         }
-
-        GameObject lastObject = getLastTobeclickObject();
-        if (lastObject != null) {
-            lastObjectHitTime = getLastTobeclickObject().getHitTime();
+        
+        if (Config.isRemoveSliderLock()){
+            GameObject lastObject = getLastTobeclickObject();
+            if (lastObject != null) {
+                lastObjectHitTime = getLastTobeclickObject().getHitTime();
+            }
         }
 
         for (final GameObject obj : activeObjects) {
@@ -2095,7 +2097,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (stat.getMod().contains(GameMod.MOD_AUTO)) {
             return false;
         }
-        if(Config.isRemoveSliderLock()){
+        if (Config.isRemoveSliderLock()){
             if(activeObjects.isEmpty()
                 || Math.abs(object.getHitTime() - lastObjectHitTime) > 0.001f) {
                 return false;
