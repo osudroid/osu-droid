@@ -296,6 +296,10 @@ public class Slider extends GameObject {
         if(tickInterval == Float.NaN || tickInterval < GameHelper.getSliderTickLength() / 1000){
             tickCount = 0;
         }
+        if ((maxTime * GameHelper.getTickRate() / tickInterval)
+        - (int) (maxTime * GameHelper.getTickRate() / tickInterval) < 0.001f){
+            tickCount--;
+        }
         ticks.clear();
         for (int i = 1; i <= tickCount; i++) {
             final Sprite tick = SpritePool.getInstance().getCenteredSprite(
@@ -1029,7 +1033,7 @@ public class Slider extends GameObject {
                     Utils.putSpriteAnchorCenter(tmpPoint, endOverlay);
                     Utils.putSpriteAnchorCenter(tmpPoint, endArrow);
                 }
-            } else if (percentage - dt <= 0.5f) {
+            } else if (percentage - dt / preTime <= 0.5f) {
                 // Setting up positions of slider parts
                 approachCircle.setAlpha(1);
                 startCircle.setAlpha(1);
