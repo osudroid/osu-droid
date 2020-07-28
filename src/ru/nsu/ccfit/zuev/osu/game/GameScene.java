@@ -42,6 +42,7 @@ import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Iterator;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -160,6 +161,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private VideoSprite mVideo = null;
     private Sprite[] ScoreBoardSprite;
     private int failcount = 0;
+    private float lastObjectHitTime = 0;
 
     private StoryboardSprite storyboardSprite;
 
@@ -505,7 +507,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         comboNum = -1;
         // if (combos.size() > 1) comboNum = 1;
         currentComboNum = 0;
-
+        lastObjectHitTime = 0;
         final String defSound = beatmapData.getData("General", "SampleSet");
         if (defSound.equals("Soft")) {
             TimingPoint.setDefaultSound("soft");
@@ -1403,6 +1405,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         for (final GameObject obj : passiveObjects) {
             obj.update(dt);
         }
+        
+        if (Config.isRemoveSliderLock()){
+            GameObject lastObject = getLastTobeclickObject();
+            if (lastObject != null) {
+                lastObjectHitTime = getLastTobeclickObject().getHitTime();
+            }
+        }
 
         for (final GameObject obj : activeObjects) {
             obj.update(dt);
@@ -2088,12 +2097,27 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (stat.getMod().contains(GameMod.MOD_AUTO)) {
             return false;
         }
-        if (activeObjects.isEmpty()
-                || Math.abs(object.getHitTime()
-                - activeObjects.peek().getHitTime()) > 0.001f) {
+        if (Config.isRemoveSliderLock()){
+            if(activeObjects.isEmpty()
+                || Math.abs(object.getHitTime() - lastObjectHitTime) > 0.001f) {
+                return false;
+            }
+        }
+        else if (activeObjects.isEmpty()
+            || Math.abs(object.getHitTime()
+            - activeObjects.peek().getHitTime()) > 0.001f) {
             return false;
         }
         return cursors[index].mousePressed;
+    }
+
+    private GameObject getLastTobeclickObject(){
+        Iterator iterator = activeObjects.iterator();
+        while(iterator.hasNext()){
+            GameObject note = (GameObject)iterator.next();
+            if(note.isStartHit() == false)return note;
+        }
+        return null;
     }
 
     @Override
