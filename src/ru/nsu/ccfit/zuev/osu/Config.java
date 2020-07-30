@@ -66,7 +66,6 @@ public class Config {
     private static String onlineUsername = "Pesets";
     private static String onlinePassword = null;
     private static String onlineDeviceID = null;
-    private static boolean loadAvatar = true;
     private static boolean stayOnline = true;
 
     private static boolean syncMusic = true;
@@ -264,7 +263,6 @@ public class Config {
         onlineUsername = prefs.getString("onlineUsername", "");
         onlinePassword = prefs.getString("onlinePassword", null);
         stayOnline = prefs.getBoolean("stayOnline", true);
-        loadAvatar = prefs.getBoolean("loadAvatar", true);
     }
 
     public static void setSize() {
@@ -589,14 +587,6 @@ public class Config {
 
     public static void setStayOnline(boolean stayOnline) {
         Config.stayOnline = stayOnline;
-    }
-
-    public static boolean getLoadAvatar() {
-        return loadAvatar;
-    }
-
-    public static void setLoadAvatar(boolean loadAvatar) {
-        Config.loadAvatar = loadAvatar;
     }
 
     public static String getOnlineDeviceID() {
