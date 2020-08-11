@@ -46,7 +46,6 @@ public class CursorSprite extends Entity {
                 particles.addParticleModifier(new AlphaModifier(1.0f, 0.0f, 0f, 0.25f));
             }
             particles.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
-
             particles.addParticleInitializer(new ScaleInitializer(csize));
             //设置粒子消失时间
             //particles.addParticleModifier(new ExpireModifier(0.25f));
@@ -104,5 +103,5 @@ public class CursorSprite extends Entity {
         return particles;
     }
 
-
+    
 }

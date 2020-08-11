@@ -299,6 +299,10 @@ public class Slider extends GameObject {
         if(tickInterval == Float.NaN || tickInterval < GameHelper.getSliderTickLength() / 1000){
             tickCount = 0;
         }
+        if ((maxTime * GameHelper.getTickRate() / tickInterval)
+        - (int) (maxTime * GameHelper.getTickRate() / tickInterval) < 0.001f){
+            tickCount--;
+        }
         ticks.clear();
         for (int i = 1; i <= tickCount; i++) {
             final Sprite tick = SpritePool.getInstance().getCenteredSprite(
@@ -773,6 +777,9 @@ public class Slider extends GameObject {
                     color);
             //}
             // and go on...
+            if (passedTime >= maxTime){
+                over();
+            }
             return;
         }
         // Calculating score
@@ -1032,7 +1039,7 @@ public class Slider extends GameObject {
                     Utils.putSpriteAnchorCenter(tmpPoint, endOverlay);
                     Utils.putSpriteAnchorCenter(tmpPoint, endArrow);
                 }
-            } else if (percentage - dt <= 0.5f) {
+            } else if (percentage - dt / preTime <= 0.5f) {
                 // Setting up positions of slider parts
                 approachCircle.setAlpha(1);
                 startCircle.setAlpha(1);
@@ -1187,4 +1194,30 @@ public class Slider extends GameObject {
             over();
         }
     }
+
+    @Override
+    public void tryHit(final float dt){
+        if (startHit == false) // If we didn't get start hit(click)
+        {
+            if (isHit() && -passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) // if
+            // we
+            // clicked
+            {
+                listener.registerAccuracy(passedTime);
+                startHit = true;
+                Utils.playHitSound(listener, soundId[0], sampleSet[0], addition[0]);
+                ticksGot++;
+                firstHitAccuracy = (int) (passedTime * 1000);
+                listener.onSliderHit(id, 30, null, path.points.get(0),
+                        false, color, GameObjectListener.SLIDER_START);
+            }
+            if (passedTime < 0) // we at approach time
+            {
+                if (startHit == true) {
+                    approachCircle.setAlpha(0);
+                }
+            }
+        }
+    }
+
 }

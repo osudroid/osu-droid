@@ -222,6 +222,7 @@ public class HitCircle extends GameObject {
             passedTime = -1;
             // Remove circle and register hit in update thread
             float finalSignAcc = signAcc;
+            startHit = true;
             SyncTaskManager.getInstance().run(() -> {
                 HitCircle.this.listener
                         .onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, color);
@@ -309,4 +310,29 @@ public class HitCircle extends GameObject {
             }
         }
     } // update(float dt)
+
+    @Override
+    public void tryHit(final float dt){
+        if (passedTime * 2 > time && isHit()) {
+            float signAcc = passedTime - time;
+            if (Config.isFixFrameOffset()) {
+                signAcc += (float) hitOffsetToPreviousFrame() / 1000f;
+            }
+            final float acc = Math.abs(signAcc);
+            //Log.i("note-ini", "signAcc: " + signAcc);
+            if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) {
+                playSound();
+            }
+            listener.registerAccuracy(signAcc);
+            passedTime = -1;
+            // Remove circle and register hit in update thread
+            float finalSignAcc = signAcc;
+            SyncTaskManager.getInstance().run(() -> {
+                HitCircle.this.listener
+                        .onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, color);
+                removeFromScene();
+            });
+            
+        }
+    }
 }

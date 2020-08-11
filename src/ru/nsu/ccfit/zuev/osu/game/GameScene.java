@@ -91,9 +91,10 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class GameScene implements IUpdateHandler, GameObjectListener,
         IOnSceneTouchListener {
-    public static final int CursorCount = 5;
+    public static final int CursorCount = 10;
     private final Engine engine;
     private final Cursor[] cursors = new Cursor[CursorCount];
+    private final boolean[] cursorIIsDown = new boolean[CursorCount];
     private final StringBuilder strBuilder = new StringBuilder();
     public String filePath = null;
     private Scene scene;
@@ -774,6 +775,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             cursors[i].mousePressed = false;
             cursors[i].mouseOldDown = false;
         }
+        for (int i = 0; i < CursorCount; i++) {
+            cursorIIsDown[i] = false;
+        }
         if(GameHelper.isFlashLight()){
             flashlightSprite = new FlashLightSprite();
             flashlightSprite.setShowing(false);
@@ -1279,7 +1283,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (replaying) {
             int cIndex;
-            for (int i = 0; i < CursorCount; i++) {
+            for (int i = 0; i < replay.cursorIndex.length; i++) {
+                if (replay.cursorMoves.size() <= i){
+                    break;
+                }
                 cIndex = replay.cursorIndex[i];
                 //Emulating moves
                 while (cIndex < replay.cursorMoves.get(i).size &&
@@ -1288,7 +1295,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                     if (move.id[cIndex] == Replay.ID_DOWN) {
                         cursors[i].mouseDown = true;
-                        for (int j = 0; j < CursorCount; j++)
+                        for (int j = 0; j < replay.cursorIndex.length; j++)
                             cursors[j].mouseOldDown = false;
                         cursors[i].mousePos.x = move.x[cIndex];
                         cursors[i].mousePos.y = move.y[cIndex];
@@ -1339,7 +1346,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 c.mousePressed = false;
             }
         }
-        
         if(GameHelper.isFlashLight()){
             if (GameHelper.isAuto() == false) {
                 if (mainCursorId < 0){
@@ -1498,7 +1504,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         for (final GameObject obj : passiveObjects) {
             obj.update(dt);
         }
-        
+
         if (Config.isRemoveSliderLock()){
             GameObject lastObject = getLastTobeclickObject();
             if (lastObject != null) {
@@ -1508,6 +1514,25 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         for (final GameObject obj : activeObjects) {
             obj.update(dt);
+        }
+        
+        int clickCount = 0;
+        for (final boolean c : cursorIIsDown){
+            if (c == true) clickCount++;
+        }
+        for (int i = 0; i < CursorCount; i++) {
+            cursorIIsDown[i] = false;
+        }
+        for (int i = 0; i < clickCount - 1; i++){
+            if (Config.isRemoveSliderLock()){
+                GameObject lastObject = getLastTobeclickObject();
+                if (lastObject != null) {
+                    lastObjectHitTime = getLastTobeclickObject().getHitTime();
+                }
+            }
+            for (final GameObject obj : activeObjects) {
+                obj.tryHit(dt);
+            }
         }
 
         if (secPassed >= 0 && musicStarted == false) {
@@ -2285,6 +2310,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (replay != null) {
                 replay.addPress(secPassed, gamePoint, i);
             }
+            cursorIIsDown[i] = true;
         } else if (pSceneTouchEvent.isActionMove()) {
             PointF gamePoint = Utils.realToTrackCoords(new PointF(pSceneTouchEvent.getX(), pSceneTouchEvent.getY()));
             cursors[i].mousePos.x = pSceneTouchEvent.getX();
