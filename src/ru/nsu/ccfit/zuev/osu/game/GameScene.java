@@ -391,30 +391,41 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setSpeedUp(false);
 
         GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_NONE);
-        if (ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME)) {
+        GameHelper.setTimeMultiplier(1f);
+        //Speed Change
+        if (ModMenu.getInstance().getChangeSpeed() != 1.00f){
+            timeMultiplier = ModMenu.getInstance().getSpeed();
+            GlobalManager.getInstance().getSongService().preLoad(filePath, timeMultiplier, ModMenu.getInstance().isEnableNCWhenSpeedChange());
+            GameHelper.setTimeMultiplier(1 / timeMultiplier);
+        } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME)) {
             GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_DT);
             /*music.setUseSoftDecoder(1);
             music.setDecoderMultiplier(150);*/
             timeMultiplier = 1.5f;
             GameHelper.setDoubleTime(true);
+            GameHelper.setTimeMultiplier(2 / 3f);
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE)) {
             GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_NC);
             /*music.setUseSoftDecoder(2);
             music.setDecoderMultiplier(150);*/
             timeMultiplier = 1.5f;
             GameHelper.setNightCore(true);
+            GameHelper.setTimeMultiplier(2 / 3f);
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_HALFTIME)) {
             GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_HT);
             /*music.setUseSoftDecoder(1);
             music.setDecoderMultiplier(75);*/
             timeMultiplier = 0.75f;
             GameHelper.setHalfTime(true);
+            GameHelper.setTimeMultiplier(4 / 3f);
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_SPEEDUP)) {
             GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_SU);
             timeMultiplier = 1.25f;
             GameHelper.setSpeedUp(true);
+            GameHelper.setTimeMultiplier(4 / 5f);
         }
 
+        /*
         if (ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME) || ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE)) {
 //            approachRate = approachRate * 2 / 3;
 //            overallDifficulty = (float) GameHelper.ms2od(GameHelper.od2ms(overallDifficulty) * 2 / 3);
@@ -428,38 +439,29 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         } else {
             GameHelper.setTimeMultiplier(1f);
         }
+        */
 
         if (ModMenu.getInstance().getMod().contains(GameMod.MOD_REALLYEASY)) {
             scale += 0.125f;
             drain *= 0.5f;
             overallDifficulty *= 0.5f;
-            if (ModMenu.getInstance().getMod().contains(GameMod.MOD_HARDROCK)){
-                if (ModMenu.getInstance().getMod().contains(GameMod.MOD_SPEEDUP)){
-                    approachRate = (float)(GameHelper.ar2ms(Math.min(1.4f * rawApproachRate, 10f) - 0.75f) / 1000f);
-                } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME) 
-                           || ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE)){
-                    approachRate = (float)(GameHelper.ar2ms(Math.min(1.4f * rawApproachRate, 10f) - 1f) / 1000f);
-                } else {
-                    approachRate = (float)(GameHelper.ar2ms(Math.min(1.4f * rawApproachRate, 10f) - 0.5f) / 1000f);
-                }
+            float ar = (float)GameHelper.ms2ar(approachRate * 1000f);
+            if (ModMenu.getInstance().getMod().contains(GameMod.MOD_EASY)) {
+                ar *= 2;
+                ar -= 0.5f;
             }
-            else {
-                if (ModMenu.getInstance().getMod().contains(GameMod.MOD_SPEEDUP)){
-                    approachRate = (float)(GameHelper.ar2ms(rawApproachRate - 0.75f) / 1000f);
-                } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME) 
-                           || ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE)){
-                    approachRate = (float)(GameHelper.ar2ms(rawApproachRate - 1f) / 1000f);
-                } else {
-                    approachRate = (float)(GameHelper.ar2ms(rawApproachRate - 0.5f) / 1000f);
-                }
-            }
+            ar -= (timeMultiplier - 1.0f) + 0.5f;
+            approachRate = (float)(GameHelper.ar2ms(ar) / 1000f);
         }
 
         if (ModMenu.getInstance().getMod().contains(GameMod.MOD_SMALLCIRCLE)) {
             scale -= (float) ((Config.getRES_HEIGHT() / 480.0f) * (4 * 4.48)
             * 2 / GameObjectSize.BASE_OBJECT_SIZE);
         }
-        //
+        //Force AR
+        if (ModMenu.getInstance().isEnableForceAR()){
+            approachRate = (float) GameHelper.ar2ms(ModMenu.getInstance().getForceAR()) / 1000f * timeMultiplier;
+        }
 
         GameHelper.setRelaxMod(ModMenu.getInstance().getMod().contains(GameMod.MOD_RELAX));
         GameHelper.setAutopilotMod(ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTOPILOT));
@@ -693,6 +695,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     prepareScene();
                 } else {
                     ModMenu.getInstance().setMod(Replay.oldMod);
+                    ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
+                    ModMenu.getInstance().setForceAR(Replay.oldForceAR);
+                    ModMenu.getInstance().setEnableForceAR(Replay.oldEnableForceAR);
                     quit();
                 }
             }
@@ -754,6 +759,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         multiplier += (Float.parseFloat(beatmapData.getData("Difficulty",
                 "CircleSize")) - 3) / 4f;
         stat.setDiffModifier(multiplier);
+        stat.setMaxObjectsCount(lastTrack.getTotalHitObjectCount());
+        stat.setMaxHighestCombo(lastTrack.getMaxCombo());
+        stat.setEnableForceAR(ModMenu.getInstance().isEnableForceAR());
+        stat.setForceAR(ModMenu.getInstance().getForceAR());
+        stat.setChangeSpeed(ModMenu.getInstance().getChangeSpeed());
         GameHelper.setHardrock(stat.getMod().contains(GameMod.MOD_HARDROCK));
         GameHelper.setDoubleTime(stat.getMod().contains(GameMod.MOD_DOUBLETIME));
         GameHelper.setNightCore(stat.getMod().contains(GameMod.MOD_NIGHTCORE));
@@ -952,6 +962,22 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         float timeOffset = 0;
+        if (stat.getMod().contains(GameMod.MOD_SCOREV2)) {
+            final GameEffect effect = GameObjectPool.getInstance().getEffect(
+                    "selection-mod-scorev2");
+            effect.init(
+                    mgScene,
+                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
+                            .toRes(130)),
+                    scale,
+                    new SequenceEntityModifier(ModifierFactory
+                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
+                            .newDelayModifier(2), new ParallelEntityModifier(
+                            ModifierFactory.newFadeOutModifier(0.5f),
+                            ModifierFactory.newScaleModifier(0.5f, 1, 1.5f))));
+            effectOffset += 25;
+            timeOffset += 0.25f;
+        }
         if (stat.getMod().contains(GameMod.MOD_EASY)) {
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-easy");
@@ -1770,6 +1796,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (scoringScene != null) {
                 if (replaying) {
                     ModMenu.getInstance().setMod(Replay.oldMod);
+                    ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
+                    ModMenu.getInstance().setForceAR(Replay.oldForceAR);
+                    ModMenu.getInstance().setEnableForceAR(Replay.oldEnableForceAR);
                 }
 
                 if (replaying)
@@ -1886,6 +1915,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (replaying) {
             replayFile = null;
             ModMenu.getInstance().setMod(Replay.oldMod);
+            ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
+            ModMenu.getInstance().setForceAR(Replay.oldForceAR);
+            ModMenu.getInstance().setEnableForceAR(Replay.oldEnableForceAR);
         }
     }
 
@@ -2116,7 +2148,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (GameHelper.isFlashLight()) {
             flashlightSprite.setShowing(true);
             if(GameHelper.isAuto()){
-                flashlightSprite.setPosition(Constants.MAP_WIDTH / 2, Constants.MAP_HEIGHT / 2);
+                PointF center = Utils.trackToRealCoords(new PointF(Constants.MAP_WIDTH / 2,Constants.MAP_HEIGHT / 2));
+                flashlightSprite.setPosition(center.x, center.y);
             }
         }
         if (replay != null && !replaying) {

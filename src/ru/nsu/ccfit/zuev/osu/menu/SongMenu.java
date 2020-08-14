@@ -880,41 +880,59 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             hp *= 1.4f;
             dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
         }
-        if (mod.contains(GameMod.MOD_DOUBLETIME)) {
-            bpm_max *= 1.5f;
-            bpm_min *= 1.5f;
-            length *= 2 / 3f;
-            beatmapInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-            dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+        if (ModMenu.getInstance().getChangeSpeed() != 1){
+            float speed = ModMenu.getInstance().getSpeed();
+            bpm_max *= speed;
+            bpm_min *= speed;
+            length /= speed;
+            if (speed > 1){
+                beatmapInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+                dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+            }
+            else if (speed < 1){
+                beatmapInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
+                dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
+            }
         }
-        if (mod.contains(GameMod.MOD_NIGHTCORE)) {
-            bpm_max *= 1.5f;
-            bpm_min *= 1.5f;
-            length *= 2 / 3f;
-            beatmapInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-            dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+        else{
+            if (mod.contains(GameMod.MOD_DOUBLETIME)) {
+                bpm_max *= 1.5f;
+                bpm_min *= 1.5f;
+                length *= 2 / 3f;
+                beatmapInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+                dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+            }
+            if (mod.contains(GameMod.MOD_NIGHTCORE)) {
+                bpm_max *= 1.5f;
+                bpm_min *= 1.5f;
+                length *= 2 / 3f;
+                beatmapInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+                dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+            }
+            if (mod.contains(GameMod.MOD_SPEEDUP)) {
+                bpm_max *= 1.25f;
+                bpm_min *= 1.25f;
+                length *= 4 / 5f;
+                beatmapInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+                dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+            }
+            if (mod.contains(GameMod.MOD_HALFTIME)) {
+                bpm_max *= 0.75f;
+                bpm_min *= 0.75f;
+                length *= 4 / 3f;
+                beatmapInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
+                dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
+            }
         }
-        if (mod.contains(GameMod.MOD_SPEEDUP)) {
-            bpm_max *= 1.25f;
-            bpm_min *= 1.25f;
-            length *= 4 / 5f;
-            beatmapInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-            dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-        }
-        if (mod.contains(GameMod.MOD_HALFTIME)) {
-            bpm_max *= 0.75f;
-            bpm_min *= 0.75f;
-            length *= 4 / 3f;
-            beatmapInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
-            dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
-        }
-        //added by hao1637
         if (mod.contains(GameMod.MOD_REALLYEASY)) {
-            if(mod.contains(GameMod.MOD_EASY)){
+            if (mod.contains(GameMod.MOD_EASY)){
                 ar *= 2f;
+                ar -= 0.5f;
             }
             ar -= 0.5f;
-            if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
+            if (ModMenu.getInstance().getChangeSpeed() != 1) {
+                ar -= ModMenu.getInstance().getSpeed() - 1.0f;
+            } else if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
                 ar -= 0.5f;
             } else if (mod.contains(GameMod.MOD_SPEEDUP)){
                 ar -= 0.25f;
@@ -948,8 +966,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         od = Math.min(10.f, od);
         cs = Math.min(15.f, cs);
         hp = Math.min(10.f, hp);
-
-        if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)) {
+        if (ModMenu.getInstance().getChangeSpeed() != 1){
+            float speed = ModMenu.getInstance().getSpeed();
+            ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) / speed), 2);
+            od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) / speed), 2);
+        } else if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)) {
             ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 2 / 3), 2);
             od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 2 / 3), 2);
         } else if (mod.contains(GameMod.MOD_HALFTIME)) {
@@ -958,6 +979,16 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         } else if (mod.contains(GameMod.MOD_SPEEDUP)) {
             ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 4 / 5), 2);
             od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 4 / 5), 2);
+        }
+        if (ModMenu.getInstance().isEnableForceAR()){
+            float oriAr = ar;
+            ar = ModMenu.getInstance().getForceAR();
+            if (ar > oriAr){
+                dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+            }
+            else if (ar < oriAr){
+                dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
+            }
         }
         dimensionStringBuilder.append("AR: ").append(GameHelper.Round(ar, 2)).append(" ")
                 .append("OD: ").append(GameHelper.Round(od, 2)).append(" ")

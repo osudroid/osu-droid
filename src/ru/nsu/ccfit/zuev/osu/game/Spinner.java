@@ -269,13 +269,13 @@ public class Spinner extends GameObject {
         if (autoPlay) {
             dfill = 5 * 4 * dt;
             circle.setRotation((rotations + dfill / 4f) * 360);
-            //TODO:auto时，FL光圈绕中心旋转
-            //if (GameHelper.isFlashLight()) {
-            //    float angle = (float)((rotations + dfill / 4f) * 360);
-            //    float pX = Constants.MAP_WIDTH / 2 + (float)Math.sin(angle);
-            //    float pY = Constants.MAP_HEIGHT / 2 + (float)Math.cos(angle);
-            //    listener.setFlashLightsPosition(pX, pY);
-            //}
+            //auto时，FL光圈绕中心旋转
+            if (GameHelper.isFlashLight()) {
+               float angle = (rotations + dfill / 4f) * 360;
+               float pX = center.x + 50 * (float)Math.sin(angle);
+               float pY = center.y + 50 * (float)Math.cos(angle);
+               listener.setFlashLightsPosition(pX, pY);
+            }
         }
         rotations += dfill / 4f;
         float percentfill = (Math.abs(rotations) + fullrotations)

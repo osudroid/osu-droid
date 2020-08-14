@@ -32,6 +32,10 @@ public class ModMenu implements IModSwitcher {
     private ChangeableText multiplierText;
     private TrackInfo selectedTrack;
     private Map<GameMod, ModButton> modButtons = new TreeMap<GameMod, ModButton>();
+    private float changeSpeed = 1.0f;
+    private float forceAR = 9.0f;
+    private boolean enableForceAR = false;
+    private boolean enableNCWhenSpeedChange = false;
 
     private ModMenu() {
         mod = EnumSet.noneOf(GameMod.class);
@@ -116,16 +120,17 @@ public class ModMenu implements IModSwitcher {
         addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-nightcore", GameMod.MOD_NIGHTCORE);
         addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hidden", GameMod.MOD_HIDDEN);
         addButton(offset + offsetGrowth * 4, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-flashlight", GameMod.MOD_FLASHLIGHT);
-        addButton(offset + offsetGrowth * 5, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-smallcircle", GameMod.MOD_SMALLCIRCLE);
-        addButton(offset + offsetGrowth * 6, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-speedup", GameMod.MOD_SPEEDUP);
+        addButton(offset + offsetGrowth * 5, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-suddendeath", GameMod.MOD_SUDDENDEATH);
+        addButton(offset + offsetGrowth * 6, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-perfect", GameMod.MOD_PERFECT);
+        //addButton(offset + offsetGrowth * 6, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-speedup", GameMod.MOD_SPEEDUP);
 
         //line 3
         addButton(offset + offsetGrowth * 0, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax", GameMod.MOD_RELAX);
         addButton(offset + offsetGrowth * 1, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax2", GameMod.MOD_AUTOPILOT);
-        addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-suddendeath", GameMod.MOD_SUDDENDEATH);
-        addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-perfect", GameMod.MOD_PERFECT);
-        addButton(offset + offsetGrowth * 4, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-autoplay", GameMod.MOD_AUTO);
-        addButton(offset + offsetGrowth * 5, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-precise", GameMod.MOD_PRECISE);
+        addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-autoplay", GameMod.MOD_AUTO);
+        addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-scorev2", GameMod.MOD_SCOREV2);
+        addButton(offset + offsetGrowth * 4, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-precise", GameMod.MOD_PRECISE);
+        addButton(offset + offsetGrowth * 5, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-smallcircle", GameMod.MOD_SMALLCIRCLE);
 
 
         final TextButton resetText = new TextButton(ResourceManager
@@ -235,6 +240,9 @@ public class ModMenu implements IModSwitcher {
         if (mod.contains(GameMod.MOD_REALLYEASY)) {
             mult *= 0.4f;
         }
+        if (changeSpeed != 1.0f){
+            mult *= getSpeedChangeScoreMultiplier();
+        }
 
         multiplierText.setText(StringTable.format(R.string.menu_mod_multiplier,
                 mult));
@@ -329,5 +337,76 @@ public class ModMenu implements IModSwitcher {
         if (selectedTrack != null) {
             changeMultiplierText();
         }
+    }
+
+    public float getSpeed(){
+        float speed = changeSpeed;
+        if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
+            speed *= 1.5f;
+        }
+        if (mod.contains(GameMod.MOD_SPEEDUP)){
+            speed *= 1.25f;
+        }
+        if (mod.contains(GameMod.MOD_HALFTIME)){
+            speed *= 0.75f;
+        }
+        return speed;
+    }
+
+    public float getChangeSpeed(){
+        return changeSpeed;
+    }
+
+    public void setChangeSpeed(float speed){
+        changeSpeed = speed;
+    }
+
+    public float getForceAR(){
+        return forceAR;
+    }
+
+    public void setForceAR(float ar){
+        forceAR = ar;
+    }
+
+    public boolean isEnableForceAR(){
+        return enableForceAR;
+    }
+
+    public void setEnableForceAR(boolean t){
+        enableForceAR = t;
+    }
+
+    public boolean isEnableNCWhenSpeedChange(){
+        return enableNCWhenSpeedChange;
+    }
+
+    public void setEnableNCWhenSpeedChange(boolean t){
+        enableNCWhenSpeedChange = t;
+    }
+
+    public void updateMultiplierText(){
+        changeMultiplierText();
+    }
+
+    private float getSpeedChangeScoreMultiplier(){
+        float multi = getSpeed();
+        if (multi > 1){
+            multi = 1.0f + (multi - 1.0f) * 0.24f;
+        } else if (multi < 1){
+            multi = (float) Math.pow(0.3, (1.0 - multi) * 4);
+        } else if (multi == 1){
+            return 1f;
+        }
+        if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
+            multi /= 1.12f;
+        }
+        if (mod.contains(GameMod.MOD_SPEEDUP)){
+            multi /= 1.06f;
+        }
+        if (mod.contains(GameMod.MOD_HALFTIME)){
+            multi /= 0.3f;
+        }
+        return multi;
     }
 }

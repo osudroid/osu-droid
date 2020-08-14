@@ -96,9 +96,10 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     }
 
     public static String ConvertModString(String s) {
+        String[] strMod = s.split("\\|", 2);
         String result = "";
-        for (int i = 0; i < s.length(); i++) {
-            switch (s.charAt(i)) {
+        for (int i = 0; i < strMod[0].length(); i++) {
+            switch (strMod[0].charAt(i)) {
                 case 'a':
                     result += "Auto,";
                     break;
@@ -150,12 +151,33 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 case 'b':
                     result += "SU,";
                     break;
+                case 'v':
+                    result += "ScoreV2,";
+                    break;
             }
+        }
+        if (strMod.length > 1){
+            result += ConvertExtraModString(strMod[1]);
         }
         if (result.length() == 0) {
             return "None";
         }
         return result.substring(0, result.length() - 1);
+    }
+
+    private static String ConvertExtraModString(String s) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String str: s.split("\\|")){
+            if (str.startsWith("x") && str.length() == 5){
+                stringBuilder.append(str.substring(1) + "x,");
+                continue;
+            }
+            if (str.startsWith("AR")){
+                stringBuilder.append(str + ",");
+                continue;
+            }
+        }
+        return stringBuilder.toString();
     }
 
     public ScoreBoardItems[] getScoreBoardItems() {

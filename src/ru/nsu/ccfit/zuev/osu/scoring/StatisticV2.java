@@ -35,6 +35,15 @@ public class StatisticV2 implements Serializable {
     private String replayName = "";
     private int forcedScore = -1;
     private String mark = null;
+    private float changeSpeed = 1.0f;
+    private float forceAR = 9.0f;
+    private boolean enableForceAR = false;
+    private final int MAX_SCORE = 1000000;
+    private final float ACC_PORTION = 0.3f;
+    private final float COMBO_PORTION = 0.7f;
+    private int maxObjectsCount = 0;
+    private int maxHighestCombo = 0;
+    private int bonusScore = 0;
 
     public StatisticV2() {
         random = new Random();
@@ -155,6 +164,9 @@ public class StatisticV2 implements Serializable {
         if (mod.contains(GameMod.MOD_REALLYEASY)) {
             mult *= 0.4f;
         }
+        if (changeSpeed != 1.0f){
+            mult *= getSpeedChangeScoreMultiplier();
+        }
         return (int) (totalScore * mult);
     }
 
@@ -189,6 +201,9 @@ public class StatisticV2 implements Serializable {
         }
         if (mod.contains(GameMod.MOD_REALLYEASY)) {
             mult *= 0.4f;
+        }
+        if (changeSpeed != 1.0f){
+            mult *= getSpeedChangeScoreMultiplier();
         }
         return (int) (totalScore * mult);
     }
@@ -236,7 +251,6 @@ public class StatisticV2 implements Serializable {
                 if (k) {
                     hit100k++;
                 }
-
                 hit100++;
                 addScore(100, true);
                 realScore += 100;
@@ -279,17 +293,47 @@ public class StatisticV2 implements Serializable {
             scoreHash = random.nextInt(1313) | 3455;
             return;
         }
-        //如果分数溢出或分数满了
-        if (totalScore + (amount * currentCombo * diffModifier) / 25 + amount < 0 || totalScore == Integer.MAX_VALUE){
-            totalScore = Integer.MAX_VALUE;
-        }
-        else{
-            totalScore += amount;
-            if (combo) {
-                totalScore += (amount * currentCombo * diffModifier) / 25;
+        //如果使用scorev2
+        if (mod.contains(GameMod.MOD_SCOREV2)){
+            if (amount == 1000) {
+                bonusScore += amount;
+            }
+            float percentage = (float)(notes) / maxObjectsCount;
+            //get real maxcb
+            int maxcb = getMaxCombo();
+            if (currentCombo == maxcb)maxcb++;
+            //get real acc
+            float acc = 0;
+            if (possibleScore > 0){
+                switch (amount) {
+                    case 300:
+                        acc = (realScore + 300) / (float) possibleScore;
+                        break;
+                    case 100:
+                        acc = (realScore + 100) / (float) possibleScore;
+                        break;
+                    case 50:
+                        acc = (realScore + 50) / (float) possibleScore;
+                        break;
+                    default:
+                        acc = realScore / (float) possibleScore;
+                        break;
+                }
+            }
+            totalScore = (int)(MAX_SCORE * (ACC_PORTION * Math.pow(acc , 10) * percentage
+                    + COMBO_PORTION * maxcb / maxHighestCombo) + bonusScore);
+        } else{
+            //如果分数溢出或分数满了
+            if (totalScore + (amount * currentCombo * diffModifier) / 25 + amount < 0 || totalScore == Integer.MAX_VALUE){
+                totalScore = Integer.MAX_VALUE;
+            }
+            else{
+                totalScore += amount;
+                if (combo) {
+                    totalScore += (amount * currentCombo * diffModifier) / 25;
+                }
             }
         }
-        
         scoreHash = SecurityUtils.getHigh16Bits(totalScore);
     }
 
@@ -503,13 +547,19 @@ public class StatisticV2 implements Serializable {
         if (mod.contains(GameMod.MOD_SUDDENDEATH)) {
             s += "u";
         }
+        if (mod.contains(GameMod.MOD_SCOREV2)) {
+            s += "v";
+        }
+        s += "|";
+        s += getExtraModString();
         return s;
     }
 
     public void setModFromString(String s) {
+        String[] strMod = s.split("\\|", 2);
         mod = EnumSet.noneOf(GameMod.class);
-        for (int i = 0; i < s.length(); i++) {
-            switch (s.charAt(i)) {
+        for (int i = 0; i < strMod[0].length(); i++) {
+            switch (strMod[0].charAt(i)) {
                 case 'a':
                     mod.add(GameMod.MOD_AUTO);
                     break;
@@ -561,8 +611,13 @@ public class StatisticV2 implements Serializable {
                 case 'b':
                     mod.add(GameMod.MOD_SPEEDUP);
                     break;   
+                case 'v':
+                    mod.add(GameMod.MOD_SCOREV2);
+                    break;   
             }
         }
+        if (strMod.length > 1)
+            setExtraModFromString(strMod[1]);
     }
 
     public String getReplayName() {
@@ -623,5 +678,99 @@ public class StatisticV2 implements Serializable {
         builder.append(' ');
         builder.append(getPlayerName());
         return builder.toString();
+    }
+
+    public void setMaxObjectsCount(int count){
+        maxObjectsCount = count;
+    }
+    public void setMaxHighestCombo(int count){
+        maxHighestCombo = count;
+    }
+
+    public float getChangeSpeed(){
+        return changeSpeed;
+    }
+
+    public void setChangeSpeed(float speed){
+        changeSpeed = speed;
+    }
+
+    public float getForceAR(){
+        return forceAR;
+    }
+
+    public void setForceAR(float ar){
+        forceAR = ar;
+    }
+
+    public boolean isEnableForceAR(){
+        return enableForceAR;
+    }
+
+    public void setEnableForceAR(boolean t){
+        enableForceAR = t;
+    }
+    
+    public float getSpeed(){
+        float speed = changeSpeed;
+        if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
+            speed *= 1.5f;
+        }
+        if (mod.contains(GameMod.MOD_SPEEDUP)){
+            speed *= 1.25f;
+        }
+        if (mod.contains(GameMod.MOD_HALFTIME)){
+            speed *= 0.75f;
+        }
+        return speed;
+    }
+
+    private float getSpeedChangeScoreMultiplier(){
+        float multi = getSpeed();
+        if (multi > 1){
+            multi = 1.0f + (multi - 1.0f) * 0.24f;
+        } else if (multi < 1){
+            multi = (float) Math.pow(0.3, (1.0 - multi) * 4);
+        } else if (multi == 1){
+            return 1f;
+        }
+        if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
+            multi /= 1.12f;
+        }
+        if (mod.contains(GameMod.MOD_SPEEDUP)){
+            multi /= 1.06f;
+        }
+        if (mod.contains(GameMod.MOD_HALFTIME)){
+            multi /= 0.3f;
+        }
+        return multi;
+    }
+
+    private String getExtraModString() {
+        StringBuilder builder = new StringBuilder();
+        if (changeSpeed != 1){
+            builder.append(String.format("x%.2f|", changeSpeed));
+        }
+        if (enableForceAR){
+            builder.append(String.format("AR%.1f|", forceAR));
+        }
+        if (builder.length() > 0){
+            builder.delete(builder.length() - 1, builder.length());
+        }
+        return builder.toString();
+    }
+
+    private void setExtraModFromString(String s) {
+        for (String str: s.split("\\|")){
+            if (str.startsWith("x") && str.length() == 5){
+                changeSpeed = Float.parseFloat(str.substring(1));
+                continue;
+            }
+            if (str.startsWith("AR")){
+                enableForceAR = true;
+                forceAR = Float.parseFloat(str.substring(2));
+                continue;
+            }
+        }
     }
 }

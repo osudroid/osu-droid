@@ -82,6 +82,28 @@ public class BassAudioFunc {
         return channel != 0;
     }
 
+    public boolean preLoad(String filePath, float speed, boolean enableNC) {
+        if (speed == 1.0f) {
+            return preLoad(filePath, PlayMode.MODE_NONE);
+        }
+        Log.w("BassAudioFunc", "preLoad File: " + filePath);
+        BASS.BASS_CHANNELINFO fx = new BASS.BASS_CHANNELINFO();
+        doClear();
+        this.mode = PlayMode.MODE_SC;
+        channel = BASS.BASS_StreamCreateFile(filePath, 0, 0, BASS.BASS_STREAM_DECODE | BASS.BASS_STREAM_PRESCAN);
+        channel = BASS_FX.BASS_FX_TempoCreate(channel, BASS.BASS_STREAM_AUTOFREE);
+        // BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_NOBUFFER, 1);
+        if (enableNC) {
+            BASS.BASS_ChannelGetInfo(channel, fx);
+            BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, (int) (fx.freq * speed));
+            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, 0.0f);
+        }
+        else{
+            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, (speed - 1.0f) * 100);
+        }
+        return channel != 0;
+    }
+
     public boolean play() {
         if (channel != 0 && BASS.BASS_ChannelIsActive(channel) == BASS.BASS_ACTIVE_PAUSED) {
             return resume();

@@ -82,6 +82,19 @@ public class ScoringScene {
         String mapperStr = "Beatmap by " + trackInfo.getCreator();
         String playerStr = "Played by " + stat.getPlayerName() + " on " +
                 new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date(stat.getTime()));
+        if (stat.getChangeSpeed() != 1 || stat.isEnableForceAR()){
+            playerStr += " [";
+            if (stat.getChangeSpeed() != 1){
+                playerStr += String.format("%.2fx,", stat.getChangeSpeed());
+            }
+            if (stat.isEnableForceAR()){
+                playerStr += String.format("AR%.1f,", stat.getForceAR());
+            }
+            if (playerStr.endsWith(",")){
+                playerStr = playerStr.substring(0, playerStr.length() - 1);
+            }
+            playerStr += "]";
+        }
         Debug.i("playedtime " + stat.getTime());
         final Text beatmapInfo = new Text(Utils.toRes(4), Utils.toRes(2),
                 ResourceManager.getInstance().getFont("font"), infoStr);
@@ -281,7 +294,13 @@ public class ScoringScene {
                     SongMenu.stopMusicStatic();
                     engine.setScene(menu.getScene());
                     Replay.oldMod = ModMenu.getInstance().getMod();
+                    Replay.oldChangeSpeed = ModMenu.getInstance().getChangeSpeed();
+                    Replay.oldForceAR = ModMenu.getInstance().getForceAR();
+                    Replay.oldEnableForceAR = ModMenu.getInstance().isEnableForceAR();
                     ModMenu.getInstance().setMod(stat.getMod());
+                    ModMenu.getInstance().setChangeSpeed(stat.getChangeSpeed());
+                    ModMenu.getInstance().setForceAR(stat.getForceAR());
+                    ModMenu.getInstance().setEnableForceAR(stat.isEnableForceAR());
 //					Replay.mod = stat.getMod();
                     game.startGame(trackToReplay, replay);
                     scene = null;
@@ -318,6 +337,12 @@ public class ScoringScene {
 
         float modX = mark.getX() - 30;
         final float modY = mark.getY() + mark.getHeight() * 2 / 3;
+        if (stat.getMod().contains(GameMod.MOD_SCOREV2)) {
+            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
+                    .getInstance().getTexture("selection-mod-scorev2"));
+            modX -= Utils.toRes(30);
+            scene.attachChild(modSprite);
+        }
         if (stat.getMod().contains(GameMod.MOD_HARDROCK)) {
             final Sprite modSprite = new Sprite(modX, modY, ResourceManager
                     .getInstance().getTexture("selection-mod-hardrock"));

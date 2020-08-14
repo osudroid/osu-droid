@@ -138,26 +138,103 @@
                         android:layout_marginLeft="5dp"
                         android:layout_weight="1"
                         android:text="@string/opt_show_scoreboard_title" />
+						
+                    <CheckBox
+                        android:id="@+id/enableNCwhenSpeedChange"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_weight="1"
+                        android:text="@string/opt_enablenc_whenspeedchange_title" />
                 </LinearLayout>
 
-                <LinearLayout
+                <TableLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:gravity="center"
-                    android:orientation="horizontal">
+                    android:gravity="center">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/opt_bgbrightness_title" />
+					<TableRow
+						android:layout_width="match_parent"
+						android:layout_height="match_parent"
+						android:layout_weight="1">
 
-                    <SeekBar
-                        android:id="@+id/backgroundBrightnessBar"
-                        android:layout_width="350dp"
-                        android:layout_height="wrap_content"
-                        android:max="100" />
-                </LinearLayout>
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="@string/opt_bgbrightness_title" />
+
+						<SeekBar
+							android:id="@+id/backgroundBrightnessBar"
+							android:layout_width="350dp"
+							android:layout_height="wrap_content"
+							android:max="100" />
+
+						<TextView
+							android:id="@+id/bgBrightnessText"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="25%" />
+					</TableRow>
+
+					<TableRow
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_weight="1">
+
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="@string/opt_changespeed_title" />
+
+						<SeekBar
+							android:id="@+id/changeSpeedBar"
+							android:layout_width="350dp"
+							android:layout_height="wrap_content"
+							android:max="30" />
+
+						<TextView
+							android:id="@+id/changeSpeedText"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="1.00x" />
+
+						<CheckBox
+							android:id="@+id/enableSpeedChange"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="@string/opt_enablespeedchange_title" />
+					</TableRow>
+
+					<TableRow
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_weight="1">
+
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="@string/opt_forcear_title" />
+
+						<SeekBar
+							android:id="@+id/forceARBar"
+							android:layout_width="350dp"
+							android:layout_height="wrap_content"
+							android:max="125" />
+
+						<TextView
+							android:id="@+id/forceARText"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="AR9.0" />
+
+						<CheckBox
+							android:id="@+id/enableForceAR"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="@string/opt_enableforcear_title" />
+					</TableRow>
+                </TableLayout >
 
             </LinearLayout>
 
