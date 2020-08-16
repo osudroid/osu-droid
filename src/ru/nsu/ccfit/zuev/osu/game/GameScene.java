@@ -758,7 +758,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final String countdownPar = beatmapData.getData("General", "Countdown");
         if (Config.isCorovans() && !countdownPar.equals("")) {
-            float cdSpeed = 0;
+            float cdSpeed;
             switch (countdownPar) {
                 case "1":
                     cdSpeed = 1;
@@ -768,6 +768,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     break;
                 case "3":
                     cdSpeed = 0.5f;
+                    break;
+                default:
+                    cdSpeed = 0;
                     break;
             }
             skipTime -= cdSpeed * Countdown.COUNTDOWN_LENGTH;
