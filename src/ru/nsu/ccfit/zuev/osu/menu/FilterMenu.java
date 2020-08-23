@@ -22,8 +22,10 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.InputManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.TextButton;
+import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu.SortOrder;
 import ru.nsu.ccfit.zuev.osuplus.R;
+import sun.util.resources.cldr.CalendarData;
 
 public class FilterMenu implements IUpdateHandler, IFilterMenu {
     private static Context configContext = null;
@@ -288,7 +290,6 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
                 favs.getY() + favs.getHeight() + Utils.toRes(20));
         scene.attachChild(folder);
         scene.registerTouchArea(folder);
-
 
         scene.registerUpdateHandler(this);
         scene.setTouchAreaBindingEnabled(true);

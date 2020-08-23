@@ -81,6 +81,7 @@ public class Config {
 
     private static boolean fixFrameOffset = true;
     private static boolean removeSliderLock = false;
+    private static boolean calculateSliderPathInGameStart = false;
 
     private static float cursorSize = 1;
 
@@ -215,6 +216,7 @@ public class Config {
 
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", true);
+        calculateSliderPathInGameStart = prefs.getBoolean("calculateSliderPathInGameStart", true);
         //Init
         onlineDeviceID = prefs.getString("installID", null);
         if (onlineDeviceID == null) {
@@ -301,6 +303,10 @@ public class Config {
 
     public static boolean isRemoveSliderLock() {
         return removeSliderLock;
+    }
+
+    public static boolean isCalculateSliderPathInGameStart() {
+        return calculateSliderPathInGameStart;
     }
 
     public static boolean isEnableExtension() {

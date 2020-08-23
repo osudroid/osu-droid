@@ -20,6 +20,7 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.game.mods.IModSwitcher;
 import ru.nsu.ccfit.zuev.osu.game.mods.ModButton;
+import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.TextButton;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -36,6 +37,7 @@ public class ModMenu implements IModSwitcher {
     private float forceAR = 9.0f;
     private boolean enableForceAR = false;
     private boolean enableNCWhenSpeedChange = false;
+    private boolean calculateAble = true;
 
     private ModMenu() {
         mod = EnumSet.noneOf(GameMod.class);
@@ -163,6 +165,18 @@ public class ModMenu implements IModSwitcher {
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionUp()) {
+                    (new Thread() {
+                        public void run() {
+                            DifficultyReCalculator rec = new DifficultyReCalculator();
+                            float newstar = rec.reCalculatorStar(
+                                GlobalManager.getInstance().getSongMenu().getSelectedTrack(), 
+                                getSpeed(), 
+                                GlobalManager.getInstance().getSongMenu().getCS());
+                            if (newstar != 0f){
+                                GlobalManager.getInstance().getSongMenu().setStarsDisplay(newstar);
+                            }
+                        }
+                    }).start();
                     hide();
                     return true;
                 }
@@ -179,6 +193,43 @@ public class ModMenu implements IModSwitcher {
 
         scene.attachChild(back);
         scene.registerTouchArea(back);
+
+        //重新计算难度的按钮
+        /*
+        final TextButton starReCalculateText = new TextButton(
+            ResourceManager.getInstance().getFont("CaptionFont"), 
+            StringTable.get(R.string.menu_reCalculateStar)) {
+
+            @Override
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
+                                        final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+                if (pSceneTouchEvent.isActionUp()) {
+                    if (calculateAble) {
+                        //starReCalculateText.set(StringTable.get(R.string.menu_reCalculateStaring));
+                        setColor(1, 1, 1);
+                        calculateAble = false;
+                        (new Thread() {
+                            public void run() {
+                                float newstar = DifficultyReCalculator.reCalculatorStar(
+                                    GlobalManager.getInstance().getSongMenu().getSelectedTrack(), 
+                                    ModMenu.getInstance().getSpeed(), 
+                                    GlobalManager.getInstance().getSongMenu().getCS());
+                                GlobalManager.getInstance().getSongMenu().setStarsDisplay(newstar);
+                                //setText(StringTable.get(R.string.menu_reCalculateStared));
+                            }
+                        }).start();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        };
+        starReCalculateText.setScale(1.2f);
+        starReCalculateText.setWidth(resetText.getWidth());
+        starReCalculateText.setHeight(resetText.getHeight());
+        starReCalculateText.setPosition(Config.getRES_WIDTH() - starReCalculateText.getWidth() - 60, resetText.getY() - starReCalculateText.getHeight() - 30);
+        scene.attachChild(starReCalculateText);
+        scene.registerTouchArea(starReCalculateText);*/
 
         scene.setTouchAreaBindingEnabled(true);
     }
@@ -200,6 +251,7 @@ public class ModMenu implements IModSwitcher {
 
     private void changeMultiplierText() {
         GlobalManager.getInstance().getSongMenu().changeDimensionInfo(selectedTrack);
+        //calculateAble = true;
         float mult = 1;
         if (mod.contains(GameMod.MOD_AUTO)) {
             mult *= 0;
@@ -408,5 +460,14 @@ public class ModMenu implements IModSwitcher {
             multi /= 0.3f;
         }
         return multi;
+    }
+
+    public boolean shouldReCalculate(){
+        if (getSpeed() != 1) return true;
+        if (mod.contains(GameMod.MOD_EASY)) return true;
+        if (mod.contains(GameMod.MOD_REALLYEASY)) return true;
+        if (mod.contains(GameMod.MOD_HARDROCK)) return true;
+        if (mod.contains(GameMod.MOD_SMALLCIRCLE)) return true;
+        return false;
     }
 }

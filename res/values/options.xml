@@ -288,5 +288,8 @@
     <string name="opt_enablenc_whenspeedchange_title">Enable NC in speed modify</string>
     <string name="opt_enablespeedchange_title">Enable speed modify</string>
     <string name="opt_enableforcear_title">Enable force AR</string>
+	
+	<string name="opt_calculate_slider_path_in_game_start_title">Calculate sliderpaths in game start</string>
+	<string name="opt_calculate_slider_path_in_game_start_summary">Increase load time. Increase fps when play complex sliders.(such as some aspire map\'s slider)</string>
 
 </resources>

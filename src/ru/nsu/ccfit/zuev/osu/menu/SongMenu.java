@@ -56,6 +56,7 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
+import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
@@ -1014,6 +1015,21 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         mapper.setText(mapperStr);
         beatmapInfo2.setText(binfoStr2);
         changeDimensionInfo(track);
+        //if (ModMenu.getInstance().shouldReCalculate()){
+            (new Thread() {
+                public void run() {
+                    DifficultyReCalculator diffReCalulator = new DifficultyReCalculator();
+                    float newstar = diffReCalulator.reCalculatorStar(
+                        getSelectedTrack(), 
+                        ModMenu.getInstance().getSpeed(), 
+                        getCS());
+                    if (newstar != 0f){
+                        setStarsDisplay(newstar);
+                    }
+                    diffReCalulator = null;
+                }
+            }).start();
+        //}
     }
 
     public void selectTrack(final TrackInfo track, boolean reloadBG) {
@@ -1407,6 +1423,34 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     }
                     break;
             }
+        }
+    }
+
+    public float getCS(){
+        float cs = getSelectedTrack().getCircleSize();
+        EnumSet<GameMod> mod = ModMenu.getInstance().getMod();
+        if (mod.contains(GameMod.MOD_EASY)) {
+            cs -= 1f;
+        }
+        if (mod.contains(GameMod.MOD_HARDROCK)) {
+            cs += 1f;
+        }
+        if (mod.contains(GameMod.MOD_SMALLCIRCLE)) {
+            cs += 4f;
+        }
+        if (mod.contains(GameMod.MOD_REALLYEASY)) {
+            cs -= 1f;
+        }
+        return cs;
+    }
+
+    public void setStarsDisplay(float star){
+        String str = dimensionInfo.getText();
+        String[] strs = str.split("Stars: ");
+        if (strs.length == 2){
+            final StringBuilder dimensionStringBuilder = new StringBuilder();
+            dimensionStringBuilder.append(strs[0]).append("Stars: ").append(star);
+            dimensionInfo.setText(dimensionStringBuilder.toString());
         }
     }
 }

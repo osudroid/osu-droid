@@ -68,6 +68,7 @@ import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
 import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
+import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.game.cursor.Cursor;
 import ru.nsu.ccfit.zuev.osu.game.cursor.CursorSprite;
 import ru.nsu.ccfit.zuev.osu.game.cursor.FlashLightSprite;
@@ -167,6 +168,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Sprite[] ScoreBoardSprite;
     private int failcount = 0;
     private float lastObjectHitTime = 0;
+    private SliderPath[] sliderPaths = null;
+    private int sliderIndex = 0;
 
     private StoryboardSprite storyboardSprite;
 
@@ -632,6 +635,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }*/
 
         lastTrack = track;
+        if (Config.isCalculateSliderPathInGameStart()){
+            stackNotes();
+            calculateAllSliderPaths();
+        }
         paused = false;
         gameStarted = false;
 
@@ -1597,7 +1604,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             // Stack notes
-            if (objects.isEmpty() == false && (objDefine & 1) > 0) {
+            // If Config.isCalculateSliderPathInGameStart(), do this in stackNotes()
+            if (Config.isCalculateSliderPathInGameStart() == false && 
+                objects.isEmpty() == false && (objDefine & 1) > 0) {
                 if (objects.peek().getTime() - data.getTime() < 2f * GameHelper.getStackLatient()
                         && Utils.squaredDistance(pos, objects.peek().getPos()) < scale) {
                     objects.peek().setPosOffset(
@@ -1716,13 +1725,25 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (params.length > 9) {
                     tempSound = params[9];
                 }
-
-                slider.init(this, mgScene, pos, data.getPosOffset(), data.getTime() - secPassed,
+                if (Config.isCalculateSliderPathInGameStart()){
+                    SliderPath sliderPath = getSliderPath(sliderIndex);
+                    slider.init(this, mgScene, pos, data.getPosOffset(), data.getTime() - secPassed,
                         col.r(), col.g(), col.b(), scale, currentComboNum,
                         Integer.parseInt(params[4]),
                         Integer.parseInt(params[6]),
                         Float.parseFloat(params[7]), params[5],
-                        currentTimingPoint, soundspec, tempSound, isFirst, Double.parseDouble(params[2]));
+                        currentTimingPoint, soundspec, tempSound, isFirst, Double.parseDouble(params[2]),
+                        sliderPath);
+                    sliderIndex++;
+                }
+                else{
+                    slider.init(this, mgScene, pos, data.getPosOffset(), data.getTime() - secPassed,
+                    col.r(), col.g(), col.b(), scale, currentComboNum,
+                    Integer.parseInt(params[4]),
+                    Integer.parseInt(params[6]),
+                    Float.parseFloat(params[7]), params[5],
+                    currentTimingPoint, soundspec, tempSound, isFirst, Double.parseDouble(params[2]));
+                }
                 slider.setEndsCombo(objects.isEmpty()
                         || objects.peek().isNewCombo());
                 addObject(slider);
@@ -2631,4 +2652,72 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         return false;
     }
+    
+    private void stackNotes(){
+        // Stack notes
+        int i = 0;
+        for (GameObjectData data : objects){
+            final PointF pos = data.getPos();
+            final String[] params = data.getData();
+            final int objDefine = Integer.parseInt(params[3]);
+            if (objects.isEmpty() == false && (objDefine & 1) > 0 && i + 1 < objects.size()) {
+                if (objects.get(i + 1).getTime() - data.getTime() < 2f * GameHelper.getStackLatient()
+                        && Utils.squaredDistance(pos, objects.get(i + 1).getPos()) < scale) {
+                    objects.get(i + 1).setPosOffset(
+                            data.getPosOffset() + Utils.toRes(4) * scale);
+                }
+            }
+            i++;
+        }
+    }
+
+    private void calculateAllSliderPaths(){
+        if (objects.isEmpty()){
+            return;
+        }
+        else {
+            if (lastTrack.getSliderCount() <= 0){
+                return;
+            }
+            sliderPaths = new SliderPath[lastTrack.getSliderCount()];
+            for (SliderPath path : sliderPaths){
+                path = null;
+            }
+            int i = 0;
+            sliderIndex = 0;
+            for (GameObjectData data : objects){
+                final String[] params = data.getData();
+                final int objDefine = Integer.parseInt(params[3]);
+                //is slider
+                if ((objDefine & 2) > 0) {
+                    final PointF pos = data.getPos();
+                    final float length = Float.parseFloat(params[7]);
+                    final float offset = data.getPosOffset();
+                    pos.x += data.getPosOffset();
+                    pos.y += data.getPosOffset();
+                    if (length < 0){
+                        sliderPaths[sliderIndex] = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
+                        params[5].split("[|]"), 0, offset);
+                    }
+                    else{
+                        sliderPaths[sliderIndex] = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
+                        params[5].split("[|]"), length, offset);
+                    }
+                    sliderIndex++;
+                }
+                i++;
+            }
+            sliderIndex = 0;
+        }
+    }
+
+    private SliderPath getSliderPath(int index){
+        if (sliderPaths != null && index < sliderPaths.length && index >= 0){
+            return sliderPaths[index];
+        }
+        else {
+            return null;
+        }
+    }
+    
 }

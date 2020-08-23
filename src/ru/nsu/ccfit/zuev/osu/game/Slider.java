@@ -111,6 +111,15 @@ public class Slider extends GameObject {
                      final float b, final float scale, int num, final int sound, final int repeats,
                      final float length, final String data, final TimingPoint timing,
                      final String customSound, final String tempSound, final boolean isFirstNote, final double realTime) {
+        init(listener,scene,pos,offset,time,r,g,b,scale,num,sound,repeats,length,data,timing,customSound,tempSound,isFirstNote,realTime,null);
+    }
+
+    public void init(final GameObjectListener listener, final Scene scene,
+                     final PointF pos, final float offset, final float time, final float r, final float g,
+                     final float b, final float scale, int num, final int sound, final int repeats,
+                     final float length, final String data, final TimingPoint timing,
+                     final String customSound, final String tempSound, final boolean isFirstNote, final double realTime,
+                     SliderPath sliderPath) {
         this.listener = listener;
         this.scene = scene;
         this.timing = timing;
@@ -119,19 +128,23 @@ public class Slider extends GameObject {
         this.length = length;
         passedTime = -time;
         preTime = time;
-        //if (Config.isUseSuperSlider()) {
-        //	path = SupportSliderPath.parseDroidLinePath(pos, data, length);
-        //} else {
-            //fixed negative length silder bug
-            if(length < 0){
-                path = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
-                data.split("[|]"), 0, offset);
-            }
-            else{
-                path = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
-                data.split("[|]"), length, offset);
-            }
-        //}
+        if (sliderPath != null){
+            path = sliderPath;
+        } else{
+            //if (Config.isUseSuperSlider()) {
+            //	path = SupportSliderPath.parseDroidLinePath(pos, data, length);
+            //} else {
+                //fixed negative length silder bug
+                if (length < 0){
+                    path = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
+                    data.split("[|]"), 0, offset);
+                }
+                else {
+                    path = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
+                    data.split("[|]"), length, offset);
+                }
+            //}
+        }
 
         num += 1;
         if (SkinJson.get().isLimitComboTextLength()) {
