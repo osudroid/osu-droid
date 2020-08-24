@@ -82,6 +82,7 @@ public class Config {
     private static boolean fixFrameOffset = true;
     private static boolean removeSliderLock = false;
     private static boolean calculateSliderPathInGameStart = false;
+    private static boolean displayScorePP = false;
 
     private static float cursorSize = 1;
 
@@ -215,8 +216,9 @@ public class Config {
         enablePP = false;//prefs.getBoolean("enablePP",true);
 
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
-        removeSliderLock = prefs.getBoolean("removeSliderLock", true);
-        calculateSliderPathInGameStart = prefs.getBoolean("calculateSliderPathInGameStart", true);
+        removeSliderLock = prefs.getBoolean("removeSliderLock", false);
+        calculateSliderPathInGameStart = prefs.getBoolean("calculateSliderPathInGameStart", false);
+        displayScorePP = prefs.getBoolean("displayScorePP", false);
         //Init
         onlineDeviceID = prefs.getString("installID", null);
         if (onlineDeviceID == null) {
@@ -307,6 +309,10 @@ public class Config {
 
     public static boolean isCalculateSliderPathInGameStart() {
         return calculateSliderPathInGameStart;
+    }
+
+    public static boolean isDisplayScorePP() {
+        return displayScorePP;
     }
 
     public static boolean isEnableExtension() {

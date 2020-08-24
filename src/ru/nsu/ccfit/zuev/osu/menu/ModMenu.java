@@ -168,10 +168,9 @@ public class ModMenu implements IModSwitcher {
                     (new Thread() {
                         public void run() {
                             DifficultyReCalculator rec = new DifficultyReCalculator();
-                            float newstar = rec.reCalculatorStar(
+                            float newstar = rec.reCalculateStar(
                                 GlobalManager.getInstance().getSongMenu().getSelectedTrack(), 
-                                getSpeed(), 
-                                GlobalManager.getInstance().getSongMenu().getCS());
+                                getSpeed(), rec.getCS(GlobalManager.getInstance().getSongMenu().getSelectedTrack()));
                             if (newstar != 0f){
                                 GlobalManager.getInstance().getSongMenu().setStarsDisplay(newstar);
                             }
@@ -193,43 +192,6 @@ public class ModMenu implements IModSwitcher {
 
         scene.attachChild(back);
         scene.registerTouchArea(back);
-
-        //重新计算难度的按钮
-        /*
-        final TextButton starReCalculateText = new TextButton(
-            ResourceManager.getInstance().getFont("CaptionFont"), 
-            StringTable.get(R.string.menu_reCalculateStar)) {
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                        final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionUp()) {
-                    if (calculateAble) {
-                        //starReCalculateText.set(StringTable.get(R.string.menu_reCalculateStaring));
-                        setColor(1, 1, 1);
-                        calculateAble = false;
-                        (new Thread() {
-                            public void run() {
-                                float newstar = DifficultyReCalculator.reCalculatorStar(
-                                    GlobalManager.getInstance().getSongMenu().getSelectedTrack(), 
-                                    ModMenu.getInstance().getSpeed(), 
-                                    GlobalManager.getInstance().getSongMenu().getCS());
-                                GlobalManager.getInstance().getSongMenu().setStarsDisplay(newstar);
-                                //setText(StringTable.get(R.string.menu_reCalculateStared));
-                            }
-                        }).start();
-                    }
-                    return true;
-                }
-                return false;
-            }
-        };
-        starReCalculateText.setScale(1.2f);
-        starReCalculateText.setWidth(resetText.getWidth());
-        starReCalculateText.setHeight(resetText.getHeight());
-        starReCalculateText.setPosition(Config.getRES_WIDTH() - starReCalculateText.getWidth() - 60, resetText.getY() - starReCalculateText.getHeight() - 30);
-        scene.attachChild(starReCalculateText);
-        scene.registerTouchArea(starReCalculateText);*/
 
         scene.setTouchAreaBindingEnabled(true);
     }

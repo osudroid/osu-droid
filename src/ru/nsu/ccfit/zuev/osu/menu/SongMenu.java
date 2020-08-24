@@ -1019,10 +1019,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             (new Thread() {
                 public void run() {
                     DifficultyReCalculator diffReCalulator = new DifficultyReCalculator();
-                    float newstar = diffReCalulator.reCalculatorStar(
-                        getSelectedTrack(), 
+                    float newstar = diffReCalulator.reCalculateStar(
+                        selectedTrack, 
                         ModMenu.getInstance().getSpeed(), 
-                        getCS());
+                        diffReCalulator.getCS(selectedTrack));
                     if (newstar != 0f){
                         setStarsDisplay(newstar);
                     }
@@ -1424,24 +1424,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     break;
             }
         }
-    }
-
-    public float getCS(){
-        float cs = getSelectedTrack().getCircleSize();
-        EnumSet<GameMod> mod = ModMenu.getInstance().getMod();
-        if (mod.contains(GameMod.MOD_EASY)) {
-            cs -= 1f;
-        }
-        if (mod.contains(GameMod.MOD_HARDROCK)) {
-            cs += 1f;
-        }
-        if (mod.contains(GameMod.MOD_SMALLCIRCLE)) {
-            cs += 4f;
-        }
-        if (mod.contains(GameMod.MOD_REALLYEASY)) {
-            cs -= 1f;
-        }
-        return cs;
     }
 
     public void setStarsDisplay(float star){

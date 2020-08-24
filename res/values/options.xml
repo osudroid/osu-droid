@@ -292,4 +292,6 @@
 	<string name="opt_calculate_slider_path_in_game_start_title">Calculate sliderpaths in game start</string>
 	<string name="opt_calculate_slider_path_in_game_start_summary">Increase load time. Increase fps when play complex sliders.(such as some aspire map\'s slider)</string>
 
+    <string name="opt_display_score_pp_title">Display PP in score</string>
+    <string name="opt_display_score_pp_summary">PP is shit(</string>
 </resources>

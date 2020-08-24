@@ -158,6 +158,8 @@
             android:summary="@string/opt_remove_sliderlock_spinnerlock_summary" android:defaultValue="false"/>
         <CheckBoxPreference android:key="calculateSliderPathInGameStart" android:title="@string/opt_calculate_slider_path_in_game_start_title"
             android:summary="@string/opt_calculate_slider_path_in_game_start_summary" android:defaultValue="false"/>
+        <CheckBoxPreference android:key="displayScorePP" android:title="@string/opt_display_score_pp_title"
+            android:summary="@string/opt_display_score_pp_summary" android:defaultValue="false"/>
         <!--CheckBoxPreference android:key="enableExtension" android:title="@string/opt_enable_extension_title"
                             android:defaultValue="false"/>
         <Preference android:key="downloadExtension" android:title="@string/opt_download_extension_title" /-->
