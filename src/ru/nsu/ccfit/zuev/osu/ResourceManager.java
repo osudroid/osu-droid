@@ -145,7 +145,9 @@ public class ResourceManager {
                     if (f.getName().length() < 5) continue;
                     final String filename = f.getName().substring(0, f.getName().length() - 4);
                     availableFiles.put(filename, f);
-                    availableFiles.put(filename + "-0", f);
+                    //if ((filename.startsWith("hit0") || filename.startsWith("hit50") || filename.startsWith("hit100") || filename.startsWith("hit300"))){
+                    //    availableFiles.put(filename + "-0", f);
+                    //}
 
                     if (filename.equals("hitcircle")) {
                         if (!availableFiles.containsKey("sliderstartcircle")) {
@@ -222,6 +224,50 @@ public class ResourceManager {
                     loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
                 else unloadTexture(textureName);
             }
+            //
+            for (int i = 0; i < 60; i++) {
+                String textureName = "hit0-" + i;
+                if (availableFiles.containsKey(textureName))
+                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
+                else unloadTexture(textureName);
+            }
+            for (int i = 0; i < 60; i++) {
+                String textureName = "hit50-" + i;
+                if (availableFiles.containsKey(textureName))
+                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
+                else unloadTexture(textureName);
+            }
+            for (int i = 0; i < 60; i++) {
+                String textureName = "hit100-" + i;
+                if (availableFiles.containsKey(textureName))
+                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
+                else unloadTexture(textureName);
+            }
+            for (int i = 0; i < 60; i++) {
+                String textureName = "hit100k-" + i;
+                if (availableFiles.containsKey(textureName))
+                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
+                else unloadTexture(textureName);
+            }
+            for (int i = 0; i < 60; i++) {
+                String textureName = "hit300-" + i;
+                if (availableFiles.containsKey(textureName))
+                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
+                else unloadTexture(textureName);
+            }
+            for (int i = 0; i < 60; i++) {
+                String textureName = "hit300k-" + i;
+                if (availableFiles.containsKey(textureName))
+                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
+                else unloadTexture(textureName);
+            }
+            for (int i = 0; i < 60; i++) {
+                String textureName = "hit300g-" + i;
+                if (availableFiles.containsKey(textureName))
+                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
+                else unloadTexture(textureName);
+            }
+            //
         } catch (final IOException e) {
             Debug.e("Resources: " + e.getMessage(), e);
         }
