@@ -326,8 +326,7 @@ public class MainActivity extends BaseGameActivity implements
         }
         String toastMessage = String.format(StringTable.get(R.string.message_low_storage_space), df.format(availableMemory / minMem));
         if(availableMemory < 0.5*minMem) { //I set 512MiB as a minimum
-            Toast.makeText(this, toastMessage
-                    , Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
         }
         Debug.i("Free Space: " + df.format(availableMemory / minMem));
     }
