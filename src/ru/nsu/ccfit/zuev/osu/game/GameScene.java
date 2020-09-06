@@ -849,7 +849,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 - Utils.toRes(95), "0000x", 1.5f);
         comboText.changeText(new StringBuilder("0****"));
         scoreText = new GameScoreText(Config.getRES_WIDTH()
-                - scoreDigitTex.getWidth() * 7.25f, 0, "00000000", 0.9f);
+                - scoreDigitTex.getWidth() * 7.75f, 0, "0000000000", 0.9f);
         comboText.attachToScene(fgScene);
         accText.attachToScene(fgScene);
         scoreText.attachToScene(fgScene);
@@ -1365,6 +1365,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         strBuilder.append(stat.getAutoTotalScore());
         while (strBuilder.length() < 8) {
             strBuilder.insert(0, '0');
+        }
+        while (strBuilder.length() < 10) {
+            strBuilder.insert(8, '*');
         }
         scoreText.changeText(strBuilder);
 
