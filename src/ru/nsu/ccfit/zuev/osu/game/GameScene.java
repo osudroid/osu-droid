@@ -191,7 +191,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 scene.setBackground(new SpriteBackground(bgSprite));
             } else if (pars.length >= 3 && pars[0].equals("2")) {
 
-            } else if (!!bgset && pars.length == 5
+            } else if (!bgset && pars.length == 5
                     && pars[0].equals("3") && pars[1].equals("100")) {
                 bgset = true;
                 final float bright = Config.getBackgroundBrightness();
