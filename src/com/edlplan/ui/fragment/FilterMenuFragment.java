@@ -43,7 +43,7 @@ public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
     private CheckBox favoritesOnly;
     private TextView favoriteFolder;
     private TextView orderText;
-    private TextView openMapInfo;
+    //private TextView openMapInfo;
 
     private Updater updater;
 
@@ -268,7 +268,7 @@ public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
             favoritesOnly = findViewById(R.id.showFav);
             orderText = findViewById(R.id.sortText);
             favoriteFolder = findViewById(R.id.favFolder);
-            openMapInfo = findViewById(R.id.openMapInfo);
+            //openMapInfo = findViewById(R.id.openMapInfo);
 
             favoritesOnly.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 updateFavChecked();
@@ -317,10 +317,10 @@ public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
                 }
             });
 
-            openMapInfo.setOnClickListener(v -> {
-                openMapinfoDialog();
-            });
-            openMapInfo.setText("MapInfo");
+            //openMapInfo.setOnClickListener(v -> {
+            //    openMapinfoDialog();
+            //});
+            //openMapInfo.setText("MapInfo");
             
             favoritesOnly.setChecked(savedFavOnly);
             if (savedFilter != null && savedFilter.length() > 0) {
