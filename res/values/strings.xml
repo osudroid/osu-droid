@@ -40,6 +40,10 @@
 	<string name="dialog_delete_pp_make_sure">Really?</string>
 	<string name="dialog_delete_pp_deleted">PP reset</string>
 
+	<string name="dialog_exit_message">Are you sure you want to exit the game?</string>
+	<string name="dialog_exit_yes">Yes</string>
+	<string name="dialog_exit_no">No</string>
+
 	<string name="favorite_folder">Folder:</string>
 	<string name="favorite_default">Default</string>
 	<string name="favorite_select">Select</string>
@@ -104,6 +108,9 @@
 	<string name="online_invconfirm">Passwords don\'t match</string>
 	<string name="online_invemail">Invaild e-mail</string>
 	<string name="online_regcomplete">Registration complete. Restart app to login</string>
+
+	<string name="userpanel_not_online">You are not online. Please log in or check your internet connection.</string>
+	<string name="userpanel_logging_in">Logging in, please wait.</string>
 
 	<!-- Color Picker -->
 	<string name="dialog_color_picker">Color Picker</string>
