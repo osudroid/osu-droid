@@ -433,6 +433,10 @@ public class OnlineManager {
         return username;
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
     public String getPassword() {
         return password;
     }

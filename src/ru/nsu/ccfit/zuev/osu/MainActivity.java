@@ -86,6 +86,7 @@ public class MainActivity extends BaseGameActivity implements
     private SaveServiceObject saveServiceObject;
     private IntentFilter filter;
     private boolean willReplay = false;
+    private static boolean activityVisible = true;
 
     public Engine onLoadEngine() {
         checkPermissions();
@@ -421,6 +422,14 @@ public class MainActivity extends BaseGameActivity implements
         }
     }
 
+    public PowerManager.WakeLock getWakeLock() {
+        return wakeLock;
+    }
+
+    public static boolean isActivityVisible() {
+        return activityVisible;
+    }
+
     @Override
     protected void onCreate(Bundle pSavedInstanceState) {
         super.onCreate(pSavedInstanceState);
@@ -527,6 +536,7 @@ public class MainActivity extends BaseGameActivity implements
                 }
             }
         }
+        activityVisible = true;
         MobclickAgent.onResume(this);
         //HideNaviBar
         if (Config.isHideNaviBar()) {
@@ -613,7 +623,14 @@ public class MainActivity extends BaseGameActivity implements
                 }
             }
         }
+        activityVisible = false;
         MobclickAgent.onPause(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        activityVisible = false;
     }
 
     @Override
@@ -628,6 +645,15 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().getGameScene().pause();
             }
         }
+        if (hasFocus && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        	getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+		}
     }
 
 //    @Override
@@ -731,10 +757,7 @@ public class MainActivity extends BaseGameActivity implements
                     return true;
                 }
 
-                GlobalManager.getInstance().getMainScene().exit();
-                if (wakeLock != null && wakeLock.isHeld()) {
-                    wakeLock.release();
-                }
+                GlobalManager.getInstance().getMainScene().showExitDialog();
             }
             return true;
         }
