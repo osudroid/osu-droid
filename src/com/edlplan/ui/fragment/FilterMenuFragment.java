@@ -21,10 +21,15 @@ import com.edlplan.ui.EasingHelper;
 
 import org.anddev.andengine.entity.scene.Scene;
 
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
+import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.menu.IFilterMenu;
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
 import ru.nsu.ccfit.zuev.osuplus.R;
+import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
+import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
 public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
 
@@ -38,6 +43,7 @@ public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
     private CheckBox favoritesOnly;
     private TextView favoriteFolder;
     private TextView orderText;
+    private TextView openMapInfo;
 
     private Updater updater;
 
@@ -247,12 +253,22 @@ public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
         }
     }
 
+    private void openMapinfoDialog() {
+        MapInfoFragment dialog = new MapInfoFragment();
+        TrackInfo selectedTrack = GlobalManager.getInstance().getSongMenu().getSelectedTrack();
+        DifficultyReCalculator diffReCalculator = new DifficultyReCalculator();
+        if (selectedTrack != null)
+            dialog.showWithMap(selectedTrack, ModMenu.getInstance().getSpeed(), diffReCalculator.getCS(selectedTrack));
+        diffReCalculator = null;
+    }
+
     public void reloadViewData() {
         if (isCreated()) {
             filter = findViewById(R.id.searchEditText);
             favoritesOnly = findViewById(R.id.showFav);
             orderText = findViewById(R.id.sortText);
             favoriteFolder = findViewById(R.id.favFolder);
+            openMapInfo = findViewById(R.id.openMapInfo);
 
             favoritesOnly.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 updateFavChecked();
@@ -301,6 +317,11 @@ public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
                 }
             });
 
+            openMapInfo.setOnClickListener(v -> {
+                openMapinfoDialog();
+            });
+            openMapInfo.setText("MapInfo");
+            
             favoritesOnly.setChecked(savedFavOnly);
             if (savedFilter != null && savedFilter.length() > 0) {
                 filter.setText(savedFilter);

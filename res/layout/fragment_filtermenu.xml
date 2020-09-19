@@ -93,6 +93,14 @@
                         android:minWidth="70dp"
                         android:textStyle="bold" />
 
+					<TextView
+                        android:id="@+id/openMapInfo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="3dp"
+                        android:minWidth="70dp"
+                        android:textStyle="bold" />
+
                 </LinearLayout>
             </LinearLayout>
         </RelativeLayout>

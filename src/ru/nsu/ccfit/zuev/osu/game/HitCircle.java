@@ -112,15 +112,15 @@ public class HitCircle extends GameObject {
         number = GameObjectPool.getInstance().getNumber(num);
         if (GameHelper.isHidden()) {
             number.init(scene, pos, GameHelper.getScale(),
-                    new SequenceEntityModifier(new FadeInModifier(time / 4),
-                            new FadeOutModifier(time * 0.35f)));
-            overlay.registerEntityModifier(new SequenceEntityModifier(new FadeInModifier(time / 4),
-                    new FadeOutModifier(time * 0.35f)));
-            circle.registerEntityModifier(new SequenceEntityModifier(new FadeInModifier(time / 4),
-                    new FadeOutModifier(time * 0.35f)));
+                    new SequenceEntityModifier(new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
+                            new FadeOutModifier(time * 0.35f * GameHelper.getTimeMultiplier())));
+            overlay.registerEntityModifier(new SequenceEntityModifier(new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
+                    new FadeOutModifier(time * 0.35f * GameHelper.getTimeMultiplier())));
+            circle.registerEntityModifier(new SequenceEntityModifier(new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
+                    new FadeOutModifier(time * 0.35f * GameHelper.getTimeMultiplier())));
         } else {
             number.init(scene, pos, GameHelper.getScale(), new FadeInModifier(
-                    time / 2));
+                    time / 2 * GameHelper.getTimeMultiplier()));
         }
         scene.attachChild(circle, 0);
         scene.attachChild(approachCircle);

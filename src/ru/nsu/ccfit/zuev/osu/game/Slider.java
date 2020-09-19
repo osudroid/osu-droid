@@ -284,11 +284,11 @@ public class Slider extends GameObject {
         }
         if (GameHelper.isHidden()) {
             number.init(scene, pos, scale,
-                    new SequenceEntityModifier(new FadeInModifier(time / 4),
-                            new FadeOutModifier(time / 4)));
+                    new SequenceEntityModifier(new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
+                            new FadeOutModifier(time / 4 * GameHelper.getTimeMultiplier())));
         } else {
             number.init(scene, pos, scale, new FadeInModifier(
-                    time / 2));
+                    time / 2 * GameHelper.getTimeMultiplier()));
         }
         scene.attachChild(startCircle, 0);
         scene.attachChild(approachCircle);

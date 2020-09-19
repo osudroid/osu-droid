@@ -46,8 +46,11 @@ public class DifficultyReCalculator {
     private int tpIndex = 0;
     private double total, aim, speed, acc;
     private AiModtpDifficulty tpDifficulty;
+    private int single, fast_single, stream, jump, switch_fingering, multi;
+    private int stream_longest;
+    private float real_time;
     //copy from OSUParser.java
-    private boolean init(final TrackInfo track, float speedmulti){
+    public boolean init(final TrackInfo track, float speedmulti){
         tpIndex = 0;
         OSUParser parser = new OSUParser(track.getFilename());
         final BeatmapData data;
@@ -197,11 +200,13 @@ public class DifficultyReCalculator {
             return 0f;
         }
     }
+    //must use reCalculateStar() before this
     public void calculaterPP(final StatisticV2 stat, final TrackInfo track){
         pp(tpDifficulty.getAimStars(),tpDifficulty.getSpeedStars(),track.getMaxCombo(),track.getHitCircleCount(),
             track.getTotalHitObjectCount(),getAR(stat,track),getOD(stat,track),stat.getMod(),
             stat.getMaxCombo(),stat.getAccuracy(),stat.getMisses());
     }
+    //must use reCalculateStar() before this
     public void calculaterMaxPP(final StatisticV2 stat, final TrackInfo track){
         pp(tpDifficulty.getAimStars(),tpDifficulty.getSpeedStars(),track.getMaxCombo(),track.getHitCircleCount(),
             track.getTotalHitObjectCount(),getAR(stat,track),getOD(stat,track),stat.getMod(),
@@ -431,5 +436,114 @@ public class DifficultyReCalculator {
     }
     public float getCS(final TrackInfo track){
         return getCS(ModMenu.getInstance().getMod(), track);
+    }
+    //must use reCalculateStar() before this
+    public boolean calculateMapInfo(final TrackInfo track, float speedmulti, float cs){
+        //计算谱面信息
+        /*
+        120bpm: 125ms(dt1), 140bpm: 107ms(dt3), 80bpm: 187.5(dt4), 180bpm: 83.33ms(dt2)
+        单点:低于120bpm，间距小于180
+        高速单点:高于120bpm且间距大于90、低于180bpm且间距大于90、小于180
+        连打:高于120bpm且间距小于90，高于180bpm且间距大于90、小于180
+        跳:间距大于180
+        */
+        if (init(track, speedmulti) == false) {
+            return false;
+        }
+        if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track){
+            return false;
+        }
+        final int ds1 = 90, ds2 = 180;
+        final int dt1 = 125, dt2 = 83, dt3 = 107, dt4 = 188;
+        single = fast_single = stream = jump = switch_fingering = multi = 0;
+        stream_longest = 0;
+        int combo = 0;
+        int last_delta_time = 0;
+        HitObject prev = null;
+        boolean first = true;
+        int firstObjectTime = 0;
+        for (HitObject object : hitObjects){
+            if (object.getType() == HitObjectType.Spinner){
+                continue;
+            }
+            if (prev != null){
+                int delta_time = object.getStartTime() - prev.getStartTime();
+                int distance = (int)Math.sqrt(Math.pow(object.getPos().x - prev.getPos().x, 2) + Math.pow(object.getPos().y - prev.getPos().y, 2));
+                if ((delta_time >= dt1 && distance <= ds2) || (delta_time >= dt4 * 4)){
+                    single++;
+                }
+                else if(delta_time >= dt2 && distance >= ds1 && distance <= ds2){
+                    fast_single++;
+                }
+                else if((delta_time <= dt1 && distance <= ds1) || (delta_time <= dt2 && distance <= ds2)){
+                    stream++;
+                }
+                else if(distance >= ds2){
+                    jump++;
+                }
+                else{
+                    single++;
+                }
+                //多押
+                if (first && delta_time == 0){
+                    first = false;
+                    multi += 2;
+                }
+                else if (delta_time == 0){
+                    multi++;
+                }
+                else if (delta_time != 0){
+                    first = true;
+                }
+                //切指
+                if (delta_time < last_delta_time * 1.2f && delta_time > last_delta_time * 0.8f){
+                }
+                else if ((delta_time < dt3 || last_delta_time < dt3) && last_delta_time != 0 && delta_time < dt4 && last_delta_time < dt4){
+                    switch_fingering += 2;
+                }
+                //最长连打
+                if (delta_time > dt3 || last_delta_time > dt3){
+                    if (combo != 0 && stream_longest < combo + 2){
+                        stream_longest = combo + 2;
+                    }
+                    combo = 0;
+                }
+                else{
+                    combo++;
+                }
+                last_delta_time = delta_time; 
+            }
+            else {
+                firstObjectTime = object.getStartTime();
+            }
+            prev = object;
+        }
+        //实际游玩时间
+        real_time = (hitObjects.get(hitObjects.size() - 1).getEndTime() - firstObjectTime) / 1000f;
+        return true;
+    }
+    public int getSingleCount(){
+        return single;
+    }
+    public int getFastSingleCount(){
+        return fast_single;
+    }
+    public int getStreamCount(){
+        return stream;
+    }
+    public int getJumpCount(){
+        return jump;
+    }
+    public int getSwitchFingeringCount(){
+        return switch_fingering;
+    }
+    public int getMultiCount(){
+        return multi;
+    }
+    public int getLongestStreamCount(){
+        return stream_longest;
+    }
+    public float getRealTime(){
+        return real_time;
     }
 }
