@@ -395,6 +395,8 @@ public class LibraryManager {
             track.setCreator("unknown");
 
             if (parser.readMetaData(track, info) == false) {
+                // delete file if import fails
+                file.delete();
                 continue;
             }
             if (track.getBackground() != null) {
