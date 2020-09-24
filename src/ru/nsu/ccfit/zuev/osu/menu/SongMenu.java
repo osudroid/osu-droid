@@ -675,10 +675,15 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public void setFilter(final String filter, final SortOrder order,
                           final boolean favsOnly, Set<String> limit) {
+        String oldTrackFileName = "";
+        if (selectedTrack != null){
+            oldTrackFileName = selectedTrack.getFilename();
+        }
         if (order.equals(sortOrder) == false) {
             sortOrder = order;
             tryReloadMenuItems(sortOrder);
             sort();
+            reSelectItem(oldTrackFileName);
         }
         if (filter == null || filterText.equals(filter)) {
             if (favsOnly == this.favsOnly && limitC == limit) {
@@ -693,11 +698,15 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         for (final MenuItem item : items) {
             item.applyFilter(lowerFilter, favsOnly, limit);
         }
+        if (favsOnly != this.favsOnly) {
+            this.favsOnly = favsOnly;
+        } else{
+            reSelectItem(oldTrackFileName);
+        }
         if (selectedItem != null && selectedItem.isVisible() == false) {
             selectedItem = null;
             selectedTrack = null;
         }
-        this.favsOnly = favsOnly;
         System.gc();
     }
 
@@ -1370,23 +1379,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private void tryReloadMenuItems(SortOrder order){
         switch(order){
             case Title:
-                reloadMenuItems(GroupType.MapSet);
-                break;
             case Artist:
-                reloadMenuItems(GroupType.MapSet);
-                break;
             case Creator:
-                reloadMenuItems(GroupType.MapSet);
-                break;
             case Date:
-                reloadMenuItems(GroupType.MapSet);
-                break;
             case Bpm:
                 reloadMenuItems(GroupType.MapSet);
                 break;
             case Stars:
-                reloadMenuItems(GroupType.SingleDiff);
-                break;
             case Length:
                 reloadMenuItems(GroupType.SingleDiff);
                 break;
@@ -1433,6 +1432,35 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             final StringBuilder dimensionStringBuilder = new StringBuilder();
             dimensionStringBuilder.append(strs[0]).append("Stars: ").append(star);
             dimensionInfo.setText(dimensionStringBuilder.toString());
+        }
+    }
+
+    private void reSelectItem(String oldTrackFileName){
+        if (oldTrackFileName != ""){
+            if (selectedTrack.getFilename() == oldTrackFileName && items.size() > 1 && selectedItem != null && selectedItem.isVisible()){
+                velocityY = 0;
+                float height = 0;
+                for (int i = 0; i < items.size(); i++) {
+                    if (items.get(i) == selectedItem) {
+                        break;
+                    }
+                    height += items.get(i).getInitialHeight();
+                }
+                camY = height - Config.getRES_HEIGHT() / 2;
+                camY += items.get(0).getTotalHeight() / 2;
+                return;
+            }
+            for (final MenuItem item : items) {
+                if (item == null || item.isVisible() == false) continue;
+                int trackid = item.tryGetCorrespondingTrackId(oldTrackFileName);
+                if (trackid >= 0){
+                    item.select(true, true);
+                    if (trackid != 0){
+                        item.selectTrack(item.getTrackSpritesById(trackid), false);
+                    }
+                    break;
+                }
+            }
         }
     }
 }

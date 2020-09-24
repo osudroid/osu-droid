@@ -1,31 +1,16 @@
 package com.edlplan.ui.fragment;
 
 import android.animation.Animator;
-import android.graphics.Color;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.OrientationHelper;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
-import com.edlplan.ui.InputDialog;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
-import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class MapInfoFragment extends BaseFragment {

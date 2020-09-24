@@ -28,8 +28,6 @@ import ru.nsu.ccfit.zuev.osu.menu.IFilterMenu;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
 import ru.nsu.ccfit.zuev.osuplus.R;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
 public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
 
@@ -253,14 +251,14 @@ public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
         }
     }
 
-    private void openMapinfoDialog() {
-        MapInfoFragment dialog = new MapInfoFragment();
-        TrackInfo selectedTrack = GlobalManager.getInstance().getSongMenu().getSelectedTrack();
-        DifficultyReCalculator diffReCalculator = new DifficultyReCalculator();
-        if (selectedTrack != null)
-            dialog.showWithMap(selectedTrack, ModMenu.getInstance().getSpeed(), diffReCalculator.getCS(selectedTrack));
-        diffReCalculator = null;
-    }
+    //private void openMapinfoDialog() {
+    //    MapInfoFragment dialog = new MapInfoFragment();
+    //    TrackInfo selectedTrack = GlobalManager.getInstance().getSongMenu().getSelectedTrack();
+    //    DifficultyReCalculator diffReCalculator = new DifficultyReCalculator();
+    //    if (selectedTrack != null)
+    //        dialog.showWithMap(selectedTrack, ModMenu.getInstance().getSpeed(), diffReCalculator.getCS(selectedTrack));
+    //    diffReCalculator = null;
+    //}
 
     public void reloadViewData() {
         if (isCreated()) {

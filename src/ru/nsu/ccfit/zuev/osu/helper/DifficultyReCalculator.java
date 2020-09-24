@@ -5,17 +5,8 @@ import android.util.Log;
 
 import org.anddev.andengine.util.Debug;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -23,9 +14,7 @@ import ru.nsu.ccfit.zuev.osu.OSUParser;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-import ru.nsu.ccfit.zuev.osu.game.GameObjectData;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
@@ -346,33 +335,19 @@ public class DifficultyReCalculator {
         return acc;
     }
     private float getAR(final StatisticV2 stat, final TrackInfo track){
+        // no need to calculate force AR value
+        if (stat.isEnableForceAR()) {
+            return stat.getForceAR();
+        }
         float ar = track.getApproachRate();
-        float od = track.getOverallDifficulty();
-        float cs = track.getCircleSize();
-        float hp = track.getHpDrain();
         EnumSet<GameMod> mod = stat.getMod();
-        float bpm_max = track.getBpmMax();
-        float bpm_min = track.getBpmMin();
-        long length = track.getMusicLength();
         if (mod.contains(GameMod.MOD_EASY)) {
             ar *= 0.5f;
-            od *= 0.5f;
-            cs -= 1f;
-            hp *= 0.5f;
         }
         if (mod.contains(GameMod.MOD_HARDROCK)) {
-            ar *= 1.4f;
-            if(ar > 10) {
-                ar = 10;
-            }
-            od *= 1.4f;
-            cs += 1f;
-            hp *= 1.4f;
+            ar = Math.min(ar * 1.4f, 10);
         }
         float speed = stat.getSpeed();
-        bpm_max *= speed;
-        bpm_min *= speed;
-        length /= speed;
         if (mod.contains(GameMod.MOD_REALLYEASY)) {
             if (mod.contains(GameMod.MOD_EASY)){
                 ar *= 2f;
@@ -380,22 +355,8 @@ public class DifficultyReCalculator {
             }
             ar -= 0.5f;
             ar -= speed - 1.0f;
-            od *= 0.5f;
-            cs -= 1f;
-            hp *= 0.5f;
         }
-        if (mod.contains(GameMod.MOD_SMALLCIRCLE)) {
-            cs += 4f;
-        }
-        ar = Math.min(13.f, ar);
-        od = Math.min(10.f, od);
-        cs = Math.min(15.f, cs);
-        hp = Math.min(10.f, hp);
-        ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) / speed), 2);
-        od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) / speed), 2);
-        if (stat.isEnableForceAR()){
-            ar = stat.getForceAR();
-        }
+        ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(Math.min(13.f, ar)) / speed), 2);
         return ar;
     }
     private float getOD(final StatisticV2 stat, final TrackInfo track){

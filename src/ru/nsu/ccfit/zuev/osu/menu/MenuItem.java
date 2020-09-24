@@ -456,4 +456,25 @@ public class MenuItem {
         visible = false;
         scene = null;
     }
+
+    public int tryGetCorrespondingTrackId(String oldTrackFileName){
+        if (trackid <= -1){
+            int i = 0;
+            for (TrackInfo track : beatmap.getTracks()){
+                if (track == null) continue;
+                if (track.getFilename() == oldTrackFileName){
+                    return i;
+                }
+                i++;
+            }
+        }
+        else if (beatmap.getTrack(trackid).getFilename() == oldTrackFileName){
+            return trackid;
+        }
+        return -1;
+    }
+
+    public MenuItemTrack getTrackSpritesById(int index){
+        return trackSprites[index];
+    }
 }

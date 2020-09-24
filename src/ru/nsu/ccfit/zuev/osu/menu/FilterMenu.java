@@ -22,10 +22,8 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.InputManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.TextButton;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu.SortOrder;
 import ru.nsu.ccfit.zuev.osuplus.R;
-import sun.util.resources.cldr.CalendarData;
 
 public class FilterMenu implements IUpdateHandler, IFilterMenu {
     private static Context configContext = null;
@@ -57,17 +55,26 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
     public void loadConfig(final Context context) {
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(context);
-
+    
         final int sortOrder = prefs.getInt("sortorder", 0);
         switch (sortOrder) {
             case 1:
                 order = SortOrder.Artist;
                 break;
             case 2:
-                order = SortOrder.Date;
+                order = SortOrder.Creator;
                 break;
             case 3:
-                order = SortOrder.Creator;
+                order = SortOrder.Date;
+                break;
+            case 4:
+                order = SortOrder.Bpm;
+                break;
+            case 5:
+                order = SortOrder.Stars;
+                break;
+            case 6:
+                order = SortOrder.Length;
                 break;
             default:
                 order = SortOrder.Title;
@@ -81,26 +88,35 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
         if (configContext == null) {
             return;
         }
-
+    
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(configContext);
         final SharedPreferences.Editor editor = prefs.edit();
-
+    
         switch (order) {
-            case Creator:
-                editor.putInt("sortorder", 3);
-                break;
             case Artist:
                 editor.putInt("sortorder", 1);
                 break;
-            case Date:
+            case Creator:
                 editor.putInt("sortorder", 2);
+                break;
+            case Date:
+                editor.putInt("sortorder", 3);
+                break;
+            case Bpm:
+                editor.putInt("sortorder", 4);
+                break;
+            case Stars:
+                editor.putInt("sortorder", 5);
+                break;
+            case Length:
+                editor.putInt("sortorder", 6);
                 break;
             default:
                 editor.putInt("sortorder", 0);
                 break;
         }
-
+    
         editor.commit();
     }
 
@@ -182,10 +198,19 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
                             newOrder = SortOrder.Artist;
                             break;
                         case Artist:
+                            newOrder = SortOrder.Creator;
+                            break;
+                        case Creator:
                             newOrder = SortOrder.Date;
                             break;
                         case Date:
-                            newOrder = SortOrder.Creator;
+                            newOrder = SortOrder.Bpm;
+                            break;
+                        case Bpm:
+                            newOrder = SortOrder.Stars;
+                            break;
+                        case Stars:
+                            newOrder = SortOrder.Length;
                             break;
                         default:
                             newOrder = SortOrder.Title;
@@ -326,6 +351,15 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
                 break;
             case Date:
                 s = StringTable.get(R.string.menu_search_sort_date);
+                break;
+            case Bpm:
+                s = StringTable.get(R.string.menu_search_sort_bpm);
+                break;
+            case Stars:
+                s = StringTable.get(R.string.menu_search_sort_stars);
+                break;
+            case Length:
+                s = StringTable.get(R.string.menu_search_sort_length);
                 break;
             default:
                 s = StringTable.get(R.string.menu_search_sort_creator);

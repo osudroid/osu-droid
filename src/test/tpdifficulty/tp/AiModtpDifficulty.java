@@ -98,7 +98,6 @@ public class AiModtpDifficulty {
         // Fill our custom tpHitObject class, that carries additional information
         tpHitObjects = new ArrayList<tpHitObject>(hitObjects.size());
         float CircleRadius = (PLAYFIELD_WIDTH / 16.0f) * (1.0f - 0.7f * (circleSize - 5.0f) / 5.0f);
-        //float CircleRadius = (PLAYFIELD_WIDTH / 16.0f) * (1.0f - 0.7f * (circleSize - 5.0f) / 5.0f);
         for (HitObject hitObject : hitObjects) {
             tpHitObjects.add(new tpHitObject(hitObject, CircleRadius));
         }
