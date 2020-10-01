@@ -480,9 +480,10 @@ public class ScoringScene {
                 || stat.getMod().contains(GameMod.MOD_SMALLCIRCLE)
                 || stat.getMod().contains(GameMod.MOD_REALLYEASY)
                 || stat.getMod().contains(GameMod.MOD_SPEEDUP)
-                || stat.getMod().contains(GameMod.MOD_FLASHLIGHT)){
+                || stat.getMod().contains(GameMod.MOD_FLASHLIGHT)
+                || stat.getMod().contains(GameMod.MOD_SCOREV2)){
                     //ToastLogger.showText(StringTable.get(R.string.mod_precise_is_unrank_now), true);
-                    ToastLogger.showText(StringTable.get(R.string.mods_sdpfprscrez_is_unrank_now), true);
+                    ToastLogger.showText(StringTable.get(R.string.mods_somemods_is_unrank_now), true);
                 }
                 else if(!stat.getMod().contains(GameMod.MOD_RELAX) && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)){
                     SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
