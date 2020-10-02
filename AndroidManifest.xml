@@ -88,15 +88,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.EDIT" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="file" android:host="*"
-                      android:mimeType="application/octet-stream" android:pathPattern=".*\\.osz"/>
-                <data android:scheme="file" android:host="*"
-                      android:mimeType="application/octet-stream" android:pathPattern=".*\\.zip"/>
-                <data android:scheme="file" android:host="*"
-                      android:mimeType="application/octet-stream" android:pathPattern=".*\\.odr"/>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				
+				<data android:scheme="file" />
+				<data android:scheme="content" />
+				<data android:mimeType="*/*" />
+				<data android:host="*" />
+				<data android:pathPattern=".*\\.osz" />
+				<data android:pathPattern=".*\\..*\\.osz" />
+				<data android:pathPattern=".*\\..*\\..*\\.osz" />
+				<data android:pathPattern=".*\\..*\\..*\\..*\\.osz" />
+				<data android:pathPattern=".*\\.osk" />
+				<data android:pathPattern=".*\\..*\\.osk" />
+				<data android:pathPattern=".*\\..*\\..*\\.osk" />
+				<data android:pathPattern=".*\\..*\\..*\\..*\\.osk" />
             </intent-filter>
             <!-- firefox and file explorer -->
             <intent-filter>
