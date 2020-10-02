@@ -51,6 +51,9 @@ public class Replay {
     private String md5 = "";
     private String mapfile = "";
     private String mapname = "";
+    public static float oldChangeSpeed = 1.0f;
+    public static float oldForceAR = 9.0f;
+    public static boolean oldEnableForceAR = false;
     public Replay() {
         cursorMoves.add(new MoveArray(200));
         cursorMoves.add(new MoveArray(50));

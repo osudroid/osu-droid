@@ -229,6 +229,9 @@
 
     <string name="opt_particles_title">Particle effects</string>
     <string name="opt_particles_summary">Show particle-based effects like cursor trail</string>
+	
+	<string name="opt_long_trail_title">Long cursor trail</string>
+    <string name="opt_long_trail_summary">Show longer cursor trail, if Particle effects is on</string>
 
     <string name="opt_bgbrightness_title">Background brightness</string>
     <string name="opt_bgbrightness_summary">Change the brightness of the background image</string>
@@ -279,5 +282,16 @@
 
     <string name="opt_superSlider_title">Super Slider</string>
     <string name="opt_superSlider_summary">Perfect shape slider!</string>
+	
+    <string name="opt_changespeed_title">Speed Modify</string>
+    <string name="opt_forcear_title">Force AR</string>
+    <string name="opt_enablenc_whenspeedchange_title">Enable metronome in speed modify</string>
+    <string name="opt_enablespeedchange_title">Enable speed modify</string>
+    <string name="opt_enableforcear_title">Enable force AR</string>
+	
+	<string name="opt_calculate_slider_path_in_game_start_title">Calculate sliderpaths in game start</string>
+	<string name="opt_calculate_slider_path_in_game_start_summary">Increases performance in beatmaps where complex sliders are present, but increases beatmap load time</string>
 
+    <string name="opt_display_score_pp_title">Display PP in score</string>
+    <string name="opt_display_score_pp_summary">Displays PP value in score result screen</string>
 </resources>

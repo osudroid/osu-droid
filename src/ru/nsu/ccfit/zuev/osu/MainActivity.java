@@ -86,6 +86,7 @@ public class MainActivity extends BaseGameActivity implements
     private SaveServiceObject saveServiceObject;
     private IntentFilter filter;
     private boolean willReplay = false;
+    private static boolean activityVisible = true;
 
     public Engine onLoadEngine() {
         checkPermissions();
@@ -421,6 +422,14 @@ public class MainActivity extends BaseGameActivity implements
         }
     }
 
+    public PowerManager.WakeLock getWakeLock() {
+        return wakeLock;
+    }
+
+    public static boolean isActivityVisible() {
+        return activityVisible;
+    }
+
     @Override
     protected void onCreate(Bundle pSavedInstanceState) {
         super.onCreate(pSavedInstanceState);
@@ -433,44 +442,6 @@ public class MainActivity extends BaseGameActivity implements
                 if (!f.exists()) f.createNewFile();
                 Runtime.getRuntime().exec("logcat -f " + (f.getAbsolutePath()));
             } catch (IOException e) {
-            }
-        }
-        if (Config.isHideNaviBar()) {
-            if (Build.VERSION.SDK_INT >= 11) {
-                // BEGIN_INCLUDE (get_current_ui_flags)
-                // The UI options currently enabled are represented by a bitfield.
-                // getSystemUiVisibility() gives us that bitfield.
-                int uiOptions = this.getWindow().getDecorView().getSystemUiVisibility();
-                int newUiOptions = uiOptions;
-                // END_INCLUDE (get_current_ui_flags)
-                // BEGIN_INCLUDE (toggle_ui_flags)
-                boolean isImmersiveModeEnabled =
-                        ((uiOptions | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) == uiOptions);
-
-                // Navigation bar hiding:  Backwards compatible to ICS.
-                if (Build.VERSION.SDK_INT >= 14) {
-                    newUiOptions ^= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-                }
-
-                // Status bar hiding: Backwards compatible to Jellybean
-                if (Build.VERSION.SDK_INT >= 16) {
-                    newUiOptions ^= View.SYSTEM_UI_FLAG_FULLSCREEN;
-                }
-
-                // Immersive mode: Backward compatible to KitKat.
-                // Note that this flag doesn't do anything by itself, it only augments the behavior
-                // of HIDE_NAVIGATION and FLAG_FULLSCREEN.  For the purposes of this sample
-                // all three flags are being toggled together.
-                // Note that there are two immersive mode UI flags, one of which is referred to as "sticky".
-                // Sticky immersive mode differs in that it makes the navigation and status bars
-                // semi-transparent, and the UI flag does not get cleared when the user interacts with
-                // the screen.
-                if (Build.VERSION.SDK_INT >= 18) {
-                    newUiOptions ^= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-                }
-
-                this.getWindow().getDecorView().setSystemUiVisibility(newUiOptions);
-                //END_INCLUDE (set_ui_flags)
             }
         }
         onBeginBindService();
@@ -565,7 +536,53 @@ public class MainActivity extends BaseGameActivity implements
                 }
             }
         }
+        activityVisible = true;
         MobclickAgent.onResume(this);
+        //HideNaviBar
+        if (Config.isHideNaviBar()) {
+            if (Build.VERSION.SDK_INT >= 11) {
+                // BEGIN_INCLUDE (get_current_ui_flags)
+                // The UI options currently enabled are represented by a bitfield.
+                // getSystemUiVisibility() gives us that bitfield.
+                int uiOptions = this.getWindow().getDecorView().getSystemUiVisibility();
+                int newUiOptions = uiOptions;
+                // END_INCLUDE (get_current_ui_flags)
+                // BEGIN_INCLUDE (toggle_ui_flags)
+                boolean isImmersiveModeEnabled =
+                        ((uiOptions | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) == uiOptions);
+
+                // Navigation bar hiding:  Backwards compatible to ICS.
+                if (Build.VERSION.SDK_INT >= 14) {
+                    if((newUiOptions | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != newUiOptions){
+                        newUiOptions ^= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+                    }
+                }
+
+                // Status bar hiding: Backwards compatible to Jellybean
+                if (Build.VERSION.SDK_INT >= 16) {
+                    if((newUiOptions | View.SYSTEM_UI_FLAG_FULLSCREEN) != newUiOptions){
+                        newUiOptions ^= View.SYSTEM_UI_FLAG_FULLSCREEN;
+                    }
+                }
+
+                // Immersive mode: Backward compatible to KitKat.
+                // Note that this flag doesn't do anything by itself, it only augments the behavior
+                // of HIDE_NAVIGATION and FLAG_FULLSCREEN.  For the purposes of this sample
+                // all three flags are being toggled together.
+                // Note that there are two immersive mode UI flags, one of which is referred to as "sticky".
+                // Sticky immersive mode differs in that it makes the navigation and status bars
+                // semi-transparent, and the UI flag does not get cleared when the user interacts with
+                // the screen.
+                if (Build.VERSION.SDK_INT >= 18) {
+                    if((newUiOptions | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != newUiOptions){
+                        newUiOptions ^= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+                    }
+                }
+
+                this.getWindow().getDecorView().setSystemUiVisibility(newUiOptions);
+                //END_INCLUDE (set_ui_flags)
+            }
+        }
     }
 
     @Override
@@ -606,7 +623,14 @@ public class MainActivity extends BaseGameActivity implements
                 }
             }
         }
+        activityVisible = false;
         MobclickAgent.onPause(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        activityVisible = false;
     }
 
     @Override
@@ -621,6 +645,15 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().getGameScene().pause();
             }
         }
+        if (hasFocus && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        	getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+		}
     }
 
 //    @Override
@@ -724,10 +757,7 @@ public class MainActivity extends BaseGameActivity implements
                     return true;
                 }
 
-                GlobalManager.getInstance().getMainScene().exit();
-                if (wakeLock != null && wakeLock.isHeld()) {
-                    wakeLock.release();
-                }
+                GlobalManager.getInstance().getMainScene().showExitDialog();
             }
             return true;
         }
