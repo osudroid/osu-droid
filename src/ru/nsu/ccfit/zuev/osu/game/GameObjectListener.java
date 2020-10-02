@@ -42,4 +42,6 @@ public interface GameObjectListener {
     public int getCursorsCount();
 
     public void registerAccuracy(float acc);
+    
+    public void setFlashLightsPosition(float pX, float pY);
 }

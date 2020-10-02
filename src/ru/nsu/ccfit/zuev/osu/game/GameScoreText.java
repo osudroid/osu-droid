@@ -94,4 +94,12 @@ public class GameScoreText {
             sp.detachSelf();
         }
     }
+
+    public void setPosition(float x, float y){
+        float width = 0;
+        for (final Sprite sp : letters){
+            sp.setPosition(x + width, y);
+            width += sp.getWidth();
+        }
+    }
 }

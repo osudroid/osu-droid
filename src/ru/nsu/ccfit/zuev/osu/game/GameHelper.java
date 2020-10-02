@@ -33,10 +33,12 @@ public class GameHelper {
     private static float timeMultiplier = 0;
     private static RGBColor sliderColor = new RGBColor();
     private static boolean hidden = false;
+    private static boolean flashLight = false;
     private static boolean hardrock = false;
     private static boolean relaxMod = false;
     private static boolean doubleTime = false;
     private static boolean nightCore = false;
+    private static boolean speedUp = false;
     private static boolean halfTime = false;
     private static boolean autopilotMod = false;
     private static boolean suddenDeath = false;
@@ -368,6 +370,13 @@ public class GameHelper {
         GameHelper.hidden = hidden;
     }
 
+    public static boolean isFlashLight() {
+        return flashLight;
+    }
+
+    public static void setFlashLight(final boolean flashLight) {
+        GameHelper.flashLight = flashLight;
+    }
     public static boolean isHalfTime() {
         return halfTime;
     }
@@ -392,6 +401,13 @@ public class GameHelper {
         GameHelper.doubleTime = doubleTime;
     }
 
+    public static boolean isSpeedUp() {
+        return speedUp;
+    }
+
+    public static void setSpeedUp(final boolean speedUp) {
+        GameHelper.speedUp = speedUp;
+    }
     public static boolean isSuddenDeath() {
         return suddenDeath;
     }
