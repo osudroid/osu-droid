@@ -160,7 +160,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
             result += ConvertExtraModString(strMod[1]);
         }
         if (result.length() == 0) {
-            return "None";
+            return " ";
         }
         return result.substring(0, result.length() - 1);
     }
