@@ -8,7 +8,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     public static final String SCORES_TABLENAME = "scores";
     public static final String MAPS_TABLENAME = "ddlmaps";
     private static final String DBNAME = "osudroid_test";
-    private static final int DBVERSION = 7;
+    private static final int DBVERSION = 6;
     private static DBOpenHelper helper = null;
 
     private DBOpenHelper(Context context) {
