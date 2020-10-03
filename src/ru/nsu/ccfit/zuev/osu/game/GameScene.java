@@ -1613,8 +1613,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                             data.getPosOffset() + Utils.toRes(4) * scale);
                 }
             }
-            pos.x += data.getPosOffset();
-            pos.y += data.getPosOffset();
+            // If this object is silder and isCalculateSliderPathInGameStart(), the pos is += in calculateAllSliderPaths()
+            if (Config.isCalculateSliderPathInGameStart() == false || (objDefine & 2) <= 0){
+                pos.x += data.getPosOffset();
+                pos.y += data.getPosOffset();
+            }
             if (objects.isEmpty() == false) {
                 distToNextObject = objects.peek().getTime() - data.getTime();
                 if (soundTimingPoint != null
