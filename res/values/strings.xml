@@ -81,6 +81,9 @@
 	<string name="menu_search_sort_date">Date</string>
 	<string name="menu_search_sort_creator">Creator</string>
 	<string name="menu_search_sort_artist">Artist</string>
+	<string name="menu_search_sort_bpm">Bpm</string>
+	<string name="menu_search_sort_stars">Stars</string>
+	<string name="menu_search_sort_length">Length</string>
 	<string name="menu_search_favsenabled">Favorites only: enabled</string>
 	<string name="menu_search_favsdisabled">Favorites only: disabled</string>
 
@@ -141,7 +144,7 @@
 	<string name="test_ed_storyboard">View storyboard (experiment)</string>
 
 	<!-- <string name="mod_precise_is_unrank_now">MOD_PRECISE is unrank now</string>-->
-	<string name="mods_sdpfprscrez_is_unrank_now">MOD:SD/PF/PR/SC/REZ is unrank now</string>
+	<string name="mods_somemods_is_unrank_now">MOD:SD/PF/PR/SC/REZ/FL/Scorev2 is unrank now</string>
 
 	<!-- new data after 1.6.7(beta1) -->
     <string name="beta_checking_upgrade">Checking Upgrade...</string>

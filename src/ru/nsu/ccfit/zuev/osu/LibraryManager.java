@@ -26,7 +26,7 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class LibraryManager {
-    private static final String VERSION = "library3.3";
+    private static final String VERSION = "library3.4";
     private static LibraryManager mgr = new LibraryManager();
     private ArrayList<BeatmapInfo> library;
     private Integer fileCount = 0;

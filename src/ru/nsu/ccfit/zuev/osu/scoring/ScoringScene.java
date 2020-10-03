@@ -24,6 +24,7 @@ import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
@@ -82,6 +83,47 @@ public class ScoringScene {
         String mapperStr = "Beatmap by " + trackInfo.getCreator();
         String playerStr = "Played by " + stat.getPlayerName() + " on " +
                 new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date(stat.getTime()));
+        if (stat.getChangeSpeed() != 1 || stat.isEnableForceAR()){
+            playerStr += " [";
+            if (stat.getChangeSpeed() != 1){
+                playerStr += String.format("%.2fx,", stat.getChangeSpeed());
+            }
+            if (stat.isEnableForceAR()){
+                playerStr += String.format("AR%.1f,", stat.getForceAR());
+            }
+            if (playerStr.endsWith(",")){
+                playerStr = playerStr.substring(0, playerStr.length() - 1);
+            }
+            playerStr += "]";
+        }
+        //calculatePP
+        if (Config.isDisplayScorePP()){
+            StringBuilder ppinfo = new StringBuilder();
+            ppinfo.append("[");
+            DifficultyReCalculator diffReCalulator = new DifficultyReCalculator();
+            float newstar = diffReCalulator.reCalculateStar(
+                            trackInfo,
+                            stat.getSpeed(), 
+                            diffReCalulator.getCS(stat, trackInfo));
+            diffReCalulator.calculaterPP(stat, trackInfo);
+            double pp = diffReCalulator.getTotalPP();
+            double aimpp = diffReCalulator.getAimPP();
+            double spdpp = diffReCalulator.getSpdPP();
+            double accpp = diffReCalulator.getAccPP();
+            diffReCalulator.calculaterMaxPP(stat, trackInfo);
+            double max_pp = diffReCalulator.getTotalPP();
+            double max_aimpp = diffReCalulator.getAimPP();
+            double max_spdpp = diffReCalulator.getSpdPP();
+            double max_accpp = diffReCalulator.getAccPP();
+            ppinfo.append(String.format("%.2f*,", newstar));
+            ppinfo.append(String.format("PP:%.2f/%.2f(", pp, max_pp));
+            ppinfo.append(String.format("Aim:%.0f/%.0f,", aimpp, max_aimpp));
+            ppinfo.append(String.format("Spd:%.0f/%.0f,", spdpp, max_spdpp));
+            ppinfo.append(String.format("Acc:%.0f/%.0f)", accpp, max_accpp));
+            ppinfo.append("]");
+            mapperStr += " " + ppinfo.toString();
+        }
+        //
         Debug.i("playedtime " + stat.getTime());
         final Text beatmapInfo = new Text(Utils.toRes(4), Utils.toRes(2),
                 ResourceManager.getInstance().getFont("font"), infoStr);
@@ -281,7 +323,13 @@ public class ScoringScene {
                     SongMenu.stopMusicStatic();
                     engine.setScene(menu.getScene());
                     Replay.oldMod = ModMenu.getInstance().getMod();
+                    Replay.oldChangeSpeed = ModMenu.getInstance().getChangeSpeed();
+                    Replay.oldForceAR = ModMenu.getInstance().getForceAR();
+                    Replay.oldEnableForceAR = ModMenu.getInstance().isEnableForceAR();
                     ModMenu.getInstance().setMod(stat.getMod());
+                    ModMenu.getInstance().setChangeSpeed(stat.getChangeSpeed());
+                    ModMenu.getInstance().setForceAR(stat.getForceAR());
+                    ModMenu.getInstance().setEnableForceAR(stat.isEnableForceAR());
 //					Replay.mod = stat.getMod();
                     game.startGame(trackToReplay, replay);
                     scene = null;
@@ -318,6 +366,12 @@ public class ScoringScene {
 
         float modX = mark.getX() - 30;
         final float modY = mark.getY() + mark.getHeight() * 2 / 3;
+        if (stat.getMod().contains(GameMod.MOD_SCOREV2)) {
+            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
+                    .getInstance().getTexture("selection-mod-scorev2"));
+            modX -= Utils.toRes(30);
+            scene.attachChild(modSprite);
+        }
         if (stat.getMod().contains(GameMod.MOD_HARDROCK)) {
             final Sprite modSprite = new Sprite(modX, modY, ResourceManager
                     .getInstance().getTexture("selection-mod-hardrock"));
@@ -333,6 +387,13 @@ public class ScoringScene {
         if (stat.getMod().contains(GameMod.MOD_HIDDEN)) {
             final Sprite modSprite = new Sprite(modX, modY, ResourceManager
                     .getInstance().getTexture("selection-mod-hidden"));
+            modX -= Utils.toRes(30);
+            scene.attachChild(modSprite);
+        }
+
+        if (stat.getMod().contains(GameMod.MOD_FLASHLIGHT)) {
+            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
+                    .getInstance().getTexture("selection-mod-flashlight"));
             modX -= Utils.toRes(30);
             scene.attachChild(modSprite);
         }
@@ -383,6 +444,11 @@ public class ScoringScene {
                     .getInstance().getTexture("selection-mod-halftime"));
             modX -= Utils.toRes(30);
             scene.attachChild(modSprite);
+        } else if (stat.getMod().contains(GameMod.MOD_SPEEDUP)) {
+            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
+                    .getInstance().getTexture("selection-mod-speedup"));
+            modX -= Utils.toRes(30);
+            scene.attachChild(modSprite);
         }
 
         if (stat.getMod().contains(GameMod.MOD_PRECISE)) {
@@ -412,9 +478,12 @@ public class ScoringScene {
                 || stat.getMod().contains(GameMod.MOD_SUDDENDEATH) 
                 || stat.getMod().contains(GameMod.MOD_PERFECT)
                 || stat.getMod().contains(GameMod.MOD_SMALLCIRCLE)
-                || stat.getMod().contains(GameMod.MOD_REALLYEASY)) {
+                || stat.getMod().contains(GameMod.MOD_REALLYEASY)
+                || stat.getMod().contains(GameMod.MOD_SPEEDUP)
+                || stat.getMod().contains(GameMod.MOD_FLASHLIGHT)
+                || stat.getMod().contains(GameMod.MOD_SCOREV2)){
                     //ToastLogger.showText(StringTable.get(R.string.mod_precise_is_unrank_now), true);
-                    ToastLogger.showText(StringTable.get(R.string.mods_sdpfprscrez_is_unrank_now), true);
+                    ToastLogger.showText(StringTable.get(R.string.mods_somemods_is_unrank_now), true);
                 }
                 else if(!stat.getMod().contains(GameMod.MOD_RELAX) && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)){
                     SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),

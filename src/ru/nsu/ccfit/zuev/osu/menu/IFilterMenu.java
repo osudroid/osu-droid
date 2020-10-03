@@ -21,5 +21,4 @@ public interface IFilterMenu {
     void hideMenu();
 
     void showMenu(SongMenu parent);
-
 }

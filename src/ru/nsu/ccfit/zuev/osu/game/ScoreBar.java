@@ -97,5 +97,5 @@ public class ScoreBar extends GameObject {
         lasthp = stat.getHp();
         update(0);
     }
-
+    
 }
