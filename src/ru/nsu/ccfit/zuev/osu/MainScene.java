@@ -214,6 +214,11 @@ public class MainScene implements IUpdateHandler {
                                 LibraryManager.getInstance().scanLibrary(GlobalManager.getInstance().getMainActivity());
                             }
                             GlobalManager.getInstance().getSongMenu().reload();
+                            //To fixed skin load bug in some Android 10
+                            if (Build.VERSION.SDK_INT >= 29) {
+                                String skinNow = Config.getSkinPath();
+                                ResourceManager.getInstance().loadSkin(skinNow);
+                            }
                         }
 
                         public void onComplete() {
