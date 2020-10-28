@@ -168,5 +168,6 @@
 	<string name="message_update_download_success">Update Successful!</string>
 	<string name="message_update_download_fail">Update fail, try again later</string>
 	<string name="message_update_ppy_unavailable">This map can not be downloaded on ppy\n\n</string>
-
+	
+	<string name="message_low_storage_space">Storage space is low. Free Storage: %s GB. This may cause replay/score submission bugs.</string>
 </resources>

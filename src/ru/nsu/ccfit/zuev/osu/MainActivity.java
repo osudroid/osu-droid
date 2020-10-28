@@ -16,11 +16,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.IBinder;
-import android.os.PowerManager;
+import android.os.*;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -34,6 +30,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
+import android.widget.Toast;
 import com.edlplan.ui.ActivityOverlay;
 import com.tencent.bugly.Bugly;
 import com.umeng.analytics.MobclickAgent;
@@ -57,6 +54,8 @@ import org.anddev.andengine.util.Debug;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
@@ -298,12 +297,38 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
                 GlobalManager.getInstance().getMainScene().loadBeatmap();
                 initPreferences();
+                availableInternalMemory();
                 if (willReplay) {
                     GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
                     willReplay = false;
                 }
             }
         });
+    }
+    /*
+    Accuracy isn't the best, but it's sufficient enough
+    to determine whether storage is low or not
+     */
+    private void availableInternalMemory() {
+        DecimalFormat df = new DecimalFormat("#.##");
+        df.setRoundingMode(RoundingMode.HALF_EVEN);
+
+        double availableMemory;
+        double minMem = 1073741824D; //1 GiB = 1073741824 bytes
+        File internal = Environment.getDataDirectory();
+        StatFs stat = new StatFs(internal.getPath());
+        if(Build.VERSION.SDK_INT >= 18) {
+            availableMemory = (double) stat.getAvailableBytes();
+        } else {
+            long blockSize = stat.getBlockSize();
+            long availableBlocks = stat.getAvailableBlocks();
+            availableMemory = (double) (availableBlocks * blockSize);
+        }
+        String toastMessage = String.format(StringTable.get(R.string.message_low_storage_space), df.format(availableMemory / minMem));
+        if(availableMemory < 0.5*minMem) { //I set 512MiB as a minimum
+            Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
+        }
+        Debug.i("Free Space: " + df.format(availableMemory / minMem));
     }
 
     @SuppressLint("ResourceType")
