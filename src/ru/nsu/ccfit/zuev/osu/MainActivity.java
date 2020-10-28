@@ -778,7 +778,7 @@ public class MainActivity extends BaseGameActivity implements
     private void checkPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
-
+            String[] PERMISSON_STORAGE = {"Manifest.permission.WRITE_EXTERNAL_STORAGE"};
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -786,13 +786,12 @@ public class MainActivity extends BaseGameActivity implements
                 builder.setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission
-                                .WRITE_EXTERNAL_STORAGE}, 2333);
+                        ActivityCompat.requestPermissions(MainActivity.this, PERMISSON_STORAGE, 2333);
                     }
                 });
                 builder.show();
             } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2333);
+                ActivityCompat.requestPermissions(this, PERMISSON_STORAGE, 2333);
             }
         }
     }

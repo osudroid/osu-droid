@@ -746,7 +746,7 @@ public class StatisticV2 implements Serializable {
         return multi;
     }
 
-    private String getExtraModString() {
+    public String getExtraModString() {
         StringBuilder builder = new StringBuilder();
         if (changeSpeed != 1){
             builder.append(String.format("x%.2f|", changeSpeed));
@@ -760,7 +760,7 @@ public class StatisticV2 implements Serializable {
         return builder.toString();
     }
 
-    private void setExtraModFromString(String s) {
+    public void setExtraModFromString(String s) {
         for (String str: s.split("\\|")){
             if (str.startsWith("x") && str.length() == 5){
                 changeSpeed = Float.parseFloat(str.substring(1));
