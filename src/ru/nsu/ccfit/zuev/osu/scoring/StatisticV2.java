@@ -750,10 +750,10 @@ public class StatisticV2 implements Serializable {
     private String getExtraModString() {
         StringBuilder builder = new StringBuilder();
         if (changeSpeed != 1){
-            builder.append(String.format(Locale.US, "x%.2f|", changeSpeed));
+            builder.append(String.format(Locale.ENGLISH, "x%.2f|", changeSpeed));
         }
         if (enableForceAR){
-            builder.append(String.format(Locale.US, "AR%.1f|", forceAR));
+            builder.append(String.format(Locale.ENGLISH, "AR%.1f|", forceAR));
         }
         if (builder.length() > 0){
             builder.delete(builder.length() - 1, builder.length());
