@@ -1923,12 +1923,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         cursorSprites = null;
 
         if (GlobalManager.getInstance().getSongService() != null) {
-            if (stat.getMod().contains(GameMod.MOD_NIGHTCORE) || stat.getMod().contains(GameMod.MOD_DOUBLETIME) 
-                || stat.getMod().contains(GameMod.MOD_HALFTIME) || stat.getMod().contains(GameMod.MOD_SPEEDUP)){
-                GlobalManager.getInstance().getSongService().stop();
-                GlobalManager.getInstance().getSongService().preLoad(filePath);
-                GlobalManager.getInstance().getSongService().play();
-            }
+            GlobalManager.getInstance().getSongService().stop();
+            GlobalManager.getInstance().getSongService().preLoad(filePath);
+            GlobalManager.getInstance().getSongService().play();
         }
 
         /*try {
@@ -1959,6 +1956,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         onExit();
+        ResourceManager.getInstance().getSound("failsound").stop();
 
         scene = new Scene();
         engine.setScene(oldScene);
