@@ -36,7 +36,11 @@ def getReleaseVersionName() {
 }
 
 def localProperties = new Properties()
-localProperties.load(new File(rootDir.getAbsolutePath(), 'local.properties').newDataInputStream())
+def localPropertiesFile = new File(rootDir.getAbsolutePath(), 'local.properties')
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.newDataInputStream())
+}
+
 
 apply plugin: 'com.android.application'
 
