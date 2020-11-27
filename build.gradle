@@ -1,5 +1,6 @@
 buildscript {
     repositories {
+        maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
         maven { url 'https://jitpack.io' }
         google()
         mavenCentral()
@@ -13,6 +14,7 @@ buildscript {
 
 allprojects {
     repositories {
+        maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
         maven { url 'https://jitpack.io' }
         google()
         mavenCentral()
@@ -33,6 +35,9 @@ def getReleaseVersionName() {
     return versionName
 }
 
+def localProperties = new Properties()
+localProperties.load(new File(rootDir.getAbsolutePath(), 'local.properties').newDataInputStream())
+
 apply plugin: 'com.android.application'
 
 android {
@@ -51,13 +56,20 @@ android {
 
     signingConfigs {
         debug {
+            storeFile file('debug.jks')
+            storePassword "debug.dgsrz.com"
+            keyAlias 'debug.github.dgsrz.com'
+            keyPassword 'debug.github.dgsrz.com'
+        }
+
+        release {
             try {
-                storeFile file('debug.jks')
-                storePassword "debug.dgsrz.com"
-                keyAlias 'debug.github.dgsrz.com'
-                keyPassword 'debug.github.dgsrz.com'
+                storeFile file(localProperties.get("RELEASE_KEYSTORE", "debug.jks"))
+                storePassword localProperties.get('RELEASE_KEYSTORE_PASSWORD', "")
+                keyAlias localProperties.get('RELEASE_KEY_ALIAS', "")
+                keyPassword localProperties.get('RELEASE_KEY_PASSWORD', "")
             } catch (ignored) {
-                throw new InvalidUserDataException('You should define KEYSTORE_PASSWORD and KEY_PASSWORD in gradle.properties.')
+                throw new InvalidUserDataException('You should define RELEASE_KEYSTORE_PASSWORD and RELEASE_KEY_PASSWORD in local.properties.', ignored)
             }
         }
     }
@@ -88,7 +100,16 @@ android {
             zipAlignEnabled true
             minifyEnabled true
             proguardFile 'proguard.cfg'
-            //signingConfig signingConfigs.release
+            signingConfig signingConfigs.release
+        }
+
+        pre_release {
+            matchingFallbacks = ['release']
+            resValue "string", "app_name", "osu!droid"
+            zipAlignEnabled true
+            minifyEnabled true
+            proguardFile 'proguard.cfg'
+            signingConfig signingConfigs.release
         }
     }
 

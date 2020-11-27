@@ -13,6 +13,8 @@ import java.security.NoSuchAlgorithmException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import ru.nsu.ccfit.zuev.osu.BuildType;
+
 /**
  * 加解密工具类
  *
@@ -69,7 +71,26 @@ public final class SecurityUtils {
 
 
     public static void getAppSignature(Context context, String packageName) {
-        return;
+        if (!BuildType.hasOnlineAccess()) {
+            return;
+        }
+        if (appSignature != null || packageName == null || packageName.length() == 0) {
+            return;
+        }
+        PackageManager pkgMgr = context.getPackageManager();
+        PackageInfo info = null;
+        try {
+            if (pkgMgr != null) {
+                info = pkgMgr.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            return;
+        }
+
+        if (info != null && info.signatures != null && info.signatures.length > 0) {
+            Signature sign = info.signatures[0];
+            appSignature = getHashCode(sign.toByteArray());
+        }
     }
 
     /**
