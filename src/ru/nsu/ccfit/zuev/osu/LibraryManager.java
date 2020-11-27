@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.app.Activity;
-import android.support.v4.app.ActivityCompat;
+import androidx.core.app.ActivityCompat;
 import android.Manifest;
 
 import org.anddev.andengine.util.Debug;
