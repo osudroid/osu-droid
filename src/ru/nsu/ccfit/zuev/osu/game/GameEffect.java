@@ -31,16 +31,21 @@ public class GameEffect extends GameObject implements IEntityModifierListener {
         this.texname = texname;
         if (texname.startsWith("hit0") || texname.startsWith("hit50") || texname.startsWith("hit100") || texname.startsWith("hit300")){
             if (ResourceManager.getInstance().isTextureLoaded(texname + "-0")) {
-                List<String> loadedScoreBarTextures = new ArrayList<>();
-                for (int i = 0; i < 60; i++) {
+                List<String> loadedTextures = new ArrayList<>();
+                int i, j;
+                for (i = 0; i < 60; i++) {
                     if (ResourceManager.getInstance().isTextureLoaded(texname + "-" + i))
-                        loadedScoreBarTextures.add(texname + "-" + i);
+                    loadedTextures.add(texname + "-" + i);
                     else break;
                 }
-                hit = new AnimSprite(0, 0, 60,
-                        loadedScoreBarTextures.toArray(new String[loadedScoreBarTextures.size()]));
+                for (j = i - 1; i < 30; i++){
+                    if (ResourceManager.getInstance().isTextureLoaded(texname + "-" + j))
+                    loadedTextures.add(texname + "-" + j);
+                    else break;
+                }
+                hit = new AnimSprite(0, 0, 60, loadedTextures.toArray(new String[loadedTextures.size()]));
                 anim = true;
-                fcount = loadedScoreBarTextures.size();
+                fcount = loadedTextures.size();
             }
             else{
                 hit = new Sprite(0, 0, ResourceManager.getInstance()
@@ -64,11 +69,12 @@ public class GameEffect extends GameObject implements IEntityModifierListener {
         hit.setPosition(pos.x - hit.getTextureRegion().getWidth() / 2, pos.y
                 - hit.getTextureRegion().getHeight() / 2);
         if (anim){
+            float totalLength = 0.0166f * fcount / 0.7f;
             hit.registerEntityModifier(new ParallelEntityModifier(this,
-                    new SequenceEntityModifier(
-                    ModifierFactory.newDelayModifier(0.016f * fcount),
-                    ModifierFactory.newAlphaModifier(0f,1f,0f),
-                    ModifierFactory.newFadeOutModifier(0f))));
+                    new SequenceEntityModifier(ModifierFactory.newScaleModifier(
+                        0.15f * totalLength , 1.0f * scale, 1.2f * scale), ModifierFactory
+                        .newScaleModifier(0.05f * totalLength , 1.2f * scale, 1.0f * scale),
+                        ModifierFactory.newAlphaModifier(0.5f * totalLength , 1, 0))));
         }
         else hit.registerEntityModifier(new ParallelEntityModifier(this, entityModifiers));
         hit.setScale(scale);
