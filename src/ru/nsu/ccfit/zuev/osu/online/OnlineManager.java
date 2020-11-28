@@ -147,7 +147,7 @@ public class OnlineManager {
         ssid = params[1];
         rank = Integer.parseInt(params[2]);
         score = Long.parseLong(params[3]);
-        accuracy = Float.parseFloat(params[4]);
+        accuracy = Integer.parseInt(params[4]) / 100000f;
         this.username = params[5];
         if (params.length >= 7) {
             avatarURL = params[6];
@@ -271,7 +271,7 @@ public class OnlineManager {
 
         rank = Integer.parseInt(resp[0]);
         score = Long.parseLong(resp[1]);
-        accuracy = Float.parseFloat(resp[2]);
+        accuracy = Integer.parseInt(resp[2]) / 100000f;
         mapRank = Integer.parseInt(resp[3]);
 
         if (resp.length >= 5) {

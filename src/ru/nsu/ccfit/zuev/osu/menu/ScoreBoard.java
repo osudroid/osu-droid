@@ -306,7 +306,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                         final int scoreID = Integer.parseInt(data[0]);
 
                         String totalScore = formatScore(Integer.parseInt(data[2]));
-                        long currTotalScore = Long.valueOf(data[2]);
+                        long currTotalScore = Long.parseLong(data[2]);
                         String titleStr = "#"
                                 + (i + 1)
                                 + " "
@@ -316,7 +316,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                                 totalScore, Integer.parseInt(data[3]));
                         long diffTotalScore = currTotalScore - lastTotalScore;
                         String accStr = ConvertModString(data[5]) + "\n"
-                                + String.format("%.2f", GameHelper.Round(Float.parseFloat(data[6]) * 100, 2)) + "%" + "\n"
+                                + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(Integer.valueOf(data[6]) / 1000f, 2)) + "%" + "\n"
                                 + (lastTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
                         lastTotalScore = currTotalScore;
                         initSprite(i, titleStr, accStr, data[4], true, scoreID, data[7], data[1]);
@@ -330,7 +330,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                     }
                     if (scores.size() > 0) {
                         String[] data = scores.get(scores.size() - 1).split("\\s+");
-                        if (data.length > 8 && data.length == 10) {
+                        if (data.length == 10) {
                             final int scoreID = Integer.parseInt(data[0]);
                             String totalScore = formatScore(Integer.parseInt(data[2]));
                             String titleStr = "#"
@@ -341,7 +341,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                                     + StringTable.format(R.string.menu_score,
                                     totalScore, Integer.parseInt(data[3]));
                             String accStr = ConvertModString(data[5]) + "\n"
-                                    + String.format("%.2f", GameHelper.Round(Integer.valueOf(data[6]) / 1000f, 2)) + "%" + "\n"
+                                    + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(Integer.valueOf(data[6]) / 1000f, 2)) + "%" + "\n"
                                     + "-";
                             initSprite(scores.size(), titleStr, accStr, data[4], true, scoreID, data[9], data[1]);
                         } else {
