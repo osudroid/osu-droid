@@ -36,9 +36,14 @@ public class TriangleDrawable extends Drawable {
     };
     private float width, height;
     private long time = -1;
+    private boolean preSpawnTriangles;
 
     public TriangleDrawable() {
+        this(true);
+    }
 
+    public TriangleDrawable(boolean preSpawnTriangles) {
+        this.preSpawnTriangles = preSpawnTriangles;
     }
 
     @Override
@@ -62,13 +67,15 @@ public class TriangleDrawable extends Drawable {
     }
 
     protected void onDraw(Canvas canvas) {
-        width = canvas.getWidth();
-        height = canvas.getHeight();
+        width = getBounds().width();
+        height = getBounds().height();
         paint.setColor(0xFFFFFFFF);
         if (time == -1) {
             time = System.currentTimeMillis();
-            for (int i = 0; i < 200; i++) {
-                update(36);
+            if (this.preSpawnTriangles) {
+                for (int i = 0; i < 200; i++) {
+                    update(36);
+                }
             }
             return;
         }
