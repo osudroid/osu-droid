@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="ru.nsu.ccfit.zuev.osuplus"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="ru.nsu.ccfit.zuev.osuplus"
       android:installLocation="auto">
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -14,11 +16,14 @@
     <uses-permission android:name ="android.permission.GET_TASKS" />
 
     <application
-            android:icon="@drawable/ic_launcher"
-            android:label="@string/app_name"
-            android:largeHeap="true"
-            android:name="ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject"
-            >
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:isGame="true"
+        android:allowAudioPlaybackCapture="true"
+        android:requestLegacyExternalStorage="true"
+        android:name="ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject"
+        tools:ignore="UnusedAttribute">
         <service android:name="ru.nsu.ccfit.zuev.audio.serviceAudio.SongService"/>
 
         <meta-data android:name="UMENG_APPKEY" android:value="54eb1969fd98c572df00001e"/>
@@ -30,7 +35,7 @@
             android:theme="@android:style/Theme.Translucent" />
 
         <provider
-            android:name="android.support.v4.content.FileProvider"
+            android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
@@ -75,12 +80,23 @@
         </activity>
 
         <activity
+            android:name="ru.nsu.ccfit.zuev.osu.PermissionActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:launchMode="singleInstance"
+            android:screenOrientation="sensorLandscape"
+            android:label="@string/app_name"
+            tools:ignore="LockedOrientationActivity">
+        </activity>
+
+        <activity
             android:name="ru.nsu.ccfit.zuev.osu.MainActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:launchMode="singleInstance"
             android:screenOrientation="sensorLandscape"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

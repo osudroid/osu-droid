@@ -55,6 +55,7 @@ public class Slider extends GameObject {
     private float tickTime;
     private float maxTime;
     private float scale;
+    private float length;
     private int repeatCount;
     private boolean reverse;
     private int[] soundId = new int[3];
@@ -110,25 +111,40 @@ public class Slider extends GameObject {
                      final float b, final float scale, int num, final int sound, final int repeats,
                      final float length, final String data, final TimingPoint timing,
                      final String customSound, final String tempSound, final boolean isFirstNote, final double realTime) {
+        init(listener,scene,pos,offset,time,r,g,b,scale,num,sound,repeats,length,data,timing,customSound,tempSound,isFirstNote,realTime,null);
+    }
+
+    public void init(final GameObjectListener listener, final Scene scene,
+                     final PointF pos, final float offset, final float time, final float r, final float g,
+                     final float b, final float scale, int num, final int sound, final int repeats,
+                     final float length, final String data, final TimingPoint timing,
+                     final String customSound, final String tempSound, final boolean isFirstNote, final double realTime,
+                     SliderPath sliderPath) {
         this.listener = listener;
         this.scene = scene;
         this.timing = timing;
         this.scale = scale;
+        this.pos = pos;
+        this.length = length;
         passedTime = -time;
         preTime = time;
-        //if (Config.isUseSuperSlider()) {
-        //	path = SupportSliderPath.parseDroidLinePath(pos, data, length);
-        //} else {
-            //fixed negative length silder bug
-            if(length < 0){
-                path = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
-                data.split("[|]"), 0, offset);
-            }
-            else{
-                path = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
-                data.split("[|]"), length, offset);
-            }
-        //}
+        if (sliderPath != null){
+            path = sliderPath;
+        } else{
+            //if (Config.isUseSuperSlider()) {
+            //	path = SupportSliderPath.parseDroidLinePath(pos, data, length);
+            //} else {
+                //fixed negative length silder bug
+                if (length < 0){
+                    path = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
+                    data.split("[|]"), 0, offset);
+                }
+                else {
+                    path = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
+                    data.split("[|]"), length, offset);
+                }
+            //}
+        }
 
         num += 1;
         if (SkinJson.get().isLimitComboTextLength()) {
@@ -268,11 +284,11 @@ public class Slider extends GameObject {
         }
         if (GameHelper.isHidden()) {
             number.init(scene, pos, scale,
-                    new SequenceEntityModifier(new FadeInModifier(time / 4),
-                            new FadeOutModifier(time / 4)));
+                    new SequenceEntityModifier(new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
+                            new FadeOutModifier(time / 4 * GameHelper.getTimeMultiplier())));
         } else {
             number.init(scene, pos, scale, new FadeInModifier(
-                    time / 2));
+                    time / 2 * GameHelper.getTimeMultiplier()));
         }
         scene.attachChild(startCircle, 0);
         scene.attachChild(approachCircle);
@@ -295,6 +311,10 @@ public class Slider extends GameObject {
         int tickCount = (int) (maxTime * GameHelper.getTickRate() / tickInterval);
         if(tickInterval == Float.NaN || tickInterval < GameHelper.getSliderTickLength() / 1000){
             tickCount = 0;
+        }
+        if ((maxTime * GameHelper.getTickRate() / tickInterval)
+        - (int) (maxTime * GameHelper.getTickRate() / tickInterval) < 0.001f){
+            tickCount--;
         }
         ticks.clear();
         for (int i = 1; i <= tickCount; i++) {
@@ -770,6 +790,9 @@ public class Slider extends GameObject {
                     color);
             //}
             // and go on...
+            if (passedTime >= maxTime){
+                over();
+            }
             return;
         }
         // Calculating score
@@ -1029,7 +1052,7 @@ public class Slider extends GameObject {
                     Utils.putSpriteAnchorCenter(tmpPoint, endOverlay);
                     Utils.putSpriteAnchorCenter(tmpPoint, endArrow);
                 }
-            } else if (percentage - dt <= 0.5f) {
+            } else if (percentage - dt / preTime <= 0.5f) {
                 // Setting up positions of slider parts
                 approachCircle.setAlpha(1);
                 startCircle.setAlpha(1);
@@ -1176,9 +1199,38 @@ public class Slider extends GameObject {
         ball.setPosition(ballpos.x - ball.getWidth() / 2,
                 ballpos.y - ball.getHeight() / 2);
         ball.setRotation(ballAngle);
+        if (GameHelper.isAuto() && GameHelper.isFlashLight()) {
+            listener.setFlashLightsPosition(ballpos.x, ballpos.y);
+        }
         // If we got 100% time, finishing slider
         if (percentage >= 1) {
             over();
         }
     }
+
+    @Override
+    public void tryHit(final float dt){
+        if (startHit == false) // If we didn't get start hit(click)
+        {
+            if (isHit() && -passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) // if
+            // we
+            // clicked
+            {
+                listener.registerAccuracy(passedTime);
+                startHit = true;
+                Utils.playHitSound(listener, soundId[0], sampleSet[0], addition[0]);
+                ticksGot++;
+                firstHitAccuracy = (int) (passedTime * 1000);
+                listener.onSliderHit(id, 30, null, path.points.get(0),
+                        false, color, GameObjectListener.SLIDER_START);
+            }
+            if (passedTime < 0) // we at approach time
+            {
+                if (startHit == true) {
+                    approachCircle.setAlpha(0);
+                }
+            }
+        }
+    }
+
 }

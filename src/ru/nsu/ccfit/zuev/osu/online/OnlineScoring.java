@@ -252,4 +252,8 @@ public class OnlineScoring {
             }
         });
     }
+
+    public boolean isAvatarLoaded() {
+        return avatarLoaded;
+    }
 }

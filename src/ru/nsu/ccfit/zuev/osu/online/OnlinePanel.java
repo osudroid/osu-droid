@@ -1,27 +1,56 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.widget.Toast;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
+import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.HorizontalAlign;
-
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class OnlinePanel extends Entity {
-    Entity onlineLayer = new Entity();
-    Entity messageLayer = new Entity();
-    Entity frontLayer = new Entity();
+    private Entity onlineLayer = new Entity();
+    private Entity messageLayer = new Entity();
+    private Entity frontLayer = new Entity();
 
-    ChangeableText rankText, nameText, scoreText, accText;
-    ChangeableText messageText, submessageText;
-    Sprite avatar = null;
+    public Rectangle rect;
+
+    private ChangeableText rankText, nameText, scoreText, accText;
+    private ChangeableText messageText, submessageText;
+    private Sprite avatar = null;
 
     public OnlinePanel() {
-        Rectangle rect = new Rectangle(0, 0, Utils.toRes(410), Utils.toRes(110));
+        rect = new Rectangle(0, 0, Utils.toRes(410), Utils.toRes(110)) {
+            @Override
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+                if (pSceneTouchEvent.isActionDown()) {
+                    final Activity activity = GlobalManager.getInstance().getMainActivity();
+                    boolean avatarLoad = OnlineScoring.getInstance().isAvatarLoaded();
+                    boolean stayOnline = OnlineManager.getInstance().isStayOnline();
+
+                    if (avatarLoad && OnlineManager.getInstance().isStayOnline()) {
+                        final Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://ops.dgsrz.com/profile.php?uid="
+                                + OnlineManager.getInstance().getUserId()));
+                        GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                        return true;
+                    } else {
+                        activity.runOnUiThread(() -> Toast.makeText(activity, avatarLoad || stayOnline ?
+                                R.string.userpanel_logging_in : R.string.userpanel_not_online, Toast.LENGTH_SHORT).show());
+                        return false;
+                    }
+                }
+                return false;
+            }
+        };
         rect.setColor(0.2f, 0.2f, 0.2f, 0.5f);
         attachChild(rect);
 
@@ -114,5 +143,4 @@ public class OnlinePanel extends Entity {
         avatar = new Sprite(0, 0, Utils.toRes(110), Utils.toRes(110), tex);
         frontLayer.attachChild(avatar);
     }
-
 }

@@ -2,7 +2,7 @@ package com.dgsrz.bancho.ui;
 
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
-import android.support.v4.view.MotionEventCompat;
+import androidx.core.view.MotionEventCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;

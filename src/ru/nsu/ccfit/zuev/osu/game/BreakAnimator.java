@@ -98,7 +98,7 @@ public class BreakAnimator extends GameObject {
         if (showMark) {
             final TextureRegion zeroRect = ResourceManager.getInstance()
                     .getTexture("score-0");
-            mark = new Sprite(Config.getRES_WIDTH() - zeroRect.getWidth() * 9,
+            mark = new Sprite(Config.getRES_WIDTH() - zeroRect.getWidth() * 11,
                     Utils.toRes(5), ResourceManager.getInstance().getTexture(
                     "ranking-" + stat.getMark() + "-small"));
             mark.setScale(1.2f);
@@ -139,8 +139,8 @@ public class BreakAnimator extends GameObject {
                     new DelayModifier(0.25f), new FadeOutModifier(0.025f),
                     new DelayModifier(0.025f), new FadeInModifier(0.025f),
                     new DelayModifier(0.6725f), new FadeOutModifier(0.3f)));
-            ResourceManager.getInstance().getCustomSound("section" + ending, 1)
-                    .play();
+            if (ResourceManager.getInstance().getCustomSound("section" + ending, 1) != null)
+                ResourceManager.getInstance().getCustomSound("section" + ending, 1).play();
         }
         if (length - time <= 1 && length - time + dt > 1) {
             for (final Sprite sp : arrows) {

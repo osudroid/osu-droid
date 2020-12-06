@@ -96,9 +96,10 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     }
 
     public static String ConvertModString(String s) {
+        String[] strMod = s.split("\\|", 2);
         String result = "";
-        for (int i = 0; i < s.length(); i++) {
-            switch (s.charAt(i)) {
+        for (int i = 0; i < strMod[0].length(); i++) {
+            switch (strMod[0].charAt(i)) {
                 case 'a':
                     result += "Auto,";
                     break;
@@ -119,6 +120,9 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                     break;
                 case 'h':
                     result += "HD,";
+                    break;
+                case 'i':
+                    result += "FL,";
                     break;
                 case 'd':
                     result += "DT,";
@@ -144,12 +148,36 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 case 'f':
                     result += "PF,";
                     break;
+                case 'b':
+                    result += "SU,";
+                    break;
+                case 'v':
+                    result += "ScoreV2,";
+                    break;
             }
+        }
+        if (strMod.length > 1){
+            result += ConvertExtraModString(strMod[1]);
         }
         if (result.length() == 0) {
             return "None";
         }
         return result.substring(0, result.length() - 1);
+    }
+
+    private static String ConvertExtraModString(String s) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String str: s.split("\\|")){
+            if (str.startsWith("x") && str.length() == 5){
+                stringBuilder.append(str.substring(1) + "x,");
+                continue;
+            }
+            if (str.startsWith("AR")){
+                stringBuilder.append(str + ",");
+                continue;
+            }
+        }
+        return stringBuilder.toString();
     }
 
     public ScoreBoardItems[] getScoreBoardItems() {
@@ -278,7 +306,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                         final int scoreID = Integer.parseInt(data[0]);
 
                         String totalScore = formatScore(Integer.parseInt(data[2]));
-                        long currTotalScore = Long.valueOf(data[2]);
+                        long currTotalScore = Long.parseLong(data[2]);
                         String titleStr = "#"
                                 + (i + 1)
                                 + " "
@@ -288,7 +316,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                                 totalScore, Integer.parseInt(data[3]));
                         long diffTotalScore = currTotalScore - lastTotalScore;
                         String accStr = ConvertModString(data[5]) + "\n"
-                                + String.format("%.2f", GameHelper.Round(Float.parseFloat(data[6]) * 100, 2)) + "%" + "\n"
+                                + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(Integer.valueOf(data[6]) / 1000f, 2)) + "%" + "\n"
                                 + (lastTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
                         lastTotalScore = currTotalScore;
                         initSprite(i, titleStr, accStr, data[4], true, scoreID, data[7], data[1]);
@@ -302,7 +330,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                     }
                     if (scores.size() > 0) {
                         String[] data = scores.get(scores.size() - 1).split("\\s+");
-                        if (data.length > 8 && data.length == 10) {
+                        if (data.length == 10) {
                             final int scoreID = Integer.parseInt(data[0]);
                             String totalScore = formatScore(Integer.parseInt(data[2]));
                             String titleStr = "#"
@@ -313,7 +341,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                                     + StringTable.format(R.string.menu_score,
                                     totalScore, Integer.parseInt(data[3]));
                             String accStr = ConvertModString(data[5]) + "\n"
-                                    + String.format("%.2f", GameHelper.Round(Integer.valueOf(data[6]) / 1000f, 2)) + "%" + "\n"
+                                    + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(Integer.valueOf(data[6]) / 1000f, 2)) + "%" + "\n"
                                     + "-";
                             initSprite(scores.size(), titleStr, accStr, data[4], true, scoreID, data[9], data[1]);
                         } else {

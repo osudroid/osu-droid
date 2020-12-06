@@ -54,8 +54,8 @@ public class Spinner extends GameObject {
 
     public Spinner() {
         ResourceManager.getInstance().checkSpinnerTextures();
-        center = Utils.trackToRealCoords(new PointF(Constants.MAP_WIDTH / 2,
-                Constants.MAP_HEIGHT / 2));
+        this.pos = new PointF(Constants.MAP_WIDTH / 2,Constants.MAP_HEIGHT / 2);
+        center = Utils.trackToRealCoords(pos);
         background = SpritePool.getInstance().getCenteredSprite(
                 "spinner-background", center);
         final float scaleX = Config.getRES_WIDTH() / background.getWidth();
@@ -269,6 +269,13 @@ public class Spinner extends GameObject {
         if (autoPlay) {
             dfill = 5 * 4 * dt;
             circle.setRotation((rotations + dfill / 4f) * 360);
+            //auto时，FL光圈绕中心旋转
+            if (GameHelper.isFlashLight()) {
+               float angle = (rotations + dfill / 4f) * 360;
+               float pX = center.x + 50 * (float)Math.sin(angle);
+               float pY = center.y + 50 * (float)Math.cos(angle);
+               listener.setFlashLightsPosition(pX, pY);
+            }
         }
         rotations += dfill / 4f;
         float percentfill = (Math.abs(rotations) + fullrotations)
@@ -319,5 +326,9 @@ public class Spinner extends GameObject {
                 (int) (metre.getBaseHeight() * (1 - Math.abs(percentfill))));
         oldMouse = v;
     }
-
+    
+    @Override
+    public void tryHit(final float dt){
+        return;
+    }
 }

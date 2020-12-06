@@ -1,5 +1,7 @@
 package test.tpdifficulty.tp;
 
+import android.graphics.PointF;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -55,7 +57,9 @@ public class AiModtpDifficulty {
 
             PreviousHitObject = hitObject;
         }
-
+        /* don't forget to add the last strain interval */
+        HighestStrains.add(MaximumStrain);
+        
         // Build the weighted sum over the highest strains for each interval
         double Difficulty = 0;
         double Weight = 1;
@@ -94,7 +98,6 @@ public class AiModtpDifficulty {
         // Fill our custom tpHitObject class, that carries additional information
         tpHitObjects = new ArrayList<tpHitObject>(hitObjects.size());
         float CircleRadius = (PLAYFIELD_WIDTH / 16.0f) * (1.0f - 0.7f * (circleSize - 5.0f) / 5.0f);
-
         for (HitObject hitObject : hitObjects) {
             tpHitObjects.add(new tpHitObject(hitObject, CircleRadius));
         }
@@ -102,6 +105,27 @@ public class AiModtpDifficulty {
         // Sort tpHitObjects by StartTime of the HitObjects - just to make sure. Not using CompareTo, since it results in a crash (HitObjectBase inherits MarshalByRefObject)
         Collections.sort(tpHitObjects);
 
+        // Calculates the flow angle of the Hitobjects
+        tpHitObject prev1 = null;
+        tpHitObject prev2 = null;
+        int i = 0;
+        for(tpHitObject hitObject : tpHitObjects){
+            if(i >= 2){
+                PointF v1 = new PointF(prev2.getNormPosStart().x - prev1.getNormPosEnd().x,
+                    prev2.getNormPosStart().y - prev1.getNormPosEnd().y);
+                PointF v2 = new PointF(hitObject.getNormPosStart().x - prev1.getNormPosEnd().x,
+                    hitObject.getNormPosStart().y - prev1.getNormPosEnd().y);
+                double dot = v1.x * v2.x + v1.y * v2.y;
+                double det = v1.x * v2.y - v1.y * v2.x;
+                hitObject.angle = Math.abs(Math.atan2(det, dot));
+            } 
+            else {
+                hitObject.angle = Double.NaN;
+            }
+            prev2 = prev1;
+            prev1 = hitObject;
+            ++i;
+        }
 
         if (CalculateStrainValues() == false) {
             System.out.println("Could not compute strain values. Aborting difficulty calculation.");

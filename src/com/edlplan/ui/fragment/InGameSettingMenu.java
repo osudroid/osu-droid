@@ -24,7 +24,13 @@ public class InGameSettingMenu extends BaseFragment {
 
     private static InGameSettingMenu menu;
     private CheckBox enableStoryboard;
+    private CheckBox showScoreboard;
+    private CheckBox enableNCWhenSpeedChange;
+    private CheckBox enableSpeedChange;
+    private CheckBox enableForceAR;
     private SeekBar backgroundBrightness;
+    private SeekBar changeSpeed;
+    private SeekBar forceAR;
 
     public static InGameSettingMenu getInstance() {
         if (menu == null) {
@@ -88,13 +94,40 @@ public class InGameSettingMenu extends BaseFragment {
                     .commit();
         });
 
-        CheckBox showScoreboard = findViewById(R.id.showScoreboard);
+        showScoreboard = findViewById(R.id.showScoreboard);
         showScoreboard.setChecked(Config.isShowScoreboard());
         showScoreboard.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Config.setShowScoreboard(isChecked);
             PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
                     .putBoolean("showscoreboard", isChecked)
                     .commit();
+        });
+
+        enableNCWhenSpeedChange = findViewById(R.id.enableNCwhenSpeedChange);
+        enableNCWhenSpeedChange.setChecked(ModMenu.getInstance().isEnableNCWhenSpeedChange());
+        enableNCWhenSpeedChange.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            ModMenu.getInstance().setEnableNCWhenSpeedChange(isChecked);
+        });
+
+        enableSpeedChange = findViewById(R.id.enableSpeedChange);
+        enableSpeedChange.setChecked(ModMenu.getInstance().getChangeSpeed() != 1.0f);
+        enableSpeedChange.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (!isChecked) {
+                ModMenu.getInstance().setChangeSpeed(1.0f);
+                ((TextView) findViewById(R.id.changeSpeedText)).setText(String.format("%.2fx", ModMenu.getInstance().getChangeSpeed()));
+                changeSpeed.setProgress(10);
+                ModMenu.getInstance().updateMultiplierText();
+            }
+            else if(ModMenu.getInstance().getChangeSpeed() == 1.0f){
+                enableSpeedChange.setChecked(false);
+            }
+        });
+
+        enableForceAR = findViewById(R.id.enableForceAR);
+        enableForceAR.setChecked(ModMenu.getInstance().isEnableForceAR());
+        enableForceAR.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            ModMenu.getInstance().setEnableForceAR(isChecked);
+            ModMenu.getInstance().updateMultiplierText();
         });
 
         backgroundBrightness = findViewById(R.id.backgroundBrightnessBar);
@@ -104,6 +137,7 @@ public class InGameSettingMenu extends BaseFragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 ((TextView) findViewById(R.id.brightPreviewText)).setText(String.valueOf(progress));
+                ((TextView) findViewById(R.id.bgBrightnessText)).setText(String.valueOf(progress) + "%");
                 int p = Math.round(FMath.clamp(255 * (progress / 100f), 0, 255));
                 findViewById(R.id.brightnessPreview).setBackgroundColor(Color.argb(255, p, p, p));
             }
@@ -113,6 +147,7 @@ public class InGameSettingMenu extends BaseFragment {
                 findViewById(R.id.brightnessPreviewLayout).setVisibility(View.VISIBLE);
                 int progress = seekBar.getProgress();
                 ((TextView) findViewById(R.id.brightPreviewText)).setText(String.valueOf(progress));
+                ((TextView) findViewById(R.id.bgBrightnessText)).setText(String.valueOf(progress) + "%");
                 int p = Math.round(FMath.clamp(255 * (progress / 100f), 0, 255));
                 findViewById(R.id.brightnessPreview).setBackgroundColor(Color.argb(255, p, p, p));
             }
@@ -120,6 +155,8 @@ public class InGameSettingMenu extends BaseFragment {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 findViewById(R.id.brightnessPreviewLayout).setVisibility(View.GONE);
+                int progress = seekBar.getProgress();
+                ((TextView) findViewById(R.id.bgBrightnessText)).setText(String.valueOf(progress) + "%");
                 Config.setBackgroundBrightness(seekBar.getProgress() / 100f);
                 PreferenceManager.getDefaultSharedPreferences(getContext())
                         .edit()
@@ -127,6 +164,90 @@ public class InGameSettingMenu extends BaseFragment {
                         .commit();
             }
         });
+        ((TextView) findViewById(R.id.bgBrightnessText)).setText(
+            Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(getContext()).getString("bgbrightness", "25")) + "%");
+
+        changeSpeed = findViewById(R.id.changeSpeedBar);
+        changeSpeed.setProgress((int)(ModMenu.getInstance().getChangeSpeed() * 20 - 10));
+        changeSpeed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float p = 0.5f + 0.05f * progress;
+                ((TextView) findViewById(R.id.changeSpeedText)).setText(String.format("%.2fx", p));
+                if (p == 1.0f){
+                    enableSpeedChange.setChecked(false);
+                }
+                else {
+                    enableSpeedChange.setChecked(true);
+                    ModMenu.getInstance().updateMultiplierText();
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                int progress = seekBar.getProgress();
+                float p = 0.5f + 0.05f * progress;
+                ((TextView) findViewById(R.id.changeSpeedText)).setText(String.format("%.2fx", p));
+                if (p == 1.0f){
+                    enableSpeedChange.setChecked(false);
+                }
+                else {
+                    enableSpeedChange.setChecked(true);
+                    ModMenu.getInstance().updateMultiplierText();
+                }
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                int progress = seekBar.getProgress();
+                float p = 0.5f + 0.05f * progress;
+                ((TextView) findViewById(R.id.changeSpeedText)).setText(String.format("%.2fx", p));
+                ModMenu.getInstance().setChangeSpeed(p);
+                if (p == 1.0f){
+                    enableSpeedChange.setChecked(false);
+                }
+                else {
+                    enableSpeedChange.setChecked(true);
+                    ModMenu.getInstance().updateMultiplierText();
+                }
+            }
+        });
+        ((TextView) findViewById(R.id.changeSpeedText)).setText(String.format("%.2fx", ModMenu.getInstance().getChangeSpeed()));
+
+        forceAR = findViewById(R.id.forceARBar);
+        forceAR.setProgress((int)(ModMenu.getInstance().getForceAR() * 10));
+        forceAR.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float p = 0.1f * progress;
+                ((TextView) findViewById(R.id.forceARText)).setText(String.format("AR%.1f", p));
+                if(ModMenu.getInstance().isEnableForceAR()){
+                    ModMenu.getInstance().updateMultiplierText();
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                int progress = seekBar.getProgress();
+                float p = 0.1f * progress;
+                ((TextView) findViewById(R.id.forceARText)).setText(String.format("AR%.1f", p));
+                if(ModMenu.getInstance().isEnableForceAR()){
+                    ModMenu.getInstance().updateMultiplierText();
+                }
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                int progress = seekBar.getProgress();
+                float p = 0.1f * progress;
+                ((TextView) findViewById(R.id.forceARText)).setText(String.format("AR%.1f", p));
+                ModMenu.getInstance().setForceAR(p);
+                if(ModMenu.getInstance().isEnableForceAR()){
+                    ModMenu.getInstance().updateMultiplierText();
+                }
+            }
+        });
+        ((TextView) findViewById(R.id.forceARText)).setText(String.format("AR%.1f", ModMenu.getInstance().getForceAR()));
     }
 
     @Override

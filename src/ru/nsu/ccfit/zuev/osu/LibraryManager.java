@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.app.Activity;
-import android.support.v4.app.ActivityCompat;
+import androidx.core.app.ActivityCompat;
 import android.Manifest;
 
 import org.anddev.andengine.util.Debug;
@@ -26,7 +26,7 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class LibraryManager {
-    private static final String VERSION = "library3.3";
+    private static final String VERSION = "library3.4";
     private static LibraryManager mgr = new LibraryManager();
     private ArrayList<BeatmapInfo> library;
     private Integer fileCount = 0;
@@ -41,19 +41,12 @@ public class LibraryManager {
     }
 
     public File getLibraryCacheFile() {
-        return new File(Config.getBeatmapPath(), String.format("library.%s.dat", VERSION));
-    }
-    
-    public boolean isReadStoragePermissionGranted(final Activity thisActivity) {
-        ActivityCompat.requestPermissions(thisActivity,
-                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                3);
-        return true;
+        // sorry for the janky code
+        return new File(GlobalManager.getInstance().getMainActivity().getFilesDir(), String.format("library.%s.dat", VERSION));
     }
     
     @SuppressWarnings("unchecked")
     synchronized public boolean loadLibraryCache(final Activity activity, boolean forceUpdate) {
-        boolean res=isReadStoragePermissionGranted(activity);
         library = new ArrayList<BeatmapInfo>();
         ToastLogger.addToLog("Loading library...");
         if (OSZParser.canUseSD() == false) {

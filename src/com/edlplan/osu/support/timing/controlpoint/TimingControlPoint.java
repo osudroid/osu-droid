@@ -20,6 +20,7 @@ public class TimingControlPoint extends ControlPoint {
     }
 
     public void setBeatLength(double beatLength) {
-        this.beatLength = FMath.clamp(beatLength, 6, 6000);
+        //this.beatLength = FMath.clamp(beatLength, 6, 6000);
+        this.beatLength = beatLength;
     }
 }

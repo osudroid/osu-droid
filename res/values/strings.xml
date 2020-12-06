@@ -40,6 +40,10 @@
 	<string name="dialog_delete_pp_make_sure">Really?</string>
 	<string name="dialog_delete_pp_deleted">PP reset</string>
 
+	<string name="dialog_exit_message">Are you sure you want to exit the game?</string>
+	<string name="dialog_exit_yes">Yes</string>
+	<string name="dialog_exit_no">No</string>
+
 	<string name="favorite_folder">Folder:</string>
 	<string name="favorite_default">Default</string>
 	<string name="favorite_select">Select</string>
@@ -77,6 +81,9 @@
 	<string name="menu_search_sort_date">Date</string>
 	<string name="menu_search_sort_creator">Creator</string>
 	<string name="menu_search_sort_artist">Artist</string>
+	<string name="menu_search_sort_bpm">Bpm</string>
+	<string name="menu_search_sort_stars">Stars</string>
+	<string name="menu_search_sort_length">Length</string>
 	<string name="menu_search_favsenabled">Favorites only: enabled</string>
 	<string name="menu_search_favsdisabled">Favorites only: disabled</string>
 
@@ -101,6 +108,9 @@
 	<string name="online_invconfirm">Passwords don\'t match</string>
 	<string name="online_invemail">Invaild e-mail</string>
 	<string name="online_regcomplete">Registration complete. Restart app to login</string>
+
+	<string name="userpanel_not_online">You are not online. Please log in or check your internet connection.</string>
+	<string name="userpanel_logging_in">Logging in, please wait.</string>
 
 	<!-- Color Picker -->
 	<string name="dialog_color_picker">Color Picker</string>
@@ -134,7 +144,7 @@
 	<string name="test_ed_storyboard">View storyboard (experiment)</string>
 
 	<!-- <string name="mod_precise_is_unrank_now">MOD_PRECISE is unrank now</string>-->
-	<string name="mods_sdpfprscrez_is_unrank_now">MOD:SD/PF/PR/SC/REZ is unrank now</string>
+	<string name="mods_somemods_is_unrank_now">MOD:SD/PF/PR/SC/REZ/FL/Scorev2 is unrank now</string>
 
 	<!-- new data after 1.6.7(beta1) -->
     <string name="beta_checking_upgrade">Checking Upgrade...</string>
@@ -158,5 +168,6 @@
 	<string name="message_update_download_success">Update Successful!</string>
 	<string name="message_update_download_fail">Update fail, try again later</string>
 	<string name="message_update_ppy_unavailable">This map can not be downloaded on ppy\n\n</string>
-
+	
+	<string name="message_low_storage_space">Storage space is low. Free Storage: %s GB. This may cause replay/score submission bugs.</string>
 </resources>

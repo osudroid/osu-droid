@@ -42,7 +42,7 @@ excluded_words:
   - edlplan
   - dgsrz
   - beatmap
-  -
+  - nsu
 
 # Would you like filenames to also be spellchecked?
 spellcheck_filenames: true
