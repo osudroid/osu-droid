@@ -55,6 +55,9 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 		this.mPaused = true;
 
 		this.mEngine = this.onLoadEngine();
+		if (this.mEngine == null) {
+			return;
+		}
 
 		this.applyEngineOptions(this.mEngine.getEngineOptions());
 
@@ -64,7 +67,9 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 	@Override
 	protected void onResume() {
 		super.onResume();
-
+		if (this.mEngine == null) {
+			return;
+		}
 		if(this.mPaused && this.mHasWindowFocused) {
 			this.doResume();
 		}
@@ -73,7 +78,9 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 	@Override
 	public void onWindowFocusChanged(final boolean pHasWindowFocus) {
 		super.onWindowFocusChanged(pHasWindowFocus);
-
+		if (this.mEngine == null) {
+			return;
+		}
 		if(pHasWindowFocus) {
 			if(this.mPaused) {
 				this.doResume();
@@ -90,7 +97,9 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 	@Override
 	protected void onPause() {
 		super.onPause();
-
+		if (this.mEngine == null) {
+			return;
+		}
 		if(!this.mPaused) {
 			this.doPause();
 		}
@@ -102,6 +111,9 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 
 		android.os.Process.killProcess(android.os.Process.myPid());
 
+		if (this.mEngine == null) {
+			return;
+		}
 		this.mEngine.interruptUpdateThread();
 
 		this.onUnloadResources();
@@ -109,6 +121,9 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 
 	@Override
 	public void onUnloadResources() {
+		if (this.mEngine == null) {
+			return;
+		}
 		if(this.mEngine.getEngineOptions().needsMusic()) {
 			this.getMusicManager().releaseAll();
 		}
@@ -160,6 +175,9 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 	// ===========================================================
 
 	private void doResume() {
+		if (this.mEngine == null) {
+			return;
+		}
 		if(!this.mGameLoaded) {
 			this.onLoadResources();
 			final Scene scene = this.onLoadScene();
@@ -178,6 +196,9 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 	}
 
 	private void doPause() {
+		if (this.mEngine == null) {
+			return;
+		}
 		this.mPaused = true;
 		this.releaseWakeLock();
 
@@ -188,10 +209,16 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 	}
 
 	public void runOnUpdateThread(final Runnable pRunnable) {
+		if (this.mEngine == null) {
+			return;
+		}
 		this.mEngine.runOnUpdateThread(pRunnable);
 	}
 
 	protected void onSetContentView() {
+		if (this.mEngine == null) {
+			return;
+		}
 		this.mRenderSurfaceView = new RenderSurfaceView(this);
 		this.mRenderSurfaceView.setEGLConfigChooser(false);
 		this.mRenderSurfaceView.setRenderer(this.mEngine);
