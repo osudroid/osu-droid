@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.edlplan.ui.ActivityOverlay;
 import com.tencent.bugly.Bugly;
 import com.umeng.analytics.MobclickAgent;
+import com.umeng.commonsdk.UMConfigure;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
@@ -572,7 +573,6 @@ public class MainActivity extends BaseGameActivity implements
             }
         }
         activityVisible = true;
-        MobclickAgent.onResume(this);
         //HideNaviBar
         if (Config.isHideNaviBar()) {
             if (Build.VERSION.SDK_INT >= 11) {
@@ -662,7 +662,6 @@ public class MainActivity extends BaseGameActivity implements
             }
         }
         activityVisible = false;
-        MobclickAgent.onPause(this);
     }
 
     @Override
