@@ -108,12 +108,11 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-
+        if (this.mEngine == null) {
+            return;
+        }
 		android.os.Process.killProcess(android.os.Process.myPid());
 
-		if (this.mEngine == null) {
-			return;
-		}
 		this.mEngine.interruptUpdateThread();
 
 		this.onUnloadResources();
