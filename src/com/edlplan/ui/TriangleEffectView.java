@@ -11,10 +11,12 @@ import android.view.View;
 public class TriangleEffectView extends View {
     private static final String NAMESPACE = "http://schemas.android.com/apk/res/com.edlplan.customview";
 
+    private TriangleDrawable triangleDrawable;
+
     public TriangleEffectView(Context context) {
         super(context);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            setBackground(new TriangleDrawable());
+            setBackground(triangleDrawable = new TriangleDrawable());
         }
     }
 
@@ -25,7 +27,7 @@ public class TriangleEffectView extends View {
             if (attrs != null) {
                 preSpawnTriangles = attrs.getAttributeBooleanValue(NAMESPACE, "preSpawnTriangles", true);
             }
-            setBackground(new TriangleDrawable(preSpawnTriangles));
+            setBackground(triangleDrawable = new TriangleDrawable(preSpawnTriangles));
         }
     }
 
@@ -36,7 +38,7 @@ public class TriangleEffectView extends View {
             if (attrs != null) {
                 preSpawnTriangles = attrs.getAttributeBooleanValue(NAMESPACE, "preSpawnTriangles", true);
             }
-            setBackground(new TriangleDrawable(preSpawnTriangles));
+            setBackground(triangleDrawable = new TriangleDrawable(preSpawnTriangles));
         }
     }
 
@@ -47,12 +49,16 @@ public class TriangleEffectView extends View {
         if (attrs != null) {
             preSpawnTriangles = attrs.getAttributeBooleanValue(NAMESPACE, "preSpawnTriangles", true);
         }
-        setBackground(new TriangleDrawable(preSpawnTriangles));
+        setBackground(triangleDrawable = new TriangleDrawable(preSpawnTriangles));
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         invalidate();
+    }
+
+    public void setXDistribution(TriangleDrawable.PosXDistribution xDistribution) {
+        triangleDrawable.setXDistribution(xDistribution);
     }
 }

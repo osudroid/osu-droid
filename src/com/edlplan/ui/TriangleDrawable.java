@@ -37,6 +37,7 @@ public class TriangleDrawable extends Drawable {
     private float width, height;
     private long time = -1;
     private boolean preSpawnTriangles;
+    private PosXDistribution xDistribution = null;
 
     public TriangleDrawable() {
         this(true);
@@ -64,6 +65,12 @@ public class TriangleDrawable extends Drawable {
     @Override
     public int getOpacity() {
         return PixelFormat.TRANSPARENT;
+    }
+
+    public void setXDistribution(PosXDistribution xDistribution) {
+        this.xDistribution = xDistribution;
+        this.time = -1;
+        this.triangles.clear();
     }
 
     protected void onDraw(Canvas canvas) {
@@ -98,7 +105,8 @@ public class TriangleDrawable extends Drawable {
 
     private PointF nextPos() {
         return new PointF(
-                (float) FMath.clamp(width / 2 * (1 + 2 * random.nextGaussian()), 0, width),
+                (float) FMath.clamp(width / 2 * (1 +
+                        (xDistribution != null ? xDistribution.generate() : 2 * random.nextGaussian())), 0, width),
                 height
         );
     }
@@ -153,6 +161,11 @@ public class TriangleDrawable extends Drawable {
             }
         }
     }
+
+    public interface PosXDistribution {
+        float generate();
+    }
+
 
     public class Triangle {
 

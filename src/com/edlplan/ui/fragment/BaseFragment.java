@@ -26,12 +26,22 @@ public abstract class BaseFragment extends Fragment {
 
     private boolean created = false;
 
+    private boolean dismissOnBackPress = true;
+
     public boolean isDismissOnBackgroundClick() {
         return dismissOnBackgroundClick;
     }
 
     public void setDismissOnBackgroundClick(boolean dissmissOnBackgroundClick) {
         this.dismissOnBackgroundClick = dissmissOnBackgroundClick;
+    }
+
+    public void setDismissOnBackPress(boolean dismissOnBackPress) {
+        this.dismissOnBackPress = dismissOnBackPress;
+    }
+
+    public boolean isDismissOnBackPress() {
+        return dismissOnBackPress;
     }
 
     public boolean isCreated() {
@@ -94,6 +104,12 @@ public abstract class BaseFragment extends Fragment {
 
     public void dismiss() {
         ActivityOverlay.dismissOverlay(this);
+    }
+
+    public void callDismissOnBackPress() {
+        if (isDismissOnBackPress()) {
+            dismiss();
+        }
     }
 
     @Nullable

@@ -30,7 +30,7 @@ public class ActivityOverlay {
 
     public static synchronized boolean onBackPress() {
         if (fragmentManager != null && displayingOverlay.size() > 0) {
-            displayingOverlay.get(displayingOverlay.size() - 1).dismiss();
+            displayingOverlay.get(displayingOverlay.size() - 1).callDismissOnBackPress();
             return true;
         }
         return false;
