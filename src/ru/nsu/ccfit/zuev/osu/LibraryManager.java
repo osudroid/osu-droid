@@ -45,16 +45,8 @@ public class LibraryManager {
         return new File(GlobalManager.getInstance().getMainActivity().getFilesDir(), String.format("library.%s.dat", VERSION));
     }
     
-    public boolean isReadStoragePermissionGranted(final Activity thisActivity) {
-        ActivityCompat.requestPermissions(thisActivity,
-                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                3);
-        return true;
-    }
-    
     @SuppressWarnings("unchecked")
     synchronized public boolean loadLibraryCache(final Activity activity, boolean forceUpdate) {
-        boolean res=isReadStoragePermissionGranted(activity);
         library = new ArrayList<BeatmapInfo>();
         ToastLogger.addToLog("Loading library...");
         if (OSZParser.canUseSD() == false) {
