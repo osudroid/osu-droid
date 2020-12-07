@@ -726,17 +726,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     Utils.toRes(480), font, "Avg offset: 0ms     ");
             fpsText.setPosition(Config.getRES_WIDTH() - fpsText.getWidth() - 5, Config.getRES_HEIGHT() - fpsText.getHeight() - 10);
             accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
-            bgScene.attachChild(fpsText);
-            bgScene.attachChild(accText);
+            fgScene.attachChild(fpsText);
+            fgScene.attachChild(accText);
 
             ChangeableText memText = null;
             if (BuildConfig.DEBUG) {
                 memText = new ChangeableText(Utils.toRes(780),
                         Utils.toRes(520), font, "M: 100/100");
-                bgScene.attachChild(memText);
+                fgScene.attachChild(memText);
             }
             final ChangeableText fmemText = memText;
-            bgScene.registerUpdateHandler(new FPSLogger(0.5f) {
+            fgScene.registerUpdateHandler(new FPSLogger(0.5f) {
                 @Override
                 protected void onLogFPS() {
                     fpsText.setText("FPS: " + this.mFrames
@@ -794,11 +794,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         for (int i = 0; i < CursorCount; i++) {
             cursorIIsDown[i] = false;
-        }
-        if(GameHelper.isFlashLight()){
-            flashlightSprite = new FlashLightSprite();
-            flashlightSprite.setShowing(false);
-            fgScene.attachChild(flashlightSprite);
         }
 
         comboWas100 = false;
@@ -973,7 +968,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-scorev2");
             effect.init(
-                    mgScene,
+                    fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
                             .toRes(130)),
                     scale,
@@ -989,7 +984,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-easy");
             effect.init(
-                    mgScene,
+                    fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
                             .toRes(130)),
                     scale,
@@ -1004,7 +999,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-hardrock");
             effect.init(
-                    mgScene,
+                    fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
                             .toRes(130)),
                     scale,
@@ -1020,7 +1015,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-nofail");
             effect.init(
-                    mgScene,
+                    fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
                             .toRes(130)),
                     scale,
@@ -1037,7 +1032,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-hidden");
             effect.init(
-                    mgScene,
+                    fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
                             .toRes(130)),
                     scale,
@@ -1055,7 +1050,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-doubletime");
             effect.init(
-                    mgScene,
+                    fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
                             .toRes(130)),
                     scale,
@@ -1072,7 +1067,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-nightcore");
             effect.init(
-                    mgScene,
+                    fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
                             .toRes(130)),
                     scale,
@@ -1089,7 +1084,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-speedup");
             effect.init(
-                    mgScene,
+                    fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
                             .toRes(130)),
                     scale,
@@ -1106,7 +1101,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-halftime");
             effect.init(
-                    mgScene,
+                    fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
                             .toRes(130)),
                     scale,
@@ -1123,7 +1118,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-precise");
             effect.init(
-                    mgScene,
+                    fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
                             .toRes(130)),
                     scale,
@@ -1140,7 +1135,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-suddendeath");
             effect.init(
-                    mgScene,
+                    fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
                             .toRes(130)),
                     scale,
@@ -1157,7 +1152,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-perfect");
             effect.init(
-                    mgScene,
+                    fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
                             .toRes(130)),
                     scale,
@@ -1174,7 +1169,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-smallcircle");
             effect.init(
-                    mgScene,
+                    fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
                             .toRes(130)),
                     scale,
@@ -1191,7 +1186,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-reallyeasy");
             effect.init(
-                    mgScene,
+                    fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
                             .toRes(130)),
                     scale,
@@ -1204,6 +1199,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             effectOffset += 25;
             timeOffset += 0.25f;
         }
+
         kiai = false;
         kiaiRect = new Rectangle(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT());
@@ -1214,7 +1210,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         unranked = new Sprite(0, 0, ResourceManager.getInstance().getTexture("play-unranked"));
         unranked.setPosition(Config.getRES_WIDTH() / 2 - unranked.getWidth() / 2, 80);
         unranked.setVisible(false);
-        bgScene.attachChild(unranked);
+        fgScene.attachChild(unranked);
 
         if (stat.getMod().contains(GameMod.MOD_RELAX)
                 || stat.getMod().contains(GameMod.MOD_AUTOPILOT)
@@ -1226,7 +1222,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         replayText.setVisible(false);
         replayText.setPosition(0, 140);
         replayText.setAlpha(0.7f);
-        bgScene.attachChild(replayText);
+        fgScene.attachChild(replayText, 0);
         String playname = null;
         if (stat.getMod().contains(GameMod.MOD_AUTO) || replaying) {
             playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStat().getPlayerName() : "osu!";
@@ -1238,6 +1234,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (Config.isShowScoreboard()) {
             scoreBoard = new DuringGameScoreBoard(fgScene, stat, playname);
             addPassiveObject(scoreBoard);
+        }
+
+        if(GameHelper.isFlashLight()){
+            flashlightSprite = new FlashLightSprite();
+            flashlightSprite.setShowing(false);
+            fgScene.attachChild(flashlightSprite, 0);
         }
 
 /*        PointF point1 = Utils.trackToRealCoords(new PointF(0, 0));
