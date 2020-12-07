@@ -9,8 +9,8 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 public class FlashLightSprite extends Entity{
     private Sprite sprite;
     private boolean showing = false;
-    private float size = 2f;
-    public FlashLightSprite(){
+    private float size = 8f;
+    public FlashLightSprite() {
         TextureRegion tex = ResourceManager.getInstance().getTexture("flashlight_cursor");
         sprite = new Sprite(-tex.getWidth() / 2, -tex.getHeight() / 2, tex);
         sprite.setScale(size);
