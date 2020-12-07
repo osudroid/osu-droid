@@ -19,21 +19,40 @@
         android:orientation="vertical">
 
         <com.edlplan.ui.TriangleEffectView
-            android:layout_width="220dp"
-            android:layout_height="110dp"
+            android:layout_width="320dp"
+            android:layout_height="120dp"
             edl:edgeClampRate="1.0"
             android:layout_centerInParent="true" />
 
         <View
-            android:layout_width="160dp"
-            android:layout_height="105dp"
-            android:layout_marginBottom="5dp"
-            android:background="#FFFFFF"
+            android:id="@+id/confirm_card"
+            android:layout_width="260dp"
+            android:layout_height="110dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/rounded_rect_small"
             android:layout_centerInParent="true"/>
 
+        <RelativeLayout
+            android:alpha="0.7"
+            android:layout_alignTop="@id/confirm_card"
+            android:layout_centerHorizontal="true"
+            android:layout_width="260dp"
+            android:layout_height="wrap_content">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:background="@color/triangleBackground" />
+
+            <com.edlplan.ui.TriangleEffectView
+                edl:freeze="true"
+                android:layout_width="match_parent"
+                android:layout_height="5dp" />
+        </RelativeLayout>
+
         <com.edlplan.ui.TriangleEffectView
-            android:layout_width="220dp"
-            android:layout_height="110dp"
+            android:layout_width="320dp"
+            android:layout_height="120dp"
             edl:freeze="true"
             edl:edgeClampRate="1.0"
             android:layout_centerInParent="true" />
@@ -52,14 +71,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="50dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginRight="50dp"
                 android:layout_marginBottom="10dp"
+                android:background="@drawable/rounded_rect_alpha"
+                android:padding="10dp"
                 android:text="@string/menu_properties_delete_confirm"
+                android:textColor="#FF3333"
                 android:textStyle="bold" />
 
             <Button
                 android:id="@+id/okButton"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_marginTop="-5dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/dialog_ok"

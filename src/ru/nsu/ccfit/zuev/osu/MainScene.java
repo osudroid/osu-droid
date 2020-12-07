@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.PowerManager;
 import android.util.Log;
 
+import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.umeng.analytics.MobclickAgent;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -1074,20 +1075,17 @@ public class MainScene implements IUpdateHandler {
     public void showExitDialog() {
         GlobalManager.getInstance().getMainActivity().runOnUiThread(new Runnable() {
             public void run() {
-                AlertDialog.Builder builder = new AlertDialog.Builder(GlobalManager.getInstance().getMainActivity());
-                builder.setMessage(R.string.dialog_exit_message);
-                builder.setPositiveButton(R.string.dialog_exit_yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        exit();
-                        PowerManager.WakeLock wakeLock = GlobalManager.getInstance().getMainActivity().getWakeLock();
-                        if (wakeLock != null && wakeLock.isHeld()) {
-                            wakeLock.release();
+                new ConfirmDialogFragment().setMessage(R.string.dialog_exit_message).showForResult(
+                        isAccepted -> {
+                            if (isAccepted) {
+                                exit();
+                                PowerManager.WakeLock wakeLock = GlobalManager.getInstance().getMainActivity().getWakeLock();
+                                if (wakeLock != null && wakeLock.isHeld()) {
+                                    wakeLock.release();
+                                }
+                            }
                         }
-                    }
-                });
-                builder.setNegativeButton(R.string.dialog_exit_no, null);
-                builder.show();
+                );
             }
         });
     }
