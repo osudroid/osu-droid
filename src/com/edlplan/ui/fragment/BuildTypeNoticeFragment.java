@@ -30,7 +30,7 @@ public class BuildTypeNoticeFragment extends BaseFragment {
     @Override
     protected void onLoadView() {
         ((TriangleEffectView) findViewById(R.id.bg_triangles)).setXDistribution(
-                ()-> (float) Math.cos(Math.random() * Math.PI)
+                ()-> (float) (2f/(1 + Math.exp((Math.random() * 2 - 1) * 10)) - 1)
         );
         playOnLoadAnim();
     }
@@ -59,7 +59,8 @@ public class BuildTypeNoticeFragment extends BaseFragment {
         View body = findViewById(R.id.frg_body);
         body.animate().cancel();
         body.animate()
-                .translationY(100)
+                .scaleX(2)
+                .scaleY(2)
                 .setDuration(1000)
                 .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
                 .setListener(new BaseAnimationListener() {

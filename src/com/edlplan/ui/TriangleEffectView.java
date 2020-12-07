@@ -9,7 +9,7 @@ import android.util.AttributeSet;
 import android.view.View;
 
 public class TriangleEffectView extends View {
-    private static final String NAMESPACE = "http://schemas.android.com/apk/res/com.edlplan.customview";
+    private static final String NAMESPACE = "http://ui.edlplan.com/customview";
 
     private TriangleDrawable triangleDrawable;
 
@@ -23,33 +23,37 @@ public class TriangleEffectView extends View {
     public TriangleEffectView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            boolean preSpawnTriangles = true;
-            if (attrs != null) {
-                preSpawnTriangles = attrs.getAttributeBooleanValue(NAMESPACE, "preSpawnTriangles", true);
-            }
-            setBackground(triangleDrawable = new TriangleDrawable(preSpawnTriangles));
+            setBackground(triangleDrawable = createDrawable(attrs));
         }
     }
 
     public TriangleEffectView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            boolean preSpawnTriangles = true;
-            if (attrs != null) {
-                preSpawnTriangles = attrs.getAttributeBooleanValue(NAMESPACE, "preSpawnTriangles", true);
-            }
-            setBackground(triangleDrawable = new TriangleDrawable(preSpawnTriangles));
+            setBackground(triangleDrawable = createDrawable(attrs));
         }
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public TriangleEffectView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+
+        setBackground(triangleDrawable = createDrawable(attrs));
+    }
+
+    protected TriangleDrawable createDrawable(@Nullable AttributeSet attrs) {
         boolean preSpawnTriangles = true;
         if (attrs != null) {
             preSpawnTriangles = attrs.getAttributeBooleanValue(NAMESPACE, "preSpawnTriangles", true);
         }
-        setBackground(triangleDrawable = new TriangleDrawable(preSpawnTriangles));
+        TriangleDrawable triangle = new TriangleDrawable(preSpawnTriangles);
+        if (attrs != null) {
+            if (attrs.getAttributeBooleanValue(NAMESPACE, "freeze", false)) {
+                triangle.setFreeze(true);
+            }
+            triangle.setEdgeClampRate(attrs.getAttributeFloatValue(NAMESPACE, "edgeClampRate", triangle.getEdgeClampRate()));
+        }
+        return triangle;
     }
 
     @Override

@@ -38,6 +38,10 @@ public class TriangleDrawable extends Drawable {
     private long time = -1;
     private boolean preSpawnTriangles;
     private PosXDistribution xDistribution = null;
+    private float defaultXDistributionScale = 10;
+    private float baseSpeed = 15;
+    private float edgeClampRate = 0.2f;
+    private boolean freeze = false;
 
     public TriangleDrawable() {
         this(true);
@@ -67,10 +71,26 @@ public class TriangleDrawable extends Drawable {
         return PixelFormat.TRANSPARENT;
     }
 
+    public void setFreeze(boolean freeze) {
+        this.freeze = freeze;
+    }
+
     public void setXDistribution(PosXDistribution xDistribution) {
         this.xDistribution = xDistribution;
         this.time = -1;
         this.triangles.clear();
+    }
+
+    public void setDefaultXDistributionScale(float defaultXDistributionScale) {
+        this.defaultXDistributionScale = defaultXDistributionScale;
+    }
+
+    public void setEdgeClampRate(float edgeClampRate) {
+        this.edgeClampRate = edgeClampRate;
+    }
+
+    public float getEdgeClampRate() {
+        return edgeClampRate;
     }
 
     protected void onDraw(Canvas canvas) {
@@ -88,7 +108,10 @@ public class TriangleDrawable extends Drawable {
         }
         int dt = (int) (System.currentTimeMillis() - time);
         time += dt;
-        update(dt * 2);
+        if (!freeze) {
+            update(dt * 2);
+        }
+
         for (Triangle triangle : triangles) {
             path.rewind();
             path.moveTo(triangle.center.x, triangle.center.y - triangle.size);
@@ -103,17 +126,23 @@ public class TriangleDrawable extends Drawable {
         return (float) Math.max(1 - 1.5 * Math.abs(random.nextGaussian()), 0.1);
     }
 
+    private float defaultX() {
+        // return 2 * random.nextGaussian();
+        return (float) (2f / (1 + Math.exp((Math.random() * 2 - 1) * defaultXDistributionScale)) - 1);
+    }
+
     private PointF nextPos() {
         return new PointF(
-                (float) FMath.clamp(width / 2 * (1 +
-                        (xDistribution != null ? xDistribution.generate() : 2 * random.nextGaussian())), 0, width),
+                FMath.clamp(width / 2 * (1 +
+                        (xDistribution != null ? xDistribution.generate() : defaultX())), 0, width),
                 height
         );
     }
 
     private float nextSize() {
-        return random.nextInt(200);
+        //return random.nextInt(200);
         //return (float) (Math.min(width, height) * 0.8 * (Math.min(1, Math.abs(random.nextGaussian())) * 0.8 + 0.2));
+        return (float) (Math.pow(Math.random(), 2) * 200);
     }
 
     private void spawnOneTriangle() {
@@ -121,10 +150,12 @@ public class TriangleDrawable extends Drawable {
         triangle.color = colors[random.nextInt(colors.length)];
         triangle.alpha = nextAlpha();
         triangle.center = nextPos();
+
         triangle.speed = (float) (15 * (Math.abs(random.nextGaussian()) * 0.4 + 0.6));
         triangle.size = nextSize();
         triangle.center.y += triangle.size;
         triangle.lifeTime = 8000;
+        triangle.center.x = FMath.clamp(triangle.center.x, triangle.size * edgeClampRate, width - triangle.size * edgeClampRate);
         triangle.fixBound();
         if (triangle.size < 20 || triangle.lifeTime < 100) {
             return;
