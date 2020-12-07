@@ -121,7 +121,7 @@ public class ScoringScene {
             ppinfo.append(String.format("Spd:%.0f/%.0f,", spdpp, max_spdpp));
             ppinfo.append(String.format("Acc:%.0f/%.0f)", accpp, max_accpp));
             ppinfo.append("]");
-            mapperStr += " " + ppinfo.toString();
+            playerStr += " " + ppinfo.toString();
         }
         //
         Debug.i("playedtime " + stat.getTime());
