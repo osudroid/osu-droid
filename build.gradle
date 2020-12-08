@@ -1,6 +1,9 @@
 buildscript {
+    ext {
+        kotlin_version = '1.3.72'
+    }
     repositories {
-        maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
         maven { url 'https://jitpack.io' }
         google()
         mavenCentral()
@@ -10,12 +13,13 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 allprojects {
     repositories {
-        maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
         maven { url 'https://jitpack.io' }
         google()
         mavenCentral()
@@ -25,7 +29,7 @@ allprojects {
 }
 
 def getReleaseVersionCode() {
-    def versionCode = (int)(new Date().getTime() / 1000)
+    def versionCode = (int) (new Date().getTime() / 1000)
     println('versionCode: ' + versionCode)
     return versionCode
 }
@@ -45,6 +49,8 @@ if (localPropertiesFile.exists()) {
 
 
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 29
@@ -172,4 +178,5 @@ dependencies {
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:bbeae03503'
     implementation project(path: ':LibBASS')
     implementation 'androidx.cardview:cardview:1.0.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
