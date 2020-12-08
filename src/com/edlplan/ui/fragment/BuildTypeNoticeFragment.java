@@ -1,15 +1,23 @@
 package com.edlplan.ui.fragment;
 
 import android.animation.Animator;
+import android.os.Build;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+
+import androidx.annotation.RequiresApi;
 
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.utils.Lazy;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 import com.edlplan.ui.TriangleEffectView;
+
+import org.anddev.andengine.util.StreamUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -27,11 +35,24 @@ public class BuildTypeNoticeFragment extends BaseFragment {
         return R.layout.fragment_build_type_notice;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onLoadView() {
         ((TriangleEffectView) findViewById(R.id.bg_triangles)).setXDistribution(
                 ()-> (float) (2f/(1 + Math.exp((Math.random() * 2 - 1) * 10)) - 1)
         );
+        findViewById(R.id.button_view_changelist).setOnClickListener(v -> {
+            String markdown = null;
+            try {
+                InputStream in = getContext().getAssets().open("app/README.md");
+                markdown = StreamUtils.readFully(in);
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                markdown = e.getMessage();
+            }
+            new MarkdownFragment().setMarkdown(markdown).show();
+        });
         playOnLoadAnim();
     }
 

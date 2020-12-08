@@ -48,6 +48,7 @@
             android:textSize="16sp" />
 
         <Button
+            android:id="@+id/button_view_changelist"
             android:textColor="#FF5722"
             android:text="Click to see change list (WIP)"
             android:layout_width="wrap_content"
