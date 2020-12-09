@@ -58,6 +58,8 @@ public class Config {
     private static boolean showCursor = false;
     private static boolean accurateSlider = true;
     private static float scaleMultiplier = 0;
+    private static float playfieldSize = 1.0f;
+    private static boolean shrinkPlayfieldDownwards = false;
     private static boolean hideNaviBar = false;
     private static boolean showScoreboard = true;
     private static boolean enablePP = true;
@@ -117,6 +119,9 @@ public class Config {
 
         setBackgroundBrightness(Integer.parseInt(prefs.getString(
                 "bgbrightness", "25")) / 100f);
+        setPlayfieldSize(Integer.parseInt(prefs.getString(
+            "playfieldsize", "100")) / 100f);
+        shrinkPlayfieldDownwards = prefs.getBoolean("shrinkPlayfieldDownwards", true);
         sliderBorders = prefs.getBoolean("sliderborders", true);
         complexAnimations = prefs.getBoolean("complexanimations", true);
         accurateSlider = true;//prefs.getBoolean("demoSpline", true);
@@ -777,5 +782,21 @@ public class Config {
 
     public static void setCursorSize() {
         Config.cursorSize = cursorSize;
+    }
+
+    public static float getPlayfieldSize() {
+        return playfieldSize;
+    }
+
+    public static void setPlayfieldSize(final float playfieldSize){
+        Config.playfieldSize = playfieldSize;
+    }
+
+    public static boolean isShrinkPlayfieldDownwards(){
+        return shrinkPlayfieldDownwards;
+    }
+
+    public static void setShrinkPlayfieldDownwards(boolean shrinkPlayfieldDownwards){
+        Config.shrinkPlayfieldDownwards = shrinkPlayfieldDownwards;
     }
 }

@@ -13,6 +13,7 @@ import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
+import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.entity.modifier.DelayModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
@@ -715,6 +716,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private void prepareScene() {
         scene.setOnSceneTouchListener(this);
         // bgScene.attachChild(mVideo);
+        if (GlobalManager.getInstance().getCamera() instanceof SmoothCamera) {
+            SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
+            camera.setZoomFactorDirect(Config.getPlayfieldSize());
+            if (Config.isShrinkPlayfieldDownwards()) {
+                camera.setCenterDirect(Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT() / 2 * Config.getPlayfieldSize());
+            }
+        }
         setBackground();
 
         if (Config.isShowFPS()) {
@@ -1817,6 +1825,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 replay.setStat(stat);
                 replay.save(replayFile);
             }
+            if (GlobalManager.getInstance().getCamera() instanceof SmoothCamera) {
+                SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
+                camera.setZoomFactorDirect(1f);
+                if (Config.isShrinkPlayfieldDownwards()) {
+                    camera.setCenterDirect(Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT() / 2);
+                }
+            }
             if (scoringScene != null) {
                 if (replaying) {
                     ModMenu.getInstance().setMod(Replay.oldMod);
@@ -1957,7 +1972,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         onExit();
         ResourceManager.getInstance().getSound("failsound").stop();
-
+        if (GlobalManager.getInstance().getCamera() instanceof SmoothCamera) {
+            SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
+            camera.setZoomFactorDirect(1f);
+            if (Config.isShrinkPlayfieldDownwards()) {
+                camera.setCenterDirect(Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT() / 2);
+            }
+        }
         scene = new Scene();
         engine.setScene(oldScene);
     }
