@@ -144,12 +144,12 @@ public class OnlineMapInfo {
     }
 
     public int getBeatmapsStateFromHash(TrackInfo t) {
-        if (!Config.isRetrieveBeatmapInfo()) {
-            return 7;
-        }
         this.map = t;
         update = null;
         updateNeccessary = false;
+        if (!Config.isRetrieveBeatmapInfo()) {
+            return 7;
+        }
         // 0"No connection", 1"ranking_disabled", 2"ranking_ranked", 3"ranking_latest" , 4"ranking_loved", 5"ranking_unsubmitted", 6"ranking_download", 7"ranking_unknown"
         //ppy                   |bloodcat
         //4 loved               |4          |4
