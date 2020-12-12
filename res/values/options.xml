@@ -263,7 +263,7 @@
     <string name="opt_show_first_approach_circle_summary">Do not hide the first approach circle in hidden mods</string>
 
     <string name="opt_apikey_title">[Beta] osu!ppy API Key</string>
-    <string name="opt_apikey_summary">Uses osu!ppy API to get beatmaps\' information. &#xD;If key is invalid, uses bloodcat instead (might be outdated/bad connection)</string>
+    <string name="opt_apikey_summary">Uses osu!ppy API to get beatmaps\' information if \"Display beatmap ranking status\" is enabled. &#xD;If key is invalid, uses bloodcat instead (might be outdated/bad connection)</string>
 
     <string name="opt_show_scoreboard_summary">Show scoreboard of selected beatmap during game</string>
     <string name="opt_show_scoreboard_title">Show scoreboard</string>
@@ -294,4 +294,7 @@
 
     <string name="opt_display_score_pp_title">Display PP in score</string>
     <string name="opt_display_score_pp_summary">Displays PP value in score result screen</string>
+
+    <string name="opt_retrieve_beatmap_info_title">[Beta] Display beatmap ranking status</string>
+    <string name="opt_retrieve_beatmap_info_summary">Displays beatmap ranking status when viewing global beatmap leaderboard</string>
 </resources>

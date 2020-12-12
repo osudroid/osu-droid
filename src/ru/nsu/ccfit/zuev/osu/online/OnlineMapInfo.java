@@ -144,6 +144,9 @@ public class OnlineMapInfo {
     }
 
     public int getBeatmapsStateFromHash(TrackInfo t) {
+        if (!Config.isRetrieveBeatmapInfo()) {
+            return 7;
+        }
         this.map = t;
         update = null;
         updateNeccessary = false;

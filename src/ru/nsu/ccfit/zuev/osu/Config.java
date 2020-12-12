@@ -29,6 +29,7 @@ public class Config {
     private static String skinTopPath = skinPath;
     private static String scorePath = corePath + "Scores/";
     private static String APIKey = "";
+    private static boolean retrieveBeatmapInfo = true;
     private static int errorMeter = 0;
     private static int spinnerStyle = 0;
     private static boolean showFirstApproachCircle = false;
@@ -777,5 +778,13 @@ public class Config {
 
     public static void setCursorSize() {
         Config.cursorSize = cursorSize;
+    }
+
+    public static boolean isRetrieveBeatmapInfo() {
+        return retrieveBeatmapInfo;
+    }
+
+    public static void setRetrieveBeatmapInfo(boolean retrieveBeatmapInfo) {
+        Config.retrieveBeatmapInfo = retrieveBeatmapInfo;
     }
 }
