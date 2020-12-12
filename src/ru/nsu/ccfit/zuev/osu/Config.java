@@ -267,6 +267,7 @@ public class Config {
                 .getDefaultSharedPreferences(context);
 
         APIKey = prefs.getString("APIKey", "");
+        retrieveBeatmapInfo = prefs.getBoolean("retrieveBeatmapInfo", true);
         onlineUsername = prefs.getString("onlineUsername", "");
         onlinePassword = prefs.getString("onlinePassword", null);
         stayOnline = prefs.getBoolean("stayOnline", true);
