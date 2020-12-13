@@ -60,7 +60,6 @@ import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
-import ru.nsu.ccfit.zuev.osu.online.OnlineMapInfo;
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
@@ -102,7 +101,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private ScrollBar scrollbar;
     private ChangeableText trackInfo, mapper, beatmapInfo, beatmapInfo2, dimensionInfo;
     private boolean isSelectComplete = true;
-    private OnlineMapInfo ppy = null;
     private HashMap<Integer, String> mapStateHashmap = new HashMap<Integer, String>();
     private int mapState;
     private AnimSprite scoringSwitcher = null;
@@ -140,10 +138,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         return items;
     }
 
-    public OnlineMapInfo getOnlineMapInfo() {
-        return ppy;
-    }
-
     public void init(final Activity context, final Engine engine,
                      final GameScene pGame) {
         this.engine = engine;
@@ -166,7 +160,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public synchronized void load() {
-        ppy = new OnlineMapInfo();
         mapStateHashmap.put(0, "Offline");
         mapStateHashmap.put(1, "Loading");
         mapStateHashmap.put(2, "Ranked");
@@ -658,15 +651,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
         scoringSwitcher.setFrame(7);
         if (selectedTrack == null) return;
-        (new Thread() {
-            public void run() {
-                int state = ppy.getBeatmapsStateFromHash(selectedTrack);
-                mapState = state == 0 ? ppy.getBeatmapsStateFromHash(selectedTrack) : state;
-                updateInfo(selectedTrack, state);
-                scoringSwitcher.setFrame(state);
-                ppy.setUpdateNeccessary(state == 6);
-            }
-        }).start();
     }
 
     public Scene getScene() {
@@ -1299,7 +1283,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
             item = selectedItem;
         }
-        (new PropsMenuFragment()).show(SongMenu.this, item, ppy, mapStateHashmap.get(mapState));
+        (new PropsMenuFragment()).show(SongMenu.this, item, mapStateHashmap.get(mapState));
     }
 
     public void showDeleteScoreMenu(int scoreId) {
