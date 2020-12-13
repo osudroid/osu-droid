@@ -116,16 +116,17 @@ android {
             resValue "string", "app_name", "osu!droid"
             zipAlignEnabled true
             minifyEnabled true
-            proguardFile 'proguard.cfg'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
             signingConfig signingConfigs.release
         }
 
         pre_release {
             matchingFallbacks = ['release']
             resValue "string", "app_name", "osu!droid"
-            zipAlignEnabled true
-            minifyEnabled true
-            proguardFile 'proguard.cfg'
+            zipAlignEnabled false
+            minifyEnabled false
+            debuggable true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
             signingConfig signingConfigs.release
         }
     }
