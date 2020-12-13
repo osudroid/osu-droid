@@ -11,6 +11,12 @@ android {
         versionName "1.0"
     }
 
+    lintOptions {
+        abortOnError true
+        ignoreWarnings true
+        disable 'MissingTranslation', 'ExpiredTargetSdkVersion', 'ProtectedPermissions', 'AppLinkUrlError'
+    }
+
     buildTypes {
         release {
             minifyEnabled false

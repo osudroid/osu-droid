@@ -64,6 +64,11 @@ android {
         ndk {
             abiFilters 'armeabi', 'x86', 'armeabi-v7a'
         }
+        multiDexEnabled = true
+    }
+
+    packagingOptions {
+        exclude 'META-INF/proguard/coroutines.pro'
     }
 
     signingConfigs {
@@ -179,4 +184,6 @@ dependencies {
     implementation project(path: ':LibBASS')
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
 }
