@@ -12,6 +12,7 @@ import com.umeng.commonsdk.UMConfigure;
 
 import ru.nsu.ccfit.zuev.osu.AppException;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
+import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 
 public class SaveServiceObject extends Application {
 
@@ -48,7 +49,7 @@ public class SaveServiceObject extends Application {
     public void onCreate() {
         super.onCreate();
         //注册App异常崩溃处理器
-        UMConfigure.init(this, "5fccbf9d19bda368eb483d62", "Main", UMConfigure.DEVICE_TYPE_PHONE, "");
+        UMConfigure.init(this, "5fccbf9d19bda368eb483d62", String.format("Main[%s]", BuildConfig.BUILD_TYPE), UMConfigure.DEVICE_TYPE_PHONE, "");
         MobclickAgent.setPageCollectionMode(MobclickAgent.PageMode.AUTO);
         Thread.setDefaultUncaughtExceptionHandler(AppException.getAppExceptionHandler());
         if (Build.VERSION.SDK_INT > 14) {

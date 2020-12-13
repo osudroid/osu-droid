@@ -23,14 +23,17 @@ class BuildTypeNoticeFragment : BaseFragment() {
         findViewById<View>(R.id.button_view_changelist)!!.setOnClickListener {
             var markdown: String?
             try {
-                val `in` = context!!.assets.open("app/README.md")
+                val `in` = context!!.assets.open("app/changelog.md")
                 markdown = StreamUtils.readFully(`in`)
                 `in`.close()
             } catch (e: IOException) {
                 e.printStackTrace()
                 markdown = e.message
             }
-            MarkdownFragment().setMarkdown(markdown).show()
+            MarkdownFragment()
+                    .setTitle(R.string.changelog_title)
+                    .setMarkdown(markdown)
+                    .show()
         }
         playOnLoadAnim()
     }

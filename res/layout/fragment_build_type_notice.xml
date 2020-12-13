@@ -50,7 +50,7 @@
         <Button
             android:id="@+id/button_view_changelist"
             android:textColor="#FF5722"
-            android:text="Click to see change list (WIP)"
+            android:text="@string/click_to_see_change_list"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
