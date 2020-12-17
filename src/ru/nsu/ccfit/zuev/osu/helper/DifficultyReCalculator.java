@@ -289,7 +289,9 @@ public class DifficultyReCalculator {
         // scale the speed value with accuracy and OD
         speed *= (0.95 + Math.pow(base_od, 2) / 750) * Math.pow(accuracy, (14.5 - Math.max(base_od, 8)) / 2);
         // scale the speed value with # of 50s to punish doubletapping
-        speed *= Math.pow(0.98, Math.max(0, stat.getHit50() - nobjects / 500));
+        if (accuracy != 1f) {
+            speed *= Math.pow(0.98, Math.max(0, stat.getHit50() - nobjects / 500));
+        }
         if (mods.contains(GameMod.MOD_RELAX)) {
             speed *= 0;
         }
