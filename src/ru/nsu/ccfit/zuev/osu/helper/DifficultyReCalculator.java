@@ -225,8 +225,7 @@ public class DifficultyReCalculator {
             length_bonus += Math.log10(nobjects_over_2k) * 0.5;
         }
 
-        double combo_break = Math.min(1.0, Math.pow(combo, 0.8) /
-            Math.pow(max_combo, 0.8));
+        double combo_break = Math.min(1.0, Math.pow((double) combo / max_combo, 0.8));
         /* ar bonus -------------------------------------------- */
         double ar_bonus = 0.0;
 
