@@ -191,11 +191,11 @@ public class DifficultyReCalculator {
     }
     //must use reCalculateStar() before this
     public void calculaterPP(final StatisticV2 stat, final TrackInfo track){
-        pp(tpDifficulty, track, stat, stat.getAccuracy(), stat.getMisses());
+        pp(tpDifficulty, track, stat, stat.getAccuracy());
     }
     //must use reCalculateStar() before this
     public void calculaterMaxPP(final StatisticV2 stat, final TrackInfo track){
-        pp(tpDifficulty, track, stat, 1f, 0);
+        pp(tpDifficulty, track, stat, 1f);
     }
     //copy from koohii.java
     private double pp_base(double stars)
@@ -206,13 +206,14 @@ public class DifficultyReCalculator {
     //copy from koohii.java
     private void pp(AiModtpDifficulty tpDifficulty, TrackInfo track,
                         StatisticV2 stat,
-                        float accuracy, int nmiss){
+                        float accuracy){
         /* global values --------------------------------------- */
         EnumSet<GameMod> mods = stat.getMod();
         int max_combo = stat.getMaxCombo();
         int combo = track.getMaxCombo();
         int ncircles = track.getHitCircleCount();
         int nobjects = track.getTotalHitObjectCount();
+        int nmiss = stat.getMisses();
         float base_ar = getAR(stat, track);
         float base_od = getOD(stat, track);
 
