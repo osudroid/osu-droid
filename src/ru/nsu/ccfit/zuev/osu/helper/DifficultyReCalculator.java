@@ -191,15 +191,11 @@ public class DifficultyReCalculator {
     }
     //must use reCalculateStar() before this
     public void calculaterPP(final StatisticV2 stat, final TrackInfo track){
-        pp(tpDifficulty.getAimStars(),tpDifficulty.getSpeedStars(),track.getMaxCombo(),track.getHitCircleCount(),
-            track.getTotalHitObjectCount(),getAR(stat,track),getOD(stat,track),stat.getMod(),
-            stat.getMaxCombo(),stat.getAccuracy(),stat.getMisses());
+        pp(tpDifficulty, track, stat, stat.getAccuracy());
     }
     //must use reCalculateStar() before this
     public void calculaterMaxPP(final StatisticV2 stat, final TrackInfo track){
-        pp(tpDifficulty.getAimStars(),tpDifficulty.getSpeedStars(),track.getMaxCombo(),track.getHitCircleCount(),
-            track.getTotalHitObjectCount(),getAR(stat,track),getOD(stat,track),stat.getMod(),
-            track.getMaxCombo(),1f,0);
+        pp(tpDifficulty, track, stat, 1f);
     }
     //copy from koohii.java
     private double pp_base(double stars)
@@ -208,11 +204,19 @@ public class DifficultyReCalculator {
             / 100000.0;
     }
     //copy from koohii.java
-    private void pp(double aim_stars, double speed_stars,
-                            int max_combo, int ncircles, int nobjects,
-                            float base_ar, float base_od, EnumSet<GameMod> mods,
-                            int combo, float accuracy, int nmiss){
+    private void pp(AiModtpDifficulty tpDifficulty, TrackInfo track,
+                        StatisticV2 stat,
+                        float accuracy){
         /* global values --------------------------------------- */
+        EnumSet<GameMod> mods = stat.getMod();
+        int max_combo = stat.getMaxCombo();
+        int combo = track.getMaxCombo();
+        int ncircles = track.getHitCircleCount();
+        int nobjects = track.getTotalHitObjectCount();
+        int nmiss = stat.getMisses();
+        float base_ar = getAR(stat, track);
+        float base_od = getOD(stat, track);
+
         double nobjects_over_2k = nobjects / 2000.0;
 
         double length_bonus = 0.95 + 0.4 *
@@ -222,29 +226,28 @@ public class DifficultyReCalculator {
             length_bonus += Math.log10(nobjects_over_2k) * 0.5;
         }
 
-        double miss_penality = Math.pow(0.97, nmiss);
-        double combo_break = Math.pow(combo, 0.8) /
-            Math.pow(max_combo, 0.8);
-        if (combo > max_combo){
-            combo_break = 1.0;
-        }
+        double combo_break = Math.min(1.0, Math.pow((double) combo / max_combo, 0.8));
         /* ar bonus -------------------------------------------- */
-        double ar_bonus = 1.0;
+        double ar_bonus = 0.0;
 
         if (base_ar > 10.33) {
-            ar_bonus += 0.3 * (base_ar - 10.33);
+            ar_bonus += 0.4 * (base_ar - 10.33);
         }
 
         else if (base_ar < 8.0) {
-            ar_bonus +=  0.01 * (8.0 - base_ar);
+            ar_bonus +=  0.1 * (8.0 - base_ar);
         }
+
+        ar_bonus = 1 + Math.min(ar_bonus, ar_bonus * nobjects / 1000);
         
         /* aim pp ---------------------------------------------- */
-        aim = pp_base(aim_stars);
+        aim = pp_base(tpDifficulty.getAimStars());
         aim *= length_bonus;
-        aim *= miss_penality;
         aim *= combo_break;
         aim *= ar_bonus;
+
+        // aim miss penalty
+        aim *= 0.97 * Math.pow(1 - Math.pow((double) nmiss / nobjects, 0.775), nmiss);
 
         double hd_bonus = 1.0;
         if (mods.contains(GameMod.MOD_HIDDEN)) {
@@ -273,18 +276,23 @@ public class DifficultyReCalculator {
             aim *= 0;
         }
         /* speed pp -------------------------------------------- */
-        speed = pp_base(speed_stars);
+        speed = pp_base(tpDifficulty.getSpeedStars());
         speed *= length_bonus;
-        speed *= miss_penality;
         speed *= combo_break;
         if (base_ar > 10.33) {
             speed *= ar_bonus;
         }
         speed *= hd_bonus;
 
-        /* similar to aim acc and od bonus */
-        speed *= 0.02 + accuracy;
-        speed *= 0.96 + od_squared / 1600.0;
+        // speed miss penalty
+        speed *= 0.97 * Math.pow(1 - Math.pow((double) nmiss / nobjects, 0.775), Math.pow(nmiss, 0.875));
+
+        // scale the speed value with accuracy and OD
+        speed *= (0.95 + Math.pow(base_od, 2) / 750) * Math.pow(accuracy, (14.5 - Math.max(base_od, 8)) / 2);
+        // scale the speed value with # of 50s to punish doubletapping
+        if (accuracy != 1f) {
+            speed *= Math.pow(0.98, Math.max(0, stat.getHit50() - nobjects / 500));
+        }
         if (mods.contains(GameMod.MOD_RELAX)) {
             speed *= 0;
         }
@@ -309,7 +317,7 @@ public class DifficultyReCalculator {
         double final_multiplier = 1.12;
 
         if (mods.contains(GameMod.MOD_NOFAIL)){
-            final_multiplier *= 0.90;
+            final_multiplier *= Math.max(0.9, 1.0 - 0.02 * nmiss);
         }
 
         //if ((mods & MODS_SO) != 0) {
