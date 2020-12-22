@@ -58,17 +58,11 @@
         <item>100%</item>
         <item>90%</item>
         <item>80%</item>
-        <item>70%</item>
-        <item>60%</item>
-        <item>50%</item>
     </string-array>
     <string-array name="set_playfield_values">
         <item>100</item>
         <item>90</item>
         <item>80</item>
-        <item>70</item>
-        <item>60</item>
-        <item>50</item>
     </string-array>
     <string name="opt_onlineOpt">Account Option</string>
 
