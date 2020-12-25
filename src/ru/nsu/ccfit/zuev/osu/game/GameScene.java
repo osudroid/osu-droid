@@ -6,6 +6,7 @@ import lt.ekgame.beatmap_analyzer.beatmap.HitObject;
 
 import com.dgsrz.bancho.game.sprite.VideoSprite;
 import com.edlplan.ext.EdExtensionHelper;
+import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
@@ -1278,6 +1279,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
 
+
+
     public RGBColor getComboColor(int num) {
         return combos.get(num % combos.size());
     }
@@ -2371,8 +2374,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return false;
         }
         final int i = pSceneTouchEvent.getPointerID();
+        float pTouchX = FMath.clamp(pSceneTouchEvent.getX(), 0, Config.getRES_WIDTH());
+        float pTouchY = FMath.clamp(pSceneTouchEvent.getY(), 0, Config.getRES_HEIGHT());
         if (pSceneTouchEvent.isActionDown()) {
-            if (pSceneTouchEvent.getX() > Config.getRES_WIDTH()) {
+            if (pTouchX > Config.getRES_WIDTH()) {
                 for (final Cursor cursor : cursors) {
                     cursor.mouseOldDown = false;
                 }
@@ -2382,17 +2387,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             cursors[i].mouseDownOffset = (pSceneTouchEvent.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier;
             for (int j = 0; j < cursors.length; j++)
                 cursors[j].mouseOldDown = false;
-            PointF gamePoint = Utils.realToTrackCoords(new PointF(pSceneTouchEvent.getX(), pSceneTouchEvent.getY()));
-            cursors[i].mousePos.x = pSceneTouchEvent.getX();
-            cursors[i].mousePos.y = pSceneTouchEvent.getY();
+            PointF gamePoint = Utils.realToTrackCoords(new PointF(pTouchX, pTouchY));
+            cursors[i].mousePos.x = pTouchX;
+            cursors[i].mousePos.y = pTouchY;
             if (replay != null) {
                 replay.addPress(secPassed, gamePoint, i);
             }
             cursorIIsDown[i] = true;
         } else if (pSceneTouchEvent.isActionMove()) {
-            PointF gamePoint = Utils.realToTrackCoords(new PointF(pSceneTouchEvent.getX(), pSceneTouchEvent.getY()));
-            cursors[i].mousePos.x = pSceneTouchEvent.getX();
-            cursors[i].mousePos.y = pSceneTouchEvent.getY();
+            PointF gamePoint = Utils.realToTrackCoords(new PointF(pTouchX, pTouchY));
+            cursors[i].mousePos.x = pTouchX;
+            cursors[i].mousePos.y = pTouchY;
             if (replay != null) {
                 replay.addMove(secPassed, gamePoint, i);
             }
