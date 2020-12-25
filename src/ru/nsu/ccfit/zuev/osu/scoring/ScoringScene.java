@@ -32,6 +32,7 @@ import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.SendingPanel;
+import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class ScoringScene {
@@ -85,18 +86,19 @@ public class ScoringScene {
         String mapperStr = "Beatmap by " + trackInfo.getCreator();
         String playerStr = "Played by " + stat.getPlayerName() + " on " +
                 new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date(stat.getTime()));
+        playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
         if (stat.getChangeSpeed() != 1 || stat.isEnableForceAR()){
-            playerStr += " [";
+            mapperStr += " [";
             if (stat.getChangeSpeed() != 1){
-                playerStr += String.format("%.2fx,", stat.getChangeSpeed());
+                mapperStr += String.format("%.2fx,", stat.getChangeSpeed());
             }
             if (stat.isEnableForceAR()){
-                playerStr += String.format("AR%.1f,", stat.getForceAR());
+                mapperStr += String.format("AR%.1f,", stat.getForceAR());
             }
-            if (playerStr.endsWith(",")){
-                playerStr = playerStr.substring(0, playerStr.length() - 1);
+            if (mapperStr.endsWith(",")){
+                mapperStr = playerStr.substring(0, playerStr.length() - 1);
             }
-            playerStr += "]";
+            mapperStr += "]";
         }
         //calculatePP
         if (Config.isDisplayScorePP()){
@@ -123,7 +125,7 @@ public class ScoringScene {
             ppinfo.append(String.format("Spd:%.0f/%.0f,", spdpp, max_spdpp));
             ppinfo.append(String.format("Acc:%.0f/%.0f)", accpp, max_accpp));
             ppinfo.append("]");
-            playerStr += " " + ppinfo.toString();
+            mapperStr += " " + ppinfo.toString();
         }
         //
         Debug.i("playedtime " + stat.getTime());
