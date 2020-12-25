@@ -54,6 +54,16 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+    <string-array name="set_playfield_names">
+        <item>100%</item>
+        <item>90%</item>
+        <item>80%</item>
+    </string-array>
+    <string-array name="set_playfield_values">
+        <item>100</item>
+        <item>90</item>
+        <item>80</item>
+    </string-array>
     <string name="opt_onlineOpt">Account Option</string>
 
     <string name="opt_onlineOpt_normal">Online Option</string>
@@ -294,4 +304,10 @@
 
     <string name="opt_display_score_pp_title">Display PP in score</string>
     <string name="opt_display_score_pp_summary">Displays PP value in score result screen</string>
+
+    <string name="opt_setplayfield_title">Set playfield size</string>
+    <string name="opt_setplayfield_summary">Change the size of the playfield</string>
+
+    <string name="opt_shrink_playfield_downwards_title">Shrink playfield downwards</string>
+    <string name="opt_shrink_playfield_downwards_summary">Shrink playfield downwards</string>
 </resources>
