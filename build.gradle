@@ -97,21 +97,6 @@ android {
             applicationIdSuffix '.debug'
         }
 
-        debugGithubRelease {
-            matchingFallbacks = ['debug']
-            debuggable true
-            signingConfig signingConfigs.debug
-        }
-
-        debugEdrows {
-            resValue "string", "app_name", "osu!droid-ed"
-            applicationIdSuffix '.debug.edrows'
-            matchingFallbacks = ['debug']
-            versionNameSuffix 'edrows'
-            debuggable true
-            proguardFile 'proguard.cfg'
-        }
-
         release {
             resValue "string", "app_name", "osu!droid"
             zipAlignEnabled true
@@ -127,6 +112,29 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
             signingConfig signingConfigs.release
+        }
+    }
+
+    flavorDimensions "download_channel"
+    productFlavors {
+        qq {
+            dimension "download_channel"
+            versionNameSuffix '-qq'
+        }
+
+        discord {
+            dimension "download_channel"
+            versionNameSuffix '-dsicord'
+        }
+
+        website {
+            dimension "download_channel"
+            versionNameSuffix '-website'
+        }
+
+        github {
+            dimension "download_channel"
+            versionNameSuffix '-github'
         }
     }
 
