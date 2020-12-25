@@ -6,6 +6,8 @@ import android.graphics.Color;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.webkit.ValueCallback;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -101,7 +103,18 @@ public class MarkdownWebView extends WebView {
         }
 
         String javascriptCommand = "javascript:setText(\'" + escapeText + "\')";
-        this.loadUrl(javascriptCommand);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            this.evaluateJavascript(javascriptCommand, new ValueCallback<String>() {
+                @Override
+                public void onReceiveValue(String value) {
+                    if (BuildConfig.DEBUG) {
+                        Log.v("WebView", "Load md: " + value);
+                    }
+                }
+            });
+        } else {
+            this.loadUrl(javascriptCommand);
+        }
     }
 
     /*static final boolean open(Context context, Uri uri) {
@@ -138,6 +151,7 @@ public class MarkdownWebView extends WebView {
                 case '"':
                 case '\\':
                 case '/':
+                case '\'':
                     out.append('\\').append(c);
                     break;
 
