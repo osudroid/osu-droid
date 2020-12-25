@@ -195,6 +195,31 @@
                                 android:text="25%" />
                         </TableRow>
 
+						<RelativeLayout
+							android:layout_marginTop="10dp"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content">
+
+							<View
+								android:layout_width="match_parent"
+								android:layout_height="2dp"
+								android:background="@color/triangleBackground" />
+
+							<com.edlplan.ui.TriangleEffectView
+								android:layout_width="match_parent"
+								android:layout_height="2dp" />
+						</RelativeLayout>
+
+						<TextView
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="10dp"
+							android:layout_weight="3"
+							android:gravity="center"
+							android:textAlignment="center"
+							android:text="@string/unranked_features"
+							android:textColor="#FF0000" />
+
                         <TableRow
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"

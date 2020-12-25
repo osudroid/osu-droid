@@ -467,9 +467,6 @@ public class StatisticV2 implements Serializable {
         if (mod.contains(GameMod.MOD_NIGHTCORE)) {
             s += "c";
         }
-        if (mod.contains(GameMod.MOD_SPEEDUP)) {
-            s += "b";
-        }
         if (mod.contains(GameMod.MOD_HALFTIME)) {
             s += "t";
         }
@@ -548,10 +545,7 @@ public class StatisticV2 implements Serializable {
                     break;    
                 case 'f':
                     mod.add(GameMod.MOD_PERFECT);
-                    break;    
-                case 'b':
-                    mod.add(GameMod.MOD_SPEEDUP);
-                    break;   
+                    break;
                 case 'v':
                     mod.add(GameMod.MOD_SCOREV2);
                     break;   
@@ -657,9 +651,6 @@ public class StatisticV2 implements Serializable {
         if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
             speed *= 1.5f;
         }
-        if (mod.contains(GameMod.MOD_SPEEDUP)){
-            speed *= 1.25f;
-        }
         if (mod.contains(GameMod.MOD_HALFTIME)){
             speed *= 0.75f;
         }
@@ -677,9 +668,6 @@ public class StatisticV2 implements Serializable {
         }
         if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
             multi /= 1.12f;
-        }
-        if (mod.contains(GameMod.MOD_SPEEDUP)){
-            multi /= 1.06f;
         }
         if (mod.contains(GameMod.MOD_HALFTIME)){
             multi /= 0.3f;

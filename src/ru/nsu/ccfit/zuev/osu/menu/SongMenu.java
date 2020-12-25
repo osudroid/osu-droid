@@ -903,13 +903,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 beatmapInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
                 dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
             }
-            if (mod.contains(GameMod.MOD_SPEEDUP)) {
-                bpm_max *= 1.25f;
-                bpm_min *= 1.25f;
-                length *= 4 / 5f;
-                beatmapInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-                dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-            }
             if (mod.contains(GameMod.MOD_HALFTIME)) {
                 bpm_max *= 0.75f;
                 bpm_min *= 0.75f;
@@ -928,8 +921,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 ar -= ModMenu.getInstance().getSpeed() - 1.0f;
             } else if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
                 ar -= 0.5f;
-            } else if (mod.contains(GameMod.MOD_SPEEDUP)){
-                ar -= 0.25f;
             }
             od *= 0.5f;
             cs -= 1f;
@@ -970,9 +961,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         } else if (mod.contains(GameMod.MOD_HALFTIME)) {
             ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 4 / 3), 2);
             od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 4 / 3), 2);
-        } else if (mod.contains(GameMod.MOD_SPEEDUP)) {
-            ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 4 / 5), 2);
-            od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 4 / 5), 2);
         }
         if (ModMenu.getInstance().isEnableForceAR()){
             float oriAr = ar;

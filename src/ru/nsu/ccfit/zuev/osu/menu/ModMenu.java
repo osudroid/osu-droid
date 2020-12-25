@@ -267,22 +267,14 @@ public class ModMenu implements IModSwitcher {
             } else if (flag.equals(GameMod.MOD_DOUBLETIME)) {
                 mod.remove(GameMod.MOD_NIGHTCORE);
                 mod.remove(GameMod.MOD_HALFTIME);
-                mod.remove(GameMod.MOD_SPEEDUP);
                 modsRemoved = true;
             } else if (flag.equals(GameMod.MOD_NIGHTCORE)) {
                 mod.remove(GameMod.MOD_DOUBLETIME);
-                mod.remove(GameMod.MOD_HALFTIME);
-                mod.remove(GameMod.MOD_SPEEDUP);
-                modsRemoved = true;
-            } else if (flag.equals(GameMod.MOD_SPEEDUP)){
-                mod.remove(GameMod.MOD_DOUBLETIME);
-                mod.remove(GameMod.MOD_NIGHTCORE);
                 mod.remove(GameMod.MOD_HALFTIME);
                 modsRemoved = true;
             } else if (flag.equals(GameMod.MOD_HALFTIME)) {
                 mod.remove(GameMod.MOD_DOUBLETIME);
                 mod.remove(GameMod.MOD_NIGHTCORE);
-                mod.remove(GameMod.MOD_SPEEDUP);
                 modsRemoved = true;
             } else if (flag.equals(GameMod.MOD_SUDDENDEATH)) {
                 mod.remove(GameMod.MOD_NOFAIL);
@@ -323,13 +315,14 @@ public class ModMenu implements IModSwitcher {
         if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
             speed *= 1.5f;
         }
-        if (mod.contains(GameMod.MOD_SPEEDUP)){
-            speed *= 1.25f;
-        }
         if (mod.contains(GameMod.MOD_HALFTIME)){
             speed *= 0.75f;
         }
         return speed;
+    }
+
+    public boolean isChangeSpeed() {
+        return changeSpeed != 1.0;
     }
 
     public float getChangeSpeed(){

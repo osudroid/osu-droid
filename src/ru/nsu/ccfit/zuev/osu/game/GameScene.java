@@ -423,11 +423,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             timeMultiplier = 0.75f;
             GameHelper.setHalfTime(true);
             GameHelper.setTimeMultiplier(4 / 3f);
-        } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_SPEEDUP)) {
-            GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_SU);
-            timeMultiplier = 1.25f;
-            GameHelper.setSpeedUp(true);
-            GameHelper.setTimeMultiplier(4 / 5f);
         }
 
         /*
@@ -1075,23 +1070,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (stat.getMod().contains(GameMod.MOD_NIGHTCORE)) {
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-nightcore");
-            effect.init(
-                    fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
-                    scale,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
-                            .newDelayModifier(2 - timeOffset),
-                            new ParallelEntityModifier(ModifierFactory
-                                    .newFadeOutModifier(0.5f), ModifierFactory
-                                    .newScaleModifier(0.5f, 1, 1.5f))));
-            effectOffset += 25;
-            timeOffset += 0.25f;
-        }
-        if (stat.getMod().contains(GameMod.MOD_SPEEDUP)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-speedup");
             effect.init(
                     fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils

@@ -144,7 +144,7 @@
 	<string name="test_ed_storyboard">View storyboard (experiment)</string>
 
 	<!-- <string name="mod_precise_is_unrank_now">MOD_PRECISE is unrank now</string>-->
-	<string name="mods_somemods_is_unrank_now">MOD:SD/PF/PR/SC/REZ/FL/Scorev2 is unrank now</string>
+	<string name="mods_somemods_is_unrank_now">Some unrank feature is actived, prevent score upload</string>
 
 	<!-- new data after 1.6.7(beta1) -->
     <string name="beta_checking_upgrade">Checking Upgrade...</string>
@@ -175,4 +175,5 @@
     <string name="click_to_see_change_list">Click to see change list</string>
 
 	<string name="changelog_title">Changelog</string>
+	<string name="unranked_features">↓ Unranked features ↓</string>
 </resources>
