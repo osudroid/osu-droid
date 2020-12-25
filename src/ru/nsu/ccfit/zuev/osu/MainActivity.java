@@ -31,6 +31,7 @@ import android.widget.RelativeLayout;
 
 import android.widget.Toast;
 import com.edlplan.ui.ActivityOverlay;
+import com.edlplan.ui.fragment.BuildTypeNoticeFragment;
 import com.tencent.bugly.Bugly;
 import com.umeng.analytics.MobclickAgent;
 import com.umeng.commonsdk.UMConfigure;
@@ -368,6 +369,10 @@ public class MainActivity extends BaseGameActivity implements
                 }});
 
         ActivityOverlay.initial(this, frameLayout.getId());
+
+        if ("pre_release".equals(BuildConfig.BUILD_TYPE) || BuildConfig.DEBUG) {
+            BuildTypeNoticeFragment.single.get().show();
+        }
     }
 
     public void checkNewBeatmaps() {

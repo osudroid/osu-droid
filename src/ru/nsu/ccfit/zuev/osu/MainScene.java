@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.PowerManager;
 import android.util.Log;
 
+import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.umeng.analytics.MobclickAgent;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -49,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
@@ -73,6 +75,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 /**
@@ -298,7 +301,11 @@ public class MainScene implements IUpdateHandler {
 
         final Text author = new Text(10, 530, ResourceManager
                 .getInstance().getFont("font"),
-                "osu!droid by Pesets&neico\nosu! is \u00a9 peppy 2007-2019") {
+                String.format(
+                        Locale.getDefault(),
+                        "osu!droid %s\nby osu!droid Team\nosu! is \u00a9 peppy 2007-2021",
+                        BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")"
+                        )) {
 
 
             @Override
@@ -465,7 +472,8 @@ public class MainScene implements IUpdateHandler {
         final Rectangle bgTopRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Utils.toRes(120));
         bgTopRect.setColor(0, 0, 0, 0.3f);
 
-        final Rectangle bgbottomRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Utils.toRes(120));
+        final Rectangle bgbottomRect = new Rectangle(0, 0, Config.getRES_WIDTH(),
+                Math.max(author.getHeight(), yasonline.getHeight()) + Utils.toRes(15));
         bgbottomRect.setPosition(0, Config.getRES_HEIGHT() - bgbottomRect.getHeight());
         bgbottomRect.setColor(0, 0, 0, 0.3f);
 
@@ -1074,20 +1082,17 @@ public class MainScene implements IUpdateHandler {
     public void showExitDialog() {
         GlobalManager.getInstance().getMainActivity().runOnUiThread(new Runnable() {
             public void run() {
-                AlertDialog.Builder builder = new AlertDialog.Builder(GlobalManager.getInstance().getMainActivity());
-                builder.setMessage(R.string.dialog_exit_message);
-                builder.setPositiveButton(R.string.dialog_exit_yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        exit();
-                        PowerManager.WakeLock wakeLock = GlobalManager.getInstance().getMainActivity().getWakeLock();
-                        if (wakeLock != null && wakeLock.isHeld()) {
-                            wakeLock.release();
+                new ConfirmDialogFragment().setMessage(R.string.dialog_exit_message).showForResult(
+                        isAccepted -> {
+                            if (isAccepted) {
+                                exit();
+                                PowerManager.WakeLock wakeLock = GlobalManager.getInstance().getMainActivity().getWakeLock();
+                                if (wakeLock != null && wakeLock.isHeld()) {
+                                    wakeLock.release();
+                                }
+                            }
                         }
-                    }
-                });
-                builder.setNegativeButton(R.string.dialog_exit_no, null);
-                builder.show();
+                );
             }
         });
     }

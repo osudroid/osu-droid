@@ -18,7 +18,6 @@ import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.menu.IPropsMenu;
 import ru.nsu.ccfit.zuev.osu.menu.MenuItem;
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
-import ru.nsu.ccfit.zuev.osu.online.OnlineMapInfo;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -26,7 +25,6 @@ public class PropsMenuFragment extends BaseFragment implements IPropsMenu {
 
     SongMenu menu;
     MenuItem item;
-    OnlineMapInfo p;
     String mapState;
     BeatmapProperties props;
 
@@ -170,11 +168,10 @@ public class PropsMenuFragment extends BaseFragment implements IPropsMenu {
     }
 
     @Override
-    public void show(SongMenu menu, MenuItem item, OnlineMapInfo p, String mapState) {
+    public void show(SongMenu menu, MenuItem item, String mapState) {
         this.mapState = mapState;
         this.menu = menu;
         this.item = item;
-        this.p = p;
         props = PropertiesLibrary.getInstance().getProperties(item.getBeatmap().getPath());
         if (props == null) {
             props = new BeatmapProperties();

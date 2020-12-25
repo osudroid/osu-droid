@@ -1,6 +1,9 @@
 buildscript {
+    ext {
+        kotlin_version = '1.3.72'
+    }
     repositories {
-        maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
         maven { url 'https://jitpack.io' }
         google()
         mavenCentral()
@@ -10,12 +13,13 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 allprojects {
     repositories {
-        maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
         maven { url 'https://jitpack.io' }
         google()
         mavenCentral()
@@ -25,14 +29,14 @@ allprojects {
 }
 
 def getReleaseVersionCode() {
-    def versionCode = (int)(new Date().getTime() / 1000)
+    def versionCode = (int) (new Date().getTime() / 1000)
     println('versionCode: ' + versionCode)
     return versionCode
 }
 
 def getReleaseVersionName() {
-    def baseline = '1.6.7'
-    def versionName = baseline + new Date().format('.MMdd-HHmm')
+    def baseline = '1.6.8'
+    def versionName = baseline + new Date().format('.MMdd')
     println('versionName: ' + versionName)
     return versionName
 }
@@ -45,6 +49,8 @@ if (localPropertiesFile.exists()) {
 
 
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 29
@@ -58,6 +64,11 @@ android {
         ndk {
             abiFilters 'armeabi', 'x86', 'armeabi-v7a'
         }
+        multiDexEnabled = true
+    }
+
+    packagingOptions {
+        exclude 'META-INF/proguard/coroutines.pro'
     }
 
     signingConfigs {
@@ -86,26 +97,11 @@ android {
             applicationIdSuffix '.debug'
         }
 
-        debugGithubRelease {
-            matchingFallbacks = ['debug']
-            debuggable true
-            signingConfig signingConfigs.debug
-        }
-
-        debugEdrows {
-            resValue "string", "app_name", "osu!droid-ed"
-            applicationIdSuffix '.debug.edrows'
-            matchingFallbacks = ['debug']
-            versionNameSuffix 'edrows'
-            debuggable true
-            proguardFile 'proguard.cfg'
-        }
-
         release {
             resValue "string", "app_name", "osu!droid"
             zipAlignEnabled true
             minifyEnabled true
-            proguardFile 'proguard.cfg'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
             signingConfig signingConfigs.release
         }
 
@@ -114,8 +110,31 @@ android {
             resValue "string", "app_name", "osu!droid"
             zipAlignEnabled true
             minifyEnabled true
-            proguardFile 'proguard.cfg'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
             signingConfig signingConfigs.release
+        }
+    }
+
+    flavorDimensions "download_channel"
+    productFlavors {
+        qq {
+            dimension "download_channel"
+            versionNameSuffix '-qq'
+        }
+
+        discord {
+            dimension "download_channel"
+            versionNameSuffix '-dsicord'
+        }
+
+        website {
+            dimension "download_channel"
+            versionNameSuffix '-website'
+        }
+
+        github {
+            dimension "download_channel"
+            versionNameSuffix '-github'
         }
     }
 
@@ -146,6 +165,7 @@ android {
 
 dependencies {
     implementation project(':AndEngine')
+    implementation project(':andnext_markdown')
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.android.material:material:1.0.0'
@@ -171,4 +191,7 @@ dependencies {
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:bbeae03503'
     implementation project(path: ':LibBASS')
     implementation 'androidx.cardview:cardview:1.0.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
 }

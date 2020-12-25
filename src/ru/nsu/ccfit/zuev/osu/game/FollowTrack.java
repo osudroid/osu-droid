@@ -47,6 +47,7 @@ public class FollowTrack extends GameObject {
         if (count > 0) {
             count--;
         }
+        count = Math.min(count, 30);
         if (count <= 0) {
             empty = true;
             GameObjectPool.getInstance().putTrac(this);
