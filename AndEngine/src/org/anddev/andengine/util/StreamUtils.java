@@ -44,12 +44,13 @@ public class StreamUtils {
 	// ===========================================================
 
 	public static final String readFully(final InputStream pInputStream) throws IOException {
-		final StringBuilder sb = new StringBuilder();
+		/*final StringBuilder sb = new StringBuilder();
 		final Scanner sc = new Scanner(pInputStream);
 		while(sc.hasNextLine()) {
 			sb.append(sc.nextLine());
 		}
-		return sb.toString();
+		return sb.toString();*/
+		return new String(streamToBytes(pInputStream), "UTF-8");
 	}
 
 	public static byte[] streamToBytes(final InputStream pInputStream) throws IOException {

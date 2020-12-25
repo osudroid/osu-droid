@@ -30,218 +30,290 @@
     </RelativeLayout>
 
 
-    <LinearLayout
-        android:id="@+id/fullLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:translationY="200dp">
+	<LinearLayout
+		android:id="@+id/fullLayout"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_alignParentBottom="true"
+		android:gravity="center"
+		android:orientation="vertical"
+		android:translationY="200dp">
 
 
-        <RelativeLayout
-            android:id="@+id/frg_header"
-            android:layout_width="match_parent"
-            android:layout_height="40dp">
+		<RelativeLayout
+			android:id="@+id/frg_header"
+			android:layout_width="match_parent"
+			android:layout_height="40dp">
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="20dp"
-                android:layout_alignParentBottom="true"
-                android:background="@drawable/shadow"
-                android:rotation="180" />
+			<View
+				android:layout_width="match_parent"
+				android:layout_height="20dp"
+				android:layout_alignParentBottom="true"
+				android:background="@drawable/shadow"
+				android:rotation="180" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="10dp"
-                android:layout_alignParentBottom="true"
-                android:background="@drawable/shadow"
-                android:rotation="180" />
+			<View
+				android:layout_width="match_parent"
+				android:layout_height="10dp"
+				android:layout_alignParentBottom="true"
+				android:background="@drawable/shadow"
+				android:rotation="180" />
 
-            <RelativeLayout
-                android:id="@+id/showMoreButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true">
+			<RelativeLayout
+				android:id="@+id/showMoreButton"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_alignParentBottom="true"
+				android:layout_centerHorizontal="true">
 
-                <View
-                    android:layout_width="100dp"
-                    android:layout_height="25dp"
-                    android:background="#99E63E8C" />
+				<View
+					android:layout_width="100dp"
+					android:layout_height="25dp"
+					android:background="#99E63E8C" />
 
-                <com.edlplan.ui.TriangleEffectView
-                    android:layout_width="100dp"
-                    android:layout_height="25dp"
-                    android:alpha="0.5" />
+				<com.edlplan.ui.TriangleEffectView
+					android:layout_width="100dp"
+					android:layout_height="25dp"
+					android:alpha="0.5" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:text="Settings"
-                    android:textColor="#FFFFFFFF"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_centerInParent="true"
+					android:text="Settings"
+					android:textColor="#FFFFFFFF"
+					android:textSize="15sp"
+					android:textStyle="bold" />
 
-            </RelativeLayout>
-        </RelativeLayout>
+			</RelativeLayout>
+		</RelativeLayout>
 
 
-        <LinearLayout
-            android:id="@+id/optionBody"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="@color/frgBodyBackgroundLight"
-            android:clickable="true"
-            android:orientation="vertical">
+		<LinearLayout
+			android:id="@+id/optionBody"
+			android:layout_width="match_parent"
+			android:layout_height="200dp"
+			android:background="@color/frgBodyBackgroundLight"
+			android:clickable="true"
+			android:orientation="vertical">
 
-            <RelativeLayout
+			<RelativeLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content">
+
+				<View
+					android:layout_width="match_parent"
+					android:layout_height="5dp"
+					android:background="@color/triangleBackground" />
+
+				<com.edlplan.ui.TriangleEffectView
+					android:layout_width="match_parent"
+					android:layout_height="5dp" />
+			</RelativeLayout>
+
+            <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="5dp"
-                    android:background="@color/triangleBackground" />
-
-                <com.edlplan.ui.TriangleEffectView
-                    android:layout_width="match_parent"
-                    android:layout_height="5dp" />
-            </RelativeLayout>
-
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="20dp"
-                android:orientation="vertical">
-
-
                 <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="-5dp"
-                    android:orientation="horizontal">
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="20dp"
+                    android:orientation="vertical">
 
-                    <CheckBox
-                        android:id="@+id/enableStoryboard"
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/opt_enableStoryboard_title" />
+                        android:layout_marginLeft="-5dp"
+                        android:orientation="horizontal">
 
-                    <CheckBox
-                        android:id="@+id/showScoreboard"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
-                        android:layout_weight="1"
-                        android:text="@string/opt_show_scoreboard_title" />
-						
-                    <CheckBox
-                        android:id="@+id/enableNCwhenSpeedChange"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
-                        android:layout_weight="1"
-                        android:text="@string/opt_enablenc_whenspeedchange_title" />
-                </LinearLayout>
+                        <CheckBox
+                            android:id="@+id/enableStoryboard"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/opt_enableStoryboard_title" />
 
-                <TableLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:gravity="center">
+                        <CheckBox
+                            android:id="@+id/showScoreboard"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:layout_weight="1"
+                            android:text="@string/opt_show_scoreboard_title" />
+                    </LinearLayout>
 
-					<TableRow
+					<RelativeLayout
 						android:layout_width="match_parent"
-						android:layout_height="match_parent"
-						android:layout_weight="1">
+						android:layout_height="wrap_content">
+
+						<View
+							android:layout_width="match_parent"
+							android:layout_height="2dp"
+							android:background="@color/triangleBackground" />
+
+						<com.edlplan.ui.TriangleEffectView
+							android:layout_width="match_parent"
+							android:layout_height="2dp" />
+					</RelativeLayout>
+
+                    <TableLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:gravity="center">
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAlignment="textEnd"
+                                android:gravity="end"
+								android:layout_marginEnd="7dp"
+								android:layout_marginRight="7dp"
+                                android:text="@string/opt_bgbrightness_title" />
+
+                            <CheckBox
+                                android:visibility="invisible"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+
+                            <SeekBar
+                                android:id="@+id/backgroundBrightnessBar"
+                                android:layout_width="350dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:max="100" />
+
+                            <TextView
+                                android:id="@+id/bgBrightnessText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="25%" />
+                        </TableRow>
+
+						<RelativeLayout
+							android:layout_marginTop="10dp"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content">
+
+							<View
+								android:layout_width="match_parent"
+								android:layout_height="2dp"
+								android:background="@color/triangleBackground" />
+
+							<com.edlplan.ui.TriangleEffectView
+								android:layout_width="match_parent"
+								android:layout_height="2dp" />
+						</RelativeLayout>
 
 						<TextView
-							android:layout_width="wrap_content"
+							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
-							android:text="@string/opt_bgbrightness_title" />
+							android:layout_marginTop="10dp"
+							android:layout_weight="3"
+							android:gravity="center"
+							android:textAlignment="center"
+							android:text="@string/unranked_features"
+							android:textColor="#FF0000" />
 
-						<SeekBar
-							android:id="@+id/backgroundBrightnessBar"
-							android:layout_width="350dp"
-							android:layout_height="wrap_content"
-							android:max="100" />
+                        <TableRow
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1">
 
-						<TextView
-							android:id="@+id/bgBrightnessText"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:text="25%" />
-					</TableRow>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAlignment="textEnd"
+                                android:gravity="end"
+								android:layout_marginEnd="7dp"
+								android:layout_marginRight="7dp"
+                                android:text="@string/opt_changespeed_title" />
 
-					<TableRow
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:layout_weight="1">
+                            <CheckBox
+                                android:id="@+id/enableSpeedChange"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
 
-						<TextView
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:text="@string/opt_changespeed_title" />
+                            <SeekBar
+                                android:id="@+id/changeSpeedBar"
+                                android:layout_width="350dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:max="30" />
 
-						<SeekBar
-							android:id="@+id/changeSpeedBar"
-							android:layout_width="350dp"
-							android:layout_height="wrap_content"
-							android:max="30" />
+                            <TextView
+                                android:id="@+id/changeSpeedText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="1.00x" />
+                        </TableRow>
 
-						<TextView
-							android:id="@+id/changeSpeedText"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:text="1.00x" />
+                        <TableRow
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1">
 
-						<CheckBox
-							android:id="@+id/enableSpeedChange"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:text="@string/opt_enablespeedchange_title" />
-					</TableRow>
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="0dp"/>
 
-					<TableRow
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:layout_weight="1">
+                            <CheckBox
+                                android:id="@+id/enableNCwhenSpeedChange"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
 
-						<TextView
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:text="@string/opt_forcear_title" />
-
-						<SeekBar
-							android:id="@+id/forceARBar"
-							android:layout_width="350dp"
-							android:layout_height="wrap_content"
-							android:max="125" />
-
-						<TextView
-							android:id="@+id/forceARText"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:text="AR9.0" />
-
-						<CheckBox
-							android:id="@+id/enableForceAR"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:text="@string/opt_enableforcear_title" />
-					</TableRow>
-                </TableLayout >
-
-            </LinearLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+								android:layout_marginLeft="15dp"
+                                android:text="@string/opt_enablenc_whenspeedchange_title"/>
+                        </TableRow>
 
 
-        </LinearLayout>
+                        <TableRow
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1">
 
-    </LinearLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAlignment="textEnd"
+                                android:gravity="end"
+								android:layout_marginEnd="7dp"
+								android:layout_marginRight="7dp"
+                                android:text="@string/opt_forcear_title" />
 
+                            <CheckBox
+                                android:id="@+id/enableForceAR"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"/>
 
+                            <SeekBar
+                                android:id="@+id/forceARBar"
+                                android:layout_width="350dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:max="125" />
+
+                            <TextView
+                                android:id="@+id/forceARText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="AR9.0" />
+                        </TableRow>
+                    </TableLayout>
+
+					<View
+						android:layout_width="match_parent"
+						android:layout_height="50dp" />
+                </LinearLayout>
+            </ScrollView>
+		</LinearLayout>
+	</LinearLayout>
 </RelativeLayout>

@@ -1,39 +1,56 @@
 buildscript {
+    ext {
+        kotlin_version = '1.3.72'
+    }
     repositories {
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
         maven { url 'https://jitpack.io' }
         google()
         mavenCentral()
         jcenter()
+        maven { url 'https://dl.bintray.com/umsdk/release' }
     }
 
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 allprojects {
     repositories {
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
         maven { url 'https://jitpack.io' }
         google()
         mavenCentral()
         jcenter()
+        maven { url 'https://dl.bintray.com/umsdk/release' }
     }
 }
 
 def getReleaseVersionCode() {
-    def versionCode = (int)(new Date().getTime() / 1000)
+    def versionCode = (int) (new Date().getTime() / 1000)
     println('versionCode: ' + versionCode)
     return versionCode
 }
 
 def getReleaseVersionName() {
-    def baseline = '1.6.7'
-    def versionName = baseline + new Date().format('.MMdd-HHmm')
+    def baseline = '1.6.8'
+    def versionName = baseline + new Date().format('(MMddhh)')
     println('versionName: ' + versionName)
     return versionName
 }
 
+def localProperties = new Properties()
+def localPropertiesFile = new File(rootDir.getAbsolutePath(), 'local.properties')
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.newDataInputStream())
+}
+
+
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 29
@@ -47,17 +64,29 @@ android {
         ndk {
             abiFilters 'armeabi', 'x86', 'armeabi-v7a'
         }
+        multiDexEnabled = true
+    }
+
+    packagingOptions {
+        exclude 'META-INF/proguard/coroutines.pro'
     }
 
     signingConfigs {
         debug {
+            storeFile file('debug.jks')
+            storePassword "debug.dgsrz.com"
+            keyAlias 'debug.github.dgsrz.com'
+            keyPassword 'debug.github.dgsrz.com'
+        }
+
+        release {
             try {
-                storeFile file('debug.jks')
-                storePassword "debug.dgsrz.com"
-                keyAlias 'debug.github.dgsrz.com'
-                keyPassword 'debug.github.dgsrz.com'
+                storeFile file(localProperties.get("RELEASE_KEYSTORE", "debug.jks"))
+                storePassword localProperties.get('RELEASE_KEYSTORE_PASSWORD', "debug.dgsrz.com")
+                keyAlias localProperties.get('RELEASE_KEY_ALIAS', "debug.github.dgsrz.com")
+                keyPassword localProperties.get('RELEASE_KEY_PASSWORD', "debug.github.dgsrz.com")
             } catch (ignored) {
-                throw new InvalidUserDataException('You should define KEYSTORE_PASSWORD and KEY_PASSWORD in gradle.properties.')
+                throw new InvalidUserDataException('You should define RELEASE_KEYSTORE_PASSWORD and RELEASE_KEY_PASSWORD in local.properties.', ignored)
             }
         }
     }
@@ -68,27 +97,44 @@ android {
             applicationIdSuffix '.debug'
         }
 
-        debugGithubRelease {
-            matchingFallbacks = ['debug']
-            debuggable true
-            signingConfig signingConfigs.debug
-        }
-
-        debugEdrows {
-            resValue "string", "app_name", "osu!droid-ed"
-            applicationIdSuffix '.debug.edrows'
-            matchingFallbacks = ['debug']
-            versionNameSuffix 'edrows'
-            debuggable true
-            proguardFile 'proguard.cfg'
-        }
-
         release {
             resValue "string", "app_name", "osu!droid"
             zipAlignEnabled true
             minifyEnabled true
-            proguardFile 'proguard.cfg'
-            //signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
+            signingConfig signingConfigs.release
+        }
+
+        pre_release {
+            matchingFallbacks = ['release']
+            resValue "string", "app_name", "osu!droid"
+            zipAlignEnabled true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    flavorDimensions "download_channel"
+    productFlavors {
+        a_github {
+            dimension "download_channel"
+            versionNameSuffix '-github'
+        }
+
+        qq {
+            dimension "download_channel"
+            versionNameSuffix '-qq'
+        }
+
+        discord {
+            dimension "download_channel"
+            versionNameSuffix '-discord'
+        }
+
+        website {
+            dimension "download_channel"
+            versionNameSuffix '-website'
         }
     }
 
@@ -115,26 +161,45 @@ android {
         ignoreWarnings true
         disable 'MissingTranslation', 'ExpiredTargetSdkVersion', 'ProtectedPermissions', 'AppLinkUrlError'
     }
+
+    android.applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def releaseTime = new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
+            def fileName = "osu!droid-${defaultConfig.versionName}-${variant.productFlavors[0].name}-${variant.buildType.name}-${releaseTime}.apk"
+            outputFileName = fileName
+        }
+    }
 }
 
 dependencies {
     implementation project(':AndEngine')
+    implementation project(':andnext_markdown')
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:support-v4:27.1.1'
-    implementation 'com.android.support:design:27.1.1'
-    implementation 'com.tencent.bugly:crashreport_upgrade:1.3.5'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'com.tencent.bugly:crashreport_upgrade:1.4.2'
     implementation 'com.tencent.bugly:nativecrashreport:3.3.1'
+
+    implementation 'com.umeng.umsdk:common:9.1.0'
+    implementation 'com.umeng.umsdk:asms:1.1.3'
+    implementation 'com.umeng.umsdk:crash:0.0.4'
+    implementation 'com.umeng.umsdk:game:9.1.0+G'
+
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
     implementation 'io.reactivex.rxjava2:rxjava:2.1.8'
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation 'com.squareup.retrofit2:retrofit:2.3.0'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
-    implementation 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.4@aar'
+    //implementation 'com.github.tbruyelle:rxpermissions:0.12'
+    implementation 'pub.devrel:easypermissions:3.0.0'
 
     implementation 'com.github.EdrowsLuo:osudroidstrings:13eadc59ff'
-    implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlJavaExt:bbeae03503'
-    implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:bbeae03503'
+    implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlJavaExt:c2dfb50faf'
+    implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:c2dfb50faf'
     implementation project(path: ':LibBASS')
-    implementation 'com.android.support:cardview-v7:27.1.1'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
 }

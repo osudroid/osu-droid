@@ -87,8 +87,12 @@ public class StoryboardSprite extends SupportSprite {
     }
 
     public void updateTime(double time) {
-        this.time = time;
-        needUpdate = true;
+        if (Math.abs(this.time - time) > 10) {
+            this.time = time;
+            if (osbPlayer != null) {
+                osbPlayer.update(time);
+            }
+        }
     }
 
     public boolean isStoryboardAvailable() {
@@ -121,14 +125,6 @@ public class StoryboardSprite extends SupportSprite {
                             canvas.getWidth() / backgroundQuad.size.x,
                             canvas.getHeight() / backgroundQuad.size.y));
             TextureQuadBatch.getDefaultBatch().add(backgroundQuad);
-        }
-
-
-        if (needUpdate) {
-            needUpdate = false;
-            if (osbPlayer != null) {
-                osbPlayer.update(time);
-            }
         }
 
         canvas.getBlendSetting().save();

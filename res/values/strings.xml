@@ -144,7 +144,7 @@
 	<string name="test_ed_storyboard">View storyboard (experiment)</string>
 
 	<!-- <string name="mod_precise_is_unrank_now">MOD_PRECISE is unrank now</string>-->
-	<string name="mods_somemods_is_unrank_now">MOD:SD/PF/PR/SC/REZ/FL/Scorev2 is unrank now</string>
+	<string name="mods_somemods_is_unrank_now">Some unrank feature is actived, prevent score upload</string>
 
 	<!-- new data after 1.6.7(beta1) -->
     <string name="beta_checking_upgrade">Checking Upgrade...</string>
@@ -168,5 +168,12 @@
 	<string name="message_update_download_success">Update Successful!</string>
 	<string name="message_update_download_fail">Update fail, try again later</string>
 	<string name="message_update_ppy_unavailable">This map can not be downloaded on ppy\n\n</string>
+	
+	<string name="message_low_storage_space">Storage space is low. Free Storage: %s GB. This may cause replay/score submission bugs.</string>
+    <string name="close_this_page">Close this page</string>
+    <string name="markdown_title">Markdown Title</string>
+    <string name="click_to_see_change_list">Click to see change list</string>
 
+	<string name="changelog_title">Changelog</string>
+	<string name="unranked_features">↓ Unranked features ↓</string>
 </resources>

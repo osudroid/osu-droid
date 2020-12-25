@@ -54,6 +54,16 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+    <string-array name="set_playfield_names">
+        <item>100%</item>
+        <item>90%</item>
+        <item>80%</item>
+    </string-array>
+    <string-array name="set_playfield_values">
+        <item>100</item>
+        <item>90</item>
+        <item>80</item>
+    </string-array>
     <string name="opt_onlineOpt">Account Option</string>
 
     <string name="opt_onlineOpt_normal">Online Option</string>
@@ -203,7 +213,7 @@
     <string name="opt_fix_frame_offset_title">Fix a random offset.</string>
     <string name="opt_fix_frame_offset_summary">Try to fix the offset between input time and frame time.</string>
     
-    <string name="opt_remove_sliderlock_spinnerlock_title">Remove slider lock and spinner lock</string>
+    <string name="opt_remove_sliderlock_spinnerlock_title">Remove slider lock and spinner lock (unrank)</string>
     <string name="opt_remove_sliderlock_spinnerlock_summary">Try to remove slider lock and spinner lock. 2b style is playable now.</string>
 
     <string name="opt_enable_extension_title">Enable extension</string>
@@ -285,7 +295,7 @@
 	
     <string name="opt_changespeed_title">Speed Modify</string>
     <string name="opt_forcear_title">Force AR</string>
-    <string name="opt_enablenc_whenspeedchange_title">Enable metronome in speed modify</string>
+    <string name="opt_enablenc_whenspeedchange_title">Enable pitch shift in speed modify</string>
     <string name="opt_enablespeedchange_title">Enable speed modify</string>
     <string name="opt_enableforcear_title">Enable force AR</string>
 	
@@ -294,4 +304,10 @@
 
     <string name="opt_display_score_pp_title">Display PP in score</string>
     <string name="opt_display_score_pp_summary">Displays PP value in score result screen</string>
+
+    <string name="opt_setplayfield_title">Set playfield size</string>
+    <string name="opt_setplayfield_summary">Change the size of the playfield</string>
+
+    <string name="opt_shrink_playfield_downwards_title">Shrink playfield downwards</string>
+    <string name="opt_shrink_playfield_downwards_summary">Shrink playfield downwards</string>
 </resources>

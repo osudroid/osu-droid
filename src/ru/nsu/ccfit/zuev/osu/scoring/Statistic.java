@@ -66,9 +66,6 @@ public class Statistic implements Serializable {
         if (mod.contains(GameMod.MOD_NIGHTCORE)) {
             mult *= 1.12f;
         }
-        if (mod.contains(GameMod.MOD_SPEEDUP)) {
-            mult *= 1.06f;
-        }
         if (mod.contains(GameMod.MOD_HALFTIME)) {
             mult *= 0.3f;
         }
@@ -100,9 +97,6 @@ public class Statistic implements Serializable {
         }
         if (mod.contains(GameMod.MOD_NIGHTCORE)) {
             mult *= 1.12f;
-        }
-        if (mod.contains(GameMod.MOD_SPEEDUP)) {
-            mult *= 1.06f;
         }
         if (mod.contains(GameMod.MOD_HALFTIME)) {
             mult *= 0.3f;

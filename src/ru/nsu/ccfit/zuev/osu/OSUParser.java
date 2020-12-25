@@ -70,6 +70,8 @@ public class OSUParser {
             }
         } catch (IOException e) {
             Debug.e("OSUParser.openFile: " + e.getMessage(), e);
+        } catch (NullPointerException e) {
+            Debug.e("OSUParser.openFile: " + e.getMessage(), e);
         }
 
         fileOpened = true;

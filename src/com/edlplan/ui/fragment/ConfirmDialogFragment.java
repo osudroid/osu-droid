@@ -2,6 +2,9 @@ package com.edlplan.ui.fragment;
 
 import android.animation.Animator;
 import android.view.View;
+import android.widget.TextView;
+
+import androidx.annotation.StringRes;
 
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
@@ -12,6 +15,9 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class ConfirmDialogFragment extends BaseFragment {
 
     private OnResult onResult;
+
+    @StringRes
+    private int text;
 
     public ConfirmDialogFragment() {
         setDismissOnBackgroundClick(true);
@@ -30,12 +36,23 @@ public class ConfirmDialogFragment extends BaseFragment {
                 dismiss();
             }
         });
+        if (text != 0) {
+            ((TextView) findViewById(R.id.confirm_message)).setText(text);
+        }
         playOnLoadAnim();
     }
 
     @Override
     public void dismiss() {
         playOnDismissAnim(super::dismiss);
+    }
+
+    public ConfirmDialogFragment setMessage(@StringRes int text) {
+        this.text = text;
+        if (findViewById(R.id.confirm_message) != null) {
+            ((TextView) findViewById(R.id.confirm_message)).setText(text);
+        }
+        return this;
     }
 
     public void showForResult(OnResult result) {

@@ -13,18 +13,13 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.IBinder;
-import android.os.PowerManager;
+import android.os.*;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.PermissionChecker;
+
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -34,9 +29,12 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
+import android.widget.Toast;
 import com.edlplan.ui.ActivityOverlay;
+import com.edlplan.ui.fragment.BuildTypeNoticeFragment;
 import com.tencent.bugly.Bugly;
 import com.umeng.analytics.MobclickAgent;
+import com.umeng.commonsdk.UMConfigure;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
@@ -44,7 +42,6 @@ import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.util.FPSLogger;
 import org.anddev.andengine.extension.input.touch.controller.MultiTouch;
 import org.anddev.andengine.extension.input.touch.controller.MultiTouchController;
 import org.anddev.andengine.extension.input.touch.exception.MultiTouchException;
@@ -57,8 +54,13 @@ import org.anddev.andengine.util.Debug;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
 
+import pub.devrel.easypermissions.AppSettingsDialog;
+import pub.devrel.easypermissions.EasyPermissions;
 import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
@@ -88,48 +90,18 @@ public class MainActivity extends BaseGameActivity implements
     private boolean willReplay = false;
     private static boolean activityVisible = true;
 
+    @Override
     public Engine onLoadEngine() {
-        checkPermissions();
-//        Debug.setDebugLevel(Debug.DebugLevel.NONE);
+        if (!checkPermissions()) {
+            return null;
+        }
+        initialGameDirectory();
+        //Debug.setDebugLevel(Debug.DebugLevel.NONE);
         Config.loadConfig(this);
         StringTable.setContext(this);
         ToastLogger.init(this);
         SyncTaskManager.getInstance().init(this);
         InputManager.setContext(this);
-        // Shape.setUseDither(Config.isUseDither());
-        File dir = new File(Config.getBeatmapPath());
-        // Creating Osu directory if it doesn't exist
-        if (dir.exists() == false) {
-            if (dir.mkdirs() == false) {
-                Config.setBeatmapPath(Config.getCorePath() + "Songs/");
-                dir = new File(Config.getBeatmapPath());
-                if (dir.exists() == false && dir.mkdirs() == false) {
-                    ToastLogger.showText(StringTable.format(
-                            R.string.message_error_createdir, dir.getPath()),
-                            true);
-                } else {
-                    final SharedPreferences prefs = PreferenceManager
-                            .getDefaultSharedPreferences(this);
-                    final SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString("directory", dir.getPath());
-                    editor.commit();
-                }
-
-            }
-            final File nomedia = new File(dir.getParentFile(), ".nomedia");
-            try {
-                nomedia.createNewFile();
-            } catch (final IOException e) {
-                Debug.e("LibraryManager: " + e.getMessage(), e);
-            }
-        }
-
-        final File skinDir = new File(Config.getCorePath() + "/Skin");
-        // Creating Osu/Skin directory if it doesn't exist
-        if (skinDir.exists() == false) {
-            skinDir.mkdirs();
-        }
-
         // 初始化BuglySDK
         Bugly.init(getApplicationContext(), "d1e89e4311", false);
         OnlineManager.getInstance().Init(getApplicationContext());
@@ -178,6 +150,41 @@ public class MainActivity extends BaseGameActivity implements
         GlobalManager.getInstance().setEngine(engine);
         GlobalManager.getInstance().setMainActivity(this);
         return GlobalManager.getInstance().getEngine();
+    }
+
+    private void initialGameDirectory() {
+        File dir = new File(Config.getBeatmapPath());
+        // Creating Osu directory if it doesn't exist
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                Config.setBeatmapPath(Config.getCorePath() + "Songs/");
+                dir = new File(Config.getBeatmapPath());
+                if (!(dir.exists() || dir.mkdirs())) {
+                    ToastLogger.showText(StringTable.format(
+                            R.string.message_error_createdir, dir.getPath()),
+                            true);
+                } else {
+                    final SharedPreferences prefs = PreferenceManager
+                            .getDefaultSharedPreferences(this);
+                    final SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString("directory", dir.getPath());
+                    editor.commit();
+                }
+
+            }
+            final File nomedia = new File(dir.getParentFile(), ".nomedia");
+            try {
+                nomedia.createNewFile();
+            } catch (final IOException e) {
+                Debug.e("LibraryManager: " + e.getMessage(), e);
+            }
+        }
+
+        final File skinDir = new File(Config.getCorePath() + "/Skin");
+        // Creating Osu/Skin directory if it doesn't exist
+        if (!skinDir.exists()) {
+            skinDir.mkdirs();
+        }
     }
 
     private void initPreferences() {
@@ -239,6 +246,7 @@ public class MainActivity extends BaseGameActivity implements
         }
     }
 
+    @Override
     public void onLoadResources() {
         Config.setTextureQuality(1);
         ResourceManager.getInstance().Init(mEngine, this);
@@ -270,18 +278,15 @@ public class MainActivity extends BaseGameActivity implements
 
     }
 
+    @Override
     public Scene onLoadScene() {
-        GlobalManager.getInstance().getEngine().registerUpdateHandler(new FPSLogger(1f));
         return new SplashScene().getScene();
     }
 
+    @Override
     public void onLoadComplete() {
         new AsyncTaskLoader().execute(new OsuAsyncCallback() {
             public void run() {
-                /*
-                 * StartingMapManager mgr = new
-                 * StartingMapManager(OsuActivity.this); mgr.copyStartingMaps();
-                 */
                 GlobalManager.getInstance().init();
                 GlobalManager.getInstance().setLoadingProgress(50);
                 checkNewBeatmaps();
@@ -298,12 +303,38 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
                 GlobalManager.getInstance().getMainScene().loadBeatmap();
                 initPreferences();
+                availableInternalMemory();
                 if (willReplay) {
                     GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
                     willReplay = false;
                 }
             }
         });
+    }
+    /*
+    Accuracy isn't the best, but it's sufficient enough
+    to determine whether storage is low or not
+     */
+    private void availableInternalMemory() {
+        DecimalFormat df = new DecimalFormat("#.##");
+        df.setRoundingMode(RoundingMode.HALF_EVEN);
+
+        double availableMemory;
+        double minMem = 1073741824D; //1 GiB = 1073741824 bytes
+        File internal = Environment.getDataDirectory();
+        StatFs stat = new StatFs(internal.getPath());
+        if(Build.VERSION.SDK_INT >= 18) {
+            availableMemory = (double) stat.getAvailableBytes();
+        } else {
+            long blockSize = stat.getBlockSize();
+            long availableBlocks = stat.getAvailableBlocks();
+            availableMemory = (double) (availableBlocks * blockSize);
+        }
+        String toastMessage = String.format(StringTable.get(R.string.message_low_storage_space), df.format(availableMemory / minMem));
+        if(availableMemory < 0.5*minMem) { //I set 512MiB as a minimum
+            Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
+        }
+        Debug.i("Free Space: " + df.format(availableMemory / minMem));
     }
 
     @SuppressLint("ResourceType")
@@ -338,6 +369,10 @@ public class MainActivity extends BaseGameActivity implements
                 }});
 
         ActivityOverlay.initial(this, frameLayout.getId());
+
+        if ("pre_release".equals(BuildConfig.BUILD_TYPE) || BuildConfig.DEBUG) {
+            BuildTypeNoticeFragment.single.get().show();
+        }
     }
 
     public void checkNewBeatmaps() {
@@ -433,6 +468,9 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     protected void onCreate(Bundle pSavedInstanceState) {
         super.onCreate(pSavedInstanceState);
+        if (this.mEngine == null) {
+            return;
+        }
         if (BuildConfig.DEBUG) {
             //Toast.makeText(this,"this is debug version",Toast.LENGTH_LONG).show();
             try {
@@ -513,6 +551,9 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     public void onResume() {
         super.onResume();
+        if (this.mEngine == null) {
+            return;
+        }
         if (GlobalManager.getInstance().getSkinNow() != null) {
             if (GlobalManager.getInstance().getSkinNow() != Config.getSkinPath()) {
                 GlobalManager.getInstance().setSkinNow(Config.getSkinPath());
@@ -537,7 +578,6 @@ public class MainActivity extends BaseGameActivity implements
             }
         }
         activityVisible = true;
-        MobclickAgent.onResume(this);
         //HideNaviBar
         if (Config.isHideNaviBar()) {
             if (Build.VERSION.SDK_INT >= 11) {
@@ -588,6 +628,9 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     public void onPause() {
         super.onPause();
+        if (this.mEngine == null) {
+            return;
+        }
         if (GlobalManager.getInstance().getEngine() != null && GlobalManager.getInstance().getGameScene() != null
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
             SpritePool.getInstance().purge();
@@ -624,7 +667,6 @@ public class MainActivity extends BaseGameActivity implements
             }
         }
         activityVisible = false;
-        MobclickAgent.onPause(this);
     }
 
     @Override
@@ -636,7 +678,9 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-
+        if (this.mEngine == null) {
+            return;
+        }
         if (GlobalManager.getInstance().getEngine() != null
                 && GlobalManager.getInstance().getGameScene() != null
                 && !hasFocus
@@ -645,7 +689,7 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().getGameScene().pause();
             }
         }
-        if (hasFocus && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if (hasFocus && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Config.isHideNaviBar()) {
         	getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -656,13 +700,12 @@ public class MainActivity extends BaseGameActivity implements
 		}
     }
 
-//    @Override
-//    public void onBackPressed() {
-//        MainManager.getInstance().getMainScene().exit();
-//    }
 
     @Override
     public void onAccelerometerChanged(final AccelerometerData arg0) {
+        if (this.mEngine == null) {
+            return;
+        }
         if (GlobalManager.getInstance().getCamera().getRotation() == 0 && arg0.getY() < -5) {
             GlobalManager.getInstance().getCamera().setRotation(180);
         } else if (GlobalManager.getInstance().getCamera().getRotation() == 180 && arg0.getY() > 5) {
@@ -672,10 +715,9 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public boolean onKeyDown(final int keyCode, final KeyEvent event) {
-        /*boolean superDown = super.onKeyDown(keyCode, event);
-        if (superDown) {
-            return superDown;
-        }*/
+        if (this.mEngine == null) {
+            return false;
+        }
 
         if (event.getAction() != KeyEvent.ACTION_DOWN) {
             return super.onKeyDown(keyCode, event);
@@ -775,61 +817,17 @@ public class MainActivity extends BaseGameActivity implements
         return super.onKeyDown(keyCode, event);
     }
 
-    private void checkPermissions() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage("Need permission to access osu!droid directory");
-                builder.setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission
-                                .WRITE_EXTERNAL_STORAGE}, 2333);
-                    }
-                });
-                builder.show();
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2333);
-            }
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case 2333: {
-                for (int i = 0; i < permissions.length; i++) {
-                    String permission = permissions[i];
-                    if (Manifest.permission.WRITE_EXTERNAL_STORAGE.equals(permission)) {
-                        if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
-                            boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, permission);
-                            if (!showRationale) {// user denied flagging NEVER ASK AGAIN
-                                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                                builder.setMessage("Game won't run without storage permission!\nPlease enable it manually.");
-                                builder.setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                        Uri uri = Uri.fromParts("package", getPackageName(), null);
-                                        intent.setData(uri);
-                                        startActivityForResult(intent, 2334);
-                                    }
-                                });
-                                builder.setNegativeButton(R.string.dialog_cancel, null);
-                                builder.show();
-
-                            } else {
-                                // user denied WITHOUT never ask again
-                                // game will exit by exception
-                            }
-                        }
-                    }
-                }
-            }
+    private boolean checkPermissions() {
+        String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        if (PermissionChecker.checkCallingOrSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PermissionChecker.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            Intent grantPermission = new Intent(this, PermissionActivity.class);
+            startActivity(grantPermission);
+            overridePendingTransition(R.anim.fast_activity_swap, R.anim.fast_activity_swap);
+            finish();
+            return false;
         }
     }
 }

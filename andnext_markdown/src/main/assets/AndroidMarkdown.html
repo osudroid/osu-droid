@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <link
+            rel="stylesheet"
+            href="./github-markdown-css/2.10.0/github-markdown.min.css"
+    />
+
+    <style>
+    .markdown-body
+    {
+        box-sizing: border-box;
+        min-width: 200px;
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 45px;
+    }
+
+    @media (max-width: 767px)
+    {
+        .markdown-body
+        {
+            padding: 15px;
+        }
+	}
+    </style>
+
+    <link rel="stylesheet"
+          href="./highlightjs/9.13.1/default.min.css">
+
+    <script src="./highlightjs/9.13.1/highlight.min.js"></script>
+
+    <script type='text/javascript' src='./marked/0.5/marked.min.js'></script>
+
+    <script>
+        marked.setOptions({
+            renderer: new marked.Renderer(),
+            gfm: true,
+            tables: true,
+            breaks: true,
+            pedantic: false,
+            sanitize: false,
+            smartLists: true,
+            smartypants: false,
+            highlight: function (code, lang) {
+                  if (lang && hljs.getLanguage(lang)) {
+                    return hljs.highlight(lang, code, true).value;
+                  } else {
+                    return hljs.highlightAuto(code).value;
+                  }
+              }
+        });
+
+
+    </script>
+
+    <script type="text/javascript">
+    function setText(text) {
+        var result = marked(text);
+
+		var element = document.getElementById('marked');
+		element.innerHTML = result;
+    }
+    </script>
+
+</head>
+
+<body>
+<article id="marked" class="markdown-body" style="text-align: left;">
+</article>
+</body>
+
+</html>

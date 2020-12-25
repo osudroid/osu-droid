@@ -60,7 +60,6 @@ import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
-import ru.nsu.ccfit.zuev.osu.online.OnlineMapInfo;
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
@@ -102,7 +101,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private ScrollBar scrollbar;
     private ChangeableText trackInfo, mapper, beatmapInfo, beatmapInfo2, dimensionInfo;
     private boolean isSelectComplete = true;
-    private OnlineMapInfo ppy = null;
     private HashMap<Integer, String> mapStateHashmap = new HashMap<Integer, String>();
     private int mapState;
     private AnimSprite scoringSwitcher = null;
@@ -140,10 +138,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         return items;
     }
 
-    public OnlineMapInfo getOnlineMapInfo() {
-        return ppy;
-    }
-
     public void init(final Activity context, final Engine engine,
                      final GameScene pGame) {
         this.engine = engine;
@@ -166,7 +160,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public synchronized void load() {
-        ppy = new OnlineMapInfo();
         mapStateHashmap.put(0, "Offline");
         mapStateHashmap.put(1, "Loading");
         mapStateHashmap.put(2, "Ranked");
@@ -658,15 +651,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
         scoringSwitcher.setFrame(7);
         if (selectedTrack == null) return;
-        (new Thread() {
-            public void run() {
-                int state = ppy.getBeatmapsStateFromHash(selectedTrack);
-                mapState = state == 0 ? ppy.getBeatmapsStateFromHash(selectedTrack) : state;
-                updateInfo(selectedTrack, state);
-                scoringSwitcher.setFrame(state);
-                ppy.setUpdateNeccessary(state == 6);
-            }
-        }).start();
     }
 
     public Scene getScene() {
@@ -919,13 +903,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 beatmapInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
                 dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
             }
-            if (mod.contains(GameMod.MOD_SPEEDUP)) {
-                bpm_max *= 1.25f;
-                bpm_min *= 1.25f;
-                length *= 4 / 5f;
-                beatmapInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-                dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-            }
             if (mod.contains(GameMod.MOD_HALFTIME)) {
                 bpm_max *= 0.75f;
                 bpm_min *= 0.75f;
@@ -944,8 +921,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 ar -= ModMenu.getInstance().getSpeed() - 1.0f;
             } else if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
                 ar -= 0.5f;
-            } else if (mod.contains(GameMod.MOD_SPEEDUP)){
-                ar -= 0.25f;
             }
             od *= 0.5f;
             cs -= 1f;
@@ -986,9 +961,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         } else if (mod.contains(GameMod.MOD_HALFTIME)) {
             ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 4 / 3), 2);
             od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 4 / 3), 2);
-        } else if (mod.contains(GameMod.MOD_SPEEDUP)) {
-            ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 4 / 5), 2);
-            od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 4 / 5), 2);
         }
         if (ModMenu.getInstance().isEnableForceAR()){
             float oriAr = ar;
@@ -1299,7 +1271,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
             item = selectedItem;
         }
-        (new PropsMenuFragment()).show(SongMenu.this, item, ppy, mapStateHashmap.get(mapState));
+        (new PropsMenuFragment()).show(SongMenu.this, item, mapStateHashmap.get(mapState));
     }
 
     public void showDeleteScoreMenu(int scoreId) {

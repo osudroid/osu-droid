@@ -161,6 +161,8 @@ public class Replay {
                 os.writeBoolean(stat.isPerfect());
                 os.writeObject(stat.getPlayerName());
                 os.writeObject(stat.getMod());
+                //Add in replay version 4
+                os.writeObject(stat.getExtraModString());
             }
 
             os.writeInt(cursorMoves.size());
@@ -254,6 +256,11 @@ public class Replay {
                 stat.setPlayerName((String) os.readObject());
                 stat.setMod((EnumSet<GameMod>) os.readObject());
             }
+
+            if  (version >= 4) {
+                stat.setExtraModFromString((String) os.readObject());
+            }
+
         } catch (EOFException e) {
             Debug.e("O_o eof...");
             ToastLogger.showTextId(R.string.replay_corrupted, true);
@@ -329,6 +336,10 @@ public class Replay {
                 stat.setMod((EnumSet<GameMod>) os.readObject());
             }
 
+            if  (version >= 4) {
+                stat.setExtraModFromString((String) os.readObject());
+            }
+
             int msize = os.readInt();
             for (int i = 0; i < msize; i++) {
                 cursorMoves.add(MoveArray.readFrom(os, this));
@@ -394,7 +405,8 @@ public class Replay {
 
     public static class ReplayVersion implements Serializable {
         private static final long serialVersionUID = 4643121693566795335L;
-        int version = 3;
+        int version = 4;
+        // version 4: Add ExtraModString's save and load in save()/load()/loadInfo()
     }
 
     public static class ReplayObjectData {

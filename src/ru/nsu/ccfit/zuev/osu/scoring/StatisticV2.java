@@ -4,6 +4,7 @@ import com.dgsrz.bancho.security.SecurityUtils;
 
 import java.io.Serializable;
 import java.util.EnumSet;
+import java.util.Locale;
 import java.util.Random;
 
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -91,7 +92,7 @@ public class StatisticV2 implements Serializable {
         hit100 = Integer.parseInt(params[7]);
         hit50 = Integer.parseInt(params[8]);
         misses = Integer.parseInt(params[9]);
-        accuracy = Float.parseFloat(params[10]);
+        accuracy = Integer.parseInt(params[10]) / 100000f;
         if (params.length >= 12) {
             time = Long.parseLong(params[11]);
         }
@@ -125,44 +126,8 @@ public class StatisticV2 implements Serializable {
         if (forcedScore > 0)
             return forcedScore;
         float mult = 1;
-        if (mod.contains(GameMod.MOD_AUTO)) {
-            mult *= 0;
-        }
-        if (mod.contains(GameMod.MOD_RELAX)) {
-            mult *= 0.001f;
-        }
-        if (mod.contains(GameMod.MOD_AUTOPILOT)) {
-            mult *= 0.001f;
-        }
-        if (mod.contains(GameMod.MOD_EASY)) {
-            mult *= 0.5f;
-        }
-        if (mod.contains(GameMod.MOD_NOFAIL)) {
-            mult *= 0.5f;
-        }
-        if (mod.contains(GameMod.MOD_HARDROCK)) {
-            mult *= 1.06f;
-        }
-        if (mod.contains(GameMod.MOD_HIDDEN)) {
-            mult *= 1.06f;
-        }
-        if (mod.contains(GameMod.MOD_FLASHLIGHT)) {
-            mult *= 1.12f;
-        }
-        if (mod.contains(GameMod.MOD_DOUBLETIME)) {
-            mult *= 1.12f;
-        }
-        if (mod.contains(GameMod.MOD_NIGHTCORE)) {
-            mult *= 1.12f;
-        }
-        if (mod.contains(GameMod.MOD_SPEEDUP)) {
-            mult *= 1.06f;
-        }
-        if (mod.contains(GameMod.MOD_HALFTIME)) {
-            mult *= 0.3f;
-        }
-        if (mod.contains(GameMod.MOD_REALLYEASY)) {
-            mult *= 0.4f;
+        for (GameMod m : mod) {
+            mult *= m.scoreMultiplier;
         }
         if (changeSpeed != 1.0f){
             mult *= getSpeedChangeScoreMultiplier();
@@ -172,35 +137,11 @@ public class StatisticV2 implements Serializable {
 
     public int getAutoTotalScore() {
         float mult = 1;
-        if (mod.contains(GameMod.MOD_EASY)) {
-            mult *= 0.5f;
-        }
-        if (mod.contains(GameMod.MOD_NOFAIL)) {
-            mult *= 0.5f;
-        }
-        if (mod.contains(GameMod.MOD_HARDROCK)) {
-            mult *= 1.06f;
-        }
-        if (mod.contains(GameMod.MOD_HIDDEN)) {
-            mult *= 1.06f;
-        }
-        if (mod.contains(GameMod.MOD_FLASHLIGHT)) {
-            mult *= 1.12f;
-        }
-        if (mod.contains(GameMod.MOD_DOUBLETIME)) {
-            mult *= 1.12f;
-        }
-        if (mod.contains(GameMod.MOD_NIGHTCORE)) {
-            mult *= 1.12f;
-        }
-        if (mod.contains(GameMod.MOD_SPEEDUP)) {
-            mult *= 1.06f;
-        }
-        if (mod.contains(GameMod.MOD_HALFTIME)) {
-            mult *= 0.3f;
-        }
-        if (mod.contains(GameMod.MOD_REALLYEASY)) {
-            mult *= 0.4f;
+        for (GameMod m : mod) {
+            if (m.typeAuto) {
+                continue;
+            }
+            mult *= m.scoreMultiplier;
         }
         if (changeSpeed != 1.0f){
             mult *= getSpeedChangeScoreMultiplier();
@@ -526,9 +467,6 @@ public class StatisticV2 implements Serializable {
         if (mod.contains(GameMod.MOD_NIGHTCORE)) {
             s += "c";
         }
-        if (mod.contains(GameMod.MOD_SPEEDUP)) {
-            s += "b";
-        }
         if (mod.contains(GameMod.MOD_HALFTIME)) {
             s += "t";
         }
@@ -607,10 +545,7 @@ public class StatisticV2 implements Serializable {
                     break;    
                 case 'f':
                     mod.add(GameMod.MOD_PERFECT);
-                    break;    
-                case 'b':
-                    mod.add(GameMod.MOD_SPEEDUP);
-                    break;   
+                    break;
                 case 'v':
                     mod.add(GameMod.MOD_SCOREV2);
                     break;   
@@ -716,17 +651,14 @@ public class StatisticV2 implements Serializable {
         if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
             speed *= 1.5f;
         }
-        if (mod.contains(GameMod.MOD_SPEEDUP)){
-            speed *= 1.25f;
-        }
         if (mod.contains(GameMod.MOD_HALFTIME)){
             speed *= 0.75f;
         }
         return speed;
     }
 
-    private float getSpeedChangeScoreMultiplier(){
-        float multi = getSpeed();
+    public static float getSpeedChangeScoreMultiplier(float speed, EnumSet<GameMod> mod) {
+        float multi = speed;
         if (multi > 1){
             multi = 1.0f + (multi - 1.0f) * 0.24f;
         } else if (multi < 1){
@@ -737,22 +669,23 @@ public class StatisticV2 implements Serializable {
         if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
             multi /= 1.12f;
         }
-        if (mod.contains(GameMod.MOD_SPEEDUP)){
-            multi /= 1.06f;
-        }
         if (mod.contains(GameMod.MOD_HALFTIME)){
             multi /= 0.3f;
         }
         return multi;
     }
 
-    private String getExtraModString() {
+    private float getSpeedChangeScoreMultiplier(){
+        return getSpeedChangeScoreMultiplier(getSpeed(), mod);
+    }
+
+    public String getExtraModString() {
         StringBuilder builder = new StringBuilder();
         if (changeSpeed != 1){
-            builder.append(String.format("x%.2f|", changeSpeed));
+            builder.append(String.format(Locale.ENGLISH, "x%.2f|", changeSpeed));
         }
         if (enableForceAR){
-            builder.append(String.format("AR%.1f|", forceAR));
+            builder.append(String.format(Locale.ENGLISH, "AR%.1f|", forceAR));
         }
         if (builder.length() > 0){
             builder.delete(builder.length() - 1, builder.length());
@@ -760,7 +693,7 @@ public class StatisticV2 implements Serializable {
         return builder.toString();
     }
 
-    private void setExtraModFromString(String s) {
+    public void setExtraModFromString(String s) {
         for (String str: s.split("\\|")){
             if (str.startsWith("x") && str.length() == 5){
                 changeSpeed = Float.parseFloat(str.substring(1));

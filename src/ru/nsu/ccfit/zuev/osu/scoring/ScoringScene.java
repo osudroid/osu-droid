@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
+import com.edlplan.framework.utils.functionality.SmartIterator;
+
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
@@ -30,6 +32,7 @@ import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.SendingPanel;
+import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class ScoringScene {
@@ -83,18 +86,19 @@ public class ScoringScene {
         String mapperStr = "Beatmap by " + trackInfo.getCreator();
         String playerStr = "Played by " + stat.getPlayerName() + " on " +
                 new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date(stat.getTime()));
+        playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
         if (stat.getChangeSpeed() != 1 || stat.isEnableForceAR()){
-            playerStr += " [";
+            mapperStr += " [";
             if (stat.getChangeSpeed() != 1){
-                playerStr += String.format("%.2fx,", stat.getChangeSpeed());
+                mapperStr += String.format("%.2fx,", stat.getChangeSpeed());
             }
             if (stat.isEnableForceAR()){
-                playerStr += String.format("AR%.1f,", stat.getForceAR());
+                mapperStr += String.format("AR%.1f,", stat.getForceAR());
             }
-            if (playerStr.endsWith(",")){
-                playerStr = playerStr.substring(0, playerStr.length() - 1);
+            if (mapperStr.endsWith(",")){
+                mapperStr = playerStr.substring(0, playerStr.length() - 1);
             }
-            playerStr += "]";
+            mapperStr += "]";
         }
         //calculatePP
         if (Config.isDisplayScorePP()){
@@ -444,11 +448,6 @@ public class ScoringScene {
                     .getInstance().getTexture("selection-mod-halftime"));
             modX -= Utils.toRes(30);
             scene.attachChild(modSprite);
-        } else if (stat.getMod().contains(GameMod.MOD_SPEEDUP)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-speedup"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
         }
 
         if (stat.getMod().contains(GameMod.MOD_PRECISE)) {
@@ -474,18 +473,22 @@ public class ScoringScene {
         if (track != null && mapMD5 != null) {
             if (stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
                     OnlineManager.getInstance().isReadyToSend()) {
-                if (stat.getMod().contains(GameMod.MOD_PRECISE)
-                || stat.getMod().contains(GameMod.MOD_SUDDENDEATH) 
+                if (stat.getMod().contains(GameMod.MOD_SUDDENDEATH)
                 || stat.getMod().contains(GameMod.MOD_PERFECT)
                 || stat.getMod().contains(GameMod.MOD_SMALLCIRCLE)
                 || stat.getMod().contains(GameMod.MOD_REALLYEASY)
-                || stat.getMod().contains(GameMod.MOD_SPEEDUP)
                 || stat.getMod().contains(GameMod.MOD_FLASHLIGHT)
-                || stat.getMod().contains(GameMod.MOD_SCOREV2)){
-                    //ToastLogger.showText(StringTable.get(R.string.mod_precise_is_unrank_now), true);
+                || stat.getMod().contains(GameMod.MOD_SCOREV2)
+                || Config.isRemoveSliderLock()
+                || ModMenu.getInstance().isChangeSpeed()
+                || ModMenu.getInstance().isEnableForceAR()){
                     ToastLogger.showText(StringTable.get(R.string.mods_somemods_is_unrank_now), true);
                 }
-                else if(!stat.getMod().contains(GameMod.MOD_RELAX) && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)){
+                else if(
+                        !SmartIterator.wrap(stat.getMod().iterator())
+                                .applyFilter(m->m.typeAuto)
+                                .hasNext()
+                ){
                     SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
                             OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy());
                     sendingPanel.setPosition(Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));

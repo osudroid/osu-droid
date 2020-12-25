@@ -7,9 +7,8 @@ import org.anddev.andengine.util.AsyncCallable;
 import org.anddev.andengine.util.Callback;
 import org.anddev.andengine.util.progress.ProgressCallable;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * (c) 2010 Nicolas Gramlich 
@@ -50,7 +49,6 @@ public abstract class BaseActivity extends AppCompatActivity {
 	 * @param <T>
 	 * @param pTitleResID
 	 * @param pMessageResID
-	 * @param pErrorMessageResID
 	 * @param pCallable
 	 * @param pCallback
 	 */
@@ -65,7 +63,6 @@ public abstract class BaseActivity extends AppCompatActivity {
 	 * @param <T>
 	 * @param pTitleResID
 	 * @param pMessageResID
-	 * @param pErrorMessageResID
 	 * @param pCallable
 	 * @param pCallback
 	 * @param pExceptionCallback
@@ -80,9 +77,6 @@ public abstract class BaseActivity extends AppCompatActivity {
 	 * 
 	 * @param <T>
 	 * @param pTitleResID
-	 * @param pMessageResID
-	 * @param pErrorMessageResID
-	 * @param pAsyncCallable
 	 * @param pCallback
 	 */
 	protected <T> void doProgressAsync(final int pTitleResID, final ProgressCallable<T> pCallable, final Callback<T> pCallback) {
@@ -95,9 +89,6 @@ public abstract class BaseActivity extends AppCompatActivity {
 	 * 
 	 * @param <T>
 	 * @param pTitleResID
-	 * @param pMessageResID
-	 * @param pErrorMessageResID
-	 * @param pAsyncCallable
 	 * @param pCallback
 	 * @param pExceptionCallback
 	 */
@@ -112,7 +103,6 @@ public abstract class BaseActivity extends AppCompatActivity {
 	 * @param <T>
 	 * @param pTitleResID
 	 * @param pMessageResID
-	 * @param pErrorMessageResID
 	 * @param pAsyncCallable
 	 * @param pCallback
 	 * @param pExceptionCallback

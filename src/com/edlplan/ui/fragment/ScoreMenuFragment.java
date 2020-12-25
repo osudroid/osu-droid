@@ -3,8 +3,8 @@ package com.edlplan.ui.fragment;
 import android.animation.Animator;
 import android.content.Intent;
 import android.os.Environment;
-import android.support.design.widget.Snackbar;
-import android.support.v4.content.FileProvider;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.core.content.FileProvider;
 import android.view.View;
 import android.widget.Toast;
 
