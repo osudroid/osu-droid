@@ -6,6 +6,7 @@ import lt.ekgame.beatmap_analyzer.beatmap.HitObject;
 
 import com.dgsrz.bancho.game.sprite.VideoSprite;
 import com.edlplan.ext.EdExtensionHelper;
+import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
@@ -13,6 +14,7 @@ import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
+import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.entity.modifier.DelayModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
@@ -715,6 +717,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private void prepareScene() {
         scene.setOnSceneTouchListener(this);
         // bgScene.attachChild(mVideo);
+        if (GlobalManager.getInstance().getCamera() instanceof SmoothCamera) {
+            SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
+            camera.setZoomFactorDirect(Config.getPlayfieldSize());
+            if (Config.isShrinkPlayfieldDownwards()) {
+                camera.setCenterDirect(Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT() / 2 * Config.getPlayfieldSize());
+            }
+        }
         setBackground();
 
         if (Config.isShowFPS()) {
@@ -1270,6 +1279,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
 
+
+
     public RGBColor getComboColor(int num) {
         return combos.get(num % combos.size());
     }
@@ -1819,6 +1830,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 replay.setStat(stat);
                 replay.save(replayFile);
             }
+            if (GlobalManager.getInstance().getCamera() instanceof SmoothCamera) {
+                SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
+                camera.setZoomFactorDirect(1f);
+                if (Config.isShrinkPlayfieldDownwards()) {
+                    camera.setCenterDirect(Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT() / 2);
+                }
+            }
             if (scoringScene != null) {
                 if (replaying) {
                     ModMenu.getInstance().setMod(Replay.oldMod);
@@ -1959,7 +1977,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         onExit();
         ResourceManager.getInstance().getSound("failsound").stop();
-
+        if (GlobalManager.getInstance().getCamera() instanceof SmoothCamera) {
+            SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
+            camera.setZoomFactorDirect(1f);
+            if (Config.isShrinkPlayfieldDownwards()) {
+                camera.setCenterDirect(Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT() / 2);
+            }
+        }
         scene = new Scene();
         engine.setScene(oldScene);
     }
@@ -2350,8 +2374,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return false;
         }
         final int i = pSceneTouchEvent.getPointerID();
+        float pTouchX = FMath.clamp(pSceneTouchEvent.getX(), 0, Config.getRES_WIDTH());
+        float pTouchY = FMath.clamp(pSceneTouchEvent.getY(), 0, Config.getRES_HEIGHT());
         if (pSceneTouchEvent.isActionDown()) {
-            if (pSceneTouchEvent.getX() > Config.getRES_WIDTH()) {
+            if (pTouchX > Config.getRES_WIDTH()) {
                 for (final Cursor cursor : cursors) {
                     cursor.mouseOldDown = false;
                 }
@@ -2361,17 +2387,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             cursors[i].mouseDownOffset = (pSceneTouchEvent.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier;
             for (int j = 0; j < cursors.length; j++)
                 cursors[j].mouseOldDown = false;
-            PointF gamePoint = Utils.realToTrackCoords(new PointF(pSceneTouchEvent.getX(), pSceneTouchEvent.getY()));
-            cursors[i].mousePos.x = pSceneTouchEvent.getX();
-            cursors[i].mousePos.y = pSceneTouchEvent.getY();
+            PointF gamePoint = Utils.realToTrackCoords(new PointF(pTouchX, pTouchY));
+            cursors[i].mousePos.x = pTouchX;
+            cursors[i].mousePos.y = pTouchY;
             if (replay != null) {
                 replay.addPress(secPassed, gamePoint, i);
             }
             cursorIIsDown[i] = true;
         } else if (pSceneTouchEvent.isActionMove()) {
-            PointF gamePoint = Utils.realToTrackCoords(new PointF(pSceneTouchEvent.getX(), pSceneTouchEvent.getY()));
-            cursors[i].mousePos.x = pSceneTouchEvent.getX();
-            cursors[i].mousePos.y = pSceneTouchEvent.getY();
+            PointF gamePoint = Utils.realToTrackCoords(new PointF(pTouchX, pTouchY));
+            cursors[i].mousePos.x = pTouchX;
+            cursors[i].mousePos.y = pTouchY;
             if (replay != null) {
                 replay.addMove(secPassed, gamePoint, i);
             }
