@@ -23,6 +23,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.ModButton;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.TextButton;
+import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class ModMenu implements IModSwitcher {
@@ -215,47 +216,11 @@ public class ModMenu implements IModSwitcher {
         GlobalManager.getInstance().getSongMenu().changeDimensionInfo(selectedTrack);
         //calculateAble = true;
         float mult = 1;
-        if (mod.contains(GameMod.MOD_AUTO)) {
-            mult *= 0;
-        }
-        if (mod.contains(GameMod.MOD_RELAX)) {
-            mult *= 0.001f;
-        }
-        if (mod.contains(GameMod.MOD_AUTOPILOT)) {
-            mult *= 0.001f;
-        }
-        if (mod.contains(GameMod.MOD_EASY)) {
-            mult *= 0.5f;
-        }
-        if (mod.contains(GameMod.MOD_NOFAIL)) {
-            mult *= 0.5f;
-        }
-        if (mod.contains(GameMod.MOD_HARDROCK)) {
-            mult *= 1.06f;
-        }
-        if (mod.contains(GameMod.MOD_HIDDEN)) {
-            mult *= 1.06f;
-        }
-        if (mod.contains(GameMod.MOD_FLASHLIGHT)) {
-            mult *= 1.12f;
-        }
-        if (mod.contains(GameMod.MOD_DOUBLETIME)) {
-            mult *= 1.12f;
-        }
-        if (mod.contains(GameMod.MOD_NIGHTCORE)) {
-            mult *= 1.12f;
-        }
-        if (mod.contains(GameMod.MOD_SPEEDUP)) {
-            mult *= 1.06f;
-        }
-        if (mod.contains(GameMod.MOD_HALFTIME)) {
-            mult *= 0.3f;
-        }
-        if (mod.contains(GameMod.MOD_REALLYEASY)) {
-            mult *= 0.4f;
+        for (GameMod m : mod) {
+            mult *= m.scoreMultiplier;
         }
         if (changeSpeed != 1.0f){
-            mult *= getSpeedChangeScoreMultiplier();
+            mult *= StatisticV2.getSpeedChangeScoreMultiplier(getSpeed(), mod);
         }
 
         multiplierText.setText(StringTable.format(R.string.menu_mod_multiplier,
@@ -401,27 +366,6 @@ public class ModMenu implements IModSwitcher {
 
     public void updateMultiplierText(){
         changeMultiplierText();
-    }
-
-    private float getSpeedChangeScoreMultiplier(){
-        float multi = getSpeed();
-        if (multi > 1){
-            multi = 1.0f + (multi - 1.0f) * 0.24f;
-        } else if (multi < 1){
-            multi = (float) Math.pow(0.3, (1.0 - multi) * 4);
-        } else if (multi == 1){
-            return 1f;
-        }
-        if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
-            multi /= 1.12f;
-        }
-        if (mod.contains(GameMod.MOD_SPEEDUP)){
-            multi /= 1.06f;
-        }
-        if (mod.contains(GameMod.MOD_HALFTIME)){
-            multi /= 0.3f;
-        }
-        return multi;
     }
 
     public boolean shouldReCalculate(){
