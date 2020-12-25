@@ -216,7 +216,10 @@ public class DifficultyReCalculator {
         int nmiss = stat.getMisses();
         float base_ar = getAR(stat, track);
         float base_od = getOD(stat, track);
-
+        if (accuracy == 1f) {
+            combo = max_combo;
+            nmiss = 0;
+        }
         double nobjects_over_2k = nobjects / 2000.0;
 
         double length_bonus = 0.95 + 0.4 *
@@ -227,6 +230,7 @@ public class DifficultyReCalculator {
         }
 
         double combo_break = Math.min(1.0, Math.pow((double) combo / max_combo, 0.8));
+
         /* ar bonus -------------------------------------------- */
         double ar_bonus = 0.0;
 
