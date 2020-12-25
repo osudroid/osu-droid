@@ -117,6 +117,11 @@ android {
 
     flavorDimensions "download_channel"
     productFlavors {
+        a_github {
+            dimension "download_channel"
+            versionNameSuffix '-github'
+        }
+
         qq {
             dimension "download_channel"
             versionNameSuffix '-qq'
@@ -124,17 +129,12 @@ android {
 
         discord {
             dimension "download_channel"
-            versionNameSuffix '-dsicord'
+            versionNameSuffix '-discord'
         }
 
         website {
             dimension "download_channel"
             versionNameSuffix '-website'
-        }
-
-        github {
-            dimension "download_channel"
-            versionNameSuffix '-github'
         }
     }
 
