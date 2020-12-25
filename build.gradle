@@ -161,6 +161,14 @@ android {
         ignoreWarnings true
         disable 'MissingTranslation', 'ExpiredTargetSdkVersion', 'ProtectedPermissions', 'AppLinkUrlError'
     }
+
+    android.applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def releaseTime = new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
+            def fileName = "osu!droid-${defaultConfig.versionName}-${variant.productFlavors[0].name}-${variant.buildType.name}-${releaseTime}.apk"
+            outputFileName = fileName
+        }
+    }
 }
 
 dependencies {
