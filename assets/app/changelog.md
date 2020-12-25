@@ -3,6 +3,7 @@ Changelog for 1.6.8
 ## Additions:
 
 - Delete local replay
+- You can scale play field, so that you can keep your fingers away from system status bar.
 - Sudden Death (SD) mod: triggers fail after 1 miss, slider breaks will not trigger fail (unranked)
 - Small Circle (SC) mod: CS + 4 (unranked)
 - Perfect (PF) mod: SS or fail (unranked)
