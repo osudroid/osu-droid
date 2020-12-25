@@ -27,7 +27,7 @@ Changelog for 1.6.8
 ## Changes:
 
   - PR (Precise) mod is ranked
-  - EZ (Easy) mod has 3 lives, increase score multiplier to 0.8
+  - EZ (Easy) mod has 3 lives
   - RX (Relax) mod and AP (AutoPilot) mod replays will be saved with 0.01x score multiplier
   - Updated star rating system (improves calculation accuracy to be closer to osu! PC star rating)
   - 10 simultaneous cursor input support
