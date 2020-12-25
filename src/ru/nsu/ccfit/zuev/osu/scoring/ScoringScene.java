@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
+import com.edlplan.framework.utils.functionality.SmartIterator;
+
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
@@ -474,18 +476,20 @@ public class ScoringScene {
         if (track != null && mapMD5 != null) {
             if (stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
                     OnlineManager.getInstance().isReadyToSend()) {
-                if (stat.getMod().contains(GameMod.MOD_PRECISE)
-                || stat.getMod().contains(GameMod.MOD_SUDDENDEATH) 
+                if (stat.getMod().contains(GameMod.MOD_SUDDENDEATH)
                 || stat.getMod().contains(GameMod.MOD_PERFECT)
                 || stat.getMod().contains(GameMod.MOD_SMALLCIRCLE)
                 || stat.getMod().contains(GameMod.MOD_REALLYEASY)
                 || stat.getMod().contains(GameMod.MOD_SPEEDUP)
                 || stat.getMod().contains(GameMod.MOD_FLASHLIGHT)
                 || stat.getMod().contains(GameMod.MOD_SCOREV2)){
-                    //ToastLogger.showText(StringTable.get(R.string.mod_precise_is_unrank_now), true);
                     ToastLogger.showText(StringTable.get(R.string.mods_somemods_is_unrank_now), true);
                 }
-                else if(!stat.getMod().contains(GameMod.MOD_RELAX) && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)){
+                else if(
+                        !SmartIterator.wrap(stat.getMod().iterator())
+                                .applyFilter(m->m.typeAuto)
+                                .hasNext()
+                ){
                     SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
                             OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy());
                     sendingPanel.setPosition(Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));
