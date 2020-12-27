@@ -168,12 +168,14 @@ public class ModMenu implements IModSwitcher {
                 if (pSceneTouchEvent.isActionUp()) {
                     (new Thread() {
                         public void run() {
-                            DifficultyReCalculator rec = new DifficultyReCalculator();
-                            float newstar = rec.reCalculateStar(
-                                GlobalManager.getInstance().getSongMenu().getSelectedTrack(), 
-                                getSpeed(), rec.getCS(GlobalManager.getInstance().getSongMenu().getSelectedTrack()));
-                            if (newstar != 0f){
-                                GlobalManager.getInstance().getSongMenu().setStarsDisplay(newstar);
+                            if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != null){
+                                DifficultyReCalculator rec = new DifficultyReCalculator();
+                                float newstar = rec.reCalculateStar(
+                                        GlobalManager.getInstance().getSongMenu().getSelectedTrack(),
+                                        getSpeed(), rec.getCS(GlobalManager.getInstance().getSongMenu().getSelectedTrack()));
+                                if (newstar != 0f){
+                                    GlobalManager.getInstance().getSongMenu().setStarsDisplay(newstar);
+                                }
                             }
                         }
                     }).start();
