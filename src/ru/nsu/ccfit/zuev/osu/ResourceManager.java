@@ -88,16 +88,8 @@ public class ResourceManager {
         loadTexture("::track2", "gfx/slidertrack.png", false);
         loadTexture("::trackborder", "gfx/sliderborder.png", false,
                 TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-        loadTexture("ranking_button", "ranking_button.png", false);
         loadTexture("ranking_enabled", "ranking_enabled.png", false);
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
-        loadTexture("ranking_ranked", "ranking_ranked.png", false);
-        loadTexture("ranking_loved", "ranking_loved.png", false);
-        loadTexture("ranking_latest", "ranking_latest.png", false);
-        loadTexture("ranking_download", "ranking_download.png", false);
-        loadTexture("ranking_unknown", "ranking_unknown.png", false);
-        loadTexture("ranking_unsubmitted", "ranking_unsubmitted.png", false);
-        loadTexture("ranking_nextpage", "ranking_nextpage.png", false);
         
         loadTexture("flashlight_cursor", "flashlight_cursor.png", false);
         if (textures.containsKey("lighting") == false)
@@ -302,13 +294,6 @@ public class ResourceManager {
         loadTexture("ranking_button", "ranking_button.png", false);
         loadTexture("ranking_enabled", "ranking_enabled.png", false);
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
-        loadTexture("ranking_ranked", "ranking_ranked.png", false);
-        loadTexture("ranking_loved", "ranking_loved.png", false);
-        loadTexture("ranking_latest", "ranking_latest.png", false);
-        loadTexture("ranking_download", "ranking_download.png", false);
-        loadTexture("ranking_unknown", "ranking_unknown.png", false);
-        loadTexture("ranking_unsubmitted", "ranking_unsubmitted.png", false);
-        loadTexture("ranking_nextpage", "ranking_nextpage.png", false);
         if (textures.containsKey("lighting") == false)
             textures.put("lighting", null);
 //		textures.put("fail-background", null);

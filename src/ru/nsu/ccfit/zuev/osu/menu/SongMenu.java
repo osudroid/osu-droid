@@ -596,7 +596,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             frontLayer.attachChild(panel);
 
 
-            scoringSwitcher = new AnimSprite(Utils.toRes(5), Utils.toRes(10), 0, "ranking_enabled", "ranking_disabled", "ranking_ranked", "ranking_latest", "ranking_loved", "ranking_unsubmitted", "ranking_download", "ranking_unknown") {
+            scoringSwitcher = new AnimSprite(Utils.toRes(5), Utils.toRes(10), 0, "ranking_enabled", "ranking_disabled") {
                 @Override
                 public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
                                              float pTouchAreaLocalX, float pTouchAreaLocalY) {
@@ -606,7 +606,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     return true;
                 }
             };
-            scoringSwitcher.setFrame(1);
+            scoringSwitcher.setFrame(0);
             scoringSwitcher.setPosition(10, 10);
             scene.registerTouchArea(scoringSwitcher);
             frontLayer.attachChild(scoringSwitcher);
@@ -634,7 +634,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             updateInfo(selectedTrack);
             return;
         }
-        scoringSwitcher.setFrame(7);
+        scoringSwitcher.setFrame(0);
         if (selectedTrack == null) return;
     }
 
