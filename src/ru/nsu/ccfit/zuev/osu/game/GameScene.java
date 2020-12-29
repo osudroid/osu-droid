@@ -1444,11 +1444,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     && stat.getMod().contains(GameMod.MOD_RELAX) == false
                     && stat.getMod().contains(GameMod.MOD_AUTOPILOT) == false
                     && stat.getMod().contains(GameMod.MOD_AUTO) == false) {
-                if(stat.getMod().contains(GameMod.MOD_EASY) && failcount < 3){
+                if (stat.getMod().contains(GameMod.MOD_EASY) && failcount < 3) {
                     failcount++;
                     stat.changeHp(1f);
                 }
-                else{
+                else {
                     gameover();
                 }
                 return;

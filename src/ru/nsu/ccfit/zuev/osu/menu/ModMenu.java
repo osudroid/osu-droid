@@ -257,14 +257,22 @@ public class ModMenu implements IModSwitcher {
             } else if (flag.equals(GameMod.MOD_AUTO)) {
                 mod.remove(GameMod.MOD_AUTOPILOT);
                 mod.remove(GameMod.MOD_RELAX);
+                mod.remove(GameMod.MOD_PERFECT);
+                mod.remove(GameMod.MOD_SUDDENDEATH);
                 modsRemoved = true;
             } else if (flag.equals(GameMod.MOD_AUTOPILOT)) {
                 mod.remove(GameMod.MOD_AUTO);
                 mod.remove(GameMod.MOD_RELAX);
+                mod.remove(GameMod.MOD_PERFECT);
+                mod.remove(GameMod.MOD_SUDDENDEATH);
+                mod.remove(GameMod.MOD_NOFAIL);
                 modsRemoved = true;
             } else if (flag.equals(GameMod.MOD_RELAX)) {
                 mod.remove(GameMod.MOD_AUTOPILOT);
                 mod.remove(GameMod.MOD_AUTO);
+                mod.remove(GameMod.MOD_PERFECT);
+                mod.remove(GameMod.MOD_SUDDENDEATH);
+                mod.remove(GameMod.MOD_NOFAIL);
                 modsRemoved = true;
             } else if (flag.equals(GameMod.MOD_DOUBLETIME)) {
                 mod.remove(GameMod.MOD_NIGHTCORE);
@@ -281,14 +289,22 @@ public class ModMenu implements IModSwitcher {
             } else if (flag.equals(GameMod.MOD_SUDDENDEATH)) {
                 mod.remove(GameMod.MOD_NOFAIL);
                 mod.remove(GameMod.MOD_PERFECT);
+                mod.remove(GameMod.MOD_AUTOPILOT);
+                mod.remove(GameMod.MOD_RELAX);
+                mod.remove(GameMod.MOD_AUTO);
                 modsRemoved = true;
             } else if (flag.equals(GameMod.MOD_PERFECT)) {
                 mod.remove(GameMod.MOD_NOFAIL);
                 mod.remove(GameMod.MOD_SUDDENDEATH);
+                mod.remove(GameMod.MOD_AUTOPILOT);
+                mod.remove(GameMod.MOD_RELAX);
+                mod.remove(GameMod.MOD_AUTO);
                 modsRemoved = true;
             } else if (flag.equals(GameMod.MOD_NOFAIL)) {
                 mod.remove(GameMod.MOD_PERFECT);
                 mod.remove(GameMod.MOD_SUDDENDEATH);
+                mod.remove(GameMod.MOD_AUTOPILOT);
+                mod.remove(GameMod.MOD_RELAX);
                 modsRemoved = true;
             }
             if (modsRemoved) {
