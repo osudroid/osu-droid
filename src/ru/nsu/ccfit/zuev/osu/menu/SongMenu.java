@@ -101,8 +101,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private ScrollBar scrollbar;
     private ChangeableText trackInfo, mapper, beatmapInfo, beatmapInfo2, dimensionInfo;
     private boolean isSelectComplete = true;
-    private HashMap<Integer, String> mapStateHashmap = new HashMap<Integer, String>();
-    private int mapState;
     private AnimSprite scoringSwitcher = null;
     private AsyncTask<OsuAsyncCallback, Integer, Boolean> boardTask;
     private GroupType groupType = GroupType.MapSet;
@@ -120,10 +118,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public void setScoringScene(final ScoringScene ss) {
         scorescene = ss;
-    }
-
-    public int getMapState() {
-        return mapState;
     }
 
     public ScoreBoard.ScoreBoardItems[] getBoard() {
@@ -160,15 +154,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public synchronized void load() {
-        mapStateHashmap.put(0, "Offline");
-        mapStateHashmap.put(1, "Loading");
-        mapStateHashmap.put(2, "Ranked");
-        mapStateHashmap.put(3, "Latest pending");
-        mapStateHashmap.put(4, "Loved");
-        mapStateHashmap.put(5, "Unsubmitted");
-        mapStateHashmap.put(6, "Updatable");
-        mapStateHashmap.put(7, "Unknown");
-        mapState = 7;
         scene = new Scene();
         camY = 0;
         velocityY = 0;
@@ -633,7 +618,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             board.setShowOnlineScores(false);
             board.init(selectedTrack);
             scoringSwitcher.setFrame(1);
-            updateInfo(selectedTrack, 0);
+            updateInfo(selectedTrack);
         } else if (OnlineManager.getInstance().isStayOnline()) {
             board.setShowOnlineScores(true);
             board.init(selectedTrack);
@@ -646,7 +631,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             if (scoringSwitcher != null) {
                 scoringSwitcher.setFrame(1);
             }
-            updateInfo(selectedTrack, 0);
+            updateInfo(selectedTrack);
             return;
         }
         scoringSwitcher.setFrame(7);
@@ -981,15 +966,14 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         dimensionInfo.setText(dimensionStringBuilder.toString());
     }
 
-    public void updateInfo(TrackInfo track, int mapState) {
-        this.mapState = mapState;
+    public void updateInfo(TrackInfo track) {
         if (track == null) {
             return;
         }
 
         String tinfoStr = (track.getBeatmap().getArtistUnicode() == null || Config.isForceRomanized() ? track.getBeatmap().getArtist() : track.getBeatmap().getArtistUnicode()) + " - " +
                 (track.getBeatmap().getTitleUnicode() == null || Config.isForceRomanized() ? track.getBeatmap().getTitle() : track.getBeatmap().getTitleUnicode()) + " [" + track.getMode() + "]";
-        String mapperStr = "Beatmap by " + track.getCreator() + (mapState != 0 ? (" (" + this.mapStateHashmap.get(mapState) + ")") : "");
+        String mapperStr = "Beatmap by " + track.getCreator();
         String binfoStr2 = String.format(StringTable.get(R.string.binfoStr2),
                 track.getHitCircleCount(), track.getSliderCount(), track.getSpinerCount(), track.getBeatmapSetID());
         trackInfo.setText(tinfoStr);
@@ -1039,10 +1023,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
         isSelectComplete = false;
         selectedTrack = track;
-        mapState = 1;
         EdExtensionHelper.onSelectTrack(selectedTrack);
         GlobalManager.getInstance().setSelectedTrack(track);
-        updateInfo(track, board.isShowOnlineScores() ? 1 : 0);
+        updateInfo(track);
         board.cancleLoadAvatar();
         if (boardTask != null && boardTask.getStatus() != AsyncTask.Status.FINISHED) {
             boardTask.cancel(true);
@@ -1271,7 +1254,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
             item = selectedItem;
         }
-        (new PropsMenuFragment()).show(SongMenu.this, item, mapStateHashmap.get(mapState));
+        (new PropsMenuFragment()).show(SongMenu.this, item);
     }
 
     public void showDeleteScoreMenu(int scoreId) {
