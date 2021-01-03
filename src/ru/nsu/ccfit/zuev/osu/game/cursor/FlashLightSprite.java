@@ -10,15 +10,26 @@ public class FlashLightSprite extends Entity{
     private Sprite sprite;
     private boolean showing = false;
     private float size = 8f;
+    private float holdX = 0f;
+    private float holdY = 0f;
+    private float leadScale = 0f;
+
     public FlashLightSprite() {
         TextureRegion tex = ResourceManager.getInstance().getTexture("flashlight_cursor");
         sprite = new Sprite(-tex.getWidth() / 2, -tex.getHeight() / 2, tex);
         sprite.setScale(size);
         attachChild(sprite);
     }
+
     public void setShowing(boolean showing) {
         this.showing = showing;
     }
+
+    public void setSliderHoldPos(float xPos, float yPos) {
+        this.holdX = xPos;
+        this.holdY = yPos;
+    }
+
     public void update(float pSecondsElapsed, int combo) {
         if (showing){
             if (!sprite.isVisible())
@@ -31,12 +42,24 @@ public class FlashLightSprite extends Entity{
             else
                 sprite.setVisible(false);
         }
-        if (combo > 200){
+        if (combo > 200) {
             sprite.setScale(0.6f * size);
-        } else if (combo > 100){
+            leadScale = 0.6f;
+        } else if (combo > 100) {
             sprite.setScale(0.8f * size);
+            leadScale = 0.8f;
         } else {
             sprite.setScale(1f * size);
+            leadScale = 1.0f;
+        }
+        if (holdX != 0 && holdY != 0) {
+            if (leadScale == 1.0f) {
+                sprite.setScale(0.8f * size);
+            } else if (leadScale == 0.8f) {
+                sprite.setScale(0.6f * size);
+            } else {
+                sprite.setScale(0.4f * size);
+            }
         }
     }
 }

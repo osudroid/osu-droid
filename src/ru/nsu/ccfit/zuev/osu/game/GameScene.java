@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 import android.os.SystemClock;
+
 import lt.ekgame.beatmap_analyzer.beatmap.HitObject;
 
 import com.dgsrz.bancho.game.sprite.VideoSprite;
@@ -2094,6 +2095,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public void onSliderHit(int id, final int score, final PointF start,
                             final PointF end, final boolean endCombo, RGBColor color, int type) {
+
         if (score == 0) {
             createHitEffect(start, "hit0", color);
             createHitEffect(end, "hit0", color);
@@ -2139,24 +2141,26 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 case GameObjectListener.SLIDER_START:
                     createBurstEffectSliderStart(end, color);
                     if(GameHelper.isFlashLight()){
+                        flashlightSprite.setShowing(true);
                         if (GameHelper.isAuto()) {
-                            flashlightSprite.setPosition(end.x, end.y);
-                            flashlightSprite.setShowing(true);
+                            flashlightSprite.setPosition(end.x, end.y);;
                         }
                         else {
                            int nearestCursorId = getNearestCursorId(end.x, end.y);
                            if (nearestCursorId >= 0) {
                                mainCursorId = nearestCursorId;
                                flashlightSprite.setPosition(cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y);
-                               flashlightSprite.setShowing(true);
+                               flashlightSprite.setSliderHoldPos(cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y);
                            }
                        }
                     }
                     break;
                 case GameObjectListener.SLIDER_END:
                     createBurstEffectSliderEnd(end, color);
+                    flashlightSprite.setSliderHoldPos(0, 0);
                     break;
                 case GameObjectListener.SLIDER_REPEAT:
+                    flashlightSprite.setSliderHoldPos(cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y);
                     break;
                 default:
                     createBurstEffect(end, color);
