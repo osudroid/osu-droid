@@ -2141,9 +2141,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 case GameObjectListener.SLIDER_START:
                     createBurstEffectSliderStart(end, color);
                     if(GameHelper.isFlashLight()){
-                        flashlightSprite.setShowing(true);
                         if (GameHelper.isAuto()) {
                             flashlightSprite.setPosition(end.x, end.y);;
+                            flashlightSprite.setSliderHoldPos(end.x, end.y);
+                            flashlightSprite.setShowing(true);
                         }
                         else {
                            int nearestCursorId = getNearestCursorId(end.x, end.y);
@@ -2151,6 +2152,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                                mainCursorId = nearestCursorId;
                                flashlightSprite.setPosition(cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y);
                                flashlightSprite.setSliderHoldPos(cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y);
+                               flashlightSprite.setShowing(true);
                            }
                        }
                     }
@@ -2160,7 +2162,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     flashlightSprite.setSliderHoldPos(0, 0);
                     break;
                 case GameObjectListener.SLIDER_REPEAT:
-                    flashlightSprite.setSliderHoldPos(cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y);
+                    try {
+                        flashlightSprite.setSliderHoldPos(cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y);
+                    } catch (java.lang.ArrayIndexOutOfBoundsException err) {
+                        return;
+                    }
                     break;
                 default:
                     createBurstEffect(end, color);
