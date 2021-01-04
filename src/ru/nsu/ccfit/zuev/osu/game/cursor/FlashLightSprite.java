@@ -46,14 +46,14 @@ public class FlashLightSprite extends Entity{
         }
         float leadScale;
         if (combo >= 200) {
-            leadScale = 0.5f;
+            leadScale = 0.6f;
         } else if (combo >= 100) {
-            leadScale = 0.7f;
+            leadScale = 0.8f;
         } else {
-            leadScale = 0.9f;
+            leadScale = 1.0f;
         }
         if (holdX == 0 && holdY == 0) {
             sprite.setScale(leadScale * size);
-        } else { sprite.setScale(0.4f * size); }
+        } else { sprite.setScale((leadScale * 0.75f) * size); }
     }
 }
