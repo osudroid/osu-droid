@@ -53,7 +53,7 @@ public class FlashLightSprite extends Entity{
             leadScale = 0.9f;
         }
         if (holdX == 0 && holdY == 0) {
-            sprite.setScale(0.4f * size);
-        } else { sprite.setScale(leadScale * size); }
+            sprite.setScale(leadScale * size);
+        } else { sprite.setScale(0.4f * size); }
     }
 }
