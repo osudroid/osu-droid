@@ -25,7 +25,6 @@ public class PropsMenuFragment extends BaseFragment implements IPropsMenu {
 
     SongMenu menu;
     MenuItem item;
-    String mapState;
     BeatmapProperties props;
 
     private EditText offset;
@@ -168,8 +167,7 @@ public class PropsMenuFragment extends BaseFragment implements IPropsMenu {
     }
 
     @Override
-    public void show(SongMenu menu, MenuItem item, String mapState) {
-        this.mapState = mapState;
+    public void show(SongMenu menu, MenuItem item) {
         this.menu = menu;
         this.item = item;
         props = PropertiesLibrary.getInstance().getProperties(item.getBeatmap().getPath());
