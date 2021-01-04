@@ -1394,6 +1394,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     }
                     break;
             }
+            final String lowerFilter = FilterMenu.getInstance().getFilter().toLowerCase();
+            final boolean favsOnly = FilterMenu.getInstance().isFavoritesOnly();
+            final Set<String> limit = FilterMenu.getInstance().getFavoriteFolder() == null ? null : FavoriteLibrary.get().getMaps(FilterMenu.getInstance().getFavoriteFolder());
+            for (final MenuItem item : items) {
+                item.applyFilter(lowerFilter, favsOnly, limit);
+            }
+            System.gc();
         }
     }
 
