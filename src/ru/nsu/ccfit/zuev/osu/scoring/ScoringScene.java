@@ -96,7 +96,7 @@ public class ScoringScene {
                 mapperStr += String.format("AR%.1f,", stat.getForceAR());
             }
             if (mapperStr.endsWith(",")){
-                mapperStr = playerStr.substring(0, playerStr.length() - 1);
+                mapperStr = mapperStr.substring(0, mapperStr.length() - 1);
             }
             mapperStr += "]";
         }

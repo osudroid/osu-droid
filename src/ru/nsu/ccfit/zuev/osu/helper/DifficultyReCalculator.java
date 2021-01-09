@@ -216,7 +216,10 @@ public class DifficultyReCalculator {
         int nmiss = stat.getMisses();
         float base_ar = getAR(stat, track);
         float base_od = getOD(stat, track);
-
+        if (accuracy == 1f) {
+            combo = max_combo;
+            nmiss = 0;
+        }
         double nobjects_over_2k = nobjects / 2000.0;
 
         double length_bonus = 0.95 + 0.4 *
@@ -227,6 +230,7 @@ public class DifficultyReCalculator {
         }
 
         double combo_break = Math.min(1.0, Math.pow((double) combo / max_combo, 0.8));
+
         /* ar bonus -------------------------------------------- */
         double ar_bonus = 0.0;
 
@@ -247,7 +251,9 @@ public class DifficultyReCalculator {
         aim *= ar_bonus;
 
         // aim miss penalty
-        aim *= 0.97 * Math.pow(1 - Math.pow((double) nmiss / nobjects, 0.775), nmiss);
+        if (nmiss > 0){
+            aim *= 0.97 * Math.pow(1 - Math.pow((double) nmiss / nobjects, 0.775), nmiss);
+        }
 
         double hd_bonus = 1.0;
         if (mods.contains(GameMod.MOD_HIDDEN)) {
@@ -285,7 +291,9 @@ public class DifficultyReCalculator {
         speed *= hd_bonus;
 
         // speed miss penalty
-        speed *= 0.97 * Math.pow(1 - Math.pow((double) nmiss / nobjects, 0.775), Math.pow(nmiss, 0.875));
+        if (nmiss > 0){
+            speed *= 0.97 * Math.pow(1 - Math.pow((double) nmiss / nobjects, 0.775), Math.pow(nmiss, 0.875));
+        }
 
         // scale the speed value with accuracy and OD
         speed *= (0.95 + Math.pow(base_od, 2) / 750) * Math.pow(accuracy, (14.5 - Math.max(base_od, 8)) / 2);
