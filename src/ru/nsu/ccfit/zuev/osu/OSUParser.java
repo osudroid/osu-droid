@@ -353,13 +353,16 @@ public class OSUParser {
         String s;
         try {
             while ((s = reader.readLine()) != null) {
-                if (s.matches(".+:.*") == false) {
+                // Skip empty lines.
+                if (s.isEmpty()) {
+                    continue;
+                }
+                if (!s.matches(".+:.*")) {
                     if (s.matches("//.+")) {
                         continue;
                     } else {
-                        if (!s.isEmpty()) {
-                            reader.reset();
-                        }
+                        // If we don't meet a comment or we arrived at a new section, go back to previous line.
+                        reader.reset();
                         break;
                     }
                 }
@@ -383,13 +386,16 @@ public class OSUParser {
         String s;
         try {
             while ((s = reader.readLine()) != null) {
-                if (s.matches("[^\\[].+") == false) {
+                // Skip empty lines.
+                if (s.isEmpty()) {
+                    continue;
+                }
+                if (!s.matches("[^\\[].+")) {
                     if (s.matches("//.+")) {
                         continue;
                     } else {
-                        if (!s.isEmpty()) {
-                            reader.reset();
-                        }
+                        // If we don't meet a comment or we arrived at a new section, go back to previous line.
+                        reader.reset();
                         break;
                     }
                 }
