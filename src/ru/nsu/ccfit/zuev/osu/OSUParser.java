@@ -306,85 +306,6 @@ public class OSUParser {
         return val;
     }
 
-/*	private float getStars(final BeatmapData data, final float breakTime) {
-		float drainTime = -breakTime;
-		ArrayList<String> objects = data.getData("HitObjects");
-
-		if (objects.size() == 0) {
-			return 0;
-		}
-		try {
-			drainTime -= Integer.parseInt(objects.get(0).split("[,]")[2]);
-			drainTime += Integer.parseInt(objects.get(objects.size() - 1)
-					.split("[,]")[2]);
-		} catch (final NullPointerException e) {
-			return 0;
-		}
-
-		int circleCount = 0, sliderCount = 0, spinnerCount = 0;
-		int partCount, stringOffset;
-		for (final String s : objects) {
-			partCount = 0;
-			stringOffset = 0;
-			do {
-				partCount++;
-				stringOffset = s.indexOf(',', stringOffset);
-				stringOffset++;
-			} while (stringOffset != 0);
-
-			if (partCount == 5) {
-				circleCount++;
-			} else if (partCount == 6) {
-				spinnerCount++;
-			} else {
-				sliderCount++;
-			}
-		}
-		objects = null;
-
-		final int totalCount = circleCount + sliderCount * 2 + spinnerCount * 3;
-		final float density = 1000f * totalCount / drainTime;
-		final ArrayList<String> timingPoints = data.getData("TimingPoints");
-
-		if (totalCount == 0 || timingPoints.size() == 0) {
-			return 0;
-		}
-
-		final TimingPoint timingPoint = new TimingPoint(timingPoints.get(0)
-				.split("[,]"), null);
-		float difficulty = Float.parseFloat(data.getData("Difficulty", "HPDrainRate"))
-				+ Float.parseFloat(data.getData("Difficulty", "OverallDifficulty"))
-				+ Float.parseFloat(data.getData("Difficulty", "CircleSize"));
-		if (sliderCount / (float) totalCount >= 0.1f) {
-			final float sliderSpeed = Float.parseFloat(data.getData(
-					"Difficulty", "SliderMultiplier"));
-			difficulty += Math.max(
-					0,
-					Math.min(4, 1 / timingPoint.getBeatLength() * sliderSpeed
-							- 1.5f) * 2.5f);
-			difficulty *= 0.75f;
-		}
-
-		double stars;
-
-		// This code was copypasted from original osu!
-		if (difficulty > 21) {
-			stars = (Math.min(difficulty, 30) / 3 * 4 + Math.min(
-					20 - 0.032 * Math.pow(density - 5, 4), 20)) / 10;
-		} else if (density >= 2.5) {
-			stars = (Math.min(difficulty, 18) / 18 * 10 + Math.min(
-					40 - 40 / Math.pow(5, 3.5)
-							* Math.pow((Math.min(density, 5) - 5), 4), 40)) / 10;
-		} else if (density < 1) {
-			stars = (Math.min(difficulty, 18) / 18 * 10) / 10 + 0.25f;
-		} else {
-			stars = (Math.min(difficulty, 18) / 18 * 10 + Math.min(
-					25 * (density - 1), 40)) / 10;
-		}
-
-        return (float) (stars < 0 ? 5 : Math.min(5, stars));
-	}*/
-
     public BeatmapData readData() {
         if (fileOpened == false) {
             return null;
@@ -436,9 +357,13 @@ public class OSUParser {
                     if (s.matches("//.+")) {
                         continue;
                     } else {
+                        if (!s.isEmpty()) {
+                            reader.reset();
+                        }
                         break;
                     }
                 }
+                reader.mark(1);
                 final String[] pair = s.split("\\s*:\\s*", 2);
 
                 if (pair.length > 1) {
@@ -462,9 +387,13 @@ public class OSUParser {
                     if (s.matches("//.+")) {
                         continue;
                     } else {
+                        if (!s.isEmpty()) {
+                            reader.reset();
+                        }
                         break;
                     }
                 }
+                reader.mark(1);
                 list.add(s);
             }
         } catch (IOException e) {
