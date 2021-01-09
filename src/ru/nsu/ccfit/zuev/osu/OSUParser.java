@@ -337,7 +337,7 @@ public class OSUParser {
         String s;
         try {
             while ((s = reader.readLine()) != null) {
-                if (s.matches("\\[\\S+\\]")) {
+                if (s.matches("\\[\\S+]")) {
                     return s.substring(1, s.length() - 1);
                 }
             }
@@ -348,24 +348,31 @@ public class OSUParser {
     }
 
     private Map<String, String> parseSection() {
-        final Map<String, String> map = new HashMap<String, String>();
+        final Map<String, String> map = new HashMap<>();
 
         String s;
         try {
             while ((s = reader.readLine()) != null) {
-                // Skip empty lines.
+                // Remove leading and trailing whitespaces.
+                s = s.trim();
+
+                // Now that we've trimmed whitespaces, we can properly skip empty lines.
                 if (s.isEmpty()) {
                     continue;
                 }
+
                 if (!s.matches(".+:.*")) {
                     if (s.matches("//.+")) {
                         continue;
                     } else {
-                        // If we don't meet a comment or we arrived at a new section, go back to previous line.
+                        // If we don't meet a comment, it means we have arrived at a new section. In that case, go back to the previous line.
+                        // This ensures that reader.readLine() in getNextSectionName() returns the mentioned section.
                         reader.reset();
                         break;
                     }
                 }
+                // Mark the current line so that we can get back to it if
+                // the next line happens to be a new section.
                 reader.mark(1);
                 final String[] pair = s.split("\\s*:\\s*", 2);
 
@@ -381,24 +388,31 @@ public class OSUParser {
     }
 
     private ArrayList<String> parseDataSection() {
-        final ArrayList<String> list = new ArrayList<String>();
+        final ArrayList<String> list = new ArrayList<>();
 
         String s;
         try {
             while ((s = reader.readLine()) != null) {
-                // Skip empty lines.
+                // Remove leading and trailing whitespaces.
+                s = s.trim();
+
+                // Now that we've trimmed whitespaces, we can properly skip empty lines.
                 if (s.isEmpty()) {
                     continue;
                 }
+
                 if (!s.matches("[^\\[].+")) {
                     if (s.matches("//.+")) {
                         continue;
                     } else {
-                        // If we don't meet a comment or we arrived at a new section, go back to previous line.
+                        // If we don't meet a comment, it means we have arrived at a new section. In that case, go back to the previous line.
+                        // This ensures that reader.readLine() in getNextSectionName() returns the mentioned section.
                         reader.reset();
                         break;
                     }
                 }
+                // Mark the current line so that we can get back to it if
+                // the next line happens to be a new section.
                 reader.mark(1);
                 list.add(s);
             }
