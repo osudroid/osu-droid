@@ -1211,7 +1211,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         replayText.setAlpha(0.7f);
         fgScene.attachChild(replayText, 0);
         String playname = null;
-        if (stat.getMod().contains(GameMod.MOD_AUTO) || replaying) {
+        if ((stat.getMod().contains(GameMod.MOD_AUTO) || replaying) && !Config.isHideReplayMarquee()) {
             playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStat().getPlayerName() : "osu!";
             replayText.setText("Watching " + playname + " play " + artist + " - " + title + " [" + version + "]");
             replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(40,
