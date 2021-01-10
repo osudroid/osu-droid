@@ -975,7 +975,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 (track.getBeatmap().getTitleUnicode() == null || Config.isForceRomanized() ? track.getBeatmap().getTitle() : track.getBeatmap().getTitleUnicode()) + " [" + track.getMode() + "]";
         String mapperStr = "Beatmap by " + track.getCreator();
         String binfoStr2 = String.format(StringTable.get(R.string.binfoStr2),
-                track.getHitCircleCount(), track.getSliderCount(), track.getSpinerCount(), track.getBeatmapSetID());
+                track.getHitCircleCount(), track.getSliderCount(), track.getSpinnerCount(), track.getBeatmapSetID());
         trackInfo.setText(tinfoStr);
         mapper.setText(mapperStr);
         beatmapInfo2.setText(binfoStr2);

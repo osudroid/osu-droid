@@ -76,11 +76,11 @@ public class MapInfoFragment extends BaseFragment {
         }
         int circleCount = track.getHitCircleCount();
         int sliderCount = track.getSliderCount();
-        int spinerCount = track.getSpinerCount();
+        int spinnerCount = track.getSpinnerCount();
         int objectCount = track.getTotalHitObjectCount();
         float circlePercent = (float)circleCount / objectCount * 100;
         float sliderPercent = (float)sliderCount / objectCount * 100;
-        float spinerPercent = (float)spinerCount / objectCount * 100;
+        float spinnerPercent = (float)spinnerCount / objectCount * 100;
         int singleCount = diffReCalulator.getSingleCount();
         int fastSingleCount = diffReCalulator.getFastSingleCount();
         int streamCount = diffReCalulator.getStreamCount();
@@ -99,10 +99,10 @@ public class MapInfoFragment extends BaseFragment {
 
         StringBuilder string = new StringBuilder();
         //string.append(String.format(StringTable.get(R.string.binfoStr2),
-        //    track.getHitCircleCount(), track.getSliderCount(), track.getSpinerCount(), track.getBeatmapSetID()));
+        //    track.getHitCircleCount(), track.getSliderCount(), track.getSpinnerCount(), track.getBeatmapSetID()));
         //string.append("\n\r");
         string.append(String.format("圈数:%d[%.1f%%] 滑条数:%d[%.1f%%] 转盘数:%d[%.1f%%] 物件数:%d 实际时间:%.1fs %.1f物件/分",
-                                    circleCount, circlePercent, sliderCount, sliderPercent, spinerCount, spinerPercent,
+                                    circleCount, circlePercent, sliderCount, sliderPercent, spinnerCount, spinnerPercent,
                                     objectCount, realTime, objectPerMin));
         string.append("\n\r");
         string.append(String.format("单点:%d[%.1f%%] 高速单点:%d[%.1f%%] 连打:%d[%.1f%%] 跳:%d[%.1f%%]",

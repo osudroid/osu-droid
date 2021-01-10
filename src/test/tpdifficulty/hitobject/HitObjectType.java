@@ -11,7 +11,7 @@ public enum HitObjectType {
     SliderNewCombo(6),
     Spinner(8);
 
-    private int value = 0;
+    private int value;
 
     HitObjectType(int value) {
         this.value = value;
@@ -29,8 +29,6 @@ public enum HitObjectType {
                 return NormalNewCombo;
             case 6:
                 return SliderNewCombo;
-            case 8:
-                return Spinner;
             default:
                 return Spinner;
         }
