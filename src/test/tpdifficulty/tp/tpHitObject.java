@@ -57,7 +57,7 @@ public class tpHitObject implements Comparable<tpHitObject> {
         }
         NormalizedStartPosition = new PointF(BaseHitObject.getPos().x * ScalingFactor, BaseHitObject.getPos().y * ScalingFactor);
         if (BaseHitObject.getType() == HitObjectType.Slider) {
-            PointF endPos = ((Slider) BaseHitObject).getPoss().get(((Slider) BaseHitObject).getPoss().size() - 1);
+            PointF endPos = ((Slider) BaseHitObject).getCurvePoints().get(((Slider) BaseHitObject).getCurvePoints().size() - 1);
             NormalizedEndPosition = new PointF(endPos.x * ScalingFactor, endPos.y * ScalingFactor);
             
             float approxFollowCircleRadius = CircleRadius * 3;

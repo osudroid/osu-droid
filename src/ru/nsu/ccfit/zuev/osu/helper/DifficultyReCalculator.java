@@ -128,15 +128,15 @@ public class DifficultyReCalculator {
             } else if (hitObjectType == HitObjectType.Slider || hitObjectType == HitObjectType.SliderNewCombo) { // slider
                 String[] data2 = rawdata[5].split("[|]");
                 SliderType sliderType = SliderType.parse(data2[0].charAt(0));
-                ArrayList<PointF> poss = new ArrayList<>();
+                ArrayList<PointF> curvePoints = new ArrayList<>();
                 for (int i = 1; i < data2.length; i++) {
                     String[] temp = data2[i].split("[:]");
-                    poss.add(new PointF(Float.parseFloat(temp[0]), Float.parseFloat(temp[1])));
+                    curvePoints.add(new PointF(Float.parseFloat(temp[0]), Float.parseFloat(temp[1])));
                 }
                 int repeat = Integer.parseInt(rawdata[6]);
                 float rawLength = Float.parseFloat(rawdata[7]);
                 int endTime = time + (int) (rawLength * (600 / currentTimingPoint.getBpm()) / sliderSpeed) * repeat;
-                object = new Slider((int)(time / speedmulti), (int)(endTime / speedmulti), pos, currentTimingPoint, sliderType, repeat, poss, rawLength);
+                object = new Slider((int)(time / speedmulti), (int)(endTime / speedmulti), pos, currentTimingPoint, sliderType, repeat, curvePoints, rawLength);
             }
             this.hitObjects.add(object);
         }
