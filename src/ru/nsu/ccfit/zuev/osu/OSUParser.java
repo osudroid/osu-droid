@@ -250,6 +250,10 @@ public class OSUParser {
                 object = new Spinner(time, endTime, pos, currentTimingPoint);
                 track.setSpinnerCount(track.getSpinnerCount() + 1);
             } else if (hitObjectType == HitObjectType.Slider || hitObjectType == HitObjectType.SliderNewCombo) { // slider
+                // Ignoring malformed slider
+                if (rawdata.length < 8) {
+                    continue;
+                }
                 String[] data2 = rawdata[5].split("[|]");
                 SliderType sliderType = SliderType.parse(data2[0].charAt(0));
                 ArrayList<PointF> curvePoints = new ArrayList<>();

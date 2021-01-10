@@ -135,6 +135,10 @@ public class DifficultyReCalculator {
                 int endTime = Integer.parseInt(rawdata[5]);
                 object = new Spinner((int)(time / speedmulti), (int)(endTime / speedmulti), pos, currentTimingPoint);
             } else if (hitObjectType == HitObjectType.Slider || hitObjectType == HitObjectType.SliderNewCombo) { // slider
+                // Ignoring malformed slider
+                if (rawdata.length < 8) {
+                    continue;
+                }
                 String[] data2 = rawdata[5].split("[|]");
                 SliderType sliderType = SliderType.parse(data2[0].charAt(0));
                 ArrayList<PointF> curvePoints = new ArrayList<>();
