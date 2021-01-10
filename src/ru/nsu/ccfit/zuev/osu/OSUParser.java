@@ -36,7 +36,7 @@ public class OSUParser {
     private boolean fileOpened = false;
     private ArrayList<TimingPoint> timingPoints;
     private ArrayList<HitObject> hitObjects;
-    private TimingPoint currentTimingPoint;
+    private TimingPoint currentTimingPoint = null;
     private int tpIndex = 0;
     private float sliderSpeed;
     private float sliderTick;
@@ -81,8 +81,8 @@ public class OSUParser {
     public boolean readMetaData(final TrackInfo track, final BeatmapInfo info) {
         final BeatmapData data = readData();
 
-        if (data.getData("General", "Mode").equals("0") == false
-                && data.getData("General", "Mode").equals("") == false) {
+        if (!data.getData("General", "Mode").equals("0")
+                && !data.getData("General", "Mode").equals("")) {
             return false;
         }
 
@@ -118,13 +118,13 @@ public class OSUParser {
         track.setBeatmapID(tryParseInt(data.getData("Metadata", "BeatmapID"), -1));
         track.setBeatmapSetID(tryParseInt(data.getData("Metadata", "BeatmapSetID"), -1));
 
-        track.setOverallDifficulty(tryParse(data.getData("Difficulty", "OverallDifficulty"), 5f));
-        track.setApproachRate(tryParse(data.getData("Difficulty", "ApproachRate"), track.getOverallDifficulty()));
-        track.setHpDrain(tryParse(data.getData("Difficulty", "HPDrainRate"), 5f));
-        track.setCircleSize(tryParse(data.getData("Difficulty", "CircleSize"), 4f));
+        track.setOverallDifficulty(tryParseFloat(data.getData("Difficulty", "OverallDifficulty"), 5f));
+        track.setApproachRate(tryParseFloat(data.getData("Difficulty", "ApproachRate"), track.getOverallDifficulty()));
+        track.setHpDrain(tryParseFloat(data.getData("Difficulty", "HPDrainRate"), 5f));
+        track.setCircleSize(tryParseFloat(data.getData("Difficulty", "CircleSize"), 4f));
 
-        this.sliderTick = tryParse(data.getData("Difficulty", "SliderTickRate"), 1.0f);
-        this.sliderSpeed = tryParse(data.getData("Difficulty", "SliderMultiplier"), 1.0f);
+        this.sliderTick = tryParseFloat(data.getData("Difficulty", "SliderTickRate"), 1.0f);
+        this.sliderSpeed = tryParseFloat(data.getData("Difficulty", "SliderMultiplier"), 1.0f);
 
         if (info.getMusic() == null) {
             final File musicFile = new File(info.getPath(), data.getData(
@@ -141,47 +141,44 @@ public class OSUParser {
             }
         }
 
-        float breakTime = 0;
+        // Load beatmap background
         for (final String s : data.getData("Events")) {
             final String[] pars = s.split("\\s*,\\s*");
             if (pars.length >= 3 && pars[0].equals("0") && pars[1].equals("0")) {
                 track.setBackground(pars[2].substring(1, pars[2].length() - 1));
-            } else if (pars.length >= 3 && pars[0].equals("2")) {
-                breakTime += Float.parseFloat(pars[2])
-                        - Float.parseFloat(pars[1]);
-            }
-        }
-        //get first no inherited timingpoint
-        for (final String tempString : data.getData("TimingPoints")) {
-            String[] tmpdata = tempString.split("[,]");
-            if(Float.parseFloat(tmpdata[1]) > 0){
-                float offset = Float.parseFloat(tmpdata[0]);
-                float bpm = 60000.0f / Float.parseFloat(tmpdata[1]);
-                float speed = 1.0f;
-                TimingPoint timing = new TimingPoint(bpm, offset, speed);
-                currentTimingPoint = timing;
                 break;
             }
         }
-        //load all timingpoint
+
+        // Load timing points
         for (final String tempString : data.getData("TimingPoints")) {
             if (timingPoints == null) {
-                timingPoints = new ArrayList<TimingPoint>();
+                timingPoints = new ArrayList<>();
             }
             String[] tmpdata = tempString.split("[,]");
             float offset = Float.parseFloat(tmpdata[0]);
             float bpm = Float.parseFloat(tmpdata[1]);
             float speed = 1.0f;
-            boolean inherited = false;
-            if (bpm < 0) {
-                inherited = true;
+            boolean inherited = bpm < 0;
+
+            // The first timing point should always be uninherited,
+            // otherwise the beatmap is invalid
+            if (currentTimingPoint == null && inherited) {
+                ToastLogger.showText(StringTable.format(R.string.osu_parser_timing_error,
+                        file.getName().substring(0, file.getName().length() - 4)), true);
+                return false;
+            }
+
+            if (inherited) {
                 speed = -100.0f / bpm;
                 bpm = currentTimingPoint.getBpm();
             } else {
                 bpm = 60000.0f / bpm;
             }
             TimingPoint timing = new TimingPoint(bpm, offset, speed);
-            if (!inherited) currentTimingPoint = timing;
+            if (!inherited) {
+                currentTimingPoint = timing;
+            }
             try {
                 bpm = GameHelper.Round(bpm, 2);
             } catch (NumberFormatException e) {
@@ -196,19 +193,20 @@ public class OSUParser {
             track.setBpmMax(track.getBpmMax() != 0 ? Math.max(track.getBpmMax(), bpm) : bpm);
             timingPoints.add(timing);
         }
-        final ArrayList<String> hitObjectss = data.getData("HitObjects");
-        if (hitObjectss.size() <= 0) {
+
+        final ArrayList<String> hitObjects = data.getData("HitObjects");
+        if (hitObjects.size() <= 0) {
             return false;
         }
-        track.setTotalHitObjectCount(hitObjectss.size());
-        for (final String tempString : hitObjectss) {
-            if (hitObjects == null) {
-                hitObjects = new ArrayList<HitObject>();
+        track.setTotalHitObjectCount(hitObjects.size());
+        for (final String tempString : hitObjects) {
+            if (this.hitObjects == null) {
+                this.hitObjects = new ArrayList<>();
                 tpIndex = 0;
                 currentTimingPoint = timingPoints.get(tpIndex);
             }
             String[] data1 = tempString.split("[,]");
-            String[] rawdata = null;
+            String[] rawdata;
             //Ignoring v10 features
             int dataSize = data1.length;
             while (dataSize > 0 && data1[dataSize - 1].matches("([0-9][:][0-9][|]?)+")) {
@@ -224,7 +222,7 @@ public class OSUParser {
 
             int time = Integer.parseInt(rawdata[2]);
             while (tpIndex < timingPoints.size() - 1 && timingPoints.get(tpIndex + 1).getOffset() <= time) {
-                tpIndex += 1;
+                tpIndex++;
             }
             currentTimingPoint = timingPoints.get(tpIndex);
             HitObjectType hitObjectType = HitObjectType.valueOf(Integer.parseInt(rawdata[3]) % 16);
@@ -240,13 +238,13 @@ public class OSUParser {
             } else if (hitObjectType == HitObjectType.Spinner) { // spinner
                 int endTime = Integer.parseInt(rawdata[5]);
                 object = new Spinner(time, endTime, pos, currentTimingPoint);
-                track.setSpinerCount(track.getSpinerCount() + 1);
+                track.setSpinnerCount(track.getSpinnerCount() + 1);
             } else if (hitObjectType == HitObjectType.Slider || hitObjectType == HitObjectType.SliderNewCombo) { // slider
-                String data2[] = rawdata[5].split("[|]");
+                String[] data2 = rawdata[5].split("[|]");
                 SliderType sliderType = SliderType.parse(data2[0].charAt(0));
-                ArrayList<PointF> poss = new ArrayList<PointF>();
+                ArrayList<PointF> poss = new ArrayList<>();
                 for (int i = 1; i < data2.length; i++) {
-                    String temp[] = data2[i].split("[:]");
+                    String[] temp = data2[i].split("[:]");
                     poss.add(new PointF(Float.parseFloat(temp[0]), Float.parseFloat(temp[1])));
                 }
                 int repeat = Integer.parseInt(rawdata[6]);
@@ -255,14 +253,14 @@ public class OSUParser {
                 object = new Slider(time, endTime, pos, currentTimingPoint, sliderType, repeat, poss, rawLength);
                 track.setSliderCount(track.getSliderCount() + 1);
             }
-            hitObjects.add(object);
+            this.hitObjects.add(object);
         }
 
-        int length = (int) tryParse(new GameObjectData(hitObjectss.get(hitObjectss.size() - 1)).getData()[2], 0);
+        int length = (int) tryParseFloat(new GameObjectData(hitObjects.get(hitObjects.size() - 1)).getData()[2], 0);
         track.setMusicLength(length);
         try {
             AiModtpDifficulty tpDifficulty = new AiModtpDifficulty();
-            tpDifficulty.CalculateAll(hitObjects, track.getCircleSize());
+            tpDifficulty.CalculateAll(this.hitObjects, track.getCircleSize());
             track.setDifficulty(GameHelper.Round(tpDifficulty.getStarRating(), 2));
         } catch (Exception e) {
             Debug.e("Beatmap <" + info.getPath() + "> has bad parameter, so give it up");
@@ -273,8 +271,6 @@ public class OSUParser {
 
         Debug.i("Caching " + track.getFilename());
 
-//		track.setDifficulty(getStars(data, breakTime));
-//		Debug.i(track.toString());
         return true;
     }
 
@@ -286,7 +282,7 @@ public class OSUParser {
         return combo;
     }
 
-    public float tryParse(String str, float defaultVal) {
+    public float tryParseFloat(String str, float defaultVal) {
         float val;
         try {
             val = Float.parseFloat(str);
@@ -307,119 +303,113 @@ public class OSUParser {
     }
 
     public BeatmapData readData() {
-        if (fileOpened == false) {
+        if (!fileOpened) {
             return null;
         }
         fileOpened = false;
-        String sname;
         final BeatmapData data = new BeatmapData();
 
-        while (true) {
-            sname = getNextSectionName();
-            if (sname == null) {
-                break;
-            }
+        String previousSection;
+        String currentSection = null;
 
-            if (sname.equals("Events") || sname.equals("TimingPoints")
-                    || sname.equals("HitObjects")) {
-                data.addSection(sname, parseDataSection());
-            } else {
-                data.addSection(sname, parseSection());
+        // Events, TimingPoints, and HitObjects sections' data are stored in an instance
+        // of ArrayList, while others are stored in an instance of HashMap
+        final Map<String, String> map = new HashMap<>();
+        final ArrayList<String> list = new ArrayList<>();
+
+        String s;
+        try {
+            while (true) {
+                s = reader.readLine();
+
+                // If s is null, it means we've reached the end of the file.
+                // End the loop and don't forget to add the last section,
+                // which would otherwise be ignored
+                if (s == null) {
+                    if (currentSection != null) {
+                        switch (currentSection) {
+                            case "Events":
+                            case "TimingPoints":
+                            case "HitObjects":
+                                data.addSection(currentSection, list);
+                                break;
+                            default:
+                                data.addSection(currentSection, map);
+                        }
+                    }
+                    reader.close();
+                    break;
+                }
+
+                // Handle space comments
+                if (s.startsWith(" ") || s.startsWith("_")) {
+                    continue;
+                }
+
+                // Now that we've handled space comments, we can trim space
+                s = s.trim();
+
+                // Handle C++ style comments and empty lines
+                if (s.startsWith("//") || s.isEmpty()) {
+                    continue;
+                }
+
+                // [SectionName]
+                if (s.startsWith("[")) {
+                    // Record the current section before loading the new section.
+                    // This is necessary so that we don't enter an empty data
+                    // if we've just entered the first section (previousSection will
+                    // be null)
+                    previousSection = currentSection;
+                    currentSection = s.substring(1, s.length() - 1);
+
+                    if (previousSection == null) {
+                        continue;
+                    }
+
+                    // Enter a deep copy of the original data holder so that
+                    // we can use the original for the next section
+                    switch (previousSection) {
+                        case "Events":
+                        case "TimingPoints":
+                        case "HitObjects":
+                            data.addSection(previousSection, new ArrayList<>(list));
+                            list.clear();
+                            break;
+                        default:
+                            data.addSection(previousSection, new HashMap<>(map));
+                            map.clear();
+                    }
+                    continue;
+                }
+
+                // If we're still not in a section yet, there is no need
+                // to start parsing data, just continue to the next line
+                if (currentSection == null) {
+                    continue;
+                }
+
+                // Collect and parse data depending on section
+                switch (currentSection) {
+                    case "Events":
+                    case "TimingPoints":
+                    case "HitObjects":
+                        list.add(s);
+                        break;
+                    default:
+                        final String[] pair = s.split("\\s*:\\s*", 2);
+                        if (pair.length > 1) {
+                            map.put(pair[0], pair[1]);
+                        }
+                }
             }
+        } catch (IOException e) {
+            Debug.e("OSUParser.readData: " + e.getMessage(), e);
+            return data;
         }
 
         data.setFolder(file.getParent());
 
         return data;
-    }
-
-    private String getNextSectionName() {
-        String s;
-        try {
-            while ((s = reader.readLine()) != null) {
-                if (s.matches("\\[\\S+]")) {
-                    return s.substring(1, s.length() - 1);
-                }
-            }
-        } catch (IOException e) {
-            Debug.e("OSUParser.getNextSectionName: " + e.getMessage(), e);
-        }
-        return null;
-    }
-
-    private Map<String, String> parseSection() {
-        final Map<String, String> map = new HashMap<>();
-
-        String s;
-        try {
-            while ((s = reader.readLine()) != null) {
-                // Remove leading and trailing whitespaces.
-                s = s.trim();
-
-                // Now that we've trimmed whitespaces, we can properly skip empty lines.
-                if (s.isEmpty()) {
-                    continue;
-                }
-
-                if (!s.matches(".+:.*")) {
-                    if (s.matches("//.+")) {
-                        continue;
-                    } else {
-                        // If we don't meet a comment, it means we have arrived at a new section. In that case, go back to the previous line.
-                        // This ensures that reader.readLine() in getNextSectionName() returns the mentioned section.
-                        reader.reset();
-                        break;
-                    }
-                }
-                // Mark the current line so that we can get back to it if
-                // the next line happens to be a new section.
-                reader.mark(1);
-                final String[] pair = s.split("\\s*:\\s*", 2);
-
-                if (pair.length > 1) {
-                    map.put(pair[0], pair[1]);
-                }
-            }
-        } catch (IOException e) {
-            Debug.e("OSUParser.parseSection: " + e.getMessage(), e);
-        }
-
-        return map;
-    }
-
-    private ArrayList<String> parseDataSection() {
-        final ArrayList<String> list = new ArrayList<>();
-
-        String s;
-        try {
-            while ((s = reader.readLine()) != null) {
-                // Remove leading and trailing whitespaces.
-                s = s.trim();
-
-                // Now that we've trimmed whitespaces, we can properly skip empty lines.
-                if (s.isEmpty()) {
-                    continue;
-                }
-
-                if (!s.matches("[^\\[].+")) {
-                    if (s.matches("//.+")) {
-                        continue;
-                    } else {
-                        // If we don't meet a comment, it means we have arrived at a new section. In that case, go back to the previous line.
-                        // This ensures that reader.readLine() in getNextSectionName() returns the mentioned section.
-                        reader.reset();
-                        break;
-                    }
-                }
-                // Mark the current line so that we can get back to it if
-                // the next line happens to be a new section.
-                reader.mark(1);
-                list.add(s);
-            }
-        } catch (IOException e) {
-            Debug.e("OSUParser.parseDataSection: " + e.getMessage(), e);
-        }
-
-        return list;
     }
 }

@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.helper;
 
 import android.graphics.PointF;
-import android.util.Log;
 
 import org.anddev.andengine.util.Debug;
 
@@ -17,7 +16,6 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
-import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 import test.tpdifficulty.TimingPoint;
 import test.tpdifficulty.hitobject.HitCircle;
@@ -31,7 +29,7 @@ import test.tpdifficulty.tp.AiModtpDifficulty;
 public class DifficultyReCalculator {
     private ArrayList<TimingPoint> timingPoints;
     private ArrayList<HitObject> hitObjects;
-    private TimingPoint currentTimingPoint;
+    private TimingPoint currentTimingPoint = null;
     private int tpIndex = 0;
     private double total, aim, speed, acc;
     private AiModtpDifficulty tpDifficulty;
@@ -40,7 +38,6 @@ public class DifficultyReCalculator {
     private float real_time;
     //copy from OSUParser.java
     public boolean init(final TrackInfo track, float speedmulti){
-        tpIndex = 0;
         OSUParser parser = new OSUParser(track.getFilename());
         final BeatmapData data;
         if (parser.openFile()) {
@@ -52,68 +49,52 @@ public class DifficultyReCalculator {
                             track.getFilename()), true);
             return false;
         }
-        //float sliderTick = parser.tryParse(data.getData("Difficulty", "SliderTickRate"), 1.0f);
-        float sliderSpeed = parser.tryParse(data.getData("Difficulty", "SliderMultiplier"), 1.0f);
-        parser = null;
-        //get first no inherited timingpoint
+        float sliderSpeed = parser.tryParseFloat(data.getData("Difficulty", "SliderMultiplier"), 1.0f);
+
+        // Load timing points
         for (final String tempString : data.getData("TimingPoints")) {
             if (timingPoints == null) {
-                timingPoints = new ArrayList<TimingPoint>();
+                timingPoints = new ArrayList<>();
             }
-            String[] tmpdata = tempString.split("[,]");
-            if(Float.parseFloat(tmpdata[1]) > 0){
-                float offset = Float.parseFloat(tmpdata[0]);
-                float bpm = 60000.0f / Float.parseFloat(tmpdata[1]);
-                float speed = 1.0f;
-                TimingPoint timing = new TimingPoint(bpm, offset, speed);
-                currentTimingPoint = timing;
-                break;
-            }
-        }
-        //load all timingpoint
-        for (final String tempString : data.getData("TimingPoints")) {
             String[] tmpdata = tempString.split("[,]");
             float offset = Float.parseFloat(tmpdata[0]);
             float bpm = Float.parseFloat(tmpdata[1]);
             float speed = 1.0f;
-            boolean inherited = false;
-            if (bpm < 0) {
-                inherited = true;
+            boolean inherited = bpm < 0;
+
+            // The first timing point should always be uninherited, otherwise
+            // the beatmap is invalid
+            if (currentTimingPoint == null && inherited) {
+                return false;
+            }
+
+            if (inherited) {
                 speed = -100.0f / bpm;
                 bpm = currentTimingPoint.getBpm();
             } else {
                 bpm = 60000.0f / bpm;
             }
             TimingPoint timing = new TimingPoint(bpm, offset, speed);
-            if (!inherited) currentTimingPoint = timing;
-            try {
-                bpm = GameHelper.Round(bpm, 2);
-            } catch (NumberFormatException e) {
-                if (BuildConfig.DEBUG) {
-                    e.printStackTrace();
-                }
-                Log.e("Beatmap Error", "" + track.getMode());
-                ToastLogger.showText(StringTable.get(R.string.osu_parser_error) + " " + track.getMode(), true);
-                return false;
+            if (!inherited) {
+                currentTimingPoint = timing;
             }
-            if (timingPoints == null) return false;
             timingPoints.add(timing);
         }
         if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track){
             return false;
         }
-        final ArrayList<String> hitObjectss = data.getData("HitObjects");
-        if (hitObjectss.size() <= 0) {
+        final ArrayList<String> hitObjects = data.getData("HitObjects");
+        if (hitObjects.size() <= 0) {
             return false;
         }
-        for (final String tempString : hitObjectss) {
-            if (hitObjects == null) {
-                hitObjects = new ArrayList<HitObject>();
+        for (final String tempString : hitObjects) {
+            if (this.hitObjects == null) {
+                this.hitObjects = new ArrayList<>();
                 tpIndex = 0;
                 currentTimingPoint = timingPoints.get(tpIndex);
             }
             String[] data1 = tempString.split("[,]");
-            String[] rawdata = null;
+            String[] rawdata;
             //Ignoring v10 features
             int dataSize = data1.length;
             while (dataSize > 0 && data1[dataSize - 1].matches("([0-9][:][0-9][|]?)+")) {
@@ -129,7 +110,7 @@ public class DifficultyReCalculator {
 
             int time = Integer.parseInt(rawdata[2]);
             while (tpIndex < timingPoints.size() - 1 && timingPoints.get(tpIndex + 1).getOffset() <= time) {
-                tpIndex += 1;
+                tpIndex++;
             }
             currentTimingPoint = timingPoints.get(tpIndex);
             HitObjectType hitObjectType = HitObjectType.valueOf(Integer.parseInt(rawdata[3]) % 16);
@@ -145,11 +126,11 @@ public class DifficultyReCalculator {
                 int endTime = Integer.parseInt(rawdata[5]);
                 object = new Spinner((int)(time / speedmulti), (int)(endTime / speedmulti), pos, currentTimingPoint);
             } else if (hitObjectType == HitObjectType.Slider || hitObjectType == HitObjectType.SliderNewCombo) { // slider
-                String data2[] = rawdata[5].split("[|]");
+                String[] data2 = rawdata[5].split("[|]");
                 SliderType sliderType = SliderType.parse(data2[0].charAt(0));
-                ArrayList<PointF> poss = new ArrayList<PointF>();
+                ArrayList<PointF> poss = new ArrayList<>();
                 for (int i = 1; i < data2.length; i++) {
-                    String temp[] = data2[i].split("[:]");
+                    String[] temp = data2[i].split("[:]");
                     poss.add(new PointF(Float.parseFloat(temp[0]), Float.parseFloat(temp[1])));
                 }
                 int repeat = Integer.parseInt(rawdata[6]);
@@ -157,13 +138,12 @@ public class DifficultyReCalculator {
                 int endTime = time + (int) (rawLength * (600 / currentTimingPoint.getBpm()) / sliderSpeed) * repeat;
                 object = new Slider((int)(time / speedmulti), (int)(endTime / speedmulti), pos, currentTimingPoint, sliderType, repeat, poss, rawLength);
             }
-            if (hitObjects == null) return false;
-            hitObjects.add(object);
+            this.hitObjects.add(object);
         }
         return true;
     }
     public float reCalculateStar(final TrackInfo track, float speedmulti, float cs){
-        if (init(track, speedmulti) == false) {
+        if (!init(track, speedmulti)) {
             return 0f;
         }
         if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track){
