@@ -156,6 +156,10 @@ public class OSUParser {
                 timingPoints = new ArrayList<>();
             }
             String[] tmpdata = tempString.split("[,]");
+            // Ignoring malformed timing point
+            if (tmpdata.length < 2) {
+                continue;
+            }
             float offset = Float.parseFloat(tmpdata[0]);
             float bpm = Float.parseFloat(tmpdata[1]);
             float speed = 1.0f;
@@ -194,6 +198,7 @@ public class OSUParser {
             timingPoints.add(timing);
         }
 
+        // Load hitobjects
         final ArrayList<String> hitObjects = data.getData("HitObjects");
         if (hitObjects.size() <= 0) {
             return false;
@@ -219,6 +224,11 @@ public class OSUParser {
                 }
             } else
                 rawdata = data1;
+
+            // Ignoring malformed hitobject
+            if (rawdata.length < 4) {
+                continue;
+            }
 
             int time = Integer.parseInt(rawdata[2]);
             while (tpIndex < timingPoints.size() - 1 && timingPoints.get(tpIndex + 1).getOffset() <= time) {

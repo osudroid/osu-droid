@@ -57,6 +57,10 @@ public class DifficultyReCalculator {
                 timingPoints = new ArrayList<>();
             }
             String[] tmpdata = tempString.split("[,]");
+            // Ignoring malformed timing point
+            if (tmpdata.length < 2) {
+                continue;
+            }
             float offset = Float.parseFloat(tmpdata[0]);
             float bpm = Float.parseFloat(tmpdata[1]);
             float speed = 1.0f;
@@ -107,6 +111,11 @@ public class DifficultyReCalculator {
                 }
             } else
                 rawdata = data1;
+
+            // Ignoring malformed hitobject
+            if (rawdata.length < 4) {
+                continue;
+            }
 
             int time = Integer.parseInt(rawdata[2]);
             while (tpIndex < timingPoints.size() - 1 && timingPoints.get(tpIndex + 1).getOffset() <= time) {
