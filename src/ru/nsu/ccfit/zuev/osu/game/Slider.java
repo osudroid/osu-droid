@@ -306,7 +306,7 @@ public class Slider extends GameObject {
         scene.attachChild(endCircle, 0);
 
         // Ticks
-        //Try to fix silder ticks bug
+        // Try to fix incorrect slider tick count bug
         tickInterval = timing.getBeatLength() * speedMultiplier;
         int tickCount = (int) (maxTime * GameHelper.getTickRate() / tickInterval);
         if(Float.isNaN((float) tickInterval) || tickInterval < GameHelper.getSliderTickLength() / 1000){
