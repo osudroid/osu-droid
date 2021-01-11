@@ -27,10 +27,9 @@ import test.tpdifficulty.hitobject.Spinner;
 import test.tpdifficulty.tp.AiModtpDifficulty;
 
 public class DifficultyReCalculator {
-    private ArrayList<TimingPoint> timingPoints;
-    private ArrayList<HitObject> hitObjects;
+    private ArrayList<TimingPoint> timingPoints = new ArrayList<>();
+    private ArrayList<HitObject> hitObjects = new ArrayList<>();
     private TimingPoint currentTimingPoint = null;
-    private int tpIndex = 0;
     private double total, aim, speed, acc;
     private AiModtpDifficulty tpDifficulty;
     private int single, fast_single, stream, jump, switch_fingering, multi;
@@ -52,22 +51,20 @@ public class DifficultyReCalculator {
         float sliderSpeed = parser.tryParseFloat(data.getData("Difficulty", "SliderMultiplier"), 1.0f);
 
         // Load timing points
+        timingPoints.clear();
         for (final String tempString : data.getData("TimingPoints")) {
-            if (timingPoints == null) {
-                timingPoints = new ArrayList<>();
-            }
-            String[] tmpdata = tempString.split("[,]");
+            String[] rawData = tempString.split("[,]");
             // Ignoring malformed timing point
-            if (tmpdata.length < 2) {
+            if (rawData.length < 2) {
                 continue;
             }
-            float offset = Float.parseFloat(tmpdata[0]);
-            float bpm = Float.parseFloat(tmpdata[1]);
+            float offset = Float.parseFloat(rawData[0]);
+            float bpm = Float.parseFloat(rawData[1]);
             float speed = 1.0f;
             boolean inherited = bpm < 0;
 
-            // The first timing point should always be uninherited, otherwise
-            // the beatmap is invalid
+            // The first timing point should always be uninherited,
+            // otherwise the beatmap is invalid
             if (currentTimingPoint == null && inherited) {
                 return false;
             }
@@ -91,65 +88,74 @@ public class DifficultyReCalculator {
         if (hitObjects.size() <= 0) {
             return false;
         }
+
+        this.hitObjects.clear();
+        int tpIndex = 0;
+        currentTimingPoint = timingPoints.get(tpIndex);
+
         for (final String tempString : hitObjects) {
-            if (this.hitObjects == null) {
-                this.hitObjects = new ArrayList<>();
-                tpIndex = 0;
-                currentTimingPoint = timingPoints.get(tpIndex);
-            }
-            String[] data1 = tempString.split("[,]");
-            String[] rawdata;
-            //Ignoring v10 features
-            int dataSize = data1.length;
-            while (dataSize > 0 && data1[dataSize - 1].matches("([0-9][:][0-9][|]?)+")) {
+            String[] hitObjectData = tempString.split("[,]");
+            String[] rawData;
+
+            // Ignoring v10 features
+            int dataSize = hitObjectData.length;
+            while (dataSize > 0 && hitObjectData[dataSize - 1].matches("([0-9][:][0-9][|]?)+")) {
                 dataSize--;
             }
-            if (dataSize < data1.length) {
-                rawdata = new String[dataSize];
-                for (int i = 0; i < rawdata.length; i++) {
-                    rawdata[i] = data1[i];
+            if (dataSize < hitObjectData.length) {
+                rawData = new String[dataSize];
+                for (int i = 0; i < rawData.length; i++) {
+                    rawData[i] = hitObjectData[i];
                 }
-            } else
-                rawdata = data1;
+            } else {
+                rawData = hitObjectData;
+            }
 
             // Ignoring malformed hitobject
-            if (rawdata.length < 4) {
+            if (rawData.length < 4) {
                 continue;
             }
 
-            int time = Integer.parseInt(rawdata[2]);
+            int time = Integer.parseInt(rawData[2]);
             while (tpIndex < timingPoints.size() - 1 && timingPoints.get(tpIndex + 1).getOffset() <= time) {
                 tpIndex++;
             }
             currentTimingPoint = timingPoints.get(tpIndex);
-            HitObjectType hitObjectType = HitObjectType.valueOf(Integer.parseInt(rawdata[3]) % 16);
-            PointF pos = new PointF(Float.parseFloat(rawdata[0]), Float.parseFloat(rawdata[1]));
+            HitObjectType hitObjectType = HitObjectType.valueOf(Integer.parseInt(rawData[3]) % 16);
+            PointF pos = new PointF(Float.parseFloat(rawData[0]), Float.parseFloat(rawData[1]));
             HitObject object = null;
             if (hitObjectType == null) {
                 System.out.println(tempString);
                 continue;
             }
-            if (hitObjectType == HitObjectType.Normal || hitObjectType == HitObjectType.NormalNewCombo) { // hitcircle
-                object = new HitCircle((int)(time / speedmulti), pos, currentTimingPoint);
-            } else if (hitObjectType == HitObjectType.Spinner) { // spinner
-                int endTime = Integer.parseInt(rawdata[5]);
-                object = new Spinner((int)(time / speedmulti), (int)(endTime / speedmulti), pos, currentTimingPoint);
-            } else if (hitObjectType == HitObjectType.Slider || hitObjectType == HitObjectType.SliderNewCombo) { // slider
+
+            if (hitObjectType == HitObjectType.Normal || hitObjectType == HitObjectType.NormalNewCombo) {
+                // HitCircle
+                object = new HitCircle(time, pos, currentTimingPoint);
+                track.setHitCircleCount(track.getHitCircleCount() + 1);
+            } else if (hitObjectType == HitObjectType.Spinner) {
+                // Spinner
+                int endTime = Integer.parseInt(rawData[5]);
+                object = new Spinner(time, endTime, pos, currentTimingPoint);
+                track.setSpinnerCount(track.getSpinnerCount() + 1);
+            } else if (hitObjectType == HitObjectType.Slider || hitObjectType == HitObjectType.SliderNewCombo) {
+                // Slider
                 // Ignoring malformed slider
-                if (rawdata.length < 8) {
+                if (rawData.length < 8) {
                     continue;
                 }
-                String[] data2 = rawdata[5].split("[|]");
-                SliderType sliderType = SliderType.parse(data2[0].charAt(0));
+                String[] curvePointsData = rawData[5].split("[|]");
+                SliderType sliderType = SliderType.parse(curvePointsData[0].charAt(0));
                 ArrayList<PointF> curvePoints = new ArrayList<>();
-                for (int i = 1; i < data2.length; i++) {
-                    String[] temp = data2[i].split("[:]");
-                    curvePoints.add(new PointF(Float.parseFloat(temp[0]), Float.parseFloat(temp[1])));
+                for (int i = 1; i < curvePointsData.length; i++) {
+                    String[] curvePointData = curvePointsData[i].split("[:]");
+                    curvePoints.add(new PointF(Float.parseFloat(curvePointData[0]), Float.parseFloat(curvePointData[1])));
                 }
-                int repeat = Integer.parseInt(rawdata[6]);
-                float rawLength = Float.parseFloat(rawdata[7]);
-                int endTime = time + (int) (rawLength * (600 / currentTimingPoint.getBpm()) / sliderSpeed) * repeat;
-                object = new Slider((int)(time / speedmulti), (int)(endTime / speedmulti), pos, currentTimingPoint, sliderType, repeat, curvePoints, rawLength);
+                int repeat = Integer.parseInt(rawData[6]);
+                float rawLength = Float.parseFloat(rawData[7]);
+                int endTime = time + (int) (rawLength * (600 / timingPoints.get(0).getBpm()) / sliderSpeed) * repeat;
+                object = new Slider(time, endTime, pos, currentTimingPoint, sliderType, repeat, curvePoints, rawLength);
+                track.setSliderCount(track.getSliderCount() + 1);
             }
             this.hitObjects.add(object);
         }
