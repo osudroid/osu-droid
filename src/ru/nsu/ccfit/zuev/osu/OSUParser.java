@@ -304,9 +304,12 @@ public class OSUParser {
         if (info.getMusic() == null) {
             final File musicFile = new File(info.getPath(), data.getData(
                     "General", "AudioFilename"));
-            if (musicFile.exists()) {
-                info.setMusic(musicFile.getPath());
+            if (!musicFile.exists()) {
+                ToastLogger.showText(StringTable.format(R.string.osu_parser_music_not_found,
+                        file.getName().substring(0, file.getName().length() - 4)), true);
+                return false;
             }
+            info.setMusic(musicFile.getPath());
             final String prevTime = data.getData("General", "PreviewTime");
             try {
                 info.setPreviewTime(Integer.parseInt(prevTime));
