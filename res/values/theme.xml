@@ -3,6 +3,6 @@
     <style name="Theme.NoBackground" parent="android:Theme">
         <item name="android:windowBackground">@null</item>
     </style>
-    <style name="AppThemeLight" parent="android:Theme.Light">
+    <style name="AppThemeLight" parent="android:Theme.DeviceDefault.DayNight">
     </style>
 </resources>
