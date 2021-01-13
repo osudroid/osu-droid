@@ -60,6 +60,9 @@ public class DifficultyReCalculator {
             }
             float offset = Float.parseFloat(rawData[0]);
             float bpm = Float.parseFloat(rawData[1]);
+            if (Float.isNaN(offset) || Float.isNaN(bpm)) {
+                continue;
+            }
             float speed = 1.0f;
             boolean inherited = bpm < 0;
 
@@ -117,12 +120,18 @@ public class DifficultyReCalculator {
             }
 
             int time = Integer.parseInt(rawData[2]);
+            if (Float.isNaN((float) time)) {
+                continue;
+            }
             while (tpIndex < timingPoints.size() - 1 && timingPoints.get(tpIndex + 1).getOffset() <= time) {
                 tpIndex++;
             }
             currentTimingPoint = timingPoints.get(tpIndex);
             HitObjectType hitObjectType = HitObjectType.valueOf(Integer.parseInt(rawData[3]) % 16);
             PointF pos = new PointF(Float.parseFloat(rawData[0]), Float.parseFloat(rawData[1]));
+            if (Float.isNaN(pos.x) || Float.isNaN(pos.y)) {
+                continue;
+            }
             HitObject object = null;
             if (hitObjectType == null) {
                 System.out.println(tempString);
@@ -141,18 +150,33 @@ public class DifficultyReCalculator {
             } else if (hitObjectType == HitObjectType.Slider || hitObjectType == HitObjectType.SliderNewCombo) {
                 // Slider
                 // Ignoring malformed slider
-                if (rawData.length < 8) {
+                boolean isValidSlider = rawData.length >= 8;
+                if (!isValidSlider) {
                     continue;
                 }
+
                 String[] curvePointsData = rawData[5].split("[|]");
                 SliderType sliderType = SliderType.parse(curvePointsData[0].charAt(0));
                 ArrayList<PointF> curvePoints = new ArrayList<>();
                 for (int i = 1; i < curvePointsData.length; i++) {
                     String[] curvePointData = curvePointsData[i].split("[:]");
-                    curvePoints.add(new PointF(Float.parseFloat(curvePointData[0]), Float.parseFloat(curvePointData[1])));
+                    PointF curvePointPosition = new PointF(Float.parseFloat(curvePointData[0]), Float.parseFloat(curvePointData[1]));
+                    if (Float.isNaN(curvePointPosition.x) || Float.isNaN(curvePointPosition.y)) {
+                        isValidSlider = false;
+                        break;
+                    }
+                    curvePoints.add(curvePointPosition);
                 }
+                if (!isValidSlider) {
+                    continue;
+                }
+
                 int repeat = Integer.parseInt(rawData[6]);
                 float rawLength = Float.parseFloat(rawData[7]);
+                if (Float.isNaN((float) repeat) || Float.isNaN(rawLength)) {
+                    continue;
+                }
+
                 int endTime = time + (int) (rawLength * (600 / timingPoints.get(0).getBpm()) / sliderSpeed) * repeat;
                 object = new Slider(time, endTime, pos, currentTimingPoint, sliderType, repeat, curvePoints, rawLength);
                 track.setSliderCount(track.getSliderCount() + 1);
