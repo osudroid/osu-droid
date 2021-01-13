@@ -70,8 +70,8 @@ public class MapInfoFragment extends BaseFragment {
     }
 
     public void showWithMap(final TrackInfo track, float speedmulti, float cs){
-        DifficultyReCalculator diffReCalulator = new DifficultyReCalculator();
-        if (!diffReCalulator.calculateMapInfo(track, speedmulti, cs)){
+        DifficultyReCalculator diffRecalculator = new DifficultyReCalculator();
+        if (!diffRecalculator.calculateMapInfo(track, speedmulti, cs)){
             return;
         }
         int circleCount = track.getHitCircleCount();
@@ -81,20 +81,20 @@ public class MapInfoFragment extends BaseFragment {
         float circlePercent = (float)circleCount / objectCount * 100;
         float sliderPercent = (float)sliderCount / objectCount * 100;
         float spinnerPercent = (float)spinnerCount / objectCount * 100;
-        int singleCount = diffReCalulator.getSingleCount();
-        int fastSingleCount = diffReCalulator.getFastSingleCount();
-        int streamCount = diffReCalulator.getStreamCount();
-        int jumpCount = diffReCalulator.getJumpCount();
-        int multiCount = diffReCalulator.getMultiCount();
-        int switchCount = diffReCalulator.getSwitchFingeringCount();
+        int singleCount = diffRecalculator.getSingleCount();
+        int fastSingleCount = diffRecalculator.getFastSingleCount();
+        int streamCount = diffRecalculator.getStreamCount();
+        int jumpCount = diffRecalculator.getJumpCount();
+        int multiCount = diffRecalculator.getMultiCount();
+        int switchCount = diffRecalculator.getSwitchFingeringCount();
         float singlePercent = (float)singleCount / objectCount * 100;
         float fastSinglePercent = (float)fastSingleCount / objectCount * 100;
         float streamPercent = (float)streamCount / objectCount * 100;
         float jumpPercent = (float)jumpCount / objectCount * 100;
         float multiPercent = (float)multiCount / objectCount * 100;
         float switchPercent = (float)switchCount / objectCount * 100;
-        int longestStreamCount = diffReCalulator.getLongestStreamCount();
-        float realTime = diffReCalulator.getRealTime();
+        int longestStreamCount = diffRecalculator.getLongestStreamCount();
+        float realTime = diffRecalculator.getRealTime();
         float objectPerMin = objectCount / realTime * 60;
 
         StringBuilder string = new StringBuilder();
@@ -114,6 +114,6 @@ public class MapInfoFragment extends BaseFragment {
                                     switchCount, switchPercent, longestStreamCount));
         info = string.toString();
         show();
-        diffReCalulator = null;
+        diffRecalculator = null;
     }
 }

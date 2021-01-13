@@ -980,21 +980,17 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         mapper.setText(mapperStr);
         beatmapInfo2.setText(binfoStr2);
         changeDimensionInfo(track);
-        //if (ModMenu.getInstance().shouldReCalculate()){
-            (new Thread() {
-                public void run() {
-                    DifficultyReCalculator diffReCalulator = new DifficultyReCalculator();
-                    float newstar = diffReCalulator.reCalculateStar(
-                        selectedTrack, 
-                        ModMenu.getInstance().getSpeed(), 
-                        diffReCalulator.getCS(selectedTrack));
-                    if (newstar != 0f){
-                        setStarsDisplay(newstar);
-                    }
-                    diffReCalulator = null;
+        (new Thread() {
+            public void run() {
+                DifficultyReCalculator diffReCalculator = new DifficultyReCalculator();
+                float newstar = diffReCalculator.recalculateStar(
+                    selectedTrack,
+                    diffReCalculator.getCS(selectedTrack));
+                if (newstar != 0f){
+                    setStarsDisplay(newstar);
                 }
-            }).start();
-        //}
+            }
+        }).start();
     }
 
     public void selectTrack(final TrackInfo track, boolean reloadBG) {

@@ -170,10 +170,10 @@ public class ModMenu implements IModSwitcher {
                         public void run() {
                             if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != null){
                                 DifficultyReCalculator rec = new DifficultyReCalculator();
-                                float newstar = rec.reCalculateStar(
+                                float newstar = rec.recalculateStar(
                                         GlobalManager.getInstance().getSongMenu().getSelectedTrack(),
-                                        getSpeed(), rec.getCS(GlobalManager.getInstance().getSongMenu().getSelectedTrack()));
-                                if (newstar != 0f){
+                                        rec.getCS(GlobalManager.getInstance().getSongMenu().getSelectedTrack()));
+                                if (newstar != 0f) {
                                     GlobalManager.getInstance().getSongMenu().setStarsDisplay(newstar);
                                 }
                             }
