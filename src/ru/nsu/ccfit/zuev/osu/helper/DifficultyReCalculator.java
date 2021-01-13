@@ -36,7 +36,7 @@ public class DifficultyReCalculator {
     private int stream_longest;
     private float real_time;
     //copy from OSUParser.java
-    public boolean init(final TrackInfo track, float speedmulti){
+    public boolean init(final TrackInfo track) {
         OSUParser parser = new OSUParser(track.getFilename());
         final BeatmapData data;
         if (parser.openFile()) {
@@ -48,8 +48,19 @@ public class DifficultyReCalculator {
                             track.getFilename()), true);
             return false;
         }
-        float sliderSpeed = parser.tryParseFloat(data.getData("Difficulty", "SliderMultiplier"), 1.0f);
 
+        if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track) {
+            return false;
+        }
+
+        if (!loadTimingPoints(data)) {
+            return false;
+        }
+        float sliderSpeed = parser.tryParseFloat(data.getData("Difficulty", "SliderMultiplier"), 1.0f);
+        return loadHitObjects(track, data, sliderSpeed);
+    }
+
+    private boolean loadTimingPoints(final BeatmapData data) {
         // Load timing points
         timingPoints.clear();
         for (final String tempString : data.getData("TimingPoints")) {
@@ -84,9 +95,11 @@ public class DifficultyReCalculator {
             }
             timingPoints.add(timing);
         }
-        if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track){
-            return false;
-        }
+
+        return timingPoints.size() > 0;
+    }
+
+    private boolean loadHitObjects(final TrackInfo track, final BeatmapData data, float sliderSpeed) {
         final ArrayList<String> hitObjects = data.getData("HitObjects");
         if (hitObjects.size() <= 0) {
             return false;
@@ -183,10 +196,12 @@ public class DifficultyReCalculator {
             }
             this.hitObjects.add(object);
         }
-        return true;
+
+        return this.hitObjects.size() > 0;
     }
-    public float reCalculateStar(final TrackInfo track, float speedmulti, float cs){
-        if (!init(track, speedmulti)) {
+
+    public float recalculateStar(final TrackInfo track, float cs) {
+        if (!init(track)) {
             return 0f;
         }
         if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track){
@@ -212,24 +227,28 @@ public class DifficultyReCalculator {
             return 0f;
         }
     }
-    //must use reCalculateStar() before this
-    public void calculaterPP(final StatisticV2 stat, final TrackInfo track){
+
+    //must use recalculateStar() before this
+    public void calculatePP(final StatisticV2 stat, final TrackInfo track) {
         pp(tpDifficulty, track, stat, stat.getAccuracy());
     }
-    //must use reCalculateStar() before this
-    public void calculaterMaxPP(final StatisticV2 stat, final TrackInfo track){
+
+    //must use recalculateStar() before this
+    public void calculateMaxPP(final StatisticV2 stat, final TrackInfo track) {
         pp(tpDifficulty, track, stat, 1f);
     }
+
     //copy from koohii.java
     private double pp_base(double stars)
     {
         return Math.pow(5.0 * Math.max(1.0, stars / 0.0675) - 4.0, 3.0)
             / 100000.0;
     }
+
     //copy from koohii.java
     private void pp(AiModtpDifficulty tpDifficulty, TrackInfo track,
                         StatisticV2 stat,
-                        float accuracy){
+                        float accuracy) {
         /* global values --------------------------------------- */
         EnumSet<GameMod> mods = stat.getMod();
         int max_combo = stat.getMaxCombo();
@@ -361,19 +380,24 @@ public class DifficultyReCalculator {
             1.0 / 1.1
         ) * final_multiplier;
     }
-    public double getTotalPP(){
+
+    public double getTotalPP() {
         return total;
     }
-    public double getAimPP(){
+
+    public double getAimPP() {
         return aim;
     }
-    public double getSpdPP(){
+
+    public double getSpdPP() {
         return speed;
     }
-    public double getAccPP(){
+
+    public double getAccPP() {
         return acc;
     }
-    private float getAR(final StatisticV2 stat, final TrackInfo track){
+
+    private float getAR(final StatisticV2 stat, final TrackInfo track) {
         // no need to calculate force AR value
         if (stat.isEnableForceAR()) {
             return stat.getForceAR();
@@ -398,7 +422,8 @@ public class DifficultyReCalculator {
         ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(Math.min(13.f, ar)) / speed), 2);
         return ar;
     }
-    private float getOD(final StatisticV2 stat, final TrackInfo track){
+
+    private float getOD(final StatisticV2 stat, final TrackInfo track) {
         float od = track.getOverallDifficulty();
         EnumSet<GameMod> mod = stat.getMod();
         if (mod.contains(GameMod.MOD_EASY)) {
@@ -415,7 +440,8 @@ public class DifficultyReCalculator {
         od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) / speed), 2);
         return od;
     }
-    public float getCS(EnumSet<GameMod> mod, final TrackInfo track){
+
+    public float getCS(EnumSet<GameMod> mod, final TrackInfo track) {
         float cs = track.getCircleSize();
         if (mod.contains(GameMod.MOD_EASY)) {
             cs -= 1f;
@@ -431,14 +457,17 @@ public class DifficultyReCalculator {
         }
         return cs;
     }
-    public float getCS(final StatisticV2 stat, final TrackInfo track){
+
+    public float getCS(final StatisticV2 stat, final TrackInfo track) {
         return getCS(stat.getMod(), track);
     }
-    public float getCS(final TrackInfo track){
+
+    public float getCS(final TrackInfo track) {
         return getCS(ModMenu.getInstance().getMod(), track);
     }
+
     //must use reCalculateStar() before this
-    public boolean calculateMapInfo(final TrackInfo track, float speedmulti, float cs){
+    public boolean calculateMapInfo(final TrackInfo track, float speedmulti, float cs) {
         //计算谱面信息
         /*
         120bpm: 125ms(dt1), 140bpm: 107ms(dt3), 80bpm: 187.5(dt4), 180bpm: 83.33ms(dt2)
@@ -447,7 +476,7 @@ public class DifficultyReCalculator {
         连打:高于120bpm且间距小于90，高于180bpm且间距大于90、小于180
         跳:间距大于180
         */
-        if (init(track, speedmulti) == false) {
+        if (!init(track)) {
             return false;
         }
         if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track){
