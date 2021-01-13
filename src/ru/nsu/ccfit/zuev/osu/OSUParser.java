@@ -409,7 +409,7 @@ public class OSUParser {
             timingPoints.add(timing);
         }
 
-        return true;
+        return timingPoints.size() > 0;
     }
 
     private boolean loadHitObjectsSection(final TrackInfo track) {
@@ -519,6 +519,6 @@ public class OSUParser {
         track.setMusicLength(length);
         track.setMaxCombo(getMaxCombo());
 
-        return true;
+        return this.hitObjects.size() > 0;
     }
 }
