@@ -28,7 +28,6 @@ public class Config {
     private static String skinPath = corePath + "Skin/";
     private static String skinTopPath = skinPath;
     private static String scorePath = corePath + "Scores/";
-    private static String APIKey = "";
     private static int errorMeter = 0;
     private static int spinnerStyle = 0;
     private static boolean showFirstApproachCircle = false;
@@ -291,7 +290,6 @@ public class Config {
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(context);
 
-        APIKey = prefs.getString("APIKey", "");
         onlineUsername = prefs.getString("onlineUsername", "");
         onlinePassword = prefs.getString("onlinePassword", null);
         stayOnline = prefs.getBoolean("stayOnline", true);
@@ -426,16 +424,8 @@ public class Config {
         return corePath;
     }
 
-    public static void setCorePath(final String scorePath) {
-        Config.corePath = scorePath;
-    }
-
-    public static String getAPIKey() {
-        return APIKey;
-    }
-
-    public static void setAPIKey(final String APIKey) {
-        Config.APIKey = APIKey;
+    public static void setCorePath(final String corePath) {
+        Config.corePath = corePath;
     }
 
     public static String getBeatmapPath() {
