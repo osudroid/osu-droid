@@ -467,7 +467,7 @@ public class DifficultyReCalculator {
     }
 
     //must use reCalculateStar() before this
-    public boolean calculateMapInfo(final TrackInfo track, float speedmulti, float cs) {
+    public boolean calculateMapInfo(final TrackInfo track) {
         //计算谱面信息
         /*
         120bpm: 125ms(dt1), 140bpm: 107ms(dt3), 80bpm: 187.5(dt4), 180bpm: 83.33ms(dt2)
