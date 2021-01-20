@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Random;
-import java.util.Calendar;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
@@ -95,7 +94,7 @@ public class StatisticV2 implements Serializable {
         misses = Integer.parseInt(params[9]);
         accuracy = Integer.parseInt(params[10]) / 100000f;
         if (params.length >= 12) {
-            time = Long.parseLong(params[11]) + Calendar.getInstance().getTimeZone().getRawOffset();
+            time = Long.parseLong(params[11]);
         }
         if (params.length >= 13) {
             perfect = Integer.parseInt(params[12]) != 0;
