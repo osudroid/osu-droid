@@ -258,8 +258,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 ToastLogger.showTextId(R.string.replay_cantdownload, true);
                 return false;
             }
-        } else
+        } else {
+            isOnlineReplay = false;
             this.replayFile = rFile;
+        }
 
         OSUParser parser = new OSUParser(track.getFilename());
         if (parser.openFile()) {
