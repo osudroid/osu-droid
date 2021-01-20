@@ -16,6 +16,7 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 
 import java.util.Locale;
+import java.util.Calendar;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -54,7 +55,7 @@ public class ScoringScene {
 
     public void load(final StatisticV2 stat, final TrackInfo track,
                      final SongService player, final String replay, final String mapMD5,
-                     final TrackInfo trackToReplay) {
+                     final TrackInfo trackToReplay, final boolean isOnlineScore) {
         scene = new Scene();
         //music = player;
         this.songService = player;
@@ -85,7 +86,10 @@ public class ScoringScene {
                 (trackInfo.getBeatmap().getTitleUnicode() == null || Config.isForceRomanized() ? trackInfo.getBeatmap().getTitle() : trackInfo.getBeatmap().getTitleUnicode()) + " [" + trackInfo.getMode() + "]";
         String mapperStr = "Beatmap by " + trackInfo.getCreator();
         String playerStr = "Played by " + stat.getPlayerName() + " on " +
-                new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date(stat.getTime()));
+                new java.text.SimpleDateFormat(
+                        "yyyy/MM/dd HH:mm:ss",
+                        Locale.getDefault()).format(new java.util.Date(stat.getTime() + (isOnlineScore ? Calendar.getInstance().getTimeZone().getRawOffset() : 0))
+                );
         playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
         if (stat.getChangeSpeed() != 1 || stat.isEnableForceAR()){
             mapperStr += " [";

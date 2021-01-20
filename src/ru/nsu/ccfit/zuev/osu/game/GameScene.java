@@ -157,6 +157,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Replay replay;
     private boolean replaying;
     private String replayFile;
+    private boolean isOnlineReplay = false;
     private float avgOffset;
     private int offsetRegs;
     private boolean kiai = false;
@@ -249,6 +250,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private boolean loadGame(final TrackInfo track, final String rFile) {
         if (rFile != null && rFile.startsWith("http://")) {
+            isOnlineReplay = true;
             this.replayFile = Config.getCachePath() + "/" +
                     MD5Calcuator.getStringMD5(rFile) + ".odr";
             Debug.i("ReplayFile = " + replayFile);
@@ -1824,7 +1826,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
 
                 if (replaying)
-                    scoringScene.load(scoringScene.getReplayStat(), null, GlobalManager.getInstance().getSongService(), replayFile, null, lastTrack);
+                    scoringScene.load(scoringScene.getReplayStat(), null, GlobalManager.getInstance().getSongService(), replayFile, null, lastTrack, isOnlineReplay);
                 else {
                     if (stat.getMod().contains(GameMod.MOD_AUTO)) {
                         stat.setPlayerName("osu!");
@@ -1836,7 +1838,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         storyboardSprite = null;
                     }
 
-                    scoringScene.load(stat, lastTrack, GlobalManager.getInstance().getSongService(), replayFile, trackMD5, null);
+                    scoringScene.load(stat, lastTrack, GlobalManager.getInstance().getSongService(), replayFile, trackMD5, null, isOnlineReplay);
                 }
                 GlobalManager.getInstance().getSongService().setVolume(0.2f);
                 engine.setScene(scoringScene.getScene());

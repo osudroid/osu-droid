@@ -1173,7 +1173,7 @@ public class MainScene implements IUpdateHandler {
                     ResourceManager.getInstance().loadBackground(track.getBackground());
                     ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance().getSongService().preLoad(track.getBeatmap().getMusic());
                     ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance().getSongService().play();
-                    scorescene.load(stat, null, ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance().getSongService(), replayFile, null, track);
+                    scorescene.load(stat, null, ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance().getSongService(), replayFile, null, track, false);
                     GlobalManager.getInstance().getEngine().setScene(scorescene.getScene());
                 }
             }

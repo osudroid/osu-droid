@@ -1140,7 +1140,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                         StatisticV2 stat = new StatisticV2(params);
                         stat.setPlayerName(playerName);
-                        scorescene.load(stat, null, null, OnlineManager.getReplayURL(id), null, selectedTrack);
+                        scorescene.load(stat, null, null, OnlineManager.getReplayURL(id), null, selectedTrack, true);
                         engine.setScene(scorescene.getScene());
 
                     } catch (OnlineManagerException e) {
@@ -1161,7 +1161,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
 
         StatisticV2 stat = ScoreLibrary.getInstance().getScore(id);
-        scorescene.load(stat, null, null, stat.getReplayName(), null, selectedTrack);
+        scorescene.load(stat, null, null, stat.getReplayName(), null, selectedTrack, false);
         engine.setScene(scorescene.getScene());
     }
 
