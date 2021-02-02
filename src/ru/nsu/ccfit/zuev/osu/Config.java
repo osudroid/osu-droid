@@ -84,6 +84,7 @@ public class Config {
     private static boolean removeSliderLock = false;
     private static boolean calculateSliderPathInGameStart = false;
     private static boolean displayScorePP = false;
+    private static boolean hideReplayMarquee = false;
 
     private static float cursorSize = 1;
 
@@ -269,7 +270,8 @@ public class Config {
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
         calculateSliderPathInGameStart = prefs.getBoolean("calculateSliderPathInGameStart", false);
         displayScorePP = prefs.getBoolean("displayScorePP", false);
-
+        hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
+      
         //Init
         onlineDeviceID = prefs.getString("installID", null);
         if (onlineDeviceID == null) {
@@ -338,6 +340,10 @@ public class Config {
 
     public static boolean isDisplayScorePP() {
         return displayScorePP;
+    }
+
+    public static boolean isHideReplayMarquee() {
+        return hideReplayMarquee;
     }
 
     public static boolean isEnableExtension() {
