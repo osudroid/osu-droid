@@ -1222,18 +1222,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             unranked.setVisible(true);
         }
 
-        replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
-        replayText.setVisible(false);
-        replayText.setPosition(0, 140);
-        replayText.setAlpha(0.7f);
-        fgScene.attachChild(replayText, 0);
-        String playname = null;
-        if (stat.getMod().contains(GameMod.MOD_AUTO) || replaying) {
-            playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStat().getPlayerName() : "osu!";
-            replayText.setText("Watching " + playname + " play " + artist + " - " + title + " [" + version + "]");
-            replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(40,
-                    Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
-            replayText.setVisible(true);
+        String playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStat().getPlayerName() : "osu!";
+        if(!Config.isHideReplayMarquee()) {
+            replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
+            replayText.setVisible(false);
+            replayText.setPosition(0, 140);
+            replayText.setAlpha(0.7f);
+            fgScene.attachChild(replayText, 0);
+            if (stat.getMod().contains(GameMod.MOD_AUTO) || replaying) {
+                replayText.setText("Watching " + playname + " play " + artist + " - " + title + " [" + version + "]");
+                replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(40,
+                        Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
+                replayText.setVisible(true);
+            }
         }
         if (Config.isShowScoreboard()) {
             scoreBoard = new DuringGameScoreBoard(fgScene, stat, playname);

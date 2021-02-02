@@ -44,7 +44,6 @@ object ActivityOverlay {
     @Synchronized
     fun addOverlay(fragment: BaseFragment, tag: String?) {
         if (fragmentManager != null) {
-            fragmentManager!!.executePendingTransactions()
             if (fragment.isAdded()) {
                 return
             }
