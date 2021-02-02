@@ -56,12 +56,16 @@
     </string-array>
     <string-array name="set_playfield_names">
         <item>100%</item>
+        <item>95%</item>
         <item>90%</item>
+        <item>85%</item>
         <item>80%</item>
     </string-array>
     <string-array name="set_playfield_values">
         <item>100</item>
+        <item>95</item>
         <item>90</item>
+        <item>85</item>
         <item>80</item>
     </string-array>
     <string name="opt_onlineOpt">Account Option</string>
