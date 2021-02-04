@@ -97,12 +97,9 @@ public class AiModtpDifficulty {
     public void CalculateAll(ArrayList<HitObject> hitObjects, float circleSize) {
         // Fill our custom tpHitObject class, that carries additional information
         tpHitObjects = new ArrayList<tpHitObject>(hitObjects.size());
-        float cs = circleSize;
         // The Max CS in osu!droid is 17.62, but in pc OSU! is about 12.14. so I map 10-17.62(gameplay CS) to 10-12.14(star calculate CS)
-        if (cs > 17.62f){
-            cs = 17.62f;
-        }
-        if (cs > 10.0f){
+        float cs = Math.min(circleSize, 17.62f);
+        if (cs > 10.0f) {
             cs = 10.0f + (cs - 10.0f) * (12.14f - 10.0f) / (17.62f - 10.0f);
         }
         float CircleRadius = (PLAYFIELD_WIDTH / 16.0f) * (1.0f - 0.7f * (cs - 5.0f) / 5.0f);
