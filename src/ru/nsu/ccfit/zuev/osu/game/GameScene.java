@@ -474,7 +474,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         } else {
             GameHelper.setStackLatient(0);
         }
-
+        if (scale < 0.001f){
+            scale = 0.001f;
+        }
         GameHelper.setSpeed(Float.parseFloat(rawSliderSpeed) * 100);
         GameHelper.setTickRate(Float.parseFloat(beatmapData.getData(
                 "Difficulty", "SliderTickRate")));
