@@ -154,12 +154,10 @@ public class DifficultyReCalculator {
             if (hitObjectType == HitObjectType.Normal || hitObjectType == HitObjectType.NormalNewCombo) {
                 // HitCircle
                 object = new HitCircle(time, pos, currentTimingPoint);
-                track.setHitCircleCount(track.getHitCircleCount() + 1);
             } else if (hitObjectType == HitObjectType.Spinner) {
                 // Spinner
                 int endTime = Integer.parseInt(rawData[5]);
                 object = new Spinner(time, endTime, pos, currentTimingPoint);
-                track.setSpinnerCount(track.getSpinnerCount() + 1);
             } else if (hitObjectType == HitObjectType.Slider || hitObjectType == HitObjectType.SliderNewCombo) {
                 // Slider
                 // Ignoring malformed slider
@@ -192,7 +190,6 @@ public class DifficultyReCalculator {
 
                 int endTime = time + (int) (rawLength * (600 / timingPoints.get(0).getBpm()) / sliderSpeed) * repeat;
                 object = new Slider(time, endTime, pos, currentTimingPoint, sliderType, repeat, curvePoints, rawLength);
-                track.setSliderCount(track.getSliderCount() + 1);
             }
             this.hitObjects.add(object);
         }
