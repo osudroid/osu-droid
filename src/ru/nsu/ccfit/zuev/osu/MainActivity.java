@@ -95,9 +95,9 @@ public class MainActivity extends BaseGameActivity implements
         if (!checkPermissions()) {
             return null;
         }
+        Config.loadConfig(this);
         initialGameDirectory();
         //Debug.setDebugLevel(Debug.DebugLevel.NONE);
-        Config.loadConfig(this);
         StringTable.setContext(this);
         ToastLogger.init(this);
         SyncTaskManager.getInstance().init(this);

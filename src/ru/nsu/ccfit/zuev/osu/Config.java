@@ -28,7 +28,6 @@ public class Config {
     private static String skinPath = corePath + "Skin/";
     private static String skinTopPath = skinPath;
     private static String scorePath = corePath + "Scores/";
-    private static String APIKey = "";
     private static int errorMeter = 0;
     private static int spinnerStyle = 0;
     private static boolean showFirstApproachCircle = false;
@@ -72,7 +71,6 @@ public class Config {
     private static boolean stayOnline = true;
 
     private static boolean syncMusic = true;
-    private static boolean saveReplays = true;
     private static boolean burstEffects = false;
     private static boolean hitLighting = false;
     private static boolean useDither = true;
@@ -204,6 +202,52 @@ public class Config {
         }
         doubleSound = prefs.getBoolean("doublesound", true);
         useNativePlayer = prefs.getBoolean("nativeplayer", true);
+
+        //advanced
+        corePath = prefs.getString("corePath", corePath);
+        if (corePath.length() == 0) {
+            corePath = Environment.getExternalStorageDirectory() + "/osu!droid/";
+        }
+        if (corePath.charAt(corePath.length() - 1) != '/') {
+            corePath += "/";
+        }
+        scorePath = corePath + "Scores/";
+
+        skinPath = prefs.getString("skinPath", corePath + "Skin/");
+        if (skinPath.length() == 0) {
+            skinPath = corePath + "Skin/";
+        }
+        if (skinPath.charAt(skinPath.length() - 1) != '/') {
+            skinPath += "/";
+        }
+
+        skinTopPath = prefs.getString("skinTopPath", skinPath);
+        if (skinTopPath.length() == 0) {
+            skinTopPath = skinPath;
+        }
+        if (skinTopPath.charAt(skinTopPath.length() - 1) != '/') {
+            skinTopPath += "/";
+        }
+
+        syncMusic = prefs.getBoolean("syncMusic", syncMusic);
+        if (prefs.getBoolean("lowDelay", true)) {
+            Engine.INPUT_PAUSE_DURATION = 0;
+        } else {
+            Engine.INPUT_PAUSE_DURATION = 20;
+        }
+        enableExtension = false;// prefs.getBoolean("enableExtension", false);
+        cachePath = context.getCacheDir().getPath();
+        burstEffects = prefs.getBoolean("bursts", burstEffects);
+        hitLighting = prefs.getBoolean("hitlighting", hitLighting);
+        useDither = prefs.getBoolean("dither", useDither);
+        useParticles = prefs.getBoolean("particles", useParticles);
+        useLongTrail = prefs.getBoolean("longTrail", useLongTrail);
+        useCustomComboColors = prefs.getBoolean("useCustomColors", useCustomComboColors);
+        comboColors = new RGBColor[4];
+        for (int i = 1; i <= 4; i++) {
+            comboColors[i - 1] = RGBColor.hex2Rgb(ColorPickerPreference.convertToRGB(prefs.getInt("combo" + i, 0xff000000)));
+        }
+
         // beatmaps
         DELETE_OSZ = prefs.getBoolean("deleteosz", true);
         SCAN_DOWNLOAD = prefs.getBoolean("scandownload", false);
@@ -215,18 +259,19 @@ public class Config {
         if (beatmapPath.charAt(beatmapPath.length() - 1) != '/') {
             beatmapPath += "/";
         }
+
         // other
         playMusicPreview = prefs.getBoolean("musicpreview", true);
         localUsername = prefs.getString("playername", "");
         showCursor = prefs.getBoolean("showcursor", false);
         hideNaviBar = prefs.getBoolean("hidenavibar", false);
         enablePP = false;//prefs.getBoolean("enablePP",true);
-
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
         calculateSliderPathInGameStart = prefs.getBoolean("calculateSliderPathInGameStart", false);
         displayScorePP = prefs.getBoolean("displayScorePP", false);
         hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
+      
         //Init
         onlineDeviceID = prefs.getString("installID", null);
         if (onlineDeviceID == null) {
@@ -239,33 +284,7 @@ public class Config {
             editor.commit();
         }
 
-
         loadOnlineConfig(context);
-
-        //advanced
-        corePath = prefs.getString("corePath", corePath);
-        skinTopPath = prefs.getString("skinTopPath", skinTopPath);
-        skinPath = prefs.getString("skinPath", skinPath);
-        syncMusic = prefs.getBoolean("syncMusic", syncMusic);
-        if (prefs.getBoolean("lowDelay", true)) {
-            Engine.INPUT_PAUSE_DURATION = 0;
-        } else {
-            Engine.INPUT_PAUSE_DURATION = 20;
-        }
-        enableExtension = false;// prefs.getBoolean("enableExtension", false);
-        cachePath = context.getCacheDir().getPath();
-        saveReplays = prefs.getBoolean("saveReplays", true);
-        burstEffects = prefs.getBoolean("bursts", burstEffects);
-        hitLighting = prefs.getBoolean("hitlighting", hitLighting);
-        useDither = prefs.getBoolean("dither", useDither);
-        useParticles = prefs.getBoolean("particles", useParticles);
-        useLongTrail = prefs.getBoolean("longTrail", useLongTrail);
-        useCustomComboColors = prefs.getBoolean("useCustomColors", useCustomComboColors);
-        comboColors = new RGBColor[4];
-        for (int i = 1; i <= 4; i++) {
-            comboColors[i - 1] = RGBColor.hex2Rgb(ColorPickerPreference.convertToRGB(prefs.getInt("combo" + i, 0xff000000)));
-        }
-
         FavoriteLibrary.get().load();
     }
 
@@ -273,7 +292,6 @@ public class Config {
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(context);
 
-        APIKey = prefs.getString("APIKey", "");
         onlineUsername = prefs.getString("onlineUsername", "");
         onlinePassword = prefs.getString("onlinePassword", null);
         stayOnline = prefs.getBoolean("stayOnline", true);
@@ -412,16 +430,8 @@ public class Config {
         return corePath;
     }
 
-    public static void setCorePath(final String scorePath) {
-        Config.corePath = scorePath;
-    }
-
-    public static String getAPIKey() {
-        return APIKey;
-    }
-
-    public static void setAPIKey(final String APIKey) {
-        Config.APIKey = APIKey;
+    public static void setCorePath(final String corePath) {
+        Config.corePath = corePath;
     }
 
     public static String getBeatmapPath() {
@@ -642,14 +652,6 @@ public class Config {
 
     public static void setCachePath(String cachePath) {
         Config.cachePath = cachePath;
-    }
-
-    public static boolean isSaveReplays() {
-        return true;
-    }
-
-    public static void setSaveReplays(boolean saveReplays) {
-        Config.saveReplays = saveReplays;
     }
 
     public static boolean isBurstEffects() {

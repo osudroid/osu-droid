@@ -599,7 +599,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 return false;
             } else
                 replay.countMarks(overallDifficulty);
-        } else if (!OnlineManager.getInstance().isStayOnline() && !Config.isSaveReplays()) {
+        } else if (!OnlineManager.getInstance().isStayOnline()) {
             replay = null;
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO)) {
             replay = null;
