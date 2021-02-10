@@ -364,10 +364,11 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     }
 
     public void init(final TrackInfo track) {
-        scoreItems = new ScoreBoardItems[0];
-        if (lastTrack == track && showOnlineScores == wasOnline && wasOnline)
+        if (lastTrack == track && showOnlineScores == wasOnline && wasOnline) {
             return;
+        }
 
+        scoreItems = new ScoreBoardItems[0];
         lastTrack = track;
         wasOnline = showOnlineScores;
 
