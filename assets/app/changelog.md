@@ -3,7 +3,7 @@ Changelog for 1.6.8
 ## Additions:
 
 - Delete local replay
-- You can scale play field, so that you can keep your fingers away from system status bar.
+- Custom playfield size ranging from 80%-100%, so that you can keep your fingers away from system status bar
 - Sudden Death (SD) mod: triggers fail after 1 miss, slider breaks will not trigger fail (unranked)
 - Small Circle (SC) mod: CS + 4 (unranked)
 - Perfect (PF) mod: SS or fail (unranked)
@@ -23,15 +23,16 @@ Changelog for 1.6.8
 - Warning message if your storage is low to prevent replay/score corruption (will cause bugs like unwatchable replays and inability to watch local replays)
 - Option to precalculate slider path (improves performance during gameplay, but increases map loading time)
 - Option to calculate pp when opening a score
+- Option to hide replay text when watching a replay
 
 ## Changes:
 
-  - PR (Precise) mod is ranked
-  - EZ (Easy) mod has 3 lives
-  - RX (Relax) mod and AP (AutoPilot) mod replays will be saved with 0.01x score multiplier
-  - Updated star rating system (improves calculation accuracy to be closer to osu! PC star rating)
-  - 10 simultaneous cursor input support
-  - Improved framerate for storyboard
+- PR (Precise) mod is ranked
+- EZ (Easy) mod has 3 lives
+- RX (Relax) mod and AP (AutoPilot) mod replays will be saved with 0.01x score multiplier
+- Updated star rating system (improves calculation accuracy to be closer to osu! PC star rating)
+- 10 simultaneous cursor input support
+- Improved framerate for storyboard
 
 ## Bug fixes:
 
@@ -52,5 +53,5 @@ Changelog for 1.6.8
 - Fixed a bug where combo count stays at 0 if complex effect is disabled without restarting the game
 - Fixed a bug where score goes to negative value beyond 2,147,483,647 (score will be capped at said value)
 - Fixed a bug where an ill-formed beatmap can crash the game during import process
-
-
+- Fixed a bug where custom directories are not loaded properly
+- Fixed a bug where player avatars in online leaderboards are not loaded when not using Wi-Fi connection
