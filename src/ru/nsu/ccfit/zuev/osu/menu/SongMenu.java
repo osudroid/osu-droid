@@ -606,7 +606,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     return true;
                 }
             };
-            scoringSwitcher.setFrame(0);
+            scoringSwitcher.setFrame(1);
             scoringSwitcher.setPosition(10, 10);
             scene.registerTouchArea(scoringSwitcher);
             frontLayer.attachChild(scoringSwitcher);
