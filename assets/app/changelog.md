@@ -54,4 +54,5 @@ Changelog for 1.6.8
 - Fixed a bug where score goes to negative value beyond 2,147,483,647 (score will be capped at said value)
 - Fixed a bug where an ill-formed beatmap can crash the game during import process
 - Fixed a bug where custom directories are not loaded properly
-- Fixed a bug where player avatars in online leaderboards are not loaded when not using Wi-Fi connection
+- Fixed a bug where player avatars in online leaderboard are not loaded when not using Wi-Fi connection
+- Fixed a bug where re-watching replays can crash the game
