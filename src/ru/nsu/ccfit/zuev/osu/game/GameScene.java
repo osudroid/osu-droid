@@ -89,7 +89,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
-import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
+//import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class GameScene implements IUpdateHandler, GameObjectListener,
@@ -736,11 +736,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             fgScene.attachChild(accText);
 
             ChangeableText memText = null;
-            if (BuildConfig.DEBUG) {
+           /* if (BuildConfig.DEBUG) {
                 memText = new ChangeableText(Utils.toRes(780),
                         Utils.toRes(520), font, "M: 100/100");
                 fgScene.attachChild(memText);
-            }
+            } */
             final ChangeableText fmemText = memText;
             fgScene.registerUpdateHandler(new FPSLogger(0.5f) {
                 @Override
@@ -1241,7 +1241,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             scoreBoard = new DuringGameScoreBoard(fgScene, stat, playname);
             addPassiveObject(scoreBoard);
         }
-
+        if(Config.isHideUI()){
+            scorebar.setVisible(false);
+            comboText.detachFromScene();
+            scoreText.detachFromScene();
+            accText.detachFromScene();
+            scoreShadow.detachFromScene();
+        }
         if(GameHelper.isFlashLight()){
             flashlightSprite = new FlashLightSprite();
             flashlightSprite.setShowing(false);
@@ -2034,8 +2040,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         } else if (score == 300) {
             if (writeReplay) replay.addObjectScore(objectId, Replay.RESULT_300);
-            if (endCombo && comboWasMissed == false) {
-                if (comboWas100 == false) {
+            if (endCombo && !comboWasMissed) {
+                if (!comboWas100) {
                     stat.registerHit(300, true, true);
                     scoreName = "hit300g";
                 } else {
@@ -2088,7 +2094,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
 
-        String scoreName = "hit300";
+        String scoreName;
         if (forcedScore == Replay.RESULT_300 ||
                 forcedScore == 0 && accuracy <= difficultyHelper.hitWindowFor300(overallDifficulty)) {
             //(75 + 25 * (5 - overallDifficulty) / 5) / 1000)

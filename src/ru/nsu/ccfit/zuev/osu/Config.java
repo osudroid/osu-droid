@@ -61,6 +61,7 @@ public class Config {
     private static boolean shrinkPlayfieldDownwards = false;
     private static boolean hideNaviBar = false;
     private static boolean showScoreboard = true;
+    private static boolean HideUI = false;
     private static boolean enablePP = true;
     private static boolean enableExtension = false;
 
@@ -113,6 +114,7 @@ public class Config {
         showFirstApproachCircle = prefs.getBoolean("showfirstapproachcircle", false);
         metronomeSwitch = Integer.parseInt(prefs.getString("metronomeswitch", "1"));
         showScoreboard = prefs.getBoolean("showscoreboard", true);
+        HideUI = prefs.getBoolean("hideui", true);
         enableStoryboard = prefs.getBoolean("enableStoryboard", false);
 
         setSize();
@@ -373,11 +375,15 @@ public class Config {
     public static boolean isShowScoreboard() {
         return showScoreboard;
     }
-
+    public static boolean isHideUI(){
+        return HideUI;
+    }
     public static void setShowScoreboard(final boolean showScoreboard) {
         Config.showScoreboard = showScoreboard;
     }
-
+    public static void setHideUI(final boolean HideUI) {
+        Config.HideUI = HideUI;
+    }
     public static boolean isDoubleSound() {
         return doubleSound;
     }

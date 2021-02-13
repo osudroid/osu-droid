@@ -28,6 +28,7 @@ public class InGameSettingMenu extends BaseFragment {
     private CheckBox enableNCWhenSpeedChange;
     private CheckBox enableSpeedChange;
     private CheckBox enableForceAR;
+    private CheckBox HideUI;
     private SeekBar backgroundBrightness;
     private SeekBar changeSpeed;
     private SeekBar forceAR;
@@ -102,7 +103,14 @@ public class InGameSettingMenu extends BaseFragment {
                     .putBoolean("showscoreboard", isChecked)
                     .commit();
         });
-
+        HideUI = findViewById(R.id.HideUI);
+        HideUI.setChecked(Config.isHideUI());
+        HideUI.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Config.setHideUI(isChecked);
+            PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
+                    .putBoolean("hideui", isChecked)
+                    .commit();
+        });
         enableNCWhenSpeedChange = findViewById(R.id.enableNCwhenSpeedChange);
         enableNCWhenSpeedChange.setChecked(ModMenu.getInstance().isEnableNCWhenSpeedChange());
         enableNCWhenSpeedChange.setOnCheckedChangeListener((buttonView, isChecked) -> {

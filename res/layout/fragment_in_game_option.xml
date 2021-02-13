@@ -140,6 +140,13 @@
                             android:layout_marginLeft="5dp"
                             android:layout_weight="1"
                             android:text="@string/opt_show_scoreboard_title" />
+						<CheckBox
+							android:id="@+id/HideUI"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginLeft="10dp"
+							android:layout_weight="2"
+							android:text="@string/opt_hide_ui_title" />
                     </LinearLayout>
 
 					<RelativeLayout

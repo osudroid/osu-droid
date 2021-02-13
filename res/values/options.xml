@@ -281,6 +281,7 @@
 
     <string name="opt_show_scoreboard_summary">Show scoreboard of selected beatmap during game</string>
     <string name="opt_show_scoreboard_title">Show scoreboard</string>
+    <string name="opt_hide_ui_title">Hide UI</string>
 
     <string name="opt_skinpath_title">Select skin</string>
     <string name="opt_skinpath_summary">Select skin from top skin directory</string>
