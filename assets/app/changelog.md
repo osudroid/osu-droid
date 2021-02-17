@@ -56,3 +56,4 @@ Changelog for 1.6.8
 - Fixed a bug where custom directories are not loaded properly
 - Fixed a bug where player avatars in online leaderboard are not loaded when not using Wi-Fi connection
 - Fixed a bug where re-watching replays can crash the game
+- Fixed a bug where custom beatmap skin's hitcircle texture does not apply to sliders if not overridden
