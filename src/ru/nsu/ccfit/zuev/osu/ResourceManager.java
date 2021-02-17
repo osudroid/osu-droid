@@ -759,6 +759,26 @@ public class ResourceManager {
             }
         } else {
             customTextures.put(resname, region);
+
+            if (resname.equals("hitcircle")) {
+                if (!customTextures.containsKey("sliderstartcircle")) {
+                    customTextures.put("sliderstartcircle", region);
+                }
+
+                if (!customTextures.containsKey("sliderendcircle")) {
+                    customTextures.put("sliderendcircle", region);
+                }
+            }
+
+            if (resname.equals("hitcircleoverlay")) {
+                if (!customTextures.containsKey("sliderstartcircleoverlay")) {
+                    customTextures.put("sliderstartcircleoverlay", region);
+                }
+
+                if (!customTextures.containsKey("sliderendcircleoverlay")) {
+                    customTextures.put("sliderendcircleoverlay", region);
+                }
+            }
         }
     }
 
