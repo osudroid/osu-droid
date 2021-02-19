@@ -129,7 +129,7 @@ public class MainScene implements IUpdateHandler {
     private float showPassTime = 0, syncPassedTime = 0;
     private float menuBarX = 0, playY, optionsY, exitY;
 
-    public static int randInt(int min, int max) {
+    privat int randInt(int min, int max) {
 
         // NOTE: This will (intentionally) not run as written so that folks
         // copy-pasting have to think about how to initialize their
@@ -605,9 +605,6 @@ public class MainScene implements IUpdateHandler {
                 ResourceManager.getInstance().loadSound("welcome", "sfx/welcome.wav", false).play();
                 break;
             case 1:
-                ResourceManager.getInstance().loadSound("welcome", "sfx/welcome_piano.wav", false).play();
-                break;
-            default:
                 ResourceManager.getInstance().loadSound("welcome", "sfx/welcome_piano.wav", false).play();
                 break;
         }
