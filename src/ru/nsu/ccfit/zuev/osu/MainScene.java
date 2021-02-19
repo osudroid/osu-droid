@@ -1142,7 +1142,13 @@ public class MainScene implements IUpdateHandler {
         options.setAlpha(0);
         exit.setAlpha(0);
 
-        ResourceManager.getInstance().loadSound("seeya", "sfx/seeya.wav", false).play();
+        //ResourceManager.getInstance().loadSound("seeya", "sfx/seeya.wav", false).play();
+        //allow customize Seeya Skin from Skins
+        BassSoundProvider exitsound = ResourceManager.getInstance().getSound("seeya");
+        if (exitsound != null) {
+            exitsound.play();
+        }
+        
         Rectangle bg = new Rectangle(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT());
         bg.setColor(0, 0, 0, 1.0f);
