@@ -1121,7 +1121,7 @@ public class MainScene implements IUpdateHandler {
         exit.setAlpha(0);
 
         //ResourceManager.getInstance().loadSound("seeya", "sfx/seeya.wav", false).play();
-        //allow customize Seeya Skin from Skins
+        //Allow customize Seeya Sounds from Skins
         BassSoundProvider exitsound = ResourceManager.getInstance().getSound("seeya");
         if (exitsound != null) {
             exitsound.play();
