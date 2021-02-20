@@ -129,6 +129,7 @@ public class MainScene implements IUpdateHandler {
     private float showPassTime = 0, syncPassedTime = 0;
     private float menuBarX = 0, playY, optionsY, exitY;
 
+
     public void load(Context context) {
         this.context = context;
         Debug.i("Load: mainMenuLoaded()");
@@ -579,7 +580,15 @@ public class MainScene implements IUpdateHandler {
         createOnlinePanel(scene);
         scene.registerUpdateHandler(this);
 
-        ResourceManager.getInstance().loadSound("welcome", "sfx/welcome.wav", false).play();
+        int randNum = new Random().nextInt((1 - 0) + 1) + 0;
+        switch (randNum){
+            case 0:
+                ResourceManager.getInstance().loadSound("welcome", "sfx/welcome.wav", false).play();
+                break;
+            case 1:
+                ResourceManager.getInstance().loadSound("welcome", "sfx/welcome_piano.wav", false).play();
+                break;
+        }
 
         hitsound = ResourceManager.getInstance().loadSound("menuhit", "sfx/menuhit.wav", false);
 
@@ -1111,7 +1120,13 @@ public class MainScene implements IUpdateHandler {
         options.setAlpha(0);
         exit.setAlpha(0);
 
-        ResourceManager.getInstance().loadSound("seeya", "sfx/seeya.wav", false).play();
+        //ResourceManager.getInstance().loadSound("seeya", "sfx/seeya.wav", false).play();
+        //allow customize Seeya Skin from Skins
+        BassSoundProvider exitsound = ResourceManager.getInstance().getSound("seeya");
+        if (exitsound != null) {
+            exitsound.play();
+        }
+        
         Rectangle bg = new Rectangle(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT());
         bg.setColor(0, 0, 0, 1.0f);
