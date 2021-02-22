@@ -34,8 +34,8 @@ public class OSUParser {
     private final File file;
     private BufferedReader reader = null;
     private boolean fileOpened = false;
-    private ArrayList<TimingPoint> timingPoints = new ArrayList<>();
-    private ArrayList<HitObject> hitObjects = new ArrayList<>();
+    private final ArrayList<TimingPoint> timingPoints = new ArrayList<>();
+    private final ArrayList<HitObject> hitObjects = new ArrayList<>();
     private TimingPoint currentTimingPoint = null;
     private BeatmapData data;
     private float sliderSpeed;
@@ -368,8 +368,8 @@ public class OSUParser {
             if (rawData.length < 2) {
                 continue;
             }
-            float offset = Float.parseFloat(rawData[0]);
-            float bpm = Float.parseFloat(rawData[1]);
+            float offset = tryParseFloat(rawData[0], Float.NaN);
+            float bpm = tryParseFloat(rawData[1], Float.NaN);
             if (Float.isNaN(offset) || Float.isNaN(bpm)) {
                 continue;
             }
@@ -447,16 +447,19 @@ public class OSUParser {
                 continue;
             }
 
-            int time = Integer.parseInt(rawData[2]);
-            if (Float.isNaN((float) time)) {
+            int time = tryParseInt(rawData[2], -1);
+            if (time <= -1) {
                 continue;
             }
             while (tpIndex < timingPoints.size() - 1 && timingPoints.get(tpIndex + 1).getOffset() <= time) {
                 tpIndex++;
             }
             currentTimingPoint = timingPoints.get(tpIndex);
-            HitObjectType hitObjectType = HitObjectType.valueOf(Integer.parseInt(rawData[3]) % 16);
-            PointF pos = new PointF(Float.parseFloat(rawData[0]), Float.parseFloat(rawData[1]));
+            HitObjectType hitObjectType = HitObjectType.valueOf(tryParseInt(rawData[3], -1) % 16);
+            PointF pos = new PointF(
+                tryParseFloat(rawData[0], Float.NaN),
+                tryParseFloat(rawData[1], Float.NaN)
+            );
             if (Float.isNaN(pos.x) || Float.isNaN(pos.y)) {
                 continue;
             }
@@ -472,8 +475,8 @@ public class OSUParser {
                 track.setHitCircleCount(track.getHitCircleCount() + 1);
             } else if (hitObjectType == HitObjectType.Spinner) {
                 // Spinner
-                int endTime = Integer.parseInt(rawData[5]);
-                if (Float.isNaN((float) endTime)) {
+                int endTime = tryParseInt(rawData[5], -1);
+                if (endTime <= -1) {
                     continue;
                 }
                 object = new Spinner(time, endTime, pos, currentTimingPoint);
@@ -491,7 +494,11 @@ public class OSUParser {
                 ArrayList<PointF> curvePoints = new ArrayList<>();
                 for (int i = 1; i < curvePointsData.length; i++) {
                     String[] curvePointData = curvePointsData[i].split("[:]");
-                    PointF curvePointPosition = new PointF(Float.parseFloat(curvePointData[0]), Float.parseFloat(curvePointData[1]));
+                    PointF curvePointPosition = new PointF(
+                        tryParseFloat(curvePointData[0], Float.NaN),
+                        tryParseFloat(curvePointData[1], Float.NaN)
+                    );
+
                     if (Float.isNaN(curvePointPosition.x) || Float.isNaN(curvePointPosition.y)) {
                         isValidSlider = false;
                         break;
@@ -502,9 +509,9 @@ public class OSUParser {
                     continue;
                 }
 
-                int repeat = Integer.parseInt(rawData[6]);
-                float rawLength = Float.parseFloat(rawData[7]);
-                if (Float.isNaN((float) repeat) || Float.isNaN(rawLength)) {
+                int repeat = tryParseInt(rawData[6], -1);
+                float rawLength = tryParseFloat(rawData[7], Float.NaN);
+                if (repeat <= -1 || Float.isNaN(rawLength)) {
                     continue;
                 }
 
