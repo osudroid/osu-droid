@@ -29,8 +29,10 @@ public enum HitObjectType {
                 return NormalNewCombo;
             case 6:
                 return SliderNewCombo;
-            default:
+            case 8:
                 return Spinner;
+            default:
+                return null;
         }
     }
 
