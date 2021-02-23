@@ -20,6 +20,8 @@ Changelog for 1.6.8
 - Search beatmap based on difficulty name
 - Multiple input support in one frame, making double-tap possible
 - Animated hit0, hit50, hit100, hit300 (using these elements animated will differentiate them from their displayed element on result screen)
+- Random welcome sound
+- Customizable exit sound via skins
 - Warning message if your storage is low to prevent replay/score corruption (will cause bugs like unwatchable replays and inability to watch local replays)
 - Option to precalculate slider path (improves performance during gameplay, but increases map loading time)
 - Option to calculate pp when opening a score
@@ -57,3 +59,4 @@ Changelog for 1.6.8
 - Fixed a bug where player avatars in online leaderboard are not loaded when not using Wi-Fi connection
 - Fixed a bug where re-watching replays can crash the game
 - Fixed a bug where custom beatmap skin's hitcircle texture does not apply to sliders if not overridden
+- Fixed a bug where background music volume setting does not apply in song selection menu
