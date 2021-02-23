@@ -764,7 +764,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public void increaseVolume(){
         if (GlobalManager.getInstance().getSongService() != null) {
             synchronized (musicMutex) {
-                if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING && GlobalManager.getInstance().getSongService().getVolume() < 1) {
+                if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING && GlobalManager.getInstance().getSongService().getVolume() < Config.getBgmVolume()) {
                     float vol = Math.min(1, GlobalManager.getInstance().getSongService().getVolume() + 0.01f);
                     GlobalManager.getInstance().getSongService().setVolume(vol);
                 }
