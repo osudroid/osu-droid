@@ -362,6 +362,35 @@ public class OSUParser {
     private boolean loadTimingPointsSection(final TrackInfo track) {
         timingPoints.clear();
 
+        // Get the first uninherited timing point
+        for (final String tempString : data.getData("TimingPoints")) {
+            String[] rawData = tempString.split("[,]");
+            // Handle malformed timing point
+            if (rawData.length < 2) {
+                return false;
+            }
+            float bpm = tryParseFloat(rawData[1], Float.NaN);
+            if (Float.isNaN(bpm)) {
+                return false;
+            }
+
+            // Uninherited: bpm > 0
+            if (bpm > 0) {
+                float offset = tryParseFloat(rawData[0], Float.NaN);
+                if (Float.isNaN(offset)) {
+                    return false;
+                }
+                currentTimingPoint = new TimingPoint(bpm, offset, 1f);
+                break;
+            }
+        }
+
+        if (currentTimingPoint == null) {
+            ToastLogger.showText(StringTable.format(R.string.osu_parser_timing_error,
+                    file.getName().substring(0, file.getName().length() - 4)), true);
+            return false;
+        }
+
         for (final String tempString : data.getData("TimingPoints")) {
             String[] rawData = tempString.split("[,]");
             // Handle malformed timing point
@@ -375,14 +404,6 @@ public class OSUParser {
             }
             float speed = 1.0f;
             boolean inherited = bpm < 0;
-
-            // The first timing point should always be uninherited,
-            // otherwise the beatmap is invalid
-            if (currentTimingPoint == null && inherited) {
-                ToastLogger.showText(StringTable.format(R.string.osu_parser_timing_error,
-                        file.getName().substring(0, file.getName().length() - 4)), true);
-                return false;
-            }
 
             if (inherited) {
                 speed = -100.0f / bpm;
