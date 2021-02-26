@@ -13,6 +13,7 @@ import com.tencent.bugly.beta.Beta;
 import com.umeng.analytics.MobclickAgent;
 
 import java.io.File;
+import java.util.Arrays;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -190,6 +191,8 @@ public class SettingsMenu extends PreferenceActivity {
                 entries[i] = skinFolders[i - 1].getName();
                 entryValues[i] = skinFolders[i - 1].getPath();
             }
+            Arrays.sort(entries, 1, entries.length);
+            Arrays.sort(entryValues, 1, entryValues.length);
             skinPathPref.setEntries(entries);
             skinPathPref.setEntryValues(entryValues);
             skinPathPref.setValue(Config.getSkinPath());
