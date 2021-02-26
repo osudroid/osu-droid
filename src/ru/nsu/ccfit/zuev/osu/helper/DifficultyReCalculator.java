@@ -66,14 +66,14 @@ public class DifficultyReCalculator {
         timingPoints.clear();
         for (final String tempString : data.getData("TimingPoints")) {
             String[] rawData = tempString.split("[,]");
-            // Ignoring malformed timing point
+            // Handle malformed timing point
             if (rawData.length < 2) {
-                continue;
+                return false;
             }
             float offset = parser.tryParseFloat(rawData[0], Float.NaN);
             float bpm = parser.tryParseFloat(rawData[1], Float.NaN);
             if (Float.isNaN(offset) || Float.isNaN(bpm)) {
-                continue;
+                return false;
             }
             float speed = 1.0f;
             boolean inherited = bpm < 0;
@@ -128,14 +128,14 @@ public class DifficultyReCalculator {
                 rawData = hitObjectData;
             }
 
-            // Ignoring malformed hitobject
+            // Handle malformed hitobject
             if (rawData.length < 4) {
-                continue;
+                return false;
             }
 
             int time = parser.tryParseInt(rawData[2], -1);
             if (time <= -1) {
-                continue;
+                return false;
             }
             while (tpIndex < timingPoints.size() - 1 && timingPoints.get(tpIndex + 1).getOffset() <= time) {
                 tpIndex++;
@@ -147,12 +147,12 @@ public class DifficultyReCalculator {
                 parser.tryParseFloat(rawData[1], Float.NaN)
             );
             if (Float.isNaN(pos.x) || Float.isNaN(pos.y)) {
-                continue;
+                return false;
             }
             HitObject object = null;
             if (hitObjectType == null) {
                 System.out.println(tempString);
-                continue;
+                return false;
             }
 
             if (hitObjectType == HitObjectType.Normal || hitObjectType == HitObjectType.NormalNewCombo) {
@@ -162,15 +162,15 @@ public class DifficultyReCalculator {
                 // Spinner
                 int endTime = parser.tryParseInt(rawData[5], -1);
                 if (endTime <= -1) {
-                    continue;
+                    return false;
                 }
                 object = new Spinner(time, endTime, pos, currentTimingPoint);
             } else if (hitObjectType == HitObjectType.Slider || hitObjectType == HitObjectType.SliderNewCombo) {
                 // Slider
-                // Ignoring malformed slider
+                // Handle malformed slider
                 boolean isValidSlider = rawData.length >= 8;
                 if (!isValidSlider) {
-                    continue;
+                    return false;
                 }
 
                 String[] curvePointsData = rawData[5].split("[|]");
@@ -189,13 +189,13 @@ public class DifficultyReCalculator {
                     curvePoints.add(curvePointPosition);
                 }
                 if (!isValidSlider) {
-                    continue;
+                    return false;
                 }
 
                 int repeat = parser.tryParseInt(rawData[6], -1);
                 float rawLength = parser.tryParseFloat(rawData[7], Float.NaN);
                 if (repeat <= -1 || Float.isNaN(rawLength)) {
-                    continue;
+                    return false;
                 }
 
                 int endTime = time + (int) (rawLength * (600 / timingPoints.get(0).getBpm()) / sliderSpeed) * repeat;

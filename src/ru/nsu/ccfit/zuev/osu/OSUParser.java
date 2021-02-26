@@ -364,14 +364,14 @@ public class OSUParser {
 
         for (final String tempString : data.getData("TimingPoints")) {
             String[] rawData = tempString.split("[,]");
-            // Ignoring malformed timing point
+            // Handle malformed timing point
             if (rawData.length < 2) {
-                continue;
+                return false;
             }
             float offset = tryParseFloat(rawData[0], Float.NaN);
             float bpm = tryParseFloat(rawData[1], Float.NaN);
             if (Float.isNaN(offset) || Float.isNaN(bpm)) {
-                continue;
+                return false;
             }
             float speed = 1.0f;
             boolean inherited = bpm < 0;
@@ -442,14 +442,14 @@ public class OSUParser {
                 rawData = hitObjectData;
             }
 
-            // Ignoring malformed hitobject
+            // Handle malformed hitobject
             if (rawData.length < 4) {
-                continue;
+                return false;
             }
 
             int time = tryParseInt(rawData[2], -1);
             if (time <= -1) {
-                continue;
+                return false;
             }
             while (tpIndex < timingPoints.size() - 1 && timingPoints.get(tpIndex + 1).getOffset() <= time) {
                 tpIndex++;
@@ -461,12 +461,12 @@ public class OSUParser {
                 tryParseFloat(rawData[1], Float.NaN)
             );
             if (Float.isNaN(pos.x) || Float.isNaN(pos.y)) {
-                continue;
+                return false;
             }
             HitObject object = null;
             if (hitObjectType == null) {
                 System.out.println(tempString);
-                continue;
+                return false;
             }
 
             if (hitObjectType == HitObjectType.Normal || hitObjectType == HitObjectType.NormalNewCombo) {
@@ -477,16 +477,16 @@ public class OSUParser {
                 // Spinner
                 int endTime = tryParseInt(rawData[5], -1);
                 if (endTime <= -1) {
-                    continue;
+                    return false;
                 }
                 object = new Spinner(time, endTime, pos, currentTimingPoint);
                 track.setSpinnerCount(track.getSpinnerCount() + 1);
             } else if (hitObjectType == HitObjectType.Slider || hitObjectType == HitObjectType.SliderNewCombo) {
                 // Slider
-                // Ignoring malformed slider
+                // Handle malformed slider
                 boolean isValidSlider = rawData.length >= 8;
                 if (!isValidSlider) {
-                    continue;
+                    return false;
                 }
 
                 String[] curvePointsData = rawData[5].split("[|]");
@@ -506,7 +506,7 @@ public class OSUParser {
                     curvePoints.add(curvePointPosition);
                 }
                 if (!isValidSlider) {
-                    continue;
+                    return false;
                 }
 
                 int repeat = tryParseInt(rawData[6], -1);
