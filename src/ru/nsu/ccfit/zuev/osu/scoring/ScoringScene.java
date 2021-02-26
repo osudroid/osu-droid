@@ -81,62 +81,6 @@ public class ScoringScene {
             trackInfo = track;
         }
         this.track = trackInfo;
-        String infoStr = (trackInfo.getBeatmap().getArtistUnicode() == null || Config.isForceRomanized() ? trackInfo.getBeatmap().getArtist() : trackInfo.getBeatmap().getArtistUnicode()) + " - " +
-                (trackInfo.getBeatmap().getTitleUnicode() == null || Config.isForceRomanized() ? trackInfo.getBeatmap().getTitle() : trackInfo.getBeatmap().getTitleUnicode()) + " [" + trackInfo.getMode() + "]";
-        String mapperStr = "Beatmap by " + trackInfo.getCreator();
-        String playerStr = "Played by " + stat.getPlayerName() + " on " +
-                new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date(stat.getTime()));
-        playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
-        if (stat.getChangeSpeed() != 1 || stat.isEnableForceAR()){
-            mapperStr += " [";
-            if (stat.getChangeSpeed() != 1){
-                mapperStr += String.format(Locale.ENGLISH, "%.2fx,", stat.getChangeSpeed());
-            }
-            if (stat.isEnableForceAR()){
-                mapperStr += String.format(Locale.ENGLISH, "AR%.1f,", stat.getForceAR());
-            }
-            if (mapperStr.endsWith(",")){
-                mapperStr = mapperStr.substring(0, mapperStr.length() - 1);
-            }
-            mapperStr += "]";
-        }
-        //calculatePP
-        if (Config.isDisplayScorePP()){
-            StringBuilder ppinfo = new StringBuilder();
-            ppinfo.append("[");
-            DifficultyReCalculator diffRecalculator = new DifficultyReCalculator();
-            float newstar = diffRecalculator.recalculateStar(
-                            trackInfo,
-                            diffRecalculator.getCS(stat, trackInfo));
-            diffRecalculator.calculatePP(stat, trackInfo);
-            double pp = diffRecalculator.getTotalPP();
-            double aimpp = diffRecalculator.getAimPP();
-            double spdpp = diffRecalculator.getSpdPP();
-            double accpp = diffRecalculator.getAccPP();
-            diffRecalculator.calculateMaxPP(stat, trackInfo);
-            double max_pp = diffRecalculator.getTotalPP();
-            double max_aimpp = diffRecalculator.getAimPP();
-            double max_spdpp = diffRecalculator.getSpdPP();
-            double max_accpp = diffRecalculator.getAccPP();
-            ppinfo.append(String.format(Locale.ENGLISH, "%.2f*,", newstar));
-            ppinfo.append(String.format(Locale.ENGLISH, "PP:%.2f/%.2f(", pp, max_pp));
-            ppinfo.append(String.format(Locale.ENGLISH, "Aim:%.0f/%.0f,", aimpp, max_aimpp));
-            ppinfo.append(String.format(Locale.ENGLISH, "Spd:%.0f/%.0f,", spdpp, max_spdpp));
-            ppinfo.append(String.format(Locale.ENGLISH, "Acc:%.0f/%.0f)", accpp, max_accpp));
-            ppinfo.append("]");
-            mapperStr += " " + ppinfo.toString();
-        }
-        //
-        Debug.i("playedtime " + stat.getTime());
-        final Text beatmapInfo = new Text(Utils.toRes(4), Utils.toRes(2),
-                ResourceManager.getInstance().getFont("font"), infoStr);
-        final Text mapperInfo = new Text(Utils.toRes(4), beatmapInfo.getY() + beatmapInfo.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("smallFont"), mapperStr);
-        final Text playerInfo = new Text(Utils.toRes(4), mapperInfo.getY() + mapperInfo.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("smallFont"), playerStr);
-        scene.attachChild(beatmapInfo);
-        scene.attachChild(mapperInfo);
-        scene.attachChild(playerInfo);
 
         final int x = 0, y = 100;
         final TextureRegion panelr = ResourceManager.getInstance().getTexture(
@@ -469,6 +413,64 @@ public class ScoringScene {
             scene.attachChild(modSprite);
         }
         //
+
+        String infoStr = (trackInfo.getBeatmap().getArtistUnicode() == null || Config.isForceRomanized() ? trackInfo.getBeatmap().getArtist() : trackInfo.getBeatmap().getArtistUnicode()) + " - " +
+                (trackInfo.getBeatmap().getTitleUnicode() == null || Config.isForceRomanized() ? trackInfo.getBeatmap().getTitle() : trackInfo.getBeatmap().getTitleUnicode()) + " [" + trackInfo.getMode() + "]";
+        String mapperStr = "Beatmap by " + trackInfo.getCreator();
+        String playerStr = "Played by " + stat.getPlayerName() + " on " +
+                new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date(stat.getTime()));
+        playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
+        if (stat.getChangeSpeed() != 1 || stat.isEnableForceAR()){
+            mapperStr += " [";
+            if (stat.getChangeSpeed() != 1){
+                mapperStr += String.format(Locale.ENGLISH, "%.2fx,", stat.getChangeSpeed());
+            }
+            if (stat.isEnableForceAR()){
+                mapperStr += String.format(Locale.ENGLISH, "AR%.1f,", stat.getForceAR());
+            }
+            if (mapperStr.endsWith(",")){
+                mapperStr = mapperStr.substring(0, mapperStr.length() - 1);
+            }
+            mapperStr += "]";
+        }
+        //calculatePP
+        if (Config.isDisplayScorePP()){
+            StringBuilder ppinfo = new StringBuilder();
+            ppinfo.append("[");
+            DifficultyReCalculator diffRecalculator = new DifficultyReCalculator();
+            float newstar = diffRecalculator.recalculateStar(
+                    trackInfo,
+                    diffRecalculator.getCS(stat, trackInfo));
+            diffRecalculator.calculatePP(stat, trackInfo);
+            double pp = diffRecalculator.getTotalPP();
+            double aimpp = diffRecalculator.getAimPP();
+            double spdpp = diffRecalculator.getSpdPP();
+            double accpp = diffRecalculator.getAccPP();
+            diffRecalculator.calculateMaxPP(stat, trackInfo);
+            double max_pp = diffRecalculator.getTotalPP();
+            double max_aimpp = diffRecalculator.getAimPP();
+            double max_spdpp = diffRecalculator.getSpdPP();
+            double max_accpp = diffRecalculator.getAccPP();
+            ppinfo.append(String.format(Locale.ENGLISH, "%.2f*,", newstar));
+            ppinfo.append(String.format(Locale.ENGLISH, "PP:%.2f/%.2f(", pp, max_pp));
+            ppinfo.append(String.format(Locale.ENGLISH, "Aim:%.0f/%.0f,", aimpp, max_aimpp));
+            ppinfo.append(String.format(Locale.ENGLISH, "Spd:%.0f/%.0f,", spdpp, max_spdpp));
+            ppinfo.append(String.format(Locale.ENGLISH, "Acc:%.0f/%.0f)", accpp, max_accpp));
+            ppinfo.append("]");
+            mapperStr += " " + ppinfo.toString();
+        }
+        //
+        Debug.i("playedtime " + stat.getTime());
+        final Text beatmapInfo = new Text(Utils.toRes(4), Utils.toRes(2),
+                ResourceManager.getInstance().getFont("font"), infoStr);
+        final Text mapperInfo = new Text(Utils.toRes(4), beatmapInfo.getY() + beatmapInfo.getHeight() + Utils.toRes(2),
+                ResourceManager.getInstance().getFont("smallFont"), mapperStr);
+        final Text playerInfo = new Text(Utils.toRes(4), mapperInfo.getY() + mapperInfo.getHeight() + Utils.toRes(2),
+                ResourceManager.getInstance().getFont("smallFont"), playerStr);
+        scene.attachChild(beatmapInfo);
+        scene.attachChild(mapperInfo);
+        scene.attachChild(playerInfo);
+
         if (track != null && mapMD5 != null) {
             if (stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
                     OnlineManager.getInstance().isReadyToSend()) {
