@@ -1120,14 +1120,9 @@ public class Slider extends GameObject {
             }
             return;
         } else {
-            if (Config.isUseSuperSlider() && repeatCount == 1) {
-                if (!reverse) {
-                    startCircle.setAlpha(0);
-                    startOverlay.setAlpha(0);
-                } else {
-                    endCircle.setAlpha(0);
-                    endOverlay.setAlpha(0);
-                }
+            if (Config.isUseSuperSlider()) {
+                startCircle.setAlpha(0);
+                startOverlay.setAlpha(0);
             }
         }
 
