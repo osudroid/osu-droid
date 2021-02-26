@@ -69,40 +69,40 @@ public class MapInfoFragment extends BaseFragment {
         playEndAnim(super::dismiss);
     }
 
-    public void showWithMap(final TrackInfo track, float speedmulti, float cs){
-        DifficultyReCalculator diffReCalulator = new DifficultyReCalculator();
-        if (!diffReCalulator.calculateMapInfo(track, speedmulti, cs)){
+    public void showWithMap(final TrackInfo track){
+        DifficultyReCalculator diffRecalculator = new DifficultyReCalculator();
+        if (!diffRecalculator.calculateMapInfo(track)){
             return;
         }
         int circleCount = track.getHitCircleCount();
         int sliderCount = track.getSliderCount();
-        int spinerCount = track.getSpinerCount();
+        int spinnerCount = track.getSpinnerCount();
         int objectCount = track.getTotalHitObjectCount();
         float circlePercent = (float)circleCount / objectCount * 100;
         float sliderPercent = (float)sliderCount / objectCount * 100;
-        float spinerPercent = (float)spinerCount / objectCount * 100;
-        int singleCount = diffReCalulator.getSingleCount();
-        int fastSingleCount = diffReCalulator.getFastSingleCount();
-        int streamCount = diffReCalulator.getStreamCount();
-        int jumpCount = diffReCalulator.getJumpCount();
-        int multiCount = diffReCalulator.getMultiCount();
-        int switchCount = diffReCalulator.getSwitchFingeringCount();
+        float spinnerPercent = (float)spinnerCount / objectCount * 100;
+        int singleCount = diffRecalculator.getSingleCount();
+        int fastSingleCount = diffRecalculator.getFastSingleCount();
+        int streamCount = diffRecalculator.getStreamCount();
+        int jumpCount = diffRecalculator.getJumpCount();
+        int multiCount = diffRecalculator.getMultiCount();
+        int switchCount = diffRecalculator.getSwitchFingeringCount();
         float singlePercent = (float)singleCount / objectCount * 100;
         float fastSinglePercent = (float)fastSingleCount / objectCount * 100;
         float streamPercent = (float)streamCount / objectCount * 100;
         float jumpPercent = (float)jumpCount / objectCount * 100;
         float multiPercent = (float)multiCount / objectCount * 100;
         float switchPercent = (float)switchCount / objectCount * 100;
-        int longestStreamCount = diffReCalulator.getLongestStreamCount();
-        float realTime = diffReCalulator.getRealTime();
+        int longestStreamCount = diffRecalculator.getLongestStreamCount();
+        float realTime = diffRecalculator.getRealTime();
         float objectPerMin = objectCount / realTime * 60;
 
         StringBuilder string = new StringBuilder();
         //string.append(String.format(StringTable.get(R.string.binfoStr2),
-        //    track.getHitCircleCount(), track.getSliderCount(), track.getSpinerCount(), track.getBeatmapSetID()));
+        //    track.getHitCircleCount(), track.getSliderCount(), track.getSpinnerCount(), track.getBeatmapSetID()));
         //string.append("\n\r");
         string.append(String.format("圈数:%d[%.1f%%] 滑条数:%d[%.1f%%] 转盘数:%d[%.1f%%] 物件数:%d 实际时间:%.1fs %.1f物件/分",
-                                    circleCount, circlePercent, sliderCount, sliderPercent, spinerCount, spinerPercent,
+                                    circleCount, circlePercent, sliderCount, sliderPercent, spinnerCount, spinnerPercent,
                                     objectCount, realTime, objectPerMin));
         string.append("\n\r");
         string.append(String.format("单点:%d[%.1f%%] 高速单点:%d[%.1f%%] 连打:%d[%.1f%%] 跳:%d[%.1f%%]",
@@ -114,6 +114,6 @@ public class MapInfoFragment extends BaseFragment {
                                     switchCount, switchPercent, longestStreamCount));
         info = string.toString();
         show();
-        diffReCalulator = null;
+        diffRecalculator = null;
     }
 }

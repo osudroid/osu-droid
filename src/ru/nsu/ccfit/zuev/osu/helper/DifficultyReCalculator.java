@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.helper;
 
 import android.graphics.PointF;
-import android.util.Log;
 
 import org.anddev.andengine.util.Debug;
 
@@ -17,7 +16,6 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
-import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 import test.tpdifficulty.TimingPoint;
 import test.tpdifficulty.hitobject.HitCircle;
@@ -29,19 +27,18 @@ import test.tpdifficulty.hitobject.Spinner;
 import test.tpdifficulty.tp.AiModtpDifficulty;
 
 public class DifficultyReCalculator {
-    private ArrayList<TimingPoint> timingPoints;
-    private ArrayList<HitObject> hitObjects;
-    private TimingPoint currentTimingPoint;
-    private int tpIndex = 0;
+    private OSUParser parser;
+    private final ArrayList<TimingPoint> timingPoints = new ArrayList<>();
+    private final ArrayList<HitObject> hitObjects = new ArrayList<>();
+    private TimingPoint currentTimingPoint = null;
     private double total, aim, speed, acc;
     private AiModtpDifficulty tpDifficulty;
     private int single, fast_single, stream, jump, switch_fingering, multi;
     private int stream_longest;
     private float real_time;
     //copy from OSUParser.java
-    public boolean init(final TrackInfo track, float speedmulti){
-        tpIndex = 0;
-        OSUParser parser = new OSUParser(track.getFilename());
+    public boolean init(final TrackInfo track) {
+        parser = new OSUParser(track.getFilename());
         final BeatmapData data;
         if (parser.openFile()) {
             data = parser.readData();
@@ -52,118 +49,166 @@ public class DifficultyReCalculator {
                             track.getFilename()), true);
             return false;
         }
-        //float sliderTick = parser.tryParse(data.getData("Difficulty", "SliderTickRate"), 1.0f);
-        float sliderSpeed = parser.tryParse(data.getData("Difficulty", "SliderMultiplier"), 1.0f);
-        parser = null;
-        //get first no inherited timingpoint
-        for (final String tempString : data.getData("TimingPoints")) {
-            if (timingPoints == null) {
-                timingPoints = new ArrayList<TimingPoint>();
-            }
-            String[] tmpdata = tempString.split("[,]");
-            if(Float.parseFloat(tmpdata[1]) > 0){
-                float offset = Float.parseFloat(tmpdata[0]);
-                float bpm = 60000.0f / Float.parseFloat(tmpdata[1]);
-                float speed = 1.0f;
-                TimingPoint timing = new TimingPoint(bpm, offset, speed);
-                currentTimingPoint = timing;
-                break;
-            }
+
+        if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track) {
+            return false;
         }
-        //load all timingpoint
+
+        if (!loadTimingPoints(data)) {
+            return false;
+        }
+        float sliderSpeed = parser.tryParseFloat(data.getData("Difficulty", "SliderMultiplier"), 1.0f);
+        return loadHitObjects(data, sliderSpeed);
+    }
+
+    private boolean loadTimingPoints(final BeatmapData data) {
+        // Load timing points
+        timingPoints.clear();
         for (final String tempString : data.getData("TimingPoints")) {
-            String[] tmpdata = tempString.split("[,]");
-            float offset = Float.parseFloat(tmpdata[0]);
-            float bpm = Float.parseFloat(tmpdata[1]);
+            String[] rawData = tempString.split("[,]");
+            // Handle malformed timing point
+            if (rawData.length < 2) {
+                return false;
+            }
+            float offset = parser.tryParseFloat(rawData[0], Float.NaN);
+            float bpm = parser.tryParseFloat(rawData[1], Float.NaN);
+            if (Float.isNaN(offset) || Float.isNaN(bpm)) {
+                return false;
+            }
             float speed = 1.0f;
-            boolean inherited = false;
-            if (bpm < 0) {
-                inherited = true;
+            boolean inherited = bpm < 0;
+
+            // The first timing point should always be uninherited,
+            // otherwise the beatmap is invalid
+            if (currentTimingPoint == null && inherited) {
+                return false;
+            }
+
+            if (inherited) {
                 speed = -100.0f / bpm;
                 bpm = currentTimingPoint.getBpm();
             } else {
                 bpm = 60000.0f / bpm;
             }
             TimingPoint timing = new TimingPoint(bpm, offset, speed);
-            if (!inherited) currentTimingPoint = timing;
-            try {
-                bpm = GameHelper.Round(bpm, 2);
-            } catch (NumberFormatException e) {
-                if (BuildConfig.DEBUG) {
-                    e.printStackTrace();
-                }
-                Log.e("Beatmap Error", "" + track.getMode());
-                ToastLogger.showText(StringTable.get(R.string.osu_parser_error) + " " + track.getMode(), true);
-                return false;
+            if (!inherited) {
+                currentTimingPoint = timing;
             }
-            if (timingPoints == null) return false;
             timingPoints.add(timing);
         }
-        if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track){
+
+        return timingPoints.size() > 0;
+    }
+
+    private boolean loadHitObjects(final BeatmapData data, float sliderSpeed) {
+        final ArrayList<String> hitObjects = data.getData("HitObjects");
+        if (hitObjects.size() <= 0) {
             return false;
         }
-        final ArrayList<String> hitObjectss = data.getData("HitObjects");
-        if (hitObjectss.size() <= 0) {
-            return false;
-        }
-        for (final String tempString : hitObjectss) {
-            if (hitObjects == null) {
-                hitObjects = new ArrayList<HitObject>();
-                tpIndex = 0;
-                currentTimingPoint = timingPoints.get(tpIndex);
-            }
-            String[] data1 = tempString.split("[,]");
-            String[] rawdata = null;
-            //Ignoring v10 features
-            int dataSize = data1.length;
-            while (dataSize > 0 && data1[dataSize - 1].matches("([0-9][:][0-9][|]?)+")) {
+
+        this.hitObjects.clear();
+        int tpIndex = 0;
+        currentTimingPoint = timingPoints.get(tpIndex);
+
+        for (final String tempString : hitObjects) {
+            String[] hitObjectData = tempString.split("[,]");
+            String[] rawData;
+
+            // Ignoring v10 features
+            int dataSize = hitObjectData.length;
+            while (dataSize > 0 && hitObjectData[dataSize - 1].matches("([0-9][:][0-9][|]?)+")) {
                 dataSize--;
             }
-            if (dataSize < data1.length) {
-                rawdata = new String[dataSize];
-                for (int i = 0; i < rawdata.length; i++) {
-                    rawdata[i] = data1[i];
+            if (dataSize < hitObjectData.length) {
+                rawData = new String[dataSize];
+                for (int i = 0; i < rawData.length; i++) {
+                    rawData[i] = hitObjectData[i];
                 }
-            } else
-                rawdata = data1;
+            } else {
+                rawData = hitObjectData;
+            }
 
-            int time = Integer.parseInt(rawdata[2]);
+            // Handle malformed hitobject
+            if (rawData.length < 4) {
+                return false;
+            }
+
+            int time = parser.tryParseInt(rawData[2], -1);
+            if (time <= -1) {
+                return false;
+            }
             while (tpIndex < timingPoints.size() - 1 && timingPoints.get(tpIndex + 1).getOffset() <= time) {
-                tpIndex += 1;
+                tpIndex++;
             }
             currentTimingPoint = timingPoints.get(tpIndex);
-            HitObjectType hitObjectType = HitObjectType.valueOf(Integer.parseInt(rawdata[3]) % 16);
-            PointF pos = new PointF(Float.parseFloat(rawdata[0]), Float.parseFloat(rawdata[1]));
+            HitObjectType hitObjectType = HitObjectType.valueOf(parser.tryParseInt(rawData[3], -1) % 16);
+            PointF pos = new PointF(
+                parser.tryParseFloat(rawData[0], Float.NaN),
+                parser.tryParseFloat(rawData[1], Float.NaN)
+            );
+            if (Float.isNaN(pos.x) || Float.isNaN(pos.y)) {
+                return false;
+            }
             HitObject object = null;
             if (hitObjectType == null) {
                 System.out.println(tempString);
-                continue;
+                return false;
             }
-            if (hitObjectType == HitObjectType.Normal || hitObjectType == HitObjectType.NormalNewCombo) { // hitcircle
-                object = new HitCircle((int)(time / speedmulti), pos, currentTimingPoint);
-            } else if (hitObjectType == HitObjectType.Spinner) { // spinner
-                int endTime = Integer.parseInt(rawdata[5]);
-                object = new Spinner((int)(time / speedmulti), (int)(endTime / speedmulti), pos, currentTimingPoint);
-            } else if (hitObjectType == HitObjectType.Slider || hitObjectType == HitObjectType.SliderNewCombo) { // slider
-                String data2[] = rawdata[5].split("[|]");
-                SliderType sliderType = SliderType.parse(data2[0].charAt(0));
-                ArrayList<PointF> poss = new ArrayList<PointF>();
-                for (int i = 1; i < data2.length; i++) {
-                    String temp[] = data2[i].split("[:]");
-                    poss.add(new PointF(Float.parseFloat(temp[0]), Float.parseFloat(temp[1])));
+
+            if (hitObjectType == HitObjectType.Normal || hitObjectType == HitObjectType.NormalNewCombo) {
+                // HitCircle
+                object = new HitCircle(time, pos, currentTimingPoint);
+            } else if (hitObjectType == HitObjectType.Spinner) {
+                // Spinner
+                int endTime = parser.tryParseInt(rawData[5], -1);
+                if (endTime <= -1) {
+                    return false;
                 }
-                int repeat = Integer.parseInt(rawdata[6]);
-                float rawLength = Float.parseFloat(rawdata[7]);
-                int endTime = time + (int) (rawLength * (600 / currentTimingPoint.getBpm()) / sliderSpeed) * repeat;
-                object = new Slider((int)(time / speedmulti), (int)(endTime / speedmulti), pos, currentTimingPoint, sliderType, repeat, poss, rawLength);
+                object = new Spinner(time, endTime, pos, currentTimingPoint);
+            } else if (hitObjectType == HitObjectType.Slider || hitObjectType == HitObjectType.SliderNewCombo) {
+                // Slider
+                // Handle malformed slider
+                boolean isValidSlider = rawData.length >= 8;
+                if (!isValidSlider) {
+                    return false;
+                }
+
+                String[] curvePointsData = rawData[5].split("[|]");
+                SliderType sliderType = SliderType.parse(curvePointsData[0].charAt(0));
+                ArrayList<PointF> curvePoints = new ArrayList<>();
+                for (int i = 1; i < curvePointsData.length; i++) {
+                    String[] curvePointData = curvePointsData[i].split("[:]");
+                    PointF curvePointPosition = new PointF(
+                        parser.tryParseFloat(curvePointData[0], Float.NaN),
+                        parser.tryParseFloat(curvePointData[1], Float.NaN)
+                    );
+                    if (Float.isNaN(curvePointPosition.x) || Float.isNaN(curvePointPosition.y)) {
+                        isValidSlider = false;
+                        break;
+                    }
+                    curvePoints.add(curvePointPosition);
+                }
+                if (!isValidSlider) {
+                    return false;
+                }
+
+                int repeat = parser.tryParseInt(rawData[6], -1);
+                float rawLength = parser.tryParseFloat(rawData[7], Float.NaN);
+                if (repeat <= -1 || Float.isNaN(rawLength)) {
+                    return false;
+                }
+
+                int endTime = time + (int) (rawLength * (600 / timingPoints.get(0).getBpm()) / sliderSpeed) * repeat;
+                object = new Slider(time, endTime, pos, currentTimingPoint, sliderType, repeat, curvePoints, rawLength);
             }
-            if (hitObjects == null) return false;
-            hitObjects.add(object);
+            this.hitObjects.add(object);
         }
-        return true;
+
+        return this.hitObjects.size() > 0;
     }
-    public float reCalculateStar(final TrackInfo track, float speedmulti, float cs){
-        if (init(track, speedmulti) == false) {
+
+    public float recalculateStar(final TrackInfo track, float cs) {
+        if (!init(track)) {
             return 0f;
         }
         if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track){
@@ -175,11 +220,9 @@ public class DifficultyReCalculator {
             double star = tpDifficulty.getStarRating();
             if (!timingPoints.isEmpty()){
                 timingPoints.clear();
-                timingPoints = null;
             }
             if (!hitObjects.isEmpty()){
                 hitObjects.clear();
-                hitObjects = null;
             }
             if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track){
                 return 0f;
@@ -189,24 +232,28 @@ public class DifficultyReCalculator {
             return 0f;
         }
     }
-    //must use reCalculateStar() before this
-    public void calculaterPP(final StatisticV2 stat, final TrackInfo track){
+
+    //must use recalculateStar() before this
+    public void calculatePP(final StatisticV2 stat, final TrackInfo track) {
         pp(tpDifficulty, track, stat, stat.getAccuracy());
     }
-    //must use reCalculateStar() before this
-    public void calculaterMaxPP(final StatisticV2 stat, final TrackInfo track){
+
+    //must use recalculateStar() before this
+    public void calculateMaxPP(final StatisticV2 stat, final TrackInfo track) {
         pp(tpDifficulty, track, stat, 1f);
     }
+
     //copy from koohii.java
     private double pp_base(double stars)
     {
         return Math.pow(5.0 * Math.max(1.0, stars / 0.0675) - 4.0, 3.0)
             / 100000.0;
     }
+
     //copy from koohii.java
     private void pp(AiModtpDifficulty tpDifficulty, TrackInfo track,
                         StatisticV2 stat,
-                        float accuracy){
+                        float accuracy) {
         /* global values --------------------------------------- */
         EnumSet<GameMod> mods = stat.getMod();
         int max_combo = stat.getMaxCombo();
@@ -338,19 +385,24 @@ public class DifficultyReCalculator {
             1.0 / 1.1
         ) * final_multiplier;
     }
-    public double getTotalPP(){
+
+    public double getTotalPP() {
         return total;
     }
-    public double getAimPP(){
+
+    public double getAimPP() {
         return aim;
     }
-    public double getSpdPP(){
+
+    public double getSpdPP() {
         return speed;
     }
-    public double getAccPP(){
+
+    public double getAccPP() {
         return acc;
     }
-    private float getAR(final StatisticV2 stat, final TrackInfo track){
+
+    private float getAR(final StatisticV2 stat, final TrackInfo track) {
         // no need to calculate force AR value
         if (stat.isEnableForceAR()) {
             return stat.getForceAR();
@@ -375,7 +427,8 @@ public class DifficultyReCalculator {
         ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(Math.min(13.f, ar)) / speed), 2);
         return ar;
     }
-    private float getOD(final StatisticV2 stat, final TrackInfo track){
+
+    private float getOD(final StatisticV2 stat, final TrackInfo track) {
         float od = track.getOverallDifficulty();
         EnumSet<GameMod> mod = stat.getMod();
         if (mod.contains(GameMod.MOD_EASY)) {
@@ -392,7 +445,8 @@ public class DifficultyReCalculator {
         od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) / speed), 2);
         return od;
     }
-    public float getCS(EnumSet<GameMod> mod, final TrackInfo track){
+
+    public float getCS(EnumSet<GameMod> mod, final TrackInfo track) {
         float cs = track.getCircleSize();
         if (mod.contains(GameMod.MOD_EASY)) {
             cs -= 1f;
@@ -408,14 +462,17 @@ public class DifficultyReCalculator {
         }
         return cs;
     }
-    public float getCS(final StatisticV2 stat, final TrackInfo track){
+
+    public float getCS(final StatisticV2 stat, final TrackInfo track) {
         return getCS(stat.getMod(), track);
     }
-    public float getCS(final TrackInfo track){
+
+    public float getCS(final TrackInfo track) {
         return getCS(ModMenu.getInstance().getMod(), track);
     }
+
     //must use reCalculateStar() before this
-    public boolean calculateMapInfo(final TrackInfo track, float speedmulti, float cs){
+    public boolean calculateMapInfo(final TrackInfo track) {
         //计算谱面信息
         /*
         120bpm: 125ms(dt1), 140bpm: 107ms(dt3), 80bpm: 187.5(dt4), 180bpm: 83.33ms(dt2)
@@ -424,7 +481,7 @@ public class DifficultyReCalculator {
         连打:高于120bpm且间距小于90，高于180bpm且间距大于90、小于180
         跳:间距大于180
         */
-        if (init(track, speedmulti) == false) {
+        if (!init(track)) {
             return false;
         }
         if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track){

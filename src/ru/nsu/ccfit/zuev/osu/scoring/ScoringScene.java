@@ -90,10 +90,10 @@ public class ScoringScene {
         if (stat.getChangeSpeed() != 1 || stat.isEnableForceAR()){
             mapperStr += " [";
             if (stat.getChangeSpeed() != 1){
-                mapperStr += String.format("%.2fx,", stat.getChangeSpeed());
+                mapperStr += String.format(Locale.ENGLISH, "%.2fx,", stat.getChangeSpeed());
             }
             if (stat.isEnableForceAR()){
-                mapperStr += String.format("AR%.1f,", stat.getForceAR());
+                mapperStr += String.format(Locale.ENGLISH, "AR%.1f,", stat.getForceAR());
             }
             if (mapperStr.endsWith(",")){
                 mapperStr = mapperStr.substring(0, mapperStr.length() - 1);
@@ -104,26 +104,25 @@ public class ScoringScene {
         if (Config.isDisplayScorePP()){
             StringBuilder ppinfo = new StringBuilder();
             ppinfo.append("[");
-            DifficultyReCalculator diffReCalulator = new DifficultyReCalculator();
-            float newstar = diffReCalulator.reCalculateStar(
+            DifficultyReCalculator diffRecalculator = new DifficultyReCalculator();
+            float newstar = diffRecalculator.recalculateStar(
                             trackInfo,
-                            stat.getSpeed(), 
-                            diffReCalulator.getCS(stat, trackInfo));
-            diffReCalulator.calculaterPP(stat, trackInfo);
-            double pp = diffReCalulator.getTotalPP();
-            double aimpp = diffReCalulator.getAimPP();
-            double spdpp = diffReCalulator.getSpdPP();
-            double accpp = diffReCalulator.getAccPP();
-            diffReCalulator.calculaterMaxPP(stat, trackInfo);
-            double max_pp = diffReCalulator.getTotalPP();
-            double max_aimpp = diffReCalulator.getAimPP();
-            double max_spdpp = diffReCalulator.getSpdPP();
-            double max_accpp = diffReCalulator.getAccPP();
-            ppinfo.append(String.format("%.2f*,", newstar));
-            ppinfo.append(String.format("PP:%.2f/%.2f(", pp, max_pp));
-            ppinfo.append(String.format("Aim:%.0f/%.0f,", aimpp, max_aimpp));
-            ppinfo.append(String.format("Spd:%.0f/%.0f,", spdpp, max_spdpp));
-            ppinfo.append(String.format("Acc:%.0f/%.0f)", accpp, max_accpp));
+                            diffRecalculator.getCS(stat, trackInfo));
+            diffRecalculator.calculatePP(stat, trackInfo);
+            double pp = diffRecalculator.getTotalPP();
+            double aimpp = diffRecalculator.getAimPP();
+            double spdpp = diffRecalculator.getSpdPP();
+            double accpp = diffRecalculator.getAccPP();
+            diffRecalculator.calculateMaxPP(stat, trackInfo);
+            double max_pp = diffRecalculator.getTotalPP();
+            double max_aimpp = diffRecalculator.getAimPP();
+            double max_spdpp = diffRecalculator.getSpdPP();
+            double max_accpp = diffRecalculator.getAccPP();
+            ppinfo.append(String.format(Locale.ENGLISH, "%.2f*,", newstar));
+            ppinfo.append(String.format(Locale.ENGLISH, "PP:%.2f/%.2f(", pp, max_pp));
+            ppinfo.append(String.format(Locale.ENGLISH, "Aim:%.0f/%.0f,", aimpp, max_aimpp));
+            ppinfo.append(String.format(Locale.ENGLISH, "Spd:%.0f/%.0f,", spdpp, max_spdpp));
+            ppinfo.append(String.format(Locale.ENGLISH, "Acc:%.0f/%.0f)", accpp, max_accpp));
             ppinfo.append("]");
             mapperStr += " " + ppinfo.toString();
         }
@@ -142,7 +141,7 @@ public class ScoringScene {
         final int x = 0, y = 100;
         final TextureRegion panelr = ResourceManager.getInstance().getTexture(
                 "ranking-panel");
-        final Sprite panel = new Sprite(0 + x, 0 + y, Utils.toRes(panelr.getWidth() * 0.9f),
+        final Sprite panel = new Sprite(x, y, Utils.toRes(panelr.getWidth() * 0.9f),
                 Utils.toRes(panelr.getHeight() * 0.9f), panelr);
         scene.attachChild(panel);
 
@@ -202,28 +201,28 @@ public class ScoringScene {
         scoreNum.attachToScene(scene);
 
         final ScoreNumber hit300num = new ScoreNumber(Utils.toRes(138 + x),
-                Utils.toRes(110 + y), String.valueOf(stat.getHit300()) + "x", 1,
+                Utils.toRes(110 + y), stat.getHit300() + "x", 1,
                 false);
         hit300num.attachToScene(scene);
         final ScoreNumber hit100num = new ScoreNumber(Utils.toRes(138 + x),
-                Utils.toRes(110 + 85 + y), String.valueOf(stat.getHit100()) + "x",
+                Utils.toRes(110 + 85 + y), stat.getHit100() + "x",
                 1, false);
         hit100num.attachToScene(scene);
         final ScoreNumber hit50num = new ScoreNumber(Utils.toRes(138 + x),
-                Utils.toRes(110 + 85 * 2 + y), String.valueOf(stat.getHit50()) + "x",
+                Utils.toRes(110 + 85 * 2 + y), stat.getHit50() + "x",
                 1, false);
         hit50num.attachToScene(scene);
 
         final ScoreNumber hit300knum = new ScoreNumber(Utils.toRes(400 + x),
-                Utils.toRes(110 + y), String.valueOf(stat.getHit300k()) + "x", 1,
+                Utils.toRes(110 + y), stat.getHit300k() + "x", 1,
                 false);
         hit300knum.attachToScene(scene);
         final ScoreNumber hit100knum = new ScoreNumber(Utils.toRes(400 + x),
-                Utils.toRes(110 + 85 + y), String.valueOf(stat.getHit100k()) + "x",
+                Utils.toRes(110 + 85 + y), stat.getHit100k() + "x",
                 1, false);
         hit100knum.attachToScene(scene);
         final ScoreNumber hit0num = new ScoreNumber(Utils.toRes(400 + x),
-                Utils.toRes(110 + 85 * 2 + y), String.valueOf(stat.getMisses()) + "x",
+                Utils.toRes(110 + 85 * 2 + y), stat.getMisses() + "x",
                 1, false);
         hit0num.attachToScene(scene);
 
@@ -239,7 +238,7 @@ public class ScoringScene {
                 false);
         maxCombo.attachToScene(scene);
         final String accStr = String
-                .format("%2.2f%%", stat.getAccuracy() * 100);
+                .format(Locale.ENGLISH, "%2.2f%%", stat.getAccuracy() * 100);
         final ScoreNumber accuracy = new ScoreNumber(Utils.toRes(260 + x),
                 Utils.toRes(accText.getY() + 38), accStr, 1, false);
         accuracy.attachToScene(scene);

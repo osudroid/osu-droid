@@ -23,7 +23,7 @@ public class TrackInfo implements Serializable {
     private long musicLength = 0;
     private int hitCircleCount = 0;
     private int sliderCount = 0;
-    private int spinerCount = 0;
+    private int spinnerCount = 0;
     private int totalHitObjectCount = 0;
     private int maxCombo = 0;
 
@@ -161,12 +161,12 @@ public class TrackInfo implements Serializable {
         this.sliderCount = sliderCount;
     }
 
-    public int getSpinerCount() {
-        return spinerCount;
+    public int getSpinnerCount() {
+        return spinnerCount;
     }
 
-    public void setSpinerCount(int spinerCount) {
-        this.spinerCount = spinerCount;
+    public void setSpinnerCount(int spinnerCount) {
+        this.spinnerCount = spinnerCount;
     }
 
     public int getTotalHitObjectCount() {

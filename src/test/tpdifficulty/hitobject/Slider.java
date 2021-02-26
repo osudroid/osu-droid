@@ -11,14 +11,15 @@ import test.tpdifficulty.TimingPoint;
  */
 public class Slider extends HitObject {
     private SliderType sliderType;
-    private ArrayList<PointF> poss;
+    private ArrayList<PointF> curvePoints;
     private float rawLength;
 
-    public Slider(int startTime, int endTime, PointF pos, TimingPoint timingPoint, SliderType sliderType, int repeat, ArrayList<PointF> poss, float rawLength) {
+    public Slider(int startTime, int endTime, PointF pos, TimingPoint timingPoint, SliderType sliderType,
+                  int repeat, ArrayList<PointF> curvePoints, float rawLength) {
         super(startTime, endTime, HitObjectType.Slider, pos, timingPoint);
         this.sliderType = sliderType;
         this.repeat = repeat;
-        this.poss = poss;
+        this.curvePoints = curvePoints;
         this.rawLength = rawLength;
     }
 
@@ -43,12 +44,12 @@ public class Slider extends HitObject {
         this.rawLength = rawLength;
     }
 
-    public ArrayList<PointF> getPoss() {
-        return poss;
+    public ArrayList<PointF> getCurvePoints() {
+        return curvePoints;
     }
 
-    public void setPoss(ArrayList<PointF> poss) {
-        this.poss = poss;
+    public void setCurvePoints(ArrayList<PointF> curvePoints) {
+        this.curvePoints = curvePoints;
     }
 
     public String toString() {
@@ -56,7 +57,7 @@ public class Slider extends HitObject {
                 super.toString() +
                 "sliderType=" + sliderType +
                 ", repeat=" + repeat +
-                ", poss=" + poss +
+                ", curvePoints=" + curvePoints +
                 '}';
     }
 
@@ -65,7 +66,7 @@ public class Slider extends HitObject {
                 super.toString() +
                 "sliderType=" + sliderType +
                 ", repeat=" + repeat +
-                ", poss=" + poss +
+                ", curvePoints=" + curvePoints +
                 ", Combo=" + getCombo(sliderTick, sliderSpeed) +
                 '}';
     }

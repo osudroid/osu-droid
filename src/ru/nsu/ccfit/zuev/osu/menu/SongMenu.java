@@ -975,26 +975,22 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 (track.getBeatmap().getTitleUnicode() == null || Config.isForceRomanized() ? track.getBeatmap().getTitle() : track.getBeatmap().getTitleUnicode()) + " [" + track.getMode() + "]";
         String mapperStr = "Beatmap by " + track.getCreator();
         String binfoStr2 = String.format(StringTable.get(R.string.binfoStr2),
-                track.getHitCircleCount(), track.getSliderCount(), track.getSpinerCount(), track.getBeatmapSetID());
+                track.getHitCircleCount(), track.getSliderCount(), track.getSpinnerCount(), track.getBeatmapSetID());
         trackInfo.setText(tinfoStr);
         mapper.setText(mapperStr);
         beatmapInfo2.setText(binfoStr2);
         changeDimensionInfo(track);
-        //if (ModMenu.getInstance().shouldReCalculate()){
-            (new Thread() {
-                public void run() {
-                    DifficultyReCalculator diffReCalulator = new DifficultyReCalculator();
-                    float newstar = diffReCalulator.reCalculateStar(
-                        selectedTrack, 
-                        ModMenu.getInstance().getSpeed(), 
-                        diffReCalulator.getCS(selectedTrack));
-                    if (newstar != 0f){
-                        setStarsDisplay(newstar);
-                    }
-                    diffReCalulator = null;
+        (new Thread() {
+            public void run() {
+                DifficultyReCalculator diffReCalculator = new DifficultyReCalculator();
+                float newstar = diffReCalculator.recalculateStar(
+                    selectedTrack,
+                    diffReCalculator.getCS(selectedTrack));
+                if (newstar != 0f){
+                    setStarsDisplay(newstar);
                 }
-            }).start();
-        //}
+            }
+        }).start();
     }
 
     public void selectTrack(final TrackInfo track, boolean reloadBG) {
