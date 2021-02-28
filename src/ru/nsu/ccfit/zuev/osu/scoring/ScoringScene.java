@@ -107,6 +107,7 @@ public class ScoringScene {
             DifficultyReCalculator diffRecalculator = new DifficultyReCalculator();
             float newstar = diffRecalculator.recalculateStar(
                             trackInfo,
+                            ModMenu.getInstance().getSpeed(),
                             diffRecalculator.getCS(stat, trackInfo));
             diffRecalculator.calculatePP(stat, trackInfo);
             double pp = diffRecalculator.getTotalPP();
