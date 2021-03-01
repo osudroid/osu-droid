@@ -23,7 +23,7 @@ import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 
 public class GameEffect extends GameObject implements IEntityModifierListener {
     private static final HashSet<String> animationEffects = new HashSet<>(Arrays.asList(
-            "hit0", "hit50", "hit100", "hit300"
+            "hit0", "hit50", "hit100", "hit100k", "hit300", "hit300k", "hit300g"
     ));
 
     Sprite hit;
