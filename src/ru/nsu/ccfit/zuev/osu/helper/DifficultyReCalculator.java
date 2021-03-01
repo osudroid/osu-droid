@@ -64,6 +64,34 @@ public class DifficultyReCalculator {
     private boolean loadTimingPoints(final BeatmapData data) {
         // Load timing points
         timingPoints.clear();
+
+        // Get the first uninherited timing point
+        for (final String tempString : data.getData("TimingPoints")) {
+            String[] rawData = tempString.split("[,]");
+            // Handle malformed timing point
+            if (rawData.length < 2) {
+                return false;
+            }
+            float bpm = parser.tryParseFloat(rawData[1], Float.NaN);
+            if (Float.isNaN(bpm)) {
+                return false;
+            }
+
+            // Uninherited: bpm > 0
+            if (bpm > 0) {
+                float offset = parser.tryParseFloat(rawData[0], Float.NaN);
+                if (Float.isNaN(offset)) {
+                    return false;
+                }
+                currentTimingPoint = new TimingPoint(bpm, offset, 1f);
+                break;
+            }
+        }
+
+        if (currentTimingPoint == null) {
+            return false;
+        }
+
         for (final String tempString : data.getData("TimingPoints")) {
             String[] rawData = tempString.split("[,]");
             // Handle malformed timing point
@@ -77,12 +105,6 @@ public class DifficultyReCalculator {
             }
             float speed = 1.0f;
             boolean inherited = bpm < 0;
-
-            // The first timing point should always be uninherited,
-            // otherwise the beatmap is invalid
-            if (currentTimingPoint == null && inherited) {
-                return false;
-            }
 
             if (inherited) {
                 speed = -100.0f / bpm;
