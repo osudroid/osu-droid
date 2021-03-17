@@ -255,31 +255,4 @@ public class tpHitObject implements Comparable<tpHitObject> {
         );
     }
 
-    // TODO: Calculates the beatmap's Difficulty with speed_mul(计算谱面带Mod后不同速度时的星数)
-
-    // private static void d_strain(DifficultyType type, tpHitObject PreviousHitObject, double speed_mul)
-    // {
-    //     double value = 0.0;
-    //     double time_elapsed = (obj.time - prev.time) / speed_mul;
-    //     double decay =
-    //         Math.pow(DECAY_BASE[type], time_elapsed / 1000.0);
-
-    //     obj.delta_time = time_elapsed;
-
-    //     /* this implementation doesn't account for sliders */
-    //     if ((obj.type & (OBJ_SLIDER | OBJ_CIRCLE)) != 0)
-    //     {
-    //         double distance = new Vector2(obj.normpos).sub(prev.normpos).len();
-    //         obj.d_distance = distance;
-
-    //         if (type.compareTo(DifficultyType.Speed)) {
-    //             obj.is_single = distance > SINGLE_SPACING_TRESHOLD;
-    //         }
-
-    //         value = d_spacing_weight(type, distance, time_elapsed, PreviousHitObject.d_distance, PreviousHitObject.delta_time, obj.angle);
-    //         value *= SPACING_WEIGHT_SCALING[type];
-    //     }
-
-    //     obj.strains[type] = PreviousHitObject.strains[type] * decay + value;
-    // }
 }

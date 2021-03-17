@@ -207,7 +207,11 @@ public class DifficultyReCalculator {
         return this.hitObjects.size() > 0;
     }
 
-    public float recalculateStar(final TrackInfo track, float cs) {
+    public float recalculateStar(final TrackInfo track, float cs){
+        return recalculateStar(track, cs, 1.0f);
+    }
+
+    public float recalculateStar(final TrackInfo track, float cs, float speed) {
         if (!init(track)) {
             return 0f;
         }
@@ -216,7 +220,7 @@ public class DifficultyReCalculator {
         }
         try {
             tpDifficulty = new AiModtpDifficulty();
-            tpDifficulty.CalculateAll(hitObjects, cs);
+            tpDifficulty.CalculateAll(hitObjects, cs, speed);
             double star = tpDifficulty.getStarRating();
             if (!timingPoints.isEmpty()){
                 timingPoints.clear();

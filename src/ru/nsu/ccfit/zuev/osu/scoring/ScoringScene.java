@@ -100,6 +100,16 @@ public class ScoringScene {
             }
             mapperStr += "]";
         }
+        Debug.i("playedtime " + stat.getTime());
+        final Text beatmapInfo = new Text(Utils.toRes(4), Utils.toRes(2),
+                ResourceManager.getInstance().getFont("font"), infoStr);
+        final Text mapperInfo = new Text(Utils.toRes(4), beatmapInfo.getY() + beatmapInfo.getHeight() + Utils.toRes(2),
+                ResourceManager.getInstance().getFont("smallFont"), mapperStr);
+        final Text playerInfo = new Text(Utils.toRes(4), mapperInfo.getY() + mapperInfo.getHeight() + Utils.toRes(2),
+                ResourceManager.getInstance().getFont("smallFont"), playerStr);
+        scene.attachChild(beatmapInfo);
+        scene.attachChild(mapperInfo);
+        scene.attachChild(playerInfo);
         //calculatePP
         if (Config.isDisplayScorePP()){
             StringBuilder ppinfo = new StringBuilder();
@@ -107,7 +117,8 @@ public class ScoringScene {
             DifficultyReCalculator diffRecalculator = new DifficultyReCalculator();
             float newstar = diffRecalculator.recalculateStar(
                             trackInfo,
-                            diffRecalculator.getCS(stat, trackInfo));
+                            diffRecalculator.getCS(stat, trackInfo),
+                            stat.getSpeed());
             diffRecalculator.calculatePP(stat, trackInfo);
             double pp = diffRecalculator.getTotalPP();
             double aimpp = diffRecalculator.getAimPP();
@@ -124,20 +135,15 @@ public class ScoringScene {
             ppinfo.append(String.format(Locale.ENGLISH, "Spd:%.0f/%.0f,", spdpp, max_spdpp));
             ppinfo.append(String.format(Locale.ENGLISH, "Acc:%.0f/%.0f)", accpp, max_accpp));
             ppinfo.append("]");
-            mapperStr += " " + ppinfo.toString();
+            String ppStr = ppinfo.toString();
+            final Text ppInfo = new Text(Utils.toRes(4), Config.getRES_HEIGHT() - playerInfo.getHeight() - Utils.toRes(2),
+                ResourceManager.getInstance().getFont("smallFont"), ppStr);
+            ppInfo.setPosition(Utils.toRes(4), Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(2));
+            final Rectangle bgBottomRect = new Rectangle(0, Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(4), ppInfo.getWidth() + Utils.toRes(12), ppInfo.getHeight() + Utils.toRes(4));
+            bgBottomRect.setColor(0, 0, 0, 0.5f);
+            scene.attachChild(bgBottomRect);
+            scene.attachChild(ppInfo);
         }
-        //
-        Debug.i("playedtime " + stat.getTime());
-        final Text beatmapInfo = new Text(Utils.toRes(4), Utils.toRes(2),
-                ResourceManager.getInstance().getFont("font"), infoStr);
-        final Text mapperInfo = new Text(Utils.toRes(4), beatmapInfo.getY() + beatmapInfo.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("smallFont"), mapperStr);
-        final Text playerInfo = new Text(Utils.toRes(4), mapperInfo.getY() + mapperInfo.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("smallFont"), playerStr);
-        scene.attachChild(beatmapInfo);
-        scene.attachChild(mapperInfo);
-        scene.attachChild(playerInfo);
-
         final int x = 0, y = 100;
         final TextureRegion panelr = ResourceManager.getInstance().getTexture(
                 "ranking-panel");
