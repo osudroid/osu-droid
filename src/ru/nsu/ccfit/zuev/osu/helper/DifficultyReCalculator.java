@@ -37,7 +37,7 @@ public class DifficultyReCalculator {
     private int stream_longest;
     private float real_time;
     //copy from OSUParser.java
-    public boolean init(final TrackInfo track, float speedMultiplier) {
+    public boolean init(final TrackInfo track) {
         parser = new OSUParser(track.getFilename());
         final BeatmapData data;
         if (parser.openFile()) {
@@ -58,7 +58,7 @@ public class DifficultyReCalculator {
             return false;
         }
         float sliderSpeed = parser.tryParseFloat(data.getData("Difficulty", "SliderMultiplier"), 1.0f);
-        return loadHitObjects(data, sliderSpeed, speedMultiplier);
+        return loadHitObjects(data, sliderSpeed);
     }
 
     private boolean loadTimingPoints(final BeatmapData data) {
@@ -122,7 +122,7 @@ public class DifficultyReCalculator {
         return timingPoints.size() > 0;
     }
 
-    private boolean loadHitObjects(final BeatmapData data, float sliderSpeed, float speedMultiplier) {
+    private boolean loadHitObjects(final BeatmapData data, float sliderSpeed) {
         final ArrayList<String> hitObjects = data.getData("HitObjects");
         if (hitObjects.size() <= 0) {
             return false;
@@ -179,14 +179,14 @@ public class DifficultyReCalculator {
 
             if (hitObjectType == HitObjectType.Normal || hitObjectType == HitObjectType.NormalNewCombo) {
                 // HitCircle
-                object = new HitCircle((int) (time / speedMultiplier), pos, currentTimingPoint);
+                object = new HitCircle(time, pos, currentTimingPoint);
             } else if (hitObjectType == HitObjectType.Spinner) {
                 // Spinner
                 int endTime = parser.tryParseInt(rawData[5], -1);
                 if (endTime <= -1) {
                     return false;
                 }
-                object = new Spinner((int) (time / speedMultiplier), (int) (endTime / speedMultiplier), pos, currentTimingPoint);
+                object = new Spinner(time, endTime, pos, currentTimingPoint);
             } else if (hitObjectType == HitObjectType.Slider || hitObjectType == HitObjectType.SliderNewCombo) {
                 // Slider
                 // Handle malformed slider
@@ -221,7 +221,7 @@ public class DifficultyReCalculator {
                 }
 
                 int endTime = time + (int) (rawLength * (600 / timingPoints.get(0).getBpm()) / sliderSpeed) * repeat;
-                object = new Slider((int) (time / speedMultiplier), (int) (endTime / speedMultiplier), pos, currentTimingPoint, sliderType, repeat, curvePoints, rawLength);
+                object = new Slider(time, endTime, pos, currentTimingPoint, sliderType, repeat, curvePoints, rawLength);
             }
             this.hitObjects.add(object);
         }
@@ -498,7 +498,8 @@ public class DifficultyReCalculator {
     }
 
     //must use reCalculateStar() before this
-    public boolean calculateMapInfo(final TrackInfo track, float speedMultiplier) {
+    //This method calculate the note count of stream/jump/etc in a diff
+    //public boolean calculateMapInfo(final TrackInfo track, float speedMultiplier) {
         //计算谱面信息
         /*
         120bpm: 125ms(dt1), 140bpm: 107ms(dt3), 80bpm: 187.5(dt4), 180bpm: 83.33ms(dt2)
@@ -507,7 +508,8 @@ public class DifficultyReCalculator {
         连打:高于120bpm且间距小于90，高于180bpm且间距大于90、小于180
         跳:间距大于180
         */
-        if (!init(track, speedMultiplier)) {
+        /*
+        if (!init(track)) {
             return false;
         }
         if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track){
@@ -582,6 +584,7 @@ public class DifficultyReCalculator {
         real_time = (hitObjects.get(hitObjects.size() - 1).getEndTime() - firstObjectTime) / 1000f;
         return true;
     }
+    */
     public int getSingleCount(){
         return single;
     }
