@@ -188,14 +188,16 @@ public class Spinner extends GameObject {
         int score = 0;
         if (replayData != null) {
             //int bonusRot = (int) (replayData.accuracy / 4 - needRotations + 1);
-            //if (fullrotations < the rotations in replay), let fullrotations = the rotations in replay
-            int bonusRot = replayData.accuracy / 4 - fullrotations;
-            while (bonusRot > 0) {
-                bonusRot--;
+            //while (bonusRot < 0) {
+            //    bonusRot++;
+            //    listener.onSpinnerHit(id, 1000, false, 0);
+            //}
+
+            //if (rotations count < the rotations in replay), let rotations count = the rotations in replay
+            while (fullrotations + this.score < replayData.accuracy / 4 + 1){
+                fullrotations++;
                 listener.onSpinnerHit(id, 1000, false, 0);
             }
-            if (fullrotations < replayData.accuracy / 4)
-                fullrotations = replayData.accuracy / 4;
             if (fullrotations >= needRotations)
                 clear = true;
         }
