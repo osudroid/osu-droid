@@ -19,7 +19,6 @@ import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
@@ -51,7 +50,7 @@ public class PauseMenu implements IOnMenuItemClickListener {
                 if (fail && pSceneTouchEvent.isActionUp() && pTouchX < Config.getRES_WIDTH() / 2 && pTouchY < 50 && savedFailedReplay == false && game.getReplaying() == false){
                     //save replay
                     if (game.saveFailedReplay()){
-                        saveFailedReplay.setText(StringTable.get(R.string.str_saved_failed_replay));
+                        saveFailedReplay.setText(StringTable.get(R.string.message_save_replay_successful));
                         savedFailedReplay = true;
                     }
                 }

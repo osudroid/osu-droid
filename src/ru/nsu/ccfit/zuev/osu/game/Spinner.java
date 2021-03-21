@@ -187,15 +187,17 @@ public class Spinner extends GameObject {
         listener.removeObject(Spinner.this);
         int score = 0;
         if (replayData != null) {
+            //int bonusRot = (int) (replayData.accuracy / 4 - needRotations + 1);
+            //if (fullrotations < the rotations in replay), let fullrotations = the rotations in replay
+            int bonusRot = replayData.accuracy / 4 - fullrotations;
+            while (bonusRot > 0) {
+                bonusRot--;
+                listener.onSpinnerHit(id, 1000, false, 0);
+            }
             if (fullrotations < replayData.accuracy / 4)
                 fullrotations = replayData.accuracy / 4;
             if (fullrotations >= needRotations)
                 clear = true;
-            int bonusRot = (int) (replayData.accuracy / 4 - needRotations + 1);
-            while (bonusRot < score) {
-                bonusRot++;
-                listener.onSpinnerHit(id, 1000, false, 0);
-            }
         }
         float percentfill = (Math.abs(rotations) + fullrotations)
                 / needRotations;

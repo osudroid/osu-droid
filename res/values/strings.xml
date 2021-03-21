@@ -179,8 +179,7 @@
 	<string name="changelog_title">Changelog</string>
 	<string name="unranked_features">↓ Unranked features ↓</string>
 
-    <string name="message_save_failed_replay">Saving failed replay</string>
     <string name="str_save_failed_replay">click there to save failed replay</string>
-    <string name="str_saved_failed_replay">save failed replay successful!</string>
+    <string name="message_save_replay_successful">save failed replay successful</string>
 	<string name="message_save_replay_failed">save replay failed</string>
 </resources>
