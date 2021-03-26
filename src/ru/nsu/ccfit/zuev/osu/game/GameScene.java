@@ -7,6 +7,7 @@ import lt.ekgame.beatmap_analyzer.beatmap.HitObject;
 import com.dgsrz.bancho.game.sprite.VideoSprite;
 import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.framework.math.FMath;
+import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
@@ -174,6 +175,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private int sliderIndex = 0;
 
     private StoryboardSprite storyboardSprite;
+    private ProxySprite storyboardOverlayProxy;
 
     private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
@@ -665,6 +667,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (Config.isEnableStoryboard()) {
             if (storyboardSprite == null) {
                 storyboardSprite = new StoryboardSprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+                storyboardOverlayProxy = new ProxySprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+                storyboardSprite.setOverlayDrawProxy(storyboardOverlayProxy);
                 scene.attachChild(storyboardSprite);
             }
             storyboardSprite.detachSelf();
@@ -675,6 +679,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         fgScene = new Scene();
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
+        if (storyboardOverlayProxy != null) {
+            scene.attachChild(storyboardOverlayProxy);
+        }
         scene.attachChild(fgScene);
         scene.setBackground(new ColorBackground(0, 0, 0));
         bgScene.setBackgroundEnabled(false);
@@ -1853,6 +1860,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     if (storyboardSprite != null) {
                         storyboardSprite.releaseStoryboard();
                         storyboardSprite = null;
+                        storyboardOverlayProxy.setDrawProxy(null);
                     }
 
                     scoringScene.load(stat, lastTrack, GlobalManager.getInstance().getSongService(), replayFile, trackMD5, null);
@@ -1970,6 +1978,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (storyboardSprite != null) {
             storyboardSprite.releaseStoryboard();
             storyboardSprite = null;
+            storyboardOverlayProxy.setDrawProxy(null);
         }
 
         onExit();

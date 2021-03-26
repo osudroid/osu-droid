@@ -11,6 +11,7 @@ import com.edlplan.edlosbsupport.parser.OsbFileParser;
 import com.edlplan.edlosbsupport.player.OsbPlayer;
 import com.edlplan.framework.math.Anchor;
 import com.edlplan.framework.math.Vec2;
+import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.SupportSprite;
 import com.edlplan.framework.support.batch.BatchEngine;
 import com.edlplan.framework.support.batch.object.TextureQuad;
@@ -99,6 +100,35 @@ public class StoryboardSprite extends SupportSprite {
         return storyboard != null;
     }
 
+    public void setOverlayDrawProxy(ProxySprite proxy) {
+        proxy.setDrawProxy(this::drawOverlay);
+    }
+
+    public void drawOverlay(BaseCanvas canvas) {
+        if (storyboard == null) {
+            return;
+        }
+
+        canvas.getBlendSetting().save();
+        canvas.save();
+        float scale = Math.max(640 / canvas.getWidth(), 480 / canvas.getHeight());
+        Vec2 startOffset = new Vec2(canvas.getWidth() / 2, canvas.getHeight() / 2)
+                .minus(640 * 0.5f / scale, 480 * 0.5f / scale);
+
+        canvas.translate(startOffset.x, startOffset.y).expendAxis(scale);
+
+        if (context.engines != null) {
+            for (LayerRenderEngine engine : context.engines) {
+                if (engine != null && engine.getLayer() == com.edlplan.edlosbsupport.elements.StoryboardSprite.Layer.Overlay) {
+                    engine.draw(canvas);
+                }
+            }
+        }
+
+        canvas.restore();
+        canvas.getBlendSetting().restore();
+    }
+
     @Override
     protected void onSupportDraw(BaseCanvas canvas) {
         super.onSupportDraw(canvas);
@@ -136,8 +166,8 @@ public class StoryboardSprite extends SupportSprite {
         canvas.translate(startOffset.x, startOffset.y).expendAxis(scale);
 
         if (context.engines != null) {
-            for (DepthOrderRenderEngine engine : context.engines) {
-                if (engine != null) {
+            for (LayerRenderEngine engine : context.engines) {
+                if (engine != null && engine.getLayer() != com.edlplan.edlosbsupport.elements.StoryboardSprite.Layer.Overlay) {
                     engine.draw(canvas);
                 }
             }
@@ -216,9 +246,9 @@ public class StoryboardSprite extends SupportSprite {
 
     private void loadFromCache() {
 
-        context.engines = new DepthOrderRenderEngine[com.edlplan.edlosbsupport.elements.StoryboardSprite.Layer.values().length];
+        context.engines = new LayerRenderEngine[com.edlplan.edlosbsupport.elements.StoryboardSprite.Layer.values().length];
         for (int i = 0; i < context.engines.length; i++) {
-            context.engines[i] = new DepthOrderRenderEngine();
+            context.engines[i] = new LayerRenderEngine(com.edlplan.edlosbsupport.elements.StoryboardSprite.Layer.values()[i]);
         }
 
         if (storyboard == null) {
@@ -256,9 +286,9 @@ public class StoryboardSprite extends SupportSprite {
         TexturePool pool = new TexturePool(dir);
 
         context.texturePool = pool;
-        context.engines = new DepthOrderRenderEngine[com.edlplan.edlosbsupport.elements.StoryboardSprite.Layer.values().length];
+        context.engines = new LayerRenderEngine[com.edlplan.edlosbsupport.elements.StoryboardSprite.Layer.values().length];
         for (int i = 0; i < context.engines.length; i++) {
-            context.engines[i] = new DepthOrderRenderEngine();
+            context.engines[i] = new LayerRenderEngine(com.edlplan.edlosbsupport.elements.StoryboardSprite.Layer.values()[i]);
         }
 
         loadOsb(osuFile);
@@ -281,33 +311,13 @@ public class StoryboardSprite extends SupportSprite {
 
             SmartIterator<String> allToPack = SmartIterator.wrap(counted.keySet().iterator())
                     .applyFilter(s -> counted.get(s) >= 15);
-            pool.packAll(allToPack, null/*new Consumer<Bitmap>() {
-                int id = 0;
-                @Override
-                public void consume(Bitmap v) {
-                    try {
-                        File out = new File("/sdcard/MyDisk/pack/" + id + ".png");
-                        if (!out.getParentFile().exists()) {
-                            out.getParentFile().mkdirs();
-                        }
-                        if (!out.exists()) {
-                            out.createNewFile();
-                        }
-                        v.compress(Bitmap.CompressFormat.PNG, 100, new FileOutputStream(out));
-                        id++;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }*/);
+            pool.packAll(allToPack, null);
 
             allToPack = SmartIterator.wrap(counted.keySet().iterator())
                     .applyFilter(s -> counted.get(s) < 15);
             while (allToPack.hasNext()) {
                 pool.add(allToPack.next());
             }
-
-
         }).then(System.out::println);
 
 

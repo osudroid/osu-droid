@@ -195,8 +195,8 @@ dependencies {
     implementation 'pub.devrel:easypermissions:3.0.0'
 
     implementation 'com.github.EdrowsLuo:osudroidstrings:13eadc59ff'
-    implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlJavaExt:c2dfb50faf'
-    implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:c2dfb50faf'
+    implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlJavaExt:d91c53fcff'
+    implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:d91c53fcff'
     implementation project(path: ':LibBASS')
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
