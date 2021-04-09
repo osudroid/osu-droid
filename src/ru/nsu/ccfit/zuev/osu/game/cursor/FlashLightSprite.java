@@ -16,11 +16,11 @@ public class FlashLightSprite extends Entity{
 
     public FlashLightSprite(Scene fgScene) {
         TextureRegion tex = ResourceManager.getInstance().getTexture("flashlight_cursor");
-        sprite = new Sprite(-tex.getWidth() / 2, -tex.getHeight() / 2, tex);
+        sprite = new Sprite(-tex.getWidth() / 2f, -tex.getHeight() / 2f, tex);
         dimLayer = new FlashLightDimLayer();
         sprite.setScale(size);
         attachChild(sprite);
-        fgScene.attachChild(dimLayer);
+        fgScene.attachChild(dimLayer, 0);
     }
 
     public void setSliderHold(boolean isSliderHold) {
@@ -51,5 +51,6 @@ public class FlashLightSprite extends Entity{
         } else {
             sprite.setScale(1f * size);
         }
+
     }
 }
