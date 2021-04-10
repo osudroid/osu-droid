@@ -7,7 +7,7 @@ Changelog for 1.6.8
 - Sudden Death (SD) mod: triggers fail after 1 miss, slider breaks will not trigger fail (unranked)
 - Small Circle (SC) mod: CS + 4 (unranked)
 - Perfect (PF) mod: SS or fail (unranked)
-- Flashlight (FL) mod: lightened area might be different from osu! PC, no dim on slider click (unranked)
+- Flashlight (FL) mod: lightened area might be different from osu! PC. (unranked)
 - Really easy (RE(z)) mod: Easier EZ, only decreases AR slightly instead of cutting in half (unranked)
 - ScoreV2 mod: no change to slider judgement, uses score calculation similar to osu!lazer (unranked)
 - Speed modifier (adjusts a map's speed between 0.5x and 2x, able to stack on top of DT/NC/HT) (unranked)
