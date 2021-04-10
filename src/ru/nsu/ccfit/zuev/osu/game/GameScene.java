@@ -1458,6 +1458,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             scorebar.setVisible(true);
             if(GameHelper.isFlashLight()){
                 mainCursorId = -1;
+                flashlightSprite.setShowing(true);
             }
         }
 
