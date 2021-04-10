@@ -19,11 +19,11 @@ public class FlashLightDimLayer extends Entity {
         attachChild(sprite);
     }
 
-    public void update(boolean isSliderHold) {
+    public void update(boolean isSliderHoldAndActive) {
         boolean isSpriteVisible = sprite.isVisible();
-        if (isSliderHold && !isSpriteVisible) {
+        if (isSliderHoldAndActive && !isSpriteVisible) {
             sprite.setVisible(true);
-        } else if (!isSliderHold && isSpriteVisible) {
+        } else if (!isSliderHoldAndActive && isSpriteVisible) {
             sprite.setVisible(false);
         }
     }

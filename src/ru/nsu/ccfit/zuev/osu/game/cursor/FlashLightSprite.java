@@ -13,6 +13,7 @@ public class FlashLightSprite extends Entity{
     private final FlashLightDimLayer dimLayer;
     private boolean showing = false;
     private boolean isSliderHold = false;
+    private boolean isSliderActive = false;
     private final float baseSize = 8f;
     private float currentSize = baseSize;
 
@@ -29,13 +30,17 @@ public class FlashLightSprite extends Entity{
         this.isSliderHold = isSliderHold;
     }
 
+    public void setSliderActive(boolean isSliderActive) {
+        this.isSliderActive = isSliderActive;
+    }
+
     public void setShowing(boolean showing) {
         this.showing = showing;
     }
 
     public void update(float pSecondsElapsed, int combo) {
         if (showing){
-            dimLayer.update(this.isSliderHold);
+            dimLayer.update(isSliderHold && isSliderActive);
             if (!sprite.isVisible()) {
                 sprite.setVisible(true);
             }
