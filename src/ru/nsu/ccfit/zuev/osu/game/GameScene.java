@@ -2122,7 +2122,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public void onSliderHit(int id, final int score, final PointF start,
                             final PointF end, final boolean endCombo, RGBColor color, int type) {
-        flashlightSprite.setSliderHold(true);
+
+        if (GameHelper.isFlashLight()) {
+            flashlightSprite.setSliderHold(true);
+        }
 
         if (score == 0) {
             createHitEffect(start, "hit0", color);
@@ -2648,7 +2651,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
 
     public void onSliderEnd(int id, int accuracy, BitSet tickSet) {
-        flashlightSprite.setSliderHold(false);
+        if (GameHelper.isFlashLight()) {
+            flashlightSprite.setSliderHold(false);
+        }
         if (replay != null && !replaying) {
             short acc = (short) (accuracy);
             replay.addObjectResult(id, acc, (BitSet) tickSet.clone());
