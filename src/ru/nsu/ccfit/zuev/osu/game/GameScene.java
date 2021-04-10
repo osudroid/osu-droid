@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 import android.os.SystemClock;
-import lt.ekgame.beatmap_analyzer.beatmap.HitObject;
 
 import com.dgsrz.bancho.game.sprite.VideoSprite;
 import com.edlplan.ext.EdExtensionHelper;
@@ -2076,6 +2075,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             replay.addObjectResult(id, sacc, null);
         }
         if(GameHelper.isFlashLight()){
+
             if (GameHelper.isAuto()) {
                 flashlightSprite.setPosition(pos.x, pos.y);
                 flashlightSprite.setShowing(true);
