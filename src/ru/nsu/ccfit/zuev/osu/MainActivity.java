@@ -58,6 +58,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipFile;
 
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -375,6 +376,17 @@ public class MainActivity extends BaseGameActivity implements
         }
     }
 
+    public static boolean isBeatmapValid(File file) {
+        ZipFile zipfile = null;
+        try {
+            zipfile = new ZipFile(file);
+            zipfile.close();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
     public void checkNewBeatmaps() {
         GlobalManager.getInstance().setInfo("Checking new maps...");
         final File mainDir = new File(Config.getCorePath());
@@ -400,9 +412,8 @@ public class MainActivity extends BaseGameActivity implements
             File[] filelist = mainDir.listFiles();
             final ArrayList<String> beatmaps = new ArrayList<String>();
             for (final File file : filelist) {
-                if (file.isFile()
-                        && file.getName().endsWith(".osz")
-                        || file.getName().endsWith(".zip")) {
+                if (isBeatmapValid(file)
+                        && file.getName().endsWith(".osz")) {
                     beatmaps.add(file.getPath());
                 }
             }
@@ -412,9 +423,8 @@ public class MainActivity extends BaseGameActivity implements
                     && beatmapDir.isDirectory()) {
                 filelist = beatmapDir.listFiles();
                 for (final File file : filelist) {
-                    if (file.isFile()
-                            && file.getName().endsWith(".osz")
-                            || file.getName().endsWith(".zip")) {
+                    if (isBeatmapValid(file)
+                            && file.getName().endsWith(".osz")) {
                         beatmaps.add(file.getPath());
                     }
                 }
@@ -426,7 +436,7 @@ public class MainActivity extends BaseGameActivity implements
                     && downloadDir.isDirectory()) {
                 filelist = downloadDir.listFiles();
                 for (final File file : filelist) {
-                    if (file.isFile()
+                    if (isBeatmapValid(file)
                             && file.getName().endsWith(".osz")) {
                         beatmaps.add(file.getPath());
                     }
