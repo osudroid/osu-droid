@@ -1404,7 +1404,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         if (c.mousePressed == true && isFirstObjectsNear(c.mousePos)) {
                             mainCursorId = i;
                             flashlightSprite.setPosition(c.mousePos.x, c.mousePos.y);
-                            flashlightSprite.setShowing(true);
+                            if (!breakAnimator.isBreak()) {
+                                flashlightSprite.setShowing(true);
+                            }
                             break;
                         }
                         ++i;
