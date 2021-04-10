@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 import android.os.SystemClock;
-import lt.ekgame.beatmap_analyzer.beatmap.HitObject;
 
 import com.dgsrz.bancho.game.sprite.VideoSprite;
 import com.edlplan.ext.EdExtensionHelper;
@@ -1250,7 +1249,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if(GameHelper.isFlashLight()){
-            flashlightSprite = new FlashLightSprite();
+            flashlightSprite = new FlashLightSprite(fgScene);
             flashlightSprite.setShowing(false);
             fgScene.attachChild(flashlightSprite, 0);
         }
@@ -2076,6 +2075,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             replay.addObjectResult(id, sacc, null);
         }
         if(GameHelper.isFlashLight()){
+
             if (GameHelper.isAuto()) {
                 flashlightSprite.setPosition(pos.x, pos.y);
                 flashlightSprite.setShowing(true);
@@ -2122,6 +2122,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public void onSliderHit(int id, final int score, final PointF start,
                             final PointF end, final boolean endCombo, RGBColor color, int type) {
+
+        if (GameHelper.isFlashLight()) {
+            flashlightSprite.setSliderHold(true);
+            flashlightSprite.setSliderActive(true);
+        }
+
         if (score == 0) {
             createHitEffect(start, "hit0", color);
             createHitEffect(end, "hit0", color);
@@ -2134,7 +2140,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 ResourceManager.getInstance().getCustomSound("combobreak", 1)
                         .play();
             }
-            if(GameHelper.isSuddenDeath())stat.changeHp(-1.0f);
+            if(GameHelper.isSuddenDeath()) stat.changeHp(-1.0f);
             stat.registerHit(0, true, false);
             return;
         }
@@ -2383,11 +2389,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         float pTouchX = FMath.clamp(pSceneTouchEvent.getX(), 0, Config.getRES_WIDTH());
         float pTouchY = FMath.clamp(pSceneTouchEvent.getY(), 0, Config.getRES_HEIGHT());
         if (pSceneTouchEvent.isActionDown()) {
-            if (pTouchX > Config.getRES_WIDTH()) {
-                for (final Cursor cursor : cursors) {
-                    cursor.mouseOldDown = false;
-                }
-                return true;
+            if (GameHelper.isFlashLight()) {
+                flashlightSprite.setSliderHold(true);
             }
             cursors[i].mouseDown = true;
             cursors[i].mouseDownOffset = (pSceneTouchEvent.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier;
@@ -2401,6 +2404,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
             cursorIIsDown[i] = true;
         } else if (pSceneTouchEvent.isActionMove()) {
+            if (GameHelper.isFlashLight()) {
+                flashlightSprite.setSliderHold(true);
+            }
             PointF gamePoint = Utils.realToTrackCoords(new PointF(pTouchX, pTouchY));
             cursors[i].mousePos.x = pTouchX;
             cursors[i].mousePos.y = pTouchY;
@@ -2408,6 +2414,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 replay.addMove(secPassed, gamePoint, i);
             }
         } else if (pSceneTouchEvent.isActionUp()) {
+            if (GameHelper.isFlashLight()) {
+                flashlightSprite.setSliderHold(false);
+            }
             cursors[i].mouseDown = false;
             if (replay != null) {
                 replay.addUp(secPassed, i);
@@ -2645,6 +2654,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
 
     public void onSliderEnd(int id, int accuracy, BitSet tickSet) {
+        if (GameHelper.isFlashLight()) {
+            flashlightSprite.setSliderHold(false);
+            flashlightSprite.setSliderActive(false);
+        }
         if (replay != null && !replaying) {
             short acc = (short) (accuracy);
             replay.addObjectResult(id, acc, (BitSet) tickSet.clone());
