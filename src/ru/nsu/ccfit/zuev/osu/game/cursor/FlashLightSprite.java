@@ -38,6 +38,14 @@ public class FlashLightSprite extends Entity{
         this.showing = showing;
     }
 
+    public void updateBreak(boolean isBreak) {
+        if (isBreak) {
+            sprite.registerEntityModifier(new ScaleModifier(1f, currentSize, 1.5f * baseSize));
+        } else {
+            sprite.registerEntityModifier(new ScaleModifier(1f, 1.5f * baseSize, currentSize));
+        }
+    }
+
     public void update(float pSecondsElapsed, int combo) {
         if (showing){
             dimLayer.update(isSliderHold && isSliderActive);

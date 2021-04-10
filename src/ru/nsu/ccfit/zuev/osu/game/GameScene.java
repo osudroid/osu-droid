@@ -1436,29 +1436,25 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GameHelper.setKiai(soundTimingPoint.isKiai());
         }
 
-        if (breakPeriods.isEmpty() == false) {
-            if (breakAnimator.isBreak() == false
+        if (!breakPeriods.isEmpty()) {
+            if (!breakAnimator.isBreak()
                     && breakPeriods.peek().getStart() <= secPassed) {
                 gameStarted = false;
                 breakAnimator.init(breakPeriods.peek().getLength());
                 if(GameHelper.isFlashLight()){
                     mainCursorId = -1;
-                    flashlightSprite.setShowing(false);
+                    flashlightSprite.updateBreak(true);
                 }
                 scorebar.setVisible(false);
                 breakPeriods.poll();
             }
-        }
-        if(breakAnimator.isBreak() == true && GameHelper.isFlashLight()){
-            mainCursorId = -1;
-            flashlightSprite.setShowing(false);
         }
         if (breakAnimator.isOver()) {
             gameStarted = true;
             scorebar.setVisible(true);
             if(GameHelper.isFlashLight()){
                 mainCursorId = -1;
-                flashlightSprite.setShowing(true);
+                flashlightSprite.updateBreak(false);
             }
         }
 
