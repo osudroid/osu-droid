@@ -1250,7 +1250,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if(GameHelper.isFlashLight()){
             flashlightSprite = new FlashLightSprite(fgScene);
-            flashlightSprite.setShowing(false);
+            flashlightSprite.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
+            flashlightSprite.setShowing(true);
             fgScene.attachChild(flashlightSprite, 0);
         }
 
@@ -1403,7 +1404,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         if (c.mousePressed == true && isFirstObjectsNear(c.mousePos)) {
                             mainCursorId = i;
                             flashlightSprite.setPosition(c.mousePos.x, c.mousePos.y);
-                            flashlightSprite.setShowing(true);
+                            if (!breakAnimator.isBreak()) {
+                                flashlightSprite.setShowing(true);
+                            }
                             break;
                         }
                         ++i;
@@ -1455,6 +1458,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             scorebar.setVisible(true);
             if(GameHelper.isFlashLight()){
                 mainCursorId = -1;
+                flashlightSprite.setShowing(true);
             }
         }
 
