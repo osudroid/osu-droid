@@ -2,10 +2,8 @@ package ru.nsu.ccfit.zuev.osu.game.cursor;
 
 
 import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.Debug;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 
@@ -17,17 +15,16 @@ public class FlashLightDimLayer extends Entity {
         sprite = new Sprite(-tex.getWidth() / 2f, -tex.getHeight() / 2f, tex);
         float size = 8f;
         sprite.setScale(size);
+        sprite.setVisible(false);
         attachChild(sprite);
     }
 
     public void update(boolean isSliderHoldAndActive) {
-        float FL_SLIDER_DIM_FADE_DURATION = 0.5f;
-        float currentSpriteAlpha = sprite.getAlpha();
-
-        if (isSliderHoldAndActive && currentSpriteAlpha != 1) {
-            sprite.registerEntityModifier(new AlphaModifier(FL_SLIDER_DIM_FADE_DURATION, 0, 1));
-        } else if (!isSliderHoldAndActive && currentSpriteAlpha != 0) {
-            sprite.registerEntityModifier(new AlphaModifier(FL_SLIDER_DIM_FADE_DURATION, 1, 0));
+        boolean isSpriteVisible = sprite.isVisible();
+        if (isSliderHoldAndActive && !isSpriteVisible) {
+            sprite.setVisible(true);
+        } else if (!isSliderHoldAndActive && isSpriteVisible) {
+            sprite.setVisible(false);
         }
     }
 }
