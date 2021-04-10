@@ -1251,7 +1251,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if(GameHelper.isFlashLight()){
             flashlightSprite = new FlashLightSprite();
-            flashlightSprite.setShowing(false);
+            flashlightSprite.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
+            flashlightSprite.setShowing(true);
             fgScene.attachChild(flashlightSprite, 0);
         }
 
