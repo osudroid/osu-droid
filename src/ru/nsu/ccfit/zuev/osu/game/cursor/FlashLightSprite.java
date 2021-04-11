@@ -42,7 +42,7 @@ public class FlashLightSprite extends Entity{
     }
 
     public void update(float pSecondsElapsed, int combo) {
-        if (showing){
+        if (showing) {
             dimLayer.update(isSliderDimActive);
             if (!sprite.isVisible()) {
                 sprite.setVisible(true);
@@ -62,8 +62,7 @@ public class FlashLightSprite extends Entity{
         if (combo <= 200 && combo % 100 == 0) {
             // For every 100 combo, the size is decreased by 20%
             final float newSize = (1 - 0.2f * combo / 100f) * baseSize;
-            ScaleModifier sm = new ScaleModifier(0.5f, currentSize, newSize);
-            sprite.registerEntityModifier(sm);
+            sprite.registerEntityModifier(new ScaleModifier(0.8f, currentSize, newSize));
             currentSize = newSize;
         }
 

@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor;
 
 import org.anddev.andengine.entity.Entity;
+import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
@@ -14,11 +15,15 @@ public class FlashLightDimLayer extends Entity {
         sprite = new Sprite(-tex.getWidth() / 2f, -tex.getHeight() / 2f, tex);
         float size = 8f;
         sprite.setScale(size);
-        sprite.setVisible(false);
+        sprite.setAlpha(0);
         attachChild(sprite);
     }
 
     public void update(boolean isSliderDimActive) {
-        sprite.setVisible(isSliderDimActive);
+        float currentSpriteAlpha = sprite.getAlpha();
+
+        if (currentSpriteAlpha % 1 == 0) {
+            sprite.registerEntityModifier(new AlphaModifier(0.05f, currentSpriteAlpha, isSliderDimActive ? 1 : 0));
+        }
     }
 }
