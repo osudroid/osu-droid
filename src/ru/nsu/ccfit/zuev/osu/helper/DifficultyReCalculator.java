@@ -37,7 +37,7 @@ public class DifficultyReCalculator {
     private int stream_longest;
     private float real_time;
     //copy from OSUParser.java
-    public boolean init(final TrackInfo track) {
+    public boolean init(final TrackInfo track, float speedMultiplier) {
         parser = new OSUParser(track.getFilename());
         final BeatmapData data;
         if (parser.openFile()) {
@@ -58,12 +58,40 @@ public class DifficultyReCalculator {
             return false;
         }
         float sliderSpeed = parser.tryParseFloat(data.getData("Difficulty", "SliderMultiplier"), 1.0f);
-        return loadHitObjects(data, sliderSpeed);
+        return loadHitObjects(data, sliderSpeed, speedMultiplier);
     }
 
     private boolean loadTimingPoints(final BeatmapData data) {
         // Load timing points
         timingPoints.clear();
+
+        // Get the first uninherited timing point
+        for (final String tempString : data.getData("TimingPoints")) {
+            String[] rawData = tempString.split("[,]");
+            // Handle malformed timing point
+            if (rawData.length < 2) {
+                return false;
+            }
+            float bpm = parser.tryParseFloat(rawData[1], Float.NaN);
+            if (Float.isNaN(bpm)) {
+                return false;
+            }
+
+            // Uninherited: bpm > 0
+            if (bpm > 0) {
+                float offset = parser.tryParseFloat(rawData[0], Float.NaN);
+                if (Float.isNaN(offset)) {
+                    return false;
+                }
+                currentTimingPoint = new TimingPoint(bpm, offset, 1f);
+                break;
+            }
+        }
+
+        if (currentTimingPoint == null) {
+            return false;
+        }
+
         for (final String tempString : data.getData("TimingPoints")) {
             String[] rawData = tempString.split("[,]");
             // Handle malformed timing point
@@ -77,12 +105,6 @@ public class DifficultyReCalculator {
             }
             float speed = 1.0f;
             boolean inherited = bpm < 0;
-
-            // The first timing point should always be uninherited,
-            // otherwise the beatmap is invalid
-            if (currentTimingPoint == null && inherited) {
-                return false;
-            }
 
             if (inherited) {
                 speed = -100.0f / bpm;
@@ -100,7 +122,7 @@ public class DifficultyReCalculator {
         return timingPoints.size() > 0;
     }
 
-    private boolean loadHitObjects(final BeatmapData data, float sliderSpeed) {
+    private boolean loadHitObjects(final BeatmapData data, float sliderSpeed, float speedMultiplier) {
         final ArrayList<String> hitObjects = data.getData("HitObjects");
         if (hitObjects.size() <= 0) {
             return false;
@@ -157,14 +179,14 @@ public class DifficultyReCalculator {
 
             if (hitObjectType == HitObjectType.Normal || hitObjectType == HitObjectType.NormalNewCombo) {
                 // HitCircle
-                object = new HitCircle(time, pos, currentTimingPoint);
+                object = new HitCircle((int) (time / speedMultiplier), pos, currentTimingPoint);
             } else if (hitObjectType == HitObjectType.Spinner) {
                 // Spinner
                 int endTime = parser.tryParseInt(rawData[5], -1);
                 if (endTime <= -1) {
                     return false;
                 }
-                object = new Spinner(time, endTime, pos, currentTimingPoint);
+                object = new Spinner((int) (time / speedMultiplier), (int) (endTime / speedMultiplier), pos, currentTimingPoint);
             } else if (hitObjectType == HitObjectType.Slider || hitObjectType == HitObjectType.SliderNewCombo) {
                 // Slider
                 // Handle malformed slider
@@ -199,7 +221,7 @@ public class DifficultyReCalculator {
                 }
 
                 int endTime = time + (int) (rawLength * (600 / timingPoints.get(0).getBpm()) / sliderSpeed) * repeat;
-                object = new Slider(time, endTime, pos, currentTimingPoint, sliderType, repeat, curvePoints, rawLength);
+                object = new Slider((int) (time / speedMultiplier), (int) (endTime / speedMultiplier), pos, currentTimingPoint, sliderType, repeat, curvePoints, rawLength);
             }
             this.hitObjects.add(object);
         }
@@ -207,8 +229,8 @@ public class DifficultyReCalculator {
         return this.hitObjects.size() > 0;
     }
 
-    public float recalculateStar(final TrackInfo track, float cs) {
-        if (!init(track)) {
+    public float recalculateStar(final TrackInfo track, float speedMultiplier, float cs) {
+        if (!init(track, speedMultiplier)) {
             return 0f;
         }
         if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track){
@@ -472,7 +494,7 @@ public class DifficultyReCalculator {
     }
 
     //must use reCalculateStar() before this
-    public boolean calculateMapInfo(final TrackInfo track) {
+    public boolean calculateMapInfo(final TrackInfo track, float speedMultiplier) {
         //计算谱面信息
         /*
         120bpm: 125ms(dt1), 140bpm: 107ms(dt3), 80bpm: 187.5(dt4), 180bpm: 83.33ms(dt2)
@@ -481,7 +503,7 @@ public class DifficultyReCalculator {
         连打:高于120bpm且间距小于90，高于180bpm且间距大于90、小于180
         跳:间距大于180
         */
-        if (!init(track)) {
+        if (!init(track, speedMultiplier)) {
             return false;
         }
         if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track){

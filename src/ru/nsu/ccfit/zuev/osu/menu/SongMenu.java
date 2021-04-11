@@ -985,6 +985,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 DifficultyReCalculator diffReCalculator = new DifficultyReCalculator();
                 float newstar = diffReCalculator.recalculateStar(
                     selectedTrack,
+                    ModMenu.getInstance().getSpeed(),
                     diffReCalculator.getCS(selectedTrack));
                 if (newstar != 0f){
                     setStarsDisplay(newstar);
