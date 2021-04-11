@@ -5,7 +5,6 @@ import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.Debug;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 
@@ -24,9 +23,9 @@ public class FlashLightDimLayer extends Entity {
         float FL_SLIDER_DIM_FADE_DURATION = 0.5f;
         float currentSpriteAlpha = sprite.getAlpha();
 
-        if (isSliderHoldAndActive && currentSpriteAlpha != 1) {
+        if (isSliderHoldAndActive && currentSpriteAlpha == 0) {
             sprite.registerEntityModifier(new AlphaModifier(FL_SLIDER_DIM_FADE_DURATION, 0, 1));
-        } else if (!isSliderHoldAndActive && currentSpriteAlpha != 0) {
+        } else if (!isSliderHoldAndActive && currentSpriteAlpha == 1) {
             sprite.registerEntityModifier(new AlphaModifier(FL_SLIDER_DIM_FADE_DURATION, 1, 0));
         }
     }

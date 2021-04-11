@@ -2414,7 +2414,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 replay.addMove(secPassed, gamePoint, i);
             }
         } else if (pSceneTouchEvent.isActionUp()) {
-            if (GameHelper.isFlashLight()) {
+            if (GameHelper.isFlashLight() && mainCursorId == -1 ) {
                 flashlightSprite.setSliderHold(false);
             }
             cursors[i].mouseDown = false;
