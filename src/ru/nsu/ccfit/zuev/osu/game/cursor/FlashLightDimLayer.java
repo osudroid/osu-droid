@@ -15,15 +15,11 @@ public class FlashLightDimLayer extends Entity {
         sprite = new Sprite(-tex.getWidth() / 2f, -tex.getHeight() / 2f, tex);
         float size = 8f;
         sprite.setScale(size);
-        sprite.setAlpha(0);
+        sprite.setVisible(false);
         attachChild(sprite);
     }
 
     public void update(boolean isSliderDimActive) {
-        float currentSpriteAlpha = sprite.getAlpha();
-
-        if (currentSpriteAlpha % 1 == 0) {
-            sprite.registerEntityModifier(new AlphaModifier(0.05f, currentSpriteAlpha, isSliderDimActive ? 1 : 0));
-        }
+        sprite.setVisible(isSliderDimActive);
     }
 }
