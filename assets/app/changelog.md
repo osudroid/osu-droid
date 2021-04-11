@@ -66,21 +66,7 @@ Changelog for 1.6.8
 
 ## Additions [+], changes [=], and bug fixes [*] since the previous pre-release:
 
-- [+] Random welcome sound
-- [+] Customizable exit sound via skins
-- [+] Option to hide replay text when watching a replay
-- [=] Custom skins are sorted alphabetically
-- [=] Rewritten beatmap parser, now able to load some beatmaps that were not possible to load
-- [*] Fixed a bug where maximum obtainable performance points is displayed incorrectly if there are misses
-- [*] Fixed a bug where beatmap information in ranking screen is displayed incorrectly if custom speed multiplier and force AR are used
-- [*] Fixed a bug where beatmap sorting option ignores chosen in-game folder
-- [*] Fixed a bug where old beatmap status text reappears when global leaderboard is active
-- [*] Fixed a bug where custom directories are not loaded properly
-- [*] Fixed a bug where player avatars in online leaderboard are not loaded when not using Wi-Fi connection
-- [*] Fixed a bug where re-watching replays can crash the game
-- [*] Fixed a bug where custom beatmap skin's hitcircle texture does not apply to sliders if not overridden
-- [*] Fixed a bug where background music volume setting does not apply in song selection menu
-- [*] Fixed a bug where some mutually exclusive mods can be selected together
-- [*] Fixed a bug where flashlight (FL) mod is not shown (if selected) when starting gameplay
-- [*] Fixed a bug where beatmap difficulty calculation breaks down at very high CS
-- [*] Fixed a bug where the game crashes if going back from mod selection menu when no beatmap is selected
++ Added slider dim for Flashlight mod
++ Added break dim for Flashlight mod
+= Flashlight mod dim area now starts at the center of the screen
+* Fixed a bug where Flashlight mod dim area flickers if the player taps during break
