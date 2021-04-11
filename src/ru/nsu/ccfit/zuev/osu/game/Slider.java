@@ -1165,6 +1165,10 @@ public class Slider extends GameObject {
                 inRadius = true;
         }
         followcircle.setAlpha(inRadius ? 1 : 0);
+        if (GameHelper.isFlashLight()) {
+            listener.setFlashLightSliderDim(inRadius);
+        }
+
         tickTime += dt;
         //try fixed big followcircle bug
         float fcscale = scale * (1.1f - 0.1f * tickTime * GameHelper.getTickRate() / timing.getBeatLength());

@@ -44,4 +44,6 @@ public interface GameObjectListener {
     public void registerAccuracy(float acc);
     
     public void setFlashLightsPosition(float pX, float pY);
+
+    public void setFlashLightSliderDim(boolean isDim);
 }

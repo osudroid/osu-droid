@@ -2122,12 +2122,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public void onSliderHit(int id, final int score, final PointF start,
                             final PointF end, final boolean endCombo, RGBColor color, int type) {
-
-        if (GameHelper.isFlashLight()) {
-            flashlightSprite.setSliderHold(true);
-            flashlightSprite.setSliderActive(true);
-        }
-
         if (score == 0) {
             createHitEffect(start, "hit0", color);
             createHitEffect(end, "hit0", color);
@@ -2389,9 +2383,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         float pTouchX = FMath.clamp(pSceneTouchEvent.getX(), 0, Config.getRES_WIDTH());
         float pTouchY = FMath.clamp(pSceneTouchEvent.getY(), 0, Config.getRES_HEIGHT());
         if (pSceneTouchEvent.isActionDown()) {
-            if (GameHelper.isFlashLight()) {
-                flashlightSprite.setSliderHold(true);
-            }
             cursors[i].mouseDown = true;
             cursors[i].mouseDownOffset = (pSceneTouchEvent.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier;
             for (int j = 0; j < cursors.length; j++)
@@ -2404,9 +2395,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
             cursorIIsDown[i] = true;
         } else if (pSceneTouchEvent.isActionMove()) {
-            if (GameHelper.isFlashLight()) {
-                flashlightSprite.setSliderHold(true);
-            }
             PointF gamePoint = Utils.realToTrackCoords(new PointF(pTouchX, pTouchY));
             cursors[i].mousePos.x = pTouchX;
             cursors[i].mousePos.y = pTouchY;
@@ -2414,9 +2402,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 replay.addMove(secPassed, gamePoint, i);
             }
         } else if (pSceneTouchEvent.isActionUp()) {
-            if (GameHelper.isFlashLight() && mainCursorId == -1) {
-                flashlightSprite.setSliderHold(false);
-            }
             cursors[i].mouseDown = false;
             if (replay != null) {
                 replay.addUp(secPassed, i);
@@ -2655,8 +2640,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public void onSliderEnd(int id, int accuracy, BitSet tickSet) {
         if (GameHelper.isFlashLight()) {
-            flashlightSprite.setSliderHold(false);
-            flashlightSprite.setSliderActive(false);
+            flashlightSprite.setSliderDimActive(false);
         }
         if (replay != null && !replaying) {
             short acc = (short) (accuracy);
@@ -2668,6 +2652,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public void setFlashLightsPosition(float pX, float pY){
         flashlightSprite.setPosition(pX, pY);
+    }
+
+    public void setFlashLightSliderDim(boolean isDim) {
+        flashlightSprite.setSliderDimActive(isDim);
     }
 
     private int getNearestCursorId(float pX, float pY){

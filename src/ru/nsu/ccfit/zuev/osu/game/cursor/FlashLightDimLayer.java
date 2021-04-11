@@ -1,6 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor;
 
-
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
@@ -19,12 +18,7 @@ public class FlashLightDimLayer extends Entity {
         attachChild(sprite);
     }
 
-    public void update(boolean isSliderHoldAndActive) {
-        boolean isSpriteVisible = sprite.isVisible();
-        if (isSliderHoldAndActive && !isSpriteVisible) {
-            sprite.setVisible(true);
-        } else if (!isSliderHoldAndActive && isSpriteVisible) {
-            sprite.setVisible(false);
-        }
+    public void update(boolean isSliderDimActive) {
+        sprite.setVisible(isSliderDimActive);
     }
 }
