@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor;
 
 import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
