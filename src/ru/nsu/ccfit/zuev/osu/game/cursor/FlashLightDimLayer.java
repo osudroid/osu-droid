@@ -20,7 +20,7 @@ public class FlashLightDimLayer extends Entity {
     }
 
     public void update(boolean isSliderHoldAndActive) {
-        float FL_SLIDER_DIM_FADE_DURATION = 0.5f;
+        float FL_SLIDER_DIM_FADE_DURATION = 0.05f;
         float currentSpriteAlpha = sprite.getAlpha();
 
         if (isSliderHoldAndActive && currentSpriteAlpha == 0) {
