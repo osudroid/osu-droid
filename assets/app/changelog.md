@@ -66,7 +66,7 @@ Changelog for 1.6.8
 
 ## Additions [+], changes [=], and bug fixes [*] since the previous pre-release:
 
-+ Added slider dim for Flashlight mod
-+ Added break dim for Flashlight mod
-= Flashlight mod dim area now starts at the center of the screen
-* Fixed a bug where Flashlight mod dim area flickers if the player taps during break
+- [+] Added slider dim for Flashlight mod
+- [+] Added break dim for Flashlight mod
+- [=] Flashlight mod dim area now starts at the center of the screen
+- [*] Fixed a bug where Flashlight mod dim area flickers if the player taps during break
