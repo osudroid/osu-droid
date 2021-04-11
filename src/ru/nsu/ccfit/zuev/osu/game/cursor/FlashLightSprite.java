@@ -35,9 +35,9 @@ public class FlashLightSprite extends Entity{
 
     public void updateBreak(boolean isBreak) {
         if (isBreak) {
-            sprite.registerEntityModifier(new ScaleModifier(1f, currentSize, 1.5f * baseSize));
+            sprite.registerEntityModifier(new ScaleModifier(0.8f, currentSize, 1.5f * baseSize));
         } else {
-            sprite.registerEntityModifier(new ScaleModifier(1f, 1.5f * baseSize, currentSize));
+            sprite.registerEntityModifier(new ScaleModifier(0.8f, 1.5f * baseSize, currentSize));
         }
     }
 
