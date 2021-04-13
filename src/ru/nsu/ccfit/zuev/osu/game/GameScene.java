@@ -89,6 +89,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -600,8 +601,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 return false;
             } else
                 replay.countMarks(overallDifficulty);
-        } else if (!OnlineManager.getInstance().isStayOnline()) {
-            replay = null;
+        //} else if (!OnlineManager.getInstance().isStayOnline()) {
+        //    replay = null;
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO)) {
             replay = null;
         }
@@ -2767,5 +2768,38 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return null;
         }
     }
+
+    public boolean getReplaying(){
+        return replaying;
+    }
     
+    public boolean saveFailedReplay(){
+        stat.setTime(System.currentTimeMillis());
+        if (replay != null && replaying == false) {
+            //write misses to replay
+            for (GameObject obj : activeObjects) {
+                stat.registerHit(0, false, false);
+                replay.addObjectScore(obj.getId(), Replay.RESULT_0);
+            }
+            while (objects.isEmpty() == false){
+                objects.poll();
+                stat.registerHit(0, false, false);
+                replay.addObjectScore(++lastObjectId, Replay.RESULT_0);
+            }
+            //save replay
+            String ctime = String.valueOf(System.currentTimeMillis());
+            replayFile = Config.getCorePath() + "Scores/"
+                    + MD5Calcuator.getStringMD5(lastTrack.getFilename() + ctime)
+                    + ctime.substring(0, Math.min(3, ctime.length())) + ".odr";
+            replay.setStat(stat);
+            replay.save(replayFile);
+            ScoreLibrary.getInstance().addScore(lastTrack.getFilename(), stat, replayFile);
+            ToastLogger.showText(StringTable.get(R.string.message_save_replay_successful), true);
+            return true;
+        }
+        else{
+            ToastLogger.showText(StringTable.get(R.string.message_save_replay_failed), true);
+            return false;
+        }
+    }
 }

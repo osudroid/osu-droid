@@ -100,34 +100,6 @@ public class ScoringScene {
             }
             mapperStr += "]";
         }
-        //calculatePP
-        if (Config.isDisplayScorePP()){
-            StringBuilder ppinfo = new StringBuilder();
-            ppinfo.append("[");
-            DifficultyReCalculator diffRecalculator = new DifficultyReCalculator();
-            float newstar = diffRecalculator.recalculateStar(
-                            trackInfo,
-                            ModMenu.getInstance().getSpeed(),
-                            diffRecalculator.getCS(stat, trackInfo));
-            diffRecalculator.calculatePP(stat, trackInfo);
-            double pp = diffRecalculator.getTotalPP();
-            double aimpp = diffRecalculator.getAimPP();
-            double spdpp = diffRecalculator.getSpdPP();
-            double accpp = diffRecalculator.getAccPP();
-            diffRecalculator.calculateMaxPP(stat, trackInfo);
-            double max_pp = diffRecalculator.getTotalPP();
-            double max_aimpp = diffRecalculator.getAimPP();
-            double max_spdpp = diffRecalculator.getSpdPP();
-            double max_accpp = diffRecalculator.getAccPP();
-            ppinfo.append(String.format(Locale.ENGLISH, "%.2f*,", newstar));
-            ppinfo.append(String.format(Locale.ENGLISH, "PP:%.2f/%.2f(", pp, max_pp));
-            ppinfo.append(String.format(Locale.ENGLISH, "Aim:%.0f/%.0f,", aimpp, max_aimpp));
-            ppinfo.append(String.format(Locale.ENGLISH, "Spd:%.0f/%.0f,", spdpp, max_spdpp));
-            ppinfo.append(String.format(Locale.ENGLISH, "Acc:%.0f/%.0f)", accpp, max_accpp));
-            ppinfo.append("]");
-            mapperStr += " " + ppinfo.toString();
-        }
-        //
         Debug.i("playedtime " + stat.getTime());
         final Text beatmapInfo = new Text(Utils.toRes(4), Utils.toRes(2),
                 ResourceManager.getInstance().getFont("font"), infoStr);
@@ -138,7 +110,6 @@ public class ScoringScene {
         scene.attachChild(beatmapInfo);
         scene.attachChild(mapperInfo);
         scene.attachChild(playerInfo);
-
         final int x = 0, y = 100;
         final TextureRegion panelr = ResourceManager.getInstance().getTexture(
                 "ranking-panel");
@@ -456,7 +427,7 @@ public class ScoringScene {
             modX -= Utils.toRes(30);
             scene.attachChild(modSprite);
         }
-        //added by hao1637
+        //new mods in 1.6.8
         if (stat.getMod().contains(GameMod.MOD_REALLYEASY)) {
             final Sprite modSprite = new Sprite(modX, modY, ResourceManager
                     .getInstance().getTexture("selection-mod-reallyeasy"));
@@ -469,7 +440,41 @@ public class ScoringScene {
             modX -= Utils.toRes(30);
             scene.attachChild(modSprite);
         }
-        //
+        //calculatePP
+        if (Config.isDisplayScorePP()){
+            StringBuilder ppinfo = new StringBuilder();
+            ppinfo.append("[");
+            DifficultyReCalculator diffRecalculator = new DifficultyReCalculator();
+            float newstar = diffRecalculator.recalculateStar(
+                            trackInfo,
+                            diffRecalculator.getCS(stat, trackInfo),
+                            stat.getSpeed());
+            diffRecalculator.calculatePP(stat, trackInfo);
+            double pp = diffRecalculator.getTotalPP();
+            double aimpp = diffRecalculator.getAimPP();
+            double spdpp = diffRecalculator.getSpdPP();
+            double accpp = diffRecalculator.getAccPP();
+            diffRecalculator.calculateMaxPP(stat, trackInfo);
+            double max_pp = diffRecalculator.getTotalPP();
+            double max_aimpp = diffRecalculator.getAimPP();
+            double max_spdpp = diffRecalculator.getSpdPP();
+            double max_accpp = diffRecalculator.getAccPP();
+            ppinfo.append(String.format(Locale.ENGLISH, "%.2f*,", newstar));
+            ppinfo.append(String.format(Locale.ENGLISH, "PP:%.2f/%.2f(", pp, max_pp));
+            ppinfo.append(String.format(Locale.ENGLISH, "Aim:%.0f/%.0f,", aimpp, max_aimpp));
+            ppinfo.append(String.format(Locale.ENGLISH, "Spd:%.0f/%.0f,", spdpp, max_spdpp));
+            ppinfo.append(String.format(Locale.ENGLISH, "Acc:%.0f/%.0f)", accpp, max_accpp));
+            ppinfo.append("]");
+            String ppStr = ppinfo.toString();
+            final Text ppInfo = new Text(Utils.toRes(4), Config.getRES_HEIGHT() - playerInfo.getHeight() - Utils.toRes(2),
+                ResourceManager.getInstance().getFont("smallFont"), ppStr);
+            ppInfo.setPosition(Utils.toRes(4), Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(2));
+            final Rectangle bgBottomRect = new Rectangle(0, Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(4), ppInfo.getWidth() + Utils.toRes(12), ppInfo.getHeight() + Utils.toRes(4));
+            bgBottomRect.setColor(0, 0, 0, 0.5f);
+            scene.attachChild(bgBottomRect);
+            scene.attachChild(ppInfo);
+        }
+        //save and upload score
         if (track != null && mapMD5 != null) {
             if (stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
                     OnlineManager.getInstance().isReadyToSend()) {
