@@ -1,18 +1,28 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
+import com.edlplan.framework.math.FMath;
+
 import org.anddev.andengine.engine.Engine;
+import org.anddev.andengine.engine.camera.Camera;
+import org.anddev.andengine.entity.scene.Scene;
+import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
 import org.anddev.andengine.entity.scene.menu.MenuScene;
 import org.anddev.andengine.entity.scene.menu.MenuScene.IOnMenuItemClickListener;
 import org.anddev.andengine.entity.scene.menu.item.IMenuItem;
 import org.anddev.andengine.entity.scene.menu.item.SpriteMenuItem;
 import org.anddev.andengine.entity.sprite.Sprite;
+import org.anddev.andengine.entity.text.ChangeableText;
+import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class PauseMenu implements IOnMenuItemClickListener {
     static final int ITEM_CONTINUE = 0;
@@ -21,12 +31,33 @@ public class PauseMenu implements IOnMenuItemClickListener {
     private final MenuScene scene;
     private final GameScene game;
     private final boolean fail;
+    private boolean savedFailedReplay;
 
     public PauseMenu(final Engine engine, final GameScene game,
                      final boolean fail) {
         this.game = game;
         this.fail = fail;
-        scene = new MenuScene(engine.getCamera());
+        savedFailedReplay = false;
+        final ChangeableText saveFailedReplay = new ChangeableText(Utils.toRes(4), Utils.toRes(2),
+                ResourceManager.getInstance().getFont("font"), StringTable.get(R.string.str_save_failed_replay));
+        class PauseMenuScene extends MenuScene implements IOnSceneTouchListener{
+            PauseMenuScene(final Camera pCamera){
+                super(pCamera);
+            }
+            public boolean onSceneTouchEvent(final Scene pScene, final TouchEvent pSceneTouchEvent) {
+                float pTouchX = FMath.clamp(pSceneTouchEvent.getX(), 0, Config.getRES_WIDTH());
+                float pTouchY = FMath.clamp(pSceneTouchEvent.getY(), 0, Config.getRES_HEIGHT());
+                if (fail && pSceneTouchEvent.isActionUp() && pTouchX < Config.getRES_WIDTH() / 2 && pTouchY < 50 && savedFailedReplay == false && game.getReplaying() == false){
+                    //save replay
+                    if (game.saveFailedReplay()){
+                        saveFailedReplay.setText(StringTable.get(R.string.message_save_replay_successful));
+                        savedFailedReplay = true;
+                    }
+                }
+                return true;
+            }
+        }
+        scene = new PauseMenuScene(engine.getCamera());
 
         final SpriteMenuItem itemContinue = new SpriteMenuItem(ITEM_CONTINUE,
                 ResourceManager.getInstance().getTexture("pause-continue"));
@@ -37,14 +68,17 @@ public class PauseMenu implements IOnMenuItemClickListener {
         final SpriteMenuItem itemBack = new SpriteMenuItem(ITEM_BACK,
                 ResourceManager.getInstance().getTexture("pause-back"));
         scene.addMenuItem(itemBack);
-
+        scene.attachChild(saveFailedReplay);
         scene.setBackgroundEnabled(false);
         TextureRegion tex = null;
         if (fail) {
             itemContinue.setVisible(false);
             tex = ResourceManager.getInstance().getTexture("fail-background");
-
+            if (game.getReplaying()){
+                saveFailedReplay.setVisible(false);
+            }
         } else {
+            saveFailedReplay.setVisible(false);
             tex = ResourceManager.getInstance().getTexture("pause-overlay");
         }
 

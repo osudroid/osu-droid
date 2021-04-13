@@ -68,7 +68,7 @@ public class MapInfoFragment extends BaseFragment {
     public void dismiss() {
         playEndAnim(super::dismiss);
     }
-
+/*
     public void showWithMap(final TrackInfo track, float speedMultiplier){
         DifficultyReCalculator diffRecalculator = new DifficultyReCalculator();
         if (!diffRecalculator.calculateMapInfo(track, speedMultiplier)){
@@ -116,4 +116,5 @@ public class MapInfoFragment extends BaseFragment {
         show();
         diffRecalculator = null;
     }
+    */
 }
