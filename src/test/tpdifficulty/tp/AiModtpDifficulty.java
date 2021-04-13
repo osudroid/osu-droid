@@ -93,8 +93,10 @@ public class AiModtpDifficulty {
 
         return true;
     }
-
     public void CalculateAll(ArrayList<HitObject> hitObjects, float circleSize) {
+        CalculateAll(hitObjects,circleSize,1.0f);
+    }
+    public void CalculateAll(ArrayList<HitObject> hitObjects, float circleSize, float speed) {
         // Fill our custom tpHitObject class, that carries additional information
         tpHitObjects = new ArrayList<tpHitObject>(hitObjects.size());
         // The Max CS in osu!droid is 17.62, but in pc OSU! is about 12.14. so I map 10-17.62(gameplay CS) to 10-12.14(star calculate CS)
@@ -104,7 +106,10 @@ public class AiModtpDifficulty {
         }
         float CircleRadius = (PLAYFIELD_WIDTH / 16.0f) * (1.0f - 0.7f * (cs - 5.0f) / 5.0f);
         for (HitObject hitObject : hitObjects) {
-            tpHitObjects.add(new tpHitObject(hitObject, CircleRadius));
+            tpHitObject hitObj = new tpHitObject(hitObject, CircleRadius);
+            hitObj.BaseHitObject.setStartTime((int)(hitObj.BaseHitObject.getStartTime() / speed));
+            hitObj.BaseHitObject.setEndTime((int)(hitObj.BaseHitObject.getEndTime() / speed));
+            tpHitObjects.add(hitObj);
         }
 
         // Sort tpHitObjects by StartTime of the HitObjects - just to make sure. Not using CompareTo, since it results in a crash (HitObjectBase inherits MarshalByRefObject)

@@ -815,6 +815,9 @@ public class Slider extends GameObject {
             Slider.this.listener.onSliderHit(id, score, path.points.get(0),
                     path.points.get(path.points.size() - 1), endsCombo, color, GameObjectListener.SLIDER_END);
         }
+        if(!startHit){
+            firstHitAccuracy = (int) (GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty()) * 1000 + 13);
+        }
         listener.onSliderEnd(id, firstHitAccuracy, tickSet);
         // Remove slider from scene
         SyncTaskManager.getInstance().run(new Runnable() {
