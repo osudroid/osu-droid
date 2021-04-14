@@ -1150,7 +1150,7 @@ public class Slider extends GameObject {
                     border.registerEntityModifier(hiddenFadeOut);
                 }
                 if (abstractSliderBody != null) {
-                    abstractSliderBody.fadeOutSlider(sliderDuration);
+                    abstractSliderBody.fadeOut(sliderDuration);
                 }
             }
         }

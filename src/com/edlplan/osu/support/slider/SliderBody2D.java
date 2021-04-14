@@ -76,7 +76,7 @@ public class SliderBody2D extends AbstractSliderBody {
      *
      * @param duration The duration of the fade-out animation.
      */
-    public void fadeOutSlider(float duration) {
+    public void fadeOut(float duration) {
         if (body.getAlpha() > 0) {
             body.registerEntityModifier(new AlphaModifier(duration, body.getAlpha(), 0));
         }
