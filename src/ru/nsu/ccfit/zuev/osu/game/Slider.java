@@ -5,7 +5,6 @@ import android.graphics.PointF;
 import com.edlplan.andengine.TrianglePack;
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
-import com.edlplan.osu.support.slider.AbstractSliderBody;
 import com.edlplan.osu.support.slider.SliderBody2D;
 import com.edlplan.osu.support.timing.controlpoint.TimingControlPoint;
 
@@ -94,7 +93,7 @@ public class Slider extends GameObject {
     private float sliderLength;
     private boolean preStageFinish = false;
 
-    private AbstractSliderBody abstractSliderBody = null;
+    private SliderBody2D abstractSliderBody = null;
 
     public Slider() {
         startCircle = SpritePool.getInstance().getSprite("sliderstartcircle");
@@ -346,17 +345,16 @@ public class Slider extends GameObject {
             abstractSliderBody.setBorderWidth(Utils.toRes(SkinJson.get().getSliderBodyWidth()) * scale);
             abstractSliderBody.setSliderBodyBaseAlpha(SkinJson.get().getSliderBodyBaseAlpha());
 
-            if (SkinJson.get().isSliderHintEnable() && abstractSliderBody instanceof SliderBody2D) {
+            if (SkinJson.get().isSliderHintEnable()) {
                 if (length > SkinJson.get().getSliderHintShowMinLength()) {
-                    SliderBody2D body2D = (SliderBody2D) abstractSliderBody;
-                    body2D.setEnableHint(true);
-                    body2D.setHintAlpha(SkinJson.get().getSliderHintAlpha());
-                    body2D.setHintWidth(Utils.toRes(SkinJson.get().getSliderHintWidth()));
+                    abstractSliderBody.setEnableHint(true);
+                    abstractSliderBody.setHintAlpha(SkinJson.get().getSliderHintAlpha());
+                    abstractSliderBody.setHintWidth(Utils.toRes(SkinJson.get().getSliderHintWidth()));
                     RGBColor hintColor = SkinJson.get().getSliderHintColor();
                     if (hintColor != null) {
-                        body2D.setHintColor(hintColor.r(), hintColor.g(), hintColor.b());
+                        abstractSliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b());
                     } else {
-                        body2D.setHintColor(color.r(), color.g(), color.b());
+                        abstractSliderBody.setHintColor(color.r(), color.g(), color.b());
                     }
                 }
             }
@@ -1126,6 +1124,34 @@ public class Slider extends GameObject {
             if (Config.isUseSuperSlider()) {
                 startCircle.setAlpha(0);
                 startOverlay.setAlpha(0);
+            }
+
+            // Slider body, border, and hint gradually fades in Hidden mod
+            // ball = null means the slider has just started
+            if (GameHelper.isHidden() && ball == null) {
+                final float sliderDuration = maxTime * repeatCount - preTime;
+                final FadeOutModifier hiddenFadeOut = new FadeOutModifier(sliderDuration);
+                if (group != null) {
+                    group.registerEntityModifier(hiddenFadeOut);
+                }
+                if (trackPoly != null) {
+                    trackPoly.registerEntityModifier(hiddenFadeOut);
+                }
+                if (borderPoly != null) {
+                    borderPoly.registerEntityModifier(hiddenFadeOut);
+                }
+                if (borderGroup != null) {
+                    borderGroup.registerEntityModifier(hiddenFadeOut);
+                }
+                if (body != null) {
+                    body.registerEntityModifier(hiddenFadeOut);
+                }
+                if (border != null) {
+                    border.registerEntityModifier(hiddenFadeOut);
+                }
+                if (abstractSliderBody != null) {
+                    abstractSliderBody.fadeOutSlider(sliderDuration);
+                }
             }
         }
 

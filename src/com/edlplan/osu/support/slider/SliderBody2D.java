@@ -6,6 +6,7 @@ import com.edlplan.andengine.TrianglePack;
 import com.edlplan.framework.math.Color4;
 import com.edlplan.framework.math.line.LinePath;
 
+import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
@@ -65,6 +66,26 @@ public class SliderBody2D extends AbstractSliderBody {
 
     public void setHintWidth(float hintWidth) {
         this.hintWidth = hintWidth;
+    }
+
+    /**
+     * Gradually fades the slider's body, border, and hint (if any) out over the specified duration.
+     * <P>
+     * Used if Hidden mod is active.
+     * </P>
+     *
+     * @param duration The duration of the fade-out animation.
+     */
+    public void fadeOutSlider(float duration) {
+        if (body.getAlpha() > 0) {
+            body.registerEntityModifier(new AlphaModifier(duration, body.getAlpha(), 0));
+        }
+        if (border.getAlpha() > 0) {
+            border.registerEntityModifier(new AlphaModifier(duration, border.getAlpha(), 0));
+        }
+        if (hint != null && hint.getAlpha() > 0) {
+            hint.registerEntityModifier(new AlphaModifier(duration, hint.getAlpha(), 0));
+        }
     }
 
     @Override
