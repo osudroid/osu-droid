@@ -1129,7 +1129,7 @@ public class Slider extends GameObject {
             // Slider body, border, and hint gradually fades in Hidden mod
             // ball = null means the slider has just started
             if (GameHelper.isHidden() && ball == null) {
-                final float sliderDuration = maxTime * repeatCount - preTime;
+                final float sliderDuration = maxTime * repeatCount;
                 final FadeOutModifier hiddenFadeOut = new FadeOutModifier(sliderDuration);
                 if (group != null) {
                     group.registerEntityModifier(hiddenFadeOut);
