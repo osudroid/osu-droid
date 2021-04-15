@@ -2,11 +2,11 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 import android.os.SystemClock;
-import lt.ekgame.beatmap_analyzer.beatmap.HitObject;
 
 import com.dgsrz.bancho.game.sprite.VideoSprite;
 import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.framework.math.FMath;
+import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
@@ -89,6 +89,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -174,6 +175,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private int sliderIndex = 0;
 
     private StoryboardSprite storyboardSprite;
+    private ProxySprite storyboardOverlayProxy;
 
     private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
@@ -599,8 +601,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 return false;
             } else
                 replay.countMarks(overallDifficulty);
-        } else if (!OnlineManager.getInstance().isStayOnline()) {
-            replay = null;
+        //} else if (!OnlineManager.getInstance().isStayOnline()) {
+        //    replay = null;
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO)) {
             replay = null;
         }
@@ -665,6 +667,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (Config.isEnableStoryboard()) {
             if (storyboardSprite == null) {
                 storyboardSprite = new StoryboardSprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+                storyboardOverlayProxy = new ProxySprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+                storyboardSprite.setOverlayDrawProxy(storyboardOverlayProxy);
                 scene.attachChild(storyboardSprite);
             }
             storyboardSprite.detachSelf();
@@ -675,6 +679,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         fgScene = new Scene();
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
+        if (storyboardOverlayProxy != null) {
+            scene.attachChild(storyboardOverlayProxy);
+        }
         scene.attachChild(fgScene);
         scene.setBackground(new ColorBackground(0, 0, 0));
         bgScene.setBackgroundEnabled(false);
@@ -1243,7 +1250,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if(GameHelper.isFlashLight()){
-            flashlightSprite = new FlashLightSprite();
+            flashlightSprite = new FlashLightSprite(fgScene);
             flashlightSprite.setShowing(false);
             fgScene.attachChild(flashlightSprite, 0);
         }
@@ -1853,6 +1860,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     if (storyboardSprite != null) {
                         storyboardSprite.releaseStoryboard();
                         storyboardSprite = null;
+                        storyboardOverlayProxy.setDrawProxy(null);
                     }
 
                     scoringScene.load(stat, lastTrack, GlobalManager.getInstance().getSongService(), replayFile, trackMD5, null);
@@ -1970,6 +1978,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (storyboardSprite != null) {
             storyboardSprite.releaseStoryboard();
             storyboardSprite = null;
+            storyboardOverlayProxy.setDrawProxy(null);
         }
 
         onExit();
@@ -2067,6 +2076,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             replay.addObjectResult(id, sacc, null);
         }
         if(GameHelper.isFlashLight()){
+
             if (GameHelper.isAuto()) {
                 flashlightSprite.setPosition(pos.x, pos.y);
                 flashlightSprite.setShowing(true);
@@ -2113,6 +2123,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public void onSliderHit(int id, final int score, final PointF start,
                             final PointF end, final boolean endCombo, RGBColor color, int type) {
+
+        if (GameHelper.isFlashLight()) {
+            flashlightSprite.setSliderHold(true);
+            flashlightSprite.setSliderActive(true);
+        }
+
         if (score == 0) {
             createHitEffect(start, "hit0", color);
             createHitEffect(end, "hit0", color);
@@ -2125,7 +2141,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 ResourceManager.getInstance().getCustomSound("combobreak", 1)
                         .play();
             }
-            if(GameHelper.isSuddenDeath())stat.changeHp(-1.0f);
+            if(GameHelper.isSuddenDeath()) stat.changeHp(-1.0f);
             stat.registerHit(0, true, false);
             return;
         }
@@ -2374,11 +2390,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         float pTouchX = FMath.clamp(pSceneTouchEvent.getX(), 0, Config.getRES_WIDTH());
         float pTouchY = FMath.clamp(pSceneTouchEvent.getY(), 0, Config.getRES_HEIGHT());
         if (pSceneTouchEvent.isActionDown()) {
-            if (pTouchX > Config.getRES_WIDTH()) {
-                for (final Cursor cursor : cursors) {
-                    cursor.mouseOldDown = false;
-                }
-                return true;
+            if (GameHelper.isFlashLight()) {
+                flashlightSprite.setSliderHold(true);
             }
             cursors[i].mouseDown = true;
             cursors[i].mouseDownOffset = (pSceneTouchEvent.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier;
@@ -2392,6 +2405,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
             cursorIIsDown[i] = true;
         } else if (pSceneTouchEvent.isActionMove()) {
+            if (GameHelper.isFlashLight()) {
+                flashlightSprite.setSliderHold(true);
+            }
             PointF gamePoint = Utils.realToTrackCoords(new PointF(pTouchX, pTouchY));
             cursors[i].mousePos.x = pTouchX;
             cursors[i].mousePos.y = pTouchY;
@@ -2399,6 +2415,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 replay.addMove(secPassed, gamePoint, i);
             }
         } else if (pSceneTouchEvent.isActionUp()) {
+            if (GameHelper.isFlashLight()) {
+                flashlightSprite.setSliderHold(false);
+            }
             cursors[i].mouseDown = false;
             if (replay != null) {
                 replay.addUp(secPassed, i);
@@ -2636,6 +2655,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
 
     public void onSliderEnd(int id, int accuracy, BitSet tickSet) {
+        if (GameHelper.isFlashLight()) {
+            flashlightSprite.setSliderHold(false);
+            flashlightSprite.setSliderActive(false);
+        }
         if (replay != null && !replaying) {
             short acc = (short) (accuracy);
             replay.addObjectResult(id, acc, (BitSet) tickSet.clone());
@@ -2745,5 +2768,38 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return null;
         }
     }
+
+    public boolean getReplaying(){
+        return replaying;
+    }
     
+    public boolean saveFailedReplay(){
+        stat.setTime(System.currentTimeMillis());
+        if (replay != null && replaying == false) {
+            //write misses to replay
+            for (GameObject obj : activeObjects) {
+                stat.registerHit(0, false, false);
+                replay.addObjectScore(obj.getId(), Replay.RESULT_0);
+            }
+            while (objects.isEmpty() == false){
+                objects.poll();
+                stat.registerHit(0, false, false);
+                replay.addObjectScore(++lastObjectId, Replay.RESULT_0);
+            }
+            //save replay
+            String ctime = String.valueOf(System.currentTimeMillis());
+            replayFile = Config.getCorePath() + "Scores/"
+                    + MD5Calcuator.getStringMD5(lastTrack.getFilename() + ctime)
+                    + ctime.substring(0, Math.min(3, ctime.length())) + ".odr";
+            replay.setStat(stat);
+            replay.save(replayFile);
+            ScoreLibrary.getInstance().addScore(lastTrack.getFilename(), stat, replayFile);
+            ToastLogger.showText(StringTable.get(R.string.message_save_replay_successful), true);
+            return true;
+        }
+        else{
+            ToastLogger.showText(StringTable.get(R.string.message_save_replay_failed), true);
+            return false;
+        }
+    }
 }

@@ -815,6 +815,9 @@ public class Slider extends GameObject {
             Slider.this.listener.onSliderHit(id, score, path.points.get(0),
                     path.points.get(path.points.size() - 1), endsCombo, color, GameObjectListener.SLIDER_END);
         }
+        if(!startHit){
+            firstHitAccuracy = (int) (GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty()) * 1000 + 13);
+        }
         listener.onSliderEnd(id, firstHitAccuracy, tickSet);
         // Remove slider from scene
         SyncTaskManager.getInstance().run(new Runnable() {
@@ -1120,14 +1123,9 @@ public class Slider extends GameObject {
             }
             return;
         } else {
-            if (Config.isUseSuperSlider() && repeatCount == 1) {
-                if (!reverse) {
-                    startCircle.setAlpha(0);
-                    startOverlay.setAlpha(0);
-                } else {
-                    endCircle.setAlpha(0);
-                    endOverlay.setAlpha(0);
-                }
+            if (Config.isUseSuperSlider()) {
+                startCircle.setAlpha(0);
+                startOverlay.setAlpha(0);
             }
         }
 

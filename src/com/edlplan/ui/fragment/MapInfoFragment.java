@@ -68,10 +68,10 @@ public class MapInfoFragment extends BaseFragment {
     public void dismiss() {
         playEndAnim(super::dismiss);
     }
-
-    public void showWithMap(final TrackInfo track){
+/*
+    public void showWithMap(final TrackInfo track, float speedMultiplier){
         DifficultyReCalculator diffRecalculator = new DifficultyReCalculator();
-        if (!diffRecalculator.calculateMapInfo(track)){
+        if (!diffRecalculator.calculateMapInfo(track, speedMultiplier)){
             return;
         }
         int circleCount = track.getHitCircleCount();
@@ -116,4 +116,5 @@ public class MapInfoFragment extends BaseFragment {
         show();
         diffRecalculator = null;
     }
+    */
 }

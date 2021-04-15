@@ -64,6 +64,34 @@ public class DifficultyReCalculator {
     private boolean loadTimingPoints(final BeatmapData data) {
         // Load timing points
         timingPoints.clear();
+
+        // Get the first uninherited timing point
+        for (final String tempString : data.getData("TimingPoints")) {
+            String[] rawData = tempString.split("[,]");
+            // Handle malformed timing point
+            if (rawData.length < 2) {
+                return false;
+            }
+            float bpm = parser.tryParseFloat(rawData[1], Float.NaN);
+            if (Float.isNaN(bpm)) {
+                return false;
+            }
+
+            // Uninherited: bpm > 0
+            if (bpm > 0) {
+                float offset = parser.tryParseFloat(rawData[0], Float.NaN);
+                if (Float.isNaN(offset)) {
+                    return false;
+                }
+                currentTimingPoint = new TimingPoint(bpm, offset, 1f);
+                break;
+            }
+        }
+
+        if (currentTimingPoint == null) {
+            return false;
+        }
+
         for (final String tempString : data.getData("TimingPoints")) {
             String[] rawData = tempString.split("[,]");
             // Handle malformed timing point
@@ -77,12 +105,6 @@ public class DifficultyReCalculator {
             }
             float speed = 1.0f;
             boolean inherited = bpm < 0;
-
-            // The first timing point should always be uninherited,
-            // otherwise the beatmap is invalid
-            if (currentTimingPoint == null && inherited) {
-                return false;
-            }
 
             if (inherited) {
                 speed = -100.0f / bpm;
@@ -207,7 +229,11 @@ public class DifficultyReCalculator {
         return this.hitObjects.size() > 0;
     }
 
-    public float recalculateStar(final TrackInfo track, float cs) {
+    public float recalculateStar(final TrackInfo track, float cs){
+        return recalculateStar(track, cs, 1.0f);
+    }
+
+    public float recalculateStar(final TrackInfo track, float cs, float speed) {
         if (!init(track)) {
             return 0f;
         }
@@ -216,7 +242,7 @@ public class DifficultyReCalculator {
         }
         try {
             tpDifficulty = new AiModtpDifficulty();
-            tpDifficulty.CalculateAll(hitObjects, cs);
+            tpDifficulty.CalculateAll(hitObjects, cs, speed);
             double star = tpDifficulty.getStarRating();
             if (!timingPoints.isEmpty()){
                 timingPoints.clear();
@@ -472,7 +498,8 @@ public class DifficultyReCalculator {
     }
 
     //must use reCalculateStar() before this
-    public boolean calculateMapInfo(final TrackInfo track) {
+    //This method calculate the note count of stream/jump/etc in a diff
+    //public boolean calculateMapInfo(final TrackInfo track, float speedMultiplier) {
         //计算谱面信息
         /*
         120bpm: 125ms(dt1), 140bpm: 107ms(dt3), 80bpm: 187.5(dt4), 180bpm: 83.33ms(dt2)
@@ -481,6 +508,7 @@ public class DifficultyReCalculator {
         连打:高于120bpm且间距小于90，高于180bpm且间距大于90、小于180
         跳:间距大于180
         */
+        /*
         if (!init(track)) {
             return false;
         }
@@ -556,6 +584,7 @@ public class DifficultyReCalculator {
         real_time = (hitObjects.get(hitObjects.size() - 1).getEndTime() - firstObjectTime) / 1000f;
         return true;
     }
+    */
     public int getSingleCount(){
         return single;
     }

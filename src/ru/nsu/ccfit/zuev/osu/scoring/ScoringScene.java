@@ -81,7 +81,6 @@ public class ScoringScene {
             trackInfo = track;
         }
         this.track = trackInfo;
-
         final int x = 0, y = 100;
         final TextureRegion panelr = ResourceManager.getInstance().getTexture(
                 "ranking-panel");
@@ -399,7 +398,7 @@ public class ScoringScene {
             modX -= Utils.toRes(30);
             scene.attachChild(modSprite);
         }
-        //added by hao1637
+        //new mods in 1.6.8
         if (stat.getMod().contains(GameMod.MOD_REALLYEASY)) {
             final Sprite modSprite = new Sprite(modX, modY, ResourceManager
                     .getInstance().getTexture("selection-mod-reallyeasy"));
@@ -446,8 +445,10 @@ public class ScoringScene {
             ppinfo.append("[");
             DifficultyReCalculator diffRecalculator = new DifficultyReCalculator();
             float newstar = diffRecalculator.recalculateStar(
-                    trackInfo,
-                    diffRecalculator.getCS(stat, trackInfo));
+                trackInfo,
+                diffRecalculator.getCS(stat, trackInfo),
+                stat.getSpeed()
+            );
             diffRecalculator.calculatePP(stat, trackInfo);
             double pp = diffRecalculator.getTotalPP();
             double aimpp = diffRecalculator.getAimPP();
@@ -477,6 +478,7 @@ public class ScoringScene {
         scene.attachChild(mapperInfo);
         scene.attachChild(playerInfo);
 
+        //save and upload score
         if (track != null && mapMD5 != null) {
             if (stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
                     OnlineManager.getInstance().isReadyToSend()) {
