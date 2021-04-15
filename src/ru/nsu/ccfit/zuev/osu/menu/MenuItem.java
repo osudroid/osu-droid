@@ -232,11 +232,15 @@ public class MenuItem {
                 boolean vis = false;
                 if(trackId < 0){
                     for (TrackInfo track : beatmap.getTracks()) {
-                        vis |= visibleTrack(track, key, opt, value);
+                        if (key != null) {
+                            vis |= visibleTrack(track, key, opt, value);
+                        }
                     }
                 }
                 else{
-                    vis |= visibleTrack(beatmap.getTrack(trackId), key, opt, value);
+                    if (key != null) {
+                        vis = visibleTrack(beatmap.getTrack(trackId), key, opt, value);
+                    }
                 }
                 canVisible &= vis;
             } else {
@@ -247,7 +251,7 @@ public class MenuItem {
             }
         }
 
-        if (filter == null || filter.equals("")) {
+        if (filter.equals("")) {
             canVisible = true;
         }
 
@@ -280,8 +284,9 @@ public class MenuItem {
                 return calOpt(track.getHpDrain(), Float.parseFloat(value), opt);
             case "star":
                 return calOpt(track.getDifficulty(), Float.parseFloat(value), opt);
+            default:
+                return false;
         }
-        return false;
     }
 
     private boolean calOpt(float val1, float val2, String opt) {
@@ -296,8 +301,9 @@ public class MenuItem {
                 return val1 <= val2;
             case ">=":
                 return val1 >= val2;
+            default:
+                return false;
         }
-        return false;
     }
 
     public void delete() {

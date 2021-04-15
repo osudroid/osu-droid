@@ -12,6 +12,8 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
+import java.util.ArrayList;
+
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
@@ -24,7 +26,12 @@ public class LoadingScreen implements IUpdateHandler {
     private float percentage;
 
     public LoadingScreen() {
-        ToastLogger.getLog().clear();
+        ArrayList<String> toastLoggerLog = ToastLogger.getLog();
+
+        if (toastLoggerLog != null) {
+            toastLoggerLog.clear();
+        }
+
         scene = new LoadingScene();
 
         final TextureRegion tex = ResourceManager.getInstance().getTexture("menu-background");
@@ -84,7 +91,6 @@ public class LoadingScreen implements IUpdateHandler {
 
     public void reset() {
         // TODO Auto-generated method stub
-
     }
 
 

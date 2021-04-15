@@ -385,7 +385,10 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         String[] columns = {"id", "playername", "score", "combo", "mark", "accuracy", "mode"};
         Cursor scoresSet = ScoreLibrary.getInstance().getMapScores(columns, track.getFilename());
         if (scoresSet == null || scoresSet.getCount() == 0) {
-            scoresSet.close();
+            if (scoresSet != null) {
+                scoresSet.close();
+            }
+
             return;
         }
         percentShow = 0;
