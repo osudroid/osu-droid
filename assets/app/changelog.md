@@ -26,6 +26,7 @@ Changelog for 1.6.8
 - Option to precalculate slider path (improves performance during gameplay, but increases map loading time)
 - Option to calculate pp when opening a score
 - Option to hide replay text when watching a replay
+- Option to save failed replays
 
 ## Changes:
 
@@ -37,12 +38,13 @@ Changelog for 1.6.8
 - Improved framerate for storyboard
 - Custom skins are sorted alphabetically
 - Rewritten beatmap parser, now able to load some beatmaps that were not possible to load
+- Sliders will gradually fade out if HD (Hidden) mod is active
 
 ## Bug fixes:
 
 - Fixed a bug where follow points that are too small will make the game lag
 - Fixed a bug where multiple overlapping notes can be hit by only tapping once
-- Fixed a bug where NC mod speed multiplier is not the same as DT mod in some beatmaps
+- Fixed a bug where NC (NightCore) mod speed multiplier is not the same as DT (DoubleTime) mod in some beatmaps
 - Fixed a bug where sliders with negative length or infinite BPM makes a beatmap unplayable
 - Fixed a bug where some beatmaps can crash the game when tapping a note due to out of bound hitsounds
 - Fixed a bug for spinners (spinners with negative length or less than 50ms will spin automatically)
@@ -63,10 +65,24 @@ Changelog for 1.6.8
 - Fixed a bug where custom beatmap skin's hitcircle texture does not apply to sliders if not overridden
 - Fixed a bug where background music volume setting does not apply in song selection menu
 - Fixed a bug where some mutually exclusive mods can be selected together
+- Fixed a bug where offline replays do not get saved
+- Fixed a bug where beatmaps that haven't finished downloading gets imported
 
-## Additions [+], changes [=], and bug fixes [*] since the previous pre-release:
+## Removals:
 
-- [+] Added slider dim for Flashlight mod
-- [+] Added break dim for Flashlight mod
-- [=] Flashlight mod dim area now starts at the center of the screen
-- [*] Fixed a bug where Flashlight mod dim area flickers if the player taps during break
+- Removed split-screen support as the game restarts if used in split screen mode
+
+## Additions [+], changes [=], bug fixes [*], and removals [-] since the previous pre-release:
+
+- [+] Added slider dim for FL (Flashlight) mod
+- [+] Added break dim for FL (Flashlight) mod
+- [+] Added the option to save failed replays
+- [=] Sliders will gradually fade out if HD (Hidden) mod is active
+- [=] FL (Flashlight) mod dim area now starts at the center of the screen
+- [=] Moved PP information in score result scene to left-bottom corner
+- [*] Fixed a bug where offline replays do not get saved
+- [*] Fixed a bug where FL (Flashlight) mod dim area flickers if the player taps during break
+- [*] Fixed a bug where beatmaps that haven't finished downloading gets imported
+- [*] Fixed a bug where star rating calculation does not take speed multiplier into account
+- [*] Fixed a bug where some animated hit results (100k, 300k, and 300g) are not displayed properly
+- [-] Removed split-screen support as the game restarts if used in split screen mode
