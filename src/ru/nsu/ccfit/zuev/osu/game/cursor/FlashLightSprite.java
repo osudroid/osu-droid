@@ -12,8 +12,7 @@ public class FlashLightSprite extends Entity{
     private final Sprite sprite;
     private final FlashLightDimLayer dimLayer;
     private boolean showing = false;
-    private boolean isSliderHold = false;
-    private boolean isSliderActive = false;
+    private boolean isSliderDimActive = false;
     private final float baseSize = 8f;
     private float currentSize = baseSize;
 
@@ -26,21 +25,25 @@ public class FlashLightSprite extends Entity{
         fgScene.attachChild(dimLayer, 0);
     }
 
-    public void setSliderHold(boolean isSliderHold) {
-        this.isSliderHold = isSliderHold;
-    }
-
-    public void setSliderActive(boolean isSliderActive) {
-        this.isSliderActive = isSliderActive;
+    public void setSliderDimActive(boolean isSliderDimActive) {
+        this.isSliderDimActive = isSliderDimActive;
     }
 
     public void setShowing(boolean showing) {
         this.showing = showing;
     }
 
+    public void updateBreak(boolean isBreak) {
+        if (isBreak) {
+            sprite.registerEntityModifier(new ScaleModifier(0.8f, currentSize, 1.5f * baseSize));
+        } else {
+            sprite.registerEntityModifier(new ScaleModifier(0.8f, 1.5f * baseSize, currentSize));
+        }
+    }
+
     public void update(float pSecondsElapsed, int combo) {
-        if (showing){
-            dimLayer.update(isSliderHold && isSliderActive);
+        if (showing) {
+            dimLayer.update(isSliderDimActive);
             if (!sprite.isVisible()) {
                 sprite.setVisible(true);
             }
@@ -59,8 +62,7 @@ public class FlashLightSprite extends Entity{
         if (combo <= 200 && combo % 100 == 0) {
             // For every 100 combo, the size is decreased by 20%
             final float newSize = (1 - 0.2f * combo / 100f) * baseSize;
-            ScaleModifier sm = new ScaleModifier(0.5f, currentSize, newSize);
-            sprite.registerEntityModifier(sm);
+            sprite.registerEntityModifier(new ScaleModifier(0.8f, currentSize, newSize));
             currentSize = newSize;
         }
 
