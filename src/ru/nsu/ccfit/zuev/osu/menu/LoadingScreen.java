@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
+import android.annotation.SuppressLint;
+
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.modifier.LoopEntityModifier;
 import org.anddev.andengine.entity.modifier.RotationByModifier;
@@ -19,7 +21,7 @@ import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 public class LoadingScreen implements IUpdateHandler {
     private final LoadingScene scene;
     private final ChangeableText logText;
-    private float percentage = -1;
+    private float percentage;
 
     public LoadingScreen() {
         ToastLogger.getLog().clear();
@@ -55,8 +57,8 @@ public class LoadingScreen implements IUpdateHandler {
 
         final TextureRegion ltexture = ResourceManager.getInstance()
                 .getTexture("loading");
-        final Sprite circle = new CentredSprite(Config.getRES_WIDTH() / 2,
-                Config.getRES_HEIGHT() / 2, ltexture);
+        final Sprite circle = new CentredSprite(Config.getRES_WIDTH() / 2f,
+                Config.getRES_HEIGHT() / 2f, ltexture);
         circle.registerEntityModifier(new LoopEntityModifier(
                 new RotationByModifier(2.0f, 360)));
         scene.attachChild(circle);
@@ -69,11 +71,12 @@ public class LoadingScreen implements IUpdateHandler {
     }
 
 
+    @SuppressLint("DefaultLocale")
     public void onUpdate(final float pSecondsElapsed) {
         if (ToastLogger.getPercentage() != percentage) {
             percentage = ToastLogger.getPercentage();
             logText.setText(String.format("%d%%", (int) percentage));
-            logText.setPosition(Config.getRES_WIDTH() / 2 - logText.getWidth()
+            logText.setPosition(Config.getRES_WIDTH() / 2f - logText.getWidth()
                     / 2, Config.getRES_HEIGHT() - Utils.toRes(100));
         }
     }
@@ -85,7 +88,5 @@ public class LoadingScreen implements IUpdateHandler {
     }
 
 
-    public class LoadingScene extends Scene {
-
-    }
+    public static class LoadingScene extends Scene { }
 }

@@ -48,22 +48,20 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     private Avatar[] avatars = null;
     private float percentShow = -1;
 
-    @SuppressLint("UseValueOf")
-    private Boolean trackMutex = false;
+    private final Boolean trackMutex = false;
     private long viewNumber = 0;
 
     private boolean showOnlineScores = false;
     private TrackInfo lastTrack = null;
     private boolean wasOnline = false;
-    private boolean isCancled = false, isScroll = false;
-
-    private ArrayList<String> lastLoadedScores = null;
+    private boolean isCanceled = false;
+    private boolean isScroll = false;
 
     private AsyncTask<OsuAsyncCallback, Integer, Boolean> onlineTask;
-    private LinkedList<AsyncTask<OsuAsyncCallback, Integer, Boolean>> avatarTasks;
-    private Context context;
+    private final LinkedList<AsyncTask<OsuAsyncCallback, Integer, Boolean>> avatarTasks;
+    private final Context context;
 
-    private SurfaceScrollDetector mScrollDetector;
+    private final SurfaceScrollDetector mScrollDetector;
 
     private float maxY = 100500;
     private int pointerId = -1;
@@ -92,76 +90,79 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
 
         this.listener = listener;
         this.mScrollDetector = new SurfaceScrollDetector(this);
-        avatarTasks = new LinkedList<AsyncTask<OsuAsyncCallback, Integer, Boolean>>();
+        avatarTasks = new LinkedList<>();
     }
 
     public static String ConvertModString(String s) {
         String[] strMod = s.split("\\|", 2);
-        String result = "";
+        StringBuilder result = new StringBuilder();
+
         for (int i = 0; i < strMod[0].length(); i++) {
             switch (strMod[0].charAt(i)) {
                 case 'a':
-                    result += "Auto,";
+                    result.append("Auto,");
                     break;
                 case 'x':
-                    result += "Relax,";
+                    result.append("Relax,");
                     break;
                 case 'p':
-                    result += "AP,";
+                    result.append("AP,");
                     break;
                 case 'e':
-                    result += "EZ,";
+                    result.append("EZ,");
                     break;
                 case 'n':
-                    result += "NF,";
+                    result.append("NF,");
                     break;
                 case 'r':
-                    result += "HR,";
+                    result.append("HR,");
                     break;
                 case 'h':
-                    result += "HD,";
+                    result.append("HD,");
                     break;
                 case 'i':
-                    result += "FL,";
+                    result.append("FL,");
                     break;
                 case 'd':
-                    result += "DT,";
+                    result.append("DT,");
                     break;
                 case 'c':
-                    result += "NC,";
+                    result.append("NC,");
                     break;
                 case 't':
-                    result += "HT,";
+                    result.append("HT,");
                     break;
                 case 's':
-                    result += "PR,";
+                    result.append("PR,");
                     break;
                 case 'l':
-                    result += "REZ,";
+                    result.append("REZ,");
                     break;
                 case 'm':
-                    result += "SC,";
+                    result.append("SC,");
                     break;
                 case 'u':
-                    result += "SD,";
+                    result.append("SD,");
                     break;
                 case 'f':
-                    result += "PF,";
+                    result.append("PF,");
                     break;
                 case 'b':
-                    result += "SU,";
+                    result.append("SU,");
                     break;
                 case 'v':
-                    result += "ScoreV2,";
+                    result.append("ScoreV2,");
                     break;
             }
         }
+
         if (strMod.length > 1){
-            result += ConvertExtraModString(strMod[1]);
+            result.append(ConvertExtraModString(strMod[1]));
         }
         if (result.length() == 0) {
             return "None";
         }
+
         return result.substring(0, result.length() - 1);
     }
 
@@ -169,12 +170,9 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         StringBuilder stringBuilder = new StringBuilder();
         for (String str: s.split("\\|")){
             if (str.startsWith("x") && str.length() == 5){
-                stringBuilder.append(str.substring(1) + "x,");
-                continue;
-            }
-            if (str.startsWith("AR")){
-                stringBuilder.append(str + ",");
-                continue;
+                stringBuilder.append(str.substring(1)).append("x,");
+            } else if (str.startsWith("AR")){
+                stringBuilder.append(str).append(",");
             }
         }
         return stringBuilder.toString();
@@ -217,7 +215,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                     downTime = 0;
                     _scoreID = scoreID;
                     return true;
-                } else if (pSceneTouchEvent.isActionUp() && moved == false && isScroll == false) {
+                } else if (pSceneTouchEvent.isActionUp() && !moved && !isScroll) {
                     downTime = -1;
                     setAlpha(0.5f);
                     listener.openScore(scoreID, showOnline, userName);
@@ -236,10 +234,8 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 }
                 return false;
             }
-
-            ;
-
         };
+
         sprites[i].setColor(0, 0, 0);
         sprites[i].setAlpha(0.5f);
         sprites[i].setScale(0.65f);
@@ -292,7 +288,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 synchronized (trackMutex) {
                     if (currentNumber != viewNumber)
                         return;
-                    lastLoadedScores = scores;
+
                     loadingText.setText(OnlineManager.getInstance().getFailMessage());
                     sprites = new Sprite[scores.size() + 1];
                     avatars = new Avatar[scores.size() + 1];
@@ -316,7 +312,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                                 totalScore, Integer.parseInt(data[3]));
                         long diffTotalScore = currTotalScore - lastTotalScore;
                         String accStr = ConvertModString(data[5]) + "\n"
-                                + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(Integer.valueOf(data[6]) / 1000f, 2)) + "%" + "\n"
+                                + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(Integer.parseInt(data[6]) / 1000f, 2)) + "%" + "\n"
                                 + (lastTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
                         lastTotalScore = currTotalScore;
                         initSprite(i, titleStr, accStr, data[4], true, scoreID, data[7], data[1]);
@@ -341,7 +337,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                                     + StringTable.format(R.string.menu_score,
                                     totalScore, Integer.parseInt(data[3]));
                             String accStr = ConvertModString(data[5]) + "\n"
-                                    + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(Integer.valueOf(data[6]) / 1000f, 2)) + "%" + "\n"
+                                    + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(Integer.parseInt(data[6]) / 1000f, 2)) + "%" + "\n"
                                     + "-";
                             initSprite(scores.size(), titleStr, accStr, data[4], true, scoreID, data[9], data[1]);
                         } else {
@@ -355,7 +351,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
 
 
             public void onComplete() {
-                isCancled = false;
+                isCanceled = false;
                 if (Utils.isWifi(context) || Config.getLoadAvatar())
                     loadAvatar();
             }
@@ -411,8 +407,8 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                     + StringTable.format(R.string.menu_score,
                     totalScore, scoresSet.getInt(scoresSet.getColumnIndex("combo")));
             long diffTotalScore = currTotalScore - lastTotalScore;
-            String accStr = ConvertModString(scoresSet.getString(scoresSet.getColumnIndex("mode"))) + "\n"
-                    + String.format("%.2f", GameHelper.Round(scoresSet.getFloat(scoresSet.getColumnIndex("accuracy")) * 100, 2)) + "%" + "\n"
+            @SuppressLint("DefaultLocale") String accStr = ConvertModString(scoresSet.getString(scoresSet.getColumnIndex("mode"))) + "\n"
+                    + String.format("%.2f", GameHelper.Round( scoresSet.getFloat(scoresSet.getColumnIndex("accuracy")) * 100, 2)) + "%" + "\n"
                     + (lastTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
             lastTotalScore = currTotalScore;
             initSprite(i, titleStr, accStr, scoresSet.getString(scoresSet.getColumnIndex("mark")),
@@ -432,15 +428,11 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         }
         final Sprite[] sprs = sprites;
         sprites = null;
-        SyncTaskManager.getInstance().run(new Runnable() {
-
-
-            public void run() {
-                for (final Sprite sp : sprs) {
-                    if (sp == null) continue;
-                    mainScene.unregisterTouchArea(sp);
-                    sp.detachSelf();
-                }
+        SyncTaskManager.getInstance().run(() -> {
+            for (final Sprite sp : sprs) {
+                if (sp == null) continue;
+                mainScene.unregisterTouchArea(sp);
+                sp.detachSelf();
             }
         });
 
@@ -531,8 +523,8 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 return;
             }
             for (int i = 0; i < avatars.length; i++) {
-                if (isCancled) {
-                    isCancled = false;
+                if (isCanceled) {
+                    isCanceled = false;
                     break;
                 }
                 if (sprites[i] == null) {
@@ -541,7 +533,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 final int finalI = i;
                 AsyncTask<OsuAsyncCallback, Integer, Boolean> avatarTask = new AsyncTaskLoader().execute(new OsuAsyncCallback() {
 
-                    private TextureRegion[] avatarTexRegion = new TextureRegion[avatars.length];
+                    private final TextureRegion[] avatarTexRegion = new TextureRegion[avatars.length];
 
                     public void run() {
 
@@ -560,19 +552,18 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                                 final Sprite avatar = new Sprite(55, 12, Utils.toRes(90), Utils.toRes(90), avatarTexRegion[finalI]);
                                 sprites[finalI].attachChild(avatar);
                             }
-                        } catch (Exception ex) {
+                        } catch (Exception ignored) {}
 
-                        }
-                        isCancled = false;
+                        isCanceled = false;
                     }
                 });
 
                 avatarTasks.add(avatarTask);
             }
-            isCancled = false;
+            isCanceled = false;
         } catch (Exception ex) {
 //                        Debug.e(ex.toString());
-            isCancled = false;
+            isCanceled = false;
         }
     }
 
@@ -586,7 +577,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         if (avatarTasks != null) {
             for (AsyncTask<OsuAsyncCallback, Integer, Boolean> avatarTask : avatarTasks) {
                 if (avatarTask.getStatus() != AsyncTask.Status.FINISHED) {
-                    isCancled = true;
+                    isCanceled = true;
                     avatarTask.cancel(true);
                     if (OnlineManager.get != null) {
                         OnlineManager.get.abort();
@@ -658,7 +649,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         return scene;
     }
 
-    public class ScoreBoardItems {
+    public static class ScoreBoardItems {
         public String userName;
         public int playScore;
         public int scoreId;
@@ -676,7 +667,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         }
     }
 
-    class Avatar {
+    static class Avatar {
         private String userName;
         private String avaUrl;
 
