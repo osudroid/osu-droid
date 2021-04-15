@@ -970,17 +970,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             public void run() {
                 DifficultyReCalculator diffReCalculator = new DifficultyReCalculator();
                 float newstar = diffReCalculator.recalculateStar(
-<<<<<<< Updated upstream
                     selectedTrack,
                     diffReCalculator.getCS(selectedTrack),
-                    ModMenu.getInstance().getSpeed());
-                if (newstar != 0f){
-=======
-                        selectedTrack,
-                        ModMenu.getInstance().getSpeed(),
-                        diffReCalculator.getCS(selectedTrack));
+                    ModMenu.getInstance().getSpeed()
+                );
+
                 if (newstar != 0f) {
->>>>>>> Stashed changes
                     setStarsDisplay(newstar);
                 }
             }
@@ -1150,6 +1145,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         scoreScene.load(stat, null, null, stat.getReplayName(), null, selectedTrack);
         engine.setScene(scoreScene.getScene());
     }
+
 
     public void onScroll(final float where) {
         velocityY = 0;
