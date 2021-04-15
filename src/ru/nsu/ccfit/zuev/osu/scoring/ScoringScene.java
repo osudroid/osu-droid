@@ -81,35 +81,6 @@ public class ScoringScene {
             trackInfo = track;
         }
         this.track = trackInfo;
-        String infoStr = (trackInfo.getBeatmap().getArtistUnicode() == null || Config.isForceRomanized() ? trackInfo.getBeatmap().getArtist() : trackInfo.getBeatmap().getArtistUnicode()) + " - " +
-                (trackInfo.getBeatmap().getTitleUnicode() == null || Config.isForceRomanized() ? trackInfo.getBeatmap().getTitle() : trackInfo.getBeatmap().getTitleUnicode()) + " [" + trackInfo.getMode() + "]";
-        String mapperStr = "Beatmap by " + trackInfo.getCreator();
-        String playerStr = "Played by " + stat.getPlayerName() + " on " +
-                new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date(stat.getTime()));
-        playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
-        if (stat.getChangeSpeed() != 1 || stat.isEnableForceAR()){
-            mapperStr += " [";
-            if (stat.getChangeSpeed() != 1){
-                mapperStr += String.format(Locale.ENGLISH, "%.2fx,", stat.getChangeSpeed());
-            }
-            if (stat.isEnableForceAR()){
-                mapperStr += String.format(Locale.ENGLISH, "AR%.1f,", stat.getForceAR());
-            }
-            if (mapperStr.endsWith(",")){
-                mapperStr = mapperStr.substring(0, mapperStr.length() - 1);
-            }
-            mapperStr += "]";
-        }
-        Debug.i("playedtime " + stat.getTime());
-        final Text beatmapInfo = new Text(Utils.toRes(4), Utils.toRes(2),
-                ResourceManager.getInstance().getFont("font"), infoStr);
-        final Text mapperInfo = new Text(Utils.toRes(4), beatmapInfo.getY() + beatmapInfo.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("smallFont"), mapperStr);
-        final Text playerInfo = new Text(Utils.toRes(4), mapperInfo.getY() + mapperInfo.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("smallFont"), playerStr);
-        scene.attachChild(beatmapInfo);
-        scene.attachChild(mapperInfo);
-        scene.attachChild(playerInfo);
         final int x = 0, y = 100;
         final TextureRegion panelr = ResourceManager.getInstance().getTexture(
                 "ranking-panel");
@@ -440,15 +411,44 @@ public class ScoringScene {
             modX -= Utils.toRes(30);
             scene.attachChild(modSprite);
         }
+        //
+
+        String infoStr = (trackInfo.getBeatmap().getArtistUnicode() == null || Config.isForceRomanized() ? trackInfo.getBeatmap().getArtist() : trackInfo.getBeatmap().getArtistUnicode()) + " - " +
+                (trackInfo.getBeatmap().getTitleUnicode() == null || Config.isForceRomanized() ? trackInfo.getBeatmap().getTitle() : trackInfo.getBeatmap().getTitleUnicode()) + " [" + trackInfo.getMode() + "]";
+        String mapperStr = "Beatmap by " + trackInfo.getCreator();
+        String playerStr = "Played by " + stat.getPlayerName() + " on " +
+                new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date(stat.getTime()));
+        playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
+        if (stat.getChangeSpeed() != 1 || stat.isEnableForceAR()){
+            mapperStr += " [";
+            if (stat.getChangeSpeed() != 1){
+                mapperStr += String.format(Locale.ENGLISH, "%.2fx,", stat.getChangeSpeed());
+            }
+            if (stat.isEnableForceAR()){
+                mapperStr += String.format(Locale.ENGLISH, "AR%.1f,", stat.getForceAR());
+            }
+            if (mapperStr.endsWith(",")){
+                mapperStr = mapperStr.substring(0, mapperStr.length() - 1);
+            }
+            mapperStr += "]";
+        }
+        Debug.i("playedtime " + stat.getTime());
+        final Text beatmapInfo = new Text(Utils.toRes(4), Utils.toRes(2),
+                ResourceManager.getInstance().getFont("font"), infoStr);
+        final Text mapperInfo = new Text(Utils.toRes(4), beatmapInfo.getY() + beatmapInfo.getHeight() + Utils.toRes(2),
+                ResourceManager.getInstance().getFont("smallFont"), mapperStr);
+        final Text playerInfo = new Text(Utils.toRes(4), mapperInfo.getY() + mapperInfo.getHeight() + Utils.toRes(2),
+                ResourceManager.getInstance().getFont("smallFont"), playerStr);
         //calculatePP
         if (Config.isDisplayScorePP()){
             StringBuilder ppinfo = new StringBuilder();
             ppinfo.append("[");
             DifficultyReCalculator diffRecalculator = new DifficultyReCalculator();
             float newstar = diffRecalculator.recalculateStar(
-                            trackInfo,
-                            diffRecalculator.getCS(stat, trackInfo),
-                            stat.getSpeed());
+                trackInfo,
+                diffRecalculator.getCS(stat, trackInfo),
+                stat.getSpeed()
+            );
             diffRecalculator.calculatePP(stat, trackInfo);
             double pp = diffRecalculator.getTotalPP();
             double aimpp = diffRecalculator.getAimPP();
@@ -467,13 +467,17 @@ public class ScoringScene {
             ppinfo.append("]");
             String ppStr = ppinfo.toString();
             final Text ppInfo = new Text(Utils.toRes(4), Config.getRES_HEIGHT() - playerInfo.getHeight() - Utils.toRes(2),
-                ResourceManager.getInstance().getFont("smallFont"), ppStr);
+                    ResourceManager.getInstance().getFont("smallFont"), ppStr);
             ppInfo.setPosition(Utils.toRes(4), Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(2));
             final Rectangle bgBottomRect = new Rectangle(0, Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(4), ppInfo.getWidth() + Utils.toRes(12), ppInfo.getHeight() + Utils.toRes(4));
             bgBottomRect.setColor(0, 0, 0, 0.5f);
             scene.attachChild(bgBottomRect);
             scene.attachChild(ppInfo);
         }
+        scene.attachChild(beatmapInfo);
+        scene.attachChild(mapperInfo);
+        scene.attachChild(playerInfo);
+
         //save and upload score
         if (track != null && mapMD5 != null) {
             if (stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
