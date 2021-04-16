@@ -19,7 +19,7 @@ public enum GameMod {
     MOD_REALLYEASY("re", 0.5f),
     MOD_SCOREV2("v2", 1),
     MOD_SPEEDUP("su", 1.06f),
-    MOD_TRACEABLE("tc", 1.12f);
+    MOD_TRACEABLE("tc", 1.06f);
     
     public final String shortName;
     public final float scoreMultiplier;
