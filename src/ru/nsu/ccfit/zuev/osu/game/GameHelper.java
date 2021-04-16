@@ -57,6 +57,7 @@ public class GameHelper {
     private static Queue<PointF> pointPool = new LinkedList<PointF>();
 
     private static DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
+    private static boolean traceable;
 
     static {
         binomTableN = 35;
@@ -377,6 +378,13 @@ public class GameHelper {
     public static void setFlashLight(final boolean flashLight) {
         GameHelper.flashLight = flashLight;
     }
+
+    public static boolean isTraceable() { return traceable; }
+
+    public static void setTraceable(final boolean traceable) {
+        GameHelper.traceable = traceable;
+    }
+
     public static boolean isHalfTime() {
         return halfTime;
     }

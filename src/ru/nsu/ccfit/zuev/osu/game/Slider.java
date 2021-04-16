@@ -249,6 +249,8 @@ public class Slider extends GameObject {
         Utils.putSpriteAnchorCenter(pos, approachCircle);
         if (GameHelper.isHidden()) {
             approachCircle.setVisible(Config.isShowFirstApproachCircle() && isFirstNote);
+        } else if (GameHelper.isTraceable()) {
+            startCircle.setVisible(Config.isShowFirstApproachCircle() && isFirstNote);
         }
 
         // End circle
@@ -285,10 +287,16 @@ public class Slider extends GameObject {
             number.init(scene, pos, scale,
                     new SequenceEntityModifier(new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
                             new FadeOutModifier(time / 4 * GameHelper.getTimeMultiplier())));
-        } else {
+        } else if (!GameHelper.isTraceable()) {
             number.init(scene, pos, scale, new FadeInModifier(
                     time / 2 * GameHelper.getTimeMultiplier()));
         }
+
+        startOverlay.setVisible(!GameHelper.isTraceable());
+        endOverlay.setVisible(!GameHelper.isTraceable());
+        startCircle.setVisible(!GameHelper.isTraceable());
+        endCircle.setVisible(!GameHelper.isTraceable());
+
         scene.attachChild(startCircle, 0);
         scene.attachChild(approachCircle);
         scene.attachChild(endOverlay, 0);
@@ -328,7 +336,8 @@ public class Slider extends GameObject {
         }
 
         // Slider track
-        if (Config.isUseSuperSlider()) {
+        // Ignores user option for using "old sliders" if "tc" mod is on, since the gameplay can be pretty unfair.
+        if (Config.isUseSuperSlider() || GameHelper.isTraceable() && !Config.isSliderBorders()) {
             superPath = new LinePath();
             for (PointF p : path.points) {
                 superPath.add(new Vec2(p.x, p.y));
@@ -343,7 +352,12 @@ public class Slider extends GameObject {
                     Utils.toRes(SkinJson.get().getSliderBodyWidth() - SkinJson.get().getSliderBorderWidth())
                             * scale);
             abstractSliderBody.setBorderWidth(Utils.toRes(SkinJson.get().getSliderBodyWidth()) * scale);
-            abstractSliderBody.setSliderBodyBaseAlpha(SkinJson.get().getSliderBodyBaseAlpha());
+
+            if (GameHelper.isTraceable()) {
+                abstractSliderBody.setSliderBodyBaseAlpha(0);
+            } else {
+                abstractSliderBody.setSliderBodyBaseAlpha(SkinJson.get().getSliderBodyBaseAlpha());
+            }
 
             if (SkinJson.get().isSliderHintEnable()) {
                 if (length > SkinJson.get().getSliderHintShowMinLength()) {
@@ -467,7 +481,13 @@ public class Slider extends GameObject {
                 sprite.setPosition(startPos.x, startPos.y);
             }
             sprite.setScale(scale);
-            sprite.setColor(color.r(), color.g(), color.b());
+
+            if (GameHelper.isTraceable()) {
+                sprite.setColor(0, 0, 0);
+            } else {
+                sprite.setColor(color.r(), color.g(), color.b());
+            }
+
             sprite.setAlpha(0.7f);
             scene.attachChild(sprite, 0);
             trackBoundaries.add(sprite);
@@ -488,6 +508,7 @@ public class Slider extends GameObject {
                 borderPolyVerts = null;
             }
             borderPoly = new Polygon(0, 0, verts);
+
             borderPoly.setColor(scolor.r(), scolor.g(), scolor.b());
 //			borderPoly.setAlpha(0.1f);
             scene.attachChild(borderPoly, 0);
@@ -1074,9 +1095,7 @@ public class Slider extends GameObject {
                             abstractSliderBody.onUpdate();
                             preStageFinish = true;
                         }
-
                     } else {
-
                         for (int i = 0; i < path.boundIndexes.size(); i++) {
                             tmpPoint = path.points
                                     .get(path.boundIndexes.get(i));

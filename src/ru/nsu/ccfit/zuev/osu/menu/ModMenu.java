@@ -17,6 +17,7 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.game.mods.IModSwitcher;
 import ru.nsu.ccfit.zuev.osu.game.mods.ModButton;
@@ -125,7 +126,8 @@ public class ModMenu implements IModSwitcher {
         addButton(offset + offsetGrowth * 4, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-flashlight", GameMod.MOD_FLASHLIGHT);
         addButton(offset + offsetGrowth * 5, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-suddendeath", GameMod.MOD_SUDDENDEATH);
         addButton(offset + offsetGrowth * 6, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-perfect", GameMod.MOD_PERFECT);
-        //addButton(offset + offsetGrowth * 6, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-speedup", GameMod.MOD_SPEEDUP);
+        addButton(offset + offsetGrowth * 7, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-traceable", GameMod.MOD_TRACEABLE);
+
 
         //line 3
         addButton(offset + offsetGrowth * 0, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax", GameMod.MOD_RELAX);
@@ -307,12 +309,20 @@ public class ModMenu implements IModSwitcher {
                 mod.remove(GameMod.MOD_AUTOPILOT);
                 mod.remove(GameMod.MOD_RELAX);
                 modsRemoved = true;
+            } else if (flag.equals(GameMod.MOD_HIDDEN)) {
+                mod.remove(GameMod.MOD_TRACEABLE);
+                modsRemoved = true;
+            } else if (flag.equals(GameMod.MOD_TRACEABLE)) {
+                mod.remove(GameMod.MOD_HIDDEN);
+                modsRemoved = true;
             }
+
             if (modsRemoved) {
                 for (GameMod gmod : modButtons.keySet()) {
                     modButtons.get(gmod).setModEnabled(mod.contains(gmod));
                 }
             }
+
             changeMultiplierText();
             return true;
         }

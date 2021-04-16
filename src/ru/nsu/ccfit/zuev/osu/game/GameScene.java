@@ -775,7 +775,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         stat = new StatisticV2();
         stat.setMod(ModMenu.getInstance().getMod());
-        float multiplier = 1 + rawDifficulty / 10f + rawDrain / 10f;
+        float
+                multiplier = 1 + rawDifficulty / 10f + rawDrain / 10f;
         multiplier += (Float.parseFloat(beatmapData.getData("Difficulty",
                 "CircleSize")) - 3) / 4f;
         stat.setDiffModifier(multiplier);
@@ -790,6 +791,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setSpeedUp(stat.getMod().contains(GameMod.MOD_SPEEDUP));
         GameHelper.setHalfTime(stat.getMod().contains(GameMod.MOD_HALFTIME));
         GameHelper.setHidden(stat.getMod().contains(GameMod.MOD_HIDDEN));
+        GameHelper.setTraceable(stat.getMod().contains(GameMod.MOD_TRACEABLE));
         GameHelper.setFlashLight(stat.getMod().contains(GameMod.MOD_FLASHLIGHT));
         GameHelper.setRelaxMod(stat.getMod().contains(GameMod.MOD_RELAX));
         GameHelper.setAutopilotMod(stat.getMod().contains(GameMod.MOD_AUTOPILOT));
@@ -798,6 +800,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         difficultyHelper = stat.getMod().contains(GameMod.MOD_PRECISE) ?
                 DifficultyHelper.HighDifficulty : DifficultyHelper.StdDifficulty;
         GameHelper.setDifficultyHelper(difficultyHelper);
+
+
 
         for (int i = 0; i < CursorCount; i++) {
             cursors[i] = new Cursor();
@@ -1044,6 +1048,22 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (stat.getMod().contains(GameMod.MOD_HIDDEN)) {
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-hidden");
+            effect.init(
+                    fgScene,
+                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
+                            .toRes(130)),
+                    scale,
+                    new SequenceEntityModifier(ModifierFactory
+                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
+                            .newDelayModifier(2 - timeOffset),
+                            new ParallelEntityModifier(ModifierFactory
+                                    .newFadeOutModifier(0.5f), ModifierFactory
+                                    .newScaleModifier(0.5f, 1, 1.5f))));
+            effectOffset += 25;
+            timeOffset += 0.25f;
+        } else if (stat.getMod().contains(GameMod.MOD_TRACEABLE)) {
+            final GameEffect effect = GameObjectPool.getInstance().getEffect(
+                    "selection-mod-traceable");
             effect.init(
                     fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
@@ -1669,6 +1689,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if ((objDefine & 1) > 0) {
                 final RGBColor col = getComboColor(comboNum);
                 final HitCircle circle = GameObjectPool.getInstance().getCircle();
+
                 String tempSound = null;
                 if (params.length > 5) {
                     tempSound = params[5];
