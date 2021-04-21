@@ -71,9 +71,9 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
 import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
-import ru.nsu.ccfit.zuev.osu.game.cursor.Cursor;
-import ru.nsu.ccfit.zuev.osu.game.cursor.CursorSprite;
-import ru.nsu.ccfit.zuev.osu.game.cursor.FlashLightCursor;
+import ru.nsu.ccfit.zuev.osu.game.cursor.main.Cursor;
+import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorSprite;
+import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
@@ -152,7 +152,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private float distToNextObject;
     private float timeMultiplier = 1.0f;
     private CursorSprite[] cursorSprites;
-    private FlashLightCursor flashlightSprite;
+    private FlashLightEntity flashlightSprite;
     private int mainCursorId = -1;
     private Replay replay;
     private boolean replaying;
@@ -1249,7 +1249,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if(GameHelper.isFlashLight()){
-            flashlightSprite = new FlashLightCursor(fgScene);
+            flashlightSprite = new FlashLightEntity(fgScene);
             flashlightSprite.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
             flashlightSprite.setShowing(true);
             fgScene.attachChild(flashlightSprite, 0);

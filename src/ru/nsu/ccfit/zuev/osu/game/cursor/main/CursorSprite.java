@@ -1,4 +1,4 @@
-package ru.nsu.ccfit.zuev.osu.game.cursor;
+package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
 import android.graphics.PointF;
 
