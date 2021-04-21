@@ -31,7 +31,6 @@ import org.anddev.andengine.util.MathUtils;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -263,7 +262,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         scene.registerUpdateHandler(this);
         scene.setTouchAreaBindingEnabled(true);
 
-        scrollbar = new ScrollBar(scene, this);
+        scrollbar = new ScrollBar(scene);
 
 		/*final Rectangle bgTopRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Utils.toRes(170));
 		bgTopRect.setColor(0, 0, 0, 0.8f);*/

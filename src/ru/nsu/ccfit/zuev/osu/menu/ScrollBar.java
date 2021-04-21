@@ -11,7 +11,7 @@ public class ScrollBar {
     private final Rectangle barRectangle;
     private boolean visible;
 
-    public ScrollBar(final Scene scene, SongMenu songMenu) {
+    public ScrollBar(final Scene scene) {
         visible = false;
 
         barRectangle = new Rectangle(Config.getRES_WIDTH() - Utils.toRes(20),
