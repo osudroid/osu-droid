@@ -7,5 +7,5 @@ public class Cursor {
     public boolean mouseDown = false;
     public boolean mouseOldDown = false;
     public boolean mousePressed = false;
-    public double mouseDownOffset = 0; //in ms
+    public double mouseDownOffsetMS = 0;
 }

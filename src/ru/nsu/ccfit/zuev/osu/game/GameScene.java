@@ -72,7 +72,7 @@ import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
 import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.Cursor;
-import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorSprite;
+import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorEntity;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
@@ -151,7 +151,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private boolean musicStarted;
     private float distToNextObject;
     private float timeMultiplier = 1.0f;
-    private CursorSprite[] cursorSprites;
+    private CursorEntity[] cursorSprites;
     private FlashLightEntity flashlightSprite;
     private int mainCursorId = -1;
     private Replay replay;
@@ -838,9 +838,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         // TODO passive objects
         if ((replaying || Config.isShowCursor()) && !GameHelper.isAutopilotMod()) {
-            cursorSprites = new CursorSprite[CursorCount];
+            cursorSprites = new CursorEntity[CursorCount];
             for (int i = 0; i < CursorCount; i++) {
-                cursorSprites[i] = new CursorSprite();
+                cursorSprites[i] = new CursorEntity();
                 ParticleSystem psys = cursorSprites[i].getParticles();
                 if (psys != null)
                     fgScene.attachChild(psys);
@@ -2362,7 +2362,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     @Override
     public double downFrameOffset(int index) {
-        return cursors[index].mouseDownOffset;
+        return cursors[index].mouseDownOffsetMS;
     }
 
     public void removeObject(final GameObject object) {
@@ -2384,7 +2384,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         float pTouchY = FMath.clamp(pSceneTouchEvent.getY(), 0, Config.getRES_HEIGHT());
         if (pSceneTouchEvent.isActionDown()) {
             cursors[i].mouseDown = true;
-            cursors[i].mouseDownOffset = (pSceneTouchEvent.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier;
+            cursors[i].mouseDownOffsetMS = (pSceneTouchEvent.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier;
             for (int j = 0; j < cursors.length; j++)
                 cursors[j].mouseOldDown = false;
             PointF gamePoint = Utils.realToTrackCoords(new PointF(pTouchX, pTouchY));
