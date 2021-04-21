@@ -91,7 +91,6 @@ public class ResourceManager {
         loadTexture("ranking_enabled", "ranking_enabled.png", false);
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
         loadTexture("flashlight_cursor", "flashlight_cursor.png", false);
-        loadTexture("flashlight_dim_layer", "flashlight_dim_layer.png", false);
 
         if (textures.containsKey("lighting") == false)
             textures.put("lighting", null);

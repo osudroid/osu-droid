@@ -73,7 +73,7 @@ import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.game.cursor.Cursor;
 import ru.nsu.ccfit.zuev.osu.game.cursor.CursorSprite;
-import ru.nsu.ccfit.zuev.osu.game.cursor.FlashLightSprite;
+import ru.nsu.ccfit.zuev.osu.game.cursor.FlashLightCursor;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
@@ -84,7 +84,6 @@ import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.PauseMenu;
 import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
@@ -153,7 +152,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private float distToNextObject;
     private float timeMultiplier = 1.0f;
     private CursorSprite[] cursorSprites;
-    private FlashLightSprite flashlightSprite;
+    private FlashLightCursor flashlightSprite;
     private int mainCursorId = -1;
     private Replay replay;
     private boolean replaying;
@@ -1250,7 +1249,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if(GameHelper.isFlashLight()){
-            flashlightSprite = new FlashLightSprite(fgScene);
+            flashlightSprite = new FlashLightCursor(fgScene);
             flashlightSprite.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
             flashlightSprite.setShowing(true);
             fgScene.attachChild(flashlightSprite, 0);
@@ -1418,7 +1417,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     flashlightSprite.setPosition(cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y);
                 }
             }
-            flashlightSprite.update(dt, stat.getCombo());
+            flashlightSprite.update(stat.getCombo());
         }
 
         while (timingPoints.isEmpty() == false
