@@ -286,8 +286,7 @@ public class StatisticV2 implements Serializable {
         for (final GameMod m : mod) {
             switch (m) {
                 case MOD_HIDDEN:
-                    isH = true;
-                    break forcycle;
+                case MOD_TRACEABLE:
                 case MOD_FLASHLIGHT:
                     isH = true;
                     break forcycle;
@@ -488,6 +487,10 @@ public class StatisticV2 implements Serializable {
         if (mod.contains(GameMod.MOD_SCOREV2)) {
             s += "v";
         }
+        if (mod.contains(GameMod.MOD_TRACEABLE)) {
+            s += "g";
+        }
+
         s += "|";
         s += getExtraModString();
         return s;
@@ -548,7 +551,10 @@ public class StatisticV2 implements Serializable {
                     break;
                 case 'v':
                     mod.add(GameMod.MOD_SCOREV2);
-                    break;   
+                    break;
+                case 'g':
+                    mod.add(GameMod.MOD_TRACEABLE);
+                    break;
             }
         }
         if (strMod.length > 1)

@@ -154,6 +154,8 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 case 'v':
                     result += "ScoreV2,";
                     break;
+                case 'g':
+                    result += "TC, ";
             }
         }
         if (strMod.length > 1){
@@ -236,9 +238,6 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 }
                 return false;
             }
-
-            ;
-
         };
         sprites[i].setColor(0, 0, 0);
         sprites[i].setAlpha(0.5f);

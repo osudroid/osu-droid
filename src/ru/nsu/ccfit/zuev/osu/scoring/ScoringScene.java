@@ -335,6 +335,11 @@ public class ScoringScene {
                     .getInstance().getTexture("selection-mod-hidden"));
             modX -= Utils.toRes(30);
             scene.attachChild(modSprite);
+        } else if (stat.getMod().contains(GameMod.MOD_TRACEABLE)) {
+            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
+                    .getInstance().getTexture("selection-mod-traceable"));
+            modX -= Utils.toRes(30);
+            scene.attachChild(modSprite);
         }
 
         if (stat.getMod().contains(GameMod.MOD_FLASHLIGHT)) {
@@ -488,6 +493,7 @@ public class ScoringScene {
                 || stat.getMod().contains(GameMod.MOD_REALLYEASY)
                 || stat.getMod().contains(GameMod.MOD_FLASHLIGHT)
                 || stat.getMod().contains(GameMod.MOD_SCOREV2)
+                || stat.getMod().contains(GameMod.MOD_TRACEABLE)
                 || Config.isRemoveSliderLock()
                 || ModMenu.getInstance().isChangeSpeed()
                 || ModMenu.getInstance().isEnableForceAR()){

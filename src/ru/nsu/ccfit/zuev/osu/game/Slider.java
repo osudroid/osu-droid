@@ -127,6 +127,9 @@ public class Slider extends GameObject {
         this.length = length;
         passedTime = -time;
         preTime = time;
+
+        boolean isFirstNoteAndIsShowFirstApproachCircle = isFirstNote && Config.isShowFirstApproachCircle();
+
         if (sliderPath != null){
             path = sliderPath;
         } else{
@@ -247,10 +250,11 @@ public class Slider extends GameObject {
         approachCircle.setScale(scale * 2);
         approachCircle.setAlpha(0);
         Utils.putSpriteAnchorCenter(pos, approachCircle);
+
         if (GameHelper.isHidden()) {
-            approachCircle.setVisible(Config.isShowFirstApproachCircle() && isFirstNote);
+            approachCircle.setVisible(isFirstNoteAndIsShowFirstApproachCircle);
         } else if (GameHelper.isTraceable()) {
-            startCircle.setVisible(Config.isShowFirstApproachCircle() && isFirstNote);
+            startCircle.setVisible(isFirstNoteAndIsShowFirstApproachCircle);
         }
 
         // End circle
@@ -283,6 +287,7 @@ public class Slider extends GameObject {
             Utils.putSpriteAnchorCenter(pos, startArrow);
             scene.attachChild(startArrow, 0);
         }
+
         if (GameHelper.isHidden()) {
             number.init(scene, pos, scale,
                     new SequenceEntityModifier(new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
@@ -292,10 +297,13 @@ public class Slider extends GameObject {
                     time / 2 * GameHelper.getTimeMultiplier()));
         }
 
-        startOverlay.setVisible(!GameHelper.isTraceable());
-        endOverlay.setVisible(!GameHelper.isTraceable());
-        startCircle.setVisible(!GameHelper.isTraceable());
-        endCircle.setVisible(!GameHelper.isTraceable());
+        if (GameHelper.isTraceable()) {
+            startOverlay.setVisible(isFirstNoteAndIsShowFirstApproachCircle);
+            endOverlay.setVisible(isFirstNoteAndIsShowFirstApproachCircle);
+            startCircle.setVisible(isFirstNoteAndIsShowFirstApproachCircle);
+            endCircle.setVisible(isFirstNoteAndIsShowFirstApproachCircle);
+        }
+
 
         scene.attachChild(startCircle, 0);
         scene.attachChild(approachCircle);
@@ -353,7 +361,7 @@ public class Slider extends GameObject {
                             * scale);
             abstractSliderBody.setBorderWidth(Utils.toRes(SkinJson.get().getSliderBodyWidth()) * scale);
 
-            if (GameHelper.isTraceable()) {
+            if (GameHelper.isTraceable() && !(isFirstNote && Config.isShowFirstApproachCircle())) {
                 abstractSliderBody.setSliderBodyBaseAlpha(0);
             } else {
                 abstractSliderBody.setSliderBodyBaseAlpha(SkinJson.get().getSliderBodyBaseAlpha());
@@ -481,13 +489,6 @@ public class Slider extends GameObject {
                 sprite.setPosition(startPos.x, startPos.y);
             }
             sprite.setScale(scale);
-
-            if (GameHelper.isTraceable()) {
-                sprite.setColor(0, 0, 0);
-            } else {
-                sprite.setColor(color.r(), color.g(), color.b());
-            }
-
             sprite.setAlpha(0.7f);
             scene.attachChild(sprite, 0);
             trackBoundaries.add(sprite);
