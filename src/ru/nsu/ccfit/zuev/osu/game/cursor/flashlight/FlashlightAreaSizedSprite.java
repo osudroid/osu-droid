@@ -5,7 +5,7 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 public class FlashlightAreaSizedSprite extends Sprite {
     public FlashlightAreaSizedSprite(TextureRegion pTextureRegion) {
-        super(FLConst.BASE_PX.v, FLConst.BASE_PY.v, pTextureRegion);
-        this.setScale(FLConst.BASE_SCALE_SIZE.v);
+        super(-MainFlashLightSprite.TEXTURE_WIDTH / 2f, -MainFlashLightSprite.TEXTURE_HEIGHT / 2f, pTextureRegion);
+        this.setScale(MainFlashLightSprite.BASE_SIZE);
     }
 }

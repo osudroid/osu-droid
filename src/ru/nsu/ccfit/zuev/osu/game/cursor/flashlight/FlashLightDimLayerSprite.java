@@ -5,9 +5,11 @@ import android.graphics.Bitmap;
 import com.edlplan.andengine.TextureHelper;
 
 public class FlashLightDimLayerSprite extends FlashlightAreaSizedSprite {
+    public final float SLIDER_DIM_ALPHA = 0.75f;
+
     public FlashLightDimLayerSprite() {
-        super(TextureHelper.createRegion(Bitmap.createBitmap((int) FLConst.TEXTURE_WIDTH.v, (int) FLConst.TEXTURE_HEIGHT.v, Bitmap.Config.RGB_565)));
-        this.setAlpha(FLConst.SLIDER_DIM_ALPHA.v);
+        super(TextureHelper.createRegion(Bitmap.createBitmap(MainFlashLightSprite.TEXTURE_WIDTH, MainFlashLightSprite.TEXTURE_HEIGHT, Bitmap.Config.RGB_565)));
+        this.setAlpha(SLIDER_DIM_ALPHA);
     }
 
     public void update(boolean isSliderDimActive) {
