@@ -20,8 +20,8 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
         this.handleAreaShrinking(combo);
     }
 
-    public void changeArea(float toScale) {
-        this.registerEntityModifier(new ScaleModifier(AREA_CHANGE_FADE_DURATION, currentSize, toScale));
+    public void shrinkArea(float fromScale, float toScale) {
+        this.registerEntityModifier(new ScaleModifier(AREA_SHRINK_FADE_DURATION, fromScale, toScale));
     }
 
     public void handleAreaShrinking(int combo) {
