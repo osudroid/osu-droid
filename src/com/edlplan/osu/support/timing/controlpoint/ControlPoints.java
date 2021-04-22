@@ -1,11 +1,8 @@
 package com.edlplan.osu.support.timing.controlpoint;
 
-import android.util.Log;
-
 import com.edlplan.osu.support.timing.TimingPoint;
 import com.edlplan.osu.support.timing.TimingPoints;
 
-import org.anddev.andengine.util.Debug;
 
 import java.util.ArrayList;
 import java.util.Collections;
