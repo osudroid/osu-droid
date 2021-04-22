@@ -70,7 +70,7 @@ public class PauseMenu implements IOnMenuItemClickListener {
         scene.addMenuItem(itemBack);
         scene.attachChild(saveFailedReplay);
         scene.setBackgroundEnabled(false);
-        TextureRegion tex = null;
+        TextureRegion tex;
         if (fail) {
             itemContinue.setVisible(false);
             tex = ResourceManager.getInstance().getTexture("fail-background");
