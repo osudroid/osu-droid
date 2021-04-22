@@ -20,7 +20,7 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
         this.handleAreaShrinking(combo);
     }
 
-    public void shrinkArea(float fromScale, float toScale) {
+    public void changeArea(float fromScale, float toScale) {
         this.registerEntityModifier(new ScaleModifier(AREA_CHANGE_FADE_DURATION, fromScale, toScale));
     }
 
@@ -29,7 +29,7 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
         if (combo <= 200 && combo % 100 == 0) {
             // For every 100 combo, the size is decreased by 20%
             final float newSize = (1 - 0.2f * combo / 100f) * BASE_SIZE;
-            this.shrinkArea(currentSize, newSize);
+            this.changeArea(currentSize, newSize);
             currentSize = newSize;
         }
     }
@@ -38,6 +38,6 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
         float fromScale = isBreak? currentSize : 1.5f * BASE_SIZE;
         float toScale = isBreak? 1.5f * BASE_SIZE : currentSize;
 
-        this.shrinkArea(fromScale, toScale);
+        this.changeArea(fromScale, toScale);
     }
 }
