@@ -24,7 +24,7 @@ public class TimingPoints {
             t.setSampleType(l.length > 3 ? Integer.parseInt(l[3]) : 1);
             t.setSampleSet(l.length > 4 ? SampleSet.parse(l[4]) : SampleSet.None);
             t.setVolume(l.length > 5 ? Integer.parseInt(l[5]) : 100);
-            t.setInherited(l.length > 6 ? U.toBool(l[6]) : false);
+            t.setInherited(t.getBeatLength() < 0);
             int eff = l.length > 7 ? Integer.parseInt(l[7]) : 0;
             t.setKiaiMode((eff & 1) > 0);
             t.setOmitFirstBarSignature((eff & 8) > 0);
