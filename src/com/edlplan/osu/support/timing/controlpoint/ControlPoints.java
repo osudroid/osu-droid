@@ -3,7 +3,6 @@ package com.edlplan.osu.support.timing.controlpoint;
 import com.edlplan.osu.support.timing.TimingPoint;
 import com.edlplan.osu.support.timing.TimingPoints;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
