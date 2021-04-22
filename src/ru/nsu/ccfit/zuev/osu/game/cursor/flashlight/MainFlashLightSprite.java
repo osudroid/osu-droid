@@ -8,7 +8,7 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
     public static final float BASE_SIZE = 8f;
     public static final int TEXTURE_WIDTH = 1024;
     public static final int TEXTURE_HEIGHT = TEXTURE_WIDTH / 2;
-    public final float AREA_SHRINK_FADE_DURATION = 0.8f;
+    public final float AREA_CHANGE_FADE_DURATION = 0.8f;
     public float currentSize = BASE_SIZE;
 
     public MainFlashLightSprite(TextureRegion pTextureRegion) {
@@ -21,7 +21,7 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
     }
 
     public void shrinkArea(float fromScale, float toScale) {
-        this.registerEntityModifier(new ScaleModifier(AREA_SHRINK_FADE_DURATION, fromScale, toScale));
+        this.registerEntityModifier(new ScaleModifier(AREA_CHANGE_FADE_DURATION, fromScale, toScale));
     }
 
     public void handleAreaShrinking(int combo) {
