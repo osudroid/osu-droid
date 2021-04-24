@@ -30,7 +30,7 @@ public class CursorTrail extends ParticleSystem {
         this.doStartEffects();
     }
 
-    public void doStartEffects() {
+    private void doStartEffects() {
         this.fadeOut();
         this.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
         this.addParticleInitializer(new ScaleInitializer(CursorSprite.BASE_SIZE));
