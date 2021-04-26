@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game.mods;
 public enum GameMod {
     MOD_NOFAIL("nf", 0.5f, true),
     MOD_AUTO("auto", 0, false, true),
-    MOD_EASY("es", 0.5f, true),
+    MOD_EASY("ez", 0.5f, true),
     MOD_HARDROCK("hr", 1.06f, true),
     MOD_HIDDEN("hd", 1.06f, true),
     MOD_RELAX("relax", 0.001f, false, true),
