@@ -482,16 +482,13 @@ public class ScoringScene {
         if (track != null && mapMD5 != null) {
             if (stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
                     OnlineManager.getInstance().isReadyToSend()) {
-                if (stat.getMod().contains(GameMod.MOD_SUDDENDEATH)
-                || stat.getMod().contains(GameMod.MOD_PERFECT)
-                || stat.getMod().contains(GameMod.MOD_SMALLCIRCLE)
-                || stat.getMod().contains(GameMod.MOD_REALLYEASY)
-                || stat.getMod().contains(GameMod.MOD_FLASHLIGHT)
-                || stat.getMod().contains(GameMod.MOD_SCOREV2)
+                if (!SmartIterator.wrap(stat.getMod().iterator())
+                    .applyFilter(m -> !m.isRanked && !m.typeAuto)
+                    .hasNext()
                 || Config.isRemoveSliderLock()
                 || ModMenu.getInstance().isChangeSpeed()
                 || ModMenu.getInstance().isEnableForceAR()){
-                    ToastLogger.showText(StringTable.get(R.string.mods_somemods_is_unrank_now), true);
+                    ToastLogger.showText(StringTable.format(R.string.mods_unranked_notice, getUnrankedModString(stat)), true);
                 }
                 else if(
                         !SmartIterator.wrap(stat.getMod().iterator())
@@ -500,7 +497,7 @@ public class ScoringScene {
                 ){
                     SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
                             OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy());
-                    sendingPanel.setPosition(Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));
+                    sendingPanel.setPosition(Config.getRES_WIDTH() / 2f - 400, Utils.toRes(-300));
                     scene.registerTouchArea(sendingPanel.getDismissTouchArea());
                     scene.attachChild(sendingPanel);
                     ScoreLibrary.getInstance().sendScoreOnline(stat, replay, sendingPanel);
@@ -511,6 +508,30 @@ public class ScoringScene {
             ScoreLibrary.getInstance().addScore(track.getFilename(), stat, replay);
         }
 
+    }
+
+    private String getUnrankedModString(final StatisticV2 stat) {
+        StringBuilder builder = new StringBuilder();
+        for (final GameMod mod : stat.getMod()) {
+            // Ensure autoplaying mods aren't included
+            if (!mod.isRanked && !mod.typeAuto) {
+                builder.append(mod.shortName.toUpperCase())
+                    .append(", ");
+            }
+        }
+
+        if (Config.isRemoveSliderLock()) {
+            builder.append("slider lock removal, ");
+        }
+        if (ModMenu.getInstance().isChangeSpeed()) {
+            builder.append("speed multiplier, ");
+        }
+        if (ModMenu.getInstance().isChangeSpeed()) {
+            builder.append("force AR, ");
+        }
+
+        final String result = builder.toString();
+        return result.substring(0, 1).toUpperCase() + result.substring(1, result.length() - 2);
     }
 
     public Scene getScene() {
