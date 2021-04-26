@@ -482,7 +482,7 @@ public class ScoringScene {
         if (track != null && mapMD5 != null) {
             if (stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
                     OnlineManager.getInstance().isReadyToSend()) {
-                if (!SmartIterator.wrap(stat.getMod().iterator())
+                if (SmartIterator.wrap(stat.getMod().iterator())
                     .applyFilter(m -> !m.isRanked && !m.typeAuto)
                     .hasNext()
                 || Config.isRemoveSliderLock()
