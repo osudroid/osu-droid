@@ -8,6 +8,7 @@ import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
+import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
 
@@ -1221,14 +1222,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         bgScene.attachChild(kiaiRect, 0);
 
         unranked = new Sprite(0, 0, ResourceManager.getInstance().getTexture("play-unranked"));
-        unranked.setPosition(Config.getRES_WIDTH() / 2 - unranked.getWidth() / 2, 80);
-        unranked.setVisible(false);
+        unranked.setPosition(Config.getRES_WIDTH() / 2f - unranked.getWidth() / 2, 80);
+        unranked.setVisible(SmartIterator.wrap(stat.getMod().iterator()).applyFilter(m -> m.typeAuto).hasNext());
         fgScene.attachChild(unranked);
-
-        if (stat.getMod().contains(GameMod.MOD_RELAX)
-                || stat.getMod().contains(GameMod.MOD_AUTOPILOT)
-                || stat.getMod().contains(GameMod.MOD_AUTO)) {
+        if (!unranked.isVisible() &&
+            (SmartIterator.wrap(stat.getMod().iterator())
+                .applyFilter(m -> !m.isRanked).hasNext()
+            || Config.isRemoveSliderLock()
+            || ModMenu.getInstance().isChangeSpeed()
+            || ModMenu.getInstance().isEnableForceAR())) {
             unranked.setVisible(true);
+            unranked.registerEntityModifier(ModifierFactory.newFadeOutModifier(5));
         }
 
         String playname = null;
