@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
+import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.ui.fragment.InGameSettingMenu;
 
 import org.anddev.andengine.entity.primitive.Rectangle;
@@ -230,12 +231,16 @@ public class ModMenu implements IModSwitcher {
         multiplierText.setPosition(
                 Config.getRES_WIDTH() / 2f - multiplierText.getWidth() / 2,
                 multiplierText.getY());
-        if (mult == 1) {
-            multiplierText.setColor(1, 1, 1);
-        } else if (mult < 1) {
-            multiplierText.setColor(1, 150f / 255f, 0);
+        if (SmartIterator.wrap(mod.iterator()).applyFilter(m -> !m.isRanked).hasNext()) {
+            multiplierText.setColor(1, 0, 0);
         } else {
-            multiplierText.setColor(5 / 255f, 240 / 255f, 5 / 255f);
+            if (mult == 1) {
+                multiplierText.setColor(1, 1, 1);
+            } else if (mult < 1) {
+                multiplierText.setColor(1, 150f / 255f, 0);
+            } else {
+                multiplierText.setColor(5 / 255f, 240 / 255f, 5 / 255f);
+            }
         }
     }
 
