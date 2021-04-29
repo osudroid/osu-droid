@@ -9,9 +9,10 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 
 public class ScrollBar {
     private final Rectangle barRectangle;
+    private float maxY = 0;
     private boolean visible;
 
-    public ScrollBar(final Scene scene) {
+    public ScrollBar(final Scene scene, final IScrollBarListener listener) {
         visible = false;
 
         barRectangle = new Rectangle(Config.getRES_WIDTH() - Utils.toRes(20),
@@ -24,19 +25,23 @@ public class ScrollBar {
     }
 
     public void setPosition(final float vy, final float maxy) {
+        maxY = maxy;
         if (!visible) {
             return;
         }
-
         barRectangle
                 .setPosition(barRectangle.getX(),
                         (Config.getRES_HEIGHT() - barRectangle.getHeight())
-                                * vy / maxy);
+                                * vy / maxY);
+    }
+
+    public boolean isVisible() {
+        return visible;
     }
 
     public void setVisible(final boolean vis) {
         barRectangle.setVisible(vis);
-        if (vis && !visible) {
+        if (vis == true && visible == false) {
             final IEntity parent = barRectangle.getParent();
             parent.detachChild(barRectangle);
             parent.attachChild(barRectangle);

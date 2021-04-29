@@ -8,7 +8,6 @@ import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody2D;
 import com.edlplan.osu.support.timing.controlpoint.TimingControlPoint;
 
-import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
@@ -81,7 +80,6 @@ public class Slider extends GameObject {
     private float borderPolyVerts[] = null;
 
     private boolean kiai;
-    private boolean isHiddenFadeOutActive = false;
     private RGBColor color = new RGBColor();
     private RGBColor circleColor = color;
 
@@ -754,7 +752,6 @@ public class Slider extends GameObject {
         GameObjectPool.getInstance().putSlider(this);
         GameObjectPool.getInstance().putNumber(number);
         scene = null;
-        isHiddenFadeOutActive = false;
     }
 
     private void over() {
@@ -1149,9 +1146,32 @@ public class Slider extends GameObject {
                 startOverlay.setAlpha(0);
             }
 
-            // Slider body, border, and hint gradually fade in Hidden mod
-            if (GameHelper.isHidden()) {
-                hiddenFadeOut();
+            // Slider body, border, and hint gradually fades in Hidden mod
+            // ball = null means the slider has just started
+            if (GameHelper.isHidden() && ball == null) {
+                final float sliderDuration = maxTime * repeatCount;
+                final FadeOutModifier hiddenFadeOut = new FadeOutModifier(sliderDuration);
+                if (group != null) {
+                    group.registerEntityModifier(hiddenFadeOut);
+                }
+                if (trackPoly != null) {
+                    trackPoly.registerEntityModifier(hiddenFadeOut);
+                }
+                if (borderPoly != null) {
+                    borderPoly.registerEntityModifier(hiddenFadeOut);
+                }
+                if (borderGroup != null) {
+                    borderGroup.registerEntityModifier(hiddenFadeOut);
+                }
+                if (body != null) {
+                    body.registerEntityModifier(hiddenFadeOut);
+                }
+                if (border != null) {
+                    border.registerEntityModifier(hiddenFadeOut);
+                }
+                if (abstractSliderBody != null) {
+                    abstractSliderBody.fadeOut(sliderDuration);
+                }
             }
         }
 
@@ -1238,53 +1258,6 @@ public class Slider extends GameObject {
         // If we got 100% time, finishing slider
         if (percentage >= 1) {
             over();
-        }
-    }
-
-    private void hiddenFadeOut() {
-        if (isHiddenFadeOutActive) {
-            return;
-        }
-        isHiddenFadeOutActive = true;
-        final float realDuration = maxTime * repeatCount * GameHelper.getTimeMultiplier();
-        if (group != null) {
-            group.registerEntityModifier(new AlphaModifier(realDuration,
-                group.getAlpha(), 0));
-        }
-        if (trackPoly != null) {
-            trackPoly.registerEntityModifier(new AlphaModifier(realDuration,
-                trackPoly.getAlpha(), 0));
-        }
-        if (borderPoly != null) {
-            borderPoly.registerEntityModifier(new AlphaModifier(realDuration,
-                borderPoly.getAlpha(), 0));
-        }
-        if (borderGroup != null) {
-            borderGroup.registerEntityModifier(new AlphaModifier(realDuration,
-                borderGroup.getAlpha(), 0));
-        }
-        if (body != null) {
-            body.registerEntityModifier(new AlphaModifier(realDuration,
-                body.getAlpha(), 0));
-        }
-        if (border != null) {
-            border.registerEntityModifier(new AlphaModifier(realDuration,
-                border.getAlpha(), 0));
-        }
-        for (final Sprite sp : trackSprites) {
-            sp.registerEntityModifier(new AlphaModifier(realDuration,
-                sp.getAlpha(), 0));
-        }
-        for (final Sprite sp : trackBorders) {
-            sp.registerEntityModifier(new AlphaModifier(realDuration,
-                sp.getAlpha(), 0));
-        }
-        for (final Sprite sp : trackBoundaries) {
-            sp.registerEntityModifier(new AlphaModifier(realDuration,
-                sp.getAlpha(), 0));
-        }
-        if (abstractSliderBody != null) {
-            abstractSliderBody.fadeOut(realDuration);
         }
     }
 
