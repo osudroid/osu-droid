@@ -1448,7 +1448,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 gameStarted = false;
                 breakAnimator.init(breakPeriods.peek().getLength());
                 if(GameHelper.isFlashLight()){
-                    mainCursorId = -1;
                     flashlightSprite.updateBreak(true);
                 }
                 scorebar.setVisible(false);
@@ -1459,7 +1458,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             gameStarted = true;
             scorebar.setVisible(true);
             if(GameHelper.isFlashLight()){
-                mainCursorId = -1;
                 flashlightSprite.updateBreak(false);
             }
         }
@@ -1569,6 +1567,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         for (final GameObject obj : activeObjects) {
             obj.update(dt);
+        }
+
+        if (activeObjects.isEmpty()) {
+            onLastObject();
         }
 
         int clickCount = 0;
@@ -1822,7 +1824,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             secPassed += dt;
         }
 
-        if (shouldBePunished || (objects.isEmpty() && activeObjects.isEmpty() && leadOut > 2)) {
+        if (shouldBePunished || (objects.isEmpty() && onLastObject() && leadOut > 2)) {
             scene = new Scene();
             SkinManager.setSkinEnabled(false);
             GameObjectPool.getInstance().purge();
@@ -1877,7 +1879,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 engine.setScene(oldScene);
             }
 
-        } else if (objects.isEmpty() && activeObjects.isEmpty()) {
+        } else if (objects.isEmpty() && onLastObject()) {
             gameStarted = false;
             leadOut += dt;
         }
@@ -2069,6 +2071,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         return scoreName;
+    }
+
+    public Boolean onLastObject() {
+        if (activeObjects.isEmpty()) {
+            if (GameHelper.isFlashLight()) {
+                flashlightSprite.updateBreak(true);
+            }
+        }
+
+        return activeObjects.isEmpty();
     }
 
 
@@ -2330,12 +2342,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return false;
         }
         if (Config.isRemoveSliderLock()){
-            if(activeObjects.isEmpty()
+            if(onLastObject()
                 || Math.abs(object.getHitTime() - lastObjectHitTime) > 0.001f) {
                 return false;
             }
         }
-        else if (activeObjects.isEmpty()
+        else if (onLastObject()
             || Math.abs(object.getHitTime()
             - activeObjects.peek().getHitTime()) > 0.001f) {
             return false;
@@ -2676,7 +2688,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private boolean isFirstObjectsNear(PointF pos){
-        if (activeObjects.isEmpty()) {
+        if (onLastObject()) {
             return true;
         }
         if (activeObjects.peek() instanceof Spinner || activeObjects.peek() instanceof Slider) {
