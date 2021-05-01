@@ -27,15 +27,14 @@ public class SplashScene implements IUpdateHandler {
     private final Rectangle bgRect;
     private final ChangeableText infoText;
     private final ChangeableText progressText;
-    private Sprite logo;
 
     public SplashScene() {
         scene = new Scene();
         final TextureRegion logotex = ResourceManager.getInstance().getTexture("logo");
-        logo = new Sprite(0, 0, logotex);
+        Sprite logo = new Sprite(0, 0, logotex);
         logo.setWidth(500);
         logo.setHeight(500);
-        logo.setPosition((Config.getRES_WIDTH() - logotex.getWidth()) / 2, (Config.getRES_HEIGHT() - logotex.getHeight()) / 2 - 40);
+        logo.setPosition((Config.getRES_WIDTH() - logotex.getWidth()) / 2f, (Config.getRES_HEIGHT() - logotex.getHeight()) / 2f - 40);
         logo.setRotationCenter(250, 250);
         scene.attachChild(logo);
 

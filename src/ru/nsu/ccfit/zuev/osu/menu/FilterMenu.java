@@ -26,7 +26,7 @@ import ru.nsu.ccfit.zuev.osu.menu.SongMenu.SortOrder;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class FilterMenu implements IUpdateHandler, IFilterMenu {
-    private static Context configContext = null;
+    private Context configContext = null;
     private static IFilterMenu instance;
     private Scene scene = null;
     private ChangeableText filterText;
@@ -117,7 +117,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
                 break;
         }
     
-        editor.commit();
+        editor.apply();
     }
 
     public void setSongMenu(final SongMenu menu) {
@@ -139,7 +139,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
         final Text caption = new Text(0, Utils.toRes(60), ResourceManager
                 .getInstance().getFont("CaptionFont"),
                 StringTable.get(R.string.menu_search_title));
-        caption.setPosition(Config.getRES_WIDTH() / 2 - caption.getWidth() / 2,
+        caption.setPosition(Config.getRES_WIDTH() / 2f - caption.getWidth() / 2,
                 caption.getY());
         scene.attachChild(caption);
 
@@ -147,7 +147,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
 
         final Text capt1 = new Text(Utils.toRes(100), Utils.toRes(160), font,
                 StringTable.get(R.string.menu_search_filter));
-        capt1.setPosition(Config.getRES_WIDTH() * 1 / 4 - capt1.getWidth(), capt1.getY());
+        capt1.setPosition(Config.getRES_WIDTH() / 4f - capt1.getWidth(), capt1.getY());
         scene.attachChild(capt1);
 
         final Rectangle filterBorder = new Rectangle(capt1.getX(),
@@ -182,7 +182,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
 
         final Text capt2 = new Text(Utils.toRes(700), Utils.toRes(160), font,
                 StringTable.get(R.string.menu_search_sort));
-        capt2.setPosition(Config.getRES_WIDTH() * 2 / 3 - capt2.getWidth(), capt2.getY());
+        capt2.setPosition(Config.getRES_WIDTH() * 2f / 3 - capt2.getWidth(), capt2.getY());
         scene.attachChild(capt2);
 
         final Rectangle sortBg = new Rectangle(capt2.getX(), Utils.toRes(200),
@@ -250,7 +250,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
         };
         back.setWidth(Utils.toRes(400));
         back.setScale(1.2f);
-        back.setPosition(Config.getRES_WIDTH() / 2 - back.getWidth() / 2, Config.getRES_HEIGHT() * 3 / 4 - back.getHeight() / 2);
+        back.setPosition(Config.getRES_WIDTH() / 2f - back.getWidth() / 2, Config.getRES_HEIGHT() * 3f / 4 - back.getHeight() / 2);
         back.setColor(66 / 255f, 76 / 255f, 80 / 255f);
         scene.attachChild(back);
         scene.registerTouchArea(back);
