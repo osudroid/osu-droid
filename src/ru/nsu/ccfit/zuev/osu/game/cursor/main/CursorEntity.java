@@ -1,21 +1,27 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
 import org.anddev.andengine.entity.Entity;
+import org.anddev.andengine.entity.modifier.MoveModifier;
 import org.anddev.andengine.entity.particle.ParticleSystem;
 import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
+import java.util.Queue;
+
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.game.GameHelper;
+import ru.nsu.ccfit.zuev.osu.game.GameObject;
 import ru.nsu.ccfit.zuev.osu.game.cursor.trail.CursorTrail;
 
 public class CursorEntity extends Entity {
+    public static final float DEFAULT_AUTO_CURSOR_DELAY = 0.1f;
     private final CursorSprite cursorSprite;
     private ParticleSystem particles = null;
     private PointParticleEmitter emitter = null;
     private boolean isShowing = false;
     // private PointF oldPoint = null;
     private float particleOffsetX, particleOffsetY;
-    // private ArrayList<Particle> tails;
 
     public CursorEntity() {
         if (Config.isUseParticles()) {
@@ -42,6 +48,37 @@ public class CursorEntity extends Entity {
 
     public void click() {
         cursorSprite.handleClick();
+    }
+
+    private void doAutoMove(float pX, float pY, float durationS) {
+        if (GameHelper.isAuto()) {
+            if (durationS <= 0) {
+                durationS = DEFAULT_AUTO_CURSOR_DELAY;
+            }
+            this.registerEntityModifier(
+                new MoveModifier(durationS, this.getX(), pX, this.getY(), pY, EaseExponentialOut.getInstance())
+            );
+        }
+    }
+
+    public void updatePosIfAuto(float pX, float pY, float sDuration) {
+        this.doAutoMove(pX, pY, sDuration);
+    }
+
+    public void updatePosIfAuto(float pX, float pY, Queue<GameObject> activeObjects) {
+        GameObject[] activeObjectsArr = activeObjects.toArray(new GameObject[]{activeObjects.peek()});
+
+        GameObject currentObj = activeObjects.peek();
+
+        if (currentObj == null) {
+            return;
+        }
+
+        float currentObjHitTime = currentObj.getHitTime();
+        float nextObjHitTime = 1 < activeObjectsArr.length? activeObjectsArr[1].getHitTime() : currentObjHitTime;
+        float moveDelay = nextObjHitTime - currentObjHitTime;
+
+        this.doAutoMove(pX, pY, moveDelay);
     }
 
     public void update(float pSecondsElapsed) {

@@ -4,6 +4,7 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 
 public class CursorSprite extends Sprite {
     public static final float BASE_SIZE = Config.getCursorSize() * 2;
@@ -24,5 +25,4 @@ public class CursorSprite extends Sprite {
             this.setScale(Math.max(BASE_SIZE, this.getScaleX() - (BASE_SIZE * 0.75f) * pSecondsElapsed));
         }
     }
-
 }
