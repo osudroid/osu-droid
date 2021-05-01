@@ -239,7 +239,7 @@
     <string name="opt_hitlighting_summary">Adds a subtle glow behind hit explosions which lights the playfield</string>
 
     <string name="opt_dither_title">Dither</string>
-    <string name="opt_dither_summary">User hardware dither (picture processing)</string>
+    <string name="opt_dither_summary">Use hardware dither (picture processing)</string>
 
     <string name="opt_particles_title">Particle effects</string>
     <string name="opt_particles_summary">Show particle-based effects like cursor trail</string>
