@@ -4,16 +4,18 @@ import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.modifier.MoveModifier;
 import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
+import ru.nsu.ccfit.zuev.osu.Config;
 
 
 public class FlashLightEntity extends Entity  {
-    private static final float DEFAULT_MOVE_DELAY = 0.12f;
     private final MainFlashLightSprite mainSprite;
     private final FlashLightDimLayerSprite dimLayer;
-    private boolean isShowing = false;
-    private boolean isSliderDimActive = false;
+    private static final float DEFAULT_MOVE_DELAY = 0.12f;
+    private boolean isTrackingSliders = false;
 
     public FlashLightEntity() {
+        super(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
+
         mainSprite = new MainFlashLightSprite();
         dimLayer = new FlashLightDimLayerSprite();
 
@@ -21,27 +23,22 @@ public class FlashLightEntity extends Entity  {
         attachChild(dimLayer);
     }
 
-    public void setSliderDimActive(boolean isSliderDimActive) {
-        this.isSliderDimActive = isSliderDimActive;
-    }
-
-    public void setShowing(boolean showing) {
-        this.isShowing = showing;
-    }
-
-    public void updateBreak(boolean isBreak) {
+    public void onBreak(boolean isBreak) {
         mainSprite.updateBreak(isBreak);
     }
 
-    public void updatePositionByValue(float pX, float pY) {
+    public void onMouseMovement(float pX, float pY) {
         this.registerEntityModifier(
             new MoveModifier(DEFAULT_MOVE_DELAY, this.getX(), pX, this.getY(), pY, EaseExponentialOut.getInstance())
         );
     }
 
-    public void update(int combo) {
-        dimLayer.update(isSliderDimActive);
-        mainSprite.update(combo, isShowing);
+    public void onTrackingSliders(boolean isTrackingSliders) {
+        this.isTrackingSliders = isTrackingSliders;
     }
+
+    public void onUpdate(int combo) {
+        dimLayer.onTrackingSliders(isTrackingSliders);
+        mainSprite.onUpdate(combo); }
 }
 

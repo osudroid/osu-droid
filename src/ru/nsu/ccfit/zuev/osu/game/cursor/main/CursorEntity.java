@@ -61,10 +61,6 @@ public class CursorEntity extends Entity {
         }
     }
 
-    public void updatePosIfAuto(float pX, float pY, float sDuration) {
-        this.doAutoMove(pX, pY, sDuration);
-    }
-
     public void updatePosIfAuto(float pX, float pY, Queue<GameObject> activeObjects) {
         GameObject[] activeObjectsArr = activeObjects.toArray(new GameObject[]{activeObjects.peek()});
 

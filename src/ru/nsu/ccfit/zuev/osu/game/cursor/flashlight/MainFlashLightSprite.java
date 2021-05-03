@@ -1,15 +1,18 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.flashlight;
 
+import org.anddev.andengine.entity.modifier.MoveModifier;
 import org.anddev.andengine.entity.modifier.ScaleModifier;
 import org.anddev.andengine.entity.text.Text;
+import org.anddev.andengine.opengl.texture.Texture;
+import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 
 
 public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
     private static final TextureRegion DEFAULT_TEXTURE = ResourceManager.getInstance().getTexture("flashlight_cursor");
-    public static final float BASE_SIZE = 8f;
     public static final int TEXTURE_WIDTH = DEFAULT_TEXTURE.getWidth();
     public static final int TEXTURE_HEIGHT = DEFAULT_TEXTURE.getHeight();
     public final float AREA_CHANGE_FADE_DURATION = 0.8f;
@@ -19,8 +22,7 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
         super(DEFAULT_TEXTURE);
     }
 
-    public void update(int combo, boolean isShowing) {
-        this.setVisible(isShowing);
+    public void onUpdate(int combo) {
         this.handleAreaShrinking(combo);
     }
 

@@ -4,6 +4,9 @@ import android.graphics.Color;
 import com.edlplan.andengine.TextureHelper;
 
 import org.anddev.andengine.entity.modifier.AlphaModifier;
+import org.anddev.andengine.opengl.texture.Texture;
+import org.anddev.andengine.opengl.texture.TextureOptions;
+import org.anddev.andengine.util.Debug;
 
 public class FlashLightDimLayerSprite extends FlashlightAreaSizedSprite {
     public final float BASE_SLIDER_DIM_ALPHA = 0.8f;
@@ -11,11 +14,11 @@ public class FlashLightDimLayerSprite extends FlashlightAreaSizedSprite {
     public FlashLightDimLayerSprite() {
         super(TextureHelper.create1xRegion(Color.BLACK));
         this.setScale(MainFlashLightSprite.TEXTURE_WIDTH, MainFlashLightSprite.TEXTURE_HEIGHT);
-        this.setAlpha(BASE_SLIDER_DIM_ALPHA);
+        this.setAlpha(0);
     }
 
-    public void update(boolean isSliderDimActive) {
-       float newAlpha = isSliderDimActive? BASE_SLIDER_DIM_ALPHA : 0;
+    public void onTrackingSliders(boolean isTrackingSliders) {
+       float newAlpha = isTrackingSliders? BASE_SLIDER_DIM_ALPHA : 0;
        this.registerEntityModifier(new AlphaModifier(0.05f, this.getAlpha(), newAlpha));
     }
 }
