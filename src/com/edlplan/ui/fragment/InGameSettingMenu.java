@@ -16,7 +16,10 @@ import com.edlplan.ui.EasingHelper;
 
 import org.anddev.andengine.input.touch.TouchEvent;
 
+import lt.ekgame.beatmap_analyzer.utils.Mod;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.game.GameHelper;
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -31,6 +34,7 @@ public class InGameSettingMenu extends BaseFragment {
     private SeekBar backgroundBrightness;
     private SeekBar changeSpeed;
     private SeekBar forceAR;
+    private SeekBar flashlightFollowDelay;
 
     public static InGameSettingMenu getInstance() {
         if (menu == null) {
@@ -248,6 +252,23 @@ public class InGameSettingMenu extends BaseFragment {
             }
         });
         ((TextView) findViewById(R.id.forceARText)).setText(String.format("AR%.1f", ModMenu.getInstance().getForceAR()));
+
+        flashlightFollowDelay = findViewById(R.id.flashlightFollowDelayBar);
+        flashlightFollowDelay.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                int progress = seekBar.getProgress();
+                float p = (float) Math.max(120f, (Math.ceil(progress / 120f) * 120));
+                ((TextView) findViewById(R.id.flashlightFollowDelayText)).setText(String.valueOf(p));
+                ModMenu.getInstance().setFLfollowDelay(p * 0.001f);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) { }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) { }
+        });
     }
 
     @Override

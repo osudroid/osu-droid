@@ -5,12 +5,12 @@ import org.anddev.andengine.entity.modifier.MoveModifier;
 import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 
 
 public class FlashLightEntity extends Entity  {
     private final MainFlashLightSprite mainSprite;
     private final FlashLightDimLayerSprite dimLayer;
-    private static final float DEFAULT_MOVE_DELAY = 0.12f;
     private boolean isTrackingSliders = false;
 
     public FlashLightEntity() {
@@ -27,9 +27,10 @@ public class FlashLightEntity extends Entity  {
         mainSprite.updateBreak(isBreak);
     }
 
-    public void onMouseMovement(float pX, float pY) {
+    public void onMouseMove(float pX, float pY) {
+        float flFollowDelay = ModMenu.getInstance().getFLfollowDelay();
         this.registerEntityModifier(
-            new MoveModifier(DEFAULT_MOVE_DELAY, this.getX(), pX, this.getY(), pY, EaseExponentialOut.getInstance())
+            new MoveModifier(flFollowDelay, this.getX(), pX, this.getY(), pY, EaseExponentialOut.getInstance())
         );
     }
 

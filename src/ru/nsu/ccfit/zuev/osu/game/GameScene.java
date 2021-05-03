@@ -1252,6 +1252,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (GameHelper.isFlashLight()){
             flashlightSprite = new FlashLightEntity();
             fgScene.attachChild(flashlightSprite, 0);
+            if (GameHelper.isAuto()) {
+                flashlightSprite.setPosition(cursors[0].mousePos.x, cursors[0].mousePos.y);
+            }
         }
 
 /*        PointF point1 = Utils.trackToRealCoords(new PointF(0, 0));
@@ -1408,7 +1411,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     for (final Cursor c : cursors) {
                         if (c.mousePressed == true && isFirstObjectsNear(c.mousePos)) {
                             mainCursorId = i;
-                            flashlightSprite.onMouseMovement(c.mousePos.x, c.mousePos.y);
+                            flashlightSprite.onMouseMove(c.mousePos.x, c.mousePos.y);
                             break;
                         }
                         ++i;
@@ -1416,7 +1419,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 } else if(cursors[mainCursorId].mouseDown == false){
                     mainCursorId = -1;
                 } else if(cursors[mainCursorId].mouseDown == true){
-                    flashlightSprite.onMouseMovement(
+                    flashlightSprite.onMouseMove(
                             cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y
                     );
                 }
@@ -2090,13 +2093,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if(GameHelper.isFlashLight()){
             if (GameHelper.isAuto()) {
-                flashlightSprite.onMouseMovement(pos.x, pos.y);
+                flashlightSprite.onMouseMove(pos.x, pos.y);
             }
             else {
                int nearestCursorId = getNearestCursorId(pos.x, pos.y);
                if (nearestCursorId >= 0) {
                    mainCursorId = nearestCursorId;
-                   flashlightSprite.onMouseMovement(
+                   flashlightSprite.onMouseMove(
                            cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y
                    );
                 }
@@ -2653,7 +2656,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (GameHelper.isAuto()) {
             cursorSprites[0].setPosition(pX, pY);
             if (GameHelper.isFlashLight()) {
-                flashlightSprite.onMouseMovement(pX, pY);
+                flashlightSprite.onMouseMove(pX, pY);
             }
         }
     }

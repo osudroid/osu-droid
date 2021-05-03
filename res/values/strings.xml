@@ -177,7 +177,8 @@
     <string name="click_to_see_change_list">Click to see change list</string>
 
 	<string name="changelog_title">Changelog</string>
-	<string name="unranked_features">↓ Unranked features ↓</string>
+	<string name="unranked_features">↓ Unranked features ↓</string>*/
+	<string name="mod_customization">↓ Mod customization ↓</string>
 
     <string name="str_save_failed_replay">Click here to save replay</string>
     <string name="message_save_replay_successful">Save failed replay success!</string>

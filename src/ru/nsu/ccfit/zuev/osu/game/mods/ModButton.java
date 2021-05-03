@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game.mods;
 
+import com.edlplan.ui.fragment.InGameSettingMenu;
+
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.input.touch.TouchEvent;
 
@@ -26,6 +28,7 @@ public class ModButton extends Sprite {
     }
 
     public void setModEnabled(boolean enabled) {
+
         if (enabled) {
             setScale(selectedScale);
             setRotation(selectedRotate);
