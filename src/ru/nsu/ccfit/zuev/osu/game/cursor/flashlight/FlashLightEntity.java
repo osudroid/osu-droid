@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu.game.cursor.flashlight;
 
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.modifier.MoveModifier;
-import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
@@ -30,7 +29,7 @@ public class FlashLightEntity extends Entity  {
     public void onMouseMove(float pX, float pY) {
         float flFollowDelay = ModMenu.getInstance().getFLfollowDelay();
         this.registerEntityModifier(
-            new MoveModifier(flFollowDelay, this.getX(), pX, this.getY(), pY, EaseExponentialOut.getInstance())
+            new MoveModifier(flFollowDelay, this.getX(), pX, this.getY(), pY)
         );
     }
 

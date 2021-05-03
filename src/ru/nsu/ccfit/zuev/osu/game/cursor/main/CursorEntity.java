@@ -5,9 +5,6 @@ import org.anddev.andengine.entity.modifier.MoveModifier;
 import org.anddev.andengine.entity.particle.ParticleSystem;
 import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
-import org.anddev.andengine.util.modifier.ease.EaseLinear;
 
 import java.util.Queue;
 
@@ -58,7 +55,7 @@ public class CursorEntity extends Entity {
                 this.setPosition(pX, pY);
             } else {
                 this.registerEntityModifier(
-                        new MoveModifier(durationS, this.getX(), pX, this.getY(), pY, EaseExponentialOut.getInstance())
+                        new MoveModifier(durationS, this.getX(), pX, this.getY(), pY)
                 );
             }
         }
