@@ -851,6 +851,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             cursorSprites = null;
         }
 
+        if (GameHelper.isAuto()) {
+            cursorSprites[0].setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
+        }
+
         final String countdownPar = beatmapData.getData("General", "Countdown");
         if (Config.isCorovans() && countdownPar.equals("") == false) {
             float cdSpeed = 0;
@@ -1252,9 +1256,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (GameHelper.isFlashLight()){
             flashlightSprite = new FlashLightEntity();
             fgScene.attachChild(flashlightSprite, 0);
-            if (GameHelper.isAuto()) {
-                flashlightSprite.setPosition(cursors[0].mousePos.x, cursors[0].mousePos.y);
-            }
         }
 
 /*        PointF point1 = Utils.trackToRealCoords(new PointF(0, 0));
@@ -1929,7 +1930,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 /*        if (GameHelper.isKiai() && Config.isComplexAnimations() && Config.getBackgroundBrightness() != 0) {
             final float kiaiModifier = Math
                     .max(0,
-                            1 - GameHelper.getGlobalTime() /ip
+                            1 - GameHelper.getGlobalTime() /
                                     GameHelper.getKiaiTickLength()) * 0.15f;
             final float a = Math.min(1, kiaiModifier);
             if (kiai == false) {

@@ -255,17 +255,20 @@ public class InGameSettingMenu extends BaseFragment {
 
         flashlightFollowDelay = findViewById(R.id.flashlightFollowDelayBar);
         flashlightFollowDelay.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            final TextView customizedModsText = findViewById(R.id.customize_mods);
+
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 int progress = seekBar.getProgress();
-                float p = (float) Math.max(120f, (Math.ceil(progress / 120f) * 120));
+                float p = (float) (Math.ceil(progress / 120f) * 120);
                 ((TextView) findViewById(R.id.flashlightFollowDelayText)).setText(String.valueOf(p));
+                String newColorS = p == 120? "#7CFC00" : "#FF0000";
+                customizedModsText.setTextColor(Color.parseColor(newColorS));
                 ModMenu.getInstance().setFLfollowDelay(p * 0.001f);
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) { }
-
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) { }
         });

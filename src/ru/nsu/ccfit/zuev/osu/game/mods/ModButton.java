@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.game.mods;
 
-import com.edlplan.ui.fragment.InGameSettingMenu;
-
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.input.touch.TouchEvent;
 

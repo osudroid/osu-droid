@@ -490,7 +490,9 @@ public class ScoringScene {
                 || stat.getMod().contains(GameMod.MOD_SCOREV2)
                 || Config.isRemoveSliderLock()
                 || ModMenu.getInstance().isChangeSpeed()
-                || ModMenu.getInstance().isEnableForceAR()){
+                || ModMenu.getInstance().isEnableForceAR()
+                || ModMenu.getInstance().getFLfollowDelay() != 120f
+                ) {
                     ToastLogger.showText(StringTable.get(R.string.mods_somemods_is_unrank_now), true);
                 }
                 else if(

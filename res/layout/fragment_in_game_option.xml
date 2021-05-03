@@ -309,6 +309,7 @@
                         </TableRow>
 
 						<TextView
+							android:id="@+id/customize_mods"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
 							android:layout_marginTop="10dp"
@@ -316,7 +317,7 @@
 							android:gravity="center"
 							android:textAlignment="center"
 							android:text="@string/mod_customization"
-							android:textColor="#FF0000" />
+							android:textColor="#7CFC00" />
 
 						<TableRow
 							android:layout_width="match_parent"
