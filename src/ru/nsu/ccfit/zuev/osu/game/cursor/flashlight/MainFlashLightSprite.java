@@ -18,6 +18,7 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
     public final float AREA_CHANGE_FADE_DURATION = 0.8f;
     public float currentSize = BASE_SIZE;
 
+
     public MainFlashLightSprite() {
         super(DEFAULT_TEXTURE);
     }
@@ -33,8 +34,8 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
     public void handleAreaShrinking(int combo) {
         // Area stops shrinking at 200 combo
         if (combo <= 200 && combo % 100 == 0) {
-            // For every 100 combo, the size is decreased by 20%
-            final float newSize = (1 - 0.2f * combo / 100f) * BASE_SIZE;
+            // For every 100 combo, the size is decreased by 10%
+            final float newSize = (1 - 0.1f * combo / 100f) * BASE_SIZE;
             this.changeArea(currentSize, newSize);
             currentSize = newSize;
         }
