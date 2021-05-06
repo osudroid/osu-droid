@@ -32,7 +32,6 @@ public class Metronome {
         }
 
         lastBeatIndex = beatIndex;
-
         int beatInBar = beatIndex % GameHelper.getTimeSignature();
 
         // 每隔8小节在第4拍kick+finish
