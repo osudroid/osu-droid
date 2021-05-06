@@ -37,11 +37,6 @@ public class FlashLightEntity extends Entity  {
     public void onMouseMove(float pX, float pY) {
         float flFollowDelay = ModMenu.getInstance().getFLfollowDelay();
 
-        if (flFollowDelay <= 0) {
-            this.setPosition(pX, pY);
-            return;
-        }
-
         if (nextPX != 0 && nextPY != 0 && currentModifier != null && this.getX() != nextPX && this.getY() != nextPY) {
             this.unregisterEntityModifier(currentModifier);
         }
