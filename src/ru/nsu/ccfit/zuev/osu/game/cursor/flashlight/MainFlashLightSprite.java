@@ -1,12 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.flashlight;
 
-import org.anddev.andengine.entity.modifier.MoveModifier;
 import org.anddev.andengine.entity.modifier.ScaleModifier;
-import org.anddev.andengine.entity.text.Text;
-import org.anddev.andengine.opengl.texture.Texture;
-import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 

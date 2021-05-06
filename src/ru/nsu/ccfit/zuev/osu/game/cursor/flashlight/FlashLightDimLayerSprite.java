@@ -4,9 +4,7 @@ import android.graphics.Color;
 import com.edlplan.andengine.TextureHelper;
 
 import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.opengl.texture.Texture;
-import org.anddev.andengine.opengl.texture.TextureOptions;
-import org.anddev.andengine.util.Debug;
+
 
 public class FlashLightDimLayerSprite extends FlashlightAreaSizedSprite {
     public final float BASE_SLIDER_DIM_ALPHA = 0.8f;
