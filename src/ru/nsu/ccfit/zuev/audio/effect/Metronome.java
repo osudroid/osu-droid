@@ -16,27 +16,18 @@ public class Metronome {
 
     public Metronome() {
         ResourceManager resources = ResourceManager.getInstance();
-
-        resources.loadSound("nightcore-kick", "sfx/nightcore-kick.wav", false);
-        resources.loadSound("nightcore-finish", "sfx/nightcore-finish.wav", false);
-        resources.loadSound("nightcore-clap", "sfx/nightcore-clap.wav", false);
-        resources.loadSound("nightcore-hat", "sfx/nightcore-hat.wav", false);
-
-        kickSound = resources.getSound("nightcore-kick");
-        finishSound = resources.getSound("nightcore-finish");
-        clapSound = resources.getSound("nightcore-clap");
-        hatSound = resources.getSound("nightcore-hat");
+        kickSound =  resources.loadSound("nightcore-kick", "sfx/nightcore-kick.wav", false);
+        finishSound = resources.loadSound("nightcore-finish", "sfx/nightcore-finish.wav", false);
+        clapSound = resources.loadSound("nightcore-clap", "sfx/nightcore-clap.wav", false);
+        hatSound = resources.loadSound("nightcore-hat", "sfx/nightcore-hat.wav", false);
     }
 
     public void update(float elapsedTime) {
-        if (elapsedTime - GameHelper.getTimingOffset() <= 0) {
-            return;
-        }
 
         float playSeconds = elapsedTime - GameHelper.getTimingOffset();
         int beatIndex = (int) (playSeconds * 2 / GameHelper.getBeatLength());
 
-        if (beatIndex < 0 || beatIndex == lastBeatIndex) {
+        if (elapsedTime - GameHelper.getTimingOffset() <= 0  || beatIndex < 0 || beatIndex == lastBeatIndex) {
             return;
         }
 
@@ -52,17 +43,19 @@ public class Metronome {
             }
             return;
         }
-        // 每小节第4拍kick
-        if (beatInBar % 4 == 0) {
-            kickSound.play(volume);
-            return;
+
+        switch (beatInBar % 4) {
+            case 0:
+                kickSound.play(volume); // 每小节第4拍kick
+                break;
+            case 1:
+                hatSound.play(volume);  // 每小节奇数拍hat
+                break;
+            case 2:
+                clapSound.play(volume); // 每小节第2拍clap
+                break;
+            default:
+                break;
         }
-        // 每小节第2拍clap
-        if (beatInBar % 4 == 2) {
-            clapSound.play(volume);
-            return;
-        }
-        // 每小节奇数拍hat
-        hatSound.play(volume);
     }
 }
