@@ -5,16 +5,28 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 
 public class Metronome {
+    private final static float volume = 1.0f;
 
-    private ResourceManager resources = ResourceManager.getInstance();
+    private final BassSoundProvider kickSound;
+    private final BassSoundProvider finishSound;
+    private final BassSoundProvider clapSound;
+    private final BassSoundProvider hatSound;
 
-    private BassSoundProvider kickSound = resources.getSound("nightcore-kick");
-    private BassSoundProvider finishSound = resources.getSound("nightcore-finish");
-    private BassSoundProvider clapSound = resources.getSound("nightcore-clap");
-    private BassSoundProvider hatSound = resources.getSound("nightcore-hat");
-
-    private float volume = 1.0f;
     private int lastBeatIndex = -1;
+
+    public Metronome() {
+        ResourceManager resources = ResourceManager.getInstance();
+
+        resources.loadSound("nightcore-kick", "sfx/nightcore-kick.wav", false);
+        resources.loadSound("nightcore-finish", "sfx/nightcore-finish.wav", false);
+        resources.loadSound("nightcore-clap", "sfx/nightcore-clap.wav", false);
+        resources.loadSound("nightcore-hat", "sfx/nightcore-hat.wav", false);
+
+        kickSound = resources.getSound("nightcore-kick");
+        finishSound = resources.getSound("nightcore-finish");
+        clapSound = resources.getSound("nightcore-clap");
+        hatSound = resources.getSound("nightcore-hat");
+    }
 
     public void update(float elapsedTime) {
         if (elapsedTime - GameHelper.getTimingOffset() <= 0) {
@@ -24,12 +36,10 @@ public class Metronome {
         float playSeconds = elapsedTime - GameHelper.getTimingOffset();
         int beatIndex = (int) (playSeconds * 2 / GameHelper.getBeatLength());
 
-        if (beatIndex < 0) {
+        if (beatIndex < 0 || beatIndex == lastBeatIndex) {
             return;
         }
-        if (beatIndex == lastBeatIndex) {
-            return;
-        }
+
         lastBeatIndex = beatIndex;
 
         int beatInBar = beatIndex % GameHelper.getTimeSignature();
