@@ -680,6 +680,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
         if (storyboardOverlayProxy != null) {
+            storyboardOverlayProxy.detachSelf();
             scene.attachChild(storyboardOverlayProxy);
         }
         scene.attachChild(fgScene);
