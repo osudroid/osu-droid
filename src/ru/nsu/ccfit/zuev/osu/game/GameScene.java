@@ -49,6 +49,7 @@ import java.util.Iterator;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import lt.ekgame.beatmap_analyzer.utils.Mod;
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.effect.Metronome;
@@ -679,6 +680,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
         if (storyboardOverlayProxy != null) {
+            storyboardOverlayProxy.detachSelf();
             scene.attachChild(storyboardOverlayProxy);
         }
         scene.attachChild(fgScene);
@@ -696,11 +698,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         new AsyncTaskLoader().execute(new OsuAsyncCallback() {
 
-
             public void run() {
                 loadComplete = loadGame(track != null ? track : lastTrack, rfile);
             }
-
 
             public void onComplete() {
                 if (loadComplete == true) {
@@ -710,6 +710,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
                     ModMenu.getInstance().setForceAR(Replay.oldForceAR);
                     ModMenu.getInstance().setEnableForceAR(Replay.oldEnableForceAR);
+                    ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
                     quit();
                 }
             }
@@ -777,12 +778,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         float multiplier = 1 + rawDifficulty / 10f + rawDrain / 10f;
         multiplier += (Float.parseFloat(beatmapData.getData("Difficulty",
                 "CircleSize")) - 3) / 4f;
+
         stat.setDiffModifier(multiplier);
         stat.setMaxObjectsCount(lastTrack.getTotalHitObjectCount());
         stat.setMaxHighestCombo(lastTrack.getMaxCombo());
         stat.setEnableForceAR(ModMenu.getInstance().isEnableForceAR());
         stat.setForceAR(ModMenu.getInstance().getForceAR());
         stat.setChangeSpeed(ModMenu.getInstance().getChangeSpeed());
+        stat.setFLFollowDelay(ModMenu.getInstance().getFLfollowDelay());
+
         GameHelper.setHardrock(stat.getMod().contains(GameMod.MOD_HARDROCK));
         GameHelper.setDoubleTime(stat.getMod().contains(GameMod.MOD_DOUBLETIME));
         GameHelper.setNightCore(stat.getMod().contains(GameMod.MOD_NIGHTCORE));
@@ -1859,6 +1863,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
                     ModMenu.getInstance().setForceAR(Replay.oldForceAR);
                     ModMenu.getInstance().setEnableForceAR(Replay.oldEnableForceAR);
+                    ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
                 }
 
                 if (replaying)
@@ -1976,6 +1981,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
             ModMenu.getInstance().setForceAR(Replay.oldForceAR);
             ModMenu.getInstance().setEnableForceAR(Replay.oldEnableForceAR);
+            ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
         }
     }
 
@@ -2764,7 +2770,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         return replaying;
     }
     
-    public boolean saveFailedReplay(){
+    public boolean saveFailedReplay() {
         stat.setTime(System.currentTimeMillis());
         if (replay != null && replaying == false) {
             //write misses to replay

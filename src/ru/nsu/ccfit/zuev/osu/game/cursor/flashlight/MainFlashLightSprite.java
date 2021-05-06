@@ -18,12 +18,12 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
         super(DEFAULT_TEXTURE);
     }
 
-    public void onUpdate(int combo) {
-        this.handleAreaShrinking(combo);
+    private void changeArea(float fromScale, float toScale) {
+        this.registerEntityModifier(new ScaleModifier(AREA_CHANGE_FADE_DURATION, fromScale, toScale));
     }
 
-    public void changeArea(float fromScale, float toScale) {
-        this.registerEntityModifier(new ScaleModifier(AREA_CHANGE_FADE_DURATION, fromScale, toScale));
+    public void onUpdate(int combo) {
+        this.handleAreaShrinking(combo);
     }
 
     public void handleAreaShrinking(int combo) {

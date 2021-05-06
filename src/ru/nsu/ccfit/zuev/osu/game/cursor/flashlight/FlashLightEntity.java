@@ -19,6 +19,7 @@ public class FlashLightEntity extends Entity  {
     private float nextPY;
 
     public static final float defaultMoveDelayMS = 120f;
+    public static final float defaultMoveDelayS = defaultMoveDelayMS * 0.001f;
 
     public FlashLightEntity() {
         super(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
