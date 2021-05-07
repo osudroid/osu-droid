@@ -16,6 +16,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameObject;
 import ru.nsu.ccfit.zuev.osu.game.GameObjectData;
+import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
 import ru.nsu.ccfit.zuev.osu.game.cursor.trail.CursorTrail;
 
 public class CursorEntity extends Entity {
@@ -62,24 +63,26 @@ public class CursorEntity extends Entity {
         this.registerEntityModifier(currentModifier);
     }
 
-    private void doAutoMove(float pX, float pY, float durationS) {
+    private void doAutoMove(float pX, float pY, float durationS, GameObjectListener listener) {
         if (durationS <= 0) {
             this.setPosition(pX, pY);
+            listener.onUpdatedAutoCursor(pX, pY);
         } else if (!this.isMovingAutoSliderOrSpinner) {
             doEasingAutoMove(pX, pY, durationS);
+            listener.onUpdatedAutoCursor(pX, pY);
         }
     }
 
-    public void updatePosIfAuto(float pX, float pY, float durationS) {
+    public void updatePosIfAuto(float pX, float pY, float durationS, GameObjectListener listener) {
         if (!GameHelper.isAuto()) {
             return;
         }
 
         this.isMovingAutoSliderOrSpinner = true;
-        this.doAutoMove(pX, pY, durationS);
+        this.doAutoMove(pX, pY, durationS, listener);
     }
 
-    public void updatePosIfAuto(Queue<GameObject> activeObjects, float secPassed, LinkedList<GameObjectData> objects) {
+    public void updatePosIfAuto(Queue<GameObject> activeObjects, float secPassed, LinkedList<GameObjectData> objects, GameObjectListener listener) {
         if (!GameHelper.isAuto()) {
             return;
         }
@@ -113,7 +116,7 @@ public class CursorEntity extends Entity {
         float movePositionY = nextObjData.getPos().y;
         float moveDelay = nextObjData.getTime() - secPassed;
 
-        this.doAutoMove(movePositionX, movePositionY, moveDelay);
+        this.doAutoMove(movePositionX, movePositionY, moveDelay, listener);
     }
 
 

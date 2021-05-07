@@ -1584,7 +1584,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (cursorSprites != null && cursorSprites.length > 0) {
-            cursorSprites[0].updatePosIfAuto(activeObjects, secPassed, allObjects);
+            cursorSprites[0].updatePosIfAuto(activeObjects, secPassed, allObjects, this);
         }
 
         int clickCount = 0;
@@ -2101,18 +2101,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             replay.addObjectResult(id, sacc, null);
         }
 
-        if(GameHelper.isFlashLight()){
-            if (GameHelper.isAuto()) {
-                flashlightSprite.onMouseMove(pos.x, pos.y);
-            }
-            else {
-               int nearestCursorId = getNearestCursorId(pos.x, pos.y);
-               if (nearestCursorId >= 0) {
-                   mainCursorId = nearestCursorId;
-                   flashlightSprite.onMouseMove(
-                           cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y
-                   );
-                }
+        if(GameHelper.isFlashLight() && !GameHelper.isAuto()){
+           int nearestCursorId = getNearestCursorId(pos.x, pos.y);
+           if (nearestCursorId >= 0) {
+               mainCursorId = nearestCursorId;
+               flashlightSprite.onMouseMove(cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y
+               );
             }
         }
 
@@ -2668,12 +2662,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
     }
 
+    public void onUpdatedAutoCursor(float pX, float pY) {
+        if (GameHelper.isFlashLight()) {
+            flashlightSprite.onMouseMove(pX, pY);
+        }
+    }
+
     public void updateAutoBasedPos(float pX, float pY, float durationS){
         if (GameHelper.isAuto()) {
-            cursorSprites[0].updatePosIfAuto(pX, pY, durationS);
-            if (GameHelper.isFlashLight()) {
-                flashlightSprite.onMouseMove(pX, pY);
-            }
+            cursorSprites[0].updatePosIfAuto(pX, pY, durationS, this);
         }
     }
 

@@ -46,4 +46,6 @@ public interface GameObjectListener {
     void updateAutoBasedPos(float pX, float pY, float durationS);
 
     void onTrackingSliders(boolean isTrackingSliders);
+
+    void onUpdatedAutoCursor(float pX, float pY);
 }
