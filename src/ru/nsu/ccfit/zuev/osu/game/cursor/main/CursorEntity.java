@@ -1,19 +1,22 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
 import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.MoveModifier;
 import org.anddev.andengine.entity.particle.ParticleSystem;
 import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
+import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import java.util.Queue;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameObject;
+import ru.nsu.ccfit.zuev.osu.game.GameObjectData;
 import ru.nsu.ccfit.zuev.osu.game.cursor.trail.CursorTrail;
 
 public class CursorEntity extends Entity {
@@ -22,10 +25,9 @@ public class CursorEntity extends Entity {
     private PointParticleEmitter emitter = null;
     private boolean isShowing = false;
     private float particleOffsetX, particleOffsetY;
-    private IEntityModifier currentModifier;
     public boolean isMovingAutoSliderOrSpinner = false;
-    float nextPX;
-    float nextPY;
+    private boolean isFirstNote = false;
+    private MoveModifier currentModifier;
 
     public CursorEntity() {
         if (Config.isUseParticles()) {
@@ -55,21 +57,11 @@ public class CursorEntity extends Entity {
     }
 
     private void doAutoMove(float pX, float pY, float durationS, float secPassed) {
-        if (nextPX != 0 && nextPY != 0 && currentModifier != null && this.getX() != nextPX && this.getY() != nextPY) {
-            this.unregisterEntityModifier(currentModifier);
-        }
-
-        durationS = durationS <= 0? 0 : durationS;
-
         if (durationS <= 0) {
             this.setPosition(pX, pY);
-            return;
-        }
-        if (!this.isMovingAutoSliderOrSpinner && this.getX() != pX && this.getY() != pY) {
+        } else if (!this.isMovingAutoSliderOrSpinner) {
+            this.unregisterEntityModifier(currentModifier);
             currentModifier = new MoveModifier(durationS, this.getX(), pX, this.getY(), pY, EaseExponentialOut.getInstance());
-            nextPX = pX;
-            nextPY = pY;
-
             this.registerEntityModifier(currentModifier);
         }
     }
@@ -83,25 +75,40 @@ public class CursorEntity extends Entity {
         this.doAutoMove(pX, pY, durationS, secPassed);
     }
 
-    public void updatePosIfAuto(Queue<GameObject> activeObjects, float secPassed) {
+    public void updatePosIfAuto(Queue<GameObject> activeObjects, float secPassed, LinkedList<GameObjectData> objects) {
         if (!GameHelper.isAuto() || this.isMovingAutoSliderOrSpinner) {
             return;
         }
 
-        GameObject[] activeObjectsArr = activeObjects.toArray(new GameObject[]{activeObjects.peek()});
         GameObject currentObj = activeObjects.peek();
-        GameObject nextObj = 1 < activeObjectsArr.length? activeObjectsArr[1] : null;
 
-        if (currentObj == null || secPassed < currentObj.getHitTime()) {
+        GameObjectData currentObjData = null;
+        GameObjectData nextObjData = null;
+
+        if (!isFirstNote) {
+            isFirstNote = true;
+            try {
+                nextObjData = objects.getFirst();
+            } catch (NoSuchElementException ignore) {}
+        } if (currentObj != null) {
+            try {
+                currentObjData = objects.get(currentObj.getId());
+                nextObjData = objects.get(currentObj.getId() + 1);
+            }  catch (IndexOutOfBoundsException ignore) {}
+        }
+
+        if (nextObjData == null  || currentObjData != null && secPassed < currentObjData.getTime()) {
             return;
         }
 
-        float movePositionX = nextObj == null? currentObj.getPos().x : nextObj.getPos().x;
-        float movePositionY = nextObj == null? currentObj.getPos().y : nextObj.getPos().y;
-        float moveDelay = nextObj == null? 0 : nextObj.getHitTime() - currentObj.getHitTime();
+        float movePositionX = nextObjData.getPos().x;
+        float movePositionY = nextObjData.getPos().y;
+        // float moveDelay = nextObjData.getTime() - currentObjData.getTime();
+        float moveDelay = nextObjData.getTime() - secPassed;
 
         this.doAutoMove(movePositionX, movePositionY, moveDelay, secPassed);
     }
+
 
     public void update(float pSecondsElapsed) {
         this.handleLongerTrail();
