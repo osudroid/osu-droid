@@ -5,7 +5,6 @@ import org.anddev.andengine.entity.modifier.MoveModifier;
 import org.anddev.andengine.entity.particle.ParticleSystem;
 import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
 import java.util.LinkedList;
@@ -28,6 +27,7 @@ public class CursorEntity extends Entity {
     public boolean isMovingAutoSliderOrSpinner = false;
     private boolean isFirstNote = false;
     private MoveModifier currentModifier;
+
 
     public CursorEntity() {
         if (Config.isUseParticles()) {
@@ -56,31 +56,39 @@ public class CursorEntity extends Entity {
         cursorSprite.handleClick();
     }
 
-    private void doAutoMove(float pX, float pY, float durationS, float secPassed) {
+    private void doEasingAutoMove(float pX, float pY, float durationS) {
+        this.unregisterEntityModifier(currentModifier);
+        currentModifier = new MoveModifier(durationS, this.getX(), pX, this.getY(), pY, EaseExponentialOut.getInstance());
+        this.registerEntityModifier(currentModifier);
+    }
+
+    private void doAutoMove(float pX, float pY, float durationS) {
         if (durationS <= 0) {
             this.setPosition(pX, pY);
         } else if (!this.isMovingAutoSliderOrSpinner) {
-            this.unregisterEntityModifier(currentModifier);
-            currentModifier = new MoveModifier(durationS, this.getX(), pX, this.getY(), pY, EaseExponentialOut.getInstance());
-            this.registerEntityModifier(currentModifier);
+            doEasingAutoMove(pX, pY, durationS);
         }
     }
 
-    public void updatePosIfAuto(float pX, float pY, float durationS, float secPassed) {
+    public void updatePosIfAuto(float pX, float pY, float durationS) {
         if (!GameHelper.isAuto()) {
             return;
         }
 
         this.isMovingAutoSliderOrSpinner = true;
-        this.doAutoMove(pX, pY, durationS, secPassed);
+        this.doAutoMove(pX, pY, durationS);
     }
 
     public void updatePosIfAuto(Queue<GameObject> activeObjects, float secPassed, LinkedList<GameObjectData> objects) {
-        if (!GameHelper.isAuto() || this.isMovingAutoSliderOrSpinner) {
+        if (!GameHelper.isAuto()) {
             return;
         }
 
         GameObject currentObj = activeObjects.peek();
+
+        if (currentObj == null) {
+            return;
+        }
 
         GameObjectData currentObjData = null;
         GameObjectData nextObjData = null;
@@ -103,10 +111,9 @@ public class CursorEntity extends Entity {
 
         float movePositionX = nextObjData.getPos().x;
         float movePositionY = nextObjData.getPos().y;
-        // float moveDelay = nextObjData.getTime() - currentObjData.getTime();
         float moveDelay = nextObjData.getTime() - secPassed;
 
-        this.doAutoMove(movePositionX, movePositionY, moveDelay, secPassed);
+        this.doAutoMove(movePositionX, movePositionY, moveDelay);
     }
 
 

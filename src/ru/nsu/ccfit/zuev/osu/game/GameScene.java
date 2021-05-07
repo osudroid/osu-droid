@@ -2208,7 +2208,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
 
     public void onSpinnerHit(int id, final int score, final boolean endCombo, int totalScore) {
-        cursorSprites[0].isMovingAutoSliderOrSpinner = false;
+        if (endCombo) {
+            cursorSprites[0].isMovingAutoSliderOrSpinner = false;
+        }
 
         if (score == 1000) {
             stat.registerHit(score, false, false);
@@ -2668,7 +2670,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public void updateAutoBasedPos(float pX, float pY, float durationS){
         if (GameHelper.isAuto()) {
-            cursorSprites[0].updatePosIfAuto(pX, pY, durationS, secPassed);
+            cursorSprites[0].updatePosIfAuto(pX, pY, durationS);
             if (GameHelper.isFlashLight()) {
                 flashlightSprite.onMouseMove(pX, pY);
             }
