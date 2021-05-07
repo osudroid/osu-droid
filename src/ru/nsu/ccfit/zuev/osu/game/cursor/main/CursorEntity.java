@@ -26,7 +26,7 @@ public class CursorEntity extends Entity {
     private boolean isShowing = false;
     private float particleOffsetX, particleOffsetY;
     public boolean isMovingAutoSliderOrSpinner = false;
-    private boolean isFirstNote = false;
+    private boolean isFirstNote = true;
     private MoveModifier currentModifier;
 
 
@@ -96,12 +96,12 @@ public class CursorEntity extends Entity {
         GameObjectData currentObjData = null;
         GameObjectData nextObjData = null;
 
-        if (!isFirstNote) {
-            isFirstNote = true;
+        if (isFirstNote) {
+            isFirstNote = false;
             try {
                 nextObjData = objects.getFirst();
             } catch (NoSuchElementException ignore) {}
-        } if (currentObj != null) {
+        } else if (currentObj != null) {
             try {
                 currentObjData = objects.get(currentObj.getId());
                 nextObjData = objects.get(currentObj.getId() + 1);
