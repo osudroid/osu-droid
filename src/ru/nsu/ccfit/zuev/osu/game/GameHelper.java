@@ -55,6 +55,7 @@ public class GameHelper {
     private static int gameid = 0;
     private static Queue<SliderPath> pathPool = new LinkedList<GameHelper.SliderPath>();
     private static Queue<PointF> pointPool = new LinkedList<PointF>();
+    private static final LinkedList<GameObject> gameObjects = new LinkedList<>();
 
     private static DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 

@@ -1,10 +1,12 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
 import org.anddev.andengine.entity.Entity;
+import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.MoveModifier;
 import org.anddev.andengine.entity.particle.ParticleSystem;
 import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
 import java.util.Queue;
 
@@ -19,8 +21,11 @@ public class CursorEntity extends Entity {
     private ParticleSystem particles = null;
     private PointParticleEmitter emitter = null;
     private boolean isShowing = false;
-    // private PointF oldPoint = null;
     private float particleOffsetX, particleOffsetY;
+    private IEntityModifier currentModifier;
+    public boolean isMovingAutoSliderOrSpinner = false;
+    float nextPX;
+    float nextPY;
 
     public CursorEntity() {
         if (Config.isUseParticles()) {
@@ -49,32 +54,53 @@ public class CursorEntity extends Entity {
         cursorSprite.handleClick();
     }
 
-    private void doAutoMove(float pX, float pY, float durationS) {
-        if (GameHelper.isAuto() ) {
-            if (durationS <= 0) {
-                this.setPosition(pX, pY);
-            } else {
-                this.registerEntityModifier(
-                        new MoveModifier(durationS, this.getX(), pX, this.getY(), pY)
-                );
-            }
+    private void doAutoMove(float pX, float pY, float durationS, float secPassed) {
+        if (nextPX != 0 && nextPY != 0 && currentModifier != null && this.getX() != nextPX && this.getY() != nextPY) {
+            this.unregisterEntityModifier(currentModifier);
+        }
+
+        durationS = durationS <= 0? 0 : durationS;
+
+        if (durationS <= 0) {
+            this.setPosition(pX, pY);
+            return;
+        }
+        if (!this.isMovingAutoSliderOrSpinner && this.getX() != pX && this.getY() != pY) {
+            currentModifier = new MoveModifier(durationS, this.getX(), pX, this.getY(), pY, EaseExponentialOut.getInstance());
+            nextPX = pX;
+            nextPY = pY;
+
+            this.registerEntityModifier(currentModifier);
         }
     }
 
-    public void updatePosIfAuto(float pX, float pY, Queue<GameObject> activeObjects) {
-        GameObject[] activeObjectsArr = activeObjects.toArray(new GameObject[]{activeObjects.peek()});
-
-        GameObject currentObj = activeObjects.peek();
-
-        if (currentObj == null) {
+    public void updatePosIfAuto(float pX, float pY, float durationS, float secPassed) {
+        if (!GameHelper.isAuto()) {
             return;
         }
 
-        float currentObjHitTime = currentObj.getHitTime();
-        float nextObjHitTime = 1 < activeObjectsArr.length? activeObjectsArr[1].getHitTime() : currentObjHitTime;
-        float moveDelay = nextObjHitTime - currentObjHitTime;
+        this.isMovingAutoSliderOrSpinner = true;
+        this.doAutoMove(pX, pY, durationS, secPassed);
+    }
 
-        this.doAutoMove(pX, pY, moveDelay);
+    public void updatePosIfAuto(Queue<GameObject> activeObjects, float secPassed) {
+        if (!GameHelper.isAuto() || this.isMovingAutoSliderOrSpinner) {
+            return;
+        }
+
+        GameObject[] activeObjectsArr = activeObjects.toArray(new GameObject[]{activeObjects.peek()});
+        GameObject currentObj = activeObjects.peek();
+        GameObject nextObj = 1 < activeObjectsArr.length? activeObjectsArr[1] : null;
+
+        if (currentObj == null || secPassed < currentObj.getHitTime()) {
+            return;
+        }
+
+        float movePositionX = nextObj == null? currentObj.getPos().x : nextObj.getPos().x;
+        float movePositionY = nextObj == null? currentObj.getPos().y : nextObj.getPos().y;
+        float moveDelay = nextObj == null? 0 : nextObj.getHitTime() - currentObj.getHitTime();
+
+        this.doAutoMove(movePositionX, movePositionY, moveDelay, secPassed);
     }
 
     public void update(float pSecondsElapsed) {

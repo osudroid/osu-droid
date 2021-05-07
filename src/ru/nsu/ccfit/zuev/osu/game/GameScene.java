@@ -49,7 +49,6 @@ import java.util.Iterator;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import lt.ekgame.beatmap_analyzer.utils.Mod;
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.effect.Metronome;
@@ -855,7 +854,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             cursorSprites = null;
         }
 
-        if (GameHelper.isAuto()) {
+        if (GameHelper.isAuto() && cursorSprites != null) {
             cursorSprites[0].setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
         }
 
@@ -1581,6 +1580,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             obj.update(dt);
         }
 
+        if (cursorSprites != null && cursorSprites.length > 0) {
+            cursorSprites[0].updatePosIfAuto(activeObjects, secPassed);
+        }
+
         int clickCount = 0;
         for (final boolean c : cursorIIsDown){
             if (c == true) clickCount++;
@@ -1588,6 +1591,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         for (int i = 0; i < CursorCount; i++) {
             cursorIIsDown[i] = false;
         }
+
         for (int i = 0; i < clickCount - 1; i++){
             if (Config.isRemoveSliderLock()){
                 GameObject lastObject = getLastTobeclickObject();
@@ -2094,10 +2098,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             replay.addObjectResult(id, sacc, null);
         }
 
-        if (cursorSprites != null) {
-            cursorSprites[0].updatePosIfAuto(pos.x, pos.y, activeObjects);
-        }
-
         if(GameHelper.isFlashLight()){
             if (GameHelper.isAuto()) {
                 flashlightSprite.onMouseMove(pos.x, pos.y);
@@ -2205,6 +2205,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
 
     public void onSpinnerHit(int id, final int score, final boolean endCombo, int totalScore) {
+        cursorSprites[0].isMovingAutoSliderOrSpinner = false;
+
         if (score == 1000) {
             stat.registerHit(score, false, false);
             return;
@@ -2649,19 +2651,21 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (replay != null && !replaying) {
             short acc = (short) (accuracy);
             replay.addObjectResult(id, acc, (BitSet) tickSet.clone());
-
         }
     }
 
     public void onTrackingSliders(boolean isTrackingSliders) {
+        if (GameHelper.isAuto()) {
+            cursorSprites[0].isMovingAutoSliderOrSpinner = isTrackingSliders;
+        }
         if (GameHelper.isFlashLight()) {
             flashlightSprite.onTrackingSliders(isTrackingSliders);
         }
     }
 
-    public void updateAutoBasedPos(float pX, float pY){
+    public void updateAutoBasedPos(float pX, float pY, float durationS){
         if (GameHelper.isAuto()) {
-            cursorSprites[0].setPosition(pX, pY);
+            cursorSprites[0].updatePosIfAuto(pX, pY, durationS, secPassed);
             if (GameHelper.isFlashLight()) {
                 flashlightSprite.onMouseMove(pX, pY);
             }
