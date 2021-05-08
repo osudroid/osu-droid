@@ -71,6 +71,7 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
 import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
+import ru.nsu.ccfit.zuev.osu.game.cursor.main.AutoCursor;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.Cursor;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorEntity;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
@@ -152,6 +153,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private float distToNextObject;
     private float timeMultiplier = 1.0f;
     private CursorEntity[] cursorSprites;
+    private AutoCursor autoCursor;
     private FlashLightEntity flashlightSprite;
     private int mainCursorId = -1;
     private Replay replay;
@@ -844,21 +846,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         distToNextObject = 0;
 
         // TODO passive objects
-        if ((replaying || Config.isShowCursor())) {
+        if ((replaying || Config.isShowCursor()) && !GameHelper.isAuto()) {
             cursorSprites = new CursorEntity[CursorCount];
             for (int i = 0; i < CursorCount; i++) {
                 cursorSprites[i] = new CursorEntity();
-                ParticleSystem psys = cursorSprites[i].getParticles();
-                if (psys != null)
-                    fgScene.attachChild(psys);
-                fgScene.attachChild(cursorSprites[i]);
+                cursorSprites[i].setup(fgScene);
             }
-        } else  {
+        } else {
             cursorSprites = null;
         }
 
-        if (GameHelper.isAuto() && cursorSprites != null) {
-            cursorSprites[0].setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
+        if (GameHelper.isAuto()) {
+            autoCursor = new AutoCursor();
+            autoCursor.setup(fgScene);
         }
 
         final String countdownPar = beatmapData.getData("General", "Countdown");
@@ -1383,22 +1383,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        if (cursorSprites != null) {
-            if (GameHelper.isAuto()) {
-                cursorSprites[0].setShowing(true);
-            }
+        if (GameHelper.isAuto()) {
+            autoCursor.update(dt);
+        } else if (cursorSprites != null) {
             for (int i = 0; i < CursorCount; i++) {
                 cursorSprites[i].update(dt);
-                if (!GameHelper.isAuto()) {
-                    cursorSprites[i].setPosition(cursors[i].mousePos.x, cursors[i].mousePos.y);
-                    if (cursors[i].mouseDown) {
-                        cursorSprites[i].setShowing(true);
-                        if (cursors[i].mousePressed) {
-                            cursorSprites[i].click();
-                        }
-                    } else {
-                        cursorSprites[i].setShowing(false);
+                cursorSprites[i].setPosition(cursors[i].mousePos.x, cursors[i].mousePos.y);
+                if (cursors[i].mouseDown) {
+                    cursorSprites[i].setShowing(true);
+                    if (cursors[i].mousePressed) {
+                        cursorSprites[i].click();
                     }
+                } else {
+                    cursorSprites[i].setShowing(false);
                 }
             }
         }
@@ -1583,8 +1580,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             obj.update(dt);
         }
 
-        if (cursorSprites != null && cursorSprites.length > 0) {
-            cursorSprites[0].updatePosIfAuto(activeObjects, secPassed, allObjects, this);
+        if (GameHelper.isAuto()) {
+            autoCursor.setPosition(activeObjects, secPassed, allObjects, this);
         }
 
         int clickCount = 0;
@@ -2202,8 +2199,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
 
     public void onSpinnerHit(int id, final int score, final boolean endCombo, int totalScore) {
-        if (endCombo) {
-            cursorSprites[0].isMovingAutoSliderOrSpinner = false;
+        if (endCombo && GameHelper.isAuto()) {
+            autoCursor.isMovingAutoSliderOrSpinner = false;
         }
 
         if (score == 1000) {
@@ -2655,7 +2652,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public void onTrackingSliders(boolean isTrackingSliders) {
         if (GameHelper.isAuto()) {
-            cursorSprites[0].isMovingAutoSliderOrSpinner = isTrackingSliders;
+            autoCursor.isMovingAutoSliderOrSpinner = isTrackingSliders;
         }
         if (GameHelper.isFlashLight()) {
             flashlightSprite.onTrackingSliders(isTrackingSliders);
@@ -2670,7 +2667,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public void updateAutoBasedPos(float pX, float pY, float durationS){
         if (GameHelper.isAuto()) {
-            cursorSprites[0].updatePosIfAuto(pX, pY, durationS, this);
+            autoCursor.setPosition(pX, pY, durationS, this);
         }
     }
 

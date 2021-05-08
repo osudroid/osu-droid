@@ -1,22 +1,13 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
 import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.modifier.MoveModifier;
 import org.anddev.andengine.entity.particle.ParticleSystem;
 import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
+import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
-
-import java.util.LinkedList;
-import java.util.NoSuchElementException;
-import java.util.Queue;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-import ru.nsu.ccfit.zuev.osu.game.GameObject;
-import ru.nsu.ccfit.zuev.osu.game.GameObjectData;
-import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
 import ru.nsu.ccfit.zuev.osu.game.cursor.trail.CursorTrail;
 
 public class CursorEntity extends Entity {
@@ -25,10 +16,6 @@ public class CursorEntity extends Entity {
     private PointParticleEmitter emitter = null;
     private boolean isShowing = false;
     private float particleOffsetX, particleOffsetY;
-    public boolean isMovingAutoSliderOrSpinner = false;
-    private boolean isFirstNote = true;
-    private MoveModifier currentModifier;
-
 
     public CursorEntity() {
         if (Config.isUseParticles()) {
@@ -57,73 +44,9 @@ public class CursorEntity extends Entity {
         cursorSprite.handleClick();
     }
 
-    private void doEasingAutoMove(float pX, float pY, float durationS) {
-        this.unregisterEntityModifier(currentModifier);
-        currentModifier = new MoveModifier(durationS, this.getX(), pX, this.getY(), pY, EaseExponentialOut.getInstance());
-        this.registerEntityModifier(currentModifier);
-    }
-
-    private void doAutoMove(float pX, float pY, float durationS, GameObjectListener listener) {
-        if (durationS <= 0) {
-            this.setPosition(pX, pY);
-            listener.onUpdatedAutoCursor(pX, pY);
-        } else if (!this.isMovingAutoSliderOrSpinner) {
-            doEasingAutoMove(pX, pY, durationS);
-            listener.onUpdatedAutoCursor(pX, pY);
-        }
-    }
-
-    public void updatePosIfAuto(float pX, float pY, float durationS, GameObjectListener listener) {
-        if (!GameHelper.isAuto()) {
-            return;
-        }
-
-        this.isMovingAutoSliderOrSpinner = true;
-        this.doAutoMove(pX, pY, durationS, listener);
-    }
-
-    public void updatePosIfAuto(Queue<GameObject> activeObjects, float secPassed, LinkedList<GameObjectData> objects, GameObjectListener listener) {
-        if (!GameHelper.isAuto()) {
-            return;
-        }
-
-        GameObject currentObj = activeObjects.peek();
-
-        if (currentObj == null) {
-            return;
-        }
-
-        GameObjectData currentObjData = null;
-        GameObjectData nextObjData = null;
-
-        if (isFirstNote) {
-            isFirstNote = false;
-            try {
-                nextObjData = objects.getFirst();
-            } catch (NoSuchElementException ignore) {}
-        } else if (currentObj != null) {
-            try {
-                currentObjData = objects.get(currentObj.getId());
-                nextObjData = objects.get(currentObj.getId() + 1);
-            }  catch (IndexOutOfBoundsException ignore) {}
-        }
-
-        if (nextObjData == null  || currentObjData != null && secPassed < currentObjData.getTime()) {
-            return;
-        }
-
-        float movePositionX = nextObjData.getPos().x;
-        float movePositionY = nextObjData.getPos().y;
-        float moveDelay = nextObjData.getTime() - secPassed;
-
-        this.doAutoMove(movePositionX, movePositionY, moveDelay, listener);
-    }
-
-
     public void update(float pSecondsElapsed) {
         this.handleLongerTrail();
         cursorSprite.update(pSecondsElapsed, isShowing);
-
         super.onManagedUpdate(pSecondsElapsed);
     }
 
@@ -171,6 +94,13 @@ public class CursorEntity extends Entity {
         }*/
     }
 
+    public void setup(Scene fgScene) {
+        fgScene.attachChild(this);
+        if (particles != null) {
+            fgScene.attachChild(particles);
+        }
+    }
+
     @Override
     public void setPosition(float pX, float pY) {
         if (emitter != null)
@@ -178,9 +108,4 @@ public class CursorEntity extends Entity {
 
         super.setPosition(pX, pY);
     }
-
-    public ParticleSystem getParticles() {
-        return particles;
-    }
-
 }
