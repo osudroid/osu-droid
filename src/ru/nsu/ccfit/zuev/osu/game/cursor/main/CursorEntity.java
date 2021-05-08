@@ -95,10 +95,10 @@ public class CursorEntity extends Entity {
     }
 
     public void setup(Scene fgScene) {
-        fgScene.attachChild(this);
         if (particles != null) {
             fgScene.attachChild(particles);
         }
+        fgScene.attachChild(this);
     }
 
     @Override
