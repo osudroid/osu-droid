@@ -425,7 +425,11 @@ public class ScoringScene {
                 new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date(stat.getTime()));
         playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
 
-        if (stat.getChangeSpeed() != 1 || stat.isEnableForceAR() || Float.compare(stat.getFLFollowDelay(), FlashLightEntity.defaultMoveDelayS) != 0){
+        if (
+                stat.getChangeSpeed() != 1 ||
+                stat.isEnableForceAR()     ||
+                Float.compare(stat.getFLFollowDelay(), FlashLightEntity.defaultMoveDelayS) != 0 && stat.getMod().contains(GameMod.MOD_FLASHLIGHT)
+        ){
             mapperStr += " [";
             if (stat.getChangeSpeed() != 1){
                 mapperStr += String.format(Locale.ENGLISH, "%.2fx,", stat.getChangeSpeed());
