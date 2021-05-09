@@ -437,7 +437,7 @@ public class ScoringScene {
             if (stat.isEnableForceAR()){
                 mapperStr += String.format(Locale.ENGLISH, "AR%.1f,", stat.getForceAR());
             }
-            if (Float.compare(stat.getFLFollowDelay(), FlashLightEntity.defaultMoveDelayS) != 0){
+            if (Float.compare(stat.getFLFollowDelay(), FlashLightEntity.defaultMoveDelayS) != 0 && stat.getMod().contains(GameMod.MOD_FLASHLIGHT)){
                 mapperStr += String.format(Locale.ENGLISH, "FLD%.2f,", stat.getFLFollowDelay());
             }
             if (mapperStr.endsWith(",")){
