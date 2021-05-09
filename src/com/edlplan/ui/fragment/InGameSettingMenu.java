@@ -15,7 +15,6 @@ import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 
 import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.util.Debug;
 
 import java.util.Locale;
 
