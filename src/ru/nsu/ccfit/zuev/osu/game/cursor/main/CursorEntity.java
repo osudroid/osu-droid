@@ -94,7 +94,7 @@ public class CursorEntity extends Entity {
         }*/
     }
 
-    public void setup(Scene fgScene) {
+    public void attachToScene(Scene fgScene) {
         if (particles != null) {
             fgScene.attachChild(particles);
         }

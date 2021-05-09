@@ -22,7 +22,6 @@ import org.anddev.andengine.entity.modifier.LoopEntityModifier;
 import org.anddev.andengine.entity.modifier.MoveXModifier;
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
-import org.anddev.andengine.entity.particle.ParticleSystem;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
@@ -850,7 +849,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             cursorSprites = new CursorEntity[CursorCount];
             for (int i = 0; i < CursorCount; i++) {
                 cursorSprites[i] = new CursorEntity();
-                cursorSprites[i].setup(fgScene);
+                cursorSprites[i].attachToScene(fgScene);
             }
         } else {
             cursorSprites = null;
@@ -858,7 +857,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (GameHelper.isAuto()) {
             autoCursor = new AutoCursor();
-            autoCursor.setup(fgScene);
+            autoCursor.attachToScene(fgScene);
         }
 
         final String countdownPar = beatmapData.getData("General", "Countdown");
