@@ -28,12 +28,12 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public class Spinner extends GameObject {
+    public final PointF center;
     private final Sprite background;
     private final Sprite circle;
     private final Sprite approachCircle;
     private final Sprite metre;
     private final Sprite spinText;
-    private final PointF center;
     private final TextureRegion mregion;
     private Sprite clearText = null;
     private PointF oldMouse;
@@ -51,6 +51,7 @@ public class Spinner extends GameObject {
     private float metreY;
     private StatisticV2 stat;
     private float totalTime;
+    private boolean did = false;
 
     public Spinner() {
         ResourceManager.getInstance().checkSpinnerTextures();
@@ -278,7 +279,7 @@ public class Spinner extends GameObject {
                float angle = (rotations + dfill / 4f) * 360;
                float pX = center.x + 50 * (float)Math.sin(angle);
                float pY = center.y + 50 * (float)Math.cos(angle);
-               listener.updateAutoBasedPos(pX, pY);
+               listener.updateAutoBasedPos(pX, pY, this);
             }
         }
         rotations += dfill / 4f;

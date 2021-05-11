@@ -2195,10 +2195,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
 
     public void onSpinnerHit(int id, final int score, final boolean endCombo, int totalScore) {
-        if (endCombo && GameHelper.isAuto()) {
-            autoCursor.isMovingAutoSliderOrSpinner = false;
-        }
-
         if (score == 1000) {
             stat.registerHit(score, false, false);
             return;
@@ -2647,9 +2643,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void onTrackingSliders(boolean isTrackingSliders) {
-        if (GameHelper.isAuto()) {
-            autoCursor.isMovingAutoSliderOrSpinner = isTrackingSliders;
-        }
         if (GameHelper.isFlashLight()) {
             flashlightSprite.onTrackingSliders(isTrackingSliders);
         }
@@ -2661,9 +2654,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
     }
 
-    public void updateAutoBasedPos(float pX, float pY) {
+    public void updateAutoBasedPos(float pX, float pY,  GameObject object) {
         if (GameHelper.isAuto()) {
-            autoCursor.setPosition(pX, pY,this);
+            autoCursor.setPosition(pX, pY, this);
         }
     }
 

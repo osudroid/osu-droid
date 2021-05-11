@@ -3,22 +3,13 @@ package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 import org.anddev.andengine.entity.modifier.MoveModifier;
 import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
-import java.util.LinkedList;
-import java.util.NoSuchElementException;
-import java.util.Queue;
-
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameObject;
-import ru.nsu.ccfit.zuev.osu.game.GameObjectData;
 import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
+import ru.nsu.ccfit.zuev.osu.game.Spinner;
 
 public class AutoCursor extends CursorEntity {
     private MoveModifier currentModifier;
-    /**
-     * Whether or not the cursor is currently tracking a slider or spinning a spinner.
-     */
-    public boolean isMovingAutoSliderOrSpinner;
     /**
      * The ID of the object that the cursor is currently active on.
      */
@@ -38,9 +29,8 @@ public class AutoCursor extends CursorEntity {
 
     private void doAutoMove(float pX, float pY, float durationS, GameObjectListener listener) {
         if (durationS <= 0) {
-            this.setPosition(pX, pY);
-            listener.onUpdatedAutoCursor(pX, pY);
-        } else if (!this.isMovingAutoSliderOrSpinner) {
+            this.setPosition(pX, pY, listener);
+        } else {
             doEasingAutoMove(pX, pY, durationS);
             listener.onUpdatedAutoCursor(pX, pY);
         }
@@ -54,12 +44,8 @@ public class AutoCursor extends CursorEntity {
      * @param listener The listener that listens to when this cursor is moved.
      */
     public void setPosition(float pX, float pY, GameObjectListener listener) {
-        if (!GameHelper.isAuto()) {
-            return;
-        }
-
-        this.isMovingAutoSliderOrSpinner = true;
-        this.doAutoMove(pX, pY, -1, listener);
+        this.setPosition(pX, pY);
+        listener.onUpdatedAutoCursor(pX, pY);
     }
 
     /**
@@ -70,18 +56,19 @@ public class AutoCursor extends CursorEntity {
      * @param listener The listener that listens to when this cursor is moved.
      */
     public void moveToObject(GameObject object, float secPassed, GameObjectListener listener) {
-        if (!GameHelper.isAuto()) {
-            return;
-        }
-
         if (object == null || currentObjectId == object.getId()) {
             return;
         }
 
-        currentObjectId = object.getId();
-
         float movePositionX = object.getPos().x;
         float movePositionY = object.getPos().y;
+
+        if (object instanceof Spinner) {
+            movePositionX =  ((Spinner) object).center.x + 50 * (float) Math.sin(0);
+            movePositionY = ((Spinner) object).center.y + 50 * (float) Math.cos(0);
+        }
+
+        currentObjectId = object.getId();
         float moveDelay = object.getHitTime() - secPassed;
 
         this.doAutoMove(movePositionX, movePositionY, moveDelay, listener);

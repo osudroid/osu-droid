@@ -35,7 +35,7 @@ public class ModernSpinner extends Spinner {
 
     private GameObjectListener listener;
     private Scene scene;
-    private PointF center;
+    public PointF center;
     private float needRotations;
     private int fullRotations = 0;
     private float rotations = 0;
@@ -161,7 +161,7 @@ public class ModernSpinner extends Spinner {
             if (GameHelper.isFlashLight() || GameHelper.isAuto()) {
                 float pX = center.x + 50 * (float)Math.sin(degree);
                 float pY = center.y + 50 * (float)Math.cos(degree);
-                listener.updateAutoBasedPos(pX, pY);
+                listener.updateAutoBasedPos(pX, pY, this);
             }
             // bottom.setRotation(-degree);
         }
