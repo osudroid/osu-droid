@@ -2664,9 +2664,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
     }
 
-    public void updateAutoBasedPos(float pX, float pY, float durationS){
+    public void updateAutoBasedPos(float pX, float pY) {
         if (GameHelper.isAuto()) {
-            autoCursor.setPosition(pX, pY, durationS, this);
+            autoCursor.setPosition(pX, pY,this);
         }
     }
 

@@ -16,6 +16,9 @@ import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
 public class AutoCursor extends CursorEntity {
     private boolean isFirstNote = true;
     private MoveModifier currentModifier;
+    /**
+     * Whether or not the cursor is currently moving on a slider or spinning a spinner.
+     */
     public boolean isMovingAutoSliderOrSpinner;
 
     public AutoCursor() {
@@ -40,13 +43,20 @@ public class AutoCursor extends CursorEntity {
         }
     }
 
-    public void setPosition(float pX, float pY, float durationS, GameObjectListener listener) {
+    /**
+     * Directly moves the cursor's position to the specified position.
+     *
+     * @param pX The X coordinate of the new cursor position.
+     * @param pY The Y coordinate of the new cursor position.
+     * @param listener The listener that listens to when this cursor is moved.
+     */
+    public void setPosition(float pX, float pY, GameObjectListener listener) {
         if (!GameHelper.isAuto()) {
             return;
         }
 
         this.isMovingAutoSliderOrSpinner = true;
-        this.doAutoMove(pX, pY, durationS, listener);
+        this.doAutoMove(pX, pY, -1, listener);
     }
 
     public void setPosition(Queue<GameObject> activeObjects, float secPassed, LinkedList<GameObjectData> objects, GameObjectListener listener) {
