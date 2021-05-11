@@ -157,6 +157,12 @@ public class ModernSpinner extends Spinner {
             dfill = 5 * 4 * dt;
             degree = (rotations + dfill / 4f) * 360;
             top.setRotation(degree);
+            //auto时，FL光圈绕中心旋转
+            if (GameHelper.isFlashLight() || GameHelper.isAuto()) {
+                float pX = center.x + 50 * (float)Math.sin(degree);
+                float pY = center.y + 50 * (float)Math.cos(degree);
+                listener.updateAutoBasedPos(pX, pY);
+            }
             // bottom.setRotation(-degree);
         }
         rotations += dfill / 4f;
