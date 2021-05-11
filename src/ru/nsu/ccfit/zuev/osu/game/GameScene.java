@@ -180,7 +180,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
     private long previousFrameTime;
-    private LinkedList<GameObjectData> allObjects;
 
     public GameScene(final Engine engine) {
         this.engine = engine;
@@ -490,10 +489,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         // Parsing hit objects
         objects = new LinkedList<GameObjectData>();
-        allObjects = new LinkedList<GameObjectData>();
         for (final String s : beatmapData.getData("HitObjects")) {
             objects.add(new GameObjectData(s));
-            allObjects.add(new GameObjectData(s));
         }
 
         if (objects.size() <= 0) {
@@ -1580,7 +1577,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (GameHelper.isAuto()) {
-            autoCursor.setPosition(activeObjects, secPassed, allObjects, this);
+            autoCursor.moveToObject(activeObjects.peek(), secPassed, this);
         }
 
         int clickCount = 0;

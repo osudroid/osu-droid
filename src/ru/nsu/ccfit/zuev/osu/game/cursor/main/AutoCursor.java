@@ -14,12 +14,15 @@ import ru.nsu.ccfit.zuev.osu.game.GameObjectData;
 import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
 
 public class AutoCursor extends CursorEntity {
-    private boolean isFirstNote = true;
     private MoveModifier currentModifier;
     /**
-     * Whether or not the cursor is currently moving on a slider or spinning a spinner.
+     * Whether or not the cursor is currently tracking a slider or spinning a spinner.
      */
     public boolean isMovingAutoSliderOrSpinner;
+    /**
+     * The ID of the object that the cursor is currently active on.
+     */
+    private int currentObjectId = -1;
 
     public AutoCursor() {
         super();
@@ -59,39 +62,27 @@ public class AutoCursor extends CursorEntity {
         this.doAutoMove(pX, pY, -1, listener);
     }
 
-    public void setPosition(Queue<GameObject> activeObjects, float secPassed, LinkedList<GameObjectData> objects, GameObjectListener listener) {
+    /**
+     * Moves the cursor to the specified object.
+     *
+     * @param object The object to move the cursor to.
+     * @param secPassed The amount of seconds that have passed since the game has started.
+     * @param listener The listener that listens to when this cursor is moved.
+     */
+    public void moveToObject(GameObject object, float secPassed, GameObjectListener listener) {
         if (!GameHelper.isAuto()) {
             return;
         }
 
-        GameObject currentObj = activeObjects.peek();
-
-        if (currentObj == null) {
+        if (object == null || currentObjectId == object.getId()) {
             return;
         }
 
-        GameObjectData currentObjData = null;
-        GameObjectData nextObjData = null;
+        currentObjectId = object.getId();
 
-        if (isFirstNote) {
-            isFirstNote = false;
-            try {
-                nextObjData = objects.getFirst();
-            } catch (NoSuchElementException ignore) {}
-        } else {
-            try {
-                currentObjData = objects.get(currentObj.getId());
-                nextObjData = objects.get(currentObj.getId() + 1);
-            }  catch (IndexOutOfBoundsException ignore) {}
-        }
-
-        if (nextObjData == null  || currentObjData != null && secPassed < currentObjData.getTime()) {
-            return;
-        }
-
-        float movePositionX = nextObjData.getPos().x;
-        float movePositionY = nextObjData.getPos().y;
-        float moveDelay = nextObjData.getTime() - secPassed;
+        float movePositionX = object.getPos().x;
+        float movePositionY = object.getPos().y;
+        float moveDelay = object.getHitTime() - secPassed;
 
         this.doAutoMove(movePositionX, movePositionY, moveDelay, listener);
     }
