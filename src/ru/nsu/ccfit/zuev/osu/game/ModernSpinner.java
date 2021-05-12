@@ -161,7 +161,7 @@ public class ModernSpinner extends Spinner {
             if (GameHelper.isFlashLight() || GameHelper.isAuto()) {
                 float pX = center.x + 50 * (float)Math.sin(degree);
                 float pY = center.y + 50 * (float)Math.cos(degree);
-                listener.updateAutoBasedPos(pX, pY, this);
+                listener.updateAutoBasedPos(pX, pY);
             }
             // bottom.setRotation(-degree);
         }
