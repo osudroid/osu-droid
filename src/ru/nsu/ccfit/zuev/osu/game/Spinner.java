@@ -279,7 +279,7 @@ public class Spinner extends GameObject {
                float angle = (rotations + dfill / 4f) * 360;
                float pX = center.x + 50 * (float)Math.sin(angle);
                float pY = center.y + 50 * (float)Math.cos(angle);
-               listener.updateAutoBasedPos(pX, pY, this);
+               listener.updateAutoBasedPos(pX, pY);
             }
         }
         rotations += dfill / 4f;

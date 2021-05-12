@@ -43,7 +43,7 @@ public interface GameObjectListener {
 
     void registerAccuracy(float acc);
     
-    void updateAutoBasedPos(float pX, float pY, GameObject object);
+    void updateAutoBasedPos(float pX, float pY);
 
     void onTrackingSliders(boolean isTrackingSliders);
 
