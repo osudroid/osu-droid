@@ -34,10 +34,6 @@ import com.edlplan.ui.ActivityOverlay;
 import com.edlplan.ui.fragment.BuildTypeNoticeFragment;
 import com.tencent.bugly.Bugly;
 
-//disable Umeng
-//import com.umeng.analytics.MobclickAgent;
-//import com.umeng.commonsdk.UMConfigure;
-
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.SmoothCamera;
