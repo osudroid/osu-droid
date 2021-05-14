@@ -33,8 +33,10 @@ import android.widget.Toast;
 import com.edlplan.ui.ActivityOverlay;
 import com.edlplan.ui.fragment.BuildTypeNoticeFragment;
 import com.tencent.bugly.Bugly;
-import com.umeng.analytics.MobclickAgent;
-import com.umeng.commonsdk.UMConfigure;
+
+//disable Umeng
+//import com.umeng.analytics.MobclickAgent;
+//import com.umeng.commonsdk.UMConfigure;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;

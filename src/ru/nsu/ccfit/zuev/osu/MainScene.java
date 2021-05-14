@@ -12,7 +12,9 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
-import com.umeng.analytics.MobclickAgent;
+//disable Umeng
+// import com.umeng.analytics.MobclickAgent;
+
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
