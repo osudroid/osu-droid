@@ -317,7 +317,7 @@
 							android:gravity="center"
 							android:textAlignment="center"
 							android:text="@string/mod_customization"
-							android:textColor="#7CFC00" />
+							android:textColor="#62c700" />
 
 						<TableRow
 							android:layout_width="match_parent"

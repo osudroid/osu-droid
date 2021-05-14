@@ -36,8 +36,7 @@ public class InGameSettingMenu extends BaseFragment {
     private SeekBar forceAR;
     private SeekBar flashlightFollowDelay;
 
-    private final int greenColor = Color.parseColor("#7CFC00");
-    private final int redColor = Color.parseColor("#FF0000");
+    private final int greenColor = Color.parseColor("#62c700");
 
     public static InGameSettingMenu getInstance() {
         if (menu == null) {
@@ -67,16 +66,8 @@ public class InGameSettingMenu extends BaseFragment {
 
     private void applyCustomModColor() {
         final TextView customizedModsText = findViewById(R.id.customize_mods);
-
-        if (customizedModsText == null) {
-            return;
-        }
-
-        if (Float.compare(ModMenu.getInstance().getFLfollowDelay(), FlashLightEntity.defaultMoveDelayMS * 0.001f) == 1) {
-            customizedModsText.setTextColor(redColor);
-        } else {
-            customizedModsText.setTextColor(greenColor);
-        }
+        int color = Float.compare(ModMenu.getInstance().getFLfollowDelay(), FlashLightEntity.defaultMoveDelayMS * 0.001f) == 1?  Color.RED: greenColor ;
+        customizedModsText.setTextColor(color);
     }
 
     @SuppressLint({"ClickableViewAccessibility", "ApplySharedPref"})
