@@ -8,6 +8,8 @@
 
 osudroid is much in Work in Progress. Some features are implemented in the future but its playable and funny.
 
+### Downloading the source code
+
 Clone the repository:
 
 ```sh
