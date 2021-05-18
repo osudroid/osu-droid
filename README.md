@@ -38,7 +38,7 @@ In Android Studio can you make a `Build` to test your Progress. The output direc
 
 ## Contributing
 
-We are welcome any sort of contributions, as long as they are helpful. Those who aren't able to develop may instead suggest changes or report issues via [Feature request](https://github.com/osudroid/osu-droid/issues/11) or [GitHub issues](https://github.com/osudroid/osu-droid/issues)
+We are welcome any sort of contributions, as long as they are helpful. Those who aren't able to develop may instead suggest changes, new features or report issues via [Feature request](https://github.com/osudroid/osu-droid/issues/11) or [GitHub issues](https://github.com/osudroid/osu-droid/issues)
 
 ## Licence
 
