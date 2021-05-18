@@ -1,4 +1,5 @@
-![osudroid](assets/logo.png)
+
+![osudroid](https://cdn.discordapp.com/attachments/259754869626241024/844308468327514152/BannerGithub.png)
 
 #  osu-plus
 [![Official International Discord](https://discordapp.com/api/guilds/316545691545501706/widget.png?style=shield)](https://discord.gg/nyD92cE)
