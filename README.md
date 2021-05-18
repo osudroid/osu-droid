@@ -28,6 +28,9 @@ To update the source code to the latest commit, run the following command inside
 ```she
 git pull
 ```
+Code Languages:
+
+you can Code in `Java` or `Kotlin`
 
 ### Building
 
