@@ -6,7 +6,7 @@
 
 ## Status
 
-osudroid is much in Work in Progress. Some features are implemted in the future but its playable and funny.
+osudroid is much in Work in Progress. Some features are implemented in the future but its playable and funny.
 
 Clone the repository:
 
