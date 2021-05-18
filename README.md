@@ -15,7 +15,7 @@ git clone https://github.com/osudroid/osu-droid.git
 open it on Android Studio
 ```
 
-To update the source code to the latest commit, run the following command inside the osu directory:
+To update the source code to the latest commit, run the following command inside the osudroid directory:
 
 ```she
 git pull
