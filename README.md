@@ -2,8 +2,33 @@
 [![Official International Discord](https://discordapp.com/api/guilds/316545691545501706/widget.png?style=shield)](https://discord.gg/nyD92cE)
 [![Android CI](https://github.com/osudroid/osu-droid/workflows/Android%20CI/badge.svg?branch=master)](https://github.com/osudroid/osu-droid/actions?query=workflow%3A"Android+CI")
 [![CodeFactor](https://www.codefactor.io/repository/github/osudroid/osu-droid/badge)](https://www.codefactor.io/repository/github/osudroid/osu-droid)
-## How to setup!
-```text
-:~$ git clone https://github.com/osudroid/osu-droid.git
-:~$ open it on Android Studio
+### Downloading the source code
+
+## Status
+
+osudroid is much in Work in Progress. Some features are implemted in the future but its playable and funny.
+
+Clone the repository:
+
+```sh
+git clone https://github.com/osudroid/osu-droid.git
+open it on Android Studio
 ```
+
+To update the source code to the latest commit, run the following command inside the osu directory:
+
+```she
+git pull
+```
+
+### Building
+
+In Android Studio can you make a `Build` to test your Progress. The output directory of  your `.apk`. Is the directory from osudroid under `build` and `output` If you're debugging.
+
+## Contributing
+
+We are welcome any sort of contributions, as long as they are helpful. Those who aren't able to develop may instead suggest changes or report issues via [Feature request](https://github.com/osudroid/osu-droid/issues/11) or [GitHub issues](https://github.com/osudroid/osu-droid/issues)
+
+## Licence
+
+osudroid is licensed under the [Apache License 2.0](https://opensource.org/licenses/Apache-2.0). Please see the licence file for more information.
