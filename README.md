@@ -7,7 +7,6 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/osudroid/osu-droid/badge)](https://www.codefactor.io/repository/github/osudroid/osu-droid)
 [![Patreon](https://cdn.discordapp.com/attachments/259754869626241024/844311810211708928/Patreon.png)](https://www.patreon.com/osudroid)
 
-### Downloading the source code
 
 ## Status
 
