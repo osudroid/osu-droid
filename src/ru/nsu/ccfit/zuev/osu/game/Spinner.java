@@ -275,7 +275,7 @@ public class Spinner extends GameObject {
             dfill = 5 * 4 * dt;
             circle.setRotation((rotations + dfill / 4f) * 360);
             //auto时，FL光圈绕中心旋转
-            if (GameHelper.isFlashLight() || GameHelper.isAuto()) {
+            if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
                float angle = (rotations + dfill / 4f) * 360;
                float pX = center.x + 50 * (float)Math.sin(angle);
                float pY = center.y + 50 * (float)Math.cos(angle);
