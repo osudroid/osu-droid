@@ -842,7 +842,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         distToNextObject = 0;
 
         // TODO passive objects
-        if ((replaying || Config.isShowCursor()) && !GameHelper.isAuto()) {
+        if ((replaying || Config.isShowCursor()) && !GameHelper.isAuto() && !GameHelper.isAutopilotMod()) {
             cursorSprites = new CursorEntity[CursorCount];
             for (int i = 0; i < CursorCount; i++) {
                 cursorSprites[i] = new CursorEntity();
@@ -852,7 +852,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             cursorSprites = null;
         }
 
-        if (GameHelper.isAuto()) {
+        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
             autoCursor = new AutoCursor();
             autoCursor.attachToScene(fgScene);
         }
@@ -1379,7 +1379,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        if (GameHelper.isAuto()) {
+        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
             autoCursor.update(dt);
         } else if (cursorSprites != null) {
             for (int i = 0; i < CursorCount; i++) {
@@ -1405,7 +1405,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
         if(GameHelper.isFlashLight()){
-            if (!GameHelper.isAuto()) {
+            if (!GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
                 if (mainCursorId < 0){
                     int i = 0;
                     for (final Cursor c : cursors) {
@@ -1576,7 +1576,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             obj.update(dt);
         }
 
-        if (GameHelper.isAuto()) {
+        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
             autoCursor.moveToObject(activeObjects.peek(), secPassed, this);
         }
 
@@ -2094,7 +2094,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             replay.addObjectResult(id, sacc, null);
         }
 
-        if(GameHelper.isFlashLight() && !GameHelper.isAuto()){
+        if(GameHelper.isFlashLight() && !GameHelper.isAuto() && !GameHelper.isAutopilotMod()){
            int nearestCursorId = getNearestCursorId(pos.x, pos.y);
            if (nearestCursorId >= 0) {
                mainCursorId = nearestCursorId;
@@ -2655,7 +2655,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void updateAutoBasedPos(float pX, float pY) {
-        if (GameHelper.isAuto()) {
+        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
             autoCursor.setPosition(pX, pY, this);
         }
     }

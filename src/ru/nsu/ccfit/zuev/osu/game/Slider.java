@@ -1212,7 +1212,7 @@ public class Slider extends GameObject {
                 ballpos.y - ball.getHeight() / 2);
         ball.setRotation(ballAngle);
 
-        if (GameHelper.isAuto() || GameHelper.isFlashLight()) {
+        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
             listener.updateAutoBasedPos(ballpos.x, ballpos.y);
         }
 
