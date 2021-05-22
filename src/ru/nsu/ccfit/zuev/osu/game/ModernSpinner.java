@@ -153,7 +153,7 @@ public class ModernSpinner extends Spinner {
         final PointF v1 = Utils.normalize(v);
         final PointF v2 = Utils.normalize(oldMouse);
         float dfill = v1.x * v2.y - v1.y * v2.x;
-        if (autoPlay ) {
+        if (autoPlay) {
             dfill = 5 * 4 * dt;
             degree = (rotations + dfill / 4f) * 360;
             top.setRotation(degree);
