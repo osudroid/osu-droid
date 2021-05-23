@@ -1,9 +1,12 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
 import org.anddev.andengine.entity.modifier.MoveModifier;
+import org.anddev.andengine.util.modifier.ease.EaseCubicInOut;
 import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
+import org.anddev.andengine.util.modifier.ease.IEaseFunction;
 
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameObject;
 import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
 import ru.nsu.ccfit.zuev.osu.game.Spinner;
@@ -15,6 +18,12 @@ public class AutoCursor extends CursorEntity {
      */
     private int currentObjectId = -1;
 
+    /**
+     * The Easing function to be used on the cursor.
+     */
+    IEaseFunction easeFunction = GameHelper.isAutopilotMod()?
+            EaseCubicInOut.getInstance() : EaseExponentialOut.getInstance();
+
     public AutoCursor() {
         super();
         this.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
@@ -23,7 +32,7 @@ public class AutoCursor extends CursorEntity {
 
     private void doEasingAutoMove(float pX, float pY, float durationS) {
         this.unregisterEntityModifier(currentModifier);
-        currentModifier = new MoveModifier(durationS, this.getX(), pX, this.getY(), pY, EaseExponentialOut.getInstance());
+        currentModifier = new MoveModifier(durationS, this.getX(), pX, this.getY(), pY, easeFunction);
         this.registerEntityModifier(currentModifier);
     }
 
