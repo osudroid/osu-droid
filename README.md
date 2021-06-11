@@ -7,11 +7,11 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/osudroid/osu-droid/badge)](https://www.codefactor.io/repository/github/osudroid/osu-droid)
 [![Patreon](https://cdn.discordapp.com/attachments/259754869626241024/844311810211708928/Patreon.png)](https://www.patreon.com/osudroid)
 
-osu!droid is a music rhythm game for android smartphones. It was a game hatched many years ago from the [osu!](https://osu.ppy.sh/home) community. This project is now being developed by a little group of fans and also with the help of foreign friends. This game is also completely free-to-play.
+osu!droid is a music rhythm game for Android devices. It was a game hatched many years ago from the [osu!](https://osu.ppy.sh/home) community. This project is now being developed by a little group of fans and also with the help of foreign friends. This game is also completely free-to-play.
 
 ## Status
 
-osu!droid is work-in-progress. Some features are going to be implemented in the future but it's still playable and fun.
+osu!droid is work-in-progress. Some features are going to be implemented in the future but it's still playable and fun!
 
 ### Downloading the source code
 
