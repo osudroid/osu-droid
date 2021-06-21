@@ -19,8 +19,9 @@ Clone the repository:
 
 ```sh
 git clone https://github.com/osudroid/osu-droid.git
-Open the folder in Android Studio.
 ```
+Open the folder in Android Studio.
+
 
 To update the source code to the latest commit, run the following command inside the osu-droid directory:
 
