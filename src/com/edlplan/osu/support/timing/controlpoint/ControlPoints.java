@@ -1,7 +1,5 @@
 package com.edlplan.osu.support.timing.controlpoint;
 
-import android.util.Log;
-
 import com.edlplan.osu.support.timing.TimingPoint;
 import com.edlplan.osu.support.timing.TimingPoints;
 
@@ -24,7 +22,6 @@ public class ControlPoints {
 
     public void load(TimingPoints points) {
         ArrayList<TimingPoint> res = points.getTimingPointList();
-        TimingPoint tmp;
         TimingControlPoint preTp;
         DifficultyControlPoint preDcp;
         EffectControlPoint preEcp;
@@ -32,34 +29,44 @@ public class ControlPoints {
         if (res.size() < 1) {
             throw new IllegalArgumentException("a beatmap must has at least 1 timing point");
         }
-        tmp = res.get(0);
-        if (!tmp.isInherited()) {
-            Log.w("err-map", "Beatmap's first timing point should be isInherited()");
+
+        // Get first uninherited timing point
+        int tmpIndex = -1;
+        for (int i = 0; i < res.size(); i++) {
+            if (!res.get(i).isInherited()) {
+                tmpIndex = i;
+                break;
+            }
         }
+        if (tmpIndex == -1) {
+            throw new IllegalArgumentException("No uninherited timing point found");
+        }
+        TimingPoint tmp = res.get(tmpIndex);
         preTp = new TimingControlPoint();
         preTp.setTime(tmp.getTime());
         preTp.setBeatLength(tmp.getBeatLength());
         preTp.setMeter(tmp.getMeter());
         timingPoints.add(preTp);
 
+        final TimingPoint firstTp = res.get(0);
         preDcp = new DifficultyControlPoint();
-        preDcp.setTime(tmp.getTime());
-        preDcp.setSpeedMultiplier(tmp.getSpeedMultiplier());
+        preDcp.setTime(firstTp.getTime());
+        preDcp.setSpeedMultiplier(firstTp.getSpeedMultiplier());
         difficultyPoints.add(preDcp);
 
         preScp = new SampleControlPoint();
-        preScp.setTime(tmp.getTime());
+        preScp.setTime(firstTp.getTime());
         samplePoints.add(preScp);
 
         preEcp = new EffectControlPoint();
-        preEcp.setTime(tmp.getTime());
-        preEcp.setKiaiModeOn(tmp.isKiaiMode());
-        preEcp.setOmitFirstBarLine(tmp.isOmitFirstBarSignature());
+        preEcp.setTime(firstTp.getTime());
+        preEcp.setKiaiModeOn(firstTp.isKiaiMode());
+        preEcp.setOmitFirstBarLine(firstTp.isOmitFirstBarSignature());
         effectPoints.add(preEcp);
 
-        for (int i = 1; i < res.size(); i++) {
+        for (int i = 0; i < res.size(); i++) {
             tmp = res.get(i);
-            if (tmp.isInherited()) {
+            if (!tmp.isInherited() && i != tmpIndex) {
                 preTp = new TimingControlPoint();
                 preTp.setTime(tmp.getTime());
                 preTp.setBeatLength(tmp.getBeatLength());
@@ -70,7 +77,7 @@ public class ControlPoints {
             if (preDcp.getSpeedMultiplier() != tmp.getSpeedMultiplier()) {
                 if (preDcp.getTime() == tmp.getTime()) {
                     //当控制线重合的时候，只保留绿线
-                    if (!tmp.isInherited()) {
+                    if (tmp.isInherited()) {
                         difficultyPoints.remove(preDcp);
                         preDcp = new DifficultyControlPoint();
                         preDcp.setTime(tmp.getTime());
