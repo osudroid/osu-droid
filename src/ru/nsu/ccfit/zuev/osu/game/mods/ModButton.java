@@ -26,6 +26,7 @@ public class ModButton extends Sprite {
     }
 
     public void setModEnabled(boolean enabled) {
+
         if (enabled) {
             setScale(selectedScale);
             setRotation(selectedRotate);

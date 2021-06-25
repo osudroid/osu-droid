@@ -8,7 +8,6 @@ import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody2D;
 import com.edlplan.osu.support.timing.controlpoint.TimingControlPoint;
 
-import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
@@ -81,7 +80,6 @@ public class Slider extends GameObject {
     private float borderPolyVerts[] = null;
 
     private boolean kiai;
-    private boolean isHiddenFadeOutActive = false;
     private RGBColor color = new RGBColor();
     private RGBColor circleColor = color;
 
@@ -129,6 +127,9 @@ public class Slider extends GameObject {
         this.length = length;
         passedTime = -time;
         preTime = time;
+
+        boolean isFirstNoteAndIsShowFirstApproachCircle = isFirstNote && Config.isShowFirstApproachCircle();
+
         if (sliderPath != null){
             path = sliderPath;
         } else{
@@ -249,8 +250,11 @@ public class Slider extends GameObject {
         approachCircle.setScale(scale * 2);
         approachCircle.setAlpha(0);
         Utils.putSpriteAnchorCenter(pos, approachCircle);
+
         if (GameHelper.isHidden()) {
-            approachCircle.setVisible(Config.isShowFirstApproachCircle() && isFirstNote);
+            approachCircle.setVisible(isFirstNoteAndIsShowFirstApproachCircle);
+        } else if (GameHelper.isTraceable()) {
+            startCircle.setVisible(isFirstNoteAndIsShowFirstApproachCircle);
         }
 
         // End circle
@@ -283,14 +287,24 @@ public class Slider extends GameObject {
             Utils.putSpriteAnchorCenter(pos, startArrow);
             scene.attachChild(startArrow, 0);
         }
+
         if (GameHelper.isHidden()) {
             number.init(scene, pos, scale,
                     new SequenceEntityModifier(new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
                             new FadeOutModifier(time / 4 * GameHelper.getTimeMultiplier())));
-        } else {
+        } else if (!GameHelper.isTraceable()) {
             number.init(scene, pos, scale, new FadeInModifier(
                     time / 2 * GameHelper.getTimeMultiplier()));
         }
+
+        if (GameHelper.isTraceable()) {
+            startOverlay.setVisible(isFirstNoteAndIsShowFirstApproachCircle);
+            endOverlay.setVisible(isFirstNoteAndIsShowFirstApproachCircle);
+            startCircle.setVisible(isFirstNoteAndIsShowFirstApproachCircle);
+            endCircle.setVisible(isFirstNoteAndIsShowFirstApproachCircle);
+        }
+
+
         scene.attachChild(startCircle, 0);
         scene.attachChild(approachCircle);
         scene.attachChild(endOverlay, 0);
@@ -330,7 +344,8 @@ public class Slider extends GameObject {
         }
 
         // Slider track
-        if (Config.isUseSuperSlider()) {
+        // Ignores user option for using "old sliders" if "tc" mod is on, since the gameplay can be pretty unfair.
+        if (Config.isUseSuperSlider() || GameHelper.isTraceable() && !Config.isSliderBorders()) {
             superPath = new LinePath();
             for (PointF p : path.points) {
                 superPath.add(new Vec2(p.x, p.y));
@@ -345,7 +360,12 @@ public class Slider extends GameObject {
                     Utils.toRes(SkinJson.get().getSliderBodyWidth() - SkinJson.get().getSliderBorderWidth())
                             * scale);
             abstractSliderBody.setBorderWidth(Utils.toRes(SkinJson.get().getSliderBodyWidth()) * scale);
-            abstractSliderBody.setSliderBodyBaseAlpha(SkinJson.get().getSliderBodyBaseAlpha());
+
+            if (GameHelper.isTraceable() && !(isFirstNote && Config.isShowFirstApproachCircle())) {
+                abstractSliderBody.setSliderBodyBaseAlpha(0);
+            } else {
+                abstractSliderBody.setSliderBodyBaseAlpha(SkinJson.get().getSliderBodyBaseAlpha());
+            }
 
             if (SkinJson.get().isSliderHintEnable()) {
                 if (length > SkinJson.get().getSliderHintShowMinLength()) {
@@ -469,7 +489,6 @@ public class Slider extends GameObject {
                 sprite.setPosition(startPos.x, startPos.y);
             }
             sprite.setScale(scale);
-            sprite.setColor(color.r(), color.g(), color.b());
             sprite.setAlpha(0.7f);
             scene.attachChild(sprite, 0);
             trackBoundaries.add(sprite);
@@ -490,6 +509,7 @@ public class Slider extends GameObject {
                 borderPolyVerts = null;
             }
             borderPoly = new Polygon(0, 0, verts);
+
             borderPoly.setColor(scolor.r(), scolor.g(), scolor.b());
 //			borderPoly.setAlpha(0.1f);
             scene.attachChild(borderPoly, 0);
@@ -732,7 +752,6 @@ public class Slider extends GameObject {
         GameObjectPool.getInstance().putSlider(this);
         GameObjectPool.getInstance().putNumber(number);
         scene = null;
-        isHiddenFadeOutActive = false;
     }
 
     private void over() {
@@ -1077,9 +1096,7 @@ public class Slider extends GameObject {
                             abstractSliderBody.onUpdate();
                             preStageFinish = true;
                         }
-
                     } else {
-
                         for (int i = 0; i < path.boundIndexes.size(); i++) {
                             tmpPoint = path.points
                                     .get(path.boundIndexes.get(i));
@@ -1129,9 +1146,32 @@ public class Slider extends GameObject {
                 startOverlay.setAlpha(0);
             }
 
-            // Slider body, border, and hint gradually fade in Hidden mod
-            if (GameHelper.isHidden()) {
-                hiddenFadeOut();
+            // Slider body, border, and hint gradually fades in Hidden mod
+            // ball = null means the slider has just started
+            if (GameHelper.isHidden() && ball == null) {
+                final float sliderDuration = maxTime * repeatCount;
+                final FadeOutModifier hiddenFadeOut = new FadeOutModifier(sliderDuration);
+                if (group != null) {
+                    group.registerEntityModifier(hiddenFadeOut);
+                }
+                if (trackPoly != null) {
+                    trackPoly.registerEntityModifier(hiddenFadeOut);
+                }
+                if (borderPoly != null) {
+                    borderPoly.registerEntityModifier(hiddenFadeOut);
+                }
+                if (borderGroup != null) {
+                    borderGroup.registerEntityModifier(hiddenFadeOut);
+                }
+                if (body != null) {
+                    body.registerEntityModifier(hiddenFadeOut);
+                }
+                if (border != null) {
+                    border.registerEntityModifier(hiddenFadeOut);
+                }
+                if (abstractSliderBody != null) {
+                    abstractSliderBody.fadeOut(sliderDuration);
+                }
             }
         }
 
@@ -1173,10 +1213,9 @@ public class Slider extends GameObject {
             if (GameHelper.isAutopilotMod() && listener.isMouseDown(i))
                 inRadius = true;
         }
+
         followcircle.setAlpha(inRadius ? 1 : 0);
-        if (GameHelper.isFlashLight()) {
-            listener.setFlashLightSliderDim(inRadius);
-        }
+        listener.onTrackingSliders(inRadius);
 
         tickTime += dt;
         //try fixed big followcircle bug
@@ -1212,59 +1251,14 @@ public class Slider extends GameObject {
         ball.setPosition(ballpos.x - ball.getWidth() / 2,
                 ballpos.y - ball.getHeight() / 2);
         ball.setRotation(ballAngle);
-        if (GameHelper.isAuto() && GameHelper.isFlashLight()) {
-            listener.setFlashLightsPosition(ballpos.x, ballpos.y);
+
+        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
+            listener.updateAutoBasedPos(ballpos.x, ballpos.y);
         }
+
         // If we got 100% time, finishing slider
         if (percentage >= 1) {
             over();
-        }
-    }
-
-    private void hiddenFadeOut() {
-        if (isHiddenFadeOutActive) {
-            return;
-        }
-        isHiddenFadeOutActive = true;
-        final float realDuration = maxTime * repeatCount * GameHelper.getTimeMultiplier();
-        if (group != null) {
-            group.registerEntityModifier(new AlphaModifier(realDuration,
-                group.getAlpha(), 0));
-        }
-        if (trackPoly != null) {
-            trackPoly.registerEntityModifier(new AlphaModifier(realDuration,
-                trackPoly.getAlpha(), 0));
-        }
-        if (borderPoly != null) {
-            borderPoly.registerEntityModifier(new AlphaModifier(realDuration,
-                borderPoly.getAlpha(), 0));
-        }
-        if (borderGroup != null) {
-            borderGroup.registerEntityModifier(new AlphaModifier(realDuration,
-                borderGroup.getAlpha(), 0));
-        }
-        if (body != null) {
-            body.registerEntityModifier(new AlphaModifier(realDuration,
-                body.getAlpha(), 0));
-        }
-        if (border != null) {
-            border.registerEntityModifier(new AlphaModifier(realDuration,
-                border.getAlpha(), 0));
-        }
-        for (final Sprite sp : trackSprites) {
-            sp.registerEntityModifier(new AlphaModifier(realDuration,
-                sp.getAlpha(), 0));
-        }
-        for (final Sprite sp : trackBorders) {
-            sp.registerEntityModifier(new AlphaModifier(realDuration,
-                sp.getAlpha(), 0));
-        }
-        for (final Sprite sp : trackBoundaries) {
-            sp.registerEntityModifier(new AlphaModifier(realDuration,
-                sp.getAlpha(), 0));
-        }
-        if (abstractSliderBody != null) {
-            abstractSliderBody.fadeOut(realDuration);
         }
     }
 

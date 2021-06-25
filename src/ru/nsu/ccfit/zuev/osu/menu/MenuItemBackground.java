@@ -13,10 +13,10 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 public class MenuItemBackground extends Sprite {
 
     private static final RGBColor DEFAULT_COLOR = new RGBColor(240 / 255f, 150 / 255f, 0 / 255f);
-    private static final RGBColor ON_TOUCH_COLOR = new RGBColor(1, 1, 1);
+    private static final RGBColor ONTOUCH_COLOR = new RGBColor(1, 1, 1);
     private final ChangeableText title, author;
     private final RGBColor defColor = SkinJson.get().getColor("MenuItemDefaultColor", DEFAULT_COLOR);
-    private final RGBColor onTouchColor = SkinJson.get().getColor("MenuItemOnTouchColor", ON_TOUCH_COLOR);
+    private final RGBColor onTouchColor = SkinJson.get().getColor("MenuItemOnTouchColor", ONTOUCH_COLOR);
     private boolean moved = false;
     private float dx = 0, dy = 0;
     private MenuItem item;
@@ -71,7 +71,7 @@ public class MenuItemBackground extends Sprite {
             dx = pTouchAreaLocalX;
             dy = pTouchAreaLocalY;
             return true;
-        } else if (pSceneTouchEvent.isActionUp() && !moved) {
+        } else if (pSceneTouchEvent.isActionUp() && moved == false) {
             ResourceManager.getInstance().getSound("menuclick").play();
             defColor.apply(this);
             if (item != null) {

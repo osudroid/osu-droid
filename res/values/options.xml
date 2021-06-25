@@ -296,7 +296,8 @@
 
     <string name="opt_superSlider_title">Super Slider</string>
     <string name="opt_superSlider_summary">Perfect shape slider!</string>
-	
+
+    <string name="opt_flashlight_follow_delay_title">FL Follow delay</string>
     <string name="opt_changespeed_title">Speed Modify</string>
     <string name="opt_forcear_title">Force AR</string>
     <string name="opt_enablenc_whenspeedchange_title">Enable pitch shift in speed modify</string>

@@ -1,4 +1,4 @@
-package ru.nsu.ccfit.zuev.osu.game.cursor;
+package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
 import android.graphics.PointF;
 
@@ -7,5 +7,5 @@ public class Cursor {
     public boolean mouseDown = false;
     public boolean mouseOldDown = false;
     public boolean mousePressed = false;
-    public double mouseDownOffset = 0; //in ms
+    public double mouseDownOffsetMS = 0;
 }

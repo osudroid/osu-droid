@@ -6,9 +6,9 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class SongMenuPool {
-    private static final SongMenuPool instance = new SongMenuPool();
-    private final Queue<MenuItemBackground> backgrounds = new LinkedList<>();
-    private final Queue<MenuItemTrack> tracks = new LinkedList<>();
+    private static SongMenuPool instance = new SongMenuPool();
+    private final Queue<MenuItemBackground> backgrounds = new LinkedList<MenuItemBackground>();
+    private final Queue<MenuItemTrack> tracks = new LinkedList<MenuItemTrack>();
     private int count = 0;
     private SongMenuPool() {
     }
@@ -31,7 +31,7 @@ public class SongMenuPool {
     }
 
     public MenuItemBackground newBackground() {
-        if (!backgrounds.isEmpty()) {
+        if (backgrounds.isEmpty() == false) {
             return backgrounds.poll();
         }
         count++;
@@ -44,7 +44,7 @@ public class SongMenuPool {
     }
 
     public MenuItemTrack newTrack() {
-        if (!tracks.isEmpty()) {
+        if (tracks.isEmpty() == false) {
             return tracks.poll();
         }
         count++;

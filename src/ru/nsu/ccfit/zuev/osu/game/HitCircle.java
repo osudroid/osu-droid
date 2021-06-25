@@ -100,6 +100,8 @@ public class HitCircle extends GameObject {
         Utils.putSpriteAnchorCenter(pos, approachCircle);
         if (GameHelper.isHidden()) {
             approachCircle.setVisible(Config.isShowFirstApproachCircle() && this.isFirstNote);
+        } else if (GameHelper.isTraceable()) {
+            circle.setVisible(Config.isShowFirstApproachCircle() && this.isFirstNote);
         }
 
         // Attach sprites to scene
@@ -118,10 +120,13 @@ public class HitCircle extends GameObject {
                     new FadeOutModifier(time * 0.35f * GameHelper.getTimeMultiplier())));
             circle.registerEntityModifier(new SequenceEntityModifier(new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
                     new FadeOutModifier(time * 0.35f * GameHelper.getTimeMultiplier())));
-        } else {
+        } else if (!GameHelper.isTraceable()) {
             number.init(scene, pos, GameHelper.getScale(), new FadeInModifier(
                     time / 2 * GameHelper.getTimeMultiplier()));
         }
+
+        circle.setVisible(!GameHelper.isTraceable());
+        overlay.setVisible(!GameHelper.isTraceable());
         scene.attachChild(circle, 0);
         scene.attachChild(approachCircle);
     }

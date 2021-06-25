@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.view.KeyEvent;
 
@@ -33,51 +34,65 @@ public class SettingsMenu extends PreferenceActivity {
         resetBetaStrings();
         addPreferencesFromResource(R.xml.options);
         reloadSkinList();
-
 		/*if (MP3Decoder.isAvailable == false) {
 			final Preference pref = findPreference("nativeplayer");
 			pref.setEnabled(false);
 		}*/
 
         final EditTextPreference skinToppref = (EditTextPreference) findPreference("skinTopPath");
-        skinToppref.setOnPreferenceChangeListener((preference, newValue) -> {
-            if (newValue.toString().trim().length() == 0) {
-                skinToppref.setText(Config.getCorePath() + "Skin/");
+        skinToppref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                if (newValue.toString().trim().length() == 0) {
+                    skinToppref.setText(Config.getCorePath() + "Skin/");
+                    Config.loadConfig(SettingsMenu.this);
+                    reloadSkinList();
+                    return false;
+                }
+
+                File file = new File(newValue.toString());
+                if (!file.exists()) {
+                    if (!file.mkdirs()) {
+                        ToastLogger.showText(StringTable.get(R.string.message_error_dir_not_found), true);
+                        return false;
+                    }
+                }
+
+                skinToppref.setText(newValue.toString());
                 Config.loadConfig(SettingsMenu.this);
                 reloadSkinList();
                 return false;
             }
-
-            File file = new File(newValue.toString());
-            if (!file.exists()) {
-                if (!file.mkdirs()) {
-                    ToastLogger.showText(StringTable.get(R.string.message_error_dir_not_found), true);
-                    return false;
-                }
-            }
-
-            skinToppref.setText(newValue.toString());
-            Config.loadConfig(SettingsMenu.this);
-            reloadSkinList();
-            return false;
         });
 
         final Preference pref = findPreference("clear");
-        pref.setOnPreferenceClickListener(preference -> {
-            LibraryManager.getInstance().clearCache(SettingsMenu.this);
-            return true;
+        pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+
+
+            public boolean onPreferenceClick(final Preference preference) {
+                LibraryManager.getInstance().clearCache(SettingsMenu.this);
+                return true;
+            }
         });
         final Preference clearProps = findPreference("clear_properties");
-        clearProps.setOnPreferenceClickListener(preference -> {
-            PropertiesLibrary.getInstance()
-                    .clear(SettingsMenu.this);
-            return true;
+        clearProps.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+
+
+            public boolean onPreferenceClick(final Preference preference) {
+                PropertiesLibrary.getInstance()
+                        .clear(SettingsMenu.this);
+                return true;
+            }
         });
         final Preference register = findPreference("registerAcc");
-        register.setOnPreferenceClickListener(preference -> {
-            OnlineInitializer initializer = new OnlineInitializer(SettingsMenu.this);
-            initializer.createInitDialog();
-            return true;
+        register.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+
+
+            public boolean onPreferenceClick(Preference preference) {
+                OnlineInitializer initializer = new OnlineInitializer(SettingsMenu.this);
+                initializer.createInitDialog();
+                return true;
+            }
         });
         //final Preference downloadExtension = findPreference("downloadExtension");
         //downloadExtension.setOnPreferenceClickListener(preference -> EdExtensionHelper.downloadExtension());
@@ -149,7 +164,7 @@ public class SettingsMenu extends PreferenceActivity {
         Beta.strToastCheckUpgradeError = StringTable.get(R.string.beta_check_upgrade_error);
         Beta.strToastCheckingUpgrade = StringTable.get(R.string.beta_checking_upgrade);
 
-//      just wasn't sure if "NOTIFICATION" translations might exceed given spaces. Toast strings are otherwise
+        //just wasn't sure if "NOTIFICATION" translations might exceed given spaces. Toast strings are otherwise
 
 //		Beta.strNotificationDownloading = StringTable.get(R.string.beta_downloading);
 //		Beta.strNotificationClickToView = StringTable.get(R.string.beta_click_to_view);
@@ -162,7 +177,6 @@ public class SettingsMenu extends PreferenceActivity {
 
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void reloadSkinList() {
         try {
             final ListPreference skinPathPref = (ListPreference) findPreference("skinPath");
@@ -185,6 +199,7 @@ public class SettingsMenu extends PreferenceActivity {
 
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("LoadSkinListError: path: " + Config.getSkinTopPath());
         }
     }
 }
