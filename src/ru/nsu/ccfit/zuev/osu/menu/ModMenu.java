@@ -7,6 +7,7 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
 import java.util.Map;
@@ -126,6 +127,8 @@ public class ModMenu implements IModSwitcher {
         addButton(offset + offsetGrowth * 4, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-flashlight", GameMod.MOD_FLASHLIGHT);
         addButton(offset + offsetGrowth * 5, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-suddendeath", GameMod.MOD_SUDDENDEATH);
         addButton(offset + offsetGrowth * 6, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-perfect", GameMod.MOD_PERFECT);
+        addButton(offset + offsetGrowth * 7, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-traceable", GameMod.MOD_TRACEABLE);
+
         //addButton(offset + offsetGrowth * 6, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-speedup", GameMod.MOD_SPEEDUP);
         //line 3
         addButton(offset, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax", GameMod.MOD_RELAX);
@@ -240,7 +243,7 @@ public class ModMenu implements IModSwitcher {
         }
     }
 
-    public void handleModFlags(GameMod flag, GameMod modToCheck, GameMod[] modsToRemove) {
+    public void handleModFlags(@NotNull GameMod flag, GameMod modToCheck, GameMod[] modsToRemove) {
         if (flag.equals(modToCheck)) {
             for (GameMod modToRemove: modsToRemove) {
                 mod.remove(modToRemove);
@@ -269,6 +272,7 @@ public class ModMenu implements IModSwitcher {
             handleModFlags(flag, GameMod.MOD_SUDDENDEATH, new GameMod[]{GameMod.MOD_NOFAIL, GameMod.MOD_PERFECT, GameMod.MOD_AUTOPILOT, GameMod.MOD_RELAX, GameMod.MOD_AUTO});
             handleModFlags(flag, GameMod.MOD_PERFECT, new GameMod[]{GameMod.MOD_NOFAIL, GameMod.MOD_SUDDENDEATH, GameMod.MOD_AUTOPILOT, GameMod.MOD_RELAX, GameMod.MOD_AUTO});
             handleModFlags(flag, GameMod.MOD_NOFAIL, new GameMod[]{GameMod.MOD_PERFECT, GameMod.MOD_SUDDENDEATH, GameMod.MOD_AUTOPILOT, GameMod.MOD_RELAX});
+            handleModFlags(flag, GameMod.MOD_TRACEABLE, new GameMod[]{GameMod.MOD_HIDDEN});
 
             if (modsRemoved) {
                 for (GameMod gameMod : modButtons.keySet()) {
