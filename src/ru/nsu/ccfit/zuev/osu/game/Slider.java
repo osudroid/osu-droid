@@ -1213,10 +1213,9 @@ public class Slider extends GameObject {
             if (GameHelper.isAutopilotMod() && listener.isMouseDown(i))
                 inRadius = true;
         }
+
         followcircle.setAlpha(inRadius ? 1 : 0);
-        if (GameHelper.isFlashLight()) {
-            listener.setFlashLightSliderDim(inRadius);
-        }
+        listener.onTrackingSliders(inRadius);
 
         tickTime += dt;
         //try fixed big followcircle bug
@@ -1252,9 +1251,11 @@ public class Slider extends GameObject {
         ball.setPosition(ballpos.x - ball.getWidth() / 2,
                 ballpos.y - ball.getHeight() / 2);
         ball.setRotation(ballAngle);
-        if (GameHelper.isAuto() && GameHelper.isFlashLight()) {
-            listener.setFlashLightsPosition(ballpos.x, ballpos.y);
+
+        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
+            listener.updateAutoBasedPos(ballpos.x, ballpos.y);
         }
+
         // If we got 100% time, finishing slider
         if (percentage >= 1) {
             over();

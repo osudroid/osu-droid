@@ -239,7 +239,7 @@
     <string name="opt_hitlighting_summary">Adds a subtle glow behind hit explosions which lights the playfield</string>
 
     <string name="opt_dither_title">Dither</string>
-    <string name="opt_dither_summary">User hardware dither (picture processing)</string>
+    <string name="opt_dither_summary">Use hardware dither for better image quality (requires restart)</string>
 
     <string name="opt_particles_title">Particle effects</string>
     <string name="opt_particles_summary">Show particle-based effects like cursor trail</string>
@@ -296,7 +296,8 @@
 
     <string name="opt_superSlider_title">Super Slider</string>
     <string name="opt_superSlider_summary">Perfect shape slider!</string>
-	
+
+    <string name="opt_flashlight_follow_delay_title">FL Follow delay</string>
     <string name="opt_changespeed_title">Speed Modify</string>
     <string name="opt_forcear_title">Force AR</string>
     <string name="opt_enablenc_whenspeedchange_title">Enable pitch shift in speed modify</string>

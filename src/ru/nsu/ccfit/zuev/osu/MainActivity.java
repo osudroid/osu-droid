@@ -14,6 +14,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
 import android.os.*;
 import android.preference.PreferenceManager;
 
@@ -342,7 +343,12 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     protected void onSetContentView() {
         this.mRenderSurfaceView = new RenderSurfaceView(this);
-        this.mRenderSurfaceView.setEGLConfigChooser(true);
+        if(Config.isUseDither()) {
+            this.mRenderSurfaceView.setEGLConfigChooser(8,8,8,8,24,0);
+            this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGBA_8888);
+        } else {
+            this.mRenderSurfaceView.setEGLConfigChooser(true);
+        }
         this.mRenderSurfaceView.setRenderer(this.mEngine);
 
         RelativeLayout layout = new RelativeLayout(this);
