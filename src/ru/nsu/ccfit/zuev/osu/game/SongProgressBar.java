@@ -5,6 +5,7 @@ import android.graphics.PointF;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 
+import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBAColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
 
@@ -24,22 +25,31 @@ public class SongProgressBar extends GameObject {
                            final Scene scene, final float time, final float startTime, final PointF pos, float width, float height) {
         this.time = time;
         this.startTime = startTime;
-        if (listener != null)
-            listener.addPassiveObject(this);
 
         bgRect = new Rectangle(pos.x, pos.y, width, height);
         bgRect.setColor(0, 0, 0, 0.3f);
-        scene.attachChild(bgRect);
 
         progressRect = new Rectangle(bgRect.getX(), bgRect.getY(), 0,
                 bgRect.getHeight());
         progressRect.setColor(153f / 255f, 204f / 255f, 51f / 255f);
+
+        if (!Config.isShowProgressBar()) {
+            return;
+        }
+
+        if (listener != null)
+            listener.addPassiveObject(this);
+
+        scene.attachChild(bgRect);
         scene.attachChild(progressRect);
     }
 
 
     @Override
     public void update(final float dt) {
+        if (!Config.isShowProgressBar()) {
+            return;
+        }
         if (passedTime >= startTime) {
             passedTime = Math.min(time, passedTime + dt);
             progressRect.setWidth(bgRect.getWidth() * (passedTime - startTime)

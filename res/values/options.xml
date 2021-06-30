@@ -197,6 +197,9 @@
     <string name="opt_error_meter_display_title">Hit error meter</string>
     <string name="opt_error_meter_display_summary">Display hit error meter</string>
 
+    <string name="opt_showprogressbar_title">Display song progress bar</string>
+    <string name="opt_showprogressbar_summary">Show song progress bar on the bottom of the screen during gameplay</string>
+
     <string name="opt_spinner_style_title">Spinner style</string>
     <string name="opt_spinner_style_summary">Change the spinner style</string>
 
