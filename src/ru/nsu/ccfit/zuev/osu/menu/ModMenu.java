@@ -273,6 +273,7 @@ public class ModMenu implements IModSwitcher {
             handleModFlags(flag, GameMod.MOD_PERFECT, new GameMod[]{GameMod.MOD_NOFAIL, GameMod.MOD_SUDDENDEATH, GameMod.MOD_AUTOPILOT, GameMod.MOD_RELAX, GameMod.MOD_AUTO});
             handleModFlags(flag, GameMod.MOD_NOFAIL, new GameMod[]{GameMod.MOD_PERFECT, GameMod.MOD_SUDDENDEATH, GameMod.MOD_AUTOPILOT, GameMod.MOD_RELAX});
             handleModFlags(flag, GameMod.MOD_TRACEABLE, new GameMod[]{GameMod.MOD_HIDDEN});
+            handleModFlags(flag, GameMod.MOD_HIDDEN, new GameMod[]{GameMod.MOD_TRACEABLE});
 
             if (modsRemoved) {
                 for (GameMod gameMod : modButtons.keySet()) {
