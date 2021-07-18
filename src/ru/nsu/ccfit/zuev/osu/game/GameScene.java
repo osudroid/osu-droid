@@ -927,54 +927,56 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }*/
         }
         GameHelper.setGlobalTime(0);
-        scorebar = new ScoreBar(this, fgScene, stat);
-        addPassiveObject(scorebar);
-        final TextureRegion scoreDigitTex = ResourceManager.getInstance()
-                .getTexture("score-0");
-        accText = new GameScoreText(Config.getRES_WIDTH()
-                - scoreDigitTex.getWidth() * 4.75f, 50,
-                "000.00%", 0.6f);
-        comboText = new GameScoreText(Utils.toRes(2), Config.getRES_HEIGHT()
-                - Utils.toRes(95), "0000x", 1.5f);
-        comboText.changeText(new StringBuilder("0****"));
-        scoreText = new GameScoreText(Config.getRES_WIDTH()
-                - scoreDigitTex.getWidth() * 7.25f, 0, "0000000000", 0.9f);
-        comboText.attachToScene(fgScene);
-        accText.attachToScene(fgScene);
-        scoreText.attachToScene(fgScene);
-        if (Config.isComplexAnimations()) {
-            scoreShadow = new GameScoreTextShadow(0, Config.getRES_HEIGHT()
-                    - Utils.toRes(90), "0000x", 1.5f);
-            scoreShadow.attachToScene(bgScene);
-            passiveObjects.add(scoreShadow);
-        }
-        breakAnimator = new BreakAnimator(this, fgScene, stat, beatmapData
-                .getData("General", "LetterboxInBreaks").equals("1"), bgSprite);
 
         float effectOffset = 155 - 25;
-        if (stat.getMod().contains(GameMod.MOD_AUTO)) {
-            final Sprite autoIcon = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 140),
-                    Utils.toRes(100), ResourceManager.getInstance().getTexture(
-                    "selection-mod-autoplay"));
-            bgScene.attachChild(autoIcon);
-            effectOffset += 25;
-        } else if (stat.getMod().contains(GameMod.MOD_RELAX)) {
-            final Sprite autoIcon = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 140),
-                    Utils.toRes(98), ResourceManager.getInstance().getTexture(
-                    "selection-mod-relax"));
-            bgScene.attachChild(autoIcon);
-            effectOffset += 25;
-        } else if (stat.getMod().contains(GameMod.MOD_AUTOPILOT)) {
-            final Sprite autoIcon = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 140),
-                    Utils.toRes(98), ResourceManager.getInstance().getTexture(
-                    "selection-mod-relax2"));
-            bgScene.attachChild(autoIcon);
-            effectOffset += 25;
-        }
-
-        if (Config.isComboburst()) {
-            comboBurst = new ComboBurst(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
-            comboBurst.attachAll(bgScene);
+        breakAnimator = new BreakAnimator(this, fgScene, stat, beatmapData
+                    .getData("General", "LetterboxInBreaks").equals("1"), bgSprite);
+        if(!Config.isHideInGameUI()){
+            scorebar = new ScoreBar(this, fgScene, stat);
+            addPassiveObject(scorebar);
+            final TextureRegion scoreDigitTex = ResourceManager.getInstance()
+                    .getTexture("score-0");
+            accText = new GameScoreText(Config.getRES_WIDTH()
+                    - scoreDigitTex.getWidth() * 4.75f, 50,
+                    "000.00%", 0.6f);
+            comboText = new GameScoreText(Utils.toRes(2), Config.getRES_HEIGHT()
+                    - Utils.toRes(95), "0000x", 1.5f);
+            comboText.changeText(new StringBuilder("0****"));
+            scoreText = new GameScoreText(Config.getRES_WIDTH()
+                    - scoreDigitTex.getWidth() * 7.25f, 0, "0000000000", 0.9f);
+            comboText.attachToScene(fgScene);
+            accText.attachToScene(fgScene);
+            scoreText.attachToScene(fgScene);
+            if (Config.isComplexAnimations()) {
+                scoreShadow = new GameScoreTextShadow(0, Config.getRES_HEIGHT()
+                        - Utils.toRes(90), "0000x", 1.5f);
+                scoreShadow.attachToScene(bgScene);
+                passiveObjects.add(scoreShadow);
+            }
+            if (stat.getMod().contains(GameMod.MOD_AUTO)) {
+                final Sprite autoIcon = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 140),
+                        Utils.toRes(100), ResourceManager.getInstance().getTexture(
+                        "selection-mod-autoplay"));
+                bgScene.attachChild(autoIcon);
+                effectOffset += 25;
+            } else if (stat.getMod().contains(GameMod.MOD_RELAX)) {
+                final Sprite autoIcon = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 140),
+                        Utils.toRes(98), ResourceManager.getInstance().getTexture(
+                        "selection-mod-relax"));
+                bgScene.attachChild(autoIcon);
+                effectOffset += 25;
+            } else if (stat.getMod().contains(GameMod.MOD_AUTOPILOT)) {
+                final Sprite autoIcon = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 140),
+                        Utils.toRes(98), ResourceManager.getInstance().getTexture(
+                        "selection-mod-relax2"));
+                bgScene.attachChild(autoIcon);
+                effectOffset += 25;
+            }
+    
+            if (Config.isComboburst()) {
+                comboBurst = new ComboBurst(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+                comboBurst.attachAll(bgScene);
+            }
         }
 
         float timeOffset = 0;
@@ -1447,13 +1449,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     mainCursorId = -1;
                     flashlightSprite.updateBreak(true);
                 }
-                scorebar.setVisible(false);
+                if(scorebar != null) scorebar.setVisible(false);
                 breakPeriods.poll();
             }
         }
         if (breakAnimator.isOver()) {
             gameStarted = true;
-            scorebar.setVisible(true);
+            if(scorebar != null) scorebar.setVisible(true);
             if(GameHelper.isFlashLight()){
                 mainCursorId = -1;
                 flashlightSprite.updateBreak(false);
@@ -1486,64 +1488,64 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             hitErrorMeter.update(dt);
         }
 
+        if(!Config.isHideInGameUI()) {
+            //连击数////////////////////////
+            final StringBuilder comboBuilder = new StringBuilder();
+            comboBuilder.setLength(0);
+            comboBuilder.append(stat.getCombo());
+            while (comboBuilder.length() < 5) {
+                comboBuilder.append('*');
+            }
+            if (Config.isComplexAnimations()) {
+                scoreShadow.changeText(comboBuilder);
+                scoreShadow.registerEntityModifier(new DelayModifier(0.2f, new IEntityModifier.IEntityModifierListener() {
+                    @Override
+                    public void onModifierStarted(IModifier<IEntity> iModifier, IEntity iEntity) { 
+                    }
+                    @Override
+                    public void onModifierFinished(IModifier<IEntity> iModifier, IEntity iEntity) {
+                        //当CB数字阴影缩小完成的时候 更改CB数字
+                        comboText.changeText(comboBuilder);
+                    }
+                }));
+            } else {
+                comboText.changeText(comboBuilder);
+            }
 
-        //连击数////////////////////////
-        final StringBuilder comboBuilder = new StringBuilder();
-        comboBuilder.setLength(0);
-        comboBuilder.append(stat.getCombo());
-        while (comboBuilder.length() < 5) {
-            comboBuilder.append('*');
-        }
-        if (Config.isComplexAnimations()) {
-            scoreShadow.changeText(comboBuilder);
-            scoreShadow.registerEntityModifier(new DelayModifier(0.2f, new IEntityModifier.IEntityModifierListener() {
-                @Override
-                public void onModifierStarted(IModifier<IEntity> iModifier, IEntity iEntity) {
-
-                }
-
-                @Override
-                public void onModifierFinished(IModifier<IEntity> iModifier, IEntity iEntity) {
-                    //当CB数字阴影缩小完成的时候 更改CB数字
-                    comboText.changeText(comboBuilder);
-                }
-            }));
-        } else {
-            comboText.changeText(comboBuilder);
-        }
-
-        //连击数////////////////////////
-        strBuilder.setLength(0);
-        float rawAccuracy = stat.getAccuracy() * 100f;
-        strBuilder.append((int) rawAccuracy);
-        if ((int) rawAccuracy < 10) {
-            strBuilder.insert(0, '0');
-        }
-        strBuilder.append('.');
-        rawAccuracy -= (int) rawAccuracy;
-        rawAccuracy *= 100;
-        if ((int) rawAccuracy < 10) {
-            strBuilder.append('0');
-        }
-        strBuilder.append((int) rawAccuracy);
-        if (strBuilder.length() < 6) {
-            strBuilder.insert(0, '*');
-        }
-        accText.changeText(strBuilder);
-        strBuilder.setLength(0);
-        strBuilder.append(stat.getAutoTotalScore());
-        while (strBuilder.length() < 8) {
-            strBuilder.insert(0, '0');
-        }
-        int scoreTextOffset = 0;
-        while (strBuilder.length() < 10) {
-            strBuilder.insert(0, '*');
-            scoreTextOffset++;
+            //连击数////////////////////////
+            strBuilder.setLength(0);
+            float rawAccuracy = stat.getAccuracy() * 100f;
+            strBuilder.append((int) rawAccuracy);
+            if ((int) rawAccuracy < 10) {
+                strBuilder.insert(0, '0');
+            }
+            strBuilder.append('.');
+            rawAccuracy -= (int) rawAccuracy;
+            rawAccuracy *= 100;
+            if ((int) rawAccuracy < 10) {
+                strBuilder.append('0');
+            }
+            strBuilder.append((int) rawAccuracy);
+            if (strBuilder.length() < 6) {
+                strBuilder.insert(0, '*');
+            }
+            accText.changeText(strBuilder);
+            strBuilder.setLength(0);
+            strBuilder.append(stat.getAutoTotalScore());
+            while (strBuilder.length() < 8) {
+                strBuilder.insert(0, '0');
+            }
+            int scoreTextOffset = 0;
+            while (strBuilder.length() < 10) {
+                strBuilder.insert(0, '*');
+                scoreTextOffset++;
+            }
+    
+            scoreText.setPosition(Config.getRES_WIDTH()
+                    - ResourceManager.getInstance().getTexture("score-0").getWidth() * (9.25f - scoreTextOffset), 0);
+            scoreText.changeText(strBuilder);
         }
 
-        scoreText.setPosition(Config.getRES_WIDTH()
-                - ResourceManager.getInstance().getTexture("score-0").getWidth() * (9.25f - scoreTextOffset), 0);
-        scoreText.changeText(strBuilder);
         if (comboBurst != null) {
             if (stat.getCombo() == 0) {
                 comboBurst.breakCombo();
@@ -2450,7 +2452,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             EdExtensionHelper.onGameover(lastTrack);
         }
 
-        scorebar.flush();
+        if(scorebar != null) scorebar.flush();
         ResourceManager.getInstance().getSound("failsound").play();
         final PauseMenu menu = new PauseMenu(engine, this, true);
         gameStarted = false;
