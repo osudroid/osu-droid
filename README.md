@@ -40,6 +40,6 @@ Or if you prefer the command line and you are on Linux, run `chmod +x gradlew` a
 
 We welcome any sort of contributions, as long as they're helpful. Those who aren't able to contribute code may instead suggest small changes like grammar fixes, new features or report client issues via [Feature request](https://github.com/osudroid/osu-droid/issues/11) or [GitHub issues](https://github.com/osudroid/osu-droid/issues).
 
-## Licence
+## License
 
 osu-droid is licensed under the [Apache License 2.0](https://opensource.org/licenses/Apache-2.0). Please see the licence file for more information.

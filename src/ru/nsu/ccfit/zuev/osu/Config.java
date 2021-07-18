@@ -85,6 +85,7 @@ public class Config {
     private static boolean calculateSliderPathInGameStart = false;
     private static boolean displayScorePP = false;
     private static boolean hideReplayMarquee = false;
+    private static boolean hideInGameUI = false;
 
     private static float cursorSize = 1;
 
@@ -271,7 +272,8 @@ public class Config {
         calculateSliderPathInGameStart = prefs.getBoolean("calculateSliderPathInGameStart", false);
         displayScorePP = prefs.getBoolean("displayScorePP", false);
         hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
-      
+        hideInGameUI = prefs.getBoolean("hideInGameUI", false);
+
         //Init
         onlineDeviceID = prefs.getString("installID", null);
         if (onlineDeviceID == null) {
@@ -340,10 +342,6 @@ public class Config {
 
     public static boolean isDisplayScorePP() {
         return displayScorePP;
-    }
-
-    public static boolean isHideReplayMarquee() {
-        return hideReplayMarquee;
     }
 
     public static boolean isEnableExtension() {
@@ -806,15 +804,31 @@ public class Config {
         return playfieldSize;
     }
 
-    public static void setPlayfieldSize(final float playfieldSize){
+    public static void setPlayfieldSize(final float playfieldSize) {
         Config.playfieldSize = playfieldSize;
     }
 
-    public static boolean isShrinkPlayfieldDownwards(){
+    public static boolean isShrinkPlayfieldDownwards() {
         return shrinkPlayfieldDownwards;
     }
 
-    public static void setShrinkPlayfieldDownwards(boolean shrinkPlayfieldDownwards){
+    public static void setShrinkPlayfieldDownwards(boolean shrinkPlayfieldDownwards) {
         Config.shrinkPlayfieldDownwards = shrinkPlayfieldDownwards;
+    }
+
+    public static boolean isHideReplayMarquee() {
+        return hideReplayMarquee;
+    }
+
+    public static void setHideReplayMarquee(boolean hideReplayMarquee) {
+        Config.hideReplayMarquee = hideReplayMarquee;
+    }
+
+    public static boolean isHideInGameUI() {
+        return hideInGameUI;
+    }
+
+    public static void setHideInGameUI(boolean hideInGameUI) {
+        Config.hideInGameUI = hideInGameUI;
     }
 }
