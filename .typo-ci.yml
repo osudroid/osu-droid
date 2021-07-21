@@ -46,6 +46,9 @@ excluded_words:
   - anddev
   - zuev
   - osuplus
+  - osk
+  - osz
+  - badosk
 
 # Would you like filenames to also be spellchecked?
 spellcheck_filenames: true
