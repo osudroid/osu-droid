@@ -62,9 +62,9 @@ android {
         versionCode getReleaseVersionCode()
         versionName getReleaseVersionName()
         ndk {
-            abiFilters 'armeabi', 'x86', 'armeabi-v7a'
+            abiFilters 'armeabi', 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
         }
-        multiDexEnabled = true
+        multiDexEnabled true
     }
 
     packagingOptions {

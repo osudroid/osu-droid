@@ -18,7 +18,7 @@ public class BassAudioProvider {
     public static final int WINDOW_FFT = 1024;
 
     private int channel = 0;
-    private Float freq = 1.0f;
+    private BASS.FloatValue freq = new BASS.FloatValue();
     private int fileFlag = 0;
     private int decoder = 0;
     private int multiplier = 0;
@@ -26,6 +26,7 @@ public class BassAudioProvider {
     private ByteBuffer buffer = null;
 
     public BassAudioProvider() {
+        freq.value = 1.0f;
         BASS.BASS_Init(-1, 44100, BASS.BASS_DEVICE_LATENCY);
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_BUFFER, 0);
         // BASS.BASS_SetConfig(BASS.BASS_CONFIG_BUFFER, 100);
@@ -42,12 +43,12 @@ public class BassAudioProvider {
 
                 if (decoder == DECODER_DOUBLE_TIME) {
                     float targetTempo = multiplier - 100.0f;
-                    BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, freq);
+                    BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, freq.value);
                     BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, targetTempo);
 
                 } else if (decoder == DECODER_NIGHT_CORE) {
                     float targetFreq = multiplier / 100.0f;
-                    BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, freq * targetFreq);
+                    BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, freq.value * targetFreq);
                     BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, 1.0f);
                 }
             }
@@ -66,12 +67,12 @@ public class BassAudioProvider {
 
                 if (decoder == DECODER_DOUBLE_TIME) {
                     float targetTempo = multiplier - 100.0f;
-                    BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, freq);
+                    BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, freq.value);
                     BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, targetTempo);
 
                 } else if (decoder == DECODER_NIGHT_CORE) {
                     float targetFreq = multiplier / 100.0f;
-                    BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, freq * targetFreq);
+                    BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, freq.value * targetFreq);
                     BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, 1.0f);
                 }
             }
@@ -193,11 +194,11 @@ public class BassAudioProvider {
     }
 
     public float getVolume() {
-        Float volume = 0f;
+        BASS.FloatValue volume = new BASS.FloatValue();
         if (channel != 0) {
             BASS.BASS_ChannelGetAttribute(channel, BASS.BASS_ATTRIB_VOL, volume);
         }
-        return volume;
+        return volume.value;
     }
 
     public void setVolume(float volume) {
