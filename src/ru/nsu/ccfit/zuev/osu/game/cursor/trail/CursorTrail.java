@@ -13,35 +13,32 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorSprite;
 
 public class CursorTrail extends ParticleSystem {
-    float DEFAULT_TRAIL_TIME = 0.25f;
-    float LONG_TRAIL_TIME = DEFAULT_TRAIL_TIME * 2;
-
-
-    public CursorTrail(PointParticleEmitter emitter, TextureRegion pTextureRegion) {
-
+    public CursorTrail(
+            PointParticleEmitter emitter,
+            int trailAmount,
+            int longTrailRateMultiplier, int longTrailMaxMultiplier,
+            TextureRegion pTextureRegion
+    ) {
         super(
             emitter,
-            Config.isUseLongTrail()? TrailConst.LONG_TRAIL_RATE_MIN.v : TrailConst.DEFAULT_TRAIL_RATE_MIN.v,
-            Config.isUseLongTrail()? TrailConst.LONG_TRAIL_RATE_MAX.v : TrailConst.DEFAULT_TRAIL_RATE_MAX.v,
-            Config.isUseLongTrail()? TrailConst.LONG_TRAIL_MAX_PARTICLES.v : TrailConst.DEFAULT_MAX_PARTICLES.v,
+            Config.isUseLongTrail()? trailAmount * longTrailRateMultiplier : trailAmount,
+            Config.isUseLongTrail()? trailAmount * longTrailRateMultiplier : trailAmount,
+            Config.isUseLongTrail()? trailAmount * longTrailMaxMultiplier : trailAmount,
             pTextureRegion
         );
 
-        this.doStartEffects();
-    }
-
-    private void doStartEffects() {
-        this.fadeOut();
-        this.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
-        this.addParticleInitializer(new ScaleInitializer(CursorSprite.BASE_SIZE));
-        this.setParticlesSpawnEnabled(false);
+        fadeOut();
+        setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+        addParticleInitializer(new ScaleInitializer(CursorSprite.BASE_SIZE));
+        setParticlesSpawnEnabled(false);
     }
 
     private void fadeOut() {
-        float lifeTime = Config.isUseLongTrail()? LONG_TRAIL_TIME : DEFAULT_TRAIL_TIME;
+        float defaultLifeTime = 0.25f;
+        float longLifeTime = defaultLifeTime * 2;
+        float lifeTime = Config.isUseLongTrail()? longLifeTime : defaultLifeTime;
 
-        this.addParticleModifier(new ExpireModifier(lifeTime));
-        this.addParticleModifier(new AlphaModifier(1.0f, 0.0f, 0f, lifeTime));
+        addParticleModifier(new ExpireModifier(lifeTime));
+        addParticleModifier(new AlphaModifier(1.0f, 0.0f, 0f, lifeTime));
     }
-
 }
