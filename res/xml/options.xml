@@ -25,6 +25,8 @@
             <EditTextPreference android:summary="@string/opt_playername_summary" android:key="playername"
                 android:title="@string/opt_playername_title"/>
         </PreferenceCategory>
+
+
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/opt_graphics" android:key="general">
@@ -42,10 +44,6 @@
             android:defaultValue="1" android:entryValues="@array/spinner_style_values"/>
         <CheckBoxPreference android:summary="@string/opt_show_first_approach_circle_summary" android:title="@string/opt_show_first_approach_circle_title"
             android:key="showfirstapproachcircle" android:defaultValue="false"/>
-        <CheckBoxPreference android:key="hideReplayMarquee" android:title="@string/opt_hide_replay_marquee_title"
-            android:summary="@string/opt_hide_replay_marquee_summary" android:defaultValue="false"/>
-        <CheckBoxPreference android:key="hideInGameUI" android:title="@string/opt_hide_ingame_ui_title"
-            android:summary="@string/opt_hide_ingame_ui_summary" android:defaultValue="false"/>
         <CheckBoxPreference android:summary="@string/opt_skin_summary" android:title="@string/opt_skin_title"
             android:key="skin" android:defaultValue="false"/>
         <CheckBoxPreference android:summary="@string/opt_combo_burst_summary" android:title="@string/opt_combo_burst_title"
@@ -160,6 +158,8 @@
             android:summary="@string/opt_calculate_slider_path_in_game_start_summary" android:defaultValue="false"/>
         <CheckBoxPreference android:key="displayScorePP" android:title="@string/opt_display_score_pp_title"
             android:summary="@string/opt_display_score_pp_summary" android:defaultValue="false"/>
+        <CheckBoxPreference android:key="hideReplayMarquee" android:title="@string/opt_hide_replay_marquee_title"
+            android:summary="@string/opt_hide_replay_marquee_summary" android:defaultValue="false"/>
         <!--CheckBoxPreference android:key="enableExtension" android:title="@string/opt_enable_extension_title"
                             android:defaultValue="false"/>
         <Preference android:key="downloadExtension" android:title="@string/opt_download_extension_title" /-->
