@@ -1,17 +1,16 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
 import org.anddev.andengine.entity.modifier.MoveModifier;
-import org.anddev.andengine.util.modifier.ease.EaseCubicInOut;
-import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
+import org.anddev.andengine.util.modifier.ease.EaseLinear;
 import org.anddev.andengine.util.modifier.ease.IEaseFunction;
 
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameObject;
 import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
+import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
 import ru.nsu.ccfit.zuev.osu.game.Spinner;
 
-public class AutoCursor extends CursorEntity {
+public class AutoCursor extends CursorEntity implements ISliderListener {
     private MoveModifier currentModifier;
     /**
      * The ID of the object that the cursor is currently active on.
@@ -21,8 +20,7 @@ public class AutoCursor extends CursorEntity {
     /**
      * The Easing function to be used on the cursor.
      */
-    IEaseFunction easeFunction = GameHelper.isAutopilotMod()?
-            EaseCubicInOut.getInstance() : EaseExponentialOut.getInstance();
+    private final IEaseFunction easeFunction = EaseLinear.getInstance();
 
     public AutoCursor() {
         super();
@@ -31,14 +29,15 @@ public class AutoCursor extends CursorEntity {
     }
 
     private void doEasingAutoMove(float pX, float pY, float durationS) {
-        this.unregisterEntityModifier(currentModifier);
-        currentModifier = new MoveModifier(durationS, this.getX(), pX, this.getY(), pY, easeFunction);
-        this.registerEntityModifier(currentModifier);
+        unregisterEntityModifier(currentModifier);
+        currentModifier = new MoveModifier(durationS, getX(), pX, getY(), pY, easeFunction);
+        registerEntityModifier(currentModifier);
     }
 
     private void doAutoMove(float pX, float pY, float durationS, GameObjectListener listener) {
         if (durationS <= 0) {
-            this.setPosition(pX, pY, listener);
+            setPosition(pX, pY, listener);
+            click();
         } else {
             doEasingAutoMove(pX, pY, durationS);
         }
@@ -53,7 +52,7 @@ public class AutoCursor extends CursorEntity {
      * @param listener The listener that listens to when this cursor is moved.
      */
     public void setPosition(float pX, float pY, GameObjectListener listener) {
-        this.setPosition(pX, pY);
+        setPosition(pX, pY);
         listener.onUpdatedAutoCursor(pX, pY);
     }
 
@@ -79,7 +78,21 @@ public class AutoCursor extends CursorEntity {
 
         currentObjectId = object.getId();
         float moveDelay = object.getHitTime() - secPassed;
+        doAutoMove(movePositionX, movePositionY, moveDelay, listener);
+    }
 
-        this.doAutoMove(movePositionX, movePositionY, moveDelay, listener);
+    @Override
+    public void onSliderStart() {
+        cursorSprite.onSliderStart();
+    }
+
+    @Override
+    public void onSliderTracking() {
+        cursorSprite.onSliderTracking();
+    }
+
+    @Override
+    public void onSliderEnd() {
+        cursorSprite.onSliderEnd();
     }
 }

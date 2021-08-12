@@ -17,6 +17,7 @@ public class CursorTrail extends ParticleSystem {
             PointParticleEmitter emitter,
             int trailAmount,
             int longTrailRateMultiplier, int longTrailMaxMultiplier,
+            float trailSize,
             TextureRegion pTextureRegion
     ) {
         super(
@@ -29,7 +30,7 @@ public class CursorTrail extends ParticleSystem {
 
         fadeOut();
         setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
-        addParticleInitializer(new ScaleInitializer(CursorSprite.BASE_SIZE));
+        addParticleInitializer(new ScaleInitializer(trailSize));
         setParticlesSpawnEnabled(false);
     }
 

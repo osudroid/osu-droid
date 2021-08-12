@@ -2090,6 +2090,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public void onCircleHit(int id, final float acc, final PointF pos,
                             final boolean endCombo, byte forcedScore, RGBColor color) {
+        if (GameHelper.isAuto()) {
+            autoCursor.click();
+        }
 
         float accuracy = Math.abs(acc);
         boolean writeReplay = replay != null && !replaying;
@@ -2640,6 +2643,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public void onSliderEnd(int id, int accuracy, BitSet tickSet) {
         onTrackingSliders(false);
+        if (GameHelper.isAuto()) {
+            autoCursor.onSliderEnd();
+        }
         if (replay != null && !replaying) {
             short acc = (short) (accuracy);
             replay.addObjectResult(id, acc, (BitSet) tickSet.clone());
@@ -2647,6 +2653,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void onTrackingSliders(boolean isTrackingSliders) {
+        if (GameHelper.isAuto()) {
+            autoCursor.onSliderTracking();
+        }
         if (GameHelper.isFlashLight()) {
             flashlightSprite.onTrackingSliders(isTrackingSliders);
         }
