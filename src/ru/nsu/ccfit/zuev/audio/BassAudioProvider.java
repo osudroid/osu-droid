@@ -38,7 +38,9 @@ public class BassAudioProvider {
             channel = BASS.BASS_StreamCreateFile(fileName, 0, 0, fileFlag);  // BASS.BASS_STREAM_DECODE
             if (decoder > 0) {
                 channel = BASS_FX.BASS_FX_TempoCreate(channel, 0);
-                BASS.BASS_ChannelGetAttribute(channel, BASS.BASS_ATTRIB_FREQ, freq);
+                BASS.FloatValue tempFreq = new BASS.FloatValue();
+                BASS.BASS_ChannelGetAttribute(channel, BASS.BASS_ATTRIB_FREQ, tempFreq);
+                freq = tempFreq.value;
 
                 if (decoder == DECODER_DOUBLE_TIME) {
                     float targetTempo = multiplier - 100.0f;
@@ -62,7 +64,9 @@ public class BassAudioProvider {
             channel = BASS.BASS_StreamCreateFile(asset, 0, 0, fileFlag);
             if (decoder > 0) {
                 channel = BASS_FX.BASS_FX_TempoCreate(channel, 0);
-                BASS.BASS_ChannelGetAttribute(channel, BASS.BASS_ATTRIB_FREQ, freq);
+                BASS.FloatValue tempFreq = new BASS.FloatValue();
+                BASS.BASS_ChannelGetAttribute(channel, BASS.BASS_ATTRIB_FREQ, tempFreq);
+                freq = tempFreq.value;
 
                 if (decoder == DECODER_DOUBLE_TIME) {
                     float targetTempo = multiplier - 100.0f;
@@ -193,9 +197,11 @@ public class BassAudioProvider {
     }
 
     public float getVolume() {
-        Float volume = 0f;
+        float volume = 0f;
         if (channel != 0) {
-            BASS.BASS_ChannelGetAttribute(channel, BASS.BASS_ATTRIB_VOL, volume);
+            BASS.FloatValue tempVolume = new BASS.FloatValue();
+            BASS.BASS_ChannelGetAttribute(channel, BASS.BASS_ATTRIB_VOL, tempVolume);
+            volume = tempVolume.value;
         }
         return volume;
     }
