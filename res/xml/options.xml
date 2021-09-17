@@ -37,6 +37,8 @@
         <ListPreference android:entries="@array/error_meter_display_names" android:title="@string/opt_error_meter_display_title"
             android:key="errormeter" android:summary="@string/opt_error_meter_display_summary"
             android:defaultValue="0" android:entryValues="@array/error_meter_display_values"/>
+        <CheckBoxPreference android:summary="@string/opt_showprogressbar_summary" android:title="@string/opt_showprogressbar_title"
+            android:key="showProgressBar" android:defaultValue="true"/>
         <ListPreference android:entries="@array/spinner_style_names" android:title="@string/opt_spinner_style_title"
             android:key="spinnerstyle" android:summary="@string/opt_spinner_style_summary"
             android:defaultValue="1" android:entryValues="@array/spinner_style_values"/>

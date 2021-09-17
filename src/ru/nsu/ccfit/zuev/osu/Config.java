@@ -29,6 +29,7 @@ public class Config {
     private static String skinTopPath = skinPath;
     private static String scorePath = corePath + "Scores/";
     private static int errorMeter = 0;
+    private static boolean showProgressBar = true;
     private static int spinnerStyle = 0;
     private static boolean showFirstApproachCircle = false;
     private static boolean comboburst = false;
@@ -110,6 +111,7 @@ public class Config {
         showFPS = prefs.getBoolean("fps", false);
         textureQuality = prefs.getBoolean("lowtextures", false) ? 2 : 1;
         errorMeter = Integer.parseInt(prefs.getString("errormeter", "0"));
+        showProgressBar = prefs.getBoolean("showProgressBar", true);
         spinnerStyle = Integer.parseInt(prefs.getString("spinnerstyle", "0"));
         showFirstApproachCircle = prefs.getBoolean("showfirstapproachcircle", false);
         metronomeSwitch = Integer.parseInt(prefs.getString("metronomeswitch", "1"));
@@ -750,6 +752,14 @@ public class Config {
 
     public static void setErrorMeter(int errorMeter) {
         Config.errorMeter = errorMeter;
+    }
+
+    public static boolean isShowProgressBar() {
+        return showProgressBar;
+    }
+
+    public static void setShowProgressBar(boolean showProgressBar) {
+        Config.showProgressBar = showProgressBar;
     }
 
     public static int getSpinnerStyle() {
