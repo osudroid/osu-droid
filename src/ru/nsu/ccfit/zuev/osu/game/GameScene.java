@@ -90,6 +90,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
+import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class GameScene implements IUpdateHandler, GameObjectListener,
@@ -744,13 +745,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             ChangeableText memText = null;
 
-            /*
             if (BuildConfig.DEBUG) {
                 memText = new ChangeableText(Utils.toRes(780),
                         Utils.toRes(520), font, "M: 100/100");
                 fgScene.attachChild(memText);
             }
-             */
 
             final ChangeableText fmemText = memText;
             fgScene.registerUpdateHandler(new FPSLogger(0.5f) {
