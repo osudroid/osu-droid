@@ -5,7 +5,6 @@ import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.MoveModifier;
 import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
-import lt.ekgame.beatmap_analyzer.utils.MathUtils;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 
