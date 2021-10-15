@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.flashlight;
 
+import com.edlplan.framework.math.FMath;
+
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.MoveModifier;
