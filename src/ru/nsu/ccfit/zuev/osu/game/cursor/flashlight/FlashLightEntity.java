@@ -5,6 +5,7 @@ import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.MoveModifier;
 import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
+import lt.ekgame.beatmap_analyzer.utils.MathUtils;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 
@@ -42,9 +43,9 @@ public class FlashLightEntity extends Entity  {
             this.unregisterEntityModifier(currentModifier);
         }
 
-        currentModifier = new MoveModifier(flFollowDelay, this.getX(), pX, this.getY(), pY, EaseExponentialOut.getInstance());
-        nextPX = pX;
-        nextPY = pY;
+        nextPX = Math.max(0, Math.min(Config.getRES_WIDTH(), pX));
+        nextPY = Math.max(0, Math.min(Config.getRES_HEIGHT(), pY));
+        currentModifier = new MoveModifier(flFollowDelay, this.getX(), nextPX, this.getY(), nextPY, EaseExponentialOut.getInstance());
 
         this.registerEntityModifier(currentModifier);
     }
@@ -55,6 +56,7 @@ public class FlashLightEntity extends Entity  {
 
     public void onUpdate(int combo) {
         dimLayer.onTrackingSliders(isTrackingSliders);
-        mainSprite.onUpdate(combo); }
+        mainSprite.onUpdate(combo);
+    }
 }
 
