@@ -42,8 +42,8 @@ public class FlashLightEntity extends Entity  {
             this.unregisterEntityModifier(currentModifier);
         }
 
-        nextPX = Math.max(0, Math.min(Config.getRES_WIDTH(), pX));
-        nextPY = Math.max(0, Math.min(Config.getRES_HEIGHT(), pY));
+        nextPX = FMath.clamp(pX, 0, Config.getRES_WIDTH());
+        nextPY = FMath.clamp(pY, 0, Config.getRES_HEIGHT());
         currentModifier = new MoveModifier(flFollowDelay, this.getX(), nextPX, this.getY(), nextPY, EaseExponentialOut.getInstance());
 
         this.registerEntityModifier(currentModifier);
