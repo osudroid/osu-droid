@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.flashlight;
 
+import com.edlplan.framework.math.FMath;
+
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.MoveModifier;
@@ -42,9 +44,9 @@ public class FlashLightEntity extends Entity  {
             this.unregisterEntityModifier(currentModifier);
         }
 
-        currentModifier = new MoveModifier(flFollowDelay, this.getX(), pX, this.getY(), pY, EaseExponentialOut.getInstance());
-        nextPX = pX;
-        nextPY = pY;
+        nextPX = FMath.clamp(pX, 0, Config.getRES_WIDTH());
+        nextPY = FMath.clamp(pY, 0, Config.getRES_HEIGHT());
+        currentModifier = new MoveModifier(flFollowDelay, this.getX(), nextPX, this.getY(), nextPY, EaseExponentialOut.getInstance());
 
         this.registerEntityModifier(currentModifier);
     }
@@ -55,6 +57,7 @@ public class FlashLightEntity extends Entity  {
 
     public void onUpdate(int combo) {
         dimLayer.onTrackingSliders(isTrackingSliders);
-        mainSprite.onUpdate(combo); }
+        mainSprite.onUpdate(combo);
+    }
 }
 
