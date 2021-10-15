@@ -299,7 +299,8 @@
 
     <string name="opt_superSlider_title">Super Slider</string>
     <string name="opt_superSlider_summary">Perfect shape slider!</string>
-	
+
+    <string name="opt_flashlight_follow_delay_title">FL Follow delay</string>
     <string name="opt_changespeed_title">Speed Modify</string>
     <string name="opt_forcear_title">Force AR</string>
     <string name="opt_enablenc_whenspeedchange_title">Enable pitch shift in speed modify</string>
@@ -312,15 +313,12 @@
     <string name="opt_display_score_pp_title">Display PP in score</string>
     <string name="opt_display_score_pp_summary">Displays PP value in score result screen</string>
 
+    <string name="opt_hide_replay_marquee_title">Hide replay marquee</string>
+    <string name="opt_hide_replay_marquee_summary">Hide the scrolling text when watching replays</string>
+
     <string name="opt_setplayfield_title">Set playfield size</string>
     <string name="opt_setplayfield_summary">Change the size of the playfield</string>
 
     <string name="opt_shrink_playfield_downwards_title">Shrink playfield downwards</string>
     <string name="opt_shrink_playfield_downwards_summary">Shrink playfield downwards</string>
-
-    <string name="opt_hide_replay_marquee_title">Hide replay marquee</string>
-    <string name="opt_hide_replay_marquee_summary">Hide the scrolling text when watching replays</string>
-
-    <string name="opt_hide_ingame_ui_title">Hide ingame ui</string>
-    <string name="opt_hide_ingame_ui_summary">Hide the score, accuracy and combo counter along with the healthbar and combo bursts when ingame</string>
 </resources>
