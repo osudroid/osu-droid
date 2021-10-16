@@ -6,6 +6,11 @@ public class DefaultFloat extends DefaultData<Float> {
     }
 
     public DefaultFloat() {
-        super(0f);
+        super();
+    }
+
+    @Override
+    protected Float instanceDefaultValue() {
+        return 0f;
     }
 }

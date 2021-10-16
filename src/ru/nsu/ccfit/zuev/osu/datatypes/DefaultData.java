@@ -1,18 +1,25 @@
 package ru.nsu.ccfit.zuev.osu.datatypes;
 
-public class DefaultData<T> {
+public abstract class DefaultData<T> implements IDefaultableData<T> {
     private final T defaultValue;
     private T currentValue;
 
     public DefaultData(T defaultValue) {
         this.defaultValue = defaultValue;
-        this.currentValue = defaultValue;
+        setCurrentValue(defaultValue);
     }
 
+    public DefaultData() {
+        this.defaultValue = instanceDefaultValue();
+        setCurrentValue(defaultValue);
+    }
+
+    @Override
     public T getDefaultValue() {
         return defaultValue;
     }
 
+    @Override
     public T getCurrentValue() {
         return currentValue;
     }
@@ -20,4 +27,6 @@ public class DefaultData<T> {
     public void setCurrentValue(T currentValue) {
         this.currentValue = currentValue;
     }
+
+    protected abstract T instanceDefaultValue();
 }

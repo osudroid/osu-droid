@@ -23,38 +23,37 @@ import java.util.HashMap;
 public class SkinJson {
     private static final SkinJson skinJson = new SkinJson();
 
+    private final FloatSkinData comboTextScale = new FloatSkinData("comboTextScale", 1f);
+    private final FloatSkinData sliderHintWidth = new FloatSkinData("sliderHintWidth", 3f);
+    private final FloatSkinData sliderBodyWidth = new FloatSkinData("sliderBodyWidth", 61f);
+    private final FloatSkinData sliderBorderWidth = new FloatSkinData("sliderBorderWidth", 5.2f);
+    private final FloatSkinData sliderBodyBaseAlpha = new FloatSkinData("sliderBodyBaseAlpha", 0.7f);
+    private final FloatSkinData sliderHintAlpha = new FloatSkinData("sliderHintAlpha");
+    private final FloatSkinData sliderHintShowMinLength = new FloatSkinData("sliderHintShowMinLength", 300f);
+
+    private final BooleanSkinData limitComboTextLength = new BooleanSkinData("limitComboTextLength");
+    private final BooleanSkinData disableKiai = new BooleanSkinData("disableKiai");
+    private final BooleanSkinData sliderHintEnable = new BooleanSkinData("sliderHintEnable");
+    private final BooleanSkinData sliderFollowComboColor = new BooleanSkinData("sliderFollowComboColor", true);
+    private final BooleanSkinData useNewLayout = new BooleanSkinData("useNewLayout");
+    private final BooleanSkinData forceOverrideComboColor = new BooleanSkinData("forceOverrideComboColor");
+    private final BooleanSkinData rotateCursor = new BooleanSkinData("rotateCursor");
+
     private final String DEFAULT_COLOR_HEX = "#FFFFFF";
     private final RGBColor DEFAULT_COLOR = RGBColor.hex2Rgb(DEFAULT_COLOR_HEX);
-    private final DefaultBoolean forceOverrideComboColor = new DefaultBoolean(false);
     private final ArrayList<RGBColor> comboColor = new ArrayList<>();
-    private final DefaultRGBColor sliderBorderColor = new DefaultRGBColor(DEFAULT_COLOR);
-    private final DefaultBoolean sliderFollowComboColor = new DefaultBoolean(true);
-    private final DefaultRGBColor sliderBodyColor = new DefaultRGBColor(DEFAULT_COLOR);
-    private final DefaultFloat sliderBodyBaseAlpha = new DefaultFloat(0.7f);
-    private final DefaultBoolean limitComboTextLength = new DefaultBoolean(false);
-    private final DefaultFloat comboTextScale = new DefaultFloat(1f);
-    private final DefaultBoolean disableKiai = new DefaultBoolean(false);
-    private final DefaultFloat sliderBodyWidth = new DefaultFloat(61f);
-    private final DefaultFloat sliderBorderWidth = new DefaultFloat(5.2f);
-    private final DefaultBoolean sliderHintEnable = new DefaultBoolean(false);
-    private final DefaultFloat sliderHintWidth = new DefaultFloat(3f);
-    private final DefaultFloat sliderHintAlpha = new DefaultFloat();
-    private final DefaultRGBColor sliderHintColor = new DefaultRGBColor(null);
-    private final DefaultBoolean rotateCursor = new DefaultBoolean(false);
-    private final int sliderType = SliderType.FLAT;
-    private final DefaultFloat sliderHintShowMinLength = new DefaultFloat(300f);
-    private final DefaultBoolean useNewLayout = new DefaultBoolean(false);
-    private final HashMap<String, Layout> layoutData = new HashMap<>();
+
+    private final ColorSkinData sliderBorderColor = new ColorSkinData("sliderBorderColor", DEFAULT_COLOR);
+    private final ColorSkinData sliderBodyColor = new ColorSkinData("sliderBodyColor", DEFAULT_COLOR);
+    private final ColorSkinData sliderHintColor = new ColorSkinData("sliderHintColor", DEFAULT_COLOR);
+
+    private final SkinSliderType skinSliderType = SkinSliderType.FLAT;
+
+    private final HashMap<String, SkinLayout> layoutData = new HashMap<>();
     private final HashMap<String, RGBColor> colorData = new HashMap<>();
 
     public static SkinJson get() {
         return skinJson;
-    }
-
-    private static void parseColor(@NonNull JSONObject data, String name, @NonNull DefaultRGBColor color) {
-        String defaultHex = "";
-        String hex = data.optString(name, defaultHex);
-        color.setCurrentValue(hex.equals(defaultHex)? color.getDefaultValue() : RGBColor.hex2Rgb(hex));
     }
 
     @NonNull
@@ -123,7 +122,7 @@ public class SkinJson {
 
     public ArrayList<RGBColor> getComboColor() {
         if (comboColor.isEmpty()) {
-            comboColor.add(RGBColor.hex2Rgb("#FFFFFF"));
+            comboColor.add(DEFAULT_COLOR);
         }
         return comboColor;
     }
@@ -144,7 +143,7 @@ public class SkinJson {
         return sliderBodyColor.getCurrentValue();
     }
 
-    public Layout getLayout(String name) {
+    public SkinLayout getLayout(String name) {
         return layoutData.get(name);
     }
 
@@ -169,32 +168,21 @@ public class SkinJson {
     }
 
     public void loadCursor(@NonNull JSONObject data) {
-        rotateCursor.setCurrentValue(data.optBoolean("cursorRotate"));
-    }
-
-    public void loadFloatData(String name, @NonNull JSONObject data, @NonNull DefaultFloat float_) {
-        float_.setCurrentValue((float) data.optDouble(name, float_.getDefaultValue()));
-    }
-
-    public void loadBooleanData(String name, @NonNull JSONObject data, @NonNull DefaultBoolean boolean_) {
-        boolean_.setCurrentValue(data.optBoolean(name, boolean_.getDefaultValue()));
+        rotateCursor.setFromJson(data);
     }
 
     public void loadSlider(@NonNull JSONObject data) {
-        loadFloatData("sliderBodyWidth", data, sliderBodyWidth);
-        loadFloatData("sliderBorderWidth", data, sliderBorderWidth);
-        loadFloatData("sliderBodyBaseAlpha", data, sliderBodyBaseAlpha);
-        loadFloatData("sliderHintWidth", data, sliderHintWidth);
-        loadFloatData("sliderHintShowMinLength", data, sliderHintShowMinLength);
-        loadFloatData("sliderHintAlpha", data, sliderHintAlpha);
-
-        loadBooleanData("sliderFollowComboColor", data, sliderFollowComboColor);
-        loadBooleanData("sliderHintEnable", data, sliderHintEnable);
-
-        parseColor(data, "sliderBodyColor", sliderBodyColor);
-        parseColor(data, "sliderBorderColor", sliderBorderColor);
-        parseColor(data, "sliderHintColor", sliderHintColor);
-        parseColor(data, "sliderHintColor", sliderHintColor);
+        sliderBodyWidth.setFromJson(data);
+        sliderBodyWidth.setFromJson(data);
+        sliderBodyBaseAlpha.setFromJson(data);
+        sliderHintWidth.setFromJson(data);
+        sliderHintShowMinLength.setFromJson(data);
+        sliderHintAlpha.setFromJson(data);
+        sliderFollowComboColor.setFromJson(data);
+        sliderHintEnable.setFromJson(data);
+        sliderBodyColor.setFromJson(data);
+        sliderBorderColor.setFromJson(data);
+        sliderHintColor.setFromJson(data);
     }
 
     public void loadColor(@NonNull JSONObject jsonObject) {
@@ -206,7 +194,7 @@ public class SkinJson {
     }
 
     public void loadLayout(JSONObject jsonObject) {
-        loadBooleanData("useNewLayout", jsonObject, useNewLayout);
+        useNewLayout.setFromJson(jsonObject);
         JSONArray names = jsonObject.names();
         if (names == null) return;
         for (int i = 0; i < names.length(); i++) {
@@ -218,7 +206,7 @@ public class SkinJson {
     }
 
     public void putLayout(String name, JSONObject object) {
-        layoutData.put(name, Layout.load(object));
+        layoutData.put(name, SkinLayout.load(object));
     }
 
     public void load(String tag, @NonNull JSONObject data, Consumer<JSONObject> consumer) {
@@ -230,7 +218,7 @@ public class SkinJson {
     }
 
     public void loadComboColorSetting(@NonNull JSONObject data) {
-        loadBooleanData("forceOverride", data, forceOverrideComboColor);
+        forceOverrideComboColor.setFromJson(data);
         comboColor.clear();
         JSONArray array = data.optJSONArray("colors");
         if (array == null || array.length() == 0) {
@@ -243,48 +231,8 @@ public class SkinJson {
     }
 
     public void loadUtils(@NonNull JSONObject data) {
-        loadBooleanData("limitComboTextLength", data, limitComboTextLength);
-        loadBooleanData("disableKiai", data, disableKiai);
-        loadFloatData("comboTextScale", data, comboTextScale);
-    }
-
-    public static class SliderType {
-        public static final int FLAT = 1;
-        public static final int STABLE = 2;
-    }
-
-    public static class Layout {
-
-        public JSONObject property;
-
-        public float width, height, xOffset, yOffset;
-
-        public float scale = 1;
-
-        @NonNull
-        public static Layout load(@NonNull JSONObject object) {
-            Layout layout = new Layout();
-            layout.property = object;
-            layout.width = (float) object.optDouble("w", -1);
-            layout.height = (float) object.optDouble("h", -1);
-            layout.xOffset = (float) object.optDouble("x", 0);
-            layout.yOffset = (float) object.optDouble("y", 0);
-            layout.scale = (float) object.optDouble("scale", -1);
-            return layout;
-        }
-
-        public void baseApply(@NonNull Sprite entity) {
-            entity.setPosition(xOffset, yOffset);
-            if (scale != -1) {
-                entity.setScale(scale);
-            }
-            if (width != -1) {
-                entity.setWidth(width);
-            }
-            if (height != -1) {
-                entity.setHeight(height);
-            }
-        }
-
+        limitComboTextLength.setFromJson(data);
+        disableKiai.setFromJson(data);
+        comboTextScale.setFromJson(data);
     }
 }

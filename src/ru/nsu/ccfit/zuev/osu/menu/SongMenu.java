@@ -64,6 +64,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
+import ru.nsu.ccfit.zuev.skins.SkinLayout;
 
 public class SongMenu implements IUpdateHandler, MenuItemListener,
         IScrollBarListener {
@@ -298,10 +299,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024);
         frontLayer.attachChild(dimensionInfo);
 
-        SkinJson.Layout layoutBackButton = SkinJson.get().getLayout("BackButton");
-        SkinJson.Layout layoutMods = SkinJson.get().getLayout("ModsButton");
-        SkinJson.Layout layoutOptions = SkinJson.get().getLayout("OptionsButton");
-        SkinJson.Layout layoutRandom = SkinJson.get().getLayout("RandomButton");
+        SkinLayout layoutBackButton = SkinJson.get().getLayout("BackButton");
+        SkinLayout layoutMods = SkinJson.get().getLayout("ModsButton");
+        SkinLayout layoutOptions = SkinJson.get().getLayout("OptionsButton");
+        SkinLayout layoutRandom = SkinJson.get().getLayout("RandomButton");
 
         if (ResourceManager.getInstance().isTextureLoaded("menu-back-0")) {
             List<String> loadedBackTextures = new ArrayList<>();
