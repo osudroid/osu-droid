@@ -7,7 +7,7 @@ import org.anddev.andengine.util.MathUtils;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.SkinJson;
+import ru.nsu.ccfit.zuev.skins.SkinJson;
 import ru.nsu.ccfit.zuev.osu.Utils;
 
 public class MenuItemBackground extends Sprite {

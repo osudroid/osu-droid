@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.SkinJson;
+import ru.nsu.ccfit.zuev.skins.SkinJson;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;

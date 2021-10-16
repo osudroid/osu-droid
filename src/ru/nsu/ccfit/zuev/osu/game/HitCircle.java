@@ -11,7 +11,7 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
-import ru.nsu.ccfit.zuev.osu.SkinJson;
+import ru.nsu.ccfit.zuev.skins.SkinJson;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;

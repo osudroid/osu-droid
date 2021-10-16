@@ -11,7 +11,6 @@ import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.font.FontFactory;
 import org.anddev.andengine.opengl.font.StrokeFont;
-import org.anddev.andengine.opengl.texture.Texture;
 import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasSource;
@@ -22,7 +21,6 @@ import org.anddev.andengine.util.Debug;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +33,8 @@ import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.QualityAssetBitmapSource;
 import ru.nsu.ccfit.zuev.osu.helper.QualityFileBitmapSource;
 import ru.nsu.ccfit.zuev.osu.helper.ScaledBitmapSource;
+import ru.nsu.ccfit.zuev.skins.SkinJson;
+import ru.nsu.ccfit.zuev.skins.SkinManager;
 
 public class ResourceManager {
     private static ResourceManager mgr = new ResourceManager();
