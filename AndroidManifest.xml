@@ -8,12 +8,12 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
     <uses-permission android:name="android.permission.READ_LOGS" />
-    <uses-permission android:name ="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
 
     <application
         android:icon="@drawable/ic_launcher"
@@ -27,13 +27,20 @@
         tools:ignore="UnusedAttribute">
         <service android:name="ru.nsu.ccfit.zuev.audio.serviceAudio.SongService"/>
 
-        <meta-data android:name="UMENG_APPKEY" android:value="54eb1969fd98c572df00001e"/>
-        <meta-data android:name="UMENG_CHANNEL" android:value="PostBar"/>
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/notify_inso"/>
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorAccent"/>
 
-        <activity
-            android:name="com.tencent.bugly.beta.ui.BetaActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize|locale"
-            android:theme="@android:style/Theme.Translucent" />
+        <service
+            android:name="ru.nsu.ccfit.zuev.push.PushNotificationService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -87,8 +94,7 @@
             android:launchMode="singleInstance"
             android:screenOrientation="sensorLandscape"
             android:label="@string/app_name"
-            tools:ignore="LockedOrientationActivity">
-        </activity>
+            tools:ignore="LockedOrientationActivity"/>
 
         <activity
             android:name="ru.nsu.ccfit.zuev.osu.MainActivity"
@@ -143,15 +149,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name="ru.nsu.ccfit.zuev.osu.menu.SettingsMenu"
-            android:screenOrientation="fullSensor"
-            android:theme="@style/AppThemeLight">
-        	<intent-filter>
-            	<category android:name="android.intent.category.DEFAULT" />
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
-        </activity>
         <activity android:name="com.dgsrz.bancho.ui.TouchEventTestActivity"
             android:theme="@style/Theme.NoBackground"
             android:launchMode="singleInstance">

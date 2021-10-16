@@ -17,7 +17,6 @@ public class AnimSprite extends Sprite {
         FROZE // do not automatically update frame
     }
 
-
     private final int count;
     private final TextureRegion[] regions;
     private int frame;

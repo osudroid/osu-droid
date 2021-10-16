@@ -700,6 +700,7 @@ public class BASS
 	public static native int BASS_SampleGetChannels(int handle, int[] channels);
 	public static native boolean BASS_SampleStop(int handle);
 
+	public static native int BASS_StreamCreate(int freq, int chans, int flags, STREAMPROC proc, Object user);
 	public static native int BASS_StreamCreateFile(String file, long offset, long length, int flags);
 	public static native int BASS_StreamCreateFile(ByteBuffer file, long offset, long length, int flags);
 	public static native int BASS_StreamCreateFile(ParcelFileDescriptor file, long offset, long length, int flags);
@@ -773,7 +774,6 @@ public class BASS
 	public static native boolean BASS_FXReset(int handle);
 
 	static native int BASS_StreamCreateConst(int freq, int chans, int flags, int proc, Object user);
-	public static native int BASS_StreamCreate(int freq, int chans, int flags, STREAMPROC proc, Object user);
 	public static int BASS_StreamCreate(int freq, int chans, int flags, int proc, Object user) {
 		return BASS_StreamCreateConst(freq, chans, flags, proc, user);
 	}

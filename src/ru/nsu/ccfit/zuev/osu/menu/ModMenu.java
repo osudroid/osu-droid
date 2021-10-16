@@ -45,6 +45,14 @@ public class ModMenu implements IModSwitcher {
         mod = EnumSet.noneOf(GameMod.class);
     }
 
+    public float getFLfollowDelay() {
+        return FLfollowDelay;
+    }
+
+    public void setFLfollowDelay(float newfLfollowDelay) {
+        FLfollowDelay = newfLfollowDelay;
+    }
+    
     public static ModMenu getInstance() {
         return instance;
     }
@@ -69,6 +77,7 @@ public class ModMenu implements IModSwitcher {
     public void hide() {
         if (menu != null) {
             menu.getScene().clearChildScene();
+            menu = null;
         }
         InGameSettingMenu.getInstance().dismiss();
     }
@@ -76,6 +85,7 @@ public class ModMenu implements IModSwitcher {
     public void hideByFrag() {
         if (menu != null) {
             menu.getScene().clearChildScene();
+            menu = null;
         }
     }
 
@@ -326,12 +336,6 @@ public class ModMenu implements IModSwitcher {
 
     public void setEnableForceAR(boolean t){
         enableForceAR = t;
-    }
-
-    public float getFLfollowDelay() {return FLfollowDelay;}
-
-    public void setFLfollowDelay(float newfLfollowDelay) {
-        FLfollowDelay = newfLfollowDelay;
     }
 
     public boolean isEnableNCWhenSpeedChange(){

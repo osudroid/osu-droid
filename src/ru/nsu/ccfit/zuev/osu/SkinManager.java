@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
+
 public class SkinManager {
     private static SkinManager instance = new SkinManager();
     private static Map<String, Integer> frameCount = new HashMap<String, Integer>();
@@ -71,7 +73,6 @@ public class SkinManager {
     }
 
     public void loadBeatmapSkin(final String beatmapFolder) {
-
         skinEnabled = true;
         if (skinname.equals(beatmapFolder)) {
             return;
@@ -79,8 +80,10 @@ public class SkinManager {
         clearSkin();
         skinname = beatmapFolder;
         final File folderFile = new File(beatmapFolder);
-        for (final File f : folderFile.listFiles()) {
-            if (f.isFile() == false) {
+        File[] folderFiles = FileUtils.listFiles(folderFile, new String[]{
+            ".wav", ".mp3", ".ogg", ".png", ".jpg"});
+        for (final File f : folderFiles) {
+            if (!f.isFile()) {
                 continue;
             }
             if (Config.isUseCustomSounds()

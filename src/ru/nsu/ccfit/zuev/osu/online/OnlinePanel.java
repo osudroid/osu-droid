@@ -1,9 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.net.Uri;
-import android.widget.Toast;
+import com.edlplan.ui.fragment.ConfirmDialogFragment;
+import com.edlplan.ui.fragment.WebViewFragment;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -12,6 +10,7 @@ import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.HorizontalAlign;
+import org.anddev.andengine.util.MathUtils;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -30,23 +29,41 @@ public class OnlinePanel extends Entity {
 
     public OnlinePanel() {
         rect = new Rectangle(0, 0, Utils.toRes(410), Utils.toRes(110)) {
+            boolean moved = false;
+            float dx = 0, dy = 0;
+
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
-                    final Activity activity = GlobalManager.getInstance().getMainActivity();
-                    boolean avatarLoad = OnlineScoring.getInstance().isAvatarLoaded();
-                    boolean stayOnline = OnlineManager.getInstance().isStayOnline();
-
-                    if (avatarLoad && OnlineManager.getInstance().isStayOnline()) {
-                        final Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://ops.dgsrz.com/profile.php?uid="
-                                + OnlineManager.getInstance().getUserId()));
-                        GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
-                        return true;
-                    } else {
-                        activity.runOnUiThread(() -> Toast.makeText(activity, avatarLoad || stayOnline ?
-                                R.string.userpanel_logging_in : R.string.userpanel_not_online, Toast.LENGTH_SHORT).show());
-                        return false;
+                    this.setColor(0.3f, 0.3f, 0.3f, 0.9f);
+                    moved = false;
+                    dx = pTouchAreaLocalX;
+                    dy = pTouchAreaLocalY;
+                    return true;
+                }
+                if (pSceneTouchEvent.isActionUp()) {
+                    this.setColor(0.2f, 0.2f, 0.2f, 0.5f);
+                    if (!moved) {
+                        if(OnlineManager.getInstance().isStayOnline()) {
+                            new ConfirmDialogFragment()
+                                .setMessage(R.string.dialog_visit_profile_page)
+                                .showForResult(isAccepted -> {
+                                    GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> {
+                                        new WebViewFragment().setURL(
+                                            WebViewFragment.PROFILE_URL + OnlineManager.getInstance().getUserId())
+                                        .show();
+                                    });
+                                });
+                        }
                     }
+                    return true;
+                }
+                if (pSceneTouchEvent.isActionOutside()
+                        || pSceneTouchEvent.isActionMove()
+                        && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
+                        pTouchAreaLocalY) > 50)) {
+                    moved = true;
+                    this.setColor(0.2f, 0.2f, 0.2f, 0.5f);
                 }
                 return false;
             }

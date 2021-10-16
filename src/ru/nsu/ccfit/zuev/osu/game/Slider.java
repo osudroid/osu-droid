@@ -1173,7 +1173,6 @@ public class Slider extends GameObject {
             if (GameHelper.isAutopilotMod() && listener.isMouseDown(i))
                 inRadius = true;
         }
-
         followcircle.setAlpha(inRadius ? 1 : 0);
         listener.onTrackingSliders(inRadius);
 

@@ -1049,8 +1049,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             public void run() {
                 // Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 synchronized (backgroundMutex) {
-                    final TextureRegion tex = ResourceManager.getInstance()
-                            .loadBackground(bgName);
+                    final TextureRegion tex = Config.isSafeBeatmapBg() ?
+                        ResourceManager.getInstance().getTexture("menu-background") :
+                        ResourceManager.getInstance().loadBackground(bgName);
                     if (tex != null) {
                         float height = tex.getHeight();
                         height *= Config.getRES_WIDTH()

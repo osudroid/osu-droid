@@ -24,14 +24,16 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.preference.Preference;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import androidx.preference.Preference;
+import androidx.preference.PreferenceViewHolder;
+
 /**
- * A preference type that allows a user to choose a time
+ * A preference type that allows a user to choose a color
  *
  * @author Sergey Margaritov
  */
@@ -64,84 +66,22 @@ public class ColorPickerPreference
         init(context, attrs);
     }
 
-    /**
-     * For custom purposes. Not used by ColorPickerPreferrence
-     *
-     * @param color
-     * @author Unknown
-     */
-    public static String convertToARGB(int color) {
-        String alpha = Integer.toHexString(Color.alpha(color));
-        String red = Integer.toHexString(Color.red(color));
-        String green = Integer.toHexString(Color.green(color));
-        String blue = Integer.toHexString(Color.blue(color));
-
-        if (alpha.length() == 1) {
-            alpha = "0" + alpha;
-        }
-
-        if (red.length() == 1) {
-            red = "0" + red;
-        }
-
-        if (green.length() == 1) {
-            green = "0" + green;
-        }
-
-        if (blue.length() == 1) {
-            blue = "0" + blue;
-        }
-
-        return "#" + alpha + red + green + blue;
-    }
-
-    /**
-     * For custom purposes. Not used by ColorPickerPreference
-     *
-     * @param color
-     * @return A string representing the hex value of color,
-     * without the alpha value
-     * @author Charles Rosaaen
-     */
-    public static String convertToRGB(int color) {
-        String red = Integer.toHexString(Color.red(color));
-        String green = Integer.toHexString(Color.green(color));
-        String blue = Integer.toHexString(Color.blue(color));
-
-        if (red.length() == 1) {
-            red = "0" + red;
-        }
-
-        if (green.length() == 1) {
-            green = "0" + green;
-        }
-
-        if (blue.length() == 1) {
-            blue = "0" + blue;
-        }
-
-        return "#" + red + green + blue;
-    }
-
-    /**
-     * For custom purposes. Not used by ColorPickerPreferrence
-     *
-     * @param argb
-     * @throws NumberFormatException
-     * @author Unknown
-     */
-    public static int convertToColorInt(String argb) throws IllegalArgumentException {
-
-        if (!argb.startsWith("#")) {
-            argb = "#" + argb;
-        }
-
-        return Color.parseColor(argb);
-    }
-
+    /**Method edited by
+     * @author Anna Berkovitch
+     * added functionality to accept hex string as defaultValue
+     * and to properly persist resources reference string, such as @color/someColor
+     * previously persisted 0*/
     @Override
     protected Object onGetDefaultValue(TypedArray a, int index) {
-        return a.getColor(index, Color.BLACK);
+        int colorInt;
+        String mHexDefaultValue = a.getString(index);
+        if (mHexDefaultValue != null && mHexDefaultValue.startsWith("#")) {
+            colorInt = convertToColorInt(mHexDefaultValue);
+            return colorInt;
+
+        } else {
+            return a.getColor(index, Color.BLACK);
+        }
     }
 
     @Override
@@ -159,9 +99,10 @@ public class ColorPickerPreference
     }
 
     @Override
-    protected void onBindView(View view) {
-        super.onBindView(view);
-        mView = view;
+    public void onBindViewHolder(PreferenceViewHolder holder) {
+        super.onBindViewHolder(holder);
+
+        mView = holder.itemView;
         setPreviewColor();
     }
 
@@ -208,10 +149,6 @@ public class ColorPickerPreference
         return bm;
     }
 
-    public int getColorInt() {
-        return mValue;
-    }
-
     @Override
     public void onColorChanged(int color) {
         if (isPersistent()) {
@@ -232,7 +169,7 @@ public class ColorPickerPreference
     }
 
     protected void showDialog(Bundle state) {
-        mDialog = new ColorPickerDialog(getContext(), mValue);
+        mDialog = new ColorPickerDialog(getContext(), mValue, getTitle().toString());
         mDialog.setOnColorChangedListener(this);
         if (mAlphaSliderEnabled) {
             mDialog.setAlphaSliderVisible(true);
@@ -264,6 +201,82 @@ public class ColorPickerPreference
         mHexValueEnabled = enable;
     }
 
+    /**
+     * For custom purposes. Not used by ColorPickerPreferrence
+     *
+     * @param color
+     * @author Unknown
+     */
+    public static String convertToARGB(int color) {
+        String alpha = Integer.toHexString(Color.alpha(color));
+        String red = Integer.toHexString(Color.red(color));
+        String green = Integer.toHexString(Color.green(color));
+        String blue = Integer.toHexString(Color.blue(color));
+
+        if (alpha.length() == 1) {
+            alpha = "0" + alpha;
+        }
+
+        if (red.length() == 1) {
+            red = "0" + red;
+        }
+
+        if (green.length() == 1) {
+            green = "0" + green;
+        }
+
+        if (blue.length() == 1) {
+            blue = "0" + blue;
+        }
+
+        return "#" + alpha + red + green + blue;
+    }
+
+    /**
+     * Method currently used by onGetDefaultValue method to
+     * convert hex string provided in android:defaultValue to color integer.
+     *
+     * @param color
+     * @return A string representing the hex value of color,
+     * without the alpha value
+     * @author Charles Rosaaen
+     */
+    public static String convertToRGB(int color) {
+        String red = Integer.toHexString(Color.red(color));
+        String green = Integer.toHexString(Color.green(color));
+        String blue = Integer.toHexString(Color.blue(color));
+
+        if (red.length() == 1) {
+            red = "0" + red;
+        }
+
+        if (green.length() == 1) {
+            green = "0" + green;
+        }
+
+        if (blue.length() == 1) {
+            blue = "0" + blue;
+        }
+
+        return "#" + red + green + blue;
+    }
+
+    /**
+     * For custom purposes. Not used by ColorPickerPreferrence
+     *
+     * @param argb
+     * @throws NumberFormatException
+     * @author Unknown
+     */
+    public static int convertToColorInt(String argb) throws IllegalArgumentException {
+
+        if (!argb.startsWith("#")) {
+            argb = "#" + argb;
+        }
+
+        return Color.parseColor(argb);
+    }
+
     @Override
     protected Parcelable onSaveInstanceState() {
         final Parcelable superState = super.onSaveInstanceState();
@@ -290,9 +303,26 @@ public class ColorPickerPreference
     }
 
     private static class SavedState extends BaseSavedState {
+        Bundle dialogBundle;
+
+        public SavedState(Parcel source) {
+            super(source);
+            dialogBundle = source.readBundle();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeBundle(dialogBundle);
+        }
+
+        public SavedState(Parcelable superState) {
+            super(superState);
+        }
+
         @SuppressWarnings("unused")
-        public static final Creator<SavedState> CREATOR =
-                new Creator<SavedState>() {
+        public static final Parcelable.Creator<SavedState> CREATOR =
+                new Parcelable.Creator<SavedState>() {
                     public SavedState createFromParcel(Parcel in) {
                         return new SavedState(in);
                     }
@@ -301,21 +331,5 @@ public class ColorPickerPreference
                         return new SavedState[size];
                     }
                 };
-        Bundle dialogBundle;
-
-        public SavedState(Parcel source) {
-            super(source);
-            dialogBundle = source.readBundle();
-        }
-
-        public SavedState(Parcelable superState) {
-            super(superState);
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            super.writeToParcel(dest, flags);
-            dest.writeBundle(dialogBundle);
-        }
     }
 }

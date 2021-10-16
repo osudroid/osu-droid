@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.helper;
 
 import android.content.Context;
+import androidx.annotation.StringRes;
 
 public class StringTable {
     static Context context;
@@ -9,7 +10,7 @@ public class StringTable {
         StringTable.context = context;
     }
 
-    public static String get(final int resid) {
+    public static String get(@StringRes final int resid) {
         String str;
         try {
             str = context.getString(resid);

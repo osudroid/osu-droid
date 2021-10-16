@@ -12,7 +12,6 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
-import com.umeng.analytics.MobclickAgent;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
@@ -134,7 +133,9 @@ public class MainScene implements IUpdateHandler {
         this.context = context;
         Debug.i("Load: mainMenuLoaded()");
         scene = new Scene();
+
         final TextureRegion tex = ResourceManager.getInstance().getTexture("menu-background");
+        
         if (tex != null) {
             float height = tex.getHeight();
             height *= Config.getRES_WIDTH()
@@ -218,11 +219,11 @@ public class MainScene implements IUpdateHandler {
                                 LibraryManager.getInstance().scanLibrary(GlobalManager.getInstance().getMainActivity());
                             }
                             GlobalManager.getInstance().getSongMenu().reload();
-                            //To fixed skin load bug in some Android 10
+                            /* To fixed skin load bug in some Android 10
                             if (Build.VERSION.SDK_INT >= 29) {
                                 String skinNow = Config.getSkinPath();
                                 ResourceManager.getInstance().loadSkin(skinNow);
-                            }
+                            } */
                         }
 
                         public void onComplete() {
@@ -258,10 +259,12 @@ public class MainScene implements IUpdateHandler {
                     setColor(1, 1, 1);
                     if (isOnExitAnim) return true;
                     GlobalManager.getInstance().getSongService().setGaming(true);
-                    GlobalManager.getInstance().getSongService().setIsSettingMenu(true);
-                    final Intent intent = new Intent(GlobalManager.getInstance().getMainActivity(),
+                    // GlobalManager.getInstance().getSongService().setIsSettingMenu(true);
+                    /* final Intent intent = new Intent(GlobalManager.getInstance().getMainActivity(),
                             SettingsMenu.class);
-                    GlobalManager.getInstance().getMainActivity().startActivity(intent);
+                    GlobalManager.getInstance().getMainActivity().startActivity(intent); */
+                    GlobalManager.getInstance().getMainActivity().runOnUiThread(() ->
+                        new SettingsMenu().show());
                     return true;
                 }
                 return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX,
@@ -313,9 +316,14 @@ public class MainScene implements IUpdateHandler {
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
-                    final Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("http://osu.ppy.sh"));
-                    GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                    new ConfirmDialogFragment().setMessage(R.string.dialog_visit_osu_website_message).showForResult(
+                        isAccepted -> {
+                            if(isAccepted) {
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
+                                GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                            }
+                        }
+                    );
                     return true;
                 }
                 return false;
@@ -331,9 +339,14 @@ public class MainScene implements IUpdateHandler {
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
-                    final Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("http://ops.dgsrz.com"));
-                    GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                    new ConfirmDialogFragment().setMessage(R.string.dialog_visit_osudroid_website_message).showForResult(
+                        isAccepted -> {
+                            if(isAccepted) {
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
+                                GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                            }
+                        }
+                    );
                     return true;
                 }
                 return false;
@@ -580,17 +593,11 @@ public class MainScene implements IUpdateHandler {
         createOnlinePanel(scene);
         scene.registerUpdateHandler(this);
 
+        String[] welcomeSounds = {"welcome", "welcome_piano"};
         int randNum = new Random().nextInt((1 - 0) + 1) + 0;
-        switch (randNum){
-            case 0:
-                ResourceManager.getInstance().loadSound("welcome", "sfx/welcome.wav", false).play();
-                break;
-            case 1:
-                ResourceManager.getInstance().loadSound("welcome", "sfx/welcome_piano.wav", false).play();
-                break;
-        }
-
-        hitsound = ResourceManager.getInstance().loadSound("menuhit", "sfx/menuhit.wav", false);
+        String welcomeSound = welcomeSounds[randNum];
+        ResourceManager.getInstance().loadSound(welcomeSound, String.format("sfx/%s.ogg", welcomeSound), false).play();
+        hitsound = ResourceManager.getInstance().loadSound("menuhit", "sfx/menuhit.ogg", false);
 
         /*if (BuildConfig.DEBUG) {
             SupportSprite supportSprite = new SupportSprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT()) {
@@ -1019,7 +1026,10 @@ public class MainScene implements IUpdateHandler {
 
             if (selectedTrack.getBackground() != null) {
                 try {
-                    final TextureRegion tex = ResourceManager.getInstance().loadBackground(selectedTrack.getBackground());
+                    final TextureRegion tex = Config.isSafeBeatmapBg() ?
+                        ResourceManager.getInstance().getTexture("menu-background") :
+                        ResourceManager.getInstance().loadBackground(selectedTrack.getBackground());
+
                     if (tex != null) {
                         float height = tex.getHeight();
                         height *= Config.getRES_WIDTH()
@@ -1092,15 +1102,11 @@ public class MainScene implements IUpdateHandler {
         GlobalManager.getInstance().getMainActivity().runOnUiThread(new Runnable() {
             public void run() {
                 new ConfirmDialogFragment().setMessage(R.string.dialog_exit_message).showForResult(
-                        isAccepted -> {
-                            if (isAccepted) {
-                                exit();
-                                PowerManager.WakeLock wakeLock = GlobalManager.getInstance().getMainActivity().getWakeLock();
-                                if (wakeLock != null && wakeLock.isHeld()) {
-                                    wakeLock.release();
-                                }
-                            }
+                    isAccepted -> {
+                        if (isAccepted) {
+                            exit();
                         }
+                    }
                 );
             }
         });
@@ -1111,6 +1117,11 @@ public class MainScene implements IUpdateHandler {
             return;
         }
         isOnExitAnim = true;
+
+        PowerManager.WakeLock wakeLock = GlobalManager.getInstance().getMainActivity().getWakeLock();
+        if (wakeLock != null && wakeLock.isHeld()) {
+            wakeLock.release();
+        }
 
         scene.unregisterTouchArea(play);
         scene.unregisterTouchArea(options);
@@ -1186,8 +1197,8 @@ public class MainScene implements IUpdateHandler {
                     GlobalManager.getInstance().getMainScene().setBeatmap(track.getBeatmap());
                     GlobalManager.getInstance().getSongMenu().select();
                     ResourceManager.getInstance().loadBackground(track.getBackground());
-                    ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance().getSongService().preLoad(track.getBeatmap().getMusic());
-                    ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance().getSongService().play();
+                    GlobalManager.getInstance().getSongService().preLoad(track.getBeatmap().getMusic());
+                    GlobalManager.getInstance().getSongService().play();
                     scorescene.load(stat, null, ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance().getSongService(), replayFile, null, track);
                     GlobalManager.getInstance().getEngine().setScene(scorescene.getScene());
                 }

@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.Field;
 import java.net.ConnectException;
 import java.net.SocketException;
@@ -39,7 +38,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
  * @version 1.0
  * @created 2012-3-21
  */
-public class AppException extends Exception implements UncaughtExceptionHandler {
+public class AppException extends Exception implements Thread.UncaughtExceptionHandler {
 
     /**
      * 定义异常类型
@@ -310,7 +309,7 @@ public class AppException extends Exception implements UncaughtExceptionHandler 
             exceptionStr.append("Android: ").append(Build.VERSION.RELEASE).append("(").append(Build.MODEL).append(")\n").append("\n");
             exceptionStr.append("System Package Info:").append(collectDeviceInfo(context)).append("\n").append("\n");
             exceptionStr.append("System Screen Info:").append(getScreenInfo(context)).append("\n").append("\n");
-            exceptionStr.append("System os Info:").append(getMobileInfo()).append("\n").append("\n");
+            exceptionStr.append("System OS Info:").append(getMobileInfo()).append("\n").append("\n");
             exceptionStr.append("Exception: ").append(ex.getMessage()).append("\n").append("\n");
             exceptionStr.append("Exception stack：").append(getTraceInfo((Activity) context, ex)).append("\n").append("\n");
         } catch (NameNotFoundException e) {

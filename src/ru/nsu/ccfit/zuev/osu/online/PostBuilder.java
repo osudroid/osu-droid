@@ -1,39 +1,33 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
-import android.util.Log;
-
 import com.dgsrz.bancho.security.SecurityUtils;
+
+import okhttp3.FormBody;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.Request;
 
 import org.anddev.andengine.util.Debug;
 
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 
 public class PostBuilder {
-    private StringBuilder builder = new StringBuilder();
+    private FormBody.Builder formBodyBuilder = new FormBody.Builder();
     private StringBuilder values = new StringBuilder();
 
     public void addParam(final String key, final String value) {
         try {
-            if (builder.length() > 0) {
-                builder.append("&");
+            if (values.length() > 0) {
                 values.append("_");
             }
-            builder.append(URLEncoder.encode(key, "UTF-8"));
-            builder.append("=");
-            builder.append(URLEncoder.encode(value, "UTF-8"));
+            formBodyBuilder.add(key, value);
             values.append(URLEncoder.encode(value, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             return;
@@ -44,6 +38,7 @@ public class PostBuilder {
     public ArrayList<String> requestWithAttempts(final String scriptUrl, int attempts) throws RequestException {
         ArrayList<String> response = null;
         String signature = SecurityUtils.signRequest(values.toString());
+
         if (signature != null) {
             addParam("sign", signature);
         }
@@ -78,44 +73,29 @@ public class PostBuilder {
         return response;
     }
 
-    public ArrayList<String> request(final String scriptUrl) throws RequestException {
-        String data = builder.toString();
-        //TODO debug code
-		/*Debug.i("Sending request to " + scriptUrl);
-		Debug.i("Request data = " + data);*/
+    private ArrayList<String> request(final String scriptUrl) throws RequestException {
+        String data = values.toString();
         ArrayList<String> response = new ArrayList<String>();
 
         try {
-            URL url = new URL(scriptUrl);
-            URLConnection connection = url.openConnection();
-            ((HttpURLConnection) connection).setRequestMethod("POST");
-            connection.setDoInput(true);
-            connection.setDoOutput(true);
+            Request request = new Request.Builder()
+                .url(scriptUrl)
+                .post(formBodyBuilder.build())
+                .build();
+            Response resp = OnlineManager.client.newCall(request).execute();
 
-            OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
-            out.write(data);
-            out.flush();
-            out.close();
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            if (BuildConfig.DEBUG) {
-                Log.i("request", "url=" + scriptUrl);
-                Log.i("request", "--------Content---------");
+            Debug.i("request url=" + scriptUrl);
+            Debug.i("request --------Content---------");
+            String line = null;
+            BufferedReader reader = new BufferedReader(new StringReader(resp.body().string()));
+            while((line = reader.readLine()) != null) {
+                Debug.i(String.format("request [%d]: %s", response.size(), line));
+                response.add(line);
             }
-            for (String s = reader.readLine(); s != null; s = reader.readLine()) {
-                response.add(s);
-                if (BuildConfig.DEBUG) {
-                    Log.i("request", s);
-                }
-            }
-            if (BuildConfig.DEBUG) {
-                Log.i("request", "url=" + scriptUrl);
-                Log.i("request", "-----End of content-----");
-            }
-        } catch (MalformedURLException e) {
-            throw new RequestException(e);
-        } catch (IOException e) {
-            throw new RequestException(e);
+            Debug.i("request url=" + scriptUrl);
+            Debug.i("request -----End of content-----");
+        } catch(Exception e) {
+            Debug.e(e.getMessage(), e);
         }
 
         if (response.isEmpty()) {

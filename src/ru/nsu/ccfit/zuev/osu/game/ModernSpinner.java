@@ -159,8 +159,8 @@ public class ModernSpinner extends Spinner {
             top.setRotation(degree);
             //auto时，FL光圈绕中心旋转
             if (GameHelper.isAutopilotMod() || GameHelper.isAuto()) {
-                float pX = center.x + 50 * (float)Math.sin(degree);
-                float pY = center.y + 50 * (float)Math.cos(degree);
+                float pX = center.x + 50 * (float) Math.sin(degree);
+                float pY = center.y + 50 * (float) Math.cos(degree);
                 listener.updateAutoBasedPos(pX, pY);
             }
             // bottom.setRotation(-degree);
