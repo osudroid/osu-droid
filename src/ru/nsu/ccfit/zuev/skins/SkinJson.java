@@ -37,7 +37,7 @@ public class SkinJson {
     private final BooleanSkinData sliderFollowComboColor = new BooleanSkinData("sliderFollowComboColor", true);
     private final BooleanSkinData useNewLayout = new BooleanSkinData("useNewLayout");
     private final BooleanSkinData forceOverrideComboColor = new BooleanSkinData("forceOverrideComboColor");
-    private final BooleanSkinData rotateCursor = new BooleanSkinData("rotateCursor");
+    private final BooleanSkinData rotateCursor = new BooleanSkinData("rotateCursor", true);
 
     private final String DEFAULT_COLOR_HEX = "#FFFFFF";
     private final RGBColor DEFAULT_COLOR = RGBColor.hex2Rgb(DEFAULT_COLOR_HEX);

@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
+import org.anddev.andengine.entity.modifier.RotationByModifier;
 import org.anddev.andengine.entity.modifier.ScaleModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -8,6 +9,7 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
+import ru.nsu.ccfit.zuev.skins.SkinJson;
 
 public class CursorSprite extends Sprite implements ISliderListener {
     public final float baseSize = Config.getCursorSize() * 2;
@@ -39,11 +41,22 @@ public class CursorSprite extends Sprite implements ISliderListener {
         );
     }
 
+    private RotationByModifier currentRotation;
+
+    private void rotateCursor() {
+        registerEntityModifier(currentRotation = new RotationByModifier(1, 360));
+    }
+
     public void update(float pSecondsElapsed, boolean isShowing) {
         setVisible(isShowing);
 
         if (getScaleX() > 2f) {
             setScale(Math.max(baseSize, this.getScaleX() - (baseSize * 0.75f) * pSecondsElapsed));
+        }
+
+        System.out.println(SkinJson.get().isRotateCursor());
+        if (currentRotation == null || SkinJson.get().isRotateCursor() && currentRotation.isFinished()) {
+            rotateCursor();
         }
     }
 
