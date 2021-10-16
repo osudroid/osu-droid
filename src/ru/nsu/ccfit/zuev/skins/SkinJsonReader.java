@@ -121,13 +121,11 @@ public class SkinJsonReader extends SkinReader {
             if (names.optString(i).equals(skin.useNewLayout.getTag())) {
                 continue;
             }
-            putLayout(names.optString(i), data.optJSONObject(names.optString(i)));
+            JSONObject layoutJSON = data.optJSONObject(names.optString(i));
+            if (layoutJSON != null) {
+                putLayout(names.optString(i), SkinLayout.load(layoutJSON));
+            }
         }
-    }
-
-    @Override
-    protected void putLayout(String name, JSONObject object) {
-        OsuSkin.get().layoutData.put(name, SkinLayout.load(object));
     }
 
     @Override
