@@ -4,12 +4,13 @@ import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import androidx.annotation.StringRes;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -37,7 +38,7 @@ public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
     private SongMenu menu;
     private CheckBox favoritesOnly;
     private TextView favoriteFolder;
-    private TextView orderText;
+    private Button orderButton;
     //private TextView openMapInfo;
 
     private Updater updater;
@@ -97,7 +98,7 @@ public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
                 R.string.menu_search_favsenabled : R.string.menu_search_favsdisabled);
     }
 
-    private void updateOrderText() {
+    private void updateOrderButton() {
         SongMenu.SortOrder order = getOrder();
         @StringRes int s;
         switch (order) {
@@ -123,7 +124,7 @@ public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
                 s = R.string.menu_search_sort_creator;
                 break;
         }
-        orderText.setText(s);
+        orderButton.setText(s);
     }
 
     private void updateFavFolderText() {
@@ -261,7 +262,7 @@ public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
         if (isCreated()) {
             filter = findViewById(R.id.searchEditText);
             favoritesOnly = findViewById(R.id.showFav);
-            orderText = findViewById(R.id.sortText);
+            orderButton = findViewById(R.id.sortButton);
             favoriteFolder = findViewById(R.id.favFolder);
             //openMapInfo = findViewById(R.id.openMapInfo);
 
@@ -270,9 +271,9 @@ public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
                 updateUpdater();
                 savedFavOnly = isChecked;
             });
-            orderText.setOnClickListener(v -> {
+            orderButton.setOnClickListener(v -> {
                 nextOrder();
-                updateOrderText();
+                updateOrderButton();
                 updateUpdater();
             });
             findViewById(R.id.favFolderLayout).setOnClickListener(v -> {
@@ -285,9 +286,9 @@ public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
             });
             filter.setOnEditorActionListener((v, actionId, event) -> {
                 if (event == null) {
-                    System.out.println("fuck sogou, sb ime");
                     return false;
                 }
+
                 if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
                     hideMenu();
                     return true;
@@ -297,12 +298,10 @@ public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
             filter.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
                 }
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
-
                 }
 
                 @Override
@@ -321,7 +320,7 @@ public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
             if (savedFilter != null && savedFilter.length() > 0) {
                 filter.setText(savedFilter);
             }
-            updateOrderText();
+            updateOrderButton();
             updateFavChecked();
             updateFavFolderText();
         }

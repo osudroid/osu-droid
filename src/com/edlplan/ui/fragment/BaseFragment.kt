@@ -12,10 +12,11 @@ import com.edlplan.ui.ActivityOverlay
 import com.edlplan.ui.EasingHelper
 import ru.nsu.ccfit.zuev.osuplus.R
 
-abstract class BaseFragment : Fragment() {
+abstract class BaseFragment : Fragment(), BackPressListener {
     var root: View? = null
         private set
     private var background: View? = null
+    var onDismissListener: OnDismissListener? = null
     var isDismissOnBackgroundClick = false
     var isCreated = false
         private set
@@ -25,6 +26,7 @@ abstract class BaseFragment : Fragment() {
     val backgroundId: Int
         get() = R.id.frg_background
 
+    @Suppress("UNCHECKED_CAST")
     fun <T : View?> findViewById(@IdRes id: Int): T? {
         val o: Any? = if (root != null) root!!.findViewById<View>(id) else null
         return if (o == null) {
@@ -68,9 +70,10 @@ abstract class BaseFragment : Fragment() {
 
     open fun dismiss() {
         ActivityOverlay.dismissOverlay(this)
+        onDismissListener?.OnDismiss()
     }
 
-    fun callDismissOnBackPress() {
+    override fun callDismissOnBackPress() {
         if (isDismissOnBackPress) {
             dismiss()
         }
@@ -86,5 +89,9 @@ abstract class BaseFragment : Fragment() {
         }
         onLoadView()
         return root
+    }
+
+    fun interface OnDismissListener {
+        fun OnDismiss()
     }
 }

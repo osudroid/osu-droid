@@ -2,13 +2,14 @@ package com.edlplan.ui
 
 import android.app.Activity
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import com.edlplan.ui.fragment.BaseFragment
+import com.edlplan.ui.fragment.BackPressListener
 import java.util.*
 
 object ActivityOverlay {
     private var fragmentManager: FragmentManager? = null
-    private val displayingOverlay: MutableList<BaseFragment> = ArrayList()
+    private val displayingOverlay: MutableList<Fragment> = ArrayList()
     private var context: Activity? = null
     private var containerId = 0
     @JvmStatic
@@ -25,14 +26,17 @@ object ActivityOverlay {
     @Synchronized
     fun onBackPress(): Boolean {
         if (fragmentManager != null && displayingOverlay.size > 0) {
-            displayingOverlay[displayingOverlay.size - 1].callDismissOnBackPress()
+            val overlay: Fragment? = displayingOverlay[displayingOverlay.size - 1]
+            if(overlay is BackPressListener) {
+                overlay.callDismissOnBackPress()
+            }
             return true
         }
         return false
     }
 
     @Synchronized
-    fun dismissOverlay(fragment: BaseFragment) {
+    fun dismissOverlay(fragment: Fragment) {
         if (fragmentManager != null) {
             if (displayingOverlay.contains(fragment)) {
                 displayingOverlay.remove(fragment)
@@ -42,7 +46,7 @@ object ActivityOverlay {
     }
 
     @Synchronized
-    fun addOverlay(fragment: BaseFragment, tag: String?) {
+    fun addOverlay(fragment: Fragment, tag: String?) {
         if (fragmentManager != null) {
             if (fragment.isAdded()) {
                 return

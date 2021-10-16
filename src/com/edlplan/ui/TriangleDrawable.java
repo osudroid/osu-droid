@@ -16,6 +16,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
 
+import ru.nsu.ccfit.zuev.osu.Config;
+
 public class TriangleDrawable extends Drawable {
 
 
@@ -94,6 +96,10 @@ public class TriangleDrawable extends Drawable {
     }
 
     protected void onDraw(Canvas canvas) {
+        if(!Config.isTrianglesAnimation()) {
+            return;
+        }
+
         width = getBounds().width();
         height = getBounds().height();
         paint.setColor(0xFFFFFFFF);

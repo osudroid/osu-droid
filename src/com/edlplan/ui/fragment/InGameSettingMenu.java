@@ -3,20 +3,21 @@ package com.edlplan.ui.fragment;
 import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.graphics.Color;
-import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import androidx.preference.PreferenceManager;
 
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 
-import org.anddev.andengine.input.touch.TouchEvent;
-
 import java.util.Locale;
+
+import org.anddev.andengine.input.touch.TouchEvent;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
@@ -144,7 +145,7 @@ public class InGameSettingMenu extends BaseFragment {
 
         backgroundBrightness = findViewById(R.id.backgroundBrightnessBar);
         backgroundBrightness.setProgress(
-                Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(getContext()).getString("bgbrightness", "25")));
+                PreferenceManager.getDefaultSharedPreferences(getContext()).getInt("bgbrightness", 25));
         backgroundBrightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -172,12 +173,12 @@ public class InGameSettingMenu extends BaseFragment {
                 Config.setBackgroundBrightness(seekBar.getProgress() / 100f);
                 PreferenceManager.getDefaultSharedPreferences(getContext())
                         .edit()
-                        .putString("bgbrightness", seekBar.getProgress() + "")
+                        .putInt("bgbrightness", progress)
                         .commit();
             }
         });
         ((TextView) findViewById(R.id.bgBrightnessText)).setText(
-                Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(getContext()).getString("bgbrightness", "25")) + "%");
+            PreferenceManager.getDefaultSharedPreferences(getContext()).getInt("bgbrightness", 25) + "%");
 
         changeSpeed = findViewById(R.id.changeSpeedBar);
         changeSpeed.setProgress((int)(ModMenu.getInstance().getChangeSpeed() * 20 - 10));
@@ -259,7 +260,7 @@ public class InGameSettingMenu extends BaseFragment {
                 }
             }
         });
-
+        
         ((TextView) findViewById(R.id.forceARText)).setText(String.format(Locale.getDefault(), "AR%.1f", ModMenu.getInstance().getForceAR()));
 
         flashlightFollowDelay = findViewById(R.id.flashlightFollowDelayBar);
@@ -282,6 +283,7 @@ public class InGameSettingMenu extends BaseFragment {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) { }
         });
+        ((TextView) findViewById(R.id.forceARText)).setText(String.format("AR%.1f", ModMenu.getInstance().getForceAR()));
     }
 
     @Override
