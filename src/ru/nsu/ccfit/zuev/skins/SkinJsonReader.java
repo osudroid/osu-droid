@@ -69,9 +69,7 @@ public class SkinJsonReader extends SkinReader {
     protected void loadComboColorSetting() {
         OsuSkin skin = OsuSkin.get();
         JSONObject data = currentComboColorData;
-        System.out.println(data.toString());
         skin.forceOverrideComboColor.setFromJson(data);
-        System.out.println(skin.forceOverrideComboColor.getCurrentValue());
         skin.comboColor.clear();
         JSONArray array = data.optJSONArray("colors");
         if (array == null || array.length() == 0) {
