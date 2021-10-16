@@ -16,5 +16,7 @@ public abstract class SkinReader {
     protected abstract void loadLayout();
     protected abstract void loadColor();
     protected abstract void loadCursor();
-    protected abstract void putLayout(String name, JSONObject object);
+    protected void putLayout(String name, SkinLayout layout) {
+        OsuSkin.get().layoutData.put(name, layout);
+    }
 }
