@@ -3,6 +3,8 @@ package com.edlplan.replay;
 import java.io.File;
 import java.util.HashMap;
 
+import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
+
 public class SongsLibrary {
 
     private static SongsLibrary library;
@@ -10,12 +12,11 @@ public class SongsLibrary {
 
     public SongsLibrary() {
         File songs = OdrConfig.getSongDir();
-        for (File set : songs.listFiles()) {
+        File[] songsList = FileUtils.listFiles(songs, ".osu");
+        for (File set : songsList) {
             if (set.isDirectory()) {
                 for (String osu : set.list()) {
-                    if (osu.endsWith(".osu")) {
-                        osu2set.put(osu, set.getName() + "/" + osu);
-                    }
+                    osu2set.put(osu, set.getName() + "/" + osu);
                 }
             }
         }
