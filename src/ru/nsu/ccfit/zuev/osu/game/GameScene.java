@@ -533,7 +533,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             ccolor = beatmapData.getData("Colours", "Combo" + comboNum++);
         }
-        System.out.println("TUS");
         if (combos.isEmpty() || Config.isUseCustomComboColors()) {
             combos.clear();
             combos.addAll(Arrays.asList(Config.getComboColors()));
