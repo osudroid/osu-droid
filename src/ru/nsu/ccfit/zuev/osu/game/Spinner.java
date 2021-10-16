@@ -28,8 +28,8 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public class Spinner extends GameObject {
-    public final PointF center;
     private final Sprite background;
+    public final PointF center;
     private final Sprite circle;
     private final Sprite approachCircle;
     private final Sprite metre;
