@@ -2,8 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:gravity="center"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
               android:background="@xml/black">
 
     <LinearLayout
@@ -35,9 +35,16 @@
                     style="@style/NotificationTitle"
                     android:id="@+id/notify_small_title"
                     android:paddingBottom="5sp"
-                    android:singleLine="true"
-                    android:focusableInTouchMode="false"
-                    android:focusable="false"/>
+                    android:maxLines="2"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Akatin"
+                    style="@style/NotificationText"
+                    android:id="@+id/notify_small_artist"
+                    android:paddingBottom="5sp"
+                    android:maxLines="2"/>
 
             <LinearLayout
                     android:orientation="horizontal"
@@ -72,13 +79,6 @@
                         android:id="@+id/notify_small_cancel"
                         android:src="@drawable/notify_clear"
                         android:background="#0000"/>
-                <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Akatin"
-                        style="@style/NotificationText"
-                        android:id="@+id/notify_small_artist"
-                        android:singleLine="true"/>
 
             </LinearLayout>
         </LinearLayout>

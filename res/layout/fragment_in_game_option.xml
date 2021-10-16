@@ -307,8 +307,8 @@
                                 android:layout_height="wrap_content"
                                 android:text="AR9.0" />
                         </TableRow>
-
-						<TextView
+                    
+                    <TextView
 							android:id="@+id/customize_mods"
 							android:layout_width="match_parent"
 							android:layout_height="wrap_content"
