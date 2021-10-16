@@ -6,6 +6,11 @@ public class DefaultInteger extends DefaultData<Integer> {
     }
 
     public DefaultInteger() {
-        super(0);
+        super();
+    }
+
+    @Override
+    protected Integer instanceDefaultValue() {
+        return 0;
     }
 }
