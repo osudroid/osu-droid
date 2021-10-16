@@ -3,12 +3,12 @@ package ru.nsu.ccfit.zuev.osu;
 import android.graphics.PointF;
 import android.util.Log;
 
+import okio.BufferedSource;
+import okio.Okio;
+
 import org.anddev.andengine.util.Debug;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +32,7 @@ import test.tpdifficulty.tp.AiModtpDifficulty;
 
 public class OSUParser {
     private final File file;
-    private BufferedReader reader = null;
+    private BufferedSource source;
     private boolean fileOpened = false;
     private final ArrayList<TimingPoint> timingPoints = new ArrayList<>();
     private final ArrayList<HitObject> hitObjects = new ArrayList<>();
@@ -51,26 +51,24 @@ public class OSUParser {
 
     public boolean openFile() {
         try {
-            FileReader fileReader = new FileReader(file);
-            reader = new BufferedReader(fileReader);
-        } catch (final FileNotFoundException e) {
+            source = Okio.buffer(Okio.source(file));
+        } catch (final IOException e) {
             Debug.e("OSUParser.openFile: " + e.getMessage(), e);
             return false;
         }
 
-        String head;
         try {
-            head = reader.readLine().trim();
+            String head = source.readUtf8Line();
             Pattern pattern = Pattern.compile("osu file format v(\\d+)");
             Matcher matcher = pattern.matcher(head);
             if (!matcher.find()) {
-                reader.close();
-                reader = null;
+                source.close();
+                source = null;
                 return false;
             }
         } catch (IOException e) {
             Debug.e("OSUParser.openFile: " + e.getMessage(), e);
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             Debug.e("OSUParser.openFile: " + e.getMessage(), e);
         }
 
@@ -102,8 +100,8 @@ public class OSUParser {
             return false;
         }
 
-        Debug.i("MaxCombo: " + track.getMaxCombo());
-        Debug.i("Caching " + track.getFilename());
+        // Debug.i("MaxCombo: " + track.getMaxCombo());
+        // Debug.i("Caching " + track.getFilename());
 
         return true;
     }
@@ -153,7 +151,7 @@ public class OSUParser {
 
         try {
             while (true) {
-                String s = reader.readLine();
+                String s = source.readUtf8Line();
 
                 // If s is null, it means we've reached the end of the file.
                 // End the loop and don't forget to add the last section,
@@ -170,7 +168,7 @@ public class OSUParser {
                                 data.addSection(currentSection, map);
                         }
                     }
-                    reader.close();
+                    source.close();
                     break;
                 }
 
