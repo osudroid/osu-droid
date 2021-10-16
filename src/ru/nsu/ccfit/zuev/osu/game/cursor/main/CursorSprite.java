@@ -53,8 +53,7 @@ public class CursorSprite extends Sprite implements ISliderListener {
         if (getScaleX() > 2f) {
             setScale(Math.max(baseSize, this.getScaleX() - (baseSize * 0.75f) * pSecondsElapsed));
         }
-
-        System.out.println(SkinJson.get().isRotateCursor());
+        
         if (currentRotation == null || SkinJson.get().isRotateCursor() && currentRotation.isFinished()) {
             rotateCursor();
         }
