@@ -9,7 +9,7 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
-import ru.nsu.ccfit.zuev.skins.SkinJson;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class CursorSprite extends Sprite implements ISliderListener {
     public final float baseSize = Config.getCursorSize() * 2;
@@ -54,7 +54,7 @@ public class CursorSprite extends Sprite implements ISliderListener {
             setScale(Math.max(baseSize, this.getScaleX() - (baseSize * 0.75f) * pSecondsElapsed));
         }
         
-        if (currentRotation == null || SkinJson.get().isRotateCursor() && currentRotation.isFinished()) {
+        if (currentRotation == null || OsuSkin.get().isRotateCursor() && currentRotation.isFinished()) {
             rotateCursor();
         }
     }

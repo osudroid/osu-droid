@@ -33,7 +33,8 @@ import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.QualityAssetBitmapSource;
 import ru.nsu.ccfit.zuev.osu.helper.QualityFileBitmapSource;
 import ru.nsu.ccfit.zuev.osu.helper.ScaledBitmapSource;
-import ru.nsu.ccfit.zuev.skins.SkinJson;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
+import ru.nsu.ccfit.zuev.skins.SkinJsonReader;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 
 public class ResourceManager {
@@ -119,14 +120,14 @@ public class ResourceManager {
             File skinJson = new File(folder, "skin.json");
             if (skinJson.exists()) {
                 try {
-                    skinjson = new JSONObject(SkinJson.readFull(skinJson));
+                    skinjson = new JSONObject(OsuSkin.readFull(skinJson));
                 } catch (Exception e) {
                     e.printStackTrace();
                     skinjson = null;
                 }
             }
             if (skinjson == null) skinjson = new JSONObject();
-            SkinJson.get().loadSkinJson(skinjson);
+            SkinJsonReader.getReader().supplyJson(skinjson);
         }
         final Map<String, File> availableFiles = new HashMap<String, File>();
         if (skinFiles != null) {

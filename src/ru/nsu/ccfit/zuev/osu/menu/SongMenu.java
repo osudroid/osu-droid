@@ -43,7 +43,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.skins.SkinJson;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -299,10 +299,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024);
         frontLayer.attachChild(dimensionInfo);
 
-        SkinLayout layoutBackButton = SkinJson.get().getLayout("BackButton");
-        SkinLayout layoutMods = SkinJson.get().getLayout("ModsButton");
-        SkinLayout layoutOptions = SkinJson.get().getLayout("OptionsButton");
-        SkinLayout layoutRandom = SkinJson.get().getLayout("RandomButton");
+        SkinLayout layoutBackButton = OsuSkin.get().getLayout("BackButton");
+        SkinLayout layoutMods = OsuSkin.get().getLayout("ModsButton");
+        SkinLayout layoutOptions = OsuSkin.get().getLayout("OptionsButton");
+        SkinLayout layoutRandom = OsuSkin.get().getLayout("RandomButton");
 
         if (ResourceManager.getInstance().isTextureLoaded("menu-back-0")) {
             List<String> loadedBackTextures = new ArrayList<>();
@@ -541,7 +541,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         modSelection.setScale(1.5f);
         optionSelection.setScale(1.5f);
         randomMap.setScale(1.5f);
-        if (SkinJson.get().isUseNewLayout()) {
+        if (OsuSkin.get().isUseNewLayout()) {
             if (layoutBackButton != null) {
                 layoutBackButton.baseApply(backButton);
             }
