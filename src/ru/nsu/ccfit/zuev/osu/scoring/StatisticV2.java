@@ -140,7 +140,7 @@ public class StatisticV2 implements Serializable {
     public int getAutoTotalScore() {
         float mult = 1;
         for (GameMod m : mod) {
-            if (m.typeAuto) {
+            if (m.unranked) {
                 continue;
             }
             mult *= m.scoreMultiplier;
@@ -644,10 +644,13 @@ public class StatisticV2 implements Serializable {
         return enableForceAR;
     }
 
+    public void setFLFollowDelay(float delay) {
+        flFollowDelay = delay;
+    }
 
-    public void setFLFollowDelay(float delay) { flFollowDelay = delay; }
-
-    public float getFLFollowDelay() { return flFollowDelay; }
+    public float getFLFollowDelay() {
+        return flFollowDelay;
+    }
 
     public void setEnableForceAR(boolean t){
         enableForceAR = t;
@@ -706,7 +709,6 @@ public class StatisticV2 implements Serializable {
 
     public void setExtraModFromString(String s) {
         for (String str: s.split("\\|")){
-
             if (str.startsWith("x") && str.length() == 5){
                 changeSpeed = Float.parseFloat(str.substring(1));
                 continue;
