@@ -1,9 +1,8 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.app.Activity;
-import androidx.core.app.ActivityCompat;
-import android.Manifest;
 
+import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
@@ -16,10 +15,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
+// import java.util.HashSet;
+// import java.util.Set;
 
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -33,7 +33,6 @@ public class LibraryManager {
     private int currentIndex = 0;
 
     private LibraryManager() {
-
     }
 
     public static LibraryManager getInstance() {
@@ -41,12 +40,11 @@ public class LibraryManager {
     }
 
     public File getLibraryCacheFile() {
-        // sorry for the janky code
         return new File(GlobalManager.getInstance().getMainActivity().getFilesDir(), String.format("library.%s.dat", VERSION));
     }
-    
+
     @SuppressWarnings("unchecked")
-    synchronized public boolean loadLibraryCache(final Activity activity, boolean forceUpdate) {
+    public boolean loadLibraryCache(final Activity activity, boolean forceUpdate) {
         library = new ArrayList<BeatmapInfo>();
         ToastLogger.addToLog("Loading library...");
         if (OSZParser.canUseSD() == false) {
@@ -136,7 +134,7 @@ public class LibraryManager {
 
     private void checkLibrary(final Activity activity) {
         final File dir = new File(Config.getBeatmapPath());
-        final File[] files = dir.listFiles();
+        final File[] files = FileUtils.listFiles(dir);
         if (files.length == fileCount) {
             return;
         }
@@ -144,16 +142,16 @@ public class LibraryManager {
                 .showText(StringTable.get(R.string.message_lib_update), true);
         final int fileCount = files.length;
         int fileCached = 0;
-        final Set<String> cachedFiles = new HashSet<String>();
+        LinkedList<String> cachedFiles = new LinkedList<String>();
         for (final File f : files) {
             GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / fileCount);
             ToastLogger.setPercentage(fileCached * 100f / fileCount);
             fileCached++;
             addBeatmap(f, cachedFiles);
         }
-        final ArrayList<BeatmapInfo> uncached = new ArrayList<BeatmapInfo>();
+        final LinkedList<BeatmapInfo> uncached = new LinkedList<BeatmapInfo>();
         for (final BeatmapInfo i : library) {
-            if (cachedFiles.contains(i.getPath()) == false) {
+            if (!cachedFiles.contains(i.getPath())) {
                 uncached.add(i);
             }
         }
@@ -164,7 +162,7 @@ public class LibraryManager {
         savetoCache(activity);
     }
 
-    synchronized public void scanLibrary(final Activity activity) {
+    public void scanLibrary(final Activity activity) {
         //ToastLogger.showText(StringTable.get(R.string.message_lib_caching),
         //		false);
         ToastLogger.addToLog("Caching library...");
@@ -172,8 +170,8 @@ public class LibraryManager {
 
         final File dir = new File(Config.getBeatmapPath());
         // Creating Osu directory if it doesn't exist
-        if (dir.exists() == false) {
-            if (dir.mkdirs() == false) {
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
                 ToastLogger.showText(StringTable.format(
                         R.string.message_error_createdir, dir.getPath()), true);
                 return;
@@ -188,7 +186,7 @@ public class LibraryManager {
         }
         // Getting all files
         int totalMaps = 0;
-        final File[] filelist = dir.listFiles().clone();
+        final File[] filelist = FileUtils.listFiles(dir);
         // Here we go!
         final int fileCount = filelist.length;
         this.fileCount = fileCount;
@@ -197,24 +195,42 @@ public class LibraryManager {
             GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / fileCount);
             ToastLogger.setPercentage(fileCached * 100f / fileCount);
             fileCached++;
-            if (file.isDirectory() == false) {
+            if (!file.isDirectory()) {
                 continue;
             }
-            GlobalManager.getInstance().setInfo("Loading " + file.getName() + " ...");
 
-            totalMaps += loadFolder(file);
+            GlobalManager.getInstance().setInfo("Loading " + file.getName() + "...");
+            final BeatmapInfo info = new BeatmapInfo();
+            info.setPath(file.getPath());
+            scanFolder(info);
+            if (info.getCount() < 1) {
+                continue;
+            }
+            info.setCreator(info.getTrack(0).getCreator());
+            if (info.getTitle().equals("")) {
+                info.setTitle("unknown");
+            }
+            if (info.getArtist().equals("")) {
+                info.setArtist("unknown");
+            }
+            if (info.getCreator().equals("")) {
+                info.setCreator("unknown");
+            }
+            library.add(info);
+            totalMaps += info.getCount();
+            // totalMaps += loadFolder(file);
         }
 
-        sort();
+        // sort();
 
         savetoCache(activity);
-
         ToastLogger.showText(
                 StringTable.format(R.string.message_lib_complete, totalMaps),
                 true);
     }
 
-    synchronized public int loadFolder(File folder) {
+    /* 
+    public int loadFolder(File folder) {
         final BeatmapInfo info = new BeatmapInfo();
         info.setPath(folder.getPath());
         scanFolder(info);
@@ -234,29 +250,30 @@ public class LibraryManager {
         }
         library.add(info);
         return info.getCount();
-    }
+    }*/ 
 
+    // NOTE: IS THIS EVEN USED?????
     public void updateMapSet(File folder, BeatmapInfo beatmapInfo) {
         library.remove(beatmapInfo);
-        loadFolder(folder);
+        // loadFolder(folder);
         savetoCache(GlobalManager.getInstance().getMainActivity());
     }
 
-    public void sort() {
-        /*
+    /* public void sort() {
+        *
          * Collections.sort(library, new Comparator<BeatmapInfo>() {
          *
          *  public int compare(final BeatmapInfo object1, final
          * BeatmapInfo object2) { return object1.getTitle().compareToIgnoreCase(
          * object2.getTitle()); } });
-         */
-    }
+         *
+    }*/
 
     private void deleteDir(final File dir) {
         if (dir.exists() == false || dir.isDirectory() == false) {
             return;
         }
-        final File[] files = dir.listFiles((FileFilter) null);
+        final File[] files = FileUtils.listFiles(dir);
         if (files == null) {
             return;
         }
@@ -280,8 +297,7 @@ public class LibraryManager {
         }
     }
 
-    public void savetoCache(final Activity activity) {
-
+    public void savetoCache(final Activity activity) {        
         if (library.isEmpty()) {
             return;
         }
@@ -311,7 +327,7 @@ public class LibraryManager {
         currentIndex = 0;
     }
 
-    public void clearCache(final Activity activity) {
+    public void clearCache() {
         final File lib = getLibraryCacheFile();
         if (lib.exists()) {
             lib.delete();
@@ -321,7 +337,7 @@ public class LibraryManager {
         currentIndex = 0;
     }
 
-    public void addBeatmap(final File file, final Set<String> cachedFiles) {
+    public void addBeatmap(final File file, LinkedList<String> cachedFiles) {
         if (file.isDirectory() == false) {
             return;
         }
@@ -362,17 +378,11 @@ public class LibraryManager {
         library.add(info);
     }
 
-    private void scanFolder(final BeatmapInfo info) {
-
+    private void scanFolder(final BeatmapInfo info) {        
         final File dir = new File(info.getPath());
         info.setDate(dir.lastModified());
-        final File[] filelist = dir.listFiles(new FilenameFilter() {
+        File[] filelist = FileUtils.listFiles(dir, ".osu");
 
-
-            public boolean accept(final File dir, final String filename) {
-                return filename.matches(".+[.]osu");
-            }
-        });
         if (filelist == null) {
             return;
         }
@@ -385,8 +395,7 @@ public class LibraryManager {
             final TrackInfo track = new TrackInfo(info);
             track.setFilename(file.getPath());
             track.setCreator("unknown");
-
-            if (parser.readMetaData(track, info) == false) {
+            if (!parser.readMetaData(track, info)) {
                 continue;
             }
             if (track.getBackground() != null) {
@@ -397,11 +406,8 @@ public class LibraryManager {
         }
 
         Collections.sort(info.getTracks(), new Comparator<TrackInfo>() {
-
-
             public int compare(final TrackInfo object1, final TrackInfo object2) {
-                return Float.valueOf(object1.getDifficulty()).compareTo(
-                        object2.getDifficulty());
+                return Float.valueOf(object1.getDifficulty()).compareTo(object2.getDifficulty());
             }
         });
     }
@@ -452,9 +458,7 @@ public class LibraryManager {
     public int findBeatmap(BeatmapInfo info) {
         if (library != null && library.size() > 0) {
             for (int i = 0; i < library.size(); i++) {
-                if (library.get(i).getArtist().equals(info.getArtist()) &&
-                        library.get(i).getTitle().equals(info.getTitle()) &&
-                        library.get(i).getCreator().equals(info.getCreator())) {
+                if (library.get(i).equals(info)) {
                     return currentIndex = i;
                 }
             }
@@ -489,7 +493,7 @@ public class LibraryManager {
                     TrackInfo track = info.getTrack(j);
                     File trackFile = new File(track.getFilename());
                     if (fileName.equals(trackFile.getName())) {
-                        String trackMD5 = MD5Calcuator.getFileMD5(trackFile);
+                        String trackMD5 = FileUtils.getMD5Checksum(trackFile);
                         if (md5.equals(trackMD5)) {
                             return track;
                         }
