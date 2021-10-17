@@ -697,7 +697,7 @@ public class StatisticV2 implements Serializable {
         if (enableForceAR){
             builder.append(String.format(Locale.ENGLISH, "AR%.1f|", forceAR));
         }
-        if (Float.compare(flFollowDelay, FlashLightEntity.defaultMoveDelayS) != 0) {
+        if (flFollowDelay != FlashLightEntity.defaultMoveDelayS) {
             builder.append(String.format(Locale.ENGLISH, "FLD%.2f|", flFollowDelay));
         }
         if (builder.length() > 0){

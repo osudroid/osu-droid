@@ -343,12 +343,13 @@
 								android:layout_width="350dp"
 								android:layout_height="wrap_content"
 								android:layout_gravity="center_vertical"
-								android:max="1200" />
+								android:min="1"
+								android:max="10"/>
 							<TextView
 								android:id="@+id/flashlightFollowDelayText"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
-								android:text="120ms"/>
+								android:text="120.0ms"/>
 						</TableRow>
 
 					</TableLayout>

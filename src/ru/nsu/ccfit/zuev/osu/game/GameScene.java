@@ -1257,7 +1257,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 || Config.isRemoveSliderLock()
                 || ModMenu.getInstance().isChangeSpeed()
                 || ModMenu.getInstance().isEnableForceAR()
-                || Float.compare(ModMenu.getInstance().getFLfollowDelay(), FlashLightEntity.defaultMoveDelayS) != 0) {
+                || (ModMenu.getInstance().getFLfollowDelay() != FlashLightEntity.defaultMoveDelayS
+                    && GameHelper.isFlashLight())) {
             unranked.setVisible(true);
         }
 
