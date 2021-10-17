@@ -67,7 +67,7 @@ public class InGameSettingMenu extends BaseFragment {
 
     private void applyCustomModColor() {
         final TextView customizedModsText = findViewById(R.id.customize_mods);
-        int color = Float.compare(ModMenu.getInstance().getFLfollowDelay(), FlashLightEntity.defaultMoveDelayMS * 0.001f) == 1?  Color.RED: greenColor ;
+        int color = ModMenu.getInstance().getFLfollowDelay() != FlashLightEntity.defaultMoveDelayS ? Color.RED : greenColor;
         customizedModsText.setTextColor(color);
     }
 
@@ -264,24 +264,20 @@ public class InGameSettingMenu extends BaseFragment {
         ((TextView) findViewById(R.id.forceARText)).setText(String.format(Locale.getDefault(), "AR%.1f", ModMenu.getInstance().getForceAR()));
 
         flashlightFollowDelay = findViewById(R.id.flashlightFollowDelayBar);
-
         flashlightFollowDelay.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            final TextView flFollowDelayText = findViewById(R.id.flashlightFollowDelayText);
-
             @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                float p = (float) (Math.ceil(i / FlashLightEntity.defaultMoveDelayMS) * FlashLightEntity.defaultMoveDelayMS);
-                p = p <= 0? FlashLightEntity.defaultMoveDelayMS : p;
-                ModMenu.getInstance().setFLfollowDelay(Math.round(p * 0.001 * 100) / 100f);
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                ModMenu.getInstance().setFLfollowDelay((float) Math.round(progress * 1200f) / (10f * 1000f));
                 applyCustomModColor();
-                flFollowDelayText.setText(String.format(Locale.getDefault(), "%.1fms", p));
+                ((TextView) findViewById(R.id.flashlightFollowDelayText))
+                    .setText(String.format(Locale.getDefault(), "%.1fms", progress * FlashLightEntity.defaultMoveDelayMS));
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) { }
+            public void onStartTrackingTouch(SeekBar seekBar) {}
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) { }
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
         ((TextView) findViewById(R.id.forceARText)).setText(String.format("AR%.1f", ModMenu.getInstance().getForceAR()));
     }
