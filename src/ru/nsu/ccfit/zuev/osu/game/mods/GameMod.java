@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game.mods;
 public enum GameMod {
     /*
      * Temporarily unranked mods (until adjusted):
-     * sd, pf, sc, re, fl, scorev2(?)
+     * sd, pf, sc, re, fl
      */
     MOD_NOFAIL("nf", 0.5f),
     MOD_AUTO("auto", 0, true),
@@ -22,7 +22,7 @@ public enum GameMod {
     MOD_SMALLCIRCLE("sc", 1.06f, true),
     MOD_REALLYEASY("re", 0.5f, true),
     MOD_SCOREV2("v2", 1, true),
-    MOD_SPEEDUP("su", 1.06f);
+    MOD_SPEEDUP("su", 1.06f, true);
 
     public final String shortName;
     public final float scoreMultiplier;
