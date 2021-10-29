@@ -51,6 +51,8 @@ Changelog for 1.6.8
     - If enabled, this will hide progress bar, combo bursts, health bar, combo counter, accuracy counter, and score counter during gameplay.
 - Option to replace all beatmaps' backgrounds with the current skin's `menu-background` image
     - Only affects in-game display. The actual beatmap background file will not be replaced.
+- Option to disable triangles animation
+    - Users with issues while triangles animation is active are encouraged to enable this option.
 - New updater based on the game's GitHub repository releases
 - Separate loading screen for any game-related operations that takes some time to process
 - Support for push notifications
