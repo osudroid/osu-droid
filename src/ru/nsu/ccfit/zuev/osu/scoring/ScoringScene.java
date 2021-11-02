@@ -22,7 +22,6 @@ import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
@@ -427,7 +426,7 @@ public class ScoringScene {
         playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
         if (stat.getChangeSpeed() != 1 ||
             stat.isEnableForceAR() ||
-            Float.compare(stat.getFLFollowDelay(), FlashLightEntity.defaultMoveDelayS) != 0 &&
+            stat.getFLFollowDelay() != FlashLightEntity.defaultMoveDelayS &&
             stat.getMod().contains(GameMod.MOD_FLASHLIGHT)) {
 
             mapperStr += " [";
@@ -437,7 +436,7 @@ public class ScoringScene {
             if (stat.isEnableForceAR()){
                 mapperStr += String.format(Locale.ENGLISH, "AR%.1f,", stat.getForceAR());
             }
-            if (Float.compare(stat.getFLFollowDelay(), FlashLightEntity.defaultMoveDelayS) != 0 && stat.getMod().contains(GameMod.MOD_FLASHLIGHT)){
+            if (stat.getFLFollowDelay() != FlashLightEntity.defaultMoveDelayS && stat.getMod().contains(GameMod.MOD_FLASHLIGHT)){
                 mapperStr += String.format(Locale.ENGLISH, "FLD%.2f,", stat.getFLFollowDelay());
             }
             if (mapperStr.endsWith(",")){
@@ -497,18 +496,19 @@ public class ScoringScene {
                     OnlineManager.getInstance().isReadyToSend()) {
                 boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator())
                     .applyFilter(m -> m.unranked).hasNext();
-
-                if(!hasUnrankedMod || !(Config.isRemoveSliderLock()
+                if (hasUnrankedMod
+                    || Config.isRemoveSliderLock()
                     || ModMenu.getInstance().isChangeSpeed()
-                    || ModMenu.getInstance().isEnableForceAR()
-                    || Float.compare(ModMenu.getInstance().getFLfollowDelay(), FlashLightEntity.defaultMoveDelayS) != 0)){
-                    SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
-                            OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy());
-                    sendingPanel.setPosition(Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));
-                    scene.registerTouchArea(sendingPanel.getDismissTouchArea());
-                    scene.attachChild(sendingPanel);
-                    ScoreLibrary.getInstance().sendScoreOnline(stat, replay, sendingPanel);
+                    || ModMenu.getInstance().isEnableForceAR()) {
+                    return;
                 }
+
+                SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
+                        OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy());
+                sendingPanel.setPosition(Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));
+                scene.registerTouchArea(sendingPanel.getDismissTouchArea());
+                scene.attachChild(sendingPanel);
+                ScoreLibrary.getInstance().sendScoreOnline(stat, replay, sendingPanel);
             }
 
             ResourceManager.getInstance().getSound("applause").play();

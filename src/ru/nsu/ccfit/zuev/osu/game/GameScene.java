@@ -8,6 +8,7 @@ import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
+import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
 import com.edlplan.ui.fragment.InGameSettingMenu;
@@ -1239,20 +1240,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         unranked.setPosition(Config.getRES_WIDTH() / 2 - unranked.getWidth() / 2, 80);
         unranked.setVisible(false);
         fgScene.attachChild(unranked);
-        boolean hasUnrankedMod = false;
 
-        for(GameMod mod : stat.getMod()) {
-            if(mod.unranked) {
-                hasUnrankedMod = true;
-                break;
-            }
-        }
-
+        boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator())
+            .applyFilter(m -> m.unranked).hasNext();
         if (hasUnrankedMod
                 || Config.isRemoveSliderLock()
                 || ModMenu.getInstance().isChangeSpeed()
-                || ModMenu.getInstance().isEnableForceAR()
-                || Float.compare(ModMenu.getInstance().getFLfollowDelay(), FlashLightEntity.defaultMoveDelayS) != 0) {
+                || ModMenu.getInstance().isEnableForceAR()) {
             unranked.setVisible(true);
         }
 
