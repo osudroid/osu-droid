@@ -324,8 +324,8 @@
     <string name="opt_hide_replay_marquee_title">Hide replay marquee</string>
     <string name="opt_hide_replay_marquee_summary">Hide the scrolling text when watching replays</string>
 
-    <string name="opt_hide_ingame_ui_title">Hide ingame ui</string>
-    <string name="opt_hide_ingame_ui_summary">Hide the counters and other UIs when ingame</string>
+    <string name="opt_hide_ingame_ui_title">Hide gameplay UI</string>
+    <string name="opt_hide_ingame_ui_summary">Hide the counters and other UIs during gameplay</string>
 
     <string name="opt_receive_announcements_title">Receive announcements</string>
     <string name="opt_receive_announcements_summary">Receive notifications of announcements, events, etc.</string>
