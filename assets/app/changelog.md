@@ -56,6 +56,7 @@ Changelog for 1.6.8
 - New updater based on the game's GitHub repository releases
 - Separate loading screen for any game-related operations that takes some time to process
 - Support for push notifications
+- Option to scan download directory for `.osk` (skin) files
 
 ## Changes:
 
@@ -65,7 +66,7 @@ Changelog for 1.6.8
 - EZ (Easy) mod has 3 lives
 - RX (Relax) mod and AP (AutoPilot) mod replays will be saved with 0.01x score multiplier
 - Updated star rating system
-    - Improves calculation accuracy to be closer to osu! PC star rating.
+  - Improves calculation accuracy to be closer to osu! PC star rating.
 - 10 simultaneous cursor input support
 - Improved framerate for storyboard
 - Custom skins are sorted alphabetically
@@ -76,6 +77,8 @@ Changelog for 1.6.8
 - Changing volume-related options no longer requires a game restart
 - Improved file-related operations' performance
 - Use `HTTPS` protocol for all web-related operations
+- Moved skin selection option to Graphics category
+- Changed the game's domain to https://osudroid.moe/
 
 ## Bug fixes:
 
@@ -85,11 +88,11 @@ Changelog for 1.6.8
 - Fixed a bug where sliders with negative length or infinite BPM makes a beatmap unplayable
 - Fixed a bug where some beatmaps can crash the game when tapping a note due to out of bound hitsounds
 - Fixed a bug for spinners
-    - Spinners with negative length or less than 50ms will spin automatically.
+  - Spinners with negative length or less than 50ms will spin automatically.
 - Fixed a bug where some slider ticks fail to display correctly
 - Fixed a bug where very high velocity reverse sliders (buzz sliders) have incorrect length
 - Fixed a bug where certain skin sound elements will crash the game
-    - The game will ignore audio files smaller than 1 KB will be ignored.
+  - The game will ignore audio files smaller than 1 KB will be ignored.
 - Fixed SD card bug by moving library cache file to the game's private directory
 - Fixed a bug in navigation bar (should disable properly)
 - Fixed a bug where score would show incorrectly above 100 million during gameplay
@@ -119,19 +122,20 @@ Changelog for 1.6.8
 - [+] Added slider dim for FL (Flashlight) mod
 - [+] Added break dim for FL (Flashlight) mod
 - [+] Added a slight delay to FL (Flashlight) mod lightened area movement towards the cursor
-    - Defaults at 120ms, but can be adjusted to anywhere from 120ms to 1200ms.
+  - Defaults at 120ms, but can be adjusted to anywhere from 120ms to 1200ms.
 - [+] Added the ability to save failed replays
 - [+] Added support for push notifications
 - [+] Added a new updater based on the game's GitHub repository releases
 - [+] Added a separate loading screen for any game-related operations that takes some time to process
 - [+] Added the option to disable triangles animation
-    - Users with issues while triangles animation is active are encouraged to enable this option.
+  - Users with issues while triangles animation is active are encouraged to enable this option.
 - [+] Added the option to replace all beatmaps' backgrounds with the current skin's `menu-background` image
-    - Only affects in-game display. The actual beatmap background file will not be replaced.
+  - Only affects in-game display. The actual beatmap background file will not be replaced.
 - [+] Added the option to hide in-game UI
-    - If enabled, this will hide combo bursts, health bar, combo counter, accuracy counter, and score counter during gameplay.
+  - If enabled, this will hide combo bursts, health bar, combo counter, accuracy counter, and score counter during gameplay.
+- [+] Added the option to scan download directory for `.osk` (skin) files
 - [=] Updated audio engine
-    - Should improve performance and optimize latency.
+  - Should improve performance and optimize latency.
 - [=] Sliders will gradually fade out if HD (Hidden) mod is active
 - [=] Changing volume-related options no longer requires a game restart
 - [=] Improved file-related operations' performance
@@ -141,6 +145,8 @@ Changelog for 1.6.8
 - [=] FL (Flashlight) mod dim area now disappears during break time
 - [=] A cursor will appear when using Auto or AP (AutoPilot) mod
 - [=] Slightly reworked the display of options list
+- [=] Moved skin selection option to Graphics category
+- [=] Changed the game's domain to https://osudroid.moe/
 - [*] Fixed a bug where offline replays do not get saved
 - [*] Fixed a bug where FL (Flashlight) mod dim area flickers if the player taps during break
 - [*] Fixed a bug where beatmaps that haven't finished downloading gets imported
