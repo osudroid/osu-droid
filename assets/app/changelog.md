@@ -56,6 +56,7 @@ Changelog for 1.6.8
 - New updater based on the game's GitHub repository releases
 - Separate loading screen for any game-related operations that takes some time to process
 - Support for push notifications
+- Option to scan download directory for `.osk` (skin) files
 
 ## Changes:
 
@@ -76,6 +77,8 @@ Changelog for 1.6.8
 - Changing volume-related options no longer requires a game restart
 - Improved file-related operations' performance
 - Use `HTTPS` protocol for all web-related operations
+- Moved skin selection option to Graphics category
+- Changed the game's domain to https://osudroid.moe/
 
 ## Bug fixes:
 
@@ -130,6 +133,7 @@ Changelog for 1.6.8
     - Only affects in-game display. The actual beatmap background file will not be replaced.
 - [+] Added the option to hide in-game UI
     - If enabled, this will hide combo bursts, health bar, combo counter, accuracy counter, and score counter during gameplay.
+- [+] Added the option to scan download directory for `.osk` (skin) files
 - [=] Updated audio engine
     - Should improve performance and optimize latency.
 - [=] Sliders will gradually fade out if HD (Hidden) mod is active
@@ -141,6 +145,8 @@ Changelog for 1.6.8
 - [=] FL (Flashlight) mod dim area now disappears during break time
 - [=] A cursor will appear when using Auto or AP (AutoPilot) mod
 - [=] Slightly reworked the display of options list
+- [=] Moved skin selection option to Graphics category
+- [=] Changed the game's domain to https://osudroid.moe/
 - [*] Fixed a bug where offline replays do not get saved
 - [*] Fixed a bug where FL (Flashlight) mod dim area flickers if the player taps during break
 - [*] Fixed a bug where beatmaps that haven't finished downloading gets imported
