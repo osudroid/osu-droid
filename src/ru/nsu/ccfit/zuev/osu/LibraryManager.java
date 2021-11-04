@@ -269,7 +269,7 @@ public class LibraryManager {
          *
     }*/
 
-    private void deleteDir(final File dir) {
+    public void deleteDir(final File dir) {
         if (dir.exists() == false || dir.isDirectory() == false) {
             return;
         }

@@ -296,7 +296,7 @@
     <string name="opt_enableStoryboard_summary">Your phone will be very hot!</string>
     <string name="opt_enableStoryboard_title">Enable Storyboard</string>
 
-    <string name="opt_scandownload_summary">Scan /Download directory for new beatmaps (Might not work with SD Card)</string>
+    <string name="opt_scandownload_summary">Scan /Download directory for new beatmaps and skins (might not work with SD card)</string>
     <string name="opt_scandownload_title">Scan Download</string>
 
     <string name="opt_superSlider_title">Super Slider</string>
