@@ -1,15 +1,20 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 29
-
-
+    compileSdkVersion 30
+    ndkVersion '22.1.7171670'
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 27
+        minSdkVersion 21
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
+    }
+
+    lintOptions {
+        abortOnError true
+        ignoreWarnings true
+        disable 'ExpiredTargetSdkVersion'
     }
 
     buildTypes {

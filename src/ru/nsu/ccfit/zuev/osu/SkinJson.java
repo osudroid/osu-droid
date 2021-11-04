@@ -2,14 +2,15 @@ package ru.nsu.ccfit.zuev.osu;
 
 import com.edlplan.framework.utils.interfaces.Consumer;
 
+import okio.BufferedSource;
+import okio.Okio;
+
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -47,11 +48,10 @@ public class SkinJson {
     }
 
     public static String readFull(File file) throws IOException {
-        FileInputStream inputStream = new FileInputStream(file);
-        byte[] bytes = new byte[inputStream.available()];
-        inputStream.read(bytes);
-        inputStream.close();
-        return new String(bytes, Charset.forName("UTF-8"));
+        BufferedSource source = Okio.buffer(Okio.source(file));
+        String result = source.readUtf8();
+        source.close();
+        return result;
     }
 
     public float getComboTextScale() {

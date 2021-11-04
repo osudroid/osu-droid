@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
+import org.anddev.andengine.entity.modifier.FadeOutModifier;
 import org.anddev.andengine.entity.modifier.LoopEntityModifier;
 import org.anddev.andengine.entity.modifier.RotationByModifier;
 import org.anddev.andengine.entity.primitive.Rectangle;
@@ -30,6 +31,7 @@ public class SplashScene implements IUpdateHandler {
 
     public SplashScene() {
         scene = new Scene();
+        scene.registerEntityModifier(new FadeOutModifier(0.5f));
         final TextureRegion logotex = ResourceManager.getInstance().getTexture("logo");
         Sprite logo = new Sprite(0, 0, logotex);
         logo.setWidth(500);

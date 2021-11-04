@@ -10,10 +10,7 @@ import org.anddev.andengine.util.Debug;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +28,6 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class ScoreLibrary {
     private static final Pattern newPathPattern = Pattern.compile("[^/]*/[^/]*\\z");
     private static ScoreLibrary lib = new ScoreLibrary();
-    private DBOpenHelper helper = null;
     private SQLiteDatabase db = null;
 
     private ScoreLibrary() {
@@ -63,7 +59,7 @@ public class ScoreLibrary {
     }
 
     public void load(Context context) {
-        helper = DBOpenHelper.getOrCreate(context);
+        DBOpenHelper helper = DBOpenHelper.getOrCreate(context);
         try {
             db = helper.getWritableDatabase();
         } catch (SQLiteCantOpenDatabaseException e) {
@@ -136,17 +132,8 @@ public class ScoreLibrary {
             }
 
             in.close();
-        } catch (final StreamCorruptedException e) {
-            Debug.e("ScoreLibrary.load: " + e.getMessage());
-            return;
-        } catch (final FileNotFoundException e) {
-            Debug.e("ScoreLibrary.load: " + e.getMessage());
-            return;
-        } catch (final IOException e) {
-            Debug.e("ScoreLibrary.load: " + e.getMessage());
-            return;
-        } catch (final ClassNotFoundException e) {
-            Debug.e("ScoreLibrary.load: " + e.getMessage());
+        } catch (final Exception e) {
+            Debug.e("ScoreLibrary.loadOld: " + e.getMessage());
             return;
         }
         f.delete();
@@ -286,21 +273,21 @@ public class ScoreLibrary {
         }
         c.moveToFirst();
 
-        stat.setPlayerName(c.getString(c.getColumnIndex("playername")));
-        stat.setReplayName(c.getString(c.getColumnIndex("replayfile")));
-        stat.setModFromString(c.getString(c.getColumnIndex("mode")));
-        stat.setForcedScore(c.getInt(c.getColumnIndex("score")));
-        stat.maxCombo = c.getInt(c.getColumnIndex("combo"));
-        stat.setMark(c.getString(c.getColumnIndex("mark")));
-        stat.hit300k = c.getInt(c.getColumnIndex("h300k"));
-        stat.hit300 = c.getInt(c.getColumnIndex("h300"));
-        stat.hit100k = c.getInt(c.getColumnIndex("h100k"));
-        stat.hit100 = c.getInt(c.getColumnIndex("h100"));
-        stat.hit50 = c.getInt(c.getColumnIndex("h50"));
-        stat.misses = c.getInt(c.getColumnIndex("misses"));
-        stat.accuracy = c.getFloat(c.getColumnIndex("accuracy"));
-        stat.time = c.getLong(c.getColumnIndex("time"));
-        stat.setPerfect(c.getInt(c.getColumnIndex("perfect")) != 0);
+        stat.setPlayerName(c.getString(c.getColumnIndexOrThrow("playername")));
+        stat.setReplayName(c.getString(c.getColumnIndexOrThrow("replayfile")));
+        stat.setModFromString(c.getString(c.getColumnIndexOrThrow("mode")));
+        stat.setForcedScore(c.getInt(c.getColumnIndexOrThrow("score")));
+        stat.maxCombo = c.getInt(c.getColumnIndexOrThrow("combo"));
+        stat.setMark(c.getString(c.getColumnIndexOrThrow("mark")));
+        stat.hit300k = c.getInt(c.getColumnIndexOrThrow("h300k"));
+        stat.hit300 = c.getInt(c.getColumnIndexOrThrow("h300"));
+        stat.hit100k = c.getInt(c.getColumnIndexOrThrow("h100k"));
+        stat.hit100 = c.getInt(c.getColumnIndexOrThrow("h100"));
+        stat.hit50 = c.getInt(c.getColumnIndexOrThrow("h50"));
+        stat.misses = c.getInt(c.getColumnIndexOrThrow("misses"));
+        stat.accuracy = c.getFloat(c.getColumnIndexOrThrow("accuracy"));
+        stat.time = c.getLong(c.getColumnIndexOrThrow("time"));
+        stat.setPerfect(c.getInt(c.getColumnIndexOrThrow("perfect")) != 0);
 
         c.close();
 

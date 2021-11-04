@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="pre_release_notice">This is pre-release update!</string>
+    <string name="pre_release_notice">This is a pre-release update!</string>
     <string name="pre_release_message"><![CDATA[Pre-release update contains experimental features. \n
 If you get into trouble, please ask for help in our community.\n
 http://ops.dgsrz.com/community

@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
+import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 
 import org.anddev.andengine.engine.Engine;
@@ -21,10 +22,10 @@ import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
+import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -61,6 +62,7 @@ public class ScoringScene {
         if (replay != null && track == null) {
             replayStat = stat;
         }
+        InGameSettingMenu.getInstance().dismiss();
         TextureRegion tex = ResourceManager.getInstance()
                 .getTextureIfLoaded("::background");
         if (tex == null) {
@@ -272,10 +274,13 @@ public class ScoringScene {
                     Replay.oldChangeSpeed = ModMenu.getInstance().getChangeSpeed();
                     Replay.oldForceAR = ModMenu.getInstance().getForceAR();
                     Replay.oldEnableForceAR = ModMenu.getInstance().isEnableForceAR();
+                    Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
+
                     ModMenu.getInstance().setMod(stat.getMod());
                     ModMenu.getInstance().setChangeSpeed(stat.getChangeSpeed());
                     ModMenu.getInstance().setForceAR(stat.getForceAR());
                     ModMenu.getInstance().setEnableForceAR(stat.isEnableForceAR());
+                    ModMenu.getInstance().setFLfollowDelay(stat.getFLFollowDelay());
 //					Replay.mod = stat.getMod();
                     game.startGame(trackToReplay, replay);
                     scene = null;
@@ -419,13 +424,20 @@ public class ScoringScene {
         String playerStr = "Played by " + stat.getPlayerName() + " on " +
                 new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date(stat.getTime()));
         playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
-        if (stat.getChangeSpeed() != 1 || stat.isEnableForceAR()){
+        if (stat.getChangeSpeed() != 1 ||
+            stat.isEnableForceAR() ||
+            stat.getFLFollowDelay() != FlashLightEntity.defaultMoveDelayS &&
+            stat.getMod().contains(GameMod.MOD_FLASHLIGHT)) {
+
             mapperStr += " [";
             if (stat.getChangeSpeed() != 1){
                 mapperStr += String.format(Locale.ENGLISH, "%.2fx,", stat.getChangeSpeed());
             }
             if (stat.isEnableForceAR()){
                 mapperStr += String.format(Locale.ENGLISH, "AR%.1f,", stat.getForceAR());
+            }
+            if (stat.getFLFollowDelay() != FlashLightEntity.defaultMoveDelayS && stat.getMod().contains(GameMod.MOD_FLASHLIGHT)){
+                mapperStr += String.format(Locale.ENGLISH, "FLD%.2f,", stat.getFLFollowDelay());
             }
             if (mapperStr.endsWith(",")){
                 mapperStr = mapperStr.substring(0, mapperStr.length() - 1);
@@ -459,11 +471,11 @@ public class ScoringScene {
             double max_aimpp = diffRecalculator.getAimPP();
             double max_spdpp = diffRecalculator.getSpdPP();
             double max_accpp = diffRecalculator.getAccPP();
-            ppinfo.append(String.format(Locale.ENGLISH, "%.2f*,", newstar));
-            ppinfo.append(String.format(Locale.ENGLISH, "PP:%.2f/%.2f(", pp, max_pp));
-            ppinfo.append(String.format(Locale.ENGLISH, "Aim:%.0f/%.0f,", aimpp, max_aimpp));
-            ppinfo.append(String.format(Locale.ENGLISH, "Spd:%.0f/%.0f,", spdpp, max_spdpp));
-            ppinfo.append(String.format(Locale.ENGLISH, "Acc:%.0f/%.0f)", accpp, max_accpp));
+            ppinfo.append(String.format(Locale.ENGLISH, "%.2f*, ", newstar));
+            ppinfo.append(String.format(Locale.ENGLISH, "%.2f/%.2fpp (", pp, max_pp));
+            ppinfo.append(String.format(Locale.ENGLISH, "Aim: %.0f/%.0f, ", aimpp, max_aimpp));
+            ppinfo.append(String.format(Locale.ENGLISH, "Speed: %.0f/%.0f, ", spdpp, max_spdpp));
+            ppinfo.append(String.format(Locale.ENGLISH, "Accuracy: %.0f/%.0f)", accpp, max_accpp));
             ppinfo.append("]");
             String ppStr = ppinfo.toString();
             final Text ppInfo = new Text(Utils.toRes(4), Config.getRES_HEIGHT() - playerInfo.getHeight() - Utils.toRes(2),
@@ -482,29 +494,21 @@ public class ScoringScene {
         if (track != null && mapMD5 != null) {
             if (stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
                     OnlineManager.getInstance().isReadyToSend()) {
-                if (stat.getMod().contains(GameMod.MOD_SUDDENDEATH)
-                || stat.getMod().contains(GameMod.MOD_PERFECT)
-                || stat.getMod().contains(GameMod.MOD_SMALLCIRCLE)
-                || stat.getMod().contains(GameMod.MOD_REALLYEASY)
-                || stat.getMod().contains(GameMod.MOD_FLASHLIGHT)
-                || stat.getMod().contains(GameMod.MOD_SCOREV2)
-                || Config.isRemoveSliderLock()
-                || ModMenu.getInstance().isChangeSpeed()
-                || ModMenu.getInstance().isEnableForceAR()){
-                    ToastLogger.showText(StringTable.get(R.string.mods_somemods_is_unrank_now), true);
+                boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator())
+                    .applyFilter(m -> m.unranked).hasNext();
+                if (hasUnrankedMod
+                    || Config.isRemoveSliderLock()
+                    || ModMenu.getInstance().isChangeSpeed()
+                    || ModMenu.getInstance().isEnableForceAR()) {
+                    return;
                 }
-                else if(
-                        !SmartIterator.wrap(stat.getMod().iterator())
-                                .applyFilter(m->m.typeAuto)
-                                .hasNext()
-                ){
-                    SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
-                            OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy());
-                    sendingPanel.setPosition(Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));
-                    scene.registerTouchArea(sendingPanel.getDismissTouchArea());
-                    scene.attachChild(sendingPanel);
-                    ScoreLibrary.getInstance().sendScoreOnline(stat, replay, sendingPanel);
-                }
+
+                SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
+                        OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy());
+                sendingPanel.setPosition(Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));
+                scene.registerTouchArea(sendingPanel.getDismissTouchArea());
+                scene.attachChild(sendingPanel);
+                ScoreLibrary.getInstance().sendScoreOnline(stat, replay, sendingPanel);
             }
 
             ResourceManager.getInstance().getSound("applause").play();

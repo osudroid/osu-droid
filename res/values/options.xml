@@ -12,7 +12,7 @@
         <item>4</item>
         <item>0</item>
     </string-array>
-    <string-array name="bg_brightness_names">
+    <!-- <string-array name="bg_brightness_names">
         <item>100%</item>
         <item>75%</item>
         <item>50%</item>
@@ -25,7 +25,7 @@
         <item>50</item>
         <item>25</item>
         <item>0</item>
-    </string-array>
+    </string-array> -->
     <string-array name="error_meter_display_names">
         <item>Always</item>
         <item>Replay Only</item>
@@ -54,6 +54,9 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+    <string-array name="placeholder_array">
+        <item>placeholder</item>
+    </string-array>
     <string-array name="set_playfield_names">
         <item>100%</item>
         <item>95%</item>
@@ -68,6 +71,8 @@
         <item>85</item>
         <item>80</item>
     </string-array>
+    <string name="opt_main">Settings</string>
+
     <string name="opt_onlineOpt">Account Option</string>
 
     <string name="opt_onlineOpt_normal">Online Option</string>
@@ -88,16 +93,16 @@
     <string name="opt_skin_summary">Load beatmap-specific skin if available</string>
 
     <string name="opt_sound_title">Beatmap sounds</string>
-    <string name="opt_sound_summary">Load beatmap-specific sound if available</string>
+    <string name="opt_sound_summary">Load beatmap-specific sounds if available</string>
 
     <string name="opt_largeimages_title">Countdown</string>
     <string name="opt_largeimages_summary">Show countdown at the beginning of a map that has it enabled</string>
 
-    <string name="opt_sound_volume_title">Hit sound volume</string>
-    <string name="opt_sound_volume_summary">Volume of hit sounds (0-100), need to restart to take effect</string>
+    <string name="opt_sound_volume_title">Sound volume</string>
+    <string name="opt_sound_volume_summary">Volume of sound effects or hit sounds</string>
 
     <string name="opt_bgm_volume_title">BGM volume</string>
-    <string name="opt_bgm_volume_summary">Volume of the background music (0-100)</string>
+    <string name="opt_bgm_volume_summary">Volume of the background music</string>
 
     <string name="opt_offset_title">Global offset</string>
     <string name="opt_offset_summary">Music offset in ms (positive values mean earlier)</string>
@@ -112,19 +117,19 @@
     <string name="opt_directory_title">Beatmap location</string>
     <string name="opt_directory_summary">Path to directory containing beatmaps (default: /mnt/sdcard/osu!droid/Songs)</string>
 
-    <string name="opt_clear_title">Library cache</string>
-    <string name="opt_clear_summary">Forced clear of library cache</string>
+    <string name="opt_clear_title">Clear beatmap cache</string>
+    <string name="opt_clear_summary">Clear all cached beatmaps</string>
 
-    <string name="opt_doublesound_title">Double hit sounds</string>
-    <string name="opt_doublesound_summary">Make hit sounds closer to original osu!</string>
+    <!-- <string name="opt_doublesound_title">Double hit sounds</string>
+    <string name="opt_doublesound_summary">Make hit sounds closer to original osu!</string> -->
 
     <string name="opt_sound">Sound</string>
 
     <string name="opt_fps_title">FPS</string>
     <string name="opt_fps_summary">Display (frames per second) during gameplay</string>
 
-    <string name="opt_skipoffset_title">Skip offset</string>
-    <string name="opt_skipoffset_summary">This offset will be added when you press the &quot;Skip&quot; button. Enter -1 for auto offset</string>
+    <!-- <string name="opt_skipoffset_title">Skip offset</string>
+    <string name="opt_skipoffset_summary">This offset will be added when you press the &quot;Skip&quot; button. Enter -1 for auto offset</string> -->
 
     <string name="opt_lowtextures_title">Texture quality</string>
     <string name="opt_lowtextures_summary">Reduce overall quality of game textures. If disabled, osu!droid will use HD-quality textures.</string>
@@ -135,8 +140,8 @@
     <string name="opt_metronome_switch_title">Metronome switch</string>
     <string name="opt_metronome_switch_summary">Enable metronome sound effect (only Nightcore mod)</string>
 
-    <string name="opt_vbroffset_title">VBR offset</string>
-    <string name="opt_vbroffset_summary">Offset for mp3\'s encoded with variable bitrate (built-in player only)</string>
+    <!-- <string name="opt_vbroffset_title">VBR offset</string>
+    <string name="opt_vbroffset_summary">Offset for mp3\'s encoded with variable bitrate (built-in player only)</string> -->
 
     <string name="opt_sliderborders_title">Slider borders</string>
     <string name="opt_sliderborders_summary">Draw borders along slider tracks. Disable for better performance</string>
@@ -149,14 +154,14 @@
     <string name="opt_multitouch_title">Multi-touch</string>
     <string name="opt_multitouch_summary">Enable multi-touch input if it\'s available</string>
 
-    <string name="opt_offsetscreen_title">Configure offsets</string>
+    <!-- <string name="opt_offsetscreen_title">Configure offsets</string>
     <string name="opt_offsetscreen_summary"/>
 
     <string name="opt_oggoffset_title">OGG offset</string>
     <string name="opt_oggoffset_summary">Additional offset for songs in .ogg format</string>
 
     <string name="opt_pauseoffset_title">Pause offset</string>
-    <string name="opt_pauseoffset_summary">Offset added every time you resume paused game</string>
+    <string name="opt_pauseoffset_summary">Offset added every time you resume paused game</string> -->
 
     <string name="opt_musicpreview_title">Preview music</string>
     <string name="opt_musicpreview_summary">Play music when you select a beatmap</string>
@@ -171,7 +176,7 @@
     <string name="opt_demoSpline_title">Demo Spline</string>
     <string name="opt_demoSpline_summary">Use another spline algorithm for sliders. (experimental, may cause some unexpected problems.)</string>
 
-    <string name="opt_clearprops_title">Map-specific data</string>
+    <string name="opt_clearprops_title">Clear map-specific data</string>
     <string name="opt_clearprops_summary">Forced clear of all map-specific data (eg. per-map offsets)</string>
 
     <string name="opt_online">Online</string>
@@ -188,7 +193,7 @@
     <string name="opt_password_summary">Password of your account</string>
 
     <string name="opt_register_title">Register</string>
-    <string name="opt_register_summary">Register a new account (You are allowed to create only one account per device)</string>
+    <string name="opt_register_summary">Register a new account</string>
 
     <string name="opt_loadavatar_title">Load Avatar</string>
     <string name="opt_loadavatar_summary">Load without WiFi connection.</string>
@@ -271,7 +276,7 @@
     <string name="force_romanized_summary">Force using only roman character for metadata, in case titles in japanese or chinese are unreadable</string>
 
     <string name="opt_cursor_size">Cursor Size</string>
-    <string name="opt_cursor_size_summary">Adjust cursor size (25 - 300, default 100)</string>
+    <string name="opt_cursor_size_summary">Adjust cursor size</string>
 
     <string name="opt_show_first_approach_circle_title">Force show first approach circle</string>
     <string name="opt_show_first_approach_circle_summary">Do not hide the first approach circle in hidden mods</string>
@@ -291,12 +296,13 @@
     <string name="opt_enableStoryboard_summary">Your phone will be very hot!</string>
     <string name="opt_enableStoryboard_title">Enable Storyboard</string>
 
-    <string name="opt_scandownload_summary">Scan /Download directory for new beatmaps and skins</string>
+    <string name="opt_scandownload_summary">Scan /Download directory for new beatmaps and skins (might not work with SD card)</string>
     <string name="opt_scandownload_title">Scan Download</string>
 
     <string name="opt_superSlider_title">Super Slider</string>
     <string name="opt_superSlider_summary">Perfect shape slider!</string>
 	
+    <string name="opt_flashlight_follow_delay_title">FL Follow delay</string>
     <string name="opt_changespeed_title">Speed Modify</string>
     <string name="opt_forcear_title">Force AR</string>
     <string name="opt_enablenc_whenspeedchange_title">Enable pitch shift in speed modify</string>
@@ -309,12 +315,24 @@
     <string name="opt_display_score_pp_title">Display PP in score</string>
     <string name="opt_display_score_pp_summary">Displays PP value in score result screen</string>
 
-    <string name="opt_hide_replay_marquee_title">Hide replay marquee</string>
-    <string name="opt_hide_replay_marquee_summary">Hide the scrolling text when watching replays</string>
-
     <string name="opt_setplayfield_title">Set playfield size</string>
     <string name="opt_setplayfield_summary">Change the size of the playfield</string>
 
     <string name="opt_shrink_playfield_downwards_title">Shrink playfield downwards</string>
     <string name="opt_shrink_playfield_downwards_summary">Shrink playfield downwards</string>
+
+    <string name="opt_hide_replay_marquee_title">Hide replay marquee</string>
+    <string name="opt_hide_replay_marquee_summary">Hide the scrolling text when watching replays</string>
+
+    <string name="opt_hide_ingame_ui_title">Hide ingame ui</string>
+    <string name="opt_hide_ingame_ui_summary">Hide the counters and other UIs when ingame</string>
+
+    <string name="opt_receive_announcements_title">Receive announcements</string>
+    <string name="opt_receive_announcements_summary">Receive notifications of announcements, events, etc.</string>
+
+    <string name="opt_triangles_animation_title">UI Triangle Animation</string>
+    <string name="opt_triangles_animation_summary">Disable this if you are having frame rate problems while a UI with the triangles animation is visible</string>
+
+    <string name="opt_safe_beatmap_bg_title">Safe beatmap background</string>
+    <string name="opt_safe_beatmap_bg_summary">Change all of the beatmaps\' background to the menu-background image from your skin</string>
 </resources>

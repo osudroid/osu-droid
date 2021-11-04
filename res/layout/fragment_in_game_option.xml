@@ -307,7 +307,52 @@
                                 android:layout_height="wrap_content"
                                 android:text="AR9.0" />
                         </TableRow>
-                    </TableLayout>
+                    
+                    <TextView
+							android:id="@+id/customize_mods"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="10dp"
+							android:layout_weight="3"
+							android:gravity="center"
+							android:textAlignment="center"
+							android:text="@string/mod_customization"
+							android:textColor="#62c700" />
+
+						<TableRow
+							android:layout_width="match_parent"
+							android:layout_height="match_parent"
+							android:layout_weight="1">
+
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:textAlignment="textEnd"
+								android:gravity="end"
+								android:layout_marginEnd="7dp"
+								android:layout_marginRight="7dp"
+								android:text="@string/opt_flashlight_follow_delay_title" />
+
+							<CheckBox
+								android:visibility="invisible"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content" />
+
+							<SeekBar
+								android:id="@+id/flashlightFollowDelayBar"
+								android:layout_width="350dp"
+								android:layout_height="wrap_content"
+								android:layout_gravity="center_vertical"
+								android:min="1"
+								android:max="10"/>
+							<TextView
+								android:id="@+id/flashlightFollowDelayText"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="120.0ms"/>
+						</TableRow>
+
+					</TableLayout>
 
 					<View
 						android:layout_width="match_parent"

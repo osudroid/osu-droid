@@ -9,6 +9,7 @@ import java.util.Random;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
+import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 
@@ -45,6 +46,7 @@ public class StatisticV2 implements Serializable {
     private int maxObjectsCount = 0;
     private int maxHighestCombo = 0;
     private int bonusScore = 0;
+    private float flFollowDelay = FlashLightEntity.defaultMoveDelayS;
 
     public StatisticV2() {
         random = new Random();
@@ -138,7 +140,7 @@ public class StatisticV2 implements Serializable {
     public int getAutoTotalScore() {
         float mult = 1;
         for (GameMod m : mod) {
-            if (m.typeAuto) {
+            if (m.unranked) {
                 continue;
             }
             mult *= m.scoreMultiplier;
@@ -642,6 +644,14 @@ public class StatisticV2 implements Serializable {
         return enableForceAR;
     }
 
+    public void setFLFollowDelay(float delay) {
+        flFollowDelay = delay;
+    }
+
+    public float getFLFollowDelay() {
+        return flFollowDelay;
+    }
+
     public void setEnableForceAR(boolean t){
         enableForceAR = t;
     }
@@ -687,9 +697,13 @@ public class StatisticV2 implements Serializable {
         if (enableForceAR){
             builder.append(String.format(Locale.ENGLISH, "AR%.1f|", forceAR));
         }
+        if (flFollowDelay != FlashLightEntity.defaultMoveDelayS) {
+            builder.append(String.format(Locale.ENGLISH, "FLD%.2f|", flFollowDelay));
+        }
         if (builder.length() > 0){
             builder.delete(builder.length() - 1, builder.length());
         }
+
         return builder.toString();
     }
 
@@ -702,7 +716,9 @@ public class StatisticV2 implements Serializable {
             if (str.startsWith("AR")){
                 enableForceAR = true;
                 forceAR = Float.parseFloat(str.substring(2));
-                continue;
+            }
+            if (str.startsWith("FLD")) {
+                flFollowDelay = Float.parseFloat(str.substring(3));
             }
         }
     }

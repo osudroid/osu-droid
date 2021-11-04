@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:edl="http://ui.edlplan.com/customview"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/frgDialogStyleBackground"
+    android:id="@+id/frg_background">
+
+    <RelativeLayout
+        android:id="@+id/frg_body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="100dp"
+        android:layout_marginRight="40dp"
+        android:clickable="true"
+        android:orientation="vertical">
+
+        <com.edlplan.ui.TriangleEffectView
+            android:layout_width="200dp"
+            android:layout_height="120dp"
+            edl:edgeClampRate="1.0"
+            android:layout_centerInParent="true" />
+
+        <View
+            android:id="@+id/card"
+            android:layout_width="140dp"
+            android:layout_height="110dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/rounded_rect_small"
+            android:layout_centerInParent="true"/>
+
+        <RelativeLayout
+            android:alpha="0.7"
+            android:layout_alignTop="@id/card"
+            android:layout_centerHorizontal="true"
+            android:layout_width="140dp"
+            android:layout_height="wrap_content">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:background="@color/triangleBackground" />
+
+            <com.edlplan.ui.TriangleEffectView
+                edl:freeze="true"
+                android:layout_width="match_parent"
+                android:layout_height="5dp" />
+        </RelativeLayout>
+
+        <com.edlplan.ui.TriangleEffectView
+            android:layout_width="200dp"
+            android:layout_height="120dp"
+            edl:freeze="true"
+            edl:edgeClampRate="1.0"
+            android:layout_centerInParent="true" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="3dp">
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_rect_alpha"
+                android:layout_marginLeft="50dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="50dp"
+                android:layout_marginBottom="10dp"
+                android:padding="10dp"/>
+
+        </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>

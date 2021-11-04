@@ -26,6 +26,7 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import java.io.File;
 import java.util.HashMap;
 
+import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
 public class StoryboardSprite extends SupportSprite {
 
@@ -186,7 +187,7 @@ public class StoryboardSprite extends SupportSprite {
     private File findOsb(String osuFile) {
         File dir = new File(osuFile);
         dir = dir.getParentFile();
-        File[] fs = dir.listFiles(f -> f.getName().endsWith(".osb"));
+        File[] fs = FileUtils.listFiles(dir, ".osb");
         if (fs.length > 0) {
             return fs[0];
         } else {

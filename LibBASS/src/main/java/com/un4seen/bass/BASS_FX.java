@@ -1,14 +1,14 @@
 /*===========================================================================
- BASS_FX 2.4 - Copyright (c) 2002-2014 (: JOBnik! :) [Arthur Aminov, ISRAEL]
+ BASS_FX 2.4 - Copyright (c) 2002-2018 (: JOBnik! :) [Arthur Aminov, ISRAEL]
                                                      [http://www.jobnik.org]
 
       bugs/suggestions/questions:
         forum  : http://www.un4seen.com/forum/?board=1
-                 http://www.jobnik.org/smforum
+                 http://www.jobnik.org/forums
         e-mail : bass_fx@jobnik.org
      --------------------------------------------------
 
- NOTE: This header will work only with BASS_FX version 2.4.11.1
+ NOTE: This header will work only with BASS_FX version 2.4.12
        Check www.un4seen.com or www.jobnik.org for any later versions.
 
  * Requires BASS 2.4 (available at http://www.un4seen.com)
@@ -337,7 +337,7 @@ public class BASS_FX
 	// tempo attributes options
 	public static final int BASS_ATTRIB_TEMPO_OPTION_USE_AA_FILTER = 0x10010;		// TRUE (default) / FALSE (default for multi-channel on mobile devices for lower CPU usage)
 	public static final int BASS_ATTRIB_TEMPO_OPTION_AA_FILTER_LENGTH = 0x10011;	// 32 default (8 .. 128 taps)
-	public static final int BASS_ATTRIB_TEMPO_OPTION_USE_QUICKALGO = 0x10012;		// TRUE (default on mobile devices for loswer CPU usage) / FALSE (default)
+	public static final int BASS_ATTRIB_TEMPO_OPTION_USE_QUICKALGO = 0x10012;		// TRUE (default on mobile devices for lower CPU usage) / FALSE (default)
 	public static final int BASS_ATTRIB_TEMPO_OPTION_SEQUENCE_MS = 0x10013;			// 82 default, 0 = automatic
 	public static final int BASS_ATTRIB_TEMPO_OPTION_SEEKWINDOW_MS = 0x10014;		// 28 default, 0 = automatic
 	public static final int BASS_ATTRIB_TEMPO_OPTION_OVERLAP_MS = 0x10015;			// 8  default

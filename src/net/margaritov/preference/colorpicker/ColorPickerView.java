@@ -135,6 +135,10 @@ public class ColorPickerView extends View {
 
     private Point mStartTouchPoint = null;
 
+    public interface OnColorChangedListener {
+        public void onColorChanged(int color);
+    }
+
     public ColorPickerView(Context context) {
         this(context, null);
     }
@@ -212,6 +216,7 @@ public class ColorPickerView extends View {
 
         return hue;
     }
+
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -340,6 +345,7 @@ public class ColorPickerView extends View {
 
     }
 
+
     private Point hueToPoint(float hue) {
 
         final RectF rect = mHueRect;
@@ -445,6 +451,7 @@ public class ColorPickerView extends View {
         return 0xff - (x * 0xff / width);
 
     }
+
 
     @Override
     public boolean onTrackballEvent(MotionEvent event) {
@@ -708,6 +715,7 @@ public class ColorPickerView extends View {
         return height;
     }
 
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
@@ -774,6 +782,7 @@ public class ColorPickerView extends View {
 
     }
 
+
     /**
      * Set a OnColorChangedListener to get notified when the color
      * selected by the user has changed.
@@ -785,13 +794,6 @@ public class ColorPickerView extends View {
     }
 
     /**
-     * Get the color of the border surrounding all panels.
-     */
-    public int getBorderColor() {
-        return mBorderColor;
-    }
-
-    /**
      * Set the color of the border surrounding all panels.
      *
      * @param color
@@ -799,6 +801,13 @@ public class ColorPickerView extends View {
     public void setBorderColor(int color) {
         mBorderColor = color;
         invalidate();
+    }
+
+    /**
+     * Get the color of the border surrounding all panels.
+     */
+    public int getBorderColor() {
+        return mBorderColor;
     }
 
     /**
@@ -859,10 +868,6 @@ public class ColorPickerView extends View {
         return mDrawingOffset;
     }
 
-    public boolean getAlphaSliderVisible() {
-        return mShowAlphaPanel;
-    }
-
     /**
      * Set if the user is allowed to adjust the alpha panel. Default is false.
      * If it is set to false no alpha will be set.
@@ -874,11 +879,11 @@ public class ColorPickerView extends View {
         if (mShowAlphaPanel != visible) {
             mShowAlphaPanel = visible;
 
-            /*
+			/*
              * Reset all shader to force a recreation.
-             * Otherwise they will not look right after
-             * the size of the view has changed.
-             */
+			 * Otherwise they will not look right after
+			 * the size of the view has changed.
+			 */
             mValShader = null;
             mSatShader = null;
             mHueShader = null;
@@ -889,8 +894,8 @@ public class ColorPickerView extends View {
 
     }
 
-    public int getSliderTrackerColor() {
-        return mSliderTrackerColor;
+    public boolean getAlphaSliderVisible() {
+        return mShowAlphaPanel;
     }
 
     public void setSliderTrackerColor(int color) {
@@ -899,6 +904,10 @@ public class ColorPickerView extends View {
         mHueTrackerPaint.setColor(mSliderTrackerColor);
 
         invalidate();
+    }
+
+    public int getSliderTrackerColor() {
+        return mSliderTrackerColor;
     }
 
     /**
@@ -913,17 +922,6 @@ public class ColorPickerView extends View {
     }
 
     /**
-     * Get the current value of the text
-     * that will be shown in the alpha
-     * slider.
-     *
-     * @return
-     */
-    public String getAlphaSliderText() {
-        return mAlphaSliderText;
-    }
-
-    /**
      * Set the text that should be shown in the
      * alpha slider. Set to null to disable text.
      *
@@ -934,7 +932,14 @@ public class ColorPickerView extends View {
         invalidate();
     }
 
-    public interface OnColorChangedListener {
-        public void onColorChanged(int color);
+    /**
+     * Get the current value of the text
+     * that will be shown in the alpha
+     * slider.
+     *
+     * @return
+     */
+    public String getAlphaSliderText() {
+        return mAlphaSliderText;
     }
 }
