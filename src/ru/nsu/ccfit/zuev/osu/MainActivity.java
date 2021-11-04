@@ -528,6 +528,8 @@ public class MainActivity extends BaseGameActivity implements
                 }
             }
         }
+    }
+
     public Handler getHandler() {
         return handler;
     }
