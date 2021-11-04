@@ -6,12 +6,10 @@ import android.os.Environment;
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+
+import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -31,10 +29,9 @@ public class OSZParser {
     public static boolean parseOSZ(final Activity activity,
                                    final String filename) {
         final File osz = new File(filename);
-        ZipInputStream istream;
 
         // Checking if we can use SD card for storage
-        if (canUseSD() == false) {
+        if (!canUseSD()) {
             return false;
         }
 
@@ -42,56 +39,17 @@ public class OSZParser {
         // Getting file name without extention ^_^
         String folderName = osz.getName();
         folderName = folderName.substring(0, folderName.length() - 4);
-        ArrayList<File> list = new ArrayList<>();
         final File folderFile = new File(Config.getBeatmapPath() + folderName);
-        if (folderFile.mkdirs()) {
-            list.add(folderFile);
+        if(!folderFile.exists()) {
+            folderFile.mkdirs();
         }
 
-
         try {
-            // Trying read file as zip-archive
-            istream = new ZipInputStream(new FileInputStream(osz));
-            // For each entry in archive
-            for (ZipEntry entry = istream.getNextEntry(); entry != null; entry = istream
-                    .getNextEntry()) {
-                //if (entry.getName().matches(".*[.]avi")
-                //		|| entry.getName().matches(".*[.]flv")) {
-                //	continue;
-                //}
-                // Opening a file according to entry information
-                final File entryFile = new File(folderFile, entry.getName());
-                if (entryFile.getParent() != null) {
-                    final File entryFolder = new File(entryFile.getParent());
-                    if (entryFolder.exists() == false) {
-                        if (entryFolder.mkdirs()) {
-                            list.add(entryFile);
-                        }
-                    }
-                }
-                if (entryFile.createNewFile()) {
-                    list.add(entryFile);
-                }
-                final FileOutputStream entryStream = new FileOutputStream(
-                        entryFile);
-
-                // Writing data from zip stream to output stream
-                final byte[] buff = new byte[4096];
-                int len = 0;
-                while ((len = istream.read(buff)) > 0) {
-                    entryStream.write(buff, 0, len);
-                }
-                // Closing output stream
-                entryStream.close();
-            }
-            // Closing .osz file stream
-            istream.close();
-
+            new ZipFile(osz).extractAll(folderFile.getAbsolutePath());
             // Adding to library
             LibraryManager.getInstance().addBeatmap(
                     new File(Config.getBeatmapPath() + folderName), null);
-
-        } catch (final FileNotFoundException e) {
+        } catch (final ZipException e) {
             Debug.e("OSZParser.ParseOSZ: " + e.getMessage(), e);
             return false;
         } catch (final Exception e) {
@@ -100,9 +58,7 @@ public class OSZParser {
                     false);
             Debug.e("OSZParser.ParseOSZ: ", e);
             osz.renameTo(new File(osz.getParentFile(), osz.getName() + ".badosz"));
-            for (int i = list.size() - 1; i >= 0; i--) {
-                list.get(i).delete();
-            }
+            LibraryManager.getInstance().deleteDir(folderFile);
             return false;
         }
 

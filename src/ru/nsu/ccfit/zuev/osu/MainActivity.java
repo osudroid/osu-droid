@@ -308,6 +308,7 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().init();
                 analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
                 GlobalManager.getInstance().setLoadingProgress(50);
+                checkNewSkins();
                 checkNewBeatmaps();
                 if (!LibraryManager.getInstance().loadLibraryCache(MainActivity.this, true)) {
                     LibraryManager.getInstance().scanLibrary(MainActivity.this);
@@ -394,10 +395,9 @@ public class MainActivity extends BaseGameActivity implements
         }
     }
 
-    public static boolean isBeatmapValid(File file) {
-        ZipFile zipfile = null;
+    public static boolean isZipValid(File file) {
         try {
-            zipfile = new ZipFile(file);
+            ZipFile zipfile = new ZipFile(file);
             zipfile.close();
             return true;
         } catch (IOException e) {
@@ -430,7 +430,8 @@ public class MainActivity extends BaseGameActivity implements
             File[] filelist = FileUtils.listFiles(mainDir, ".osz");
             final ArrayList<String> beatmaps = new ArrayList<String>();
             for (final File file : filelist) {
-                if (isBeatmapValid(file)) {
+                if (isZipValid(file)
+                        && file.getName().endsWith(".osz")) {
                     beatmaps.add(file.getPath());
                 }
             }
@@ -440,7 +441,8 @@ public class MainActivity extends BaseGameActivity implements
                     && beatmapDir.isDirectory()) {
                 filelist = FileUtils.listFiles(beatmapDir, ".osz");
                 for (final File file : filelist) {
-                    if (isBeatmapValid(file)) {
+                    if (isZipValid(file)
+                            && file.getName().endsWith(".osz")) {
                         beatmaps.add(file.getPath());
                     }
                 }
@@ -452,7 +454,8 @@ public class MainActivity extends BaseGameActivity implements
                     && downloadDir.isDirectory()) {
                 filelist = FileUtils.listFiles(downloadDir, ".osz");
                 for (final File file : filelist) {
-                    if (isBeatmapValid(file)) {
+                    if (isZipValid(file)
+                            && file.getName().endsWith(".osz")) {
                         beatmaps.add(file.getPath());
                     }
                 }
@@ -477,6 +480,52 @@ public class MainActivity extends BaseGameActivity implements
 
                 // LibraryManager.getInstance().sort();
                 LibraryManager.getInstance().savetoCache(MainActivity.this);
+            }
+        }
+    }
+
+    public void checkNewSkins() {
+        GlobalManager.getInstance().setInfo("Checking new skins...");
+
+        final ArrayList<String> skins = new ArrayList<>();
+
+        // Scanning skin directory
+        final File skinDir = new File(Config.getSkinTopPath());
+
+        if (skinDir.exists() && skinDir.isDirectory()) {
+            final File[] files = skinDir.listFiles(file -> isZipValid(file) && file.getName().endsWith(".osk"));
+
+            for (final File file : files) {
+                skins.add(file.getPath());
+            }
+        }
+
+        // Scanning download directory
+        final File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+
+        if (Config.isSCAN_DOWNLOAD()
+                && downloadDir.exists()
+                && downloadDir.isDirectory()) {
+            final File[] files = downloadDir.listFiles(file -> isZipValid(file) && file.getName().endsWith(".osk"));
+
+            for (final File file : files) {
+                skins.add(file.getPath());
+            }
+        }
+
+        if (skins.size() > 0) {
+            ToastLogger.showText(StringTable.format(
+                    R.string.message_skin_importing_several,
+                    skins.size()), false);
+
+            for (final String skin : skins) {
+                if (SkinImporter.importSkin(skin)) {
+                    String folderName = skin.substring(0, skin.length() - 4);
+                    // We have imported the skin!
+                    ToastLogger.showText(
+                            StringTable.format(R.string.message_lib_imported, folderName),
+                            true);
+                }
             }
         }
     }
