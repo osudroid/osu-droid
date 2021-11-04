@@ -128,7 +128,7 @@ Changelog for 1.6.8
 - [+] Added a new updater based on the game's GitHub repository releases
 - [+] Added a separate loading screen for any game-related operations that takes some time to process
 - [+] Added the option to disable triangles animation
-  - Users with issues while triangles animation is active are encouraged to enable this option.
+  - Users with issues while triangles animation is active are encouraged to try this option.
 - [+] Added the option to replace all beatmaps' backgrounds with the current skin's `menu-background` image
   - Only affects in-game display. The actual beatmap background file will not be replaced.
 - [+] Added the option to hide in-game UI
