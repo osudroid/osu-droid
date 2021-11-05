@@ -43,7 +43,9 @@ public class CursorSprite extends Sprite implements ISliderListener {
     }
 
     private void rotateCursor() {
-        registerEntityModifier(currentRotation = new RotationByModifier(1, 360));
+        if (currentRotation == null || currentRotation.isFinished()) {
+            registerEntityModifier(currentRotation = new RotationByModifier(1, 360));
+        }
     }
 
     public void update(float pSecondsElapsed, boolean isShowing) {
@@ -53,7 +55,7 @@ public class CursorSprite extends Sprite implements ISliderListener {
             setScale(Math.max(baseSize, this.getScaleX() - (baseSize * 0.75f) * pSecondsElapsed));
         }
 
-        if (currentRotation == null || OsuSkin.get().isRotateCursor() && currentRotation.isFinished()) {
+        if (OsuSkin.get().isRotateCursor()) {
             rotateCursor();
         }
     }
