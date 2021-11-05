@@ -9,8 +9,8 @@ import ru.nsu.ccfit.zuev.osu.datatypes.DefaultData;
 import ru.nsu.ccfit.zuev.osu.datatypes.IDefaultableData;
 
 public abstract class SkinData<I> implements IDefaultableData<I> {
-    protected DefaultData<I> data;
-    public String tag;
+    private final DefaultData<I> data;
+    private final String tag;
 
     public SkinData(String tag, @NonNull DefaultData<I> data) {
         this.tag = tag;
