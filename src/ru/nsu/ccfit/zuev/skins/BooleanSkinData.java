@@ -7,8 +7,8 @@ import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.datatypes.DefaultBoolean;
 
 public class BooleanSkinData extends SkinData<Boolean> {
-    public BooleanSkinData(String tag, boolean boolean_) {
-        super(tag, new DefaultBoolean(boolean_));
+    public BooleanSkinData(String tag, boolean defaultValue) {
+        super(tag, new DefaultBoolean(defaultValue));
     }
 
     public BooleanSkinData(String tag) {

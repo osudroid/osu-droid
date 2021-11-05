@@ -8,8 +8,8 @@ import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.datatypes.DefaultRGBColor;
 
 public class ColorSkinData extends SkinData<RGBColor> {
-    public ColorSkinData(String tag, RGBColor color) {
-        super(tag, new DefaultRGBColor(color));
+    public ColorSkinData(String tag, RGBColor defaultValue) {
+        super(tag, new DefaultRGBColor(defaultValue));
     }
 
     @Override
