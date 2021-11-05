@@ -14,8 +14,7 @@ public class ColorSkinData extends SkinData<RGBColor> {
 
     @Override
     public void setFromJson(@NonNull JSONObject data) {
-        String defaultHex = "";
-        String hex = data.optString(getTag(), defaultHex);
-        setCurrentValue(hex.equals(defaultHex)? getDefaultValue() : RGBColor.hex2Rgb(hex));
+        String hex = data.optString(getTag());
+        setCurrentValue(hex.isEmpty() ? getDefaultValue() : RGBColor.hex2Rgb(hex));
     }
 }
