@@ -10,7 +10,7 @@ import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 
 public class SkinJsonReader extends SkinReader {
-    private final static SkinJsonReader reader;
+    private static final SkinJsonReader reader = new SkinJsonReader();
 
     private JSONObject currentData;
     private JSONObject currentComboColorData;
@@ -19,10 +19,6 @@ public class SkinJsonReader extends SkinReader {
     private JSONObject currentLayoutData;
     private JSONObject currentColorData;
     private JSONObject currentCursorData;
-
-    static {
-        reader = new SkinJsonReader();
-    }
 
     private SkinJsonReader() {
 
