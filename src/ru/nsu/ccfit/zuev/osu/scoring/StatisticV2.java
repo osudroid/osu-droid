@@ -47,6 +47,11 @@ public class StatisticV2 implements Serializable {
     private int maxHighestCombo = 0;
     private int bonusScore = 0;
     private float flFollowDelay = FlashLightEntity.defaultMoveDelayS;
+    private int positiveTotalOffsetSum;
+    private float positiveHitOffsetSum;
+    private int negativeTotalOffsetSum;
+    private float negativeHitOffsetSum;
+    private float unstableRate;
 
     public StatisticV2() {
         random = new Random();
@@ -654,6 +659,45 @@ public class StatisticV2 implements Serializable {
 
     public void setEnableForceAR(boolean t){
         enableForceAR = t;
+    }
+
+    public float getUnstableRate() {
+        return unstableRate;
+    }
+
+    public void addHitOffset(float accuracy) {
+        float msAccuracy = accuracy * 1000;
+
+        // Update hit offset
+        if (accuracy >= 0) {
+            positiveHitOffsetSum += msAccuracy;
+            positiveTotalOffsetSum++;
+        } else {
+            negativeHitOffsetSum += msAccuracy;
+            negativeTotalOffsetSum++;
+        }
+
+        // Update unstable rate
+        // Reference: https://math.stackexchange.com/questions/775391/can-i-calculate-the-new-standard-deviation-when-adding-a-value-without-knowing-t
+        int totalOffsetSum = positiveTotalOffsetSum + negativeTotalOffsetSum;
+        float hitOffsetSum = positiveHitOffsetSum + negativeHitOffsetSum;
+
+        if (totalOffsetSum > 1) {
+            float avgOffset = hitOffsetSum / totalOffsetSum;
+
+            unstableRate = 10 * (float) Math.sqrt(
+                ((totalOffsetSum - 1) * Math.pow(unstableRate / 10, 2) +
+                    (msAccuracy - avgOffset / totalOffsetSum) * (msAccuracy - (avgOffset - msAccuracy) / (totalOffsetSum - 1))) / totalOffsetSum
+            );
+        }
+    }
+    
+    public float getNegativeHitError() {
+        return negativeTotalOffsetSum == 0 ? 0 : negativeHitOffsetSum / negativeTotalOffsetSum;
+    }
+    
+    public float getPositiveHitError() {
+        return positiveTotalOffsetSum == 0 ? 0 : positiveHitOffsetSum / positiveTotalOffsetSum;
     }
     
     public float getSpeed(){

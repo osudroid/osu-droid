@@ -164,7 +164,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private String replayFile;
     private float avgOffset;
     private int offsetRegs;
-    private float unstableRate;
     private boolean kiai = false;
     private Rectangle kiaiRect = null;
     private Sprite bgSprite = null;
@@ -594,7 +593,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         // TODO replay
         avgOffset = 0;
         offsetRegs = 0;
-        unstableRate = 0;
 
         File trackFile = new File(track.getFilename());
         trackMD5 = FileUtils.getMD5Checksum(trackFile);
@@ -778,7 +776,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                                 + "ms");
                         elapsedInt = 0;
                     }
-                    urText.setText(String.format(Locale.ENGLISH, "Unstable rate: %.2f", unstableRate));
+                    urText.setText(String.format(Locale.ENGLISH, "Unstable rate: %.2f", stat.getUnstableRate()));
 
                     fpsText.setPosition(Config.getRES_WIDTH() - fpsText.getWidth() - 5, Config.getRES_HEIGHT() - fpsText.getHeight() - 10);
                     accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
@@ -2662,7 +2660,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         avgOffset += acc;
         offsetRegs++;
-        updateUnstableRate(acc);
+
+        stat.addHitOffset(acc);
+
+        if (replaying) {
+            scoringScene.getReplayStat().addHitOffset(acc);
+        }
     }
 
 
@@ -2695,19 +2698,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     public void updateAutoBasedPos(float pX, float pY) {
         if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
             autoCursor.setPosition(pX, pY, this);
-        }
-    }
-
-    private void updateUnstableRate(float newAcc) {
-        // Reference: https://math.stackexchange.com/questions/775391/can-i-calculate-the-new-standard-deviation-when-adding-a-value-without-knowing-t
-        if (offsetRegs > 1) {
-            float msAcc = newAcc * 1000;
-            float msAvgOffset = avgOffset * 1000;
-
-            unstableRate = 10 * (float) Math.sqrt(
-                ((offsetRegs - 1) * Math.pow(unstableRate / 10, 2) +
-                    (msAcc - msAvgOffset / offsetRegs) * (msAcc - (msAvgOffset - msAcc) / (offsetRegs - 1))) / offsetRegs
-            );
         }
     }
 
