@@ -313,7 +313,7 @@
 	<string name="opt_calculate_slider_path_in_game_start_summary">Increases performance in beatmaps where complex sliders are present, but increases beatmap load time</string>
 
     <string name="opt_display_score_statistics_title">Display score statistics</string>
-    <string name="opt_display_score_statistics_summary">Displays score statistics in result screen</string>
+    <string name="opt_display_score_statistics_summary">Displays score statistics (star rating, PP, and more) in result screen</string>
 
     <string name="opt_setplayfield_title">Set playfield size</string>
     <string name="opt_setplayfield_summary">Change the size of the playfield</string>
