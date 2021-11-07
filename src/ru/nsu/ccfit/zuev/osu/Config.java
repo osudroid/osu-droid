@@ -63,7 +63,7 @@ public class Config {
         fixFrameOffset,
         removeSliderLock,
         calculateSliderPathInGameStart,
-        displayScorePP,
+        displayScoreStatistics,
         hideReplayMarquee,
         hideInGameUI,
         receiveAnnouncements,
@@ -209,7 +209,7 @@ public class Config {
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
         calculateSliderPathInGameStart = prefs.getBoolean("calculateSliderPathInGameStart", false);
-        displayScorePP = prefs.getBoolean("displayScorePP", false);
+        displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", true);
         hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
@@ -287,8 +287,8 @@ public class Config {
         return calculateSliderPathInGameStart;
     }
 
-    public static boolean isDisplayScorePP() {
-        return displayScorePP;
+    public static boolean isDisplayScoreStatistics() {
+        return displayScoreStatistics;
     }
 
     public static boolean isEnableExtension() {
