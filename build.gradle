@@ -8,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.1'
+        classpath 'com.android.tools.build:gradle:7.0.2'
         classpath 'com.google.gms:google-services:4.3.10'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.7.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -160,6 +160,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.8'
     //implementation 'com.github.tbruyelle:rxpermissions:0.12'
     implementation 'pub.devrel:easypermissions:3.0.0'
+    implementation 'net.lingala.zip4j:zip4j:2.9.0'
 
     implementation 'com.github.EdrowsLuo:osudroidstrings:bd9507b289'
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlJavaExt:d91c53fcff'
