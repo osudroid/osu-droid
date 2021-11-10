@@ -123,10 +123,6 @@ public class OsuSkin {
         return comboColor;
     }
 
-    public boolean isForceOverrideSliderBorderColor() {
-        return sliderBorderColor.getCurrentValue() != sliderBorderColor.getDefaultValue();
-    }
-
     public RGBColor getSliderBorderColor() {
         return sliderBorderColor.getCurrentValue();
     }
