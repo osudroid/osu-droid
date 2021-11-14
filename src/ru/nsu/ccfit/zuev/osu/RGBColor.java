@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu;
 
+import androidx.annotation.NonNull;
+
 import org.anddev.andengine.entity.Entity;
 
 public class RGBColor {
@@ -52,11 +54,11 @@ public class RGBColor {
         cb = b;
     }
 
-    public void apply(Entity entity) {
+    public void apply(@NonNull Entity entity) {
         entity.setColor(cr, cg, cb);
     }
 
-    public void applyAll(Entity... entities) {
+    public void applyAll(@NonNull Entity... entities) {
         for (Entity entity : entities) {
             entity.setColor(cr, cg, cb);
         }

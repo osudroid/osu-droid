@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.skins;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.json.JSONObject;
 
@@ -8,13 +9,38 @@ import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.datatypes.DefaultRGBColor;
 
 public class ColorSkinData extends SkinData<RGBColor> {
-    public ColorSkinData(String tag, RGBColor defaultValue) {
-        super(tag, new DefaultRGBColor(defaultValue));
+    private final String defaultHex;
+    private String currentHex;
+
+    public ColorSkinData(String tag, String defaultHex) {
+        super(tag, new DefaultRGBColor(new RGBColor(RGBColor.hex2Rgb(defaultHex))));
+        this.defaultHex = defaultHex;
+        this.currentHex = defaultHex;
     }
 
     @Override
     public void setFromJson(@NonNull JSONObject data) {
         String hex = data.optString(getTag());
-        setCurrentValue(hex.isEmpty() ? getDefaultValue() : RGBColor.hex2Rgb(hex));
+        if (hex.isEmpty()) {
+            currentHex = defaultHex;
+            setCurrentValue(getDefaultValue());
+        } else {
+            currentHex = hex;
+            setCurrentValue(RGBColor.hex2Rgb(hex));
+        }
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (obj instanceof ColorSkinData) {
+            return (((ColorSkinData) obj).currentHex.equals(currentHex));
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean currentIsDefault() {
+        return currentHex.equals(defaultHex);
     }
 }

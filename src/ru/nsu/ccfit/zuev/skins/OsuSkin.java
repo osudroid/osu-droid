@@ -2,14 +2,9 @@ package ru.nsu.ccfit.zuev.skins;
 
 import androidx.annotation.NonNull;
 
-import com.edlplan.framework.utils.interfaces.Consumer;
-
 import okio.BufferedSource;
 import okio.Okio;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,12 +31,11 @@ public class OsuSkin {
     protected final BooleanSkinData rotateCursor = new BooleanSkinData("rotateCursor", true);
 
     protected final String DEFAULT_COLOR_HEX = "#FFFFFF";
-    protected final RGBColor DEFAULT_COLOR = RGBColor.hex2Rgb(DEFAULT_COLOR_HEX);
     protected final ArrayList<RGBColor> comboColor = new ArrayList<>();
 
-    protected final ColorSkinData sliderBorderColor = new ColorSkinData("sliderBorderColor", DEFAULT_COLOR);
-    protected final ColorSkinData sliderBodyColor = new ColorSkinData("sliderBodyColor", DEFAULT_COLOR);
-    protected final ColorSkinData sliderHintColor = new ColorSkinData("sliderHintColor", DEFAULT_COLOR);
+    protected final ColorSkinData sliderBorderColor = new ColorSkinData("sliderBorderColor", DEFAULT_COLOR_HEX);
+    protected final ColorSkinData sliderBodyColor = new ColorSkinData("sliderBodyColor", DEFAULT_COLOR_HEX);
+    protected final ColorSkinData sliderHintColor = new ColorSkinData("sliderHintColor", DEFAULT_COLOR_HEX);
 
     protected final SkinSliderType skinSliderType = SkinSliderType.FLAT;
 
@@ -118,13 +112,13 @@ public class OsuSkin {
 
     public ArrayList<RGBColor> getComboColor() {
         if (comboColor.isEmpty()) {
-            comboColor.add(DEFAULT_COLOR);
+            comboColor.add(RGBColor.hex2Rgb(DEFAULT_COLOR_HEX));
         }
         return comboColor;
     }
 
     public boolean isForceOverrideSliderBorderColor() {
-        return sliderBorderColor.getCurrentValue() != sliderBorderColor.getDefaultValue();
+        return !sliderBorderColor.currentIsDefault();
     }
 
     public RGBColor getSliderBorderColor() {

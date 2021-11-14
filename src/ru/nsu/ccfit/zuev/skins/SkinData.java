@@ -36,5 +36,10 @@ public abstract class SkinData<I> implements IDefaultableData<I> {
         data.setCurrentValue(currentValue);
     }
 
+    @Override
+    public boolean currentIsDefault() {
+        return data.getCurrentValue() == data.getDefaultValue();
+    }
+
     public abstract void setFromJson(JSONObject data);
 }
