@@ -509,7 +509,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         passiveObjects = new LinkedList<GameObject>();
         lastObjectId = -1;
 
-        final String slidercolor = beatmapData.getData("Colours", "SliderBorder");
+        GameHelper.setSliderColor(SkinManager.getInstance().getSliderColor());
+        final String slidercolor = beatmapData.getData("Colours",
+                "SliderBorder");
         if (slidercolor.equals("") == false) {
             final String[] sliderColors = slidercolor.split("[,]");
             GameHelper.setSliderColor(new RGBColor(Integer
@@ -518,7 +520,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     .parseInt(sliderColors[2]) / 255.0f));
         }
 
-        GameHelper.setSliderColor(OsuSkin.get().getSliderBorderColor());
+        if (OsuSkin.get().isForceOverrideSliderBorderColor()) {
+            GameHelper.setSliderColor(new RGBColor(OsuSkin.get().getSliderBorderColor()));
+        }
 
         combos = new ArrayList<RGBColor>();
         comboNum = 2;

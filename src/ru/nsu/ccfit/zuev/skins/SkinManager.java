@@ -24,6 +24,7 @@ public class SkinManager {
         frameCount.putAll(stdframeCount);
     }
 
+    private final RGBColor sliderColor = new RGBColor(1, 1, 1);
     private String skinname = "";
 
     private SkinManager() {
@@ -51,6 +52,10 @@ public class SkinManager {
 
     public static void setFrames(final String texname, final int frames) {
         frameCount.put(texname, frames);
+    }
+
+    public RGBColor getSliderColor() {
+        return sliderColor;
     }
 
     public void presetFrameCount() {
