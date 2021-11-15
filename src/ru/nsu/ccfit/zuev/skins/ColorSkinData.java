@@ -31,15 +31,6 @@ public class ColorSkinData extends SkinData<RGBColor> {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
-        if (obj instanceof ColorSkinData) {
-            return (((ColorSkinData) obj).currentHex.equals(currentHex));
-        } else {
-            return false;
-        }
-    }
-
-    @Override
     public boolean currentIsDefault() {
         return currentHex.equals(defaultHex);
     }
