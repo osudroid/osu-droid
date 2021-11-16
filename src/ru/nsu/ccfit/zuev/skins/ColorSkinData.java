@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.skins;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import org.json.JSONObject;
 
