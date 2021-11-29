@@ -1,9 +1,12 @@
-package ru.nsu.ccfit.zuev.osu;
+package ru.nsu.ccfit.zuev.skins;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.RGBColor;
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
 public class SkinManager {

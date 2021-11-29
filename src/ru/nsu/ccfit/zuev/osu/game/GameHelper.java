@@ -14,7 +14,7 @@ import java.util.Random;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
-import ru.nsu.ccfit.zuev.osu.SkinJson;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.polygon.Spline;
@@ -433,7 +433,7 @@ public class GameHelper {
     }
 
     public static boolean isKiai() {
-        if (SkinJson.get().isDisableKiai()) return false;
+        if (OsuSkin.get().isDisableKiai()) return false;
         return isKiai;
     }
 

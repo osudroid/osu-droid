@@ -11,7 +11,6 @@ import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.font.FontFactory;
 import org.anddev.andengine.opengl.font.StrokeFont;
-import org.anddev.andengine.opengl.texture.Texture;
 import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasSource;
@@ -22,7 +21,6 @@ import org.anddev.andengine.util.Debug;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +33,9 @@ import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.QualityAssetBitmapSource;
 import ru.nsu.ccfit.zuev.osu.helper.QualityFileBitmapSource;
 import ru.nsu.ccfit.zuev.osu.helper.ScaledBitmapSource;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
+import ru.nsu.ccfit.zuev.skins.SkinJsonReader;
+import ru.nsu.ccfit.zuev.skins.SkinManager;
 
 public class ResourceManager {
     private static ResourceManager mgr = new ResourceManager();
@@ -119,14 +120,14 @@ public class ResourceManager {
             File skinJson = new File(folder, "skin.json");
             if (skinJson.exists()) {
                 try {
-                    skinjson = new JSONObject(SkinJson.readFull(skinJson));
+                    skinjson = new JSONObject(OsuSkin.readFull(skinJson));
                 } catch (Exception e) {
                     e.printStackTrace();
                     skinjson = null;
                 }
             }
             if (skinjson == null) skinjson = new JSONObject();
-            SkinJson.get().loadSkinJson(skinjson);
+            SkinJsonReader.getReader().supplyJson(skinjson);
         }
         final Map<String, File> availableFiles = new HashMap<String, File>();
         if (skinFiles != null) {
