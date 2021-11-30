@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu.scoring;
 
 import android.graphics.PointF;
 
+import androidx.annotation.NonNull;
+
 import org.anddev.andengine.util.Debug;
 
 import java.io.EOFException;
@@ -30,19 +32,10 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class Replay {
-
-    public static final byte RESULT_300 = 4;
-    public static final byte RESULT_100 = 3;
-    public static final byte RESULT_50 = 2;
-    public static final byte RESULT_0 = 1;
-    public static final byte ID_DOWN = 0;
-    public static final byte ID_UP = 2;
-
-    public static final byte ID_MOVE = 1;
     public static EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
     public static EnumSet<GameMod> oldMod = EnumSet.noneOf(GameMod.class);
-    private static int pointsSkipped = 0;
-    public ArrayList<MoveArray> cursorMoves = new ArrayList<MoveArray>();
+    protected static int pointsSkipped = 0;
+    public ArrayList<MoveArray> cursorMoves = new ArrayList<>();
     public int[] cursorIndex;
     public int[] lastMoveIndex;
     public ReplayObjectData[] objectData = null;
@@ -92,34 +85,34 @@ public class Replay {
         objectData[id] = data;
     }
 
-    public void addObjectScore(int id, byte score) {
+    public void addObjectScore(int id, ResultType score) {
         if (id < 0 || objectData == null || id >= objectData.length)
             return;
 
         if (objectData[id] == null)
             objectData[id] = new ReplayObjectData();
-        objectData[id].result = score;
+
+        objectData[id].result = score.getId();
     }
 
     public void addPress(final float time, final PointF pos, final int pid) {
         if (pid > GameScene.CursorCount) return;
 
         int itime = Math.max(0, (int) (time * 1000));
-        cursorMoves.get(pid).pushBack(itime, (short) pos.x, (short) pos.y, ID_DOWN);
+        cursorMoves.get(pid).pushBack(itime, (short) pos.x, (short) pos.y, TouchType.DOWN);
     }
 
     public void addMove(final float time, final PointF pos, final int pid) {
         if (pid > GameScene.CursorCount) return;
 
         int itime = Math.max(0, (int) (time * 1000));
-        cursorMoves.get(pid).pushBack(itime, (short) pos.x, (short) pos.y, ID_MOVE);
+        cursorMoves.get(pid).pushBack(itime, (short) pos.x, (short) pos.y, TouchType.MOVE);
     }
 
     public void addUp(final float time, final int pid) {
         if (pid > GameScene.CursorCount) return;
-
         int itime = Math.max(0, (int) (time * 1000));
-        cursorMoves.get(pid).pushBack(itime, ID_UP);
+        cursorMoves.get(pid).pushBack(itime, TouchType.UP);
     }
 
     public void save(final String filename) {
@@ -130,7 +123,7 @@ public class Replay {
         ObjectOutputStream os;
         ZipOutputStream zip;
         try {
-            zip = new ZipOutputStream(new FileOutputStream(new File(filename)));
+            zip = new ZipOutputStream(new FileOutputStream(filename));
             zip.setMethod(ZipOutputStream.DEFLATED);
             zip.setLevel(Deflater.DEFAULT_COMPRESSION);
             zip.putNextEntry(new ZipEntry("data"));
@@ -209,8 +202,7 @@ public class Replay {
     public boolean loadInfo(final String filename) {
         ObjectInputStream os;
         try {
-            final ZipInputStream zip = new ZipInputStream(new FileInputStream(
-                    new File(filename)));
+            final ZipInputStream zip = new ZipInputStream(new FileInputStream(filename));
             zip.getNextEntry();
             os = new ObjectInputStream(zip);
             // zip.close();
@@ -231,7 +223,6 @@ public class Replay {
                 version = ((ReplayVersion) firstObject).version;
                 replayVersion = version;
                 mapname = (String) os.readObject();
-
             } else {
                 mapname = (String) firstObject;
             }
@@ -259,7 +250,7 @@ public class Replay {
                 stat.setMod((EnumSet<GameMod>) os.readObject());
             }
 
-            if  (version >= 4) {
+            if (version >= 4) {
                 stat.setExtraModFromString((String) os.readObject());
             }
 
@@ -280,8 +271,7 @@ public class Replay {
     public boolean load(final String filename) {
         ObjectInputStream os;
         try {
-            final ZipInputStream zip = new ZipInputStream(new FileInputStream(
-                    new File(filename)));
+            final ZipInputStream zip = new ZipInputStream(new FileInputStream(filename));
             zip.getNextEntry();
             os = new ObjectInputStream(zip);
             // zip.close();
@@ -367,6 +357,7 @@ public class Replay {
             }
         } catch (EOFException e) {
             Debug.e("O_o eof...");
+            System.exit(-1);
             ToastLogger.showTextId(R.string.replay_corrupted, true);
             return false;
 
@@ -407,60 +398,45 @@ public class Replay {
 
     public static class ReplayVersion implements Serializable {
         private static final long serialVersionUID = 4643121693566795335L;
-        int version = 4;
+        int version = 5;
         // version 4: Add ExtraModString's save and load in save()/load()/loadInfo()
     }
 
-    public static class ReplayObjectData {
-        public short accuracy = 0;
-        public BitSet tickSet = null;
-        public byte result = 0;
-    }
-
     public static class MoveArray {
-        public int[] time;
-        public short[] x;
-        public short[] y;
-        public byte[] id;
-
+        public ReplayMovement[] movements;
         public int size;
         public int allocated;
 
         public MoveArray(int startSize) {
             allocated = startSize;
             size = 0;
-            time = new int[allocated];
-            x = new short[allocated];
-            y = new short[allocated];
-            id = new byte[allocated];
+            movements = new ReplayMovement[allocated];
         }
 
-        public static MoveArray readFrom(ObjectInputStream is, Replay replay) throws IOException {
+        @NonNull
+        public static MoveArray readFrom(@NonNull ObjectInputStream is, Replay replay) throws IOException {
             int size = is.readInt();
             MoveArray array = new MoveArray(size);
-
+            array.size = size;
             for (int i = 0; i < size; i++) {
-                array.time[i] = is.readInt();
-                array.id[i] = (byte) (array.time[i] & 3);
-                array.time[i] >>= 2;
-                if (array.id[i] != ID_UP) {
-                    PointF gamePoint = new PointF((short) (is.readShort() / Config.getTextureQuality()),
-                            (short) (is.readShort() / Config.getTextureQuality()));
-					/*if (GameHelper.isHardrock())
-					{
-						array.y[i] = Utils.flipY(array.y[i]);
-					}*/
-                    if (replay.replayVersion == 1) {
-                        PointF realPoint = Utils.trackToRealCoords(Utils.realToTrackCoords(gamePoint, 1024, 600, true));
-                        array.x[i] = (short) realPoint.x;
-                        array.y[i] = (short) realPoint.y;
-                    } else if (replay.replayVersion > 1) {
-                        PointF realPoint = Utils.trackToRealCoords(gamePoint);
-                        array.x[i] = (short) realPoint.x;
-                        array.y[i] = (short) realPoint.y;
-                    }
+                ReplayMovement movement = new ReplayMovement();
+                array.movements[i] = movement;
+                movement.time = is.readInt();
+                movement.touchType = TouchType.getByID((byte) (movement.getTime() & 3));
+                movement.time >>= 2;
+                System.out.println(i + ", " + movement.touchType);
+                if (movement.touchType != TouchType.UP) {
+                    PointF gamePoint = new PointF(
+                            is.readFloat() / Config.getTextureQuality(),
+                            is.readFloat() / Config.getTextureQuality()
+                    );
+                    PointF realPoint = replay.replayVersion > 1?
+                            Utils.trackToRealCoords(gamePoint) :
+                            Utils.trackToRealCoords(
+                                    Utils.realToTrackCoords(gamePoint, 1024, 600, true)
+                            );
+                    movement.point.set(realPoint);
                 }
-                array.size = size;
             }
 
             return array;
@@ -468,65 +444,70 @@ public class Replay {
 
         public void reallocate(int newSize) {
             if (newSize <= allocated) return;
-            int[] newTime = new int[newSize];
-            short[] newX = new short[newSize];
-            short[] newY = new short[newSize];
-            byte[] newId = new byte[newSize];
-
-            System.arraycopy(time, 0, newTime, 0, size);
-            System.arraycopy(x, 0, newX, 0, size);
-            System.arraycopy(y, 0, newY, 0, size);
-            System.arraycopy(id, 0, newId, 0, size);
-
-            time = newTime;
-            x = newX;
-            y = newY;
-            id = newId;
-
+            ReplayMovement[] newMovements = new ReplayMovement[newSize];
+            System.arraycopy(movements, 0, newMovements, 0, size);
+            movements = newMovements;
             allocated = newSize;
         }
 
         public boolean checkNewPoint(short px, short py) {
             if (size < 2) return false;
-            float tx = (px + x[size - 2]) * 0.5f;
-            float ty = (py + y[size - 2]) * 0.5f;
 
-            return (Utils.sqr(x[size - 1] - tx) + Utils.sqr(y[size - 1] - ty)) <= 25;
+            ReplayMovement minusTwoMovement = movements[size - 2];
+            ReplayMovement previousMovement = movements[size - 1];
+
+            float tx = (px + minusTwoMovement.point.x) * 0.5f;
+            float ty = (py + minusTwoMovement.point.y) * 0.5f;
+
+            return (Utils.sqr(previousMovement.point.x - tx) + Utils.sqr(previousMovement.point.y - ty)) <= 25;
         }
 
-        public void pushBack(int time, short x, short y, byte id) {
+        public void pushBack(int time, short x, short y, TouchType touchType) {
             int idx = size;
-            if (id == ID_MOVE && checkNewPoint(x, y)) {
+            if (touchType == TouchType.MOVE && checkNewPoint(x, y)) {
                 idx = size - 1;
                 pointsSkipped++;
             } else {
-                if (size + 1 >= allocated)
+                if (size + 1 >= allocated) {
                     reallocate((allocated * 3) / 2);
+                }
                 size++;
             }
-            this.time[idx] = time;
-            this.x[idx] = x;
-            this.y[idx] = y;
-            this.id[idx] = id;
+            movements[idx] = new ReplayMovement();
+            ReplayMovement movement = movements[idx];
+            movement.time = time;
+            movement.point.x = x;
+            movement.point.y = y;
+            movement.touchType = touchType;
         }
 
-        public void pushBack(int time, byte id) {
-            if (size >= allocated)
+        public void pushBack(int time, TouchType touchType) {
+            if (size >= allocated) {
                 reallocate((allocated * 3) / 2);
-            this.time[size] = time;
-            this.id[size] = id;
+            }
+            movements[size] = new ReplayMovement();
+            ReplayMovement movement = movements[size];
+            movement.time = time;
+            movement.touchType = touchType;
             size++;
         }
 
-        public void writeTo(ObjectOutputStream os) throws IOException {
+        public void writeTo(@NonNull ObjectOutputStream os) throws IOException {
             os.writeInt(size);
             for (int i = 0; i < size; i++) {
-                os.writeInt((time[i] << 2) + id[i]);
-                if (id[i] != ID_UP) {
-                    os.writeShort(x[i] * Config.getTextureQuality());
-                    os.writeShort(y[i] * Config.getTextureQuality());
+                ReplayMovement movement = movements[i];
+                os.writeInt((movement.time << 2) + movement.touchType.getId());
+                if (movement.touchType != TouchType.UP) {
+                    os.writeFloat(movement.point.x * Config.getTextureQuality());
+                    os.writeFloat(movement.point.y * Config.getTextureQuality());
                 }
             }
         }
+    }
+
+    public static class ReplayObjectData {
+        public short accuracy = 0;
+        public BitSet tickSet = null;
+        public byte result = 0;
     }
 }

@@ -14,7 +14,7 @@ import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.SkinJson;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
-import ru.nsu.ccfit.zuev.osu.scoring.Replay;
+import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 
 public class HitCircle extends GameObject {
     private final Sprite circle;
@@ -48,7 +48,7 @@ public class HitCircle extends GameObject {
                      final float b, final float scale, int num, final int sound, final String tempSound, final boolean isFirstNote) {
         // Storing parameters into fields
         //Log.i("note-ini", time + "s");
-        this.replayData = null;
+        this.replayObjectData = null;
         this.scale = scale;
         this.pos = pos;
         this.listener = listener;
@@ -189,20 +189,20 @@ public class HitCircle extends GameObject {
             return;
         }
         // If we have clicked circle
-        if (replayData != null) {
-            if (passedTime - time + dt / 2 > replayData.accuracy / 1000f) {
-                final float acc = Math.abs(replayData.accuracy / 1000f);
+        if (replayObjectData != null) {
+            if (passedTime - time + dt / 2 > replayObjectData.accuracy / 1000f) {
+                final float acc = Math.abs(replayObjectData.accuracy / 1000f);
                 if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) {
                     playSound();
                 }
-                listener.registerAccuracy(replayData.accuracy / 1000f);
+                listener.registerAccuracy(replayObjectData.accuracy / 1000f);
                 passedTime = -1;
                 // Remove circle and register hit in update thread
                 SyncTaskManager.getInstance().run(new Runnable() {
                     public void run() {
                         HitCircle.this.listener
-                                .onCircleHit(id, replayData.accuracy / 1000f, pos,
-                                        endsCombo, replayData.result, color);
+                                .onCircleHit(id, replayObjectData.accuracy / 1000f, pos,
+                                        endsCombo, replayObjectData.result, color);
                         removeFromScene();
                     }
                 });
@@ -253,13 +253,9 @@ public class HitCircle extends GameObject {
             playSound();
             passedTime = -1;
             // Remove circle and register hit in update thread
-            SyncTaskManager.getInstance().run(new Runnable() {
-
-
-                public void run() {
-                    HitCircle.this.listener.onCircleHit(id, 0, pos, endsCombo, Replay.RESULT_300, color);
-                    removeFromScene();
-                }
+            SyncTaskManager.getInstance().run(() -> {
+                HitCircle.this.listener.onCircleHit(id, 0, pos, endsCombo, ResultType.HIT300.getId(), color);
+                removeFromScene();
             });
             return;
         }
@@ -302,7 +298,7 @@ public class HitCircle extends GameObject {
             // If passed too many time, counting it as miss
             if (passedTime > time + GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) {
                 passedTime = -1;
-                final byte forcedScore = (replayData == null) ? 0 : replayData.result;
+                final byte forcedScore = (replayObjectData == null) ? 0 : replayObjectData.result;
                 SyncTaskManager.getInstance().run(() -> {
                     removeFromScene();
                     HitCircle.this.listener.onCircleHit(id, 10, pos, false, forcedScore, color);

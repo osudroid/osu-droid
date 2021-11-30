@@ -187,7 +187,7 @@ public class Spinner extends GameObject {
         }
         listener.removeObject(Spinner.this);
         int score = 0;
-        if (replayData != null) {
+        if (replayObjectData != null) {
             //int bonusRot = (int) (replayData.accuracy / 4 - needRotations + 1);
             //while (bonusRot < 0) {
             //    bonusRot++;
@@ -195,7 +195,7 @@ public class Spinner extends GameObject {
             //}
 
             //if (rotations count < the rotations in replay), let rotations count = the rotations in replay
-            while (fullrotations + this.score < replayData.accuracy / 4 + 1){
+            while (fullrotations + this.score < replayObjectData.accuracy / 4 + 1){
                 fullrotations++;
                 listener.onSpinnerHit(id, 1000, false, 0);
             }
@@ -217,8 +217,8 @@ public class Spinner extends GameObject {
         if (clear) {
             score = 300;
         }
-        if (replayData != null) {
-            switch (replayData.accuracy % 4) {
+        if (replayObjectData != null) {
+            switch (replayObjectData.accuracy % 4) {
                 case 0:
                     score = 0;
                     break;
@@ -315,7 +315,7 @@ public class Spinner extends GameObject {
             }
         } else if (Math.abs(rotations) > 1) {
             rotations -= 1 * Math.signum(rotations);
-            if (replayData == null || replayData.accuracy / 4 > fullrotations) {
+            if (replayObjectData == null || replayObjectData.accuracy / 4 > fullrotations) {
                 fullrotations++;
                 stat.registerSpinnerHit();
                 float rate = 0.375f;
