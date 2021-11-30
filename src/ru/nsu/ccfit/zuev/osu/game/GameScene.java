@@ -88,7 +88,6 @@ import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.PauseMenu;
 import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
-import ru.nsu.ccfit.zuev.osu.scoring.ReplayMovement;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
@@ -1365,7 +1364,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
 
                 cIndex = replay.cursorIndex[i];
-                ReplayMovement movement = null;
+                Replay.ReplayMovement movement = null;
 
                 // Emulating moves
                 while (
@@ -1397,7 +1396,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 // Interpolating cursor movements
                 if (movement != null && movement.getTouchType() == TouchType.MOVE && replay.lastMoveIndex[i] >= 0) {
                     final int lIndex = replay.lastMoveIndex[i];
-                    final ReplayMovement lastMovement = replay.cursorMoves.get(i).movements[lIndex];
+                    final Replay.ReplayMovement lastMovement = replay.cursorMoves.get(i).movements[lIndex];
                     float t = (secPassed * 1000 - movement.getTime()) / (lastMovement.getTime() - movement.getTime());
                     cursors[i].mousePos.x = lastMovement.getPoint().x * t + movement.getPoint().x * (1 - t);
                     cursors[i].mousePos.y = lastMovement.getPoint().y * t + movement.getPoint().y * (1 - t);

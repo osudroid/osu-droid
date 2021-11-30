@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import org.anddev.andengine.util.Debug;
 
 import java.io.EOFException;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -99,14 +98,14 @@ public class Replay {
         if (pid > GameScene.CursorCount) return;
 
         int itime = Math.max(0, (int) (time * 1000));
-        cursorMoves.get(pid).pushBack(itime, (short) pos.x, (short) pos.y, TouchType.DOWN);
+        cursorMoves.get(pid).pushBack(itime, pos.x, pos.y, TouchType.DOWN);
     }
 
     public void addMove(final float time, final PointF pos, final int pid) {
         if (pid > GameScene.CursorCount) return;
 
         int itime = Math.max(0, (int) (time * 1000));
-        cursorMoves.get(pid).pushBack(itime, (short) pos.x, (short) pos.y, TouchType.MOVE);
+        cursorMoves.get(pid).pushBack(itime, pos.x, pos.y, TouchType.MOVE);
     }
 
     public void addUp(final float time, final int pid) {
@@ -357,7 +356,7 @@ public class Replay {
             }
         } catch (EOFException e) {
             Debug.e("O_o eof...");
-            System.exit(-1);
+            Debug.e(e);
             ToastLogger.showTextId(R.string.replay_corrupted, true);
             return false;
 
@@ -413,6 +412,11 @@ public class Replay {
             movements = new ReplayMovement[allocated];
         }
 
+
+        private static float readTouchPoint(ObjectInputStream is, Replay replay) throws IOException {
+            return replay.replayVersion < 5? is.readShort() : is.readFloat();
+        }
+
         @NonNull
         public static MoveArray readFrom(@NonNull ObjectInputStream is, Replay replay) throws IOException {
             int size = is.readInt();
@@ -422,13 +426,14 @@ public class Replay {
                 ReplayMovement movement = new ReplayMovement();
                 array.movements[i] = movement;
                 movement.time = is.readInt();
-                movement.touchType = TouchType.getByID((byte) (movement.getTime() & 3));
+                movement.touchType = TouchType.getByID((byte) (movement.time & 3));
                 movement.time >>= 2;
-                System.out.println(i + ", " + movement.touchType);
                 if (movement.touchType != TouchType.UP) {
+                    float baseX = readTouchPoint(is, replay);
+                    float baseY = readTouchPoint(is, replay);
                     PointF gamePoint = new PointF(
-                            is.readFloat() / Config.getTextureQuality(),
-                            is.readFloat() / Config.getTextureQuality()
+                            baseX / Config.getTextureQuality(),
+                            baseY / Config.getTextureQuality()
                     );
                     PointF realPoint = replay.replayVersion > 1?
                             Utils.trackToRealCoords(gamePoint) :
@@ -450,7 +455,7 @@ public class Replay {
             allocated = newSize;
         }
 
-        public boolean checkNewPoint(short px, short py) {
+        public boolean checkNewPoint(float px, float py) {
             if (size < 2) return false;
 
             ReplayMovement minusTwoMovement = movements[size - 2];
@@ -462,7 +467,7 @@ public class Replay {
             return (Utils.sqr(previousMovement.point.x - tx) + Utils.sqr(previousMovement.point.y - ty)) <= 25;
         }
 
-        public void pushBack(int time, short x, short y, TouchType touchType) {
+        public void pushBack(int time, float x, float y, TouchType touchType) {
             int idx = size;
             if (touchType == TouchType.MOVE && checkNewPoint(x, y)) {
                 idx = size - 1;
@@ -473,8 +478,8 @@ public class Replay {
                 }
                 size++;
             }
-            movements[idx] = new ReplayMovement();
-            ReplayMovement movement = movements[idx];
+            ReplayMovement movement = new ReplayMovement();
+            movements[idx] = movement;
             movement.time = time;
             movement.point.x = x;
             movement.point.y = y;
@@ -497,7 +502,7 @@ public class Replay {
             for (int i = 0; i < size; i++) {
                 ReplayMovement movement = movements[i];
                 os.writeInt((movement.time << 2) + movement.touchType.getId());
-                if (movement.touchType != TouchType.UP) {
+                if (movement.touchType != TouchType.DOWN) {
                     os.writeFloat(movement.point.x * Config.getTextureQuality());
                     os.writeFloat(movement.point.y * Config.getTextureQuality());
                 }
@@ -509,5 +514,20 @@ public class Replay {
         public short accuracy = 0;
         public BitSet tickSet = null;
         public byte result = 0;
+    }
+
+    public static class ReplayMovement {
+        protected int time;
+        protected PointF point = new PointF();
+        protected TouchType touchType;
+
+        public int getTime() {
+            return time;
+        }
+
+        public PointF getPoint() { return point; }
+        public TouchType getTouchType() {
+            return touchType;
+        }
     }
 }
