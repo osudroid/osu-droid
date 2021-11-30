@@ -1373,7 +1373,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 ) {
                     float mx = movement.getPoint().x;
                     float my = movement.getPoint().y;
-                    System.out.println(movement.getPoint().x +","+movement.getPoint().y);
                     if (movement.getTouchType() == TouchType.DOWN) {
                         cursors[i].mouseDown = true;
                         for (int j = 0; j < replay.cursorIndex.length; j++) {

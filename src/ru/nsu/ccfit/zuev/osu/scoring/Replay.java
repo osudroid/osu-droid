@@ -502,7 +502,7 @@ public class Replay {
             for (int i = 0; i < size; i++) {
                 ReplayMovement movement = movements[i];
                 os.writeInt((movement.time << 2) + movement.touchType.getId());
-                if (movement.touchType != TouchType.DOWN) {
+                if (movement.touchType != TouchType.UP) {
                     os.writeFloat(movement.point.x * Config.getTextureQuality());
                     os.writeFloat(movement.point.y * Config.getTextureQuality());
                 }
