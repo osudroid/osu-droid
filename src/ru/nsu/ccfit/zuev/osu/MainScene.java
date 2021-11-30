@@ -1190,7 +1190,7 @@ public class MainScene implements IUpdateHandler {
                 //replay
                 ScoringScene scorescene = GlobalManager.getInstance().getScoring();
                 StatisticV2 stat = replay.getStat();
-                TrackInfo track = LibraryManager.getInstance().findTrackByFileNameAndMD5(replay.getMapfile(), replay.getMd5());
+                TrackInfo track = LibraryManager.getInstance().findTrackByFileNameAndMD5(replay.getMapFile(), replay.getMd5());
                 if (track != null) {
                     GlobalManager.getInstance().getMainScene().setBeatmap(track.getBeatmap());
                     GlobalManager.getInstance().getSongMenu().select();
