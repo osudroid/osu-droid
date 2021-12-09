@@ -9,7 +9,7 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.SkinJson;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 
 public class CircleNumber extends GameObject {
@@ -30,7 +30,7 @@ public class CircleNumber extends GameObject {
 
     public void init(final Scene scene, final PointF pos, float scale,
                      final IEntityModifier... entityModifiers) {
-        scale *= SkinJson.get().getComboTextScale();
+        scale *= OsuSkin.get().getComboTextScale();
         final String snum = String.valueOf(Math.abs(num));
 
         float twidth = 0;

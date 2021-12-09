@@ -44,7 +44,8 @@ Changelog for 1.6.8
     - Low storage causes bugs such as unwatchable replays and inability to watch local replays.
 - Option to precalculate slider path
     - Improves performance during gameplay at the cost of beatmap loading time.
-- Option to calculate pp (performance points) when opening a score
+- Option to show score statistics when opening a score
+    - Score statistics includes star rating, PP (performance points), and more.
 - Option to hide replay text when watching a replay
 - Option to save failed replays
 - Option to hide in-game UI
@@ -52,11 +53,14 @@ Changelog for 1.6.8
 - Option to replace all beatmaps' backgrounds with the current skin's `menu-background` image
     - Only affects in-game display. The actual beatmap background file will not be replaced.
 - Option to disable triangles animation
-    - Users with issues while triangles animation is active are encouraged to enable this option.
+    - Users with issues while triangles animation is active are encouraged to try this option.
 - New updater based on the game's GitHub repository releases
 - Separate loading screen for any game-related operations that takes some time to process
 - Support for push notifications
 - Option to scan download directory for `.osk` (skin) files
+- Display unstable rate (UR) in gameplay and result screen
+    - Like average offset, this is only visible in gameplay if show FPS is enabled in Graphics settings.
+    - When replaying a score, the result may differ from the original value due to the way replay is saved.
 
 ## Changes:
 
@@ -128,12 +132,15 @@ Changelog for 1.6.8
 - [+] Added a new updater based on the game's GitHub repository releases
 - [+] Added a separate loading screen for any game-related operations that takes some time to process
 - [+] Added the option to disable triangles animation
-    - Users with issues while triangles animation is active are encouraged to enable this option.
+    - Users with issues while triangles animation is active are encouraged to try this option.
 - [+] Added the option to replace all beatmaps' backgrounds with the current skin's `menu-background` image
     - Only affects in-game display. The actual beatmap background file will not be replaced.
 - [+] Added the option to hide in-game UI
     - If enabled, this will hide combo bursts, health bar, combo counter, accuracy counter, and score counter during gameplay.
 - [+] Added the option to scan download directory for `.osk` (skin) files
+- [+] Added unstable rate (UR) in gameplay and result screen
+    - Like average offset, this is only visible in gameplay if show FPS is enabled in Graphics settings.
+    - When replaying a score, the result may differ from the original value due to the way replay is saved.
 - [=] Updated audio engine
     - Should improve performance and optimize latency.
 - [=] Sliders will gradually fade out if HD (Hidden) mod is active
@@ -147,6 +154,7 @@ Changelog for 1.6.8
 - [=] Slightly reworked the display of options list
 - [=] Moved skin selection option to Graphics category
 - [=] Changed the game's domain to https://osudroid.moe/
+- [=] Renamed "display PP in score" option to "display score statistics in score" to incorporate unstable rate and hit error to the option
 - [*] Fixed a bug where offline replays do not get saved
 - [*] Fixed a bug where FL (Flashlight) mod dim area flickers if the player taps during break
 - [*] Fixed a bug where beatmaps that haven't finished downloading gets imported

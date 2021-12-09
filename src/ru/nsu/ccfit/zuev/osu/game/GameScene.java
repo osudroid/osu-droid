@@ -45,6 +45,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Queue;
 import java.util.Iterator;
 
@@ -64,8 +65,8 @@ import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.RGBAColor;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.SkinJson;
-import ru.nsu.ccfit.zuev.osu.SkinManager;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
+import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -519,8 +520,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     .parseInt(sliderColors[2]) / 255.0f));
         }
 
-        if (SkinJson.get().isForceOverrideSliderBorderColor()) {
-            GameHelper.setSliderColor(new RGBColor(SkinJson.get().getSliderBorderColor()));
+        if (OsuSkin.get().isForceOverrideSliderBorderColor()) {
+            GameHelper.setSliderColor(new RGBColor(OsuSkin.get().getSliderBorderColor()));
         }
 
         combos = new ArrayList<RGBColor>();
@@ -535,19 +536,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             ccolor = beatmapData.getData("Colours", "Combo" + comboNum++);
         }
         if (combos.isEmpty() || Config.isUseCustomComboColors()) {
-//			combos.add(new RGBColor(255 / 255.0f, 150 / 255.0f, 0 / 255.0f));
-//			combos.add(new RGBColor(5 / 255.0f, 240 / 255.0f, 5 / 255.0f));
-//			combos.add(new RGBColor(5 / 255.0f, 2 / 255.0f, 240 / 255.0f));
-//			combos.add(new RGBColor(240 / 255.0f, 5 / 255.0f, 5 / 255.0f));
             combos.clear();
             combos.addAll(Arrays.asList(Config.getComboColors()));
         }
-        if (SkinJson.get().isForceOverrideComboColor()) {
+        if (OsuSkin.get().isForceOverrideComboColor()) {
             combos.clear();
-            combos.addAll(SkinJson.get().getComboColor());
+            combos.addAll(OsuSkin.get().getComboColor());
         }
         comboNum = -1;
-        // if (combos.size() > 1) comboNum = 1;
         currentComboNum = 0;
         lastObjectHitTime = 0;
         final String defSound = beatmapData.getData("General", "SampleSet");
@@ -741,12 +737,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     "smallFont");
             final ChangeableText fpsText = new ChangeableText(Utils.toRes(790),
                     Utils.toRes(520), font, "00.00 FPS");
+            final ChangeableText urText = new ChangeableText(Utils.toRes(720),
+                    Utils.toRes(480), font, "Unstable rate: 0.00     ");
             final ChangeableText accText = new ChangeableText(Utils.toRes(720),
-                    Utils.toRes(480), font, "Avg offset: 0ms     ");
+                    Utils.toRes(440), font, "Avg offset: 0ms     ");
             fpsText.setPosition(Config.getRES_WIDTH() - fpsText.getWidth() - 5, Config.getRES_HEIGHT() - fpsText.getHeight() - 10);
             accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
+            urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, accText.getY() - urText.getHeight());
             fgScene.attachChild(fpsText);
             fgScene.attachChild(accText);
+            fgScene.attachChild(urText);
 
             ChangeableText memText = null;
             if (BuildConfig.DEBUG) {
@@ -765,19 +765,23 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     elapsedInt++;
                     fpsText.setText(Math.round(this.getFPS()) + " FPS");
                     if (offsetRegs != 0 && elapsedInt > 200) {
+                        float mean = avgOffset / offsetRegs;
                         accText.setText("Avg offset: "
-                                + (int) (avgOffset * 1000f / offsetRegs)
+                                + (int) (mean * 1000f)
                                 + "ms");
                         elapsedInt = 0;
                     }
+                    urText.setText(String.format(Locale.ENGLISH, "Unstable rate: %.2f", stat.getUnstableRate()));
+
                     fpsText.setPosition(Config.getRES_WIDTH() - fpsText.getWidth() - 5, Config.getRES_HEIGHT() - fpsText.getHeight() - 10);
                     accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
+                    urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, accText.getY() - urText.getHeight());
 
                     if (fmemText != null) {
                         fmemText.setText("M: "
                                 + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024
                                 + "/" + Runtime.getRuntime().totalMemory() / 1024 / 1024);
-                        fmemText.setPosition(Config.getRES_WIDTH() - fmemText.getWidth() - 5, accText.getY() - fmemText.getHeight());
+                        fmemText.setPosition(Config.getRES_WIDTH() - fmemText.getWidth() - 5, urText.getY() - fmemText.getHeight());
                     }
 
                 }
@@ -2651,6 +2655,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         avgOffset += acc;
         offsetRegs++;
+
+        stat.addHitOffset(acc);
+
+        if (replaying) {
+            scoringScene.getReplayStat().addHitOffset(acc);
+        }
     }
 
 

@@ -11,7 +11,7 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
-import ru.nsu.ccfit.zuev.osu.SkinJson;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
@@ -106,7 +106,7 @@ public class HitCircle extends GameObject {
         scene.attachChild(overlay, 0);
         // and getting new number from sprite pool
         num += 1;
-        if (SkinJson.get().isLimitComboTextLength()) {
+        if (OsuSkin.get().isLimitComboTextLength()) {
             num %= 10;
         }
         number = GameObjectPool.getInstance().getNumber(num);
