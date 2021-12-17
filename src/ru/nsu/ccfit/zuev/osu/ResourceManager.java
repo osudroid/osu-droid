@@ -137,7 +137,12 @@ public class ResourceManager {
                             && (f.getName().endsWith(".wav") || f.getName().endsWith(".mp3"))) {
                         continue;
                     }
-                    if (f.getName().length() < 5) continue;
+                    if (f.getName().length() < 5) {
+                        continue;
+                    }
+                    if (f.length() == 0) {
+                        continue;
+                    }
                     final String filename = f.getName().substring(0, f.getName().length() - 4);
                     availableFiles.put(filename, f);
                     //if ((filename.startsWith("hit0") || filename.startsWith("hit50") || filename.startsWith("hit100") || filename.startsWith("hit300"))){
