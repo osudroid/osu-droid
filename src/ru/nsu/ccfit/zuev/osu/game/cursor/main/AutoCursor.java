@@ -1,19 +1,12 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
 import org.anddev.andengine.entity.modifier.MoveModifier;
-import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
-import org.anddev.andengine.util.modifier.ease.EaseQuintOut;
-import org.anddev.andengine.util.modifier.ease.EaseSineInOut;
 import org.anddev.andengine.util.modifier.ease.IEaseFunction;
 
-import java.util.Queue;
-
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameObject;
 import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
-import ru.nsu.ccfit.zuev.osu.game.HitCircle;
 import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
 import ru.nsu.ccfit.zuev.osu.game.Spinner;
 
@@ -54,8 +47,8 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
     /**
      * Directly moves the cursor's position to the specified position.
      *
-     * @param pX The X coordinate of the new cursor position.
-     * @param pY The Y coordinate of the new cursor position.
+     * @param pX       The X coordinate of the new cursor position.
+     * @param pY       The Y coordinate of the new cursor position.
      * @param listener The listener that listens to when this cursor is moved.
      */
     public void setPosition(float pX, float pY, GameObjectListener listener) {
@@ -66,10 +59,10 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
     /**
      * Moves the cursor to the specified object.
      *
-     * @param object The object to move the cursor to.
-     * @param secPassed The amount of seconds that have passed since the game has started.
+     * @param object       The object to move the cursor to.
+     * @param secPassed    The amount of seconds that have passed since the game has started.
      * @param approachRate The approach rate of the beatmap.
-     * @param listener The listener that listens to when this cursor is moved.
+     * @param listener     The listener that listens to when this cursor is moved.
      */
     public void moveToObject(GameObject object, float secPassed, float approachRate, GameObjectListener listener) {
         if (object == null || currentObjectId == object.getId()) {
@@ -81,7 +74,7 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
         float deltaT = object.getHitTime() - secPassed;
 
         if (object instanceof Spinner) {
-            movePositionX =  ((Spinner) object).center.x + 50 * (float) Math.sin(0);
+            movePositionX = ((Spinner) object).center.x + 50 * (float) Math.sin(0);
             movePositionY = ((Spinner) object).center.y + 50 * (float) Math.cos(0);
         }
 
