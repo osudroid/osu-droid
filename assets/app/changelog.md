@@ -97,7 +97,7 @@ Changelog for 1.6.8
 - Fixed a bug where some slider ticks fail to display correctly
 - Fixed a bug where very high velocity reverse sliders (buzz sliders) have incorrect length
 - Fixed a bug where certain skin sound elements will crash the game
-    - The game will ignore audio files smaller than 1 KB.
+    - The game will ignore audio files that have 0 B size.
 - Fixed SD card bug by moving library cache file to the game's private directory
 - Fixed a bug in navigation bar (should disable properly)
 - Fixed a bug where score would show incorrectly above 100 million during gameplay
