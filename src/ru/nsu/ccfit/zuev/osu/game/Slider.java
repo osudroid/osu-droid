@@ -29,8 +29,8 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.SkinJson;
-import ru.nsu.ccfit.zuev.osu.SkinManager;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
+import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
@@ -149,7 +149,7 @@ public class Slider extends GameObject {
         }
 
         num += 1;
-        if (SkinJson.get().isLimitComboTextLength()) {
+        if (OsuSkin.get().isLimitComboTextLength()) {
             num %= 10;
         }
         number = GameObjectPool.getInstance().getNumber(num);
@@ -188,9 +188,9 @@ public class Slider extends GameObject {
         kiai = GameHelper.isKiai();
         preStageFinish = false;
         color.set(r, g, b);
-        if (!SkinJson.get().isSliderFollowComboColor()) {
+        if (!OsuSkin.get().isSliderFollowComboColor()) {
             circleColor = color;
-            color = new RGBColor(SkinJson.get().getSliderBodyColor());
+            color = new RGBColor(OsuSkin.get().getSliderBodyColor());
         }
 
         if (soundId.length < repeats + 1) {
@@ -343,17 +343,17 @@ public class Slider extends GameObject {
 
             abstractSliderBody = new SliderBody2D(superPath);
             abstractSliderBody.setBodyWidth(
-                    Utils.toRes(SkinJson.get().getSliderBodyWidth() - SkinJson.get().getSliderBorderWidth())
+                    Utils.toRes(OsuSkin.get().getSliderBodyWidth() - OsuSkin.get().getSliderBorderWidth())
                             * scale);
-            abstractSliderBody.setBorderWidth(Utils.toRes(SkinJson.get().getSliderBodyWidth()) * scale);
-            abstractSliderBody.setSliderBodyBaseAlpha(SkinJson.get().getSliderBodyBaseAlpha());
+            abstractSliderBody.setBorderWidth(Utils.toRes(OsuSkin.get().getSliderBodyWidth()) * scale);
+            abstractSliderBody.setSliderBodyBaseAlpha(OsuSkin.get().getSliderBodyBaseAlpha());
 
-            if (SkinJson.get().isSliderHintEnable()) {
-                if (length > SkinJson.get().getSliderHintShowMinLength()) {
+            if (OsuSkin.get().isSliderHintEnable()) {
+                if (length > OsuSkin.get().getSliderHintShowMinLength()) {
                     abstractSliderBody.setEnableHint(true);
-                    abstractSliderBody.setHintAlpha(SkinJson.get().getSliderHintAlpha());
-                    abstractSliderBody.setHintWidth(Utils.toRes(SkinJson.get().getSliderHintWidth()));
-                    RGBColor hintColor = SkinJson.get().getSliderHintColor();
+                    abstractSliderBody.setHintAlpha(OsuSkin.get().getSliderHintAlpha());
+                    abstractSliderBody.setHintWidth(Utils.toRes(OsuSkin.get().getSliderHintWidth()));
+                    RGBColor hintColor = OsuSkin.get().getSliderHintColor();
                     if (hintColor != null) {
                         abstractSliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b());
                     } else {

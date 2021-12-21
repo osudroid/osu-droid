@@ -9,7 +9,7 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.SkinManager;
+import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;

@@ -65,8 +65,8 @@ import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.RGBAColor;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.SkinJson;
-import ru.nsu.ccfit.zuev.osu.SkinManager;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
+import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -520,8 +520,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     .parseInt(sliderColors[2]) / 255.0f));
         }
 
-        if (SkinJson.get().isForceOverrideSliderBorderColor()) {
-            GameHelper.setSliderColor(new RGBColor(SkinJson.get().getSliderBorderColor()));
+        if (OsuSkin.get().isForceOverrideSliderBorderColor()) {
+            GameHelper.setSliderColor(new RGBColor(OsuSkin.get().getSliderBorderColor()));
         }
 
         combos = new ArrayList<RGBColor>();
@@ -536,19 +536,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             ccolor = beatmapData.getData("Colours", "Combo" + comboNum++);
         }
         if (combos.isEmpty() || Config.isUseCustomComboColors()) {
-//			combos.add(new RGBColor(255 / 255.0f, 150 / 255.0f, 0 / 255.0f));
-//			combos.add(new RGBColor(5 / 255.0f, 240 / 255.0f, 5 / 255.0f));
-//			combos.add(new RGBColor(5 / 255.0f, 2 / 255.0f, 240 / 255.0f));
-//			combos.add(new RGBColor(240 / 255.0f, 5 / 255.0f, 5 / 255.0f));
             combos.clear();
             combos.addAll(Arrays.asList(Config.getComboColors()));
         }
-        if (SkinJson.get().isForceOverrideComboColor()) {
+        if (OsuSkin.get().isForceOverrideComboColor()) {
             combos.clear();
-            combos.addAll(SkinJson.get().getComboColor());
+            combos.addAll(OsuSkin.get().getComboColor());
         }
         comboNum = -1;
-        // if (combos.size() > 1) comboNum = 1;
         currentComboNum = 0;
         lastObjectHitTime = 0;
         final String defSound = beatmapData.getData("General", "SampleSet");
