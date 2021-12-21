@@ -1,12 +1,19 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
 import org.anddev.andengine.entity.modifier.MoveModifier;
-import org.anddev.andengine.util.modifier.ease.EaseLinear;
+import org.anddev.andengine.util.Debug;
+import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
+import org.anddev.andengine.util.modifier.ease.EaseQuintOut;
+import org.anddev.andengine.util.modifier.ease.EaseSineInOut;
 import org.anddev.andengine.util.modifier.ease.IEaseFunction;
 
+import java.util.Queue;
+
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameObject;
 import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
+import ru.nsu.ccfit.zuev.osu.game.HitCircle;
 import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
 import ru.nsu.ccfit.zuev.osu.game.Spinner;
 
@@ -20,7 +27,7 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
     /**
      * The Easing function to be used on the cursor.
      */
-    private final IEaseFunction easeFunction = EaseLinear.getInstance();
+    private final IEaseFunction easeFunction = EaseQuadOut.getInstance();
 
     public AutoCursor() {
         super();
@@ -61,15 +68,17 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
      *
      * @param object The object to move the cursor to.
      * @param secPassed The amount of seconds that have passed since the game has started.
+     * @param approachRate The approach rate of the beatmap.
      * @param listener The listener that listens to when this cursor is moved.
      */
-    public void moveToObject(GameObject object, float secPassed, GameObjectListener listener) {
+    public void moveToObject(GameObject object, float secPassed, float approachRate, GameObjectListener listener) {
         if (object == null || currentObjectId == object.getId()) {
             return;
         }
 
         float movePositionX = object.getPos().x;
         float movePositionY = object.getPos().y;
+        float deltaT = object.getHitTime() - secPassed;
 
         if (object instanceof Spinner) {
             movePositionX =  ((Spinner) object).center.x + 50 * (float) Math.sin(0);
@@ -77,7 +86,8 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
         }
 
         currentObjectId = object.getId();
-        float moveDelay = object.getHitTime() - secPassed;
+        // smoothing factor is arbitrary
+        float moveDelay = (deltaT / approachRate) + 0.1f;
         doAutoMove(movePositionX, movePositionY, moveDelay, listener);
     }
 

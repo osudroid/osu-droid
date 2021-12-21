@@ -1604,7 +1604,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
-            autoCursor.moveToObject(activeObjects.peek(), secPassed, this);
+            autoCursor.moveToObject(activeObjects.peek(), secPassed, approachRate, this);
         }
 
         int clickCount = 0;
