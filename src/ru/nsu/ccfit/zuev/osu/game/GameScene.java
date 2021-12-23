@@ -1989,6 +1989,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GlobalManager.getInstance().getSongService().stop();
             GlobalManager.getInstance().getSongService().preLoad(filePath);
             GlobalManager.getInstance().getSongService().play();
+            GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
         }
 
         /*try {
