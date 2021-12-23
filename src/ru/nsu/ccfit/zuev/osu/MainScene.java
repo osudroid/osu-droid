@@ -877,6 +877,7 @@ public class MainScene implements IUpdateHandler {
                 }
                 progressBar.setStartTime(0);
                 GlobalManager.getInstance().getSongService().play();
+                GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
                 if (lastTimingPoint != null) {
                     offset = lastTimingPoint.getTime() * 1000f % bpmLength;
                 }
