@@ -83,6 +83,7 @@ Changelog for 1.6.8
 - Use `HTTPS` protocol for all web-related operations
 - Moved skin selection option to Graphics category
 - Changed the game's domain to https://osudroid.moe/
+- Changed leaderboard avatar to point to game domain instead of Gravatar
 
 ## Bug fixes:
 
@@ -96,7 +97,7 @@ Changelog for 1.6.8
 - Fixed a bug where some slider ticks fail to display correctly
 - Fixed a bug where very high velocity reverse sliders (buzz sliders) have incorrect length
 - Fixed a bug where certain skin sound elements will crash the game
-    - The game will ignore audio files smaller than 1 KB will be ignored.
+    - The game will ignore audio files that have 0 B size.
 - Fixed SD card bug by moving library cache file to the game's private directory
 - Fixed a bug in navigation bar (should disable properly)
 - Fixed a bug where score would show incorrectly above 100 million during gameplay
@@ -141,6 +142,13 @@ Changelog for 1.6.8
 - [+] Added unstable rate (UR) in gameplay and result screen
     - Like average offset, this is only visible in gameplay if show FPS is enabled in Graphics settings.
     - When replaying a score, the result may differ from the original value due to the way replay is saved.
+- [+] Added the option to rotate cursor into `skin.json`
+    - Format in `skin.json` (set to `true` to enable, `false` to disable):
+        ```json
+        "Cursor": {
+            "rotateCursor": true
+        }
+        ```
 - [=] Updated audio engine
     - Should improve performance and optimize latency.
 - [=] Sliders will gradually fade out if HD (Hidden) mod is active
@@ -148,12 +156,13 @@ Changelog for 1.6.8
 - [=] Improved file-related operations' performance
 - [=] Use `HTTPS` protocol for all web-related operations
 - [=] FL (Flashlight) mod dim area now starts at the center of the screen
-- [=] Moved PP information in score result scene to left-bottom corner
+- [=] Moved PP information in score result scene
 - [=] FL (Flashlight) mod dim area now disappears during break time
 - [=] A cursor will appear when using Auto or AP (AutoPilot) mod
 - [=] Slightly reworked the display of options list
 - [=] Moved skin selection option to Graphics category
 - [=] Changed the game's domain to https://osudroid.moe/
+- [=] Changed leaderboard avatar to point to game domain instead of Gravatar
 - [=] Renamed "display PP in score" option to "display score statistics in score" to incorporate unstable rate and hit error to the option
 - [*] Fixed a bug where offline replays do not get saved
 - [*] Fixed a bug where FL (Flashlight) mod dim area flickers if the player taps during break

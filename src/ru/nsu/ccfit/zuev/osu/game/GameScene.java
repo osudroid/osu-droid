@@ -1599,7 +1599,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
-            autoCursor.moveToObject(activeObjects.peek(), secPassed, this);
+            autoCursor.moveToObject(activeObjects.peek(), secPassed, approachRate, this);
         }
 
         int clickCount = 0;
@@ -1989,6 +1989,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GlobalManager.getInstance().getSongService().stop();
             GlobalManager.getInstance().getSongService().preLoad(filePath);
             GlobalManager.getInstance().getSongService().play();
+            GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
         }
 
         /*try {
