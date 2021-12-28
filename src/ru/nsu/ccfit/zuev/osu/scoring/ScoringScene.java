@@ -483,6 +483,8 @@ public class ScoringScene {
 
         //save and upload score
         if (track != null && mapMD5 != null) {
+            ResourceManager.getInstance().getSound("applause").play();
+            ScoreLibrary.getInstance().addScore(track.getFilename(), stat, replay);
             if (stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
                     OnlineManager.getInstance().isReadyToSend()) {
                 boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator())
@@ -501,11 +503,7 @@ public class ScoringScene {
                 scene.attachChild(sendingPanel);
                 ScoreLibrary.getInstance().sendScoreOnline(stat, replay, sendingPanel);
             }
-
-            ResourceManager.getInstance().getSound("applause").play();
-            ScoreLibrary.getInstance().addScore(track.getFilename(), stat, replay);
         }
-
     }
 
     public Scene getScene() {
