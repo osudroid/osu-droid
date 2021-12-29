@@ -296,7 +296,7 @@
     <string name="opt_enableStoryboard_summary">Your phone will be very hot!</string>
     <string name="opt_enableStoryboard_title">Enable Storyboard</string>
 
-    <string name="opt_scandownload_summary">Scan /Download directory for new beatmaps (Might not work with SD Card)</string>
+    <string name="opt_scandownload_summary">Scan /Download directory for new beatmaps and skins (might not work with SD card)</string>
     <string name="opt_scandownload_title">Scan Download</string>
 
     <string name="opt_superSlider_title">Super Slider</string>
@@ -312,8 +312,8 @@
 	<string name="opt_calculate_slider_path_in_game_start_title">Calculate sliderpaths in game start</string>
 	<string name="opt_calculate_slider_path_in_game_start_summary">Increases performance in beatmaps where complex sliders are present, but increases beatmap load time</string>
 
-    <string name="opt_display_score_pp_title">Display PP in score</string>
-    <string name="opt_display_score_pp_summary">Displays PP value in score result screen</string>
+    <string name="opt_display_score_statistics_title">Display score statistics</string>
+    <string name="opt_display_score_statistics_summary">Displays score statistics (star rating, PP, and more) in result screen</string>
 
     <string name="opt_setplayfield_title">Set playfield size</string>
     <string name="opt_setplayfield_summary">Change the size of the playfield</string>
@@ -324,8 +324,8 @@
     <string name="opt_hide_replay_marquee_title">Hide replay marquee</string>
     <string name="opt_hide_replay_marquee_summary">Hide the scrolling text when watching replays</string>
 
-    <string name="opt_hide_ingame_ui_title">Hide ingame ui</string>
-    <string name="opt_hide_ingame_ui_summary">Hide the counters and other UIs when ingame</string>
+    <string name="opt_hide_ingame_ui_title">Hide gameplay UI</string>
+    <string name="opt_hide_ingame_ui_summary">Hide the counters and other UIs during gameplay</string>
 
     <string name="opt_receive_announcements_title">Receive announcements</string>
     <string name="opt_receive_announcements_summary">Receive notifications of announcements, events, etc.</string>

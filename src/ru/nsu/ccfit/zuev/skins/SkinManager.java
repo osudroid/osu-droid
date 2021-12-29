@@ -1,9 +1,12 @@
-package ru.nsu.ccfit.zuev.osu;
+package ru.nsu.ccfit.zuev.skins;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.RGBColor;
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
 public class SkinManager {
@@ -90,7 +93,7 @@ public class SkinManager {
                     && (f.getName().toLowerCase().matches(".*[.]wav")
                     || f.getName().toLowerCase().matches(".*[.]mp3")
                     || f.getName().toLowerCase().matches(".*[.]ogg"))
-                && f.length() >= 1024) {
+                && f.length() > 0) {
                 ResourceManager.getInstance().loadCustomSound(f);
             } else if (Config.isUseCustomSkins()
                     && (f.getName().toLowerCase().matches(".*[.]png")

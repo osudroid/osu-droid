@@ -44,7 +44,8 @@ Changelog for 1.6.8
     - Low storage causes bugs such as unwatchable replays and inability to watch local replays.
 - Option to precalculate slider path
     - Improves performance during gameplay at the cost of beatmap loading time.
-- Option to calculate pp (performance points) when opening a score
+- Option to show score statistics when opening a score
+    - Score statistics includes star rating, PP (performance points), and more.
 - Option to hide replay text when watching a replay
 - Option to save failed replays
 - Option to hide in-game UI
@@ -52,10 +53,14 @@ Changelog for 1.6.8
 - Option to replace all beatmaps' backgrounds with the current skin's `menu-background` image
     - Only affects in-game display. The actual beatmap background file will not be replaced.
 - Option to disable triangles animation
-    - Users with issues while triangles animation is active are encouraged to enable this option.
+    - Users with issues while triangles animation is active are encouraged to try this option.
 - New updater based on the game's GitHub repository releases
 - Separate loading screen for any game-related operations that takes some time to process
 - Support for push notifications
+- Option to scan download directory for `.osk` (skin) files
+- Display unstable rate (UR) in gameplay and result screen
+    - Like average offset, this is only visible in gameplay if show FPS is enabled in Graphics settings.
+    - When replaying a score, the result may differ from the original value due to the way replay is saved.
 
 ## Changes:
 
@@ -76,6 +81,9 @@ Changelog for 1.6.8
 - Changing volume-related options no longer requires a game restart
 - Improved file-related operations' performance
 - Use `HTTPS` protocol for all web-related operations
+- Moved skin selection option to Graphics category
+- Changed the game's domain to https://osudroid.moe/
+- Changed leaderboard avatar to point to game domain instead of Gravatar
 
 ## Bug fixes:
 
@@ -89,7 +97,7 @@ Changelog for 1.6.8
 - Fixed a bug where some slider ticks fail to display correctly
 - Fixed a bug where very high velocity reverse sliders (buzz sliders) have incorrect length
 - Fixed a bug where certain skin sound elements will crash the game
-    - The game will ignore audio files smaller than 1 KB will be ignored.
+    - The game will ignore audio files that have 0 B size.
 - Fixed SD card bug by moving library cache file to the game's private directory
 - Fixed a bug in navigation bar (should disable properly)
 - Fixed a bug where score would show incorrectly above 100 million during gameplay
@@ -125,11 +133,22 @@ Changelog for 1.6.8
 - [+] Added a new updater based on the game's GitHub repository releases
 - [+] Added a separate loading screen for any game-related operations that takes some time to process
 - [+] Added the option to disable triangles animation
-    - Users with issues while triangles animation is active are encouraged to enable this option.
+    - Users with issues while triangles animation is active are encouraged to try this option.
 - [+] Added the option to replace all beatmaps' backgrounds with the current skin's `menu-background` image
     - Only affects in-game display. The actual beatmap background file will not be replaced.
 - [+] Added the option to hide in-game UI
     - If enabled, this will hide combo bursts, health bar, combo counter, accuracy counter, and score counter during gameplay.
+- [+] Added the option to scan download directory for `.osk` (skin) files
+- [+] Added unstable rate (UR) in gameplay and result screen
+    - Like average offset, this is only visible in gameplay if show FPS is enabled in Graphics settings.
+    - When replaying a score, the result may differ from the original value due to the way replay is saved.
+- [+] Added the option to rotate cursor into `skin.json`
+    - Format in `skin.json` (set to `true` to enable, `false` to disable):
+        ```json
+        "Cursor": {
+            "rotateCursor": true
+        }
+        ```
 - [=] Updated audio engine
     - Should improve performance and optimize latency.
 - [=] Sliders will gradually fade out if HD (Hidden) mod is active
@@ -137,10 +156,14 @@ Changelog for 1.6.8
 - [=] Improved file-related operations' performance
 - [=] Use `HTTPS` protocol for all web-related operations
 - [=] FL (Flashlight) mod dim area now starts at the center of the screen
-- [=] Moved PP information in score result scene to left-bottom corner
+- [=] Moved PP information in score result scene
 - [=] FL (Flashlight) mod dim area now disappears during break time
 - [=] A cursor will appear when using Auto or AP (AutoPilot) mod
 - [=] Slightly reworked the display of options list
+- [=] Moved skin selection option to Graphics category
+- [=] Changed the game's domain to https://osudroid.moe/
+- [=] Changed leaderboard avatar to point to game domain instead of Gravatar
+- [=] Renamed "display PP in score" option to "display score statistics in score" to incorporate unstable rate and hit error to the option
 - [*] Fixed a bug where offline replays do not get saved
 - [*] Fixed a bug where FL (Flashlight) mod dim area flickers if the player taps during break
 - [*] Fixed a bug where beatmaps that haven't finished downloading gets imported

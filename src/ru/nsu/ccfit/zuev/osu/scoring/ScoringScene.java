@@ -450,9 +450,8 @@ public class ScoringScene {
         final Text playerInfo = new Text(Utils.toRes(4), mapperInfo.getY() + mapperInfo.getHeight() + Utils.toRes(2),
                 ResourceManager.getInstance().getFont("smallFont"), playerStr);
         //calculatePP
-        if (Config.isDisplayScorePP()){
+        if (Config.isDisplayScoreStatistics()){
             StringBuilder ppinfo = new StringBuilder();
-            ppinfo.append("[");
             DifficultyReCalculator diffRecalculator = new DifficultyReCalculator();
             float newstar = diffRecalculator.recalculateStar(
                 trackInfo,
@@ -461,27 +460,21 @@ public class ScoringScene {
             );
             diffRecalculator.calculatePP(stat, trackInfo);
             double pp = diffRecalculator.getTotalPP();
-            double aimpp = diffRecalculator.getAimPP();
-            double spdpp = diffRecalculator.getSpdPP();
-            double accpp = diffRecalculator.getAccPP();
             diffRecalculator.calculateMaxPP(stat, trackInfo);
             double max_pp = diffRecalculator.getTotalPP();
-            double max_aimpp = diffRecalculator.getAimPP();
-            double max_spdpp = diffRecalculator.getSpdPP();
-            double max_accpp = diffRecalculator.getAccPP();
-            ppinfo.append(String.format(Locale.ENGLISH, "%.2f*, ", newstar));
-            ppinfo.append(String.format(Locale.ENGLISH, "%.2f/%.2fpp (", pp, max_pp));
-            ppinfo.append(String.format(Locale.ENGLISH, "Aim: %.0f/%.0f, ", aimpp, max_aimpp));
-            ppinfo.append(String.format(Locale.ENGLISH, "Speed: %.0f/%.0f, ", spdpp, max_spdpp));
-            ppinfo.append(String.format(Locale.ENGLISH, "Accuracy: %.0f/%.0f)", accpp, max_accpp));
-            ppinfo.append("]");
-            String ppStr = ppinfo.toString();
+            ppinfo.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fpp", newstar, pp, max_pp));
+            if (stat.getUnstableRate() > 0) {
+                ppinfo.append("\n\n");
+                ppinfo.append(String.format(Locale.ENGLISH, "Error: %.2fms - %.2fms avg", stat.getNegativeHitError(), stat.getPositiveHitError()));
+                ppinfo.append("\n");
+                ppinfo.append(String.format(Locale.ENGLISH, "Unstable Rate: %.2f", stat.getUnstableRate()));
+            }
             final Text ppInfo = new Text(Utils.toRes(4), Config.getRES_HEIGHT() - playerInfo.getHeight() - Utils.toRes(2),
-                    ResourceManager.getInstance().getFont("smallFont"), ppStr);
-            ppInfo.setPosition(Utils.toRes(4), Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(2));
-            final Rectangle bgBottomRect = new Rectangle(0, Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(4), ppInfo.getWidth() + Utils.toRes(12), ppInfo.getHeight() + Utils.toRes(4));
-            bgBottomRect.setColor(0, 0, 0, 0.5f);
-            scene.attachChild(bgBottomRect);
+                    ResourceManager.getInstance().getFont("smallFont"), ppinfo.toString());
+            ppInfo.setPosition(Utils.toRes(244), Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(2));
+            final Rectangle statisticRectangle = new Rectangle(Utils.toRes(240), Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(4), ppInfo.getWidth() + Utils.toRes(12), ppInfo.getHeight() + Utils.toRes(4));
+            statisticRectangle.setColor(0, 0, 0, 0.5f);
+            scene.attachChild(statisticRectangle);
             scene.attachChild(ppInfo);
         }
         scene.attachChild(beatmapInfo);
@@ -490,6 +483,8 @@ public class ScoringScene {
 
         //save and upload score
         if (track != null && mapMD5 != null) {
+            ResourceManager.getInstance().getSound("applause").play();
+            ScoreLibrary.getInstance().addScore(track.getFilename(), stat, replay);
             if (stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
                     OnlineManager.getInstance().isReadyToSend()) {
                 boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator())
@@ -508,11 +503,7 @@ public class ScoringScene {
                 scene.attachChild(sendingPanel);
                 ScoreLibrary.getInstance().sendScoreOnline(stat, replay, sendingPanel);
             }
-
-            ResourceManager.getInstance().getSound("applause").play();
-            ScoreLibrary.getInstance().addScore(track.getFilename(), stat, replay);
         }
-
     }
 
     public Scene getScene() {

@@ -8,6 +8,7 @@ import com.edlplan.framework.math.line.LinePath;
 
 import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.scene.Scene;
+import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 
@@ -77,14 +78,16 @@ public class SliderBody2D extends AbstractSliderBody {
      * @param duration The duration of the fade-out animation.
      */
     public void fadeOut(float duration) {
+        final EaseQuadOut easing = EaseQuadOut.getInstance();
+
         if (body.getAlpha() > 0) {
-            body.registerEntityModifier(new AlphaModifier(duration, body.getAlpha(), 0));
+            body.registerEntityModifier(new AlphaModifier(duration, body.getAlpha(), 0, easing));
         }
         if (border.getAlpha() > 0) {
-            border.registerEntityModifier(new AlphaModifier(duration, border.getAlpha(), 0));
+            border.registerEntityModifier(new AlphaModifier(duration, border.getAlpha(), 0, easing));
         }
         if (hint != null && hint.getAlpha() > 0) {
-            hint.registerEntityModifier(new AlphaModifier(duration, hint.getAlpha(), 0));
+            hint.registerEntityModifier(new AlphaModifier(duration, hint.getAlpha(), 0, easing));
         }
     }
 
