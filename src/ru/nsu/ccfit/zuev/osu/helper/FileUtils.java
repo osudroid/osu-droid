@@ -120,7 +120,7 @@ public class FileUtils {
         return sb.toString();
     }
 
-    // TODO: Make this more accurate
+    // Need to make this more accurate
     public static boolean canUseSD() {
         if (Environment.getExternalStorageState().equals(
                 Environment.MEDIA_MOUNTED)) {
