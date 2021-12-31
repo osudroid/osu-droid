@@ -47,7 +47,7 @@ public class LibraryManager {
     public boolean loadLibraryCache(final Activity activity, boolean forceUpdate) {
         library = new ArrayList<BeatmapInfo>();
         ToastLogger.addToLog("Loading library...");
-        if (OSZParser.canUseSD() == false) {
+        if (!FileUtils.canUseSD()) {
             ToastLogger.addToLog("Can't use SD card!");
             return true;
         }

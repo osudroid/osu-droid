@@ -740,49 +740,39 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final ChangeableText fpsText = new ChangeableText(Utils.toRes(790),
                     Utils.toRes(520), font, "00.00 FPS");
             final ChangeableText urText = new ChangeableText(Utils.toRes(720),
-                    Utils.toRes(480), font, "Unstable rate: 0.00     ");
-            final ChangeableText accText = new ChangeableText(Utils.toRes(720),
-                    Utils.toRes(440), font, "Avg offset: 0ms     ");
+                    Utils.toRes(480), font, "00.00 UR    ");
+            /* final ChangeableText accText = new ChangeableText(Utils.toRes(720),
+                    Utils.toRes(440), font, "Avg offset: 0ms     ");  */
             fpsText.setPosition(Config.getRES_WIDTH() - fpsText.getWidth() - 5, Config.getRES_HEIGHT() - fpsText.getHeight() - 10);
-            accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
-            urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, accText.getY() - urText.getHeight());
+            // accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
+            urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, fpsText.getY() - urText.getHeight());
             fgScene.attachChild(fpsText);
-            fgScene.attachChild(accText);
+            // fgScene.attachChild(accText);
             fgScene.attachChild(urText);
 
             ChangeableText memText = null;
             if (BuildConfig.DEBUG) {
                 memText = new ChangeableText(Utils.toRes(780),
-                        Utils.toRes(520), font, "M: 100/100");
+                        Utils.toRes(520), font, "0 MB/0 MB    ");
                 fgScene.attachChild(memText);
             }
 
             final ChangeableText fmemText = memText;
             fgScene.registerUpdateHandler(new FPSCounter() {
-                int elapsedInt = 0;
-
                 @Override
                 public void onUpdate(final float pSecondsElapsed) {
                     super.onUpdate(pSecondsElapsed);
-                    elapsedInt++;
                     fpsText.setText(Math.round(this.getFPS()) + " FPS");
-                    if (offsetRegs != 0 && elapsedInt > 200) {
-                        float mean = avgOffset / offsetRegs;
-                        accText.setText("Avg offset: "
-                                + (int) (mean * 1000f)
-                                + "ms");
-                        elapsedInt = 0;
-                    }
-                    urText.setText(String.format(Locale.ENGLISH, "Unstable rate: %.2f", stat.getUnstableRate()));
+                    urText.setText(String.format(Locale.ENGLISH, "%.2f UR    ", stat.getUnstableRate()));
 
                     fpsText.setPosition(Config.getRES_WIDTH() - fpsText.getWidth() - 5, Config.getRES_HEIGHT() - fpsText.getHeight() - 10);
-                    accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
-                    urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, accText.getY() - urText.getHeight());
+                    urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, fpsText.getY() - urText.getHeight());
 
                     if (fmemText != null) {
-                        fmemText.setText("M: "
-                                + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024
-                                + "/" + Runtime.getRuntime().totalMemory() / 1024 / 1024);
+                        Runtime runtime = Runtime.getRuntime();
+                        fmemText.setText(
+                            ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB"
+                            + "/" + (Runtime.getRuntime().totalMemory() / 1024 / 1024) + " MB    ");
                         fmemText.setPosition(Config.getRES_WIDTH() - fmemText.getWidth() - 5, urText.getY() - fmemText.getHeight());
                     }
 
