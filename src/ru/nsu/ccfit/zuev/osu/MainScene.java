@@ -214,9 +214,11 @@ public class MainScene implements IUpdateHandler {
                     new AsyncTaskLoader().execute(new OsuAsyncCallback() {
                         public void run() {
                             GlobalManager.getInstance().getEngine().setScene(new LoadingScreen().getScene());
+                            GlobalManager.getInstance().getMainActivity().checkNewSkins();
                             GlobalManager.getInstance().getMainActivity().checkNewBeatmaps();
-                            if (!LibraryManager.getInstance().loadLibraryCache(GlobalManager.getInstance().getMainActivity(), false)) {
+                            if (!LibraryManager.getInstance().loadLibraryCache(GlobalManager.getInstance().getMainActivity(), true)) {
                                 LibraryManager.getInstance().scanLibrary(GlobalManager.getInstance().getMainActivity());
+                                System.gc();
                             }
                             GlobalManager.getInstance().getSongMenu().reload();
                             /* To fixed skin load bug in some Android 10

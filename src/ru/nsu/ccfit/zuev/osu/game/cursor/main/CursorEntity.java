@@ -37,7 +37,8 @@ public class CursorEntity extends Entity {
     }
 
     public void setShowing(boolean showing) {
-        this.isShowing = showing;
+        isShowing = showing;
+        setVisible(showing);
         if (particles != null)
             particles.setParticlesSpawnEnabled(showing);
     }
@@ -47,14 +48,15 @@ public class CursorEntity extends Entity {
     }
 
     public void update(float pSecondsElapsed) {
-        this.handleLongerTrail();
-        cursorSprite.update(pSecondsElapsed, isShowing);
+        // this.handleLongerTrail();
+        if(isShowing) {
+            cursorSprite.update(pSecondsElapsed);
+        }
         super.onManagedUpdate(pSecondsElapsed);
     }
 
-    private void handleLongerTrail() {
-        //TODO:finish Longer Tail
-        /*
+    // TODO:finish Longer Tail
+    /* private void handleLongerTrail() {  
         if (isShowing && Config.isUseLongTrail()) {
             if (oldPoint != null){
                 float px = cursorSprite.getX() - oldPoint.x;
@@ -93,8 +95,8 @@ public class CursorEntity extends Entity {
                     }
                 }
             }
-        }*/
-    }
+        }
+    } */
 
     public void attachToScene(Scene fgScene) {
         if (particles != null) {

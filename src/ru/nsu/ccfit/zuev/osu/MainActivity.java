@@ -70,7 +70,8 @@ import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.ZipFile;
+
+import net.lingala.zip4j.ZipFile;
 
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -259,7 +260,7 @@ public class MainActivity extends BaseGameActivity implements
 
             //TODO removed auto registration at first launch
             /*OnlineInitializer initializer = new OnlineInitializer(this);
-			initializer.createInitDialog();*/
+            initializer.createInitDialog();*/
         }
     }
 
@@ -395,32 +396,24 @@ public class MainActivity extends BaseGameActivity implements
         }
     }
 
-    public static boolean isZipValid(File file) {
-        try {
-            ZipFile zipfile = new ZipFile(file);
-            zipfile.close();
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
-    }
-
     public void checkNewBeatmaps() {
         GlobalManager.getInstance().setInfo("Checking for new maps...");
         final File mainDir = new File(Config.getCorePath());
         if (beatmapToAdd != null) {
             File file = new File(beatmapToAdd);
-            if (file.getName().endsWith(".osz")) {
+            if (file.getName().toLowerCase().endsWith(".osz")) {
                 ToastLogger.showText(
                         StringTable.get(R.string.message_lib_importing),
                         false);
-                if (OSZParser.parseOSZ(MainActivity.this, beatmapToAdd)) {
+
+                if(FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath())) {
                     String folderName = beatmapToAdd.substring(0, beatmapToAdd.length() - 4);
                     // We have imported the beatmap!
                     ToastLogger.showText(
                             StringTable.format(R.string.message_lib_imported, folderName),
                             true);
                 }
+
                 // LibraryManager.getInstance().sort();
                 LibraryManager.getInstance().savetoCache(MainActivity.this);
             } else if (file.getName().endsWith(".odr")) {
@@ -430,8 +423,8 @@ public class MainActivity extends BaseGameActivity implements
             File[] filelist = FileUtils.listFiles(mainDir, ".osz");
             final ArrayList<String> beatmaps = new ArrayList<String>();
             for (final File file : filelist) {
-                if (isZipValid(file)
-                        && file.getName().endsWith(".osz")) {
+                ZipFile zip = new ZipFile(file);
+                if(zip.isValidZipFile()) {
                     beatmaps.add(file.getPath());
                 }
             }
@@ -441,8 +434,8 @@ public class MainActivity extends BaseGameActivity implements
                     && beatmapDir.isDirectory()) {
                 filelist = FileUtils.listFiles(beatmapDir, ".osz");
                 for (final File file : filelist) {
-                    if (isZipValid(file)
-                            && file.getName().endsWith(".osz")) {
+                    ZipFile zip = new ZipFile(file);
+                    if(zip.isValidZipFile()) {
                         beatmaps.add(file.getPath());
                     }
                 }
@@ -454,29 +447,29 @@ public class MainActivity extends BaseGameActivity implements
                     && downloadDir.isDirectory()) {
                 filelist = FileUtils.listFiles(downloadDir, ".osz");
                 for (final File file : filelist) {
-                    if (isZipValid(file)
-                            && file.getName().endsWith(".osz")) {
+                    ZipFile zip = new ZipFile(file);
+                    if(zip.isValidZipFile()) {
                         beatmaps.add(file.getPath());
                     }
                 }
             }
 
             if (beatmaps.size() > 0) {
-                final boolean deleteOsz = Config.isDELETE_OSZ();
-                Config.setDELETE_OSZ(true);
+                // final boolean deleteOsz = Config.isDELETE_OSZ();
+                // Config.setDELETE_OSZ(true);
                 ToastLogger.showText(StringTable.format(
                         R.string.message_lib_importing_several,
                         beatmaps.size()), false);
-                for (final String s : beatmaps) {
-                    if (OSZParser.parseOSZ(MainActivity.this, s)) {
-                        String folderName = s.substring(0, s.length() - 4);
+                for (final String beatmap : beatmaps) {
+                    if(FileUtils.extractZip(beatmap, Config.getBeatmapPath())) {
+                        String folderName = beatmap.substring(0, beatmap.length() - 4);
                         // We have imported the beatmap!
                         ToastLogger.showText(
                                 StringTable.format(R.string.message_lib_imported, folderName),
                                 true);
                     }
                 }
-                Config.setDELETE_OSZ(deleteOsz);
+                // Config.setDELETE_OSZ(deleteOsz);
 
                 // LibraryManager.getInstance().sort();
                 LibraryManager.getInstance().savetoCache(MainActivity.this);
@@ -493,10 +486,13 @@ public class MainActivity extends BaseGameActivity implements
         final File skinDir = new File(Config.getSkinTopPath());
 
         if (skinDir.exists() && skinDir.isDirectory()) {
-            final File[] files = skinDir.listFiles(file -> isZipValid(file) && file.getName().endsWith(".osk"));
+            final File[] files = FileUtils.listFiles(skinDir, ".osk");
 
             for (final File file : files) {
-                skins.add(file.getPath());
+                ZipFile zip = new ZipFile(file);
+                if(zip.isValidZipFile()) {
+                    skins.add(file.getPath());
+                }
             }
         }
 
@@ -506,10 +502,13 @@ public class MainActivity extends BaseGameActivity implements
         if (Config.isSCAN_DOWNLOAD()
                 && downloadDir.exists()
                 && downloadDir.isDirectory()) {
-            final File[] files = downloadDir.listFiles(file -> isZipValid(file) && file.getName().endsWith(".osk"));
+            final File[] files = FileUtils.listFiles(downloadDir, ".osk");
 
             for (final File file : files) {
-                skins.add(file.getPath());
+                ZipFile zip = new ZipFile(file);
+                if(zip.isValidZipFile()) {
+                    skins.add(file.getPath());
+                }
             }
         }
 
@@ -519,12 +518,13 @@ public class MainActivity extends BaseGameActivity implements
                     skins.size()), false);
 
             for (final String skin : skins) {
-                if (SkinImporter.importSkin(skin)) {
+                if (FileUtils.extractZip(skin, Config.getSkinTopPath())) {
                     String folderName = skin.substring(0, skin.length() - 4);
                     // We have imported the skin!
                     ToastLogger.showText(
                             StringTable.format(R.string.message_lib_imported, folderName),
                             true);
+                    Config.addSkin(folderName.substring(folderName.lastIndexOf("/") + 1), skin);
                 }
             }
         }
@@ -616,7 +616,7 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     protected void onStart() {
-//		this.enableAccelerometerSensor(this);
+//        this.enableAccelerometerSensor(this);
         if (getIntent().getAction() != null
                 && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
             if (ContentResolver.SCHEME_FILE.equals(getIntent().getData().getScheme())) {
@@ -720,14 +720,14 @@ public class MainActivity extends BaseGameActivity implements
             }
         }
         if (hasFocus && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Config.isHideNaviBar()) {
-        	getWindow().getDecorView().setSystemUiVisibility(
+            getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-		}
+        }
     }
 
     @Override

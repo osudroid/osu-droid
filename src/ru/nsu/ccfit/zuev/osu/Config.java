@@ -12,12 +12,17 @@ import androidx.preference.PreferenceManager;
 import com.edlplan.favorite.FavoriteLibrary;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.util.Debug;
 
-import java.util.UUID;
+import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
 public class Config {
     private static String corePath,
@@ -88,6 +93,8 @@ public class Config {
         playfieldSize,
         cursorSize;
 
+    private static Map<String, String> skins;
+
     private static RGBColor[] comboColors;
     private static Context context;
 
@@ -141,6 +148,7 @@ public class Config {
                 .commit();
             Config.loadConfig(context);
         }
+        
 
         //advanced
         defaultCorePath = Environment.getExternalStorageDirectory() + "/osu!droid/";
@@ -188,6 +196,14 @@ public class Config {
             comboColors[i - 1] = RGBColor.hex2Rgb(ColorPickerPreference.convertToRGB(prefs.getInt("combo" + i, 0xff000000)));
         }
 
+        // skins
+        File[] folders = FileUtils.listFiles(new File(skinTopPath), file -> file.isDirectory() && !file.getName().startsWith("."));
+        skins = new HashMap<String, String>();
+        for(File folder : folders) {
+            skins.put(folder.getName(), folder.getPath());
+            Debug.i("skins: " + folder.getName() + " - " + folder.getPath());
+        }
+
         // beatmaps
         DELETE_OSZ = prefs.getBoolean("deleteosz", true);
         SCAN_DOWNLOAD = prefs.getBoolean("scandownload", false);
@@ -209,7 +225,7 @@ public class Config {
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
         calculateSliderPathInGameStart = prefs.getBoolean("calculateSliderPathInGameStart", false);
-        displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", true);
+        displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", false);
         hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
@@ -749,6 +765,15 @@ public class Config {
 
     public static String getDefaultCorePath() {
         return defaultCorePath;
+    }
+
+    public static Map<String, String> getSkins(){
+        return skins;
+    }
+
+    public static void addSkin(String name, String path) {
+        if(skins == null) skins = new HashMap<String, String>();
+        skins.put(name, path);
     }
 
 }
