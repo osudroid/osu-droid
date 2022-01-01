@@ -5,6 +5,7 @@ import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 import org.anddev.andengine.util.modifier.ease.IEaseFunction;
 
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameObject;
 import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
 import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
@@ -79,7 +80,11 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
         }
 
         currentObjectId = object.getId();
-        // smoothing factor is arbitrary
+        if (GameHelper.ms2ar(approachRate) > 12f) {
+            approachRate *= 1000f;
+        } else if (GameHelper.ms2ar(approachRate) > 10f) {
+            approachRate *= 4f;
+        }
         float moveDelay = (deltaT / approachRate) + 0.1f;
         doAutoMove(movePositionX, movePositionY, moveDelay, listener);
     }
