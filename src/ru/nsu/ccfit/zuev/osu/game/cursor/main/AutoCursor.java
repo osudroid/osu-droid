@@ -10,7 +10,6 @@ import ru.nsu.ccfit.zuev.osu.game.GameObject;
 import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
 import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
 import ru.nsu.ccfit.zuev.osu.game.Spinner;
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public class AutoCursor extends CursorEntity implements ISliderListener {
     private MoveModifier currentModifier;
@@ -60,13 +59,13 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
 
     /**
      * Moves the cursor to the specified object.
+     *
      * @param object       The object to move the cursor to.
      * @param secPassed    The amount of seconds that have passed since the game has started.
      * @param approachRate The approach rate of the beatmap.
-     * @param stat         The StatisticsV2 class for force AR checking.
      * @param listener     The listener that listens to when this cursor is moved.
      */
-    public void moveToObject(GameObject object, float secPassed, float approachRate, StatisticV2 stat, GameObjectListener listener) {
+    public void moveToObject(GameObject object, float secPassed, float approachRate, GameObjectListener listener) {
         if (object == null || currentObjectId == object.getId()) {
             return;
         }
@@ -81,14 +80,10 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
         }
 
         currentObjectId = object.getId();
-        if (stat.getForceAR() != approachRate && stat.isEnableForceAR()) {
-            if (stat.getForceAR() > 12f) {
-                approachRate = (float) GameHelper.ar2ms(stat.getForceAR()); // AR 12 is pretty much instantaneous so it doesn't matter
-            } else if (stat.getForceAR() > 10f) {
-                approachRate = (float) GameHelper.ar2ms(stat.getForceAR()) / 250f;
-            } else {
-                approachRate = (float) GameHelper.ar2ms(stat.getForceAR()) / 1000f;
-            }
+        if (GameHelper.ms2ar(approachRate) > 12f) {
+            approachRate *= 1000f;
+        } else if (GameHelper.ms2ar(approachRate) > 10f) {
+            approachRate *= 4f;
         }
         float moveDelay = (deltaT / approachRate) + 0.1f;
         doAutoMove(movePositionX, movePositionY, moveDelay, listener);
