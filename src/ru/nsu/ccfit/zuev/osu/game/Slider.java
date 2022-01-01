@@ -740,8 +740,8 @@ public class Slider extends GameObject {
         //int type = repeatCount > 0 ? GameObjectListener.SLIDER_REPEAT : GameObjectListener.SLIDER_END;
         repeatCount--;
         // If alpha > 0 means cursor in slider ball bounds
-        if (followcircle.getAlpha() > 0 && replayData == null ||
-                replayData != null && replayData.tickSet.get(tickIndex)) {
+        if (followcircle.getAlpha() > 0 && replayObjectData == null ||
+                replayObjectData != null && replayObjectData.tickSet.get(tickIndex)) {
             if (soundIdIndex < soundId.length)
                 Utils.playHitSound(listener, soundId[soundIdIndex],
                         sampleSet[soundIdIndex], addition[soundIdIndex]);
@@ -886,9 +886,9 @@ public class Slider extends GameObject {
                 Utils.playHitSound(listener, soundId[0], sampleSet[0], addition[0]);
                 ticksGot++;
                 listener.onSliderHit(id, 30, null, path.points.get(0), false, color, GameObjectListener.SLIDER_START);
-            } else if (replayData != null &&
-                    Math.abs(replayData.accuracy / 1000f) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty()) &&
-                    passedTime + dt / 2 > replayData.accuracy / 1000f) {
+            } else if (replayObjectData != null &&
+                    Math.abs(replayObjectData.accuracy / 1000f) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty()) &&
+                    passedTime + dt / 2 > replayObjectData.accuracy / 1000f) {
                 startHit = true;
                 Utils.playHitSound(listener, soundId[0], sampleSet[0], addition[0]);
                 ticksGot++;
@@ -1187,8 +1187,8 @@ public class Slider extends GameObject {
         while (ticks.size() > 0 && percentage < 1 - 0.02f / maxTime
                 && tickTime * GameHelper.getTickRate() > tickInterval) {
             tickTime -= tickInterval / GameHelper.getTickRate();
-            if (followcircle.getAlpha() > 0 && replayData == null ||
-                    replayData != null && replayData.tickSet.get(tickIndex)) {
+            if (followcircle.getAlpha() > 0 && replayObjectData == null ||
+                    replayObjectData != null && replayObjectData.tickSet.get(tickIndex)) {
                 Utils.playHitSound(listener, 16);
                 listener.onSliderHit(id, 10, null, ballpos, false, color, GameObjectListener.SLIDER_TICK);
                 ticksGot++;

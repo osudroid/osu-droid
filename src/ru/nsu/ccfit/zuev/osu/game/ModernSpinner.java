@@ -205,7 +205,7 @@ public class ModernSpinner extends Spinner {
             }
         } else if (Math.abs(rotations) > 1) {
             rotations -= 1 * Math.signum(rotations);
-            if (replayData == null || replayData.accuracy / 4 > fullRotations) {
+            if (replayObjectData == null || replayObjectData.accuracy / 4 > fullRotations) {
                 fullRotations++;
                 stat.registerSpinnerHit();
                 float rate = 0.375f;
@@ -236,12 +236,12 @@ public class ModernSpinner extends Spinner {
         }
         listener.removeObject(ModernSpinner.this);
         int score = 0;
-        if (replayData != null) {
-            if (fullRotations < replayData.accuracy / 4)
-                fullRotations = replayData.accuracy / 4;
+        if (replayObjectData != null) {
+            if (fullRotations < replayObjectData.accuracy / 4)
+                fullRotations = replayObjectData.accuracy / 4;
             if (fullRotations >= needRotations)
                 clear = true;
-            int bonusRot = (int) (replayData.accuracy / 4 - needRotations + 1);
+            int bonusRot = (int) (replayObjectData.accuracy / 4 - needRotations + 1);
             while (bonusRot < score) {
                 bonusRot++;
                 listener.onSpinnerHit(id, 1000, false, 0);
@@ -258,8 +258,8 @@ public class ModernSpinner extends Spinner {
         if (clear) {
             score = 300;
         }
-        if (replayData != null) {
-            switch (replayData.accuracy % 4) {
+        if (replayObjectData != null) {
+            switch (replayObjectData.accuracy % 4) {
                 case 0:
                     score = 0;
                     break;
