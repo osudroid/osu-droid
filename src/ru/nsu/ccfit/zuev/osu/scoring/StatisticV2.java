@@ -270,7 +270,12 @@ public class StatisticV2 implements Serializable {
             }
             totalScore = (int)(MAX_SCORE * (ACC_PORTION * Math.pow(acc , 10) * percentage
                     + COMBO_PORTION * maxcb / maxHighestCombo) + bonusScore);
-        } else{
+        } else if (amount + amount * currentCombo * diffModifier / 25 > 0) {
+            // It is possible for score addition to be a negative number due to
+            // difficulty modifier, hence the prior check.
+            //
+            // In that case, just skip score addition to ensure score is always positive.
+
             //如果分数溢出或分数满了
             if (totalScore + (amount * currentCombo * diffModifier) / 25 + amount < 0 || totalScore == Integer.MAX_VALUE){
                 totalScore = Integer.MAX_VALUE;
