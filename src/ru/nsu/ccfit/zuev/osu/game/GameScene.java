@@ -90,6 +90,8 @@ import ru.nsu.ccfit.zuev.osu.menu.PauseMenu;
 import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
+import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
+import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
@@ -738,49 +740,39 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final ChangeableText fpsText = new ChangeableText(Utils.toRes(790),
                     Utils.toRes(520), font, "00.00 FPS");
             final ChangeableText urText = new ChangeableText(Utils.toRes(720),
-                    Utils.toRes(480), font, "Unstable rate: 0.00     ");
-            final ChangeableText accText = new ChangeableText(Utils.toRes(720),
-                    Utils.toRes(440), font, "Avg offset: 0ms     ");
+                    Utils.toRes(480), font, "00.00 UR    ");
+            /* final ChangeableText accText = new ChangeableText(Utils.toRes(720),
+                    Utils.toRes(440), font, "Avg offset: 0ms     ");  */
             fpsText.setPosition(Config.getRES_WIDTH() - fpsText.getWidth() - 5, Config.getRES_HEIGHT() - fpsText.getHeight() - 10);
-            accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
-            urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, accText.getY() - urText.getHeight());
+            // accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
+            urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, fpsText.getY() - urText.getHeight());
             fgScene.attachChild(fpsText);
-            fgScene.attachChild(accText);
+            // fgScene.attachChild(accText);
             fgScene.attachChild(urText);
 
             ChangeableText memText = null;
             if (BuildConfig.DEBUG) {
                 memText = new ChangeableText(Utils.toRes(780),
-                        Utils.toRes(520), font, "M: 100/100");
+                        Utils.toRes(520), font, "0 MB/0 MB    ");
                 fgScene.attachChild(memText);
             }
 
             final ChangeableText fmemText = memText;
             fgScene.registerUpdateHandler(new FPSCounter() {
-                int elapsedInt = 0;
-
                 @Override
                 public void onUpdate(final float pSecondsElapsed) {
                     super.onUpdate(pSecondsElapsed);
-                    elapsedInt++;
                     fpsText.setText(Math.round(this.getFPS()) + " FPS");
-                    if (offsetRegs != 0 && elapsedInt > 200) {
-                        float mean = avgOffset / offsetRegs;
-                        accText.setText("Avg offset: "
-                                + (int) (mean * 1000f)
-                                + "ms");
-                        elapsedInt = 0;
-                    }
-                    urText.setText(String.format(Locale.ENGLISH, "Unstable rate: %.2f", stat.getUnstableRate()));
+                    urText.setText(String.format(Locale.ENGLISH, "%.2f UR    ", stat.getUnstableRate()));
 
                     fpsText.setPosition(Config.getRES_WIDTH() - fpsText.getWidth() - 5, Config.getRES_HEIGHT() - fpsText.getHeight() - 10);
-                    accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
-                    urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, accText.getY() - urText.getHeight());
+                    urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, fpsText.getY() - urText.getHeight());
 
                     if (fmemText != null) {
-                        fmemText.setText("M: "
-                                + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024
-                                + "/" + Runtime.getRuntime().totalMemory() / 1024 / 1024);
+                        Runtime runtime = Runtime.getRuntime();
+                        fmemText.setText(
+                            ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB"
+                            + "/" + (Runtime.getRuntime().totalMemory() / 1024 / 1024) + " MB    ");
                         fmemText.setPosition(Config.getRES_WIDTH() - fmemText.getWidth() - 5, urText.getY() - fmemText.getHeight());
                     }
 
@@ -1364,39 +1356,43 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (replay.cursorMoves.size() <= i){
                     break;
                 }
-                cIndex = replay.cursorIndex[i];
-                //Emulating moves
-                while (cIndex < replay.cursorMoves.get(i).size &&
-                        replay.cursorMoves.get(i).time[cIndex] <= (secPassed + dt / 4) * 1000) {
-                    final Replay.MoveArray move = replay.cursorMoves.get(i);
 
-                    if (move.id[cIndex] == Replay.ID_DOWN) {
+                cIndex = replay.cursorIndex[i];
+                Replay.ReplayMovement movement = null;
+
+                // Emulating moves
+                while (
+                        cIndex < replay.cursorMoves.get(i).size &&
+                        (movement = replay.cursorMoves.get(i).movements[cIndex]).getTime() <= (secPassed + dt / 4) * 1000
+                ) {
+                    float mx = movement.getPoint().x;
+                    float my = movement.getPoint().y;
+                    if (movement.getTouchType() == TouchType.DOWN) {
                         cursors[i].mouseDown = true;
-                        for (int j = 0; j < replay.cursorIndex.length; j++)
+                        for (int j = 0; j < replay.cursorIndex.length; j++) {
                             cursors[j].mouseOldDown = false;
-                        cursors[i].mousePos.x = move.x[cIndex];
-                        cursors[i].mousePos.y = move.y[cIndex];
+                        }
+                        cursors[i].mousePos.x = mx;
+                        cursors[i].mousePos.y = my;
+
                         replay.lastMoveIndex[i] = -1;
-                    } else if (move.id[cIndex] == Replay.ID_MOVE) {
-                        cursors[i].mousePos.x = move.x[cIndex];
-                        cursors[i].mousePos.y = move.y[cIndex];
+                    } else if (movement.getTouchType() == TouchType.MOVE) {
+                        cursors[i].mousePos.x = mx;
+                        cursors[i].mousePos.y = my;
                         replay.lastMoveIndex[i] = cIndex;
                     } else {
                         cursors[i].mouseDown = false;
                     }
-
                     replay.cursorIndex[i]++;
                     cIndex++;
                 }
-                //Interpolating cursor movements
-                if (cIndex < replay.cursorMoves.get(i).size &&
-                        replay.cursorMoves.get(i).id[cIndex] == Replay.ID_MOVE &&
-                        replay.lastMoveIndex[i] >= 0) {
-                    final Replay.MoveArray move = replay.cursorMoves.get(i);
+                // Interpolating cursor movements
+                if (movement != null && movement.getTouchType() == TouchType.MOVE && replay.lastMoveIndex[i] >= 0) {
                     final int lIndex = replay.lastMoveIndex[i];
-                    float t = (secPassed * 1000 - move.time[cIndex]) / (move.time[lIndex] - move.time[cIndex]);
-                    cursors[i].mousePos.x = move.x[lIndex] * t + move.x[cIndex] * (1 - t);
-                    cursors[i].mousePos.y = move.y[lIndex] * t + move.y[cIndex] * (1 - t);
+                    final Replay.ReplayMovement lastMovement = replay.cursorMoves.get(i).movements[lIndex];
+                    float t = (secPassed * 1000 - movement.getTime()) / (lastMovement.getTime() - movement.getTime());
+                    cursors[i].mousePos.x = lastMovement.getPoint().x * t + movement.getPoint().x * (1 - t);
+                    cursors[i].mousePos.y = lastMovement.getPoint().y * t + movement.getPoint().y * (1 - t);
                 }
             }
         }
@@ -1405,8 +1401,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             autoCursor.update(dt);
         } else if (cursorSprites != null) {
             for (int i = 0; i < CursorCount; i++) {
-                cursorSprites[i].update(dt);
                 cursorSprites[i].setPosition(cursors[i].mousePos.x, cursors[i].mousePos.y);
+                cursorSprites[i].update(dt);
                 if (cursors[i].mouseDown) {
                     cursorSprites[i].setShowing(true);
                     if (cursors[i].mousePressed) {
@@ -1431,16 +1427,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (mainCursorId < 0){
                     int i = 0;
                     for (final Cursor c : cursors) {
-                        if (c.mousePressed == true && isFirstObjectsNear(c.mousePos)) {
+                        if (c.mousePressed && isFirstObjectsNear(c.mousePos)) {
                             mainCursorId = i;
                             flashlightSprite.onMouseMove(c.mousePos.x, c.mousePos.y);
                             break;
                         }
                         ++i;
                     }
-                } else if(cursors[mainCursorId].mouseDown == false){
+                } else if(!cursors[mainCursorId].mouseDown){
                     mainCursorId = -1;
-                } else if(cursors[mainCursorId].mouseDown == true){
+                } else if(cursors[mainCursorId].mouseDown){
                     flashlightSprite.onMouseMove(
                             cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y
                     );
@@ -2047,7 +2043,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
             comboWasMissed = true;
             stat.registerHit(0, false, false);
-            if (writeReplay) replay.addObjectScore(objectId, Replay.RESULT_0);
+            if (writeReplay) replay.addObjectScore(objectId, ResultType.MISS);
             if(GameHelper.isPerfect()){
                 gameover();
                 restartGame();
@@ -2059,7 +2055,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         String scoreName = "hit300";
         if (score == 50) {
             stat.registerHit(50, false, false);
-            if (writeReplay) replay.addObjectScore(objectId, Replay.RESULT_50);
+            if (writeReplay) replay.addObjectScore(objectId, ResultType.HIT50);
             scoreName = "hit50";
             comboWas100 = true;
             if(GameHelper.isPerfect()){
@@ -2068,7 +2064,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         } else if (score == 100) {
             comboWas100 = true;
-            if (writeReplay) replay.addObjectScore(objectId, Replay.RESULT_100);
+            if (writeReplay) replay.addObjectScore(objectId, ResultType.HIT100);
             if (endCombo && comboWasMissed == false) {
                 stat.registerHit(100, true, false);
                 scoreName = "hit100k";
@@ -2081,7 +2077,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 restartGame();
             }
         } else if (score == 300) {
-            if (writeReplay) replay.addObjectScore(objectId, Replay.RESULT_300);
+            if (writeReplay) replay.addObjectScore(objectId, ResultType.HIT300);
             if (endCombo && comboWasMissed == false) {
                 if (comboWas100 == false) {
                     stat.registerHit(300, true, true);
@@ -2129,18 +2125,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         //(30 - overallDifficulty) / 100f
-        if (accuracy > difficultyHelper.hitWindowFor50(overallDifficulty) || forcedScore == Replay.RESULT_0) {
+        if (accuracy > difficultyHelper.hitWindowFor50(overallDifficulty) || forcedScore == ResultType.MISS.getId()) {
             createHitEffect(pos, "hit0", color);
             registerHit(id, 0, endCombo);
             return;
         }
 
         String scoreName = "hit300";
-        if (forcedScore == Replay.RESULT_300 ||
+        if (forcedScore == ResultType.HIT300.getId() ||
                 forcedScore == 0 && accuracy <= difficultyHelper.hitWindowFor300(overallDifficulty)) {
             //(75 + 25 * (5 - overallDifficulty) / 5) / 1000)
             scoreName = registerHit(id, 300, endCombo);
-        } else if (forcedScore == Replay.RESULT_100 ||
+        } else if (forcedScore == ResultType.HIT100.getId() ||
                 forcedScore == 0 && accuracy <= difficultyHelper.hitWindowFor100(overallDifficulty)) {
             //(150 + 50 * (5 - overallDifficulty) / 5) / 1000)
             scoreName = registerHit(id, 100, endCombo);
@@ -2805,12 +2801,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             //write misses to replay
             for (GameObject obj : activeObjects) {
                 stat.registerHit(0, false, false);
-                replay.addObjectScore(obj.getId(), Replay.RESULT_0);
+                replay.addObjectScore(obj.getId(), ResultType.MISS);
             }
             while (objects.isEmpty() == false){
                 objects.poll();
                 stat.registerHit(0, false, false);
-                replay.addObjectScore(++lastObjectId, Replay.RESULT_0);
+                replay.addObjectScore(++lastObjectId, ResultType.MISS);
             }
             //save replay
             String ctime = String.valueOf(System.currentTimeMillis());

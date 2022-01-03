@@ -121,6 +121,7 @@ Changelog for 1.6.8
 ## Removals:
 
 - Removed split-screen support as the game restarts if used in split screen mode
+- Removed average offset counter during gameplay
 
 ## Additions [+], changes [=], bug fixes [*], and removals [-] since the previous pre-release:
 
@@ -174,3 +175,4 @@ Changelog for 1.6.8
 - [*] Fixed a bug where hardware dither option is not working as intended
 - [*] Fixed a bug where retrying a beatmap with a storyboard causes the game to crash
 - [-] Removed split-screen support as the game restarts if used in split screen mode
+- [-] Removed average offset counter during gameplay

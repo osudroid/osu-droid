@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.helper;
 
 import android.os.Build;
+import android.os.Environment;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -20,11 +21,19 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+
 import okio.BufferedSink;
 import okio.Okio;
 import okio.Source;
 
 import org.anddev.andengine.util.Debug;
+
+import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.LibraryManager;
+import ru.nsu.ccfit.zuev.osu.ToastLogger;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class FileUtils {
 
@@ -40,6 +49,48 @@ public class FileUtils {
     public static void move(File from, File to) throws FileNotFoundException, IOException {
         copy(from, to);
         from.delete();
+    }
+
+    public static boolean extractZip(final String sourcePath, final String targetPath) {
+        final File file = new File(sourcePath);
+
+        // Check if we can use SD card for storage
+        if (!canUseSD()) {
+            return false;
+        }
+
+        ToastLogger.addToLog("Importing " + sourcePath);
+
+        final String folderName = file.getName().substring(0, file.getName().length() - 4);
+
+        final File folderFile = new File(targetPath + "/" + folderName);
+        if(!folderFile.exists()) {
+            folderFile.mkdirs();
+        }
+
+        try {
+            ZipFile zip = new ZipFile(file);
+            if(!zip.isValidZipFile()) {
+                ToastLogger.showText(
+                        StringTable.format(R.string.message_error, "Invalid file"),
+                        false);
+                Debug.e("FileUtils.extractZip: " + file.getName() + " is invalid");
+                file.renameTo(new File(file.getParentFile(), file.getName() + ".badzip"));
+                LibraryManager.getInstance().deleteDir(folderFile);
+                return false;
+            }
+
+            zip.extractAll(folderFile.getAbsolutePath());
+            if((Config.isDELETE_OSZ() && file.getName().toLowerCase().endsWith(".osz"))
+                || file.getName().toLowerCase().endsWith(".osk")) {
+                file.delete();
+            }
+        } catch (final ZipException e) {
+            Debug.e("FileUtils.extractZip: " + e.getMessage(), e);
+            return false;
+        }
+
+        return true;
     }
 
     public static String getFileChecksum(String algorithm, File file) {
@@ -67,6 +118,26 @@ public class FileUtils {
             Debug.e(e.getMessage(), e);
         }
         return sb.toString();
+    }
+
+    // Need to make this more accurate
+    public static boolean canUseSD() {
+        if (Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            return true;
+        } else {
+            if (Environment.getExternalStorageState().equals(
+                    Environment.MEDIA_MOUNTED_READ_ONLY)) {
+                ToastLogger.showText(
+                        StringTable.get(R.string.message_error_sdcardread),
+                        false);
+            } else {
+                ToastLogger.showText(
+                        StringTable.get(R.string.message_error_sdcard), false);
+            }
+        }
+
+        return false;
     }
 
     public static String getMD5Checksum(File file) {

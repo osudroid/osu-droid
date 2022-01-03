@@ -1,9 +1,7 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PointF;
 import android.net.Uri;
@@ -214,9 +212,11 @@ public class MainScene implements IUpdateHandler {
                     new AsyncTaskLoader().execute(new OsuAsyncCallback() {
                         public void run() {
                             GlobalManager.getInstance().getEngine().setScene(new LoadingScreen().getScene());
+                            GlobalManager.getInstance().getMainActivity().checkNewSkins();
                             GlobalManager.getInstance().getMainActivity().checkNewBeatmaps();
-                            if (!LibraryManager.getInstance().loadLibraryCache(GlobalManager.getInstance().getMainActivity(), false)) {
+                            if (!LibraryManager.getInstance().loadLibraryCache(GlobalManager.getInstance().getMainActivity(), true)) {
                                 LibraryManager.getInstance().scanLibrary(GlobalManager.getInstance().getMainActivity());
+                                System.gc();
                             }
                             GlobalManager.getInstance().getSongMenu().reload();
                             /* To fixed skin load bug in some Android 10
@@ -1193,7 +1193,7 @@ public class MainScene implements IUpdateHandler {
                 //replay
                 ScoringScene scorescene = GlobalManager.getInstance().getScoring();
                 StatisticV2 stat = replay.getStat();
-                TrackInfo track = LibraryManager.getInstance().findTrackByFileNameAndMD5(replay.getMapfile(), replay.getMd5());
+                TrackInfo track = LibraryManager.getInstance().findTrackByFileNameAndMD5(replay.getMapFile(), replay.getMd5());
                 if (track != null) {
                     GlobalManager.getInstance().getMainScene().setBeatmap(track.getBeatmap());
                     GlobalManager.getInstance().getSongMenu().select();
