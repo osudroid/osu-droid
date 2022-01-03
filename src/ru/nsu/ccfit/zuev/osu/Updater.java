@@ -16,15 +16,10 @@ import okhttp3.Request;
 
 import org.anddev.andengine.util.Debug;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
 import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osu.model.vo.GithubReleaseVO;
-import ru.nsu.ccfit.zuev.osu.model.vo.GithubReleaseVO.Asset;
-import ru.nsu.ccfit.zuev.osu.model.vo.VersionCodeVO;
+import ru.nsu.ccfit.zuev.osu.model.vo.UpdateVO;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -69,25 +64,12 @@ public class Updater {
                         }
                     });
 
-                    ResponseBody response = httpGet("https://api.github.com/repos/osudroid/osu-droid/releases");
-                    GithubReleaseVO updateInfo = new Gson().fromJson(response.string(), GithubReleaseVO[].class)[0];
-                    Debug.i("updateInfo body: " + updateInfo.getBody());
-                    ArrayList<Asset> assets = new ArrayList<Asset>(updateInfo.getAssets());
-                    Debug.i("assets size: " + String.valueOf(assets.size()));
-
-                    for(Asset asset : assets) {
-                        // equal comparison doesn't seem to work for some reason
-                        if(asset.getName().endsWith("info.json") && !newUpdate) {
-                            ResponseBody versionResponse = httpGet(asset.getBrowser_download_url());
-                            VersionCodeVO updateVersionCode = new Gson().fromJson(versionResponse.string(), VersionCodeVO.class);
-
-                            if(updateVersionCode.getValue() > mActivity.getVersionCode()) {
-                                changelogMsg = updateInfo.getBody();
-                                newUpdate = true;
-                            }
-                        }else if(asset.getName().endsWith(".apk") && newUpdate) {
-                            downloadUrl = asset.getBrowser_download_url();
-                        }
+                    ResponseBody response = httpGet(OnlineManager.endpoint + "update.php");
+                    UpdateVO updateInfo = new Gson().fromJson(response.string(), UpdateVO.class);
+                    if(!newUpdate && updateInfo.getVersionCode() > mActivity.getVersionCode()) {
+                        changelogMsg = updateInfo.getChangelog();
+                        downloadUrl = updateInfo.getLink();
+                        newUpdate = true;
                     }
                 }catch(IOException e) {
                     Debug.e("Updater onRun: " + e.getMessage(), e); 
