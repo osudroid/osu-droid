@@ -20,45 +20,30 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.helper.StringTable;
+import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class PauseMenu implements IOnMenuItemClickListener {
-    static final int ITEM_CONTINUE = 0;
-    static final int ITEM_RETRY = 1;
-    static final int ITEM_BACK = 2;
+    static final int ITEM_SAVE_REPLAY = 0;
+    static final int ITEM_CONTINUE = 1;
+    static final int ITEM_RETRY = 2;
+    static final int ITEM_BACK = 3;
     private final MenuScene scene;
     private final GameScene game;
     private final boolean fail;
-    private boolean savedFailedReplay;
+    private boolean replaySaved;
 
     public PauseMenu(final Engine engine, final GameScene game,
                      final boolean fail) {
         this.game = game;
         this.fail = fail;
-        savedFailedReplay = false;
-        final ChangeableText saveFailedReplay = new ChangeableText(Utils.toRes(4), Utils.toRes(2),
-                ResourceManager.getInstance().getFont("font"), StringTable.get(R.string.str_save_failed_replay));
-        class PauseMenuScene extends MenuScene implements IOnSceneTouchListener{
-            PauseMenuScene(final Camera pCamera){
-                super(pCamera);
-            }
-            public boolean onSceneTouchEvent(final Scene pScene, final TouchEvent pSceneTouchEvent) {
-                float pTouchX = FMath.clamp(pSceneTouchEvent.getX(), 0, Config.getRES_WIDTH());
-                float pTouchY = FMath.clamp(pSceneTouchEvent.getY(), 0, Config.getRES_HEIGHT());
-                if (fail && pSceneTouchEvent.isActionUp() && pTouchX < Config.getRES_WIDTH() / 2 && pTouchY < 50 && savedFailedReplay == false && game.getReplaying() == false){
-                    //save replay
-                    if (game.saveFailedReplay()){
-                        saveFailedReplay.setText(StringTable.get(R.string.message_save_replay_successful));
-                        savedFailedReplay = true;
-                    }
-                }
-                return true;
-            }
-        }
-        scene = new PauseMenuScene(engine.getCamera());
+        replaySaved = false;
+        scene = new MenuScene(engine.getCamera());
 
+        final SpriteMenuItem saveFailedReplay = new SpriteMenuItem(ITEM_SAVE_REPLAY,
+                ResourceManager.getInstance().getTexture("pause-save-replay"));
+        scene.addMenuItem(saveFailedReplay);
         final SpriteMenuItem itemContinue = new SpriteMenuItem(ITEM_CONTINUE,
                 ResourceManager.getInstance().getTexture("pause-continue"));
         scene.addMenuItem(itemContinue);
@@ -68,7 +53,6 @@ public class PauseMenu implements IOnMenuItemClickListener {
         final SpriteMenuItem itemBack = new SpriteMenuItem(ITEM_BACK,
                 ResourceManager.getInstance().getTexture("pause-back"));
         scene.addMenuItem(itemBack);
-        scene.attachChild(saveFailedReplay);
         scene.setBackgroundEnabled(false);
         TextureRegion tex;
         if (fail) {
@@ -83,7 +67,6 @@ public class PauseMenu implements IOnMenuItemClickListener {
         }
 
         if (tex != null) {
-//			scene.setBackgroundEnabled(true);
             float height = tex.getHeight();
             height *= Config.getRES_WIDTH() / (float) (tex.getWidth());
             final Sprite bg = new Sprite(0,
@@ -110,6 +93,14 @@ public class PauseMenu implements IOnMenuItemClickListener {
         }
         BassSoundProvider playSnd;
         switch (pMenuItem.getID()) {
+            case ITEM_SAVE_REPLAY:
+                if(fail && !replaySaved && !game.getReplaying() && game.saveFailedReplay()){
+                    ToastLogger.showTextId(R.string.message_save_replay_successful, true);
+                    replaySaved = true;
+                    return true;
+                }
+                return true;
+
             case ITEM_CONTINUE:
                 if (fail) {
                     return false;
@@ -120,6 +111,7 @@ public class PauseMenu implements IOnMenuItemClickListener {
                 }
                 game.resume();
                 return true;
+
             case ITEM_BACK:
                 GlobalManager.getInstance().getScoring().setReplayID(-1);
                 playSnd = ResourceManager.getInstance().getSound("menuback");
@@ -129,6 +121,7 @@ public class PauseMenu implements IOnMenuItemClickListener {
                 game.resume();
                 game.quit();
                 return true;
+
             case ITEM_RETRY:
                 ResourceManager.getInstance().getSound("failsound").stop();
                 playSnd = ResourceManager.getInstance().getSound("menuhit");
