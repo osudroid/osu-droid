@@ -138,13 +138,13 @@ public class Config {
             soundVolume = prefs.getInt("soundvolume", 100) / 100f;
             bgmVolume = prefs.getInt("bgmvolume", 100) / 100f;
             cursorSize = prefs.getInt("cursorSize", 50) / 100f;
-        }catch(RuntimeException e) { // migrate to integers to prevent crash
+        }catch(RuntimeException e) { // use valid integer since this makes the game crash on android m
             prefs.edit()
-                .putInt("offset", Integer.parseInt(prefs.getString("offset", "0")))
-                .putInt("bgbrightness", Integer.parseInt(prefs.getString("bgbrightness", "25")))
-                .putInt("soundvolume", Integer.parseInt(prefs.getString("soundvolume", "100")))
-                .putInt("bgmvolume", Integer.parseInt(prefs.getString("bgmvolume", "100")))
-                .putInt("cursorSize", Integer.parseInt(prefs.getString("cursorSize", "50")))
+                .putInt("offset", 0)
+                .putInt("bgbrightness", 25)
+                .putInt("soundvolume", 100)
+                .putInt("bgmvolume", 100)
+                .putInt("cursorSize", 50)
                 .commit();
             Config.loadConfig(context);
         }
@@ -194,14 +194,6 @@ public class Config {
         comboColors = new RGBColor[4];
         for (int i = 1; i <= 4; i++) {
             comboColors[i - 1] = RGBColor.hex2Rgb(ColorPickerPreference.convertToRGB(prefs.getInt("combo" + i, 0xff000000)));
-        }
-
-        // skins
-        File[] folders = FileUtils.listFiles(new File(skinTopPath), file -> file.isDirectory() && !file.getName().startsWith("."));
-        skins = new HashMap<String, String>();
-        for(File folder : folders) {
-            skins.put(folder.getName(), folder.getPath());
-            Debug.i("skins: " + folder.getName() + " - " + folder.getPath());
         }
 
         // beatmaps
@@ -765,6 +757,15 @@ public class Config {
 
     public static String getDefaultCorePath() {
         return defaultCorePath;
+    }
+
+    public static void loadSkins() {
+        File[] folders = FileUtils.listFiles(new File(skinTopPath), file -> file.isDirectory() && !file.getName().startsWith("."));
+        skins = new HashMap<String, String>();
+        for(File folder : folders) {
+            skins.put(folder.getName(), folder.getPath());
+            Debug.i("skins: " + folder.getName() + " - " + folder.getPath());
+        }
     }
 
     public static Map<String, String> getSkins(){
