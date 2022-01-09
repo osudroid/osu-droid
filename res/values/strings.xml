@@ -45,6 +45,8 @@
 	<string name="dialog_exit_yes">Yes</string>
 	<string name="dialog_exit_no">No</string>
 
+	<string name="dialog_dither_confirm">Restart to apply changes.</string>
+
 	<string name="dialog_visit_osu_website_message">Do you want to visit the official osu! website?</string>
 	<string name="dialog_visit_osudroid_website_message">Do you want to visit the official osu!droid website?</string>
 

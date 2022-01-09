@@ -1170,6 +1170,20 @@ public class MainScene implements IUpdateHandler {
         }, 3000, TimeUnit.MILLISECONDS);
     }
 
+    public void restart() {
+        MainActivity mActivity = GlobalManager.getInstance().getMainActivity();
+        mActivity.runOnUiThread(() -> new ConfirmDialogFragment().setMessage(R.string.dialog_dither_confirm).showForResult(
+                isAccepted -> {
+                    if (isAccepted) {
+                        Intent mIntent = new Intent(mActivity, MainActivity.class);
+                        mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        mActivity.startActivity(mIntent);
+                        System.exit(0);
+                    }
+                }
+        ));
+    }
+
     public Scene getScene() {
         return scene;
     }
