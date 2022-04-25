@@ -251,7 +251,7 @@ public class Config {
 
         onlineUsername = prefs.getString("onlineUsername", "");
         onlinePassword = prefs.getString("onlinePassword", null);
-        stayOnline = prefs.getBoolean("stayOnline", true);
+        stayOnline = prefs.getBoolean("stayOnline", false);
         loadAvatar = prefs.getBoolean("loadAvatar",false);
     }
 
