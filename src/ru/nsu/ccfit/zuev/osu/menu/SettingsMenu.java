@@ -159,6 +159,14 @@ public class SettingsMenu extends SettingsFragment {
             Updater.getInstance().checkForUpdates();
             return true;
         });
+
+        final Preference dither = findPreference("dither");
+        dither.setOnPreferenceChangeListener((preference, newValue) -> {
+            if (Config.isUseDither() != (boolean) newValue) {
+                GlobalManager.getInstance().getMainScene().restart();
+            }
+            return true;
+        });
     }
 
     public void onNavigateToScreen(PreferenceScreen preferenceScreen) {

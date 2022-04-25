@@ -80,12 +80,12 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
         }
 
         currentObjectId = object.getId();
-        if (GameHelper.ms2ar(approachRate) > 12f) {
-            approachRate *= 1000f;
-        } else if (GameHelper.ms2ar(approachRate) > 10f) {
-            approachRate *= 4f;
+        if (GameHelper.ms2ar(approachRate * 1000f) > 12f) {
+            approachRate *= 500f;
+        } else if (GameHelper.ms2ar(approachRate * 1000f) > 10f) {
+            approachRate *= 2f;
         }
-        float moveDelay = (deltaT / approachRate) + 0.1f;
+        float moveDelay = (deltaT / (approachRate * 2f)) + 0.1f;
         doAutoMove(movePositionX, movePositionY, moveDelay, listener);
     }
 

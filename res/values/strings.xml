@@ -45,6 +45,8 @@
 	<string name="dialog_exit_yes">Yes</string>
 	<string name="dialog_exit_no">No</string>
 
+	<string name="dialog_dither_confirm">Restart to apply changes.</string>
+
 	<string name="dialog_visit_osu_website_message">Do you want to visit the official osu! website?</string>
 	<string name="dialog_visit_osudroid_website_message">Do you want to visit the official osu!droid website?</string>
 
@@ -185,7 +187,6 @@
 	<string name="unranked_features">↓ Unranked features ↓</string>
 	<string name="mod_customization">↓ Mod customization ↓</string>
 
-    <string name="str_save_failed_replay">Click here to save replay</string>
     <string name="message_save_replay_successful">Save failed replay success!</string>
 	<string name="message_save_replay_failed">Save replay failed</string>
 

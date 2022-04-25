@@ -6,6 +6,7 @@ import android.os.Environment;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -176,11 +177,9 @@ public class FileUtils {
         return null;
     }
 
-    public static File[] listFiles(File directory, FileUtilsFilter filter) {
+    public static File[] listFiles(File directory, FileFilter filter) {
         File[] filelist = null;
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            filelist = directory.listFiles(pathname -> filter.accept(pathname));
-        }else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             LinkedList<File> cachedFiles = new LinkedList<File>();
             DirectoryStream.Filter<Path> directoryFilter = new DirectoryStream.Filter<Path>() {
                 @Override
@@ -196,12 +195,10 @@ public class FileUtils {
                 Debug.e("FileUtils.listFiles: " + err.getMessage(), err);
             }
             filelist = cachedFiles.toArray(new File[cachedFiles.size()]);
+        }else {
+            filelist = directory.listFiles(filter);
         }
         return filelist;
-    }
-
-    public interface FileUtilsFilter {
-        boolean accept(File file);
     }
 
 }

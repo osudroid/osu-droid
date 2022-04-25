@@ -54,7 +54,6 @@ Changelog for 1.6.8
     - Only affects in-game display. The actual beatmap background file will not be replaced.
 - Option to disable triangles animation
     - Users with issues while triangles animation is active are encouraged to try this option.
-- New updater based on the game's GitHub repository releases
 - Separate loading screen for any game-related operations that takes some time to process
 - Support for push notifications
 - Option to scan download directory for `.osk` (skin) files
@@ -131,7 +130,6 @@ Changelog for 1.6.8
     - Defaults at 120ms, but can be adjusted to anywhere from 120ms to 1200ms.
 - [+] Added the ability to save failed replays
 - [+] Added support for push notifications
-- [+] Added a new updater based on the game's GitHub repository releases
 - [+] Added a separate loading screen for any game-related operations that takes some time to process
 - [+] Added the option to disable triangles animation
     - Users with issues while triangles animation is active are encouraged to try this option.

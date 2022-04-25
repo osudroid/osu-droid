@@ -73,7 +73,7 @@ public class Slider extends GameObject {
     private Sprite followcircle;
 
     private PointF tmpPoint = new PointF();
-    private Float ballAngle = new Float(0);
+    private Float ballAngle = 0f;
     private SpriteGroup group = null;
     private SpriteGroup borderGroup = null;
     private Polygon trackPoly = null;

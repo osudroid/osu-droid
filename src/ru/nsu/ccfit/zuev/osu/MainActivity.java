@@ -309,6 +309,7 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().init();
                 analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
                 GlobalManager.getInstance().setLoadingProgress(50);
+                Config.loadSkins();
                 checkNewSkins();
                 checkNewBeatmaps();
                 if (!LibraryManager.getInstance().loadLibraryCache(MainActivity.this, true)) {

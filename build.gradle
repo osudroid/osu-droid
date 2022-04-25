@@ -31,7 +31,7 @@ def getReleaseVersionCode() {
 
 def getReleaseVersionName() {
     def baseline = '1.6.8'
-    def versionName = baseline + new Date().format('(MMddhh)')
+    def versionName = baseline + new Date().format('(yyMMdd)')
     println('versionName: ' + versionName)
     return versionName
 }
@@ -90,23 +90,33 @@ android {
         debug {
             resValue "string", "app_name", "osu!droid-debug"
             applicationIdSuffix '.debug'
+            firebaseCrashlytics {
+                mappingFileUploadEnabled false
+            }
         }
 
         release {
             resValue "string", "app_name", "osu!droid"
             zipAlignEnabled true
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
+//            minifyEnabled true
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
             signingConfig signingConfigs.release
+            firebaseCrashlytics {
+                mappingFileUploadEnabled false
+            }
         }
 
         pre_release {
             matchingFallbacks = ['release']
             resValue "string", "app_name", "osu!droid"
             zipAlignEnabled true
-            minifyEnabled true            
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
+//            minifyEnabled true
+//            debuggable true
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
             signingConfig signingConfigs.release
+            firebaseCrashlytics {
+                mappingFileUploadEnabled false
+            }
         }
     }
 
