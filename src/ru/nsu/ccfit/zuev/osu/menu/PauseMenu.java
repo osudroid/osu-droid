@@ -118,7 +118,6 @@ public class PauseMenu implements IOnMenuItemClickListener {
                 if (playSnd != null) {
                     playSnd.play();
                 }
-                game.resume();
                 game.quit();
                 return true;
 
