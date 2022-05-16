@@ -285,6 +285,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (Config.isEnableVideo() && track.getVideo() != null) {
             try {
+                if (mVideo != null) {
+                    mVideo.release();
+                    mVideo.detachSelf();
+                }
                 int xOffset = track.getVideo().getxOffset();
                 int yOffset = track.getVideo().getyOffset();
                 mVideo = new VideoSprite(
@@ -2026,10 +2030,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (mVideo != null) {
-            if (mVideo.isPlaying()) {
-                mVideo.stop();
-            }
             mVideo.release();
+            mVideo.detachSelf();
             mVideo = null;
         }
     }
