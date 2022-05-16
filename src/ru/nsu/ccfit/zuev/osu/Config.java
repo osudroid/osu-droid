@@ -759,7 +759,7 @@ public class Config {
     }
 
     public static boolean isEnableVideo() {
-        return enableVideo && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+        return enableVideo && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && backgroundBrightness > 0.02;
     }
 
     public static void setEnableVideo(boolean enableVideo) {
