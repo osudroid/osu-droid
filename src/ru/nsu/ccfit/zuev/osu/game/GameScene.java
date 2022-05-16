@@ -285,12 +285,20 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (Config.isEnableVideo() && track.getVideo() != null) {
             try {
-                mVideo = new VideoSprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
-                mVideo.setDataSource(track.getVideo().getPath());
+                int xOffset = track.getVideo().getxOffset();
+                int yOffset = track.getVideo().getyOffset();
+                mVideo = new VideoSprite(
+                    xOffset,
+                    yOffset,
+                    Config.getRES_WIDTH() + xOffset,
+                    Config.getRES_HEIGHT() + yOffset
+                );
+                mVideo.setDataSource(track.getBeatmap().getPath() + "/" + track.getVideo().getPath());
                 mVideo.setAlpha(0f);
                 videoStartTime = track.getVideo().getStartTime() / 1000f;
             } catch (IOException e) {
                 Debug.e("Load video " + e.getMessage());
+                mVideo = null;
             }
         }
 
@@ -1639,7 +1647,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
         if (mVideo != null && secPassed >= videoStartTime) {
-            if (!mVideo.getIsPlaying()) {
+            if (!mVideo.isPlaying()) {
                 mVideo.play();
             }
             if (mVideo.getAlpha() < 1.0f) {
@@ -2016,7 +2024,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (mVideo != null) {
-            if (mVideo.getIsPlaying()) {
+            if (mVideo.isPlaying()) {
                 mVideo.stop();
             }
             mVideo.release();
@@ -2477,7 +2485,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             GlobalManager.getInstance().getSongService().pause();
         }
-        if (mVideo != null && mVideo.getIsPlaying()) {
+        if (mVideo != null && mVideo.isPlaying()) {
             mVideo.pause();
         }
         paused = true;
@@ -2500,7 +2508,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             GlobalManager.getInstance().getSongService().pause();
         }
-        if (mVideo != null && mVideo.getIsPlaying()) {
+        if (mVideo != null && mVideo.isPlaying()) {
             mVideo.stop();
         }
         paused = true;
@@ -2530,7 +2538,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             EdExtensionHelper.onResume(lastTrack);
         }
 
-        if (mVideo != null && !mVideo.getIsPlaying()) {
+        if (mVideo != null && !mVideo.isPlaying()) {
             mVideo.play();
         }
 
