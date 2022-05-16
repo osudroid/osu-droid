@@ -353,17 +353,20 @@ public class OSUParser {
                     track.setBackground(pars[2].substring(1, pars[2].length() - 1));
                 }
 
-                if (s.startsWith("2") || s.startsWith(("Video"))) {
+                if (s.startsWith("1") || s.startsWith(("Video"))) {
                     track.setVideo(
                         new Video(
-                            pars[2].substring(1, pars[2].length() - 1),
+                            pars[2].replace("\"", ""),
                             tryParseInt(pars[1], 0),
-                            tryParseInt(pars[3], 0),
-                            tryParseInt(pars[4], 0)
+                            pars.length >= 4 ? tryParseInt(pars[3], 0) : 0,
+                            pars.length >= 5 ? tryParseInt(pars[4], 0) : 0
                         )
                     );
                 }
-                break;
+
+                if (track.getVideo() != null && track.getBackground() != null) {
+                    break;
+                }
             }
         }
 
