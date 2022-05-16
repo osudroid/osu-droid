@@ -30,8 +30,6 @@ public class VideoSprite extends BaseRectangle
 
     private boolean mUpdated = false;
 
-    private volatile boolean mIsPlaying = false;
-
     public VideoSprite(float pX, float pY, float pWidth, float pHeight) {
         super(pX, pY, pWidth, pHeight);
         mPlayer = new MediaPlayer();
@@ -45,7 +43,6 @@ public class VideoSprite extends BaseRectangle
 
     public void play() {
         mPlayer.start();
-        mIsPlaying = true;
     }
 
     public void pause() {
@@ -57,6 +54,9 @@ public class VideoSprite extends BaseRectangle
     }
 
     public void release() {
+        if (isPlaying()) {
+            stop();
+        }
         mPlayer.release();
         GLES10.glDeleteTextures(1, mTextures, 0);
     }
@@ -131,7 +131,7 @@ public class VideoSprite extends BaseRectangle
         // 经常跑着跑着收不到回调?
     }
 
-    public final boolean getIsPlaying() {
-        return mIsPlaying;
+    public final boolean isPlaying() {
+        return mPlayer.isPlaying();
     }
 }
