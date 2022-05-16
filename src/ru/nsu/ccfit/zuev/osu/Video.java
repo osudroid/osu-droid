@@ -1,6 +1,10 @@
 package ru.nsu.ccfit.zuev.osu;
 
-public class Video {
+import java.io.Serializable;
+
+public class Video implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private final String path;
     private final int startTime;
     private final int xOffset;
