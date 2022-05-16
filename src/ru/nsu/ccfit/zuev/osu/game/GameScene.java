@@ -296,6 +296,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 mVideo.setDataSource(track.getBeatmap().getPath() + "/" + track.getVideo().getPath());
                 mVideo.setAlpha(0f);
                 videoStartTime = track.getVideo().getStartTime() / 1000f;
+                float brightness = Config.getBackgroundBrightness();
+                mVideo.setColor(brightness, brightness, brightness);
             } catch (IOException e) {
                 Debug.e("Load video " + e.getMessage());
                 mVideo = null;
