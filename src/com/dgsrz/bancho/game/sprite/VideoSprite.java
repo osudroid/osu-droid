@@ -54,9 +54,6 @@ public class VideoSprite extends BaseRectangle
     }
 
     public void release() {
-        if (isPlaying()) {
-            stop();
-        }
         mPlayer.release();
         GLES10.glDeleteTextures(1, mTextures, 0);
     }
@@ -75,10 +72,6 @@ public class VideoSprite extends BaseRectangle
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             mPlayer.seekTo((long)sec * 1000, MediaPlayer.SEEK_CLOSEST_SYNC);
         }
-    }
-
-    public int getCurrentPosition() {
-        return mPlayer.getCurrentPosition();
     }
 
     @Override
@@ -120,7 +113,6 @@ public class VideoSprite extends BaseRectangle
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
-        stop();
         release();
     }
 

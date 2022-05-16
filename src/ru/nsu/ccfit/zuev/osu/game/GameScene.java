@@ -181,6 +181,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private SliderPath[] sliderPaths = null;
     private int sliderIndex = 0;
     private float videoStartTime;
+    private boolean videoHasStarted;
 
     private StoryboardSprite storyboardSprite;
     private ProxySprite storyboardOverlayProxy;
@@ -289,6 +290,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     mVideo.release();
                     mVideo.detachSelf();
                 }
+                videoHasStarted = false;
                 int xOffset = track.getVideo().getxOffset();
                 int yOffset = track.getVideo().getyOffset();
                 mVideo = new VideoSprite(
@@ -1652,9 +1654,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             secPassed = 0;
             return;
         }
+
         if (mVideo != null && secPassed >= videoStartTime) {
-            if (!mVideo.isPlaying()) {
+            if (!mVideo.isPlaying() && !videoHasStarted) {
                 mVideo.play();
+                videoHasStarted = true;
             }
             if (mVideo.getAlpha() < 1.0f) {
                 mVideo.setAlpha(Math.min(mVideo.getAlpha() + 0.03f, 1.0f));
@@ -2008,6 +2012,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         passiveObjects.clear();
         breakPeriods.clear();
         cursorSprites = null;
+        videoHasStarted = false;
 
         if (GlobalManager.getInstance().getSongService() != null) {
             GlobalManager.getInstance().getSongService().stop();
