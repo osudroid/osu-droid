@@ -11,6 +11,7 @@ public class TrackInfo implements Serializable {
     private String mode;
     private String creator;
     private String background = null;
+    private Video video = null;
     private int beatmapID = 0;
     private int beatmapSetID = 0;
     private float difficulty;
@@ -71,6 +72,14 @@ public class TrackInfo implements Serializable {
 
     public void setBackground(final String background) {
         this.background = background;
+    }
+
+    public Video getVideo() {
+        return video;
+    }
+
+    public void setVideo(Video video) {
+        this.video = video;
     }
 
     public String getPublicName() {

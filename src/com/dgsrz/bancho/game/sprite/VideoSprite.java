@@ -21,7 +21,7 @@ public class VideoSprite extends BaseRectangle
 
     private static final int GL_TEXTURE_EXTERNAL_OES = 0x8D65;
 
-    private MediaPlayer mPlayer;
+    private final MediaPlayer mPlayer;
 
     private int[] mTextures;
     private SurfaceTexture mExternalTexture;

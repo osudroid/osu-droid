@@ -345,11 +345,24 @@ public class OSUParser {
     }
 
     private boolean loadEventsSection(final TrackInfo track) {
-        // We only need to load beatmap background
+        // We only need to load beatmap background and video
         for (final String s : data.getData("Events")) {
             final String[] pars = s.split("\\s*,\\s*");
-            if (pars.length >= 3 && s.startsWith("0,0")) {
-                track.setBackground(pars[2].substring(1, pars[2].length() - 1));
+            if (pars.length >= 3) {
+                if (s.startsWith("0,0")) {
+                    track.setBackground(pars[2].substring(1, pars[2].length() - 1));
+                }
+
+                if (s.startsWith("2") || s.startsWith(("Video"))) {
+                    track.setVideo(
+                        new Video(
+                            pars[2].substring(1, pars[2].length() - 1),
+                            tryParseInt(pars[1], 0),
+                            tryParseInt(pars[3], 0),
+                            tryParseInt(pars[4], 0)
+                        )
+                    );
+                }
                 break;
             }
         }

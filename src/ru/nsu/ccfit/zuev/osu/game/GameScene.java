@@ -40,6 +40,7 @@ import org.anddev.andengine.util.modifier.IModifier;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -281,16 +282,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         parser = null;
 
-//        try {
-//            float height = 720;
-//            height *= 1. * Config.getRES_WIDTH() / 1280;
-//            mVideo = new VideoSprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
-//            mVideo.setDataSource(Environment.getExternalStorageDirectory().getPath() + "/PV.mp4");
-//            mVideo.setAlpha(0f);
-//            // mVideo.play();
-//        } catch (IOException e) {
-//            Log.i("Load avi", e.getMessage());
-//        }
+        if (track.getVideo() != null) {
+            try {
+                float height = 720;
+                height *= 1. * Config.getRES_WIDTH() / 1280;
+                mVideo = new VideoSprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+                mVideo.setDataSource(track.getVideo().getPath());
+                mVideo.setAlpha(0f);
+                mVideo.play();
+            } catch (IOException e) {
+                Debug.e("Load video " + e.getMessage());
+            }
+        }
 
         // TODO skin manager
         SkinManager.getInstance().loadBeatmapSkin(beatmapData.getFolder());
@@ -724,7 +727,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private void prepareScene() {
         scene.setOnSceneTouchListener(this);
-        // bgScene.attachChild(mVideo);
+        if (mVideo != null) {
+            bgScene.attachChild(mVideo);
+        }
         if (GlobalManager.getInstance().getCamera() instanceof SmoothCamera) {
             SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
             camera.setZoomFactorDirect(Config.getPlayfieldSize());
@@ -1626,15 +1631,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             secPassed = 0;
             return;
         }
-//        if (secPassed >= 0) {
-//            if (!mVideo.getIsPlaying()) {
-//                mVideo.play();
-//            }
-//            if (mVideo.getAlpha() < 1.0f) {
-//                float alpha = mVideo.getAlpha();
-//                mVideo.setAlpha(Math.min(alpha + 0.03f, 1.0f));
-//            }
-//        }
+        if (secPassed >= 0) {
+            if (!mVideo.getIsPlaying()) {
+                mVideo.play();
+            }
+            if (mVideo.getAlpha() < 1.0f) {
+                mVideo.setAlpha(Math.min(mVideo.getAlpha() + 0.03f, 1.0f));
+            }
+        }
 
         boolean shouldBePunished = false;
 
@@ -1999,6 +2003,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
             ModMenu.getInstance().setForceAR(Replay.oldForceAR);
             ModMenu.getInstance().setEnableForceAR(Replay.oldEnableForceAR);
+        }
+
+        if (mVideo != null) {
+            if (mVideo.getIsPlaying()) {
+                mVideo.stop();
+            }
+            mVideo.release();
+            mVideo = null;
         }
     }
 
@@ -2455,6 +2467,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             GlobalManager.getInstance().getSongService().pause();
         }
+        if (mVideo != null && mVideo.getIsPlaying()) {
+            mVideo.pause();
+        }
         paused = true;
         scene.setChildScene(menu.getScene(), false, true, true);
     }
@@ -2474,6 +2489,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }*/
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             GlobalManager.getInstance().getSongService().pause();
+        }
+        if (mVideo != null && mVideo.getIsPlaying()) {
+            mVideo.stop();
         }
         paused = true;
         scene.setChildScene(menu.getScene(), false, true, true);
@@ -2500,6 +2518,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (!replaying) {
             EdExtensionHelper.onResume(lastTrack);
+        }
+
+        if (mVideo != null && !mVideo.getIsPlaying()) {
+            mVideo.play();
         }
 
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() != Status.PLAYING && secPassed > 0) {
