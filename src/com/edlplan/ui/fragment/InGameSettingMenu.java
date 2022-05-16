@@ -29,6 +29,7 @@ public class InGameSettingMenu extends BaseFragment {
     private static InGameSettingMenu menu;
     private CheckBox enableStoryboard;
     private CheckBox showScoreboard;
+    private CheckBox enableVideo;
     private CheckBox enableNCWhenSpeedChange;
     private CheckBox enableSpeedChange;
     private CheckBox enableForceAR;
@@ -113,6 +114,15 @@ public class InGameSettingMenu extends BaseFragment {
             Config.setShowScoreboard(isChecked);
             PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
                     .putBoolean("showscoreboard", isChecked)
+                    .commit();
+        });
+
+        enableVideo = findViewById(R.id.enableVideo);
+        enableVideo.setChecked(Config.isEnableVideo());
+        enableVideo.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Config.setEnableVideo(isChecked);
+            PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
+                    .putBoolean("enableVideo", isChecked)
                     .commit();
         });
 
