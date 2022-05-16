@@ -1658,6 +1658,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (mVideo != null && secPassed >= videoStartTime) {
             if (!mVideo.isPlaying() && !videoHasStarted) {
                 mVideo.play();
+                // This flag is needed to prevent race conditions for
+                // when the player is pausing the game.
                 videoHasStarted = true;
             }
             if (mVideo.getAlpha() < 1.0f) {
