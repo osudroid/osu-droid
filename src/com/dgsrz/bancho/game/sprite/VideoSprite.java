@@ -2,7 +2,9 @@ package com.dgsrz.bancho.game.sprite;
 
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
+import android.media.PlaybackParams;
 import android.opengl.GLES10;
+import android.os.Build;
 import android.view.Surface;
 
 import org.anddev.andengine.engine.camera.Camera;
@@ -38,6 +40,7 @@ public class VideoSprite extends BaseRectangle
     public void setDataSource(String filePath) throws IOException {
         mPlayer.setDataSource(filePath);
         mPlayer.prepare();
+        mPlayer.setVolume(0, 0);
     }
 
     public void play() {
@@ -56,6 +59,26 @@ public class VideoSprite extends BaseRectangle
     public void release() {
         mPlayer.release();
         GLES10.glDeleteTextures(1, mTextures, 0);
+    }
+
+    public void setPlaybackSpeed(float speed) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mPlayer.setPlaybackParams(new PlaybackParams().setSpeed(speed));
+        }
+    }
+
+    public void seekTo(double sec) {
+        seekTo((float) sec);
+    }
+
+    public void seekTo(float sec) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mPlayer.seekTo((long)sec * 1000, MediaPlayer.SEEK_CLOSEST_SYNC);
+        }
+    }
+
+    public int getCurrentPosition() {
+        return mPlayer.getCurrentPosition();
     }
 
     @Override

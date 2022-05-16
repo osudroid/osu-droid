@@ -335,4 +335,7 @@
 
     <string name="opt_safe_beatmap_bg_title">Safe beatmap background</string>
     <string name="opt_safe_beatmap_bg_summary">Change all of the beatmaps\' background to the menu-background image from your skin</string>
+
+    <string name="opt_enable_video_title">Enable video</string>
+    <string name="opt_enable_video_summary">Enable video playback during gameplay. Only supports Android 6 or higher.</string>
 </resources>

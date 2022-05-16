@@ -35,6 +35,8 @@
             android:summary="@string/opt_bg_summary" android:defaultValue="1"/>
         <SeekBarPreference android:summary="@string/opt_bgbrightness_summary" android:title="@string/opt_bgbrightness_title"
             android:key="bgbrightness" app:min="1" app:showSeekBarValue="true" android:defaultValue="25"/>
+        <CheckBoxPreference android:title="@string/opt_enable_video_title" android:summary="@string/opt_enable_video_summary"
+            android:key="enableVideo" android:defaultValue="false" />
         <!-- <ListPreference android:entries="@array/bg_brightness_names" android:title="@string/opt_bgbrightness_title"
             android:key="bgbrightness" android:summary="@string/opt_bgbrightness_summary"
             android:defaultValue="25" android:entryValues="@array/bg_brightness_values"/> -->

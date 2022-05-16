@@ -180,6 +180,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private float lastObjectHitTime = 0;
     private SliderPath[] sliderPaths = null;
     private int sliderIndex = 0;
+    private float videoStartTime;
 
     private StoryboardSprite storyboardSprite;
     private ProxySprite storyboardOverlayProxy;
@@ -282,14 +283,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         parser = null;
 
-        if (track.getVideo() != null) {
+        if (Config.isEnableVideo() && track.getVideo() != null) {
             try {
-                float height = 720;
-                height *= 1. * Config.getRES_WIDTH() / 1280;
                 mVideo = new VideoSprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
                 mVideo.setDataSource(track.getVideo().getPath());
                 mVideo.setAlpha(0f);
-                mVideo.play();
+                videoStartTime = track.getVideo().getStartTime() / 1000f;
             } catch (IOException e) {
                 Debug.e("Load video " + e.getMessage());
             }
@@ -437,6 +436,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             timeMultiplier = 0.75f;
             GameHelper.setHalfTime(true);
             GameHelper.setTimeMultiplier(4 / 3f);
+        }
+
+        if (mVideo != null) {
+            mVideo.setPlaybackSpeed(timeMultiplier);
         }
 
         /*
@@ -886,6 +889,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 addPassiveObject(new Countdown(this, bgScene, cdSpeed, 0,
                         objects.peek().getTime() - secPassed));
             }
+        }
+
+        if (mVideo != null) {
+            mVideo.seekTo(skipTime);
         }
 
         float lastObjectTme = 0;
@@ -1631,7 +1638,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             secPassed = 0;
             return;
         }
-        if (secPassed >= 0) {
+        if (mVideo != null && secPassed >= videoStartTime) {
             if (!mVideo.getIsPlaying()) {
                 mVideo.play();
             }
@@ -1946,6 +1953,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     //music.seekTo((int) Math.ceil((skipTime - 0.5f) * 1000));
                     GlobalManager.getInstance().getSongService().seekTo((int) Math.ceil((skipTime - 0.5f) * 1000));
                     secPassed = skipTime - 0.5f;
+                    if (mVideo != null) {
+                        mVideo.seekTo(Math.ceil(secPassed));
+                    }
                     skipBtn.detachSelf();
                     skipBtn = null;
                     return;

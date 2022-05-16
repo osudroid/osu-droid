@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.Build;
 import android.os.Environment;
 import android.util.DisplayMetrics;
 
@@ -75,7 +76,8 @@ public class Config {
         useSuperSlider,
         enableStoryboard,
         safeBeatmapBg,
-        trianglesAnimation;
+        trianglesAnimation,
+        enableVideo;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -106,6 +108,7 @@ public class Config {
         // graphics
         s = prefs.getString("background", "2");
         backgroundQuality = Integer.parseInt(s);
+        enableVideo = prefs.getBoolean("enableVideo", false);
         useCustomSkins = prefs.getBoolean("skin", false);
         useCustomSounds = prefs.getBoolean("beatmapSounds", true);
         comboburst = prefs.getBoolean("comboburst", false);
@@ -753,6 +756,14 @@ public class Config {
 
     public static void setTrianglesAnimation(boolean trianglesAnimation) {
         Config.trianglesAnimation = trianglesAnimation;
+    }
+
+    public static boolean isEnableVideo() {
+        return enableVideo && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+    }
+
+    public static void setEnableVideo(boolean enableVideo) {
+        Config.enableVideo = enableVideo;
     }
 
     public static String getDefaultCorePath() {
