@@ -7,6 +7,7 @@ package ru.nsu.ccfit.zuev.audio.serviceAudio;
 
 import static androidx.media.app.NotificationCompat.MediaStyle;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -110,6 +111,7 @@ public class NotifyPlayer {
         create();
     }
 
+    @SuppressLint("RestrictedApi")
     public void updateState() {
         if (!isShowing)
             return;
