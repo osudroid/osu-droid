@@ -4,7 +4,6 @@ import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -20,7 +19,6 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.*;
 
-import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 import androidx.core.content.PermissionChecker;
 
@@ -62,19 +60,15 @@ import org.anddev.andengine.util.Debug;
 import java.io.File;
 import java.io.IOException;
 import java.math.RoundingMode;
-import java.security.Security;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import net.lingala.zip4j.ZipFile;
 
-import pub.devrel.easypermissions.AppSettingsDialog;
-import pub.devrel.easypermissions.EasyPermissions;
 import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
@@ -88,7 +82,6 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.menu.FilterMenu;
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
-import ru.nsu.ccfit.zuev.osu.menu.SettingsMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SplashScene;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
@@ -98,7 +91,6 @@ public class MainActivity extends BaseGameActivity implements
         IAccelerometerListener {
     public static SongService songService;
     public ServiceConnection connection;
-    public BroadcastReceiver onNotifyButtonClick;
     private PowerManager.WakeLock wakeLock = null;
     private String beatmapToAdd = null;
     private SaveServiceObject saveServiceObject;
@@ -568,26 +560,6 @@ public class MainActivity extends BaseGameActivity implements
         onBeginBindService();
     }
 
-    public void onCreateNotifyReceiver() {
-        if (filter == null) {
-            //过滤器创建
-            filter = new IntentFilter();
-            filter.addAction("Notify_cancel");
-        }
-
-        //按钮广播监听
-        onNotifyButtonClick = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals("Notify_cancel")) {
-                    songService.stop();
-                    GlobalManager.getInstance().getMainScene().exit();
-                }
-            }
-        };
-        registerReceiver(onNotifyButtonClick, filter);
-    }
-
     public void onBeginBindService() {
         if (connection == null && songService == null) {
             connection = new ServiceConnection() {
@@ -607,9 +579,6 @@ public class MainActivity extends BaseGameActivity implements
             };
 
             bindService(new Intent(MainActivity.this, SongService.class), connection, BIND_AUTO_CREATE);
-            if (Build.VERSION.SDK_INT > 10) {
-                onCreateNotifyReceiver();
-            }
         }
         GlobalManager.getInstance().setSongService(songService);
         GlobalManager.getInstance().setSaveServiceObject(saveServiceObject);
@@ -644,7 +613,7 @@ public class MainActivity extends BaseGameActivity implements
         }
         if (GlobalManager.getInstance().getMainScene() != null) {
             if (songService != null && Build.VERSION.SDK_INT > 10) {
-                if (songService.hideNotifyPanel()) {
+                if (songService.hideNotification()) {
                     if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
                     GlobalManager.getInstance().getMainScene().loadBeatmapInfo();
                     GlobalManager.getInstance().getMainScene().loadTimeingPoints(false);
@@ -670,28 +639,14 @@ public class MainActivity extends BaseGameActivity implements
         }
         if (GlobalManager.getInstance().getMainScene() != null) {
             BeatmapInfo beatmapInfo = GlobalManager.getInstance().getMainScene().beatmapInfo;
-            if (songService != null && beatmapInfo != null && !songService.isGaming()/* && !songService.isSettingMenu()*/) {
-                if (Build.VERSION.SDK_INT > 10) {
-                    songService.showNotifyPanel();
+            if (songService != null && beatmapInfo != null && !songService.isGaming()) {
+                songService.showNotification();
 
-                    if (wakeLock == null) {
-                        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-                        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "osudroid:MainActivity");
-                    }
-                    wakeLock.acquire();
-
-                    if (beatmapInfo.getArtistUnicode() != null && beatmapInfo.getTitleUnicode() != null) {
-                        songService.updateTitleText(beatmapInfo.getTitleUnicode(), beatmapInfo.getArtistUnicode());
-                    } else if (beatmapInfo.getArtist() != null && beatmapInfo.getTitle() != null) {
-                        songService.updateTitleText(beatmapInfo.getTitle(), beatmapInfo.getArtist());
-                    } else {
-                        songService.updateTitleText("QAQ I cant load info", " ");
-                    }
-                    songService.updateCoverImage(beatmapInfo.getTrack(0).getBackground());
-                    songService.updateStatus();
-                } else {
-                    songService.stop();
+                if (wakeLock == null) {
+                    PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+                    wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "osudroid:MainActivity");
                 }
+                wakeLock.acquire();
             } else {
                 if (songService != null) {
                     songService.pause();
