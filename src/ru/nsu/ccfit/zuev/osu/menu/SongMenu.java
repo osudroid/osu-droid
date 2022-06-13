@@ -1032,7 +1032,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         final int quality = Config.getBackgroundQuality();
         synchronized (backgroundMutex) {
 
-            if (!reloadBG && bgName.equals(track.getBackground())) {
+            if (!reloadBG && (track.getBackground() == null || bgName.equals(track.getBackground()))) {
                 isSelectComplete = true;
                 return;
             }
@@ -1050,7 +1050,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             public void run() {
                 // Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 synchronized (backgroundMutex) {
-                    final TextureRegion tex = Config.isSafeBeatmapBg() ?
+                    final TextureRegion tex = Config.isSafeBeatmapBg() || track.getBackground() == null?
                         ResourceManager.getInstance().getTexture("menu-background") :
                         ResourceManager.getInstance().loadBackground(bgName);
                     if (tex != null) {
