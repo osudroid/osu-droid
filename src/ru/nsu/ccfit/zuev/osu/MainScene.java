@@ -1158,9 +1158,7 @@ public class MainScene implements IUpdateHandler {
             @Override
             public void run() {
                 if (GlobalManager.getInstance().getSongService() != null) {
-                    GlobalManager.getInstance().getSongService().hideNotifyPanel();
-                    if (Build.VERSION.SDK_INT > 10)
-                        GlobalManager.getInstance().getMainActivity().unregisterReceiver(GlobalManager.getInstance().getMainActivity().onNotifyButtonClick);
+                    GlobalManager.getInstance().getSongService().hideNotification();
                     GlobalManager.getInstance().getMainActivity().unbindService(GlobalManager.getInstance().getMainActivity().connection);
                     GlobalManager.getInstance().getMainActivity().stopService(new Intent(GlobalManager.getInstance().getMainActivity(), SongService.class));
                     musicStarted = false;

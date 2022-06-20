@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.audio.serviceAudio;
 
 import android.app.Activity;
 import android.app.Application;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -74,7 +73,7 @@ public class SaveServiceObject extends Application {
                 Log.w("onActivityDestroyed", "I'm going to Dead O_x");
                 if (songService != null) {
                     Log.w("onActivityDestroyed", "I'm Dead x_x");
-                    songService.hideNotifyPanel();
+                    songService.hideNotification();
                 }
             }
         });
