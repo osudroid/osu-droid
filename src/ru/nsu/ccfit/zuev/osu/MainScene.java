@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.reco1l.entity.Menu;
+import com.reco1l.entity.Spectrum;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
@@ -76,10 +77,6 @@ public class MainScene implements IUpdateHandler {
     private ChangeableText musicInfoText;
     //    private ArrayList<BeatmapInfo> beatmaps;
     private Random random = new Random();
-    private Rectangle[] spectrum = new Rectangle[120];
-    private float[] peakLevel = new float[120];
-    private float[] peakDownRate = new float[120];
-    private float[] peakAlpha = new float[120];
     private Replay replay = null;
     private TrackInfo selectedTrack;
     private BeatmapData beatmapData;
@@ -110,12 +107,14 @@ public class MainScene implements IUpdateHandler {
     private boolean isOnExitAnim = false;
 
     private Menu menu;
+    private Spectrum spectrum;
 
     public void load(Context context) {
         this.context = context;
         Debug.i("Load: mainMenuLoaded()");
         scene = new Scene();
         menu = new Menu();
+        spectrum = new Spectrum();
 
         final TextureRegion tex = ResourceManager.getInstance().getTexture("menu-background");
         
@@ -325,18 +324,7 @@ public class MainScene implements IUpdateHandler {
         bgbottomRect.setPosition(0, Config.getRES_HEIGHT() - bgbottomRect.getHeight());
         bgbottomRect.setColor(0, 0, 0, 0.3f);
 
-        for (int i = 0; i < 120; i++) {
-            final float pX = Config.getRES_WIDTH() / 2;
-            final float pY = Config.getRES_HEIGHT() / 2;
-
-            spectrum[i] = new Rectangle(pX, pY, 260, 10);
-            spectrum[i].setRotationCenter(0, 5);
-            spectrum[i].setScaleCenter(0, 5);
-            spectrum[i].setRotation(-220 + i * 3f);
-            spectrum[i].setAlpha(0.0f);
-
-            scene.attachChild(spectrum[i]);
-        }
+        spectrum.draw(scene);
 
         LibraryManager.getInstance().loadLibraryCache((Activity) context, false);
 
@@ -525,10 +513,7 @@ public class MainScene implements IUpdateHandler {
     public void onUpdate(final float pSecondsElapsed) {
         beatPassTime += pSecondsElapsed * 1000f;
         if (isOnExitAnim) {
-            for (Rectangle specRectangle : spectrum) {
-                specRectangle.setWidth(0);
-                specRectangle.setAlpha(0);
-            }
+            spectrum.clear();
             return;
         }
 
@@ -607,44 +592,11 @@ public class MainScene implements IUpdateHandler {
                     }
                     particleEnabled = false;
                 }
+                spectrum.update();
 
-                int windowSize = 240;
-                int spectrumWidth = 120;
-                float[] fft = GlobalManager.getInstance().getSongService().getSpectrum();
-                if (fft == null) return;
-                for (int i = 0, leftBound = 0; i < spectrumWidth; i++) {
-                    float peak = 0;
-                    int rightBound = (int) Math.pow(2., i * 9. / (windowSize - 1));
-                    if (rightBound <= leftBound) rightBound = leftBound + 1;
-                    if (rightBound > 511) rightBound = 511;
-
-                    for (; leftBound < rightBound; leftBound++) {
-                        if (peak < fft[1 + leftBound])
-                            peak = fft[1 + leftBound];
-                    }
-
-                    float initialAlpha = 0.4f;
-                    float gradient = 20;
-                    float currPeakLevel = peak * 500;
-
-                    if (currPeakLevel > peakLevel[i]) {
-                        peakLevel[i] = currPeakLevel;
-                        peakDownRate[i] = peakLevel[i] / gradient;
-                        peakAlpha[i] = initialAlpha;
-
-                    } else {
-                        peakLevel[i] = Math.max(peakLevel[i] - peakDownRate[i], 0f);
-                        peakAlpha[i] = Math.max(peakAlpha[i] - initialAlpha / gradient, 0f);
-                    }
-
-                    spectrum[i].setWidth(250f + peakLevel[i]);
-                    spectrum[i].setAlpha(peakAlpha[i]);
-                }
             } else {
-                for (Rectangle specRectangle : spectrum) {
-                    specRectangle.setWidth(0);
-                    specRectangle.setAlpha(0);
-                }
+                spectrum.clear();
+
                 if (!doChange && !doStop && GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getPosition() >= GlobalManager.getInstance().getSongService().getLength()) {
                     musicControl(MusicOption.NEXT);
                 }
@@ -704,6 +656,7 @@ public class MainScene implements IUpdateHandler {
             int trackIndex = random.nextInt(trackInfos.size());
             selectedTrack = trackInfos.get(trackIndex);
 
+            spectrum.updateColor(selectedTrack);
             if (selectedTrack.getBackground() != null) {
                 try {
                     final TextureRegion tex = Config.isSafeBeatmapBg() ?
@@ -752,10 +705,6 @@ public class MainScene implements IUpdateHandler {
                     Log.w("nullpoint", "GlobalManager.getInstance().getSongService() is null while reload music (MainScene.loadTimeingPoints)");
                 }
             }
-
-            Arrays.fill(peakLevel, 0f);
-            Arrays.fill(peakDownRate, 1f);
-            Arrays.fill(peakAlpha, 0f);
 
             OSUParser parser = new OSUParser(selectedTrack.getFilename());
             if (parser.openFile()) {

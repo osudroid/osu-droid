@@ -1,8 +1,3 @@
-/*
- * Written by Reco1l on 11/6/22 20:43
- * Last modified: 11/6/22 06:14
- */
-
 package com.reco1l.notification;
 
 import static androidx.media.app.NotificationCompat.MediaStyle;
@@ -33,6 +28,8 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osuplus.R;
+
+// Created by Reco1l on 11/6/22 20:43
 
 public class NotifyPlayer {
 
