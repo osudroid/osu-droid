@@ -8,6 +8,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.reco1l.notification.NotifyPlayer;
+
 import java.io.File;
 
 import ru.nsu.ccfit.zuev.audio.Status;

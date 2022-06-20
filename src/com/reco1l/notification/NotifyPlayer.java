@@ -3,7 +3,7 @@
  * Last modified: 11/6/22 06:14
  */
 
-package ru.nsu.ccfit.zuev.audio.serviceAudio;
+package com.reco1l.notification;
 
 import static androidx.media.app.NotificationCompat.MediaStyle;
 
@@ -27,6 +27,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import ru.nsu.ccfit.zuev.audio.Status;
+import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
