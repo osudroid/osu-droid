@@ -1,22 +1,21 @@
-package test.tpdifficulty.hitobject;
+package com.dgsrz.tpdifficulty.hitobject;
 
 import android.graphics.PointF;
 
-import test.tpdifficulty.TimingPoint;
+import com.dgsrz.tpdifficulty.TimingPoint;
 
 /**
  * Created by Fuuko on 2015/5/29.
  */
-public class Spinner extends HitObject {
+public class HitCircle extends HitObject {
 
-    public Spinner(int startTime, int endTime, PointF pos, TimingPoint timingPoint) {
-        super(startTime, endTime, HitObjectType.Spinner, pos, timingPoint);
+    public HitCircle(int startTime, PointF pos, TimingPoint timingPoint) {
+        super(startTime, startTime, HitObjectType.Normal, pos, timingPoint);
         this.repeat = 1;
     }
 
-    @Override
     public String toString() {
-        return "Spinner{" +
+        return "HitCircle{" +
                 super.toString() +
                 ", Combo=" + getCombo(0, 0) +
                 "}";

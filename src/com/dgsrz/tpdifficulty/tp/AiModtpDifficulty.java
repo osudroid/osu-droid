@@ -1,4 +1,4 @@
-package test.tpdifficulty.tp;
+package com.dgsrz.tpdifficulty.tp;
 
 import android.graphics.PointF;
 
@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 
-import test.tpdifficulty.hitobject.HitObject;
+import com.dgsrz.tpdifficulty.hitobject.HitObject;
 
 /**
  * Created by Fuuko on 2015/5/30.

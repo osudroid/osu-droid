@@ -1,10 +1,10 @@
-package test.tpdifficulty.tp;
+package com.dgsrz.tpdifficulty.tp;
 
 import android.graphics.PointF;
 
-import test.tpdifficulty.hitobject.HitObject;
-import test.tpdifficulty.hitobject.HitObjectType;
-import test.tpdifficulty.hitobject.Slider;
+import com.dgsrz.tpdifficulty.hitobject.HitObject;
+import com.dgsrz.tpdifficulty.hitobject.HitObjectType;
+import com.dgsrz.tpdifficulty.hitobject.Slider;
 
 /**
  * Created by Fuuko on 2015/5/30.

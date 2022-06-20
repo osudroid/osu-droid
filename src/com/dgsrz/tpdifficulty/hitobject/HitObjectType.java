@@ -1,4 +1,4 @@
-package test.tpdifficulty.hitobject;
+package com.dgsrz.tpdifficulty.hitobject;
 
 /**
  * Created by Fuuko on 2015/5/29.
