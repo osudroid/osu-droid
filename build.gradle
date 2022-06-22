@@ -179,4 +179,5 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     implementation 'androidx.palette:palette:1.0.0'
+    implementation 'com.intuit.sdp:sdp-android:1.0.6'
 }

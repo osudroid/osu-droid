@@ -40,6 +40,8 @@ import com.edlplan.ui.fragment.BuildTypeNoticeFragment;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.reco1l.EngineBridge;
+import com.reco1l.ui.platform.FragmentPlatform;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
@@ -142,7 +144,7 @@ public class MainActivity extends BaseGameActivity implements
         opt.setNeedsSound(true);
         opt.getRenderOptions().disableExtensionVertexBufferObjects();
         opt.getTouchOptions().enableRunOnUpdateThread();
-        final Engine engine = new Engine(opt);
+        final Engine engine = new EngineBridge(opt);
         try {
             if (MultiTouch.isSupported(this)) {
                 engine.setTouchController(new MultiTouchController());
@@ -299,6 +301,7 @@ public class MainActivity extends BaseGameActivity implements
         new AsyncTaskLoader().execute(new OsuAsyncCallback() {
             public void run() {
                 GlobalManager.getInstance().init();
+                ((EngineBridge) getEngine()).isGlobalManagerInit = true;
                 analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
                 GlobalManager.getInstance().setLoadingProgress(50);
                 Config.loadSkins();
@@ -346,7 +349,6 @@ public class MainActivity extends BaseGameActivity implements
         Debug.i("Free Space: " + df.format(availableMemory / minMem));
     }
 
-    @SuppressLint("ResourceType")
     @Override
     protected void onSetContentView() {
         this.mRenderSurfaceView = new RenderSurfaceView(this);
@@ -358,31 +360,7 @@ public class MainActivity extends BaseGameActivity implements
         }
         this.mRenderSurfaceView.setRenderer(this.mEngine);
 
-        RelativeLayout layout = new RelativeLayout(this);
-        layout.setBackgroundColor(Color.argb(255, 0, 0, 0));
-        layout.addView(
-                mRenderSurfaceView,
-                new RelativeLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT){{
-                    addRule(RelativeLayout.CENTER_IN_PARENT);
-                }});
-
-        FrameLayout frameLayout = new FrameLayout(this);
-        frameLayout.setId(0x28371);
-        layout.addView(frameLayout, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-        View c = new View(this);
-        c.setBackgroundColor(Color.argb(0, 0, 0, 0));
-        layout.addView(c, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-        this.setContentView(
-                layout,
-                new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT) {{
-                    gravity = Gravity.CENTER;
-                }});
-
-        ActivityOverlay.initial(this, frameLayout.getId());
+        new FragmentPlatform().load(this, this, mRenderSurfaceView);
 
         if ("pre_release".equals(BuildConfig.BUILD_TYPE) || BuildConfig.DEBUG) {
             BuildTypeNoticeFragment.single.get().show();
