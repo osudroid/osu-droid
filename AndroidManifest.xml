@@ -149,37 +149,5 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.dgsrz.bancho.ui.TouchEventTestActivity"
-            android:theme="@style/Theme.NoBackground"
-            android:launchMode="singleInstance">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity android:name="com.dgsrz.bancho.ui.SliderTestActivity"
-            android:theme="@style/Theme.NoBackground"
-            android:launchMode="singleInstance">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity android:name="com.dgsrz.bancho.ui.StoryBoardTestActivity"
-            android:theme="@style/Theme.NoBackground"
-            android:launchMode="singleInstance">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity android:name="com.dgsrz.bancho.ui.VideoBackgroundTestActivity"
-            android:theme="@style/Theme.NoBackground"
-            android:launchMode="singleInstance">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
     </application>
 </manifest>
