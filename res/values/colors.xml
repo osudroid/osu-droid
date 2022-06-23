@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
 
-    <color name="frgDialogStyleBackground">#55000000</color>
-    <color name="frgBodyBackgroundLight">#EFFFFFFF</color>
-    <color name="triangleBackground">#DDFD7CB5</color>
+<!-- Created by Reco1l on 23/6/22 03:43 -->
+
+<resources>
+
 </resources>

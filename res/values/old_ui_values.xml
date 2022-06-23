@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+
+<!-- Created by Reco1l on 23/6/22 05:03 -->
+
+
+<!-- Created by Reco1l on 23/6/22 03:52 -->
+
+<!-- Created by Reco1l on 23/6/22 03:31 -->
+
+<resources>
+
+    <!--Temporal place for all values from the old UI, this XML is intended to be deleted
+    once the UI replacement gets finished-->
+
+    <!--Colors-->
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="frgDialogStyleBackground">#55000000</color>
+    <color name="frgBodyBackgroundLight">#EFFFFFFF</color>
+    <color name="triangleBackground">#DDFD7CB5</color>
+
+    <!--Integers-->
+    <integer name="COLOR_BLACK">0xff000000</integer>
+    <integer name="COLOR_GREEN">0xff00ca00</integer>
+    <integer name="COLOR_RED">0xfff21839</integer>
+    <integer name="COLOR_BLUE">0xff127cff</integer>
+    <integer name="COLOR_YELLOW">0xffffc000</integer>
+
+    <!--Pre release strings-->
+    <string name="pre_release_notice">This is a pre-release update!</string>
+    <string name="pre_release_message"><![CDATA[
+    Pre-release update contains experimental features. \n
+    If you get into trouble, please ask for help in our community.\n
+    http://ops.dgsrz.com/community]]></string>
+
+    <!--Import replay activity-->
+    <string name="act_import_replay">Import replay into osu!droid</string>
+    <string name="invalid_edr_file">Invalid repay!</string>
+    <string name="failed_to_import_edr">Failed to import replay!</string>
+    <string name="failed_to_import_edr_with_err" formatted="true">Failed to import replay: %s</string>
+    <string name="import_edr_successfully">Import replay successfully!</string>
+
+    <!--Score menu-->
+    <string name="frg_score_menu_title">Score</string>
+    <string name="frg_score_menu_export_score">Export Score</string>
+    <string name="frg_score_menu_export_failed">Failed to export replay!</string>
+    <string name="frg_score_menu_export_succeed" formatted="true">Replay is saved to %s</string>
+
+</resources>
