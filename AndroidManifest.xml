@@ -98,7 +98,7 @@
 
         <activity
             android:name="ru.nsu.ccfit.zuev.osu.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/AppTheme"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:launchMode="singleInstance"
             android:screenOrientation="sensorLandscape"
