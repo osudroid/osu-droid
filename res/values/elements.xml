@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 23/6/22 22:45 -->
+
+<resources> <!--This resource file is intended to globally contain predefined View styles-->
+
+    <!--Texts-->
+    <style name="text">
+        <item name="android:textColor">@color/textPrimary</item>
+        <item name="android:textSize">@dimen/textS</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <!--Progress Bar-->
+    <style name="determinate_circular_progress_bar">
+        <item name="android:progressDrawable">@drawable/circular_progress_bar</item>
+        <item name="android:indeterminateOnly">false</item>
+        <item name="android:scaleX">-1</item>
+    </style>
+
+</resources>

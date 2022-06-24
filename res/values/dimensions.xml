@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 23/6/22 22:40 -->
+
+<resources> <!--This resource file is intended to globally contain all dimensions from UI-->
+
+    <!--Predefined dimensions-->
+    <dimen name="XXS">@dimen/_2sdp</dimen>
+    <dimen name="XS">@dimen/_4sdp</dimen>
+    <dimen name="S">@dimen/_8sdp</dimen>
+    <dimen name="M">@dimen/_12sdp</dimen>
+    <dimen name="L">@dimen/_14sdp</dimen>
+    <dimen name="XL">@dimen/_18sdp</dimen>
+    <dimen name="XXL">@dimen/_20sdp</dimen>
+
+    <dimen name="_XXS">@dimen/_minus2sdp</dimen>
+    <dimen name="_XS">@dimen/_minus4sdp</dimen>
+    <dimen name="_S">@dimen/_minus8sdp</dimen>
+    <dimen name="_M">@dimen/_minus12sdp</dimen>
+    <dimen name="_L">@dimen/_minus14sdp</dimen>
+    <dimen name="_XL">@dimen/_minus18sdp</dimen>
+    <dimen name="_XXL">@dimen/_minus20sdp</dimen>
+
+    <!--Text-->
+    <dimen name="textXS">@dimen/_8sdp</dimen>
+    <dimen name="textS">@dimen/_10sdp</dimen>
+    <dimen name="textM">@dimen/_12sdp</dimen>
+    <dimen name="textL">@dimen/_14sdp</dimen>
+    <dimen name="textXL">@dimen/_18sdp</dimen>
+
+    <!--Progress Bar-->
+    <dimen name="circularProgressBarThickness">8</dimen>
+    <dimen name="smallCircularProgressBarSize">@dimen/_16sdp</dimen>
+
+    <!--Splash Screen-->
+    <dimen name="splashScreenLogoSize">@dimen/_28sdp</dimen>
+
+</resources>

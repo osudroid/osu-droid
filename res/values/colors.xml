@@ -2,8 +2,21 @@
 
 <!-- Created by Reco1l on 23/6/22 03:43 -->
 
-<resources>
+<resources> <!--This resource file is intended to globally contain all colors used in the UI-->
 
+    <!--Theme-->
+    <color name="primary">#7CB1E5</color>
+    <color name="accent">#7CB1E5</color>
     <color name="touchEffectHighlight">#2FFFFFFF</color>
+    <color name="windowBackground">#000000</color>
+
+    <!--Text-->
+    <color name="textPrimary">#FFFFFF</color>
+    <color name="textSecondary">#CCFFFFFF</color>
+    <color name="textTertiary">#33FFFFFF</color>
+
+    <!--Progress Bar-->
+    <color name="progressBarIndicatorColor">#FFFFFF</color>
+    <color name="progressBarTrackColor">#20FFFFFF</color>
 
 </resources>
