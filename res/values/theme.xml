@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="Theme.NoBackground" parent="android:Theme">
-        <item name="android:windowBackground">@null</item>
-    </style>
-    <style name="AppThemeLight" parent="android:Theme.Light">
-    </style>
-</resources>
