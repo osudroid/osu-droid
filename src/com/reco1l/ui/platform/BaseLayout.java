@@ -33,9 +33,6 @@ public abstract class BaseLayout extends Fragment {
     //--------------------------------------------------------------------------------------------//
     protected abstract void onLoad();
 
-    //Is called before the fragment gets removed from the main container.
-    protected abstract void onClose();
-
     // This simplified the way views are called with the method find(), every layout XML file have an
     // undefined prefix (you have to define it on every view ID declaration) and this method gets that prefix.
     protected abstract String getPrefix();
@@ -65,15 +62,13 @@ public abstract class BaseLayout extends Fragment {
     //---------------------------------------Management-------------------------------------------//
 
     public void close() {
+        // If you override this method always compare if 'isShowing' is true, otherwise any action
+        // with a View that is not showing can generate a NullPointerException.
         if (!isShowing)
             return;
-        new Runnable() {
-            @Override public void run() {
-                mActivity.runOnUiThread(() -> onClose());
-                FragmentPlatform.getInstance().removeFragment(BaseLayout.this);
-                isShowing = false;
-            }
-        };
+        FragmentPlatform.getInstance().removeFragment(BaseLayout.this);
+        isShowing = false;
+        // Also don't forget to call 'super.close()' otherwise the layout will not dismiss.
     }
 
     public void show() {

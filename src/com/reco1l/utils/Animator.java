@@ -4,7 +4,6 @@ import android.view.View;
 import android.view.ViewPropertyAnimator;
 
 import com.edlplan.framework.easing.Easing;
-import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -25,7 +24,7 @@ public class Animator {
     private Float fromAlpha, toAlpha;
     private Easing interpolator = Easing.InOutQuad;
     private Runnable onStart, onEnd;
-    private long delay = 0;
+    private Long delay;
 
     /**
      * Don't forget to call {@link #play(long)} to start the animation
@@ -113,7 +112,6 @@ public class Animator {
         return this;
     }
 
-
     /**
      * @param duration duration of animation in milliseconds.
      */
@@ -155,33 +153,16 @@ public class Animator {
         if(interpolator != null) 
             anim.setInterpolator(EasingHelper.asInterpolator(interpolator));
 
+        if (onStart != null) anim.withStartAction(onStart);
+        if (onEnd != null) anim.withEndAction(() -> {
+            onEnd.run();
+            System.gc();
+        });
+
+        if (delay != null) anim.setStartDelay(delay);
+
         anim.setDuration(duration);
-        anim.setListener(new BaseAnimationListener(){
-
-            @Override
-            public void onAnimationStart(android.animation.Animator animation) {
-                if(onStart != null)
-                    onStart.run();
-                super.onAnimationStart(animation);
-            }
-            @Override
-            public void onAnimationEnd(android.animation.Animator animation) {
-                if(onEnd != null)
-                    onEnd.run();
-                super.onAnimationEnd(animation);
-            }
-        });
-
-        //Prevents crashes if the view isn't visible.
-        anim.setUpdateListener(animation -> {
-            if(!view.isShown()) {
-                anim.cancel();
-                return;
-            }
-            view.invalidate();
-        });
-
-        view.postDelayed(anim::start, delay);
+        anim.start();
     }
 
 }
