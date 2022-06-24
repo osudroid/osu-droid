@@ -4,4 +4,6 @@
 
 <resources>
 
+    <color name="touchEffectHighlight">#2FFFFFFF</color>
+
 </resources>
