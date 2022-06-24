@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 24/6/22 02:42 -->
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ss_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <LinearLayout
+        android:id="@+id/ss_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:padding="@dimen/S"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ProgressBar
+            android:id="@+id/ss_progress"
+            style="@style/determinate_circular_progress_bar"
+            android:layout_width="@dimen/smallCircularProgressBarSize"
+            android:layout_height="@dimen/smallCircularProgressBarSize"
+            tools:progress="25"/>
+
+        <TextView
+            android:id="@+id/ss_percent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/XS"
+            android:text="0%"/>
+
+        <TextView
+            android:id="@+id/ss_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/XS"
+            android:maxLength="70"
+            android:text="Loading..."
+            android:textColor="@color/textSecondary"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ss_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!--TODO This icon need to be replaced with a new vector instead-->
+        <ImageView
+            android:layout_width="@dimen/splashScreenLogoSize"
+            android:layout_height="@dimen/splashScreenLogoSize"
+            android:src="@drawable/notify_inso"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ss_buildInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="@dimen/M"
+        app:layout_constraintTop_toBottomOf="@id/ss_icon">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/build_notice"
+            android:textColor="@color/textSecondary"
+            android:textSize="@dimen/textM" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

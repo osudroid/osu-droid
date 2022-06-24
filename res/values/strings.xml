@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+	<string name="build_notice">This is a <font color='#FFFFFF'>debug</font> build, online features are not available!</string>
+
 	<string name="message_error">Error: %s</string>
 	<string name="message_error_createdir">Cannot create %s</string>
 	<string name="message_error_multitouch">Multitouch is not supported by your device</string>

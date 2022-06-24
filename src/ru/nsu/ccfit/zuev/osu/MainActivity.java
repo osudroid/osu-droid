@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -23,24 +22,20 @@ import androidx.preference.PreferenceManager;
 import androidx.core.content.PermissionChecker;
 
 import android.util.DisplayMetrics;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 
 import android.widget.Toast;
 import com.edlplan.ui.ActivityOverlay;
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
-import com.edlplan.ui.fragment.BuildTypeNoticeFragment;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.EngineBridge;
+import com.reco1l.ui.SplashScene;
 import com.reco1l.ui.platform.FragmentPlatform;
 
 import org.anddev.andengine.engine.Engine;
@@ -84,7 +79,6 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.menu.FilterMenu;
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
-import ru.nsu.ccfit.zuev.osu.menu.SplashScene;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -293,7 +287,7 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public Scene onLoadScene() {
-        return new SplashScene().getScene();
+        return new SplashScene().scene;
     }
 
     @Override
@@ -362,9 +356,9 @@ public class MainActivity extends BaseGameActivity implements
 
         new FragmentPlatform().load(this, this, mRenderSurfaceView);
 
-        if ("pre_release".equals(BuildConfig.BUILD_TYPE) || BuildConfig.DEBUG) {
+        /*if ("pre_release".equals(BuildConfig.BUILD_TYPE) || BuildConfig.DEBUG) {
             BuildTypeNoticeFragment.single.get().show();
-        }
+        }*/
     }
 
     public void checkNewBeatmaps() {
