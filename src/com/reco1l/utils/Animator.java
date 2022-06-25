@@ -119,50 +119,54 @@ public class Animator {
         //hasWindowFocus() prevents crashes when the activity is paused.
         if(view == null || duration <= 0 || !GlobalManager.getInstance().getMainActivity().hasWindowFocus())
           return;
-        
-        if(fromX != null) view.setTranslationX(fromX);
-        if(fromY != null) view.setTranslationY(fromY);
-        if(fromZ != null) view.setTranslationZ(fromZ);
-        if(pivotX != null) view.setPivotX(pivotX);
-        if(pivotY != null) view.setPivotY(pivotY);
 
-        if(fromScale != null || fromScaleX != null) 
-            view.setScaleX(fromScale != null ? fromScale : fromScaleX);
+        GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> {
 
-        if(fromScale != null || fromScaleY != null)
-            view.setScaleY(fromScale != null ? fromScale : fromScaleY);
+            if(fromX != null) view.setTranslationX(fromX);
+            if(fromY != null) view.setTranslationY(fromY);
+            if(fromZ != null) view.setTranslationZ(fromZ);
+            if(pivotX != null) view.setPivotX(pivotX);
+            if(pivotY != null) view.setPivotY(pivotY);
 
-        if(fromAlpha != null) view.setAlpha(fromAlpha);
+            if(fromScale != null || fromScaleX != null)
+                view.setScaleX(fromScale != null ? fromScale : fromScaleX);
 
-        view.animate().cancel();
+            if(fromScale != null || fromScaleY != null)
+                view.setScaleY(fromScale != null ? fromScale : fromScaleY);
 
-        ViewPropertyAnimator anim = view.animate();
+            if(fromAlpha != null) view.setAlpha(fromAlpha);
 
-        if(toX != null) anim.translationX(toX);
-        if(toY != null) anim.translationY(toY);
-        if(toZ != null) anim.translationZ(toZ);
+            view.animate().cancel();
 
-        if(toScale != null || toScaleX != null)
-            anim.scaleX(toScale != null ? toScale : toScaleX);
+            ViewPropertyAnimator anim = view.animate();
 
-        if(toScale != null || toScaleY != null)
-            anim.scaleY(toScale != null ? toScale : toScaleY);
+            if(toX != null) anim.translationX(toX);
+            if(toY != null) anim.translationY(toY);
+            if(toZ != null) anim.translationZ(toZ);
 
-        if(toAlpha != null) anim.alpha(toAlpha);
+            if(toScale != null || toScaleX != null)
+                anim.scaleX(toScale != null ? toScale : toScaleX);
 
-        if(interpolator != null) 
-            anim.setInterpolator(EasingHelper.asInterpolator(interpolator));
+            if(toScale != null || toScaleY != null)
+                anim.scaleY(toScale != null ? toScale : toScaleY);
 
-        if (onStart != null) anim.withStartAction(onStart);
-        if (onEnd != null) anim.withEndAction(() -> {
-            onEnd.run();
-            System.gc();
+            if(toAlpha != null) anim.alpha(toAlpha);
+
+            if(interpolator != null)
+                anim.setInterpolator(EasingHelper.asInterpolator(interpolator));
+
+            if (onStart != null) anim.withStartAction(onStart);
+            if (onEnd != null) anim.withEndAction(() -> {
+                onEnd.run();
+                System.gc();
+            });
+
+            if (delay != null) anim.setStartDelay(delay);
+
+            anim.setDuration(duration);
+            anim.start();
+
         });
-
-        if (delay != null) anim.setStartDelay(delay);
-
-        anim.setDuration(duration);
-        anim.start();
     }
 
 }

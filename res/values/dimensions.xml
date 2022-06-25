@@ -4,6 +4,11 @@
 
 <resources> <!--This resource file is intended to globally contain all dimensions from UI-->
 
+    <!--Layers-->
+    <dimen name="topLayer">2dp</dimen>
+    <dimen name="middleLayer">1dp</dimen>
+    <dimen name="backLayer">0dp</dimen>
+
     <!--Predefined dimensions-->
     <dimen name="XXS">@dimen/_2sdp</dimen>
     <dimen name="XS">@dimen/_4sdp</dimen>
@@ -28,11 +33,30 @@
     <dimen name="textL">@dimen/_14sdp</dimen>
     <dimen name="textXL">@dimen/_18sdp</dimen>
 
+    <!--Vectors-->
+    <dimen name="vectorXXS">@dimen/_7sdp</dimen>
+    <dimen name="vectorXS">@dimen/_10sdp</dimen>
+    <dimen name="vectorS">@dimen/_14sdp</dimen>
+    <dimen name="vectorM">@dimen/_18sdp</dimen>
+    <dimen name="vectorL">@dimen/_28sdp</dimen>
+    <dimen name="vectorXL">@dimen/_46sdp</dimen>
+
+    <!--Shapes-->
+    <dimen name="globalCorners">@dimen/_12sdp</dimen>
+
     <!--Progress Bar-->
     <dimen name="circularProgressBarThickness">8</dimen>
     <dimen name="smallCircularProgressBarSize">@dimen/_16sdp</dimen>
 
     <!--Splash Screen-->
     <dimen name="splashScreenLogoSize">@dimen/_28sdp</dimen>
+
+    <!--Top Bar-->
+    <dimen name="topBarButtonWidth">@dimen/_62sdp</dimen>
+    <dimen name="topBarHeight">@dimen/_40sdp</dimen>
+    <dimen name="topBarMusicButtonHeight">@dimen/_26sdp</dimen>
+    <dimen name="topBarAvatarSize">@dimen/_26sdp</dimen>
+    <dimen name="topBarAvatarCorners">@dimen/_8sdp</dimen>
+    <dimen name="topBarShadowHeight">@dimen/_12sdp</dimen>
 
 </resources>

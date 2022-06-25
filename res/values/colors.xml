@@ -8,12 +8,22 @@
     <color name="primary">#7CB1E5</color>
     <color name="accent">#7CB1E5</color>
     <color name="touchEffectHighlight">#2FFFFFFF</color>
-    <color name="windowBackground">#000000</color>
+    <color name="windowBackground">#FFFFFF</color>
+    <color name="shadowColor">#000000</color>
+
+    <!--Vectors-->
+    <color name="vectorPrimary">#FFFFFF</color>
+    <color name="vectorSecondary">#FFFFFF</color>
 
     <!--Text-->
     <color name="textPrimary">#FFFFFF</color>
     <color name="textSecondary">#CCFFFFFF</color>
     <color name="textTertiary">#33FFFFFF</color>
+
+    <!--Top Bar-->
+    <color name="topBarUserBoxBackground">#25000000</color>
+    <color name="topBarBackground">#A6000000</color>
+    <color name="topBarMusicButtonBackground">#40000000</color>
 
     <!--Progress Bar-->
     <color name="progressBarIndicatorColor">#FFFFFF</color>

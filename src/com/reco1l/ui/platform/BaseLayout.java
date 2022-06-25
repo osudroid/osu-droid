@@ -146,7 +146,7 @@ public abstract class BaseLayout extends Fragment {
         return metrics;
     }
 
-    public Resources resources(){
+    public Resources res(){
         return mActivity.getResources();
     }
 }

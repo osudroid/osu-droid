@@ -355,10 +355,6 @@ public class MainActivity extends BaseGameActivity implements
         this.mRenderSurfaceView.setRenderer(this.mEngine);
 
         new FragmentPlatform().load(this, this, mRenderSurfaceView);
-
-        /*if ("pre_release".equals(BuildConfig.BUILD_TYPE) || BuildConfig.DEBUG) {
-            BuildTypeNoticeFragment.single.get().show();
-        }*/
     }
 
     public void checkNewBeatmaps() {
