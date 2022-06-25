@@ -311,6 +311,7 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().setInfo("");
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
+                SplashScene.instance.close();
                 GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
                 GlobalManager.getInstance().getMainScene().loadBeatmap();
                 initPreferences();

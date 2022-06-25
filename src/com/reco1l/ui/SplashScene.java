@@ -19,14 +19,15 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class SplashScene extends BaseLayout implements IUpdateHandler {
 
     private final GlobalManager global = GlobalManager.getInstance();
+    public static SplashScene instance;
     public final Scene scene;
 
     private View bottomLayout, background, buildInfo, icon;
-    private TextView percentText, loadingInfo, buildInfoText;
+    private TextView percentText, loadingInfo;
     private ProgressBar progressBar;
     private boolean showBuildText = false;
 
-    private type build;
+    private final type build;
     private enum type {
         RELEASE(0),
         DEBUG(R.string.debug_build),
@@ -48,6 +49,7 @@ public class SplashScene extends BaseLayout implements IUpdateHandler {
 
     public SplashScene() {
         scene = new Scene();
+        instance = this;
 
         //noinspection ConstantConditions
         build = BuildConfig.BUILD_TYPE.equals("pre_release") ?
@@ -63,7 +65,7 @@ public class SplashScene extends BaseLayout implements IUpdateHandler {
     protected void onLoad() {
         setDismissMode(false, false);
 
-        buildInfoText = find("buildInfoText");
+        TextView buildInfoText = find("buildInfoText");
         background = find("background");
         progressBar = find("progress");
         bottomLayout = find("bottom");
@@ -106,13 +108,15 @@ public class SplashScene extends BaseLayout implements IUpdateHandler {
             return;
         }
 
-        new Animator(bottomLayout).moveX(0, -50).fade(1, 0)
-                .play(300);
+        mActivity.runOnUiThread(() -> {
+            new Animator(bottomLayout).moveX(0, -50).fade(1, 0)
+                    .play(300);
 
-        new Animator(icon).fade(1, 0).delay(300)
-                .play(400);
-        new Animator(background).fade(1, 0).delay(300).runOnEnd(super::close)
-                .play(400);
+            new Animator(icon).fade(1, 0).delay(300)
+                    .play(400);
+            new Animator(background).fade(1, 0).delay(300).runOnEnd(super::close)
+                    .play(400);
+        });
     }
 
     @Override
@@ -138,10 +142,10 @@ public class SplashScene extends BaseLayout implements IUpdateHandler {
 
             if (global.getLoadingProgress() == 100) {
                 scene.unregisterUpdateHandler(this);
-                close();
             }
         });
     }
+
 
     @Override public void reset() { }
 }
