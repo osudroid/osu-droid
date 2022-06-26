@@ -93,8 +93,7 @@ public class FragmentPlatform {
 
     public void closeAll() {
         for (BaseLayout layout: layouts) {
-            if (layout.isShowing)
-                mActivity.runOnUiThread(layout::close);
+            mActivity.runOnUiThread(layout::close);
         }
     }
 
@@ -110,8 +109,7 @@ public class FragmentPlatform {
         toClose.removeAll(Arrays.asList(toExclude));
 
         for (BaseLayout layout: toClose) {
-            if (layout.isShowing)
-                mActivity.runOnUiThread(layout::close);
+            mActivity.runOnUiThread(layout::close);
         }
     }
 

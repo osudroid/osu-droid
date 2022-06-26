@@ -14,6 +14,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 public interface IMainClasses {
 
     // Be sure of call this variables once their classes get initialized.
+    // Most of them get initialized once they are called or when the activity is created.
     FragmentPlatform platform = FragmentPlatform.getInstance();
     GlobalManager global = GlobalManager.getInstance();
     MainActivity mActivity = global.getMainActivity();

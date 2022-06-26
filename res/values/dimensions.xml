@@ -5,6 +5,7 @@
 <resources> <!--This resource file is intended to globally contain all dimensions from UI-->
 
     <!--Layers-->
+    <dimen name="imposedLayer">3dp</dimen>
     <dimen name="topLayer">2dp</dimen>
     <dimen name="middleLayer">1dp</dimen>
     <dimen name="backLayer">0dp</dimen>
@@ -42,6 +43,7 @@
     <dimen name="vectorXL">@dimen/_46sdp</dimen>
 
     <!--Shapes-->
+    <dimen name="tabIndicatorHeight">@dimen/_2sdp</dimen>
     <dimen name="globalCorners">@dimen/_12sdp</dimen>
 
     <!--Progress Bar-->
