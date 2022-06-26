@@ -1,5 +1,7 @@
 package com.reco1l.entity;
 
+import com.reco1l.utils.IMainClasses;
+
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
@@ -17,11 +19,7 @@ import org.anddev.andengine.util.modifier.ease.EaseQuadInOut;
 import org.anddev.andengine.util.modifier.ease.IEaseFunction;
 
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.LibraryManager;
-import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osu.MainScene;
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
 import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
@@ -31,12 +29,7 @@ import ru.nsu.ccfit.zuev.osu.menu.SettingsMenu;
 
 // Created by Reco1l on 20/6/22 03:39
 
-public class Menu {
-
-    private final ResourceManager resources = ResourceManager.getInstance();
-    private final LibraryManager library = LibraryManager.getInstance();
-    private final GlobalManager global = GlobalManager.getInstance();
-    private final MainActivity mActivity = global.getMainActivity();
+public class Menu implements IMainClasses {
 
     @SuppressWarnings("FieldCanBeLocal")
     private final float
@@ -100,7 +93,7 @@ public class Menu {
         };
     }
 
-    public void adjust(){
+    public void adjust() {
 
         int resH = Config.getRES_HEIGHT();
         int resW = Config.getRES_WIDTH();
@@ -145,12 +138,17 @@ public class Menu {
                 new ScaleModifier(animTime, logo.getScaleX(), logoScale - downScale, new IEntityModifier.IEntityModifierListener() {
                     @Override
                     public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+                        scene.unregisterTouchArea(logo);
                         logoAnimInProgress = true;
                     }
                     @Override
                     public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
                         isLogoSmall = true;
                         logoAnimInProgress = false;
+                        scene.registerTouchArea(logo);
+                        scene.registerTouchArea(play);
+                        scene.registerTouchArea(settings);
+                        scene.registerTouchArea(exit);
                     }
                 }, interpolator)
         ));
@@ -167,10 +165,6 @@ public class Menu {
                 new MoveXModifier(animTime + 0.08f, menuX - 20, menuX, interpolator),
                 new AlphaModifier(animTime + 0.08f, 0, 1f, interpolator)
         ));
-
-        scene.registerTouchArea(play);
-        scene.registerTouchArea(settings);
-        scene.registerTouchArea(exit);
     }
 
     private void hide(Scene scene) {
@@ -187,11 +181,13 @@ public class Menu {
                     @Override
                     public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
                         logoAnimInProgress = true;
+                        scene.unregisterTouchArea(logo);
                     }
                     @Override
                     public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
                         isLogoSmall = false;
                         logoAnimInProgress = false;
+                        scene.registerTouchArea(logo);
                     }
                 }, EaseQuadInOut.getInstance())
         ));
