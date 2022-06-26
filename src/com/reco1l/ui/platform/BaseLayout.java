@@ -14,14 +14,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.MainActivity;
+import com.reco1l.utils.IMainClasses;
 
 // Created by Reco1l on 22/6/22 02:26
 
-public abstract class BaseLayout extends Fragment {
-
-    protected final MainActivity mActivity = GlobalManager.getInstance().getMainActivity();
+public abstract class BaseLayout extends Fragment implements IMainClasses {
 
     protected View rootView;
     protected boolean
