@@ -127,14 +127,13 @@ public abstract class BaseLayout extends Fragment implements IMainClasses {
         }
     }
 
-    // Simple method to check in multiple views if one of them is null, in fact that should never
-    // happen making this method unnecessary but it's a workaround to avoid stupid warnings.
+    // Simple method to check nullability of multiples views at once.
     public boolean isNull(View... views) {
-        boolean returnValue = false;
         for (View view: views) {
-            returnValue = view == null;
+            if (view == null)
+                return true;
         }
-        return returnValue;
+        return false;
     }
 
     public DisplayMetrics displayMetrics() {
