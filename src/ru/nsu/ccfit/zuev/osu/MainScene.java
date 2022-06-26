@@ -68,13 +68,10 @@ import ru.nsu.ccfit.zuev.osuplus.R;
  * Created by Fuuko on 2015/4/24.
  */
 public class MainScene implements IUpdateHandler {
-    public SongProgressBar progressBar;
     public BeatmapInfo beatmapInfo;
     private Context context;
     private Sprite background, lastBackground;
-    private Sprite music_nowplay;
     private Scene scene;
-    private ChangeableText musicInfoText;
     //    private ArrayList<BeatmapInfo> beatmaps;
     private Random random = new Random();
     private Replay replay = null;
@@ -135,195 +132,6 @@ public class MainScene implements IUpdateHandler {
         lastBackground = new Sprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), ResourceManager.getInstance().getTexture("emptyavatar"));
 
         menu.draw();
-
-        final Text author = new Text(10, 530, ResourceManager
-                .getInstance().getFont("font"),
-                String.format(
-                        Locale.getDefault(),
-                        "osu!droid %s\nby osu!droid Team\nosu! is \u00a9 peppy 2007-2022",
-                        BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")"
-                        )) {
-
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-                    new ConfirmDialogFragment().setMessage(R.string.dialog_visit_osu_website_message).showForResult(
-                        isAccepted -> {
-                            if(isAccepted) {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
-                                GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
-                            }
-                        }
-                    );
-                    return true;
-                }
-                return false;
-            }
-        };
-        author.setPosition(10, Config.getRES_HEIGHT() - author.getHeight() - 10);
-
-        final Text yasonline = new Text(720, 530, ResourceManager
-                .getInstance().getFont("font"),
-                "  Performance Ranking\n   Provided by iBancho") {
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-                    new ConfirmDialogFragment().setMessage(R.string.dialog_visit_osudroid_website_message).showForResult(
-                        isAccepted -> {
-                            if(isAccepted) {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
-                                GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
-                            }
-                        }
-                    );
-                    return true;
-                }
-                return false;
-            }
-        };
-        yasonline.setPosition(Config.getRES_WIDTH() - yasonline.getWidth() - 40, Config.getRES_HEIGHT() - yasonline.getHeight() - 10);
-
-        final Sprite music_prev = new Sprite(Config.getRES_WIDTH() - 50 * 6 + 35,
-                47, 40, 40, ResourceManager.getInstance().getTexture(
-                "music_prev")) {
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-                    setColor(0.7f, 0.7f, 0.7f);
-                    doChange = true;
-                    return true;
-                }
-                if (pSceneTouchEvent.isActionUp()) {
-                    setColor(1, 1, 1);
-                    if (lastHit == 0) {
-                        lastHit = System.currentTimeMillis();
-                    } else {
-                        if (System.currentTimeMillis() - lastHit <= 1000 && !isOnExitAnim) {
-                            return true;
-                        }
-                    }
-                    lastHit = System.currentTimeMillis();
-                    musicControl(MusicOption.PREV);
-                    return true;
-                }
-                return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX,
-                        pTouchAreaLocalY);
-            }
-        };
-
-        final Sprite music_play = new Sprite(Config.getRES_WIDTH() - 50 * 5 + 35,
-                47, 40, 40, ResourceManager.getInstance().getTexture(
-                "music_play")) {
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-                    setColor(0.7f, 0.7f, 0.7f);
-                    return true;
-                }
-                if (pSceneTouchEvent.isActionUp()) {
-                    setColor(1, 1, 1);
-                    musicControl(MusicOption.PLAY);
-                    return true;
-                }
-                return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX,
-                        pTouchAreaLocalY);
-            }
-        };
-
-        final Sprite music_pause = new Sprite(Config.getRES_WIDTH() - 50 * 4 + 35,
-                47, 40, 40, ResourceManager.getInstance().getTexture(
-                "music_pause")) {
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-                    setColor(0.7f, 0.7f, 0.7f);
-                    return true;
-                }
-                if (pSceneTouchEvent.isActionUp()) {
-                    setColor(1, 1, 1);
-                    musicControl(MusicOption.PAUSE);
-                    return true;
-                }
-                return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX,
-                        pTouchAreaLocalY);
-            }
-        };
-
-        final Sprite music_stop = new Sprite(Config.getRES_WIDTH() - 50 * 3 + 35,
-                47, 40, 40, ResourceManager.getInstance().getTexture(
-                "music_stop")) {
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-                    setColor(0.7f, 0.7f, 0.7f);
-                    doStop = true;
-                    return true;
-                }
-                if (pSceneTouchEvent.isActionUp()) {
-                    setColor(1, 1, 1);
-                    musicControl(MusicOption.STOP);
-                    return true;
-                }
-                return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX,
-                        pTouchAreaLocalY);
-            }
-        };
-
-        final Sprite music_next = new Sprite(Config.getRES_WIDTH() - 50 * 2 + 35,
-                47, 40, 40, ResourceManager.getInstance().getTexture(
-                "music_next")) {
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-                    setColor(0.7f, 0.7f, 0.7f);
-                    doChange = true;
-                    return true;
-                }
-                if (pSceneTouchEvent.isActionUp()) {
-                    setColor(1, 1, 1);
-                    if (lastHit == 0) {
-                        lastHit = System.currentTimeMillis();
-                    } else {
-                        if (System.currentTimeMillis() - lastHit <= 1000 && !isOnExitAnim) {
-                            return true;
-                        }
-                    }
-                    lastHit = System.currentTimeMillis();
-                    musicControl(MusicOption.NEXT);
-                    return true;
-                }
-                return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX,
-                        pTouchAreaLocalY);
-            }
-        };
-
-        musicInfoText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", HorizontalAlign.RIGHT, 35);
-
-        final TextureRegion nptex = ResourceManager.getInstance().getTexture("music_np");
-        music_nowplay = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 500), 0, 40 * nptex.getWidth() / nptex.getHeight(), 40, nptex);
-
-        final Rectangle bgTopRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Utils.toRes(120));
-        bgTopRect.setColor(0, 0, 0, 0.3f);
-
-        final Rectangle bgbottomRect = new Rectangle(0, 0, Config.getRES_WIDTH(),
-                Math.max(author.getHeight(), yasonline.getHeight()) + Utils.toRes(15));
-        bgbottomRect.setPosition(0, Config.getRES_HEIGHT() - bgbottomRect.getHeight());
-        bgbottomRect.setColor(0, 0, 0, 0.3f);
-
         spectrum.draw(scene);
 
         LibraryManager.getInstance().loadLibraryCache((Activity) context, false);
@@ -367,32 +175,10 @@ public class MainScene implements IUpdateHandler {
         menu.adjust();
 
         scene.attachChild(lastBackground, 0);
-        scene.attachChild(bgTopRect);
-        scene.attachChild(bgbottomRect);
-        scene.attachChild(author);
-        scene.attachChild(yasonline);
-        scene.attachChild(music_nowplay);
-        scene.attachChild(musicInfoText);
-        scene.attachChild(music_prev);
-        scene.attachChild(music_play);
-        scene.attachChild(music_pause);
-        scene.attachChild(music_stop);
-        scene.attachChild(music_next);
-
-        scene.registerTouchArea(author);
-        scene.registerTouchArea(yasonline);
-        scene.registerTouchArea(music_prev);
-        scene.registerTouchArea(music_play);
-        scene.registerTouchArea(music_pause);
-        scene.registerTouchArea(music_stop);
-        scene.registerTouchArea(music_next);
 
         menu.attach(scene);
 
         scene.setTouchAreaBindingEnabled(true);
-
-        progressBar = new SongProgressBar(null, scene, 0, 0, new PointF(Utils.toRes(Config.getRES_WIDTH() - 320), Utils.toRes(100)));
-        progressBar.setProgressRectColor(new RGBAColor(0.9f, 0.9f, 0.9f, 0.8f));
 
         createOnlinePanel(scene);
         scene.registerUpdateHandler(this);
@@ -539,7 +325,7 @@ public class MainScene implements IUpdateHandler {
                 } else {
                     return;
                 }
-                progressBar.setStartTime(0);
+                //musicPlayer.startTime = 0;
                 GlobalManager.getInstance().getSongService().play();
                 GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
                 if (lastTimingPoint != null) {
@@ -551,16 +337,9 @@ public class MainScene implements IUpdateHandler {
             }
 
             if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
-//                syncPassedTime += pSecondsElapsed * 1000f;
-                int position = GlobalManager.getInstance().getSongService().getPosition();
-                progressBar.setTime(GlobalManager.getInstance().getSongService().getLength());
-                progressBar.setPassedTime(position);
-                progressBar.update(pSecondsElapsed * 1000);
 
-//                if (syncPassedTime > bpmLength * 8) {
-//                    musicControl(MusicOption.SYNC);
-//                    syncPassedTime = 0;
-//                }
+                int position = GlobalManager.getInstance().getSongService().getPosition();
+                //musicPlayer.updateSeekbar(pSecondsElapsed * 1000f);
 
                 if (currentTimingPoint != null && position > currentTimingPoint.getTime() * 1000) {
                     if (!isContinuousKiai && currentTimingPoint.isKiai()) {
@@ -619,25 +398,7 @@ public class MainScene implements IUpdateHandler {
         if (LibraryManager.getInstance().getSizeOfBeatmaps() != 0) {
             beatmapInfo = LibraryManager.getInstance().getBeatmap();
             Log.w("MainMenuActivity", "Next song: " + beatmapInfo.getMusic() + ", Start at: " + beatmapInfo.getPreviewTime());
-
-            if (musicInfoText == null) {
-                musicInfoText = new ChangeableText(Utils.toRes(Config.getRES_WIDTH() - 500), Utils.toRes(3),
-                        ResourceManager.getInstance().getFont("font"), "None...", HorizontalAlign.RIGHT, 35);
-            }
-            if (beatmapInfo.getArtistUnicode() != null && beatmapInfo.getTitleUnicode() != null && Config.isForceRomanized() == false) {
-                musicInfoText.setText(beatmapInfo.getArtistUnicode() + " - " + beatmapInfo.getTitleUnicode(), true);
-            } else if (beatmapInfo.getArtist() != null && beatmapInfo.getTitle() != null) {
-                musicInfoText.setText(beatmapInfo.getArtist() + " - " + beatmapInfo.getTitle(), true);
-            } else {
-                musicInfoText.setText("Failure to load QAQ", true);
-            }
-            try {
-                musicInfoText.setPosition(Utils.toRes(Config.getRES_WIDTH() - 500 + 470 - musicInfoText.getWidth()), musicInfoText.getY());
-                music_nowplay.setPosition(Utils.toRes(Config.getRES_WIDTH() - 500 + 470 - musicInfoText.getWidth() - 130), 0);
-            } catch (NullPointerException e) {
-                musicInfoText.setPosition(Utils.toRes(Config.getRES_WIDTH() - 500 + 470 - 200), 5);
-                music_nowplay.setPosition(Utils.toRes(Config.getRES_WIDTH() - 500 + 470 - 200 - 130), 0);
-            }
+            //musicPlayer.updateSong();
         }
     }
 

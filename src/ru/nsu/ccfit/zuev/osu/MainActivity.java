@@ -586,8 +586,6 @@ public class MainActivity extends BaseGameActivity implements
                     if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
                     GlobalManager.getInstance().getMainScene().loadBeatmapInfo();
                     GlobalManager.getInstance().getMainScene().loadTimeingPoints(false);
-                    GlobalManager.getInstance().getMainScene().progressBar.setTime(songService.getLength());
-                    GlobalManager.getInstance().getMainScene().progressBar.setPassedTime(songService.getPosition());
                     GlobalManager.getInstance().getMainScene().musicControl(MainScene.MusicOption.SYNC);
                 }
             }
