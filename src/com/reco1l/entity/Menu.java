@@ -31,6 +31,8 @@ import ru.nsu.ccfit.zuev.osu.menu.SettingsMenu;
 
 public class Menu implements IMainClasses {
 
+    private Scene parent;
+
     @SuppressWarnings("FieldCanBeLocal")
     private final float
             logoScale = 0.89f,
@@ -38,30 +40,31 @@ public class Menu implements IMainClasses {
             downScale = 0.17f,
             animTime = 0.3f;
 
-    private float
-            logoFinalX,
-            logoCenterX,
-            menuX;
+    private float logoFinalX, logoCenterX, menuX;
+    public boolean isMenuShowing = false;
+
     private boolean
             logoAnimInProgress = false,
-            isLogoSmall = false,
-            isOnExitAnim = false;
-
-    public boolean isMenuShowing = false;
-    private int showPassTime = 0;
+            isOnExitAnim = false,
+            isLogoSmall = false;
 
     private final IEaseFunction interpolator = EaseQuadInOut.getInstance();
     private static Sprite logo, play, exit, settings;
-    private Scene scene;
+
+    private final int resW = Config.getRES_WIDTH();
+    private final int resH = Config.getRES_HEIGHT();
+    private int showPassTime = 0;
 
     //--------------------------------------------------------------------------------------------//
     
-    public void draw() {
+    public void draw(Scene scene) {
+        parent = scene;
+
         TextureRegion
-            logoTex = resources.getTexture("logo"),
-            playTex = resources.getTexture("play"),
-            exitTex = resources.getTexture("exit"),
-            settingTex = resources.getTexture("options");
+                logoTex = resources.getTexture("logo"),
+                playTex = resources.getTexture("play"),
+                exitTex = resources.getTexture("exit"),
+                settingTex = resources.getTexture("options");
 
         logo = new Sprite(0, 0, logoTex) {
             @Override
@@ -94,43 +97,41 @@ public class Menu implements IMainClasses {
     }
 
     public void adjust() {
+        logo.setScale(logoScale);
+        logo.setPosition((resW - logo.getWidth()) / 2f, (resH - logo.getHeight()) / 2f);
 
-        int resH = Config.getRES_HEIGHT();
-        int resW = Config.getRES_WIDTH();
-        float logoX = (resW - logo.getWidth()) / 2f;
-        float logoY = (resH - logo.getHeight()) / 2;
+        float menuY = resH / 2f - play.getHeight() / 2f;
+        menuX = resW / 5f;
 
-        logo.setPosition(logoX, logoY);
         play.setAlpha(0f);
         play.setScale(resW / 1024f);
+        play.setPosition(menuX, menuY);
+
         settings.setAlpha(0f);
         settings.setScale(resW / 1024f);
+        settings.setPosition(menuX, menuY);
+
         exit.setAlpha(0f);
         exit.setScale(resW / 1024f);
-
-        logoFinalX = Config.getRES_WIDTH() / 5f - logo.getWidth() / 2;
-        logoCenterX = Config.getRES_WIDTH() / 2f - logo.getWidth() / 2;
-        menuX = Config.getRES_WIDTH() / 5f;
-
-        logo.setScale(logoScale);
-        float menuY = Config.getRES_HEIGHT() / 2f - play.getHeight() / 2f;
-        play.setPosition(menuX, menuY);
-        settings.setPosition(menuX, menuY);
         exit.setPosition(menuX, menuY);
+
+        logoFinalX = resW / 5f - logo.getWidth() / 2;
+        logoCenterX = resW / 2f - logo.getWidth() / 2;
     }
 
-    public void attach(Scene scene){
-        this.scene = scene;
-        scene.attachChild(exit);
-        scene.attachChild(settings);
-        scene.attachChild(play);
-        scene.attachChild(logo);
-        scene.registerTouchArea(logo);
+    public void attach(){
+        if (parent == null)
+            return;
+        parent.attachChild(exit);
+        parent.attachChild(settings);
+        parent.attachChild(play);
+        parent.attachChild(logo);
+        parent.registerTouchArea(logo);
     }
 
-    private void show(Scene scene) {
+    private void show() {
 
-        //global.getMainScene().getBackground().zoomIn();
+        global.getMainScene().background.zoomIn();
 
         logo.clearEntityModifiers();
         logo.registerEntityModifier(new ParallelEntityModifier(
@@ -138,17 +139,17 @@ public class Menu implements IMainClasses {
                 new ScaleModifier(animTime, logo.getScaleX(), logoScale - downScale, new IEntityModifier.IEntityModifierListener() {
                     @Override
                     public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-                        scene.unregisterTouchArea(logo);
+                        parent.unregisterTouchArea(logo);
                         logoAnimInProgress = true;
                     }
                     @Override
                     public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
                         isLogoSmall = true;
                         logoAnimInProgress = false;
-                        scene.registerTouchArea(logo);
-                        scene.registerTouchArea(play);
-                        scene.registerTouchArea(settings);
-                        scene.registerTouchArea(exit);
+                        parent.registerTouchArea(logo);
+                        parent.registerTouchArea(play);
+                        parent.registerTouchArea(settings);
+                        parent.registerTouchArea(exit);
                     }
                 }, interpolator)
         ));
@@ -167,12 +168,12 @@ public class Menu implements IMainClasses {
         ));
     }
 
-    private void hide(Scene scene) {
-        scene.unregisterTouchArea(play);
-        scene.unregisterTouchArea(settings);
-        scene.unregisterTouchArea(exit);
+    private void hide() {
+        parent.unregisterTouchArea(play);
+        parent.unregisterTouchArea(settings);
+        parent.unregisterTouchArea(exit);
 
-        //global.getMainScene().getBackground().zoomOut();
+        global.getMainScene().background.zoomOut();
 
         logo.clearEntityModifiers();
         logo.registerEntityModifier(new ParallelEntityModifier(
@@ -181,13 +182,13 @@ public class Menu implements IMainClasses {
                     @Override
                     public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
                         logoAnimInProgress = true;
-                        scene.unregisterTouchArea(logo);
+                        parent.unregisterTouchArea(logo);
                     }
                     @Override
                     public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
                         isLogoSmall = false;
                         logoAnimInProgress = false;
-                        scene.registerTouchArea(logo);
+                        parent.registerTouchArea(logo);
                     }
                 }, EaseQuadInOut.getInstance())
         ));
@@ -207,7 +208,6 @@ public class Menu implements IMainClasses {
 
         showPassTime = 0;
     }
-
     
     //-----------------------------------------Actions--------------------------------------------//
 
@@ -247,8 +247,8 @@ public class Menu implements IMainClasses {
             if (button == logo) {
                 new AsyncTaskLoader().execute(new OsuAsyncCallback() {
                     @Override public void run() {
-                        if (!isMenuShowing) show(scene);
-                        else hide(scene);
+                        if (!isMenuShowing) show();
+                        else hide();
                     }
                     @Override
                     public void onComplete() {
@@ -292,7 +292,7 @@ public class Menu implements IMainClasses {
 
         if (isMenuShowing) {
             if (showPassTime > 10000f) {
-                hide(scene);
+                hide();
                 isMenuShowing = false;
             }
             else showPassTime += secondsElapsed * 1000f;
@@ -317,12 +317,11 @@ public class Menu implements IMainClasses {
     }
 
     public void doExitAnim() {
-        hide(scene);
+        hide();
         isOnExitAnim = true;
         logo.registerEntityModifier(new ParallelEntityModifier(
                 new RotationModifier(3.0f, 0, -15),
                 ModifierFactory.newScaleModifier(3.0f, 1f, 0.8f)
         ));
     }
-
 }

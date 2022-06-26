@@ -3,14 +3,14 @@ package ru.nsu.ccfit.zuev.osu;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.PointF;
-import android.net.Uri;
 import android.os.PowerManager;
 import android.util.Log;
 
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
+import com.reco1l.entity.Background;
 import com.reco1l.entity.Menu;
 import com.reco1l.entity.Spectrum;
+import com.reco1l.utils.ILayouts;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
@@ -28,12 +28,8 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.scene.background.SpriteBackground;
 import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.entity.text.Text;
-import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.HorizontalAlign;
 import org.anddev.andengine.util.modifier.IModifier;
 
 import java.util.ArrayList;
@@ -67,10 +63,9 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 /**
  * Created by Fuuko on 2015/4/24.
  */
-public class MainScene implements IUpdateHandler {
+public class MainScene implements IUpdateHandler /* ILayouts */ {
     public BeatmapInfo beatmapInfo;
     private Context context;
-    private Sprite background, lastBackground;
     private Scene scene;
     //    private ArrayList<BeatmapInfo> beatmaps;
     private Random random = new Random();
@@ -103,7 +98,8 @@ public class MainScene implements IUpdateHandler {
     private long lastHit = 0;
     private boolean isOnExitAnim = false;
 
-    private Menu menu;
+    public Menu menu;
+    public Background background;
     private Spectrum spectrum;
 
     public void load(Context context) {
@@ -112,26 +108,10 @@ public class MainScene implements IUpdateHandler {
         scene = new Scene();
         menu = new Menu();
         spectrum = new Spectrum();
+        background = new Background();
 
-        final TextureRegion tex = ResourceManager.getInstance().getTexture("menu-background");
-        
-        if (tex != null) {
-            float height = tex.getHeight();
-            height *= Config.getRES_WIDTH()
-                    / (float) tex.getWidth();
-            final Sprite menuBg = new Sprite(
-                    0,
-                    (Config.getRES_HEIGHT() - height) / 2,
-                    Config.getRES_WIDTH(),
-                    height, tex);
-            scene.setBackground(new SpriteBackground(menuBg));
-        } else {
-            scene.setBackground(new ColorBackground(70 / 255f, 129 / 255f,
-                    252 / 255f));
-        }
-        lastBackground = new Sprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), ResourceManager.getInstance().getTexture("emptyavatar"));
-
-        menu.draw();
+        background.draw(scene);
+        menu.draw(scene);
         spectrum.draw(scene);
 
         LibraryManager.getInstance().loadLibraryCache((Activity) context, false);
@@ -173,13 +153,9 @@ public class MainScene implements IUpdateHandler {
         }
 
         menu.adjust();
-
-        scene.attachChild(lastBackground, 0);
-
-        menu.attach(scene);
+        menu.attach();
 
         scene.setTouchAreaBindingEnabled(true);
-
         createOnlinePanel(scene);
         scene.registerUpdateHandler(this);
 
@@ -398,6 +374,7 @@ public class MainScene implements IUpdateHandler {
         if (LibraryManager.getInstance().getSizeOfBeatmaps() != 0) {
             beatmapInfo = LibraryManager.getInstance().getBeatmap();
             Log.w("MainMenuActivity", "Next song: " + beatmapInfo.getMusic() + ", Start at: " + beatmapInfo.getPreviewTime());
+            // topBar.updateMusicText();
             //musicPlayer.updateSong();
         }
     }
@@ -418,45 +395,7 @@ public class MainScene implements IUpdateHandler {
             selectedTrack = trackInfos.get(trackIndex);
 
             spectrum.updateColor(selectedTrack);
-            if (selectedTrack.getBackground() != null) {
-                try {
-                    final TextureRegion tex = Config.isSafeBeatmapBg() ?
-                        ResourceManager.getInstance().getTexture("menu-background") :
-                        ResourceManager.getInstance().loadBackground(selectedTrack.getBackground());
-
-                    if (tex != null) {
-                        float height = tex.getHeight();
-                        height *= Config.getRES_WIDTH()
-                                / (float) tex.getWidth();
-                        background = new Sprite(0,
-                                (Config.getRES_HEIGHT() - height) / 2, Config
-                                .getRES_WIDTH(), height, tex);
-                        lastBackground.registerEntityModifier(new org.anddev.andengine.entity.modifier.AlphaModifier(1.5f, 1, 0, new IEntityModifier.IEntityModifierListener() {
-                            @Override
-                            public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-                                scene.attachChild(background, 0);
-                            }
-
-                            @Override
-                            public void onModifierFinished(IModifier<IEntity> pModifier, final IEntity pItem) {
-                                GlobalManager.getInstance().getMainActivity().runOnUpdateThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        // TODO Auto-generated method stub
-                                        pItem.detachSelf();
-                                    }
-                                });
-                            }
-                        }));
-                        lastBackground = background;
-                    }
-                } catch (Exception e) {
-                    Debug.e(e.toString());
-                    lastBackground.setAlpha(0);
-                }
-            } else {
-                lastBackground.setAlpha(0);
-            }
+            background.redraw(selectedTrack);
 
             if (reloadMusic) {
                 if (GlobalManager.getInstance().getSongService() != null) {
