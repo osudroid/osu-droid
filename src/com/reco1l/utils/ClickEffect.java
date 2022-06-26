@@ -3,11 +3,11 @@ package com.reco1l.utils;
 import android.animation.ValueAnimator;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
 
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 23/6/22 20:44
@@ -31,7 +31,11 @@ public class ClickEffect implements IMainClasses {
         GradientDrawable shape = new GradientDrawable();
         shape.setColor(color);
 
-        if (view.getBackground() != null)
+        // Only ShapeDrawable class can be casted to GradientDrawable.
+        boolean allow = view.getBackground() instanceof GradientDrawable
+                || view.getBackground() instanceof ShapeDrawable;
+
+        if (view.getBackground() != null && allow)
             shape.setCornerRadius(((GradientDrawable) view.getBackground()).getCornerRadius());
 
         ValueAnimator downAnim = ValueAnimator.ofArgb(0, color);
