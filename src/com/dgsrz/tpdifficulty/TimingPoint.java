@@ -1,4 +1,4 @@
-package test.tpdifficulty;
+package com.dgsrz.tpdifficulty;
 
 /**
  * Created by Fuuko on 2015/5/29.

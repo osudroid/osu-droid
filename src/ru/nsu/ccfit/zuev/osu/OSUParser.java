@@ -21,14 +21,14 @@ import ru.nsu.ccfit.zuev.osu.game.GameObjectData;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
-import test.tpdifficulty.TimingPoint;
-import test.tpdifficulty.hitobject.HitCircle;
-import test.tpdifficulty.hitobject.HitObject;
-import test.tpdifficulty.hitobject.HitObjectType;
-import test.tpdifficulty.hitobject.Slider;
-import test.tpdifficulty.hitobject.SliderType;
-import test.tpdifficulty.hitobject.Spinner;
-import test.tpdifficulty.tp.AiModtpDifficulty;
+import com.dgsrz.tpdifficulty.TimingPoint;
+import com.dgsrz.tpdifficulty.hitobject.HitCircle;
+import com.dgsrz.tpdifficulty.hitobject.HitObject;
+import com.dgsrz.tpdifficulty.hitobject.HitObjectType;
+import com.dgsrz.tpdifficulty.hitobject.Slider;
+import com.dgsrz.tpdifficulty.hitobject.SliderType;
+import com.dgsrz.tpdifficulty.hitobject.Spinner;
+import com.dgsrz.tpdifficulty.tp.AiModtpDifficulty;
 
 public class OSUParser {
     private final File file;
