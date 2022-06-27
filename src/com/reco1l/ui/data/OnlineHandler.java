@@ -2,6 +2,7 @@ package com.reco1l.ui.data;
 
 import android.graphics.drawable.Drawable;
 
+import com.reco1l.utils.ILayouts;
 import com.reco1l.utils.IMainClasses;
 
 import java.io.File;
@@ -13,10 +14,10 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 26/6/22 21:20
 
-public class OnlineHandler implements IMainClasses {
+public class OnlineHandler implements IMainClasses, ILayouts {
     // This class translates contains tools to translate online data for the new UI.
 
-    public static OnlineHandler instance;
+    private static OnlineHandler instance;
     private static final Drawable defaultAvatar = mActivity.getDrawable(R.drawable.default_avatar);
 
     //--------------------------------------------------------------------------------------------//
@@ -60,4 +61,13 @@ public class OnlineHandler implements IMainClasses {
 
         return Drawable.createFromPath(file.getPath());
     }
+
+    //--------------------------------------------------------------------------------------------//
+
+    // This method updates all showing layouts that contains Views showing online data from player
+    public void update() {
+        if (topBar != null && topBar.userBox != null)
+            topBar.userBox.update();
+    }
+
 }

@@ -1,16 +1,12 @@
 package com.reco1l.ui;
 
 import android.animation.ValueAnimator;
-import android.content.Context;
-import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.material.imageview.ShapeableImageView;
 import com.reco1l.EngineBridge;
-import com.reco1l.ui.data.OnlineHandler;
 import com.reco1l.ui.platform.BaseLayout;
 import com.reco1l.utils.Animator;
 import com.reco1l.utils.ClickListener;
@@ -77,7 +73,7 @@ public class TopBar extends BaseLayout {
 
         setAuthorVisibility(engine.currentScene == EngineBridge.Scenes.MAIN_MENU);
 
-        userBox.updateData();
+        userBox.update();
         updateMusicText();
     }
 
@@ -153,7 +149,7 @@ public class TopBar extends BaseLayout {
             new ClickListener(body).simple(null);
         }
 
-        public void updateData() {
+        public void update() {
             if (!parent.isShowing || online == null)
                 return;
 
@@ -165,15 +161,10 @@ public class TopBar extends BaseLayout {
 
             name.setText(online.getUsername());
             rank.setText(String.format("#%d", online.getRank()));
-            updateAvatar();
-        }
 
-        public void updateAvatar() {
-            if (!parent.isShowing || avatar == null)
-                return;
-            avatar.setImageDrawable(onlineHandler.getPlayerAvatar());
+            if (onlineHandler.getPlayerAvatar() != null)
+                avatar.setImageDrawable(onlineHandler.getPlayerAvatar());
         }
-
     }
 
     //--------------------------------------------------------------------------------------------//

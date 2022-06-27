@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu.online;
 
 import android.os.AsyncTask;
 
+import com.reco1l.utils.IMainClasses;
+
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
@@ -14,7 +16,7 @@ import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
-public class OnlineScoring {
+public class OnlineScoring implements IMainClasses {
     private static final int attemptCount = 5;
     private static OnlineScoring instance = null;
     private Boolean onlineMutex = new Boolean(false);
@@ -105,6 +107,7 @@ public class OnlineScoring {
                         setPanelMessage("Cannot log in", OnlineManager.getInstance().getFailMessage());
                         OnlineManager.getInstance().setStayOnline(false);
                     }
+                    onlineHandler.update();
                 }
             }
 
