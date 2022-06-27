@@ -5,6 +5,8 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.Log;
 
+import androidx.core.content.res.ResourcesCompat;
+
 import com.dgsrz.bancho.security.SecurityUtils;
 
 import org.anddev.andengine.engine.Engine;
@@ -33,6 +35,7 @@ import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.QualityAssetBitmapSource;
 import ru.nsu.ccfit.zuev.osu.helper.QualityFileBitmapSource;
 import ru.nsu.ccfit.zuev.osu.helper.ScaledBitmapSource;
+import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinJsonReader;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
@@ -337,8 +340,9 @@ public class ResourceManager {
                 TextureOptions.BILINEAR_PREMULTIPLYALPHA);
         Font font;
         if (file == null) {
-            font = new Font(texture, Typeface.create(Typeface.DEFAULT,
-                    Typeface.NORMAL), size, true, color);
+            Typeface defaultFont = ResourcesCompat.getFont(context, R.font.varela_regular);
+
+            font = new Font(texture, defaultFont, size, true, color);
         } else {
             font = FontFactory.createFromAsset(texture, context, "fonts/"
                     + file, size, true, color);
@@ -356,8 +360,9 @@ public class ResourceManager {
                 TextureOptions.BILINEAR_PREMULTIPLYALPHA);
         StrokeFont font;
         if (file == null) {
-            font = new StrokeFont(texture, Typeface.create(Typeface.DEFAULT,
-                    Typeface.NORMAL), size, true, color1,
+            Typeface defaultFont = ResourcesCompat.getFont(context, R.font.varela_regular);
+
+            font = new StrokeFont(texture, defaultFont, size, true, color1,
                     Config.getTextureQuality() == 1 ? 2 : 0.75f, color2);
         } else {
             font = FontFactory.createStrokeFromAsset(texture, context, "fonts/"

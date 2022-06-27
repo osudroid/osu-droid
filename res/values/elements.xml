@@ -6,9 +6,18 @@
 
     <!--Texts-->
     <style name="text">
+        <item name="fontFamily">@font/varela_regular</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">@color/textPrimary</item>
         <item name="android:textSize">@dimen/textS</item>
         <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="largeText" parent="text">
+        <item name="android:textSize">@dimen/textM</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:maxLines">2</item>
     </style>
 
     <!--Buttons-->
@@ -28,6 +37,16 @@
     <style name="avatar_shape">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">@dimen/topBarAvatarCorners</item>
+    </style>
+
+    <!--Layouts-->
+    <style name="panel">
+        <item name="android:layout_width">@dimen/panelWidth</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/round_shape</item>
+        <item name="android:backgroundTint">@color/backgroundSecondary</item>
+        <item name="android:clickable">true</item>
+        <item name="android:layout_margin">@dimen/panelMargins</item>
     </style>
 
 </resources>
