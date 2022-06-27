@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 24/6/22 21:26 -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:translationZ="@dimen/topLayer">
+
+    <RelativeLayout
+        android:id="@+id/tb_body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.edlplan.ui.TriangleEffectView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/tb_bar"
+            android:alpha="0.5"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <RelativeLayout
+            android:id="@+id/tb_bar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/topBarHeight"
+            android:background="@color/topBarBackground"
+            android:gravity="center_vertical">
+
+            <!--Settings-->
+            <ImageView
+                android:id="@+id/tb_settings"
+                style="@style/icon_button"
+                android:layout_width="@dimen/topBarButtonWidth"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:src="@drawable/v_settings" />
+
+            <!--User box-->
+            <RelativeLayout
+                android:id="@+id/tb_userBox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_toStartOf="@+id/tb_settings"
+                android:background="@color/topBarUserBoxBackground">
+
+                <TextView
+                    android:id="@+id/tb_playerRank"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginLeft="@dimen/XXS"
+                    android:text="@string/top_bar_offline"
+                    android:textColor="@color/textTertiary"
+                    android:textSize="@dimen/textXL" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:paddingHorizontal="@dimen/XL">
+
+                    <TextView
+                        android:id="@+id/tb_playerName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="@dimen/L"
+                        android:maxLength="32"
+                        android:text="Guest"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="@dimen/textM" />
+
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/tb_avatar"
+                        android:layout_width="@dimen/topBarAvatarSize"
+                        android:layout_height="@dimen/topBarAvatarSize"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/default_avatar"
+                        app:shapeAppearanceOverlay="@style/avatar_shape" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <!--Music-->
+            <LinearLayout
+                android:id="@+id/tb_music"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/topBarMusicButtonHeight"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/S"
+                android:background="@drawable/round_shape"
+                android:backgroundTint="@color/topBarMusicButtonBackground"
+                android:gravity="center"
+                android:paddingHorizontal="@dimen/M"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/S"
+                    android:src="@drawable/v_music_s" />
+
+                <TextView
+                    android:id="@+id/tb_mText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:maxLength="32"
+                    android:paddingRight="@dimen/XXS"
+                    android:text="title"
+                    android:textSize="@dimen/textS" />
+
+            </LinearLayout>
+
+            <!--<include layout="@layout/top_bar_buttons" />-->
+
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/topBarShadowHeight"
+            android:layout_below="@+id/tb_bar"
+            android:alpha="0.3"
+            android:background="@drawable/shadow_horizontal" />
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/tb_author"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/XS"
+        android:background="@drawable/round_shape"
+        android:backgroundTint="@color/authorTextBackground"
+        android:paddingHorizontal="@dimen/S"
+        android:paddingVertical="@dimen/XXS"
+        android:text="[Author information]"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

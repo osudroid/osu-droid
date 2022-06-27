@@ -13,7 +13,7 @@ import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 
 // Created by Reco1l on 22/6/22 02:20
 
-public class EngineBridge extends Engine implements IMainClasses /*, ILayouts */ {
+public class EngineBridge extends Engine implements IMainClasses, ILayouts {
     //Check which AndEngine scene is showing now and updates the new UI when setScene() is called.
 
     public Scenes currentScene;
@@ -32,7 +32,6 @@ public class EngineBridge extends Engine implements IMainClasses /*, ILayouts */
     //--------------------------------------------------------------------------------------------//
 
     private void checkScene(Scene scene) {
-        //isGlobalManagerInit avoids a crash at first start when GlobalManager and instances are not loaded yet.
         if (!isGlobalManagerInit) {
             initNewUi();
             return;
@@ -57,7 +56,7 @@ public class EngineBridge extends Engine implements IMainClasses /*, ILayouts */
     }
 
     private void initNewUi() {
-        //TopBar.instance = new TopBar();
+        TopBar.instance = new TopBar();
     }
 
     private void updateNewUi() {
@@ -68,8 +67,8 @@ public class EngineBridge extends Engine implements IMainClasses /*, ILayouts */
         switch(currentScene) {
 
             case MAIN_MENU:
-                //topBar.show();
-                //platform.closeAllExcept(topBar);
+                topBar.show();
+                platform.closeAllExcept(topBar);
                 break;
             case LOADING_SCREEN:
             case SONG_MENU:

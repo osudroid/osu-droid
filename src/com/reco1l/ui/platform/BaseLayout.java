@@ -14,11 +14,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.reco1l.utils.ILayouts;
 import com.reco1l.utils.IMainClasses;
 
 // Created by Reco1l on 22/6/22 02:26
 
-public abstract class BaseLayout extends Fragment implements IMainClasses {
+public abstract class BaseLayout extends Fragment implements IMainClasses, ILayouts {
 
     protected View rootView;
     protected boolean
@@ -89,7 +90,7 @@ public abstract class BaseLayout extends Fragment implements IMainClasses {
 
     //-----------------------------------------Tools----------------------------------------------//
     @SuppressWarnings("unchecked")
-    public <T extends View> T find(@IdRes int id) {
+    protected <T extends View> T find(@IdRes int id) {
         if (rootView == null || id == 0)
             return null;
         Object object = rootView.findViewById(id);
@@ -102,7 +103,7 @@ public abstract class BaseLayout extends Fragment implements IMainClasses {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends View> T find(String prefix, String view) {
+    protected <T extends View> T find(String prefix, String view) {
         if (rootView == null || view == null || prefix == null)
             return null;
 
@@ -114,11 +115,11 @@ public abstract class BaseLayout extends Fragment implements IMainClasses {
         return object != null ? (T) object : null;
     }
 
-    public void setVisible(View... views) {
+    protected void setVisible(View... views) {
         setVisible(true, views);
     }
 
-    public void setVisible(boolean bool, View... views) {
+    protected void setVisible(boolean bool, View... views) {
         for (View view: views) {
             if (view == null)
                 return;
@@ -128,7 +129,7 @@ public abstract class BaseLayout extends Fragment implements IMainClasses {
     }
 
     // Simple method to check nullability of multiples views at once.
-    public boolean isNull(View... views) {
+    protected boolean isNull(View... views) {
         for (View view: views) {
             if (view == null)
                 return true;
@@ -136,13 +137,13 @@ public abstract class BaseLayout extends Fragment implements IMainClasses {
         return false;
     }
 
-    public DisplayMetrics displayMetrics() {
+    protected DisplayMetrics displayMetrics() {
         DisplayMetrics metrics = new DisplayMetrics();
         mActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
         return metrics;
     }
 
-    public Resources res(){
+    protected Resources res(){
         return mActivity.getResources();
     }
 }

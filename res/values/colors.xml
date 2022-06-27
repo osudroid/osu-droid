@@ -20,10 +20,17 @@
     <color name="textSecondary">#CCFFFFFF</color>
     <color name="textTertiary">#33FFFFFF</color>
 
+    <!--Backgrounds-->
+    <color name="backgroundPrimary">#242424</color>
+    <color name="backgroundSecondary">#FA292929</color>
+    <color name="backgroundDimmed">#99000000</color>
+
     <!--Top Bar-->
     <color name="topBarUserBoxBackground">#25000000</color>
     <color name="topBarBackground">#A6000000</color>
     <color name="topBarMusicButtonBackground">#40000000</color>
+    <color name="topBarButtonsBackground">#19000000</color>
+    <color name="authorTextBackground">#50000000</color>
 
     <!--Progress Bar-->
     <color name="progressBarIndicatorColor">#FFFFFF</color>

@@ -1,6 +1,7 @@
 package com.reco1l.utils;
 
 import com.reco1l.EngineBridge;
+import com.reco1l.ui.data.OnlineHandler;
 import com.reco1l.ui.platform.FragmentPlatform;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -21,5 +22,6 @@ public interface IMainClasses {
     LibraryManager library = LibraryManager.getInstance();
     ResourceManager resources = ResourceManager.getInstance();
     OnlineManager online = OnlineManager.getInstance();
+    OnlineHandler onlineHandler = OnlineHandler.getInstance();
     EngineBridge engine = (EngineBridge) mActivity.getEngine();
 }
