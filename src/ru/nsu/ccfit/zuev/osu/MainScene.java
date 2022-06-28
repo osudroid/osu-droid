@@ -10,11 +10,8 @@ import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.reco1l.entity.Background;
 import com.reco1l.entity.Menu;
 import com.reco1l.entity.Spectrum;
-import com.reco1l.utils.ILayouts;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.particle.ParticleSystem;
 import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
 import org.anddev.andengine.entity.particle.initializer.AccelerationInitializer;
@@ -25,18 +22,12 @@ import org.anddev.andengine.entity.particle.modifier.ExpireModifier;
 import org.anddev.andengine.entity.particle.modifier.ScaleModifier;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.scene.background.ColorBackground;
-import org.anddev.andengine.entity.scene.background.SpriteBackground;
-import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.modifier.IModifier;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Random;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
@@ -48,7 +39,6 @@ import javax.microedition.khronos.opengles.GL10;
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
-import ru.nsu.ccfit.zuev.osu.game.SongProgressBar;
 import ru.nsu.ccfit.zuev.osu.game.TimingPoint;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierFactory;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
@@ -57,7 +47,6 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
-import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 /**
@@ -156,7 +145,7 @@ public class MainScene implements IUpdateHandler /* ILayouts */ {
         menu.attach();
 
         scene.setTouchAreaBindingEnabled(true);
-        createOnlinePanel(scene);
+        loadOnline();
         scene.registerUpdateHandler(this);
 
         String[] welcomeSounds = {"welcome", "welcome_piano"};
@@ -167,25 +156,10 @@ public class MainScene implements IUpdateHandler /* ILayouts */ {
 
     }
 
-    private void createOnlinePanel(Scene scene) {
+    public void loadOnline() {
         Config.loadOnlineConfig(context);
         OnlineManager.getInstance().Init(context);
-
-        if (OnlineManager.getInstance().isStayOnline()) {
-            Debug.i("Stay online, creating panel");
-            OnlineScoring.getInstance().createPanel();
-            final OnlinePanel panel = OnlineScoring.getInstance().getPanel();
-            panel.setPosition(5, 5);
-            scene.attachChild(panel);
-            scene.registerTouchArea(panel.rect);
-        }
-
         OnlineScoring.getInstance().login();
-    }
-
-    public void reloadOnlinePanel() {
-        scene.detachChild(OnlineScoring.getInstance().getPanel());
-        createOnlinePanel(scene);
     }
 
     public void musicControl(MusicOption option) {

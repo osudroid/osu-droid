@@ -585,14 +585,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         frontLayer.attachChild(randomMap);
         scene.registerTouchArea(randomMap);
 
-        if (OnlineScoring.getInstance().createSecondPanel() != null) {
-            OnlinePanel panel = OnlineScoring.getInstance().getSecondPanel();
-            panel.detachSelf();
-            panel.setPosition(randomMap.getX() + randomMap.getWidthScaled() - 18, Config.getRES_HEIGHT() - Utils.toRes(110));
-            OnlineScoring.getInstance().loadAvatar(false);
-            frontLayer.attachChild(panel);
-
-
+        // TODO temporal workaround once SongMenu UI get replaced.
+        if (OnlineScoring.online.isStayOnline()) {
             scoringSwitcher = new AnimSprite(Utils.toRes(5), Utils.toRes(10), 0, "ranking_enabled", "ranking_disabled") {
                 @Override
                 public boolean onAreaTouched(TouchEvent pSceneTouchEvent,

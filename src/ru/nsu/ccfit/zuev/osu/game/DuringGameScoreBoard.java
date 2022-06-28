@@ -52,7 +52,7 @@ public class DuringGameScoreBoard extends GameObject {
         }
         posNow = scoreBoardDatas.length;
         currentUsername = isNotMe != null ? isNotMe :
-                OnlineScoring.getInstance().getPanel() == null ?
+                !OnlineScoring.online.isStayOnline() ?
                         Config.getLocalUsername() :
                         Config.getOnlineUsername();
         TextureRegion tex = ResourceManager.getInstance().getTexture("menu-button-background").deepCopy();

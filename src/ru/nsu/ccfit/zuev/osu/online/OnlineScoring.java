@@ -30,46 +30,6 @@ public class OnlineScoring implements IMainClasses {
         return instance;
     }
 
-    public void createPanel() {
-        panel = new OnlinePanel();
-    }
-
-    public OnlinePanel getPanel() {
-        return panel;
-    }
-
-    public OnlinePanel createSecondPanel() {
-        if (OnlineManager.getInstance().isStayOnline() == false)
-            return null;
-        secondPanel = new OnlinePanel();
-        secondPanel.setInfo();
-        secondPanel.setAvatar(avatarLoaded ? "userAvatar" : null);
-        return secondPanel;
-    }
-
-    public OnlinePanel getSecondPanel() {
-        return secondPanel;
-    }
-
-    public void setPanelMessage(String message, String submessage) {
-        panel.setMessage(message, submessage);
-        if (secondPanel != null)
-            secondPanel.setMessage(message, submessage);
-    }
-
-    public void updatePanels() {
-        panel.setInfo();
-        if (secondPanel != null)
-            secondPanel.setInfo();
-    }
-
-    public void updatePanelAvatars() {
-        String texname = avatarLoaded ? "userAvatar" : null;
-        panel.setAvatar(texname);
-        if (secondPanel != null)
-            secondPanel.setAvatar(texname);
-    }
-
     public void login() {
         if (OnlineManager.getInstance().isStayOnline() == false)
             return;
@@ -83,13 +43,13 @@ public class OnlineScoring implements IMainClasses {
 
                     //Trying to send request
                     for (int i = 0; i < 3; i++) {
-                        setPanelMessage("Logging in...", "");
+                        // todo new ui message here
 
                         try {
                             success = OnlineManager.getInstance().logIn();
                         } catch (OnlineManagerException e) {
                             Debug.e("Login error: " + e.getMessage());
-                            setPanelMessage("Login failed", "Retrying in 5 sec");
+                            // todo new ui message here
                             try {
                                 Thread.sleep(3000);
                             } catch (InterruptedException e1) {
@@ -100,21 +60,16 @@ public class OnlineScoring implements IMainClasses {
                         break;
                     }
                     if (success) {
-                        updatePanels();
                         OnlineManager.getInstance().setStayOnline(true);
-                        loadAvatar(true);
                     } else {
-                        setPanelMessage("Cannot log in", OnlineManager.getInstance().getFailMessage());
+                        // todo new ui message here
                         OnlineManager.getInstance().setStayOnline(false);
                     }
-                    onlineHandler.update();
                 }
             }
 
-
             public void onComplete() {
-                // TODO Auto-generated method stub
-
+                onlineHandler.update();
             }
         });
     }
@@ -186,7 +141,7 @@ public class OnlineScoring implements IMainClasses {
                             if (OnlineManager.getInstance().getFailMessage().equals("Invalid record data"))
                                 i = attemptCount;
                         } else if (success) {
-                            updatePanels();
+                            onlineHandler.update();
                             OnlineManager mgr = OnlineManager.getInstance();
                             panel.show(mgr.getMapRank(), mgr.getScore(), mgr.getRank(), mgr.getAccuracy());
                             OnlineManager.getInstance().sendReplay(replay);
@@ -226,37 +181,4 @@ public class OnlineScoring implements IMainClasses {
         }
     }
 
-    public void loadAvatar(final boolean both) {
-        if (!OnlineManager.getInstance().isStayOnline()) return;
-        final String avatarUrl = OnlineManager.getInstance().getAvatarURL();
-        if (avatarUrl == null || avatarUrl.length() == 0)
-            return;
-
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
-
-            public void run() {
-                synchronized (onlineMutex) {
-                    if (OnlineManager.getInstance().loadAvatarToTextureManager()) {
-                        avatarLoaded = true;
-                    } else
-                        avatarLoaded = false;
-                    if (both)
-                        updatePanelAvatars();
-                    else if (secondPanel != null)
-                        secondPanel.setAvatar(avatarLoaded ? "userAvatar" : null);
-                }
-            }
-
-
-            public void onComplete() {
-                // TODO Auto-generated method stub
-
-            }
-        });
-    }
-
-    public boolean isAvatarLoaded() {
-        return avatarLoaded;
-    }
 }

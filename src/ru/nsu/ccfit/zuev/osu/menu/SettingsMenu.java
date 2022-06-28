@@ -281,7 +281,7 @@ public class SettingsMenu extends SettingsFragment {
     public void dismiss() {
         playOnDismissAnim(() -> {
             Config.loadConfig(mActivity);
-            GlobalManager.getInstance().getMainScene().reloadOnlinePanel();
+            GlobalManager.getInstance().getMainScene().loadOnline();
             GlobalManager.getInstance().getMainScene().loadTimeingPoints(false);
             GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
             GlobalManager.getInstance().getSongService().setGaming(false);
