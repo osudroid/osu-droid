@@ -1,8 +1,8 @@
-package test.tpdifficulty.hitobject;
+package com.dgsrz.tpdifficulty.hitobject;
 
 import android.graphics.PointF;
 
-import test.tpdifficulty.TimingPoint;
+import com.dgsrz.tpdifficulty.TimingPoint;
 
 /**
  * Created by Fuuko on 2015/5/29.

@@ -17,14 +17,14 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
-import test.tpdifficulty.TimingPoint;
-import test.tpdifficulty.hitobject.HitCircle;
-import test.tpdifficulty.hitobject.HitObject;
-import test.tpdifficulty.hitobject.HitObjectType;
-import test.tpdifficulty.hitobject.Slider;
-import test.tpdifficulty.hitobject.SliderType;
-import test.tpdifficulty.hitobject.Spinner;
-import test.tpdifficulty.tp.AiModtpDifficulty;
+import com.dgsrz.tpdifficulty.TimingPoint;
+import com.dgsrz.tpdifficulty.hitobject.HitCircle;
+import com.dgsrz.tpdifficulty.hitobject.HitObject;
+import com.dgsrz.tpdifficulty.hitobject.HitObjectType;
+import com.dgsrz.tpdifficulty.hitobject.Slider;
+import com.dgsrz.tpdifficulty.hitobject.SliderType;
+import com.dgsrz.tpdifficulty.hitobject.Spinner;
+import com.dgsrz.tpdifficulty.tp.AiModtpDifficulty;
 
 public class DifficultyReCalculator {
     private OSUParser parser;
