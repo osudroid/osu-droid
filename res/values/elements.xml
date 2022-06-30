@@ -49,4 +49,10 @@
         <item name="android:layout_margin">@dimen/panelMargins</item>
     </style>
 
+    <style name="panelSeparatorView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/panelSeparatorHeight</item>
+        <item name="android:background">@color/panelSeparator</item>
+    </style>
+
 </resources>

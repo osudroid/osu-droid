@@ -42,6 +42,9 @@
     <dimen name="vectorL">@dimen/_28sdp</dimen>
     <dimen name="vectorXL">@dimen/_46sdp</dimen>
 
+    <!--Buttons-->
+    <dimen name="buttonSize">@dimen/_40sdp</dimen>
+
     <!--Shapes-->
     <dimen name="tabIndicatorHeight">@dimen/_2sdp</dimen>
     <dimen name="globalCorners">@dimen/_12sdp</dimen>
@@ -49,10 +52,11 @@
     <!--Progress Bar-->
     <dimen name="circularProgressBarThickness">8</dimen>
     <dimen name="smallCircularProgressBarSize">@dimen/_16sdp</dimen>
+    <dimen name="linearProgressBarHeight">@dimen/_3sdp</dimen>
 
     <!--Splash Screen-->
     <dimen name="splashScreenLogoSize">@dimen/_28sdp</dimen>
-
+    
     <!--Top Bar-->
     <dimen name="topBarButtonWidth">@dimen/_62sdp</dimen>
     <dimen name="topBarHeight">@dimen/_40sdp</dimen>
@@ -60,5 +64,17 @@
     <dimen name="topBarAvatarSize">@dimen/_26sdp</dimen>
     <dimen name="topBarAvatarCorners">@dimen/_8sdp</dimen>
     <dimen name="topBarShadowHeight">@dimen/_12sdp</dimen>
+
+    <!--Panels-->
+    <dimen name="panelWidth">@dimen/_200sdp</dimen>
+    <dimen name="panelMargins">@dimen/_14sdp</dimen>
+    <dimen name="viewMargin">@dimen/_6sdp</dimen>
+    <dimen name="panelShadowWidth">@dimen/_8sdp</dimen>
+    <dimen name="panelSeparatorHeight">@dimen/_1sdp</dimen>
+
+    <!--Notifications-->
+    <dimen name="notificationCenterWidth">@dimen/_220sdp</dimen>
+    <dimen name="popupNotificationWidth">@dimen/_240sdp</dimen>
+    <dimen name="popupNotificationHeight">@dimen/_30sdp</dimen>
 
 </resources>

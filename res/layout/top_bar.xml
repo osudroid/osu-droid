@@ -37,6 +37,15 @@
                 android:layout_alignParentEnd="true"
                 android:src="@drawable/v_settings" />
 
+            <!--Inbox-->
+            <ImageView
+                android:id="@+id/tb_inbox"
+                style="@style/icon_button"
+                android:layout_width="@dimen/topBarButtonWidth"
+                android:layout_height="match_parent"
+                android:layout_toStartOf="@id/tb_userBox"
+                android:src="@drawable/v_inbox"/>
+
             <!--User box-->
             <RelativeLayout
                 android:id="@+id/tb_userBox"
