@@ -29,13 +29,7 @@ public class TriangleDrawable extends Drawable {
     private Paint paint = new Paint();
     private Random random = new Random();
     private Path path = new Path();
-    private int[] colors = new int[]{
-            0xFFF7E67A,
-            0xFFEE8100,
-            0xFF74C684,
-            0xFFF8558C,
-            0xFF5245F7
-    };
+    private int color = 0xFF000000;
     private float width, height;
     private long time = -1;
     private boolean preSpawnTriangles;
@@ -153,7 +147,7 @@ public class TriangleDrawable extends Drawable {
 
     private void spawnOneTriangle() {
         Triangle triangle = new Triangle();
-        triangle.color = colors[random.nextInt(colors.length)];
+        triangle.color = color;
         triangle.alpha = nextAlpha();
         triangle.center = nextPos();
 
