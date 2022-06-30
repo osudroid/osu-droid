@@ -2,7 +2,7 @@ package com.reco1l.ui.data;
 
 import android.graphics.drawable.Drawable;
 
-import com.reco1l.utils.ILayouts;
+import com.reco1l.utils.UI;
 import com.reco1l.utils.IMainClasses;
 
 import java.io.File;
@@ -14,7 +14,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 26/6/22 21:20
 
-public class OnlineHandler implements IMainClasses, ILayouts {
+public class OnlineHandler implements IMainClasses, UI {
     // This class translates contains tools to translate online data for the new UI.
 
     private static OnlineHandler instance;
@@ -37,11 +37,12 @@ public class OnlineHandler implements IMainClasses, ILayouts {
         String fileName = MD5Calcuator.getStringMD5(online.getAvatarURL() + online.getUsername());
         File file = new File(Config.getCachePath(), fileName);
 
-        if(!file.exists())
+        if(!file.exists()) {
             OnlineFileOperator.downloadFile(online.getAvatarURL(), file.getAbsolutePath());
-
-        else if ((file.exists() && file.length() < 1) & file.delete())
+        }
+        else if ((file.exists() && file.length() < 1) & file.delete()) {
             OnlineFileOperator.downloadFile(online.getAvatarURL(), file.getAbsolutePath());
+        }
 
         return Drawable.createFromPath(file.getPath());
     }

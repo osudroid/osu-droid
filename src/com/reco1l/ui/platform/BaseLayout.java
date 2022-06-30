@@ -14,14 +14,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.reco1l.utils.ILayouts;
+import com.reco1l.utils.UI;
 import com.reco1l.utils.IMainClasses;
 
+import ru.nsu.ccfit.zuev.osuplus.R;
+
 // Created by Reco1l on 22/6/22 02:26
+// Based on the EdrowsLuo BaseFragment class :)
 
-public abstract class BaseLayout extends Fragment implements IMainClasses, ILayouts {
+public abstract class BaseLayout extends Fragment implements IMainClasses, UI {
 
-    protected View rootView;
+    protected View rootView, rootBackground;
     protected boolean
             isDismissOnBackgroundPress = false,
             isDismissOnBackPress = true;
@@ -29,44 +32,60 @@ public abstract class BaseLayout extends Fragment implements IMainClasses, ILayo
     public boolean isShowing = false;
 
     //--------------------------------------------------------------------------------------------//
+    /**
+     * Runs once the layout XML is inflated.
+     */
     protected abstract void onLoad();
 
-    // This simplified the way views are called with the method find(), every layout XML file have an
-    // undefined prefix (you have to define it on every view ID declaration) and this method gets that prefix.
+    /**
+     * Simplifies the way views are got with the method {@link #find(String)}, every layout XML file have an
+     * undefined prefix (you have to define it on every view ID declaration).
+     */
     protected abstract String getPrefix();
 
     protected abstract @LayoutRes int getLayout();
     //--------------------------------------------------------------------------------------------//
 
     @Nullable @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle bundle) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle bundle) {
 
         rootView = inflater.inflate(getLayout(), container, false);
 
-        // Is important to set "background" as ID for the back view on your layout if you
-        // want to enable dismiss on background press.
-        View background = find("background");
-        if (isDismissOnBackgroundPress && background != null)
-            background.setOnTouchListener((view, event) -> {
-                if (event.getAction() == MotionEvent.ACTION_UP)
-                    close();
-                return true;
-            });
-
+        // Don't forget to create a View matching root bounds and set its ID to "background" for this feature.
+        // You can also set the root view ID as "background".
+        rootBackground = find(R.id.background);
         onLoad();
+        if (isDismissOnBackgroundPress && rootBackground != null) {
+            rootBackground.setClickable(true);
+
+            if (!rootBackground.hasOnClickListeners())
+                rootBackground.setOnTouchListener((view, event) -> {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        close();
+                    }
+                    return true;
+                });
+        }
         return rootView;
     }
 
     //---------------------------------------Management-------------------------------------------//
 
+    /**
+     * Dismiss the layout.
+     * <p>
+     * If you override this method always compare if 'isShowing' is true a the start of the method,
+     * otherwise any action with a View that is not showing can generate a {@link NullPointerException}.
+     * <p>
+     * Also don't forget to call 'super.close()' otherwise the layout will not dismiss, if you add
+     * animations call it at the end of the animation, otherwise the animation will broke up.
+     */
     public void close() {
-        // If you override this method always compare if 'isShowing' is true, otherwise any action
-        // with a View that is not showing can generate a NullPointerException.
         if (!isShowing)
             return;
         FragmentPlatform.getInstance().removeFragment(BaseLayout.this);
         isShowing = false;
-        // Also don't forget to call 'super.close()' otherwise the layout will not dismiss.
+        System.gc();
     }
 
     public void show() {
@@ -77,18 +96,31 @@ public abstract class BaseLayout extends Fragment implements IMainClasses, ILayo
         isShowing = true;
     }
 
-    //Alternates between show and close the fragment according if it's showing or not.
+    /**
+     * If the layout is showing then dismiss it, otherwise shows it.
+     */
     public void altShow() {
         if (isShowing) close();
         else show();
     }
 
+    /**
+     * @param onBackgroundPress allows the user dismiss the fragment when the background is pressed.
+     *                          <p> default value is: <code>false</code>.
+     * <p>
+     * @param onBackPress allows the user dismiss the fragment when the back button is pressed.
+     *                    <p> default value is: <code>true</code>.
+     */
     protected void setDismissMode(boolean onBackgroundPress, boolean onBackPress) {
         isDismissOnBackgroundPress = onBackgroundPress;
         isDismissOnBackPress = onBackPress;
     }
 
     //-----------------------------------------Tools----------------------------------------------//
+    /**
+     * Finds a child View of the parent layout from its resource ID.
+     * @return the view itself if it exists as child in the layout, otherwise null.
+     */
     @SuppressWarnings("unchecked")
     protected <T extends View> T find(@IdRes int id) {
         if (rootView == null || id == 0)
@@ -98,27 +130,44 @@ public abstract class BaseLayout extends Fragment implements IMainClasses, ILayo
         return object != null ? (T) object : null;
     }
 
-    public <T extends View> T find(String view) {
-        return find(getPrefix(), view);
-    }
-
+    /**
+     * Finds a child View of the parent layout from its ID name in String format.
+     * <p>
+     *     Note: if you previously defined the layout prefix with the method {@link #getPrefix()}
+     *     you don't need to add the prefix to the ID name.
+     * @return the view itself if it exists as child in the layout, otherwise null.
+     */
     @SuppressWarnings("unchecked")
-    protected <T extends View> T find(String prefix, String view) {
-        if (rootView == null || view == null || prefix == null)
+    protected <T extends View> T find(String name) {
+        if (rootView == null || name == null)
             return null;
 
-        @IdRes int id = mActivity.getResources()
-                .getIdentifier(prefix + "_" + view, "id", mActivity.getPackageName());
+        int Id;
 
-        Object object = rootView.findViewById(id);
+        if (getPrefix() == null || name.startsWith(getPrefix())) {
+            Id = res().getIdentifier(name, "id", mActivity.getPackageName());
+        } else {
+            Id = res().getIdentifier(getPrefix() + "_" + name, "id", mActivity.getPackageName());
+        }
 
-        return object != null ? (T) object : null;
+        Object view = rootView.findViewById(Id);
+        return (T) view;
     }
 
+    /**
+     * Fast tool to switch the visibility of multiple views to <code>VISIBLE</code>.
+     * <p>
+     *     To switch visibility of them to <code>GONE</code> use {@link #setVisible(boolean, View...)}
+     *     with <code>false</code> as first parameter.
+     */
     protected void setVisible(View... views) {
         setVisible(true, views);
     }
 
+    /**
+     * Fast tool to switch the visibility of multiple views between <code>GONE</code> and <code>VISIBLE</code>.
+     * @param bool true to show the views, false to hide them.
+     */
     protected void setVisible(boolean bool, View... views) {
         for (View view: views) {
             if (view == null)
@@ -128,7 +177,9 @@ public abstract class BaseLayout extends Fragment implements IMainClasses, ILayo
         }
     }
 
-    // Simple method to check nullability of multiples views at once.
+    /**
+     * Simple method to check nullability of multiples views at once.
+     */
     protected boolean isNull(View... views) {
         for (View view: views) {
             if (view == null)

@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<string name="debug_build">This is a <font color='#FFFFFF'>debug</font> build, online features are not available!</string>
-	<string name="pre_release_build">This is a <font color='#FFFFFF'>pre release</font> build, this build contains experimental features.</string>
+	<!--New UI-->
+	<string name="splash_screen_debug_build">This is a <font color='#FFFFFF'>debug</font> build, online features are not available!</string>
+	<string name="splash_screen_pre_release_build">This is a <font color='#FFFFFF'>pre release</font> build, this build contains experimental features.</string>
+
 	<string name="top_bar_offline">offline</string> <!--Always lowercase-->
 	<string name="top_bar_back">Back</string>
+
 	<string name="notification_center_title">Notifications</string>
+	<string name="notification_center_empty">There are nothing to show</string>
+	<!--End-->
 
 	<string name="message_error">Error: %s</string>
 	<string name="message_error_createdir">Cannot create %s</string>

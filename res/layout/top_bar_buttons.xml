@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 25/6/22 01:14 -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tb_container"
+    android:layout_width="wrap_content"
+    android:layout_height="@dimen/topBarHeight">
+
+    <!--Back-->
+    <RelativeLayout
+        android:id="@+id/tb_back"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginHorizontal="@dimen/XL">
+
+            <ImageView
+                style="@style/icon_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/v_back" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/S"
+                android:text="@string/top_bar_back"
+                android:textSize="@dimen/textM" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <!--Indicator-->
+    <View
+        android:id="@+id/tb_tabIndicator"
+        android:layout_width="@dimen/topBarButtonWidth"
+        android:layout_height="@dimen/tabIndicatorHeight"
+        android:layout_alignParentBottom="true"
+        android:background="#FFFFFF"
+        android:visibility="gone" />
+
+    <!--Song menu buttons-->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_toEndOf="@+id/tb_back"
+        android:background="@color/topBarButtonsBackground">
+
+        <ImageView
+            android:id="@+id/tb_mods"
+            style="@style/icon_button"
+            android:layout_width="@dimen/topBarButtonWidth"
+            android:layout_height="match_parent"
+            android:src="@drawable/v_tune" />
+
+        <ImageView
+            android:id="@+id/tb_search"
+            style="@style/icon_button"
+            android:layout_width="@dimen/topBarButtonWidth"
+            android:layout_height="match_parent"
+            android:src="@drawable/v_search" />
+
+        <ImageView
+            android:id="@+id/tb_shuffle"
+            style="@style/icon_button"
+            android:layout_width="@dimen/topBarButtonWidth"
+            android:layout_height="match_parent"
+            android:src="@drawable/v_random" />
+
+    </LinearLayout>
+
+</RelativeLayout>

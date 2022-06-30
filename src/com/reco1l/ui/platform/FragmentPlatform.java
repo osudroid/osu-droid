@@ -8,6 +8,7 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.edlplan.ui.ActivityOverlay;
@@ -28,11 +29,14 @@ public class FragmentPlatform {
     // and manages the UI layouts in a easy way.
 
     protected final MainActivity mActivity = GlobalManager.getInstance().getMainActivity();
+
     private static FragmentPlatform instance;
-    protected FragmentManager manager;
-    private List<BaseLayout> layouts;
+    private List<Fragment> fragments;
+
+    public RenderSurfaceView renderView;
+    public FragmentManager manager;
     public FrameLayout container;
-    
+
     //--------------------------------------------------------------------------------------------//
     public static FragmentPlatform getInstance() {
         return instance;
@@ -46,9 +50,10 @@ public class FragmentPlatform {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void load(AppCompatActivity activity, Context context, RenderSurfaceView engine) {
+    public void load(AppCompatActivity activity, Context context, RenderSurfaceView renderView) {
         instance = this;
-        layouts = new ArrayList<>();
+        fragments = new ArrayList<>();
+        this.renderView = renderView;
         int Id = 0x90009;
 
         RelativeLayout platform = new RelativeLayout(context);
@@ -58,7 +63,7 @@ public class FragmentPlatform {
         container.setId(Id);
         view.setBackgroundColor(Color.argb(0, 0, 0, 0));
 
-        platform.addView(engine, matchParent);
+        platform.addView(renderView, matchParent);
         platform.addView(container, matchParent);
         platform.addView(view, matchParent);
 
@@ -73,44 +78,48 @@ public class FragmentPlatform {
 
 
     public void addFragment(BaseLayout layout, String tag){
-        if (manager == null || layout.isAdded() || layouts.contains(layout) 
-                || manager.findFragmentByTag(tag) != null)
+        if (layout.isAdded() || fragments.contains(layout) || manager.findFragmentByTag(tag) != null)
             return;
 
-        layouts.add(layout);
+        fragments.add(layout);
         mActivity.runOnUiThread(() ->
                 manager.beginTransaction().add(container.getId(), layout, tag).commit());
     }
 
     public void removeFragment(BaseLayout fragment){
-        if (manager == null || !fragment.isAdded() || !layouts.contains(fragment))
+        if (!fragment.isAdded() || !fragments.contains(fragment))
             return;
 
-        layouts.remove(fragment);
+        fragments.remove(fragment);
         mActivity.runOnUiThread(() ->
                 manager.beginTransaction().remove(fragment).commit());
     }
 
     public void closeAll() {
-        for (BaseLayout layout: layouts) {
-            mActivity.runOnUiThread(layout::close);
+        for (Fragment fragment: fragments) {
+            if (fragment instanceof BaseLayout)
+                mActivity.runOnUiThread(((BaseLayout) fragment)::close);
         }
     }
 
     public void closeThis(BaseLayout... toClose) {
         for (BaseLayout layout: toClose) {
-            if (layouts.contains(layout) && layout.isShowing)
+            if (fragments.contains(layout))
                 mActivity.runOnUiThread(layout::close);
         }
     }
 
     public void closeAllExcept(BaseLayout... toExclude) {
-        List<BaseLayout> toClose = new ArrayList<>(layouts);
+        List<BaseLayout> toClose = new ArrayList<>();
+
+        for (Fragment fragment: fragments) {
+            if (fragment instanceof BaseLayout)
+                toClose.add((BaseLayout) fragment);
+        }
         toClose.removeAll(Arrays.asList(toExclude));
 
-        for (BaseLayout layout: toClose) {
+        for (BaseLayout layout: toClose)
             mActivity.runOnUiThread(layout::close);
-        }
     }
 
 }

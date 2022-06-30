@@ -6,10 +6,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.material.imageview.ShapeableImageView;
-import com.reco1l.EngineBridge;
+import com.reco1l.EngineMirror;
 import com.reco1l.ui.platform.BaseLayout;
 import com.reco1l.utils.Animator;
 import com.reco1l.utils.ClickListener;
+import com.reco1l.utils.UI;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -24,7 +25,7 @@ public class TopBar extends BaseLayout {
     public static TopBar instance;
     public UserBox userBox;
 
-    private View body, bar, music;
+    private View body, bar, music, inbox;
     private TextView musicText;
     private TextView author;
 
@@ -55,6 +56,7 @@ public class TopBar extends BaseLayout {
         musicText = find("mText");
         author = find("author");
         music = find("music");
+        inbox = find("inbox");
         body = find("body");
         bar = find("bar");
 
@@ -68,10 +70,11 @@ public class TopBar extends BaseLayout {
         String build = BuildConfig.BUILD_TYPE;
         author.setText(String.format("osu!droid %s by osu!droid Team", ver + " (" + build + ")"));
 
+        new ClickListener(inbox).simple(UI.inbox::altShow);
         new ClickListener(music).simple(null);
         new ClickListener(settings).simple(() -> new SettingsMenu().show());
 
-        setAuthorVisibility(engine.currentScene == EngineBridge.Scenes.MAIN_MENU);
+        setAuthorVisibility(engine.currentScene == EngineMirror.Scenes.MAIN_MENU);
 
         userBox.update();
         updateMusicText();
@@ -138,6 +141,8 @@ public class TopBar extends BaseLayout {
         private final TextView rank, name;
         private final ShapeableImageView avatar;
 
+        private int clickCount = 0;
+
         public UserBox(TopBar parent) {
             this.parent = parent;
 
@@ -146,13 +151,20 @@ public class TopBar extends BaseLayout {
             name = parent.find("playerName");
             avatar = parent.find("avatar");
 
-            new ClickListener(body).simple(null);
+            new ClickListener(body).simple(() -> {
+                Inbox.Notification notification =
+                        new Inbox.Notification("test notification " + clickCount, "testing");
+
+                UI.inbox.add(notification);
+                clickCount++;
+            });
         }
 
         public void update() {
             if (!parent.isShowing || online == null)
                 return;
 
+            avatar.setImageResource(R.drawable.default_avatar);
             name.setText(Config.getLocalUsername());
             rank.setText(topBar.res().getString(R.string.top_bar_offline));
 

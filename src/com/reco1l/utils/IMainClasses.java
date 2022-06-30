@@ -1,6 +1,6 @@
 package com.reco1l.utils;
 
-import com.reco1l.EngineBridge;
+import com.reco1l.EngineMirror;
 import com.reco1l.ui.data.OnlineHandler;
 import com.reco1l.ui.platform.FragmentPlatform;
 
@@ -23,5 +23,5 @@ public interface IMainClasses {
     ResourceManager resources = ResourceManager.getInstance();
     OnlineManager online = OnlineManager.getInstance();
     OnlineHandler onlineHandler = OnlineHandler.getInstance();
-    EngineBridge engine = (EngineBridge) mActivity.getEngine();
+    EngineMirror engine = (EngineMirror) mActivity.getEngine();
 }

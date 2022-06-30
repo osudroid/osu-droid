@@ -43,11 +43,13 @@
     <dimen name="vectorXL">@dimen/_46sdp</dimen>
 
     <!--Buttons-->
-    <dimen name="buttonSize">@dimen/_40sdp</dimen>
+    <dimen name="barButtonWidth">@dimen/_50sdp</dimen>
+    <dimen name="barButtonHeight">@dimen/_40sdp</dimen>
 
     <!--Shapes-->
     <dimen name="tabIndicatorHeight">@dimen/_2sdp</dimen>
     <dimen name="globalCorners">@dimen/_12sdp</dimen>
+    <dimen name="verticalShadowWidth">@dimen/_8sdp</dimen>
 
     <!--Progress Bar-->
     <dimen name="circularProgressBarThickness">8</dimen>
@@ -75,6 +77,6 @@
     <!--Notifications-->
     <dimen name="notificationCenterWidth">@dimen/_220sdp</dimen>
     <dimen name="popupNotificationWidth">@dimen/_240sdp</dimen>
-    <dimen name="popupNotificationHeight">@dimen/_30sdp</dimen>
+    <dimen name="popupNotificationHeight">@dimen/_26sdp</dimen>
 
 </resources>

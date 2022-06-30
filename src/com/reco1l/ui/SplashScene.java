@@ -30,8 +30,8 @@ public class SplashScene extends BaseLayout implements IUpdateHandler {
     private final type build;
     private enum type {
         RELEASE(0),
-        DEBUG(R.string.debug_build),
-        PRE_RELEASE(R.string.pre_release_build);
+        DEBUG(R.string.splash_screen_debug_build),
+        PRE_RELEASE(R.string.splash_screen_pre_release_build);
 
         int textId;
         type(int textId) { this.textId = textId; }
