@@ -24,7 +24,7 @@
         <View
             android:layout_width="@dimen/verticalShadowWidth"
             android:layout_height="match_parent"
-            android:alpha="0.15"
+            android:alpha="0.1"
             android:background="@drawable/shadow_vertical"
             android:rotation="180" />
 
@@ -95,6 +95,7 @@
         <TextView
             android:id="@+id/nc_emptyText"
             style="@style/text"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
@@ -109,12 +110,11 @@
                 android:id="@+id/nc_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/S"
                 android:layout_marginTop="@dimen/S"
                 android:backgroundTint="#00000000"
                 android:orientation="vertical">
 
-                <!--<include layout="@layout/notification"/>-->
+                <include layout="@layout/notification"/>
 
             </LinearLayout>
 

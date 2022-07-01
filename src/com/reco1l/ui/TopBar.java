@@ -7,6 +7,7 @@ import android.widget.TextView;
 
 import com.google.android.material.imageview.ShapeableImageView;
 import com.reco1l.EngineMirror;
+import com.reco1l.ui.data.GameNotification;
 import com.reco1l.ui.platform.BaseLayout;
 import com.reco1l.utils.Animator;
 import com.reco1l.utils.ClickListener;
@@ -151,10 +152,10 @@ public class TopBar extends BaseLayout {
             name = parent.find("playerName");
             avatar = parent.find("avatar");
 
+            // Debug
             new ClickListener(body).simple(() -> {
-                Inbox.Notification notification =
-                        new Inbox.Notification("test notification " + clickCount, "testing");
-
+                GameNotification notification = new GameNotification("Test notification");
+                notification.message = "Notification number " + clickCount;
                 UI.inbox.add(notification);
                 clickCount++;
             });

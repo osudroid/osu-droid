@@ -77,13 +77,13 @@ public class EngineMirror extends Engine implements IMainClasses, UI {
             case MAIN_MENU:
                 topBar.show();
                 platform.closeAllExcept(topBar);
-                inbox.allowPopupNotificator(true);
+                inbox.allowBadgeNotificator(true);
                 break;
             case LOADING_SCREEN:
             case SONG_MENU:
             case SCORING:
             case GAME:
-                inbox.allowPopupNotificator(false);
+                inbox.allowBadgeNotificator(false);
                 platform.closeAll();
                 break;
         }

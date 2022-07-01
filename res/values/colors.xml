@@ -41,4 +41,9 @@
     <color name="panelTopBar">#19000000</color>
     <color name="panelSeparator">#33000000</color>
 
+    <!--Notifications-->
+    <color name="notificationBackground">#1F000000</color>
+    <color name="notificationDrawableBackground">#1F000000</color>
+    <color name="notificationDismissButtonTint">#B3FFFFFF</color>
+
 </resources>

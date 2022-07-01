@@ -55,6 +55,7 @@ public abstract class BaseLayout extends Fragment implements IMainClasses, UI {
         // You can also set the root view ID as "background".
         rootBackground = find(R.id.background);
         onLoad();
+        System.gc();
         if (isDismissOnBackgroundPress && rootBackground != null) {
             rootBackground.setClickable(true);
 

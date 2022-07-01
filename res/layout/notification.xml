@@ -7,75 +7,82 @@
     xmlns:tool="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="@dimen/viewMargin">
+    android:paddingTop="@dimen/viewMargin"
+    android:paddingHorizontal="@dimen/S">
 
     <RelativeLayout
         android:id="@+id/n_body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/round_shape"
-        android:backgroundTint="#24000000"
-        android:padding="@dimen/S"
-        android:clipChildren="false"
-        android:elevation="@dimen/M">
+        android:backgroundTint="@color/notificationBackground"
+        android:elevation="@dimen/M"
+        android:padding="@dimen/S">
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/n_icon"
-            android:layout_width="@dimen/_26sdp"
-            android:layout_height="@dimen/_26sdp"
-            android:layout_centerVertical="true"
-            android:background="#10000000"
-            android:scaleType="centerCrop"
-            app:shapeAppearanceOverlay="@style/avatar_shape" />
-
-        <LinearLayout
+        <RelativeLayout
+            android:id="@+id/n_innerBody"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/S"
-            android:layout_toStartOf="@+id/n_close"
-            android:layout_toEndOf="@id/n_icon"
-            android:orientation="vertical">
+            android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/n_title"
-                style="@style/text"
-                android:text="[Notification title]"
-                android:textColor="@color/textSecondary"
-                android:textSize="@dimen/textXS"
-                android:textStyle="bold" />
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/n_icon"
+                android:layout_width="@dimen/_26sdp"
+                android:layout_height="@dimen/_26sdp"
+                android:layout_centerVertical="true"
+                android:background="@color/notificationDrawableBackground"
+                android:scaleType="centerCrop"
+                app:shapeAppearanceOverlay="@style/avatar_shape" />
 
-            <TextView
-                android:id="@+id/n_message"
-                style="@style/text"
-                android:text="[Message]"
-                android:textSize="@dimen/textXS" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/S"
+                android:layout_toStartOf="@+id/n_close"
+                android:layout_toEndOf="@id/n_icon"
+                android:orientation="vertical">
 
-            <com.google.android.material.progressindicator.LinearProgressIndicator
-                android:id="@+id/n_progress"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/linearProgressBarHeight"
-                android:layout_marginTop="@dimen/XS"
-                android:indeterminate="true"
-                android:theme="@style/AppTheme"
-                android:visibility="gone"
-                app:indicatorColor="@color/progressBarIndicatorColor"
-                app:trackColor="@color/progressBarTrackColor"
-                app:trackCornerRadius="@dimen/_2sdp"
-                tool:progress="40" />
+                <TextView
+                    android:id="@+id/n_title"
+                    style="@style/text"
+                    android:text="[Header]"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="@dimen/textXS"
+                    android:textStyle="bold" />
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/n_message"
+                    style="@style/text"
+                    android:text="[Message]"
+                    android:textSize="@dimen/textXS" />
 
-        <ImageView
-            android:id="@+id/n_close"
-            style="@style/icon_button"
-            android:layout_width="@dimen/XXL"
-            android:layout_height="@dimen/XXL"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:background="@drawable/round_shape"
-            android:src="@drawable/v_close_s"
-            app:tint="@color/vectorSecondary" />
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:id="@+id/n_progress"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/linearProgressBarHeight"
+                    android:layout_marginTop="@dimen/XS"
+                    android:indeterminate="true"
+                    android:theme="@style/AppTheme"
+                    android:visibility="gone"
+                    app:indicatorColor="@color/progressBarIndicatorColor"
+                    app:trackColor="@color/progressBarTrackColor"
+                    app:trackCornerRadius="@dimen/_2sdp"
+                    tool:progress="40" />
+
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/n_close"
+                style="@style/icon_button"
+                android:layout_width="@dimen/XXL"
+                android:layout_height="@dimen/XXL"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/round_shape"
+                android:src="@drawable/v_close_s"
+                app:tint="@color/vectorSecondary" />
+
+        </RelativeLayout>
 
     </RelativeLayout>
 

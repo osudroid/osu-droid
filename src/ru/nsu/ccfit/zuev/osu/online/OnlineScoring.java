@@ -2,7 +2,10 @@ package ru.nsu.ccfit.zuev.osu.online;
 
 import android.os.AsyncTask;
 
+import com.reco1l.ui.Inbox;
+import com.reco1l.ui.data.InboxTable;
 import com.reco1l.utils.IMainClasses;
+import com.reco1l.utils.UI;
 
 import org.anddev.andengine.util.Debug;
 
@@ -16,7 +19,7 @@ import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
-public class OnlineScoring implements IMainClasses {
+public class OnlineScoring implements IMainClasses, UI {
     private static final int attemptCount = 5;
     private static OnlineScoring instance = null;
     private Boolean onlineMutex = new Boolean(false);
@@ -33,9 +36,10 @@ public class OnlineScoring implements IMainClasses {
     public void login() {
         if (OnlineManager.getInstance().isStayOnline() == false)
             return;
+        InboxTable.online(null);
         avatarLoaded = false;
-        new AsyncTaskLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new OsuAsyncCallback() {
 
+        new AsyncTaskLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new OsuAsyncCallback() {
 
             public void run() {
                 synchronized (onlineMutex) {
@@ -43,13 +47,13 @@ public class OnlineScoring implements IMainClasses {
 
                     //Trying to send request
                     for (int i = 0; i < 3; i++) {
-                        // todo new ui message here
+                        InboxTable.online("try" + (i + 1));
 
                         try {
                             success = OnlineManager.getInstance().logIn();
                         } catch (OnlineManagerException e) {
                             Debug.e("Login error: " + e.getMessage());
-                            // todo new ui message here
+                            InboxTable.online("fail");
                             try {
                                 Thread.sleep(3000);
                             } catch (InterruptedException e1) {
@@ -60,9 +64,10 @@ public class OnlineScoring implements IMainClasses {
                         break;
                     }
                     if (success) {
+                        InboxTable.online("success");
                         OnlineManager.getInstance().setStayOnline(true);
                     } else {
-                        // todo new ui message here
+                        InboxTable.online("error");
                         OnlineManager.getInstance().setStayOnline(false);
                     }
                 }

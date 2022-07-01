@@ -36,6 +36,7 @@ public class FragmentPlatform {
     public RenderSurfaceView renderView;
     public FragmentManager manager;
     public FrameLayout container;
+    public Context context;
 
     //--------------------------------------------------------------------------------------------//
     public static FragmentPlatform getInstance() {
@@ -54,6 +55,7 @@ public class FragmentPlatform {
         instance = this;
         fragments = new ArrayList<>();
         this.renderView = renderView;
+        this.context = context;
         int Id = 0x90009;
 
         RelativeLayout platform = new RelativeLayout(context);

@@ -1,8 +1,8 @@
 package com.reco1l.ui;
 
+import static android.view.ViewGroup.*;
+
 import android.animation.ValueAnimator;
-import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,15 +15,11 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.edlplan.framework.easing.Easing;
-import com.google.android.material.imageview.ShapeableImageView;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
+import com.reco1l.ui.data.GameNotification;
 import com.reco1l.ui.platform.BaseLayout;
 import com.reco1l.utils.Animator;
 import com.reco1l.utils.ClickListener;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -32,11 +28,11 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class Inbox extends BaseLayout {
 
-    public static List<Notification> notifications;
+    public static List<GameNotification> notifications;
     public static Inbox instance;
 
-    protected LinearLayout container;
-    protected PopupNotification currentPopup;
+    protected BadgeNotification currentPopup;
+    public LinearLayout container;
 
     private boolean isAllowedPopups = true;
     private TextView emptyText;
@@ -69,14 +65,13 @@ public class Inbox extends BaseLayout {
         ImageView close = find("close");
         ImageView clear = find("clear");
 
-        if (notifications.size() != 0)
-            setVisible(false, emptyText);
+        setVisible(notifications.isEmpty(), emptyText);
 
         new ClickListener(close).simple(this::close);
         new ClickListener(clear).simple(() -> clear(false));
 
-        new Animator(rootBackground).fade(0, 1).play(300);
-
+        new Animator(rootBackground).fade(0, 1)
+                .play(300);
         new Animator(platform.renderView).moveX(0, -60)
                 .play(300);
         new Animator(layer).moveX(bodyWidth, 0).interpolator(Easing.OutExpo)
@@ -85,44 +80,57 @@ public class Inbox extends BaseLayout {
                 .delay(50)
                 .play(400);
 
-        body.postDelayed(this::loadNotifications, 200);
+        body.postDelayed(this::loadNotifications, 250);
     }
 
     private void loadNotifications() {
         if (notifications.isEmpty())
             return;
 
-        final List<Notification> list = new ArrayList<>();
-
-        // Finding notifications that are priority
         for (int i = 0; i < notifications.size(); i++) {
-            if (!notifications.get(i).isPriority())
-                list.add(notifications.get(i));
-        }
-
-        // Then adding not priority notifications after the priority ones
-        for (int i = 0; i < notifications.size(); i++) {
-            if (notifications.get(i).isPriority())
-                list.add(notifications.get(i));
-        }
-
-        // Showing notifications with the new order
-        for (int i = 0; i < list.size(); i++) {
-            int finalI = i;
-            container.postDelayed(() -> {
-                container.addView(list.get(finalI).build(getContext()));
-                list.get(finalI).load();
-                list.get(finalI).show();
-            }, i * 100L);
+            display(i * 120L, notifications.get(i));
         }
     }
 
+    //--------------------------------------------------------------------------------------------//
+
+    public void allowBadgeNotificator(boolean bool) {
+        isAllowedPopups = bool;
+
+        if (currentPopup != null) {
+            if (!bool) {
+                currentPopup.dismiss();
+                currentPopup = null;
+                return;
+            }
+            // If there's a pending BadgeNotification while they were not allowed, it will be shown instantly.
+            mActivity.runOnUiThread(() -> {
+                if (!currentPopup.isAdded())
+                    currentPopup.show();
+            });
+        }
+    }
+
+    public void createBadgeNotification(GameNotification notification) {
+        if (currentPopup != null) {
+            currentPopup.dismiss();
+            currentPopup = null;
+        }
+
+        currentPopup = new BadgeNotification(notification.header, notification.message);
+
+        if (isAllowedPopups && !isShowing)
+            currentPopup.show();
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
     /**
      * Clears all the notifications that can be dismissed in the Notification Center.
+     *
+     * @param onlyVisually if true, the notifications will be removed from the screen, but not from the list.
      */
     public void clear(boolean onlyVisually) {
-        if (notifications.isEmpty())
-            return;
 
         if (onlyVisually) {
             new Animator(container).moveX(0, 80).fade(1, 0)
@@ -132,124 +140,53 @@ public class Inbox extends BaseLayout {
         }
 
         for (int i = 0; i < notifications.size(); i++) {
-            Notification notification = notifications.get(i);
-
-            if (!notification.canDismiss)
+            if (notifications.get(i).hasPriority())
                 continue;
-
-            notification.dismiss(i * 100L, () -> {
-                container.removeView(notification.root);
-                notifications.remove(notification);
-                if (notifications.size() == 0) {
-                    setVisible(true, emptyText);
-                    new Animator(emptyText).fade(0, 1).moveX(50, 0).play(300);
-                }
-            });
-            notification.isAdded = false;
-        }
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public void allowPopupNotificator(boolean bool) {
-        this.isAllowedPopups = bool;
-
-        if (currentPopup != null) {
-
-            if (!bool) {
-                currentPopup.dismiss();
-                currentPopup = null;
-                return;
-            }
-            // If there's a pending Popup Notification, it will be shown instantly.
-            mActivity.runOnUiThread(() -> {
-                if (!currentPopup.isAdded())
-                    platform.manager.beginTransaction()
-                            .add(platform.container.getId(), currentPopup, currentPopup.tag)
-                            .commit();
-            });
+            dismiss(i * 100L, notifications.get(i));
         }
     }
 
     /**
-     * Adds a new Notification, if the notification center is not showing a Popup Notification
-     * will be shown instead if they are Allowed.
-     *
-     * @param notification The notification to be added to the Notification Center.
+     * Adds a new GameNotification, if the notification center is not showing a Popup Notification
+     * will be shown instead if they are allowed.
      */
-    public void add(Notification notification) {
+    public void add(GameNotification notification) {
         if (notifications.contains(notification))
             return;
 
-        notifications.add(notification);
+        notifications.add(notification.hasPriority() ? 0 : notifications.size(), notification);
 
         mActivity.runOnUiThread(() -> {
             if (isShowing) {
                 setVisible(false, emptyText);
-                
-                container.addView(notification.build(getContext()));
-                notification.load();
-                notification.show();
-            } else {
-                if (currentPopup != null) {
-                    currentPopup.dismiss();
-                    currentPopup = null;
-                }
-                final String tag = "popup" + "@" + notifications.indexOf(notification);
-
-                currentPopup = new PopupNotification(tag, notification.title, notification.runOnClick);
-
-                if (!isAllowedPopups)
-                    return;
-                platform.manager.beginTransaction()
-                        .add(platform.container.getId(), currentPopup, currentPopup.tag)
-                        .commit();
+                display(0, notification);
+                return;
             }
+            createBadgeNotification(notification);
         });
     }
 
-    /**
-     * Removes a notification from the Notification Center.
-     *
-     * @param notification The notification to be removed from the Notification Center.
-     */
-    public void remove(Notification notification) {
+    public void remove(GameNotification notification) {
         if (!notifications.remove(notification))
             return;
 
-        if (currentPopup != null && currentPopup.text.equals(notification.title)) {
+        if (currentPopup != null && currentPopup.header.equals(notification.header)) {
             currentPopup.dismiss();
             currentPopup = null;
         }
 
-        if (!isShowing)
-            return;
-
-        mActivity.runOnUiThread(() -> {
-            notification.dismiss(0, () -> {
-                container.removeView(notification.root);
-                if (notifications.size() == 0) {
-                    setVisible(true, emptyText);
-                    new Animator(emptyText).fade(0, 1).moveX(50, 0).play(300);
-                }
-            });
-            notification.isAdded = false;
-        });
-    }
-
-    /**
-     * @return <code>true</code> if the notification is already added to the notifications list.
-     */
-    public boolean hasAdded(Notification notification) {
-        return notifications.contains(notification);
+        if (isShowing)
+            mActivity.runOnUiThread(() -> dismiss(0, notification));
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     public void show() {
-        if (currentPopup != null)
+        if (currentPopup != null) {
             currentPopup.dismiss();
+            currentPopup = null;
+        }
         super.show();
     }
 
@@ -260,7 +197,8 @@ public class Inbox extends BaseLayout {
 
             new Animator(platform.renderView).moveX(-50, 0)
                     .play(400);
-            new Animator(body).moveX(0, res().getDimension(R.dimen.notificationCenterWidth)).interpolator(Easing.InExpo)
+            new Animator(body).moveX(0, res().getDimension(R.dimen.notificationCenterWidth))
+                    .interpolator(Easing.InExpo)
                     .runOnStart(() -> new Animator(rootBackground).fade(1, 0).play(300))
                     .play(350);
             new Animator(layer).moveX(0, bodyWidth).interpolator(Easing.InExpo)
@@ -270,27 +208,60 @@ public class Inbox extends BaseLayout {
         });
     }
 
+    //--------------------------------------------------------------------------------------------//
+
+    private void display(long delay, GameNotification notification) {
+        container.postDelayed(() -> {
+            container.addView(notification.build());
+            notification.load();
+            new Animator(notification.layout).fade(0, 1).moveX(80, 0)
+                    .play(100);
+        }, delay);
+    }
+
+    private void dismiss(long delay, GameNotification notification) {
+        if (notification.layout == null) {
+            notifications.remove(notification);
+            setVisible(notifications.isEmpty(), emptyText);
+            return;
+        }
+
+        ValueAnimator anim = ValueAnimator.ofInt(notification.layout.getHeight(), 0);
+        anim.setDuration(240);
+        anim.addUpdateListener(animation -> {
+            LayoutParams params = notification.layout.getLayoutParams();
+            params.height = (int) animation.getAnimatedValue();
+            notification.layout.setLayoutParams(params);
+            notification.layout.requestLayout();
+        });
+
+        new Animator(notification.layout).fade(1, 0).moveX(0, notification.layout.getWidth())
+                .runOnStart(anim::start)
+                .runOnEnd(() -> {
+                    container.removeView(notification.layout);
+                    notifications.remove(notification);
+                    setVisible(notifications.isEmpty(), emptyText);
+                })
+                .delay(delay)
+                .play(240);
+    }
+
     //--------------------------------------------------------------------------------------------/
 
-    public static class PopupNotification extends Fragment {
-
-        protected final String tag;
+    public static class BadgeNotification extends Fragment {
 
         private LinearLayout body;
-        private final String text;
-        private final Runnable onClick;
+        private final String header;
+        private final String message;
 
-        public PopupNotification(String tag, String text, Runnable onClick) {
-            this.tag = tag;
-            this.text = text;
-            this.onClick = onClick;
+        //----------------------------------------------------------------------------------------//
+
+        public BadgeNotification(String header, String message) {
+            this.header = header;
+            this.message = message;
         }
 
-        public void dismiss() {
-            new Animator(body).moveY(0, -50).fade(1, 0)
-                    .runOnEnd(() -> platform.manager.beginTransaction().remove(this).commit())
-                    .play(200);
-        }
+        //----------------------------------------------------------------------------------------//
 
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle bundle) {
@@ -298,172 +269,29 @@ public class Inbox extends BaseLayout {
             View root = inflater.inflate(R.layout.popup_notification, container, false);
 
             body = root.findViewById(R.id.npop_body);
-            if (onClick != null) {
-                new ClickListener(body).simple(onClick);
-            }
+            new ClickListener(body).simple(inbox::show);
 
             TextView text = root.findViewById(R.id.npop_text);
-            text.setText(this.text);
+            text.setText(header + " - " + message.replace("\n", " "));
 
             body.postDelayed(this::dismiss, 3000);
             new Animator(body).moveY(-50, 0).fade(0, 1).play(200);
 
             return root;
         }
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public static class Notification {
-
-        protected View root;
-        protected boolean isAdded = false;
-
-        public Drawable icon;
-        public String title, message;
-        public Runnable runOnClick, onDismiss;
-        public int progressBarMax = 100, progress = 0;
-        public boolean
-                canDismiss = true,
-                hasProgressBar = false,
-                isProgressBarIndeterminate = true;
-
-        private View body;
-        private ImageView close;
-        private ShapeableImageView iconIv;
-        private TextView titleTv, messageTv;
-        private LinearProgressIndicator progressIndicator;
 
         //----------------------------------------------------------------------------------------//
 
-        protected void show() {
-            new Animator(body).fade(0, 1).moveX(80, 0).play(100);
+        public void show() {
+            mActivity.runOnUiThread(() -> platform.manager.beginTransaction()
+                    .add(platform.container.getId(), this, null)
+                    .commit());
         }
 
-        protected void dismiss(long delay, Runnable runOnEnd) {
-            int duration = 240;
-
-            ValueAnimator anim = ValueAnimator.ofInt(body.getHeight(), 0);
-            anim.setDuration(duration - 1);
-            anim.addUpdateListener(animation -> {
-                ViewGroup.LayoutParams params = body.getLayoutParams();
-                params.height = (int) animation.getAnimatedValue();
-                body.setLayoutParams(params);
-                body.requestLayout();
-            });
-
-            new Animator(body).fade(1, 0).moveX(0, body.getWidth())
-                    .runOnStart(anim::start)
-                    .runOnEnd(runOnEnd)
-                    .delay(delay).play(duration);
-        }
-
-        /**
-         * You can change later the content of the notification by modifying the variables.
-         * <p>
-         * If you change something after the creation of the notification, don't forget to call {@link #update()}.
-         */
-        public Notification(String title, String message) {
-            this.title = title;
-            this.message = message;
-            if (icon == null) {
-                try {
-                    InputStream asset = mActivity.getAssets().open("music_list.png");
-                    icon = Drawable.createFromStream(asset, null);
-                } catch (IOException ignored) {}
-            }
-        }
-
-        protected View build(Context context) {
-            root = LayoutInflater.from(context).inflate(R.layout.notification, null);
-            body = root.findViewById(R.id.n_body);
-            iconIv = root.findViewById(R.id.n_icon);
-            close = root.findViewById(R.id.n_close);
-            titleTv = root.findViewById(R.id.n_title);
-            messageTv = root.findViewById(R.id.n_message);
-            progressIndicator = root.findViewById(R.id.n_progress);
-            isAdded = true;
-            return root;
-        }
-
-        protected boolean isPriority() {
-            return !canDismiss || (hasProgressBar && isProgressBarIndeterminate);
-        }
-
-        protected void load() {
-            if (!isAdded)
-                return;
-
-            titleTv.setText(title);
-            messageTv.setText(message);
-
-            if (isPriority()) {
-                close.setVisibility(View.INVISIBLE);
-            } else {
-                close.setVisibility(View.VISIBLE);
-                new ClickListener(close).simple(() -> {
-                    if (onDismiss != null)
-                        onDismiss.run();
-                    inbox.remove(this);
-                });
-            }
-
-            if (hasProgressBar) {
-                progressIndicator.setVisibility(View.VISIBLE);
-                progressIndicator.setMax(progressBarMax);
-                progressIndicator.setProgress(progress);
-                progressIndicator.setIndeterminate(isProgressBarIndeterminate);
-            } else {
-                progressIndicator.setVisibility(View.GONE);
-            }
-            if (icon != null)
-                iconIv.setImageDrawable(icon);
-
-            if (runOnClick != null)
-                new ClickListener(body).simple(runOnClick);
-        }
-
-        public void setIcon(Drawable icon) {
-            this.icon = icon;
-        }
-
-        public Notification showProgressBar(int max, boolean indeterminate) {
-            hasProgressBar = true;
-            progressBarMax = max;
-            isProgressBarIndeterminate = indeterminate;
-            return this;
-        }
-
-        /**
-         * Set if the notification can be dismissed by the user, you can change this later modifying
-         * the variable onDismiss.
-         * <p>
-         * By default this is <code>true</code>, call this method only if you want to disable it.
-         * <p>
-         * Note: If you set this to <code>false</code>, the notification will automatically set
-         * as priority.
-         */
-        public Notification showDismissButton(boolean bool) {
-            canDismiss = bool;
-            return this;
-        }
-
-        /**
-         * Set runnable to be executed when the user clicks on the close button.
-         */
-        public Notification runOnDismiss(Runnable runnable) {
-            onDismiss = runnable;
-            return this;
-        }
-
-        /**
-         * Update the notification with the new values.
-         */
-        public void update() {
-            if (root == null || !inbox.isShowing)
-                return;
-            load();
+        public void dismiss() {
+            new Animator(body).moveY(0, -50).fade(1, 0)
+                    .runOnEnd(() -> platform.manager.beginTransaction().remove(this).commit())
+                    .play(200);
         }
     }
-
 }
