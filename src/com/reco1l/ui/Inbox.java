@@ -213,8 +213,8 @@ public class Inbox extends BaseLayout {
     private void display(long delay, GameNotification notification) {
         container.postDelayed(() -> {
             container.addView(notification.build());
-            notification.load();
             new Animator(notification.layout).fade(0, 1).moveX(80, 0)
+                    .runOnStart(notification::load)
                     .play(100);
         }, delay);
     }

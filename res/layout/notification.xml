@@ -80,7 +80,7 @@
                 android:layout_centerVertical="true"
                 android:background="@drawable/round_shape"
                 android:src="@drawable/v_close_s"
-                app:tint="@color/vectorSecondary" />
+                app:tint="@color/notificationDismissButtonTint" />
 
         </RelativeLayout>
 

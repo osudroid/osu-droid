@@ -114,7 +114,7 @@
                 android:backgroundTint="#00000000"
                 android:orientation="vertical">
 
-                <include layout="@layout/notification"/>
+                <!--<include layout="@layout/notification"/>-->
 
             </LinearLayout>
 
