@@ -6,25 +6,30 @@ import android.view.ViewPropertyAnimator;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.EasingHelper;
 
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
-
 // Created by Reco1l on 23/6/22 20:44
 
-public class Animator {
-    //Simplifies the usage of ViewPropertyAnimator class.
+/**
+ * Simplifies the usage of ViewPropertyAnimator class.
+ */
+public class Animator implements IMainClasses {
+
+    private static ViewPropertyAnimator anim;
 
     private final View view;
-    private Float fromX, toX;
-    private Float fromY, toY;
-    private Float fromZ, toZ;
-    private Float fromScale, toScale;
-    private Float fromScaleX, toScaleX;
-    private Float fromScaleY, toScaleY;
-    private Float pivotX, pivotY;
-    private Float fromAlpha, toAlpha;
-    private Easing interpolator = Easing.InOutQuad;
+
+    private Easing interpolator;
     private Runnable onStart, onEnd;
-    private Long delay;
+
+    private long delay = 0;
+
+    private float pivotX, pivotY;
+    private float fromX, toX;
+    private float fromY, toY;
+    private float fromScaleX, toScaleX;
+    private float fromScaleY, toScaleY;
+    private float fromAlpha, toAlpha;
+
+    //--------------------------------------------------------------------------------------------//
 
     /**
      * Don't forget to call {@link #play(long)} to start the animation
@@ -33,52 +38,70 @@ public class Animator {
      */
     public Animator(View view) {
         this.view = view;
+        if (view == null)
+            return;
+
+        // Initial values
+        pivotX = view.getPivotX();
+        pivotY = view.getPivotY();
+
+        fromX = view.getTranslationX();
+        toX = fromX;
+        fromY = view.getTranslationY();
+        toY = fromY;
+
+        fromScaleX = view.getScaleX();
+        toScaleX = fromScaleX;
+        fromScaleY = view.getScaleY();
+        toScaleY = fromScaleY;
+
+        fromAlpha = view.getAlpha();
+        toAlpha = fromAlpha;
     }
 
-    public Animator delay(long delay){
-        this.delay = delay;
+    public Animator delay(long ms){
+        delay = ms;
         return this;
     }
 
-    public Animator pivot(Float pivotX, Float pivotY) {
-        this.pivotX = pivotX;
-        this.pivotY = pivotY;
+    public Animator pivot(Float X, Float Y) {
+        pivotX = X;
+        pivotY = Y;
         return this;
     }
 
-    public Animator scaleY(float fromScaleY, float toScaleY) {
-        this.fromScaleY = fromScaleY;
-        this.toScaleY = toScaleY;
+    public Animator scaleY(float from, float to) {
+        fromScaleY = from;
+        toScaleY = to;
         return this;
     }
 
-    public Animator scaleX(float fromScaleX, float toScaleX) {
-        this.fromScaleX = fromScaleX;
-        this.toScaleX = toScaleX;
+    public Animator scaleX(float from, float to) {
+        fromScaleX = from;
+        toScaleX = to;
         return this;
     }
 
-    public Animator scale(float fromScale, float toScale) {
-        this.fromScale = fromScale;
-        this.toScale = toScale;
+    /**
+     * This method sets ScaleX and ScaleY at the same time.
+     */
+    public Animator scale(float from, float to) {
+        fromScaleX = from;
+        fromScaleY = from;
+        toScaleX = to;
+        toScaleY = to;
         return this;
     }
 
-    public Animator moveX(float fromX, float toX) {
-        this.fromX = fromX;
-        this.toX = toX;
+    public Animator moveX(float from, float to) {
+        fromX = from;
+        toX = to;
         return this;
     }
 
-    public Animator moveY(float fromY, float toY) {
-        this.fromY = fromY;
-        this.toY = toY;
-        return this;
-    }
-
-    public Animator moveZ(float fromZ, float toZ) {
-        this.fromZ = fromZ;
-        this.toZ = toZ;
+    public Animator moveY(float from, float to) {
+        fromY = from;
+        toY = to;
         return this;
     }
 
@@ -90,25 +113,19 @@ public class Animator {
         return this;
     }
 
-    public Animator fade(float fromAlpha, float toAlpha){
-        this.fromAlpha = fromAlpha;
-        this.toAlpha = toAlpha;
+    public Animator fade(float from, float to){
+        fromAlpha = from;
+        toAlpha = to;
         return this;
     }
 
-    /**
-     * @param onStart The runnable to run when the animation starts.
-     */
-    public Animator runOnStart(Runnable onStart) {
-        this.onStart = onStart;
+    public Animator runOnStart(Runnable task) {
+        this.onStart = task;
         return this;
     }
 
-    /**
-     * @param onEnd Runnable to run when animation is finished
-     */
-    public Animator runOnEnd(Runnable onEnd) {
-        this.onEnd = onEnd;
+    public Animator runOnEnd(Runnable task) {
+        onEnd = task;
         return this;
     }
 
@@ -116,56 +133,52 @@ public class Animator {
      * @param duration duration of animation in milliseconds.
      */
     public void play(long duration) {
-        //hasWindowFocus() prevents crashes when the activity is paused.
-        if(view == null || duration <= 0 || !GlobalManager.getInstance().getMainActivity().hasWindowFocus())
+        if(view == null || !mActivity.hasWindowFocus())
           return;
 
-        GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> {
-
-            if(fromX != null) view.setTranslationX(fromX);
-            if(fromY != null) view.setTranslationY(fromY);
-            if(fromZ != null) view.setTranslationZ(fromZ);
-            if(pivotX != null) view.setPivotX(pivotX);
-            if(pivotY != null) view.setPivotY(pivotY);
-
-            if(fromScale != null || fromScaleX != null)
-                view.setScaleX(fromScale != null ? fromScale : fromScaleX);
-
-            if(fromScale != null || fromScaleY != null)
-                view.setScaleY(fromScale != null ? fromScale : fromScaleY);
-
-            if(fromAlpha != null) view.setAlpha(fromAlpha);
-
+        mActivity.runOnUiThread(() -> {
             view.animate().cancel();
 
-            ViewPropertyAnimator anim = view.animate();
+            anim = view.animate();
 
-            if(toX != null) anim.translationX(toX);
-            if(toY != null) anim.translationY(toY);
-            if(toZ != null) anim.translationZ(toZ);
+            // Translation X
+            view.setTranslationX(fromX);
+            anim.translationX(toX);
 
-            if(toScale != null || toScaleX != null)
-                anim.scaleX(toScale != null ? toScale : toScaleX);
+            // Translation Y
+            view.setTranslationY(fromY);
+            anim.translationY(toY);
 
-            if(toScale != null || toScaleY != null)
-                anim.scaleY(toScale != null ? toScale : toScaleY);
+            // Pivot
+            view.setPivotX(pivotX);
+            view.setPivotY(pivotY);
 
-            if(toAlpha != null) anim.alpha(toAlpha);
+            // Scale X
+            view.setScaleX(fromScaleX);
+            anim.scaleX(toScaleX);
 
-            if(interpolator != null)
+            // Scale Y
+            view.setScaleY(fromScaleY);
+            anim.scaleY(toScaleY);
+
+            // Alpha
+            view.setAlpha(fromAlpha);
+            anim.alpha(toAlpha);
+
+            // Interpolator
+            if (interpolator != null)
                 anim.setInterpolator(EasingHelper.asInterpolator(interpolator));
 
+            // Actions
             if (onStart != null) anim.withStartAction(onStart);
             if (onEnd != null) anim.withEndAction(() -> {
                 onEnd.run();
-                System.gc();
+                anim = null;
             });
 
-            if (delay != null) anim.setStartDelay(delay);
-
+            anim.setStartDelay(delay);
             anim.setDuration(duration);
             anim.start();
-
         });
     }
 
