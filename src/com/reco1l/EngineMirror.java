@@ -2,6 +2,7 @@ package com.reco1l;
 
 import com.reco1l.ui.Inbox;
 import com.reco1l.ui.TopBar;
+import com.reco1l.ui.platform.BaseLayout;
 import com.reco1l.utils.UI;
 import com.reco1l.utils.IMainClasses;
 
@@ -22,6 +23,10 @@ public class EngineMirror extends Engine implements IMainClasses, UI {
 
     public Scenes currentScene;
     public static boolean isGlobalManagerInit = false;
+
+    private final BaseLayout[] extras = {
+            UI.inbox,
+    };
 
     public EngineMirror(EngineOptions pEngineOptions) {
         super(pEngineOptions);
@@ -70,6 +75,9 @@ public class EngineMirror extends Engine implements IMainClasses, UI {
     private void updateUI() {
         if (platform == null || currentScene == null)
             return;
+
+        // Closing all extras on every scene change.
+        platform.closeThis(extras);
 
         // This sets which layouts show according to the current scene.
         switch(currentScene) {

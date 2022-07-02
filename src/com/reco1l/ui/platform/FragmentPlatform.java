@@ -27,8 +27,6 @@ import ru.nsu.ccfit.zuev.osu.MainActivity;
 // Created by Reco1l on 22/6/22 02:25
 
 public class FragmentPlatform {
-    // It places a overlay as MainActivity content view, sets the AndEngine SurfaceView
-    // and manages the UI layouts in a easy way.
 
     protected final MainActivity mActivity = GlobalManager.getInstance().getMainActivity();
 
@@ -72,7 +70,7 @@ public class FragmentPlatform {
 
         mActivity.setContentView(platform, params);
         manager = activity.getSupportFragmentManager();
-        
+
         //I leave it for compatibility with EdrowsLuo fragments until the entire UI gets replaced.
         ActivityOverlay.initial(activity, container.getId());
     }
@@ -80,7 +78,7 @@ public class FragmentPlatform {
     //--------------------------------------------------------------------------------------------//
 
 
-    public void addFragment(BaseLayout layout, String tag){
+    public void addFragment(BaseLayout layout, String tag) {
         if (layout.isAdded() || fragments.contains(layout) || manager.findFragmentByTag(tag) != null)
             return;
 
@@ -89,7 +87,7 @@ public class FragmentPlatform {
                 manager.beginTransaction().add(container.getId(), layout, tag).commit());
     }
 
-    public void removeFragment(BaseLayout fragment){
+    public void removeFragment(BaseLayout fragment) {
         if (!fragment.isAdded() || !fragments.contains(fragment))
             return;
 
@@ -100,29 +98,25 @@ public class FragmentPlatform {
 
     public void closeAll() {
         for (Fragment fragment: fragments) {
-            if (fragment instanceof BaseLayout)
+            if (fragment.getClass().isAssignableFrom(BaseLayout.class))
                 mActivity.runOnUiThread(((BaseLayout) fragment)::close);
         }
     }
 
     public void closeThis(BaseLayout... toClose) {
-        for (BaseLayout layout: toClose) {
+        for (BaseLayout layout : toClose) {
             if (fragments.contains(layout))
                 mActivity.runOnUiThread(layout::close);
         }
     }
 
     public void closeAllExcept(BaseLayout... toExclude) {
-        List<BaseLayout> toClose = new ArrayList<>();
-
-        for (Fragment fragment: fragments) {
-            if (fragment instanceof BaseLayout)
-                toClose.add((BaseLayout) fragment);
-        }
+        List<Fragment> toClose = new ArrayList<>(fragments);
         toClose.removeAll(Arrays.asList(toExclude));
 
-        for (BaseLayout layout: toClose)
-            mActivity.runOnUiThread(layout::close);
+        for (Fragment fragment: toClose) {
+            if (fragment.getClass().isAssignableFrom(BaseLayout.class))
+                mActivity.runOnUiThread(((BaseLayout) fragment)::close);
+        }
     }
-
 }
