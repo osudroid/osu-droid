@@ -184,6 +184,13 @@ public class BassAudioFunc {
         return 0;
     }
 
+    public void setPosition(int pos) {
+        if (channel != 0 && pos > 0) {
+            long newPos = BASS.BASS_ChannelSeconds2Bytes(channel, pos / 1000.0);
+            BASS.BASS_ChannelSetPosition(channel, newPos, BASS.BASS_POS_BYTE);
+        }
+    }
+
     public int getLength() {
         if (channel != 0) {
             long length = BASS.BASS_ChannelGetLength(channel, BASS.BASS_POS_BYTE);
