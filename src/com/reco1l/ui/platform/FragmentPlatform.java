@@ -1,11 +1,13 @@
 package com.reco1l.ui.platform;
 
+import static android.widget.RelativeLayout.LayoutParams.*;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -39,15 +41,12 @@ public class FragmentPlatform {
     public Context context;
 
     //--------------------------------------------------------------------------------------------//
+
     public static FragmentPlatform getInstance() {
         return instance;
     }
 
-    private final RelativeLayout.LayoutParams matchParent = new RelativeLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT) {
-        { addRule(RelativeLayout.CENTER_IN_PARENT);}
-    };
+    private final LayoutParams params = new LayoutParams(MATCH_PARENT, MATCH_PARENT);
 
     //--------------------------------------------------------------------------------------------//
 
@@ -58,6 +57,8 @@ public class FragmentPlatform {
         this.context = context;
         int Id = 0x90009;
 
+        params.addRule(RelativeLayout.CENTER_IN_PARENT);
+
         RelativeLayout platform = new RelativeLayout(context);
         container = new FrameLayout(context);
         View view = new View(context);
@@ -65,11 +66,11 @@ public class FragmentPlatform {
         container.setId(Id);
         view.setBackgroundColor(Color.argb(0, 0, 0, 0));
 
-        platform.addView(renderView, matchParent);
-        platform.addView(container, matchParent);
-        platform.addView(view, matchParent);
+        platform.addView(renderView, params);
+        platform.addView(container, params);
+        platform.addView(view, params);
 
-        mActivity.setContentView(platform, matchParent);
+        mActivity.setContentView(platform, params);
         manager = activity.getSupportFragmentManager();
         
         //I leave it for compatibility with EdrowsLuo fragments until the entire UI gets replaced.

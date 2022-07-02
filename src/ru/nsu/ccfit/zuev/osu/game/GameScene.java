@@ -695,8 +695,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         isFirst = true;
         failcount = 0;
         mainCursorId = -1;
-        final LoadingScreen screen = new LoadingScreen();
-        engine.setScene(screen.getScene());
+        engine.setScene(LoadingScreen.getInstance().getScene());
 
         final String rfile = track != null ? replayFile : this.replayFile;
 
@@ -2448,7 +2447,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         // totalOffset += Config.getPauseOffset();
-        final PauseMenu menu = new PauseMenu(engine, this, false);
+        PauseMenu.getInstance().load(engine, this, false);
         /*if (music != null && music.getStatus() == Status.PLAYING) {
             music.pause();
         }*/
@@ -2456,7 +2455,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GlobalManager.getInstance().getSongService().pause();
         }
         paused = true;
-        scene.setChildScene(menu.getScene(), false, true, true);
+        scene.setChildScene(PauseMenu.getInstance().getScene(), false, true, true);
     }
 
     public void gameover() {
@@ -2467,7 +2466,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if(scorebar != null) scorebar.flush();
         ResourceManager.getInstance().getSound("failsound").play();
-        final PauseMenu menu = new PauseMenu(engine, this, true);
+        PauseMenu.getInstance().load(engine, this, true);
         gameStarted = false;
         /*if (music != null && music.getStatus() == Status.PLAYING) {
             music.pause();
@@ -2476,7 +2475,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GlobalManager.getInstance().getSongService().pause();
         }
         paused = true;
-        scene.setChildScene(menu.getScene(), false, true, true);
+        scene.setChildScene(PauseMenu.getInstance().getScene(), false, true, true);
     }
 
     public void resume() {

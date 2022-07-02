@@ -27,7 +27,7 @@ public class GameNotification implements IMainClasses, UI {
     public Drawable icon;
     public String header, message;
     public Runnable runOnClick, onDismiss;
-    public int progressBarMax = 100, progress = 0;
+    public int progressMax = 100, progress = 0;
     public boolean
             showProgressBar = false,
             showDismissButton = true,
@@ -105,7 +105,7 @@ public class GameNotification implements IMainClasses, UI {
             return;
         }
         progressBar.setVisibility(View.VISIBLE);
-        progressBar.setMax(progressBarMax);
+        progressBar.setMax(progressMax);
         progressBar.setProgress(progress);
         progressBar.setIndeterminate(isProgressBarIndeterminate);
     }
@@ -131,6 +131,8 @@ public class GameNotification implements IMainClasses, UI {
     }
 
     public void updateProgress(int progress) {
-        progressBar.setProgress(progress);
+        this.progress = progress;
+        if (inbox.isShowing && progressBar != null)
+            mActivity.runOnUiThread(() -> progressBar.setProgress(progress));
     }
 }

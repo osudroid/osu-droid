@@ -2,8 +2,7 @@ package ru.nsu.ccfit.zuev.osu.online;
 
 import android.os.AsyncTask;
 
-import com.reco1l.ui.Inbox;
-import com.reco1l.ui.data.InboxTable;
+import com.reco1l.ui.data.Notificator;
 import com.reco1l.utils.IMainClasses;
 import com.reco1l.utils.UI;
 
@@ -36,7 +35,7 @@ public class OnlineScoring implements IMainClasses, UI {
     public void login() {
         if (OnlineManager.getInstance().isStayOnline() == false)
             return;
-        InboxTable.online(null);
+        Notificator.accountLogIn(null, 0);
         avatarLoaded = false;
 
         new AsyncTaskLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new OsuAsyncCallback() {
@@ -47,13 +46,13 @@ public class OnlineScoring implements IMainClasses, UI {
 
                     //Trying to send request
                     for (int i = 0; i < 3; i++) {
-                        InboxTable.online("try" + (i + 1));
+                        Notificator.accountLogIn("try", i);
 
                         try {
                             success = OnlineManager.getInstance().logIn();
                         } catch (OnlineManagerException e) {
                             Debug.e("Login error: " + e.getMessage());
-                            InboxTable.online("fail");
+                            Notificator.accountLogIn("fail", i);
                             try {
                                 Thread.sleep(3000);
                             } catch (InterruptedException e1) {
@@ -64,10 +63,10 @@ public class OnlineScoring implements IMainClasses, UI {
                         break;
                     }
                     if (success) {
-                        InboxTable.online("success");
+                        Notificator.accountLogIn("success", 0);
                         OnlineManager.getInstance().setStayOnline(true);
                     } else {
-                        InboxTable.online("error");
+                        Notificator.accountLogIn("error", 0);
                         OnlineManager.getInstance().setStayOnline(false);
                     }
                 }

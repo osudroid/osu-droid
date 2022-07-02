@@ -274,7 +274,7 @@ public class Inbox extends BaseLayout {
             TextView text = root.findViewById(R.id.npop_text);
             text.setText(header + " - " + message.replace("\n", " "));
 
-            body.postDelayed(this::dismiss, 3000);
+            body.postDelayed(() -> { dismiss(); inbox.currentPopup = null; }, 3000);
             new Animator(body).moveY(-50, 0).fade(0, 1).play(200);
 
             return root;

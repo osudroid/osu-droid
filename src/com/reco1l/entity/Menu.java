@@ -215,7 +215,7 @@ public class Menu implements IMainClasses {
         public void run() {
 
             //global.getEngine().setScene(LoadingScreen.getInstance().getScene());
-            global.getEngine().setScene(new LoadingScreen().getScene());
+            global.getEngine().setScene(LoadingScreen.getInstance().getScene());
             mActivity.checkNewSkins();
             mActivity.checkNewBeatmaps();
             if (!library.loadLibraryCache(mActivity, true)) {

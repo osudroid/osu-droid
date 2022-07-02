@@ -1,40 +1,41 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import com.edlplan.framework.math.FMath;
-
 import org.anddev.andengine.engine.Engine;
-import org.anddev.andengine.engine.camera.Camera;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
 import org.anddev.andengine.entity.scene.menu.MenuScene;
 import org.anddev.andengine.entity.scene.menu.MenuScene.IOnMenuItemClickListener;
 import org.anddev.andengine.entity.scene.menu.item.IMenuItem;
 import org.anddev.andengine.entity.scene.menu.item.SpriteMenuItem;
 import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class PauseMenu implements IOnMenuItemClickListener {
+
+    public static PauseMenu instance;
+
     static final int ITEM_SAVE_REPLAY = 0;
     static final int ITEM_CONTINUE = 1;
     static final int ITEM_RETRY = 2;
     static final int ITEM_BACK = 3;
-    private final MenuScene scene;
-    private final GameScene game;
-    private final boolean fail;
+    private MenuScene scene;
+    private GameScene game;
+    private boolean fail;
     private boolean replaySaved;
 
-    public PauseMenu(final Engine engine, final GameScene game,
+    public static PauseMenu getInstance() {
+        if (instance == null)
+            instance = new PauseMenu();
+        return instance;
+    }
+
+    public void load(final Engine engine, final GameScene game,
                      final boolean fail) {
         this.game = game;
         this.fail = fail;

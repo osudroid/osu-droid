@@ -22,9 +22,18 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 
 public class LoadingScreen implements IUpdateHandler {
+
+    private static LoadingScreen instance;
+
     private final LoadingScene scene;
     private final ChangeableText logText;
     private float percentage;
+
+    public static LoadingScreen getInstance() {
+        if (instance == null)
+            instance = new LoadingScreen();
+        return instance;
+    }
 
     public LoadingScreen() {
         ArrayList<String> toastLoggerLog = ToastLogger.getLog();

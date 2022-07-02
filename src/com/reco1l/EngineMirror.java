@@ -8,16 +8,17 @@ import com.reco1l.utils.IMainClasses;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.scene.menu.MenuScene;
 
 import java.util.ArrayList;
 
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
+import ru.nsu.ccfit.zuev.osu.menu.PauseMenu;
 
 // Created by Reco1l on 22/6/22 02:20
 
 public class EngineMirror extends Engine implements IMainClasses, UI {
-    //Check which AndEngine scene is showing now and updates the new UI when setScene() is called.
+    // Checks which AndEngine scene is showing now and updates the new UI when setScene() is called.
 
     public Scenes currentScene;
     public static boolean isGlobalManagerInit = false;
@@ -36,23 +37,22 @@ public class EngineMirror extends Engine implements IMainClasses, UI {
 
     private void checkScene(Scene scene) {
         if (!isGlobalManagerInit) {
+            global.setInfo("Loading UI...");
             initializeUI();
             return;
         }
 
-        if (scene instanceof LoadingScreen.LoadingScene) {
-            currentScene = Scenes.LOADING_SCREEN;
-        }
-        else if (scene instanceof MenuScene) {
-            //PauseMenu is the only scene that extends MenuScene so this is a workaround for now.
-            currentScene = Scenes.PAUSE_MENU;
-        }
-        else {
-            for (Scenes toCheck: Scenes.values()) {
-                if (toCheck.AndEngineScene != null && scene == toCheck.AndEngineScene) {
-                    currentScene = toCheck;
-                    break;
-                }
+        for (Scenes toCheck : Scenes.values()) {
+            if (toCheck.AndEngineScene == null)
+                continue;
+
+            if (scene.hasChildScene() && scene.getChildScene() == toCheck.AndEngineScene) {
+                currentScene = toCheck;
+                break;
+            }
+            if (scene == toCheck.AndEngineScene) {
+                currentScene = toCheck;
+                break;
             }
         }
         updateUI();
@@ -74,12 +74,14 @@ public class EngineMirror extends Engine implements IMainClasses, UI {
         // This sets which layouts show according to the current scene.
         switch(currentScene) {
 
+            case LOADING_SCREEN:
+                inbox.allowBadgeNotificator(true);
+                break;
             case MAIN_MENU:
                 topBar.show();
                 platform.closeAllExcept(topBar);
                 inbox.allowBadgeNotificator(true);
                 break;
-            case LOADING_SCREEN:
             case SONG_MENU:
             case SCORING:
             case GAME:
@@ -93,10 +95,8 @@ public class EngineMirror extends Engine implements IMainClasses, UI {
     }
 
     public enum Scenes {
-        // LoadingScene & PauseMenu are compared with 'instanceof' because they are a different type of Scene.
-        LOADING_SCREEN(null),
-        PAUSE_MENU(null),
-
+        PAUSE_MENU(PauseMenu.getInstance().getScene()),
+        LOADING_SCREEN(LoadingScreen.getInstance().getScene()),
         MAIN_MENU(global.getMainScene().getScene()),
         SONG_MENU(global.getSongMenu().getScene()),
         SCORING(global.getScoring().getScene()),
