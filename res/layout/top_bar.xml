@@ -44,7 +44,7 @@
                 android:layout_width="@dimen/topBarButtonWidth"
                 android:layout_height="match_parent"
                 android:layout_toStartOf="@id/tb_userBox"
-                android:src="@drawable/v_inbox"/>
+                android:src="@drawable/v_inbox" />
 
             <!--User box-->
             <RelativeLayout
@@ -80,7 +80,6 @@
                         android:textColor="@color/textPrimary"
                         android:textSize="@dimen/textM" />
 
-
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/tb_avatar"
                         android:layout_width="@dimen/topBarAvatarSize"
@@ -93,38 +92,7 @@
 
             </RelativeLayout>
 
-            <!--Music-->
-            <LinearLayout
-                android:id="@+id/tb_music"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/topBarMusicButtonHeight"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="@dimen/S"
-                android:background="@drawable/round_shape"
-                android:backgroundTint="@color/topBarMusicButtonBackground"
-                android:gravity="center"
-                android:paddingHorizontal="@dimen/M"
-                android:visibility="gone">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/S"
-                    android:src="@drawable/v_music_s" />
-
-                <TextView
-                    android:id="@+id/tb_mText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:maxLength="32"
-                    android:paddingRight="@dimen/XXS"
-                    android:text="title"
-                    android:textSize="@dimen/textS" />
-
-            </LinearLayout>
-
-            <!--<include layout="@layout/top_bar_buttons" />-->
+            <include layout="@layout/top_bar_buttons" />
 
         </RelativeLayout>
 

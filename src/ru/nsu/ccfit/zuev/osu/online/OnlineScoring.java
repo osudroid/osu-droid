@@ -3,8 +3,8 @@ package ru.nsu.ccfit.zuev.osu.online;
 import android.os.AsyncTask;
 
 import com.reco1l.ui.data.Notificator;
-import com.reco1l.utils.IMainClasses;
-import com.reco1l.utils.UI;
+import com.reco1l.utils.interfaces.IMainClasses;
+import com.reco1l.utils.interfaces.UI;
 
 import org.anddev.andengine.util.Debug;
 
@@ -43,7 +43,7 @@ public class OnlineScoring implements IMainClasses, UI {
             public void run() {
                 synchronized (onlineMutex) {
                     boolean success = false;
-
+                    onlineHandler.clear();
                     //Trying to send request
                     for (int i = 0; i < 3; i++) {
                         Notificator.accountLogIn("try", i);

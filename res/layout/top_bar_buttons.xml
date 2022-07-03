@@ -2,16 +2,62 @@
 
 <!-- Created by Reco1l on 25/6/22 01:14 -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/tb_container"
     android:layout_width="wrap_content"
-    android:layout_height="@dimen/topBarHeight">
+    android:layout_height="@dimen/topBarHeight"
+    android:gravity="center_vertical">
+    <!--tool:background="@color/topBarBackground">-->
+
+    <!--Music-->
+    <RelativeLayout
+        android:id="@+id/tb_music"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/topBarMusicButtonHeight"
+        android:layout_marginHorizontal="@dimen/S"
+        android:background="@drawable/round_shape"
+        android:backgroundTint="@color/topBarMusicButtonBackground"
+        android:paddingLeft="@dimen/M"
+        android:paddingRight="@dimen/L">
+
+        <ImageView
+            android:id="@+id/tb_musicArrow"
+            android:alpha="0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:src="@drawable/v_arrow_s"
+            android:rotation="180"/>
+
+        <LinearLayout
+            android:id="@+id/tb_musicChildLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/v_music_s" />
+
+            <TextView
+                android:id="@+id/tb_musicText"
+                style="@style/text"
+                android:layout_marginLeft="@dimen/S"
+                android:maxLength="32"
+                android:maxLines="1"
+                android:text="[Song title]" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
 
     <!--Back-->
     <RelativeLayout
         android:id="@+id/tb_back"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -36,43 +82,42 @@
 
     </RelativeLayout>
 
-    <!--Indicator-->
-    <View
-        android:id="@+id/tb_tabIndicator"
-        android:layout_width="@dimen/topBarButtonWidth"
-        android:layout_height="@dimen/tabIndicatorHeight"
-        android:layout_alignParentBottom="true"
-        android:background="#FFFFFF"
-        android:visibility="gone" />
-
-    <!--Song menu buttons-->
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_toEndOf="@+id/tb_back"
-        android:background="@color/topBarButtonsBackground">
+        android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/tb_mods"
-            style="@style/icon_button"
-            android:layout_width="@dimen/topBarButtonWidth"
+        <!--Buttons-->
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:src="@drawable/v_tune" />
+            android:background="@color/topBarButtonsBackground">
 
-        <ImageView
-            android:id="@+id/tb_search"
-            style="@style/icon_button"
-            android:layout_width="@dimen/topBarButtonWidth"
-            android:layout_height="match_parent"
-            android:src="@drawable/v_search" />
+            <ImageView
+                android:id="@+id/tb_mods"
+                style="@style/icon_button"
+                android:layout_width="@dimen/topBarButtonWidth"
+                android:layout_height="match_parent"
+                android:src="@drawable/v_tune"
+                android:visibility="gone" />
 
-        <ImageView
-            android:id="@+id/tb_shuffle"
-            style="@style/icon_button"
-            android:layout_width="@dimen/topBarButtonWidth"
-            android:layout_height="match_parent"
-            android:src="@drawable/v_random" />
+            <ImageView
+                android:id="@+id/tb_search"
+                style="@style/icon_button"
+                android:layout_width="@dimen/topBarButtonWidth"
+                android:layout_height="match_parent"
+                android:src="@drawable/v_search"
+                android:visibility="gone" />
 
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/tb_shuffle"
+                style="@style/icon_button"
+                android:layout_width="@dimen/topBarButtonWidth"
+                android:layout_height="match_parent"
+                android:src="@drawable/v_random"
+                android:visibility="gone" />
 
-</RelativeLayout>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>

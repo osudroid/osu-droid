@@ -3,8 +3,8 @@ package com.reco1l.ui.data;
 // Created by Reco1l on 30/6/22 19:20
 
 import com.reco1l.EngineMirror;
-import com.reco1l.utils.IMainClasses;
-import com.reco1l.utils.UI;
+import com.reco1l.utils.interfaces.IMainClasses;
+import com.reco1l.utils.interfaces.UI;
 
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
@@ -15,9 +15,20 @@ import ru.nsu.ccfit.zuev.osuplus.R;
  */
 public class Notificator implements IMainClasses, UI {
 
+    // Single instance notifications
     private static GameNotification
             online,
             importing;
+
+    // Notification for debugging
+    //--------------------------------------------------------------------------------------------//
+
+    public static void debug(String text) {
+        GameNotification notification = new GameNotification("Debug");
+        notification.message = text;
+        notification.isSilent = true;
+        inbox.add(notification);
+    }
 
     // Notification for beatmap importing (Currently not used)
     //--------------------------------------------------------------------------------------------//
@@ -67,12 +78,6 @@ public class Notificator implements IMainClasses, UI {
             online.showProgressBar = true;
             online.isProgressBarIndeterminate = true;
             inbox.add(online);
-            return;
-        }
-
-        if (state.startsWith("try")) {
-            online.message = "Logging in...\n(Try: " + state.charAt(3) + ")";
-            online.update();
             return;
         }
 

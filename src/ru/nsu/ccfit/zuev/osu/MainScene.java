@@ -10,6 +10,7 @@ import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.reco1l.entity.Background;
 import com.reco1l.entity.Menu;
 import com.reco1l.entity.Spectrum;
+import com.reco1l.utils.interfaces.UI;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.particle.ParticleSystem;
@@ -42,7 +43,6 @@ import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.game.TimingPoint;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierFactory;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
-import ru.nsu.ccfit.zuev.osu.online.OnlinePanel;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
@@ -52,14 +52,14 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 /**
  * Created by Fuuko on 2015/4/24.
  */
-public class MainScene implements IUpdateHandler /* ILayouts */ {
+public class MainScene implements IUpdateHandler, UI {
     public BeatmapInfo beatmapInfo;
     private Context context;
     private Scene scene;
     //    private ArrayList<BeatmapInfo> beatmaps;
     private Random random = new Random();
     private Replay replay = null;
-    private TrackInfo selectedTrack;
+    public TrackInfo selectedTrack;
     private BeatmapData beatmapData;
     private List<TimingPoint> timingPoints;
     private TimingPoint currentTimingPoint, lastTimingPoint, firstTimingPoint;
@@ -73,18 +73,17 @@ public class MainScene implements IUpdateHandler /* ILayouts */ {
     //private BassAudioPlayer music;
 
     private boolean musicStarted;
-    private BassSoundProvider hitsound;
 
     private float bpmLength = 1000;
     private float lastBpmLength = 0;
     private float offset = 0;
     private float beatPassTime = 0;
     private float lastBeatPassTime = 0;
-    private boolean doChange = false;
-    private boolean doStop = false;
+    public boolean doChange = false;
+    public boolean doStop = false;
     //    private int playIndex = 0;
 //    private int lastPlayIndex = -1;
-    private long lastHit = 0;
+    public long lastHit = 0;
     private boolean isOnExitAnim = false;
 
     public Menu menu;
@@ -152,8 +151,6 @@ public class MainScene implements IUpdateHandler /* ILayouts */ {
         int randNum = new Random().nextInt((1 - 0) + 1) + 0;
         String welcomeSound = welcomeSounds[randNum];
         ResourceManager.getInstance().loadSound(welcomeSound, String.format("sfx/%s.ogg", welcomeSound), false).play();
-        hitsound = ResourceManager.getInstance().loadSound("menuhit", "sfx/menuhit.ogg", false);
-
     }
 
     public void loadOnline() {
@@ -166,6 +163,8 @@ public class MainScene implements IUpdateHandler /* ILayouts */ {
         if (GlobalManager.getInstance().getSongService() == null || beatmapInfo == null) {
             return;
         }
+        musicPlayer.currentOption = option;
+
         switch (option) {
             case PREV: {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING || GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED) {
@@ -259,14 +258,11 @@ public class MainScene implements IUpdateHandler /* ILayouts */ {
         }
 
         boolean doBounce = false;
-
         if (beatPassTime - lastBeatPassTime >= bpmLength - offset) {
             lastBeatPassTime = beatPassTime;
             offset = 0;
             doBounce = true;
         }
-
-        menu.update(pSecondsElapsed, doBounce, bpmLength);
 
         if (GlobalManager.getInstance().getSongService() != null) {
             if (!musicStarted) {
@@ -275,7 +271,6 @@ public class MainScene implements IUpdateHandler /* ILayouts */ {
                 } else {
                     return;
                 }
-                //musicPlayer.startTime = 0;
                 GlobalManager.getInstance().getSongService().play();
                 GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
                 if (lastTimingPoint != null) {
@@ -289,7 +284,6 @@ public class MainScene implements IUpdateHandler /* ILayouts */ {
             if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
 
                 int position = GlobalManager.getInstance().getSongService().getPosition();
-                //musicPlayer.updateSeekbar(pSecondsElapsed * 1000f);
 
                 if (currentTimingPoint != null && position > currentTimingPoint.getTime() * 1000) {
                     if (!isContinuousKiai && currentTimingPoint.isKiai()) {
@@ -331,6 +325,8 @@ public class MainScene implements IUpdateHandler /* ILayouts */ {
                 }
             }
         }
+        menu.update(pSecondsElapsed, doBounce, bpmLength);
+        musicPlayer.update();
     }
 
     @Override
@@ -348,8 +344,6 @@ public class MainScene implements IUpdateHandler /* ILayouts */ {
         if (LibraryManager.getInstance().getSizeOfBeatmaps() != 0) {
             beatmapInfo = LibraryManager.getInstance().getBeatmap();
             Log.w("MainMenuActivity", "Next song: " + beatmapInfo.getMusic() + ", Start at: " + beatmapInfo.getPreviewTime());
-            // topBar.updateMusicText();
-            //musicPlayer.updateSong();
         }
     }
 
@@ -368,8 +362,8 @@ public class MainScene implements IUpdateHandler /* ILayouts */ {
             int trackIndex = random.nextInt(trackInfos.size());
             selectedTrack = trackInfos.get(trackIndex);
 
-            spectrum.updateColor(selectedTrack);
             background.redraw(selectedTrack);
+            spectrum.updateColor(selectedTrack);
 
             if (reloadMusic) {
                 if (GlobalManager.getInstance().getSongService() != null) {

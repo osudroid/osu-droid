@@ -1,12 +1,13 @@
 package com.reco1l.utils;
 
 import android.animation.ValueAnimator;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
+
+import com.reco1l.utils.interfaces.IMainClasses;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 

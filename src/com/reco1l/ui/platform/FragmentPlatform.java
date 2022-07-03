@@ -31,7 +31,7 @@ public class FragmentPlatform {
     protected final MainActivity mActivity = GlobalManager.getInstance().getMainActivity();
 
     private static FragmentPlatform instance;
-    private List<Fragment> fragments;
+    private final List<Fragment> fragments = new ArrayList<>();
 
     public RenderSurfaceView renderView;
     public FragmentManager manager;
@@ -50,7 +50,6 @@ public class FragmentPlatform {
 
     public void load(AppCompatActivity activity, Context context, RenderSurfaceView renderView) {
         instance = this;
-        fragments = new ArrayList<>();
         this.renderView = renderView;
         this.context = context;
         int Id = 0x90009;
@@ -78,16 +77,16 @@ public class FragmentPlatform {
     //--------------------------------------------------------------------------------------------//
 
 
-    public void addFragment(BaseLayout layout, String tag) {
-        if (layout.isAdded() || fragments.contains(layout) || manager.findFragmentByTag(tag) != null)
+    public void addFragment(Fragment fragment, String tag) {
+        if (fragment.isAdded() || fragments.contains(fragment) || manager.findFragmentByTag(tag) != null)
             return;
 
-        fragments.add(layout);
+        fragments.add(fragment);
         mActivity.runOnUiThread(() ->
-                manager.beginTransaction().add(container.getId(), layout, tag).commit());
+                manager.beginTransaction().add(container.getId(), fragment, tag).commit());
     }
 
-    public void removeFragment(BaseLayout fragment) {
+    public void removeFragment(Fragment fragment) {
         if (!fragment.isAdded() || !fragments.contains(fragment))
             return;
 
@@ -98,15 +97,15 @@ public class FragmentPlatform {
 
     public void closeAll() {
         for (Fragment fragment: fragments) {
-            if (fragment.getClass().isAssignableFrom(BaseLayout.class))
+            if (fragment.getClass().getSuperclass() == BaseLayout.class)
                 mActivity.runOnUiThread(((BaseLayout) fragment)::close);
         }
     }
 
     public void closeThis(BaseLayout... toClose) {
-        for (BaseLayout layout : toClose) {
-            if (fragments.contains(layout))
-                mActivity.runOnUiThread(layout::close);
+        for (BaseLayout fragment : toClose) {
+           if (fragment != null)
+               mActivity.runOnUiThread(fragment::close);
         }
     }
 
@@ -115,7 +114,7 @@ public class FragmentPlatform {
         toClose.removeAll(Arrays.asList(toExclude));
 
         for (Fragment fragment: toClose) {
-            if (fragment.getClass().isAssignableFrom(BaseLayout.class))
+            if (fragment.getClass().getSuperclass() == BaseLayout.class)
                 mActivity.runOnUiThread(((BaseLayout) fragment)::close);
         }
     }

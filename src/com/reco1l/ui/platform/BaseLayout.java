@@ -14,8 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.reco1l.utils.UI;
-import com.reco1l.utils.IMainClasses;
+import com.reco1l.utils.interfaces.UI;
+import com.reco1l.utils.interfaces.IMainClasses;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -55,7 +55,6 @@ public abstract class BaseLayout extends Fragment implements IMainClasses, UI {
         // You can also set the root view ID as "background".
         rootBackground = find(R.id.background);
         onLoad();
-        System.gc();
         if (isDismissOnBackgroundPress && rootBackground != null) {
             rootBackground.setClickable(true);
 
@@ -75,16 +74,17 @@ public abstract class BaseLayout extends Fragment implements IMainClasses, UI {
     /**
      * Dismiss the layout.
      * <p>
-     * If you override this method always compare if 'isShowing' is true a the start of the method,
-     * otherwise any action with a View that is not showing can generate a {@link NullPointerException}.
+     * If you override this method always compare if {@linkplain #isShowing} is <code>true</code> at
+     * the start of the method, otherwise any action with a View that is not showing will throw a
+     * {@link NullPointerException}.
      * <p>
-     * Also don't forget to call 'super.close()' otherwise the layout will not dismiss, if you add
+     * Also don't forget to call <code>super.close()</code> otherwise the layout will not dismiss, if you add
      * animations call it at the end of the animation, otherwise the animation will broke up.
      */
     public void close() {
         if (!isShowing)
             return;
-        FragmentPlatform.getInstance().removeFragment(BaseLayout.this);
+        FragmentPlatform.getInstance().removeFragment(this);
         isShowing = false;
         System.gc();
     }
@@ -95,6 +95,7 @@ public abstract class BaseLayout extends Fragment implements IMainClasses, UI {
         String tag = this.getClass().getName() + "@" + this.hashCode();
         FragmentPlatform.getInstance().addFragment(this, tag);
         isShowing = true;
+        System.gc();
     }
 
     /**
@@ -139,16 +140,16 @@ public abstract class BaseLayout extends Fragment implements IMainClasses, UI {
      * @return the view itself if it exists as child in the layout, otherwise null.
      */
     @SuppressWarnings("unchecked")
-    protected <T extends View> T find(String name) {
-        if (rootView == null || name == null)
+    protected <T extends View> T find(String id) {
+        if (rootView == null || id == null)
             return null;
 
         int Id;
 
-        if (getPrefix() == null || name.startsWith(getPrefix())) {
-            Id = res().getIdentifier(name, "id", mActivity.getPackageName());
+        if (getPrefix() == null || id.startsWith(getPrefix())) {
+            Id = res().getIdentifier(id, "id", mActivity.getPackageName());
         } else {
-            Id = res().getIdentifier(getPrefix() + "_" + name, "id", mActivity.getPackageName());
+            Id = res().getIdentifier(getPrefix() + "_" + id, "id", mActivity.getPackageName());
         }
 
         Object view = rootView.findViewById(Id);

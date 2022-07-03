@@ -9,6 +9,7 @@ import android.os.Build;
 import androidx.palette.graphics.Palette;
 
 import org.anddev.andengine.entity.modifier.AlphaModifier;
+import org.anddev.andengine.entity.modifier.ColorModifier;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 
@@ -16,25 +17,33 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class Spectrum {
-    //Spectrum moved to a separate class as an object.
 
-    @SuppressWarnings("FieldCanBeLocal")
-    private final int //Leaving these variables as global to make it easy customizable.
-            lines = 80,
+    private int lines;
+
+    private final int
             lineWidth = 14,
             lineDistance = 2,
             peakMultiplier = 600;
-    @SuppressWarnings("FieldCanBeLocal")
+
     private final float alpha = 0.5f;
 
-    private final float[]
-            peakLevel = new float[lines],
-            peakDownRate = new float[lines];
+    private float[] peakLevel, peakDownRate;
 
-    private final Rectangle[] spectrum = new Rectangle[lines];
+    private AlphaModifier[] alphaModifiers;
+    private Rectangle[] spectrum;
+
+    //--------------------------------------------------------------------------------------------//
 
     public void draw(Scene scene) {
+        lines = Config.getRES_WIDTH() / (lineWidth + lineDistance) + 1;
+
+        peakLevel = new float[lines];
+        peakDownRate = new float[lines];
+        alphaModifiers = new AlphaModifier[lines];
+        spectrum = new Rectangle[lines];
+
         for (int i = 0; i < lines; i++) {
             spectrum[i] = new Rectangle((lineWidth + lineDistance) * i, 0, lineWidth, 0);
             spectrum[i].setAlpha(0);
@@ -45,8 +54,8 @@ public class Spectrum {
     public void clear() {
         for (int i = 0; i < lines; i++) {
             spectrum[i].clearEntityModifiers();
-            final float currentAlpha = spectrum[i].getAlpha();
-            spectrum[i].registerEntityModifier(new AlphaModifier(0.5f, currentAlpha, 0));
+            alphaModifiers[i] = new AlphaModifier(0.5f, spectrum[i].getAlpha(), 0);
+            spectrum[i].registerEntityModifier(alphaModifiers[i]);
         }
     }
 
@@ -75,7 +84,8 @@ public class Spectrum {
                     Config.getRES_HEIGHT() - spectrum[i].getHeight());
 
             if (spectrum[i].getAlpha() != alpha) {
-                spectrum[i].clearEntityModifiers();
+                spectrum[i].unregisterEntityModifier(alphaModifiers[i]);
+                alphaModifiers[i] = new AlphaModifier(0.5f, spectrum[i].getAlpha(), alpha);
                 spectrum[i].setAlpha(alpha);
             }
         }
@@ -102,11 +112,18 @@ public class Spectrum {
         //This can be replaced with some algorithm to get color luminance.
         boolean isDarker = Color.luminance(color) < 0.5f;
 
-        for (Rectangle lines : spectrum){
-            if (isDarker)
-                lines.setColor(1, 1, 1);
-            else
-                lines.setColor(0, 0, 0);
+        for (int i = 0; i < lines; i++) {
+
+            spectrum[i].clearEntityModifiers();
+            final float[] cRGB = {spectrum[i].getRed(), spectrum[i].getGreen(), spectrum[i].getBlue()};
+
+            if (isDarker) {
+                spectrum[i].registerEntityModifier(
+                        new ColorModifier(0.2f, cRGB[0], 1f, cRGB[1], 1f, cRGB[2], 1f));
+            } else {
+                spectrum[i].registerEntityModifier(
+                        new ColorModifier(0.2f, cRGB[0], 0, cRGB[1], 0, cRGB[2], 0));
+            }
         }
 
         if (bitmap != null)

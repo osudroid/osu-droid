@@ -90,7 +90,6 @@ public class MainActivity extends BaseGameActivity implements
     private PowerManager.WakeLock wakeLock = null;
     private String beatmapToAdd = null;
     private SaveServiceObject saveServiceObject;
-    private IntentFilter filter;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private FirebaseAnalytics analytics;
     private FirebaseCrashlytics crashlytics;

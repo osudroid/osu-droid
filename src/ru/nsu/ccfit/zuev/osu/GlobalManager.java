@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.util.DisplayMetrics;
 
+import com.reco1l.ui.platform.UIManager;
+
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 
@@ -73,6 +75,7 @@ public class GlobalManager {
             songService.stop();
             songService.hideNotification();
         }
+        UIManager.loadResources();
     }
 
     public Engine getEngine() {

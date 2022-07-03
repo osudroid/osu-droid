@@ -22,7 +22,7 @@
 
     <!--Backgrounds-->
     <color name="backgroundPrimary">#242424</color>
-    <color name="backgroundSecondary">#FA292929</color>
+    <color name="backgroundSecondary">#FC262626</color>
     <color name="backgroundTertiary">#1F1F1F</color>
     <color name="backgroundDimmed">#99000000</color>
 
@@ -33,9 +33,11 @@
     <color name="topBarButtonsBackground">#19000000</color>
     <color name="authorTextBackground">#50000000</color>
 
-    <!--Progress bar-->
+    <!--ProgressBar & SeekBar-->
     <color name="progressBarIndicatorColor">#FFFFFF</color>
     <color name="progressBarTrackColor">#20FFFFFF</color>
+    <color name="songSeekBarIndicatorColor">#61000000</color>
+    <color name="songSeekBarBackground">#30000000</color>
 
     <!--Panels-->
     <color name="panelTopBar">#19000000</color>

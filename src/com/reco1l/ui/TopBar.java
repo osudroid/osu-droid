@@ -3,17 +3,18 @@ package com.reco1l.ui;
 import android.animation.ValueAnimator;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.edlplan.framework.easing.Easing;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.reco1l.EngineMirror;
 import com.reco1l.ui.data.GameNotification;
 import com.reco1l.ui.platform.BaseLayout;
 import com.reco1l.utils.Animator;
 import com.reco1l.utils.ClickListener;
-import com.reco1l.utils.UI;
+import com.reco1l.utils.interfaces.UI;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.menu.SettingsMenu;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
@@ -23,11 +24,13 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class TopBar extends BaseLayout {
 
-    public static TopBar instance;
+    public View musicBody, musicArrow;
+    public TextView musicText;
     public UserBox userBox;
 
-    private View body, bar, music, inbox;
-    private TextView musicText;
+    private EngineMirror.Scenes lastScene;
+    private View body, bar, music, back;
+    private LinearLayout container;
     private TextView author;
 
     private boolean isAuthorShown = false;
@@ -47,81 +50,113 @@ public class TopBar extends BaseLayout {
 
     //--------------------------------------------------------------------------------------------//
 
+    public void reload() {
+        if (lastScene == engine.currentScene || !isShowing)
+            return;
+
+        lastScene = engine.currentScene;
+        showAuthorText(engine.currentScene == EngineMirror.Scenes.MAIN_MENU);
+
+        if(container == null)
+            return;
+
+        Runnable hide = () -> setVisible(false, music, back);
+        Runnable show = null;
+        Runnable task = null;
+
+        new Animator(container).moveX(0, -container.getWidth() / 2f).fade(1, 0)
+                .runOnEnd(hide)
+                .interpolator(Easing.OutExpo)
+                .play(200);
+
+        switch (engine.currentScene) {
+
+            case MAIN_MENU:
+                show = () -> setVisible(music);
+                break;
+
+            case SONG_MENU:
+                show = () -> setVisible(back);
+                task = () -> global.getSongMenu().back();
+                break;
+
+            case LOADING_SCREEN:
+            case PAUSE_MENU:
+            case SCORING:
+            case GAME:
+                // Nothing because the top bar is hidden in these scenes.
+                break;
+        }
+
+        new Animator(container).moveX(-container.getWidth() / 2f, 0).fade(0, 1)
+                .interpolator(Easing.OutExpo)
+                .runOnStart(show)
+                .delay(200)
+                .play(200);
+
+        new ClickListener(back).simple(task);
+    }
+
     @Override
     protected void onLoad() {
         setDismissMode(false, false);
         barHeight = (int) res().getDimension(R.dimen.topBarHeight);
         userBox = new UserBox(this);
 
-        ImageView settings = find("settings");
-        musicText = find("mText");
         author = find("author");
-        music = find("music");
-        inbox = find("inbox");
         body = find("body");
         bar = find("bar");
 
-        author.setAlpha(0);
         new Animator(body).moveY(-barHeight, 0).play(300);
 
-        if (library.getSizeOfBeatmaps() <= 0)
-            setVisible(false, music);
+        ImageView settings = find("settings");
+        ImageView inbox = find("inbox");
 
-        String ver = BuildConfig.VERSION_NAME;
-        String build = BuildConfig.BUILD_TYPE;
-        author.setText(String.format("osu!droid %s by osu!droid Team", ver + " (" + build + ")"));
+        container = find("container");
+        back = find("back");
+        musicBody = find("musicChildLayout");
+        musicArrow = find("musicArrow");
+        musicText = find("musicText");
+        music = find("music");
+
+        author.setAlpha(0);
+        showAuthorText(engine.currentScene == EngineMirror.Scenes.MAIN_MENU);
+
+        if (library.getSizeOfBeatmaps() <= 0)
+            setVisible(false, musicText);
+
+        author.setText(String.format("osu!droid %s", BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")"));
 
         new ClickListener(inbox).simple(UI.inbox::altShow);
-        new ClickListener(music).simple(null);
+        new ClickListener(music).simple(musicPlayer::altShow);
         new ClickListener(settings).simple(() -> new SettingsMenu().show());
 
-        setAuthorVisibility(engine.currentScene == EngineMirror.Scenes.MAIN_MENU);
-
-        userBox.update();
-        updateMusicText();
+        userBox.update(false);
     }
 
     @Override
     public void close() {
         if (!isShowing)
             return;
-
-        setAuthorVisibility(false);
+        lastScene = null;
+        showAuthorText(false);
         new Animator(body).moveY(0, -barHeight).runOnEnd(super::close).play(300);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void updateMusicText() {
-        if (!isShowing || musicText == null)
-            return;
-
-        BeatmapInfo info = library.getBeatmap();
-        mActivity.runOnUiThread(() -> {
-            if (info == null) {
-                musicText.setText("Error loading song title!");
-                return;
-            }
-
-            if (info.getTitleUnicode() != null && !Config.isForceRomanized()) {
-                musicText.setText(info.getTitleUnicode());
-            } else if (info.getTitle() != null) {
-                musicText.setText(info.getTitle());
-            } else {
-                musicText.setText("Error loading song title!");
-            }
-        });
-    }
-
-    private void setAuthorVisibility(boolean bool) {
+    private void showAuthorText(boolean bool) {
         if (author == null || isAuthorShown == bool)
             return;
+
         if (bool) {
-            new Animator(author).fade(0, 1).moveY(50, 0).play(300);
-        } else {
-            new Animator(author).fade(1, 0).moveY(0, 50).play(300);
+            new Animator(author).fade(0, 1).moveY(50, 0)
+                    .runOnEnd(() -> isAuthorShown = bool)
+                    .play(200);
+            return;
         }
-        isAuthorShown = bool; // This avoids animation duplicate.
+        new Animator(author).fade(1, 0).moveY(0, 50).runOnEnd(() -> isAuthorShown = bool)
+                .play(200);
     }
 
     public void switchColor(boolean isOnTab) {
@@ -161,15 +196,15 @@ public class TopBar extends BaseLayout {
             });
         }
 
-        public void update() {
-            if (!parent.isShowing || online == null)
+        public void update(boolean clear) {
+            if (!parent.isShowing)
                 return;
 
             avatar.setImageResource(R.drawable.default_avatar);
             name.setText(Config.getLocalUsername());
             rank.setText(topBar.res().getString(R.string.top_bar_offline));
 
-            if (!online.isStayOnline())
+            if (!online.isStayOnline() || clear)
                 return;
 
             name.setText(online.getUsername());

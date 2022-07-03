@@ -17,19 +17,21 @@ import androidx.fragment.app.Fragment;
 import com.edlplan.framework.easing.Easing;
 import com.reco1l.ui.data.GameNotification;
 import com.reco1l.ui.platform.BaseLayout;
+import com.reco1l.ui.platform.UIManager;
 import com.reco1l.utils.Animator;
 import com.reco1l.utils.ClickListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 27/6/22 17:17
 
+//TODO replace with RecyclerView due to performance issues when are too many notifications
 public class Inbox extends BaseLayout {
 
     public static List<GameNotification> notifications;
-    public static Inbox instance;
 
     protected BadgeNotification currentPopup;
     public LinearLayout container;
@@ -40,6 +42,10 @@ public class Inbox extends BaseLayout {
     private float bodyWidth;
 
     //--------------------------------------------------------------------------------------------//
+
+    public Inbox() {
+        notifications = new ArrayList<>();
+    }
 
     @Override
     protected String getPrefix() {
@@ -100,7 +106,6 @@ public class Inbox extends BaseLayout {
         if (currentPopup != null) {
             if (!bool) {
                 currentPopup.dismiss();
-                currentPopup = null;
                 return;
             }
             // If there's a pending BadgeNotification while they were not allowed, it will be shown instantly.
@@ -112,10 +117,8 @@ public class Inbox extends BaseLayout {
     }
 
     public void createBadgeNotification(GameNotification notification) {
-        if (currentPopup != null) {
+        if (currentPopup != null)
             currentPopup.dismiss();
-            currentPopup = null;
-        }
 
         currentPopup = new BadgeNotification(notification.header, notification.message);
 
@@ -162,7 +165,8 @@ public class Inbox extends BaseLayout {
                 display(0, notification);
                 return;
             }
-            createBadgeNotification(notification);
+            if (!notification.isSilent)
+                createBadgeNotification(notification);
         });
     }
 
@@ -170,10 +174,8 @@ public class Inbox extends BaseLayout {
         if (!notifications.remove(notification))
             return;
 
-        if (currentPopup != null && currentPopup.header.equals(notification.header)) {
+        if (currentPopup != null && currentPopup.header.equals(notification.header))
             currentPopup.dismiss();
-            currentPopup = null;
-        }
 
         if (isShowing)
             mActivity.runOnUiThread(() -> dismiss(0, notification));
@@ -183,10 +185,9 @@ public class Inbox extends BaseLayout {
 
     @Override
     public void show() {
-        if (currentPopup != null) {
+        platform.closeThis(UIManager.extras);
+        if (currentPopup != null)
             currentPopup.dismiss();
-            currentPopup = null;
-        }
         super.show();
     }
 
@@ -232,7 +233,6 @@ public class Inbox extends BaseLayout {
             LayoutParams params = notification.layout.getLayoutParams();
             params.height = (int) animation.getAnimatedValue();
             notification.layout.setLayoutParams(params);
-            notification.layout.requestLayout();
         });
 
         new Animator(notification.layout).fade(1, 0).moveX(0, notification.layout.getWidth())
@@ -275,7 +275,7 @@ public class Inbox extends BaseLayout {
             text.setText(header + " - " + message.replace("\n", " "));
 
             body.postDelayed(() -> { dismiss(); inbox.currentPopup = null; }, 3000);
-            new Animator(body).moveY(-50, 0).fade(0, 1).play(200);
+            new Animator(body).moveY(-50, 0).fade(0, 1).play(150);
 
             return root;
         }
@@ -283,15 +283,19 @@ public class Inbox extends BaseLayout {
         //----------------------------------------------------------------------------------------//
 
         public void show() {
+            inbox.currentPopup = this;
+            if (isAdded())
+                return;
             mActivity.runOnUiThread(() -> platform.manager.beginTransaction()
                     .add(platform.container.getId(), this, null)
                     .commit());
         }
 
         public void dismiss() {
+            inbox.currentPopup = null;
             new Animator(body).moveY(0, -50).fade(1, 0)
                     .runOnEnd(() -> platform.manager.beginTransaction().remove(this).commit())
-                    .play(200);
+                    .play(150);
         }
     }
 }

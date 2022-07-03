@@ -1,4 +1,4 @@
-package com.reco1l.utils;
+package com.reco1l.utils.interfaces;
 
 import com.reco1l.EngineMirror;
 import com.reco1l.ui.data.OnlineHandler;

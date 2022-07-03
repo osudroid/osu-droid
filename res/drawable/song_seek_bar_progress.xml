@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Created by Reco1l 3/5/2022-->
+<layer-list
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape>
+                <solid android:color="@color/songSeekBarIndicatorColor"/>
+                <corners android:radius="@dimen/songSeekBarCornerRadius" />
+            </shape>
+        </clip>
+    </item>
+
+</layer-list>

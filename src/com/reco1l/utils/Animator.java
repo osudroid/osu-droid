@@ -4,7 +4,9 @@ import android.view.View;
 import android.view.ViewPropertyAnimator;
 
 import com.edlplan.framework.easing.Easing;
+import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
+import com.reco1l.utils.interfaces.IMainClasses;
 
 // Created by Reco1l on 23/6/22 20:44
 
@@ -169,11 +171,21 @@ public class Animator implements IMainClasses {
             if (interpolator != null)
                 anim.setInterpolator(EasingHelper.asInterpolator(interpolator));
 
-            // Actions
-            if (onStart != null) anim.withStartAction(onStart);
-            if (onEnd != null) anim.withEndAction(() -> {
-                onEnd.run();
-                anim = null;
+            anim.setListener(new BaseAnimationListener() {
+                @Override
+                public void onAnimationStart(android.animation.Animator animation) {
+                    if (onStart != null)
+                        onStart.run();
+                    super.onAnimationStart(animation);
+                }
+
+                @Override
+                public void onAnimationEnd(android.animation.Animator animation) {
+                    if (onEnd != null)
+                        onEnd.run();
+                    super.onAnimationEnd(animation);
+                    anim = null;
+                }
             });
 
             anim.setStartDelay(delay);

@@ -2,7 +2,7 @@ package com.reco1l.entity;
 
 // Created by Reco1l on 26/6/22 18:22
 
-import com.reco1l.utils.IMainClasses;
+import com.reco1l.utils.interfaces.IMainClasses;
 
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;

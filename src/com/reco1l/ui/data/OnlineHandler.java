@@ -2,8 +2,8 @@ package com.reco1l.ui.data;
 
 import android.graphics.drawable.Drawable;
 
-import com.reco1l.utils.UI;
-import com.reco1l.utils.IMainClasses;
+import com.reco1l.utils.interfaces.UI;
+import com.reco1l.utils.interfaces.IMainClasses;
 
 import java.io.File;
 
@@ -65,10 +65,12 @@ public class OnlineHandler implements IMainClasses, UI {
 
     //--------------------------------------------------------------------------------------------//
 
-    // This method updates all showing layouts that contains Views showing online data from player
+    public void clear() {
+        topBar.userBox.update(true);
+    }
+
     public void update() {
-        if (topBar != null && topBar.userBox != null)
-            topBar.userBox.update();
+        topBar.userBox.update(false);
     }
 
 }

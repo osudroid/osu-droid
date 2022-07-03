@@ -10,8 +10,8 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.reco1l.utils.Animator;
 import com.reco1l.utils.ClickListener;
-import com.reco1l.utils.IMainClasses;
-import com.reco1l.utils.UI;
+import com.reco1l.utils.interfaces.IMainClasses;
+import com.reco1l.utils.interfaces.UI;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,6 +29,7 @@ public class GameNotification implements IMainClasses, UI {
     public Runnable runOnClick, onDismiss;
     public int progressMax = 100, progress = 0;
     public boolean
+            isSilent = false,
             showProgressBar = false,
             showDismissButton = true,
             isProgressBarIndeterminate = true;
