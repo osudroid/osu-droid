@@ -14,11 +14,6 @@ public class UIManager {
     public static Inbox inbox;
     public static MusicPlayer musicPlayer;
 
-    public static final BaseLayout[] extras = {
-            inbox,
-            musicPlayer
-    };
-
     //--------------------------------------------------------------------------------------------//
 
     public static void initialize() {
@@ -33,6 +28,16 @@ public class UIManager {
     }
 
     //--------------------------------------------------------------------------------------------//
+
+    /**
+     * @return layouts that are "extras", that means panels or dialogs that aren't necessary related to a Scene.
+     */
+    public static BaseLayout[] getExtras() {
+        return new BaseLayout[] {
+                getInbox(),
+                getMusicPlayer()
+        };
+    }
 
     public static TopBar getTopBar() {
         if (topBar == null) {

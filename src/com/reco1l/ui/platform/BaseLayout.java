@@ -2,6 +2,7 @@ package com.reco1l.ui.platform;
 
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;

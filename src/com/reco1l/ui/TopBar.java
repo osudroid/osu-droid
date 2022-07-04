@@ -13,6 +13,7 @@ import com.reco1l.ui.data.GameNotification;
 import com.reco1l.ui.platform.BaseLayout;
 import com.reco1l.utils.Animator;
 import com.reco1l.utils.ClickListener;
+import com.reco1l.utils.Res;
 import com.reco1l.utils.interfaces.UI;
 
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -53,54 +54,52 @@ public class TopBar extends BaseLayout {
     public void reload() {
         if (lastScene == engine.currentScene || !isShowing)
             return;
-
         lastScene = engine.currentScene;
-        showAuthorText(engine.currentScene == EngineMirror.Scenes.MAIN_MENU);
 
-        if(container == null)
-            return;
+        if (container != null) {
 
-        Runnable hide = () -> setVisible(false, music, back);
-        Runnable show = null;
-        Runnable task = null;
+            Runnable onBack = null;
 
-        new Animator(container).moveX(0, -container.getWidth() / 2f).fade(1, 0)
-                .runOnEnd(hide)
-                .interpolator(Easing.OutExpo)
-                .play(200);
+            Animator inAnim = new Animator(container).moveX(-60, 0).fade(0, 1);
+            Animator outAnim = new Animator(container).moveX(0, -60).fade(1, 0);
 
-        switch (engine.currentScene) {
+            outAnim.onEnd = () -> setVisible(false, music, back);
 
-            case MAIN_MENU:
-                show = () -> setVisible(music);
-                break;
+            outAnim.interpolator(Easing.OutExpo);
+            inAnim.interpolator(Easing.OutExpo);
 
-            case SONG_MENU:
-                show = () -> setVisible(back);
-                task = () -> global.getSongMenu().back();
-                break;
+            switch (engine.currentScene) {
 
-            case LOADING_SCREEN:
-            case PAUSE_MENU:
-            case SCORING:
-            case GAME:
-                // Nothing because the top bar is hidden in these scenes.
-                break;
+                case MAIN_MENU:
+                    inAnim.onStart = () -> setVisible(music);
+                    break;
+
+                case SONG_MENU:
+                    inAnim.onStart = () -> setVisible(back);
+                    onBack = () -> global.getSongMenu().back();
+                    break;
+
+                case LOADING_SCREEN:
+                case PAUSE_MENU:
+                case SCORING:
+                case GAME:
+                    // Nothing because the top bar is hidden in these scenes.
+                    break;
+            }
+
+            outAnim.play(200);
+            inAnim.delay(200).play(200);
+
+            new ClickListener(back).simple(onBack);
         }
 
-        new Animator(container).moveX(-container.getWidth() / 2f, 0).fade(0, 1)
-                .interpolator(Easing.OutExpo)
-                .runOnStart(show)
-                .delay(200)
-                .play(200);
-
-        new ClickListener(back).simple(task);
+        showAuthorText(engine.currentScene == EngineMirror.Scenes.MAIN_MENU);
     }
 
     @Override
     protected void onLoad() {
         setDismissMode(false, false);
-        barHeight = (int) res().getDimension(R.dimen.topBarHeight);
+        barHeight = (int) Res.dimen(R.dimen.topBarHeight);
         userBox = new UserBox(this);
 
         author = find("author");
@@ -119,7 +118,6 @@ public class TopBar extends BaseLayout {
         musicText = find("musicText");
         music = find("music");
 
-        author.setAlpha(0);
         showAuthorText(engine.currentScene == EngineMirror.Scenes.MAIN_MENU);
 
         if (library.getSizeOfBeatmaps() <= 0)
@@ -155,17 +153,20 @@ public class TopBar extends BaseLayout {
                     .play(200);
             return;
         }
-        new Animator(author).fade(1, 0).moveY(0, 50).runOnEnd(() -> isAuthorShown = bool)
+        new Animator(author).fade(1, 0).moveY(0, 50)
+                .runOnEnd(() -> isAuthorShown = bool)
                 .play(200);
     }
 
-    public void switchColor(boolean isOnTab) {
-        int normalColor = res().getColor(R.color.topBarBackground);
-        int onTabColor = res().getColor(R.color.backgroundPrimary);
+    public void switchColor(boolean isFromTab) {
 
-        ValueAnimator anim = ValueAnimator.ofArgb(isOnTab ? onTabColor : normalColor, isOnTab ? normalColor : onTabColor);
+        int from = Res.color(isFromTab ? R.color.backgroundPrimary : R.color.topBarBackground);
+        int to = Res.color(isFromTab ? R.color.topBarBackground : R.color.backgroundPrimary);
+
+        ValueAnimator anim = ValueAnimator.ofArgb(from, to);
+
+        anim.addUpdateListener(val -> bar.setBackgroundColor((int) val.getAnimatedValue()));
         anim.setDuration(300);
-        anim.addUpdateListener(value -> bar.setBackgroundColor((int) value.getAnimatedValue()));
         anim.start();
     }
 

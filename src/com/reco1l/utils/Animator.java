@@ -20,7 +20,7 @@ public class Animator implements IMainClasses {
     private final View view;
 
     private Easing interpolator;
-    private Runnable onStart, onEnd;
+    public Runnable onStart, onEnd;
 
     private long delay = 0;
 

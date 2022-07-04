@@ -47,6 +47,7 @@ public class MusicPlayer extends BaseLayout implements IMainClasses {
     private ImageView play;
 
     private boolean isTrackingTouch = false;
+    private final Runnable closeTask = this::close;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -73,10 +74,7 @@ public class MusicPlayer extends BaseLayout implements IMainClasses {
         sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
 
         body = find("body");
-        body.postDelayed(() -> {
-            if (isShowing)
-                close();
-        }, 8000);
+        body.postDelayed(closeTask, 8000);
 
         ValueAnimator anim = ValueAnimator.ofInt((int) Res.dimen(R.dimen._30sdp),
                 (int) Res.dimen(R.dimen.musicPlayerHeight));
@@ -254,6 +252,7 @@ public class MusicPlayer extends BaseLayout implements IMainClasses {
         if (!isShowing)
             return;
 
+        body.removeCallbacks(closeTask);
         new Animator(topBar.musicArrow).moveY(0, -10).fade(1, 0).play(120);
         new Animator(topBar.musicBody).moveY(10, 0).fade(0, 1).delay(120).play(120);
 

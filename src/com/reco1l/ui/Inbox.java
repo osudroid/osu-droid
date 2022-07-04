@@ -185,7 +185,7 @@ public class Inbox extends BaseLayout {
 
     @Override
     public void show() {
-        platform.closeThis(UIManager.extras);
+        platform.closeThis(UIManager.getExtras());
         if (currentPopup != null)
             currentPopup.dismiss();
         super.show();
@@ -193,6 +193,9 @@ public class Inbox extends BaseLayout {
 
     @Override
     public void close() {
+        if (!isShowing)
+            return;
+
         mActivity.runOnUiThread(() -> {
             clear(true);
 

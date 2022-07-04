@@ -82,7 +82,7 @@ public class EngineMirror extends Engine implements IMainClasses, UI {
         Notificator.debug("Current scene: " + currentScene.name());
 
         // Closing all extras on every scene change.
-        platform.closeThis(UIManager.extras);
+        platform.closeThis(UIManager.getExtras());
 
         // This sets which layouts show according to the current scene.
         switch (currentScene) {

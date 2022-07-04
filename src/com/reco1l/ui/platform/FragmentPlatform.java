@@ -75,8 +75,7 @@ public class FragmentPlatform {
     }
 
     //--------------------------------------------------------------------------------------------//
-
-
+    
     public void addFragment(Fragment fragment, String tag) {
         if (fragment.isAdded() || fragments.contains(fragment) || manager.findFragmentByTag(tag) != null)
             return;
@@ -95,6 +94,11 @@ public class FragmentPlatform {
                 manager.beginTransaction().remove(fragment).commit());
     }
 
+    //--------------------------------------------------------------------------------------------//
+
+    /**
+     * Close all fragments currently showing
+     */
     public void closeAll() {
         for (Fragment fragment: fragments) {
             if (fragment.getClass().getSuperclass() == BaseLayout.class)
@@ -102,6 +106,9 @@ public class FragmentPlatform {
         }
     }
 
+    /**
+     * @param toClose fragments to close
+     */
     public void closeThis(BaseLayout... toClose) {
         for (BaseLayout fragment : toClose) {
            if (fragment != null)
@@ -109,6 +116,9 @@ public class FragmentPlatform {
         }
     }
 
+    /**
+     * @param toExclude fragments to exclude from closing
+     */
     public void closeAllExcept(BaseLayout... toExclude) {
         List<Fragment> toClose = new ArrayList<>(fragments);
         toClose.removeAll(Arrays.asList(toExclude));
