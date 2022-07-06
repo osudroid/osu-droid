@@ -101,29 +101,39 @@ public class MusicPlayer extends BaseLayout implements IMainClasses {
         ImageView prev = find("prev");
         ImageView next = find("next");
 
-        new ClickListener(play).simple(() -> {
+        new ClickListener(play).simple(() -> body.removeCallbacks(closeTask), () -> {
             if (global.getSongService().getStatus() == Status.PLAYING) {
                 global.getMainScene().musicControl(MainScene.MusicOption.PAUSE);
             } else {
                 global.getMainScene().musicControl(MainScene.MusicOption.PLAY);
             }
+            body.postDelayed(closeTask, 8000);
         });
 
-        new ClickListener(prev).simple(() -> global.getMainScene().doChange = true, () -> {
+        new ClickListener(prev).simple(() -> {
+            global.getMainScene().doChange = true;
+            body.removeCallbacks(closeTask);
+        }, () -> {
             global.getMainScene().lastHit = System.currentTimeMillis();
             global.getMainScene().musicControl(MainScene.MusicOption.PREV);
+            body.postDelayed(closeTask, 8000);
         });
 
-        new ClickListener(next).simple(() -> global.getMainScene().doChange = true, () -> {
+        new ClickListener(next).simple(() -> {
+            global.getMainScene().doChange = true;
+            body.removeCallbacks(closeTask);
+        }, () -> {
             global.getMainScene().lastHit = System.currentTimeMillis();
             global.getMainScene().musicControl(MainScene.MusicOption.NEXT);
+            body.postDelayed(closeTask, 8000);
         });
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 isTrackingTouch = true;
-                global.getMainScene().musicControl(MainScene.MusicOption.PAUSE);
+                //global.getMainScene().musicControl(MainScene.MusicOption.PAUSE);
+                body.removeCallbacks(closeTask);
             }
 
             @Override
@@ -137,8 +147,9 @@ public class MusicPlayer extends BaseLayout implements IMainClasses {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 global.getSongService().setPosition(toPosition);
-                global.getMainScene().musicControl(MainScene.MusicOption.PLAY);
+                //global.getMainScene().musicControl(MainScene.MusicOption.PLAY);
                 isTrackingTouch = false;
+                body.postDelayed(closeTask, 8000);
             }
         });
         loadSongData(library.getBeatmap());

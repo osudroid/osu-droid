@@ -63,6 +63,7 @@ public abstract class BaseLayout extends Fragment implements IMainClasses, UI {
                 rootBackground.setOnTouchListener((view, event) -> {
                     if (event.getAction() == MotionEvent.ACTION_UP) {
                         close();
+                        view.setOnTouchListener(null);
                     }
                     return true;
                 });

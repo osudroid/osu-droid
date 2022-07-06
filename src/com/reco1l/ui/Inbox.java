@@ -73,7 +73,7 @@ public class Inbox extends BaseLayout {
 
         setVisible(notifications.isEmpty(), emptyText);
 
-        new ClickListener(close).simple(this::close);
+        new ClickListener(close).onlyOnce(true).simple(this::close);
         new ClickListener(clear).simple(() -> clear(false));
 
         new Animator(rootBackground).fade(0, 1)

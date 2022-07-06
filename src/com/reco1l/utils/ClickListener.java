@@ -14,6 +14,7 @@ public class ClickListener {
     private final View view;
     private boolean soundEffect = true;
     private boolean touchEffect = true;
+    private boolean isOnlyOnce = false;
     private BassSoundProvider customSound;
 
     public ClickListener(View view) {
@@ -44,6 +45,14 @@ public class ClickListener {
         return this;
     }
 
+    /**
+     * Removes the listener once the view is clicked.
+     */
+    public ClickListener onlyOnce(Boolean bool) {
+        isOnlyOnce = bool;
+        return this;
+    }
+
     public void simple(Runnable onUpAction) {simple(null, onUpAction); }
 
     /**
@@ -63,19 +72,25 @@ public class ClickListener {
             if(touchEffect)
                new ClickEffect(view, event);
 
-            switch(event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    if(onDownAction != null)
-                        onDownAction.run();
-                    break;
-                case MotionEvent.ACTION_UP:
-                    if(onUpAction != null)
-                        onUpAction.run();
-                    if (soundEffect && sound != null)
-                        sound.play();
-                    break;
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (onDownAction != null)
+                    onDownAction.run();
+                return true;
             }
-            return true;
+
+            else if (event.getAction() == MotionEvent.ACTION_UP) {
+                if (onUpAction != null)
+                    onUpAction.run();
+
+                if (soundEffect && sound != null)
+                    sound.play();
+
+                if (isOnlyOnce)
+                    view.setOnTouchListener(null);
+
+                return true;
+            }
+            return false;
         });
     }
 
