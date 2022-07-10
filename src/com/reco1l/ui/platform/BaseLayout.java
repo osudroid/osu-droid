@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import com.reco1l.utils.interfaces.UI;
 import com.reco1l.utils.interfaces.IMainClasses;
 
+import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 22/6/22 02:26
@@ -31,6 +32,9 @@ public abstract class BaseLayout extends Fragment implements IMainClasses, UI {
             isDismissOnBackPress = true;
 
     public boolean isShowing = false;
+
+    protected int screenWidth = Config.getRES_WIDTH();
+    protected int screenHeight = Config.getRES_HEIGHT();
 
     //--------------------------------------------------------------------------------------------//
     /**

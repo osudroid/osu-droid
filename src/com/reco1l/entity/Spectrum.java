@@ -8,10 +8,14 @@ import android.os.Build;
 
 import androidx.palette.graphics.Palette;
 
+import com.reco1l.utils.ModifierListener;
+
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.modifier.ColorModifier;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
+import org.anddev.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -32,7 +36,10 @@ public class Spectrum {
     private float[] peakLevel, peakDownRate;
 
     private AlphaModifier[] alphaModifiers;
+    private ColorModifier[] colorModifiers;
     private Rectangle[] spectrum;
+
+    private boolean isForcedClearInProgress = false;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -42,6 +49,7 @@ public class Spectrum {
         peakLevel = new float[lines];
         peakDownRate = new float[lines];
         alphaModifiers = new AlphaModifier[lines];
+        colorModifiers = new ColorModifier[lines];
         spectrum = new Rectangle[lines];
 
         for (int i = 0; i < lines; i++) {
@@ -51,10 +59,21 @@ public class Spectrum {
         }
     }
 
-    public void clear() {
+    public void clear(boolean force) {
+        isForcedClearInProgress = force;
+
         for (int i = 0; i < lines; i++) {
             spectrum[i].clearEntityModifiers();
-            alphaModifiers[i] = new AlphaModifier(0.5f, spectrum[i].getAlpha(), 0);
+            alphaModifiers[i] = new AlphaModifier(force ? 0.3f : 0.5f, spectrum[i].getAlpha(), 0);
+
+            if (force && i == 0) {
+                alphaModifiers[i].addModifierListener(new ModifierListener() {
+                    @Override
+                    public void onModifierFinished(IModifier<IEntity> m, IEntity i) {
+                        isForcedClearInProgress = false;
+                    }
+                });
+            }
             spectrum[i].registerEntityModifier(alphaModifiers[i]);
         }
     }
@@ -62,8 +81,7 @@ public class Spectrum {
     public void update() {
 
         float[] fft = GlobalManager.getInstance().getSongService().getSpectrum();
-        if (fft == null)
-            return;
+        if (fft == null) return;
 
         for (int i = 0; i < lines; i++) {
             float peak = 0;
@@ -83,9 +101,8 @@ public class Spectrum {
             spectrum[i].setPosition((lineWidth + lineDistance) * i,
                     Config.getRES_HEIGHT() - spectrum[i].getHeight());
 
-            if (spectrum[i].getAlpha() != alpha) {
+            if (spectrum[i].getAlpha() != alpha && !isForcedClearInProgress) {
                 spectrum[i].unregisterEntityModifier(alphaModifiers[i]);
-                alphaModifiers[i] = new AlphaModifier(0.5f, spectrum[i].getAlpha(), alpha);
                 spectrum[i].setAlpha(alpha);
             }
         }
@@ -114,19 +131,18 @@ public class Spectrum {
 
         for (int i = 0; i < lines; i++) {
 
-            spectrum[i].clearEntityModifiers();
+            spectrum[i].unregisterEntityModifier(colorModifiers[i]);
             final float[] cRGB = {spectrum[i].getRed(), spectrum[i].getGreen(), spectrum[i].getBlue()};
 
             if (isDarker) {
-                spectrum[i].registerEntityModifier(
-                        new ColorModifier(0.2f, cRGB[0], 1f, cRGB[1], 1f, cRGB[2], 1f));
+                colorModifiers[i] = new ColorModifier(0.2f, cRGB[0], 1, cRGB[1], 1, cRGB[2], 1);
             } else {
-                spectrum[i].registerEntityModifier(
-                        new ColorModifier(0.2f, cRGB[0], 0, cRGB[1], 0, cRGB[2], 0));
+                colorModifiers[i] = new ColorModifier(0.2f, cRGB[0], 0, cRGB[1], 0, cRGB[2], 0);
             }
+            spectrum[i].registerEntityModifier(colorModifiers[i]);
         }
 
         if (bitmap != null)
-            bitmap.recycle(); //Recycling the bitmap to avoid memory leaks.
+            bitmap.recycle(); // Recycling the bitmap to avoid memory leaks.
     }
 }

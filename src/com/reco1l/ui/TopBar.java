@@ -9,7 +9,6 @@ import android.widget.TextView;
 import com.edlplan.framework.easing.Easing;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.reco1l.EngineMirror;
-import com.reco1l.ui.data.GameNotification;
 import com.reco1l.ui.platform.BaseLayout;
 import com.reco1l.utils.Animator;
 import com.reco1l.utils.ClickListener;
@@ -178,7 +177,7 @@ public class TopBar extends BaseLayout {
         private final TextView rank, name;
         private final ShapeableImageView avatar;
 
-        private int clickCount = 0;
+        // private int clickCount = 0;
 
         public UserBox(TopBar parent) {
             this.parent = parent;
@@ -189,12 +188,12 @@ public class TopBar extends BaseLayout {
             avatar = parent.find("avatar");
 
             // Debug
-            new ClickListener(body).simple(() -> {
-                GameNotification notification = new GameNotification("Test notification");
+            /*GameNotification notification = new GameNotification("Test notification");
                 notification.message = "Notification number " + clickCount;
                 UI.inbox.add(notification);
-                clickCount++;
-            });
+                clickCount++;*/
+
+            new ClickListener(body).simple(null);
         }
 
         public void update(boolean clear) {

@@ -57,6 +57,12 @@ public class TriangleDrawable extends Drawable {
 
     }
 
+    public void setTriangleColor(int color) {
+        this.color = color;
+        this.time = -1;
+        this.triangles.clear();
+    }
+
     @Override
     public void setColorFilter(@Nullable ColorFilter colorFilter) {
 
@@ -143,6 +149,12 @@ public class TriangleDrawable extends Drawable {
         //return random.nextInt(200);
         //return (float) (Math.min(width, height) * 0.8 * (Math.min(1, Math.abs(random.nextGaussian())) * 0.8 + 0.2));
         return (float) (Math.pow(Math.random(), 2) * 200);
+    }
+
+    public void speedUp(float multiplier) {
+        for (int i = 0; i < triangles.size(); i++) {
+            triangles.get(i).speed = 15 * multiplier;
+        }
     }
 
     private void spawnOneTriangle() {

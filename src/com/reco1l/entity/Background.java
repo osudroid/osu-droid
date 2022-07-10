@@ -3,6 +3,7 @@ package com.reco1l.entity;
 // Created by Reco1l on 26/6/22 18:22
 
 import com.reco1l.utils.interfaces.IMainClasses;
+import com.reco1l.utils.interfaces.UI;
 
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;
@@ -23,7 +24,8 @@ import ru.nsu.ccfit.zuev.osu.TrackInfo;
 public class Background implements IMainClasses {
 
     private Scene parent;
-    private Rectangle dim;
+
+    public Rectangle dim;
     private TextureRegion defaultTexture;
     private Sprite background, lastBackground;
 
@@ -58,18 +60,22 @@ public class Background implements IMainClasses {
         if (track == null)
             return;
 
+        if (dim.getAlpha() == 0.3f && !UI.mainMenu.isMenuShowing)
+            dim.setAlpha(0);
+
         final boolean allow = track.getBackground() != null && !Config.isSafeBeatmapBg();
 
         final TextureRegion texture = allow ?
                 resources.loadBackground(track.getBackground()) : defaultTexture;
 
         background = new Sprite(0, (resH - height(texture)) / 2f, resW, height(texture), texture);
-        background.setScale(global.getMainScene().menu.isMenuShowing ? 1.2f : 1f);
+        background.setScale(UI.mainMenu.isMenuShowing ? 1.2f : 1f);
 
         IEntityModifierListener listener = new IEntityModifierListener() {
             @Override
             public void onModifierStarted(IModifier<IEntity> modifier, IEntity item) {
                 parent.attachChild(background, 0);
+                global.getMainScene().spectrum.updateColor(track);
             }
 
             @Override
@@ -83,7 +89,7 @@ public class Background implements IMainClasses {
     }
 
     public void zoomIn() {
-        if (background == null || global.getMainScene().menu.isMenuShowing)
+        if (background == null || UI.mainMenu.isMenuShowing)
             return;
         background.clearEntityModifiers();
         dim.clearEntityModifiers();
@@ -92,14 +98,18 @@ public class Background implements IMainClasses {
         background.registerEntityModifier(new ScaleModifier(0.4f, 1, 1.2f, interpolator));
     }
 
-    public void zoomOut() {
-        if (background == null || !global.getMainScene().menu.isMenuShowing)
+    public void zoomOut(boolean isTransition) {
+        if (background == null || !UI.mainMenu.isMenuShowing)
             return;
-        background.clearEntityModifiers();
-        dim.clearEntityModifiers();
 
-        dim.registerEntityModifier(new AlphaModifier(0.4f, 0.3f, 0, interpolator));
+        background.clearEntityModifiers();
         background.registerEntityModifier(new ScaleModifier(0.4f, 1.2f, 1, interpolator));
+
+        if (isTransition)
+            return;
+
+        dim.clearEntityModifiers();
+        dim.registerEntityModifier(new AlphaModifier(0.4f, 0.3f, 0, interpolator));
     }
 
 }

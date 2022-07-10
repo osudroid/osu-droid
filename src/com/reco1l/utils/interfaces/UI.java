@@ -1,6 +1,8 @@
 package com.reco1l.utils.interfaces;
 
 import com.reco1l.ui.Inbox;
+import com.reco1l.ui.LoadingScene;
+import com.reco1l.ui.MainMenu;
 import com.reco1l.ui.MusicPlayer;
 import com.reco1l.ui.TopBar;
 import com.reco1l.ui.platform.UIManager;
@@ -13,4 +15,6 @@ public interface UI {
     TopBar topBar = UIManager.getTopBar();
     Inbox inbox = UIManager.getInbox();
     MusicPlayer musicPlayer = UIManager.getMusicPlayer();
+    LoadingScene loadingScene = UIManager.getLoadingScene();
+    MainMenu mainMenu = UIManager.getMainMenu();
 }

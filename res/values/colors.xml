@@ -48,4 +48,7 @@
     <color name="notificationDrawableBackground">#1F000000</color>
     <color name="notificationDismissButtonTint">#B3FFFFFF</color>
 
+    <!--Main Menu-->
+    <color name="mainMenuLogoBackground">#E866A0</color>
+
 </resources>

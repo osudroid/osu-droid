@@ -65,4 +65,12 @@ public class TriangleEffectView extends View {
     public void setXDistribution(TriangleDrawable.PosXDistribution xDistribution) {
         triangleDrawable.setXDistribution(xDistribution);
     }
+
+    public void setTriangleColor(int color) {
+        triangleDrawable.setTriangleColor(color);
+    }
+
+    public void setTriangleSpeed(float multiplier) {
+        triangleDrawable.speedUp(multiplier);
+    }
 }

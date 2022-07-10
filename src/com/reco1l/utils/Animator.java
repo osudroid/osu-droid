@@ -31,6 +31,8 @@ public class Animator implements IMainClasses {
     private float fromScaleY, toScaleY;
     private float fromAlpha, toAlpha;
 
+    private boolean cancelPendingAnimations = true;
+
     //--------------------------------------------------------------------------------------------//
 
     /**
@@ -59,6 +61,11 @@ public class Animator implements IMainClasses {
 
         fromAlpha = view.getAlpha();
         toAlpha = fromAlpha;
+    }
+
+    public Animator cancelPending(boolean bool) {
+        cancelPendingAnimations = bool;
+        return this;
     }
 
     public Animator delay(long ms){
@@ -139,7 +146,9 @@ public class Animator implements IMainClasses {
           return;
 
         mActivity.runOnUiThread(() -> {
-            view.animate().cancel();
+
+            if(cancelPendingAnimations)
+                view.animate().cancel();
 
             anim = view.animate();
 

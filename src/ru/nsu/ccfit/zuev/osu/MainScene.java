@@ -8,7 +8,6 @@ import android.util.Log;
 
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.reco1l.entity.Background;
-import com.reco1l.entity.Menu;
 import com.reco1l.entity.Spectrum;
 import com.reco1l.utils.interfaces.UI;
 
@@ -86,20 +85,17 @@ public class MainScene implements IUpdateHandler, UI {
     public long lastHit = 0;
     private boolean isOnExitAnim = false;
 
-    public Menu menu;
     public Background background;
-    private Spectrum spectrum;
+    public Spectrum spectrum;
 
     public void load(Context context) {
         this.context = context;
         Debug.i("Load: mainMenuLoaded()");
         scene = new Scene();
-        menu = new Menu();
         spectrum = new Spectrum();
         background = new Background();
 
         background.draw(scene);
-        menu.draw(scene);
         spectrum.draw(scene);
 
         LibraryManager.getInstance().loadLibraryCache((Activity) context, false);
@@ -139,9 +135,6 @@ public class MainScene implements IUpdateHandler, UI {
 
             scene.attachChild(particleSystem[1]);
         }
-
-        menu.adjust();
-        menu.attach();
 
         scene.setTouchAreaBindingEnabled(true);
         loadOnline();
@@ -248,7 +241,7 @@ public class MainScene implements IUpdateHandler, UI {
     public void onUpdate(final float pSecondsElapsed) {
         beatPassTime += pSecondsElapsed * 1000f;
         if (isOnExitAnim) {
-            spectrum.clear();
+            spectrum.clear(false);
             return;
         }
 
@@ -257,11 +250,11 @@ public class MainScene implements IUpdateHandler, UI {
             offset = 0;
         }
 
-        boolean doBounce = false;
+        boolean allowBounce = false;
         if (beatPassTime - lastBeatPassTime >= bpmLength - offset) {
             lastBeatPassTime = beatPassTime;
             offset = 0;
-            doBounce = true;
+            allowBounce = true;
         }
 
         if (GlobalManager.getInstance().getSongService() != null) {
@@ -318,14 +311,14 @@ public class MainScene implements IUpdateHandler, UI {
                 spectrum.update();
 
             } else {
-                spectrum.clear();
+                spectrum.clear(false);
 
                 if (!doChange && !doStop && GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getPosition() >= GlobalManager.getInstance().getSongService().getLength()) {
                     musicControl(MusicOption.NEXT);
                 }
             }
         }
-        menu.update(pSecondsElapsed, doBounce, bpmLength);
+        UI.mainMenu.update(pSecondsElapsed, allowBounce, bpmLength);
         musicPlayer.update();
     }
 
@@ -363,7 +356,6 @@ public class MainScene implements IUpdateHandler, UI {
             selectedTrack = trackInfos.get(trackIndex);
 
             background.redraw(selectedTrack);
-            spectrum.updateColor(selectedTrack);
 
             if (reloadMusic) {
                 if (GlobalManager.getInstance().getSongService() != null) {
@@ -433,7 +425,7 @@ public class MainScene implements IUpdateHandler, UI {
         bg.registerEntityModifier(ModifierFactory.newAlphaModifier(3.0f, 0, 1));
         scene.attachChild(bg);
 
-        menu.doExitAnim();
+        UI.mainMenu.playExitAnim();
 
         ScheduledExecutorService taskPool = Executors.newScheduledThreadPool(1);
         taskPool.schedule(new TimerTask() {

@@ -1,6 +1,8 @@
 package com.reco1l.ui.platform;
 
 import com.reco1l.ui.Inbox;
+import com.reco1l.ui.LoadingScene;
+import com.reco1l.ui.MainMenu;
 import com.reco1l.ui.MusicPlayer;
 import com.reco1l.ui.TopBar;
 
@@ -13,6 +15,8 @@ public class UIManager {
     public static TopBar topBar;
     public static Inbox inbox;
     public static MusicPlayer musicPlayer;
+    public static LoadingScene loadingScene;
+    public static MainMenu mainMenu;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -58,5 +62,19 @@ public class UIManager {
             musicPlayer = new MusicPlayer();
         }
         return musicPlayer;
+    }
+
+    public static LoadingScene getLoadingScene() {
+        if (loadingScene == null) {
+            loadingScene = new LoadingScene();
+        }
+        return loadingScene;
+    }
+
+    public static MainMenu getMainMenu() {
+        if (mainMenu == null) {
+            mainMenu = new MainMenu();
+        }
+        return mainMenu;
     }
 }

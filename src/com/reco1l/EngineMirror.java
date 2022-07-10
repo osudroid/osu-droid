@@ -53,7 +53,8 @@ public class EngineMirror extends Engine implements IMainClasses, UI {
             currentScene = Scenes.PAUSE_MENU;
         }*/
 
-        if (scene == LoadingScreen.getInstance().getScene()) {
+        if (scene == LoadingScreen.getInstance().getScene()
+                || scene == loadingScene.scene) {
             currentScene = Scenes.LOADING_SCREEN;
         }
         if (scene == global.getMainScene().getScene()) {
@@ -79,27 +80,25 @@ public class EngineMirror extends Engine implements IMainClasses, UI {
         if (currentScene == null || !UIManager.isUserInterfaceInit)
             return;
 
-        Notificator.debug("Current scene: " + currentScene.name());
-
         // Closing all extras on every scene change.
         platform.closeThis(UIManager.getExtras());
+
+        inbox.allowBadgeNotificator(currentScene == Scenes.GAME);
 
         // This sets which layouts show according to the current scene.
         switch (currentScene) {
 
             case LOADING_SCREEN:
-                inbox.allowBadgeNotificator(true);
+                platform.closeAllExcept(loadingScene);
                 break;
             case MAIN_MENU:
                 topBar.show();
-                platform.closeAllExcept(topBar);
-                inbox.allowBadgeNotificator(true);
+                mainMenu.show();
+                platform.closeAllExcept(topBar, mainMenu);
                 break;
             case SONG_MENU:
-                break;
             case SCORING:
             case GAME:
-                inbox.allowBadgeNotificator(false);
                 platform.closeAll();
                 break;
         }

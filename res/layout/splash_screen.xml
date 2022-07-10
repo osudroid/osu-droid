@@ -22,7 +22,8 @@
 
         <ProgressBar
             android:id="@+id/ss_progress"
-            style="@style/determinate_circular_progress_bar"
+            style="@style/circular_progress_bar"
+            android:indeterminate="false"
             android:layout_width="@dimen/smallCircularProgressBarSize"
             android:layout_height="@dimen/smallCircularProgressBarSize"
             tools:progress="25"/>
