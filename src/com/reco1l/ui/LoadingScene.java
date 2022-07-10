@@ -94,6 +94,9 @@ public class LoadingScene extends BaseLayout implements IUpdateHandler {
 
     @Override
     public void show() {
+        if (isShowing)
+            return;
+
         TextureRegion texture;
 
         if (resources.getTexture("::background") != null) {

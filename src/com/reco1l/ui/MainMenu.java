@@ -83,9 +83,11 @@ public class MainMenu extends BaseLayout {
             logo.setScaleY((float) val.getAnimatedValue());
         };
 
+        bounceUp.removeAllUpdateListeners();
         bounceUp.addUpdateListener(logoBounce);
         bounceUp.setInterpolator(easeInOutQuad);
 
+        bounceDown.removeAllUpdateListeners();
         bounceDown.addUpdateListener(logoBounce);
         bounceDown.setInterpolator(easeInOutQuad);
 
@@ -93,7 +95,9 @@ public class MainMenu extends BaseLayout {
         AnimatorUpdateListener triangleSpeed = val ->
                 logoTriangles.setTriangleSpeed((float) val.getAnimatedValue());
 
+        triangleSpeedUp.removeAllUpdateListeners();
         triangleSpeedUp.addUpdateListener(triangleSpeed);
+        triangleSpeedDown.removeAllUpdateListeners();
         triangleSpeedDown.addUpdateListener(triangleSpeed);
 
         // Logo size effect
@@ -106,14 +110,17 @@ public class MainMenu extends BaseLayout {
         logoShow = ValueAnimator.ofInt(logoNormalSize, smallLogoSize);
         logoShow.setDuration(300);
         logoShow.setInterpolator(easeInOutQuad);
+        logoShow.removeAllUpdateListeners();
         logoShow.addUpdateListener(logoResize);
 
         logoHide = ValueAnimator.ofInt(smallLogoSize, logoNormalSize);
         logoHide.setDuration(300);
         logoHide.setInterpolator(easeInOutQuad);
+        logoHide.removeAllUpdateListeners();
         logoHide.addUpdateListener(logoResize);
 
         // Logo transition effect
+        logoFadeOut.removeAllUpdateListeners();
         logoFadeOut.addUpdateListener(val -> logo.setAlpha((float) val.getAnimatedValue()));
         logoFadeOut.setInterpolator(easeInOutQuad);
         logoFadeOut.setDuration(200);
@@ -191,30 +198,29 @@ public class MainMenu extends BaseLayout {
 
     private void playTransitionAnim() {
 
-        final OsuAsyncCallback playCallback = new OsuAsyncCallback() {
-            public void run() {
-                UI.loadingScene.show();
-                mActivity.checkNewSkins();
-                mActivity.checkNewBeatmaps();
-                if (!library.loadLibraryCache(mActivity, true)) {
-                    library.scanLibrary(mActivity);
-                    System.gc();
-                }
-                global.getSongMenu().reload();
-            }
-
-            public void onComplete() {
-                global.getMainScene().musicControl(MainScene.MusicOption.PLAY);
-                UI.loadingScene.close();
-                global.getEngine().setScene(global.getSongMenu().getScene());
-                global.getSongMenu().select();
-            }
-        };
-
+        logoFadeOut.removeAllListeners();
         logoFadeOut.addListener(new BaseAnimationListener() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                new AsyncTaskLoader().execute(playCallback);
+                new AsyncTaskLoader().execute(new OsuAsyncCallback() {
+                    public void run() {
+                        UI.loadingScene.show();
+                        mActivity.checkNewSkins();
+                        mActivity.checkNewBeatmaps();
+                        if (!library.loadLibraryCache(mActivity, true)) {
+                            library.scanLibrary(mActivity);
+                            System.gc();
+                        }
+                        global.getSongMenu().reload();
+                    }
+
+                    public void onComplete() {
+                        global.getMainScene().musicControl(MainScene.MusicOption.PLAY);
+                        UI.loadingScene.close();
+                        global.getEngine().setScene(global.getSongMenu().getScene());
+                        global.getSongMenu().select();
+                    }
+                });
             }
         });
 
@@ -238,6 +244,7 @@ public class MainMenu extends BaseLayout {
 
         global.getMainScene().background.zoomIn();
 
+        logoShow.removeAllListeners();
         logoShow.addListener(new BaseAnimationListener() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -257,6 +264,7 @@ public class MainMenu extends BaseLayout {
 
         global.getMainScene().background.zoomOut(isTransition);
 
+        logoHide.removeAllListeners();
         logoHide.addListener(new BaseAnimationListener() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -362,6 +370,7 @@ public class MainMenu extends BaseLayout {
         public void show(long delay) {
 
             if (delay == 120) {
+                showAnim.removeAllListeners();
                 showAnim.addListener(new BaseAnimationListener() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -381,6 +390,7 @@ public class MainMenu extends BaseLayout {
         public void hide(long delay) {
 
             if (delay == 120) {
+                hideAnim.removeAllListeners();
                 hideAnim.addListener(new BaseAnimationListener() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
