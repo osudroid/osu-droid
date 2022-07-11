@@ -8,9 +8,10 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.cardview.widget.CardView;
+
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.EasingHelper;
-import com.google.android.material.imageview.ShapeableImageView;
 import com.reco1l.ui.platform.BaseLayout;
 import com.reco1l.utils.Animator;
 import com.reco1l.utils.ClickListener;
@@ -41,10 +42,10 @@ public class MusicPlayer extends BaseLayout implements IMainClasses {
     private int length, position, toPosition;
 
     private TextView titleTv, artistTv, timeTv, lengthTv;
-    private ShapeableImageView songIv;
-    private View body, innerBody;
+    private ImageView play, songIv;
+    private CardView body;
+    private View innerBody;
     private SeekBar seekBar;
-    private ImageView play;
 
     private boolean isTrackingTouch = false;
     private final Runnable closeTask = this::close;
@@ -52,7 +53,7 @@ public class MusicPlayer extends BaseLayout implements IMainClasses {
     //--------------------------------------------------------------------------------------------//
 
     public static void onResourcesLoad() {
-        playDrw = Res.drw(R.drawable.v_play_xl);
+        playDrw = Res.drw(R.drawable.v_play_xl_circle);
         pauseDrw = Res.drw(R.drawable.v_pause_xl);
     }
 

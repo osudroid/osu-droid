@@ -1,6 +1,7 @@
 package com.reco1l.utils;
 
 import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
@@ -22,51 +23,68 @@ public class ClickEffect implements IMainClasses {
 
     private static int color = 0;
 
-    public ClickEffect(View view, MotionEvent event) {
+    private final View view;
+    private ValueAnimator downAnim, upAnim;
+
+    public ClickEffect(View view) {
+        this.view = view;
+
         if (Build.VERSION.SDK_INT < 24 || view == null)
             return;
 
         if (color == 0)
-            color = mActivity.getResources().getColor(R.color.touchEffectHighlight);
+            color = Res.color(R.color.touchEffectHighlight);
+
+        downAnim = ValueAnimator.ofArgb(0, color);
+        downAnim.setDuration(100);
+
+        upAnim = ValueAnimator.ofArgb(color, 0);
+        upAnim.setDuration(300);
 
         GradientDrawable shape = new GradientDrawable();
-        shape.setColor(color);
 
-        // Only ShapeDrawable class can be casted to GradientDrawable.
-        boolean allow = view.getBackground() instanceof GradientDrawable
-                || view.getBackground() instanceof ShapeDrawable;
+        // If the view has rounded corners we can only get the radius of those corners if the background
+        // is a ShapeDrawable or a GradientDrawable.
+        if (view.getBackground() != null) {
+            if (view.getBackground() instanceof GradientDrawable || view.getBackground() instanceof ShapeDrawable) {
 
-        if (view.getBackground() != null && allow)
-            shape.setCornerRadius(((GradientDrawable) view.getBackground()).getCornerRadius());
+                GradientDrawable background = (GradientDrawable) view.getBackground().mutate();
 
-        ValueAnimator downAnim = ValueAnimator.ofArgb(0, color);
-        ValueAnimator upAnim = ValueAnimator.ofArgb(color, 0);
+                float r = background.getCornerRadius();
+                // Setting 'android:radius' property will override any corner radius set in XML.
+                if (r > 0) {
+                    float[] radii = {r, r, r, r, r, r, r, r};
+                    background.setCornerRadii(radii);
+                }
+                shape.setCornerRadii(background.getCornerRadii());
+            }
+        }
+
+        AnimatorUpdateListener update = val -> {
+            shape.setColor((int) val.getAnimatedValue());
+            view.setForeground(shape);
+        };
+
+        downAnim.addUpdateListener(update);
+        upAnim.addUpdateListener(update);
+    }
+
+
+    public void play(MotionEvent event) {
+        if (Build.VERSION.SDK_INT < 24 || view == null)
+            return;
 
         switch (event.getAction()) {
-
-            case MotionEvent.ACTION_DOWN: {
-                downAnim.setDuration(100);
-                downAnim.addUpdateListener(value -> {
-                    shape.setColor((int) value.getAnimatedValue());
-                    view.setForeground(shape);
-                });
+            case MotionEvent.ACTION_DOWN:
                 downAnim.start();
                 break;
-            }
-
             case MotionEvent.ACTION_OUTSIDE:
             case MotionEvent.ACTION_SCROLL:
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_MOVE:
-            case MotionEvent.ACTION_UP: {
-                upAnim.setDuration(300);
-                upAnim.addUpdateListener(value -> {
-                    shape.setColor((int) value.getAnimatedValue());
-                    view.setForeground(shape);
-                });
+            case MotionEvent.ACTION_UP:
                 upAnim.start();
                 break;
-            }
         }
     }
 

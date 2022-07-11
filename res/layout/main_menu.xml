@@ -9,6 +9,7 @@
     android:translationZ="@dimen/topLayer">
 
     <RelativeLayout
+        android:id="@+id/mainM_body"
         android:layout_width="match_parent"
         android:layout_height="@dimen/mainMenuMainLayoutHeight"
         android:layout_centerVertical="true"
@@ -36,11 +37,21 @@
             android:orientation="vertical"
             android:translationZ="@dimen/mainMenuButtonZ">
 
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/M"
+                android:scaleX="0.72"
+                android:scaleY="0.72"
+                android:src="@drawable/v_exit_xl" />
+
             <TextView
                 style="@style/text"
+                android:layout_marginTop="@dimen/XXS"
                 android:ellipsize="none"
                 android:singleLine="true"
-                android:text="Exit" />
+                android:text="@string/main_menu_exit"
+                android:textColor="@color/textSecondary" />
 
         </LinearLayout>
 
@@ -66,11 +77,21 @@
             android:orientation="vertical"
             android:translationZ="@dimen/mainMenuButtonZ">
 
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/M"
+                android:scaleX="0.72"
+                android:scaleY="0.72"
+                android:src="@drawable/v_settings_xl" />
+
             <TextView
                 style="@style/text"
+                android:layout_marginTop="@dimen/XXS"
                 android:ellipsize="none"
                 android:singleLine="true"
-                android:text="Settings" />
+                android:text="@string/main_menu_settings"
+                android:textColor="@color/textSecondary" />
 
         </LinearLayout>
 
@@ -96,11 +117,19 @@
             android:orientation="vertical"
             android:translationZ="@dimen/mainMenuButtonZ">
 
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="@dimen/M"
+                android:src="@drawable/v_play_xl" />
+
             <TextView
                 style="@style/text"
+                android:layout_marginTop="@dimen/XXS"
                 android:ellipsize="none"
                 android:singleLine="true"
-                android:text="Play" />
+                android:text="@string/main_menu_play"
+                android:textColor="@color/textSecondary" />
 
         </LinearLayout>
 
@@ -122,7 +151,7 @@
                 android:id="@+id/mainM_logoTriangles"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:alpha="0.4"/>
+                android:alpha="0.4" />
 
             <ImageView
                 android:layout_width="wrap_content"

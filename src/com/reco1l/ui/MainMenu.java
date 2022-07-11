@@ -35,6 +35,7 @@ public class MainMenu extends BaseLayout {
             menuAnimInProgress = false,
             isExitAnimInProgress = false;
 
+    private View body;
     private CardView logo;
     private MenuButton play, settings, exit;
     private TriangleEffectView logoTriangles;
@@ -42,7 +43,6 @@ public class MainMenu extends BaseLayout {
     private final ValueAnimator
             bounceUp,
             bounceDown,
-            logoFadeOut,
             triangleSpeedUp,
             triangleSpeedDown;
 
@@ -58,7 +58,6 @@ public class MainMenu extends BaseLayout {
         bounceDown = ValueAnimator.ofFloat(0.9f, 1f);
         triangleSpeedUp = ValueAnimator.ofFloat(1f, 8f);
         triangleSpeedDown = ValueAnimator.ofFloat(8f, 1f);
-        logoFadeOut = ValueAnimator.ofFloat(1f, 0f);
     }
 
     @Override
@@ -118,12 +117,6 @@ public class MainMenu extends BaseLayout {
         logoHide.setInterpolator(easeInOutQuad);
         logoHide.removeAllUpdateListeners();
         logoHide.addUpdateListener(logoResize);
-
-        // Logo transition effect
-        logoFadeOut.removeAllUpdateListeners();
-        logoFadeOut.addUpdateListener(val -> logo.setAlpha((float) val.getAnimatedValue()));
-        logoFadeOut.setInterpolator(easeInOutQuad);
-        logoFadeOut.setDuration(200);
     }
 
     @Override
@@ -134,6 +127,7 @@ public class MainMenu extends BaseLayout {
         smallLogoSize = (int) Res.dimen(R.dimen.mainMenuSmallLogoSize);
 
         logo = find("logo");
+        body = find("body");
         logoTriangles = find("logoTriangles");
 
         play = new MenuButton(
@@ -157,7 +151,6 @@ public class MainMenu extends BaseLayout {
         play.setWidth(0);
         exit.setWidth(0);
         settings.setWidth(0);
-        isMenuShowing = false;
 
         new ClickListener(logo)
                 .soundEffect(resources.loadSound("menuhit", "sfx/menuhit.ogg", false))
@@ -166,28 +159,25 @@ public class MainMenu extends BaseLayout {
                     if (!isMenuShowing) {
                         showMenu();
                     } else {
-                        hideMenu(false);
+                        hideMenu();
                     }
                 });
 
-        new ClickListener(play.button)
+        new ClickListener(play.view)
                 .onlyOnce(true)
-                .touchEffect(false)
                 .simple(() -> {
                     Utils.setAccelerometerSign(global.getCamera().getRotation() == 0 ? 1 : -1);
                     global.getSongService().setGaming(true);
                     playTransitionAnim();
                 });
 
-        new ClickListener(exit.button)
-                .touchEffect(false)
+        new ClickListener(exit.view)
                 .simple(() -> {
                     Utils.setAccelerometerSign(global.getCamera().getRotation() == 0 ? 1 : -1);
                     global.getMainScene().showExitDialog();
                 });
 
-        new ClickListener(settings.button)
-                .touchEffect(false)
+        new ClickListener(settings.view)
                 .simple(() -> {
                     global.getSongService().setGaming(true);
                     mActivity.runOnUiThread(() -> new SettingsMenu().show());
@@ -198,38 +188,40 @@ public class MainMenu extends BaseLayout {
 
     private void playTransitionAnim() {
 
-        logoFadeOut.removeAllListeners();
-        logoFadeOut.addListener(new BaseAnimationListener() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-                    public void run() {
-                        UI.loadingScene.show();
-                        mActivity.checkNewSkins();
-                        mActivity.checkNewBeatmaps();
-                        if (!library.loadLibraryCache(mActivity, true)) {
-                            library.scanLibrary(mActivity);
-                            System.gc();
-                        }
-                        global.getSongMenu().reload();
-                    }
-
-                    public void onComplete() {
-                        global.getMainScene().musicControl(MainScene.MusicOption.PLAY);
-                        UI.loadingScene.close();
-                        global.getEngine().setScene(global.getSongMenu().getScene());
-                        global.getSongMenu().select();
-                    }
-                });
+        OsuAsyncCallback asyncCallback = new OsuAsyncCallback() {
+            public void run() {
+                UI.loadingScene.show();
+                mActivity.checkNewSkins();
+                mActivity.checkNewBeatmaps();
+                if (!library.loadLibraryCache(mActivity, true)) {
+                    library.scanLibrary(mActivity);
+                    System.gc();
+                }
+                global.getSongMenu().reload();
             }
-        });
 
-        hideMenu(true);
+            public void onComplete() {
+                global.getMainScene().musicControl(MainScene.MusicOption.PLAY);
+                UI.loadingScene.close();
+                global.getEngine().setScene(global.getSongMenu().getScene());
+                global.getSongMenu().select();
+            }
+        };
+
+        new com.reco1l.utils.Animator(body)
+                .runOnStart(() -> global.getMainScene().background.zoomOut(true))
+                .runOnEnd(() -> {
+                    new AsyncTaskLoader().execute(asyncCallback);
+                    isMenuShowing = false;
+                })
+                .moveY(0, Res.dimen(R.dimen._80sdp))
+                .fade(1, 0)
+                .play(400);
     }
 
     public void playExitAnim() {
         mActivity.runOnUiThread(() -> {
-            hideMenu(false);
+            hideMenu();
             isExitAnimInProgress = true;
             logo.setOnTouchListener(null);
             logo.animate().rotation(-15).setDuration(3000).alpha(0).setStartDelay(160).start();
@@ -258,23 +250,17 @@ public class MainMenu extends BaseLayout {
         exit.show(120);
     }
 
-    private void hideMenu(boolean isTransition) {
+    private void hideMenu() {
         if (menuAnimInProgress || !isMenuShowing)
             return;
 
-        global.getMainScene().background.zoomOut(isTransition);
+        global.getMainScene().background.zoomOut(false);
 
         logoHide.removeAllListeners();
         logoHide.addListener(new BaseAnimationListener() {
             @Override
             public void onAnimationStart(Animator animation) {
                 menuAnimInProgress = true;
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (isTransition)
-                    logoFadeOut.start();
             }
         });
         logoHide.start();
@@ -294,7 +280,7 @@ public class MainMenu extends BaseLayout {
 
         if (isMenuShowing) {
             if (showPassTime > 10000f) {
-                mActivity.runOnUiThread(() -> hideMenu(false));
+                mActivity.runOnUiThread(this::hideMenu);
             } else {
                 showPassTime += secondsElapsed * 1000f;
             }
@@ -322,6 +308,14 @@ public class MainMenu extends BaseLayout {
             triangleSpeedDown.start();
         });
     }
+
+    @Override
+    public void close() {
+        super.close();
+        if (isShowing)
+            isMenuShowing = false;
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     private static class MenuButton {
@@ -368,6 +362,7 @@ public class MainMenu extends BaseLayout {
         }
 
         public void show(long delay) {
+            view.setAlpha(1);
 
             if (delay == 120) {
                 showAnim.removeAllListeners();
@@ -380,8 +375,11 @@ public class MainMenu extends BaseLayout {
                 });
             }
 
-            new com.reco1l.utils.Animator(view).fade(0, 1).delay(delay).play(100);
-            new com.reco1l.utils.Animator(button).fade(0, 1).delay(delay + 100).play(100);
+            button.animate()
+                    .setStartDelay(delay + 100)
+                    .setDuration(100)
+                    .alpha(1)
+                    .start();
 
             showAnim.setStartDelay(delay);
             showAnim.start();
@@ -389,20 +387,23 @@ public class MainMenu extends BaseLayout {
 
         public void hide(long delay) {
 
-            if (delay == 120) {
-                hideAnim.removeAllListeners();
-                hideAnim.addListener(new BaseAnimationListener() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
+            hideAnim.removeAllListeners();
+            hideAnim.addListener(new BaseAnimationListener() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    view.setAlpha(0);
+                    if (delay == 120) {
                         mainMenu.menuAnimInProgress = false;
                         mainMenu.isMenuShowing = false;
                     }
-                });
-            }
+                }
+            });
 
-            new com.reco1l.utils.Animator(view).fade(1, 0).delay(delay).play(100);
-            new com.reco1l.utils.Animator(button).fade(1, 0)
-                    .delay(delay - 100 <= 0 ? 0 : delay - 100).play(100);
+            button.animate()
+                    .setStartDelay(delay - 100 <= 0 ? 0 : delay - 100)
+                    .setDuration(80)
+                    .alpha(0)
+                    .start();
 
             hideAnim.setStartDelay(delay);
             hideAnim.start();

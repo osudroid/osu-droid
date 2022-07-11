@@ -65,12 +65,15 @@ public class ClickListener {
         if(this.view == null)
             return;
 
+        ClickEffect clickEffect = touchEffect ? new ClickEffect(view) : null;
+
         BassSoundProvider sound = customSound != null ?
                 customSound : ResourceManager.getInstance().getSound("menuclick");
 
         this.view.setOnTouchListener((view, event) -> {
-            if(touchEffect)
-               new ClickEffect(view, event);
+
+            if(touchEffect && clickEffect != null)
+                clickEffect.play(event);
 
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 if (onDownAction != null)

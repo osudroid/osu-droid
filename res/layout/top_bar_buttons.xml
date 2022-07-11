@@ -45,7 +45,7 @@
                 style="@style/text"
                 android:layout_marginLeft="@dimen/S"
                 android:maxLength="32"
-                android:maxLines="1"
+                android:singleLine="true"
                 android:text="[Song title]" />
 
         </LinearLayout>
