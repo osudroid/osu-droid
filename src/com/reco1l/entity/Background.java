@@ -2,6 +2,7 @@ package com.reco1l.entity;
 
 // Created by Reco1l on 26/6/22 18:22
 
+import com.reco1l.utils.ModifierListener;
 import com.reco1l.utils.interfaces.IMainClasses;
 import com.reco1l.utils.interfaces.UI;
 
@@ -56,30 +57,29 @@ public class Background implements IMainClasses {
         parent.attachChild(dim, 1);
     }
 
-    public void redraw(TrackInfo track) {
-        if (track == null)
-            return;
+    public void redraw(String path) {
+        TextureRegion texture;
 
-        if (dim.getAlpha() == 0.3f && !UI.mainMenu.isMenuShowing)
-            dim.setAlpha(0);
+        if (!Config.isSafeBeatmapBg() && path != null) {
+            texture = resources.loadBackground(path);
+        } else {
+            texture = defaultTexture;
+        }
 
-        final boolean allow = track.getBackground() != null && !Config.isSafeBeatmapBg();
-
-        final TextureRegion texture = allow ?
-                resources.loadBackground(track.getBackground()) : defaultTexture;
+        dim.setAlpha(UI.mainMenu.isMenuShowing ? 0.3f : 0);
 
         background = new Sprite(0, (resH - height(texture)) / 2f, resW, height(texture), texture);
         background.setScale(UI.mainMenu.isMenuShowing ? 1.2f : 1f);
 
-        IEntityModifierListener listener = new IEntityModifierListener() {
+        ModifierListener listener = new ModifierListener() {
             @Override
             public void onModifierStarted(IModifier<IEntity> modifier, IEntity item) {
                 parent.attachChild(background, 0);
-                global.getMainScene().spectrum.updateColor(track);
             }
 
             @Override
             public void onModifierFinished(IModifier<IEntity> modifier, IEntity item) {
+                global.getMainScene().spectrum.updateColor(path);
                 mActivity.runOnUpdateThread(item::detachSelf);
             }
         };

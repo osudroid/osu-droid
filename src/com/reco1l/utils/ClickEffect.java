@@ -51,7 +51,7 @@ public class ClickEffect implements IMainClasses {
                 GradientDrawable background = (GradientDrawable) view.getBackground().mutate();
 
                 float r = background.getCornerRadius();
-                // Setting 'android:radius' property will override any corner radius set in XML.
+                // Setting 'android:radius' property will override any corner radius set in the XML.
                 if (r > 0) {
                     float[] radii = {r, r, r, r, r, r, r, r};
                     background.setCornerRadii(radii);

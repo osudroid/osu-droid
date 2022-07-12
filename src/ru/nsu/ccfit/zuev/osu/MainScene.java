@@ -355,7 +355,7 @@ public class MainScene implements IUpdateHandler, UI {
             int trackIndex = random.nextInt(trackInfos.size());
             selectedTrack = trackInfos.get(trackIndex);
 
-            background.redraw(selectedTrack);
+            background.redraw(selectedTrack.getBackground());
 
             if (reloadMusic) {
                 if (GlobalManager.getInstance().getSongService() != null) {

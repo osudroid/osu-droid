@@ -1,6 +1,5 @@
 package com.reco1l.entity;
 
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -108,41 +107,53 @@ public class Spectrum {
         }
     }
 
+    private final Runnable resetColor = () -> {
+        for (int i = 0; i < lines; i++) {
+            spectrum[i].setColor(1, 1, 1);
+        }
+    };
+
     //This method change the spectrum color according to the background luminance, using androidx.palette library.
-    public void updateColor(TrackInfo currentTrack) {
-        if (Build.VERSION.SDK_INT < 24)
+    public void updateColor(String background) {
+
+        if (background == null || Build.VERSION.SDK_INT < 24) {
+            resetColor.run();
             return;
-
-        Drawable drawable = Drawable.createFromPath(currentTrack.getBackground());
-        if (drawable == null)
-            return;
-
-        int color = 1;
-
-        Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
-        if (bitmap != null) {
-            Palette palette = Palette.from(bitmap).generate();
-            color = palette.getDominantColor(0x000000);
         }
 
-        //Color.luminance is not compatible with API < 24.
-        //This can be replaced with some algorithm to get color luminance.
-        boolean isDarker = Color.luminance(color) < 0.5f;
+        BitmapDrawable drw = (BitmapDrawable) Drawable.createFromPath(background);
+        if (drw == null) {
+            resetColor.run();
+            return;
+        }
+
+        boolean isDarker = false;
+
+        if (drw.getBitmap() != null) {
+            Palette palette = Palette.from(drw.getBitmap()).generate();
+            isDarker = Color.luminance(palette.getDominantColor(0xFFFFFFFF)) < 0.5f;
+        }
 
         for (int i = 0; i < lines; i++) {
 
             spectrum[i].unregisterEntityModifier(colorModifiers[i]);
             final float[] cRGB = {spectrum[i].getRed(), spectrum[i].getGreen(), spectrum[i].getBlue()};
 
-            if (isDarker) {
-                colorModifiers[i] = new ColorModifier(0.2f, cRGB[0], 1, cRGB[1], 1, cRGB[2], 1);
-            } else {
-                colorModifiers[i] = new ColorModifier(0.2f, cRGB[0], 0, cRGB[1], 0, cRGB[2], 0);
+            colorModifiers[i] = isDarker ?
+                    new ColorModifier(0.2f, cRGB[0], 1, cRGB[1], 1, cRGB[2], 1)
+                    :
+                    new ColorModifier(0.2f, cRGB[0], 0, cRGB[1], 0, cRGB[2], 0);
+
+            if (i == lines - 1 && drw.getBitmap() != null) {
+                colorModifiers[i].addModifierListener(new ModifierListener() {
+                    @Override
+                    public void onModifierFinished(IModifier<IEntity> m, IEntity i) {
+                        drw.getBitmap().recycle();
+                    }
+                });
             }
+
             spectrum[i].registerEntityModifier(colorModifiers[i]);
         }
-
-        if (bitmap != null)
-            bitmap.recycle(); // Recycling the bitmap to avoid memory leaks.
     }
 }
