@@ -407,7 +407,8 @@ public class ResourceManager {
                     textures.get("::background").getTexture());
         }
         if (file == null) {
-            return null;
+            textures.put("::background", textures.get("menu-background"));
+            return textures.get("::background");
         }
         int tw = 16, th = 16;
         TextureRegion region;
@@ -421,7 +422,7 @@ public class ResourceManager {
         while (th < source.getHeight()) {
             th *= 2;
         }
-        if (source.preload() == false) {
+        if (!source.preload()) {
             textures.put("::background", textures.get("menu-background"));
             return textures.get("::background");
         }
