@@ -24,7 +24,6 @@ public class Animation implements IMainClasses {
 
     private long delay = 0;
 
-    private float pivotX, pivotY;
     private float fromX, toX;
     private float fromY, toY;
     private float fromScaleX, toScaleX;
@@ -46,8 +45,6 @@ public class Animation implements IMainClasses {
             return;
 
         // Initial values
-        pivotX = view.getPivotX();
-        pivotY = view.getPivotY();
 
         fromX = view.getTranslationX();
         toX = fromX;
@@ -74,8 +71,10 @@ public class Animation implements IMainClasses {
     }
 
     public Animation pivot(Float X, Float Y) {
-        pivotX = X;
-        pivotY = Y;
+        if (view == null)
+            return this;
+        view.setPivotX(X);
+        view.setPivotY(Y);
         return this;
     }
 
@@ -159,10 +158,6 @@ public class Animation implements IMainClasses {
             // Translation Y
             view.setTranslationY(fromY);
             anim.translationY(toY);
-
-            // Pivot
-            view.setPivotX(pivotX);
-            view.setPivotY(pivotY);
 
             // Scale X
             view.setScaleX(fromScaleX);

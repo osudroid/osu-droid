@@ -1,5 +1,6 @@
 package com.reco1l.ui;
 
+import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -60,6 +61,7 @@ public class LoadingScene extends BaseLayout implements IUpdateHandler {
     protected void onLoad() {
         setDismissMode(false, false);
 
+        View body = find("loadingBody");
         progress = find("progress");
         text = find("text");
 
@@ -69,26 +71,29 @@ public class LoadingScene extends BaseLayout implements IUpdateHandler {
         ToastLogger.setPercentage(-1);
         percentage = -1;
 
-        new Animation(progress).fade(0, 1)
-                .play(200);
-        new Animation(text).moveY(-40, 0).fade(0, 1)
-                .delay(200)
-                .play(150);
+        new Animation(body).fade(0, 1).scale(0.8f, 1).play(200);
     }
 
     @Override
     public void onUpdate(float pSecondsElapsed) {
-        if (ToastLogger.getPercentage() == percentage || isNull(progress, text))
+        if (ToastLogger.getPercentage() == percentage || !isShowing || isNull(progress, text))
             return;
 
-        if (progress.isIndeterminate())
-            progress.setIndeterminate(false);
-
-        progress.setMax(100);
-        progress.setProgress((int) percentage);
-
         percentage = ToastLogger.getPercentage();
-        text.setText("Importing beatmaps... (" + (int) percentage + "%)"); //TODO add translation here
+
+        mActivity.runOnUiThread(() -> {
+
+            progress.setMax(100);
+            progress.setIndeterminate(false);
+            progress.setProgress((int) percentage);
+
+            text.setText("Importing beatmaps... (" + (int) percentage + "%)"); //TODO add translation here
+
+            if (text.getVisibility() == View.GONE) {
+                setVisible(text);
+                new Animation(text).moveY(50, 0).fade(0, 1).play(200);
+            }
+        });
     }
 
     @Override

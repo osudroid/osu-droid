@@ -18,7 +18,6 @@ import org.anddev.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class Spectrum {
@@ -63,7 +62,7 @@ public class Spectrum {
 
         for (int i = 0; i < lines; i++) {
             spectrum[i].clearEntityModifiers();
-            alphaModifiers[i] = new AlphaModifier(force ? 0.3f : 0.5f, spectrum[i].getAlpha(), 0);
+            alphaModifiers[i] = new AlphaModifier(force ? 0.4f : 0.5f, spectrum[i].getAlpha(), 0);
 
             if (force && i == 0) {
                 alphaModifiers[i].addModifierListener(new ModifierListener() {

@@ -179,7 +179,7 @@ public abstract class BaseLayout extends Fragment implements IMainClasses, UI {
     protected void setVisible(boolean bool, View... views) {
         for (View view: views) {
             if (view == null)
-                return;
+                continue;
             if (bool) view.setVisibility(View.VISIBLE);
             else view.setVisibility(View.GONE);
         }

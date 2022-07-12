@@ -210,7 +210,10 @@ public class MainMenu extends BaseLayout {
         };
 
         new Animation(body)
-                .runOnStart(() -> global.getMainScene().background.zoomOut(true))
+                .runOnStart(() -> {
+                    global.getMainScene().background.zoomOut(true);
+                    global.getMainScene().spectrum.clear(true);
+                })
                 .runOnEnd(() -> {
                     new AsyncTaskLoader().execute(asyncCallback);
                     isMenuShowing = false;

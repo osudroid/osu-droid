@@ -111,7 +111,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/XS"
         android:background="@drawable/round_shape"
-        android:backgroundTint="@color/authorTextBackground"
+        android:backgroundTint="@color/badgeTextBackground"
         android:paddingHorizontal="@dimen/S"
         android:paddingVertical="@dimen/XXS"
         android:text="[Author information]"

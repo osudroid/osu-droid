@@ -8,21 +8,35 @@
     android:layout_height="match_parent"
     android:translationZ="@dimen/middleLayer">
 
-    <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/ls_progress"
+    <LinearLayout
+        android:id="@+id/ls_loadingBody"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        app:indicatorColor="@color/progressBarIndicatorColor"
-        app:trackCornerRadius="@dimen/progressBarTrackCornerRadius"
-        android:indeterminate="true"
-        android:layout_width="@dimen/loadingScreenProgressBarSize"
-        android:layout_height="@dimen/loadingScreenProgressBarSize"/>
+        android:background="@drawable/round_shape"
+        android:backgroundTint="@color/loadingSceneViewsBackground">
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/ls_progress"
+            android:layout_width="@dimen/loadingScreenProgressBarSize"
+            android:layout_height="@dimen/loadingScreenProgressBarSize"
+            android:layout_margin="@dimen/XS"
+            android:indeterminate="true"
+            app:indicatorColor="@color/progressBarIndicatorColor"
+            app:trackCornerRadius="@dimen/progressBarTrackCornerRadius" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/ls_text"
         style="@style/text"
-        android:text="Loading beatmaps..."
-        android:textColor="@color/textSecondary"
-        android:layout_below="@id/ls_progress"
+        android:visibility="gone"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/M"/>
+        android:layout_marginTop="@dimen/XS"
+        android:background="@drawable/round_shape"
+        android:backgroundTint="@color/loadingSceneViewsBackground"
+        android:paddingHorizontal="@dimen/S"
+        android:paddingVertical="@dimen/XXS"
+        android:text="Importing beatmaps... (100%)" />
+
 </RelativeLayout>
