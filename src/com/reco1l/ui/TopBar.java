@@ -10,7 +10,7 @@ import com.edlplan.framework.easing.Easing;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.reco1l.EngineMirror;
 import com.reco1l.ui.platform.BaseLayout;
-import com.reco1l.utils.Animator;
+import com.reco1l.utils.Animation;
 import com.reco1l.utils.ClickListener;
 import com.reco1l.utils.Res;
 import com.reco1l.utils.interfaces.UI;
@@ -59,8 +59,8 @@ public class TopBar extends BaseLayout {
 
             Runnable onBack = null;
 
-            Animator inAnim = new Animator(container).moveX(-60, 0).fade(0, 1);
-            Animator outAnim = new Animator(container).moveX(0, -60).fade(1, 0);
+            Animation inAnim = new Animation(container).moveX(-60, 0).fade(0, 1);
+            Animation outAnim = new Animation(container).moveX(0, -60).fade(1, 0);
 
             outAnim.onEnd = () -> setVisible(false, music, back);
 
@@ -105,7 +105,7 @@ public class TopBar extends BaseLayout {
         body = find("body");
         bar = find("bar");
 
-        new Animator(body).moveY(-barHeight, 0).play(300);
+        new Animation(body).moveY(-barHeight, 0).play(300);
 
         ImageView settings = find("settings");
         ImageView inbox = find("inbox");
@@ -137,7 +137,7 @@ public class TopBar extends BaseLayout {
             return;
         lastScene = null;
         showAuthorText(false);
-        new Animator(body).moveY(0, -barHeight).runOnEnd(super::close).play(300);
+        new Animation(body).moveY(0, -barHeight).runOnEnd(super::close).play(300);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -147,12 +147,12 @@ public class TopBar extends BaseLayout {
             return;
 
         if (bool) {
-            new Animator(author).fade(0, 1).moveY(50, 0)
+            new Animation(author).fade(0, 1).moveY(50, 0)
                     .runOnEnd(() -> isAuthorShown = bool)
                     .play(200);
             return;
         }
-        new Animator(author).fade(1, 0).moveY(0, 50)
+        new Animation(author).fade(1, 0).moveY(0, 50)
                 .runOnEnd(() -> isAuthorShown = bool)
                 .play(200);
     }

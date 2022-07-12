@@ -5,7 +5,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.reco1l.ui.platform.BaseLayout;
-import com.reco1l.utils.Animator;
+import com.reco1l.utils.Animation;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.scene.Scene;
@@ -86,12 +86,12 @@ public class SplashScene extends BaseLayout implements IUpdateHandler {
         bottomLayout.setAlpha(0f);
         setVisible(showBuildText, buildInfo);
 
-        new Animator(icon).moveY(-50, 0).fade(0, 1).play(300);
+        new Animation(icon).moveY(-50, 0).fade(0, 1).play(300);
 
         if (showBuildText)
-            new Animator(buildInfo).moveY(20, 0).fade(0, 1).delay(1400).play(300);
+            new Animation(buildInfo).moveY(20, 0).fade(0, 1).delay(1400).play(300);
 
-        new Animator(bottomLayout).moveX(-50, 0).fade(0, 1).delay(1000)
+        new Animation(bottomLayout).moveX(-50, 0).fade(0, 1).delay(1000)
                 .play(300);
 
         progressBar.setMax(100);
@@ -109,12 +109,12 @@ public class SplashScene extends BaseLayout implements IUpdateHandler {
         }
 
         mActivity.runOnUiThread(() -> {
-            new Animator(bottomLayout).moveX(0, -50).fade(1, 0)
+            new Animation(bottomLayout).moveX(0, -50).fade(1, 0)
                     .play(300);
 
-            new Animator(icon).fade(1, 0).delay(300)
+            new Animation(icon).fade(1, 0).delay(300)
                     .play(400);
-            new Animator(background).fade(1, 0).delay(300).runOnEnd(super::close)
+            new Animation(background).fade(1, 0).delay(300).runOnEnd(super::close)
                     .play(400);
         });
     }
@@ -137,7 +137,7 @@ public class SplashScene extends BaseLayout implements IUpdateHandler {
 
             if (buildInfo != null && showBuildText)
                 if (global.getLoadingProgress() > 80) {
-                    new Animator(buildInfo).moveY(0, -20).fade(1, 0).play(300);
+                    new Animation(buildInfo).moveY(0, -20).fade(1, 0).play(300);
                 }
 
             if (global.getLoadingProgress() == 100) {

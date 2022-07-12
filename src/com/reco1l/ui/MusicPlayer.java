@@ -13,7 +13,7 @@ import androidx.cardview.widget.CardView;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.EasingHelper;
 import com.reco1l.ui.platform.BaseLayout;
-import com.reco1l.utils.Animator;
+import com.reco1l.utils.Animation;
 import com.reco1l.utils.ClickListener;
 import com.reco1l.utils.interfaces.IMainClasses;
 import com.reco1l.utils.Res;
@@ -87,7 +87,7 @@ public class MusicPlayer extends BaseLayout implements IMainClasses {
             body.setLayoutParams(params);
         });
 
-        new Animator(body).moveY(-30, 0).fade(0, 1).runOnStart(anim::start).play(240);
+        new Animation(body).moveY(-30, 0).fade(0, 1).runOnStart(anim::start).play(240);
 
         seekBar = find("seekBar");
         songIv = find("songImage");
@@ -197,9 +197,9 @@ public class MusicPlayer extends BaseLayout implements IMainClasses {
 
         String title = !Config.isForceRomanized() ? beatmap.getTitleUnicode() : beatmap.getTitle();
         if (topBar.isShowing) {
-            new Animator(topBar.musicText).fade(1, 0)
+            new Animation(topBar.musicText).fade(1, 0)
                     .play(150);
-            new Animator(topBar.musicText).fade(0, 1)
+            new Animation(topBar.musicText).fade(0, 1)
                     .runOnStart(() -> topBar.musicText.setText(title))
                     .delay(150)
                     .play(150);
@@ -212,18 +212,18 @@ public class MusicPlayer extends BaseLayout implements IMainClasses {
             return;
 
         if (currentOption == MainScene.MusicOption.NEXT) {
-            new Animator(innerBody).moveX(0, -10).fade(1, 0)
+            new Animation(innerBody).moveX(0, -10).fade(1, 0)
                     .play(200);
 
-            new Animator(innerBody).moveX(10, 0).fade(0, 1)
+            new Animation(innerBody).moveX(10, 0).fade(0, 1)
                     .runOnStart(() -> loadSongData(beatmap))
                     .delay(200)
                     .play(200);
         }
         if (currentOption == MainScene.MusicOption.PREV) {
-            new Animator(innerBody).moveX(0, 10).fade(1, 0)
+            new Animation(innerBody).moveX(0, 10).fade(1, 0)
                     .play(200);
-            new Animator(innerBody).moveX(-10, 0).fade(0, 1)
+            new Animation(innerBody).moveX(-10, 0).fade(0, 1)
                     .runOnStart(() -> loadSongData(beatmap))
                     .delay(200)
                     .play(200);
@@ -254,8 +254,8 @@ public class MusicPlayer extends BaseLayout implements IMainClasses {
         if (isShowing)
             return;
 
-        new Animator(topBar.musicBody).moveY(0, -10).fade(1, 0).play(120);
-        new Animator(topBar.musicArrow).moveY(10, 0).fade(0, 1).delay(120).play(120);
+        new Animation(topBar.musicBody).moveY(0, -10).fade(1, 0).play(120);
+        new Animation(topBar.musicArrow).moveY(10, 0).fade(0, 1).delay(120).play(120);
         super.show();
     }
 
@@ -265,8 +265,8 @@ public class MusicPlayer extends BaseLayout implements IMainClasses {
             return;
 
         body.removeCallbacks(closeTask);
-        new Animator(topBar.musicArrow).moveY(0, -10).fade(1, 0).play(120);
-        new Animator(topBar.musicBody).moveY(10, 0).fade(0, 1).delay(120).play(120);
+        new Animation(topBar.musicArrow).moveY(0, -10).fade(1, 0).play(120);
+        new Animation(topBar.musicBody).moveY(10, 0).fade(0, 1).delay(120).play(120);
 
         ValueAnimator anim = ValueAnimator.ofInt((int) Res.dimen(R.dimen.musicPlayerHeight),
                 (int) Res.dimen(R.dimen._30sdp));
@@ -279,7 +279,7 @@ public class MusicPlayer extends BaseLayout implements IMainClasses {
             body.setLayoutParams(params);
         });
 
-        new Animator(body).moveY(0, -30).fade(1, 0).runOnStart(anim::start).runOnEnd(super::close)
+        new Animation(body).moveY(0, -30).fade(1, 0).runOnStart(anim::start).runOnEnd(super::close)
                 .play(240);
     }
 }

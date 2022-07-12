@@ -2,10 +2,9 @@ package com.reco1l.ui;
 
 import android.widget.TextView;
 
-import com.edlplan.framework.easing.Easing;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.ui.platform.BaseLayout;
-import com.reco1l.utils.Animator;
+import com.reco1l.utils.Animation;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.primitive.Rectangle;
@@ -70,9 +69,9 @@ public class LoadingScene extends BaseLayout implements IUpdateHandler {
         ToastLogger.setPercentage(-1);
         percentage = -1;
 
-        new Animator(progress).fade(0, 1)
+        new Animation(progress).fade(0, 1)
                 .play(200);
-        new Animator(text).moveY(-40, 0).fade(0, 1)
+        new Animation(text).moveY(-40, 0).fade(0, 1)
                 .delay(200)
                 .play(150);
     }

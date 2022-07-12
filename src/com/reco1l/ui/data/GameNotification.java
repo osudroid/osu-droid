@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
-import com.reco1l.utils.Animator;
+import com.reco1l.utils.Animation;
 import com.reco1l.utils.ClickListener;
 import com.reco1l.utils.interfaces.IMainClasses;
 import com.reco1l.utils.interfaces.UI;
@@ -122,10 +122,10 @@ public class GameNotification implements IMainClasses, UI {
                 inbox.createBadgeNotification(this);
                 return;
             }
-            new Animator(innerBody).moveX(0, -50).fade(1, 0)
+            new Animation(innerBody).moveX(0, -50).fade(1, 0)
                     .runOnEnd(() -> {
                         load();
-                        new Animator(innerBody).moveX(50, 0).fade(0, 1).play(120);
+                        new Animation(innerBody).moveX(50, 0).fade(0, 1).play(120);
                     })
                     .play(120);
         });

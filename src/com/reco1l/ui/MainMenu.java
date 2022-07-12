@@ -15,6 +15,7 @@ import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 import com.edlplan.ui.TriangleEffectView;
 import com.reco1l.ui.platform.BaseLayout;
+import com.reco1l.utils.Animation;
 import com.reco1l.utils.ClickListener;
 import com.reco1l.utils.Res;
 import com.reco1l.utils.interfaces.UI;
@@ -208,7 +209,7 @@ public class MainMenu extends BaseLayout {
             }
         };
 
-        new com.reco1l.utils.Animator(body)
+        new Animation(body)
                 .runOnStart(() -> global.getMainScene().background.zoomOut(true))
                 .runOnEnd(() -> {
                     new AsyncTaskLoader().execute(asyncCallback);

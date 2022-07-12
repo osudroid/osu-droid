@@ -13,7 +13,7 @@ import com.reco1l.utils.interfaces.IMainClasses;
 /**
  * Simplifies the usage of ViewPropertyAnimator class.
  */
-public class Animator implements IMainClasses {
+public class Animation implements IMainClasses {
 
     private static ViewPropertyAnimator anim;
 
@@ -40,7 +40,7 @@ public class Animator implements IMainClasses {
      *
      * @param view View to animate.
      */
-    public Animator(View view) {
+    public Animation(View view) {
         this.view = view;
         if (view == null)
             return;
@@ -63,29 +63,29 @@ public class Animator implements IMainClasses {
         toAlpha = fromAlpha;
     }
 
-    public Animator cancelPending(boolean bool) {
+    public Animation cancelPending(boolean bool) {
         cancelPendingAnimations = bool;
         return this;
     }
 
-    public Animator delay(long ms){
+    public Animation delay(long ms){
         delay = ms;
         return this;
     }
 
-    public Animator pivot(Float X, Float Y) {
+    public Animation pivot(Float X, Float Y) {
         pivotX = X;
         pivotY = Y;
         return this;
     }
 
-    public Animator scaleY(float from, float to) {
+    public Animation scaleY(float from, float to) {
         fromScaleY = from;
         toScaleY = to;
         return this;
     }
 
-    public Animator scaleX(float from, float to) {
+    public Animation scaleX(float from, float to) {
         fromScaleX = from;
         toScaleX = to;
         return this;
@@ -94,7 +94,7 @@ public class Animator implements IMainClasses {
     /**
      * This method sets ScaleX and ScaleY at the same time.
      */
-    public Animator scale(float from, float to) {
+    public Animation scale(float from, float to) {
         fromScaleX = from;
         fromScaleY = from;
         toScaleX = to;
@@ -102,13 +102,13 @@ public class Animator implements IMainClasses {
         return this;
     }
 
-    public Animator moveX(float from, float to) {
+    public Animation moveX(float from, float to) {
         fromX = from;
         toX = to;
         return this;
     }
 
-    public Animator moveY(float from, float to) {
+    public Animation moveY(float from, float to) {
         fromY = from;
         toY = to;
         return this;
@@ -117,23 +117,23 @@ public class Animator implements IMainClasses {
     /**
      * @param interpolator The interpolator to use.
      */
-    public Animator interpolator(Easing interpolator) {
+    public Animation interpolator(Easing interpolator) {
         this.interpolator = interpolator;
         return this;
     }
 
-    public Animator fade(float from, float to){
+    public Animation fade(float from, float to){
         fromAlpha = from;
         toAlpha = to;
         return this;
     }
 
-    public Animator runOnStart(Runnable task) {
+    public Animation runOnStart(Runnable task) {
         this.onStart = task;
         return this;
     }
 
-    public Animator runOnEnd(Runnable task) {
+    public Animation runOnEnd(Runnable task) {
         onEnd = task;
         return this;
     }

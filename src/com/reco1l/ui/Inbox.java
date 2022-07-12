@@ -18,7 +18,7 @@ import com.edlplan.framework.easing.Easing;
 import com.reco1l.ui.data.GameNotification;
 import com.reco1l.ui.platform.BaseLayout;
 import com.reco1l.ui.platform.UIManager;
-import com.reco1l.utils.Animator;
+import com.reco1l.utils.Animation;
 import com.reco1l.utils.ClickListener;
 
 import java.util.ArrayList;
@@ -76,13 +76,13 @@ public class Inbox extends BaseLayout {
         new ClickListener(close).onlyOnce(true).simple(this::close);
         new ClickListener(clear).simple(() -> clear(false));
 
-        new Animator(rootBackground).fade(0, 1)
+        new Animation(rootBackground).fade(0, 1)
                 .play(300);
-        new Animator(platform.renderView).moveX(0, -60)
+        new Animation(platform.renderView).moveX(0, -60)
                 .play(300);
-        new Animator(layer).moveX(bodyWidth, 0).interpolator(Easing.OutExpo)
+        new Animation(layer).moveX(bodyWidth, 0).interpolator(Easing.OutExpo)
                 .play(350);
-        new Animator(body).moveX(bodyWidth, 0).interpolator(Easing.OutExpo)
+        new Animation(body).moveX(bodyWidth, 0).interpolator(Easing.OutExpo)
                 .delay(50)
                 .play(400);
 
@@ -136,7 +136,7 @@ public class Inbox extends BaseLayout {
     public void clear(boolean onlyVisually) {
 
         if (onlyVisually) {
-            new Animator(container).moveX(0, 80).fade(1, 0)
+            new Animation(container).moveX(0, 80).fade(1, 0)
                     .runOnEnd(container::removeAllViews)
                     .play(200);
             return;
@@ -199,13 +199,13 @@ public class Inbox extends BaseLayout {
         mActivity.runOnUiThread(() -> {
             clear(true);
 
-            new Animator(platform.renderView).moveX(-50, 0)
+            new Animation(platform.renderView).moveX(-50, 0)
                     .play(400);
-            new Animator(body).moveX(0, res().getDimension(R.dimen.notificationCenterWidth))
+            new Animation(body).moveX(0, res().getDimension(R.dimen.notificationCenterWidth))
                     .interpolator(Easing.InExpo)
-                    .runOnStart(() -> new Animator(rootBackground).fade(1, 0).play(300))
+                    .runOnStart(() -> new Animation(rootBackground).fade(1, 0).play(300))
                     .play(350);
-            new Animator(layer).moveX(0, bodyWidth).interpolator(Easing.InExpo)
+            new Animation(layer).moveX(0, bodyWidth).interpolator(Easing.InExpo)
                     .runOnEnd(super::close)
                     .delay(50)
                     .play(400);
@@ -217,7 +217,7 @@ public class Inbox extends BaseLayout {
     private void display(long delay, GameNotification notification) {
         container.postDelayed(() -> {
             container.addView(notification.build());
-            new Animator(notification.layout).fade(0, 1).moveX(80, 0)
+            new Animation(notification.layout).fade(0, 1).moveX(80, 0)
                     .runOnStart(notification::load)
                     .play(100);
         }, delay);
@@ -238,7 +238,7 @@ public class Inbox extends BaseLayout {
             notification.layout.setLayoutParams(params);
         });
 
-        new Animator(notification.layout).fade(1, 0).moveX(0, notification.layout.getWidth())
+        new Animation(notification.layout).fade(1, 0).moveX(0, notification.layout.getWidth())
                 .runOnStart(anim::start)
                 .runOnEnd(() -> {
                     container.removeView(notification.layout);
@@ -278,7 +278,7 @@ public class Inbox extends BaseLayout {
             text.setText(header + " - " + message.replace("\n", " "));
 
             body.postDelayed(() -> { dismiss(); inbox.currentPopup = null; }, 3000);
-            new Animator(body).moveY(-50, 0).fade(0, 1).play(150);
+            new Animation(body).moveY(-50, 0).fade(0, 1).play(150);
 
             return root;
         }
@@ -296,7 +296,7 @@ public class Inbox extends BaseLayout {
 
         public void dismiss() {
             inbox.currentPopup = null;
-            new Animator(body).moveY(0, -50).fade(1, 0)
+            new Animation(body).moveY(0, -50).fade(1, 0)
                     .runOnEnd(() -> platform.manager.beginTransaction().remove(this).commit())
                     .play(150);
         }
