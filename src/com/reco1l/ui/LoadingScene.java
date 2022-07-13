@@ -29,6 +29,7 @@ public class LoadingScene extends BaseLayout implements IUpdateHandler {
 
     private CircularProgressIndicator progress;
     private TextView text;
+    private View body;
 
     private float percentage;
 
@@ -61,7 +62,7 @@ public class LoadingScene extends BaseLayout implements IUpdateHandler {
     protected void onLoad() {
         setDismissMode(false, false);
 
-        View body = find("loadingBody");
+        body = find("loadingBody");
         progress = find("progress");
         text = find("text");
 
@@ -91,9 +92,26 @@ public class LoadingScene extends BaseLayout implements IUpdateHandler {
 
             if (text.getVisibility() == View.GONE) {
                 setVisible(text);
-                new Animation(text).moveY(50, 0).fade(0, 1).play(200);
+                new Animation(text).moveY(50, 0).fade(0, 1).play(180);
             }
         });
+    }
+
+    public void complete(Runnable runOnAnimationEnd) {
+        if (!isShowing) {
+            runOnAnimationEnd.run();
+            return;
+        }
+
+        if (text.getVisibility() == View.VISIBLE)
+            new Animation(text).moveY(0, -50).fade(1, 0).play(180);
+
+        new Animation(body).fade(1, 0).scale(1, 0.8f)
+                .runOnEnd(() -> {
+                    super.close();
+                    runOnAnimationEnd.run();
+                })
+                .play(200);
     }
 
     @Override

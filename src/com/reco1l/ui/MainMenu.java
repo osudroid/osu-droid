@@ -187,27 +187,28 @@ public class MainMenu extends BaseLayout {
 
     //--------------------------------------------------------------------------------------------//
 
-    private void playTransitionAnim() {
-
-        OsuAsyncCallback asyncCallback = new OsuAsyncCallback() {
-            public void run() {
-                UI.loadingScene.show();
-                mActivity.checkNewSkins();
-                mActivity.checkNewBeatmaps();
-                if (!library.loadLibraryCache(mActivity, true)) {
-                    library.scanLibrary(mActivity);
-                    System.gc();
-                }
-                global.getSongMenu().reload();
+    private final OsuAsyncCallback asyncCallback = new OsuAsyncCallback() {
+        public void run() {
+            UI.loadingScene.show();
+            mActivity.checkNewSkins();
+            mActivity.checkNewBeatmaps();
+            if (!library.loadLibraryCache(mActivity, true)) {
+                library.scanLibrary(mActivity);
+                System.gc();
             }
+            global.getSongMenu().reload();
+        }
 
-            public void onComplete() {
-                global.getMainScene().musicControl(MainScene.MusicOption.PLAY);
-                UI.loadingScene.close();
-                global.getEngine().setScene(global.getSongMenu().getScene());
+        public void onComplete() {
+            global.getMainScene().musicControl(MainScene.MusicOption.PLAY);
+            UI.loadingScene.complete(() -> {
+                engine.setScene(global.getSongMenu().getScene());
                 global.getSongMenu().select();
-            }
-        };
+            });
+        }
+    };
+
+    private void playTransitionAnim() {
 
         new Animation(body)
                 .runOnStart(() -> {

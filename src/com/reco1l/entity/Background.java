@@ -75,11 +75,11 @@ public class Background implements IMainClasses {
             @Override
             public void onModifierStarted(IModifier<IEntity> modifier, IEntity item) {
                 parent.attachChild(background, 0);
+                global.getMainScene().spectrum.updateColor(path);
             }
 
             @Override
             public void onModifierFinished(IModifier<IEntity> modifier, IEntity item) {
-                global.getMainScene().spectrum.updateColor(path);
                 mActivity.runOnUpdateThread(item::detachSelf);
             }
         };
