@@ -37,8 +37,11 @@
     <!--ProgressBar & SeekBar-->
     <color name="progressBarIndicatorColor">#FFFFFF</color>
     <color name="progressBarTrackColor">#20FFFFFF</color>
-    <color name="songSeekBarIndicatorColor">#61000000</color>
+    <color name="songSeekBarIndicatorColor">#5CFFFFFF</color>
     <color name="songSeekBarBackground">#30000000</color>
+
+    <!--Music Player-->
+    <color name="musicPlayerSeekbarCardBackground">#292929</color>
 
     <!--Panels-->
     <color name="panelTopBar">#19000000</color>

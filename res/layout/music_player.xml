@@ -18,7 +18,7 @@
         android:layout_margin="@dimen/panelMargins"
         app:cardBackgroundColor="@color/backgroundSecondary"
         app:cardCornerRadius="@dimen/globalCorners"
-        app:cardElevation="@dimen/_12sdp">
+        app:cardElevation="@dimen/musicPlayerCardElevation">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -49,8 +49,8 @@
                     <TextView
                         android:id="@+id/mp_artist"
                         style="@style/text"
-                        android:singleLine="true"
                         android:layout_marginTop="@dimen/_4sdp"
+                        android:singleLine="true"
                         android:text="HOKAGO TEA TIME" />
 
                 </LinearLayout>
@@ -64,9 +64,9 @@
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
                         android:layout_marginHorizontal="@dimen/songSeekBarHorizontalPadding"
-                        app:cardBackgroundColor="#292929"
-                        app:cardElevation="@dimen/_6sdp"
-                        app:cardCornerRadius="@dimen/songSeekBarCornerRadius">
+                        app:cardBackgroundColor="@color/musicPlayerSeekbarCardBackground"
+                        app:cardCornerRadius="@dimen/songSeekBarCornerRadius"
+                        app:cardElevation="@dimen/musicPlayerSeekbarElevation">
 
                         <ImageView
                             android:id="@+id/mp_songImage"
@@ -80,10 +80,10 @@
                     <SeekBar
                         android:id="@+id/mp_seekBar"
                         style="@style/song_seek_bar"
-                        android:elevation="@dimen/_6sdp"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/songSeekBarHeight"
                         android:layout_centerVertical="true"
+                        android:elevation="@dimen/musicPlayerSeekbarElevation"
                         android:paddingHorizontal="@dimen/songSeekBarHorizontalPadding"
                         tool:progress="50" />
 
@@ -117,8 +117,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/panelMargins"
-                android:gravity="center_horizontal">
+                android:layout_marginTop="@dimen/musicPlayerButtonsMargin"
+                android:gravity="center">
 
                 <ImageView
                     android:id="@+id/mp_prev"
@@ -134,8 +134,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/musicPlayerPlayButtonMargin"
-                    android:background="@drawable/round_shape"
-                    android:src="@drawable/v_play_xl_circle" />
+                    android:src="@drawable/v_pause_xl" />
 
                 <ImageView
                     android:id="@+id/mp_next"
@@ -149,6 +148,5 @@
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
-
 
 </RelativeLayout>

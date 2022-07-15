@@ -29,6 +29,7 @@ public class Animation implements IMainClasses {
     private float fromScaleX, toScaleX;
     private float fromScaleY, toScaleY;
     private float fromAlpha, toAlpha;
+    private float fromRotation, toRotation;
 
     private boolean cancelPendingAnimations = true;
 
@@ -121,6 +122,12 @@ public class Animation implements IMainClasses {
         return this;
     }
 
+    public Animation rotation(float from, float to) {
+        fromRotation = from;
+        toRotation = to;
+        return this;
+    }
+
     public Animation fade(float from, float to){
         fromAlpha = from;
         toAlpha = to;
@@ -170,6 +177,10 @@ public class Animation implements IMainClasses {
             // Alpha
             view.setAlpha(fromAlpha);
             anim.alpha(toAlpha);
+
+            // Rotation
+            view.setRotation(fromRotation);
+            anim.rotation(toRotation);
 
             // Interpolator
             if (interpolator != null)

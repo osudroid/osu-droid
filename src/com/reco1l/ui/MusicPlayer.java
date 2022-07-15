@@ -178,11 +178,16 @@ public class MusicPlayer extends BaseLayout implements IMainClasses {
             }
 
             if (global.getSongService().getStatus() == Status.PLAYING) {
-                if (play.getDrawable() != pauseDrw)
-                    play.setImageDrawable(pauseDrw);
+                if (play.getDrawable() != pauseDrw) {
+                    new Animation(play).rotation(180, 0)
+                            .runOnEnd(() -> play.setImageDrawable(pauseDrw))
+                            .play(160);
+                }
             }
             else if (play.getDrawable() != playDrw) {
-                play.setImageDrawable(playDrw);
+                new Animation(play).rotation(180, 0)
+                        .runOnEnd(() -> play.setImageDrawable(playDrw))
+                        .play(160);
             }
         });
     }

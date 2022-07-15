@@ -69,9 +69,12 @@
     <dimen name="loadingScreenProgressBarSize">@dimen/_32sdp</dimen>
 
     <!--Music Player-->
+    <dimen name="musicPlayerCardElevation">@dimen/_16sdp</dimen>
     <dimen name="musicPlayerSongShapeHeight">@dimen/_44sdp</dimen>
     <dimen name="musicPlayerPlayButtonMargin">@dimen/_16sdp</dimen>
     <dimen name="musicPlayerHeight">@dimen/_215sdp</dimen>
+    <dimen name="musicPlayerButtonsMargin">@dimen/_16sdp</dimen>
+    <dimen name="musicPlayerSeekbarElevation">@dimen/_6sdp</dimen>
     
     <!--Top Bar-->
     <dimen name="topBarButtonWidth">@dimen/_62sdp</dimen>
