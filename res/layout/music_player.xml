@@ -131,6 +131,7 @@
                 <ImageView
                     android:id="@+id/mp_play"
                     style="@style/icon_button"
+                    android:background="@drawable/round_shape"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/musicPlayerPlayButtonMargin"
