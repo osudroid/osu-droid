@@ -25,8 +25,8 @@ public class Spectrum {
 
     private static final int
             lineWidth = 12,
-            lineDistance = 2,
-            peakMultiplier = 700;
+            lineDistance = 1,
+            peakMultiplier = 600;
 
     //--------------------------------------------------------------------------------------------//
 
