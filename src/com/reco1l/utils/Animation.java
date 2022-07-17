@@ -1,6 +1,9 @@
 package com.reco1l.utils;
 
+import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 
 import com.edlplan.framework.easing.Easing;
@@ -8,14 +11,19 @@ import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 import com.reco1l.utils.interfaces.IMainClasses;
 
+import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
+import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
+
 // Created by Reco1l on 23/6/22 20:44
 
 /**
- * Simplifies the usage of ViewPropertyAnimator class.
+ * Simplifies the usage of ViewPropertyAnimator and ValueAnimator.
+ * <p>Note: This is intended to be used in Views only.</p>
  */
 public class Animation implements IMainClasses {
 
-    private static ViewPropertyAnimator anim;
+    private ViewPropertyAnimator anim;
+    private ValueAnimator valueAnim;
 
     private final View view;
 
@@ -32,6 +40,14 @@ public class Animation implements IMainClasses {
     private float fromRotation, toRotation;
 
     private boolean cancelPendingAnimations = true;
+
+    private InterpolatorTo interpolatorTo = InterpolatorTo.BOTH;
+
+    public enum InterpolatorTo {
+        VIEW_PROPERTY_ANIMATOR,
+        VALUE_ANIMATOR,
+        BOTH
+    }
 
     //--------------------------------------------------------------------------------------------//
 
@@ -59,6 +75,61 @@ public class Animation implements IMainClasses {
 
         fromAlpha = view.getAlpha();
         toAlpha = fromAlpha;
+    }
+
+    public Animation ofInt(int from, int to) {
+        valueAnim = ValueAnimator.ofInt(from, to);
+        return this;
+    }
+
+    public Animation ofFloat(float from, float to) {
+        valueAnim = ValueAnimator.ofFloat(from, to);
+        return this;
+    }
+
+    public Animation ofArgb(int from, int to) {
+        valueAnim = ValueAnimator.ofArgb(from, to);
+        return this;
+    }
+
+    public Animation runOnUpdate(AnimatorUpdateListener onUpdate) {
+        valueAnim.addUpdateListener(onUpdate);
+        return this;
+    }
+
+    public Animation size(float from, float to) {
+        valueAnim = ValueAnimator.ofInt((int) from,(int) to);
+        valueAnim.addUpdateListener(animation -> {
+            view.getLayoutParams().height = (int) animation.getAnimatedValue();
+            view.getLayoutParams().width = (int) animation.getAnimatedValue();
+            view.requestLayout();
+        });
+        return this;
+    }
+
+    public Animation height(float from, float to) {
+        valueAnim = ValueAnimator.ofInt((int) from,(int) to);
+        valueAnim.addUpdateListener(animation -> {
+            view.getLayoutParams().height = (int) animation.getAnimatedValue();
+            view.requestLayout();
+        });
+        return this;
+    }
+
+    public Animation width(float from, float to) {
+        valueAnim = ValueAnimator.ofInt((int) from,(int) to);
+        valueAnim.addUpdateListener(animation -> {
+            view.getLayoutParams().width = (int) animation.getAnimatedValue();
+            view.requestLayout();
+        });
+        return this;
+    }
+
+    public Animation elevation(float from, float to) {
+        valueAnim = ValueAnimator.ofFloat(from, to);
+        valueAnim.addUpdateListener(animation ->
+                view.setElevation((float) animation.getAnimatedValue()));
+        return this;
     }
 
     public Animation cancelPending(boolean bool) {
@@ -114,11 +185,13 @@ public class Animation implements IMainClasses {
         return this;
     }
 
-    /**
-     * @param interpolator The interpolator to use.
-     */
     public Animation interpolator(Easing interpolator) {
         this.interpolator = interpolator;
+        return this;
+    }
+
+    public Animation interpolatorMode(InterpolatorTo mode) {
+        interpolatorTo = mode;
         return this;
     }
 
@@ -148,8 +221,26 @@ public class Animation implements IMainClasses {
      * @param duration duration of animation in milliseconds.
      */
     public void play(long duration) {
-        if(view == null || !mActivity.hasWindowFocus())
-          return;
+        if(view == null || !mActivity.hasWindowFocus()) {
+            if (onStart != null || onEnd != null) {
+                new AsyncTaskLoader().execute(new OsuAsyncCallback() {
+                    @Override
+                    public void run() {
+                        if (onStart != null)
+                            mActivity.runOnUiThread(onStart);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        if (onEnd != null)
+                            mActivity.runOnUiThread(onEnd);
+                        anim = null;
+                        valueAnim = null;
+                    }
+                });
+            }
+            return;
+        }
 
         mActivity.runOnUiThread(() -> {
 
@@ -183,8 +274,22 @@ public class Animation implements IMainClasses {
             anim.rotation(toRotation);
 
             // Interpolator
-            if (interpolator != null)
-                anim.setInterpolator(EasingHelper.asInterpolator(interpolator));
+            if (interpolator != null) {
+                if (interpolatorTo == InterpolatorTo.VIEW_PROPERTY_ANIMATOR || interpolatorTo == InterpolatorTo.BOTH) {
+                    anim.setInterpolator(EasingHelper.asInterpolator(interpolator));
+                }
+            }
+
+            if (valueAnim != null) {
+                valueAnim.setDuration(duration);
+                valueAnim.setStartDelay(delay);
+                if (interpolator != null) {
+                    if (interpolatorTo == InterpolatorTo.VALUE_ANIMATOR || interpolatorTo == InterpolatorTo.BOTH) {
+                        valueAnim.setInterpolator(EasingHelper.asInterpolator(interpolator));
+                    }
+                }
+                valueAnim.start();
+            }
 
             anim.setListener(new BaseAnimationListener() {
                 @Override
@@ -200,6 +305,7 @@ public class Animation implements IMainClasses {
                         onEnd.run();
                     super.onAnimationEnd(animation);
                     anim = null;
+                    valueAnim = null;
                 }
             });
 
@@ -209,4 +315,78 @@ public class Animation implements IMainClasses {
         });
     }
 
+    public ViewGroupAnimation forChildView(IChildViewAnimation childAnimation) {
+        if (view == null)
+            return null;
+
+        if (view instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup) view;
+            return new ViewGroupAnimation(viewGroup, childAnimation);
+        }
+        return null;
+    }
+
+    public interface IChildViewAnimation {
+        Animation forChild(View child);
+    }
+
+    public static class ViewGroupAnimation {
+
+        private final ViewGroup view;
+        private final IChildViewAnimation childAnimation;
+
+        private boolean countFromLast = false;
+        private Runnable onStart, onEnd;
+        private long delay = 0;
+
+        public ViewGroupAnimation (ViewGroup view, IChildViewAnimation childAnimation) {
+            this.view = view;
+            this.childAnimation = childAnimation;
+        }
+
+        public ViewGroupAnimation delay(long ms) {
+            delay = ms;
+            return this;
+        }
+
+        public ViewGroupAnimation invertOrder(boolean countFromLast) {
+            this.countFromLast = countFromLast;
+            return this;
+        }
+
+        public ViewGroupAnimation runOnStart(Runnable task) {
+            this.onStart = task;
+            return this;
+        }
+
+        public ViewGroupAnimation runOnEnd(Runnable task) {
+            onEnd = task;
+            return this;
+        }
+
+        public void play(long duration) {
+            if (view == null)
+                return;
+
+            view.postDelayed(() ->{
+                int childCount = view.getChildCount();
+
+                for (int i = countFromLast ? childCount - 1 : 0; countFromLast ? i >= 0 : i < childCount;) {
+                    View child = view.getChildAt(i);
+                    Animation anim = childAnimation.forChild(child);
+
+                    if (countFromLast ? i == childCount - 1 : i == 0) {
+                        anim.runOnStart(onStart);
+                    }
+                    if (countFromLast ? i == 0 : i == view.getChildCount() - 1) {
+                        anim.runOnEnd(onEnd);
+                    }
+
+                    anim.delay(duration * i);
+                    anim.play(duration);
+                    i += countFromLast ? -1 : 1;
+                }
+            }, delay);
+        }
+    }
 }
