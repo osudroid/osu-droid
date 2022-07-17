@@ -24,23 +24,23 @@ public class Res implements IMainClasses {
         return mActivity.getResources().getDimension(id);
     }
 
-    public static float sdp(int dimen) {
-        if (dimen == 0)
+    public static float sdp(int dp) {
+        if (dp == 0)
             return 0;
         int id;
-        if (dimen < 0) {
-            if (dimen < -60) { // This because Scalable DP doesn't support negative values less than -60
-                int count = 0;
-                for (int i = 0; i >= dimen; i--) {
+        if (dp < 0) {
+            if (dp < -60) { // This because Scalable DP doesn't support negative values less than -60
+                float count = dimen(R.dimen._minus60sdp);
+                for (int i = -60; i >= dp; i--) {
                     count -= dimen(R.dimen._1sdp);
                 }
                 return count;
             }
-            id = mActivity.getResources().getIdentifier("_minus" + dimen + "sdp", "dimen", mActivity.getPackageName());
+            id = mActivity.getResources().getIdentifier("_minus" + dp + "sdp", "dimen", mActivity.getPackageName());
         } else {
-            if (dimen > 600)
+            if (dp > 600)
                 return 0; // This because Scalable DP doesn't support values greater than 600 (And why would you want to use such a big value? lol)
-            id = mActivity.getResources().getIdentifier("_" + dimen + "sdp", "dimen", mActivity.getPackageName());
+            id = mActivity.getResources().getIdentifier("_" + dp + "sdp", "dimen", mActivity.getPackageName());
         }
         return mActivity.getResources().getDimension(id);
     }
