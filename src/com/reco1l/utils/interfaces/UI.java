@@ -5,6 +5,7 @@ import com.reco1l.ui.LoadingScene;
 import com.reco1l.ui.MainMenu;
 import com.reco1l.ui.MusicPlayer;
 import com.reco1l.ui.TopBar;
+import com.reco1l.ui.UserProfile;
 import com.reco1l.ui.platform.UIManager;
 
 // Created by Reco1l on 29/6/22 22:38
@@ -17,4 +18,5 @@ public interface UI {
     MusicPlayer musicPlayer = UIManager.getMusicPlayer();
     LoadingScene loadingScene = UIManager.getLoadingScene();
     MainMenu mainMenu = UIManager.getMainMenu();
+    UserProfile userProfile = UIManager.getUserProfile();
 }

@@ -46,6 +46,10 @@
     <dimen name="barButtonWidth">@dimen/_50sdp</dimen>
     <dimen name="barButtonHeight">@dimen/_40sdp</dimen>
 
+    <dimen name="buttonCornerRadius">@dimen/_8sdp</dimen>
+    <dimen name="buttonHeight">@dimen/_28sdp</dimen>
+    <dimen name="buttonCardElevation">@dimen/_6sdp</dimen>
+
     <!--Shapes-->
     <dimen name="tabIndicatorHeight">@dimen/_2sdp</dimen>
     <dimen name="globalCorners">@dimen/_12sdp</dimen>
@@ -53,9 +57,13 @@
 
     <!--ProgressBar & SeekBar-->
     <dimen name="circularProgressBarThickness">8</dimen>
+    <dimen name="circularProgressIndicatorThickness">@dimen/_6sdp</dimen>
     <dimen name="smallCircularProgressBarSize">@dimen/_16sdp</dimen>
     <dimen name="linearProgressBarHeight">@dimen/_3sdp</dimen>
     <dimen name="progressBarTrackCornerRadius">@dimen/_2sdp</dimen>
+
+    <!--Scrollbar-->
+    <dimen name="scrollbarIndicatorWidth">@dimen/_4sdp</dimen>
 
     <dimen name="songSeekBarHeight">@dimen/_54sdp</dimen>
     <dimen name="songSeekBarCornerRadius">@dimen/_8sdp</dimen>
@@ -69,7 +77,6 @@
     <dimen name="loadingScreenProgressBarSize">@dimen/_32sdp</dimen>
 
     <!--Music Player-->
-    <dimen name="musicPlayerCardElevation">@dimen/_16sdp</dimen>
     <dimen name="musicPlayerSongShapeHeight">@dimen/_44sdp</dimen>
     <dimen name="musicPlayerPlayButtonMargin">@dimen/_16sdp</dimen>
     <dimen name="musicPlayerHeight">@dimen/_215sdp</dimen>
@@ -85,11 +92,12 @@
     <dimen name="topBarShadowHeight">@dimen/_12sdp</dimen>
 
     <!--Panels-->
+    <dimen name="panelCardElevation">@dimen/_16sdp</dimen>
     <dimen name="panelWidth">@dimen/_200sdp</dimen>
     <dimen name="panelMargins">@dimen/_14sdp</dimen>
-    <dimen name="viewMargin">@dimen/_6sdp</dimen>
     <dimen name="panelShadowWidth">@dimen/_8sdp</dimen>
     <dimen name="panelSeparatorHeight">@dimen/_1sdp</dimen>
+    <dimen name="panelViewsMargin">@dimen/_6sdp</dimen>
 
     <!--Notifications-->
     <dimen name="notificationCenterWidth">@dimen/_220sdp</dimen>
@@ -114,5 +122,12 @@
     <dimen name="mainMenuExitElevation">2dp</dimen>
     <dimen name="mainMenuSettingsElevation">4dp</dimen>
     <dimen name="mainMenuPlayElevation">6dp</dimen>
+
+    <!--User panel-->
+    <dimen name="userPanelAvatarSize">@dimen/_36sdp</dimen>
+    <dimen name="userPanelHeight">@dimen/_240sdp</dimen>
+    <dimen name="userPanelSmallHeight">@dimen/_160sdp</dimen>
+    <dimen name="userPanelAccuracyProgressBarSize">@dimen/_70sdp</dimen>
+    <dimen name="userPanelTextLayoutHeight">@dimen/_24sdp</dimen>
 
 </resources>

@@ -5,6 +5,7 @@ import com.reco1l.ui.LoadingScene;
 import com.reco1l.ui.MainMenu;
 import com.reco1l.ui.MusicPlayer;
 import com.reco1l.ui.TopBar;
+import com.reco1l.ui.UserProfile;
 
 // Created by Reco1l on 2/7/22 22:44
 
@@ -17,6 +18,7 @@ public class UIManager {
     public static MusicPlayer musicPlayer;
     public static LoadingScene loadingScene;
     public static MainMenu mainMenu;
+    public static UserProfile userProfile;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -24,6 +26,9 @@ public class UIManager {
         topBar = new TopBar();
         inbox = new Inbox();
         musicPlayer = new MusicPlayer();
+        loadingScene = new LoadingScene();
+        mainMenu = new MainMenu();
+        userProfile = new UserProfile();
         isUserInterfaceInit = true;
     }
 
@@ -39,7 +44,8 @@ public class UIManager {
     public static BaseLayout[] getExtras() {
         return new BaseLayout[] {
                 getInbox(),
-                getMusicPlayer()
+                getMusicPlayer(),
+                getUserProfile()
         };
     }
 
@@ -76,5 +82,12 @@ public class UIManager {
             mainMenu = new MainMenu();
         }
         return mainMenu;
+    }
+
+    public static UserProfile getUserProfile() {
+        if (userProfile == null) {
+            userProfile = new UserProfile();
+        }
+        return userProfile;
     }
 }

@@ -26,6 +26,16 @@
         <item name="android:clickable">true</item>
     </style>
 
+    <style name="button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/buttonHeight</item>
+        <item name="cardElevation">@dimen/buttonCardElevation</item>
+        <item name="cardBackgroundColor">@color/buttonBackground</item>
+        <item name="cardCornerRadius">@dimen/buttonCornerRadius</item>
+        <item name="contentPaddingLeft">@dimen/M</item>
+        <item name="contentPaddingRight">@dimen/M</item>
+    </style>
+
     <!--ProgressBar & SeekBar-->
     <style name="circular_progress_bar">
         <item name="android:progressDrawable">@drawable/circular_progress_bar</item>
@@ -56,10 +66,10 @@
     <!--Layouts-->
     <style name="panel">
         <item name="android:layout_width">@dimen/panelWidth</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">@drawable/round_shape</item>
-        <item name="android:backgroundTint">@color/backgroundSecondary</item>
         <item name="android:clickable">true</item>
+        <item name="cardCornerRadius">@dimen/globalCorners</item>
+        <item name="cardBackgroundColor">@color/backgroundSecondary</item>
+        <item name="cardElevation">@dimen/panelCardElevation</item>
         <item name="android:layout_margin">@dimen/panelMargins</item>
     </style>
 

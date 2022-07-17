@@ -13,12 +13,8 @@
 
     <androidx.cardview.widget.CardView
         android:id="@+id/mp_body"
-        android:layout_width="@dimen/panelWidth"
-        android:layout_height="@dimen/musicPlayerHeight"
-        android:layout_margin="@dimen/panelMargins"
-        app:cardBackgroundColor="@color/backgroundSecondary"
-        app:cardCornerRadius="@dimen/globalCorners"
-        app:cardElevation="@dimen/musicPlayerCardElevation">
+        style="@style/panel"
+        android:layout_height="@dimen/musicPlayerHeight">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -131,10 +127,10 @@
                 <ImageView
                     android:id="@+id/mp_play"
                     style="@style/icon_button"
-                    android:background="@drawable/round_shape"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/musicPlayerPlayButtonMargin"
+                    android:background="@drawable/round_shape"
                     android:src="@drawable/v_pause_xl" />
 
                 <ImageView

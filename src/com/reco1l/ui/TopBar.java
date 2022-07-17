@@ -177,8 +177,6 @@ public class TopBar extends BaseLayout {
         private final TextView rank, name;
         private final ShapeableImageView avatar;
 
-        // private int clickCount = 0;
-
         public UserBox(TopBar parent) {
             this.parent = parent;
 
@@ -187,13 +185,7 @@ public class TopBar extends BaseLayout {
             name = parent.find("playerName");
             avatar = parent.find("avatar");
 
-            // Debug
-            /*GameNotification notification = new GameNotification("Test notification");
-                notification.message = "Notification number " + clickCount;
-                UI.inbox.add(notification);
-                clickCount++;*/
-
-            new ClickListener(body).simple(null);
+            new ClickListener(body).simple(userProfile::altShow);
         }
 
         public void update(boolean clear) {

@@ -58,4 +58,7 @@
     <!--Loading Scene-->
     <color name="loadingSceneViewsBackground">#34000000</color>
 
+    <!--Buttons-->
+    <color name="buttonBackground">#2E2E2E</color>
+
 </resources>
