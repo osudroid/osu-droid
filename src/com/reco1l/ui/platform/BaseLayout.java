@@ -2,10 +2,8 @@ package com.reco1l.ui.platform;
 
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -15,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.reco1l.utils.ClickListener;
 import com.reco1l.utils.interfaces.UI;
 import com.reco1l.utils.interfaces.IMainClasses;
 
@@ -64,13 +63,7 @@ public abstract class BaseLayout extends Fragment implements IMainClasses, UI {
             rootBackground.setClickable(true);
 
             if (!rootBackground.hasOnClickListeners())
-                rootBackground.setOnTouchListener((view, event) -> {
-                    if (event.getAction() == MotionEvent.ACTION_UP) {
-                        close();
-                        view.setOnTouchListener(null);
-                    }
-                    return true;
-                });
+                new ClickListener(rootBackground).onlyOnce(true).touchEffect(false).simple(this::close);
         }
         return rootView;
     }
