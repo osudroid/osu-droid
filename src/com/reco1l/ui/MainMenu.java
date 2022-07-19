@@ -36,7 +36,6 @@ public class MainMenu extends BaseLayout {
             menuAnimInProgress = false,
             isExitAnimInProgress = false;
 
-    private View body;
     private CardView logo;
     private MenuButton play, settings, exit;
     private TriangleEffectView logoTriangles;
@@ -55,8 +54,8 @@ public class MainMenu extends BaseLayout {
     //--------------------------------------------------------------------------------------------//
 
     public MainMenu() {
-        bounceUp = ValueAnimator.ofFloat(1f, 0.9f);
-        bounceDown = ValueAnimator.ofFloat(0.9f, 1f);
+        bounceUp = ValueAnimator.ofFloat(0.93f, 1f);
+        bounceDown = ValueAnimator.ofFloat(1f, 0.93f);
         triangleSpeedUp = ValueAnimator.ofFloat(1f, 8f);
         triangleSpeedDown = ValueAnimator.ofFloat(8f, 1f);
     }
@@ -128,7 +127,6 @@ public class MainMenu extends BaseLayout {
         smallLogoSize = (int) Res.dimen(R.dimen.mainMenuSmallLogoSize);
 
         logo = find("logo");
-        body = find("body");
         logoTriangles = find("logoTriangles");
 
         play = new MenuButton(
@@ -210,7 +208,7 @@ public class MainMenu extends BaseLayout {
 
     private void playTransitionAnim() {
 
-        new Animation(body)
+        new Animation(rootView)
                 .runOnStart(() -> {
                     global.getMainScene().background.zoomOut(true);
                     global.getMainScene().spectrum.clear(true);

@@ -105,7 +105,6 @@
     <dimen name="popupNotificationHeight">@dimen/_26sdp</dimen>
 
     <!--Main menu-->
-    <dimen name="mainMenuMainLayoutHeight">@dimen/_250sdp</dimen>
     <dimen name="mainMenuButtonSize">@dimen/_120sdp</dimen>
     <dimen name="mainMenuButtonZ">8dp</dimen>
 
