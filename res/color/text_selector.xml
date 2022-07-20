@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 20/7/22 01:11 -->
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:color="@color/textPrimary" android:state_enabled="true"/>
+    <item android:color="@color/textTertiary" android:state_enabled="false"/>
+
+</selector>

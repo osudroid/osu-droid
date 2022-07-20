@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 18/7/22 23:26 -->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="Graphics"
+        android:layout="@null"
+        app:iconSpaceReserved="false"/>
+
+    <PreferenceCategory
+        android:title="Background"
+        app:iconSpaceReserved="false">
+
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/bg_quality_names"
+            android:entryValues="@array/bg_quality_values"
+            android:key="background"
+            android:summary="@string/opt_bg_summary"
+            android:title="@string/opt_bg_title"
+            app:iconSpaceReserved="false" />
+
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Sliders"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="sliderborders"
+            android:summary="@string/opt_sliderborders_summary"
+            android:title="@string/opt_sliderborders_title"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="superSlider"
+            android:summary="@string/opt_superSlider_summary"
+            android:title="@string/opt_superSlider_title"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Effects"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="comboburst"
+            android:summary="@string/opt_combo_burst_summary"
+            android:title="@string/opt_combo_burst_title"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="complexanimations"
+            android:summary="@string/opt_complexanimations_summary"
+            android:title="@string/opt_complexanimations_title"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="bursts"
+            android:summary="@string/opt_bursts_summary"
+            android:title="@string/opt_bursts_title"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="hitlighting"
+            android:summary="@string/opt_hitlighting_summary"
+            android:title="@string/opt_hitlighting_title"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="particles"
+            android:summary="@string/opt_particles_summary"
+            android:title="@string/opt_particles_title"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="dither"
+            android:summary="@string/opt_dither_summary"
+            android:title="@string/opt_dither_title"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

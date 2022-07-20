@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 18/7/22 23:13 -->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="Gameplay"
+        android:layout="@null"
+        app:iconSpaceReserved="false"/>
+
+    <PreferenceCategory
+        android:title="Background"
+        app:iconSpaceReserved="false">
+
+        <SeekBarPreference
+            android:defaultValue="25"
+            android:key="bgbrightness"
+            android:summary="@string/opt_bgbrightness_summary"
+            android:title="@string/opt_bgbrightness_title"
+            app:iconSpaceReserved="false"
+            app:min="1"
+            app:showSeekBarValue="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Play area"
+        app:iconSpaceReserved="false">
+
+        <ListPreference
+            android:defaultValue="100"
+            android:entries="@array/set_playfield_names"
+            android:entryValues="@array/set_playfield_values"
+            android:key="playfieldsize"
+            android:summary="@string/opt_setplayfield_summary"
+            android:title="@string/opt_setplayfield_title"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="shrinkPlayfieldDownwards"
+            android:summary="@string/opt_shrink_playfield_downwards_summary"
+            android:title="@string/opt_shrink_playfield_downwards_title"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="hidenavibar"
+            android:summary="@string/opt_hide_navibar_summary"
+            android:title="@string/opt_hide_navibar_title"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Cursor"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="showcursor"
+            android:summary="@string/opt_showcursor_summary"
+            android:title="@string/opt_showcursor_title"
+            app:iconSpaceReserved="false" />
+
+        <SeekBarPreference
+            android:defaultValue="50"
+            android:key="cursorSize"
+            android:max="300"
+            android:summary="@string/opt_cursor_size_summary"
+            android:title="@string/opt_cursor_size"
+            app:iconSpaceReserved="false"
+            app:min="25"
+            app:showSeekBarValue="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="HUD"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="hideInGameUI"
+            android:summary="@string/opt_hide_ingame_ui_summary"
+            android:title="@string/opt_hide_ingame_ui_title"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="hideReplayMarquee"
+            android:summary="@string/opt_hide_replay_marquee_summary"
+            android:title="@string/opt_hide_replay_marquee_title"
+            app:iconSpaceReserved="false" />
+
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/error_meter_display_names"
+            android:entryValues="@array/error_meter_display_values"
+            android:key="errormeter"
+            android:summary="@string/opt_error_meter_display_summary"
+            android:title="@string/opt_error_meter_display_title"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Objects"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="images"
+            android:summary="@string/opt_largeimages_summary"
+            android:title="@string/opt_largeimages_title"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="showfirstapproachcircle"
+            android:summary="@string/opt_show_first_approach_circle_summary"
+            android:title="@string/opt_show_first_approach_circle_title"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

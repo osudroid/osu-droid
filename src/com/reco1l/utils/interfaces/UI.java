@@ -4,6 +4,7 @@ import com.reco1l.ui.Inbox;
 import com.reco1l.ui.LoadingScene;
 import com.reco1l.ui.MainMenu;
 import com.reco1l.ui.MusicPlayer;
+import com.reco1l.ui.SettingsMenu;
 import com.reco1l.ui.TopBar;
 import com.reco1l.ui.UserProfile;
 import com.reco1l.ui.platform.UIManager;
@@ -19,4 +20,5 @@ public interface UI {
     LoadingScene loadingScene = UIManager.getLoadingScene();
     MainMenu mainMenu = UIManager.getMainMenu();
     UserProfile userProfile = UIManager.getUserProfile();
+    SettingsMenu settingsPanel = UIManager.getSettingsPanel();
 }

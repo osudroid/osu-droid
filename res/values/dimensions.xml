@@ -51,8 +51,8 @@
     <dimen name="buttonCardElevation">@dimen/_6sdp</dimen>
 
     <!--Shapes-->
-    <dimen name="tabIndicatorHeight">@dimen/_2sdp</dimen>
     <dimen name="globalCorners">@dimen/_12sdp</dimen>
+    <dimen name="tabIndicatorSize">@dimen/_2sdp</dimen>
     <dimen name="verticalShadowWidth">@dimen/_8sdp</dimen>
 
     <!--ProgressBar & SeekBar-->
@@ -128,5 +128,10 @@
     <dimen name="userPanelSmallHeight">@dimen/_160sdp</dimen>
     <dimen name="userPanelAccuracyProgressBarSize">@dimen/_70sdp</dimen>
     <dimen name="userPanelTextLayoutHeight">@dimen/_24sdp</dimen>
+
+    <!--Settings panel-->
+    <dimen name="settingsPanelWidth">@dimen/_260sdp</dimen>
+    <dimen name="settingsPanelNavBarWidth">@dimen/_60sdp</dimen>
+    <dimen name="settingsPanelButtonHeight">@dimen/_50sdp</dimen>
 
 </resources>

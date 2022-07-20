@@ -9,7 +9,7 @@
         <item name="fontFamily">@font/varela_regular</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@color/textPrimary</item>
+        <item name="android:textColor">@color/text_selector</item>
         <item name="android:textSize">@dimen/textS</item>
         <item name="android:ellipsize">end</item>
     </style>
@@ -34,6 +34,12 @@
         <item name="cardCornerRadius">@dimen/buttonCornerRadius</item>
         <item name="contentPaddingLeft">@dimen/M</item>
         <item name="contentPaddingRight">@dimen/M</item>
+    </style>
+
+    <style name="settings_panel_tab_button" parent="icon_button">
+        <item name="android:paddingLeft">@dimen/tabIndicatorSize</item>
+        <item name="android:layout_width">@dimen/settingsPanelNavBarWidth</item>
+        <item name="android:layout_height">@dimen/settingsPanelButtonHeight</item>
     </style>
 
     <!--ProgressBar & SeekBar-->

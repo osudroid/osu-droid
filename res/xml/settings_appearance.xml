@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 19/7/22 00:18 -->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="Appearance"
+        android:layout="@null"
+        app:iconSpaceReserved="false"/>
+
+    <PreferenceCategory
+        android:title="Skin"
+        app:iconSpaceReserved="false">
+
+        <com.edlplan.ui.SkinPathPreference
+            android:entries="@array/placeholder_array"
+            android:entryValues="@array/placeholder_array"
+            android:key="skinPath"
+            android:summary="@string/opt_skinpath_summary"
+            android:title="@string/opt_skinpath_title"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="skin"
+            android:summary="@string/opt_skin_summary"
+            android:title="@string/opt_skin_title"
+            app:iconSpaceReserved="false" />
+
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/spinner_style_names"
+            android:entryValues="@array/spinner_style_values"
+            android:key="spinnerstyle"
+            android:summary="@string/opt_spinner_style_summary"
+            android:title="@string/opt_spinner_style_title"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="UI"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="trianglesAnimation"
+            android:summary="@string/opt_triangles_animation_summary"
+            android:title="@string/opt_triangles_animation_title"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="color"
+        android:title="Combo colors"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:key="useCustomColors"
+            android:summary="@string/opt_combo_colors_summary"
+            android:title="@string/opt_combo_colors_title"
+            app:iconSpaceReserved="false" />
+
+        <net.margaritov.preference.colorpicker.ColorPickerPreference
+            android:defaultValue="@integer/COLOR_GREEN"
+            android:key="combo1"
+            android:title="First color"
+            app:iconSpaceReserved="false" />
+
+        <net.margaritov.preference.colorpicker.ColorPickerPreference
+            android:defaultValue="@integer/COLOR_BLUE"
+            android:key="combo2"
+            android:title="Second color"
+            app:iconSpaceReserved="false" />
+
+        <net.margaritov.preference.colorpicker.ColorPickerPreference
+            android:defaultValue="@integer/COLOR_RED"
+            android:key="combo3"
+            android:title="Third color"
+            app:iconSpaceReserved="false" />
+
+        <net.margaritov.preference.colorpicker.ColorPickerPreference
+            android:defaultValue="@integer/COLOR_YELLOW"
+            android:key="combo4"
+            android:title="Fourth color"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

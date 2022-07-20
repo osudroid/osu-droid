@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?><!--Adapted to new UI, this first page will never show-->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="Advanced"
+        android:layout="@null" />
+
+    <PreferenceCategory
+        android:title="Location"
+        app:iconSpaceReserved="false">
+
+        <EditTextPreference
+            android:key="corePath"
+            android:summary="@string/opt_corepath_summary"
+            android:title="@string/opt_corepath_title"
+            app:iconSpaceReserved="false" />
+
+        <EditTextPreference
+            android:key="skinTopPath"
+            android:summary="@string/opt_skin_top_path_summary"
+            android:title="@string/opt_skin_top_path_title"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Synchronization"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="lowDelay"
+            android:summary="@string/opt_lowdelay_summary"
+            android:title="@string/opt_lowdelay_title"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="fixFrameOffset"
+            android:summary="@string/opt_fix_frame_offset_summary"
+            android:title="@string/opt_fix_frame_offset_title"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="syncMusic"
+            android:summary="@string/opt_syncmusic_summary"
+            android:title="@string/opt_syncmusic_title"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Experimental"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="removeSliderLock"
+            android:summary="@string/opt_remove_sliderlock_spinnerlock_summary"
+            android:title="@string/opt_remove_sliderlock_spinnerlock_title"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="calculateSliderPathInGameStart"
+            android:summary="@string/opt_calculate_slider_path_in_game_start_summary"
+            android:title="@string/opt_calculate_slider_path_in_game_start_title"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Debug"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="displayScoreStatistics"
+            android:summary="@string/opt_display_score_statistics_summary"
+            android:title="@string/opt_display_score_statistics_title"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="fps"
+            android:summary="@string/opt_fps_summary"
+            android:title="@string/opt_fps_title"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

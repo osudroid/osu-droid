@@ -7,8 +7,10 @@ import com.reco1l.ui.platform.FragmentPlatform;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
+import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
+import ru.nsu.ccfit.zuev.skins.SkinManager;
 
 // Created by Reco1l on 25/6/22 00:39
 
@@ -24,4 +26,6 @@ public interface IMainClasses {
     OnlineManager online = OnlineManager.getInstance();
     OnlineHandler onlineHandler = OnlineHandler.getInstance();
     EngineMirror engine = (EngineMirror) mActivity.getEngine();
+    SkinManager skinManager = SkinManager.getInstance();
+    PropertiesLibrary properties = PropertiesLibrary.getInstance();
 }

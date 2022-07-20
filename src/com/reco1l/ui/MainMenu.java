@@ -176,11 +176,7 @@ public class MainMenu extends BaseLayout {
                     global.getMainScene().showExitDialog();
                 });
 
-        new ClickListener(settings.view)
-                .simple(() -> {
-                    global.getSongService().setGaming(true);
-                    mActivity.runOnUiThread(() -> new SettingsMenu().show());
-                });
+        new ClickListener(settings.view).simple(settingsPanel::altShow);
     }
 
     //--------------------------------------------------------------------------------------------//

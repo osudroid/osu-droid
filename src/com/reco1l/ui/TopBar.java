@@ -126,7 +126,7 @@ public class TopBar extends BaseLayout {
 
         new ClickListener(inbox).simple(UI.inbox::altShow);
         new ClickListener(music).simple(musicPlayer::altShow);
-        new ClickListener(settings).simple(() -> new SettingsMenu().show());
+        new ClickListener(settings).simple(settingsPanel::altShow);
 
         userBox.update(false);
     }

@@ -4,6 +4,7 @@ import com.reco1l.ui.Inbox;
 import com.reco1l.ui.LoadingScene;
 import com.reco1l.ui.MainMenu;
 import com.reco1l.ui.MusicPlayer;
+import com.reco1l.ui.SettingsMenu;
 import com.reco1l.ui.TopBar;
 import com.reco1l.ui.UserProfile;
 
@@ -19,6 +20,7 @@ public class UIManager {
     public static LoadingScene loadingScene;
     public static MainMenu mainMenu;
     public static UserProfile userProfile;
+    public static SettingsMenu settingsPanel;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -29,6 +31,7 @@ public class UIManager {
         loadingScene = new LoadingScene();
         mainMenu = new MainMenu();
         userProfile = new UserProfile();
+        settingsPanel = new SettingsMenu();
         isUserInterfaceInit = true;
     }
 
@@ -45,7 +48,8 @@ public class UIManager {
         return new BaseLayout[] {
                 getInbox(),
                 getMusicPlayer(),
-                getUserProfile()
+                getUserProfile(),
+                getSettingsPanel()
         };
     }
 
@@ -89,5 +93,12 @@ public class UIManager {
             userProfile = new UserProfile();
         }
         return userProfile;
+    }
+
+    public static SettingsMenu getSettingsPanel() {
+        if (settingsPanel == null) {
+            settingsPanel = new SettingsMenu();
+        }
+        return settingsPanel;
     }
 }

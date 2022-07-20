@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 18/7/22 23:10 -->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="General"
+        android:layout="@null"
+        app:iconSpaceReserved="false"/>
+
+    <PreferenceCategory
+        android:key="onlineOption_normal"
+        android:title="@string/opt_onlineOpt_normal"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="stayOnline"
+            android:summary="@string/opt_stayonline_summary"
+            android:title="@string/opt_stayonline_title"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="loadAvatar"
+            android:summary="@string/opt_loadavatar_summary"
+            android:title="@string/opt_loadavatar_title"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="login"
+            android:summary="Sign in to your account"
+            android:title="@string/opt_login_title"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="onlineOption_normal"
+        android:title="osu!droid"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="receiveAnnouncements"
+            android:summary="@string/opt_receive_announcements_summary"
+            android:title="@string/opt_receive_announcements_title"
+            app:iconSpaceReserved="false" />
+
+
+    </PreferenceCategory>
+
+    <!--<PreferenceCategory
+        android:key="onlineOption_user"
+        android:title="@string/opt_onlineOpt_user"
+        app:iconSpaceReserved="false">
+
+        <EditTextPreference
+            android:key="onlineUsername"
+            android:summary="@string/opt_login_summary"
+            android:title="@string/opt_login_title"
+            app:iconSpaceReserved="false" />
+
+        <EditTextPreference
+            android:inputType="textPassword"
+            android:key="onlinePassword"
+            android:summary="@string/opt_password_summary"
+            android:title="@string/opt_password_title"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="registerAcc"
+            android:summary="@string/opt_register_summary"
+            android:title="@string/opt_register_title"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory> -->
+
+    <PreferenceCategory
+        android:key="offlineOption"
+        android:title="@string/opt_offline"
+        app:iconSpaceReserved="false">
+
+        <EditTextPreference
+            android:key="playername"
+            android:summary="@string/opt_playername_summary"
+            android:title="@string/opt_playername_title"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

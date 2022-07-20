@@ -5,10 +5,10 @@
 <resources> <!--This resource file is intended to globally contain all colors used in the UI-->
 
     <!--Theme-->
-    <color name="primary">#7CB1E5</color>
+    <color name="primary">#FFFFFF</color>
     <color name="accent">#7CB1E5</color>
     <color name="touchEffectHighlight">#2FFFFFFF</color>
-    <color name="windowBackground">#FFFFFF</color>
+    <color name="windowBackground">#000000</color>
     <color name="shadowColor">#000000</color>
 
     <!--Vectors-->

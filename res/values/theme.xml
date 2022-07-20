@@ -12,13 +12,8 @@
         <item name="colorAccent">@color/accent</item>
 
         <!--Styles-->
-        <item name="preferenceTheme">@style/AppTheme.PreferenceThemeOverlay</item>
         <item name="android:textViewStyle">@style/text</item>
 
     </style>
 
-    <style name="AppTheme.PreferenceThemeOverlay" parent="@style/PreferenceThemeOverlay">
-        <item name="android:layout">@layout/fragment_settings</item>
-    </style>
-
-</resources>  
+</resources>
