@@ -11,6 +11,7 @@ import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.SeekBarPreference;
 
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.SkinPathPreference;
@@ -145,18 +146,19 @@ public class SettingsMenu extends BaseLayout {
             return;
 
         currentTab = tab;
+        final boolean toTop = tabIndicator.getTranslationY() > find(tab.name()).getY();
 
         new Animation(tabIndicator)
                 .moveY(tabIndicator.getTranslationY(), find(tab.name()).getY())
-                .play(300);
-
-        new Animation(container).moveX(0, -60).fade(1, 0)
-                .runOnEnd(() -> fragment.navigate(tab))
-                .play(100);
-
-        new Animation(container).moveX(60, 0).fade(0, 1)
-                .delay(100)
                 .play(400);
+
+        new Animation(container).moveY(0, toTop ? 80 : -80).fade(1, 0)
+                .runOnEnd(() -> fragment.navigate(tab))
+                .play(160);
+
+        new Animation(container).moveY(toTop ? -80 : 80, 0).fade(0, 1)
+                .delay(160)
+                .play(300);
 
     }
 
@@ -172,7 +174,7 @@ public class SettingsMenu extends BaseLayout {
             reloadBackground = false;
         }
 
-        global.getSongService().setVolume(Config.getBgmVolume());
+        // global.getSongService().setVolume(Config.getBgmVolume());
         global.getSongService().setGaming(false);
     }
 
@@ -223,26 +225,19 @@ public class SettingsMenu extends BaseLayout {
 
         public void navigate(Tabs tab) {
             switch (tab) {
-                case general:
-                    setPreferencesFromResource(R.xml.settings_general, null);
+                case general: setPreferencesFromResource(R.xml.settings_general, null);
                     break;
-                case appearance:
-                    setPreferencesFromResource(R.xml.settings_appearance, null);
+                case appearance: setPreferencesFromResource(R.xml.settings_appearance, null);
                     break;
-                case gameplay:
-                    setPreferencesFromResource(R.xml.settings_gameplay, null);
+                case gameplay: setPreferencesFromResource(R.xml.settings_gameplay, null);
                     break;
-                case graphics:
-                    setPreferencesFromResource(R.xml.settings_graphics, null);
+                case graphics: setPreferencesFromResource(R.xml.settings_graphics, null);
                     break;
-                case sounds:
-                    setPreferencesFromResource(R.xml.settings_sounds, null);
+                case sounds: setPreferencesFromResource(R.xml.settings_sounds, null);
                     break;
-                case library:
-                    setPreferencesFromResource(R.xml.settings_library, null);
+                case library: setPreferencesFromResource(R.xml.settings_library, null);
                     break;
-                case advanced:
-                    setPreferencesFromResource(R.xml.settings_advanced, null);
+                case advanced: setPreferencesFromResource(R.xml.settings_advanced, null);
                     break;
             }
             loadPreferences(tab);
@@ -325,6 +320,18 @@ public class SettingsMenu extends BaseLayout {
                             settingsPanel.reloadBackground = true;
                         return true;
                     });
+            }
+
+            // Sounds
+            if (tab == Tabs.sounds) {
+                SeekBarPreference bgmVolume = findPreference("bgmvolume");
+
+                if (bgmVolume != null) {
+                    bgmVolume.setOnPreferenceChangeListener((p, val) -> {
+                        global.getSongService().setVolume(Float.parseFloat(val.toString()) / 100f);
+                        return true;
+                    });
+                }
             }
 
             // Library

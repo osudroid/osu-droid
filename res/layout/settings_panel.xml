@@ -91,9 +91,15 @@
                         android:src="@drawable/v_general" />
 
                     <ImageView
-                        android:id="@+id/sm_appearance"
+                        android:id="@+id/sm_gameplay"
                         style="@style/settings_panel_tab_button"
                         android:layout_below="@id/sm_general"
+                        android:src="@drawable/v_gameplay" />
+
+                    <ImageView
+                        android:id="@+id/sm_appearance"
+                        style="@style/settings_panel_tab_button"
+                        android:layout_below="@id/sm_gameplay"
                         android:src="@drawable/v_appearance" />
 
                     <ImageView
