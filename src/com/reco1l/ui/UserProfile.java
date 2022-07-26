@@ -9,7 +9,7 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.fragment.WebViewFragment;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.reco1l.ui.platform.BaseLayout;
+import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.ui.platform.UIManager;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.ClickListener;
@@ -21,7 +21,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class UserProfile extends BaseLayout {
+public class UserProfile extends UIFragment {
 
     public static String message;
     private View body;

@@ -25,7 +25,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 // Created by Reco1l on 22/6/22 02:26
 // Based on the EdrowsLuo BaseFragment class :)
 
-public abstract class BaseLayout extends Fragment implements IMainClasses, UI {
+public abstract class UIFragment extends Fragment implements IMainClasses, UI {
 
     protected View rootView, rootBackground;
     protected boolean

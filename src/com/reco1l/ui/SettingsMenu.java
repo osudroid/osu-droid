@@ -17,7 +17,7 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.SkinPathPreference;
 import com.google.android.material.snackbar.Snackbar;
 import com.reco1l.EngineMirror;
-import com.reco1l.ui.platform.BaseLayout;
+import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.ClickListener;
 import com.reco1l.utils.Res;
@@ -38,7 +38,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 18/7/22 22:13
 
-public class SettingsMenu extends BaseLayout {
+public class SettingsMenu extends UIFragment {
 
     protected Tabs currentTab;
     private FrameLayout container;

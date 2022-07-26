@@ -4,7 +4,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.reco1l.ui.platform.BaseLayout;
+import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -22,7 +22,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 7/7/22 01:17
 
-public class LoadingScene extends BaseLayout implements IUpdateHandler {
+public class LoadingScene extends UIFragment implements IUpdateHandler {
 
     public final Scene scene;
     private final ArrayList<String> log;

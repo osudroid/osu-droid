@@ -101,16 +101,16 @@ public class FragmentPlatform {
      */
     public void closeAll() {
         for (Fragment fragment: fragments) {
-            if (fragment.getClass().getSuperclass() == BaseLayout.class)
-                mActivity.runOnUiThread(((BaseLayout) fragment)::close);
+            if (fragment.getClass().getSuperclass() == UIFragment.class)
+                mActivity.runOnUiThread(((UIFragment) fragment)::close);
         }
     }
 
     /**
      * @param toClose fragments to close
      */
-    public void closeThis(BaseLayout... toClose) {
-        for (BaseLayout fragment : toClose) {
+    public void closeThis(UIFragment... toClose) {
+        for (UIFragment fragment : toClose) {
            if (fragment != null)
                mActivity.runOnUiThread(fragment::close);
         }
@@ -119,13 +119,13 @@ public class FragmentPlatform {
     /**
      * @param toExclude fragments to exclude from closing
      */
-    public void closeAllExcept(BaseLayout... toExclude) {
+    public void closeAllExcept(UIFragment... toExclude) {
         List<Fragment> toClose = new ArrayList<>(fragments);
         toClose.removeAll(Arrays.asList(toExclude));
 
         for (Fragment fragment: toClose) {
-            if (fragment.getClass().getSuperclass() == BaseLayout.class)
-                mActivity.runOnUiThread(((BaseLayout) fragment)::close);
+            if (fragment.getClass().getSuperclass() == UIFragment.class)
+                mActivity.runOnUiThread(((UIFragment) fragment)::close);
         }
     }
 }

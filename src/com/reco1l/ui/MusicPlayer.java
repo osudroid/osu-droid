@@ -9,7 +9,7 @@ import android.widget.TextView;
 import androidx.cardview.widget.CardView;
 
 import com.edlplan.framework.easing.Easing;
-import com.reco1l.ui.platform.BaseLayout;
+import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.ui.platform.UIManager;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.ClickListener;
@@ -28,7 +28,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 1/7/22 22:45
 
-public class MusicPlayer extends BaseLayout implements IMainClasses {
+public class MusicPlayer extends UIFragment implements IMainClasses {
 
     private final SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
     private static Drawable playDrw, pauseDrw;

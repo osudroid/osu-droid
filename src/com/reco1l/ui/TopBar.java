@@ -9,20 +9,19 @@ import android.widget.TextView;
 import com.edlplan.framework.easing.Easing;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.reco1l.EngineMirror;
-import com.reco1l.ui.platform.BaseLayout;
+import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.ClickListener;
 import com.reco1l.utils.Res;
 import com.reco1l.utils.interfaces.UI;
 
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.menu.SettingsMenu;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 26/6/22 21:20
 
-public class TopBar extends BaseLayout {
+public class TopBar extends UIFragment {
 
     public View musicBody, musicArrow;
     public TextView musicText;

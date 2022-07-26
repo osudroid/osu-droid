@@ -4,7 +4,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.reco1l.ui.platform.BaseLayout;
+import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -16,7 +16,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 24/6/22 02:49
 
-public class SplashScene extends BaseLayout implements IUpdateHandler {
+public class SplashScene extends UIFragment implements IUpdateHandler {
 
     private final GlobalManager global = GlobalManager.getInstance();
     public static SplashScene instance;

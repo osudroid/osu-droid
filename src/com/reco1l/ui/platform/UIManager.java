@@ -44,8 +44,8 @@ public class UIManager {
     /**
      * @return layouts that are "extras", that means panels or dialogs that aren't necessary related to a Scene.
      */
-    public static BaseLayout[] getExtras() {
-        return new BaseLayout[] {
+    public static UIFragment[] getExtras() {
+        return new UIFragment[] {
                 getInbox(),
                 getMusicPlayer(),
                 getUserProfile(),

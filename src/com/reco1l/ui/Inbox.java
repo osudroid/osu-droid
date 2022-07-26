@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment;
 
 import com.edlplan.framework.easing.Easing;
 import com.reco1l.ui.data.GameNotification;
-import com.reco1l.ui.platform.BaseLayout;
+import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.ui.platform.UIManager;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.ClickListener;
@@ -29,7 +29,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 // Created by Reco1l on 27/6/22 17:17
 
 //TODO replace with RecyclerView due to performance issues when are too many notifications
-public class Inbox extends BaseLayout {
+public class Inbox extends UIFragment {
 
     public static List<GameNotification> notifications;
 
