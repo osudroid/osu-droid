@@ -1,6 +1,7 @@
 package com.reco1l.ui;
 
 import android.animation.ValueAnimator;
+import android.graphics.Paint;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -9,6 +10,10 @@ import android.widget.TextView;
 import com.edlplan.framework.easing.Easing;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.reco1l.EngineMirror;
+import com.reco1l.ui.custom.Dialog;
+import com.reco1l.ui.custom.DialogBuilder;
+import com.reco1l.ui.custom.DialogFragment;
+import com.reco1l.ui.data.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.ClickListener;
@@ -126,6 +131,7 @@ public class TopBar extends UIFragment {
         new ClickListener(inbox).simple(UI.inbox::altShow);
         new ClickListener(music).simple(musicPlayer::altShow);
         new ClickListener(settings).simple(settingsPanel::altShow);
+        new ClickListener(author).simple(() -> new Dialog(DialogTable.author()).show());
 
         userBox.update(false);
     }

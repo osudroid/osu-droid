@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 25/7/22 20:24 -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/M"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="@dimen/_60sdp"
+            android:layout_height="@dimen/_60sdp"
+            android:layout_margin="@dimen/S"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_launcher" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/M"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/text"
+                android:text="osu!droid"
+                android:textStyle="bold" />
+
+            <TextView
+                style="@style/text"
+                android:text="by osu!droid team"
+                android:textColor="@color/textSecondary" />
+
+            <TextView
+                android:id="@+id/d_author_version"
+                style="@style/text"
+                android:text="[version]"
+                android:textColor="@color/textSecondary" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <View style="@style/panelSeparatorView" />
+
+    <LinearLayout
+        android:id="@+id/d_author_links"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/M"
+        android:layout_marginVertical="@dimen/M"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/text"
+            android:autoLink="web"
+            android:text="Visit our website:\nosudroid.moe" />
+
+        <TextView
+            style="@style/text"
+            android:layout_marginTop="@dimen/S"
+            android:autoLink="web"
+            android:text="Join the official Discord server:\ndiscord.gg/nyD92cE" />
+
+        <TextView
+            style="@style/text"
+            android:layout_marginTop="@dimen/S"
+            android:autoLink="web"
+            android:text="Join the official development Discord server:\ndiscord.gg/Jumudbq7pz" />
+
+        <TextView
+            style="@style/text"
+            android:layout_marginTop="@dimen/S"
+            android:autoLink="web"
+            android:text="Donate to the project:\npatreon.com/osudroid" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -370,9 +370,17 @@ public class Animation implements IMainClasses {
 
             view.postDelayed(() ->{
                 int childCount = view.getChildCount();
+                int goneCount = 0;
 
                 for (int i = countFromLast ? childCount - 1 : 0; countFromLast ? i >= 0 : i < childCount;) {
                     View child = view.getChildAt(i);
+
+                    if (child.getVisibility() == View.GONE) {
+                        goneCount++;
+                        i += countFromLast ? -1 : 1;
+                        continue;
+                    }
+
                     Animation anim = childAnimation.forChild(child);
 
                     if (countFromLast ? i == childCount - 1 : i == 0) {
@@ -382,7 +390,9 @@ public class Animation implements IMainClasses {
                         anim.runOnEnd(onEnd);
                     }
 
-                    anim.delay(duration * i);
+                    long delayPerChild = duration * (i - goneCount);
+
+                    anim.delay(delayPerChild > 0 ? delayPerChild : 0);
                     anim.play(duration);
                     i += countFromLast ? -1 : 1;
                 }

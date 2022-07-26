@@ -14,6 +14,8 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 import com.edlplan.ui.TriangleEffectView;
+import com.reco1l.ui.custom.Dialog;
+import com.reco1l.ui.data.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.ClickListener;
@@ -172,7 +174,7 @@ public class MainMenu extends UIFragment {
         new ClickListener(exit.view)
                 .simple(() -> {
                     Utils.setAccelerometerSign(global.getCamera().getRotation() == 0 ? 1 : -1);
-                    global.getMainScene().showExitDialog();
+                    new Dialog(DialogTable.exit()).show();
                 });
 
         new ClickListener(settings.view).simple(settingsPanel::altShow);

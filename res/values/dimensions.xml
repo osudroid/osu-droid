@@ -134,4 +134,11 @@
     <dimen name="settingsPanelNavBarWidth">@dimen/_60sdp</dimen>
     <dimen name="settingsPanelButtonHeight">@dimen/_50sdp</dimen>
 
+    <!--Dialog-->
+    <dimen name="dialogWidth">@dimen/_280sdp</dimen>
+    <dimen name="dialogContainerMinHeight">@dimen/_80sdp</dimen>
+    <dimen name="dialogCardElevation">@dimen/_20sdp</dimen>
+    <dimen name="dialogButtonHeight">@dimen/_38sdp</dimen>
+    <dimen name="dialogButtonElevation">@dimen/_4sdp</dimen>
+
 </resources>

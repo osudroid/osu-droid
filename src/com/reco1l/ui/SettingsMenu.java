@@ -17,6 +17,9 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.SkinPathPreference;
 import com.google.android.material.snackbar.Snackbar;
 import com.reco1l.EngineMirror;
+import com.reco1l.ui.custom.Dialog;
+import com.reco1l.ui.custom.DialogBuilder;
+import com.reco1l.ui.data.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.ClickListener;
@@ -304,13 +307,21 @@ public class SettingsMenu extends UIFragment {
 
             // Graphics
             if (tab == Tabs.graphics) {
-                Preference dither = findPreference("dither");
+                CheckBoxPreference dither = findPreference("dither");
                 ListPreference background = findPreference("background");
 
+                final boolean oldValue = Config.isUseDither();
+
                 if (dither != null)
-                    dither.setOnPreferenceChangeListener((preference, newValue) -> {
-                        if (Config.isUseDither() != (boolean) newValue)
-                            global.getMainScene().restart();
+                    dither.setOnPreferenceChangeListener((p, val) -> {
+                        if (Config.isUseDither() != (boolean) val) {
+                            DialogBuilder builder = DialogTable.restart();
+
+                            builder.onClose = () -> dither.setChecked(oldValue);
+                            builder.addButton("Cancel", Dialog::close);
+
+                            new Dialog(builder).closeExtras(false).show();
+                        }
                         return true;
                     });
 
