@@ -6,6 +6,7 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.MarginLayoutParams;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
@@ -14,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.reco1l.utils.ClickListener;
+import com.reco1l.utils.Res;
 import com.reco1l.utils.interfaces.UI;
 import com.reco1l.utils.interfaces.IMainClasses;
 
@@ -176,6 +178,30 @@ public abstract class BaseLayout extends Fragment implements IMainClasses, UI {
             if (bool) view.setVisibility(View.VISIBLE);
             else view.setVisibility(View.GONE);
         }
+    }
+
+    protected void setMargin(View view, int left, int top, int right, int bottom) {
+        if (view == null)
+            return;
+        MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
+        params.setMargins(left, top, right, bottom);
+        view.requestLayout();
+    }
+
+    protected void setVerticalMargin(View view, int top, int bottom) {
+        if (view == null)
+            return;
+        MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
+        params.setMargins(params.leftMargin, top, params.rightMargin, bottom);
+        view.requestLayout();
+    }
+
+    protected void setHorizontalMargin(View view, int left, int right) {
+        if (view == null)
+            return;
+        MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
+        params.setMargins(left, params.topMargin, right, params.bottomMargin);
+        view.requestLayout();
     }
 
     /**
