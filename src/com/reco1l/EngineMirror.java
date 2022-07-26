@@ -1,6 +1,5 @@
 package com.reco1l;
 
-import com.reco1l.ui.data.Notificator;
 import com.reco1l.ui.platform.UIManager;
 import com.reco1l.utils.interfaces.UI;
 import com.reco1l.utils.interfaces.IMainClasses;
@@ -10,7 +9,6 @@ import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
-import ru.nsu.ccfit.zuev.osu.menu.PauseMenu;
 
 // Created by Reco1l on 22/6/22 02:20
 

@@ -13,7 +13,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 /**
  * This class contains easy access to show notifications from other classes without adding a lot of lines.
  */
-public class Notificator implements IMainClasses, UI {
+public class NotificationTable implements IMainClasses, UI {
 
     // Single instance notifications
     private static GameNotification

@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu.online;
 
 import android.os.AsyncTask;
 
-import com.reco1l.ui.data.Notificator;
+import com.reco1l.ui.data.NotificationTable;
 import com.reco1l.utils.interfaces.IMainClasses;
 import com.reco1l.utils.interfaces.UI;
 
@@ -35,7 +35,7 @@ public class OnlineScoring implements IMainClasses, UI {
     public void login() {
         if (OnlineManager.getInstance().isStayOnline() == false)
             return;
-        Notificator.accountLogIn(null, 0);
+        NotificationTable.accountLogIn(null, 0);
         avatarLoaded = false;
 
         new AsyncTaskLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new OsuAsyncCallback() {
@@ -46,13 +46,13 @@ public class OnlineScoring implements IMainClasses, UI {
                     onlineHandler.clear();
                     //Trying to send request
                     for (int i = 0; i < 3; i++) {
-                        Notificator.accountLogIn("try", i);
+                        NotificationTable.accountLogIn("try", i);
 
                         try {
                             success = OnlineManager.getInstance().logIn();
                         } catch (OnlineManagerException e) {
                             Debug.e("Login error: " + e.getMessage());
-                            Notificator.accountLogIn("fail", i);
+                            NotificationTable.accountLogIn("fail", i);
                             try {
                                 Thread.sleep(3000);
                             } catch (InterruptedException e1) {
@@ -63,10 +63,10 @@ public class OnlineScoring implements IMainClasses, UI {
                         break;
                     }
                     if (success) {
-                        Notificator.accountLogIn("success", 0);
+                        NotificationTable.accountLogIn("success", 0);
                         OnlineManager.getInstance().setStayOnline(true);
                     } else {
-                        Notificator.accountLogIn("error", 0);
+                        NotificationTable.accountLogIn("error", 0);
                         OnlineManager.getInstance().setStayOnline(false);
                     }
                 }
