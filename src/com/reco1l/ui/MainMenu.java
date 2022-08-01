@@ -42,8 +42,8 @@ public class MainMenu extends UIFragment {
     private TriangleEffectView logoTriangles;
 
     private final ValueAnimator
-            bounceUp,
-            bounceDown,
+            logoBounceUp,
+            logoBounceDown,
             triangleSpeedUp,
             triangleSpeedDown;
 
@@ -55,8 +55,8 @@ public class MainMenu extends UIFragment {
     //--------------------------------------------------------------------------------------------//
 
     public MainMenu() {
-        bounceUp = ValueAnimator.ofFloat(0.93f, 1f);
-        bounceDown = ValueAnimator.ofFloat(1f, 0.93f);
+        logoBounceUp = ValueAnimator.ofFloat(0.93f, 1f);
+        logoBounceDown = ValueAnimator.ofFloat(1f, 0.93f);
         triangleSpeedUp = ValueAnimator.ofFloat(1f, 8f);
         triangleSpeedDown = ValueAnimator.ofFloat(8f, 1f);
     }
@@ -83,13 +83,13 @@ public class MainMenu extends UIFragment {
             logo.setScaleY((float) val.getAnimatedValue());
         };
 
-        bounceUp.removeAllUpdateListeners();
-        bounceUp.addUpdateListener(logoBounce);
-        bounceUp.setInterpolator(easeInOutQuad);
+        logoBounceUp.removeAllUpdateListeners();
+        logoBounceUp.addUpdateListener(logoBounce);
+        logoBounceUp.setInterpolator(easeInOutQuad);
 
-        bounceDown.removeAllUpdateListeners();
-        bounceDown.addUpdateListener(logoBounce);
-        bounceDown.setInterpolator(easeInOutQuad);
+        logoBounceDown.removeAllUpdateListeners();
+        logoBounceDown.addUpdateListener(logoBounce);
+        logoBounceDown.setInterpolator(easeInOutQuad);
 
         // Triangles speed up effect
         AnimatorUpdateListener triangleSpeed = val ->
@@ -221,10 +221,15 @@ public class MainMenu extends UIFragment {
 
     public void playExitAnim() {
         mActivity.runOnUiThread(() -> {
+            platform.closeAllExcept(this);
+            if (!isShowing)
+                return;
+
             hideMenu();
             isExitAnimInProgress = true;
             logo.setOnTouchListener(null);
-            logo.animate().rotation(-15).setDuration(3000).alpha(0).setStartDelay(160).start();
+            new Animation(logo).scale(logo.getScaleX(), 1).fade(1, 0)
+                    .delay(160).play(3000);
         });
     }
 
@@ -292,19 +297,19 @@ public class MainMenu extends UIFragment {
         long upTime = (long) (bpm * 0.07f);
         long downTime = (long) (bpm * 0.9f);
 
-        bounceUp.setDuration(upTime);
+        logoBounceUp.setDuration(upTime);
         triangleSpeedUp.setDuration(upTime);
 
-        bounceDown.setDuration(downTime);
+        logoBounceDown.setDuration(downTime);
         triangleSpeedDown.setDuration(downTime);
 
-        bounceDown.setStartDelay(upTime);
+        logoBounceDown.setStartDelay(upTime);
         triangleSpeedDown.setStartDelay(upTime);
 
         mActivity.runOnUiThread(() -> {
-            bounceUp.start();
+            logoBounceUp.start();
             triangleSpeedUp.start();
-            bounceDown.start();
+            logoBounceDown.start();
             triangleSpeedDown.start();
         });
     }
