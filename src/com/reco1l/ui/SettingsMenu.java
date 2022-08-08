@@ -169,7 +169,7 @@ public class SettingsMenu extends UIFragment {
 
     private void applySettings() {
         Config.loadConfig(mActivity);
-        onlineHandler.update();
+        onlineHelper.update();
         OnlineScoring.getInstance().login();
 
         if (reloadBackground && engine.currentScene == EngineMirror.Scenes.MAIN_MENU) {

@@ -43,7 +43,7 @@ public class OnlineScoring implements IMainClasses, UI {
             public void run() {
                 synchronized (onlineMutex) {
                     boolean success = false;
-                    onlineHandler.clear();
+                    onlineHelper.clear();
                     //Trying to send request
                     for (int i = 0; i < 3; i++) {
                         NotificationTable.accountLogIn("try", i);
@@ -73,7 +73,7 @@ public class OnlineScoring implements IMainClasses, UI {
             }
 
             public void onComplete() {
-                onlineHandler.update();
+                onlineHelper.update();
             }
         });
     }
@@ -145,7 +145,7 @@ public class OnlineScoring implements IMainClasses, UI {
                             if (OnlineManager.getInstance().getFailMessage().equals("Invalid record data"))
                                 i = attemptCount;
                         } else if (success) {
-                            onlineHandler.update();
+                            onlineHelper.update();
                             OnlineManager mgr = OnlineManager.getInstance();
                             panel.show(mgr.getMapRank(), mgr.getScore(), mgr.getRank(), mgr.getAccuracy());
                             OnlineManager.getInstance().sendReplay(replay);

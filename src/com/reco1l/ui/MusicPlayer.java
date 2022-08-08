@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.cardview.widget.CardView;
 
 import com.edlplan.framework.easing.Easing;
+import com.reco1l.ui.data.BeatmapHelper;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.ui.platform.UIManager;
 import com.reco1l.utils.Animation;
@@ -21,9 +22,7 @@ import java.util.TimeZone;
 
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.MainScene;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 1/7/22 22:45
@@ -77,7 +76,7 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
 
         new Animation(body)
                 .height((int) Res.dimen(R.dimen._30sdp), (int) Res.dimen(R.dimen.musicPlayerHeight))
-                .interpolatorMode(Animation.InterpolatorTo.VALUE_ANIMATOR)
+                .interpolatorMode(Animation.Interpolate.VALUE_ANIMATOR)
                 .interpolator(Easing.OutExpo)
                 .moveY(-30, 0)
                 .fade(0, 1)
@@ -195,27 +194,21 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
     }
 
     private void change() {
-        TrackInfo track = global.getMainScene().selectedTrack;
         BeatmapInfo beatmap = library.getBeatmap();
         songDrw = null;
 
-        if (beatmap == null)
-            return;
-
-        String title = !Config.isForceRomanized() ? beatmap.getTitleUnicode() : beatmap.getTitle();
         if (topBar.isShowing) {
             new Animation(topBar.musicText).fade(1, 0)
                     .play(150);
             new Animation(topBar.musicText).fade(0, 1)
-                    .runOnStart(() -> topBar.musicText.setText(title))
+                    .runOnStart(() -> topBar.musicText.setText(BeatmapHelper.getTitle(beatmap)))
                     .delay(150)
                     .play(150);
         }
 
-        if (track != null && track.getBackground() != null)
-            songDrw = Drawable.createFromPath(track.getBackground());
+        songDrw = BeatmapHelper.getBackground(global.getMainScene().selectedTrack);
 
-        if (!isShowing)
+        if (!isShowing || beatmap == null)
             return;
 
         if (currentOption == MainScene.MusicOption.NEXT) {
@@ -239,11 +232,8 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
 
     private void loadSongData(BeatmapInfo beatmap) {
 
-        String title = !Config.isForceRomanized() ? beatmap.getTitleUnicode() : beatmap.getTitle();
-        String artist = !Config.isForceRomanized() ? beatmap.getArtistUnicode() : beatmap.getArtist();
-
-        titleTv.setText(title);
-        artistTv.setText(artist);
+        titleTv.setText(BeatmapHelper.getTitle(beatmap));
+        artistTv.setText(BeatmapHelper.getArtist(beatmap));
         lengthTv.setText(sdf.format(length));
 
         if (songDrw == null) {
@@ -281,7 +271,7 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
 
         new Animation(body)
                 .height((int) Res.dimen(R.dimen.musicPlayerHeight), (int) Res.dimen(R.dimen._30sdp))
-                .interpolatorMode(Animation.InterpolatorTo.VALUE_ANIMATOR)
+                .interpolatorMode(Animation.Interpolate.VALUE_ANIMATOR)
                 .interpolator(Easing.OutExpo)
                 .runOnEnd(super::close)
                 .moveY(0, -30)

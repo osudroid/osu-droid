@@ -49,7 +49,7 @@ public class UserProfile extends UIFragment {
         new Animation(body)
                 .height(Res.sdp(30), Res.dimen(online.isStayOnline() ?
                         R.dimen.userPanelHeight : R.dimen.userPanelSmallHeight))
-                .interpolatorMode(Animation.InterpolatorTo.VALUE_ANIMATOR)
+                .interpolatorMode(Animation.Interpolate.VALUE_ANIMATOR)
                 .interpolator(Easing.OutExpo)
                 .moveY(-30, 0)
                 .fade(0, 1)
@@ -87,7 +87,7 @@ public class UserProfile extends UIFragment {
                                 .fade(0, child.getAlpha()))
                 .play(200);
 
-        avatar.setImageDrawable(onlineHandler.getPlayerAvatar());
+        avatar.setImageDrawable(onlineHelper.getPlayerAvatar());
 
         setVisible(false, message);
         setVisible(infoContainer);
@@ -146,7 +146,7 @@ public class UserProfile extends UIFragment {
         new Animation(body)
                 .height(Res.dimen(online.isStayOnline() ?
                         R.dimen.userPanelHeight : R.dimen.userPanelSmallHeight), Res.sdp(30))
-                .interpolatorMode(Animation.InterpolatorTo.VALUE_ANIMATOR)
+                .interpolatorMode(Animation.Interpolate.VALUE_ANIMATOR)
                 .interpolator(Easing.OutExpo)
                 .runOnEnd(super::close)
                 .moveY(0, -30)

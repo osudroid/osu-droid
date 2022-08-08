@@ -1,7 +1,6 @@
 package com.reco1l.ui;
 
 import android.animation.ValueAnimator;
-import android.graphics.Paint;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -11,8 +10,6 @@ import com.edlplan.framework.easing.Easing;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.reco1l.EngineMirror;
 import com.reco1l.ui.custom.Dialog;
-import com.reco1l.ui.custom.DialogBuilder;
-import com.reco1l.ui.custom.DialogFragment;
 import com.reco1l.ui.data.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
@@ -207,8 +204,8 @@ public class TopBar extends UIFragment {
             name.setText(online.getUsername());
             rank.setText(String.format("#%d", online.getRank()));
 
-            if (onlineHandler.getPlayerAvatar() != null)
-                avatar.setImageDrawable(onlineHandler.getPlayerAvatar());
+            if (onlineHelper.getPlayerAvatar() != null)
+                avatar.setImageDrawable(onlineHelper.getPlayerAvatar());
         }
     }
 

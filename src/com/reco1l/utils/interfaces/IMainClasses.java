@@ -1,7 +1,7 @@
 package com.reco1l.utils.interfaces;
 
 import com.reco1l.EngineMirror;
-import com.reco1l.ui.data.OnlineHandler;
+import com.reco1l.ui.data.OnlineHelper;
 import com.reco1l.ui.platform.FragmentPlatform;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -24,7 +24,7 @@ public interface IMainClasses {
     LibraryManager library = LibraryManager.getInstance();
     ResourceManager resources = ResourceManager.getInstance();
     OnlineManager online = OnlineManager.getInstance();
-    OnlineHandler onlineHandler = OnlineHandler.getInstance();
+    OnlineHelper onlineHelper = OnlineHelper.getInstance();
     EngineMirror engine = (EngineMirror) mActivity.getEngine();
     SkinManager skinManager = SkinManager.getInstance();
     PropertiesLibrary properties = PropertiesLibrary.getInstance();

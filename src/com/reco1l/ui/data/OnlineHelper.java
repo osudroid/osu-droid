@@ -14,17 +14,17 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 26/6/22 21:20
 
-public class OnlineHandler implements IMainClasses, UI {
+public class OnlineHelper implements IMainClasses, UI {
     // This class translates contains tools to translate online data for the new UI.
 
-    private static OnlineHandler instance;
+    private static OnlineHelper instance;
     private static final Drawable defaultAvatar = mActivity.getDrawable(R.drawable.default_avatar);
 
     //--------------------------------------------------------------------------------------------//
 
-    public static OnlineHandler getInstance() {
+    public static OnlineHelper getInstance() {
         if (instance == null)
-            instance = new OnlineHandler();
+            instance = new OnlineHelper();
         return instance;
     }
 
