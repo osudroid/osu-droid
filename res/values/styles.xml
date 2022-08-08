@@ -66,7 +66,7 @@
         <item name="cornerSize">@dimen/topBarAvatarCorners</item>
     </style>
 
-    <style name="song_seek_bar_shape">
+    <style name="song_seekbar_shape">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">@dimen/songSeekBarCornerRadius</item>
     </style>
@@ -85,6 +85,38 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/panelSeparatorHeight</item>
         <item name="android:background">@color/panelSeparator</item>
+    </style>
+
+    <!--Text badges-->
+    <style name="propertyBadge" parent="text">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:layout_marginStart">@dimen/XS</item>
+        <item name="android:drawablePadding">@dimen/XS</item>
+
+        <item name="android:paddingTop">@dimen/XXS</item>
+        <item name="android:paddingBottom">@dimen/XXS</item>
+        <item name="android:paddingLeft">@dimen/XS</item>
+        <item name="android:paddingRight">@dimen/S</item>
+
+        <item name="android:backgroundTint">@color/beatmapPanelPropertyBadgeBackground</item>
+        <item name="android:background">@drawable/round_shape</item>
+        <item name="android:textSize">@dimen/textXS</item>
+    </style>
+
+    <style name="smallPropertyBadge" parent="text">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:layout_marginStart">@dimen/XS</item>
+
+        <item name="android:paddingTop">@dimen/XXS</item>
+        <item name="android:paddingBottom">@dimen/XXS</item>
+        <item name="android:paddingLeft">@dimen/_3sdp</item>
+        <item name="android:paddingRight">@dimen/XS</item>
+
+        <item name="android:drawablePadding">@dimen/_3sdp</item>
+
+        <item name="android:backgroundTint">@color/scoreboardItemBadgeBackground</item>
+        <item name="android:background">@drawable/round_shape</item>
+        <item name="android:textSize">@dimen/textXXS</item>
     </style>
 
 </resources>

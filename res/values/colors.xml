@@ -61,4 +61,11 @@
     <!--Buttons-->
     <color name="buttonBackground">#2E2E2E</color>
 
+    <!--Beatmap panel-->
+    <color name="beatmapPanelBackground">#80000000</color>
+    <color name="beatmapPanelTabBackground">#20000000</color>
+    <color name="beatmapPanelPropertyBadgeBackground">#66000000</color>
+
+    <!--Scoreboard-->
+    <color name="scoreboardItemBadgeBackground">#24000000</color>
 </resources>
