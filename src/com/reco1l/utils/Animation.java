@@ -11,6 +11,8 @@ import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 import com.reco1l.utils.interfaces.IMainClasses;
 
+import java.util.ArrayList;
+
 import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
 import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 
@@ -22,10 +24,11 @@ import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
  */
 public class Animation implements IMainClasses {
 
-    private ViewPropertyAnimator anim;
-    private ValueAnimator valueAnim;
-
     private final View view;
+
+    private ViewPropertyAnimator anim;
+    private ValueAnimator singleValueAnim;
+    private ArrayList<ValueAnimator> multiValueAnim;
 
     private Easing interpolator;
     public Runnable onStart, onEnd;
@@ -41,10 +44,10 @@ public class Animation implements IMainClasses {
 
     private boolean cancelPendingAnimations = true;
 
-    private InterpolatorTo interpolatorTo = InterpolatorTo.BOTH;
+    private Interpolate interpolatorMode = Interpolate.BOTH;
 
-    public enum InterpolatorTo {
-        VIEW_PROPERTY_ANIMATOR,
+    public enum Interpolate {
+        PROPERTY_ANIMATOR,
         VALUE_ANIMATOR,
         BOTH
     }
@@ -75,31 +78,34 @@ public class Animation implements IMainClasses {
 
         fromAlpha = view.getAlpha();
         toAlpha = fromAlpha;
+
+        multiValueAnim = new ArrayList<>();
     }
 
+    // ValueAnimator based animations
+    //--------------------------------------------------------------------------------------------//
+
     public Animation ofInt(int from, int to) {
-        valueAnim = ValueAnimator.ofInt(from, to);
+        singleValueAnim = ValueAnimator.ofInt(from, to);
         return this;
     }
 
     public Animation ofFloat(float from, float to) {
-        valueAnim = ValueAnimator.ofFloat(from, to);
+        singleValueAnim = ValueAnimator.ofFloat(from, to);
         return this;
     }
 
     public Animation ofArgb(int from, int to) {
-        valueAnim = ValueAnimator.ofArgb(from, to);
+        singleValueAnim = ValueAnimator.ofArgb(from, to);
         return this;
     }
 
-    public Animation runOnUpdate(AnimatorUpdateListener onUpdate) {
-        valueAnim.addUpdateListener(onUpdate);
-        return this;
-    }
+    // Size
+    //--------------------------------------------------------------------------------------------//
 
     public Animation size(float from, float to) {
-        valueAnim = ValueAnimator.ofInt((int) from,(int) to);
-        valueAnim.addUpdateListener(animation -> {
+        singleValueAnim = ValueAnimator.ofInt((int) from,(int) to);
+        singleValueAnim.addUpdateListener(animation -> {
             view.getLayoutParams().height = (int) animation.getAnimatedValue();
             view.getLayoutParams().width = (int) animation.getAnimatedValue();
             view.requestLayout();
@@ -108,8 +114,8 @@ public class Animation implements IMainClasses {
     }
 
     public Animation height(float from, float to) {
-        valueAnim = ValueAnimator.ofInt((int) from,(int) to);
-        valueAnim.addUpdateListener(animation -> {
+        singleValueAnim = ValueAnimator.ofInt((int) from,(int) to);
+        singleValueAnim.addUpdateListener(animation -> {
             view.getLayoutParams().height = (int) animation.getAnimatedValue();
             view.requestLayout();
         });
@@ -117,30 +123,77 @@ public class Animation implements IMainClasses {
     }
 
     public Animation width(float from, float to) {
-        valueAnim = ValueAnimator.ofInt((int) from,(int) to);
-        valueAnim.addUpdateListener(animation -> {
+        singleValueAnim = ValueAnimator.ofInt((int) from,(int) to);
+        singleValueAnim.addUpdateListener(animation -> {
             view.getLayoutParams().width = (int) animation.getAnimatedValue();
             view.requestLayout();
         });
         return this;
     }
 
+    // Margins
+    //--------------------------------------------------------------------------------------------//
+
+    public Animation marginTop(int from, int to) {
+        ValueAnimator anim = ValueAnimator.ofInt(from, to);
+
+        anim.addUpdateListener(animation -> {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+            params.topMargin = (int) animation.getAnimatedValue();
+            view.requestLayout();
+        });
+        multiValueAnim.add(anim);
+        return this;
+    }
+
+    public Animation marginBottom(int from, int to) {
+        ValueAnimator anim = ValueAnimator.ofInt(from, to);
+
+        anim.addUpdateListener(animation -> {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+            params.bottomMargin = (int) animation.getAnimatedValue();
+            view.requestLayout();
+        });
+        multiValueAnim.add(anim);
+        return this;
+    }
+
+    public Animation marginLeft(int from, int to) {
+        ValueAnimator anim = ValueAnimator.ofInt(from, to);
+
+        anim.addUpdateListener(animation -> {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+            params.leftMargin = (int) animation.getAnimatedValue();
+            view.requestLayout();
+        });
+        multiValueAnim.add(anim);
+        return this;
+    }
+
+    public Animation marginRight(int from, int to) {
+        ValueAnimator anim = ValueAnimator.ofInt(from, to);
+
+        anim.addUpdateListener(animation -> {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+            params.rightMargin = (int) animation.getAnimatedValue();
+            view.requestLayout();
+        });
+        multiValueAnim.add(anim);
+        return this;
+    }
+
+    // Elevation
+    //--------------------------------------------------------------------------------------------//
+
     public Animation elevation(float from, float to) {
-        valueAnim = ValueAnimator.ofFloat(from, to);
-        valueAnim.addUpdateListener(animation ->
+        singleValueAnim = ValueAnimator.ofFloat(from, to);
+        singleValueAnim.addUpdateListener(animation ->
                 view.setElevation((float) animation.getAnimatedValue()));
         return this;
     }
 
-    public Animation cancelPending(boolean bool) {
-        cancelPendingAnimations = bool;
-        return this;
-    }
-
-    public Animation delay(long ms){
-        delay = ms;
-        return this;
-    }
+    // Scale
+    //--------------------------------------------------------------------------------------------//
 
     public Animation pivot(Float X, Float Y) {
         if (view == null)
@@ -173,6 +226,9 @@ public class Animation implements IMainClasses {
         return this;
     }
 
+    // Translation
+    //--------------------------------------------------------------------------------------------//
+
     public Animation moveX(float from, float to) {
         fromX = from;
         toX = to;
@@ -185,15 +241,21 @@ public class Animation implements IMainClasses {
         return this;
     }
 
+    // Interpolation
+    //--------------------------------------------------------------------------------------------//
+
     public Animation interpolator(Easing interpolator) {
         this.interpolator = interpolator;
         return this;
     }
 
-    public Animation interpolatorMode(InterpolatorTo mode) {
-        interpolatorTo = mode;
+    public Animation interpolatorMode(Interpolate mode) {
+        interpolatorMode = mode;
         return this;
     }
+
+    // Rotation
+    //--------------------------------------------------------------------------------------------//
 
     public Animation rotation(float from, float to) {
         fromRotation = from;
@@ -201,19 +263,39 @@ public class Animation implements IMainClasses {
         return this;
     }
 
+    // Alpha
+    //--------------------------------------------------------------------------------------------//
+
     public Animation fade(float from, float to){
         fromAlpha = from;
         toAlpha = to;
         return this;
     }
 
+    //--------------------------------------------------------------------------------------------//
+
     public Animation runOnStart(Runnable task) {
         this.onStart = task;
         return this;
     }
 
+    public Animation runOnUpdate(AnimatorUpdateListener onUpdate) {
+        singleValueAnim.addUpdateListener(onUpdate);
+        return this;
+    }
+
     public Animation runOnEnd(Runnable task) {
         onEnd = task;
+        return this;
+    }
+
+    public Animation cancelPending(boolean bool) {
+        cancelPendingAnimations = bool;
+        return this;
+    }
+
+    public Animation delay(long ms){
+        delay = ms;
         return this;
     }
 
@@ -235,7 +317,8 @@ public class Animation implements IMainClasses {
                         if (onEnd != null)
                             mActivity.runOnUiThread(onEnd);
                         anim = null;
-                        valueAnim = null;
+                        singleValueAnim = null;
+                        multiValueAnim = null;
                     }
                 });
             }
@@ -275,20 +358,33 @@ public class Animation implements IMainClasses {
 
             // Interpolator
             if (interpolator != null) {
-                if (interpolatorTo == InterpolatorTo.VIEW_PROPERTY_ANIMATOR || interpolatorTo == InterpolatorTo.BOTH) {
+                if (interpolatorMode == Interpolate.PROPERTY_ANIMATOR || interpolatorMode == Interpolate.BOTH) {
                     anim.setInterpolator(EasingHelper.asInterpolator(interpolator));
                 }
             }
 
-            if (valueAnim != null) {
-                valueAnim.setDuration(duration);
-                valueAnim.setStartDelay(delay);
+            if (singleValueAnim != null) {
+                singleValueAnim.setDuration(duration);
+                singleValueAnim.setStartDelay(delay);
                 if (interpolator != null) {
-                    if (interpolatorTo == InterpolatorTo.VALUE_ANIMATOR || interpolatorTo == InterpolatorTo.BOTH) {
-                        valueAnim.setInterpolator(EasingHelper.asInterpolator(interpolator));
+                    if (interpolatorMode == Interpolate.VALUE_ANIMATOR || interpolatorMode == Interpolate.BOTH) {
+                        singleValueAnim.setInterpolator(EasingHelper.asInterpolator(interpolator));
                     }
                 }
-                valueAnim.start();
+                singleValueAnim.start();
+            }
+
+            if (multiValueAnim != null) {
+                for (ValueAnimator valueAnim : multiValueAnim) {
+                    valueAnim.setDuration(duration);
+                    valueAnim.setStartDelay(delay);
+                    if (interpolator != null) {
+                        if (interpolatorMode == Interpolate.VALUE_ANIMATOR || interpolatorMode == Interpolate.BOTH) {
+                            valueAnim.setInterpolator(EasingHelper.asInterpolator(interpolator));
+                        }
+                    }
+                    valueAnim.start();
+                }
             }
 
             anim.setListener(new BaseAnimationListener() {
@@ -305,7 +401,7 @@ public class Animation implements IMainClasses {
                         onEnd.run();
                     super.onAnimationEnd(animation);
                     anim = null;
-                    valueAnim = null;
+                    singleValueAnim = null;
                 }
             });
 
@@ -314,6 +410,9 @@ public class Animation implements IMainClasses {
             anim.start();
         });
     }
+
+    // Animation for layouts childs
+    //--------------------------------------------------------------------------------------------//
 
     public ViewGroupAnimation forChildView(IChildViewAnimation childAnimation) {
         if (view == null)
