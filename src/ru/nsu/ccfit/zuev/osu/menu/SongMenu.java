@@ -1,9 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Process;
 
 import com.edlplan.ext.EdExtensionHelper;
@@ -11,6 +9,7 @@ import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.replay.OdrDatabase;
 import com.edlplan.ui.fragment.PropsMenuFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
+import com.reco1l.utils.interfaces.UI;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -20,54 +19,37 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.scene.background.SpriteBackground;
 import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.entity.text.Text;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.HorizontalAlign;
-import org.anddev.andengine.util.MathUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
 import java.util.Set;
-import java.util.TimeZone;
 
-import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
 import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
-import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
-import ru.nsu.ccfit.zuev.osu.online.OnlinePanel;
-import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
-import ru.nsu.ccfit.zuev.skins.SkinLayout;
 
-public class SongMenu implements IUpdateHandler, MenuItemListener,
-        IScrollBarListener {
+public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarListener, UI {
     private final static Boolean musicMutex = true;
     private final Boolean backgroundMutex = true;
     public Scene scene;
@@ -86,7 +68,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private Sprite bg = null;
     private Boolean bgLoaded = false;
     private String bgName = "";
-    private ScoreBoard board;
     private Float touchY = null;
     private String filterText = "";
     private boolean favsOnly = false;
@@ -96,12 +77,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private int pointerId = -1;
     private float initalY = -1;
     private float secPassed = 0, tapTime;
-    private Sprite backButton = null;
     private ScrollBar scrollbar;
-    private ChangeableText trackInfo, mapper, beatmapInfo, beatmapInfo2, dimensionInfo;
     private boolean isSelectComplete = true;
-    private AnimSprite scoringSwitcher = null;
-    private AsyncTask<OsuAsyncCallback, Integer, Boolean> boardTask;
     private GroupType groupType = GroupType.MapSet;
 
     public SongMenu() {
@@ -117,14 +94,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public void setScoringScene(final ScoringScene ss) {
         scoreScene = ss;
-    }
-
-    public ScoreBoard.ScoreBoardItems[] getBoard() {
-        return board.getScoreBoardItems();
-    }
-
-    public boolean isBoardOnline() {
-        return board.isShowOnlineScores();
     }
 
     public ArrayList<MenuItem> getMenuItems() {
@@ -178,8 +147,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         final Rectangle bgDimRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
         bgDimRect.setColor(0, 0, 0, 0.2f);
         backLayer.attachChild(bgDimRect);
-
-        board = new ScoreBoard(scene, backLayer, this, context);
 
         float oy = 10;
         for (final BeatmapInfo i : LibraryManager.getInstance().getLibrary()) {
@@ -264,368 +231,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         scene.setTouchAreaBindingEnabled(true);
 
         scrollbar = new ScrollBar(scene);
-
-		/*final Rectangle bgTopRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Utils.toRes(170));
-		bgTopRect.setColor(0, 0, 0, 0.8f);*/
-        final TextureRegion songSelectTopTexture = ResourceManager.getInstance().getTexture("songselect-top");
-        final Sprite songSelectTop = new Sprite(0, 0, songSelectTopTexture);
-        songSelectTop.setSize(songSelectTopTexture.getWidth() * songSelectTopTexture.getHeight() / 184f, 184);
-        songSelectTop.setPosition(-1640, songSelectTop.getY());
-        songSelectTop.setAlpha(0.6f);
-        frontLayer.attachChild(songSelectTop);
-
-		/*final Rectangle bgbottomRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Utils.toRes(110));
-		bgbottomRect.setPosition(0, Config.getRES_HEIGHT() - bgbottomRect.getHeight());
-		bgbottomRect.setColor(0, 0, 0, 0.8f);
-		frontLayer.attachChild(bgbottomRect);*/
-
-        trackInfo = new ChangeableText(Utils.toRes(70), Utils.toRes(2),
-                ResourceManager.getInstance().getFont("font"), "title", 1024);
-        frontLayer.attachChild(trackInfo);
-
-        mapper = new ChangeableText(Utils.toRes(70), trackInfo.getY() + trackInfo.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "mapper", 1024);
-        frontLayer.attachChild(mapper);
-
-        beatmapInfo = new ChangeableText(Utils.toRes(4), mapper.getY() + mapper.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo", 1024);
-        frontLayer.attachChild(beatmapInfo);
-
-        beatmapInfo2 = new ChangeableText(Utils.toRes(4), beatmapInfo.getY() + beatmapInfo.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo2", 1024);
-        frontLayer.attachChild(beatmapInfo2);
-
-        dimensionInfo = new ChangeableText(Utils.toRes(4), beatmapInfo2.getY() + beatmapInfo2.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024);
-        frontLayer.attachChild(dimensionInfo);
-
-        SkinLayout layoutBackButton = OsuSkin.get().getLayout("BackButton");
-        SkinLayout layoutMods = OsuSkin.get().getLayout("ModsButton");
-        SkinLayout layoutOptions = OsuSkin.get().getLayout("OptionsButton");
-        SkinLayout layoutRandom = OsuSkin.get().getLayout("RandomButton");
-
-        if (ResourceManager.getInstance().isTextureLoaded("menu-back-0")) {
-            List<String> loadedBackTextures = new ArrayList<>();
-            for (int i = 0; i < 60; i++) {
-                if (ResourceManager.getInstance().isTextureLoaded("menu-back-" + i))
-                    loadedBackTextures.add("menu-back-" + i);
-            }
-            backButton = new AnimSprite(0, 0, loadedBackTextures.size(), loadedBackTextures.toArray(new String[0])) {
-                boolean moved = false;
-                float dx = 0, dy = 0;
-                boolean scaleWhenHold = true;
-
-                {
-                    if (layoutBackButton != null) {
-                        scaleWhenHold = layoutBackButton.property.optBoolean("scaleWhenHold", true);
-                    }
-                }
-
-                @Override
-                public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                             final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                    if (pSceneTouchEvent.isActionDown()) {
-                        if (scaleWhenHold) backButton.setScale(1.25f);
-                        moved = false;
-                        dx = pTouchAreaLocalX;
-                        dy = pTouchAreaLocalY;
-                        BassSoundProvider playSnd = ResourceManager.getInstance().getSound("menuback");
-                        if (playSnd != null) {
-                            playSnd.play();
-                        }
-                        return true;
-                    }
-                    if (pSceneTouchEvent.isActionUp()) {
-                        // back
-                        if (selectedTrack == null) {
-                            return true;
-                        }
-                        if (!moved) {
-                            backButton.setScale(1f);
-                            back();
-                        }
-                        return true;
-                    }
-                    if (pSceneTouchEvent.isActionOutside()
-                            || pSceneTouchEvent.isActionMove()
-                            && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                            pTouchAreaLocalY) > 50)) {
-                        backButton.setScale(1f);
-                        moved = true;
-                    }
-                    return false;
-                }
-            };
-        } else {
-            backButton = new Sprite(0, 0, ResourceManager.getInstance().getTexture("menu-back")) {
-                boolean moved = false;
-                float dx = 0, dy = 0;
-                boolean scaleWhenHold = true;
-
-                {
-                    if (layoutBackButton != null) {
-                        scaleWhenHold = layoutBackButton.property.optBoolean("scaleWhenHold", true);
-                    }
-                }
-
-                @Override
-                public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                             final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                    if (pSceneTouchEvent.isActionDown()) {
-                        if (scaleWhenHold) backButton.setScale(1.25f);
-                        moved = false;
-                        dx = pTouchAreaLocalX;
-                        dy = pTouchAreaLocalY;
-                        BassSoundProvider playSnd = ResourceManager.getInstance().getSound("menuback");
-                        if (playSnd != null) {
-                            playSnd.play();
-                        }
-                        return true;
-                    }
-                    if (pSceneTouchEvent.isActionUp()) {
-                        // back
-                        if (selectedTrack == null) {
-                            return true;
-                        }
-                        if (!moved) {
-                            backButton.setScale(1f);
-                            back();
-                        }
-                        return true;
-                    }
-                    if (pSceneTouchEvent.isActionOutside()
-                            || pSceneTouchEvent.isActionMove()
-                            && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                            pTouchAreaLocalY) > 50)) {
-                        backButton.setScale(1f);
-                        moved = true;
-                    }
-                    return false;
-                }
-            };
-        }
-
-        final AnimSprite modSelection = new AnimSprite(0, 0, 0,
-                "selection-mods", "selection-mods-over") {
-            boolean moved = false;
-            private float dx = 0, dy = 0;
-
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-                    setFrame(1);
-                    moved = false;
-                    dx = pTouchAreaLocalX;
-                    dy = pTouchAreaLocalY;
-                    return true;
-                }
-                if (pSceneTouchEvent.isActionUp()) {
-                    setFrame(0);
-                    if (!moved) {
-                        velocityY = 0;
-                        ModMenu.getInstance().show(SongMenu.this, selectedTrack);
-                    }
-                    return true;
-                }
-                if (pSceneTouchEvent.isActionOutside()
-                        || pSceneTouchEvent.isActionMove()
-                        && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                        pTouchAreaLocalY) > 50)) {
-                    moved = true;
-                    setFrame(0);
-                }
-                return false;
-            }
-        };
-
-        final AnimSprite optionSelection = new AnimSprite(0, 0, 0,
-                "selection-options", "selection-options-over") {
-            boolean moved = false;
-            private float dx = 0, dy = 0;
-
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-                    setFrame(1);
-                    moved = false;
-                    dx = pTouchAreaLocalX;
-                    dy = pTouchAreaLocalY;
-                    return true;
-                }
-                if (pSceneTouchEvent.isActionUp()) {
-
-                    setFrame(0);
-                    if (!moved) {
-                        velocityY = 0;
-
-                        FilterMenu.getInstance().showMenu(SongMenu.this);
-                    }
-                    return true;
-                }
-                if (pSceneTouchEvent.isActionOutside()
-                        || pSceneTouchEvent.isActionMove()
-                        && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                        pTouchAreaLocalY) > 50)) {
-                    moved = true;
-                    setFrame(0);
-                }
-                return false;
-            }
-        };
-
-        final AnimSprite randomMap = new AnimSprite(0, 0, 0,
-                "selection-random", "selection-random-over") {
-            boolean moved = false;
-            private float dx = 0, dy = 0;
-
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-                    setFrame(1);
-                    moved = false;
-                    dx = pTouchAreaLocalX;
-                    dy = pTouchAreaLocalY;
-                    return true;
-                }
-                if (pSceneTouchEvent.isActionUp()) {
-                    setFrame(0);
-                    if (!isSelectComplete) {
-                        return true;
-                    }
-                    if (!moved) {
-                        velocityY = 0;
-                        if (items.size() <= 1) {
-                            return true;
-                        }
-                        int rnd = MathUtils.random(0, items.size() - 1);
-                        int index = 0;
-                        while (rnd > 0) {
-                            rnd--;
-                            int oldIndex = index;
-                            do {
-                                index = (index + 1) % items.size();
-                                if (index == oldIndex)
-                                    return true;
-                            } while (!items.get(index).isVisible());
-                        }
-                        if (!items.get(index).isVisible()) {
-                            return true;
-                        }
-                        if (selectedItem == items.get(index)) {
-                            return true;
-                        }
-                        ResourceManager.getInstance().getSound("menuclick")
-                                .play();
-                        items.get(index).select(true, true);
-                    }
-                    return true;
-                }
-                if (pSceneTouchEvent.isActionOutside()
-                        || pSceneTouchEvent.isActionMove()
-                        && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                        pTouchAreaLocalY) > 50)) {
-                    moved = true;
-                    setFrame(0);
-                }
-                return false;
-            }
-        };
-
-
-        modSelection.setScale(1.5f);
-        optionSelection.setScale(1.5f);
-        randomMap.setScale(1.5f);
-        if (OsuSkin.get().isUseNewLayout()) {
-            if (layoutBackButton != null) {
-                layoutBackButton.baseApply(backButton);
-            }
-            if (layoutMods != null) {
-                layoutMods.baseApply(modSelection);
-            }
-            if (layoutOptions != null) {
-                layoutOptions.baseApply(optionSelection);
-            }
-            if (layoutRandom != null) {
-                layoutRandom.baseApply(randomMap);
-            }
-            backButton.setPosition(0, Config.getRES_HEIGHT() - backButton.getHeightScaled());
-            modSelection.setPosition(backButton.getX() + backButton.getWidth(),
-                    Config.getRES_HEIGHT() - modSelection.getHeightScaled());
-            optionSelection.setPosition(
-                    modSelection.getX() + modSelection.getWidthScaled(),
-                    Config.getRES_HEIGHT() - optionSelection.getHeightScaled());
-            randomMap.setPosition(
-                    optionSelection.getX() + optionSelection.getWidthScaled(),
-                    Config.getRES_HEIGHT() - randomMap.getHeightScaled());
-        } else {
-            backButton.setPosition(0, Config.getRES_HEIGHT() - backButton.getHeight());
-            modSelection.setPosition(backButton.getX() + backButton.getWidth(),
-                    Config.getRES_HEIGHT() - Utils.toRes(90));
-            optionSelection.setPosition(
-                    modSelection.getX() + modSelection.getWidthScaled(),
-                    Config.getRES_HEIGHT() - Utils.toRes(90));
-            randomMap.setPosition(
-                    optionSelection.getX() + optionSelection.getWidthScaled(),
-                    Config.getRES_HEIGHT() - Utils.toRes(90));
-        }
-
-
-        frontLayer.attachChild(backButton);
-        scene.registerTouchArea(backButton);
-        frontLayer.attachChild(modSelection);
-        scene.registerTouchArea(modSelection);
-        frontLayer.attachChild(optionSelection);
-        scene.registerTouchArea(optionSelection);
-        frontLayer.attachChild(randomMap);
-        scene.registerTouchArea(randomMap);
-
-        // TODO temporal workaround once SongMenu UI get replaced.
-        if (OnlineScoring.online.isStayOnline()) {
-            scoringSwitcher = new AnimSprite(Utils.toRes(5), Utils.toRes(10), 0, "ranking_enabled", "ranking_disabled") {
-                @Override
-                public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
-                                             float pTouchAreaLocalX, float pTouchAreaLocalY) {
-                    if (!pSceneTouchEvent.isActionDown()) return false;
-                    board.cancleLoadAvatar();
-                    toggleScoringSwitcher();
-                    return true;
-                }
-            };
-            scoringSwitcher.setFrame(1);
-            scoringSwitcher.setPosition(10, 10);
-            scene.registerTouchArea(scoringSwitcher);
-            frontLayer.attachChild(scoringSwitcher);
-        }
-    }
-
-    public void toggleScoringSwitcher() {
-        if (board.isShowOnlineScores()) {
-            board.setShowOnlineScores(false);
-            board.init(selectedTrack);
-            scoringSwitcher.setFrame(1);
-            updateInfo(selectedTrack);
-        } else if (OnlineManager.getInstance().isStayOnline()) {
-            board.setShowOnlineScores(true);
-            board.init(selectedTrack);
-            setRank();
-        }
-    }
-
-    public void setRank() {
-        if (!board.isShowOnlineScores()) {
-            if (scoringSwitcher != null) {
-                scoringSwitcher.setFrame(1);
-            }
-            updateInfo(selectedTrack);
-            return;
-        }
-        scoringSwitcher.setFrame(0);
     }
 
     public Scene getScene() {
@@ -743,7 +348,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         expandSelectedItem(pSecondsElapsed);
 
-        board.update(pSecondsElapsed);
         updateScrollbar(camY + Config.getRES_HEIGHT() / 2f, oy);
     }
 
@@ -808,185 +412,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         camY += item.getTotalHeight() / 2;
     }
 
-    @SuppressLint("SimpleDateFormat")
-    public void changeDimensionInfo(TrackInfo track) {
-        if (track == null) {
-            return;
-        }
-        float ar = track.getApproachRate();
-        float od = track.getOverallDifficulty();
-        float cs = track.getCircleSize();
-        float hp = track.getHpDrain();
-        float bpm_max = track.getBpmMax();
-        float bpm_min = track.getBpmMin();
-        long length = track.getMusicLength();
-        EnumSet<GameMod> mod = ModMenu.getInstance().getMod();
-
-        dimensionInfo.setColor(1, 1, 1);
-        beatmapInfo.setColor(1, 1, 1);
-
-        if (mod.contains(GameMod.MOD_EASY)) {
-            ar *= 0.5f;
-            od *= 0.5f;
-            cs -= 1f;
-            hp *= 0.5f;
-            dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
-        }
-        if (mod.contains(GameMod.MOD_HARDROCK)) {
-            ar *= 1.4f;
-            if (ar > 10) {
-                ar = 10;
-            }
-            od *= 1.4f;
-            cs += 1f;
-            hp *= 1.4f;
-            dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-        }
-        if (ModMenu.getInstance().getChangeSpeed() != 1) {
-            float speed = ModMenu.getInstance().getSpeed();
-            bpm_max *= speed;
-            bpm_min *= speed;
-            length /= speed;
-            if (speed > 1) {
-                beatmapInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-                dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-            } else if (speed < 1) {
-                beatmapInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
-                dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
-            }
-        } else {
-            if (mod.contains(GameMod.MOD_DOUBLETIME)) {
-                bpm_max *= 1.5f;
-                bpm_min *= 1.5f;
-                length *= 2 / 3f;
-                beatmapInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-                dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-            }
-            if (mod.contains(GameMod.MOD_NIGHTCORE)) {
-                bpm_max *= 1.5f;
-                bpm_min *= 1.5f;
-                length *= 2 / 3f;
-                beatmapInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-                dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-            }
-            if (mod.contains(GameMod.MOD_HALFTIME)) {
-                bpm_max *= 0.75f;
-                bpm_min *= 0.75f;
-                length *= 4 / 3f;
-                beatmapInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
-                dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
-            }
-        }
-        if (mod.contains(GameMod.MOD_REALLYEASY)) {
-            if (mod.contains(GameMod.MOD_EASY)) {
-                ar *= 2f;
-                ar -= 0.5f;
-            }
-            ar -= 0.5f;
-            if (ModMenu.getInstance().getChangeSpeed() != 1) {
-                ar -= ModMenu.getInstance().getSpeed() - 1.0f;
-            } else if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)) {
-                ar -= 0.5f;
-            }
-            od *= 0.5f;
-            cs -= 1f;
-            hp *= 0.5f;
-            dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
-        }
-        if (mod.contains(GameMod.MOD_SMALLCIRCLE)) {
-            cs += 4f;
-            dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-        }
-        //
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
-        String binfoStr = String.format(StringTable.get(R.string.binfoStr1), sdf.format(length),
-                (bpm_min == bpm_max ? GameHelper.Round(bpm_min, 1) : GameHelper.Round(bpm_min, 1) + "-" + GameHelper.Round(bpm_max, 1)),
-                track.getMaxCombo());
-        if (length > 3600 * 1000) {
-            sdf = new SimpleDateFormat("HH:mm:ss");
-            sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
-            binfoStr = String.format(StringTable.get(R.string.binfoStr1), sdf.format(length),
-                    (bpm_min == bpm_max ? GameHelper.Round(bpm_min, 1) : GameHelper.Round(bpm_min, 1) + "-" + GameHelper.Round(bpm_max, 1)),
-                    track.getMaxCombo());
-        }
-        beatmapInfo.setText(binfoStr);
-
-        final StringBuilder dimensionStringBuilder = new StringBuilder();
-        ar = Math.min(13.f, ar);
-        od = Math.min(10.f, od);
-        cs = Math.min(15.f, cs);
-        hp = Math.min(10.f, hp);
-        if (ModMenu.getInstance().getChangeSpeed() != 1) {
-            float speed = ModMenu.getInstance().getSpeed();
-            ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) / speed), 2);
-            od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) / speed), 2);
-        } else if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)) {
-            ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 2 / 3), 2);
-            od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 2 / 3), 2);
-        } else if (mod.contains(GameMod.MOD_HALFTIME)) {
-            ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 4 / 3), 2);
-            od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 4 / 3), 2);
-        }
-        if (ModMenu.getInstance().isEnableForceAR()) {
-            float oriAr = ar;
-            ar = ModMenu.getInstance().getForceAR();
-            if (ar > oriAr) {
-                dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-            } else if (ar < oriAr) {
-                dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
-            }
-        }
-        dimensionStringBuilder.append("AR: ").append(GameHelper.Round(ar, 2)).append(" ")
-                .append("OD: ").append(GameHelper.Round(od, 2)).append(" ")
-                .append("CS: ").append(GameHelper.Round(cs, 2)).append(" ")
-                .append("HP: ").append(GameHelper.Round(hp, 2)).append(" ")
-                .append("Stars: ").append(GameHelper.Round(track.getDifficulty(), 2));
-
-        dimensionInfo.setText(dimensionStringBuilder.toString());
-    }
-
     public void updateInfo(TrackInfo track) {
-        if (track == null) {
-            return;
-        }
-
-        String tinfoStr = (track.getBeatmap().getArtistUnicode() == null || Config.isForceRomanized() ? track.getBeatmap().getArtist() : track.getBeatmap().getArtistUnicode()) + " - " +
-                (track.getBeatmap().getTitleUnicode() == null || Config.isForceRomanized() ? track.getBeatmap().getTitle() : track.getBeatmap().getTitleUnicode()) + " [" + track.getMode() + "]";
-        String mapperStr = "Beatmap by " + track.getCreator();
-        String binfoStr2 = String.format(StringTable.get(R.string.binfoStr2),
-                track.getHitCircleCount(), track.getSliderCount(), track.getSpinnerCount(), track.getBeatmapSetID());
-        trackInfo.setText(tinfoStr);
-        mapper.setText(mapperStr);
-        beatmapInfo2.setText(binfoStr2);
-        changeDimensionInfo(track);
-        (new Thread() {
-            public void run() {
-                DifficultyReCalculator diffReCalculator = new DifficultyReCalculator();
-                float newstar = diffReCalculator.recalculateStar(
-                    selectedTrack,
-                    diffReCalculator.getCS(selectedTrack),
-                    ModMenu.getInstance().getSpeed()
-                );
-
-                if (newstar != 0f) {
-                    setStarsDisplay(newstar);
-                }
-            }
-        }).start();
+        beatmapPanel.updateProperties(track);
     }
 
     public void selectTrack(final TrackInfo track, boolean reloadBG) {
-//		BassAudioProvider provider = BassAudioPlayer.getProvider();
-//		if (provider != null && provider.getStatus() != Status.STOPPED) {
-//			provider.stop();
-//		}
-        new Thread() {
-            @Override
-            public void run() {
-                if (board.isShowOnlineScores()) setRank();
-            }
-        }.start();
 
         if (selectedTrack == track) {
             synchronized (bgLoaded) {
@@ -1006,22 +436,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         EdExtensionHelper.onSelectTrack(selectedTrack);
         GlobalManager.getInstance().setSelectedTrack(track);
         updateInfo(track);
-        board.cancleLoadAvatar();
-        if (boardTask != null && boardTask.getStatus() != AsyncTask.Status.FINISHED) {
-            boardTask.cancel(true);
-            board.cancleLoadOnlineScores();
-        }
-        boardTask = new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-            @Override
-            public void run() {
-                board.init(track);
-            }
-
-            @Override
-            public void onComplete() {
-                // Do something cleanup
-            }
-        });
+        beatmapPanel.updateScoreboard();
 
         final int quality = Config.getBackgroundQuality();
         synchronized (backgroundMutex) {
@@ -1097,7 +512,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void updateScore() {
-        board.init(selectedTrack);
+        // board.init(selectedTrack);
         if (selectedItem != null) {
             selectedItem.updateMarks();
         }
@@ -1156,7 +571,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void bindDataBaseChangedListener() {
-        OdrDatabase.get().setOnDatabaseChangedListener(this::reloadScoreBroad);
+        OdrDatabase.get().setOnDatabaseChangedListener(beatmapPanel::updateScoreboard);
     }
 
     public void unbindDataBaseChangedListener() {
@@ -1237,25 +652,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         //ScorePropsMenu.getInstance().setSongMenu(SongMenu.this);
         //ScorePropsMenu.getInstance().setScoreId(scoreId);
         //scene.setChildScene(ScorePropsMenu.getInstance().getScene(), false, true, true);
-    }
-
-    public void reloadScoreBroad() {
-        board.cancleLoadAvatar();
-        if (boardTask != null && boardTask.getStatus() != AsyncTask.Status.FINISHED) {
-            boardTask.cancel(true);
-            board.cancleLoadOnlineScores();
-        }
-        boardTask = new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-            @Override
-            public void run() {
-                board.init(selectedTrack);
-            }
-
-            @Override
-            public void onComplete() {
-                // Do something cleanup
-            }
-        });
     }
 
     public Entity getFrontLayer() {
@@ -1349,14 +745,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 item.applyFilter(lowerFilter, favsOnly, limit);
             }
             System.gc();
-        }
-    }
-
-    public void setStarsDisplay(float star) {
-        String str = dimensionInfo.getText();
-        String[] strs = str.split("Stars: ");
-        if (strs.length == 2) {
-            dimensionInfo.setText(strs[0] + "Stars: " + star);
         }
     }
 

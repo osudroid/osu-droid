@@ -23,7 +23,9 @@
 	<string name="user_profile_offline_message">Stay online is disabled or cannot connect to server.</string>
 	<string name="user_profile_unable_message">Unable to reach online data.</string>
 
-	<string name="beatmap_panel_offline_prompt">Online features are not available on debug builds.</string>
+	<string name="beatmap_panel_offline_prompt">Online features are not available on debug builds</string>
+	<string name="beatmap_panel_error_prompt">Error loading scores</string>
+	<string name="beatmap_panel_empty_prompt">No scores found</string>
 	<!--End-->
 
 	<string name="message_error">Error: %s</string>

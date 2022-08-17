@@ -100,9 +100,11 @@ public class FragmentPlatform {
      * Close all fragments currently showing
      */
     public void closeAll() {
-        for (Fragment fragment: fragments) {
-            if (fragment.getClass().getSuperclass() == UIFragment.class)
+        for (int i = 0; i < fragments.size(); i++) {
+            Fragment fragment = fragments.get(i);
+            if (fragment.getClass().getSuperclass() == UIFragment.class) {
                 mActivity.runOnUiThread(((UIFragment) fragment)::close);
+            }
         }
     }
 

@@ -18,19 +18,20 @@
         android:background="@drawable/round_shape"
         android:backgroundTint="@color/topBarMusicButtonBackground"
         android:paddingLeft="@dimen/M"
-        android:paddingRight="@dimen/L">
+        android:paddingRight="@dimen/L"
+        android:visibility="gone">
 
         <ImageView
             android:id="@+id/tb_musicArrow"
-            android:alpha="0"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:src="@drawable/v_arrow_s"
-            android:rotation="180"/>
+            android:alpha="0"
+            android:rotation="180"
+            android:src="@drawable/v_arrow_s" />
 
         <LinearLayout
-            android:id="@+id/tb_musicChildLayout"
+            android:id="@+id/tb_musicBody"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true">
@@ -88,6 +89,7 @@
 
         <!--Buttons-->
         <LinearLayout
+            android:id="@+id/tb_buttons"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:background="@color/topBarButtonsBackground">

@@ -64,7 +64,10 @@
     <!--Beatmap panel-->
     <color name="beatmapPanelBackground">#80000000</color>
     <color name="beatmapPanelTabBackground">#20000000</color>
-    <color name="beatmapPanelPropertyBadgeBackground">#66000000</color>
+
+    <color name="propertyBackground">#66000000</color>
+    <color name="propertyTextGreen">#2E8B56</color>
+    <color name="propertyTextRed">#CD5555</color>
 
     <!--Scoreboard-->
     <color name="scoreboardItemBadgeBackground">#24000000</color>

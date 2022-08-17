@@ -2,12 +2,14 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.opengl.GLES20;
 
+import com.reco1l.ui.data.ScoreboardItem;
+import com.reco1l.utils.interfaces.UI;
+
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.entity.text.Text;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.HorizontalAlign;
 
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -15,15 +17,14 @@ import java.util.Locale;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.menu.ScoreBoard;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
-public class DuringGameScoreBoard extends GameObject {
+public class DuringGameScoreBoard extends GameObject implements UI {
     private final StatisticV2 stat;
     private Sprite[] boards;
     private ChangeableText[] ranks;
-    private ScoreBoard.ScoreBoardItems[] scoreBoardDatas;
+    private ScoreboardItem[] scoreBoardDatas;
     private int posNow;
     private String currentUsername;
     private ChangeableText playerRank;
@@ -35,15 +36,15 @@ public class DuringGameScoreBoard extends GameObject {
     private float paddingTop = 15, paddingLeft = 10;
 
     public DuringGameScoreBoard(final Scene scene, final StatisticV2 stat, String isNotMe) {
-        final ScoreBoard.ScoreBoardItems[] items = GlobalManager.getInstance().getSongMenu().getBoard();
+        final ScoreboardItem[] items = beatmapPanel.getBoard();
         this.stat = stat;
         int replayid = GlobalManager.getInstance().getScoring().getReplayID();
         if (replayid == -1) scoreBoardDatas = items;
         else {
             int replayIndex = -1;
-            scoreBoardDatas = new ScoreBoard.ScoreBoardItems[items.length - 1];
+            scoreBoardDatas = new ScoreboardItem[items.length - 1];
             for (int i = 0; i < items.length; i++) {
-                if (replayid == items[i].scoreId) {
+                if (replayid == items[i].id) {
                     replayIndex = i;
                     continue;
                 }
@@ -63,7 +64,7 @@ public class DuringGameScoreBoard extends GameObject {
         for (int i = 0; i < scoreBoardDatas.length; i++) {
             Sprite s = new Sprite(0, 0, tex);
             s.setAlpha(0.5f);
-            s.setColor(scoreBoardDatas[i].userName.equals(currentUsername) && !currentUsername.equals("osu!") ? 1 : 0.5f, 0.5f, 0.5f);
+            s.setColor(scoreBoardDatas[i].name.equals(currentUsername) && !currentUsername.equals("osu!") ? 1 : 0.5f, 0.5f, 0.5f);
             final Text info = new Text(paddingLeft, paddingTop,
                     ResourceManager.getInstance().getFont("font"), scoreBoardDatas[i].get());
             info.setScaleCenter(0, 0);
@@ -100,7 +101,7 @@ public class DuringGameScoreBoard extends GameObject {
         playerRank.setScaleCenter(0, 0);
         playerRank.setScale(1.7f);
         playerRank.setColor(0.6f, 0.6f, 0.6f, 0.9f);
-        playerRank.setText("#" + (!GlobalManager.getInstance().getSongMenu().isBoardOnline() || posNow < (replayid == -1 ? 20 : 19) ?
+        playerRank.setText("#" + (!beatmapPanel.isOnlineBoard || posNow < (replayid == -1 ? 20 : 19) ?
                 String.valueOf(posNow + 1) : "?"));
         playerRank.setPosition(100 - playerRank.getWidth(), paddingTop * 2);
         playerSprite.attachChild(playerRank);
@@ -122,7 +123,7 @@ public class DuringGameScoreBoard extends GameObject {
         playerText.setScaleCenter(0, 0);
         playerText.setScale(0.65f);
         for (int i = posNow - 1; i >= 0; i--) {
-            if (score > scoreBoardDatas[i].playScore) {
+            if (score > scoreBoardDatas[i].lScore) {
                 posNow = i;
                 ranks[i].setText("#" + (i + 2));
                 ranks[i].setPosition(100 - ranks[i].getWidth(), paddingTop * 2);

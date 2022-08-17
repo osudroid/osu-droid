@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 9/8/22 20:20 -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/scoreboardItemHeight"
+    android:layout_marginBottom="@dimen/XXS"
+    android:paddingHorizontal="@dimen/XS"
+    android:paddingVertical="@dimen/XXS">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/sb_body"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:outlineAmbientShadowColor="#0000"
+        android:outlineSpotShadowColor="#0000"
+        app:cardBackgroundColor="#40000000"
+        app:cardCornerRadius="@dimen/globalCorners">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/sb_rank"
+                style="@style/text"
+                android:layout_width="@dimen/scoreboardItemRankLayoutWidth"
+                android:layout_height="match_parent"
+                android:alpha="0.6"
+                android:gravity="center"
+                android:text="50"
+                android:textStyle="bold" />
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/sb_avatar"
+                android:layout_width="@dimen/scoreboardItemAvatarSize"
+                android:layout_height="@dimen/scoreboardItemAvatarSize"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/sb_rank"
+                android:scaleType="centerCrop"
+                android:src="@drawable/default_avatar"
+                app:shapeAppearanceOverlay="@style/avatar_shape" />
+
+            <ImageView
+                android:id="@+id/sb_mark"
+                android:layout_width="@dimen/scoreboardItemMarkSize"
+                android:layout_height="@dimen/scoreboardItemMarkSize"
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="@dimen/_S"
+                android:layout_marginBottom="@dimen/XXS"
+                android:layout_toEndOf="@id/sb_avatar" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/S"
+                android:layout_toEndOf="@id/sb_avatar"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/M"
+                        android:layout_marginLeft="@dimen/_1sdp"
+                        android:layout_marginBottom="@dimen/_3sdp">
+
+                        <TextView
+                            android:id="@+id/sb_name"
+                            style="@style/text"
+                            android:layout_centerVertical="true"
+                            android:text="[player]"
+                            android:textSize="@dimen/textXS" />
+
+                        <LinearLayout
+                            android:id="@+id/sb_mods"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="@dimen/_3sdp"
+                            android:layout_toRightOf="@id/sb_name"
+                            android:orientation="horizontal">
+
+                            <!--Mods drawables here-->
+
+                        </LinearLayout>
+
+                    </RelativeLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/sb_score"
+                            style="@style/smallPropertyBadge"
+                            android:layout_marginStart="0dp"
+                            android:backgroundTint="@color/scoreboardItemBadgeBackground"
+                            android:drawableStart="@drawable/v_score_xxs"
+                            android:text="000,000,000" />
+
+                        <TextView
+                            android:id="@+id/sb_difference"
+                            style="@style/smallPropertyBadge"
+                            android:layout_marginLeft="@dimen/XXS"
+                            android:backgroundTint="@color/scoreboardItemBadgeBackground"
+                            android:drawableStart="@drawable/v_upgrade_xxs"
+                            android:text="0000000" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="@dimen/XS"
+                android:gravity="right"
+                android:orientation="vertical"
+                android:paddingRight="@dimen/XXS">
+
+                <TextView
+                    android:id="@+id/sb_accuracy"
+                    style="@style/smallPropertyBadge"
+                    android:layout_marginLeft="@dimen/XXS"
+                    android:layout_marginBottom="@dimen/XXS"
+                    android:backgroundTint="@color/scoreboardItemBadgeBackground"
+                    android:drawableStart="@drawable/v_touch_xxs"
+                    android:text="100.00%" />
+
+                <TextView
+                    android:id="@+id/sb_combo"
+                    style="@style/smallPropertyBadge"
+                    android:backgroundTint="@color/scoreboardItemBadgeBackground"
+                    android:drawableStart="@drawable/v_combo_xxs"
+                    android:text="0000x" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>

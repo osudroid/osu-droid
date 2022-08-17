@@ -1,5 +1,6 @@
 package com.reco1l.utils.interfaces;
 
+import com.reco1l.ui.BeatmapPanel;
 import com.reco1l.ui.Inbox;
 import com.reco1l.ui.LoadingScene;
 import com.reco1l.ui.MainMenu;
@@ -21,4 +22,5 @@ public interface UI {
     MainMenu mainMenu = UIManager.getMainMenu();
     UserProfile userProfile = UIManager.getUserProfile();
     SettingsMenu settingsPanel = UIManager.getSettingsPanel();
+    BeatmapPanel beatmapPanel = UIManager.getBeatmapPanel();
 }

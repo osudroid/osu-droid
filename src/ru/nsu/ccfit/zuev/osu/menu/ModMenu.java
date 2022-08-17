@@ -176,20 +176,6 @@ public class ModMenu implements IModSwitcher {
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionUp()) {
-                    (new Thread() {
-                        public void run() {
-                            if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != null){
-                                DifficultyReCalculator rec = new DifficultyReCalculator();
-                                float newstar = rec.recalculateStar(
-                                        GlobalManager.getInstance().getSongMenu().getSelectedTrack(),
-                                        rec.getCS(GlobalManager.getInstance().getSongMenu().getSelectedTrack()),
-                                        getSpeed());
-                                if (newstar != 0f) {
-                                    GlobalManager.getInstance().getSongMenu().setStarsDisplay(newstar);
-                                }
-                            }
-                        }
-                    }).start();
                     hide();
                     return true;
                 }
@@ -226,7 +212,7 @@ public class ModMenu implements IModSwitcher {
     }
 
     private void changeMultiplierText() {
-        GlobalManager.getInstance().getSongMenu().changeDimensionInfo(selectedTrack);
+        GlobalManager.getInstance().getSongMenu().updateInfo(selectedTrack);
         //calculateAble = true;
         float mult = 1;
         for (GameMod m : mod) {

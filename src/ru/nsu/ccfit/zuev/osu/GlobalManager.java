@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.util.DisplayMetrics;
 
+import com.reco1l.DrawableManager;
 import com.reco1l.ui.platform.UIManager;
 
 import org.anddev.andengine.engine.Engine;
@@ -58,6 +59,7 @@ public class GlobalManager {
         setInfo("Loading skin...");
         skinNow = Config.getSkinPath();
         ResourceManager.getInstance().loadSkin(skinNow);
+        DrawableManager.getInstance().loadAssets(skinNow);
         ScoreLibrary.getInstance().load(mainActivity);
         setLoadingProgress(20);
         PropertiesLibrary.getInstance().load(mainActivity);
@@ -75,7 +77,6 @@ public class GlobalManager {
             songService.stop();
             songService.hideNotification();
         }
-        UIManager.loadResources();
     }
 
     public Engine getEngine() {

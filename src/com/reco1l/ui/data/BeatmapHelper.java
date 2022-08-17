@@ -1,4 +1,4 @@
-package com.reco1l.ui.data;// Created by Reco1l on 1/8/22 05:27
+package com.reco1l.ui.data;
 
 import android.graphics.drawable.Drawable;
 
@@ -10,6 +10,8 @@ import java.io.InputStream;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
+
+// Created by Reco1l on 1/8/22 05:27
 
 public class BeatmapHelper implements IMainClasses {
 
@@ -65,54 +67,41 @@ public class BeatmapHelper implements IMainClasses {
         return value >= min && value < max;
     }
 
-    public static float[] getDifficultyColor(float stars) {
-        return getDifficultyColor(stars, false);
-    }
+    // Don't ask me how this works, but if you want you can write a better algorithm.
+    // TODO [BeatmapHelper] make a better algorithm to get the difficulty color.
+    public static float[] getColor(float stars) {
 
-    public static float[] getDifficultyColor(float stars, boolean darker) {
-
-        float[] HSV = {1f, 0.75f, 0.50f};
+        float[] hsv = {1f, 0.75f, 0.50f};
 
         float f = 1 + stars - (int) stars; // Decimal part
         int i = 36; // Hue difference between difficulty
 
         if (range(stars, 1, 5)) {
-            HSV[0] = 180 - (i * stars);
+            hsv[0] = 180 - (i * stars);
         }
-        if (range(stars, 5, 6)) {
-            HSV[0] = 360 - (i * (f - 1));
+        else if (range(stars, 5, 6)) {
+            hsv[0] = 360 - (i * (f - 1));
         }
-        if (range(stars, 6, 7)) {
-            HSV[0] = 360 - (i * f);
+        else if (range(stars, 6, 7)) {
+            hsv[0] = 360 - (i * f);
         }
-        if (range(stars, 7, 8)) {
-            HSV[0] = 360 - (i + (i * f));
+        else if (range(stars, 7, 8)) {
+            hsv[0] = 360 - (i + (i * f));
         }
-        if (range(stars, 8, 9)) {
-            HSV[0] = 360 - (2 * i + (i * f));
+        else if (range(stars, 8, 9)) {
+            hsv[0] = 360 - (2 * i + (i * f));
         }
-        if (range(stars, 9, 10)) {
-            HSV[0] = 360 - (3 * i + (i * f));
-            HSV[2] = 0.50f - (0.1f * f);
+        else if (range(stars, 9, 10)) {
+            hsv[0] = 360 - (3 * i + (i * f));
+            hsv[2] = 0.50f - (0.1f * f);
         }
 
         if (stars < 1) {
-            HSV[0] = 180;
+            hsv[0] = 180;
         } else if (stars >= 10) {
-            HSV[2] = 0;
+            hsv[2] = 0;
         }
-
-        if(darker) {
-            HSV[1] = 0.70f;
-            HSV[2] = 0.20f;
-
-            if(stars >= 10) {
-                HSV[2] = 0.08f;
-                HSV[1] = 0;
-            }
-        }
-
-        return HSV;
+        return hsv;
     }
 
     // Background
@@ -124,20 +113,17 @@ public class BeatmapHelper implements IMainClasses {
 
         if (track.getBackground() != null) {
             return Drawable.createFromPath(track.getBackground());
-        } else {
-            InputStream is;
+        }
+        InputStream is;
 
-            try {
-                is = mActivity.getAssets().open("gfx/menu-background.png");
-            } catch (IOException e) {
-                return null;
-            }
-
-            if (is != null) {
-                return Drawable.createFromStream(is, null);
-            }
-
+        try {
+            is = mActivity.getAssets().open("gfx/menu-background.png");
+        } catch (IOException e) {
             return null;
         }
+        if (is != null) {
+            return Drawable.createFromStream(is, null);
+        }
+        return null;
     }
 }

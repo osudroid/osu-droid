@@ -156,7 +156,7 @@ public class PropsMenuFragment extends BaseFragment implements IPropsMenu {
 
     @Override
     public void dismiss() {
-        menu.setRank();
+        // update scoreboard if score is deleted
         playEndAnim(super::dismiss);
     }
 

@@ -1,12 +1,14 @@
 package com.reco1l.ui.platform;
 
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
+import android.widget.TextView;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
@@ -14,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.reco1l.utils.Animation;
 import com.reco1l.utils.ClickListener;
 import com.reco1l.utils.Res;
 import com.reco1l.utils.interfaces.UI;
@@ -119,7 +122,7 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
         isDismissOnBackPress = onBackPress;
     }
 
-    //-----------------------------------------Tools----------------------------------------------//
+    //--------------------------------------------------------------------------------------------//
     /**
      * Finds a child View of the parent layout from its resource ID.
      * @return the view itself if it exists as child in the layout, otherwise null.
@@ -157,6 +160,8 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
         return (T) view;
     }
 
+    // View tools
+    //--------------------------------------------------------------------------------------------//
     /**
      * Fast tool to switch the visibility of multiple views to <code>VISIBLE</code>.
      * <p>
@@ -215,12 +220,36 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
         return false;
     }
 
-    protected DisplayMetrics displayMetrics() {
-        DisplayMetrics metrics = new DisplayMetrics();
-        mActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        return metrics;
+    /**
+     * Set text with a fade animation.
+     */
+    public void setText(TextView view, String text) {
+        if (view == null)
+            return;
+
+        final int color = view.getCurrentTextColor();
+        final int alpha = Color.alpha(color);
+        final int[] rgb = {
+                Color.red(color),
+                Color.green(color),
+                Color.blue(color)
+        };
+
+        new Animation(view)
+                .ofArgb(color, Color.argb(0, rgb[0], rgb[1], rgb[2]))
+                .runOnUpdate(val -> view.setTextColor((int) val.getAnimatedValue()))
+                .play(400);
+
+        new Animation(view)
+                .ofArgb(view.getCurrentTextColor(), Color.argb(alpha, rgb[0], rgb[1], rgb[2]))
+                .runOnUpdate(val -> view.setTextColor((int) val.getAnimatedValue()))
+                .runOnStart(() -> view.setText(text))
+                .delay(400)
+                .play(400);
     }
 
+    //--------------------------------------------------------------------------------------------//
+    @Deprecated // Use Res class instead.
     protected Resources res(){
         return mActivity.getResources();
     }

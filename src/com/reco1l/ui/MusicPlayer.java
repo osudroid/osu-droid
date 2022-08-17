@@ -49,11 +49,6 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
 
     //--------------------------------------------------------------------------------------------//
 
-    public static void onResourcesLoad() {
-        playDrw = Res.drw(R.drawable.v_play_xl_circle);
-        pauseDrw = Res.drw(R.drawable.v_pause_xl);
-    }
-
     @Override
     protected int getLayout() {
         return R.layout.music_player;
@@ -73,6 +68,9 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
 
         body = find("body");
         body.postDelayed(closeTask, 8000);
+
+        playDrw = Res.drw(R.drawable.v_play_xl_circle);
+        pauseDrw = Res.drw(R.drawable.v_pause_xl);
 
         new Animation(body)
                 .height((int) Res.dimen(R.dimen._30sdp), (int) Res.dimen(R.dimen.musicPlayerHeight))
@@ -198,12 +196,7 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
         songDrw = null;
 
         if (topBar.isShowing) {
-            new Animation(topBar.musicText).fade(1, 0)
-                    .play(150);
-            new Animation(topBar.musicText).fade(0, 1)
-                    .runOnStart(() -> topBar.musicText.setText(BeatmapHelper.getTitle(beatmap)))
-                    .delay(150)
-                    .play(150);
+            topBar.musicButton.update(beatmap);
         }
 
         songDrw = BeatmapHelper.getBackground(global.getMainScene().selectedTrack);
@@ -250,11 +243,8 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
     public void show() {
         if (isShowing)
             return;
-
         platform.closeThis(UIManager.getExtras());
-        
-        new Animation(topBar.musicBody).moveY(0, -10).fade(1, 0).play(120);
-        new Animation(topBar.musicArrow).rotation(180, 180).moveY(10, 0).fade(0, 1).delay(120).play(120);
+        topBar.musicButton.playAnimation(true);
         super.show();
     }
 
@@ -264,8 +254,7 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
             return;
 
         body.removeCallbacks(closeTask);
-        new Animation(topBar.musicArrow).rotation(180, 180).moveY(0, -10).fade(1, 0).play(120);
-        new Animation(topBar.musicBody).moveY(10, 0).fade(0, 1).delay(120).play(120);
+        topBar.musicButton.playAnimation(false);
 
         new Animation(find("innerBody")).fade(1, 0).play(100);
 

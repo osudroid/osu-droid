@@ -51,20 +51,19 @@ public class EngineMirror extends Engine implements IMainClasses, UI {
             currentScene = Scenes.PAUSE_MENU;
         }*/
 
-        if (scene == LoadingScreen.getInstance().getScene()
-                || scene == loadingScene.scene) {
+        if (scene == LoadingScreen.getInstance().getScene() || scene == loadingScene.scene) {
             currentScene = Scenes.LOADING_SCREEN;
         }
-        if (scene == global.getMainScene().getScene()) {
+        else if (scene == global.getMainScene().getScene()) {
             currentScene = Scenes.MAIN_MENU;
         }
-        if (scene == global.getSongMenu().getScene()) {
+        else if (scene == global.getSongMenu().getScene()) {
             currentScene = Scenes.SONG_MENU;
         }
-        if (scene == global.getScoring().getScene()) {
+        else if (scene == global.getScoring().getScene()) {
             currentScene = Scenes.SCORING;
         }
-        if (scene == global.getGameScene().getScene()) {
+        else if (scene == global.getGameScene().getScene()) {
             currentScene = Scenes.GAME;
         }
 
@@ -95,6 +94,10 @@ public class EngineMirror extends Engine implements IMainClasses, UI {
                 platform.closeAllExcept(topBar, mainMenu);
                 break;
             case SONG_MENU:
+                topBar.show();
+                beatmapPanel.show();
+                platform.closeAllExcept(topBar, beatmapPanel);
+                break;
             case SCORING:
             case GAME:
                 platform.closeAll();

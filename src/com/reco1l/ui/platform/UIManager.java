@@ -1,5 +1,7 @@
 package com.reco1l.ui.platform;
 
+import com.reco1l.DrawableManager;
+import com.reco1l.ui.BeatmapPanel;
 import com.reco1l.ui.Inbox;
 import com.reco1l.ui.LoadingScene;
 import com.reco1l.ui.MainMenu;
@@ -21,6 +23,7 @@ public class UIManager {
     public static MainMenu mainMenu;
     public static UserProfile userProfile;
     public static SettingsMenu settingsPanel;
+    public static BeatmapPanel beatmapPanel;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -33,10 +36,6 @@ public class UIManager {
         userProfile = new UserProfile();
         settingsPanel = new SettingsMenu();
         isUserInterfaceInit = true;
-    }
-
-    public static void loadResources() {
-        MusicPlayer.onResourcesLoad();
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -52,6 +51,8 @@ public class UIManager {
                 getSettingsPanel()
         };
     }
+
+    //--------------------------------------------------------------------------------------------//
 
     public static TopBar getTopBar() {
         if (topBar == null) {
@@ -100,5 +101,12 @@ public class UIManager {
             settingsPanel = new SettingsMenu();
         }
         return settingsPanel;
+    }
+
+    public static BeatmapPanel getBeatmapPanel() {
+        if (beatmapPanel == null) {
+            beatmapPanel = new BeatmapPanel();
+        }
+        return beatmapPanel;
     }
 }

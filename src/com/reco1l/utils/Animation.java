@@ -1,9 +1,11 @@
 package com.reco1l.utils;
 
+import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewPropertyAnimator;
 
 import com.edlplan.framework.easing.Easing;
@@ -12,6 +14,7 @@ import com.edlplan.ui.EasingHelper;
 import com.reco1l.utils.interfaces.IMainClasses;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
 import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
@@ -24,16 +27,15 @@ import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
  */
 public class Animation implements IMainClasses {
 
-    private final View view;
+    private View view;
 
     private ViewPropertyAnimator anim;
-    private ValueAnimator singleValueAnim;
-    private ArrayList<ValueAnimator> multiValueAnim;
+    private List<ValueAnimator> valueAnimators;
 
     private Easing interpolator;
     public Runnable onStart, onEnd;
 
-    private long delay = 0;
+    private long duration = -1, delay = 0;
 
     private float fromX, toX;
     private float fromY, toY;
@@ -53,6 +55,13 @@ public class Animation implements IMainClasses {
     }
 
     //--------------------------------------------------------------------------------------------//
+
+    /**
+     * This constructor is intended to be used for multiple Animations.
+     */
+    public Animation() {
+        valueAnimators = new ArrayList<>();
+    }
 
     /**
      * Don't forget to call {@link #play(long)} to start the animation
@@ -79,55 +88,89 @@ public class Animation implements IMainClasses {
         fromAlpha = view.getAlpha();
         toAlpha = fromAlpha;
 
-        multiValueAnim = new ArrayList<>();
+        valueAnimators = new ArrayList<>();
     }
 
     // ValueAnimator based animations
     //--------------------------------------------------------------------------------------------//
 
-    public Animation ofInt(int from, int to) {
-        singleValueAnim = ValueAnimator.ofInt(from, to);
-        return this;
+    public static class ValueAnimation {
+
+        private final ValueAnimator valueAnimator;
+        private final Animation instance;
+
+        public ValueAnimation(ValueAnimator valueAnimator, Animation instance) {
+            this.valueAnimator = valueAnimator;
+            this.instance = instance;
+        }
+
+        public ValueAnimation interpolator(Easing interpolator) {
+            valueAnimator.setInterpolator(EasingHelper.asInterpolator(interpolator));
+            return this;
+        }
+
+        public Animation runOnUpdate(AnimatorUpdateListener onUpdate) {
+            valueAnimator.removeAllUpdateListeners();
+            valueAnimator.addUpdateListener(onUpdate);
+            return instance;
+        }
     }
 
-    public Animation ofFloat(float from, float to) {
-        singleValueAnim = ValueAnimator.ofFloat(from, to);
-        return this;
+    public ValueAnimation ofInt(int from, int to) {
+        ValueAnimator valueAnimator = ValueAnimator.ofInt(from, to);
+        valueAnimators.add(valueAnimator);
+        return new ValueAnimation(valueAnimator, this);
     }
 
-    public Animation ofArgb(int from, int to) {
-        singleValueAnim = ValueAnimator.ofArgb(from, to);
-        return this;
+    public ValueAnimation ofFloat(float from, float to) {
+        ValueAnimator valueAnimator = ValueAnimator.ofFloat(from, to);
+        valueAnimators.add(valueAnimator);
+        return new ValueAnimation(valueAnimator, this);
+    }
+
+    public ValueAnimation ofArgb(int from, int to) {
+        ValueAnimator valueAnimator = ValueAnimator.ofArgb(from, to);
+        valueAnimators.add(valueAnimator);
+        return new ValueAnimation(valueAnimator, this);
     }
 
     // Size
     //--------------------------------------------------------------------------------------------//
 
     public Animation size(float from, float to) {
-        singleValueAnim = ValueAnimator.ofInt((int) from,(int) to);
-        singleValueAnim.addUpdateListener(animation -> {
+        ValueAnimator valueAnimator = ValueAnimator.ofInt((int) from, (int) to);
+        valueAnimator.addUpdateListener(animation -> {
+            if (view == null)
+                return;
             view.getLayoutParams().height = (int) animation.getAnimatedValue();
             view.getLayoutParams().width = (int) animation.getAnimatedValue();
             view.requestLayout();
         });
+        valueAnimators.add(valueAnimator);
         return this;
     }
 
     public Animation height(float from, float to) {
-        singleValueAnim = ValueAnimator.ofInt((int) from,(int) to);
-        singleValueAnim.addUpdateListener(animation -> {
+        ValueAnimator valueAnimator = ValueAnimator.ofInt((int) from, (int) to);
+        valueAnimator.addUpdateListener(animation -> {
+            if (view == null)
+                return;
             view.getLayoutParams().height = (int) animation.getAnimatedValue();
             view.requestLayout();
         });
+        valueAnimators.add(valueAnimator);
         return this;
     }
 
     public Animation width(float from, float to) {
-        singleValueAnim = ValueAnimator.ofInt((int) from,(int) to);
-        singleValueAnim.addUpdateListener(animation -> {
+        ValueAnimator valueAnimator = ValueAnimator.ofInt((int) from, (int) to);
+        valueAnimator.addUpdateListener(animation -> {
+            if (view == null)
+                return;
             view.getLayoutParams().width = (int) animation.getAnimatedValue();
             view.requestLayout();
         });
+        valueAnimators.add(valueAnimator);
         return this;
     }
 
@@ -135,50 +178,54 @@ public class Animation implements IMainClasses {
     //--------------------------------------------------------------------------------------------//
 
     public Animation marginTop(int from, int to) {
-        ValueAnimator anim = ValueAnimator.ofInt(from, to);
-
-        anim.addUpdateListener(animation -> {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+        ValueAnimator valueAnimator = ValueAnimator.ofInt(from, to);
+        valueAnimator.addUpdateListener(animation -> {
+            if (view == null)
+                return;
+            MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
             params.topMargin = (int) animation.getAnimatedValue();
             view.requestLayout();
         });
-        multiValueAnim.add(anim);
+        valueAnimators.add(valueAnimator);
         return this;
     }
 
     public Animation marginBottom(int from, int to) {
-        ValueAnimator anim = ValueAnimator.ofInt(from, to);
-
-        anim.addUpdateListener(animation -> {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+        ValueAnimator valueAnimator = ValueAnimator.ofInt(from, to);
+        valueAnimator.addUpdateListener(animation -> {
+            if (view == null)
+                return;
+            MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
             params.bottomMargin = (int) animation.getAnimatedValue();
             view.requestLayout();
         });
-        multiValueAnim.add(anim);
+        valueAnimators.add(valueAnimator);
         return this;
     }
 
     public Animation marginLeft(int from, int to) {
-        ValueAnimator anim = ValueAnimator.ofInt(from, to);
-
-        anim.addUpdateListener(animation -> {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+        ValueAnimator valueAnimator = ValueAnimator.ofInt(from, to);
+        valueAnimator.addUpdateListener(animation -> {
+            if (view == null)
+                return;
+            MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
             params.leftMargin = (int) animation.getAnimatedValue();
             view.requestLayout();
         });
-        multiValueAnim.add(anim);
+        valueAnimators.add(valueAnimator);
         return this;
     }
 
     public Animation marginRight(int from, int to) {
-        ValueAnimator anim = ValueAnimator.ofInt(from, to);
-
-        anim.addUpdateListener(animation -> {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+        ValueAnimator valueAnimator = ValueAnimator.ofInt(from, to);
+        valueAnimator.addUpdateListener(animation -> {
+            if (view == null)
+                return;
+            MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
             params.rightMargin = (int) animation.getAnimatedValue();
             view.requestLayout();
         });
-        multiValueAnim.add(anim);
+        valueAnimators.add(valueAnimator);
         return this;
     }
 
@@ -186,9 +233,13 @@ public class Animation implements IMainClasses {
     //--------------------------------------------------------------------------------------------//
 
     public Animation elevation(float from, float to) {
-        singleValueAnim = ValueAnimator.ofFloat(from, to);
-        singleValueAnim.addUpdateListener(animation ->
-                view.setElevation((float) animation.getAnimatedValue()));
+        ValueAnimator valueAnimator = ValueAnimator.ofFloat(from, to);
+        valueAnimator.addUpdateListener(animation -> {
+            if (view == null)
+                return;
+            view.setElevation((float) animation.getAnimatedValue());
+        });
+        valueAnimators.add(valueAnimator);
         return this;
     }
 
@@ -275,12 +326,7 @@ public class Animation implements IMainClasses {
     //--------------------------------------------------------------------------------------------//
 
     public Animation runOnStart(Runnable task) {
-        this.onStart = task;
-        return this;
-    }
-
-    public Animation runOnUpdate(AnimatorUpdateListener onUpdate) {
-        singleValueAnim.addUpdateListener(onUpdate);
+        onStart = task;
         return this;
     }
 
@@ -289,46 +335,71 @@ public class Animation implements IMainClasses {
         return this;
     }
 
+    //--------------------------------------------------------------------------------------------//
+
     public Animation cancelPending(boolean bool) {
         cancelPendingAnimations = bool;
         return this;
     }
 
-    public Animation delay(long ms){
+    public Animation delay(long ms) {
         delay = ms;
         return this;
+    }
+
+    public Animation duration(long ms) {
+        duration = ms;
+        return this;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public void play() {
+        play(duration == -1 ? 300 : duration);
     }
 
     /**
      * @param duration duration of animation in milliseconds.
      */
     public void play(long duration) {
-        if(view == null || !mActivity.hasWindowFocus()) {
-            if (onStart != null || onEnd != null) {
-                new AsyncTaskLoader().execute(new OsuAsyncCallback() {
+
+        if (view == null || !mActivity.hasWindowFocus()) {
+            mActivity.runOnUiThread(() -> {
+
+                if (valueAnimators != null) {
+                    for (ValueAnimator valueAnimator : valueAnimators) {
+                        valueAnimator.setStartDelay(delay);
+                        valueAnimator.setDuration(duration);
+                        valueAnimator.start();
+                    }
+                }
+
+                ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
+                animator.addListener(new BaseAnimationListener() {
                     @Override
-                    public void run() {
+                    public void onAnimationStart(Animator animation) {
                         if (onStart != null)
-                            mActivity.runOnUiThread(onStart);
+                            onStart.run();
                     }
 
                     @Override
-                    public void onComplete() {
+                    public void onAnimationEnd(Animator animation) {
                         if (onEnd != null)
-                            mActivity.runOnUiThread(onEnd);
-                        anim = null;
-                        singleValueAnim = null;
-                        multiValueAnim = null;
+                            onEnd.run();
                     }
                 });
-            }
+                animator.setStartDelay(delay);
+                animator.setDuration(duration);
+                animator.start();
+            });
             return;
         }
 
         mActivity.runOnUiThread(() -> {
 
-            if(cancelPendingAnimations)
+            if (cancelPendingAnimations) {
                 view.animate().cancel();
+            }
 
             anim = view.animate();
 
@@ -363,45 +434,38 @@ public class Animation implements IMainClasses {
                 }
             }
 
-            if (singleValueAnim != null) {
-                singleValueAnim.setDuration(duration);
-                singleValueAnim.setStartDelay(delay);
-                if (interpolator != null) {
-                    if (interpolatorMode == Interpolate.VALUE_ANIMATOR || interpolatorMode == Interpolate.BOTH) {
-                        singleValueAnim.setInterpolator(EasingHelper.asInterpolator(interpolator));
-                    }
-                }
-                singleValueAnim.start();
-            }
-
-            if (multiValueAnim != null) {
-                for (ValueAnimator valueAnim : multiValueAnim) {
-                    valueAnim.setDuration(duration);
-                    valueAnim.setStartDelay(delay);
+            if (valueAnimators != null) {
+                for (ValueAnimator valueAnimator : valueAnimators) {
                     if (interpolator != null) {
                         if (interpolatorMode == Interpolate.VALUE_ANIMATOR || interpolatorMode == Interpolate.BOTH) {
-                            valueAnim.setInterpolator(EasingHelper.asInterpolator(interpolator));
+                            valueAnimator.setInterpolator(EasingHelper.asInterpolator(interpolator));
                         }
                     }
-                    valueAnim.start();
+                    valueAnimator.setStartDelay(delay);
+                    valueAnimator.setDuration(duration);
+                    valueAnimator.start();
                 }
             }
 
             anim.setListener(new BaseAnimationListener() {
                 @Override
-                public void onAnimationStart(android.animation.Animator animation) {
-                    if (onStart != null)
+                public void onAnimationStart(Animator animation) {
+                    if (onStart != null) {
                         onStart.run();
-                    super.onAnimationStart(animation);
+                    }
+                }
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    if (onEnd != null) {
+                        onEnd.run();
+                    }
                 }
 
                 @Override
-                public void onAnimationEnd(android.animation.Animator animation) {
-                    if (onEnd != null)
+                public void onAnimationCancel(Animator animation) {
+                    if (onEnd != null) {
                         onEnd.run();
-                    super.onAnimationEnd(animation);
-                    anim = null;
-                    singleValueAnim = null;
+                    }
                 }
             });
 
@@ -494,6 +558,42 @@ public class Animation implements IMainClasses {
                     anim.delay(delayPerChild > 0 ? delayPerChild : 0);
                     anim.play(duration);
                     i += countFromLast ? -1 : 1;
+                }
+            }, delay);
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public MultipleAnimation multi(Animation... animations) {
+        return new MultipleAnimation(animations);
+    }
+
+    public static class MultipleAnimation {
+
+        private final Animation[] animations;
+        private long delay = 0;
+
+        //----------------------------------------------------------------------------------------//
+
+        public MultipleAnimation(Animation... animations) {
+            this.animations = animations;
+        }
+
+        //----------------------------------------------------------------------------------------//
+
+        public MultipleAnimation delay(long ms) {
+            delay = ms;
+            return this;
+        }
+
+        public void play(long duration) {
+            if (animations.length == 0)
+                return;
+
+            animations[0].view.postDelayed(() -> {
+                for (Animation anim : animations) {
+                    anim.play(duration);
                 }
             }, delay);
         }

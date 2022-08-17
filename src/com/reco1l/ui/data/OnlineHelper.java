@@ -18,7 +18,7 @@ public class OnlineHelper implements IMainClasses, UI {
     // This class translates contains tools to translate online data for the new UI.
 
     private static OnlineHelper instance;
-    private static final Drawable defaultAvatar = mActivity.getDrawable(R.drawable.default_avatar);
+    public static final Drawable defaultAvatar = mActivity.getDrawable(R.drawable.default_avatar);
 
     //--------------------------------------------------------------------------------------------//
 
@@ -34,33 +34,30 @@ public class OnlineHelper implements IMainClasses, UI {
         if (online == null || online.getAvatarURL() == null || online.getAvatarURL().length() == 0)
             return defaultAvatar;
 
-        String fileName = MD5Calcuator.getStringMD5(online.getAvatarURL() + online.getUsername());
-        File file = new File(Config.getCachePath(), fileName);
+        String name = MD5Calcuator.getStringMD5(online.getAvatarURL() + "_" + online.getUsername());
+        File file = new File(Config.getCachePath(), name);
 
-        if(!file.exists()) {
-            OnlineFileOperator.downloadFile(online.getAvatarURL(), file.getAbsolutePath());
+        if(!file.exists() || file.length() < 1 & file.delete()) {
+            if (OnlineFileOperator.downloadFile(online.getAvatarURL(), file.getAbsolutePath())) {
+                return Drawable.createFromPath(file.getPath());
+            }
         }
-        else if ((file.exists() && file.length() < 1) & file.delete()) {
-            OnlineFileOperator.downloadFile(online.getAvatarURL(), file.getAbsolutePath());
-        }
-
-        return Drawable.createFromPath(file.getPath());
+        return defaultAvatar;
     }
 
     public Drawable getAvatarFromURL(String url, String username) {
-        if (url == null || url.length() == 0)
+        if (url == null || url.length() == 0 || username == null)
             return defaultAvatar;
 
-        String fileName = MD5Calcuator.getStringMD5(url + username);
-        File file = new File(Config.getCachePath(), fileName);
+        String name = MD5Calcuator.getStringMD5(url + "_" + username);
+        File file = new File(Config.getCachePath(), name);
 
-        if(!file.exists())
-            OnlineFileOperator.downloadFile(url, file.getAbsolutePath());
-
-        else if ((file.exists() && file.length() < 1) & file.delete())
-            OnlineFileOperator.downloadFile(url, file.getAbsolutePath());
-
-        return Drawable.createFromPath(file.getPath());
+        if (!file.exists() || file.length() < 1 & file.delete()) {
+            if (OnlineFileOperator.downloadFile(url, file.getAbsolutePath())) {
+                return Drawable.createFromPath(file.getPath());
+            }
+        }
+        return defaultAvatar;
     }
 
     //--------------------------------------------------------------------------------------------//

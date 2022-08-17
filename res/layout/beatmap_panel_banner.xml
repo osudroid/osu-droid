@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 1/8/22 06:36 -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bp_banner"
+    android:layout_width="@dimen/beatmapPanelWidth"
+    android:layout_height="wrap_content"
+    android:background="@color/backgroundSecondary"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/bp_songBackground"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/bp_content"
+            android:layout_alignBottom="@+id/bp_content"
+            android:scaleType="centerCrop" />
+
+        <View
+            android:id="@+id/bp_gradient"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/bp_content"
+            android:layout_alignBottom="@+id/bp_content"
+            android:background="@drawable/double_gradient" />
+
+        <LinearLayout
+            android:id="@+id/bp_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/S">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/bp_expand"
+                    style="@style/icon_button"
+                    android:layout_width="@dimen/beatmapPanelExpandButtonSize"
+                    android:layout_height="@dimen/beatmapPanelExpandButtonSize"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:background="@drawable/round_shape"
+                    android:src="@drawable/v_arrow_s" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_toStartOf="@+id/bp_expand"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/bp_title"
+                        style="@style/largeText"
+                        android:text="[title]" />
+
+                    <TextView
+                        android:id="@+id/bp_artist"
+                        style="@style/text"
+                        android:layout_below="@+id/bp_title"
+                        android:layout_marginTop="@dimen/XXS"
+                        android:text="[artist]" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/bp_properties"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/beatmapPanelPropertiesLayoutHeight"
+                android:gravity="bottom|left"
+                android:orientation="vertical">
+
+                <!--First row-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/XS"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/bp_mapper"
+                        style="@style/propertyBadge"
+                        android:layout_above="@+id/bp_props_row1"
+                        android:layout_marginStart="0dp"
+                        android:drawableStart="@drawable/v_person_xs"
+                        android:text="[mapper name]" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/XS"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/bp_length"
+                        style="@style/propertyBadge"
+                        android:layout_marginStart="0dp"
+                        android:drawableStart="@drawable/v_time_xs"
+                        android:text="00:00" />
+
+                    <TextView
+                        android:id="@+id/bp_bpm"
+                        style="@style/propertyBadge"
+                        android:drawableStart="@drawable/v_bpm_xs"
+                        android:text="000.0-000.0" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/XS"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/bp_combo"
+                        style="@style/propertyBadge"
+                        android:layout_marginStart="0dp"
+                        android:drawableStart="@drawable/v_combo_xs"
+                        android:text="0000" />
+
+                    <TextView
+                        android:id="@+id/bp_circles"
+                        style="@style/propertyBadge"
+                        android:drawableStart="@drawable/v_circle_xs"
+                        android:text="0000" />
+
+                    <TextView
+                        android:id="@+id/bp_sliders"
+                        style="@style/propertyBadge"
+                        android:drawableStart="@drawable/v_slider_xs"
+                        android:text="0000" />
+
+                    <TextView
+                        android:id="@+id/bp_spinners"
+                        style="@style/propertyBadge"
+                        android:drawableStart="@drawable/v_spinner_xs"
+                        android:text="00" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/bp_ar"
+                        style="@style/propertyBadge"
+                        android:layout_marginStart="0dp"
+                        android:drawableStart="@drawable/v_ar_xs"
+                        android:text="00.0" />
+
+                    <TextView
+                        android:id="@+id/bp_od"
+                        style="@style/propertyBadge"
+                        android:drawableStart="@drawable/v_od_xs"
+                        android:text="00.0" />
+
+                    <TextView
+                        android:id="@+id/bp_cs"
+                        style="@style/propertyBadge"
+                        android:drawableStart="@drawable/v_cs_xs"
+                        android:text="00.0" />
+
+                    <TextView
+                        android:id="@+id/bp_hp"
+                        style="@style/propertyBadge"
+                        android:drawableStart="@drawable/v_hp_xs"
+                        android:text="00.0" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/bp_banner"
+        android:orientation="horizontal"
+        android:padding="@dimen/S">
+
+        <TextView
+            android:id="@+id/bp_stars"
+            style="@style/propertyBadge"
+            android:layout_marginStart="0dp"
+            android:drawableStart="@drawable/v_star_xs"
+            android:text="00.00" />
+
+        <TextView
+            android:id="@+id/bp_difficulty"
+            style="@style/text"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/S"
+            android:layout_toEndOf="@+id/bp_stars"
+            android:gravity="center_vertical"
+            android:text="[Difficulty name]"
+            android:textColor="@color/textSecondary"
+            android:textSize="@dimen/textXS" />
+
+    </RelativeLayout>
+
+</LinearLayout>

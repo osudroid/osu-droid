@@ -6,10 +6,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.edlplan.framework.easing.Easing;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.reco1l.EngineMirror;
 import com.reco1l.ui.custom.Dialog;
+import com.reco1l.ui.data.BeatmapHelper;
 import com.reco1l.ui.data.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
@@ -17,6 +17,7 @@ import com.reco1l.utils.ClickListener;
 import com.reco1l.utils.Res;
 import com.reco1l.utils.interfaces.UI;
 
+import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -25,13 +26,13 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class TopBar extends UIFragment {
 
-    public View musicBody, musicArrow;
-    public TextView musicText;
     public UserBox userBox;
+    private ButtonsLayout buttons;
+    public MusicButton musicButton;
 
     private EngineMirror.Scenes lastScene;
-    private View body, bar, music, back;
     private LinearLayout container;
+    private View body, bar, back;
     private TextView author;
 
     private boolean isAuthorShown = false;
@@ -54,79 +55,64 @@ public class TopBar extends UIFragment {
     public void reload() {
         if (lastScene == engine.currentScene || !isShowing)
             return;
-        lastScene = engine.currentScene;
 
-        if (container != null) {
+        new Animation(container).moveX(0, -60).fade(1, 0).runOnEnd(() -> {
+            back.setVisibility(View.GONE);
+            musicButton.setVisibility(false);
+            buttons.gone();
+        }).play(190);
 
-            Runnable onBack = null;
-
-            Animation inAnim = new Animation(container).moveX(-60, 0).fade(0, 1);
-            Animation outAnim = new Animation(container).moveX(0, -60).fade(1, 0);
-
-            outAnim.onEnd = () -> setVisible(false, music, back);
-
-            outAnim.interpolator(Easing.OutExpo);
-            inAnim.interpolator(Easing.OutExpo);
-
+        new Animation(container).moveX(-60, 0).fade(0, 1).runOnStart(() -> {
             switch (engine.currentScene) {
 
                 case MAIN_MENU:
-                    inAnim.onStart = () -> setVisible(music);
+                    musicButton.setVisibility(true);
                     break;
 
                 case SONG_MENU:
-                    inAnim.onStart = () -> setVisible(back);
-                    onBack = () -> global.getSongMenu().back();
+                    back.setVisibility(View.VISIBLE);
                     break;
 
-                case LOADING_SCREEN:
-                case PAUSE_MENU:
-                case SCORING:
-                case GAME:
-                    // Nothing because the top bar is hidden in these scenes.
+                default:
+                    // Nothing
                     break;
             }
-
-            outAnim.play(200);
-            inAnim.delay(200).play(200);
-
-            new ClickListener(back).simple(onBack);
-        }
+            buttons.update(engine.currentScene);
+        }).delay(200).play(200);
 
         showAuthorText(engine.currentScene == EngineMirror.Scenes.MAIN_MENU);
+        lastScene = engine.currentScene;
     }
 
     @Override
     protected void onLoad() {
         setDismissMode(false, false);
         barHeight = (int) Res.dimen(R.dimen.topBarHeight);
+
+        musicButton = new MusicButton(this);
+        buttons = new ButtonsLayout(this);
         userBox = new UserBox(this);
-
-        author = find("author");
-        body = find("body");
-        bar = find("bar");
-
-        new Animation(body).moveY(-barHeight, 0).play(300);
 
         ImageView settings = find("settings");
         ImageView inbox = find("inbox");
-
         container = find("container");
+        author = find("author");
+        body = find("body");
         back = find("back");
-        musicBody = find("musicChildLayout");
-        musicArrow = find("musicArrow");
-        musicText = find("musicText");
-        music = find("music");
+        bar = find("bar");
+
+        new Animation(body).moveY(-barHeight, 0)
+                .play(300);
 
         showAuthorText(engine.currentScene == EngineMirror.Scenes.MAIN_MENU);
 
-        if (library.getSizeOfBeatmaps() <= 0)
-            setVisible(false, musicText);
+        if (library.getSizeOfBeatmaps() <= 0) {
+            musicButton.setVisibility(false);
+        }
 
         author.setText(String.format("osu!droid %s", BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")"));
 
         new ClickListener(inbox).simple(UI.inbox::altShow);
-        new ClickListener(music).simple(musicPlayer::altShow);
         new ClickListener(settings).simple(settingsPanel::altShow);
         new ClickListener(author).simple(() -> new Dialog(DialogTable.author()).show());
 
@@ -173,6 +159,96 @@ public class TopBar extends UIFragment {
 
     //--------------------------------------------------------------------------------------------//
 
+    public static class ButtonsLayout {
+
+        private final TopBar parent;
+        private final LinearLayout container;
+
+        // Song menu
+        private final ImageView mods, search, shuffle;
+
+        public ButtonsLayout(TopBar parent) {
+            this.parent = parent;
+
+            container = parent.find("buttons");
+
+            mods = parent.find("mods");
+            search = parent.find("search");
+            shuffle = parent.find("shuffle");
+        }
+
+        protected void gone() {
+            for (int i = 0; i < container.getChildCount(); i++) {
+                container.getChildAt(i).setVisibility(View.GONE);
+            }
+        }
+
+        protected void update(EngineMirror.Scenes scene) {
+            if (!parent.isShowing)
+                return;
+
+            switch (scene) {
+                case SONG_MENU:
+                    mods.setVisibility(View.VISIBLE);
+                    search.setVisibility(View.VISIBLE);
+                    shuffle.setVisibility(View.VISIBLE);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public static class MusicButton {
+
+        private final TopBar parent;
+        private final View view, body, arrow;
+        private final TextView text;
+
+        public MusicButton(TopBar parent) {
+            this.parent = parent;
+
+            view = parent.find("music");
+            body = parent.find("musicBody");
+            arrow = parent.find("musicArrow");
+            text = parent.find("musicText");
+
+            new ClickListener(view).simple(musicPlayer::altShow);
+        }
+
+        public void update(BeatmapInfo beatmap) {
+            if (!parent.isShowing)
+                return;
+
+            new Animation(text).fade(1, 0)
+                    .play(150);
+            new Animation(text).fade(0, 1)
+                    .runOnStart(() -> text.setText(BeatmapHelper.getTitle(beatmap)))
+                    .delay(150)
+                    .play(150);
+        }
+
+        public void playAnimation(boolean show) {
+            Animation bodyAnim = new Animation(body);
+            Animation arrowAnim = new Animation(arrow);
+
+            if (show) {
+                bodyAnim.moveY(0, -10).fade(1, 0);
+                arrowAnim.rotation(180, 180).moveY(10, 0).fade(0, 1);
+            } else {
+                bodyAnim.moveY(10, 0).fade(0, 1);
+                arrowAnim.rotation(180, 180).moveY(0, -10).fade(1, 0);
+            }
+            bodyAnim.play(150);
+            arrowAnim.delay(150).play(150);
+        }
+
+        protected void setVisibility(boolean bool) {
+            view.setVisibility(bool ? View.VISIBLE : View.GONE);
+        }
+
+    }
+
     public static class UserBox {
 
         private final TopBar parent;
@@ -196,7 +272,7 @@ public class TopBar extends UIFragment {
 
             avatar.setImageResource(R.drawable.default_avatar);
             name.setText(Config.getLocalUsername());
-            rank.setText(topBar.res().getString(R.string.top_bar_offline));
+            rank.setText(Res.str(R.string.top_bar_offline));
 
             if (!online.isStayOnline() || clear)
                 return;
@@ -208,8 +284,4 @@ public class TopBar extends UIFragment {
                 avatar.setImageDrawable(onlineHelper.getPlayerAvatar());
         }
     }
-
-    //--------------------------------------------------------------------------------------------//
-
-
 }
