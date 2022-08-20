@@ -45,13 +45,6 @@
     </style>
 
     <!--ProgressBar & SeekBar-->
-    <style name="circular_progress_bar">
-        <item name="android:progressDrawable">@drawable/circular_progress_bar</item>
-        <item name="android:indeterminateDrawable">@drawable/circular_progress_bar</item>
-        <item name="android:indeterminateOnly">false</item>
-        <item name="android:scaleX">-1</item>
-    </style>
-
     <style name="song_seek_bar">
         <item name="android:progressDrawable">@drawable/song_seek_bar_progress</item>
         <item name="android:thumb">@drawable/song_seek_bar_thumb</item>

@@ -60,6 +60,8 @@
     <dimen name="circularProgressBarThickness">8</dimen>
     <dimen name="circularProgressIndicatorThickness">@dimen/_6sdp</dimen>
     <dimen name="smallCircularProgressBarSize">@dimen/_16sdp</dimen>
+    <dimen name="smallCircularProgressBarThickness">@dimen/_2sdp</dimen>
+
     <dimen name="linearProgressBarHeight">@dimen/_3sdp</dimen>
     <dimen name="progressBarTrackCornerRadius">@dimen/_2sdp</dimen>
 
@@ -74,7 +76,7 @@
     <dimen name="songSeekBarHorizontalPadding">@dimen/_12sdp</dimen>
 
     <!--Splash & Loading screen-->
-    <dimen name="splashScreenLogoSize">@dimen/_28sdp</dimen>
+    <dimen name="splashScreenLogoSize">@dimen/_48sdp</dimen>
     <dimen name="loadingScreenProgressBarSize">@dimen/_32sdp</dimen>
 
     <!--Music Player-->

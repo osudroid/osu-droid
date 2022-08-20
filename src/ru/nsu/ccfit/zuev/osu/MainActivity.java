@@ -301,12 +301,10 @@ public class MainActivity extends BaseGameActivity implements
             }
 
             public void onComplete() {  
-                GlobalManager.getInstance().setInfo("");
+                GlobalManager.getInstance().setInfo("Starting...");
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
-                SplashScene.instance.close();
                 GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
-                GlobalManager.getInstance().getMainScene().loadBeatmap();
                 initPreferences();
                 availableInternalMemory();
                 initAccessibilityDetector();

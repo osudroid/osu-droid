@@ -1,5 +1,7 @@
 package com.reco1l.ui;
 
+import static com.reco1l.EngineMirror.*;
+
 import android.animation.ValueAnimator;
 import android.view.View;
 import android.widget.ImageView;
@@ -7,7 +9,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.material.imageview.ShapeableImageView;
-import com.reco1l.EngineMirror;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.data.BeatmapHelper;
 import com.reco1l.ui.data.DialogTable;
@@ -30,13 +31,14 @@ public class TopBar extends UIFragment {
     private ButtonsLayout buttons;
     public MusicButton musicButton;
 
-    private EngineMirror.Scenes lastScene;
-    private LinearLayout container;
-    private View body, bar, back;
-    private TextView author;
+    public View body;
+    public int barHeight;
+    public TextView author;
 
-    private boolean isAuthorShown = false;
-    private int barHeight;
+    private View bar, back;
+    private LinearLayout container;
+
+    private Scenes lastScene;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -80,7 +82,7 @@ public class TopBar extends UIFragment {
             buttons.update(engine.currentScene);
         }).delay(200).play(200);
 
-        showAuthorText(engine.currentScene == EngineMirror.Scenes.MAIN_MENU);
+        showAuthorText(engine.currentScene == Scenes.MAIN_MENU);
         lastScene = engine.currentScene;
     }
 
@@ -104,7 +106,8 @@ public class TopBar extends UIFragment {
         new Animation(body).moveY(-barHeight, 0)
                 .play(300);
 
-        showAuthorText(engine.currentScene == EngineMirror.Scenes.MAIN_MENU);
+        author.setAlpha(0);
+        showAuthorText(engine.currentScene == Scenes.MAIN_MENU);
 
         if (library.getSizeOfBeatmaps() <= 0) {
             musicButton.setVisibility(false);
@@ -131,18 +134,14 @@ public class TopBar extends UIFragment {
     //--------------------------------------------------------------------------------------------//
 
     private void showAuthorText(boolean bool) {
-        if (author == null || isAuthorShown == bool)
+        if (author == null || bool && author.getAlpha() == 1 || !bool && author.getAlpha() == 0)
             return;
 
         if (bool) {
-            new Animation(author).fade(0, 1).moveY(50, 0)
-                    .runOnEnd(() -> isAuthorShown = bool)
-                    .play(200);
+            new Animation(author).fade(0, 1).moveY(50, 0).play(200);
             return;
         }
-        new Animation(author).fade(1, 0).moveY(0, 50)
-                .runOnEnd(() -> isAuthorShown = bool)
-                .play(200);
+        new Animation(author).fade(1, 0).moveY(0, 50).play(200);
     }
 
     public void switchColor(boolean isFromTab) {
@@ -183,7 +182,7 @@ public class TopBar extends UIFragment {
             }
         }
 
-        protected void update(EngineMirror.Scenes scene) {
+        protected void update(Scenes scene) {
             if (!parent.isShowing)
                 return;
 

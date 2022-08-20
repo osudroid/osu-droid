@@ -15,9 +15,8 @@ import com.reco1l.utils.interfaces.IMainClasses;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
+import java.util.Timer;
+import java.util.TimerTask;
 
 // Created by Reco1l on 23/6/22 20:44
 
@@ -28,6 +27,7 @@ import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 public class Animation implements IMainClasses {
 
     private View view;
+    private final static long DEFAULT_DURATION = 1000;
 
     private ViewPropertyAnimator anim;
     private List<ValueAnimator> valueAnimators;
@@ -355,13 +355,14 @@ public class Animation implements IMainClasses {
     //--------------------------------------------------------------------------------------------//
 
     public void play() {
-        play(duration == -1 ? 300 : duration);
+        play(-1);
     }
 
     /**
      * @param duration duration of animation in milliseconds.
      */
     public void play(long duration) {
+        this.duration = duration >= 0 ? duration : DEFAULT_DURATION;
 
         if (view == null || !mActivity.hasWindowFocus()) {
             mActivity.runOnUiThread(() -> {
@@ -369,12 +370,12 @@ public class Animation implements IMainClasses {
                 if (valueAnimators != null) {
                     for (ValueAnimator valueAnimator : valueAnimators) {
                         valueAnimator.setStartDelay(delay);
-                        valueAnimator.setDuration(duration);
+                        valueAnimator.setDuration(this.duration);
                         valueAnimator.start();
                     }
                 }
 
-                ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
+                ValueAnimator animator = ValueAnimator.ofFloat(0, 1f);
                 animator.addListener(new BaseAnimationListener() {
                     @Override
                     public void onAnimationStart(Animator animation) {
@@ -389,7 +390,7 @@ public class Animation implements IMainClasses {
                     }
                 });
                 animator.setStartDelay(delay);
-                animator.setDuration(duration);
+                animator.setDuration(this.duration);
                 animator.start();
             });
             return;
@@ -400,7 +401,6 @@ public class Animation implements IMainClasses {
             if (cancelPendingAnimations) {
                 view.animate().cancel();
             }
-
             anim = view.animate();
 
             // Translation X
@@ -442,7 +442,7 @@ public class Animation implements IMainClasses {
                         }
                     }
                     valueAnimator.setStartDelay(delay);
-                    valueAnimator.setDuration(duration);
+                    valueAnimator.setDuration(this.duration);
                     valueAnimator.start();
                 }
             }
@@ -470,7 +470,7 @@ public class Animation implements IMainClasses {
             });
 
             anim.setStartDelay(delay);
-            anim.setDuration(duration);
+            anim.setDuration(this.duration);
             anim.start();
         });
     }
@@ -566,18 +566,22 @@ public class Animation implements IMainClasses {
     //--------------------------------------------------------------------------------------------//
 
     public MultipleAnimation multi(Animation... animations) {
-        return new MultipleAnimation(animations);
+        return new MultipleAnimation(view, animations);
     }
 
     public static class MultipleAnimation {
 
+        private final View view;
+
         private final Animation[] animations;
+        private boolean sequential = false;
         private long delay = 0;
 
         //----------------------------------------------------------------------------------------//
 
-        public MultipleAnimation(Animation... animations) {
+        public MultipleAnimation(View view, Animation... animations) {
             this.animations = animations;
+            this.view = view;
         }
 
         //----------------------------------------------------------------------------------------//
@@ -587,13 +591,42 @@ public class Animation implements IMainClasses {
             return this;
         }
 
+        public MultipleAnimation sequential(boolean bool) {
+            sequential = bool;
+            return this;
+        }
+
+        public void play() {
+            play(-1);
+        }
+
         public void play(long duration) {
             if (animations.length == 0)
                 return;
+            Timer timer = new Timer();
 
-            animations[0].view.postDelayed(() -> {
-                for (Animation anim : animations) {
-                    anim.play(duration);
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    long delayCount = 0;
+
+                    for (Animation anim : animations) {
+                        if (anim.view == null && view != null) {
+                            anim.view = view;
+                            if (!sequential) {
+                                anim.cancelPending(false);
+                            }
+                        }
+                        if (duration > 0 && anim.duration <= 0) {
+                            anim.duration = duration;
+                        }
+                        if (sequential) {
+                            anim.delay += delayCount;
+                            delayCount += anim.duration > 0 ? anim.duration : Animation.DEFAULT_DURATION;
+                        }
+                        anim.play();
+                    }
+                    timer.cancel();
                 }
             }, delay);
         }

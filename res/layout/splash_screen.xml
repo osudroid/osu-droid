@@ -2,38 +2,89 @@
 
 <!-- Created by Reco1l on 24/6/22 02:42 -->
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/ss_background"
-    android:translationZ="@dimen/imposedLayer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000">
+    android:translationZ="@dimen/imposedLayer">
+
+    <View
+        android:id="@+id/background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000" />
+
+    <com.edlplan.ui.TriangleEffectView
+        android:id="@+id/ss_triangles2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:rotation="180"
+        android:alpha="0.05" />
+
+    <com.edlplan.ui.TriangleEffectView
+        android:id="@+id/ss_triangles1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.05" />
+
+    <View
+        android:id="@+id/ss_effect"
+        android:layout_width="@dimen/mainMenuLogoSize"
+        android:layout_height="@dimen/mainMenuLogoSize"
+        android:layout_centerInParent="true"
+        android:alpha="0"/>
+
+    <ImageView
+        android:id="@+id/ss_logo"
+        android:layout_width="@dimen/splashScreenLogoSize"
+        android:layout_height="@dimen/splashScreenLogoSize"
+        android:layout_centerInParent="true"
+        android:src="@drawable/logo_overlay" />
+
+    <TextView
+        style="@style/text"
+        android:id="@+id/ss_buildText"
+        android:layout_below="@id/ss_logo"
+        android:layout_marginTop="@dimen/XS"
+        android:padding="@dimen/S"
+        android:layout_centerHorizontal="true"
+        android:text="[build information]"
+        android:textColor="@color/textSecondary" />
 
     <LinearLayout
         android:id="@+id/ss_bottom"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/S"
+        android:background="@drawable/round_shape"
+        android:backgroundTint="@color/loadingSceneViewsBackground"
         android:gravity="center_vertical"
-        android:padding="@dimen/S"
-        app:layout_constraintBottom_toBottomOf="parent">
+        android:paddingLeft="@dimen/XS"
+        android:paddingRight="@dimen/M">
 
-        <ProgressBar
+        <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/ss_progress"
-            style="@style/circular_progress_bar"
-            android:indeterminate="false"
-            android:layout_width="@dimen/smallCircularProgressBarSize"
-            android:layout_height="@dimen/smallCircularProgressBarSize"
-            tools:progress="25"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/XS"
+            android:max="100"
+            android:progress="0"
+            app:indicatorColor="@color/progressBarIndicatorColor"
+            app:indicatorDirectionCircular="counterclockwise"
+            app:indicatorInset="0dp"
+            app:indicatorSize="@dimen/smallCircularProgressBarSize"
+            app:trackCornerRadius="@dimen/progressBarTrackCornerRadius"
+            app:trackThickness="@dimen/smallCircularProgressBarThickness"
+            tools:progress="40" />
 
         <TextView
             android:id="@+id/ss_percent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/XS"
-            android:text="0%"/>
+            android:layout_marginLeft="@dimen/XXS"
+            android:text="0%" />
 
         <TextView
             android:id="@+id/ss_info"
@@ -42,43 +93,8 @@
             android:layout_marginLeft="@dimen/XS"
             android:maxLength="70"
             android:text="Loading..."
-            android:textColor="@color/textSecondary"/>
+            android:textColor="@color/textSecondary" />
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/ss_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <!--TODO This icon need to be replaced with a new vector instead-->
-        <ImageView
-            android:layout_width="@dimen/splashScreenLogoSize"
-            android:layout_height="@dimen/splashScreenLogoSize"
-            android:src="@drawable/notify_inso"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/ss_buildInfo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="@dimen/M"
-        app:layout_constraintTop_toBottomOf="@id/ss_icon">
-
-        <TextView
-            android:id="@+id/ss_buildInfoText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="[Build information]"
-            android:textColor="@color/textSecondary"
-            android:textSize="@dimen/textM" />
-
-    </LinearLayout>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>

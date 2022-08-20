@@ -153,7 +153,7 @@ public class MainMenu extends UIFragment {
         settings.setWidth(0);
 
         new ClickListener(logo)
-                .soundEffect(resources.loadSound("menuhit", "sfx/menuhit.ogg", false))
+                .soundEffect(resources.getSound("menuhit"))
                 .touchEffect(false)
                 .simple(() -> {
                     if (!isMenuShowing) {

@@ -38,6 +38,11 @@
                 android:textColor="@color/textSecondary" />
 
             <TextView
+                style="@style/text"
+                android:text="re-designed by Reco1l"
+                android:textColor="@color/textSecondary" />
+
+            <TextView
                 android:id="@+id/d_author_version"
                 style="@style/text"
                 android:text="[version]"

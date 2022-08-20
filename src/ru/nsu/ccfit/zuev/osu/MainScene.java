@@ -139,11 +139,6 @@ public class MainScene implements IUpdateHandler, UI {
         scene.setTouchAreaBindingEnabled(true);
         loadOnline();
         scene.registerUpdateHandler(this);
-
-        String[] welcomeSounds = {"welcome", "welcome_piano"};
-        int randNum = new Random().nextInt((1 - 0) + 1) + 0;
-        String welcomeSound = welcomeSounds[randNum];
-        ResourceManager.getInstance().loadSound(welcomeSound, String.format("sfx/%s.ogg", welcomeSound), false).play();
     }
 
     public void loadOnline() {
