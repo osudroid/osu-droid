@@ -107,4 +107,17 @@ public class EngineMirror extends Engine implements IMainClasses, UI {
         // This updates the TopBar according to the current scene.
         topBar.reload();
     }
+
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
+    public void onPause() {
+        platform.handleWindowFocus(false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        platform.handleWindowFocus(true);
+    }
 }

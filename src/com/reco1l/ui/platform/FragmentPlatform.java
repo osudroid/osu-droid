@@ -4,16 +4,25 @@ import static android.widget.RelativeLayout.LayoutParams.*;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.experimental.Experimental;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.edlplan.ui.ActivityOverlay;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.reco1l.utils.Animation;
+import com.reco1l.utils.Res;
+import com.reco1l.utils.interfaces.IMainClasses;
 
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 
@@ -23,6 +32,7 @@ import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 22/6/22 02:25
 
@@ -37,6 +47,8 @@ public class FragmentPlatform {
     public FragmentManager manager;
     public FrameLayout container;
     public Context context;
+
+    private LoaderFragment loaderFragment;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -70,7 +82,9 @@ public class FragmentPlatform {
         mActivity.setContentView(platform, params);
         manager = activity.getSupportFragmentManager();
 
-        //I leave it for compatibility with EdrowsLuo fragments until the entire UI gets replaced.
+        loaderFragment = new LoaderFragment();
+
+        //I left it for compatibility with EdrowsLuo fragments until the entire UI gets replaced.
         ActivityOverlay.initial(activity, container.getId());
     }
 
@@ -128,6 +142,51 @@ public class FragmentPlatform {
         for (Fragment fragment: toClose) {
             if (fragment.getClass().getSuperclass() == UIFragment.class)
                 mActivity.runOnUiThread(((UIFragment) fragment)::close);
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------//
+    // NOT WORKING
+    public void handleWindowFocus(boolean isResumed) {
+        if (!isResumed) {
+            addFragment(loaderFragment, "loaderFragment@" + loaderFragment.hashCode());
+            return;
+        }
+        new Animation(loaderFragment.layout).fade(1, 0)
+                .runOnEnd(() -> removeFragment(loaderFragment))
+                .play(300);
+    }
+
+    public static class LoaderFragment extends Fragment implements IMainClasses {
+
+        protected RelativeLayout layout;
+
+        @Override
+        public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle bundle) {
+
+            layout = new RelativeLayout(platform.context);
+            layout.setLayoutParams(platform.params);
+            layout.setElevation(Res.dimen(R.dimen.imposedLayer));
+
+            CircularProgressIndicator indicator = new CircularProgressIndicator(platform.context);
+            indicator.setTrackCornerRadius((int) Res.dimen(R.dimen.progressBarTrackCornerRadius));
+            indicator.setIndicatorColor(Res.color(R.color.progressBarIndicatorColor));
+            indicator.setIndeterminate(true);
+
+            View background = new View(platform.context);
+            background.setBackgroundColor(Color.BLACK);
+
+            float size = Res.dimen(R.dimen.loadingScreenProgressBarSize);
+
+            LayoutParams params = new LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+            params.addRule(RelativeLayout.CENTER_IN_PARENT);
+            params.width = (int) size;
+            params.height = (int) size;
+
+            layout.addView(background, platform.params);
+            layout.addView(indicator, params);
+
+            return layout;
         }
     }
 }
