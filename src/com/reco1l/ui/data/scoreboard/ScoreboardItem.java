@@ -1,4 +1,6 @@
-package com.reco1l.ui.data;
+package com.reco1l.ui.data.scoreboard;
+
+import com.reco1l.ui.data.helpers.ScoringHelper;
 
 import java.text.NumberFormat;
 import java.util.List;

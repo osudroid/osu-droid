@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.opengl.GLES20;
 
-import com.reco1l.ui.data.ScoreboardItem;
+import com.reco1l.ui.data.scoreboard.ScoreboardItem;
 import com.reco1l.utils.interfaces.UI;
 
 import org.anddev.andengine.entity.scene.Scene;

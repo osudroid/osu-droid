@@ -1,4 +1,4 @@
-package com.reco1l.ui.data;
+package com.reco1l.ui.data.scoreboard;
 
 import static android.view.ViewGroup.*;
 
@@ -26,9 +26,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-/*
- * Written by Reco1l on 18/6/22 01:20
- */
+// Created by Reco1l on 18/6/22 01:20
 
 public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.BoardViewHolder>
         implements IMainClasses {

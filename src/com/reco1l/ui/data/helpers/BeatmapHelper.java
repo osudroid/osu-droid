@@ -1,4 +1,4 @@
-package com.reco1l.ui.data;
+package com.reco1l.ui.data.helpers;
 
 import android.graphics.drawable.Drawable;
 
