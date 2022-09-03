@@ -158,4 +158,10 @@
     <dimen name="scoreboardItemMarkSize">@dimen/_16sdp</dimen>
     <dimen name="scoreboardItemModSize">@dimen/_10sdp</dimen>
 
+
+    <!--Beatmap List-->
+    <dimen name="beatmapListItemHeight">@dimen/_52sdp</dimen>
+    <dimen name="beatmapListChildItemHeight">@dimen/_36sdp</dimen>
+
+
 </resources>

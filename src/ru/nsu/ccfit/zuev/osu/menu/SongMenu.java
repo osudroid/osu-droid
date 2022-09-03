@@ -53,7 +53,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
     private final static Boolean musicMutex = true;
     private final Boolean backgroundMutex = true;
     public Scene scene;
-    public Entity frontLayer = new Entity();
     SortOrder sortOrder = SortOrder.Title;
     private Engine engine;
     private GameScene game;
@@ -61,8 +60,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
     private float camY = 0;
     private float velocityY;
     private Activity context;
-    private Entity backLayer = new Entity();
-    private ArrayList<MenuItem> items = new ArrayList<>();
     private MenuItem selectedItem = null;
     private TrackInfo selectedTrack;
     private Sprite bg = null;
@@ -96,9 +93,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
         scoreScene = ss;
     }
 
-    public ArrayList<MenuItem> getMenuItems() {
-        return items;
-    }
 
     public void init(final Activity context, final Engine engine,
                      final GameScene pGame) {
@@ -113,8 +107,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
     }
 
     public void reload() {
-        frontLayer = new Entity();
-        backLayer = new Entity();
         scene.unregisterUpdateHandler(this);
         scene.setTouchAreaBindingEnabled(false);
         load();
@@ -126,16 +118,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
         camY = 0;
         velocityY = 0;
         selectedItem = null;
-        items = new ArrayList<>();
         selectedTrack = null;
         bgLoaded = true;
         SongMenuPool.getInstance().init();
         FilterMenu.getInstance().loadConfig(context);
         ModMenu.getInstance().reload();
         bindDataBaseChangedListener();
-
-        scene.attachChild(backLayer);
-        scene.attachChild(frontLayer);
 
         final TextureRegion tex = ResourceManager.getInstance().getTexture("menu-background");
         float height = tex.getHeight();
@@ -146,29 +134,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
 
         final Rectangle bgDimRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
         bgDimRect.setColor(0, 0, 0, 0.2f);
-        backLayer.attachChild(bgDimRect);
 
-        float oy = 10;
-        for (final BeatmapInfo i : LibraryManager.getInstance().getLibrary()) {
-            final MenuItem item = new MenuItem(this, i);
-            items.add(item);
-            item.attachToScene(scene, backLayer);
-            oy += item.getHeight();
-        }
         sortOrder = SortOrder.Title;
         sort();
-
-        if (items.size() == 0) {
-            final Text text = new Text(0, 0, ResourceManager.getInstance()
-                    .getFont("CaptionFont"), "There are no songs in library",
-                    HorizontalAlign.CENTER);
-            text.setPosition(Config.getRES_WIDTH() / 2f - text.getWidth() / 2,
-                    Config.getRES_HEIGHT() / 2f - text.getHeight() / 2);
-            text.setScale(1.5f);
-            text.setColor(0, 0, 0);
-            scene.attachChild(text);
-            return;
-        }
 
         scene.setOnSceneTouchListener((pScene, evt) -> {
             if (evt.getX() < Config.getRES_WIDTH() / 5f * 2) {
@@ -259,9 +227,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
         camY = 0;
         velocityY = 0;
         final String lowerFilter = filter.toLowerCase();
-        for (final MenuItem item : items) {
-            item.applyFilter(lowerFilter, favsOnly, limit);
-        }
+        /*for (final MenuItem item : items) {
+            item.applyFilter(lowerFilter, favsOnly, limit); //TODO filtering
+        }*/
         if (favsOnly != this.favsOnly) {
             this.favsOnly = favsOnly;
         } else {
@@ -275,7 +243,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
     }
 
     public void sort() {
-        if (!sortOrder.equals(FilterMenu.getInstance().getOrder())) {
+       /* if (!sortOrder.equals(FilterMenu.getInstance().getOrder())) {
             sortOrder = FilterMenu.getInstance().getOrder();
         }
         Collections.sort(items, (i1, i2) -> {
@@ -312,7 +280,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
             }
 
             return s1.compareToIgnoreCase(s2);
-        });
+        });*/
     }
 
     public void onUpdate(final float pSecondsElapsed) {
@@ -322,7 +290,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
 
         secondsSinceLastSelect += pSecondsElapsed;
         float oy = -camY;
-        for (final MenuItem item : items) {
+        /*for (final MenuItem item : items) {
             final float cy = oy + Config.getRES_HEIGHT() / 2f + item.getHeight()
                     / 2;
             float ox = Config.getRES_WIDTH() / 1.85f + 200 * (float) Math.abs(Math.cos(cy * Math.PI
@@ -330,7 +298,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
             ox = Utils.toRes(ox);
             item.setPos(ox, oy);
             oy += item.getHeight();
-        }
+        }*/
         oy += camY;
         camY += velocityY * pSecondsElapsed;
         maxY = oy - Config.getRES_HEIGHT() / 2f;
@@ -402,12 +370,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
         velocityY = 0;
         selectedTrack = null;
         float height = 0;
-        for (int i = 0; i < items.size(); i++) {
+        /*for (int i = 0; i < items.size(); i++) {
             if (items.get(i) == selectedItem) {
                 break;
             }
             height += items.get(i).getInitialHeight();
-        }
+        }*/
         camY = height - Config.getRES_HEIGHT() / 2f;
         camY += item.getTotalHeight() / 2;
     }
@@ -654,18 +622,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
         //scene.setChildScene(ScorePropsMenu.getInstance().getScene(), false, true, true);
     }
 
-    public Entity getFrontLayer() {
-        return frontLayer;
-    }
-
-    public Entity getBackLayer() {
-        return backLayer;
-    }
-
     public void select() {
         if (GlobalManager.getInstance().getMainScene().getBeatmapInfo() != null) {
             BeatmapInfo beatmapInfo = GlobalManager.getInstance().getMainScene().getBeatmapInfo();
-            for (int i = 0; i < items.size(); i++) {
+            /*for (int i = 0; i < items.size(); i++) {
                 if (items.get(i).getBeatmap().getArtist().equals(beatmapInfo.getArtist()) &&
                         items.get(i).getBeatmap().getTitle().equals(beatmapInfo.getTitle()) &&
                         items.get(i).getBeatmap().getCreator().equals(beatmapInfo.getCreator())) {
@@ -673,7 +633,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
                     items.get(i).select(false, true);
                     break;
                 }
-            }
+            }*/
         }
     }
 
@@ -711,7 +671,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
     }
 
     private void reloadMenuItems(GroupType type) {
-        if (!groupType.equals(type)) {
+        /*if (!groupType.equals(type)) {
             groupType = type;
             float oy = 10;
             for (MenuItem item : items) {
@@ -745,11 +705,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
                 item.applyFilter(lowerFilter, favsOnly, limit);
             }
             System.gc();
-        }
+        }*/
     }
 
     private void reSelectItem(String oldTrackFileName) {
-        if (!oldTrackFileName.equals("")) {
+        /*if (!oldTrackFileName.equals("")) {
             if (selectedTrack.getFilename().equals(oldTrackFileName) && items.size() > 1 && selectedItem != null && selectedItem.isVisible()) {
                 velocityY = 0;
                 float height = 0;
@@ -774,7 +734,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
                     break;
                 }
             }
-        }
+        }*/
     }
 
     public enum SortOrder {

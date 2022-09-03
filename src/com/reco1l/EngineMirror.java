@@ -96,7 +96,8 @@ public class EngineMirror extends Engine implements IMainClasses, UI {
             case SONG_MENU:
                 topBar.show();
                 beatmapPanel.show();
-                platform.closeAllExcept(topBar, beatmapPanel);
+                beatmapList.show();
+                platform.closeAllExcept(topBar, beatmapPanel, beatmapList);
                 break;
             case SCORING:
             case GAME:

@@ -1,6 +1,6 @@
 package com.reco1l.ui.platform;
 
-import com.reco1l.DrawableManager;
+import com.reco1l.ui.BeatmapList;
 import com.reco1l.ui.BeatmapPanel;
 import com.reco1l.ui.Inbox;
 import com.reco1l.ui.LoadingScene;
@@ -24,6 +24,7 @@ public class UIManager {
     public static UserProfile userProfile;
     public static SettingsMenu settingsPanel;
     public static BeatmapPanel beatmapPanel;
+    public static BeatmapList beatmapList;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -35,6 +36,7 @@ public class UIManager {
         mainMenu = new MainMenu();
         userProfile = new UserProfile();
         settingsPanel = new SettingsMenu();
+        beatmapList = new BeatmapList();
         isUserInterfaceInit = true;
     }
 
@@ -108,5 +110,12 @@ public class UIManager {
             beatmapPanel = new BeatmapPanel();
         }
         return beatmapPanel;
+    }
+
+    public static BeatmapList getBeatmapList() {
+        if (beatmapList == null) {
+            beatmapList = new BeatmapList();
+        }
+        return beatmapList;
     }
 }

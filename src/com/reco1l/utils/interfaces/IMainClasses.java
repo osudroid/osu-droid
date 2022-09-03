@@ -1,6 +1,6 @@
 package com.reco1l.utils.interfaces;
 
-import com.reco1l.DrawableManager;
+import com.reco1l.BitmapManager;
 import com.reco1l.EngineMirror;
 import com.reco1l.ui.data.helpers.OnlineHelper;
 import com.reco1l.ui.platform.FragmentPlatform;
@@ -33,6 +33,6 @@ public interface IMainClasses {
     FragmentPlatform platform = FragmentPlatform.getInstance();
     PropertiesLibrary properties = PropertiesLibrary.getInstance();
 
-    DrawableManager drawableManager = DrawableManager.getInstance();
+    BitmapManager bitmapManager = BitmapManager.getInstance();
     OnlineHelper onlineHelper = OnlineHelper.getInstance();
 }

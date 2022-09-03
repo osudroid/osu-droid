@@ -2,8 +2,7 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.util.DisplayMetrics;
 
-import com.reco1l.DrawableManager;
-import com.reco1l.ui.platform.UIManager;
+import com.reco1l.BitmapManager;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
@@ -59,7 +58,7 @@ public class GlobalManager {
         setInfo("Loading skin...");
         skinNow = Config.getSkinPath();
         ResourceManager.getInstance().loadSkin(skinNow);
-        DrawableManager.getInstance().loadAssets(skinNow);
+        BitmapManager.getInstance().loadAssets(skinNow);
         ScoreLibrary.getInstance().load(mainActivity);
         setLoadingProgress(20);
         PropertiesLibrary.getInstance().load(mainActivity);
