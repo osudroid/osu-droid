@@ -15,6 +15,8 @@ import com.reco1l.ui.platform.UIManager;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.ClickListener;
 import com.reco1l.utils.Res;
+import com.reco1l.utils.ViewUtils;
+import com.reco1l.utils.ViewUtils.MarginUtils;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -102,18 +104,19 @@ public class Dialog extends UIFragment {
                 new Animation(button.view).fade(0, 1).delay(200L * i)
                         .play(200);
 
-                setHorizontalMargin(button.view, m, m);
+                MarginUtils margins = ViewUtils.margins(button.view);
+                margins.horizontal(m, m);
 
                 if (builder.buttons.size() > 1) {
                     if (i == 0) {
-                        setVerticalMargin(button.view, m, xs);
+                        margins.vertical(m, xs);
                     } else if (i == builder.buttons.size() - 1) {
-                        setVerticalMargin(button.view, xs, m);
+                        margins.vertical(xs, m);
                     } else {
-                        setVerticalMargin(button.view, xs, xs);
+                        margins.vertical(xs, xs);
                     }
                 } else {
-                    setVerticalMargin(button.view, m, m);
+                    margins.vertical(m, m);
                 }
             }
         }

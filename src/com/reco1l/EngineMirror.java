@@ -15,7 +15,7 @@ import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 public class EngineMirror extends Engine implements IMainClasses, UI {
     // Checks which AndEngine scene is showing now and updates the new UI when setScene() is called.
 
-    public Scenes currentScene;
+    public Scenes currentScene, lastScene;
     public static boolean isGlobalManagerInit = false;
 
     public enum Scenes {
@@ -46,6 +46,8 @@ public class EngineMirror extends Engine implements IMainClasses, UI {
             UIManager.initialize();
             return;
         }
+
+        lastScene = currentScene;
 
         /*if (scene.hasChildScene() && scene.getChildScene() == PauseMenu.getInstance().getScene()) {
             currentScene = Scenes.PAUSE_MENU;

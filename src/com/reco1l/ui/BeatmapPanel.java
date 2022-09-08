@@ -138,7 +138,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         tabIndicator = find("tabIndicator");
         ImageView expand = find("expand");
 
-        setVisible(false, message);
+        message.setVisibility(View.GONE);
 
         new ClickListener(localTab).simple(() -> switchTab(localTab));
         new ClickListener(globalTab).simple(() -> switchTab(globalTab));
@@ -212,6 +212,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
         pLength.set(track.getMusicLength());
         pBPM.set(track.getBpmMin(), track.getBpmMax());
+        pStars.set(track.getDifficulty());
 
         if (mod.contains(EZ)) {
             pAR.val *= 0.5f;

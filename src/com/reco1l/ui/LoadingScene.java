@@ -91,7 +91,7 @@ public class LoadingScene extends UIFragment implements IUpdateHandler {
             text.setText("Importing beatmaps... (" + (int) percentage + "%)"); //TODO add translation here
 
             if (text.getVisibility() == View.GONE) {
-                setVisible(text);
+                text.setVisibility(View.VISIBLE);
                 new Animation(text).moveY(50, 0).fade(0, 1).play(180);
             }
         });

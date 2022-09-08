@@ -160,54 +160,7 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
         return (T) view;
     }
 
-    // View tools
     //--------------------------------------------------------------------------------------------//
-    /**
-     * Fast tool to switch the visibility of multiple views to <code>VISIBLE</code>.
-     * <p>
-     *     To switch visibility of them to <code>GONE</code> use {@link #setVisible(boolean, View...)}
-     *     with <code>false</code> as first parameter.
-     */
-    protected void setVisible(View... views) {
-        setVisible(true, views);
-    }
-
-    /**
-     * Fast tool to switch the visibility of multiple views between <code>GONE</code> and <code>VISIBLE</code>.
-     * @param bool true to show the views, false to hide them.
-     */
-    protected void setVisible(boolean bool, View... views) {
-        for (View view: views) {
-            if (view == null)
-                continue;
-            if (bool) view.setVisibility(View.VISIBLE);
-            else view.setVisibility(View.GONE);
-        }
-    }
-
-    protected void setMargin(View view, int left, int top, int right, int bottom) {
-        if (view == null)
-            return;
-        MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
-        params.setMargins(left, top, right, bottom);
-        view.requestLayout();
-    }
-
-    protected void setVerticalMargin(View view, int top, int bottom) {
-        if (view == null)
-            return;
-        MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
-        params.setMargins(params.leftMargin, top, params.rightMargin, bottom);
-        view.requestLayout();
-    }
-
-    protected void setHorizontalMargin(View view, int left, int right) {
-        if (view == null)
-            return;
-        MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
-        params.setMargins(left, params.topMargin, right, params.bottomMargin);
-        view.requestLayout();
-    }
 
     /**
      * Simple method to check nullability of multiples views at once.
@@ -222,7 +175,12 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
 
     /**
      * Set text with a fade animation.
+     *
+     * <p>
+     *     Will be removed.
+     * </p>
      */
+    @Deprecated
     public void setText(TextView view, String text) {
         if (view == null)
             return;

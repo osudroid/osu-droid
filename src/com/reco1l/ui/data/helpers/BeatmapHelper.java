@@ -71,7 +71,7 @@ public class BeatmapHelper implements IMainClasses {
     // TODO [BeatmapHelper] make a better algorithm to get the difficulty color.
     public static float[] getColor(float stars) {
 
-        float[] hsv = {1f, 0.75f, 0.50f};
+        float[] hsv = {1f, 0.60f, 0.50f};
 
         float f = 1 + stars - (int) stars; // Decimal part
         int i = 36; // Hue difference between difficulty

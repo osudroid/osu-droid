@@ -5,6 +5,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:background="#FFF"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
@@ -27,26 +29,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center|left"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/bl_difficulty"
-                    style="@style/text"
-                    android:layout_width="match_parent"
-                    android:layout_marginLeft="@dimen/M"
-                    android:layout_marginRight="@dimen/XXL"
-                    android:layout_marginBottom="@dimen/XXS"
-                    android:paddingLeft="@dimen/XXS"
-                    android:singleLine="true"
-                    android:text="difficulty" />
+                android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/bl_stars"
                     style="@style/propertyBadge"
                     android:layout_marginStart="@dimen/M"
-                    android:layout_marginTop="@dimen/XS"
                     android:drawableStart="@drawable/v_star_xs"
-                    android:text="00.00" />
+                    android:text="00.0" />
+
+                <TextView
+                    android:id="@+id/bl_difficulty"
+                    style="@style/text"
+                    android:layout_width="match_parent"
+                    android:layout_marginLeft="@dimen/S"
+                    android:layout_marginRight="@dimen/XXL"
+                    android:paddingLeft="@dimen/XXS"
+                    android:maxLines="2"
+                    android:text="difficulty" />
 
             </LinearLayout>
 

@@ -15,12 +15,12 @@
         android:layout_alignParentRight="true"
         android:layout_marginLeft="@dimen/beatmapPanelWidth">
 
-        <com.reco1l.view.AnimatedRecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/bl_recycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:layout_marginLeft="@dimen/_20sdp"
+            android:layout_marginLeft="@dimen/beatmapListLeftMargin"
             tools:listitem="@layout/beatmap_list_item" />
 
     </RelativeLayout>

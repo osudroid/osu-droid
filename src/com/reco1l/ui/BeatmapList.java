@@ -2,7 +2,7 @@ package com.reco1l.ui;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,22 +12,27 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
+import com.edlplan.ui.TriangleEffectView;
 import com.reco1l.BitmapManager;
 import com.reco1l.ui.data.helpers.BeatmapHelper;
 import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.utils.AsyncExec;
+import com.reco1l.utils.Res;
 import com.reco1l.utils.ClickListener;
-import com.reco1l.view.AnimatedRecyclerView;
+import com.reco1l.utils.ViewUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
+import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -35,10 +40,13 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class BeatmapList extends UIFragment {
 
-    public List<Item> items = new ArrayList<>();
-    public Item selected;
+    public List<Item> beatmaps = new ArrayList<>();
+    public TrackInfo selectedTrack;
 
-    protected AnimatedRecyclerView recyclerView;
+    protected RecyclerView recyclerView;
+
+    private List<Item> temp;
+    private Item selectedItem;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -54,56 +62,108 @@ public class BeatmapList extends UIFragment {
 
     //--------------------------------------------------------------------------------------------//
 
+    public void setSelected(TrackInfo selectedTrack) {
+        this.selectedTrack = selectedTrack;
+
+        if (isShowing) {
+            mActivity.runOnUiThread(this::reload);
+        }
+    }
+
+    public void update() {
+        if (!isShowing || recyclerView == null)
+            return;
+
+        for(int i = 0; i < recyclerView.getChildCount(); ++i) {
+            final View child = recyclerView.getChildAt(i);
+
+            if (child == null)
+                continue;
+
+            mActivity.runOnUiThread(() -> child.setTranslationX(computeTranslationX(child)));
+        }
+    }
+
+    private float computeTranslationX(View view) {
+        int y = (int) ((recyclerView.getHeight() - view.getHeight()) * 1f / 2);
+
+        float m = 1 - Math.abs(view.getY() - y) / Math.abs(y + view.getHeight() / 0.025f);
+        float val = view.getWidth() - view.getWidth() * (m < 0 ? 0f : m > 1 ? 1f : m);
+
+        return val < 0 ? 0 : val > view.getWidth() ? view.getWidth() : val;
+    }
+
+    public void loadBeatmaps() {
+        this.beatmaps = new ArrayList<>();
+        for (BeatmapInfo beatmap : library.getLibrary()) {
+            this.beatmaps.add(new Item(beatmap));
+        }
+    }
+
     @Override
     protected void onLoad() {
-        items = new ArrayList<>();
-        for (BeatmapInfo beatmap : library.getLibrary()) {
-            items.add(new Item(beatmap));
-        }
-
-        for (Item item : items) {
-            if (global.getMainScene().beatmapInfo == item.beatmap) {
-                selected = item;
-                break;
-            }
-        }
-
         recyclerView = find("recycler");
+        loadBeatmaps();
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+        this.selectedTrack = global.getMainScene().selectedTrack;
         reload();
+
+        recyclerView.post(() -> {
+            if (selectedTrack == null)
+                return;
+
+            for (Item item : beatmaps) {
+                if (this.selectedTrack.getBeatmap().getPath().equals(item.beatmap.getPath())) {
+                    setSelected(item.beatmap.getTrack(0));
+                    break;
+                }
+            }
+        });
+    }
+
+    protected void selectItem(Item item) {
+        if (item == selectedItem)
+            return;
+
+        this.selectedItem = item;
+
+        if (!item.isTrack) {
+            selectedTrack = item.beatmap.getTrack(0); // Always selecting first song when changing beatmap
+
+            new AsyncExec() {
+                @Override
+                public void run() {
+                    reload();
+                }
+
+                @Override
+                public void onComplete() {
+                    recyclerView.scrollToPosition(beatmaps.indexOf(item));
+                }
+            }.execute();
+            return;
+        }
+        recyclerView.scrollToPosition(temp.indexOf(item));
     }
 
     protected void reload() {
-        items = new ArrayList<>();
-        ListAdapter adapter = new ListAdapter(items);
-        int selectedPosition = -1;
+        temp = new ArrayList<>();
+        ListAdapter adapter = new ListAdapter(temp);
 
-        for (BeatmapInfo beatmap : library.getLibrary()) {
-            Item item = new Item(beatmap);
-            item.isSelected = selected != null && selected.beatmap == beatmap;
-            items.add(item);
+        for (Item song : beatmaps) {
+            temp.add(song);
 
-            if (item.isSelected) {
-                if (!selected.isTrack) {
-                    selectedPosition = items.indexOf(item);
-                }
-
-                for (TrackInfo track : beatmap.getTracks()) {
-                    Item child = new Item(track);
-                    items.add(child);
-
-                    if (selected.isTrack && track == selected.track) {
-                        selectedPosition = items.indexOf(child);
-                    }
+            if (selectedTrack != null && selectedTrack.getBeatmap() == song.beatmap) {
+                for (TrackInfo track : song.beatmap.getTracks()) {
+                    temp.add(new Item(track));
                 }
             }
-
         }
-        recyclerView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
-
-        if (selectedPosition >= 0) {
-            recyclerView.smoothScrollToPosition(selectedPosition);
-        }
+        mActivity.runOnUiThread(() -> {
+            recyclerView.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+        });
     }
 
     @Override
@@ -172,8 +232,8 @@ public class BeatmapList extends UIFragment {
     public static class ListVH extends ViewHolder {
 
         private Item song;
-        private ImageView songBackground;
-        private AsyncTask<OsuAsyncCallback, Integer, Boolean> task;
+        private ImageView background;
+        private AsyncExec task;
 
         final CardView body;
         final TextView title, artist, mapper, stars, difficulty;
@@ -181,63 +241,78 @@ public class BeatmapList extends UIFragment {
 
         //----------------------------------------------------------------------------------------//
 
-        ListVH(@NonNull View item) {
-            super(item);
-            body = item.findViewById(R.id.bl_itemBody);
-            beatmapLayout = item.findViewById(R.id.bl_beatmapLayout);
-            trackLayout = item.findViewById(R.id.bl_trackLayout);
+        ListVH(@NonNull View root) {
+            super(root);
+            body = root.findViewById(R.id.bl_itemBody);
+            beatmapLayout = root.findViewById(R.id.bl_beatmapLayout);
+            trackLayout = root.findViewById(R.id.bl_trackLayout);
 
-            title = item.findViewById(R.id.bl_title);
-            artist = item.findViewById(R.id.bl_artist);
-            mapper = item.findViewById(R.id.bl_mapper);
-            songBackground = item.findViewById(R.id.bl_songBackground);
-            stars = item.findViewById(R.id.bl_difficulty);
-            difficulty = item.findViewById(R.id.bl_difficulty);
+            title = root.findViewById(R.id.bl_title);
+            artist = root.findViewById(R.id.bl_artist);
+            mapper = root.findViewById(R.id.bl_mapper);
+            background = root.findViewById(R.id.bl_songBackground);
+            stars = root.findViewById(R.id.bl_stars);
+            difficulty = root.findViewById(R.id.bl_difficulty);
         }
 
         //----------------------------------------------------------------------------------------//
 
         final Runnable callback = () -> {
-            TrackInfo track = song.beatmap.getTrack(0);
+            final TrackInfo track = song.beatmap.getTrack(0);
+            background.animate().cancel();
+            ((View) background).setAlpha(0);
 
             if (track.getBackground() == null) {
-                songBackground.setImageAlpha(0);
                 return;
             }
 
             if (bitmapManager.contains("bg@" + track.getFilename())) {
-                songBackground.setImageBitmap(bitmapManager.get("bg@" + track.getFilename()));
+                background.setImageBitmap(bitmapManager.get("bg@" + track.getFilename()));
+                background.animate()
+                        .alpha(1f)
+                        .withEndAction(() -> task = null)
+                        .setDuration(100)
+                        .start();
                 return;
             }
 
-            task = new AsyncTaskLoader().execute(new OsuAsyncCallback() {
+            task = new AsyncExec() {
                 @Override
                 public void run() {
-                    Bitmap bitmap = BitmapManager.compress(BitmapFactory.decodeFile(track.getBackground()), 10);
+                    Bitmap bitmap = BitmapManager.compress(BitmapFactory.decodeFile(track.getBackground()), 8);
                     bitmapManager.loadBitmap("bg@" + track.getFilename(), bitmap);
-                    mActivity.runOnUiThread(() -> songBackground.setImageBitmap(bitmap));
                 }
 
                 @Override
                 public void onComplete() {
-                    task = null;
+                    background.setImageBitmap(bitmapManager.get("bg@" + track.getFilename()));
+                    background.animate()
+                            .alpha(1f)
+                            .withEndAction(() -> task = null)
+                            .setDuration(100)
+                            .start();
                 }
-            });
+            };
+            task.execute();
         };
 
         void cancelBackgroundLoad() {
-            if (!song.isTrack) {
-                if (task != null) {
-                    task.cancel(true);
-                }
-                songBackground.removeCallbacks(callback);
-                songBackground.setImageDrawable(null);
+            if (song.isTrack)
+                return;
+
+            if (task != null) {
+                task.cancel(true);
             }
+            background.animate().cancel();
+            background.removeCallbacks(callback);
+            background.setImageDrawable(null);
+            ((View) background).setAlpha(0);
+            task = null;
         }
 
         void loadBackground() {
             if (!song.isTrack) {
-                songBackground.postDelayed(callback, 50);
+                background.postDelayed(callback, 50); // Delay to avoid loading the background on fast scrolling
             }
         }
 
@@ -246,12 +321,27 @@ public class BeatmapList extends UIFragment {
         void bind(Item song) {
             this.song = song;
 
+            new ClickListener(body).simple(() -> beatmapList.selectItem(song));
+
             if (song.isTrack) {
                 trackLayout.setVisibility(View.VISIBLE);
                 beatmapLayout.setVisibility(View.GONE);
 
-                stars.setText("" + GameHelper.Round(song.track.getDifficulty(), 2));
+                TriangleEffectView triangles = new TriangleEffectView(beatmapList.getContext());
+                triangles.setAlpha(0.3f);
+                trackLayout.addView(triangles, 0, ViewUtils.match_parent());
+
+                final float[] color = BeatmapHelper.getColor(song.track.getDifficulty());
+
                 difficulty.setText(song.track.getMode());
+
+                stars.setText("" + GameHelper.Round(song.track.getDifficulty(), 2));
+                stars.getBackground().setTint(Color.HSVToColor(color));
+
+                body.setCardElevation(0);
+                body.setCardBackgroundColor(Res.color(R.color.backgroundDimmed));
+
+                ViewUtils.margins(body).left((int) Res.dimen(R.dimen.beatmapListTrackLeftMargin));
                 return;
             }
             trackLayout.setVisibility(View.GONE);
@@ -260,17 +350,6 @@ public class BeatmapList extends UIFragment {
             title.setText(BeatmapHelper.getTitle(song.beatmap));
             artist.setText("by " + BeatmapHelper.getArtist(song.beatmap));
             mapper.setText(song.beatmap.getCreator());
-
-            new ClickListener(body).simple(this::setSelected);
-        }
-
-        void setSelected() {
-            if (this.song.isSelected)
-                return;
-
-            this.song.isSelected = true;
-            beatmapList.selected = this.song;
-            beatmapList.reload();
         }
     }
 
@@ -282,23 +361,18 @@ public class BeatmapList extends UIFragment {
 
         protected BeatmapInfo beatmap;
         protected TrackInfo track;
-        protected ArrayList<TrackInfo> tracks;
-
-        boolean isFavorite;
-        boolean isSelected = false;
 
         //----------------------------------------------------------------------------------------//
 
         Item(BeatmapInfo beatmap) {
             this.beatmap = beatmap;
             this.isTrack = false;
-            tracks = beatmap.getTracks();
         }
 
         Item(TrackInfo track) {
             this.track = track;
-            this.beatmap = track.getBeatmap();
             this.isTrack = true;
+            this.beatmap = track.getBeatmap();
         }
     }
 }

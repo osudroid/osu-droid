@@ -63,8 +63,8 @@ public class UserProfile extends UIFragment {
         errorText = find("message");
 
         if (!online.isStayOnline()) {
-            setVisible(false, infoContainer);
-            setVisible(message);
+            infoContainer.setVisibility(View.GONE);
+            message.setVisibility(View.VISIBLE);
 
             name.setText(Config.getLocalUsername());
             new Animation(message).fade(0, 1).play(200);
@@ -89,8 +89,9 @@ public class UserProfile extends UIFragment {
 
         avatar.setImageDrawable(onlineHelper.getPlayerAvatar());
 
-        setVisible(false, message);
-        setVisible(infoContainer);
+        infoContainer.setVisibility(View.VISIBLE);
+        message.setVisibility(View.GONE);
+
         new ClickListener(goProfile).simple(() -> {
             new WebViewFragment().setURL(WebViewFragment.PROFILE_URL + online.getUserId()).show();
             close();

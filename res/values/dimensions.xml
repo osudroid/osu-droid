@@ -160,8 +160,8 @@
 
 
     <!--Beatmap List-->
+    <dimen name="beatmapListLeftMargin">@dimen/_40sdp</dimen>
     <dimen name="beatmapListItemHeight">@dimen/_52sdp</dimen>
-    <dimen name="beatmapListChildItemHeight">@dimen/_36sdp</dimen>
-
+    <dimen name="beatmapListTrackLeftMargin">@dimen/_50sdp</dimen>
 
 </resources>

@@ -20,6 +20,7 @@ import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.ui.platform.UIManager;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.ClickListener;
+import com.reco1l.utils.ViewUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +72,7 @@ public class Inbox extends UIFragment {
         ImageView close = find("close");
         ImageView clear = find("clear");
 
-        setVisible(notifications.isEmpty(), emptyText);
+        ViewUtils.visibility(notifications.isEmpty(), emptyText);
 
         new ClickListener(close).onlyOnce(true).simple(this::close);
         new ClickListener(clear).simple(() -> clear(false));
@@ -161,7 +162,7 @@ public class Inbox extends UIFragment {
 
         mActivity.runOnUiThread(() -> {
             if (isShowing) {
-                setVisible(false, emptyText);
+                emptyText.setVisibility(View.GONE);
                 display(0, notification);
                 return;
             }
@@ -226,7 +227,7 @@ public class Inbox extends UIFragment {
     private void dismiss(long delay, GameNotification notification) {
         if (notification.layout == null) {
             notifications.remove(notification);
-            setVisible(notifications.isEmpty(), emptyText);
+            ViewUtils.visibility(notifications.isEmpty(), emptyText);
             return;
         }
 
@@ -243,7 +244,7 @@ public class Inbox extends UIFragment {
                 .runOnEnd(() -> {
                     container.removeView(notification.layout);
                     notifications.remove(notification);
-                    setVisible(notifications.isEmpty(), emptyText);
+                    ViewUtils.visibility(notifications.isEmpty(), emptyText);
                 })
                 .delay(delay)
                 .play(240);
