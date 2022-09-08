@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -65,6 +66,32 @@ public class AnimatedRecyclerView extends RecyclerView {
         layoutManagerState = null;
     }
 
+    @Override
+    protected int getChildDrawingOrder(int childCount, int i) {
+        final int center = layoutManager.getCenterPosition();
+
+        int position = -1;
+        int order = i;
+
+        final View child = layoutManager.getChildAt(i);
+
+        if (child != null) {
+            position = layoutManager.getPosition(child);
+        }
+        if (position != -1) {
+            final int distance = position - center;
+            order = distance < 0 ? i : childCount - 1 - distance;
+        }
+
+        if (order < 0) {
+            order = 0;
+        }
+        if (order >= childCount) {
+            order = childCount - 1;
+        }
+        return order;
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     @Override
@@ -88,22 +115,6 @@ public class AnimatedRecyclerView extends RecyclerView {
 
     public void setOnItemSelectListener(AnimatedLayoutManager.OnItemSelected listener) {
         layoutManager.selectListener = listener;
-    }
-
-    public void setTranslationEffect(boolean bool) {
-        layoutManager.isTranslationEffectEnabled = bool;
-    }
-
-    public void setAlphaEffect(boolean bool) {
-        layoutManager.isAlphaEffectEnabled = bool;
-    }
-
-    public void setTranslationRatio(float ratio) {
-        layoutManager.translationRatio = ratio;
-    }
-
-    public void setAlphaRatio(float ratio) {
-        layoutManager.alphaRatio = ratio;
     }
 
     public void setScrolling(boolean bool) {

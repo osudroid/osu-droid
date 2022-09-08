@@ -5,6 +5,8 @@ import static androidx.recyclerview.widget.RecyclerView.LayoutParams.*;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.graphics.Rect;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.View;
@@ -42,7 +44,7 @@ public class AnimatedLayoutManager extends RecyclerView.LayoutManager {
     private int itemDecoratedHeight = 0;
     private int itemDecoratedWidth = 0;
 
-    private float startY = 0;
+    private int startY = 0;
     private int totalOffset = 0;
 
     private int currentPosition;
@@ -53,19 +55,14 @@ public class AnimatedLayoutManager extends RecyclerView.LayoutManager {
 
     //--------------------------------------------------------------------------------------------//
 
-    protected OnItemSelected selectListener;
-
-    protected float translationRatio = 0.1f;
-    protected float alphaRatio = 0.25f;
-
-    protected boolean isTranslationEffectEnabled = true;
-    protected boolean isAlphaEffectEnabled = true;
+    protected float translationRatio = 0.025f; // Yes, that's too low.
     protected boolean isScrollingEnabled = true;
 
     //--------------------------------------------------------------------------------------------//
 
     private enum Scroll {BOTTOM, TOP}
 
+    protected OnItemSelected selectListener;
     protected interface OnItemSelected {
         void run(int pos);
     }
@@ -82,6 +79,11 @@ public class AnimatedLayoutManager extends RecyclerView.LayoutManager {
         return new LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
     }
 
+    @Override
+    public boolean supportsPredictiveItemAnimations() {
+        return false;
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     @Override
@@ -90,35 +92,36 @@ public class AnimatedLayoutManager extends RecyclerView.LayoutManager {
             return;
 
         if (state.getItemCount() <= 0  || state.isPreLayout()) {
-            totalOffset = 0;
+            this.totalOffset = 0;
             return;
         }
 
-        itemFrames.clear();
-        itemsAttached.clear();
+        this.itemFrames.clear();
+        this.itemsAttached.clear();
 
         final View scrap = recycler.getViewForPosition(0);
-
         addView(scrap);
         measureChildWithMargins(scrap, 0, 0);
 
-        itemDecoratedWidth = getDecoratedMeasuredWidth(scrap);
-        itemDecoratedHeight = getDecoratedMeasuredHeight(scrap);
-        startY = (getVerticalSpace() - itemDecoratedHeight) * 1.0f / 2;
+        this.itemDecoratedWidth = getDecoratedMeasuredWidth(scrap);
+        this.itemDecoratedHeight = getDecoratedMeasuredHeight(scrap);
+        this.startY = (int) ((getVerticalSpace() - itemDecoratedHeight) * 1.0f / 2);
 
-        float offset = startY;
+        int offset = this.startY;
 
-        for (int i = 0; i < getItemCount() && i < MAX_RECT_COUNT; i++) {
-            Rect frame = itemFrames.get(i);
+        int i = 0;
+        while(i < getItemCount() && i < MAX_RECT_COUNT) {
+            Rect frame = this.itemFrames.get(i);
             if (frame == null) {
                 frame = new Rect();
             }
 
-            frame.set(0, (int) offset, itemDecoratedWidth, (int) offset + itemDecoratedHeight);
+            frame.set(0, offset, itemDecoratedWidth, offset + itemDecoratedHeight);
 
-            itemFrames.put(i, frame);
-            itemsAttached.put(i, false);
-            offset += itemDecoratedHeight;
+            this.itemFrames.put(i, frame);
+            this.itemsAttached.put(i, false);
+            offset += this.itemDecoratedHeight;
+            i++;
         }
 
         detachAndScrapAttachedViews(recycler);
@@ -129,12 +132,12 @@ public class AnimatedLayoutManager extends RecyclerView.LayoutManager {
             onSelectedCallback();
         }
 
-        layoutItems(recycler, state, Scroll.TOP);
+        layout(recycler, state, Scroll.TOP);
         this.recycler = recycler;
         this.state = state;
     }
 
-    private void layoutItems(Recycler recycler, State state, Scroll direction) {
+    private void layout(Recycler recycler, State state, Scroll direction) {
         if (state.isPreLayout())
             return;
 
@@ -148,20 +151,19 @@ public class AnimatedLayoutManager extends RecyclerView.LayoutManager {
                 break;
 
             position = getPosition(child);
-
             final Rect rect = getFrame(position);
 
             if (!Rect.intersects(display, rect)) {
                 removeAndRecycleView(child, recycler);
-                itemsAttached.delete(position);
+                this.itemsAttached.delete(position);
             } else {
-                layoutSingleItem(child, rect);
-                itemsAttached.put(position, true);
+                layoutItem(child, rect);
+                this.itemsAttached.put(position, true);
             }
         }
 
         if (position == 0) {
-            position = centerPosition();
+            position = getCenterPosition();
         }
 
         int min = position - 20;
@@ -177,25 +179,28 @@ public class AnimatedLayoutManager extends RecyclerView.LayoutManager {
         for (int i = min; i < max; i++) {
             final Rect rect = getFrame(i);
 
-            if (Rect.intersects(display, rect) && !itemsAttached.get(i)) {
-                int actualPos = i % getItemCount();
+            if (Rect.intersects(display, rect) && !this.itemsAttached.get(i)) {
 
-                final View view = recycler.getViewForPosition(actualPos);
-                measureChildWithMargins(view, 0, 0);
+                int actualPos = i % getItemCount();
+                if (actualPos >= state.getItemCount())
+                    break;
+
+                final View scrap = recycler.getViewForPosition(actualPos);
+                measureChildWithMargins(scrap, 0, 0);
 
                 if (direction == Scroll.BOTTOM) {
-                    addView(view, 0);
+                    addView(scrap, 0);
                 } else {
-                    addView(view);
+                    addView(scrap);
                 }
 
-                layoutSingleItem(view, rect);
-                itemsAttached.put(i, true);
+                layoutItem(scrap, rect);
+                this.itemsAttached.put(i, true);
             }
         }
     }
 
-    private void layoutSingleItem(View child, Rect rect) {
+    private void layoutItem(View child, Rect rect) {
         if (child == null)
             return;
 
@@ -205,12 +210,7 @@ public class AnimatedLayoutManager extends RecyclerView.LayoutManager {
                 rect.right,
                 rect.bottom - totalOffset);
 
-        if (isTranslationEffectEnabled) {
-            child.setTranslationX(computeTranslationX(child.getWidth(), rect.top - totalOffset));
-        }
-        if (isAlphaEffectEnabled) {
-            child.setAlpha(computeAlpha(rect.top - totalOffset));
-        }
+        child.setTranslationX(computeTranslationX(rect.top - totalOffset));
 
         if (child.getTranslationX() == 0) {
             currentPosition = getPosition(child);
@@ -222,7 +222,7 @@ public class AnimatedLayoutManager extends RecyclerView.LayoutManager {
     private Rect getFrame(int position) {
         Rect frame = itemFrames.get(position);
         if (frame == null) {
-            final int offset = (int) (startY + itemDecoratedHeight * position);
+            final int offset = startY + itemDecoratedHeight * position;
 
             frame = new Rect();
             frame.set(0, offset, itemDecoratedWidth, offset + itemDecoratedHeight);
@@ -235,7 +235,6 @@ public class AnimatedLayoutManager extends RecyclerView.LayoutManager {
 
     private void fixOffset() {
         if (itemDecoratedHeight != 0) {
-
             int scrollPos = (int) (totalOffset * 1.0f / itemDecoratedHeight);
             final float dy = totalOffset % itemDecoratedHeight;
 
@@ -281,7 +280,7 @@ public class AnimatedLayoutManager extends RecyclerView.LayoutManager {
         }
 
         totalOffset += travel;
-        layoutItems(recycler, state, dy > 0 ? Scroll.TOP : Scroll.BOTTOM);
+        layout(recycler, state, dy > 0 ? Scroll.TOP : Scroll.BOTTOM);
         return travel;
     }
 
@@ -302,7 +301,7 @@ public class AnimatedLayoutManager extends RecyclerView.LayoutManager {
 
         animation.addUpdateListener(val -> {
             totalOffset = ((Float) val.getAnimatedValue()).intValue();
-            layoutItems(recycler, state, direction);
+            layout(recycler, state, direction);
         });
 
         animation.addListener(new BaseAnimationListener() {
@@ -319,6 +318,18 @@ public class AnimatedLayoutManager extends RecyclerView.LayoutManager {
         if (recycler == null || state == null)
             return;
 
+        if (currentPosition < 0) {
+            currentPosition = 0;
+        } else if (currentPosition >= getItemCount()) {
+            currentPosition = getItemCount() - 1;
+        }
+
+        if (position < 0) {
+            position = 0;
+        } else if (position >= getItemCount()) {
+            position = getItemCount() - 1;
+        }
+
         final int oy = itemDecoratedHeight * currentPosition;
         final int fy = itemDecoratedHeight * position;
 
@@ -334,28 +345,27 @@ public class AnimatedLayoutManager extends RecyclerView.LayoutManager {
             return;
 
         if (recycler == null || state == null) {
-            isOrientationChanged = true;
-            selectedPosition = position;
+            this.isOrientationChanged = true;
+            this.selectedPosition = position;
+            this.currentPosition = position;
             requestLayout();
             return;
         }
-        totalOffset = itemDecoratedHeight * position;
-        layoutItems(recycler, state, position > selectedPosition ? Scroll.TOP : Scroll.BOTTOM);
+        this.totalOffset = itemDecoratedHeight * position;
+        layout(recycler, state, position > selectedPosition ? Scroll.TOP : Scroll.BOTTOM);
         onSelectedCallback();
     }
 
-    protected int centerPosition() {
-        final int intervalPos = itemDecoratedHeight;
-
-        if (intervalPos == 0) {
-            return intervalPos;
+    protected int getCenterPosition() {
+        if (this.itemDecoratedHeight == 0) {
+            return 0;
         }
 
-        int pos = totalOffset / intervalPos;
-        final int mPos = totalOffset % intervalPos;
+        int pos = totalOffset / this.itemDecoratedHeight;
+        final int more = totalOffset % this.itemDecoratedHeight;
 
-        if (Math.abs(mPos) >= intervalPos * 0.5f) {
-            if (mPos >= 0) {
+        if (Math.abs(more) >= this.itemDecoratedHeight * 0.5f) {
+            if (more >= 0) {
                 pos++;
             } else {
                 pos--;
@@ -375,42 +385,36 @@ public class AnimatedLayoutManager extends RecyclerView.LayoutManager {
     }
 
     private void onSelectedCallback() {
-        final int intervalDistance = itemDecoratedHeight;
-        if (intervalDistance == 0)
+        if (itemDecoratedHeight == 0)
             return;
 
-        selectedPosition = (int) ((float) totalOffset / intervalDistance);
+        this.selectedPosition = (int) ((float) totalOffset / itemDecoratedHeight);
         if (selectedPosition < 0) {
-            selectedPosition += getItemCount();
+            this.selectedPosition += getItemCount();
         }
 
-        selectedPosition = Math.abs(selectedPosition % getItemCount());
+        this.selectedPosition = Math.abs(selectedPosition % getItemCount());
 
         if (selectListener != null && selectedPosition != lastSelectedPosition) {
             selectListener.run(selectedPosition);
         }
-        lastSelectedPosition = selectedPosition;
+        this.lastSelectedPosition = selectedPosition;
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    private float computeTranslationX(int width, int y) {
+    private float computeTranslationX(int y) {
         float m = 1 - Math.abs(y - startY) / Math.abs(startY + itemDecoratedHeight / translationRatio);
-        float value = width - width * (m < 0 ? 0f : m > 1 ? 1f : m);
+        float value = itemDecoratedWidth - itemDecoratedWidth * (m < 0 ? 0f : m > 1 ? 1f : m);
 
         if (value < 0) {
             value = 0;
         }
-        if (value > width) {
-            value = width;
+        if (value > itemDecoratedWidth) {
+            value = itemDecoratedWidth;
         }
 
         return value;
-    }
-
-    private float computeAlpha(int y) {
-        float alpha = 1 - Math.abs(y - startY) / Math.abs(startY + itemDecoratedHeight / alphaRatio);
-        return alpha < 0.1 ? 0f : alpha > 1 ? 1f : alpha;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -428,5 +432,64 @@ public class AnimatedLayoutManager extends RecyclerView.LayoutManager {
     @Override
     public boolean canScrollVertically() {
         return isScrollingEnabled;
+    }
+
+    @Override
+    public boolean isAutoMeasureEnabled() {
+        return true;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    @Nullable
+    @Override
+    public Parcelable onSaveInstanceState() {
+        return new StateHolder(selectedPosition);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        super.onRestoreInstanceState(state);
+        if (state instanceof StateHolder) {
+            isOrientationChanged = true;
+            this.selectedPosition = ((StateHolder) state).position;
+            this.currentPosition = ((StateHolder) state).position;
+        }
+    }
+
+    private static class StateHolder implements Parcelable {
+        final int position;
+
+        protected StateHolder(int position) {
+            this.position = position;
+        }
+
+        protected StateHolder(Parcel parcel) {
+            this.position = parcel.readInt();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            if (dest != null) {
+                dest.writeInt(position);
+            }
+        }
+
+        public static final Creator<StateHolder> CREATOR = new Creator<StateHolder>() {
+            @Override
+            public StateHolder createFromParcel(Parcel in) {
+                return new StateHolder(in);
+            }
+
+            @Override
+            public StateHolder[] newArray(int size) {
+                return new StateHolder[size];
+            }
+        };
     }
 }
