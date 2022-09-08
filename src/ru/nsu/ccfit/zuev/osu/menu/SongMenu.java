@@ -13,31 +13,23 @@ import com.reco1l.utils.interfaces.UI;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
-import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.scene.background.SpriteBackground;
 import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.Text;
-import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.HorizontalAlign;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Set;
 
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
 import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
@@ -49,7 +41,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarListener, UI {
+public class SongMenu implements IUpdateHandler, MenuItemListener, UI {
     private final static Boolean musicMutex = true;
     private final Boolean backgroundMutex = true;
     public Scene scene;
@@ -57,24 +49,18 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
     private Engine engine;
     private GameScene game;
     private ScoringScene scoreScene;
-    private float camY = 0;
-    private float velocityY;
     private Activity context;
     private MenuItem selectedItem = null;
     private TrackInfo selectedTrack;
     private Sprite bg = null;
     private Boolean bgLoaded = false;
     private String bgName = "";
-    private Float touchY = null;
     private String filterText = "";
     private boolean favsOnly = false;
     private Set<String> limitC;
     private float secondsSinceLastSelect = 0;
-    private float maxY = 100500;
     private int pointerId = -1;
-    private float initalY = -1;
     private float secPassed = 0, tapTime;
-    private ScrollBar scrollbar;
     private boolean isSelectComplete = true;
     private GroupType groupType = GroupType.MapSet;
 
@@ -115,8 +101,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
 
     public synchronized void load() {
         scene = new Scene();
-        camY = 0;
-        velocityY = 0;
         selectedItem = null;
         selectedTrack = null;
         bgLoaded = true;
@@ -138,67 +122,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
         sortOrder = SortOrder.Title;
         sort();
 
-        scene.setOnSceneTouchListener((pScene, evt) -> {
-            if (evt.getX() < Config.getRES_WIDTH() / 5f * 2) {
-                return false;
-            }
-            switch (evt.getAction()) {
-                case (TouchEvent.ACTION_DOWN):
-                    velocityY = 0;
-                    touchY = evt.getY();
-                    pointerId = evt.getPointerID();
-                    tapTime = secPassed;
-                    initalY = touchY;
-                    break;
-                case (TouchEvent.ACTION_MOVE):
-                    if (pointerId != -1 && pointerId != evt.getPointerID()) {
-                        break;
-                    }
-                    if (initalY == -1) {
-                        velocityY = 0;
-                        touchY = evt.getY();
-                        initalY = touchY;
-                        tapTime = secPassed;
-                        pointerId = evt.getPointerID();
-                    }
-                    final float dy = evt.getY() - touchY;
-
-                    camY -= dy;
-                    touchY = evt.getY();
-                    if (camY <= -Config.getRES_HEIGHT() / 2f) {
-                        camY = -Config.getRES_HEIGHT() / 2f;
-                        velocityY = 0;
-                    } else if (camY >= maxY) {
-                        camY = maxY;
-                        velocityY = 0;
-                    }
-
-                    // velocityY = -3f * dy;
-                    break;
-                default: {
-                    if (pointerId != -1 && pointerId != evt.getPointerID()) {
-                        break;
-                    }
-                    touchY = null;
-                    if (secPassed - tapTime < 0.001f || initalY == -1) {
-                        velocityY = 0;
-                    } else {
-                        velocityY = (initalY - evt.getY())
-                                / (secPassed - tapTime);
-                    }
-                    pointerId = -1;
-                    initalY = -1;
-
-                }
-                break;
-            }
-            return true;
-        });
-
         scene.registerUpdateHandler(this);
         scene.setTouchAreaBindingEnabled(true);
-
-        scrollbar = new ScrollBar(scene);
     }
 
     public Scene getScene() {
@@ -224,8 +149,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
         }
         limitC = limit;
         filterText = filter;
-        camY = 0;
-        velocityY = 0;
         final String lowerFilter = filter.toLowerCase();
         /*for (final MenuItem item : items) {
             item.applyFilter(lowerFilter, favsOnly, limit); //TODO filtering
@@ -287,36 +210,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
         secPassed += pSecondsElapsed;
         increaseVolume();
         increaseBackgroundLuminance(pSecondsElapsed);
+        beatmapList.update();
 
         secondsSinceLastSelect += pSecondsElapsed;
-        float oy = -camY;
-        /*for (final MenuItem item : items) {
-            final float cy = oy + Config.getRES_HEIGHT() / 2f + item.getHeight()
-                    / 2;
-            float ox = Config.getRES_WIDTH() / 1.85f + 200 * (float) Math.abs(Math.cos(cy * Math.PI
-                    / (Config.getRES_HEIGHT() * 2)));
-            ox = Utils.toRes(ox);
-            item.setPos(ox, oy);
-            oy += item.getHeight();
-        }*/
-        oy += camY;
-        camY += velocityY * pSecondsElapsed;
-        maxY = oy - Config.getRES_HEIGHT() / 2f;
-        if (camY <= -Config.getRES_HEIGHT() / 2f && velocityY < 0
-                || camY >= maxY && velocityY > 0) {
-            camY -= velocityY * pSecondsElapsed;
-            velocityY = 0;
-        }
-        if (Math.abs(velocityY) > Utils.toRes(1000) * pSecondsElapsed) {
-            velocityY -= Utils.toRes(1000) * pSecondsElapsed
-                    * Math.signum(velocityY);
-        } else {
-            velocityY = 0;
-        }
 
         expandSelectedItem(pSecondsElapsed);
-
-        updateScrollbar(camY + Config.getRES_HEIGHT() / 2f, oy);
     }
 
     public void increaseVolume() {
@@ -352,13 +250,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
         }
     }
 
-    public void updateScrollbar(final float vy, final float maxy) {
-        scrollbar.setPosition(vy, maxy);
-        scrollbar.setVisible(Math.abs(velocityY) > Utils.toRes(500));
-    }
-
-    public void reset() {
-    }
+    public void reset() {}
 
     public void select(final MenuItem item) {
         secondsSinceLastSelect = 0;
@@ -367,17 +259,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
         }
 
         selectedItem = item;
-        velocityY = 0;
         selectedTrack = null;
-        float height = 0;
-        /*for (int i = 0; i < items.size(); i++) {
-            if (items.get(i) == selectedItem) {
-                break;
-            }
-            height += items.get(i).getInitialHeight();
-        }*/
-        camY = height - Config.getRES_HEIGHT() / 2f;
-        camY += item.getTotalHeight() / 2;
     }
 
     public void updateInfo(TrackInfo track) {
@@ -474,9 +356,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
     }
 
     public void stopScroll(final float y) {
-        velocityY = 0;
-        touchY = y;
-        initalY = -1;
     }
 
     public void updateScore() {
@@ -524,12 +403,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
         engine.setScene(scoreScene.getScene());
     }
 
-
-    public void onScroll(final float where) {
-        velocityY = 0;
-        camY = where - Config.getRES_HEIGHT() / 2f;
-    }
-
     public void unload() {
     }
 
@@ -547,8 +420,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
     }
 
     public void setY(final float y) {
-        velocityY = 0;
-        camY = y;
     }
 
     public void stopMusic() {
