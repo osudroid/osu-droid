@@ -94,6 +94,7 @@
         <item name="android:backgroundTint">@color/propertyBackground</item>
         <item name="android:background">@drawable/round_shape</item>
         <item name="android:textSize">@dimen/textXS</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="smallPropertyBadge" parent="text">

@@ -342,10 +342,12 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
             pCombo.update();
 
             final int current = pStars.view.getBackgroundTintList().getDefaultColor();
-            float[] color = BeatmapHelper.getColor(pStars.val);
+
+            float[] color = new float[3];
+            Color.colorToHSV(BeatmapHelper.getDifficultyColor(pStars.val), color);
 
             new Animation(pStars.view)
-                    .ofArgb(current, Color.HSVToColor(color))
+                    .ofArgb(current, BeatmapHelper.getDifficultyColor(pStars.val))
                     .runOnUpdate(val -> pStars.view.getBackground().setTint((int) val.getAnimatedValue()))
                     .runOnStart(pStars::update)
                     .cancelPending(false)
@@ -357,16 +359,16 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
                     pStars.val >= 10 ? 0.08f : 0.20f
             };
 
-            int bannerColor = ((ColorDrawable) banner.getBackground()).getColor();
-            int mapperColor = mapper.getBackgroundTintList().getDefaultColor();
+            final int bannerColor = ((ColorDrawable) banner.getBackground()).getColor();
+            final int mapperColor = mapper.getBackgroundTintList().getDefaultColor();
 
             new Animation(banner)
-                    .ofArgb(bannerColor, Color.HSVToColor(dark))
+                    .ofArgb(bannerColor, BeatmapHelper.getDifficultyBackgroundColor(pStars.val))
                     .runOnUpdate(val -> banner.setBackgroundColor((int) val.getAnimatedValue()))
                     .play(500);
 
             new Animation(pStars.view)
-                    .ofArgb(mapperColor, Color.HSVToColor(180, dark))
+                    .ofArgb(mapperColor, BeatmapHelper.getDifficultyBackgroundColor(pStars.val))
                     .runOnUpdate(val -> mapper.getBackground().setTint((int) val.getAnimatedValue()))
                     .cancelPending(false)
                     .play(500);

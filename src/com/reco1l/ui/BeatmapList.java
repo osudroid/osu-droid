@@ -2,7 +2,6 @@ package com.reco1l.ui;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
+import com.edlplan.framework.math.FMath;
 import com.edlplan.ui.TriangleEffectView;
 import com.reco1l.BitmapManager;
 import com.reco1l.ui.data.helpers.BeatmapHelper;
@@ -30,8 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -85,12 +83,12 @@ public class BeatmapList extends UIFragment {
     }
 
     private float computeTranslationX(View view) {
-        int y = (int) ((recyclerView.getHeight() - view.getHeight()) * 1f / 2);
+        int oy = (int) ((recyclerView.getHeight() - view.getHeight()) * 1f / 2);
 
-        float m = 1 - Math.abs(view.getY() - y) / Math.abs(y + view.getHeight() / 0.025f);
-        float val = view.getWidth() - view.getWidth() * (m < 0 ? 0f : m > 1 ? 1f : m);
+        float fx = 1 - Math.abs(view.getY() - oy) / Math.abs(oy + view.getHeight() / 0.025f);
+        float val = view.getWidth() - view.getWidth() * FMath.clamp(fx, 0f, 1f);
 
-        return val < 0 ? 0 : val > view.getWidth() ? view.getWidth() : val;
+        return FMath.clamp(val, 0, view.getWidth());
     }
 
     public void loadBeatmaps() {
@@ -139,12 +137,12 @@ public class BeatmapList extends UIFragment {
 
                 @Override
                 public void onComplete() {
-                    recyclerView.scrollToPosition(beatmaps.indexOf(item));
+                    recyclerView.smoothScrollToPosition(beatmaps.indexOf(item));
                 }
             }.execute();
             return;
         }
-        recyclerView.scrollToPosition(temp.indexOf(item));
+        recyclerView.smoothScrollToPosition(temp.indexOf(item));
     }
 
     protected void reload() {
@@ -215,8 +213,7 @@ public class BeatmapList extends UIFragment {
 
         //----------------------------------------------------------------------------------------//
 
-        @NonNull
-        @Override
+        @Override @NonNull
         public ListVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new ListVH(LayoutInflater
                     .from(parent.getContext())
@@ -331,12 +328,16 @@ public class BeatmapList extends UIFragment {
                 triangles.setAlpha(0.3f);
                 trackLayout.addView(triangles, 0, ViewUtils.match_parent());
 
-                final float[] color = BeatmapHelper.getColor(song.track.getDifficulty());
+                final TrackInfo track = song.track;
 
-                difficulty.setText(song.track.getMode());
+                difficulty.setText(track.getMode());
+                stars.setText("" + GameHelper.Round(track.getDifficulty(), 2));
 
-                stars.setText("" + GameHelper.Round(song.track.getDifficulty(), 2));
-                stars.getBackground().setTint(Color.HSVToColor(color));
+                final int textColor = BeatmapHelper.getDifficultyTextColor(track.getDifficulty());
+
+                stars.setTextColor(textColor);
+                stars.getCompoundDrawablesRelative()[0].setTint(textColor);
+                stars.getBackground().setTint(BeatmapHelper.getDifficultyColor(track.getDifficulty()));
 
                 body.setCardElevation(0);
                 body.setCardBackgroundColor(Res.color(R.color.backgroundDimmed));

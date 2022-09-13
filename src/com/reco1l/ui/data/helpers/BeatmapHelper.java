@@ -1,7 +1,9 @@
 package com.reco1l.ui.data.helpers;
 
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
+import com.edlplan.framework.math.FMath;
 import com.reco1l.utils.interfaces.IMainClasses;
 
 import java.io.IOException;
@@ -10,6 +12,7 @@ import java.io.InputStream;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 
 // Created by Reco1l on 1/8/22 05:27
 
@@ -61,47 +64,66 @@ public class BeatmapHelper implements IMainClasses {
         return "null";
     }
 
-    // Difficulty color in HSV
+    // Difficulty color in HEX
     //--------------------------------------------------------------------------------------------//
-    private static boolean range(float value, float min, float max) {
-        return value >= min && value < max;
+
+    private static class DifficultyPalette {
+
+        static final float[] domain = {
+                0.1f, 1.25f, 2f, 2.5f, 3.3f,
+                4.2f, 4.9f, 5.8f, 6.7f, 7.7f, 9f, Float.MAX_VALUE
+        };
+
+        static final int[] range = {
+                0xFF4290FB, 0xFF4FC0FF, 0xFF4FFFD5, 0xFF7CFF4F, 0xFFF6F05C,
+                0xFFFF8068, 0xFFFF4E6F, 0xFFC645B8, 0xFF6563DE, 0xFF18158E, 0xFF000000
+        };
+
+        // TODO make it as a spectrum like osu!web does.
+        static int getColor(float stars) {
+            stars = GameHelper.Round(stars, 2);
+
+            if (stars < domain[0]) {
+                return 0xFF999999;
+            } else if (stars >= domain[10]) {
+                return 0xFF000000;
+            }
+
+            int color = 0;
+            for (int i = 0; i < range.length; ++i) {
+                if (FMath.inInterval(domain[i] - 0.01f, domain[i + 1], stars)) {
+                    color = range[i];
+                    break;
+                }
+            }
+            return color;
+        }
+
+        static int getTextColor(float stars) {
+            return stars < domain[5] ? 0xCF000000 : Color.WHITE;
+        }
+
+        static int getBackgroundColor(float stars) {
+            float[] hsv = new float[3];
+
+            Color.colorToHSV(getDifficultyColor(stars), hsv);
+            hsv[1] = stars >= domain[10] ? 0 : 0.70f;
+            hsv[2] = stars >= domain[10] ? 0.08f : 0.20f;
+
+            return Color.HSVToColor(hsv);
+        }
     }
 
-    // Don't ask me how this works, but if you want you can write a better algorithm.
-    // TODO [BeatmapHelper] make a better algorithm to get the difficulty color.
-    public static float[] getColor(float stars) {
+    public static int getDifficultyColor(float stars) {
+        return DifficultyPalette.getColor(stars);
+    }
 
-        float[] hsv = {1f, 0.60f, 0.50f};
+    public static int getDifficultyTextColor(float stars) {
+        return DifficultyPalette.getTextColor(stars);
+    }
 
-        float f = 1 + stars - (int) stars; // Decimal part
-        int i = 36; // Hue difference between difficulty
-
-        if (range(stars, 1, 5)) {
-            hsv[0] = 180 - (i * stars);
-        }
-        else if (range(stars, 5, 6)) {
-            hsv[0] = 360 - (i * (f - 1));
-        }
-        else if (range(stars, 6, 7)) {
-            hsv[0] = 360 - (i * f);
-        }
-        else if (range(stars, 7, 8)) {
-            hsv[0] = 360 - (i + (i * f));
-        }
-        else if (range(stars, 8, 9)) {
-            hsv[0] = 360 - (2 * i + (i * f));
-        }
-        else if (range(stars, 9, 10)) {
-            hsv[0] = 360 - (3 * i + (i * f));
-            hsv[2] = 0.50f - (0.1f * f);
-        }
-
-        if (stars < 1) {
-            hsv[0] = 180;
-        } else if (stars >= 10) {
-            hsv[2] = 0;
-        }
-        return hsv;
+    public static int getDifficultyBackgroundColor(float stars) {
+        return DifficultyPalette.getBackgroundColor(stars);
     }
 
     // Background
