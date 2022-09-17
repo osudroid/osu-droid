@@ -1,6 +1,6 @@
 package com.reco1l.ui.data.helpers;
 
-import com.reco1l.utils.interfaces.IGameMods;
+import com.reco1l.interfaces.IGameMods;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.reco1l.ui;
+package com.reco1l.ui.fragments.extras;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,14 +16,14 @@ import androidx.preference.SeekBarPreference;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.SkinPathPreference;
 import com.google.android.material.snackbar.Snackbar;
-import com.reco1l.EngineMirror;
+import com.reco1l.Scenes;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
-import com.reco1l.ui.data.DialogTable;
+import com.reco1l.ui.data.tables.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.ClickListener;
-import com.reco1l.utils.Res;
+import com.reco1l.utils.ViewTouchHandler;
+import com.reco1l.utils.Resources;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
@@ -40,6 +40,10 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 18/7/22 22:13
+
+// Created by Reco1l on 13/9/22 01:22
+
+// Created by Reco1l on 13/9/22 01:49
 
 public class SettingsMenu extends UIFragment {
 
@@ -99,8 +103,8 @@ public class SettingsMenu extends UIFragment {
     protected void onLoad() {
         setDismissMode(true, true);
 
-        panelWidth = (int) Res.dimen(R.dimen.settingsPanelWidth);
-        navbarWidth = (int) Res.dimen(R.dimen.settingsPanelNavBarWidth);
+        panelWidth = (int) Resources.dimen(R.dimen.settingsPanelWidth);
+        navbarWidth = (int) Resources.dimen(R.dimen.settingsPanelNavBarWidth);
 
         if (fragment == null)
             fragment = new SettingsFragment();
@@ -136,11 +140,13 @@ public class SettingsMenu extends UIFragment {
                 .delay(200)
                 .play(200);
 
-        ImageView close = find("close");
-        new ClickListener(close).onlyOnce(true).simple(this::close);
+        bindTouchListener(find("close"), () -> {
+            unbindTouchListeners();
+            close();
+        });
 
         for (Tabs tab : Tabs.values()) {
-            new ClickListener(find(tab.name())).simple(() -> navigateTo(tab));
+            bindTouchListener(find(tab.name()), () -> navigateTo(tab));
         }
     }
 
@@ -172,7 +178,7 @@ public class SettingsMenu extends UIFragment {
         onlineHelper.update();
         OnlineScoring.getInstance().login();
 
-        if (reloadBackground && engine.currentScene == EngineMirror.Scenes.MAIN_MENU) {
+        if (reloadBackground && engine.currentScene == Scenes.MAIN_MENU) {
             global.getMainScene().loadTimeingPoints(false);
             reloadBackground = false;
         }

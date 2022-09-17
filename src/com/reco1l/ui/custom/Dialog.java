@@ -7,16 +7,19 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 
 import com.edlplan.framework.easing.Easing;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.ui.platform.UIManager;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.ClickListener;
-import com.reco1l.utils.Res;
+import com.reco1l.utils.Resources;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.ViewUtils.MarginUtils;
+import com.reco1l.utils.listeners.TouchListener;
+
+import org.jetbrains.annotations.NotNull;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -24,21 +27,21 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class Dialog extends UIFragment {
 
-    private final DialogBuilder builder;
-
     private CardView body;
+    private TextView title;
     private ScrollView bodyParent;
     private LinearLayout container, buttonsContainer;
 
-    private TextView title;
-
+    private final DialogBuilder builder;
     private boolean closeExtras = true;
 
     //--------------------------------------------------------------------------------------------//
 
-    public Dialog(DialogBuilder builder) {
+    public Dialog(@NotNull DialogBuilder builder) {
         this.builder = builder;
     }
+
+    //--------------------------------------------------------------------------------------------//
 
     @Override
     protected String getPrefix() {
@@ -50,14 +53,19 @@ public class Dialog extends UIFragment {
         return R.layout.dialog;
     }
 
+    @Override
+    protected long getDismissTime() {
+        return builder.dismissTime;
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onLoad() {
         setDismissMode(builder.closeOnBackgroundClick, builder.closeOnBackPress);
 
-        int m = (int) Res.dimen(R.dimen.M);
-        int xs = (int) Res.dimen(R.dimen.XS);
+        int m = (int) Resources.dimen(R.dimen.M);
+        int xs = (int) Resources.dimen(R.dimen.XS);
 
         buttonsContainer = find("buttonsContainer");
         bodyParent = find("bodyParent");
@@ -69,12 +77,16 @@ public class Dialog extends UIFragment {
 
         new Animation(rootBackground).fade(0, 1)
                 .play(500);
-        new Animation(body).fade(0, 1).interpolator(Easing.OutExpo)
+        new Animation(body).fade(0, 1)
+                .interpolator(Easing.OutExpo)
                 .play(500);
-        new Animation(bodyParent).moveY(screenHeight / 0.85f, 0).interpolator(Easing.OutExpo)
+        new Animation(bodyParent).moveY(screenHeight / 0.85f, 0)
+                .interpolator(Easing.OutExpo)
                 .play(500);
+        new Animation(title).fade(0, 1)
+                .play(300);
 
-        new Animation(title).fade(0, 1).play(300);
+
 
         if (builder.customFragment != null) {
             platform.manager.beginTransaction()
@@ -87,8 +99,14 @@ public class Dialog extends UIFragment {
         }
 
         if (builder.closeOnBackgroundClick) {
-            new ClickListener(find("scrollBackground")).touchEffect(false).onlyOnce(true)
-                    .simple(this::close);
+            bindTouchListener(find("scrollBackground"), new TouchListener() {
+                public boolean hasTouchEffect() { return false; }
+                public boolean isOnlyOnce() { return true; }
+
+                public void onPressUp() {
+                    close();
+                }
+            });
         }
 
         bodyParent.setSmoothScrollingEnabled(true);
@@ -198,13 +216,13 @@ public class Dialog extends UIFragment {
         }
 
         private void inflate(LinearLayout container) {
-            LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, (int) Res.dimen(R.dimen.dialogButtonHeight));
+            LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, (int) Resources.dimen(R.dimen.dialogButtonHeight));
             view = LayoutInflater.from(platform.context).inflate(R.layout.dialog_button, null);
             container.addView(view, params);
         }
 
         private void load(Dialog dialog) {
-            new ClickListener(view).simple(() -> onClick.onButtonClick(dialog));
+            dialog.bindTouchListener(view, () -> onClick.onButtonClick(dialog));
 
             if (color != null) {
                 ((CardView) view).setCardBackgroundColor(color);

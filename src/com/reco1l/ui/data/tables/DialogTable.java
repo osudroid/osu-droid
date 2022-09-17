@@ -1,4 +1,4 @@
-package com.reco1l.ui.data;
+package com.reco1l.ui.data.tables;
 
 import android.content.Intent;
 import android.widget.TextView;
@@ -6,7 +6,7 @@ import android.widget.TextView;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
 import com.reco1l.ui.custom.DialogFragment;
-import com.reco1l.utils.interfaces.IMainClasses;
+import com.reco1l.interfaces.IMainClasses;
 
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;

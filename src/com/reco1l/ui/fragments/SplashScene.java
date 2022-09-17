@@ -1,4 +1,4 @@
-package com.reco1l.ui;
+package com.reco1l.ui.fragments;
 
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
@@ -10,7 +10,7 @@ import com.edlplan.ui.TriangleEffectView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.Res;
+import com.reco1l.utils.Resources;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.scene.Scene;
@@ -21,6 +21,8 @@ import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 24/6/22 02:49
+
+// Created by Reco1l on 13/9/22 01:22
 
 public class SplashScene extends UIFragment implements IUpdateHandler {
 
@@ -93,7 +95,7 @@ public class SplashScene extends UIFragment implements IUpdateHandler {
     @Override
     protected void onLoad() {
         setDismissMode(false, false);
-        logoSize = Res.dimen(R.dimen.mainMenuLogoSize);
+        logoSize = Resources.dimen(R.dimen.mainMenuLogoSize);
         resources.loadSound(START_SOUND, "sfx/" + START_SOUND + ".ogg", false);
         resources.loadSound(HIT_SOUND, "sfx/" + HIT_SOUND + ".ogg", false);
 
@@ -168,7 +170,7 @@ public class SplashScene extends UIFragment implements IUpdateHandler {
             new Animation(trianglesTop).scale(1, 1.2f).fade(0.05f, 0).rotation(180, 180)
                     .play(400);
 
-            new Animation(logo).size(Res.dimen(R.dimen.splashScreenLogoSize), logoSize)
+            new Animation(logo).size(Resources.dimen(R.dimen.splashScreenLogoSize), logoSize)
                     .runOnEnd(() -> new Animation(effect).size(logoSize, logoSize * 1.5f).fade(0.1f, 0).play(300))
                     .play(400);
 

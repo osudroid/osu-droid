@@ -1,7 +1,5 @@
-package com.reco1l.ui;
+package com.reco1l.ui.fragments;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,13 +16,14 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.edlplan.framework.math.FMath;
 import com.edlplan.ui.TriangleEffectView;
-import com.reco1l.BitmapManager;
+import com.reco1l.Scenes;
 import com.reco1l.ui.data.helpers.BeatmapHelper;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.AsyncExec;
-import com.reco1l.utils.Res;
-import com.reco1l.utils.ClickListener;
+import com.reco1l.utils.Resources;
+import com.reco1l.utils.ViewTouchHandler;
 import com.reco1l.utils.ViewUtils;
+import com.reco1l.utils.listeners.TouchListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +55,11 @@ public class BeatmapList extends UIFragment {
     @Override
     protected int getLayout() {
         return R.layout.beatmap_list;
+    }
+
+    @Override
+    protected Scenes getParentScene() {
+        return Scenes.SONG_MENU;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -130,12 +134,10 @@ public class BeatmapList extends UIFragment {
             selectedTrack = item.beatmap.getTrack(0); // Always selecting first song when changing beatmap
 
             new AsyncExec() {
-                @Override
                 public void run() {
                     reload();
                 }
 
-                @Override
                 public void onComplete() {
                     recyclerView.smoothScrollToPosition(beatmaps.indexOf(item));
                 }
@@ -173,7 +175,7 @@ public class BeatmapList extends UIFragment {
 
     public static class ListAdapter extends Adapter<ListVH> {
 
-        final List<Item> items;
+        private final List<Item> items;
 
         //----------------------------------------------------------------------------------------//
 
@@ -232,9 +234,9 @@ public class BeatmapList extends UIFragment {
         private ImageView background;
         private AsyncExec task;
 
-        final CardView body;
-        final TextView title, artist, mapper, stars, difficulty;
-        final RelativeLayout beatmapLayout, trackLayout;
+        private final CardView body;
+        private final TextView title, artist, mapper, stars, difficulty;
+        private final RelativeLayout beatmapLayout, trackLayout;
 
         //----------------------------------------------------------------------------------------//
 
@@ -254,8 +256,8 @@ public class BeatmapList extends UIFragment {
 
         //----------------------------------------------------------------------------------------//
 
-        final Runnable callback = () -> {
-            final TrackInfo track = song.beatmap.getTrack(0);
+        private final Runnable callback = () -> {
+            TrackInfo track = song.beatmap.getTrack(0);
             background.animate().cancel();
             ((View) background).setAlpha(0);
 
@@ -263,8 +265,8 @@ public class BeatmapList extends UIFragment {
                 return;
             }
 
-            if (bitmapManager.contains("bg@" + track.getFilename())) {
-                background.setImageBitmap(bitmapManager.get("bg@" + track.getFilename()));
+            if (BeatmapHelper.getCompressedBackground(track) != null) {
+                background.setImageBitmap(BeatmapHelper.getCompressedBackground(track));
                 background.animate()
                         .alpha(1f)
                         .withEndAction(() -> task = null)
@@ -276,13 +278,12 @@ public class BeatmapList extends UIFragment {
             task = new AsyncExec() {
                 @Override
                 public void run() {
-                    Bitmap bitmap = BitmapManager.compress(BitmapFactory.decodeFile(track.getBackground()), 8);
-                    bitmapManager.loadBitmap("bg@" + track.getFilename(), bitmap);
+                    BeatmapHelper.loadCompressedBackground(track);
                 }
 
                 @Override
                 public void onComplete() {
-                    background.setImageBitmap(bitmapManager.get("bg@" + track.getFilename()));
+                    background.setImageBitmap(BeatmapHelper.getCompressedBackground(track));
                     background.animate()
                             .alpha(1f)
                             .withEndAction(() -> task = null)
@@ -293,7 +294,7 @@ public class BeatmapList extends UIFragment {
             task.execute();
         };
 
-        void cancelBackgroundLoad() {
+        private void cancelBackgroundLoad() {
             if (song.isTrack)
                 return;
 
@@ -307,7 +308,7 @@ public class BeatmapList extends UIFragment {
             task = null;
         }
 
-        void loadBackground() {
+        private void loadBackground() {
             if (!song.isTrack) {
                 background.postDelayed(callback, 50); // Delay to avoid loading the background on fast scrolling
             }
@@ -318,7 +319,11 @@ public class BeatmapList extends UIFragment {
         void bind(Item song) {
             this.song = song;
 
-            new ClickListener(body).simple(() -> beatmapList.selectItem(song));
+            new ViewTouchHandler(new TouchListener() {
+                public void onPressUp() {
+                    beatmapList.selectItem(song);
+                }
+            }).apply(body);
 
             if (song.isTrack) {
                 trackLayout.setVisibility(View.VISIBLE);
@@ -340,9 +345,9 @@ public class BeatmapList extends UIFragment {
                 stars.getBackground().setTint(BeatmapHelper.getDifficultyColor(track.getDifficulty()));
 
                 body.setCardElevation(0);
-                body.setCardBackgroundColor(Res.color(R.color.backgroundDimmed));
+                body.setCardBackgroundColor(Resources.color(R.color.backgroundDimmed));
 
-                ViewUtils.margins(body).left((int) Res.dimen(R.dimen.beatmapListTrackLeftMargin));
+                ViewUtils.margins(body).left((int) Resources.dimen(R.dimen.beatmapListTrackLeftMargin));
                 return;
             }
             trackLayout.setVisibility(View.GONE);
@@ -358,7 +363,7 @@ public class BeatmapList extends UIFragment {
 
     public static class Item {
 
-        final boolean isTrack;
+        protected final boolean isTrack;
 
         protected BeatmapInfo beatmap;
         protected TrackInfo track;

@@ -9,7 +9,7 @@ import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.replay.OdrDatabase;
 import com.edlplan.ui.fragment.PropsMenuFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
-import com.reco1l.utils.interfaces.UI;
+import com.reco1l.ui.platform.UI;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -509,7 +509,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, UI {
     }
 
     public TrackInfo getSelectedTrack() {
-        return selectedTrack;
+        return beatmapList.selectedTrack;
     }
 
     public boolean checkBG(String filePath) {

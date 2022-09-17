@@ -17,6 +17,8 @@ public class DialogBuilder {
             closeOnBackPress = false,
             closeOnBackgroundClick = false;
 
+    public long dismissTime = 0;
+
     //--------------------------------------------------------------------------------------------//
 
     /**

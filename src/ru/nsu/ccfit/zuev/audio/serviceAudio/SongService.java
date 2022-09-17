@@ -8,7 +8,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.reco1l.notification.NotifyPlayer;
+import com.reco1l.notification.NotificationPlayer;
 
 import java.io.File;
 
@@ -22,12 +22,12 @@ public class SongService extends Service {
     private BassAudioFunc audioFunc;
     private boolean isGaming = false;
     // private boolean isSettingMenu = false;
-    private NotifyPlayer notify;
+    private NotificationPlayer notify;
 
     @Override
     public IBinder onBind(Intent intent) {
         if (notify == null) {
-            notify = new NotifyPlayer();
+            notify = new NotificationPlayer();
             notify.load(this);
         }
         if (audioFunc == null) {

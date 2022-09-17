@@ -1,6 +1,4 @@
-package com.reco1l.ui;
-
-import static com.reco1l.EngineMirror.*;
+package com.reco1l.ui.fragments;
 
 import android.animation.ValueAnimator;
 import android.view.View;
@@ -9,14 +7,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.material.imageview.ShapeableImageView;
+import com.reco1l.Scenes;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.data.helpers.BeatmapHelper;
-import com.reco1l.ui.data.DialogTable;
+import com.reco1l.ui.data.tables.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.ClickListener;
-import com.reco1l.utils.Res;
-import com.reco1l.utils.interfaces.UI;
+import com.reco1l.utils.Resources;
+import com.reco1l.utils.listeners.TouchListener;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -89,14 +87,12 @@ public class TopBar extends UIFragment {
     @Override
     protected void onLoad() {
         setDismissMode(false, false);
-        barHeight = (int) Res.dimen(R.dimen.topBarHeight);
+        barHeight = (int) Resources.dimen(R.dimen.topBarHeight);
 
         musicButton = new MusicButton(this);
         buttons = new ButtonsLayout(this);
         userBox = new UserBox(this);
 
-        ImageView settings = find("settings");
-        ImageView inbox = find("inbox");
         container = find("container");
         author = find("author");
         body = find("body");
@@ -115,9 +111,14 @@ public class TopBar extends UIFragment {
 
         author.setText(String.format("osu!droid %s", BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")"));
 
-        new ClickListener(inbox).simple(UI.inbox::altShow);
-        new ClickListener(settings).simple(settingsPanel::altShow);
-        new ClickListener(author).simple(() -> new Dialog(DialogTable.author()).show());
+        bindTouchListener(find("inbox"), notificationCenter::altShow);
+        bindTouchListener(find("settings"), settingsPanel::altShow);
+
+        bindTouchListener(author, new TouchListener() {
+            public void onPressUp() {
+                new Dialog(DialogTable.author()).show();
+            }
+        });
 
         userBox.update(false);
     }
@@ -146,8 +147,8 @@ public class TopBar extends UIFragment {
 
     public void switchColor(boolean isFromTab) {
 
-        int from = Res.color(isFromTab ? R.color.backgroundPrimary : R.color.topBarBackground);
-        int to = Res.color(isFromTab ? R.color.topBarBackground : R.color.backgroundPrimary);
+        int from = Resources.color(isFromTab ? R.color.backgroundPrimary : R.color.topBarBackground);
+        int to = Resources.color(isFromTab ? R.color.topBarBackground : R.color.backgroundPrimary);
 
         ValueAnimator anim = ValueAnimator.ofArgb(from, to);
 
@@ -186,14 +187,10 @@ public class TopBar extends UIFragment {
             if (!parent.isShowing)
                 return;
 
-            switch (scene) {
-                case SONG_MENU:
-                    mods.setVisibility(View.VISIBLE);
-                    search.setVisibility(View.VISIBLE);
-                    shuffle.setVisibility(View.VISIBLE);
-                    break;
-                default:
-                    break;
+            if (scene == Scenes.SONG_MENU) {
+                mods.setVisibility(View.VISIBLE);
+                search.setVisibility(View.VISIBLE);
+                shuffle.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -212,7 +209,7 @@ public class TopBar extends UIFragment {
             arrow = parent.find("musicArrow");
             text = parent.find("musicText");
 
-            new ClickListener(view).simple(musicPlayer::altShow);
+            topBar.bindTouchListener(view, musicPlayer::altShow);
         }
 
         public void update(BeatmapInfo beatmap) {
@@ -262,7 +259,7 @@ public class TopBar extends UIFragment {
             name = parent.find("playerName");
             avatar = parent.find("avatar");
 
-            new ClickListener(body).simple(userProfile::altShow);
+            topBar.bindTouchListener(body, userProfile::altShow);
         }
 
         public void update(boolean clear) {
@@ -271,7 +268,7 @@ public class TopBar extends UIFragment {
 
             avatar.setImageResource(R.drawable.default_avatar);
             name.setText(Config.getLocalUsername());
-            rank.setText(Res.str(R.string.top_bar_offline));
+            rank.setText(Resources.str(R.string.top_bar_offline));
 
             if (!online.isStayOnline() || clear)
                 return;

@@ -2,6 +2,8 @@ package com.reco1l.notification;
 
 import static androidx.media.app.NotificationCompat.MediaStyle;
 
+import static com.reco1l.interfaces.IMainClasses.mActivity;
+
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -31,16 +33,15 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 11/6/22 20:43
 
-public class NotifyPlayer {
+public class NotificationPlayer {
 
-    private final MainActivity mActivity = GlobalManager.getInstance().getMainActivity();
-    private Context context;
+    public boolean isShowing = false;
 
-    private final String
-            actionPrev = "player_previous",
-            actionPlay = "player_play",
-            actionNext = "Notify_next", //It has an usage in BassAudioFunc, that's why i left the original name.
-            actionClose = "player_close";
+    private final static String
+            ACTION_PREV = "player_previous",
+            ACTION_PLAY = "player_play",
+            ACTION_NEXT = "Notify_next",
+            ACTION_CLOSE = "player_close";
 
     private PendingIntent prev, next, play, close;
     private NotificationCompat.Builder builder;
@@ -48,11 +49,12 @@ public class NotifyPlayer {
     public BroadcastReceiver receiver;
     public IntentFilter filter;
 
-    private MediaSessionCompat mediaSession;
-    private Notification notification;
-
-    public boolean isShowing = false;
+    private Context context;
     private Bitmap defaultIcon;
+    private Notification notification;
+    private MediaSessionCompat mediaSession;
+
+    //--------------------------------------------------------------------------------------------//
 
     public void load(SongService service) {
         this.context = service.getApplicationContext();
@@ -61,17 +63,17 @@ public class NotifyPlayer {
         mediaSession = new MediaSessionCompat(context, "osu!droid");
 
         filter = new IntentFilter();
-        filter.addAction(actionPrev);
-        filter.addAction(actionPlay);
-        filter.addAction(actionNext);
-        filter.addAction(actionClose);
+        filter.addAction(ACTION_PREV);
+        filter.addAction(ACTION_PLAY);
+        filter.addAction(ACTION_NEXT);
+        filter.addAction(ACTION_CLOSE);
 
         defaultIcon = BitmapFactory.decodeResource(mActivity.getResources(), R.drawable.osut);
 
-        prev = PendingIntent.getBroadcast(context, 0, new Intent(actionPrev), 0);
-        next = PendingIntent.getBroadcast(context, 0, new Intent(actionNext), 0);
-        play = PendingIntent.getBroadcast(context, 0, new Intent(actionPlay), 0);
-        close = PendingIntent.getBroadcast(context, 0, new Intent(actionClose), 0);
+        prev = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_PREV), 0);
+        next = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_NEXT), 0);
+        play = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_PLAY), 0);
+        close = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_CLOSE), 0);
 
         receiver = new BroadcastReceiver() {
             @Override
@@ -81,25 +83,25 @@ public class NotifyPlayer {
                     return;
 
                 switch (intent.getAction()) {
-                    case actionPlay:
+                    case ACTION_PLAY:
                         if (service.getStatus() == Status.PLAYING) service.pause();
                         else service.play();
                         break;
-                    case actionPrev:
+                    case ACTION_PREV:
                         service.stop();
                         BeatmapInfo prevBeatmap = LibraryManager.getInstance().getPrevBeatmap();
                         service.preLoad(prevBeatmap.getMusic());
                         updateSong(prevBeatmap);
                         service.play();
                         break;
-                    case actionNext:
+                    case ACTION_NEXT:
                         service.stop();
                         BeatmapInfo nextBeatmap = LibraryManager.getInstance().getNextBeatmap();
                         service.preLoad(nextBeatmap.getMusic());
                         updateSong(nextBeatmap);
                         service.play();
                         break;
-                    case actionClose:
+                    case ACTION_CLOSE:
                         service.stop();
                         GlobalManager.getInstance().getMainScene().exit();
                         break;
@@ -109,6 +111,8 @@ public class NotifyPlayer {
         create();
     }
 
+    //--------------------------------------------------------------------------------------------//
+
     @SuppressLint("RestrictedApi")
     public void updateState() {
         if (!isShowing)
@@ -116,7 +120,7 @@ public class NotifyPlayer {
         boolean isPlaying = GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING;
         int drawable = isPlaying ? R.drawable.v_pause : R.drawable.v_play;
 
-        builder.mActions.set(1, new NotificationCompat.Action(drawable, actionPlay, play));
+        builder.mActions.set(1, new NotificationCompat.Action(drawable, ACTION_PLAY, play));
         manager.notify(1, builder.build());
     }
 
@@ -151,6 +155,8 @@ public class NotifyPlayer {
         notification = builder.build();
         manager.notify(1, notification);
     }
+
+    //--------------------------------------------------------------------------------------------//
 
     public void show() {
         if (isShowing)
@@ -201,10 +207,10 @@ public class NotifyPlayer {
                 .setOngoing(true)
                 .setShowWhen(false)
                 .setContentIntent(openApp)
-                .addAction(R.drawable.v_prev, actionPrev, prev)
-                .addAction(R.drawable.v_play, actionPlay, play)
-                .addAction(R.drawable.v_next, actionNext, next)
-                .addAction(R.drawable.v_close, actionClose, close)
+                .addAction(R.drawable.v_prev, ACTION_PREV, prev)
+                .addAction(R.drawable.v_play, ACTION_PLAY, play)
+                .addAction(R.drawable.v_next, ACTION_NEXT, next)
+                .addAction(R.drawable.v_close, ACTION_CLOSE, close)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setStyle(new MediaStyle()
                         .setShowActionsInCompactView(0, 1, 2)
@@ -212,6 +218,8 @@ public class NotifyPlayer {
 
         notification = builder.build();
     }
+
+    //--------------------------------------------------------------------------------------------//
 
     public BroadcastReceiver getReceiver() {
         return receiver;

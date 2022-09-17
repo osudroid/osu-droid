@@ -1,4 +1,4 @@
-package com.reco1l.ui;
+package com.reco1l.ui.fragments.extras;
 
 import static android.view.ViewGroup.*;
 
@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -19,8 +18,10 @@ import com.reco1l.ui.data.GameNotification;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.ui.platform.UIManager;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.ClickListener;
+import com.reco1l.utils.ViewTouchHandler;
+import com.reco1l.utils.Resources;
 import com.reco1l.utils.ViewUtils;
+import com.reco1l.utils.listeners.TouchListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 // Created by Reco1l on 27/6/22 17:17
 
 //TODO replace with RecyclerView due to performance issues when are too many notifications
-public class Inbox extends UIFragment {
+public class NotificationCenter extends UIFragment {
 
     public static List<GameNotification> notifications;
 
@@ -44,7 +45,7 @@ public class Inbox extends UIFragment {
 
     //--------------------------------------------------------------------------------------------//
 
-    public Inbox() {
+    public NotificationCenter() {
         notifications = new ArrayList<>();
     }
 
@@ -63,19 +64,27 @@ public class Inbox extends UIFragment {
     @Override
     protected void onLoad() {
         setDismissMode(true, true);
-        bodyWidth = res().getDimension(R.dimen.notificationCenterWidth);
+        bodyWidth = Resources.dimen(R.dimen.notificationCenterWidth);
 
         body = find("body");
         layer = find("layer");
         emptyText = find("emptyText");
         container = find("container");
-        ImageView close = find("close");
-        ImageView clear = find("clear");
 
         ViewUtils.visibility(notifications.isEmpty(), emptyText);
 
-        new ClickListener(close).onlyOnce(true).simple(this::close);
-        new ClickListener(clear).simple(() -> clear(false));
+        bindTouchListener(find("close"), new TouchListener() {
+            public boolean isOnlyOnce() { return true; }
+
+            public void onPressUp() {
+                close();
+            }
+        });
+        bindTouchListener(find("clear"), new TouchListener() {
+            public void onPressUp() {
+                clear(false);
+            }
+        });
 
         new Animation(rootBackground).fade(0, 1)
                 .play(300);
@@ -202,7 +211,7 @@ public class Inbox extends UIFragment {
 
             new Animation(platform.renderView).moveX(-50, 0)
                     .play(400);
-            new Animation(body).moveX(0, res().getDimension(R.dimen.notificationCenterWidth))
+            new Animation(body).moveX(0, Resources.dimen(R.dimen.notificationCenterWidth))
                     .interpolator(Easing.InExpo)
                     .runOnStart(() -> new Animation(rootBackground).fade(1, 0).play(300))
                     .play(350);
@@ -273,12 +282,16 @@ public class Inbox extends UIFragment {
             View root = inflater.inflate(R.layout.popup_notification, container, false);
 
             body = root.findViewById(R.id.npop_body);
-            new ClickListener(body).simple(inbox::show);
+            new ViewTouchHandler(new TouchListener() {
+                public void onPressUp() {
+                    notificationCenter.show();
+                }
+            }).apply(body);
 
             TextView text = root.findViewById(R.id.npop_text);
             text.setText(header + " - " + message.replace("\n", " "));
 
-            body.postDelayed(() -> { dismiss(); inbox.currentPopup = null; }, 3000);
+            body.postDelayed(() -> { dismiss(); notificationCenter.currentPopup = null; }, 3000);
             new Animation(body).moveY(-50, 0).fade(0, 1).play(150);
 
             return root;
@@ -287,7 +300,7 @@ public class Inbox extends UIFragment {
         //----------------------------------------------------------------------------------------//
 
         public void show() {
-            inbox.currentPopup = this;
+            notificationCenter.currentPopup = this;
             if (isAdded())
                 return;
             mActivity.runOnUiThread(() -> platform.manager.beginTransaction()
@@ -296,7 +309,7 @@ public class Inbox extends UIFragment {
         }
 
         public void dismiss() {
-            inbox.currentPopup = null;
+            notificationCenter.currentPopup = null;
             new Animation(body).moveY(0, -50).fade(1, 0)
                     .runOnEnd(() -> platform.manager.beginTransaction().remove(this).commit())
                     .play(150);

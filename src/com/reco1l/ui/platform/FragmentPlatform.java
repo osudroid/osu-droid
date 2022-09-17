@@ -13,35 +13,35 @@ import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.experimental.Experimental;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import com.edlplan.ui.ActivityOverlay;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.reco1l.Scenes;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.Res;
-import com.reco1l.utils.interfaces.IMainClasses;
+import com.reco1l.utils.Resources;
+import com.reco1l.interfaces.IMainClasses;
 
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 22/6/22 02:25
 
-public class FragmentPlatform {
-
-    protected final MainActivity mActivity = GlobalManager.getInstance().getMainActivity();
+public class FragmentPlatform implements IMainClasses {
 
     private static FragmentPlatform instance;
-    private final List<Fragment> fragments = new ArrayList<>();
+    private static final int containerId = 0x999999;
+
+    private final List<Fragment> fragments;
+    private final Map<Scenes, FrameLayout> sceneLayouts;
 
     public RenderSurfaceView renderView;
     public FragmentManager manager;
@@ -51,6 +51,11 @@ public class FragmentPlatform {
     private LoaderFragment loaderFragment;
 
     //--------------------------------------------------------------------------------------------//
+
+    public FragmentPlatform() {
+        this.fragments = new ArrayList<>();
+        this.sceneLayouts = new HashMap<>();
+    }
 
     public static FragmentPlatform getInstance() {
         return instance;
@@ -64,7 +69,6 @@ public class FragmentPlatform {
         instance = this;
         this.renderView = renderView;
         this.context = context;
-        int Id = 0x90009;
 
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
 
@@ -72,7 +76,7 @@ public class FragmentPlatform {
         container = new FrameLayout(context);
         View view = new View(context);
 
-        container.setId(Id);
+        container.setId(containerId);
         view.setBackgroundColor(Color.argb(0, 0, 0, 0));
 
         platform.addView(renderView, params);
@@ -83,12 +87,37 @@ public class FragmentPlatform {
         manager = activity.getSupportFragmentManager();
 
         loaderFragment = new LoaderFragment();
+        initializeContainers(container);
+    }
+    
+    private void initializeContainers(FrameLayout mainContainer) {
+        for (Scenes scene : Scenes.values()) {
+            FrameLayout container = new FrameLayout(context);
+            container.setId(containerId + scene.ordinal() + 1);
 
-        //I left it for compatibility with EdrowsLuo fragments until the entire UI gets replaced.
-        ActivityOverlay.initial(activity, container.getId());
+            sceneLayouts.put(scene, container);
+            mainContainer.addView(container, params);
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
+
+    public void addSceneFragment(Scenes type, Fragment fragment, String tag) {
+        if (fragment.isAdded() || fragments.contains(fragment) || manager.findFragmentByTag(tag) != null)
+            return;
+
+        if (sceneLayouts.get(type) == null)
+            return;
+
+        fragments.add(fragment);
+
+        mActivity.runOnUiThread(() -> {
+            @SuppressWarnings("ConstantConditions")
+            final int id = sceneLayouts.get(type).getId();
+
+            manager.beginTransaction().add(id, fragment, tag).commit();
+        });
+    }
     
     public void addFragment(Fragment fragment, String tag) {
         if (fragment.isAdded() || fragments.contains(fragment) || manager.findFragmentByTag(tag) != null)
@@ -146,7 +175,6 @@ public class FragmentPlatform {
     }
 
     //--------------------------------------------------------------------------------------------//
-    // NOT WORKING
     public void handleWindowFocus(boolean isResumed) {
         if (!isResumed) {
             addFragment(loaderFragment, "loaderFragment@" + loaderFragment.hashCode());
@@ -166,17 +194,17 @@ public class FragmentPlatform {
 
             layout = new RelativeLayout(platform.context);
             layout.setLayoutParams(platform.params);
-            layout.setElevation(Res.dimen(R.dimen.imposedLayer));
+            layout.setElevation(Resources.dimen(R.dimen.imposedLayer));
 
             CircularProgressIndicator indicator = new CircularProgressIndicator(platform.context);
-            indicator.setTrackCornerRadius((int) Res.dimen(R.dimen.progressBarTrackCornerRadius));
-            indicator.setIndicatorColor(Res.color(R.color.progressBarIndicatorColor));
+            indicator.setTrackCornerRadius((int) Resources.dimen(R.dimen.progressBarTrackCornerRadius));
+            indicator.setIndicatorColor(Resources.color(R.color.progressBarIndicatorColor));
             indicator.setIndeterminate(true);
 
             View background = new View(platform.context);
             background.setBackgroundColor(Color.BLACK);
 
-            float size = Res.dimen(R.dimen.loadingScreenProgressBarSize);
+            float size = Resources.dimen(R.dimen.loadingScreenProgressBarSize);
 
             LayoutParams params = new LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
             params.addRule(RelativeLayout.CENTER_IN_PARENT);

@@ -1,6 +1,8 @@
-package com.reco1l.ui;
+package com.reco1l.ui.fragments.extras;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -13,9 +15,10 @@ import com.reco1l.ui.data.helpers.BeatmapHelper;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.ui.platform.UIManager;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.ClickListener;
-import com.reco1l.utils.Res;
-import com.reco1l.utils.interfaces.IMainClasses;
+import com.reco1l.utils.AsyncExec;
+import com.reco1l.utils.Resources;
+import com.reco1l.interfaces.IMainClasses;
+import com.reco1l.utils.listeners.TouchListener;
 
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
@@ -23,29 +26,30 @@ import java.util.TimeZone;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.MainScene;
+import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 1/7/22 22:45
 
 public class MusicPlayer extends UIFragment implements IMainClasses {
 
-    private final SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
-    private static Drawable playDrw, pauseDrw;
-
     public MainScene.MusicOption currentOption;
 
-    private BeatmapInfo lastBeatmap;
-    private Drawable songDrw;
-    private int length, position, toPosition;
-
-    private TextView titleTv, artistTv, timeTv, lengthTv;
-    private ImageView play, songIv;
     private CardView body;
-    private View innerBody;
+    private View songBody;
     private SeekBar seekBar;
+    private ImageView play, songImage;
+    private TextView titleTv, artistTv, timeTv, lengthTv;
 
+    private Bitmap songBitmap;
+    private SimpleDateFormat sdf;
+    private BeatmapInfo lastBeatmap;
+    private Drawable playDrawable, pauseDrawable;
+
+    private AsyncExec songBitmapTask;
+
+    private int length, position, toPosition;
     private boolean isTrackingTouch = false;
-    private final Runnable closeTask = this::close;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -59,21 +63,26 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
         return "mp";
     }
 
+    @Override
+    protected long getDismissTime() {
+        return 8000;
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onLoad() {
         setDismissMode(true, true);
+        sdf = new SimpleDateFormat("mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
 
         body = find("body");
-        body.postDelayed(closeTask, 8000);
 
-        playDrw = Res.drw(R.drawable.v_play_xl_circle);
-        pauseDrw = Res.drw(R.drawable.v_pause_xl);
+        playDrawable = Resources.drw(R.drawable.v_play_xl_circle);
+        pauseDrawable = Resources.drw(R.drawable.v_pause_xl);
 
         new Animation(body)
-                .height((int) Res.dimen(R.dimen._30sdp), (int) Res.dimen(R.dimen.musicPlayerHeight))
+                .height((int) Resources.dimen(R.dimen._30sdp), (int) Resources.dimen(R.dimen.musicPlayerHeight))
                 .interpolatorMode(Animation.Interpolate.VALUE_ANIMATOR)
                 .interpolator(Easing.OutExpo)
                 .moveY(-30, 0)
@@ -89,8 +98,8 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
                 .play(100);
         
         seekBar = find("seekBar");
-        songIv = find("songImage");
-        innerBody = find("songBody");
+        songImage = find("songImage");
+        songBody = find("songBody");
 
         titleTv = find("title");
         artistTv = find("artist");
@@ -98,42 +107,44 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
         timeTv = find("songProgress");
 
         play = find("play");
-        ImageView prev = find("prev");
-        ImageView next = find("next");
 
-        new ClickListener(play).touchEffect(false).simple(() -> body.removeCallbacks(closeTask), () -> {
-            if (global.getSongService().getStatus() == Status.PLAYING) {
-                global.getMainScene().musicControl(MainScene.MusicOption.PAUSE);
-            } else {
-                global.getMainScene().musicControl(MainScene.MusicOption.PLAY);
+        bindTouchListener(play, new TouchListener() {
+            public boolean hasTouchEffect() { return false; }
+
+            public void onPressUp() {
+                if (global.getSongService().getStatus() == Status.PLAYING) {
+                    global.getMainScene().musicControl(MainScene.MusicOption.PAUSE);
+                } else {
+                    global.getMainScene().musicControl(MainScene.MusicOption.PLAY);
+                }
             }
-            body.postDelayed(closeTask, 8000);
         });
 
-        new ClickListener(prev).simple(() -> {
-            global.getMainScene().doChange = true;
-            body.removeCallbacks(closeTask);
-        }, () -> {
-            global.getMainScene().lastHit = System.currentTimeMillis();
-            global.getMainScene().musicControl(MainScene.MusicOption.PREV);
-            body.postDelayed(closeTask, 8000);
+        bindTouchListener(find("prev"), new TouchListener() {
+            public void onPressDown() {
+                global.getMainScene().doChange = true;
+            }
+            public void onPressUp() {
+                global.getMainScene().lastHit = System.currentTimeMillis();
+                global.getMainScene().musicControl(MainScene.MusicOption.PREV);
+            }
         });
 
-        new ClickListener(next).simple(() -> {
-            global.getMainScene().doChange = true;
-            body.removeCallbacks(closeTask);
-        }, () -> {
-            global.getMainScene().lastHit = System.currentTimeMillis();
-            global.getMainScene().musicControl(MainScene.MusicOption.NEXT);
-            body.postDelayed(closeTask, 8000);
+        bindTouchListener(find("next"), new TouchListener() {
+            public void onPressDown() {
+                global.getMainScene().doChange = true;
+            }
+            public void onPressUp() {
+                global.getMainScene().lastHit = System.currentTimeMillis();
+                global.getMainScene().musicControl(MainScene.MusicOption.NEXT);
+            }
         });
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 isTrackingTouch = true;
-                //global.getMainScene().musicControl(MainScene.MusicOption.PAUSE);
-                body.removeCallbacks(closeTask);
+                onTouchEventNotified(MotionEvent.ACTION_DOWN);
             }
 
             @Override
@@ -147,9 +158,8 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 global.getSongService().setPosition(toPosition);
-                //global.getMainScene().musicControl(MainScene.MusicOption.PLAY);
                 isTrackingTouch = false;
-                body.postDelayed(closeTask, 8000);
+                onTouchEventNotified(MotionEvent.ACTION_UP);
             }
         });
         loadSongData(library.getBeatmap());
@@ -177,15 +187,15 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
             }
 
             if (global.getSongService().getStatus() == Status.PLAYING) {
-                if (play.getDrawable() != pauseDrw) {
+                if (play.getDrawable() != pauseDrawable) {
                     new Animation(play).rotation(180, 0)
-                            .runOnEnd(() -> play.setImageDrawable(pauseDrw))
+                            .runOnEnd(() -> play.setImageDrawable(pauseDrawable))
                             .play(160);
                 }
             }
-            else if (play.getDrawable() != playDrw) {
+            else if (play.getDrawable() != playDrawable) {
                 new Animation(play).rotation(180, 0)
-                        .runOnEnd(() -> play.setImageDrawable(playDrw))
+                        .runOnEnd(() -> play.setImageDrawable(playDrawable))
                         .play(160);
             }
         });
@@ -193,30 +203,29 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
 
     private void change() {
         BeatmapInfo beatmap = library.getBeatmap();
-        songDrw = null;
+        songBitmap = null;
 
         if (topBar.isShowing) {
             topBar.musicButton.update(beatmap);
         }
-
-        songDrw = BeatmapHelper.getBackground(global.getMainScene().selectedTrack);
-
-        if (!isShowing || beatmap == null)
+        if (!isShowing)
             return;
 
+        songBitmap = BeatmapHelper.getCompressedBackground(beatmap.getTrack(0));
+
         if (currentOption == MainScene.MusicOption.NEXT) {
-            new Animation(innerBody).moveX(0, -10).fade(1, 0)
+            new Animation(songBody).moveX(0, -10).fade(1, 0)
                     .play(200);
 
-            new Animation(innerBody).moveX(10, 0).fade(0, 1)
+            new Animation(songBody).moveX(10, 0).fade(0, 1)
                     .runOnStart(() -> loadSongData(beatmap))
                     .delay(200)
                     .play(200);
         }
         if (currentOption == MainScene.MusicOption.PREV) {
-            new Animation(innerBody).moveX(0, 10).fade(1, 0)
+            new Animation(songBody).moveX(0, 10).fade(1, 0)
                     .play(200);
-            new Animation(innerBody).moveX(-10, 0).fade(0, 1)
+            new Animation(songBody).moveX(-10, 0).fade(0, 1)
                     .runOnStart(() -> loadSongData(beatmap))
                     .delay(200)
                     .play(200);
@@ -224,16 +233,41 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
     }
 
     private void loadSongData(BeatmapInfo beatmap) {
-
         titleTv.setText(BeatmapHelper.getTitle(beatmap));
         artistTv.setText(BeatmapHelper.getArtist(beatmap));
         lengthTv.setText(sdf.format(length));
 
-        if (songDrw == null) {
-            songIv.setImageDrawable(null);
+        TrackInfo track = beatmap.getTrack(0);
+
+        songImage.setImageDrawable(null);
+        songImage.animate().cancel();
+        ((View) songImage).setAlpha(0);
+
+        if (track.getBackground() == null) {
             return;
         }
-        songIv.setImageDrawable(songDrw);
+
+        Animation fade = new Animation(songImage).fade(0, 1)
+                .runOnStart(() -> {
+                    Bitmap bitmap = BeatmapHelper.getCompressedBackground(track);
+                    songImage.setImageBitmap(bitmap);
+                });
+
+        if (songBitmap == null) {
+            if (songBitmapTask != null) {
+                songBitmapTask.cancel(true);
+            }
+            songBitmapTask = new AsyncExec() {
+                public void run() {
+                    BeatmapHelper.loadCompressedBackground(track);
+                }
+                public void onComplete() {
+                    fade.play(200);
+                }
+            };
+        } else {
+            fade.play(200);
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -253,13 +287,12 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
         if (!isShowing)
             return;
 
-        body.removeCallbacks(closeTask);
         topBar.musicButton.playAnimation(false);
 
         new Animation(find("innerBody")).fade(1, 0).play(100);
 
         new Animation(body)
-                .height((int) Res.dimen(R.dimen.musicPlayerHeight), (int) Res.dimen(R.dimen._30sdp))
+                .height((int) Resources.dimen(R.dimen.musicPlayerHeight), (int) Resources.dimen(R.dimen._30sdp))
                 .interpolatorMode(Animation.Interpolate.VALUE_ANIMATOR)
                 .interpolator(Easing.OutExpo)
                 .runOnEnd(super::close)

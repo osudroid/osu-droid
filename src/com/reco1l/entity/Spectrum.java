@@ -7,7 +7,7 @@ import android.os.Build;
 
 import androidx.palette.graphics.Palette;
 
-import com.reco1l.utils.ModifierListener;
+import com.reco1l.utils.listeners.ModifierListener;
 
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;

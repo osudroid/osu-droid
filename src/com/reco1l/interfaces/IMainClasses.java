@@ -1,4 +1,4 @@
-package com.reco1l.utils.interfaces;
+package com.reco1l.interfaces;
 
 import com.reco1l.BitmapManager;
 import com.reco1l.EngineMirror;

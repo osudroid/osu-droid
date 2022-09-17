@@ -2,8 +2,8 @@ package com.reco1l.ui.data.helpers;
 
 import android.graphics.drawable.Drawable;
 
-import com.reco1l.utils.interfaces.UI;
-import com.reco1l.utils.interfaces.IMainClasses;
+import com.reco1l.ui.platform.UI;
+import com.reco1l.interfaces.IMainClasses;
 
 import java.io.File;
 

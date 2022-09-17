@@ -148,7 +148,7 @@
     <dimen name="beatmapPanelWidth">@dimen/_240sdp</dimen>
     <dimen name="beatmapPanelPropertiesLayoutHeight">@dimen/_80sdp</dimen>
     <dimen name="beatmapPanelExpandButtonSize">@dimen/_26sdp</dimen>
-    <dimen name="beatmapPanelTabButtonWidth">@dimen/_74sdp</dimen>
+    <dimen name="beatmapPanelTabButtonWidth">@dimen/_111sdp</dimen>
     <dimen name="beatmapPanelTabLayoutHeight">@dimen/_28sdp</dimen>
 
     <!--Scoreboard-->

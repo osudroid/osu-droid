@@ -1,4 +1,4 @@
-package com.reco1l.ui;
+package com.reco1l.ui.fragments;
 
 import android.animation.ValueAnimator;
 import android.database.Cursor;
@@ -13,16 +13,16 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.reco1l.ui.data.BeatmapProperty;
 import com.reco1l.ui.data.helpers.BeatmapHelper;
-import com.reco1l.ui.data.Property;
 import com.reco1l.ui.data.scoreboard.ScoreboardAdapter;
 import com.reco1l.ui.data.scoreboard.ScoreboardItem;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.ClickListener;
-import com.reco1l.utils.Res;
-import com.reco1l.utils.interfaces.IGameMods;
-import com.reco1l.utils.interfaces.UI;
+import com.reco1l.utils.Resources;
+import com.reco1l.interfaces.IGameMods;
+import com.reco1l.ui.platform.UI;
+import com.reco1l.utils.listeners.TouchListener;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -42,6 +42,8 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
+// Created by Reco1l on 13/9/22 01:22
+
 public class BeatmapPanel extends UIFragment implements IGameMods {
 
     private int bodyWidth;
@@ -59,33 +61,32 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
     private TrackInfo track;
     private TextView title, artist, mapper, difficulty;
 
-    private final Property.Bpm pBPM;
-    private final Property.Length pLength;
-    private final Property.Int pCombo, pCircles, pSliders, pSpinners;
-    private final Property.Float pAR, pOD, pCS, pHP, pStars;
+    private final BeatmapProperty.BPM pBPM;
+    private final BeatmapProperty.Length pLength;
+    private final BeatmapProperty<Integer> pCombo, pCircles, pSliders, pSpinners;
+    private final BeatmapProperty<Float> pAR, pOD, pCS, pHP, pStars;
     // End
 
     private Scoreboard scoreboard;
     public boolean isOnlineBoard = false;
-    private boolean initialized = false;
 
     //--------------------------------------------------------------------------------------------//
 
     public BeatmapPanel() {
-        pStars = new Property.Float();
 
-        pBPM = new Property.Bpm();
-        pLength = new Property.Length();
+        pBPM = new BeatmapProperty.BPM();
+        pLength = new BeatmapProperty.Length();
 
-        pCombo = new Property.Int();
-        pCircles = new Property.Int();
-        pSliders = new Property.Int();
-        pSpinners = new Property.Int();
+        pCombo = new BeatmapProperty<>();
+        pCircles = new BeatmapProperty<>();
+        pSliders = new BeatmapProperty<>();
+        pSpinners = new BeatmapProperty<>();
 
-        pAR = new Property.Float();
-        pOD = new Property.Float();
-        pCS = new Property.Float();
-        pHP = new Property.Float();
+        pStars = new BeatmapProperty<>();
+        pAR = new BeatmapProperty<>();
+        pOD = new BeatmapProperty<>();
+        pCS = new BeatmapProperty<>();
+        pHP = new BeatmapProperty<>();
     }
 
     @Override
@@ -105,7 +106,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
         track = global.getSelectedTrack();
 
-        bodyWidth = (int) Res.dimen(R.dimen.beatmapPanelWidth);
+        bodyWidth = (int) Resources.dimen(R.dimen.beatmapPanelWidth);
         isBannerExpanded = true;
 
         if (scoreboard == null) {
@@ -115,7 +116,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         body = find("body");
 
         new Animation(body)
-                .marginTop(0, (int) Res.dimen(R.dimen.topBarHeight))
+                .marginTop(0, (int) Resources.dimen(R.dimen.topBarHeight))
                 .moveX(-bodyWidth, 0)
                 .fade(0, 1)
                 .play(300);
@@ -136,40 +137,49 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         globalTab = find("globalTab");
         propertiesTab = find("propertiesTab");
         tabIndicator = find("tabIndicator");
-        ImageView expand = find("expand");
 
         message.setVisibility(View.GONE);
 
-        new ClickListener(localTab).simple(() -> switchTab(localTab));
-        new ClickListener(globalTab).simple(() -> switchTab(globalTab));
-        new ClickListener(propertiesTab).simple(() -> switchTab(propertiesTab));
+        bindTouchListener(localTab, new TouchListener() {
+            public void onPressUp() {
+                switchTab(localTab);
+            }
+        });
+
+        bindTouchListener(globalTab, new TouchListener() {
+            public void onPressUp() {
+                switchTab(globalTab);
+            }
+        });
 
         int max = (int) GlobalManager.getInstance().getMainActivity().getResources().getDimension(R.dimen._84sdp);
 
-        new ClickListener(expand).simple(() -> {
-            if (isBannerExpanded) {
-                ValueAnimator anim = ValueAnimator.ofInt(max, 0);
-                anim.setDuration(300);
-                anim.addUpdateListener(value -> {
-                    songProperties.getLayoutParams().height = (int) value.getAnimatedValue();
-                    songProperties.requestLayout();
-                });
-                anim.start();
-                isBannerExpanded = false;
-            } else {
-                ValueAnimator anim = ValueAnimator.ofInt(0, max);
-                anim.setDuration(300);
-                anim.addUpdateListener(value -> {
-                    songProperties.getLayoutParams().height = (int) value.getAnimatedValue();
-                    songProperties.requestLayout();
-                });
-                anim.start();
-                isBannerExpanded = true;
+        bindTouchListener(find("expand"), new TouchListener() {
+            public void onPressUp() {
+                if (isBannerExpanded) {
+                    ValueAnimator anim = ValueAnimator.ofInt(max, 0);
+                    anim.setDuration(300);
+                    anim.addUpdateListener(value -> {
+                        songProperties.getLayoutParams().height = (int) value.getAnimatedValue();
+                        songProperties.requestLayout();
+                    });
+                    anim.start();
+                    isBannerExpanded = false;
+                } else {
+                    ValueAnimator anim = ValueAnimator.ofInt(0, max);
+                    anim.setDuration(300);
+                    anim.addUpdateListener(value -> {
+                        songProperties.getLayoutParams().height = (int) value.getAnimatedValue();
+                        songProperties.requestLayout();
+                    });
+                    anim.start();
+                    isBannerExpanded = true;
+                }
             }
         });
 
         pStars.view = find("stars");
-        pStars.format = val -> "" + GameHelper.Round((float) val, 2);
+        pStars.format = val -> GameHelper.Round((float) val, 2);
         pStars.allowColorChange = false;
 
         pBPM.view = find("bpm");
@@ -185,13 +195,11 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         pCS.view = find("cs");
         pHP.view = find("hp");
 
-        pBPM.format = val -> "" + GameHelper.Round((float) val, 1);
-        pAR.format = val -> "" + GameHelper.Round((float) val, 2);
-        pOD.format = val -> "" + GameHelper.Round((float) val, 2);
-        pCS.format = val -> "" + GameHelper.Round((float) val, 2);
-        pHP.format = val -> "" + GameHelper.Round((float) val, 2);
+        pAR.format = val -> GameHelper.Round((float) val, 2);
+        pOD.format = val -> GameHelper.Round((float) val, 2);
+        pCS.format = val -> GameHelper.Round((float) val, 2);
+        pHP.format = val -> GameHelper.Round((float) val, 2);
 
-        initialized = true;
         updateProperties(track);
         switchTab(localTab);
     }
@@ -212,79 +220,72 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
         pLength.set(track.getMusicLength());
         pBPM.set(track.getBpmMin(), track.getBpmMax());
-        pStars.set(track.getDifficulty());
 
         if (mod.contains(EZ)) {
-            pAR.val *= 0.5f;
-            pOD.val *= 0.5f;
-            pHP.val *= 0.5f;
-            pCS.val -= 1f;
+            pAR.value *= 0.5f;
+            pOD.value *= 0.5f;
+            pHP.value *= 0.5f;
+            pCS.value -= 1f;
         }
         if (mod.contains(HR)) {
-
-            pAR.val = Math.min(pAR.val * 1.4f, 10);
-            pOD.val *= 1.4f;
-            pHP.val *= 1.4f;
-            pCS.val += 1f;
+            pAR.value = Math.min(pAR.value * 1.4f, 10);
+            pOD.value *= 1.4f;
+            pHP.value *= 1.4f;
+            pCS.value += 1f;
         }
         if (mod.contains(REZ)) {
             if (mod.contains(EZ)) {
-                pAR.val *= 2f;
-                pAR.val -= 0.5f;
+                pAR.value *= 2f;
+                pAR.value -= 0.5f;
             }
-            pAR.val -= 0.5f;
+            pAR.value -= 0.5f;
             if (modMenu.getChangeSpeed() != 1) {
-                pAR.val -= modMenu.getSpeed() - 1.0f;
+                pAR.value -= modMenu.getSpeed() - 1.0f;
             }
             else if (mod.contains(DT) || mod.contains(NC)) {
-                pAR.val -= 0.5f;
+                pAR.value -= 0.5f;
             }
-            pOD.val *= 0.5f;
-            pHP.val *= 0.5f;
-            pCS.val -= 1f;
+            pOD.value *= 0.5f;
+            pHP.value *= 0.5f;
+            pCS.value -= 1f;
         }
         if (mod.contains(SC)) {
-            pCS.val += 4f;
+            pCS.value += 4f;
         }
 
         if (modMenu.getChangeSpeed() != 1) {
             float speed = modMenu.getSpeed();
-
-            pBPM.min *= speed;
-            pBPM.max *= speed;
-
-            pLength.val /= speed;
+            pBPM.multiply(speed);
+            pLength.value = (long) (pLength.value / speed);
         } else {
             if (mod.contains(DT) || mod.contains(NC)) {
-                pBPM.min *= 1.5f;
-                pBPM.max *= 1.5f;
-                pLength.val *= 2 / 3f;
+                pBPM.multiply(1.5f);
+                pLength.value = (long) (pLength.value * (2 / 3f));
             }
             if (mod.contains(HT)) {
-                pBPM.min *= 0.7f;
-                pBPM.max *= 0.7f;
-                pLength.val *= 4 / 3f;
+                pBPM.multiply(0.7f);
+                pLength.value = (long) (pLength.value * (4 / 3f));
             }
         }
 
-        pAR.val = Math.min(13.f, pAR.val);
-        pOD.val = Math.min(10.f, pOD.val);
-        pCS.val = Math.min(15.f, pCS.val);
-        pHP.val = Math.min(10.f, pHP.val);
+        pAR.value = Math.min(13.f, pAR.value);
+        pOD.value = Math.min(10.f, pOD.value);
+        pCS.value = Math.min(15.f, pCS.value);
+        pHP.value = Math.min(10.f, pHP.value);
 
         if (modMenu.getChangeSpeed() != 1) {
             float speed = modMenu.getSpeed();
-            pAR.val = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(pAR.val) / speed), 2);
-            pOD.val = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(pOD.val) / speed), 2);
+            pAR.value = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(pAR.value) / speed), 2);
+            pOD.value = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(pOD.value) / speed), 2);
         } else if (mod.contains(DT) || mod.contains(NC)) {
-            pAR.val = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(pAR.val) * 2 / 3), 2);
-            pOD.val = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(pOD.val) * 2 / 3), 2);
+            pAR.value = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(pAR.value) * 2 / 3), 2);
+            pOD.value = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(pOD.value) * 2 / 3), 2);
         } else if (mod.contains(HT)) {
-            pAR.val = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(pAR.val) * 4 / 3), 2);
-            pOD.val = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(pOD.val) * 4 / 3), 2);
+            pAR.value = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(pAR.value) * 4 / 3), 2);
+            pOD.value = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(pOD.value) * 4 / 3), 2);
         }
         if (modMenu.isEnableForceAR()) {
-            pAR.val = modMenu.getForceAR();
+            pAR.value = modMenu.getForceAR();
         }
 
         if (isShowing) {
@@ -300,11 +301,12 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
     public void updateProperties(TrackInfo track) {
         this.track = track;
-        if (track == null || !initialized)
+        if (track == null || !isLoaded)
             return;
 
         mActivity.runOnUiThread(() -> {
 
+            pStars.set(track.getDifficulty());
             pCircles.set(track.getHitCircleCount());
             pSpinners.set(track.getSpinnerCount());
             pSliders.set(track.getSliderCount());
@@ -314,17 +316,17 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
             new Thread(() -> {
                 DifficultyReCalculator math = new DifficultyReCalculator();
-                pStars.val = math.recalculateStar(track, math.getCS(track), modMenu.getSpeed());
-                pStars.set(pStars.val);
+                pStars.value = math.recalculateStar(track, math.getCS(track), modMenu.getSpeed());
+                pStars.update();
             }).start();
 
             if (!isShowing)
                 return;
 
-            setText(title, BeatmapHelper.getTitle(track));
-            setText(artist, "by " + BeatmapHelper.getArtist(track));
-            setText(mapper, track.getCreator());
-            setText(difficulty, track.getMode());
+            title.setText(BeatmapHelper.getTitle(track));
+            artist.setText("by " + BeatmapHelper.getArtist(track));
+            mapper.setText(track.getCreator());
+            difficulty.setText(track.getMode());
 
             if (track.getBackground() != null) {
                 songBackground.setVisibility(View.VISIBLE);
@@ -344,31 +346,25 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
             final int current = pStars.view.getBackgroundTintList().getDefaultColor();
 
             float[] color = new float[3];
-            Color.colorToHSV(BeatmapHelper.getDifficultyColor(pStars.val), color);
+            Color.colorToHSV(BeatmapHelper.getDifficultyColor(pStars.value), color);
 
             new Animation(pStars.view)
-                    .ofArgb(current, BeatmapHelper.getDifficultyColor(pStars.val))
+                    .ofArgb(current, BeatmapHelper.getDifficultyColor(pStars.value))
                     .runOnUpdate(val -> pStars.view.getBackground().setTint((int) val.getAnimatedValue()))
                     .runOnStart(pStars::update)
                     .cancelPending(false)
                     .play(500);
 
-            final float[] dark = {
-                    color[0],
-                    pStars.val >= 10 ? 0 : 0.70f,
-                    pStars.val >= 10 ? 0.08f : 0.20f
-            };
-
             final int bannerColor = ((ColorDrawable) banner.getBackground()).getColor();
             final int mapperColor = mapper.getBackgroundTintList().getDefaultColor();
 
             new Animation(banner)
-                    .ofArgb(bannerColor, BeatmapHelper.getDifficultyBackgroundColor(pStars.val))
+                    .ofArgb(bannerColor, BeatmapHelper.getDifficultyBackgroundColor(pStars.value))
                     .runOnUpdate(val -> banner.setBackgroundColor((int) val.getAnimatedValue()))
                     .play(500);
 
             new Animation(pStars.view)
-                    .ofArgb(mapperColor, BeatmapHelper.getDifficultyBackgroundColor(pStars.val))
+                    .ofArgb(mapperColor, BeatmapHelper.getDifficultyBackgroundColor(pStars.value))
                     .runOnUpdate(val -> mapper.getBackground().setTint((int) val.getAnimatedValue()))
                     .cancelPending(false)
                     .play(500);
@@ -406,7 +402,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
     }
 
     public void updateScoreboard() {
-        if (!isShowing || !initialized)
+        if (!isShowing || !isLoaded)
             return;
 
         mActivity.runOnUiThread(() -> {
@@ -425,9 +421,8 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
     public void close() {
         if (!isShowing)
             return;
-        initialized = false;
         new Animation(body).moveX(0, -bodyWidth)
-                .marginTop((int) Res.dimen(R.dimen.topBarHeight), 0)
+                .marginTop((int) Resources.dimen(R.dimen.topBarHeight), 0)
                 .fade(1, 0)
                 .runOnEnd(super::close)
                 .play(300);
@@ -505,7 +500,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
             if (cursor.getCount() == 0) {
                 cursor.close();
-                errorMessage = Res.str(R.string.beatmap_panel_empty_prompt);
+                errorMessage = Resources.str(R.string.beatmap_panel_empty_prompt);
                 return false;
             }
             cursor.moveToFirst();
@@ -552,7 +547,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         //----------------------------------------------------------------------------------------//
         private boolean loadOnlineBoard(TrackInfo track) {
             if (track == null || !online.isStayOnline() || BuildConfig.DEBUG) {
-                errorMessage = Res.str(R.string.beatmap_panel_offline_prompt);
+                errorMessage = Resources.str(R.string.beatmap_panel_offline_prompt);
                 return false;
             }
 
@@ -562,12 +557,12 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
                 scores = online.getTop(file, FileUtils.getMD5Checksum(file));
             }
             catch (OnlineManager.OnlineManagerException exception) {
-                errorMessage = Res.str(R.string.beatmap_panel_error_prompt) + "\n(" + exception.getMessage() + ")";
+                errorMessage = Resources.str(R.string.beatmap_panel_error_prompt) + "\n(" + exception.getMessage() + ")";
                 return false;
             }
 
             if (scores.size() == 0) {
-                errorMessage = Res.str(R.string.beatmap_panel_empty_prompt);
+                errorMessage = Resources.str(R.string.beatmap_panel_empty_prompt);
                 return false;
             }
 

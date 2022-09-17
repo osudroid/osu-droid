@@ -9,9 +9,9 @@ import android.widget.TextView;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.ClickListener;
-import com.reco1l.utils.interfaces.IMainClasses;
-import com.reco1l.utils.interfaces.UI;
+import com.reco1l.utils.ViewTouchHandler;
+import com.reco1l.interfaces.IMainClasses;
+import com.reco1l.ui.platform.UI;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,10 +23,10 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class GameNotification implements IMainClasses, UI {
 
     public View layout;
-
     public Drawable icon;
     public String header, message;
     public Runnable runOnClick, onDismiss;
+
     public int progressMax = 100, progress = 0;
     public boolean
             isSilent = false,
@@ -68,7 +68,7 @@ public class GameNotification implements IMainClasses, UI {
     }
 
     public boolean isAdded() {
-        return inbox.container.indexOfChild(layout) != -1;
+        return notificationCenter.container.indexOfChild(layout) != -1;
     }
 
     public boolean hasPriority() {
@@ -84,18 +84,20 @@ public class GameNotification implements IMainClasses, UI {
         titleTv.setText(header);
         messageTv.setText(message);
 
-        if (runOnClick != null)
-            new ClickListener(body).simple(runOnClick);
+        if (runOnClick != null) {
+            new ViewTouchHandler(runOnClick).apply(body);
+        }
 
         if (hasPriority()) {
             close.setVisibility(View.INVISIBLE);
         } else {
             close.setVisibility(View.VISIBLE);
-            new ClickListener(close).simple(() -> {
-                if (onDismiss != null)
+            new ViewTouchHandler(() -> {
+                if (onDismiss != null) {
                     onDismiss.run();
-                inbox.remove(this);
-            });
+                }
+                notificationCenter.remove(this);
+            }).apply(close);
         }
 
         if (icon != null)
@@ -118,8 +120,8 @@ public class GameNotification implements IMainClasses, UI {
      */
     public void update() {
         mActivity.runOnUiThread(() -> {
-            if (!inbox.isShowing) {
-                inbox.createBadgeNotification(this);
+            if (!notificationCenter.isShowing) {
+                notificationCenter.createBadgeNotification(this);
                 return;
             }
             new Animation(innerBody).moveX(0, -50).fade(1, 0)
@@ -133,7 +135,7 @@ public class GameNotification implements IMainClasses, UI {
 
     public void updateProgress(int progress) {
         this.progress = progress;
-        if (inbox.isShowing && progressBar != null)
+        if (notificationCenter.isShowing && progressBar != null)
             mActivity.runOnUiThread(() -> progressBar.setProgress(progress));
     }
 }

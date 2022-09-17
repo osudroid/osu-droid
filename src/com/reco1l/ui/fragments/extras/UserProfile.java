@@ -1,4 +1,4 @@
-package com.reco1l.ui;
+package com.reco1l.ui.fragments.extras;
 
 import android.view.View;
 import android.widget.TextView;
@@ -9,11 +9,11 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.fragment.WebViewFragment;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.reco1l.Scenes;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.ui.platform.UIManager;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.ClickListener;
-import com.reco1l.utils.Res;
+import com.reco1l.utils.Resources;
 
 import java.text.DecimalFormat;
 
@@ -21,23 +21,34 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
+// Created by Reco1l on 13/9/22 01:22
+
 public class UserProfile extends UIFragment {
 
     public static String message;
+
     private View body;
     private TextView errorText;
+    private final Runnable closeTask = this::close;
+
+    //--------------------------------------------------------------------------------------------//
 
     @Override
     protected int getLayout() {
         return R.layout.user_profile;
-    }    private final Runnable closeTask = this::close;
-
-    //--------------------------------------------------------------------------------------------//
+    }
 
     @Override
     protected String getPrefix() {
         return "UC";
     }
+
+    @Override
+    protected Scenes getParentScene() {
+        return null;
+    }
+
+    //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onLoad() {
@@ -47,7 +58,7 @@ public class UserProfile extends UIFragment {
         body.postDelayed(closeTask, 8000);
 
         new Animation(body)
-                .height(Res.sdp(30), Res.dimen(online.isStayOnline() ?
+                .height(Resources.sdp(30), Resources.dimen(online.isStayOnline() ?
                         R.dimen.userPanelHeight : R.dimen.userPanelSmallHeight))
                 .interpolatorMode(Animation.Interpolate.VALUE_ANIMATOR)
                 .interpolator(Easing.OutExpo)
@@ -92,7 +103,7 @@ public class UserProfile extends UIFragment {
         infoContainer.setVisibility(View.VISIBLE);
         message.setVisibility(View.GONE);
 
-        new ClickListener(goProfile).simple(() -> {
+        bindTouchListener(goProfile, () -> {
             new WebViewFragment().setURL(WebViewFragment.PROFILE_URL + online.getUserId()).show();
             close();
         });
@@ -100,14 +111,14 @@ public class UserProfile extends UIFragment {
         name.setText(online.getUsername());
         rank.setText(String.format("#%d", online.getRank()));
 
-        new Animation(accuracy).ofFloat(0, online.getAccuracy() * 100f)
-                .runOnUpdate(val -> accuracy.setText(String.format("%.2f%%", (float) val.getAnimatedValue())))
+        new Animation().ofFloat(0, online.getAccuracy() * 100f)
+                .runOnUpdate(val -> accuracy.setText(String.format("%.2f%%", (Float) val.getAnimatedValue())))
                 .interpolator(Easing.OutExpo)
                 .cancelPending(false)
                 .delay(200)
                 .play(1000);
 
-        new Animation(accuracyBar).ofInt(0, (int) (online.getAccuracy() * 100))
+        new Animation().ofInt(0, (int) (online.getAccuracy() * 100))
                 .runOnUpdate(val -> accuracyBar.setProgress((int) val.getAnimatedValue()))
                 .interpolator(Easing.OutExpo)
                 .cancelPending(false)
@@ -121,14 +132,16 @@ public class UserProfile extends UIFragment {
     //--------------------------------------------------------------------------------------------//
 
     public void updateMessage(String text) {
-        message = text != null ? text : Res.str(R.string.user_profile_offline_message);
+        message = text != null ? text : Resources.str(R.string.user_profile_offline_message);
         if (BuildConfig.DEBUG)
-            message = text != null ? text : Res.str(R.string.user_profile_debug_message);
+            message = text != null ? text : Resources.str(R.string.user_profile_debug_message);
         if (!isShowing)
             return;
         mActivity.runOnUiThread(() -> errorText.setText(message));
     }
-    
+
+    //--------------------------------------------------------------------------------------------//
+
     @Override
     public void show() {
         platform.closeThis(UIManager.getExtras());
@@ -141,12 +154,14 @@ public class UserProfile extends UIFragment {
             return;
 
         body.removeCallbacks(closeTask);
-        new Animation(find("innerBody")).fade(1, 0).play(100);
-        new Animation(errorText).fade(1, 0).play(100);
+        new Animation(find("innerBody")).fade(1, 0)
+                .play(100);
+        new Animation(errorText).fade(1, 0)
+                .play(100);
 
         new Animation(body)
-                .height(Res.dimen(online.isStayOnline() ?
-                        R.dimen.userPanelHeight : R.dimen.userPanelSmallHeight), Res.sdp(30))
+                .height(Resources.dimen(online.isStayOnline() ?
+                        R.dimen.userPanelHeight : R.dimen.userPanelSmallHeight), Resources.sdp(30))
                 .interpolatorMode(Animation.Interpolate.VALUE_ANIMATOR)
                 .interpolator(Easing.OutExpo)
                 .runOnEnd(super::close)

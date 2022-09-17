@@ -1,4 +1,4 @@
-package com.reco1l.utils.interfaces;
+package com.reco1l.interfaces;
 
 // Created by Reco1l on 8/8/22 16:31
 

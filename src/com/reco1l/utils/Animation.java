@@ -11,7 +11,7 @@ import android.view.ViewPropertyAnimator;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
-import com.reco1l.utils.interfaces.IMainClasses;
+import com.reco1l.interfaces.IMainClasses;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,30 +22,27 @@ import java.util.TimerTask;
 
 /**
  * Simplifies the usage of ViewPropertyAnimator and ValueAnimator.
- * <p>Note: This is intended to be used in Views only.</p>
  */
 public class Animation implements IMainClasses {
 
-    private View view;
     private final static long DEFAULT_DURATION = 1000;
 
+    public Runnable onStart, onEnd;
+
+    private View view;
+    private Easing interpolator;
     private ViewPropertyAnimator anim;
     private List<ValueAnimator> valueAnimators;
 
-    private Easing interpolator;
-    public Runnable onStart, onEnd;
-
-    private long duration = -1, delay = 0;
-
     private float fromX, toX;
     private float fromY, toY;
+    private float fromAlpha, toAlpha;
     private float fromScaleX, toScaleX;
     private float fromScaleY, toScaleY;
-    private float fromAlpha, toAlpha;
     private float fromRotation, toRotation;
+    private long duration = -1, delay = 0;
 
     private boolean cancelPendingAnimations = true;
-
     private Interpolate interpolatorMode = Interpolate.BOTH;
 
     public enum Interpolate {
@@ -489,6 +486,7 @@ public class Animation implements IMainClasses {
         return null;
     }
 
+    @FunctionalInterface
     public interface IChildViewAnimation {
         Animation forChild(View child);
     }

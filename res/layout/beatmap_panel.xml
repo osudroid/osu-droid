@@ -45,22 +45,11 @@
                         android:backgroundTint="#FFFFFF" />
 
                     <TextView
-                        android:id="@+id/bp_propertiesTab"
-                        style="@style/text"
-                        android:layout_width="@dimen/beatmapPanelTabButtonWidth"
-                        android:layout_height="match_parent"
-                        android:background="@drawable/round_shape"
-                        android:gravity="center"
-                        android:text="Properties"
-                        android:textSize="@dimen/textS" />
-
-                    <TextView
                         android:id="@+id/bp_localTab"
                         style="@style/text"
                         android:layout_width="@dimen/beatmapPanelTabButtonWidth"
                         android:layout_height="match_parent"
                         android:background="@drawable/round_shape"
-                        android:layout_toEndOf="@+id/bp_propertiesTab"
                         android:gravity="center"
                         android:text="Local"
                         android:textSize="@dimen/textS" />

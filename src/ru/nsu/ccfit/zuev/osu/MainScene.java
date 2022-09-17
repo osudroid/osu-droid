@@ -9,7 +9,7 @@ import android.util.Log;
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.reco1l.entity.Background;
 import com.reco1l.entity.Spectrum;
-import com.reco1l.utils.interfaces.UI;
+import com.reco1l.ui.platform.UI;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.particle.ParticleSystem;

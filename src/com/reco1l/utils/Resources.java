@@ -2,6 +2,8 @@ package com.reco1l.utils;
 
 // Created by Reco1l on 2/7/22 06:18
 
+import static com.reco1l.interfaces.IMainClasses.mActivity;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
@@ -12,11 +14,9 @@ import androidx.annotation.DimenRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
 
-import com.reco1l.utils.interfaces.IMainClasses;
-
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class Res implements IMainClasses {
+public class Resources {
 
     //--------------------------------------------------------------------------------------------//
 

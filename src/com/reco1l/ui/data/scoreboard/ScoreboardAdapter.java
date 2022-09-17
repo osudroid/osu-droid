@@ -3,7 +3,6 @@ package com.reco1l.ui.data.scoreboard;
 import static android.view.ViewGroup.*;
 
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -14,11 +13,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.imageview.ShapeableImageView;
-import com.reco1l.utils.ClickListener;
-import com.reco1l.utils.GestureListener;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.Res;
-import com.reco1l.utils.interfaces.IMainClasses;
+import com.reco1l.utils.Resources;
+import com.reco1l.utils.ViewTouchHandler;
+import com.reco1l.interfaces.IMainClasses;
+import com.reco1l.utils.listeners.TouchListener;
 
 import java.util.List;
 
@@ -95,26 +94,19 @@ public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.B
             if (body == null)
                 return;
 
-            new ClickListener(body).touchEffect(false).gesture(new GestureListener() {
+            new ViewTouchHandler(new TouchListener() {
 
-                @Override
-                public boolean onDown(MotionEvent event) {
-                    return true;
-                }
-
-                @Override
-                public boolean onSingleTapUp(MotionEvent event) {
-                    if (data.onClick != null)
+                public void onPressUp() {
+                    if (data.onClick != null) {
                         data.onClick.run();
-                    return true;
+                    }
                 }
-
-                @Override
-                public void onLongPress(MotionEvent event) {
-                    if (data.onLongClick != null)
+                public void onLongPress() {
+                    if (data.onLongClick != null) {
                         data.onLongClick.run();
+                    }
                 }
-            });
+            }).apply(body);
 
             rank.setText(data.rank);
             avatar.setImageDrawable(onlineHelper.getAvatarFromURL(AVATAR_URL + data.avatar, data.name));
@@ -128,12 +120,12 @@ public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.B
 
                 image.setImageBitmap(bitmapManager.get("mod-selection-" + mod.texture));
 
-                image.getLayoutParams().width = (int) Res.dimen(R.dimen.scoreboardItemModSize);
-                image.getLayoutParams().height = (int) Res.dimen(R.dimen.scoreboardItemModSize);
+                image.getLayoutParams().width = (int) Resources.dimen(R.dimen.scoreboardItemModSize);
+                image.getLayoutParams().height = (int) Resources.dimen(R.dimen.scoreboardItemModSize);
                 image.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
                 if (data.getMods().indexOf(mod) > 0) {
-                    ((MarginLayoutParams) image.getLayoutParams()).leftMargin = (int) Res.dimen(R.dimen.XXS);
+                    ((MarginLayoutParams) image.getLayoutParams()).leftMargin = (int) Resources.dimen(R.dimen.XXS);
                 }
             }
 

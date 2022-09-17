@@ -1,4 +1,4 @@
-package com.reco1l.ui;
+package com.reco1l.ui.fragments;
 
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
@@ -15,13 +15,16 @@ import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 import com.edlplan.ui.TriangleEffectView;
 import com.reco1l.ui.custom.Dialog;
-import com.reco1l.ui.data.DialogTable;
+import com.reco1l.ui.data.tables.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.ClickListener;
-import com.reco1l.utils.Res;
-import com.reco1l.utils.interfaces.UI;
+import com.reco1l.utils.Resources;
+import com.reco1l.ui.platform.UI;
+import com.reco1l.utils.listeners.TouchListener;
 
+import org.anddev.andengine.util.Debug;
+
+import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.MainScene;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
@@ -124,8 +127,8 @@ public class MainMenu extends UIFragment {
     protected void onLoad() {
         setDismissMode(false, false);
 
-        logoNormalSize = (int) Res.dimen(R.dimen.mainMenuLogoSize);
-        smallLogoSize = (int) Res.dimen(R.dimen.mainMenuSmallLogoSize);
+        logoNormalSize = (int) Resources.dimen(R.dimen.mainMenuLogoSize);
+        smallLogoSize = (int) Resources.dimen(R.dimen.mainMenuSmallLogoSize);
 
         logo = find("logo");
         logoTriangles = find("logoTriangles");
@@ -152,32 +155,35 @@ public class MainMenu extends UIFragment {
         exit.setWidth(0);
         settings.setWidth(0);
 
-        new ClickListener(logo)
-                .soundEffect(resources.getSound("menuhit"))
-                .touchEffect(false)
-                .simple(() -> {
-                    if (!isMenuShowing) {
-                        showMenu();
-                    } else {
-                        hideMenu();
-                    }
-                });
+        bindTouchListener(logo, new TouchListener() {
+            public BassSoundProvider getClickSound() { return resources.getSound("menuhit"); }
+            public boolean hasTouchEffect() { return false; }
 
-        new ClickListener(play.view)
-                .onlyOnce(true)
-                .simple(() -> {
-                    Utils.setAccelerometerSign(global.getCamera().getRotation() == 0 ? 1 : -1);
-                    global.getSongService().setGaming(true);
-                    playTransitionAnim();
-                });
+            public void onPressUp() {
+                if (!isMenuShowing) {
+                    showMenu();
+                } else {
+                    hideMenu();
+                }
+            }
+        });
 
-        new ClickListener(exit.view)
-                .simple(() -> {
-                    Utils.setAccelerometerSign(global.getCamera().getRotation() == 0 ? 1 : -1);
-                    new Dialog(DialogTable.exit()).show();
-                });
+        bindTouchListener(play.view, new TouchListener() {
+            public boolean isOnlyOnce() { return true; }
 
-        new ClickListener(settings.view).simple(settingsPanel::altShow);
+            public void onPressUp() {
+                Utils.setAccelerometerSign(global.getCamera().getRotation() == 0 ? 1 : -1);
+                global.getSongService().setGaming(true);
+                playTransitionAnim();
+            }
+        });
+
+        bindTouchListener(exit.view, () -> {
+            Utils.setAccelerometerSign(global.getCamera().getRotation() == 0 ? 1 : -1);
+            new Dialog(DialogTable.exit()).show();
+        });
+
+        bindTouchListener(settings.view, settingsPanel::altShow);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -214,7 +220,7 @@ public class MainMenu extends UIFragment {
                     new AsyncTaskLoader().execute(asyncCallback);
                     isMenuShowing = false;
                 })
-                .moveY(0, Res.dimen(R.dimen._80sdp))
+                .moveY(0, Resources.dimen(R.dimen._80sdp))
                 .fade(1, 0)
                 .play(400);
     }
@@ -346,12 +352,12 @@ public class MainMenu extends UIFragment {
                     button.setLayoutParams(params);
                 };
 
-                showAnim = ValueAnimator.ofInt(0, (int) Res.dimen(R.dimen.mainMenuButtonSize));
+                showAnim = ValueAnimator.ofInt(0, (int) Resources.dimen(R.dimen.mainMenuButtonSize));
                 showAnim.addUpdateListener(updateListener);
                 showAnim.setInterpolator(interpolator);
                 showAnim.setDuration(100);
 
-                hideAnim = ValueAnimator.ofInt((int) Res.dimen(R.dimen.mainMenuButtonSize), 0);
+                hideAnim = ValueAnimator.ofInt((int) Resources.dimen(R.dimen.mainMenuButtonSize), 0);
                 hideAnim.addUpdateListener(updateListener);
                 hideAnim.setInterpolator(interpolator);
                 hideAnim.setDuration(100);

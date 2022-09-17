@@ -8,7 +8,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -35,7 +34,7 @@ import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.EngineMirror;
-import com.reco1l.ui.SplashScene;
+import com.reco1l.ui.fragments.SplashScene;
 import com.reco1l.ui.platform.FragmentPlatform;
 
 import org.anddev.andengine.engine.Engine;

@@ -1,14 +1,10 @@
 package com.reco1l.ui.platform;
 
-import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
-import android.widget.TextView;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
@@ -16,11 +12,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.reco1l.utils.Animation;
-import com.reco1l.utils.ClickListener;
-import com.reco1l.utils.Res;
-import com.reco1l.utils.interfaces.UI;
-import com.reco1l.utils.interfaces.IMainClasses;
+import com.reco1l.Scenes;
+import com.reco1l.utils.listeners.TouchListener;
+import com.reco1l.utils.ViewTouchHandler;
+import com.reco1l.utils.Resources;
+import com.reco1l.interfaces.IMainClasses;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -30,15 +29,25 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public abstract class UIFragment extends Fragment implements IMainClasses, UI {
 
-    protected View rootView, rootBackground;
-    protected boolean
-            isDismissOnBackgroundPress = false,
-            isDismissOnBackPress = true;
-
     public boolean isShowing = false;
+
+    protected View rootView, rootBackground;
+    protected boolean isDismissOnBackgroundPress = false,
+            isDismissOnBackPress = true,
+            isLoaded = false;
 
     protected int screenWidth = Config.getRES_WIDTH();
     protected int screenHeight = Config.getRES_HEIGHT();
+
+    protected final Map<View, ViewTouchHandler> registeredViews;
+
+    private final Runnable close = this::close;
+
+    //--------------------------------------------------------------------------------------------//
+
+    public UIFragment() {
+        registeredViews = new HashMap<>();
+    }
 
     //--------------------------------------------------------------------------------------------//
     /**
@@ -51,8 +60,20 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
      * undefined prefix (you have to define it on every view ID declaration).
      */
     protected abstract String getPrefix();
-
     protected abstract @LayoutRes int getLayout();
+
+    /**
+     * Defines which scene the fragment belongs to.
+     * <p>Note: If you set it to <code>null</code> it will gonna be added to the main container
+     * (use this only in extras or dialogs)</p>
+     */
+    protected Scenes getParentScene() { return null; }
+
+    /**
+     * Sets the time of inactivity that need to be reached to close the fragment.
+     * <p>Note: Use this only on extras dialogs.</p>
+     */
+    protected long getDismissTime() { return 0; }
     //--------------------------------------------------------------------------------------------//
 
     @Nullable @Override
@@ -64,11 +85,23 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
         // You can also set the root view ID as "background".
         rootBackground = find(R.id.background);
         onLoad();
+        isLoaded = true;
         if (isDismissOnBackgroundPress && rootBackground != null) {
             rootBackground.setClickable(true);
 
-            if (!rootBackground.hasOnClickListeners())
-                new ClickListener(rootBackground).onlyOnce(true).touchEffect(false).simple(this::close);
+            if (!rootBackground.hasOnClickListeners()) {
+                bindTouchListener(rootBackground, new TouchListener() {
+                    public boolean hasTouchEffect() { return false; }
+                    public boolean isOnlyOnce() { return true; }
+
+                    public void onPressUp() {
+                        close();
+                    }
+                });
+            }
+        }
+        if (getDismissTime() > 0) {
+            rootView.postDelayed(close, getDismissTime());
         }
         return rootView;
     }
@@ -88,16 +121,26 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
     public void close() {
         if (!isShowing)
             return;
-        FragmentPlatform.getInstance().removeFragment(this);
+        rootView.removeCallbacks(close);
+        platform.removeFragment(this);
         isShowing = false;
+        isLoaded = false;
+        unbindTouchListeners();
+        registeredViews.clear();
         System.gc();
     }
 
     public void show() {
         if (isShowing)
             return;
+        isLoaded = false;
         String tag = this.getClass().getName() + "@" + this.hashCode();
-        FragmentPlatform.getInstance().addFragment(this, tag);
+
+        if (getParentScene() != null) {
+            platform.addSceneFragment(getParentScene(), this, tag);
+        } else {
+            platform.addFragment(this, tag);
+        }
         isShowing = true;
         System.gc();
     }
@@ -106,8 +149,11 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
      * If the layout is showing then dismiss it, otherwise shows it.
      */
     public void altShow() {
-        if (isShowing) close();
-        else show();
+        if (isShowing) {
+            close();
+        } else {
+            show();
+        }
     }
 
     /**
@@ -148,19 +194,19 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
         if (rootView == null || id == null)
             return null;
 
-        int Id;
-
+        int identifier;
         if (getPrefix() == null || id.startsWith(getPrefix())) {
-            Id = res().getIdentifier(id, "id", mActivity.getPackageName());
+            identifier = Resources.id(id, "id");
         } else {
-            Id = res().getIdentifier(getPrefix() + "_" + id, "id", mActivity.getPackageName());
+            identifier = Resources.id(getPrefix() + "_" + id, "id");
         }
 
-        Object view = rootView.findViewById(Id);
+        Object view = rootView.findViewById(identifier);
+        if (view != null) {
+            registeredViews.put((T) view, null);
+        }
         return (T) view;
     }
-
-    //--------------------------------------------------------------------------------------------//
 
     /**
      * Simple method to check nullability of multiples views at once.
@@ -173,42 +219,61 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
         return false;
     }
 
-    /**
-     * Set text with a fade animation.
-     *
-     * <p>
-     *     Will be removed.
-     * </p>
-     */
-    @Deprecated
-    public void setText(TextView view, String text) {
+    //--------------------------------------------------------------------------------------------//
+
+    public void onTouchEventNotified(int action) {
+        if (getDismissTime() > 0) {
+            if (action == MotionEvent.ACTION_DOWN) {
+                rootView.removeCallbacks(close);
+            }
+            if (action == MotionEvent.ACTION_UP) {
+                rootView.postDelayed(close, getDismissTime());
+            }
+        }
+    }
+
+    protected void unbindTouchListener(View view) {
         if (view == null)
             return;
 
-        final int color = view.getCurrentTextColor();
-        final int alpha = Color.alpha(color);
-        final int[] rgb = {
-                Color.red(color),
-                Color.green(color),
-                Color.blue(color)
-        };
-
-        new Animation(view)
-                .ofArgb(color, Color.argb(0, rgb[0], rgb[1], rgb[2]))
-                .runOnUpdate(val -> view.setTextColor((int) val.getAnimatedValue()))
-                .play(400);
-
-        new Animation(view)
-                .ofArgb(view.getCurrentTextColor(), Color.argb(alpha, rgb[0], rgb[1], rgb[2]))
-                .runOnUpdate(val -> view.setTextColor((int) val.getAnimatedValue()))
-                .runOnStart(() -> view.setText(text))
-                .delay(400)
-                .play(400);
+        view.setOnTouchListener(null);
+        if (registeredViews.containsKey(view)) {
+            registeredViews.put(view, null);
+        }
     }
 
-    //--------------------------------------------------------------------------------------------//
-    @Deprecated // Use Res class instead.
-    protected Resources res(){
-        return mActivity.getResources();
+    protected void bindTouchListener(View view, Runnable onSingleTapUp) {
+        bindTouchListener(view, new TouchListener() {
+            public void onPressUp() {
+                onSingleTapUp.run();
+            }
+        });
+    }
+
+    protected void bindTouchListener(View view, TouchListener listener) {
+        ViewTouchHandler touchHandler = registeredViews.get(view);
+        if (touchHandler == null) {
+            touchHandler = new ViewTouchHandler(listener);
+            registeredViews.put(view, touchHandler);
+        } else {
+            touchHandler.listener = listener;
+        }
+        touchHandler.linkToFragment(this);
+        touchHandler.apply(view);
+    }
+
+    protected void unbindTouchListeners() {
+        for (View view : registeredViews.keySet()) {
+            view.setOnTouchListener(null);
+        }
+    }
+
+    protected void rebindTouchListeners() {
+        for (View view : registeredViews.keySet()) {
+            ViewTouchHandler touchHandler = registeredViews.get(view);
+            if (touchHandler != null) {
+                touchHandler.apply(view);
+            }
+        }
     }
 }

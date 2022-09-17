@@ -1,8 +1,8 @@
 package com.reco1l;
 
+import com.reco1l.ui.platform.UI;
 import com.reco1l.ui.platform.UIManager;
-import com.reco1l.utils.interfaces.UI;
-import com.reco1l.utils.interfaces.IMainClasses;
+import com.reco1l.interfaces.IMainClasses;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.options.EngineOptions;
@@ -13,19 +13,11 @@ import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 // Created by Reco1l on 22/6/22 02:20
 
 public class EngineMirror extends Engine implements IMainClasses, UI {
-    // Checks which AndEngine scene is showing now and updates the new UI when setScene() is called.
 
-    public Scenes currentScene, lastScene;
     public static boolean isGlobalManagerInit = false;
 
-    public enum Scenes {
-        LOADING_SCREEN,
-        PAUSE_MENU,
-        MAIN_MENU,
-        SONG_MENU,
-        SCORING,
-        GAME
-    }
+    public Scenes currentScene;
+    public Scenes lastScene;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -46,13 +38,11 @@ public class EngineMirror extends Engine implements IMainClasses, UI {
             UIManager.initialize();
             return;
         }
-
         lastScene = currentScene;
 
         /*if (scene.hasChildScene() && scene.getChildScene() == PauseMenu.getInstance().getScene()) {
             currentScene = Scenes.PAUSE_MENU;
         }*/
-
         if (scene == LoadingScreen.getInstance().getScene() || scene == loadingScene.scene) {
             currentScene = Scenes.LOADING_SCREEN;
         }
@@ -65,10 +55,6 @@ public class EngineMirror extends Engine implements IMainClasses, UI {
         else if (scene == global.getScoring().getScene()) {
             currentScene = Scenes.SCORING;
         }
-        else if (scene == global.getGameScene().getScene()) {
-            currentScene = Scenes.GAME;
-        }
-
         mActivity.runOnUiThread(this::updateUI);
     }
 
@@ -82,7 +68,7 @@ public class EngineMirror extends Engine implements IMainClasses, UI {
         // Closing all extras on every scene change.
         platform.closeThis(UIManager.getExtras());
 
-        inbox.allowBadgeNotificator(currentScene == Scenes.GAME);
+        notificationCenter.allowBadgeNotificator(currentScene == Scenes.GAME);
 
         // This sets which layouts show according to the current scene.
         switch (currentScene) {

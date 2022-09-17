@@ -1,14 +1,14 @@
 package com.reco1l.ui.platform;
 
-import com.reco1l.ui.BeatmapList;
-import com.reco1l.ui.BeatmapPanel;
-import com.reco1l.ui.Inbox;
-import com.reco1l.ui.LoadingScene;
-import com.reco1l.ui.MainMenu;
-import com.reco1l.ui.MusicPlayer;
-import com.reco1l.ui.SettingsMenu;
-import com.reco1l.ui.TopBar;
-import com.reco1l.ui.UserProfile;
+import com.reco1l.ui.fragments.BeatmapList;
+import com.reco1l.ui.fragments.BeatmapPanel;
+import com.reco1l.ui.fragments.extras.NotificationCenter;
+import com.reco1l.ui.fragments.LoadingScene;
+import com.reco1l.ui.fragments.MainMenu;
+import com.reco1l.ui.fragments.extras.MusicPlayer;
+import com.reco1l.ui.fragments.extras.SettingsMenu;
+import com.reco1l.ui.fragments.TopBar;
+import com.reco1l.ui.fragments.extras.UserProfile;
 
 // Created by Reco1l on 2/7/22 22:44
 
@@ -17,7 +17,7 @@ public class UIManager {
     public static boolean isUserInterfaceInit = false;
 
     public static TopBar topBar;
-    public static Inbox inbox;
+    public static NotificationCenter notificationCenter;
     public static MusicPlayer musicPlayer;
     public static LoadingScene loadingScene;
     public static MainMenu mainMenu;
@@ -30,7 +30,7 @@ public class UIManager {
 
     public static void initialize() {
         topBar = new TopBar();
-        inbox = new Inbox();
+        notificationCenter = new NotificationCenter();
         musicPlayer = new MusicPlayer();
         loadingScene = new LoadingScene();
         mainMenu = new MainMenu();
@@ -63,11 +63,11 @@ public class UIManager {
         return topBar;
     }
 
-    public static Inbox getInbox() {
-        if (inbox == null) {
-            inbox = new Inbox();
+    public static NotificationCenter getInbox() {
+        if (notificationCenter == null) {
+            notificationCenter = new NotificationCenter();
         }
-        return inbox;
+        return notificationCenter;
     }
 
     public static MusicPlayer getMusicPlayer() {

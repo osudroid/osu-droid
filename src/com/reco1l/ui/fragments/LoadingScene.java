@@ -1,4 +1,4 @@
-package com.reco1l.ui;
+package com.reco1l.ui.fragments;
 
 import android.view.View;
 import android.widget.TextView;
@@ -21,6 +21,8 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 7/7/22 01:17
+
+// Created by Reco1l on 13/9/22 01:22
 
 public class LoadingScene extends UIFragment implements IUpdateHandler {
 

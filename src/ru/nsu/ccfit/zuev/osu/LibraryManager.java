@@ -443,7 +443,7 @@ public class LibraryManager {
     }
 
     public BeatmapInfo getBeatmapByIndex(int index) {
-        Debug.i("Music Changing Info: Require index :" + index + "/" + library.size());
+        //Debug.i("Music Changing Info: Require index :" + index + "/" + library.size());
         if (library == null || library.size() <= 0) return null;
         if (index < 0 || index >= library.size()) {
             shuffleLibrary();

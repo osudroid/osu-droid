@@ -9,7 +9,7 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.reco1l.utils.interfaces.IMainClasses;
+import com.reco1l.interfaces.IMainClasses;
 
 // Created by Reco1l on 25/7/22 21:51
 

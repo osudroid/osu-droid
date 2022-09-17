@@ -2,13 +2,12 @@ package com.reco1l.entity;
 
 // Created by Reco1l on 26/6/22 18:22
 
-import com.reco1l.utils.ModifierListener;
-import com.reco1l.utils.interfaces.IMainClasses;
-import com.reco1l.utils.interfaces.UI;
+import com.reco1l.utils.listeners.ModifierListener;
+import com.reco1l.interfaces.IMainClasses;
+import com.reco1l.ui.platform.UI;
 
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
 import org.anddev.andengine.entity.modifier.ScaleModifier;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
@@ -20,7 +19,6 @@ import org.anddev.andengine.util.modifier.ease.EaseQuadInOut;
 import org.anddev.andengine.util.modifier.ease.IEaseFunction;
 
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
 public class Background implements IMainClasses {
 

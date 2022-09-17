@@ -1,10 +1,13 @@
 package com.reco1l.ui.data.helpers;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
 import com.edlplan.framework.math.FMath;
-import com.reco1l.utils.interfaces.IMainClasses;
+import com.reco1l.BitmapManager;
+import com.reco1l.interfaces.IMainClasses;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +20,8 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 // Created by Reco1l on 1/8/22 05:27
 
 public class BeatmapHelper implements IMainClasses {
+
+    private static final String COMPRESSED_BG_SUFFIX = "bg@";
 
     // Title
     //--------------------------------------------------------------------------------------------//
@@ -147,5 +152,16 @@ public class BeatmapHelper implements IMainClasses {
             return Drawable.createFromStream(is, null);
         }
         return null;
+    }
+
+    public static Bitmap getCompressedBackground(TrackInfo track) {
+        return bitmapManager.get(COMPRESSED_BG_SUFFIX + track.getFilename());
+    }
+
+    public static void loadCompressedBackground(TrackInfo track) {
+        if (!bitmapManager.contains(COMPRESSED_BG_SUFFIX + track.getFilename())) {
+            Bitmap bitmap = BitmapManager.compress(BitmapFactory.decodeFile(track.getBackground()), 8);
+            bitmapManager.loadBitmap(COMPRESSED_BG_SUFFIX + track.getFilename(), bitmap);
+        }
     }
 }

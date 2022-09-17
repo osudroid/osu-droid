@@ -1,14 +1,15 @@
 package com.reco1l;
 
-import static com.reco1l.ITextures.fileNames;
+import static com.reco1l.interfaces.ITextures.fileNames;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 
-import com.reco1l.utils.interfaces.IMainClasses;
+import androidx.core.math.MathUtils;
+
+import com.reco1l.interfaces.IMainClasses;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,10 +19,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
 // Created by Reco1l on 22/8/22 21:38
 
@@ -65,25 +62,28 @@ public class BitmapManager implements IMainClasses {
         global.setLoadingProgress(15);
     }
 
-    public void loadBitmap(String key, Bitmap bitmap) {
+    public Bitmap loadBitmap(String key, Bitmap bitmap) {
         bitmaps.put(key, bitmap);
+        return bitmap;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public static Bitmap compress(Bitmap raw, int quality) {
-        if (quality == 100)
-            return raw;
+        if (raw == null)
+            return null;
 
-        if (raw != null && quality != 0) {
+        quality = MathUtils.clamp(quality, 1, 100);
+
+        if (quality < 100) {
             final ByteArrayOutputStream stream = new ByteArrayOutputStream();
             raw.compress(Bitmap.CompressFormat.JPEG, quality, stream);
 
-            final Bitmap compressed = BitmapFactory.decodeStream(new ByteArrayInputStream(stream.toByteArray()));
+            Bitmap compressed = BitmapFactory.decodeStream(new ByteArrayInputStream(stream.toByteArray()));
             raw.recycle();
             return compressed;
         }
-        return null;
+        return raw;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -92,11 +92,12 @@ public class BitmapManager implements IMainClasses {
         return bitmaps.get(name);
     }
 
+    public Drawable getAsDrawable(String name) {
+        return new BitmapDrawable(mActivity.getResources(), bitmaps.get(name));
+    }
+
     public boolean contains(String name) {
         return bitmaps.containsKey(name);
     }
 
-    public Drawable getAsDrawable(String name) {
-        return new BitmapDrawable(mActivity.getResources(), bitmaps.get(name));
-    }
 }
