@@ -36,7 +36,7 @@ public class NotificationTable implements IMainClasses, UI {
     private static int beatmapsFounded = 0;
 
     public static void beatmapImport(String state, int i, String s) {
-        if (engine.currentScene != Scenes.LOADING_SCREEN)
+        if (engine.currentScene != Scenes.LOADING_SCENE)
             return;
 
         if (importing == null)

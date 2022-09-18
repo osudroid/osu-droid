@@ -58,7 +58,7 @@ public class BeatmapList extends UIFragment {
     }
 
     @Override
-    protected Scenes getParentScene() {
+    protected Scenes getParent() {
         return Scenes.SONG_MENU;
     }
 

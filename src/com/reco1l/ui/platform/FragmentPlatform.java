@@ -35,13 +35,13 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 22/6/22 02:25
 
-public class FragmentPlatform implements IMainClasses {
+public final class FragmentPlatform implements IMainClasses {
 
     private static FragmentPlatform instance;
     private static final int containerId = 0x999999;
 
     private final List<Fragment> fragments;
-    private final Map<Scenes, FrameLayout> sceneLayouts;
+    private final Map<Scenes, List<UIFragment>> sceneFragments;
 
     public RenderSurfaceView renderView;
     public FragmentManager manager;
@@ -54,7 +54,11 @@ public class FragmentPlatform implements IMainClasses {
 
     public FragmentPlatform() {
         this.fragments = new ArrayList<>();
-        this.sceneLayouts = new HashMap<>();
+        this.sceneFragments = new HashMap<>();
+
+        for (Scenes scene : Scenes.values()) {
+            sceneFragments.put(scene, new ArrayList<>());
+        }
     }
 
     public static FragmentPlatform getInstance() {
@@ -87,37 +91,9 @@ public class FragmentPlatform implements IMainClasses {
         manager = activity.getSupportFragmentManager();
 
         loaderFragment = new LoaderFragment();
-        initializeContainers(container);
-    }
-    
-    private void initializeContainers(FrameLayout mainContainer) {
-        for (Scenes scene : Scenes.values()) {
-            FrameLayout container = new FrameLayout(context);
-            container.setId(containerId + scene.ordinal() + 1);
-
-            sceneLayouts.put(scene, container);
-            mainContainer.addView(container, params);
-        }
     }
 
     //--------------------------------------------------------------------------------------------//
-
-    public void addSceneFragment(Scenes type, Fragment fragment, String tag) {
-        if (fragment.isAdded() || fragments.contains(fragment) || manager.findFragmentByTag(tag) != null)
-            return;
-
-        if (sceneLayouts.get(type) == null)
-            return;
-
-        fragments.add(fragment);
-
-        mActivity.runOnUiThread(() -> {
-            @SuppressWarnings("ConstantConditions")
-            final int id = sceneLayouts.get(type).getId();
-
-            manager.beginTransaction().add(id, fragment, tag).commit();
-        });
-    }
     
     public void addFragment(Fragment fragment, String tag) {
         if (fragment.isAdded() || fragments.contains(fragment) || manager.findFragmentByTag(tag) != null)
@@ -133,44 +109,64 @@ public class FragmentPlatform implements IMainClasses {
             return;
 
         fragments.remove(fragment);
-        mActivity.runOnUiThread(() ->
-                manager.beginTransaction().remove(fragment).commit());
+        mActivity.runOnUiThread(() -> manager.beginTransaction().remove(fragment).commit());
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    /**
-     * Close all fragments currently showing
-     */
-    public void closeAll() {
-        for (int i = 0; i < fragments.size(); i++) {
-            Fragment fragment = fragments.get(i);
-            if (fragment.getClass().getSuperclass() == UIFragment.class) {
-                mActivity.runOnUiThread(((UIFragment) fragment)::close);
-            }
+    private List<UIFragment> getFragmentList(Scenes scene) {
+        List<UIFragment> list = sceneFragments.get(scene);
+        if (list == null) {
+            list = new ArrayList<>();
+            sceneFragments.put(scene, list);
+        }
+        return list;
+    }
+
+    public void assignToScene(Scenes scene, UIFragment fragment) {
+        getFragmentList(scene).add(fragment);
+    }
+
+
+    public UIFragment[] getFragmentsFrom(Scenes scene) {
+        UIFragment[] array = new UIFragment[getFragmentList(scene).size()];
+        getFragmentList(scene).toArray(array);
+        return array;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public void showAll(Scenes scene) {
+        for (UIFragment fragment : getFragmentList(scene)) {
+            fragment.show();
         }
     }
 
-    /**
-     * @param toClose fragments to close
-     */
-    public void closeThis(UIFragment... toClose) {
+    public void close(UIFragment... toClose) {
         for (UIFragment fragment : toClose) {
            if (fragment != null)
                mActivity.runOnUiThread(fragment::close);
         }
     }
 
-    /**
-     * @param toExclude fragments to exclude from closing
-     */
     public void closeAllExcept(UIFragment... toExclude) {
         List<Fragment> toClose = new ArrayList<>(fragments);
         toClose.removeAll(Arrays.asList(toExclude));
 
         for (Fragment fragment: toClose) {
-            if (fragment.getClass().getSuperclass() == UIFragment.class)
-                mActivity.runOnUiThread(((UIFragment) fragment)::close);
+            if (fragment.getClass().getSuperclass() == UIFragment.class) {
+                UIFragment ui = (UIFragment) fragment;
+                mActivity.runOnUiThread(ui::close);
+            }
+        }
+    }
+
+    public void updateFragments(Scenes oldScene, Scenes newScene) {
+        for (Fragment fragment: fragments) {
+            if (fragment.getClass().getSuperclass() == UIFragment.class) {
+                UIFragment ui = (UIFragment) fragment;
+                mActivity.runOnUiThread(() -> ui.onSceneChange(oldScene, newScene));
+            }
         }
     }
 

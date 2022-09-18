@@ -25,16 +25,17 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class TopBar extends UIFragment {
 
+    public View body;
+    public TextView author;
+
     public UserBox userBox;
-    private ButtonsLayout buttons;
     public MusicButton musicButton;
 
-    public View body;
     public int barHeight;
-    public TextView author;
 
     private View bar, back;
     private LinearLayout container;
+    private ButtonsLayout buttons;
 
     private Scenes lastScene;
 
@@ -50,7 +51,17 @@ public class TopBar extends UIFragment {
         return R.layout.top_bar;
     }
 
+    @Override
+    protected Scenes[] getParents() {
+        return new Scenes[] {Scenes.MAIN_SCENE, Scenes.SONG_MENU, Scenes.SCORING};
+    }
+
     //--------------------------------------------------------------------------------------------//
+
+    @Override
+    protected void onSceneChange(Scenes oldScene, Scenes newScene) {
+        reload();
+    }
 
     public void reload() {
         if (lastScene == engine.currentScene || !isShowing)
@@ -65,7 +76,7 @@ public class TopBar extends UIFragment {
         new Animation(container).moveX(-60, 0).fade(0, 1).runOnStart(() -> {
             switch (engine.currentScene) {
 
-                case MAIN_MENU:
+                case MAIN_SCENE:
                     musicButton.setVisibility(true);
                     break;
 
@@ -80,7 +91,7 @@ public class TopBar extends UIFragment {
             buttons.update(engine.currentScene);
         }).delay(200).play(200);
 
-        showAuthorText(engine.currentScene == Scenes.MAIN_MENU);
+        showAuthorText(engine.currentScene == Scenes.MAIN_SCENE);
         lastScene = engine.currentScene;
     }
 
@@ -103,7 +114,7 @@ public class TopBar extends UIFragment {
                 .play(300);
 
         author.setAlpha(0);
-        showAuthorText(engine.currentScene == Scenes.MAIN_MENU);
+        showAuthorText(engine.currentScene == Scenes.MAIN_SCENE);
 
         if (library.getSizeOfBeatmaps() <= 0) {
             musicButton.setVisibility(false);

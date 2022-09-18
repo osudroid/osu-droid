@@ -22,20 +22,17 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 24/6/22 02:49
 
-// Created by Reco1l on 13/9/22 01:22
-
 public class SplashScene extends UIFragment implements IUpdateHandler {
 
     private static final String START_SOUND = "welcome_piano";
     private static final String HIT_SOUND = "menuhit";
 
     public final Scene scene;
-    private final type build;
 
-    private int lastProgress = 0;
     private float logoSize;
+    private int lastProgress = 0;
 
-
+    private final type build;
     private View background, logo, effect;
     private TextView percentText, loadingInfo, buildText;
 
@@ -89,6 +86,8 @@ public class SplashScene extends UIFragment implements IUpdateHandler {
     protected String getPrefix() {
         return "ss";
     }
+
+    // In this case this doesn't have parent scene since it only appear when the game starts
 
     //--------------------------------------------------------------------------------------------//
 

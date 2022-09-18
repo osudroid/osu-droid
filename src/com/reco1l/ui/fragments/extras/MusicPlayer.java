@@ -46,7 +46,7 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
     private BeatmapInfo lastBeatmap;
     private Drawable playDrawable, pauseDrawable;
 
-    private AsyncExec songBitmapTask;
+    private AsyncExec bitmapTask;
 
     private int length, position, toPosition;
     private boolean isTrackingTouch = false;
@@ -105,7 +105,6 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
         artistTv = find("artist");
         lengthTv = find("songLength");
         timeTv = find("songProgress");
-
         play = find("play");
 
         bindTouchListener(play, new TouchListener() {
@@ -129,7 +128,6 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
                 global.getMainScene().musicControl(MainScene.MusicOption.PREV);
             }
         });
-
         bindTouchListener(find("next"), new TouchListener() {
             public void onPressDown() {
                 global.getMainScene().doChange = true;
@@ -162,7 +160,9 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
                 onTouchEventNotified(MotionEvent.ACTION_UP);
             }
         });
-        loadSongData(library.getBeatmap());
+
+        loadMetadata(library.getBeatmap());
+        loadSeekbarImage();
     }
 
     public void update() {
@@ -203,70 +203,73 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
 
     private void change() {
         BeatmapInfo beatmap = library.getBeatmap();
-        songBitmap = null;
 
         if (topBar.isShowing) {
             topBar.musicButton.update(beatmap);
         }
-        if (!isShowing)
-            return;
+        changeBitmap(beatmap.getTrack(0));
 
-        songBitmap = BeatmapHelper.getCompressedBackground(beatmap.getTrack(0));
+        if (isShowing) {
+            if (currentOption == MainScene.MusicOption.NEXT) {
+                new Animation(songBody).moveX(0, -10).fade(1, 0)
+                        .play(200);
 
-        if (currentOption == MainScene.MusicOption.NEXT) {
-            new Animation(songBody).moveX(0, -10).fade(1, 0)
-                    .play(200);
-
-            new Animation(songBody).moveX(10, 0).fade(0, 1)
-                    .runOnStart(() -> loadSongData(beatmap))
-                    .delay(200)
-                    .play(200);
-        }
-        if (currentOption == MainScene.MusicOption.PREV) {
-            new Animation(songBody).moveX(0, 10).fade(1, 0)
-                    .play(200);
-            new Animation(songBody).moveX(-10, 0).fade(0, 1)
-                    .runOnStart(() -> loadSongData(beatmap))
-                    .delay(200)
-                    .play(200);
+                new Animation(songBody).moveX(10, 0).fade(0, 1)
+                        .runOnStart(() -> loadMetadata(beatmap))
+                        .delay(200)
+                        .play(200);
+            }
+            if (currentOption == MainScene.MusicOption.PREV) {
+                new Animation(songBody).moveX(0, 10).fade(1, 0)
+                        .play(200);
+                new Animation(songBody).moveX(-10, 0).fade(0, 1)
+                        .runOnStart(() -> loadMetadata(beatmap))
+                        .delay(200)
+                        .play(200);
+            }
         }
     }
 
-    private void loadSongData(BeatmapInfo beatmap) {
-        titleTv.setText(BeatmapHelper.getTitle(beatmap));
-        artistTv.setText(BeatmapHelper.getArtist(beatmap));
-        lengthTv.setText(sdf.format(length));
-
-        TrackInfo track = beatmap.getTrack(0);
-
-        songImage.setImageDrawable(null);
-        songImage.animate().cancel();
-        ((View) songImage).setAlpha(0);
+    private void changeBitmap(TrackInfo track) {
+        if (bitmapTask != null) {
+            bitmapTask.cancel(true);
+            bitmapTask = null;
+        }
 
         if (track.getBackground() == null) {
+            songBitmap = null;
+            loadSeekbarImage();
             return;
         }
 
-        Animation fade = new Animation(songImage).fade(0, 1)
-                .runOnStart(() -> {
-                    Bitmap bitmap = BeatmapHelper.getCompressedBackground(track);
-                    songImage.setImageBitmap(bitmap);
-                });
-
-        if (songBitmap == null) {
-            if (songBitmapTask != null) {
-                songBitmapTask.cancel(true);
+        bitmapTask = new AsyncExec() {
+            public void run() {
+                BeatmapHelper.loadCompressedBackground(track);
             }
-            songBitmapTask = new AsyncExec() {
-                public void run() {
-                    BeatmapHelper.loadCompressedBackground(track);
-                }
-                public void onComplete() {
-                    fade.play(200);
-                }
-            };
+            public void onComplete() {
+                songBitmap = BeatmapHelper.getCompressedBackground(track);
+                loadSeekbarImage();
+            }
+        };
+        bitmapTask.execute();
+    }
+
+    private void loadMetadata(BeatmapInfo beatmap) {
+        titleTv.setText(BeatmapHelper.getTitle(beatmap));
+        artistTv.setText(BeatmapHelper.getArtist(beatmap));
+        lengthTv.setText(sdf.format(length));
+    }
+
+    private void loadSeekbarImage() {
+        if (!isShowing)
+            return;
+        ((View) songImage).setAlpha(0);
+
+        if (songBitmap != null) {
+            songImage.setImageBitmap(songBitmap);
+            new Animation(songImage).fade(0, 1).play(200);
         } else {
-            fade.play(200);
+            songImage.setImageDrawable(null);
         }
     }
 
@@ -277,7 +280,7 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
     public void show() {
         if (isShowing)
             return;
-        platform.closeThis(UIManager.getExtras());
+        platform.close(UIManager.getExtras());
         topBar.musicButton.playAnimation(true);
         super.show();
     }

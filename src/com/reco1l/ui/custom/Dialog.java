@@ -7,7 +7,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 
 import com.edlplan.framework.easing.Easing;
@@ -190,7 +189,7 @@ public class Dialog extends UIFragment {
     @Override
     public void show() {
         if (closeExtras)
-            platform.closeThis(UIManager.getExtras());
+            platform.close(UIManager.getExtras());
 
         super.show();
     }

@@ -195,7 +195,7 @@ public class NotificationCenter extends UIFragment {
 
     @Override
     public void show() {
-        platform.closeThis(UIManager.getExtras());
+        platform.close(UIManager.getExtras());
         if (currentPopup != null)
             currentPopup.dismiss();
         super.show();

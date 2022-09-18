@@ -4,6 +4,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.reco1l.Scenes;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 
@@ -21,8 +22,6 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 7/7/22 01:17
-
-// Created by Reco1l on 13/9/22 01:22
 
 public class LoadingScene extends UIFragment implements IUpdateHandler {
 
@@ -45,6 +44,11 @@ public class LoadingScene extends UIFragment implements IUpdateHandler {
     @Override
     protected int getLayout() {
         return R.layout.loading_screen;
+    }
+
+    @Override
+    protected Scenes getParent() {
+        return Scenes.LOADING_SCENE;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -133,8 +137,6 @@ public class LoadingScene extends UIFragment implements IUpdateHandler {
         Sprite background = new Sprite(0, (screenHeight - H) / 2f, screenWidth, H, texture);
 
         scene.setBackground(new SpriteBackground(background));
-
-        engine.setScene(scene);
         mActivity.runOnUiThread(super::show);
     }
 

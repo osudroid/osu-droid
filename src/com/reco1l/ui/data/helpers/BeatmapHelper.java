@@ -160,7 +160,7 @@ public class BeatmapHelper implements IMainClasses {
 
     public static void loadCompressedBackground(TrackInfo track) {
         if (!bitmapManager.contains(COMPRESSED_BG_SUFFIX + track.getFilename())) {
-            Bitmap bitmap = BitmapManager.compress(BitmapFactory.decodeFile(track.getBackground()), 8);
+            Bitmap bitmap = BitmapManager.compress(BitmapFactory.decodeFile(track.getBackground()), 10);
             bitmapManager.loadBitmap(COMPRESSED_BG_SUFFIX + track.getFilename(), bitmap);
         }
     }

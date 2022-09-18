@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.reco1l.Scenes;
 import com.reco1l.ui.data.BeatmapProperty;
 import com.reco1l.ui.data.helpers.BeatmapHelper;
 import com.reco1l.ui.data.scoreboard.ScoreboardAdapter;
@@ -22,7 +23,6 @@ import com.reco1l.utils.Animation;
 import com.reco1l.utils.Resources;
 import com.reco1l.interfaces.IGameMods;
 import com.reco1l.ui.platform.UI;
-import com.reco1l.utils.listeners.TouchListener;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -89,6 +89,8 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         pHP = new BeatmapProperty<>();
     }
 
+    //--------------------------------------------------------------------------------------------//
+
     @Override
     protected int getLayout() {
         return R.layout.beatmap_panel;
@@ -97,6 +99,11 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
     @Override
     protected String getPrefix() {
         return "bp";
+    }
+
+    @Override
+    protected Scenes getParent() {
+        return Scenes.SONG_MENU;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -110,7 +117,10 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         isBannerExpanded = true;
 
         if (scoreboard == null) {
-            scoreboard = new Scoreboard(find("scoreboard"));
+            RecyclerView recyclerView = find("scoreboard");
+            if (recyclerView != null) {
+                scoreboard = new Scoreboard(recyclerView);
+            }
         }
 
         body = find("body");
@@ -140,46 +150,35 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
         message.setVisibility(View.GONE);
 
-        bindTouchListener(localTab, new TouchListener() {
-            public void onPressUp() {
-                switchTab(localTab);
-            }
-        });
-
-        bindTouchListener(globalTab, new TouchListener() {
-            public void onPressUp() {
-                switchTab(globalTab);
-            }
-        });
+        bindTouchListener(globalTab, () -> switchTab(globalTab));
+        bindTouchListener(localTab, () -> switchTab(localTab));
 
         int max = (int) GlobalManager.getInstance().getMainActivity().getResources().getDimension(R.dimen._84sdp);
 
-        bindTouchListener(find("expand"), new TouchListener() {
-            public void onPressUp() {
-                if (isBannerExpanded) {
-                    ValueAnimator anim = ValueAnimator.ofInt(max, 0);
-                    anim.setDuration(300);
-                    anim.addUpdateListener(value -> {
-                        songProperties.getLayoutParams().height = (int) value.getAnimatedValue();
-                        songProperties.requestLayout();
-                    });
-                    anim.start();
-                    isBannerExpanded = false;
-                } else {
-                    ValueAnimator anim = ValueAnimator.ofInt(0, max);
-                    anim.setDuration(300);
-                    anim.addUpdateListener(value -> {
-                        songProperties.getLayoutParams().height = (int) value.getAnimatedValue();
-                        songProperties.requestLayout();
-                    });
-                    anim.start();
-                    isBannerExpanded = true;
-                }
+        bindTouchListener(find("expand"), () -> {
+            if (isBannerExpanded) {
+                ValueAnimator anim = ValueAnimator.ofInt(max, 0);
+                anim.setDuration(300);
+                anim.addUpdateListener(value -> {
+                    songProperties.getLayoutParams().height = (int) value.getAnimatedValue();
+                    songProperties.requestLayout();
+                });
+                anim.start();
+                isBannerExpanded = false;
+            } else {
+                ValueAnimator anim = ValueAnimator.ofInt(0, max);
+                anim.setDuration(300);
+                anim.addUpdateListener(value -> {
+                    songProperties.getLayoutParams().height = (int) value.getAnimatedValue();
+                    songProperties.requestLayout();
+                });
+                anim.start();
+                isBannerExpanded = true;
             }
         });
 
         pStars.view = find("stars");
-        pStars.format = val -> GameHelper.Round((float) val, 2);
+        pStars.format = val -> GameHelper.Round(val, 2);
         pStars.allowColorChange = false;
 
         pBPM.view = find("bpm");
@@ -195,10 +194,10 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         pCS.view = find("cs");
         pHP.view = find("hp");
 
-        pAR.format = val -> GameHelper.Round((float) val, 2);
-        pOD.format = val -> GameHelper.Round((float) val, 2);
-        pCS.format = val -> GameHelper.Round((float) val, 2);
-        pHP.format = val -> GameHelper.Round((float) val, 2);
+        pAR.format = val -> GameHelper.Round(val, 2);
+        pOD.format = val -> GameHelper.Round(val, 2);
+        pCS.format = val -> GameHelper.Round(val, 2);
+        pHP.format = val -> GameHelper.Round(val, 2);
 
         updateProperties(track);
         switchTab(localTab);
@@ -328,13 +327,16 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
             mapper.setText(track.getCreator());
             difficulty.setText(track.getMode());
 
+            View gradient = find("gradient");
+            if (gradient != null) {
+                gradient.setAlpha(track.getBackground() != null ? 1 : 0);
+            }
+
             if (track.getBackground() != null) {
                 songBackground.setVisibility(View.VISIBLE);
                 songBackground.setImageDrawable(BeatmapHelper.getBackground(track));
-                find("gradient").setAlpha(1);
             } else {
                 songBackground.setVisibility(View.INVISIBLE);
-                find("gradient").setAlpha(0);
             }
 
             pStars.update();

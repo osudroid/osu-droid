@@ -9,7 +9,6 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.fragment.WebViewFragment;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.reco1l.Scenes;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.ui.platform.UIManager;
 import com.reco1l.utils.Animation;
@@ -41,11 +40,6 @@ public class UserProfile extends UIFragment {
     @Override
     protected String getPrefix() {
         return "UC";
-    }
-
-    @Override
-    protected Scenes getParentScene() {
-        return null;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -112,7 +106,7 @@ public class UserProfile extends UIFragment {
         rank.setText(String.format("#%d", online.getRank()));
 
         new Animation().ofFloat(0, online.getAccuracy() * 100f)
-                .runOnUpdate(val -> accuracy.setText(String.format("%.2f%%", (Float) val.getAnimatedValue())))
+                .runOnUpdate(val -> accuracy.setText(String.format("%.2f%%", (float) val.getAnimatedValue())))
                 .interpolator(Easing.OutExpo)
                 .cancelPending(false)
                 .delay(200)
@@ -144,7 +138,7 @@ public class UserProfile extends UIFragment {
 
     @Override
     public void show() {
-        platform.closeThis(UIManager.getExtras());
+        platform.close(UIManager.getExtras());
         super.show();
     }
 

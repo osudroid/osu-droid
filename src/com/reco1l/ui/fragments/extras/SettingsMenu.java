@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.EditTextPreference;
@@ -22,7 +21,6 @@ import com.reco1l.ui.custom.DialogBuilder;
 import com.reco1l.ui.data.tables.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.ViewTouchHandler;
 import com.reco1l.utils.Resources;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
@@ -178,7 +176,7 @@ public class SettingsMenu extends UIFragment {
         onlineHelper.update();
         OnlineScoring.getInstance().login();
 
-        if (reloadBackground && engine.currentScene == Scenes.MAIN_MENU) {
+        if (reloadBackground && engine.currentScene == Scenes.MAIN_SCENE) {
             global.getMainScene().loadTimeingPoints(false);
             reloadBackground = false;
         }

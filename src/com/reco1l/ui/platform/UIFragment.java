@@ -25,14 +25,15 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 22/6/22 02:26
-// Based on the EdrowsLuo BaseFragment class :)
 
 public abstract class UIFragment extends Fragment implements IMainClasses, UI {
 
     public boolean isShowing = false;
 
     protected View rootView, rootBackground;
-    protected boolean isDismissOnBackgroundPress = false,
+
+    protected boolean
+            isDismissOnBackgroundPress = false,
             isDismissOnBackPress = true,
             isLoaded = false;
 
@@ -40,20 +41,30 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
     protected int screenHeight = Config.getRES_HEIGHT();
 
     protected final Map<View, ViewTouchHandler> registeredViews;
-
     private final Runnable close = this::close;
 
     //--------------------------------------------------------------------------------------------//
 
     public UIFragment() {
         registeredViews = new HashMap<>();
+        if (getParent() != null) {
+            platform.assignToScene(getParent(), this);
+        }
+        if (getParents() != null) {
+            for (Scenes scene : getParents()) {
+                platform.assignToScene(scene, this);
+            }
+        }
     }
 
+    // To override
     //--------------------------------------------------------------------------------------------//
     /**
      * Runs once the layout XML is inflated.
      */
     protected abstract void onLoad();
+
+    protected void onSceneChange(Scenes oldScene, Scenes newScene) { }
 
     /**
      * Simplifies the way views are got with the method {@link #find(String)}, every layout XML file have an
@@ -64,10 +75,16 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
 
     /**
      * Defines which scene the fragment belongs to.
-     * <p>Note: If you set it to <code>null</code> it will gonna be added to the main container
-     * (use this only in extras or dialogs)</p>
      */
-    protected Scenes getParentScene() { return null; }
+    protected Scenes getParent() { return null; }
+
+    /**
+     * Does the same that {@link #getParent()} but in this case this is intended to those fragments
+     * that belongs from multiple scenes.
+     * <p>Note: in case the fragment is intended to show on every scene (like overlays) you can
+     * return <code>Scenes.values()</code></p>
+     */
+    protected Scenes[] getParents() { return null; }
 
     /**
      * Sets the time of inactivity that need to be reached to close the fragment.
@@ -135,12 +152,7 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
             return;
         isLoaded = false;
         String tag = this.getClass().getName() + "@" + this.hashCode();
-
-        if (getParentScene() != null) {
-            platform.addSceneFragment(getParentScene(), this, tag);
-        } else {
-            platform.addFragment(this, tag);
-        }
+        platform.addFragment(this, tag);
         isShowing = true;
         System.gc();
     }
@@ -148,7 +160,7 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
     /**
      * If the layout is showing then dismiss it, otherwise shows it.
      */
-    public void altShow() {
+    public final void altShow() {
         if (isShowing) {
             close();
         } else {
@@ -163,7 +175,7 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
      * @param onBackPress allows the user dismiss the fragment when the back button is pressed.
      *                    <p> default value is: <code>true</code>.
      */
-    protected void setDismissMode(boolean onBackgroundPress, boolean onBackPress) {
+    protected final void setDismissMode(boolean onBackgroundPress, boolean onBackPress) {
         isDismissOnBackgroundPress = onBackgroundPress;
         isDismissOnBackPress = onBackPress;
     }
@@ -211,7 +223,7 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
     /**
      * Simple method to check nullability of multiples views at once.
      */
-    protected boolean isNull(View... views) {
+    protected final boolean isNull(View... views) {
         for (View view: views) {
             if (view == null)
                 return true;
@@ -232,7 +244,7 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
         }
     }
 
-    protected void unbindTouchListener(View view) {
+    protected final void unbindTouchListener(View view) {
         if (view == null)
             return;
 
@@ -242,7 +254,7 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
         }
     }
 
-    protected void bindTouchListener(View view, Runnable onSingleTapUp) {
+    protected final void bindTouchListener(View view, Runnable onSingleTapUp) {
         bindTouchListener(view, new TouchListener() {
             public void onPressUp() {
                 onSingleTapUp.run();
@@ -250,7 +262,7 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
         });
     }
 
-    protected void bindTouchListener(View view, TouchListener listener) {
+    protected final void bindTouchListener(View view, TouchListener listener) {
         ViewTouchHandler touchHandler = registeredViews.get(view);
         if (touchHandler == null) {
             touchHandler = new ViewTouchHandler(listener);
@@ -262,13 +274,13 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
         touchHandler.apply(view);
     }
 
-    protected void unbindTouchListeners() {
+    protected final void unbindTouchListeners() {
         for (View view : registeredViews.keySet()) {
             view.setOnTouchListener(null);
         }
     }
 
-    protected void rebindTouchListeners() {
+    protected final void rebindTouchListeners() {
         for (View view : registeredViews.keySet()) {
             ViewTouchHandler touchHandler = registeredViews.get(view);
             if (touchHandler != null) {

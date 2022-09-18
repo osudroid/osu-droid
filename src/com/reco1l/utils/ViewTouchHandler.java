@@ -2,12 +2,16 @@ package com.reco1l.utils;
 
 import static android.view.MotionEvent.*;
 
+import static com.reco1l.interfaces.IMainClasses.platform;
+
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -36,6 +40,7 @@ public class ViewTouchHandler {
 
     private Handler handler;
     private Runnable longPress;
+    private Vibrator vibrator;
 
     private boolean isLongPressActioned = false;
 
@@ -43,11 +48,15 @@ public class ViewTouchHandler {
 
     public ViewTouchHandler(TouchListener listener) {
         this.listener = listener;
-
+        this.vibrator = (Vibrator) platform.context.getSystemService(Context.VIBRATOR_SERVICE);
         this.handler = new Handler();
+
         this.longPress = () -> {
             this.isLongPressActioned = true;
             this.listener.onLongPress();
+            if (vibrator != null) {
+                vibrator.vibrate(50);
+            }
             Log.i("ViewTouchHandler", "onLongPress() actioned");
         };
     }
@@ -73,6 +82,7 @@ public class ViewTouchHandler {
                     downAnim.start();
                 }
                 break;
+            case ACTION_CANCEL:
             case ACTION_UP:
                 if (upAnim != null) {
                     upAnim.start();

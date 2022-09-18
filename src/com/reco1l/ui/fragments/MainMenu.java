@@ -14,6 +14,7 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 import com.edlplan.ui.TriangleEffectView;
+import com.reco1l.Scenes;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.data.tables.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
@@ -21,8 +22,6 @@ import com.reco1l.utils.Animation;
 import com.reco1l.utils.Resources;
 import com.reco1l.ui.platform.UI;
 import com.reco1l.utils.listeners.TouchListener;
-
-import org.anddev.andengine.util.Debug;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.MainScene;
@@ -64,6 +63,9 @@ public class MainMenu extends UIFragment {
         triangleSpeedDown = ValueAnimator.ofFloat(8f, 1f);
     }
 
+    //--------------------------------------------------------------------------------------------//
+
+
     @Override
     protected String getPrefix() {
         return "mainM";
@@ -72,6 +74,11 @@ public class MainMenu extends UIFragment {
     @Override
     protected int getLayout() {
         return R.layout.main_menu;
+    }
+
+    @Override
+    protected Scenes getParent() {
+        return Scenes.MAIN_SCENE;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -190,7 +197,7 @@ public class MainMenu extends UIFragment {
 
     private final OsuAsyncCallback asyncCallback = new OsuAsyncCallback() {
         public void run() {
-            UI.loadingScene.show();
+            engine.setScene(loadingScene.scene);
             mActivity.checkNewSkins();
             mActivity.checkNewBeatmaps();
             if (!library.loadLibraryCache(mActivity, true)) {
