@@ -3,13 +3,13 @@ package com.reco1l.ui.fragments;
 import android.animation.ValueAnimator;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -46,8 +46,11 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class BeatmapPanel extends UIFragment implements IGameMods {
 
+    public boolean isOnlineBoard = false;
+
     private int bodyWidth;
-    private LinearLayout banner, songProperties;
+    private CardView banner;
+    private LinearLayout songProperties;
 
     private ImageView songBackground;
     private View body, message, pageContainer, tabIndicator;
@@ -68,7 +71,6 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
     // End
 
     private Scoreboard scoreboard;
-    public boolean isOnlineBoard = false;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -113,7 +115,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
         track = global.getSelectedTrack();
 
-        bodyWidth = (int) Resources.dimen(R.dimen.beatmapPanelWidth);
+        bodyWidth = (int) Resources.dimen(R.dimen.beatmapPanelContentWidth);
         isBannerExpanded = true;
 
         if (scoreboard == null) {
@@ -181,7 +183,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         pStars.format = val -> GameHelper.Round(val, 2);
         pStars.allowColorChange = false;
 
-        pBPM.view = find("bpm");
+        pBPM.view = find("beatspersecond");
         pLength.view = find("length");
 
         pCombo.view = find("combo");
@@ -316,7 +318,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
             new Thread(() -> {
                 DifficultyReCalculator math = new DifficultyReCalculator();
                 pStars.value = math.recalculateStar(track, math.getCS(track), modMenu.getSpeed());
-                pStars.update();
+                mActivity.runOnUiThread(pStars::update);
             }).start();
 
             if (!isShowing)
@@ -357,12 +359,12 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
                     .cancelPending(false)
                     .play(500);
 
-            final int bannerColor = ((ColorDrawable) banner.getBackground()).getColor();
+            final int bannerColor = banner.getCardBackgroundColor().getDefaultColor();
             final int mapperColor = mapper.getBackgroundTintList().getDefaultColor();
 
             new Animation(banner)
                     .ofArgb(bannerColor, BeatmapHelper.getDifficultyBackgroundColor(pStars.value))
-                    .runOnUpdate(val -> banner.setBackgroundColor((int) val.getAnimatedValue()))
+                    .runOnUpdate(val -> banner.setCardBackgroundColor((int) val.getAnimatedValue()))
                     .play(500);
 
             new Animation(pStars.view)

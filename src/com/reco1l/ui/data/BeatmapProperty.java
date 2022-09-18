@@ -150,7 +150,6 @@ public class BeatmapProperty<T extends Number> {
         private final BeatmapProperty<Float> max;
 
         private float minValue, maxValue;
-        private State minState;
 
         //----------------------------------------------------------------------------------------//
 
@@ -158,7 +157,6 @@ public class BeatmapProperty<T extends Number> {
             min = new BeatmapProperty<Float>() {
                 protected void onUpdate(Float value, State state) {
                     minValue = value;
-                    minState = state;
                 }
             };
 
@@ -168,8 +166,8 @@ public class BeatmapProperty<T extends Number> {
                 }
             };
 
-            min.format = value -> GameHelper.Round((float) value, 1);
-            max.format = value -> GameHelper.Round((float) value, 1);
+            min.format = value -> GameHelper.Round(value, 1);
+            max.format = value -> GameHelper.Round(value, 1);
         }
 
         //----------------------------------------------------------------------------------------//
@@ -188,11 +186,15 @@ public class BeatmapProperty<T extends Number> {
             min.update();
             max.update();
 
-            if (view != null) {
-                view.setText(minValue + "-" + maxValue);
+            if (view == null)
+                return;
+            view.setText(minValue + "-" + maxValue);
+
+            if (min.state != null) {
+                view.setTextColor(min.state.color);
 
                 if (view.getCompoundDrawablesRelative()[0] != null) {
-                    view.getCompoundDrawablesRelative()[0].setTint(minState.color);
+                    view.getCompoundDrawablesRelative()[0].setTint(min.state.color);
                 }
             }
         }

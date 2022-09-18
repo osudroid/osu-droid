@@ -4,14 +4,14 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:background="#FFF"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:background="#FFF">
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/bl_itemBody"
+        android:id="@+id/bl_item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="@dimen/XXS"
@@ -21,42 +21,8 @@
         app:cardCornerRadius="@dimen/globalCorners">
 
         <RelativeLayout
-            android:id="@+id/bl_trackLayout"
             android:layout_width="match_parent"
             android:layout_height="@dimen/beatmapListItemHeight">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center|left"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/bl_stars"
-                    style="@style/propertyBadge"
-                    android:layout_marginStart="@dimen/M"
-                    android:drawableStart="@drawable/v_star_xs"
-                    android:text="00.00" />
-
-                <TextView
-                    android:id="@+id/bl_difficulty"
-                    style="@style/text"
-                    android:layout_width="match_parent"
-                    android:layout_marginLeft="@dimen/S"
-                    android:layout_marginRight="@dimen/XXL"
-                    android:paddingLeft="@dimen/XXS"
-                    android:maxLines="2"
-                    android:text="difficulty" />
-
-            </LinearLayout>
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/bl_beatmapLayout"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/beatmapListItemHeight"
-            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/bl_songBackground"
@@ -115,5 +81,13 @@
         </RelativeLayout>
 
     </androidx.cardview.widget.CardView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/bl_trackList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/M"
+        tools:itemCount="3"
+        tools:listitem="@layout/beatmap_list_child_item" />
 
 </LinearLayout>

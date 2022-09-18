@@ -12,6 +12,8 @@ import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
 import com.edlplan.ui.fragment.InGameSettingMenu;
+import com.reco1l.interfaces.IMainClasses;
+import com.reco1l.ui.platform.UI;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -707,6 +709,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             public void onComplete() {
                 if (loadComplete == true) {
+                    IMainClasses.mActivity.runOnUiThread(UI.loadingScene::close);
                     prepareScene();
                 } else {
                     ModMenu.getInstance().setMod(Replay.oldMod);

@@ -15,11 +15,22 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent">
 
+        <View
+            android:layout_width="@dimen/beatmapPanelContentWidth"
+            android:layout_height="match_parent"
+            android:background="@color/beatmapPanelBackground"/>
+
+        <View
+            android:layout_width="@dimen/verticalShadowWidth"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/beatmapPanelContentWidth"
+            android:alpha="0.2"
+            android:background="@drawable/shadow_vertical" />
+
         <androidx.core.widget.NestedScrollView
             android:id="@+id/bp_panel"
-            android:layout_width="@dimen/beatmapPanelWidth"
-            android:layout_height="match_parent"
-            android:background="@color/beatmapPanelBackground">
+            android:layout_width="@dimen/beatmapPanelBannerWidth"
+            android:layout_height="match_parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -69,7 +80,7 @@
 
                 <LinearLayout
                     android:id="@+id/bp_pageContainer"
-                    android:layout_width="match_parent"
+                    android:layout_width="@dimen/beatmapPanelContentWidth"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
@@ -102,7 +113,7 @@
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/bp_scoreboard"
                         android:visibility="gone"
-                        android:layout_width="match_parent"
+                        android:layout_width="@dimen/beatmapPanelContentWidth"
                         android:layout_height="wrap_content"
                         tool:listitem="@layout/scoreboard_item"/>
 
@@ -111,13 +122,6 @@
             </LinearLayout>
 
         </androidx.core.widget.NestedScrollView>
-
-        <View
-            android:layout_width="@dimen/verticalShadowWidth"
-            android:layout_height="match_parent"
-            android:layout_toRightOf="@id/bp_panel"
-            android:alpha="0.2"
-            android:background="@drawable/shadow_vertical" />
 
     </RelativeLayout>
 

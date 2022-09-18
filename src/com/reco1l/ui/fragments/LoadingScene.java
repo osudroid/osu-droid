@@ -65,6 +65,13 @@ public class LoadingScene extends UIFragment implements IUpdateHandler {
     }
 
     @Override
+    protected void onSceneChange(Scenes oldScene, Scenes newScene) {
+        if (newScene != Scenes.LOADING_SCENE) {
+            close();
+        }
+    }
+
+    @Override
     protected void onLoad() {
         setDismissMode(false, false);
 

@@ -145,7 +145,8 @@
     <dimen name="dialogButtonElevation">@dimen/_4sdp</dimen>
     
     <!--Beatmap Panel-->
-    <dimen name="beatmapPanelWidth">@dimen/_240sdp</dimen>
+    <dimen name="beatmapPanelContentWidth">@dimen/_240sdp</dimen>
+    <dimen name="beatmapPanelBannerWidth">@dimen/_270sdp</dimen>
     <dimen name="beatmapPanelPropertiesLayoutHeight">@dimen/_80sdp</dimen>
     <dimen name="beatmapPanelExpandButtonSize">@dimen/_26sdp</dimen>
     <dimen name="beatmapPanelTabButtonWidth">@dimen/_111sdp</dimen>
@@ -161,6 +162,7 @@
     <!--Beatmap List-->
     <dimen name="beatmapListLeftMargin">@dimen/_40sdp</dimen>
     <dimen name="beatmapListItemHeight">@dimen/_52sdp</dimen>
+    <dimen name="beatmapListChildItemHeight">@dimen/_42sdp</dimen>
     <dimen name="beatmapListTrackLeftMargin">@dimen/_50sdp</dimen>
 
 </resources>
