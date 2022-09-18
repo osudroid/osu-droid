@@ -45,6 +45,8 @@ public class Animation implements IMainClasses {
     private boolean cancelPendingAnimations = true;
     private Interpolate interpolatorMode = Interpolate.BOTH;
 
+    //--------------------------------------------------------------------------------------------//
+
     public enum Interpolate {
         PROPERTY_ANIMATOR,
         VALUE_ANIMATOR,
@@ -91,44 +93,56 @@ public class Animation implements IMainClasses {
     // ValueAnimator based animations
     //--------------------------------------------------------------------------------------------//
 
-    public static class ValueAnimation {
+    @FunctionalInterface
+    public interface ValueAnimationListener<T extends Number> {
+        void onUpdate(T value);
+    }
+
+    public static class ValueAnimation <T extends Number> {
 
         private final ValueAnimator valueAnimator;
         private final Animation instance;
+
+        //----------------------------------------------------------------------------------------//
 
         public ValueAnimation(ValueAnimator valueAnimator, Animation instance) {
             this.valueAnimator = valueAnimator;
             this.instance = instance;
         }
 
-        public ValueAnimation interpolator(Easing interpolator) {
+        //----------------------------------------------------------------------------------------//
+
+        public ValueAnimation<T> interpolator(Easing interpolator) {
             valueAnimator.setInterpolator(EasingHelper.asInterpolator(interpolator));
             return this;
         }
 
-        public Animation runOnUpdate(AnimatorUpdateListener onUpdate) {
+        @SuppressWarnings("unchecked")
+        public Animation runOnUpdate(ValueAnimationListener<T> listener) {
             valueAnimator.removeAllUpdateListeners();
-            valueAnimator.addUpdateListener(onUpdate);
+            valueAnimator.addUpdateListener(val -> listener.onUpdate((T) val.getAnimatedValue()));
             return instance;
         }
     }
 
-    public ValueAnimation ofInt(int from, int to) {
+    //--------------------------------------------------------------------------------------------//
+
+    public ValueAnimation<Integer> ofInt(int from, int to) {
         ValueAnimator valueAnimator = ValueAnimator.ofInt(from, to);
         valueAnimators.add(valueAnimator);
-        return new ValueAnimation(valueAnimator, this);
+        return new ValueAnimation<>(valueAnimator, this);
     }
 
-    public ValueAnimation ofFloat(float from, float to) {
+    public ValueAnimation<Float> ofFloat(float from, float to) {
         ValueAnimator valueAnimator = ValueAnimator.ofFloat(from, to);
         valueAnimators.add(valueAnimator);
-        return new ValueAnimation(valueAnimator, this);
+        return new ValueAnimation<>(valueAnimator, this);
     }
 
-    public ValueAnimation ofArgb(int from, int to) {
+    public ValueAnimation<Integer> ofArgb(int from, int to) {
         ValueAnimator valueAnimator = ValueAnimator.ofArgb(from, to);
         valueAnimators.add(valueAnimator);
-        return new ValueAnimation(valueAnimator, this);
+        return new ValueAnimation<>(valueAnimator, this);
     }
 
     // Size

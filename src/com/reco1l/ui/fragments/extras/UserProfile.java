@@ -106,14 +106,14 @@ public class UserProfile extends UIFragment {
         rank.setText(String.format("#%d", online.getRank()));
 
         new Animation().ofFloat(0, online.getAccuracy() * 100f)
-                .runOnUpdate(val -> accuracy.setText(String.format("%.2f%%", (float) val.getAnimatedValue())))
+                .runOnUpdate(val -> accuracy.setText(String.format("%.2f%%", val)))
                 .interpolator(Easing.OutExpo)
                 .cancelPending(false)
                 .delay(200)
                 .play(1000);
 
         new Animation().ofInt(0, (int) (online.getAccuracy() * 100))
-                .runOnUpdate(val -> accuracyBar.setProgress((int) val.getAnimatedValue()))
+                .runOnUpdate(accuracyBar::setProgress)
                 .interpolator(Easing.OutExpo)
                 .cancelPending(false)
                 .delay(200)

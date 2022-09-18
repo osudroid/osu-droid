@@ -2,6 +2,7 @@ package com.reco1l.ui.data;
 
 // Created by Reco1l on 16/9/22 18:46
 
+import android.graphics.drawable.Drawable;
 import android.widget.TextView;
 
 import com.reco1l.utils.Resources;
@@ -59,6 +60,7 @@ public class BeatmapProperty<T extends Number> {
 
     //--------------------------------------------------------------------------------------------//
 
+    // Only supports Float, Integer and Long values, but you can add support for Double and Short values
     private Evaluator getEvaluator() {
         if (value instanceof Float) {
             return new Evaluator() {
@@ -125,9 +127,6 @@ public class BeatmapProperty<T extends Number> {
     }
 
     public void update() {
-        if (view == null)
-            return;
-
         if (allowColorChange) {
             state = getState();
         }

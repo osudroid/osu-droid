@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.edlplan.framework.math.FMath;
 import com.reco1l.Scenes;
 import com.reco1l.ui.data.beatmaps.BeatmapListAdapter;
+import com.reco1l.ui.data.beatmaps.TrackListAdapter;
 import com.reco1l.ui.platform.UIFragment;
 
 import java.util.ArrayList;
@@ -23,10 +24,12 @@ public class BeatmapList extends UIFragment {
 
     public List<BeatmapInfo> beatmaps = new ArrayList<>();
 
-    public BeatmapListAdapter.VH selectedHolder;
+    public BeatmapListAdapter.VH selectedBeatmapHolder;
+    public TrackListAdapter.VH selectedTrackHolder;
+
     public BeatmapInfo selectedBeatmap;
     public TrackInfo selectedTrack;
-    public RecyclerView selectedTrackList;
+    public RecyclerView trackList;
 
     private RecyclerView recyclerView;
 
@@ -57,7 +60,7 @@ public class BeatmapList extends UIFragment {
 
             if (holder.beatmap.getPath().equals(beatmap.getPath())) {
                 holder.select();
-                recyclerView.scrollToPosition(recyclerView.getChildLayoutPosition(child));
+                recyclerView.scrollToPosition(recyclerView.getChildAdapterPosition(child));
                 break;
             }
             i++;
@@ -83,6 +86,11 @@ public class BeatmapList extends UIFragment {
         if (selectedBeatmap == null || !selectedBeatmap.getPath().equals(track.getBeatmap().getPath())) {
             navigate(track.getBeatmap());
         }
+
+        if (selectedBeatmapHolder != null) {
+            selectedBeatmapHolder.navigateTrack(track);
+        }
+
         this.selectedBeatmap = track.getBeatmap();
         this.selectedTrack = track;
         global.getSongMenu().selectTrack(track, true);
@@ -92,20 +100,13 @@ public class BeatmapList extends UIFragment {
         if (!isShowing)
             return;
 
-        if (selectedTrackList != null) {
-            handleCarrouselEffect(selectedTrackList);
-        }
         if (recyclerView != null) {
-            handleCarrouselEffect(recyclerView);
-        }
-    }
+            for(int i = 0; i < recyclerView.getChildCount(); ++i) {
+                View child = recyclerView.getChildAt(i);
 
-    private void handleCarrouselEffect(RecyclerView rv) {
-        for(int i = 0; i < rv.getChildCount(); ++i) {
-            View child = rv.getChildAt(i);
-
-            if (child != null) {
-                mActivity.runOnUiThread(() -> child.setTranslationX(computeTranslationX(child)));
+                if (child != null) {
+                    mActivity.runOnUiThread(() -> child.setTranslationX(computeTranslationX(child)));
+                }
             }
         }
     }
@@ -133,12 +134,13 @@ public class BeatmapList extends UIFragment {
         loadBeatmaps();
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-        this.selectedTrack = global.getMainScene().selectedTrack;
-        setSelected(global.getMainScene().getBeatmapInfo());
+        recyclerView.post(() -> setSelected(global.getMainScene().getBeatmapInfo()));
     }
 
     @Override
     public void close() {
+        selectedBeatmapHolder = null;
+        selectedTrackHolder = null;
         super.close();
     }
 }

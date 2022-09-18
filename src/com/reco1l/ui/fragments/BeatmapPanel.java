@@ -1,45 +1,29 @@
 package com.reco1l.ui.fragments;
 
 import android.animation.ValueAnimator;
-import android.database.Cursor;
-import android.graphics.Color;
-import android.os.AsyncTask;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.reco1l.Scenes;
 import com.reco1l.ui.data.BeatmapProperty;
-import com.reco1l.ui.data.helpers.BeatmapHelper;
-import com.reco1l.ui.data.scoreboard.ScoreboardAdapter;
-import com.reco1l.ui.data.scoreboard.ScoreboardItem;
+import com.reco1l.utils.helpers.BeatmapHelper;
+import com.reco1l.ui.data.scoreboard.Scoreboard;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Resources;
 import com.reco1l.interfaces.IGameMods;
-import com.reco1l.ui.platform.UI;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
-import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
-import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
-import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 13/9/22 01:22
@@ -54,7 +38,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
     private ImageView songBackground;
     private View body, message, pageContainer, tabIndicator;
-    private TextView localTab, globalTab, propertiesTab, messageText;
+    private TextView localTab, globalTab, messageText;
 
     private boolean
             isTabAnimInProgress = false,
@@ -72,10 +56,11 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
     private Scoreboard scoreboard;
 
+    private float lastDifficulty = -1;
+
     //--------------------------------------------------------------------------------------------//
 
     public BeatmapPanel() {
-
         pBPM = new BeatmapProperty.BPM();
         pLength = new BeatmapProperty.Length();
 
@@ -114,16 +99,13 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         setDismissMode(false, false);
 
         track = global.getSelectedTrack();
-
         bodyWidth = (int) Resources.dimen(R.dimen.beatmapPanelContentWidth);
         isBannerExpanded = true;
 
         if (scoreboard == null) {
-            RecyclerView recyclerView = find("scoreboard");
-            if (recyclerView != null) {
-                scoreboard = new Scoreboard(recyclerView);
-            }
+            scoreboard = new Scoreboard();
         }
+        scoreboard.setContainer(find("scoreboard"));
 
         body = find("body");
 
@@ -147,7 +129,6 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
         localTab = find("localTab");
         globalTab = find("globalTab");
-        propertiesTab = find("propertiesTab");
         tabIndicator = find("tabIndicator");
 
         message.setVisibility(View.GONE);
@@ -302,7 +283,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
     public void updateProperties(TrackInfo track) {
         this.track = track;
-        if (track == null || !isLoaded)
+        if (track == null || !isLoaded )
             return;
 
         mActivity.runOnUiThread(() -> {
@@ -329,16 +310,13 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
             mapper.setText(track.getCreator());
             difficulty.setText(track.getMode());
 
-            View gradient = find("gradient");
-            if (gradient != null) {
-                gradient.setAlpha(track.getBackground() != null ? 1 : 0);
-            }
-
             if (track.getBackground() != null) {
                 songBackground.setVisibility(View.VISIBLE);
                 songBackground.setImageDrawable(BeatmapHelper.getBackground(track));
+                find("gradient").setAlpha(1);
             } else {
                 songBackground.setVisibility(View.INVISIBLE);
+                find("gradient").setAlpha(0);
             }
 
             pStars.update();
@@ -347,32 +325,43 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
             pSliders.update();
             pCombo.update();
 
-            final int current = pStars.view.getBackgroundTintList().getDefaultColor();
+            int darkerColor = BeatmapHelper.Palette.getDarkerColor(pStars.value);
+            int textColor = BeatmapHelper.Palette.getTextColor(pStars.value);
+            int color = BeatmapHelper.Palette.getColor(pStars.value);
 
-            float[] color = new float[3];
-            Color.colorToHSV(BeatmapHelper.getDifficultyColor(pStars.value), color);
+            if (lastDifficulty == -1) {
+                pStars.view.getBackground().setTint(color);
+                pStars.view.setTextColor(textColor);
+                banner.setCardBackgroundColor(darkerColor);
 
-            new Animation(pStars.view)
-                    .ofArgb(current, BeatmapHelper.getDifficultyColor(pStars.value))
-                    .runOnUpdate(val -> pStars.view.getBackground().setTint((int) val.getAnimatedValue()))
-                    .runOnStart(pStars::update)
-                    .cancelPending(false)
+                lastDifficulty = pStars.value;
+                return;
+            }
+
+            int lastDarkerColor = BeatmapHelper.Palette.getDarkerColor(lastDifficulty);
+            int lastTextColor = BeatmapHelper.Palette.getTextColor(lastDifficulty);
+            int lastColor = BeatmapHelper.Palette.getColor(lastDifficulty);
+            lastDifficulty = pStars.value;
+
+            new Animation().ofArgb(lastTextColor, textColor)
+                    .runOnUpdate(value -> {
+                        pStars.view.setTextColor(value);
+                        if (pStars.view.getCompoundDrawablesRelative()[0] != null) {
+                            pStars.view.getCompoundDrawablesRelative()[0].setTint(value);
+                        }
+                    }).play(500);
+
+            new Animation().ofArgb(lastColor, color)
+                    .runOnUpdate(value -> pStars.view.getBackground().setTint(value))
                     .play(500);
 
-            final int bannerColor = banner.getCardBackgroundColor().getDefaultColor();
-            final int mapperColor = mapper.getBackgroundTintList().getDefaultColor();
-
-            new Animation(banner)
-                    .ofArgb(bannerColor, BeatmapHelper.getDifficultyBackgroundColor(pStars.value))
-                    .runOnUpdate(val -> banner.setCardBackgroundColor((int) val.getAnimatedValue()))
+            new Animation(banner).ofArgb(lastDarkerColor, darkerColor)
+                    .runOnUpdate(value -> {
+                        banner.setCardBackgroundColor(value);
+                        mapper.getBackground().setTint(value);
+                    })
+                    .cancelPending(true)
                     .play(500);
-
-            new Animation(pStars.view)
-                    .ofArgb(mapperColor, BeatmapHelper.getDifficultyBackgroundColor(pStars.value))
-                    .runOnUpdate(val -> mapper.getBackground().setTint((int) val.getAnimatedValue()))
-                    .cancelPending(false)
-                    .play(500);
-
         });
     }
 
@@ -393,13 +382,6 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
                 .play(200);
 
         pageContainer.postDelayed(() -> {
-            if (button == propertiesTab) {
-                scoreboard.setVisibility(false);
-                message.setVisibility(View.GONE);
-                return;
-            }
-
-            scoreboard.setVisibility(true);
             isOnlineBoard = button == globalTab;
             updateScoreboard();
         }, 200);
@@ -425,6 +407,8 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
     public void close() {
         if (!isShowing)
             return;
+        scoreboard.setContainer(null);
+
         new Animation(body).moveX(0, -bodyWidth)
                 .marginTop((int) Resources.dimen(R.dimen.topBarHeight), 0)
                 .fade(1, 0)
@@ -435,180 +419,9 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
     //--------------------------------------------------------------------------------------------//
     // Temporal workaround until DuringGameScoreBoard gets replaced (old UI)
 
-    public ScoreboardItem[] getBoard() {
-        return scoreboard.boardScores.toArray(new ScoreboardItem[0]);
+    public Scoreboard.Item[] getBoard() {
+        return scoreboard.boardScores.toArray(new Scoreboard.Item[0]);
     }
 
     //--------------------------------------------------------------------------------------------//
-
-    public static class Scoreboard implements UI {
-
-        private final RecyclerView container;
-        private final ScoreboardAdapter adapter;
-        private final List<ScoreboardItem> boardScores;
-
-        private AsyncTask<OsuAsyncCallback, Integer, Boolean> loadingTask;
-        private Cursor currentCursor;
-
-        public String errorMessage;
-
-        //----------------------------------------------------------------------------------------//
-
-        public Scoreboard(RecyclerView container) {
-            this.container = container;
-
-            boardScores = new ArrayList<>();
-            adapter = new ScoreboardAdapter(boardScores);
-
-            container.setLayoutManager(new LinearLayoutManager(beatmapPanel.getContext(), LinearLayoutManager.VERTICAL, true));
-            container.setAdapter(adapter);
-            container.setNestedScrollingEnabled(false);
-        }
-
-        //----------------------------------------------------------------------------------------//
-
-        public void setVisibility(boolean bool) {
-            container.setVisibility(bool ? View.VISIBLE : View.GONE);
-        }
-
-        public void clear() {
-            errorMessage = null;
-            if (loadingTask != null && loadingTask.getStatus() != AsyncTask.Status.FINISHED) {
-                loadingTask.cancel(true);
-                loadingTask = null;
-            }
-            if (currentCursor != null) {
-                currentCursor.close();
-                currentCursor = null;
-            }
-            boardScores.clear();
-            if (beatmapPanel.isShowing) {
-                adapter.notifyDataSetChanged();
-            }
-        }
-
-        public boolean loadScores(TrackInfo track, boolean fromOnline) {
-            clear();
-            return fromOnline ? loadOnlineBoard(track) : loadLocalBoard(track);
-        }
-
-        // From offline
-        //----------------------------------------------------------------------------------------//
-        private boolean loadLocalBoard(TrackInfo track) {
-            if (track == null)
-                return false;
-
-            String[] columns = {"id", "playername", "score", "combo", "mark", "accuracy", "mode"};
-            Cursor cursor = ScoreLibrary.getInstance().getMapScores(columns, track.getFilename());
-            currentCursor = cursor;
-
-            if (cursor.getCount() == 0) {
-                cursor.close();
-                errorMessage = Resources.str(R.string.beatmap_panel_empty_prompt);
-                return false;
-            }
-            cursor.moveToFirst();
-
-            loadingTask = new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-                @Override
-                public void run() {
-                    long lastScore = 0;
-
-                    for (int i = cursor.getCount() - 1; i >= 0; i--) {
-                        cursor.moveToPosition(i);
-                        ScoreboardItem item = new ScoreboardItem();
-
-                        long currentScore = cursor.getLong(cursor.getColumnIndexOrThrow("score"));
-
-                        item.rank = "" + i + 1;
-                        item.mark = cursor.getString(cursor.getColumnIndexOrThrow("mark"));
-                        item.name = cursor.getString(cursor.getColumnIndexOrThrow("playername"));
-
-                        item.setDifference(currentScore - lastScore);
-                        item.setCombo(cursor.getInt(cursor.getColumnIndexOrThrow("combo")));
-                        item.setScore(cursor.getLong(cursor.getColumnIndexOrThrow("score")));
-                        item.setMods(cursor.getString(cursor.getColumnIndexOrThrow("mode")));
-                        item.setAccuracy(cursor.getFloat(cursor.getColumnIndexOrThrow("accuracy")));
-
-                        lastScore = currentScore;
-                        boardScores.add(item);
-                    }
-                }
-
-                @Override
-                public void onComplete() {
-                    cursor.close();
-                    currentCursor = null;
-                    if (beatmapPanel.isShowing) {
-                        adapter.notifyDataSetChanged();
-                    }
-                }
-            });
-            return true;
-        }
-
-        // From online
-        //----------------------------------------------------------------------------------------//
-        private boolean loadOnlineBoard(TrackInfo track) {
-            if (track == null || !online.isStayOnline() || BuildConfig.DEBUG) {
-                errorMessage = Resources.str(R.string.beatmap_panel_offline_prompt);
-                return false;
-            }
-
-            File file = new File(track.getFilename());
-            ArrayList<String> scores;
-            try {
-                scores = online.getTop(file, FileUtils.getMD5Checksum(file));
-            }
-            catch (OnlineManager.OnlineManagerException exception) {
-                errorMessage = Resources.str(R.string.beatmap_panel_error_prompt) + "\n(" + exception.getMessage() + ")";
-                return false;
-            }
-
-            if (scores.size() == 0) {
-                errorMessage = Resources.str(R.string.beatmap_panel_empty_prompt);
-                return false;
-            }
-
-            loadingTask = new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-                @Override
-                public void run() {
-                    long lastScore = 0;
-
-                    for (int i = scores.size() - 1; i >= 0; i--) {
-                        ScoreboardItem item = new ScoreboardItem();
-
-                        String[] data = scores.get(i).split("\\s+");
-                        if (data.length < 8)
-                            continue;
-
-                        long currentScore = Long.parseLong(data[2]);
-
-                        item.id = Integer.parseInt(data[0]);
-                        item.rank = data.length == 10 ? data[7] : "" + i + 1;
-                        item.mark = data[4];
-                        item.name = data.length == 10 ? data[8] : data[1];
-                        item.avatar = data.length == 10 ? data[9] : data[7];
-
-                        item.setDifference(currentScore - lastScore);
-                        item.setAccuracy(Float.parseFloat(data[6]));
-                        item.setCombo(Integer.parseInt(data[3]));
-                        item.setScore(Long.parseLong(data[2]));
-                        item.setMods(data[5]);
-
-                        lastScore = currentScore;
-                        boardScores.add(item);
-                    }
-                }
-
-                @Override
-                public void onComplete() {
-                    if (beatmapPanel.isShowing) {
-                        adapter.notifyDataSetChanged();
-                    }
-                }
-            });
-            return true;
-        }
-    }
 }

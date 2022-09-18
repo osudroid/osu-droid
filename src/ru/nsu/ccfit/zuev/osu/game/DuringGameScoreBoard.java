@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.opengl.GLES20;
 
-import com.reco1l.ui.data.scoreboard.ScoreboardItem;
+import com.reco1l.ui.data.scoreboard.Scoreboard;
 import com.reco1l.ui.platform.UI;
 
 import org.anddev.andengine.entity.scene.Scene;
@@ -24,7 +24,7 @@ public class DuringGameScoreBoard extends GameObject implements UI {
     private final StatisticV2 stat;
     private Sprite[] boards;
     private ChangeableText[] ranks;
-    private ScoreboardItem[] scoreBoardDatas;
+    private Scoreboard.Item[] scoreBoardDatas;
     private int posNow;
     private String currentUsername;
     private ChangeableText playerRank;
@@ -36,13 +36,13 @@ public class DuringGameScoreBoard extends GameObject implements UI {
     private float paddingTop = 15, paddingLeft = 10;
 
     public DuringGameScoreBoard(final Scene scene, final StatisticV2 stat, String isNotMe) {
-        final ScoreboardItem[] items = beatmapPanel.getBoard();
+        final Scoreboard.Item[] items = beatmapPanel.getBoard();
         this.stat = stat;
         int replayid = GlobalManager.getInstance().getScoring().getReplayID();
         if (replayid == -1) scoreBoardDatas = items;
         else {
             int replayIndex = -1;
-            scoreBoardDatas = new ScoreboardItem[items.length - 1];
+            scoreBoardDatas = new Scoreboard.Item[items.length - 1];
             for (int i = 0; i < items.length; i++) {
                 if (replayid == items[i].id) {
                     replayIndex = i;
@@ -123,7 +123,7 @@ public class DuringGameScoreBoard extends GameObject implements UI {
         playerText.setScaleCenter(0, 0);
         playerText.setScale(0.65f);
         for (int i = posNow - 1; i >= 0; i--) {
-            if (score > scoreBoardDatas[i].lScore) {
+            if (score > scoreBoardDatas[i].rawScore) {
                 posNow = i;
                 ranks[i].setText("#" + (i + 2));
                 ranks[i].setPosition(100 - ranks[i].getWidth(), paddingTop * 2);

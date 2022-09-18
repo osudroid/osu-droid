@@ -13,7 +13,7 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.reco1l.ui.data.helpers.BeatmapHelper;
+import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.platform.UI;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.ViewTouchHandler;
@@ -93,7 +93,7 @@ public class BeatmapListAdapter extends RecyclerView.Adapter<BeatmapListAdapter.
 
         //----------------------------------------------------------------------------------------//
 
-        private final Runnable callback = () -> {
+        private final Runnable imageCallback = () -> {
             TrackInfo track = beatmap.getTrack(0);
             background.animate().cancel();
             ((View) background).setAlpha(0);
@@ -151,35 +151,57 @@ public class BeatmapListAdapter extends RecyclerView.Adapter<BeatmapListAdapter.
                 imageTask.cancel(true);
             }
             background.animate().cancel();
-            background.removeCallbacks(callback);
+            background.removeCallbacks(imageCallback);
             background.setImageDrawable(null);
             ((View) background).setAlpha(0);
             imageTask = null;
         }
 
         private void loadBackground() {
-            background.postDelayed(callback, 50); // Delay to avoid loading the background on fast scrolling
+            background.postDelayed(imageCallback, 50); // Delay to avoid loading the background on fast scrolling
+        }
+
+        //----------------------------------------------------------------------------------------//
+
+        public void navigateTrack(TrackInfo track) {
+            trackList.post(() -> {
+                int i = 0;
+                while (i < trackList.getChildCount()) {
+                    View child = trackList.getChildAt(i);
+                    TrackListAdapter.VH holder = (TrackListAdapter.VH) trackList.getChildViewHolder(child);
+
+                    if (holder.track.getFilename().equals(track.getFilename())) {
+                        holder.select();
+                        break;
+                    }
+                    i++;
+                }
+            });
         }
 
         //----------------------------------------------------------------------------------------//
 
         public void select() {
-            if (beatmapList.selectedHolder == this)
-                return;
+            if (beatmapList.selectedBeatmapHolder != this) {
+                if (beatmapList.selectedBeatmapHolder != null) {
+                    beatmapList.selectedBeatmapHolder.deselect();
+                }
+                beatmapList.selectedBeatmapHolder = this;
+                beatmapList.trackList = this.trackList;
 
-            if (beatmapList.selectedHolder != null) {
-                beatmapList.selectedHolder.deselect();
+                trackList.post(() -> {
+                    trackList.setVisibility(View.VISIBLE);
+                    trackList.setAdapter(new TrackListAdapter(beatmap.getTracks()));
+                });
             }
-            beatmapList.selectedHolder = this;
-            beatmapList.selectedTrackList = this.trackList;
-            trackList.setVisibility(View.VISIBLE);
-            trackList.setAdapter(new TrackListAdapter(beatmap.getTracks()));
         }
 
         public void deselect() {
             trackList.setAdapter(null);
             trackList.setVisibility(View.GONE);
         }
+
+        //----------------------------------------------------------------------------------------//
 
         private void bind(BeatmapInfo beatmap) {
             this.beatmap = beatmap;

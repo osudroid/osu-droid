@@ -28,6 +28,24 @@ public class ViewUtils {
 
     //--------------------------------------------------------------------------------------------//
 
+    public static void size(View view, int size) {
+        view.getLayoutParams().width = size;
+        view.getLayoutParams().height = size;
+        view.requestLayout();
+    }
+
+    public static void width(View view, int width) {
+        view.getLayoutParams().width = width;
+        view.requestLayout();
+    }
+
+    public static void height(View view, int height) {
+        view.getLayoutParams().height = height;
+        view.requestLayout();
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
     public static MarginUtils margins(View view) {
         return new MarginUtils(view);
     }

@@ -4,8 +4,7 @@ import static com.reco1l.interfaces.ITextures.fileNames;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
+import android.util.Log;
 
 import androidx.core.math.MathUtils;
 
@@ -50,21 +49,18 @@ public class BitmapManager implements IMainClasses {
                         InputStream stream = mActivity.getAssets().open("gfx/" + asset);
                         bitmaps.put(name, BitmapFactory.decodeStream(stream));
                     } catch (IOException e) {
+                        Log.e("BitmapManager", "Failed to load asset :" + name);
                         e.printStackTrace();
                     }
                 }
             }
         } catch (IOException e) {
+            Log.e("BitmapManager", "Failed to load game assets!!");
             e.printStackTrace();
         }
 
         global.setInfo("Loading song backgrounds...");
         global.setLoadingProgress(15);
-    }
-
-    public Bitmap loadBitmap(String key, Bitmap bitmap) {
-        bitmaps.put(key, bitmap);
-        return bitmap;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -88,12 +84,16 @@ public class BitmapManager implements IMainClasses {
 
     //--------------------------------------------------------------------------------------------//
 
-    public Bitmap get(String name) {
-        return bitmaps.get(name);
+    public void put(String key, Bitmap bitmap) {
+        bitmaps.put(key, bitmap);
     }
 
-    public Drawable getAsDrawable(String name) {
-        return new BitmapDrawable(mActivity.getResources(), bitmaps.get(name));
+    public Bitmap get(String name) {
+        Bitmap bitmap = bitmaps.get(name);
+        if (bitmap == null) {
+            Log.e("BitmapManager", "Bitmap \"" + name + "\" does not exist or isn't loaded!");
+        }
+        return bitmap;
     }
 
     public boolean contains(String name) {

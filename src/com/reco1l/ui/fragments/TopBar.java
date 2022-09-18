@@ -9,7 +9,7 @@ import android.widget.TextView;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.reco1l.Scenes;
 import com.reco1l.ui.custom.Dialog;
-import com.reco1l.ui.data.helpers.BeatmapHelper;
+import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.data.tables.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;

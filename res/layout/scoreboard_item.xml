@@ -82,7 +82,7 @@
                         <LinearLayout
                             android:id="@+id/sb_mods"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="@dimen/scoreboardItemModSize"
                             android:layout_centerVertical="true"
                             android:layout_marginLeft="@dimen/_3sdp"
                             android:layout_toRightOf="@id/sb_name"

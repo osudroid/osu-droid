@@ -2,7 +2,7 @@ package com.reco1l.interfaces;
 
 import com.reco1l.BitmapManager;
 import com.reco1l.EngineMirror;
-import com.reco1l.ui.data.helpers.OnlineHelper;
+import com.reco1l.utils.helpers.OnlineHelper;
 import com.reco1l.ui.platform.FragmentPlatform;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;

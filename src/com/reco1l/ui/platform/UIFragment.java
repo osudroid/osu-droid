@@ -158,9 +158,6 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
         System.gc();
     }
 
-    /**
-     * If the layout is showing then dismiss it, otherwise shows it.
-     */
     public final void altShow() {
         if (isShowing) {
             close();
@@ -196,7 +193,7 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
             return null;
 
         int identifier;
-        if (getPrefix() == null || id.startsWith(getPrefix())) {
+        if (getPrefix() == null || id.startsWith(getPrefix() + "_")) {
             identifier = Resources.id(id, "id");
         } else {
             identifier = Resources.id(getPrefix() + "_" + id, "id");
@@ -245,25 +242,15 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
     }
 
     protected final void bindTouchListener(View view, TouchListener listener) {
-        ViewTouchHandler touchHandler = registeredViews.get(view);
-        if (touchHandler == null) {
-            touchHandler = new ViewTouchHandler(listener);
-            registeredViews.put(view, touchHandler);
+        ViewTouchHandler vth = registeredViews.get(view);
+        if (vth == null) {
+            vth = new ViewTouchHandler(listener);
+            registeredViews.put(view, vth);
         } else {
-            touchHandler.listener = listener;
+            vth.listener = listener;
         }
-        touchHandler.linkToFragment(this);
-        touchHandler.apply(view);
-    }
-
-    protected final void unbindTouchListener(View view) {
-        if (view == null)
-            return;
-
-        view.setOnTouchListener(null);
-        if (registeredViews.containsKey(view)) {
-            registeredViews.put(view, null);
-        }
+        vth.linkToFragment(this);
+        vth.apply(view);
     }
 
     protected final void unbindTouchListeners() {

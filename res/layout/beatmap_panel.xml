@@ -112,7 +112,6 @@
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/bp_scoreboard"
-                        android:visibility="gone"
                         android:layout_width="@dimen/beatmapPanelContentWidth"
                         android:layout_height="wrap_content"
                         tool:listitem="@layout/scoreboard_item"/>

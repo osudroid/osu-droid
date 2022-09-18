@@ -127,8 +127,8 @@ public class SplashScene extends UIFragment implements IUpdateHandler {
 
         new Animation().ofFloat(8f, 1f)
                 .runOnUpdate(val -> {
-                    trianglesBottom.setTriangleSpeed((float) val.getAnimatedValue());
-                    trianglesTop.setTriangleSpeed((float) val.getAnimatedValue());
+                    trianglesBottom.setTriangleSpeed(val);
+                    trianglesTop.setTriangleSpeed(val);
                 })
                 .play(1000);
 
@@ -223,8 +223,8 @@ public class SplashScene extends UIFragment implements IUpdateHandler {
             if (progress != lastProgress) {
                 new Animation().ofInt(lastProgress, progress)
                         .runOnUpdate(val -> {
-                            progressBar.setProgress((int) val.getAnimatedValue());
-                            percentText.setText(val.getAnimatedValue() + "%");
+                            progressBar.setProgress(val);
+                            percentText.setText(val + "%");
                         })
                         .play(200);
             }

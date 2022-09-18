@@ -16,27 +16,43 @@ public abstract class AsyncExec {
     private final ExecutorService executor;
     private final Handler handler;
 
+    //--------------------------------------------------------------------------------------------//
+
     public AsyncExec() {
         executor = Executors.newSingleThreadExecutor();
         handler = new Handler(Looper.getMainLooper());
     }
 
+    //--------------------------------------------------------------------------------------------//
+
     public abstract void run();
     public abstract void onComplete();
 
-    public void execute() {
+    //--------------------------------------------------------------------------------------------//
+
+    public final void execute() {
         this.executor.execute(() -> {
             this.run();
             this.handler.post(this::onComplete);
         });
     }
 
-    public void cancel(boolean forceCancel) {
-        if (forceCancel) {
+    public final void cancel(boolean force) {
+        if (force) {
             this.executor.shutdownNow();
         } else {
             this.executor.shutdown();
         }
         this.handler.removeCallbacks(this::onComplete);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public final boolean isTerminated() {
+        return this.executor.isTerminated();
+    }
+
+    public final boolean hasBeenShutdown() {
+        return this.executor.isShutdown();
     }
 }
