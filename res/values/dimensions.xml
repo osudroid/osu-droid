@@ -116,9 +116,9 @@
     <dimen name="mainMenuButtonLayoutLeftMargin">@dimen/_80sdp</dimen>
     <dimen name="mainMenuButtonLayoutWidth">@dimen/_180sdp</dimen>
 
-    <dimen name="mainMenuLogoCornerRadius">500dip</dimen>
+    <dimen name="mainMenuLogoCornerRadius">600dip</dimen>
     <dimen name="mainMenuSmallLogoSize">@dimen/_160sdp</dimen>
-    <dimen name="mainMenuLogoSize">@dimen/_220sdp</dimen>
+    <dimen name="mainMenuLogoSize">@dimen/_240sdp</dimen>
     <dimen name="mainMenuLogoElevation">@dimen/_20sdp</dimen>
 
     <dimen name="mainMenuExitElevation">2dp</dimen>
@@ -157,7 +157,6 @@
     <dimen name="scoreboardItemRankLayoutWidth">@dimen/_24sdp</dimen>
     <dimen name="scoreboardItemMarkSize">@dimen/_16sdp</dimen>
     <dimen name="scoreboardItemModSize">@dimen/_10sdp</dimen>
-
 
     <!--Beatmap List-->
     <dimen name="beatmapListLeftMargin">@dimen/_40sdp</dimen>

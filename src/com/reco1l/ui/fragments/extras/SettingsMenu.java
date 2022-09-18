@@ -181,7 +181,6 @@ public class SettingsMenu extends UIFragment {
             reloadBackground = false;
         }
 
-        // global.getSongService().setVolume(Config.getBgmVolume());
         global.getSongService().setGaming(false);
     }
 

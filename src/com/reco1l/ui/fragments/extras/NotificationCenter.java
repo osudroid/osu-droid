@@ -73,12 +73,9 @@ public class NotificationCenter extends UIFragment {
 
         ViewUtils.visibility(notifications.isEmpty(), emptyText);
 
-        bindTouchListener(find("close"), new TouchListener() {
-            public boolean isOnlyOnce() { return true; }
-
-            public void onPressUp() {
-                close();
-            }
+        bindTouchListener(find("close"), () -> {
+            unbindTouchListeners();
+            close();
         });
         bindTouchListener(find("clear"), new TouchListener() {
             public void onPressUp() {

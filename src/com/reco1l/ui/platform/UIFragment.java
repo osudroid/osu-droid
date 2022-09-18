@@ -1,12 +1,12 @@
 package com.reco1l.ui.platform;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -100,7 +100,7 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
 
         // Don't forget to create a View matching root bounds and set its ID to "background" for this feature.
         // You can also set the root view ID as "background".
-        rootBackground = find(R.id.background);
+        rootBackground = rootView.findViewById(R.id.background);
         onLoad();
         isLoaded = true;
         if (isDismissOnBackgroundPress && rootBackground != null) {
@@ -112,6 +112,7 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
                     public boolean isOnlyOnce() { return true; }
 
                     public void onPressUp() {
+                        unbindTouchListeners();
                         close();
                     }
                 });
@@ -181,18 +182,6 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
     }
 
     //--------------------------------------------------------------------------------------------//
-    /**
-     * Finds a child View of the parent layout from its resource ID.
-     * @return the view itself if it exists as child in the layout, otherwise null.
-     */
-    @SuppressWarnings("unchecked")
-    protected <T extends View> T find(@IdRes int id) {
-        if (rootView == null || id == 0)
-            return null;
-        Object object = rootView.findViewById(id);
-
-        return object != null ? (T) object : null;
-    }
 
     /**
      * Finds a child View of the parent layout from its ID name in String format.
@@ -214,8 +203,11 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
         }
 
         Object view = rootView.findViewById(identifier);
-        if (view != null) {
+
+        if (view != null && !registeredViews.containsKey((T) view)) {
             registeredViews.put((T) view, null);
+            Log.i("UIFragment", "Found view: " + getPrefix() + "_" + id
+                    + " (registered views: " + registeredViews.size() + ")");
         }
         return (T) view;
     }
@@ -244,17 +236,7 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
         }
     }
 
-    protected final void unbindTouchListener(View view) {
-        if (view == null)
-            return;
-
-        view.setOnTouchListener(null);
-        if (registeredViews.containsKey(view)) {
-            registeredViews.put(view, null);
-        }
-    }
-
-    protected final void bindTouchListener(View view, Runnable onSingleTapUp) {
+    protected final void bindTouchListener(View view, @NonNull Runnable onSingleTapUp) {
         bindTouchListener(view, new TouchListener() {
             public void onPressUp() {
                 onSingleTapUp.run();
@@ -272,6 +254,16 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
         }
         touchHandler.linkToFragment(this);
         touchHandler.apply(view);
+    }
+
+    protected final void unbindTouchListener(View view) {
+        if (view == null)
+            return;
+
+        view.setOnTouchListener(null);
+        if (registeredViews.containsKey(view)) {
+            registeredViews.put(view, null);
+        }
     }
 
     protected final void unbindTouchListeners() {
