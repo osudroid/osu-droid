@@ -29,7 +29,7 @@ public class CursorEntity extends Entity {
 
             emitter = new PointParticleEmitter(particleOffsetX, particleOffsetY);
             particles = new CursorTrail(
-                    emitter, 30, 35, 40, cursorSprite.baseSize, trailTex
+                    emitter, 10, 15, 20, cursorSprite.baseSize, trailTex
             );
         }
 
