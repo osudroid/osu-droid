@@ -35,7 +35,7 @@ public class CursorTrail extends ParticleSystem {
     }
 
     private void fadeOut() {
-        float defaultLifeTime = 0.50f;
+        float defaultLifeTime = 0.20f;
         float longLifeTime = defaultLifeTime * 2;
         float lifeTime = Config.isUseLongTrail()? longLifeTime : defaultLifeTime;
 
