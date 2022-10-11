@@ -24,6 +24,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class UserProfile extends UIFragment {
 
+    public static UserProfile instance;
     public static String message;
 
     private View body;

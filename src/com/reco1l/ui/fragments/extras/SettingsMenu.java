@@ -40,19 +40,17 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 18/7/22 22:13
 
-// Created by Reco1l on 13/9/22 01:22
-
-// Created by Reco1l on 13/9/22 01:49
-
 public class SettingsMenu extends UIFragment {
 
+    public static SettingsMenu instance;
+
     protected Tabs currentTab;
+
     private FrameLayout container;
     private SettingsFragment fragment;
-
     private View body, navbar, tabIndicator, layer, loading;
-    private int panelWidth, navbarWidth;
 
+    private int panelWidth, navbarWidth;
     private boolean reloadBackground = false;
 
     //--------------------------------------------------------------------------------------------//

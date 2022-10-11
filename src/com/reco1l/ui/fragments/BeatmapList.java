@@ -24,6 +24,8 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class BeatmapList extends UIFragment {
 
+    public static BeatmapList instance;
+
     public List<BeatmapInfo> beatmaps = new ArrayList<>();
 
     public BeatmapListAdapter.VH selectedBeatmapHolder;

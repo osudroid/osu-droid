@@ -30,6 +30,8 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class BeatmapPanel extends UIFragment implements IGameMods {
 
+    public static BeatmapPanel instance;
+
     public boolean isOnlineBoard = false;
 
     private int bodyWidth;

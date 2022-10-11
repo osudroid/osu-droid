@@ -67,49 +67,37 @@ public final class UI {
     }
 
     private static MainMenu getMainMenu() {
-        if (mainMenuInstance == null) {
-            mainMenuInstance = new MainMenu();
+        if (MainMenu.instance == null) {
+            MainMenu.instance = new MainMenu();
         }
-        return mainMenuInstance;
+        return MainMenu.instance;
     }
 
     private static UserProfile getUserProfile() {
-        if (userProfileInstance == null) {
-            userProfileInstance = new UserProfile();
+        if (UserProfile.instance == null) {
+            UserProfile.instance = new UserProfile();
         }
-        return userProfileInstance;
+        return UserProfile.instance;
     }
 
     private static SettingsMenu getSettingsMenu() {
-        if (settingsMenuInstance == null) {
-            settingsMenuInstance = new SettingsMenu();
+        if (SettingsMenu.instance == null) {
+            SettingsMenu.instance = new SettingsMenu();
         }
-        return settingsMenuInstance;
+        return SettingsMenu.instance;
     }
 
     private static BeatmapPanel getBeatmapPanel() {
-        if (beatmapPanelInstance == null) {
-            beatmapPanelInstance = new BeatmapPanel();
+        if (BeatmapPanel.instance == null) {
+            BeatmapPanel.instance = new BeatmapPanel();
         }
-        return beatmapPanelInstance;
+        return BeatmapPanel.instance;
     }
 
     private static BeatmapList getBeatmapList() {
-        if (beatmapListInstance == null) {
-            beatmapListInstance = new BeatmapList();
+        if (BeatmapList.instance == null) {
+            BeatmapList.instance = new BeatmapList();
         }
-        return beatmapListInstance;
+        return BeatmapList.instance;
     }
-
-    //--------------------------------------------------------------------------------------------//
-
-    private static TopBar topBarInstance;
-    private static NotificationCenter notificationCenterInstance;
-    private static MusicPlayer musicPlayerInstance;
-    private static LoadingScene loadingSceneInstance;
-    private static MainMenu mainMenuInstance;
-    private static UserProfile userProfileInstance;
-    private static SettingsMenu settingsMenuInstance;
-    private static BeatmapPanel beatmapPanelInstance;
-    private static BeatmapList beatmapListInstance;
 }

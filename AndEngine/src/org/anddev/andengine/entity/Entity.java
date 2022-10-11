@@ -1064,6 +1064,8 @@ public class Entity implements IEntity {
 			final ArrayList<IEntity> entities = this.mChildren;
 			final int entityCount = entities.size();
 			for(int i = 0; i < entityCount; i++) {
+				if (entities.get(i) == null)
+					continue;
 				entities.get(i).onUpdate(pSecondsElapsed);
 			}
 		}

@@ -34,6 +34,8 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class MainMenu extends UIFragment {
 
+    public static MainMenu instance;
+
     public boolean
             isMenuShowing = false,
             menuAnimInProgress = false,
