@@ -6,7 +6,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.edlplan.framework.math.FMath;
-import com.reco1l.Scenes;
+import com.reco1l.Game;
+import com.reco1l.enums.Scenes;
+import com.reco1l.management.MusicManager;
 import com.reco1l.ui.data.beatmaps.BeatmapListAdapter;
 import com.reco1l.ui.data.beatmaps.TrackListAdapter;
 import com.reco1l.ui.platform.UIFragment;
@@ -35,6 +37,13 @@ public class BeatmapList extends UIFragment {
 
     //--------------------------------------------------------------------------------------------//
 
+    public enum SortOrder {
+        TITLE, ARTIST, CREATOR, DATE, BPM, STARS, LENGTH
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+
     @Override
     protected String getPrefix() {
         return "bl";
@@ -47,7 +56,7 @@ public class BeatmapList extends UIFragment {
 
     @Override
     protected Scenes getParent() {
-        return Scenes.SONG_MENU;
+        return Scenes.LIST;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -93,8 +102,10 @@ public class BeatmapList extends UIFragment {
 
         this.selectedBeatmap = track.getBeatmap();
         this.selectedTrack = track;
-        global.getSongMenu().selectTrack(track, true);
+        Game.listScene.onTrackSelect(track);
     }
+
+    //--------------------------------------------------------------------------------------------//
 
     public void update() {
         if (!isShowing)
@@ -120,6 +131,12 @@ public class BeatmapList extends UIFragment {
         return FMath.clamp(val, 0, view.getWidth());
     }
 
+    //--------------------------------------------------------------------------------------------//
+
+    public void sort(SortOrder order) {
+
+    }
+
     public void loadBeatmaps() {
         this.beatmaps = new ArrayList<>();
         this.beatmaps.addAll(library.getLibrary());
@@ -128,13 +145,15 @@ public class BeatmapList extends UIFragment {
         recyclerView.setAdapter(adapter);
     }
 
+    //--------------------------------------------------------------------------------------------//
+
     @Override
     protected void onLoad() {
         recyclerView = find("recycler");
         loadBeatmaps();
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-        recyclerView.post(() -> setSelected(global.getMainScene().getBeatmapInfo()));
+        recyclerView.post(() -> setSelected(MusicManager.beatmap));
     }
 
     @Override

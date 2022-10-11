@@ -8,6 +8,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.reco1l.management.MusicManager;
 import com.reco1l.notification.NotificationPlayer;
 
 import java.io.File;
@@ -115,7 +116,8 @@ public class SongService extends Service {
     }
 
     public void seekTo(int time) {
-        if (audioFunc == null) return;
+        if (audioFunc == null)
+            return;
         System.out.println(audioFunc.jump(time));
     }
 
@@ -194,7 +196,7 @@ public class SongService extends Service {
             return;
         }
         notify.show();
-        notify.updateSong(GlobalManager.getInstance().getMainScene().getBeatmapInfo());
+        notify.updateSong(MusicManager.beatmap);
         notify.updateState();
     }
 

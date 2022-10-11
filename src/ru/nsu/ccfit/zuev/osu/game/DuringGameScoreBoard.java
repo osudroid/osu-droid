@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.opengl.GLES20;
 
 import com.reco1l.ui.data.scoreboard.Scoreboard;
-import com.reco1l.ui.platform.UI;
+import com.reco1l.UI;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -20,7 +20,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
-public class DuringGameScoreBoard extends GameObject implements UI {
+public class DuringGameScoreBoard extends GameObject {
     private final StatisticV2 stat;
     private Sprite[] boards;
     private ChangeableText[] ranks;
@@ -36,7 +36,7 @@ public class DuringGameScoreBoard extends GameObject implements UI {
     private float paddingTop = 15, paddingLeft = 10;
 
     public DuringGameScoreBoard(final Scene scene, final StatisticV2 stat, String isNotMe) {
-        final Scoreboard.Item[] items = beatmapPanel.getBoard();
+        final Scoreboard.Item[] items = UI.beatmapPanel.getBoard();
         this.stat = stat;
         int replayid = GlobalManager.getInstance().getScoring().getReplayID();
         if (replayid == -1) scoreBoardDatas = items;
@@ -101,7 +101,7 @@ public class DuringGameScoreBoard extends GameObject implements UI {
         playerRank.setScaleCenter(0, 0);
         playerRank.setScale(1.7f);
         playerRank.setColor(0.6f, 0.6f, 0.6f, 0.9f);
-        playerRank.setText("#" + (!beatmapPanel.isOnlineBoard || posNow < (replayid == -1 ? 20 : 19) ?
+        playerRank.setText("#" + (!UI.beatmapPanel.isOnlineBoard || posNow < (replayid == -1 ? 20 : 19) ?
                 String.valueOf(posNow + 1) : "?"));
         playerRank.setPosition(100 - playerRank.getWidth(), paddingTop * 2);
         playerSprite.attachChild(playerRank);

@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import com.edlplan.ui.TriangleEffectView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.reco1l.UI;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Resources;
@@ -176,8 +177,8 @@ public class SplashScene extends UIFragment implements IUpdateHandler {
             new Animation(background).fade(1, 0)
                     .runOnEnd(() -> {
                         super.close();
-                        new Animation(topBar.body).moveY(-topBar.barHeight, 0).play(300);
-                        new Animation(topBar.author).fade(0, 1).moveY(50, 0).play(200);
+                        new Animation(UI.topBar.body).moveY(-UI.topBar.barHeight, 0).play(300);
+                        new Animation(UI.topBar.author).fade(0, 1).moveY(50, 0).play(200);
                     })
                     .play(700);
         }, 300);
@@ -191,7 +192,7 @@ public class SplashScene extends UIFragment implements IUpdateHandler {
         new AsyncTaskLoader().execute(new OsuAsyncCallback() {
             @Override
             public void run() {
-                global.getMainScene().loadBeatmap();
+                global.getMainScene().loadMusic();
             }
 
             @Override

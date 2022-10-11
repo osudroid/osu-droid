@@ -2,7 +2,7 @@ package com.reco1l.utils;
 
 import static android.view.MotionEvent.*;
 
-import static com.reco1l.interfaces.IMainClasses.platform;
+import static com.reco1l.interfaces.IReferences.platform;
 
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;

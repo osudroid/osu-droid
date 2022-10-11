@@ -14,17 +14,17 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 import com.edlplan.ui.TriangleEffectView;
-import com.reco1l.Scenes;
+import com.reco1l.Game;
+import com.reco1l.enums.Scenes;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.data.tables.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Resources;
-import com.reco1l.ui.platform.UI;
+import com.reco1l.UI;
 import com.reco1l.utils.listeners.TouchListener;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
-import ru.nsu.ccfit.zuev.osu.MainScene;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
 import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
@@ -78,7 +78,7 @@ public class MainMenu extends UIFragment {
 
     @Override
     protected Scenes getParent() {
-        return Scenes.MAIN_SCENE;
+        return Scenes.MAIN;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -190,14 +190,14 @@ public class MainMenu extends UIFragment {
             new Dialog(DialogTable.exit()).show();
         });
 
-        bindTouchListener(settings.view, settingsPanel::altShow);
+        bindTouchListener(settings.view, UI.settingsPanel::altShow);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     private final OsuAsyncCallback asyncCallback = new OsuAsyncCallback() {
         public void run() {
-            engine.setScene(loadingScene.scene);
+            engine.setScene(UI.loadingScene.scene);
             mActivity.checkNewSkins();
             mActivity.checkNewBeatmaps();
             if (!library.loadLibraryCache(mActivity, true)) {
@@ -208,10 +208,10 @@ public class MainMenu extends UIFragment {
         }
 
         public void onComplete() {
-            global.getMainScene().musicControl(MainScene.MusicOption.PLAY);
+            musicManager.play();
             UI.loadingScene.complete(() -> {
-                engine.setScene(global.getSongMenu().getScene());
-                global.getSongMenu().select();
+                engine.setScene(global.getSongMenu());
+                //global.getSongMenu().select();
             });
         }
     };
@@ -220,7 +220,7 @@ public class MainMenu extends UIFragment {
 
         new Animation(rootView)
                 .runOnStart(() -> {
-                    global.getMainScene().background.zoomOut(true);
+                    global.getMainScene().background.zoomOut();
                     global.getMainScene().spectrum.clear(true);
                 })
                 .runOnEnd(() -> {
@@ -253,6 +253,7 @@ public class MainMenu extends UIFragment {
             return;
 
         global.getMainScene().background.zoomIn();
+        global.getMainScene().background.dimIn();
 
         logoShow.removeAllListeners();
         logoShow.addListener(new BaseAnimationListener() {
@@ -272,7 +273,8 @@ public class MainMenu extends UIFragment {
         if (menuAnimInProgress || !isMenuShowing)
             return;
 
-        global.getMainScene().background.zoomOut(false);
+        global.getMainScene().background.zoomOut();
+        global.getMainScene().background.dimOut();
 
         logoHide.removeAllListeners();
         logoHide.addListener(new BaseAnimationListener() {
@@ -292,19 +294,8 @@ public class MainMenu extends UIFragment {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void update(float secondsElapsed, boolean allowBounce, float bpm) {
-        if (!isShowing)
-            return;
-
-        if (isMenuShowing) {
-            if (showPassTime > 10000f) {
-                mActivity.runOnUiThread(this::hideMenu);
-            } else {
-                showPassTime += secondsElapsed * 1000f;
-            }
-        }
-
-        if (logo == null || !allowBounce || isExitAnimInProgress)
+    public void updateLogo(float bpm) {
+        if (logo == null || isExitAnimInProgress)
             return;
 
         long upTime = (long) (bpm * 0.07f);
@@ -325,6 +316,19 @@ public class MainMenu extends UIFragment {
             logoBounceDown.start();
             triangleSpeedDown.start();
         });
+    }
+
+    public void update(float secondsElapsed) {
+        if (!isShowing)
+            return;
+
+        if (isMenuShowing) {
+            if (showPassTime > 10000f) {
+                mActivity.runOnUiThread(this::hideMenu);
+            } else {
+                showPassTime += secondsElapsed * 1000f;
+            }
+        }
     }
 
     @Override
@@ -387,8 +391,8 @@ public class MainMenu extends UIFragment {
                 showAnim.addListener(new BaseAnimationListener() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        mainMenu.menuAnimInProgress = false;
-                        mainMenu.isMenuShowing = true;
+                        UI.mainMenu.menuAnimInProgress = false;
+                        UI.mainMenu.isMenuShowing = true;
                     }
                 });
             }
@@ -411,8 +415,8 @@ public class MainMenu extends UIFragment {
                 public void onAnimationEnd(Animator animation) {
                     view.setAlpha(0);
                     if (delay == 120) {
-                        mainMenu.menuAnimInProgress = false;
-                        mainMenu.isMenuShowing = false;
+                        UI.mainMenu.menuAnimInProgress = false;
+                        UI.mainMenu.isMenuShowing = false;
                     }
                 }
             });

@@ -1,6 +1,6 @@
 package com.reco1l.utils.listeners;
 
-import static com.reco1l.interfaces.IMainClasses.resources;
+import static com.reco1l.interfaces.IReferences.resources;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 

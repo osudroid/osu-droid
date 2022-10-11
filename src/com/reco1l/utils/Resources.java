@@ -2,7 +2,7 @@ package com.reco1l.utils;
 
 // Created by Reco1l on 2/7/22 06:18
 
-import static com.reco1l.interfaces.IMainClasses.mActivity;
+import static com.reco1l.interfaces.IReferences.mActivity;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

@@ -2,8 +2,8 @@ package com.reco1l.utils.helpers;
 
 import android.graphics.drawable.Drawable;
 
-import com.reco1l.ui.platform.UI;
-import com.reco1l.interfaces.IMainClasses;
+import com.reco1l.UI;
+import com.reco1l.interfaces.IReferences;
 
 import java.io.File;
 
@@ -14,7 +14,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 26/6/22 21:20
 
-public class OnlineHelper implements IMainClasses, UI {
+public class OnlineHelper implements IReferences {
     // This class translates contains tools to translate online data for the new UI.
 
     private static OnlineHelper instance;
@@ -63,11 +63,11 @@ public class OnlineHelper implements IMainClasses, UI {
     //--------------------------------------------------------------------------------------------//
 
     public void clear() {
-        topBar.userBox.update(true);
+        UI.topBar.userBox.update(true);
     }
 
     public void update() {
-        topBar.userBox.update(false);
+        UI.topBar.userBox.update(false);
     }
 
 }

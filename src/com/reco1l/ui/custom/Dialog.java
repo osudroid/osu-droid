@@ -10,8 +10,8 @@ import android.widget.TextView;
 import androidx.cardview.widget.CardView;
 
 import com.edlplan.framework.easing.Easing;
+import com.reco1l.UI;
 import com.reco1l.ui.platform.UIFragment;
-import com.reco1l.ui.platform.UIManager;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Resources;
 import com.reco1l.utils.ViewUtils;
@@ -189,7 +189,7 @@ public class Dialog extends UIFragment {
     @Override
     public void show() {
         if (closeExtras)
-            platform.close(UIManager.getExtras());
+            platform.close(UI.getExtras());
 
         super.show();
     }

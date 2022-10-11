@@ -3,8 +3,7 @@ package ru.nsu.ccfit.zuev.osu.online;
 import android.os.AsyncTask;
 
 import com.reco1l.ui.data.tables.NotificationTable;
-import com.reco1l.interfaces.IMainClasses;
-import com.reco1l.ui.platform.UI;
+import com.reco1l.interfaces.IReferences;
 
 import org.anddev.andengine.util.Debug;
 
@@ -18,7 +17,7 @@ import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
-public class OnlineScoring implements IMainClasses, UI {
+public class OnlineScoring implements IReferences {
     private static final int attemptCount = 5;
     private static OnlineScoring instance = null;
     private Boolean onlineMutex = new Boolean(false);

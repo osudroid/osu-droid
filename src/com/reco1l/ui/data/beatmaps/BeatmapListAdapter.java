@@ -2,6 +2,8 @@ package com.reco1l.ui.data.beatmaps;
 
 // Created by Reco1l on 18/9/22 00:01
 
+import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +15,9 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.reco1l.Game;
 import com.reco1l.utils.helpers.BeatmapHelper;
-import com.reco1l.ui.platform.UI;
+import com.reco1l.UI;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.ViewTouchHandler;
 
@@ -24,7 +27,7 @@ import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class BeatmapListAdapter extends RecyclerView.Adapter<BeatmapListAdapter.VH> implements UI {
+public class BeatmapListAdapter extends RecyclerView.Adapter<BeatmapListAdapter.VH> {
 
     private final List<BeatmapInfo> items;
 
@@ -182,12 +185,14 @@ public class BeatmapListAdapter extends RecyclerView.Adapter<BeatmapListAdapter.
         //----------------------------------------------------------------------------------------//
 
         public void select() {
-            if (beatmapList.selectedBeatmapHolder != this) {
-                if (beatmapList.selectedBeatmapHolder != null) {
-                    beatmapList.selectedBeatmapHolder.deselect();
+            if (UI.beatmapList.selectedBeatmapHolder != this) {
+                if (UI.beatmapList.selectedBeatmapHolder != null) {
+                    UI.beatmapList.selectedBeatmapHolder.deselect();
                 }
-                beatmapList.selectedBeatmapHolder = this;
-                beatmapList.trackList = this.trackList;
+                UI.beatmapList.selectedBeatmapHolder = this;
+                UI.beatmapList.trackList = this.trackList;
+
+                Game.listScene.playMusic(beatmap);
 
                 trackList.post(() -> {
                     trackList.setVisibility(View.VISIBLE);
@@ -206,12 +211,12 @@ public class BeatmapListAdapter extends RecyclerView.Adapter<BeatmapListAdapter.
         private void bind(BeatmapInfo beatmap) {
             this.beatmap = beatmap;
             new ViewTouchHandler(() -> {
-                if (beatmapList.selectedBeatmap != beatmap) {
-                    beatmapList.setSelected(beatmap);
+                if (UI.beatmapList.selectedBeatmap != beatmap) {
+                    UI.beatmapList.setSelected(beatmap);
                 }
             }).apply(body);
 
-            trackList.setLayoutManager(new LinearLayoutManager(beatmapList.getContext(), LinearLayoutManager.VERTICAL, false));
+            trackList.setLayoutManager(new LinearLayoutManager(UI.beatmapList.getContext(), VERTICAL, false));
 
             title.setText(BeatmapHelper.getTitle(beatmap));
             artist.setText("by " + BeatmapHelper.getArtist(beatmap));

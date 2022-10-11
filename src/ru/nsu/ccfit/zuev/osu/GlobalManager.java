@@ -2,7 +2,9 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.util.DisplayMetrics;
 
-import com.reco1l.BitmapManager;
+import com.reco1l.andengine.scenes.ListScene;
+import com.reco1l.andengine.scenes.MainScene;
+import com.reco1l.management.BitmapManager;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
@@ -24,7 +26,7 @@ public class GlobalManager {
     private GameScene gameScene;
     private MainScene mainScene;
     private ScoringScene scoring;
-    private SongMenu songMenu;
+    private ListScene songMenu;
     private MainActivity mainActivity;
     private int loadingProgress;
     private String info;
@@ -54,7 +56,6 @@ public class GlobalManager {
         songService = saveServiceObject.getSongService();
         setLoadingProgress(10);
         setMainScene(new MainScene());
-        getMainScene().load(mainActivity);
         setInfo("Loading skin...");
         skinNow = Config.getSkinPath();
         ResourceManager.getInstance().loadSkin(skinNow);
@@ -64,14 +65,11 @@ public class GlobalManager {
         PropertiesLibrary.getInstance().load(mainActivity);
         setLoadingProgress(30);
         setGameScene(new GameScene(getEngine()));
-        setSongMenu(new SongMenu());
+        setSongMenu(new ListScene());
         setLoadingProgress(40);
-        getSongMenu().init(mainActivity, getEngine(), getGameScene());
-        getSongMenu().load();
-        setScoring(new ScoringScene(getEngine(), getGameScene(), getSongMenu()));
-        getSongMenu().setScoringScene(getScoring());
+        setScoring(new ScoringScene(getEngine(), getGameScene(), null)); // TODO SCORING
         getGameScene().setScoringScene(getScoring());
-        getGameScene().setOldScene(getSongMenu().getScene());
+        getGameScene().setOldScene(getSongMenu());
         if (songService != null) {
             songService.stop();
             songService.hideNotification();
@@ -126,11 +124,11 @@ public class GlobalManager {
         this.scoring = scoring;
     }
 
-    public SongMenu getSongMenu() {
+    public ListScene getSongMenu() {
         return songMenu;
     }
 
-    public void setSongMenu(SongMenu songMenu) {
+    public void setSongMenu(ListScene songMenu) {
         this.songMenu = songMenu;
     }
 

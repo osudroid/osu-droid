@@ -2,6 +2,7 @@ package com.reco1l.ui.fragments.extras;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -11,13 +12,14 @@ import android.widget.TextView;
 import androidx.cardview.widget.CardView;
 
 import com.edlplan.framework.easing.Easing;
+import com.reco1l.enums.MusicOption;
+import com.reco1l.UI;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.platform.UIFragment;
-import com.reco1l.ui.platform.UIManager;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.Resources;
-import com.reco1l.interfaces.IMainClasses;
+import com.reco1l.interfaces.IReferences;
 import com.reco1l.utils.listeners.TouchListener;
 
 import java.text.SimpleDateFormat;
@@ -25,15 +27,16 @@ import java.util.TimeZone;
 
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.MainScene;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 1/7/22 22:45
 
-public class MusicPlayer extends UIFragment implements IMainClasses {
+public class MusicPlayer extends UIFragment implements IReferences {
 
-    public MainScene.MusicOption currentOption;
+    public static MusicPlayer instance;
+
+    public MusicOption currentOption;
 
     private CardView body;
     private View songBody;
@@ -112,31 +115,15 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
 
             public void onPressUp() {
                 if (global.getSongService().getStatus() == Status.PLAYING) {
-                    global.getMainScene().musicControl(MainScene.MusicOption.PAUSE);
+                    musicManager.pause();
                 } else {
-                    global.getMainScene().musicControl(MainScene.MusicOption.PLAY);
+                    musicManager.play();
                 }
             }
         });
 
-        bindTouchListener(find("prev"), new TouchListener() {
-            public void onPressDown() {
-                global.getMainScene().doChange = true;
-            }
-            public void onPressUp() {
-                global.getMainScene().lastHit = System.currentTimeMillis();
-                global.getMainScene().musicControl(MainScene.MusicOption.PREV);
-            }
-        });
-        bindTouchListener(find("next"), new TouchListener() {
-            public void onPressDown() {
-                global.getMainScene().doChange = true;
-            }
-            public void onPressUp() {
-                global.getMainScene().lastHit = System.currentTimeMillis();
-                global.getMainScene().musicControl(MainScene.MusicOption.NEXT);
-            }
-        });
+        bindTouchListener(find("prev"), musicManager::previous);
+        bindTouchListener(find("next"), musicManager::next);
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -156,6 +143,7 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 global.getSongService().setPosition(toPosition);
+                Log.i("MusicPlayer", "Skipped song position to " + sdf.format(toPosition));
                 isTrackingTouch = false;
                 onTouchEventNotified(MotionEvent.ACTION_UP);
             }
@@ -204,13 +192,13 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
     private void change() {
         BeatmapInfo beatmap = library.getBeatmap();
 
-        if (topBar.isShowing) {
-            topBar.musicButton.update(beatmap);
+        if (UI.topBar.isShowing) {
+            UI.topBar.musicButton.update(beatmap);
         }
         changeBitmap(beatmap.getTrack(0));
 
         if (isShowing) {
-            if (currentOption == MainScene.MusicOption.NEXT) {
+            if (currentOption == MusicOption.NEXT) {
                 new Animation(songBody).moveX(0, -10).fade(1, 0)
                         .play(200);
 
@@ -219,7 +207,7 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
                         .delay(200)
                         .play(200);
             }
-            if (currentOption == MainScene.MusicOption.PREV) {
+            if (currentOption == MusicOption.PREVIOUS) {
                 new Animation(songBody).moveX(0, 10).fade(1, 0)
                         .play(200);
                 new Animation(songBody).moveX(-10, 0).fade(0, 1)
@@ -280,8 +268,8 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
     public void show() {
         if (isShowing)
             return;
-        platform.close(UIManager.getExtras());
-        topBar.musicButton.playAnimation(true);
+        platform.close(UI.getExtras());
+        UI.topBar.musicButton.playAnimation(true);
         super.show();
     }
 
@@ -290,7 +278,7 @@ public class MusicPlayer extends UIFragment implements IMainClasses {
         if (!isShowing)
             return;
 
-        topBar.musicButton.playAnimation(false);
+        UI.topBar.musicButton.playAnimation(false);
 
         new Animation(find("innerBody")).fade(1, 0).play(100);
 

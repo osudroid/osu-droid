@@ -8,9 +8,8 @@ import android.util.Log;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.reco1l.interfaces.IMainClasses;
+import com.reco1l.interfaces.IReferences;
 import com.reco1l.utils.helpers.ScoringHelper;
-import com.reco1l.ui.platform.UI;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.Resources;
 
@@ -30,7 +29,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 18/9/22 12:40
 
-public class Scoreboard implements UI, IMainClasses {
+public class Scoreboard implements IReferences {
 
     public String errorMessage;
     public final List<Item> boardScores;
@@ -77,7 +76,7 @@ public class Scoreboard implements UI, IMainClasses {
 
     public void clear() {
         errorMessage = null;
-        if (loadingTask != null && !loadingTask.isTerminated()) {
+        if (loadingTask != null && !loadingTask.isCompleted()) {
             loadingTask.cancel(true);
             loadingTask = null;
         }

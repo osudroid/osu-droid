@@ -2,9 +2,9 @@ package com.reco1l.ui.data.tables;
 
 // Created by Reco1l on 30/6/22 19:20
 
-import com.reco1l.Scenes;
-import com.reco1l.interfaces.IMainClasses;
-import com.reco1l.ui.platform.UI;
+import com.reco1l.enums.Scenes;
+import com.reco1l.UI;
+import com.reco1l.interfaces.IReferences;
 import com.reco1l.ui.data.GameNotification;
 
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -14,7 +14,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 /**
  * This class contains easy access to show notifications from other classes without adding a lot of lines.
  */
-public class NotificationTable implements IMainClasses, UI {
+public class NotificationTable implements IReferences {
 
     // Single instance notifications
     private static GameNotification
@@ -28,7 +28,7 @@ public class NotificationTable implements IMainClasses, UI {
         GameNotification notification = new GameNotification("Debug");
         notification.message = text;
         notification.isSilent = true;
-        notificationCenter.add(notification);
+        UI.notificationCenter.add(notification);
     }
 
     // Notification for beatmap importing (Currently not used)
@@ -36,7 +36,7 @@ public class NotificationTable implements IMainClasses, UI {
     private static int beatmapsFounded = 0;
 
     public static void beatmapImport(String state, int i, String s) {
-        if (engine.currentScene != Scenes.LOADING_SCENE)
+        if (engine.currentScene != Scenes.LOADING)
             return;
 
         if (importing == null)
@@ -50,15 +50,15 @@ public class NotificationTable implements IMainClasses, UI {
                 importing.isProgressBarIndeterminate = false;
                 importing.progressMax = i;
                 beatmapsFounded = i;
-                notificationCenter.add(importing);
+                UI.notificationCenter.add(importing);
                 break;
             case "imported":
                 GameNotification imported = new GameNotification("Beatmap Imported");
                 imported.message = StringTable.format(R.string.message_lib_imported, s);
-                notificationCenter.add(imported);
+                UI.notificationCenter.add(imported);
                 importing.updateProgress(i);
                 if (i == beatmapsFounded) {
-                    notificationCenter.remove(importing);
+                    UI.notificationCenter.remove(importing);
                     importing = null;
                     beatmapsFounded = 0;
                 }
@@ -78,7 +78,7 @@ public class NotificationTable implements IMainClasses, UI {
             online.message = "Logging in...";
             online.showProgressBar = true;
             online.isProgressBarIndeterminate = true;
-            notificationCenter.add(online);
+            UI.notificationCenter.add(online);
             return;
         }
 

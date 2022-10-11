@@ -9,11 +9,11 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.reco1l.interfaces.IMainClasses;
+import com.reco1l.interfaces.IReferences;
 
 // Created by Reco1l on 25/7/22 21:51
 
-public class DialogFragment extends Fragment implements IMainClasses {
+public class DialogFragment extends Fragment implements IReferences {
 
     public View root;
 

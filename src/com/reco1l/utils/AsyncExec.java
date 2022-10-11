@@ -16,6 +16,13 @@ public abstract class AsyncExec {
     private final ExecutorService executor;
     private final Handler handler;
 
+    private boolean isCompleted;
+
+    private final Runnable onComplete = () -> {
+        this.onComplete();
+        this.isCompleted = true;
+    };
+
     //--------------------------------------------------------------------------------------------//
 
     public AsyncExec() {
@@ -28,12 +35,15 @@ public abstract class AsyncExec {
     public abstract void run();
     public abstract void onComplete();
 
+    public void onCancel(boolean wasForced) {}
+
     //--------------------------------------------------------------------------------------------//
 
     public final void execute() {
         this.executor.execute(() -> {
+            this.isCompleted = false;
             this.run();
-            this.handler.post(this::onComplete);
+            this.handler.post(this.onComplete);
         });
     }
 
@@ -43,16 +53,17 @@ public abstract class AsyncExec {
         } else {
             this.executor.shutdown();
         }
-        this.handler.removeCallbacks(this::onComplete);
+        this.handler.removeCallbacks(this.onComplete);
+        this.onCancel(force);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public final boolean isTerminated() {
-        return this.executor.isTerminated();
+    public final boolean isCompleted() {
+        return this.isCompleted;
     }
 
-    public final boolean hasBeenShutdown() {
-        return this.executor.isShutdown();
+    public final boolean isCanceled() {
+        return this.executor.isTerminated();
     }
 }

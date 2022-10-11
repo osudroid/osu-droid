@@ -171,6 +171,9 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 	public void setScene(final Scene pScene) {
 		this.mScene = pScene;
+		if (pScene != null) {
+			pScene.onSceneShow();
+		}
 	}
 
 	public EngineOptions getEngineOptions() {

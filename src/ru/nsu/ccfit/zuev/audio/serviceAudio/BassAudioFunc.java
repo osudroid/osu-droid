@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.reco1l.management.MusicManager;
 import com.un4seen.bass.BASS;
 import com.un4seen.bass.BASS_FX;
 
@@ -128,6 +129,7 @@ public class BassAudioFunc {
             BASS.BASS_ChannelSetSync(channel, BASS.BASS_SYNC_END, 0, new BASS.SYNCPROC() {
                 @Override
                 public void SYNCPROC(int handle, int channel, int data, Object user) {
+                    MusicManager.getInstance().onMusicEnd();
                     if (!isGaming) {
                         broadcastManager.sendBroadcast(new Intent("Notify_next"));
                     } else {

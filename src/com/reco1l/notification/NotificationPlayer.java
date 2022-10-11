@@ -2,7 +2,7 @@ package com.reco1l.notification;
 
 import static androidx.media.app.NotificationCompat.MediaStyle;
 
-import static com.reco1l.interfaces.IMainClasses.mActivity;
+import static com.reco1l.interfaces.IReferences.mActivity;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -22,6 +22,8 @@ import android.support.v4.media.session.MediaSessionCompat;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+
+import com.reco1l.Game;
 
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
@@ -103,7 +105,7 @@ public class NotificationPlayer {
                         break;
                     case ACTION_CLOSE:
                         service.stop();
-                        GlobalManager.getInstance().getMainScene().exit();
+                        Game.exit();
                         break;
                 }
             }

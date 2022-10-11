@@ -34,6 +34,8 @@ import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.EngineMirror;
+import com.reco1l.Game;
+import com.reco1l.management.MusicManager;
 import com.reco1l.ui.fragments.SplashScene;
 import com.reco1l.ui.platform.FragmentPlatform;
 
@@ -303,12 +305,12 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().setInfo("Starting...");
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
-                GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
+                GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene());
                 initPreferences();
                 availableInternalMemory();
                 initAccessibilityDetector();
                 if (willReplay) {
-                    GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
+                    Game.watchReplay(beatmapToAdd);
                     willReplay = false;
                 }
             }
@@ -573,10 +575,10 @@ public class MainActivity extends BaseGameActivity implements
         if (GlobalManager.getInstance().getMainScene() != null) {
             if (songService != null && Build.VERSION.SDK_INT > 10) {
                 if (songService.hideNotification()) {
-                    if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
-                    GlobalManager.getInstance().getMainScene().loadBeatmapInfo();
-                    GlobalManager.getInstance().getMainScene().loadTimeingPoints(false);
-                    GlobalManager.getInstance().getMainScene().musicControl(MainScene.MusicOption.SYNC);
+                    if (wakeLock != null && wakeLock.isHeld()) {
+                        wakeLock.release();
+                    }
+                    MusicManager.getInstance().sync();
                 }
             }
         }
@@ -595,7 +597,7 @@ public class MainActivity extends BaseGameActivity implements
             GlobalManager.getInstance().getGameScene().pause();
         }
         if (GlobalManager.getInstance().getMainScene() != null) {
-            BeatmapInfo beatmapInfo = GlobalManager.getInstance().getMainScene().beatmapInfo;
+            BeatmapInfo beatmapInfo = MusicManager.beatmap;
             if (songService != null && beatmapInfo != null && !songService.isGaming()) {
                 songService.showNotification();
 
@@ -644,6 +646,16 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     @Override
+    public void onResumeGame() {
+        FragmentPlatform.getInstance().handleWindowFocus(true);
+    }
+
+    @Override
+    public void onPauseGame() {
+        FragmentPlatform.getInstance().handleWindowFocus(false);
+    }
+
+    @Override
     public void onAccelerometerChanged(final AccelerometerData arg0) {
         if (this.mEngine == null) {
             return;
@@ -689,8 +701,8 @@ public class MainActivity extends BaseGameActivity implements
         if (GlobalManager.getInstance().getScoring() != null && keyCode == KeyEvent.KEYCODE_BACK
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getScoring().getScene()) {
             GlobalManager.getInstance().getScoring().replayMusic();
-            GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getSongMenu().getScene());
-            GlobalManager.getInstance().getSongMenu().updateScore();
+            GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getSongMenu());
+            // GlobalManager.getInstance().getSongMenu().updateScore();
             ResourceManager.getInstance().getSound("applause").stop();
             GlobalManager.getInstance().getScoring().setReplayID(-1);
             return true;
@@ -698,10 +710,10 @@ public class MainActivity extends BaseGameActivity implements
         if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ENTER)
                 && GlobalManager.getInstance().getEngine() != null
                 && GlobalManager.getInstance().getSongMenu() != null
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()
-                && GlobalManager.getInstance().getSongMenu().getScene().hasChildScene()) {
+                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu()
+                && GlobalManager.getInstance().getSongMenu().hasChildScene()) {
             if (FilterMenu.getInstance().getClass() == FilterMenu.class) {
-                if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == FilterMenu.getInstance()
+                if (GlobalManager.getInstance().getSongMenu().getChildScene() == FilterMenu.getInstance()
                         .getScene()) {
                     if (keyCode == KeyEvent.KEYCODE_ENTER) {
                         InputManager.getInstance().toggleKeyboard();
@@ -718,7 +730,7 @@ public class MainActivity extends BaseGameActivity implements
                 }
             }*/
 
-            if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == ModMenu.getInstance().getScene()) {
+            if (GlobalManager.getInstance().getSongMenu().getChildScene() == ModMenu.getInstance().getScene()) {
                 ModMenu.getInstance().hide();
             }
 
@@ -726,15 +738,15 @@ public class MainActivity extends BaseGameActivity implements
         }
         if (GlobalManager.getInstance().getSongMenu() != null && GlobalManager.getInstance().getEngine() != null
                 && keyCode == KeyEvent.KEYCODE_MENU
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()
-                && GlobalManager.getInstance().getSongMenu().getScene().hasChildScene() == false) {
-            GlobalManager.getInstance().getSongMenu().stopScroll(0);
-            GlobalManager.getInstance().getSongMenu().showPropertiesMenu(null);
+                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu()
+                && GlobalManager.getInstance().getSongMenu().hasChildScene() == false) {
+            // GlobalManager.getInstance().getSongMenu().stopScroll(0);
+            //GlobalManager.getInstance().getSongMenu().showPropertiesMenu(null);
             return true;
         }
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (GlobalManager.getInstance().getEngine() != null && GlobalManager.getInstance().getSongMenu() != null &&
-                    GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()) {
+                    GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu()) {
 
                 //SongMenu 界面按返回按钮（系统按钮）
                 GlobalManager.getInstance().getSongMenu().back();
@@ -744,7 +756,7 @@ public class MainActivity extends BaseGameActivity implements
                     return true;
                 }
 
-                GlobalManager.getInstance().getMainScene().showExitDialog();
+                // GlobalManager.getInstance().getMainScene().showExitDialog();
             }
             return true;
         }
@@ -766,8 +778,8 @@ public class MainActivity extends BaseGameActivity implements
         if(GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
             GlobalManager.getInstance().getGameScene().quit();
         }
-        GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
-        GlobalManager.getInstance().getMainScene().exit();
+        GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene());
+        Game.exit();
     }
 
     private void initAccessibilityDetector() {

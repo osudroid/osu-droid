@@ -50,7 +50,7 @@ public class DifficultyReCalculator {
             return false;
         }
 
-        if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track) {
+        if (GlobalManager.getInstance().getSelectedTrack() != track) {
             return false;
         }
 
@@ -237,7 +237,7 @@ public class DifficultyReCalculator {
         if (!init(track)) {
             return 0f;
         }
-        if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track){
+        if (GlobalManager.getInstance().getSelectedTrack() != track){
             return 0f;
         }
         try {
@@ -250,7 +250,7 @@ public class DifficultyReCalculator {
             if (!hitObjects.isEmpty()){
                 hitObjects.clear();
             }
-            if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != track){
+            if (GlobalManager.getInstance().getSelectedTrack() != track){
                 return 0f;
             }
             return GameHelper.Round(star, 2);

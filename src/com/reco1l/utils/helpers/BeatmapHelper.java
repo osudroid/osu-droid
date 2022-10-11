@@ -6,8 +6,8 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
 import com.edlplan.framework.math.FMath;
-import com.reco1l.BitmapManager;
-import com.reco1l.interfaces.IMainClasses;
+import com.reco1l.management.BitmapManager;
+import com.reco1l.interfaces.IReferences;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +19,7 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 
 // Created by Reco1l on 1/8/22 05:27
 
-public class BeatmapHelper implements IMainClasses {
+public class BeatmapHelper implements IReferences {
 
     private static final String COMPRESSED_BG_SUFFIX = "bg@";
 

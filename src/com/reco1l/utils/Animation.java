@@ -2,7 +2,6 @@ package com.reco1l.utils;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
@@ -11,7 +10,7 @@ import android.view.ViewPropertyAnimator;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
-import com.reco1l.interfaces.IMainClasses;
+import com.reco1l.interfaces.IReferences;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,7 @@ import java.util.TimerTask;
 /**
  * Simplifies the usage of ViewPropertyAnimator and ValueAnimator.
  */
-public class Animation implements IMainClasses {
+public class Animation implements IReferences {
 
     private final static long DEFAULT_DURATION = 1000;
 

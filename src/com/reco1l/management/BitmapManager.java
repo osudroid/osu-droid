@@ -1,4 +1,4 @@
-package com.reco1l;
+package com.reco1l.management;
 
 import static com.reco1l.interfaces.ITextures.fileNames;
 
@@ -8,7 +8,7 @@ import android.util.Log;
 
 import androidx.core.math.MathUtils;
 
-import com.reco1l.interfaces.IMainClasses;
+import com.reco1l.interfaces.IReferences;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,7 +21,7 @@ import java.util.Map;
 
 // Created by Reco1l on 22/8/22 21:38
 
-public class BitmapManager implements IMainClasses {
+public class BitmapManager implements IReferences {
     public static BitmapManager instance;
 
     private final Map<String, Bitmap> bitmaps = new HashMap<>();
@@ -49,13 +49,13 @@ public class BitmapManager implements IMainClasses {
                         InputStream stream = mActivity.getAssets().open("gfx/" + asset);
                         bitmaps.put(name, BitmapFactory.decodeStream(stream));
                     } catch (IOException e) {
-                        Log.e("BitmapManager", "Failed to load asset :" + name);
+                        Log.e("BitmapManager", "Failed to load asset: " + name);
                         e.printStackTrace();
                     }
                 }
             }
         } catch (IOException e) {
-            Log.e("BitmapManager", "Failed to load game assets!!");
+            Log.e("BitmapManager", "Failed to load game assets! \n");
             e.printStackTrace();
         }
 
@@ -85,7 +85,7 @@ public class BitmapManager implements IMainClasses {
     //--------------------------------------------------------------------------------------------//
 
     public void put(String key, Bitmap bitmap) {
-        bitmaps.put(key, bitmap);
+        this.bitmaps.put(key, bitmap);
     }
 
     public Bitmap get(String name) {
@@ -97,7 +97,6 @@ public class BitmapManager implements IMainClasses {
     }
 
     public boolean contains(String name) {
-        return bitmaps.containsKey(name);
+        return this.bitmaps.containsKey(name);
     }
-
 }

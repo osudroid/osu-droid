@@ -14,7 +14,7 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Resources;
 import com.reco1l.utils.ViewTouchHandler;
-import com.reco1l.interfaces.IMainClasses;
+import com.reco1l.interfaces.IReferences;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.listeners.TouchListener;
 
@@ -27,7 +27,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 // Created by Reco1l on 18/6/22 01:20
 
 public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.VH>
-        implements IMainClasses {
+        implements IReferences {
 
     private static final String AVATAR_URL = "https://" + OnlineManager.hostname + "/user/avatar/?s=100&id=";
     private final List<Scoreboard.Item> data;

@@ -3,10 +3,11 @@ package com.reco1l.ui.data.tables;
 import android.content.Intent;
 import android.widget.TextView;
 
+import com.reco1l.Game;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
 import com.reco1l.ui.custom.DialogFragment;
-import com.reco1l.interfaces.IMainClasses;
+import com.reco1l.interfaces.IReferences;
 
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
@@ -14,7 +15,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 25/7/22 22:30
 
-public class DialogTable implements IMainClasses {
+public class DialogTable implements IReferences {
 
     // Builder for Author dialog
     //--------------------------------------------------------------------------------------------//
@@ -62,7 +63,7 @@ public class DialogTable implements IMainClasses {
         builder.setCloseMode(false);
         builder.addButton("Accept", dialog -> {
             dialog.close();
-            global.getMainScene().exit();
+            Game.exit();
         });
         builder.addButton("Cancel", Dialog::close);
 

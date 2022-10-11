@@ -10,8 +10,8 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.ViewTouchHandler;
-import com.reco1l.interfaces.IMainClasses;
-import com.reco1l.ui.platform.UI;
+import com.reco1l.interfaces.IReferences;
+import com.reco1l.UI;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +20,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 1/7/22 00:04
 
-public class GameNotification implements IMainClasses, UI {
+public class GameNotification implements IReferences {
 
     public View layout;
     public Drawable icon;
@@ -68,7 +68,7 @@ public class GameNotification implements IMainClasses, UI {
     }
 
     public boolean isAdded() {
-        return notificationCenter.container.indexOfChild(layout) != -1;
+        return UI.notificationCenter.container.indexOfChild(layout) != -1;
     }
 
     public boolean hasPriority() {
@@ -96,7 +96,7 @@ public class GameNotification implements IMainClasses, UI {
                 if (onDismiss != null) {
                     onDismiss.run();
                 }
-                notificationCenter.remove(this);
+                UI.notificationCenter.remove(this);
             }).apply(close);
         }
 
@@ -120,8 +120,8 @@ public class GameNotification implements IMainClasses, UI {
      */
     public void update() {
         mActivity.runOnUiThread(() -> {
-            if (!notificationCenter.isShowing) {
-                notificationCenter.createBadgeNotification(this);
+            if (!UI.notificationCenter.isShowing) {
+                UI.notificationCenter.createBadgeNotification(this);
                 return;
             }
             new Animation(innerBody).moveX(0, -50).fade(1, 0)
@@ -135,7 +135,7 @@ public class GameNotification implements IMainClasses, UI {
 
     public void updateProgress(int progress) {
         this.progress = progress;
-        if (notificationCenter.isShowing && progressBar != null)
+        if (UI.notificationCenter.isShowing && progressBar != null)
             mActivity.runOnUiThread(() -> progressBar.setProgress(progress));
     }
 }

@@ -15,10 +15,11 @@ import androidx.preference.SeekBarPreference;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.SkinPathPreference;
 import com.google.android.material.snackbar.Snackbar;
-import com.reco1l.Scenes;
+import com.reco1l.enums.Scenes;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
 import com.reco1l.ui.data.tables.DialogTable;
+import com.reco1l.UI;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Resources;
@@ -176,8 +177,8 @@ public class SettingsMenu extends UIFragment {
         onlineHelper.update();
         OnlineScoring.getInstance().login();
 
-        if (reloadBackground && engine.currentScene == Scenes.MAIN_SCENE) {
-            global.getMainScene().loadTimeingPoints(false);
+        if (reloadBackground && engine.currentScene == Scenes.MAIN) {
+            // global.getMainScene().loadTimeingPoints(false);
             reloadBackground = false;
         }
 
@@ -331,7 +332,7 @@ public class SettingsMenu extends UIFragment {
                 if (background != null)
                     background.setOnPreferenceChangeListener((p, val) -> {
                         if (Config.getBackgroundQuality() != Integer.parseInt(val.toString()))
-                            settingsPanel.reloadBackground = true;
+                            UI.settingsPanel.reloadBackground = true;
                         return true;
                     });
             }

@@ -9,7 +9,7 @@ import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.replay.OdrDatabase;
 import com.edlplan.ui.fragment.PropsMenuFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
-import com.reco1l.ui.platform.UI;
+import com.reco1l.UI;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -41,7 +41,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class SongMenu implements IUpdateHandler, MenuItemListener, UI {
+public class SongMenu implements IUpdateHandler {
     private final static Boolean musicMutex = true;
     private final Boolean backgroundMutex = true;
     public Scene scene;
@@ -73,18 +73,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, UI {
                 GlobalManager.getInstance().getSongService().stop();
             }
         }
-    }
-
-    public void setScoringScene(final ScoringScene ss) {
-        scoreScene = ss;
-    }
-
-
-    public void init(final Activity context, final Engine engine,
-                     final GameScene pGame) {
-        this.engine = engine;
-        game = pGame;
-        this.context = context;
     }
 
     public void loadFilter(IFilterMenu filterMenu) {
@@ -208,154 +196,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, UI {
 
     public void onUpdate(final float pSecondsElapsed) {
         secPassed += pSecondsElapsed;
-        increaseVolume();
-        increaseBackgroundLuminance(pSecondsElapsed);
-        beatmapList.update();
 
         secondsSinceLastSelect += pSecondsElapsed;
-
-        expandSelectedItem(pSecondsElapsed);
-    }
-
-    public void increaseVolume() {
-        if (GlobalManager.getInstance().getSongService() != null) {
-            synchronized (musicMutex) {
-                if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING && GlobalManager.getInstance().getSongService().getVolume() < Config.getBgmVolume()) {
-                    float vol = Math.min(1, GlobalManager.getInstance().getSongService().getVolume() + 0.01f);
-                    GlobalManager.getInstance().getSongService().setVolume(vol);
-                }
-            }
-        }
-    }
-
-    public void increaseBackgroundLuminance(final float pSecondsElapsed) {
-        if (bg != null) {
-            synchronized (backgroundMutex) {
-                if (bg != null && bg.getRed() < 1) {
-                    final float col = Math.min(1, bg.getRed() + pSecondsElapsed);
-                    bg.setColor(col, col, col);
-                }
-            }
-        }
-    }
-
-    public void expandSelectedItem(float pSecondsElapsed) {
-        if (selectedItem != null) {
-            if (selectedItem.percentAppeared < 1) {
-                selectedItem.percentAppeared += 2 * pSecondsElapsed;
-            } else {
-                selectedItem.percentAppeared = 1;
-            }
-            selectedItem.update(pSecondsElapsed);
-        }
-    }
-
-    public void reset() {}
-
-    public void select(final MenuItem item) {
-        secondsSinceLastSelect = 0;
-        if (selectedItem != null) {
-            selectedItem.deselect();
-        }
-
-        selectedItem = item;
-        selectedTrack = null;
-    }
-
-    public void updateInfo(TrackInfo track) {
-        beatmapPanel.updateProperties(track);
-    }
-
-    public void selectTrack(final TrackInfo track, boolean reloadBG) {
-
-        if (selectedTrack == track) {
-            synchronized (bgLoaded) {
-                if (!bgLoaded) {
-                    return;
-                }
-            }
-
-            ResourceManager.getInstance().getSound("menuhit").play();
-            stopMusic();
-            game.startGame(track, null);
-            unload();
-            return;
-        }
-        isSelectComplete = false;
-        selectedTrack = track;
-        EdExtensionHelper.onSelectTrack(selectedTrack);
-        GlobalManager.getInstance().setSelectedTrack(track);
-        updateInfo(track);
-        beatmapPanel.updateScoreboard();
-
-        final int quality = Config.getBackgroundQuality();
-        synchronized (backgroundMutex) {
-
-            if (!reloadBG && (track.getBackground() == null || bgName.equals(track.getBackground()))) {
-                isSelectComplete = true;
-                return;
-            }
-            bgName = track.getBackground();
-            bg = null;
-            bgLoaded = false;
-            scene.setBackground(new ColorBackground(0, 0, 0));
-            if (quality == 0) {
-                Config.setBackgroundQuality(4);
-            }
-        }
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
-
-            public void run() {
-                // Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                synchronized (backgroundMutex) {
-                    final TextureRegion tex = Config.isSafeBeatmapBg() || track.getBackground() == null?
-                        ResourceManager.getInstance().getTexture("menu-background") :
-                        ResourceManager.getInstance().loadBackground(bgName);
-                    if (tex != null) {
-                        float height = tex.getHeight();
-                        height *= Config.getRES_WIDTH()
-                                / (float) tex.getWidth();
-                        bg = new Sprite(0,
-                                (Config.getRES_HEIGHT() - height) / 2, Config
-                                .getRES_WIDTH(), height, tex);
-                        bg.setColor(0, 0, 0);
-                    }
-
-                    // run()
-                    SyncTaskManager.getInstance().run(() -> {
-                        synchronized (backgroundMutex) {
-                            if (bg == null) {
-                                final TextureRegion tex1 = ResourceManager
-                                        .getInstance().getTexture("menu-background");
-                                float height = tex1.getHeight();
-                                height *= Config.getRES_WIDTH()
-                                        / (float) tex1.getWidth();
-                                bg = new Sprite(
-                                        0,
-                                        (Config.getRES_HEIGHT() - height) / 2,
-                                        Config.getRES_WIDTH(), height, tex1);
-                                bgName = "";
-                            }
-                            scene.setBackground(new SpriteBackground(bg));
-                            Config.setBackgroundQuality(quality);
-                            synchronized (bgLoaded) {
-                                bgLoaded = true;
-                            }
-                        }
-                    });// SyncTask.run
-
-                }
-            }
-
-
-            public void onComplete() {
-                isSelectComplete = true;
-            }// onComplete
-        });
-    }
-
-    public void stopScroll(final float y) {
     }
 
     public void updateScore() {
@@ -403,23 +245,18 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, UI {
         engine.setScene(scoreScene.getScene());
     }
 
-    public void unload() {
-    }
-
     public void back() {
         unbindDataBaseChangedListener();
-        GlobalManager.getInstance().getMainScene().show();
+        GlobalManager.getInstance().getSongService().setGaming(false);
+        GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene());
     }
 
     public void bindDataBaseChangedListener() {
-        OdrDatabase.get().setOnDatabaseChangedListener(beatmapPanel::updateScoreboard);
+        OdrDatabase.get().setOnDatabaseChangedListener(UI.beatmapPanel::updateScoreboard);
     }
 
     public void unbindDataBaseChangedListener() {
         OdrDatabase.get().setOnDatabaseChangedListener(null);
-    }
-
-    public void setY(final float y) {
     }
 
     public void stopMusic() {
@@ -428,52 +265,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, UI {
                 GlobalManager.getInstance().getSongService().stop();
             }
         }
-    }
-
-    public void playMusic(final String filename, final int previewTime) {
-        if (!Config.isPlayMusicPreview()) {
-            return;
-        }
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
-
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                synchronized (musicMutex) {
-                    if (GlobalManager.getInstance().getSongService() != null) {
-                        GlobalManager.getInstance().getSongService().stop();
-                    }
-
-                    try {
-//                        GlobalManager.getInstance().getSongService().preLoadWithLoop(filename);
-                        GlobalManager.getInstance().getSongService().preLoad(filename);
-                        GlobalManager.getInstance().getSongService().play();
-                        GlobalManager.getInstance().getSongService().setVolume(0);
-                        if (previewTime >= 0) {
-                            GlobalManager.getInstance().getSongService().seekTo(previewTime);
-                        } else {
-                            GlobalManager.getInstance().getSongService().seekTo(GlobalManager.getInstance().getSongService().getLength() / 2);
-                        }
-                    } catch (final Exception e) {
-                        Debug.e("LoadingMusic: " + e.getMessage(), e);
-                    }
-
-                }
-            }
-
-
-            public void onComplete() {
-                // TODO Auto-generated method stub
-
-            }
-        });
-    }
-
-    public boolean isSelectAllowed() {
-        if (!bgLoaded) {
-            return false;
-        }
-        return secondsSinceLastSelect > 0.5f;
     }
 
     public void showPropertiesMenu(MenuItem item) {
@@ -491,38 +282,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, UI {
         //ScorePropsMenu.getInstance().setSongMenu(SongMenu.this);
         //ScorePropsMenu.getInstance().setScoreId(scoreId);
         //scene.setChildScene(ScorePropsMenu.getInstance().getScene(), false, true, true);
-    }
-
-    public void select() {
-        if (GlobalManager.getInstance().getMainScene().getBeatmapInfo() != null) {
-            BeatmapInfo beatmapInfo = GlobalManager.getInstance().getMainScene().getBeatmapInfo();
-            /*for (int i = 0; i < items.size(); i++) {
-                if (items.get(i).getBeatmap().getArtist().equals(beatmapInfo.getArtist()) &&
-                        items.get(i).getBeatmap().getTitle().equals(beatmapInfo.getTitle()) &&
-                        items.get(i).getBeatmap().getCreator().equals(beatmapInfo.getCreator())) {
-                    secondsSinceLastSelect = 2;
-                    items.get(i).select(false, true);
-                    break;
-                }
-            }*/
-        }
-    }
-
-    public TrackInfo getSelectedTrack() {
-        return beatmapList.selectedTrack;
-    }
-
-    public boolean checkBG(String filePath) {
-        if (filePath == null) return false;
-        if (filePath.trim().equals("")) return false;
-
-        BitmapFactory.Options bgOption = new BitmapFactory.Options();
-        bgOption.inJustDecodeBounds = true;
-        int w = BitmapFactory.decodeFile(filePath).getWidth();
-        int h = BitmapFactory.decodeFile(filePath).getHeight();
-        bgOption.inJustDecodeBounds = false;
-        bgOption = null;
-        return (w * h) > 0;
     }
 
     private void tryReloadMenuItems(SortOrder order) {

@@ -1,12 +1,14 @@
-package com.reco1l.entity;
+package com.reco1l.andengine.entity;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 
 import androidx.palette.graphics.Palette;
 
+import com.reco1l.andengine.IAttachableEntity;
+import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.listeners.ModifierListener;
 
 import org.anddev.andengine.entity.IEntity;
@@ -15,12 +17,10 @@ import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.modifier.IModifier;
 
-import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 
-public class Spectrum {
+public class Spectrum implements IAttachableEntity {
 
-    private final Drawing spectrum, shadow;
     private static int lines;
 
     private static final int
@@ -28,10 +28,15 @@ public class Spectrum {
             lineDistance = 1,
             peakMultiplier = 600;
 
+    private final Drawing spectrum, shadow;
+
+    private Bitmap bitmap;
+    private AsyncExec task;
+
     //--------------------------------------------------------------------------------------------//
 
     public Spectrum() {
-        lines = Config.getRES_WIDTH() / (lineWidth + lineDistance) + 1;
+        lines = screenWidth / (lineWidth + lineDistance) + 1;
 
         spectrum = new Drawing();
         shadow = new Drawing();
@@ -39,6 +44,7 @@ public class Spectrum {
 
     //--------------------------------------------------------------------------------------------//
 
+    @Override
     public void draw(Scene scene) {
         spectrum.draw(scene);
         shadow.draw(scene);
@@ -54,14 +60,22 @@ public class Spectrum {
         shadow.clear(force);
     }
 
+    public void setColor(int r, int g, int b) {
+        spectrum.setColor(r, g, b);
+        shadow.setColor(r, g, b);
+    }
+
+    @Override
     public void update() {
         float[] fft = GlobalManager.getInstance().getSongService().getSpectrum();
 
-        if (fft == null)
-            return;
+        if (fft != null) {
+            spectrum.fft = fft;
+            shadow.fft = fft;
 
-        spectrum.update(fft);
-        shadow.update(fft);
+            spectrum.update();
+            shadow.update();
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -76,41 +90,61 @@ public class Spectrum {
 
     public void updateColor(String background) {
         if (background == null || Build.VERSION.SDK_INT < 24) {
-            spectrum.setColor(1, 1, 1);
-            shadow.setColor(1, 1, 1);
+            setColor(1, 1, 1);
             return;
         }
 
-        BitmapDrawable drw = (BitmapDrawable) Drawable.createFromPath(background);
-        if (drw == null || drw.getBitmap() == null) {
-            spectrum.setColor(1, 1, 1);
-            shadow.setColor(1, 1, 1);
-            return;
+        if (task != null) {
+            task.cancel(true);
+            if (bitmap != null) {
+                bitmap.recycle();
+                bitmap = null;
+            }
+            task = null;
         }
 
-        Palette palette = Palette.from(drw.getBitmap()).generate();
+        task = new AsyncExec() {
+            @Override
+            public void run() {
+                bitmap = BitmapFactory.decodeFile(background);
+                if (bitmap == null) {
+                    setColor(1, 1, 1);
+                    return;
+                }
 
-        if (isDark(palette.getDominantColor(0xFFFFFFFF))) {
-            spectrum.setColor(1, 1, 1);
-            shadow.setColor(1, 1, 1);
-        } else {
-            spectrum.setColor(0, 0, 0);
-            shadow.setColor(0, 0, 0);
-        }
+                Palette palette = Palette.from(bitmap).generate();
 
-        drw.getBitmap().recycle();
+                if (isDark(palette.getDominantColor(0))) {
+                    setColor(1, 1, 1);
+                } else {
+                    setColor(0, 0, 0);
+                }
+            }
+
+            @Override
+            public void onComplete() {
+                if (bitmap != null) {
+                    bitmap.recycle();
+                    bitmap = null;
+                }
+                task = null;
+            }
+        };
+        task.execute();
     }
 
-    private static class Drawing {
+    private static class Drawing implements IAttachableEntity {
 
         private final Rectangle[] spectrum;
 
-        public int downRateMultiplier;
-        public float alpha;
+        private final float[] peakLevel;
+        private final float[] peakDownRate;
 
-        private final float[] peakLevel, peakDownRate;
+        private float[] fft;
+
+        private float alpha;
+        private int downRateMultiplier;
         private boolean isForcedClearInProgress = false;
-
 
         //--------------------------------------------------------------------------------------------//
 
@@ -120,16 +154,18 @@ public class Spectrum {
             spectrum = new Rectangle[Spectrum.lines];
         }
 
-        private void draw(Scene scene) {
+        @Override
+        public void draw(Scene scene) {
             for (int i = 0; i < Spectrum.lines; i++) {
-                spectrum[i] = new Rectangle((Spectrum.lineWidth + Spectrum.lineDistance) * i, 0,
-                        Spectrum.lineWidth, 0);
+                spectrum[i] = new Rectangle(
+                        (Spectrum.lineWidth + Spectrum.lineDistance) * i, 0, Spectrum.lineWidth, 0
+                );
                 spectrum[i].setAlpha(0);
                 scene.attachChild(spectrum[i], 1);
             }
         }
 
-        private void clear(boolean force) {
+        public void clear(boolean force) {
             isForcedClearInProgress = force;
 
             for (int i = 0; i < Spectrum.lines; i++) {
@@ -150,11 +186,13 @@ public class Spectrum {
             }
         }
 
-        private void update(float[] fft) {
-
+        @Override
+        public void update() {
             for (int i = 0; i < Spectrum.lines; i++) {
-                if (i > fft.length - 1)
+
+                if (i > fft.length - 1) {
                     break;
+                }
 
                 float peak = fft[i + 1] * Spectrum.peakMultiplier;
 
@@ -165,8 +203,9 @@ public class Spectrum {
                     peakLevel[i] = Math.max(peakLevel[i] - peakDownRate[i], 0);
                 }
                 spectrum[i].setHeight(peakLevel[i]);
-                spectrum[i].setPosition((Spectrum.lineWidth + Spectrum.lineDistance) * i,
-                        Config.getRES_HEIGHT() - spectrum[i].getHeight());
+                spectrum[i].setPosition(
+                        (Spectrum.lineWidth + Spectrum.lineDistance) * i, screenHeight - spectrum[i].getHeight()
+                );
 
                 if (spectrum[i].getAlpha() != alpha && !isForcedClearInProgress) {
                     spectrum[i].clearEntityModifiers();
@@ -175,7 +214,7 @@ public class Spectrum {
             }
         }
 
-        private void setColor(int r, int g, int b) {
+        public void setColor(int r, int g, int b) {
             for (int i = 0; i < Spectrum.lines; i++) {
                 spectrum[i].setColor(r, g, b);
             }

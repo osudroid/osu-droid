@@ -15,7 +15,7 @@ import com.edlplan.ui.TriangleEffectView;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.helpers.BeatmapHelper;
-import com.reco1l.ui.platform.UI;
+import com.reco1l.UI;
 import com.reco1l.utils.ViewTouchHandler;
 
 import java.util.List;
@@ -24,7 +24,7 @@ import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.VH> implements UI {
+public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.VH> {
 
     private final List<TrackInfo> tracks;
 
@@ -91,14 +91,14 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.VH> 
         //----------------------------------------------------------------------------------------//
 
         public void select() {
-            if (beatmapList.selectedTrackHolder == this)
+            if (UI.beatmapList.selectedTrackHolder == this)
                 return;
 
-            if (beatmapList.selectedTrackHolder != null) {
-                beatmapList.selectedTrackHolder.deselect();
+            if (UI.beatmapList.selectedTrackHolder != null) {
+                UI.beatmapList.selectedTrackHolder.deselect();
             }
 
-            triangles = new TriangleEffectView(beatmapList.getContext());
+            triangles = new TriangleEffectView(UI.beatmapList.getContext());
             triangles.setTriangleColor(color);
             triangles.setAlpha(0);
 
@@ -109,7 +109,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.VH> 
             new Animation(triangles).fade(0, 0.3f)
                     .play(200);
 
-            beatmapList.selectedTrackHolder = this;
+            UI.beatmapList.selectedTrackHolder = this;
         }
 
         public void deselect() {
@@ -128,7 +128,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.VH> 
         private void bind(TrackInfo track) {
             this.track = track;
 
-            new ViewTouchHandler(() -> beatmapList.setSelected(track)).apply(body);
+            new ViewTouchHandler(() -> UI.beatmapList.setSelected(track)).apply(body);
 
             difficulty.setText(track.getMode());
             stars.setText("" + GameHelper.Round(track.getDifficulty(), 2));

@@ -385,6 +385,10 @@ public class Scene extends Entity {
 		return this.mChildScene.onSceneTouchEvent(pSceneTouchEvent);
 	}
 
+	public void onSceneShow() {
+
+	}
+
 	@Override
 	public void reset() {
 		super.reset();

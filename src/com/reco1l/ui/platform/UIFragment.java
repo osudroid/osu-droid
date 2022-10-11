@@ -12,11 +12,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.reco1l.Scenes;
+import com.reco1l.enums.Scenes;
 import com.reco1l.utils.listeners.TouchListener;
 import com.reco1l.utils.ViewTouchHandler;
 import com.reco1l.utils.Resources;
-import com.reco1l.interfaces.IMainClasses;
+import com.reco1l.interfaces.IReferences;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +26,9 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 22/6/22 02:26
 
-public abstract class UIFragment extends Fragment implements IMainClasses, UI {
+public abstract class UIFragment extends Fragment implements IReferences {
+
+    public static UIFragment instance;
 
     public boolean isShowing = false;
 
@@ -41,11 +43,14 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
     protected int screenHeight = Config.getRES_HEIGHT();
 
     protected final Map<View, ViewTouchHandler> registeredViews;
+
+    private final String tag;
     private final Runnable close = this::close;
 
     //--------------------------------------------------------------------------------------------//
 
     public UIFragment() {
+        tag = this.getClass().getSimpleName() + "@" + this.hashCode();
         registeredViews = new HashMap<>();
         if (getParent() != null) {
             platform.assignToScene(getParent(), this);
@@ -137,10 +142,16 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
      * animations call it at the end of the animation, otherwise the animation will broke up.
      */
     public void close() {
-        if (!isShowing)
+        if (!isShowing) {
+            Log.i("FragmentPlatform", "Fragment " + tag + " isn't showing.");
             return;
+        }
         rootView.removeCallbacks(close);
-        platform.removeFragment(this);
+        if (platform.removeFragment(this)) {
+            Log.i("FragmentPlatform", "Removed fragment " + tag);
+        } else {
+            Log.i("FragmentPlatform", "Unable to remove fragment " + tag);
+        }
         isShowing = false;
         isLoaded = false;
         unbindTouchListeners();
@@ -149,11 +160,16 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
     }
 
     public void show() {
-        if (isShowing)
+        if (isShowing) {
+            Log.i("FragmentPlatform", "Fragment " + tag + " is already showing.");
             return;
+        }
         isLoaded = false;
-        String tag = this.getClass().getName() + "@" + this.hashCode();
-        platform.addFragment(this, tag);
+        if (platform.addFragment(this, tag)) {
+            Log.i("FragmentPlatform", "Added fragment " + tag);
+        } else {
+            Log.i("FragmentPlatform", "Unable to add fragment " + tag);
+        }
         isShowing = true;
         System.gc();
     }
@@ -203,8 +219,7 @@ public abstract class UIFragment extends Fragment implements IMainClasses, UI {
 
         if (view != null && !registeredViews.containsKey((T) view)) {
             registeredViews.put((T) view, null);
-            Log.i("UIFragment", "Found view: " + getPrefix() + "_" + id
-                    + " (registered views: " + registeredViews.size() + ")");
+            // Log.i("UIFragment", "Found view: " + getPrefix() + "_" + id + " (registered views: " + registeredViews.size() + ")");
         }
         return (T) view;
     }

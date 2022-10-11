@@ -212,7 +212,7 @@ public class ModMenu implements IModSwitcher {
     }
 
     private void changeMultiplierText() {
-        GlobalManager.getInstance().getSongMenu().updateInfo(selectedTrack);
+        //GlobalManager.getInstance().getSongMenu().updateInfo(selectedTrack);
         //calculateAble = true;
         float mult = 1;
         for (GameMod m : mod) {

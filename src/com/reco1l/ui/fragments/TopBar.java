@@ -7,8 +7,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.material.imageview.ShapeableImageView;
-import com.reco1l.Scenes;
+import com.reco1l.enums.Scenes;
 import com.reco1l.ui.custom.Dialog;
+import com.reco1l.UI;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.data.tables.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
@@ -25,9 +26,10 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class TopBar extends UIFragment {
 
+    public static TopBar instance;
+
     public View body;
     public TextView author;
-
     public UserBox userBox;
     public MusicButton musicButton;
 
@@ -53,7 +55,7 @@ public class TopBar extends UIFragment {
 
     @Override
     protected Scenes[] getParents() {
-        return new Scenes[] {Scenes.MAIN_SCENE, Scenes.SONG_MENU, Scenes.SCORING};
+        return new Scenes[] {Scenes.MAIN, Scenes.LIST, Scenes.SCORING};
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -76,11 +78,11 @@ public class TopBar extends UIFragment {
         new Animation(container).moveX(-60, 0).fade(0, 1).runOnStart(() -> {
             switch (engine.currentScene) {
 
-                case MAIN_SCENE:
+                case MAIN:
                     musicButton.setVisibility(true);
                     break;
 
-                case SONG_MENU:
+                case LIST:
                     back.setVisibility(View.VISIBLE);
                     break;
 
@@ -91,7 +93,7 @@ public class TopBar extends UIFragment {
             buttons.update(engine.currentScene);
         }).delay(200).play(200);
 
-        showAuthorText(engine.currentScene == Scenes.MAIN_SCENE);
+        showAuthorText(engine.currentScene == Scenes.MAIN);
         lastScene = engine.currentScene;
     }
 
@@ -114,7 +116,7 @@ public class TopBar extends UIFragment {
                 .play(300);
 
         author.setAlpha(0);
-        showAuthorText(engine.currentScene == Scenes.MAIN_SCENE);
+        showAuthorText(engine.currentScene == Scenes.MAIN);
 
         if (library.getSizeOfBeatmaps() <= 0) {
             musicButton.setVisibility(false);
@@ -122,8 +124,8 @@ public class TopBar extends UIFragment {
 
         author.setText(String.format("osu!droid %s", BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")"));
 
-        bindTouchListener(find("inbox"), notificationCenter::altShow);
-        bindTouchListener(find("settings"), settingsPanel::altShow);
+        bindTouchListener(find("inbox"), UI.notificationCenter::altShow);
+        bindTouchListener(find("settings"), UI.settingsPanel::altShow);
 
         bindTouchListener(author, new TouchListener() {
             public void onPressUp() {
@@ -198,7 +200,7 @@ public class TopBar extends UIFragment {
             if (!parent.isShowing)
                 return;
 
-            if (scene == Scenes.SONG_MENU) {
+            if (scene == Scenes.LIST) {
                 mods.setVisibility(View.VISIBLE);
                 search.setVisibility(View.VISIBLE);
                 shuffle.setVisibility(View.VISIBLE);
@@ -220,7 +222,7 @@ public class TopBar extends UIFragment {
             arrow = parent.find("musicArrow");
             text = parent.find("musicText");
 
-            topBar.bindTouchListener(view, musicPlayer::altShow);
+            UI.topBar.bindTouchListener(view, UI.musicPlayer::altShow);
         }
 
         public void update(BeatmapInfo beatmap) {
@@ -270,7 +272,7 @@ public class TopBar extends UIFragment {
             name = parent.find("playerName");
             avatar = parent.find("avatar");
 
-            topBar.bindTouchListener(body, userProfile::altShow);
+            UI.topBar.bindTouchListener(body, UI.userProfile::altShow);
         }
 
         public void update(boolean clear) {

@@ -15,8 +15,8 @@ import androidx.fragment.app.Fragment;
 
 import com.edlplan.framework.easing.Easing;
 import com.reco1l.ui.data.GameNotification;
+import com.reco1l.UI;
 import com.reco1l.ui.platform.UIFragment;
-import com.reco1l.ui.platform.UIManager;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.ViewTouchHandler;
 import com.reco1l.utils.Resources;
@@ -33,15 +33,17 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 //TODO replace with RecyclerView due to performance issues when are too many notifications
 public class NotificationCenter extends UIFragment {
 
+    public static NotificationCenter instance;
     public static List<GameNotification> notifications;
 
-    protected BadgeNotification currentPopup;
     public LinearLayout container;
 
     private boolean isAllowedPopups = true;
+    private float bodyWidth;
+
+    private BadgeNotification currentPopup;
     private TextView emptyText;
     private View body, layer;
-    private float bodyWidth;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -192,7 +194,7 @@ public class NotificationCenter extends UIFragment {
 
     @Override
     public void show() {
-        platform.close(UIManager.getExtras());
+        platform.close(UI.getExtras());
         if (currentPopup != null)
             currentPopup.dismiss();
         super.show();
@@ -281,14 +283,17 @@ public class NotificationCenter extends UIFragment {
             body = root.findViewById(R.id.npop_body);
             new ViewTouchHandler(new TouchListener() {
                 public void onPressUp() {
-                    notificationCenter.show();
+                    UI.notificationCenter.show();
                 }
             }).apply(body);
 
             TextView text = root.findViewById(R.id.npop_text);
             text.setText(header + " - " + message.replace("\n", " "));
 
-            body.postDelayed(() -> { dismiss(); notificationCenter.currentPopup = null; }, 3000);
+            body.postDelayed(() -> {
+                dismiss();
+                UI.notificationCenter.currentPopup = null;
+                }, 3000);
             new Animation(body).moveY(-50, 0).fade(0, 1).play(150);
 
             return root;
@@ -297,7 +302,7 @@ public class NotificationCenter extends UIFragment {
         //----------------------------------------------------------------------------------------//
 
         public void show() {
-            notificationCenter.currentPopup = this;
+            UI.notificationCenter.currentPopup = this;
             if (isAdded())
                 return;
             mActivity.runOnUiThread(() -> platform.manager.beginTransaction()
@@ -306,7 +311,7 @@ public class NotificationCenter extends UIFragment {
         }
 
         public void dismiss() {
-            notificationCenter.currentPopup = null;
+            UI.notificationCenter.currentPopup = null;
             new Animation(body).moveY(0, -50).fade(1, 0)
                     .runOnEnd(() -> platform.manager.beginTransaction().remove(this).commit())
                     .play(150);

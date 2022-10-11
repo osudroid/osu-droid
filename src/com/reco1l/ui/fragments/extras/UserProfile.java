@@ -9,8 +9,8 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.fragment.WebViewFragment;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.reco1l.UI;
 import com.reco1l.ui.platform.UIFragment;
-import com.reco1l.ui.platform.UIManager;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Resources;
 
@@ -138,7 +138,7 @@ public class UserProfile extends UIFragment {
 
     @Override
     public void show() {
-        platform.close(UIManager.getExtras());
+        platform.close(UI.getExtras());
         super.show();
     }
 

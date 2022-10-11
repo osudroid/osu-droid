@@ -18,10 +18,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.reco1l.Scenes;
+import com.reco1l.enums.Scenes;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Resources;
-import com.reco1l.interfaces.IMainClasses;
+import com.reco1l.interfaces.IReferences;
 
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 
@@ -35,7 +35,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 22/6/22 02:25
 
-public final class FragmentPlatform implements IMainClasses {
+public final class FragmentPlatform implements IReferences {
 
     private static FragmentPlatform instance;
     private static final int containerId = 0x999999;
@@ -95,21 +95,23 @@ public final class FragmentPlatform implements IMainClasses {
 
     //--------------------------------------------------------------------------------------------//
     
-    public void addFragment(Fragment fragment, String tag) {
+    public boolean addFragment(Fragment fragment, String tag) {
         if (fragment.isAdded() || fragments.contains(fragment) || manager.findFragmentByTag(tag) != null)
-            return;
+            return false;
 
         fragments.add(fragment);
         mActivity.runOnUiThread(() ->
                 manager.beginTransaction().add(container.getId(), fragment, tag).commit());
+        return true;
     }
 
-    public void removeFragment(Fragment fragment) {
+    public boolean removeFragment(Fragment fragment) {
         if (!fragment.isAdded() || !fragments.contains(fragment))
-            return;
+            return false;
 
         fragments.remove(fragment);
         mActivity.runOnUiThread(() -> manager.beginTransaction().remove(fragment).commit());
+        return true;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -144,8 +146,9 @@ public final class FragmentPlatform implements IMainClasses {
 
     public void close(UIFragment... toClose) {
         for (UIFragment fragment : toClose) {
-           if (fragment != null)
+           if (fragment != null) {
                mActivity.runOnUiThread(fragment::close);
+           }
         }
     }
 
@@ -154,18 +157,18 @@ public final class FragmentPlatform implements IMainClasses {
         toClose.removeAll(Arrays.asList(toExclude));
 
         for (Fragment fragment: toClose) {
-            if (fragment.getClass().getSuperclass() == UIFragment.class) {
-                UIFragment ui = (UIFragment) fragment;
-                mActivity.runOnUiThread(ui::close);
+            if (fragment instanceof UIFragment) {
+                UIFragment frg = (UIFragment) fragment;
+                mActivity.runOnUiThread(frg::close);
             }
         }
     }
 
-    public void updateFragments(Scenes oldScene, Scenes newScene) {
+    public void notifySceneChange(Scenes oldScene, Scenes newScene) {
         for (Fragment fragment: fragments) {
-            if (fragment.getClass().getSuperclass() == UIFragment.class) {
-                UIFragment ui = (UIFragment) fragment;
-                mActivity.runOnUiThread(() -> ui.onSceneChange(oldScene, newScene));
+            if (fragment instanceof UIFragment) {
+                UIFragment frg = (UIFragment) fragment;
+                mActivity.runOnUiThread(() -> frg.onSceneChange(oldScene, newScene));
             }
         }
     }
@@ -178,10 +181,11 @@ public final class FragmentPlatform implements IMainClasses {
         }
         new Animation(loaderFragment.layout).fade(1, 0)
                 .runOnEnd(() -> removeFragment(loaderFragment))
-                .play(300);
+                .delay(50)
+                .play(500);
     }
 
-    public static class LoaderFragment extends Fragment implements IMainClasses {
+    public static class LoaderFragment extends Fragment implements IReferences {
 
         protected RelativeLayout layout;
 
