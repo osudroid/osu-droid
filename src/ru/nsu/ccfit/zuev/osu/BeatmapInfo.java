@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class BeatmapInfo implements Serializable {
     private static final long serialVersionUID = -3865268984942011628L;
@@ -120,5 +121,15 @@ public class BeatmapInfo implements Serializable {
 
     public void setPreviewTime(final int previewTime) {
         this.previewTime = previewTime;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        BeatmapInfo that = (BeatmapInfo) o;
+        return Objects.equals(title, that.title) && Objects.equals(artist, that.artist) && Objects.equals(path, that.path);
     }
 }
