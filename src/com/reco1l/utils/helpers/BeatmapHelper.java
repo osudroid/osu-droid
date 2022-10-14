@@ -9,6 +9,8 @@ import com.edlplan.framework.math.FMath;
 import com.reco1l.management.BitmapManager;
 import com.reco1l.interfaces.IReferences;
 
+import org.anddev.andengine.opengl.texture.region.TextureRegion;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -121,6 +123,21 @@ public class BeatmapHelper implements IReferences {
 
     // Background
     //--------------------------------------------------------------------------------------------//
+
+    public static TextureRegion getBackgroundAsTexture(BeatmapInfo beatmap) {
+        if (beatmap != null) {
+            String path = null;
+
+            for (TrackInfo track : beatmap.getTracks()) {
+                if (track.getBackground() != null) {
+                    path = track.getBackground();
+                    break;
+                }
+            }
+            return resources.loadBackground(path);
+        }
+        return null;
+    }
 
     public static Drawable getBackground(TrackInfo track) {
         if (track == null)

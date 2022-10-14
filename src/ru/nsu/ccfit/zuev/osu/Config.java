@@ -75,7 +75,8 @@ public class Config {
         useSuperSlider,
         enableStoryboard,
         safeBeatmapBg,
-        trianglesAnimation;
+        trianglesAnimation,
+        showItemBackground;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -119,6 +120,9 @@ public class Config {
         showScoreboard = prefs.getBoolean("showscoreboard", true);
         enableStoryboard = prefs.getBoolean("enableStoryboard", false);
         trianglesAnimation = prefs.getBoolean("trianglesAnimation", true);
+
+        // UI
+        showItemBackground = prefs.getBoolean("ui_showItemBackground", true);
 
         setSize();
 
@@ -777,4 +781,7 @@ public class Config {
         skins.put(name, path);
     }
 
+    public static boolean isItemBackground() {
+        return showItemBackground;
+    }
 }

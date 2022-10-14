@@ -6,9 +6,9 @@ import static com.reco1l.enums.MusicOption.*;
 
 import android.util.Log;
 
+import com.reco1l.Game;
 import com.reco1l.enums.Scenes;
 import com.reco1l.andengine.ISceneHandler;
-import com.reco1l.interfaces.IReferences;
 import com.reco1l.interfaces.IMusicObserver;
 import com.reco1l.enums.MusicOption;
 
@@ -20,7 +20,7 @@ import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 
-public final class MusicManager implements IReferences {
+public final class MusicManager {
 
     public static BeatmapInfo beatmap;
 
@@ -45,17 +45,18 @@ public final class MusicManager implements IReferences {
 
     //--------------------------------------------------------------------------------------------//
 
-    public static boolean isInvalidRequest(Status... toCheck) {
-        if (global.getSongService() == null) {
+    public boolean isInvalidRequest(Status... toCheck) {
+        if (getService() == null) {
             Log.e("MusicManager", "InvalidRequest: SongService is not initialized!");
             return true;
         }
         if (toCheck.length > 0) {
             for (Status status : toCheck) {
-                if (global.getSongService().getStatus() == status) {
+                if (getState() == status) {
                     return false;
                 }
             }
+            Log.e("MusicManager", "InvalidRequest: cannot call this action while state is " + getState().name());
             return true;
         }
         return false;
@@ -64,15 +65,15 @@ public final class MusicManager implements IReferences {
     //--------------------------------------------------------------------------------------------//
 
     private Status getState() {
-        return global.getSongService().getStatus();
+        return Game.songService.getStatus();
     }
 
     public SongService getService() {
-        return global.getSongService();
+        return Game.songService;
     }
 
     public IMusicObserver getCurrentObserver() {
-        return observers.get(engine.currentScene);
+        return observers.get(Game.engine.currentScene);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -146,7 +147,7 @@ public final class MusicManager implements IReferences {
         if (getState() == Status.PLAYING || getState() == Status.PAUSED) {
             getService().stop();
         }
-        beatmap = library.getPrevBeatmap();
+        beatmap = Game.library.getPrevBeatmap();
         getService().preLoad(beatmap.getMusic());
         getService().play();
         getService().setVolume(Config.getBgmVolume());
@@ -158,7 +159,7 @@ public final class MusicManager implements IReferences {
         if (getState() == Status.PLAYING || getState() == Status.PAUSED) {
             getService().stop();
         }
-        beatmap = library.getNextBeatmap();
+        beatmap = Game.library.getNextBeatmap();
         getService().preLoad(beatmap.getMusic());
         getService().play();
         getService().setVolume(Config.getBgmVolume());

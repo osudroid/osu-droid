@@ -36,7 +36,7 @@ public class ParticleScatter implements IAttachableEntity {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public void draw(Scene scene) {
+    public void draw(Scene scene, int index) {
         TextureRegion texture = resources.getTexture("star");
 
         PointParticleEmitter ppe1 = new PointParticleEmitter(-40, screenHeight * 3 / 4f);
@@ -65,7 +65,7 @@ public class ParticleScatter implements IAttachableEntity {
 
             scatter.setParticlesSpawnEnabled(false);
 
-            scene.attachChild(scatter, 1);
+            scene.attachChild(scatter, index);
         }
     }
 

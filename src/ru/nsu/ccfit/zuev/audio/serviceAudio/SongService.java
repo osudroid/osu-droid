@@ -177,6 +177,13 @@ public class SongService extends Service {
         return new float[0];
     }
 
+    public float getLevel() {
+        if (audioFunc != null) {
+            return audioFunc.getLevel();
+        }
+        return 0;
+    }
+
     public float getVolume() {
         if (audioFunc != null) {
             return audioFunc.getVolume();

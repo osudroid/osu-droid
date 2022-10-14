@@ -4,7 +4,6 @@ package com.reco1l.andengine.entity;
 
 import com.reco1l.Game;
 import com.reco1l.andengine.IAttachableEntity;
-import com.reco1l.interfaces.IReferences;
 import com.reco1l.UI;
 import com.reco1l.utils.Animation;
 
@@ -18,11 +17,7 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.modifier.ease.EaseQuadInOut;
 import org.anddev.andengine.util.modifier.ease.IEaseFunction;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-
-public class Background implements IAttachableEntity, IReferences {
+public class Background implements IAttachableEntity {
 
     public Rectangle layer;
     public Sprite sprite;
@@ -41,11 +36,11 @@ public class Background implements IAttachableEntity, IReferences {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public void draw(Scene scene) {
+    public void draw(Scene scene, int index) {
         parent = scene;
-        defaultTexture = resources.getTexture("menu-background");
+        defaultTexture = Game.resources.getTexture("menu-background");
 
-        parent.setBackground(new ColorBackground(0, 0, 0));
+        scene.setBackground(new ColorBackground(0, 0, 0));
 
         sprite = new Sprite(0, 0, defaultTexture);
 
@@ -53,8 +48,8 @@ public class Background implements IAttachableEntity, IReferences {
         layer.setColor(0, 0, 0);
         layer.setAlpha(0);
 
-        parent.attachChild(sprite, 0);
-        parent.attachChild(layer, 1);
+        scene.attachChild(sprite, 0);
+        scene.attachChild(layer, index);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -67,45 +62,19 @@ public class Background implements IAttachableEntity, IReferences {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void change(BeatmapInfo beatmap) {
-        if (beatmap != null) {
-            change(beatmap.getTrack(0));
-            return;
-        }
-        redraw(null);
-    }
+    public void change(TextureRegion texture) {
+        Game.mActivity.runOnUpdateThread(() -> parent.detachChild(sprite));
 
-    public void change(TrackInfo track) {
-        if (track != null) {
-            redraw(track.getBackground());
-            return;
-        }
-        redraw(null);
-    }
-
-    public void redraw(String path) {
-        TextureRegion texture = defaultTexture;
-
-        if (!Config.isSafeBeatmapBg() && path != null) {
-            texture = resources.loadBackground(path);
+        if (texture == null) {
+            sprite = getScaledSprite(defaultTexture);
+        } else {
+            sprite = getScaledSprite(texture);
         }
 
-        sprite.setColor(0, 0, 0);
-
-        TextureRegion finalTexture = texture;
-        Game.mActivity.runOnUpdateThread(() -> {
-            parent.detachChild(sprite);
-
-            sprite = getScaledSprite(finalTexture);
-
-            new Animation().ofFloat(0, 1f)
-                    .runOnUpdate(val -> sprite.setColor(val, val, val))
-                    .runOnStart(() -> parent.attachChild(sprite, 0))
-                    .delay(10)
-                    .play(500);
-        });
-
-
+        new Animation().ofFloat(0, 1f)
+                .runOnUpdate(val -> sprite.setColor(val, val, val))
+                .runOnStart(() -> Game.mActivity.runOnUpdateThread(() -> parent.attachChild(sprite, 0)))
+                .play(500);
     }
 
     //--------------------------------------------------------------------------------------------//

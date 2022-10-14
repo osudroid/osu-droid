@@ -122,6 +122,10 @@ public class Animation implements IReferences {
             valueAnimator.addUpdateListener(val -> listener.onUpdate((T) val.getAnimatedValue()));
             return instance;
         }
+
+        public Animation build() {
+            return instance;
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -379,6 +383,11 @@ public class Animation implements IReferences {
 
                 if (valueAnimators != null) {
                     for (ValueAnimator valueAnimator : valueAnimators) {
+                        if (interpolator != null) {
+                            if (interpolatorMode == Interpolate.VALUE_ANIMATOR || interpolatorMode == Interpolate.BOTH) {
+                                valueAnimator.setInterpolator(EasingHelper.asInterpolator(interpolator));
+                            }
+                        }
                         valueAnimator.setStartDelay(delay);
                         valueAnimator.setDuration(this.duration);
                         valueAnimator.start();

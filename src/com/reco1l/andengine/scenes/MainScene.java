@@ -4,6 +4,7 @@ package com.reco1l.andengine.scenes;
 
 import com.reco1l.Game;
 import com.reco1l.andengine.OsuScene;
+import com.reco1l.andengine.entity.BeatMarker;
 import com.reco1l.game.TimingWrapper;
 import com.reco1l.enums.Scenes;
 import com.reco1l.andengine.entity.ParticleScatter;
@@ -20,9 +21,12 @@ import ru.nsu.ccfit.zuev.osu.helper.ModifierFactory;
 
 public class MainScene extends OsuScene {
 
+    public static MainScene instance;
+
     public Spectrum spectrum;
 
     private ParticleScatter scatter;
+    private BeatMarker beatMarker;
     private int particleBeginTime = 0;
 
     //--------------------------------------------------------------------------------------------//
@@ -41,34 +45,43 @@ public class MainScene extends OsuScene {
 
         this.spectrum = new Spectrum();
         this.scatter = new ParticleScatter();
+        this.beatMarker = new BeatMarker();
 
         timingWrapper.setObserver(new TimingWrapper.Observer() {
             @Override
             public void onKiaiStart() {
-                if (getSongService() != null) {
+                if (Game.songService != null) {
                     int position = Game.songService.getPosition();
 
                     scatter.start();
                     particleBeginTime = position;
                 }
+                beatMarker.setAlternateMode(true);
+            }
+
+            @Override
+            public void onKiaiEnd() {
+                beatMarker.setAlternateMode(false);
             }
 
             @Override
             public void onBpmUpdate(float BPMLength) {
                 UI.mainMenu.updateLogo(BPMLength);
+                beatMarker.onBpmUpdate(BPMLength);
             }
         });
 
-        spectrum.draw(this);
-        scatter.draw(this);
+        beatMarker.draw(this, 1);
+        spectrum.draw(this, 1);
+        scatter.draw(this, 1);
 
         Game.library.loadLibraryCache(Game.mActivity, false);
-
-        setTouchAreaBindingEnabled(true);
 
         Config.loadOnlineConfig(Game.mActivity);
         Game.online.Init(Game.mActivity);
         Game.onlineScoring.login();
+
+        setTouchAreaBindingEnabled(true);
     }
 
     @Override
@@ -82,6 +95,7 @@ public class MainScene extends OsuScene {
         if (Game.songService != null) {
             if (Game.songService.getStatus() == Status.PLAYING) {
                 spectrum.update();
+                beatMarker.update();
             } else {
                 spectrum.clear(false);
             }
@@ -97,17 +111,12 @@ public class MainScene extends OsuScene {
         UI.musicPlayer.update();
     }
 
-    @Override
-    public void onSceneShow() {
-
-    }
-
     //--------------------------------------------------------------------------------------------//
 
     public void loadMusic() {
         Game.library.shuffleLibrary();
         MusicManager.beatmap = Game.library.getBeatmap();
-        MusicManager.getInstance().play();
+        Game.musicManager.play();
     }
 
     public void playExitAnim() {

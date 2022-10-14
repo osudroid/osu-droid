@@ -24,6 +24,7 @@ import com.reco1l.utils.ViewTouchHandler;
 import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
+import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -42,12 +43,16 @@ public class BeatmapListAdapter extends RecyclerView.Adapter<BeatmapListAdapter.
 
     @Override
     public void onViewAttachedToWindow(@NonNull VH holder) {
-        holder.loadBackground();
+        if (Config.isItemBackground()) {
+            holder.loadBackground();
+        }
     }
 
     @Override
     public void onViewDetachedFromWindow(@NonNull VH holder) {
-        holder.cancelBackgroundLoad();
+        if (Config.isItemBackground()) {
+            holder.cancelBackgroundLoad();
+        }
     }
 
     //--------------------------------------------------------------------------------------------//

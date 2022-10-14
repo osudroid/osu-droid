@@ -130,11 +130,6 @@ public class BassAudioFunc {
                 @Override
                 public void SYNCPROC(int handle, int channel, int data, Object user) {
                     MusicManager.getInstance().onMusicEnd();
-                    if (!isGaming) {
-                        broadcastManager.sendBroadcast(new Intent("Notify_next"));
-                    } else {
-                        stop();
-                    }
                 }
             }, 0);
             return BASS.BASS_ChannelPlay(channel, true);
@@ -232,6 +227,14 @@ public class BassAudioFunc {
         } else {
             this.playflag = BASS.BASS_STREAM_PRESCAN;
         }
+    }
+
+    public float getLevel() {
+        float[] levels = {0};
+        if (channel != 0) {
+            BASS.BASS_ChannelGetLevelEx(channel, levels, 1, BASS.BASS_LEVEL_RMS);
+        }
+        return levels[0];
     }
 
     public float getVolume() {

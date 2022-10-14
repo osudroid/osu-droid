@@ -6,7 +6,6 @@ import android.os.PowerManager;
 import com.reco1l.andengine.scenes.ListScene;
 import com.reco1l.andengine.scenes.MainScene;
 import com.reco1l.interfaces.IReferences;
-import com.reco1l.management.MusicManager;
 
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
@@ -26,28 +25,28 @@ public final class Game implements IReferences {
 
     public static MainScene mainScene = getMainScene();
     public static ListScene listScene = getListScene();
-    public static SongService songService = global.getSongService();
+
+    public static SongService songService = getSongService();
 
     //----------------------------------------------------------------------------------------//
 
     private static MainScene getMainScene() {
-        if (mainSceneInstance == null) {
-            mainSceneInstance = new MainScene();
+        if (MainScene.instance == null) {
+            MainScene.instance = new MainScene();
         }
-        return mainSceneInstance;
+        return MainScene.instance;
     }
 
     private static ListScene getListScene() {
-        if (listSceneInstance == null) {
-            listSceneInstance = new ListScene();
+        if (ListScene.instance == null) {
+            ListScene.instance = new ListScene();
         }
-        return listSceneInstance;
+        return ListScene.instance;
     }
 
-    //----------------------------------------------------------------------------------------//
-
-    private static MainScene mainSceneInstance;
-    private static ListScene listSceneInstance;
+    private static SongService getSongService() {
+        return global.getSongService();
+    }
 
     //----------------------------------------------------------------------------------------//
 

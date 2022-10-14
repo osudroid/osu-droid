@@ -11,7 +11,7 @@ public interface IAttachableEntity {
     int screenWidth = Config.getRES_WIDTH();
     int screenHeight = Config.getRES_HEIGHT();
 
-    void draw(Scene scene);
+    void draw(Scene scene, int index);
 
     default void update() {}
 }

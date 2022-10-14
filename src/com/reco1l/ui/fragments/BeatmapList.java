@@ -69,7 +69,7 @@ public class BeatmapList extends UIFragment {
             View child = recyclerView.getChildAt(i);
             BeatmapListAdapter.VH holder = (BeatmapListAdapter.VH) recyclerView.getChildViewHolder(child);
 
-            if (holder.beatmap.getPath().equals(beatmap.getPath())) {
+            if (holder.beatmap.equals(beatmap)) {
                 holder.select();
                 recyclerView.scrollToPosition(recyclerView.getChildAdapterPosition(child));
                 break;
@@ -82,7 +82,7 @@ public class BeatmapList extends UIFragment {
         if (beatmap == null)
             return;
 
-        if (selectedBeatmap == null || !selectedBeatmap.getPath().equals(beatmap.getPath())) {
+        if (selectedBeatmap == null || !selectedBeatmap.equals(beatmap)) {
             navigate(beatmap);
         }
         this.selectedBeatmap = beatmap;
@@ -94,7 +94,7 @@ public class BeatmapList extends UIFragment {
         if (track == null)
             return;
 
-        if (selectedBeatmap == null || !selectedBeatmap.getPath().equals(track.getBeatmap().getPath())) {
+        if (selectedBeatmap == null || !selectedBeatmap.equals(track.getBeatmap())) {
             navigate(track.getBeatmap());
         }
 
@@ -155,7 +155,14 @@ public class BeatmapList extends UIFragment {
         loadBeatmaps();
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-        recyclerView.post(() -> setSelected(MusicManager.beatmap));
+
+        recyclerView.post(() -> {
+            if (Game.listScene.lastTrack != null) {
+                setSelected(Game.listScene.lastTrack);
+            } else {
+                setSelected(MusicManager.beatmap);
+            }
+        });
     }
 
     @Override

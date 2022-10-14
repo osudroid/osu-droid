@@ -45,9 +45,9 @@ public class Spectrum implements IAttachableEntity {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public void draw(Scene scene) {
-        spectrum.draw(scene);
-        shadow.draw(scene);
+    public void draw(Scene scene, int index) {
+        spectrum.draw(scene, index);
+        shadow.draw(scene, index);
 
         spectrum.downRateMultiplier = 20;
         spectrum.alpha = 0.3f;
@@ -155,13 +155,13 @@ public class Spectrum implements IAttachableEntity {
         }
 
         @Override
-        public void draw(Scene scene) {
+        public void draw(Scene scene, int index) {
             for (int i = 0; i < Spectrum.lines; i++) {
                 spectrum[i] = new Rectangle(
                         (Spectrum.lineWidth + Spectrum.lineDistance) * i, 0, Spectrum.lineWidth, 0
                 );
                 spectrum[i].setAlpha(0);
-                scene.attachChild(spectrum[i], 1);
+                scene.attachChild(spectrum[i], index);
             }
         }
 

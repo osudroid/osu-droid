@@ -11,15 +11,17 @@ import com.reco1l.andengine.OsuScene;
 import com.reco1l.management.MusicManager;
 import com.reco1l.utils.Animation;
 
+import org.anddev.andengine.opengl.texture.region.TextureRegion;
+
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.menu.SongMenuPool;
 
 public class ListScene extends OsuScene {
 
-    private TrackInfo currentTrack;
+    public static ListScene instance;
+
+    public TrackInfo currentTrack, lastTrack;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -35,8 +37,6 @@ public class ListScene extends OsuScene {
         setTimingWrapper(true);
         setContinuousPlay(false);
 
-
-        background.draw(this);
         background.layer.setAlpha(0.3f);
 
         load();
@@ -67,6 +67,8 @@ public class ListScene extends OsuScene {
             Game.resources.getSound("menuhit").play();
             Game.musicManager.stop();
             Game.global.getGameScene().startGame(track, null);
+            lastTrack = currentTrack;
+            currentTrack = null;
             return;
         }
 
@@ -75,7 +77,10 @@ public class ListScene extends OsuScene {
         UI.beatmapPanel.updateProperties(track);
         UI.beatmapPanel.updateScoreboard();
 
-        background.change(track);
+        TextureRegion texture = Game.resources.loadBackground(track.getBackground());
+
+        background.change(texture);
+        currentTrack = track;
     }
 
     public void playMusic(BeatmapInfo beatmap) {
@@ -91,6 +96,11 @@ public class ListScene extends OsuScene {
         new Animation().ofFloat(0, Config.getBgmVolume())
                 .runOnUpdate(Game.global.getSongService()::setVolume)
                 .play(400);
+    }
+
+    @Override
+    public void onMusicEnd() {
+        playMusic(MusicManager.beatmap);
     }
 
     //--------------------------------------------------------------------------------------------//

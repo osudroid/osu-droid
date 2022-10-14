@@ -12,8 +12,10 @@ import android.widget.TextView;
 import androidx.cardview.widget.CardView;
 
 import com.edlplan.framework.easing.Easing;
+import com.reco1l.Game;
 import com.reco1l.enums.MusicOption;
 import com.reco1l.UI;
+import com.reco1l.management.MusicManager;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
@@ -32,7 +34,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 1/7/22 22:45
 
-public class MusicPlayer extends UIFragment implements IReferences {
+public class MusicPlayer extends UIFragment {
 
     public static MusicPlayer instance;
 
@@ -115,15 +117,15 @@ public class MusicPlayer extends UIFragment implements IReferences {
 
             public void onPressUp() {
                 if (global.getSongService().getStatus() == Status.PLAYING) {
-                    musicManager.pause();
+                    Game.musicManager.pause();
                 } else {
-                    musicManager.play();
+                    Game.musicManager.play();
                 }
             }
         });
 
-        bindTouchListener(find("prev"), musicManager::previous);
-        bindTouchListener(find("next"), musicManager::next);
+        bindTouchListener(find("prev"), Game.musicManager::previous);
+        bindTouchListener(find("next"), Game.musicManager::next);
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -159,8 +161,8 @@ public class MusicPlayer extends UIFragment implements IReferences {
 
         mActivity.runOnUiThread(() -> {
 
-            if (library.getBeatmap() != lastBeatmap) {
-                lastBeatmap = library.getBeatmap();
+            if (MusicManager.beatmap != lastBeatmap) {
+                lastBeatmap = MusicManager.beatmap;
                 change();
                 return;
             }
@@ -190,7 +192,7 @@ public class MusicPlayer extends UIFragment implements IReferences {
     }
 
     private void change() {
-        BeatmapInfo beatmap = library.getBeatmap();
+        BeatmapInfo beatmap = MusicManager.beatmap;
 
         if (UI.topBar.isShowing) {
             UI.topBar.musicButton.update(beatmap);

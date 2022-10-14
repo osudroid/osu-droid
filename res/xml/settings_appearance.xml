@@ -51,6 +51,13 @@
             android:title="@string/opt_triangles_animation_title"
             app:iconSpaceReserved="false" />
 
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="ui_showItemBackground"
+            android:title="Disable backgrounds in list items"
+            android:summary="Disable background in song list items (Increase performance)"
+            app:iconSpaceReserved="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory

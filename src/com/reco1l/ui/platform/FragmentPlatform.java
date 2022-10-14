@@ -101,7 +101,7 @@ public final class FragmentPlatform implements IReferences {
 
         fragments.add(fragment);
         mActivity.runOnUiThread(() ->
-                manager.beginTransaction().add(container.getId(), fragment, tag).commit());
+                manager.beginTransaction().add(container.getId(), fragment, tag).commitAllowingStateLoss());
         return true;
     }
 
@@ -110,7 +110,7 @@ public final class FragmentPlatform implements IReferences {
             return false;
 
         fragments.remove(fragment);
-        mActivity.runOnUiThread(() -> manager.beginTransaction().remove(fragment).commit());
+        mActivity.runOnUiThread(() -> manager.beginTransaction().remove(fragment).commitAllowingStateLoss());
         return true;
     }
 

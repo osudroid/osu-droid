@@ -8,9 +8,11 @@ import android.widget.TextView;
 
 import com.edlplan.ui.TriangleEffectView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.Resources;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -189,17 +191,17 @@ public class SplashScene extends UIFragment implements IUpdateHandler {
         if (!isShowing)
             return;
 
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
+        new AsyncExec() {
             @Override
             public void run() {
-                global.getMainScene().loadMusic();
+                Game.mainScene.loadMusic();
             }
 
             @Override
             public void onComplete() {
                 mActivity.runOnUiThread(onComplete);
             }
-        });
+        }.execute();
     }
 
     //--------------------------------------------------------------------------------------------//

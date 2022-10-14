@@ -6,6 +6,7 @@ import com.reco1l.management.MusicManager;
 import com.reco1l.utils.helpers.OnlineHelper;
 import com.reco1l.ui.platform.FragmentPlatform;
 
+import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
@@ -22,19 +23,18 @@ import ru.nsu.ccfit.zuev.skins.SkinManager;
 public interface IReferences {
 
     GlobalManager global = GlobalManager.getInstance();
-
     MainActivity mActivity = global.getMainActivity();
-    EngineMirror engine = (EngineMirror) global.getMainActivity().getEngine();
 
     ModMenu modMenu = ModMenu.getInstance();
+    EngineMirror engine = EngineMirror.getInstance();
     OnlineManager online = OnlineManager.getInstance();
     SkinManager skinManager = SkinManager.getInstance();
     LibraryManager library = LibraryManager.getInstance();
     ScoreLibrary scoreLibrary = ScoreLibrary.getInstance();
     ResourceManager resources = ResourceManager.getInstance();
+    OnlineScoring onlineScoring = OnlineScoring.getInstance();
     FragmentPlatform platform = FragmentPlatform.getInstance();
     PropertiesLibrary properties = PropertiesLibrary.getInstance();
-    OnlineScoring onlineScoring = OnlineScoring.getInstance();
 
     BitmapManager bitmapManager = BitmapManager.getInstance();
     OnlineHelper onlineHelper = OnlineHelper.getInstance();

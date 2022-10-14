@@ -210,7 +210,7 @@ public class MainMenu extends UIFragment {
         }
 
         public void onComplete() {
-            musicManager.play();
+            Game.musicManager.play();
             UI.loadingScene.complete(() -> {
                 engine.setScene(global.getSongMenu());
                 //global.getSongMenu().select();

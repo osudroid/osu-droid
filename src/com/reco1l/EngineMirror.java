@@ -1,6 +1,9 @@
 package com.reco1l;
 
+import android.util.Log;
+
 import com.reco1l.andengine.ISceneHandler;
+import com.reco1l.andengine.OsuScene;
 import com.reco1l.interfaces.IReferences;
 import com.reco1l.enums.Scenes;
 
@@ -20,6 +23,8 @@ public class EngineMirror extends Engine implements IReferences {
 
     public static boolean isGlobalManagerInit = false;
 
+    private static EngineMirror instance;
+
     public Scenes currentScene;
     public Scenes lastScene;
 
@@ -29,8 +34,15 @@ public class EngineMirror extends Engine implements IReferences {
 
     public EngineMirror(EngineOptions pEngineOptions) {
         super(pEngineOptions);
-        this.sceneHandlers = new ArrayList<>();
+        instance = this;
+        sceneHandlers = new ArrayList<>();
     }
+
+    public static EngineMirror getInstance() {
+        return instance;
+    }
+
+    //--------------------------------------------------------------------------------------------//
 
     @Override
     public void setScene(Scene scene) {
@@ -42,26 +54,36 @@ public class EngineMirror extends Engine implements IReferences {
         super.setScene(scene);
     }
 
-    //--------------------------------------------------------------------------------------------//
-
     private Scenes parseScene(Scene scene) {
+        Scenes type = null;
+
+        if (scene instanceof OsuScene) {
+            type = ((OsuScene) scene).getIdentifier();
+        }
         if (scene.hasChildScene() && scene.getChildScene() == PauseMenu.getInstance().getScene()) {
-            return Scenes.PAUSE;
+            type = Scenes.PAUSE;
         }
         else if (scene == LoadingScreen.getInstance().getScene() || scene == UI.loadingScene.scene) {
-            return Scenes.LOADING;
-        }
-        else if (scene == global.getMainScene()) {
-            return Scenes.MAIN;
-        }
-        else if (scene == global.getSongMenu()) {
-            return Scenes.LIST;
+            type = Scenes.LOADING;
         }
         else if (scene == global.getScoring().getScene()) {
-            return Scenes.SCORING;
+            type = Scenes.SCORING;
         }
-        return null;
+        else if (scene == global.getGameScene().getScene()) {
+            type = Scenes.GAME;
+        }
+
+        if (type != null) {
+            if (lastScene != null) {
+                Log.i("Engine", "Setting scene to " + type.name() + " last scene was " + lastScene.name());
+            } else {
+                Log.i("Engine", "Setting scene to " + type.name());
+            }
+        }
+        return type;
     }
+
+    //--------------------------------------------------------------------------------------------//
 
     @Override
     public void onResume() {
@@ -97,6 +119,8 @@ public class EngineMirror extends Engine implements IReferences {
 
         platform.notifySceneChange(lastScene, currentScene);
     }
+
+    //--------------------------------------------------------------------------------------------//
 
     public void registerSceneHandler(ISceneHandler sceneHandler) {
         this.sceneHandlers.add(sceneHandler);
