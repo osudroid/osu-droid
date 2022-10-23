@@ -22,7 +22,6 @@ import net.margaritov.preference.colorpicker.ColorPickerPreference;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.util.Debug;
 
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
 public class Config {

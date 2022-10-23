@@ -51,9 +51,14 @@ public abstract class GameObject {
         return startHit;
     }
 
-    public boolean tryHit(float dt) {return false;};
+    public PointF getPos() {return pos;}
 
-    public PointF getPos() {return pos;};
+    // Try hit the object. For example, click on a Circle or Slider
+    // Returns true when the object is clicked and clickable
+    // If object can't be clicked, just return false
+    public boolean tryHit(float dt) {return false;}
 
-    public void forceMiss() {};
+    // miss and remove object
+    // If object can't be missed, do nothing
+    public void forceMiss() {}
 }

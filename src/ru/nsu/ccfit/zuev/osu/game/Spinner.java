@@ -331,11 +331,6 @@ public class Spinner extends GameObject {
                 (int) (metre.getBaseHeight() * (1 - Math.abs(percentfill))));
         oldMouse = v;
     }
-    
-    @Override
-    public boolean tryHit(final float dt){
-        return false;
-    }
 
     @Override
     public void forceMiss(){

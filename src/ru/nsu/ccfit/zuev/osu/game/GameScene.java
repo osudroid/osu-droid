@@ -1584,9 +1584,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (Config.isRemoveSliderLock()){
-            GameObject lastObject = getNextObject();
-            if (lastObject != null) {
-                nextObjectHitTime = getNextObject().getHitTime();
+            GameObject nextObject = getNextObject();
+            if (nextObject != null) {
+                nextObjectHitTime = nextObject.getHitTime();
             }
         }
 
@@ -1608,9 +1608,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         for (int i = 0; i < clickCount - 1; i++){
             if (Config.isRemoveSliderLock()){
-                GameObject lastObject = getNextObject();
-                if (lastObject != null) {
-                    nextObjectHitTime = getNextObject().getHitTime();
+                GameObject nextObject = getNextObject();
+                if (nextObject != null) {
+                    nextObjectHitTime = nextObject.getHitTime();
                 }
             }
             if (Config.isRemoveNoteLock()){
@@ -1670,7 +1670,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             // Stack notes
-            // If Config.isCalculateSliderPathInGameStart(), do this in stackNotes()
+            // If "isCalculateSliderPathInGameStart", do this in stackNotes()
             if (Config.isCalculateSliderPathInGameStart() == false &&
                 objects.isEmpty() == false && (objDefine & 1) > 0) {
                 if (objects.peek().getTime() - data.getTime() < 2f * GameHelper.getStackLatient()
@@ -1679,7 +1679,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                             data.getPosOffset() + Utils.toRes(4) * scale);
                 }
             }
-            // If this object is silder and isCalculateSliderPathInGameStart(), the pos is += in calculateAllSliderPaths()
+            // If "isCalculateSliderPathInGameStart", do this in calculateAllSliderPaths()
             if (Config.isCalculateSliderPathInGameStart() == false || (objDefine & 2) <= 0){
                 pos.x += data.getPosOffset();
                 pos.y += data.getPosOffset();
@@ -2386,6 +2386,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private GameObject getNextObject(){
+        // return next unclicked object, skip clicked sliders
         Iterator iterator = activeObjects.iterator();
         while(iterator.hasNext()){
             GameObject note = (GameObject)iterator.next();
