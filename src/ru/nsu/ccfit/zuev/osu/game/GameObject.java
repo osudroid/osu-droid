@@ -55,5 +55,5 @@ public abstract class GameObject {
 
     public PointF getPos() {return pos;};
 
-    public abstract void forceMiss();
+    public void forceMiss() {};
 }

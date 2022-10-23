@@ -2844,17 +2844,21 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public void removePreviousNote(final float hitTime) {
         // if enable removeNoteLock, hit a note will remove all previous note
+        ArrayList<GameObject> removeObjects = new ArrayList<>();
         for (final GameObject obj : activeObjects) {
             if (obj.getHitTime() < hitTime - 0.001){
                 if (Config.isRemoveSliderLock()){
                     if (obj instanceof HitCircle){
-                       obj.forceMiss();
+                        removeObjects.add(obj);
                     }
                 }
                 else {
-                    obj.forceMiss();
+                    removeObjects.add(obj);
                 }
             }
+        }
+        for (final GameObject obj : removeObjects) {
+            obj.forceMiss();
         }
     }
 }
