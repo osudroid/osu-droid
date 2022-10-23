@@ -29,6 +29,7 @@ public class InGameSettingMenu extends BaseFragment {
     private static InGameSettingMenu menu;
     private CheckBox enableStoryboard;
     private CheckBox showScoreboard;
+    private CheckBox removeNoteLockWhenMiss;
     private CheckBox enableNCWhenSpeedChange;
     private CheckBox enableSpeedChange;
     private CheckBox enableForceAR;
@@ -114,6 +115,12 @@ public class InGameSettingMenu extends BaseFragment {
             PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
                     .putBoolean("showscoreboard", isChecked)
                     .commit();
+        });
+
+        removeNoteLockWhenMiss = findViewById(R.id.removeNoteLockWhenMiss);
+        removeNoteLockWhenMiss.setChecked(Config.isRemoveNoteLockWhenMiss());
+        removeNoteLockWhenMiss.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Config.setRemoveNoteLockWhenMiss(isChecked);
         });
 
         enableNCWhenSpeedChange = findViewById(R.id.enableNCwhenSpeedChange);

@@ -308,7 +308,7 @@ public class HitCircle extends GameObject {
     } // update(float dt)
 
     @Override
-    public void tryHit(final float dt){
+    public boolean tryHit(final float dt){
         if (passedTime * 2 > time && isHit()) {
             float signAcc = passedTime - time;
             if (Config.isFixFrameOffset()) {
@@ -328,7 +328,14 @@ public class HitCircle extends GameObject {
                         .onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, color);
                 removeFromScene();
             });
-            
+            return true;
         }
+        return false;
+    }
+
+    @Override
+    public void forceMiss(){
+        HitCircle.this.listener.onCircleHit(id, 0, pos, endsCombo, (byte) 0, color);
+        removeFromScene();
     }
 }

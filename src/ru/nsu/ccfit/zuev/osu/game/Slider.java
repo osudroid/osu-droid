@@ -1271,12 +1271,17 @@ public class Slider extends GameObject {
     }
 
     @Override
-    public void tryHit(final float dt){
+    public boolean tryHit(final float dt){
         if (startHit == false) // If we didn't get start hit(click)
         {
-            if (isHit() && -passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) // if
-            // we
-            // clicked
+            if (passedTime < 0) // we at approach time
+            {
+                if (startHit == true) {
+                    approachCircle.setAlpha(0);
+                }
+            }
+            if (isHit() && -passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty()))
+            // if we clicked
             {
                 listener.registerAccuracy(passedTime);
                 startHit = true;
@@ -1285,14 +1290,16 @@ public class Slider extends GameObject {
                 firstHitAccuracy = (int) (passedTime * 1000);
                 listener.onSliderHit(id, 30, null, path.points.get(0),
                         false, color, GameObjectListener.SLIDER_START);
-            }
-            if (passedTime < 0) // we at approach time
-            {
-                if (startHit == true) {
-                    approachCircle.setAlpha(0);
-                }
+                return true;
             }
         }
+        return false;
     }
 
+    @Override
+    public void forceMiss(){
+        listener.onSliderHit(id, -1, null, path.points.get(0),
+                false, color, GameObjectListener.SLIDER_START);
+        removeFromScene();
+    }
 }

@@ -176,7 +176,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private VideoSprite mVideo = null;
     private Sprite[] ScoreBoardSprite;
     private int failcount = 0;
-    private float lastObjectHitTime = 0;
+    private float nextObjectHitTime = 0;
     private SliderPath[] sliderPaths = null;
     private int sliderIndex = 0;
 
@@ -547,7 +547,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         comboNum = -1;
         currentComboNum = 0;
-        lastObjectHitTime = 0;
+        nextObjectHitTime = 0;
         final String defSound = beatmapData.getData("General", "SampleSet");
         if (defSound.equals("Soft")) {
             TimingPoint.setDefaultSound("soft");
@@ -1584,9 +1584,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (Config.isRemoveSliderLock()){
-            GameObject lastObject = getLastTobeclickObject();
+            GameObject lastObject = getNextObject();
             if (lastObject != null) {
-                lastObjectHitTime = getLastTobeclickObject().getHitTime();
+                nextObjectHitTime = getNextObject().getHitTime();
             }
         }
 
@@ -1608,13 +1608,29 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         for (int i = 0; i < clickCount - 1; i++){
             if (Config.isRemoveSliderLock()){
-                GameObject lastObject = getLastTobeclickObject();
+                GameObject lastObject = getNextObject();
                 if (lastObject != null) {
-                    lastObjectHitTime = getLastTobeclickObject().getHitTime();
+                    nextObjectHitTime = getNextObject().getHitTime();
                 }
             }
-            for (final GameObject obj : activeObjects) {
-                obj.tryHit(dt);
+            if (Config.isRemoveNoteLock()){
+                boolean hitFlag = false;
+                for (final GameObject obj : activeObjects) {
+                    if (!hitFlag){
+                        nextObjectHitTime = obj.getHitTime();
+                    }
+                    if (obj.tryHit(dt)){
+                        hitFlag = true;
+                    }
+                }
+                if (hitFlag){
+                    removePreviousNote(nextObjectHitTime);
+                }
+            }
+            else{
+                for (final GameObject obj : activeObjects) {
+                    obj.tryHit(dt);
+                }
             }
         }
 
@@ -2036,6 +2052,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     //CB打击处理
     private String registerHit(final int objectId, final int score, final boolean endCombo) {
         boolean writeReplay = objectId != -1 && replay != null && !replaying;
+        onObjectHit(score);
         if (score == 0) {
             if (stat.getCombo() > 30) {
                 ResourceManager.getInstance().getCustomSound("combobreak", 1)
@@ -2044,11 +2061,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             comboWasMissed = true;
             stat.registerHit(0, false, false);
             if (writeReplay) replay.addObjectScore(objectId, ResultType.MISS);
-            if(GameHelper.isPerfect()){
-                gameover();
-                restartGame();
-            }
-            if(GameHelper.isSuddenDeath())stat.changeHp(-1.0f);
             return "hit0";
         }
 
@@ -2058,10 +2070,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (writeReplay) replay.addObjectScore(objectId, ResultType.HIT50);
             scoreName = "hit50";
             comboWas100 = true;
-            if(GameHelper.isPerfect()){
-                gameover();
-                restartGame();
-            }
         } else if (score == 100) {
             comboWas100 = true;
             if (writeReplay) replay.addObjectScore(objectId, ResultType.HIT100);
@@ -2071,10 +2079,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             } else {
                 stat.registerHit(100, false, false);
                 scoreName = "hit100";
-            }
-            if(GameHelper.isPerfect()){
-                gameover();
-                restartGame();
             }
         } else if (score == 300) {
             if (writeReplay) replay.addObjectScore(objectId, ResultType.HIT300);
@@ -2100,6 +2104,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         return scoreName;
     }
 
+    private void onObjectHit(final int score){
+        // mod or config's logic on note hit
+        if(GameHelper.isSuddenDeath() && score == 0){
+            stat.changeHp(-1.0f);
+        }
+        if(GameHelper.isPerfect() && (score == 100 || score == 50 || score == 0)){
+            gameover();
+            restartGame();
+        }
+        if(Config.isRemoveNoteLockWhenMiss()){
+            Config.setRemoveNoteLock(score == 0);
+        }
+    }
 
     public void onCircleHit(int id, final float acc, final PointF pos,
                             final boolean endCombo, byte forcedScore, RGBColor color) {
@@ -2354,9 +2371,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (stat.getMod().contains(GameMod.MOD_AUTO)) {
             return false;
         }
-        if (Config.isRemoveSliderLock()){
+        if (Config.isRemoveSliderLock() || Config.isRemoveNoteLock()){
             if(activeObjects.isEmpty()
-                || Math.abs(object.getHitTime() - lastObjectHitTime) > 0.001f) {
+                || Math.abs(object.getHitTime() - nextObjectHitTime) > 0.001f) {
                 return false;
             }
         }
@@ -2368,7 +2385,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         return cursors[index].mousePressed;
     }
 
-    private GameObject getLastTobeclickObject(){
+    private GameObject getNextObject(){
         Iterator iterator = activeObjects.iterator();
         while(iterator.hasNext()){
             GameObject note = (GameObject)iterator.next();
@@ -2822,6 +2839,22 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         else{
             ToastLogger.showText(StringTable.get(R.string.message_save_replay_failed), true);
             return false;
+        }
+    }
+
+    public void removePreviousNote(final float hitTime) {
+        // if enable removeNoteLock, hit a note will remove all previous note
+        for (final GameObject obj : activeObjects) {
+            if (obj.getHitTime() < hitTime - 0.001){
+                if (Config.isRemoveSliderLock()){
+                    if (obj instanceof HitCircle){
+                       obj.forceMiss();
+                    }
+                }
+                else {
+                    obj.forceMiss();
+                }
+            }
         }
     }
 }

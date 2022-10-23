@@ -140,6 +140,14 @@
                             android:layout_marginLeft="5dp"
                             android:layout_weight="1"
                             android:text="@string/opt_show_scoreboard_title" />
+
+						<CheckBox
+							android:id="@+id/removeNoteLockWhenMiss"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginLeft="5dp"
+							android:layout_weight="1"
+							android:text="@string/opt_remove_notelock_when_miss" />
                     </LinearLayout>
 
 					<RelativeLayout

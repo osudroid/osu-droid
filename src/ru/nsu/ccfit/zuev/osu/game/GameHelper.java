@@ -46,6 +46,8 @@ public class GameHelper {
     private static boolean useReplay;
     private static boolean isKiai = false;
     private static boolean auto = false;
+    private static boolean removeNoteLock = false;
+    private static boolean removeNoteLockWhenMiss = false;
     private static float beatLength = 0;
     private static float timingOffset = 0;
     private static int timeSignature = 4;
@@ -511,6 +513,18 @@ public class GameHelper {
 
     public static void setAuto(boolean auto) {
         GameHelper.auto = auto;
+    }
+
+    public static boolean isRemoveNoteLock() {return removeNoteLock;}
+
+    public static void setRemoveNoteLock(boolean removeNoteLock) {
+        GameHelper.removeNoteLock = removeNoteLock;
+    }
+
+    public static boolean isRemoveNoteLockWhenMiss() {return removeNoteLockWhenMiss;}
+
+    public static void setRemoveNoteLockWhenMiss(boolean removeNoteLockWhenMiss) {
+        GameHelper.removeNoteLockWhenMiss = removeNoteLockWhenMiss;
     }
 
     public static float Round(double value, int digits) throws NumberFormatException {

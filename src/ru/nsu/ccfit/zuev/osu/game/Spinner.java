@@ -333,7 +333,13 @@ public class Spinner extends GameObject {
     }
     
     @Override
-    public void tryHit(final float dt){
-        return;
+    public boolean tryHit(final float dt){
+        return false;
+    }
+
+    @Override
+    public void forceMiss(){
+        listener.onSpinnerHit(id, 0, false, 0);
+        removeFromScene();
     }
 }

@@ -51,7 +51,9 @@ public abstract class GameObject {
         return startHit;
     }
 
-    public void tryHit(float dt) {return;};
+    public boolean tryHit(float dt) {return false;};
 
     public PointF getPos() {return pos;};
+
+    public abstract void forceMiss();
 }

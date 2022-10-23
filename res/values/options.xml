@@ -308,6 +308,8 @@
     <string name="opt_enablenc_whenspeedchange_title">Enable pitch shift in speed modify</string>
     <string name="opt_enablespeedchange_title">Enable speed modify</string>
     <string name="opt_enableforcear_title">Enable force AR</string>
+
+    <string name="opt_remove_notelock_when_miss">Remove notelock when miss</string>
 	
 	<string name="opt_calculate_slider_path_in_game_start_title">Calculate sliderpaths in game start</string>
 	<string name="opt_calculate_slider_path_in_game_start_summary">Increases performance in beatmaps where complex sliders are present, but increases beatmap load time</string>

@@ -22,6 +22,7 @@ import net.margaritov.preference.colorpicker.ColorPickerPreference;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.util.Debug;
 
+import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
 public class Config {
@@ -67,6 +68,8 @@ public class Config {
         forceRomanized,
         fixFrameOffset,
         removeSliderLock,
+        removeNoteLock,
+        removeNoteLockWhenMiss,
         calculateSliderPathInGameStart,
         displayScoreStatistics,
         hideReplayMarquee,
@@ -713,6 +716,16 @@ public class Config {
 
     public static void setPlayfieldSize(final float playfieldSize) {
         Config.playfieldSize = playfieldSize;
+    }
+    public static boolean isRemoveNoteLock() {return removeNoteLock;}
+
+    public static void setRemoveNoteLock(boolean removeNoteLock) {
+        Config.removeNoteLock = removeNoteLock;
+    }
+    public static boolean isRemoveNoteLockWhenMiss() { return removeNoteLockWhenMiss; }
+
+    public static void setRemoveNoteLockWhenMiss(boolean removeNoteLockWhenMiss) {
+        Config.removeNoteLockWhenMiss = removeNoteLockWhenMiss;
     }
 
     public static boolean isShrinkPlayfieldDownwards() {
