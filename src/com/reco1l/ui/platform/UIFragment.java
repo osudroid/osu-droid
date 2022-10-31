@@ -96,6 +96,8 @@ public abstract class UIFragment extends Fragment implements IReferences {
      * <p>Note: Use this only on extras dialogs.</p>
      */
     protected long getDismissTime() { return 0; }
+
+    protected void onUpdate(float secondsElapsed) {}
     //--------------------------------------------------------------------------------------------//
 
     @Nullable @Override

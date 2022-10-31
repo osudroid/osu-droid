@@ -1,12 +1,11 @@
 package com.reco1l.interfaces;
 
 import com.reco1l.management.BitmapManager;
-import com.reco1l.EngineMirror;
+import com.reco1l.GameEngine;
 import com.reco1l.management.MusicManager;
 import com.reco1l.utils.helpers.OnlineHelper;
 import com.reco1l.ui.platform.FragmentPlatform;
 
-import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
@@ -26,7 +25,7 @@ public interface IReferences {
     MainActivity mActivity = global.getMainActivity();
 
     ModMenu modMenu = ModMenu.getInstance();
-    EngineMirror engine = EngineMirror.getInstance();
+    GameEngine engine = GameEngine.getInstance();
     OnlineManager online = OnlineManager.getInstance();
     SkinManager skinManager = SkinManager.getInstance();
     LibraryManager library = LibraryManager.getInstance();

@@ -16,9 +16,9 @@ public class BeatMarker implements IAttachableEntity {
     private Sprite spriteLeft, spriteRight;
 
     private boolean isKiai = false;
-    private float level;
+    private float currentLevel;
     private int sideCursor = 0;
-    private int beat = 0;
+    //private int beat = 0;
 
     private ValueAnimationListener<Float> listener;
 
@@ -55,21 +55,22 @@ public class BeatMarker implements IAttachableEntity {
     @Override
     public void update() {
         if (Game.songService != null) {
-            level = Game.songService.getLevel() * 1.2f;
+            currentLevel = Game.songService.getLevel();
         }
     }
 
-    public void onBpmUpdate(float bpm) {
-        long upTime = (long) (bpm * 0.07f);
-        long downTime = (long) (bpm * 0.9f);
+    public void onBeatUpdate(float beatLenght, final int beat) {
+        long upTime = (long) (beatLenght * 0.07f);
+        long downTime = (long) (beatLenght * 0.9f);
 
         if (!isKiai) {
-            downTime *= 1.3f;
+            downTime *= 1.4f;
         }
 
-        final float fLevel = level;
-        Animation fadeUp = new Animation().ofFloat(0f, fLevel).runOnUpdate(listener);
-        Animation fadeDown = new Animation().ofFloat(fLevel, 0f).runOnUpdate(listener);
+        final float level = isKiai ? currentLevel * 1.2f : currentLevel;
+
+        Animation fadeUp = new Animation().ofFloat(0f, level).runOnUpdate(listener);
+        Animation fadeDown = new Animation().ofFloat(level, 0f).runOnUpdate(listener);
 
         fadeUp.runOnStart(() -> {
             if (isKiai) {
@@ -83,11 +84,7 @@ public class BeatMarker implements IAttachableEntity {
             }
         });
 
-        fadeUp.runOnEnd(() -> beat++).play(upTime);
+        fadeUp.play(upTime);
         fadeDown.delay(upTime).play(downTime);
-
-        if (beat > 3) {
-            beat = 0;
-        }
     }
 }

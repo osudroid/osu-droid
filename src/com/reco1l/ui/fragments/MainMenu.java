@@ -22,9 +22,11 @@ import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Resources;
 import com.reco1l.UI;
+import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.listeners.TouchListener;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
+import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
 import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
@@ -41,29 +43,31 @@ public class MainMenu extends UIFragment {
             menuAnimInProgress = false,
             isExitAnimInProgress = false;
 
+    private boolean
+            isKiai = false,
+            wasPlaying = false,
+            clearAnimInProgress = false,
+            isBounceAnimInProgress = false;
+
     private CardView logo;
+    private View logoInnerRect;
     private MenuButton play, settings, exit;
     private TriangleEffectView logoTriangles;
 
-    private final ValueAnimator
-            logoBounceUp,
-            logoBounceDown,
+    private Animation
+            logoBounceAnim,
             triangleSpeedUp,
             triangleSpeedDown;
 
     private ValueAnimator logoShow, logoHide;
     private LayoutParams logoParams;
 
-    private int logoNormalSize, smallLogoSize, showPassTime = 0;
+    private int
+            logoNormalSize,
+            smallLogoSize,
+            showPassTime = 0;
 
-    //--------------------------------------------------------------------------------------------//
-
-    public MainMenu() {
-        logoBounceUp = ValueAnimator.ofFloat(0.93f, 1f);
-        logoBounceDown = ValueAnimator.ofFloat(1f, 0.93f);
-        triangleSpeedUp = ValueAnimator.ofFloat(1f, 8f);
-        triangleSpeedDown = ValueAnimator.ofFloat(8f, 1f);
-    }
+    private float currentScale = 1f;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -86,31 +90,20 @@ public class MainMenu extends UIFragment {
     //--------------------------------------------------------------------------------------------//
 
     private void loadAnimations() {
+        logoBounceAnim = new Animation(logo)
+                .runOnStart(() -> isBounceAnimInProgress = true)
+                .runOnEnd(() -> isBounceAnimInProgress = false);
 
         // Logo bounce effect
         TimeInterpolator easeInOutQuad = EasingHelper.asInterpolator(Easing.InOutQuad);
 
-        AnimatorUpdateListener logoBounce = val -> {
-            logo.setScaleX((float) val.getAnimatedValue());
-            logo.setScaleY((float) val.getAnimatedValue());
-        };
-
-        logoBounceUp.removeAllUpdateListeners();
-        logoBounceUp.addUpdateListener(logoBounce);
-        logoBounceUp.setInterpolator(easeInOutQuad);
-
-        logoBounceDown.removeAllUpdateListeners();
-        logoBounceDown.addUpdateListener(logoBounce);
-        logoBounceDown.setInterpolator(easeInOutQuad);
-
         // Triangles speed up effect
-        AnimatorUpdateListener triangleSpeed = val ->
-                logoTriangles.setTriangleSpeed((float) val.getAnimatedValue());
+        triangleSpeedDown = new Animation().ofFloat(2f, 10f)
+                .runOnUpdate(logoTriangles::setTriangleSpeed);
 
-        triangleSpeedUp.removeAllUpdateListeners();
-        triangleSpeedUp.addUpdateListener(triangleSpeed);
-        triangleSpeedDown.removeAllUpdateListeners();
-        triangleSpeedDown.addUpdateListener(triangleSpeed);
+        triangleSpeedUp = new Animation().ofFloat(10f, 2f)
+                .runOnUpdate(logoTriangles::setTriangleSpeed)
+                .runOnEnd(triangleSpeedDown::play);
 
         // Logo size effect
         AnimatorUpdateListener logoResize = val -> {
@@ -140,6 +133,7 @@ public class MainMenu extends UIFragment {
         smallLogoSize = (int) Resources.dimen(R.dimen.mainMenuSmallLogoSize);
 
         logo = find("logo");
+        logoInnerRect = find("logoRect");
         logoTriangles = find("logoTriangles");
 
         play = new MenuButton(
@@ -154,6 +148,7 @@ public class MainMenu extends UIFragment {
 
         loadAnimations();
         logoTriangles.setTriangleColor(0xFFFFFFFF);
+        logoInnerRect.setAlpha(0);
 
         logoParams = logo.getLayoutParams();
         logoParams.width = logoNormalSize;
@@ -211,10 +206,7 @@ public class MainMenu extends UIFragment {
 
         public void onComplete() {
             Game.musicManager.play();
-            UI.loadingScene.complete(() -> {
-                engine.setScene(global.getSongMenu());
-                //global.getSongMenu().select();
-            });
+            UI.loadingScene.complete(() -> engine.setScene(global.getSongMenu()));
         }
     };
 
@@ -296,33 +288,65 @@ public class MainMenu extends UIFragment {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void updateLogo(float bpm) {
+    public void setLogoKiai(boolean bool) {
+        this.isKiai = bool;
+    }
+
+    public void onBeatUpdate(float beatLength, final int beat) {
         if (logo == null || isExitAnimInProgress)
             return;
 
-        long upTime = (long) (bpm * 0.07f);
-        long downTime = (long) (bpm * 0.9f);
+        long upTime = (long) (beatLength * 0.07f);
+        long downTime = (long) (beatLength * 0.9f);
 
-        logoBounceUp.setDuration(upTime);
-        triangleSpeedUp.setDuration(upTime);
+        if (logoBounceAnim != null) {
+            logoBounceAnim.scale(currentScale, currentScale * 0.99f).play((long) (beatLength * 0.8f));
+        }
 
-        logoBounceDown.setDuration(downTime);
-        triangleSpeedDown.setDuration(downTime);
+        if (logoInnerRect != null && isKiai) {
+            Animation fadeOut = new Animation(logoInnerRect).fade(0.2f, 0f);
 
-        logoBounceDown.setStartDelay(upTime);
-        triangleSpeedDown.setStartDelay(upTime);
+            new Animation(logoInnerRect).fade(0f, 0.2f)
+                    .runOnEnd(() -> fadeOut.cancelPending(false).play(downTime))
+                    .play(upTime);
+        }
 
-        mActivity.runOnUiThread(() -> {
-            logoBounceUp.start();
-            triangleSpeedUp.start();
-            logoBounceDown.start();
-            triangleSpeedDown.start();
-        });
+        // Nullability checks to avoid NPE before views initialization
+        if (logoTriangles != null) {
+            if (triangleSpeedUp != null && triangleSpeedDown != null) {
+                triangleSpeedUp.duration(upTime);
+                triangleSpeedDown.duration(downTime);
+
+                if (beat == 0) {
+                    triangleSpeedUp.play();
+                }
+            }
+        }
     }
 
-    public void update(float secondsElapsed) {
+    @Override
+    protected void onUpdate(float secondsElapsed) {
         if (!isShowing)
             return;
+
+        float multiplier = Game.songService.getLevel() * 2f;
+        currentScale = Math.min(0.93f + (0.07f * multiplier), 1f);
+
+        if (logo != null) {
+            if (Game.songService.getStatus() == Status.PLAYING) {
+                wasPlaying = true;
+                if (!isBounceAnimInProgress && !clearAnimInProgress) {
+                    logo.animate().cancel();
+                    ViewUtils.scale(logo, currentScale);
+                }
+            } else if (wasPlaying) {
+                wasPlaying = false;
+                new Animation(logo).scale(currentScale, 0.93f)
+                        .runOnStart(() -> clearAnimInProgress = true)
+                        .runOnEnd(() -> clearAnimInProgress = false)
+                        .play(100);
+            }
+        }
 
         if (isMenuShowing) {
             if (showPassTime > 10000f) {

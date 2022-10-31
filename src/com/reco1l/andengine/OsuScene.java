@@ -20,7 +20,7 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
 
     public Background background;
 
-    protected TimingWrapper timingWrapper;
+    public TimingWrapper timingWrapper;
 
     protected int screenWidth = Config.getRES_WIDTH();
     protected int screenHeight = Config.getRES_HEIGHT();
@@ -45,7 +45,7 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
                 if (getSongService().getStatus() == Status.PLAYING) {
                     timingWrapper.update(elapsed, position);
                 } else {
-                    timingWrapper.setBPMLength(1000);
+                    timingWrapper.setBeatLength(1000);
                     timingWrapper.update(elapsed, -1);
                 }
             }
@@ -112,7 +112,7 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
         }
 
         if (option == MusicOption.STOP || option == MusicOption.PAUSE) {
-            timingWrapper.setBPMLength(1000);
+            timingWrapper.setBeatLength(1000);
         }
     }
 

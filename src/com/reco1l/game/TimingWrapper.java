@@ -5,6 +5,8 @@ package com.reco1l.game;
 import android.util.Log;
 
 import java.util.LinkedList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
@@ -16,8 +18,10 @@ public class TimingWrapper {
 
     public boolean isContinuousKiai = false;
 
+    public int beat;
+
     public float
-            BPMLength, lastBPMLength,
+            BeatLength, lastBeatLength,
             beatPassTime, lastBeatPassTime,
             offset;
 
@@ -75,31 +79,31 @@ public class TimingWrapper {
         firstPoint = timingPoints.removeFirst();
         currentPoint = firstPoint;
         lastPoint = currentPoint;
-        BPMLength = firstPoint.getBeatLength() * 1000f;
+        BeatLength = firstPoint.getBeatLength() * 1000f;
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void setBPMLength(float length) {
-        lastBPMLength = BPMLength;
-        BPMLength = length;
+    public void setBeatLength(float length) {
+        lastBeatLength = BeatLength;
+        BeatLength = length;
     }
 
     public void restoreBPMLength() {
-        BPMLength = lastBPMLength;
+        BeatLength = lastBeatLength;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public void computeCurrentBpmLength() {
         if (currentPoint != null) {
-            BPMLength = currentPoint.getBeatLength() * 1000;
+            BeatLength = currentPoint.getBeatLength() * 1000;
         }
     }
 
     public boolean computeFirstBpmLength() {
         if (firstPoint != null) {
-            BPMLength = firstPoint.getBeatLength() * 1000;
+            BeatLength = firstPoint.getBeatLength() * 1000;
             return true;
         }
         return false;
@@ -107,13 +111,13 @@ public class TimingWrapper {
 
     public void computeOffset() {
         if (lastPoint != null) {
-            offset = lastPoint.getTime() * 1000f % BPMLength;
+            offset = lastPoint.getTime() * 1000f % BeatLength;
         }
     }
 
     public void computeOffsetAtPosition(int position) {
         if (lastPoint != null) {
-            offset = (position - lastPoint.getTime() * 1000f) % BPMLength;
+            offset = (position - lastPoint.getTime() * 1000f) % BeatLength;
         }
     }
 
@@ -126,7 +130,7 @@ public class TimingWrapper {
     public interface Observer {
         default void onKiaiStart() {}
         default void onKiaiEnd() {}
-        default void onBpmUpdate(float BPMLength) {}
+        default void onBeatUpdate(float BPMLength, int beat) {}
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -134,12 +138,23 @@ public class TimingWrapper {
     public void update(float elapsed, int position) {
         beatPassTime += elapsed * 1000f;
 
-        if (beatPassTime - lastBeatPassTime >= BPMLength - offset) {
+        if (beatPassTime - lastBeatPassTime >= BeatLength - offset) {
             this.lastBeatPassTime = beatPassTime;
             this.offset = 0;
 
+            new Timer().schedule(new TimerTask() {
+                public void run() {
+                    beat++;
+                    cancel(); // Cleaning timer
+                }
+            }, (long) BeatLength);
+
+            if (beat > 3) {
+                beat = 0;
+            }
+
             if (observer != null) {
-                observer.onBpmUpdate(BPMLength);
+                observer.onBeatUpdate(BeatLength, beat);
             }
         }
 

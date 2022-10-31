@@ -28,6 +28,11 @@ public class ViewUtils {
 
     //--------------------------------------------------------------------------------------------//
 
+    public static void scale(View view, float scale) {
+        view.setScaleX(scale);
+        view.setScaleY(scale);
+    }
+
     public static void size(View view, int size) {
         view.getLayoutParams().width = size;
         view.getLayoutParams().height = size;

@@ -33,7 +33,7 @@ import com.edlplan.ui.fragment.ConfirmDialogFragment;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.reco1l.EngineMirror;
+import com.reco1l.GameEngine;
 import com.reco1l.Game;
 import com.reco1l.management.MusicManager;
 import com.reco1l.ui.fragments.SplashScene;
@@ -138,7 +138,7 @@ public class MainActivity extends BaseGameActivity implements
         opt.setNeedsSound(true);
         opt.getRenderOptions().disableExtensionVertexBufferObjects();
         opt.getTouchOptions().enableRunOnUpdateThread();
-        final Engine engine = new EngineMirror(opt);
+        final Engine engine = new GameEngine(opt);
         try {
             if (MultiTouch.isSupported(this)) {
                 engine.setTouchController(new MultiTouchController());
@@ -281,7 +281,7 @@ public class MainActivity extends BaseGameActivity implements
         new AsyncTaskLoader().execute(new OsuAsyncCallback() {
             public void run() {
                 GlobalManager.getInstance().init();
-                EngineMirror.isGlobalManagerInit = true;
+                Game.engine.notifyGlobalInit();
                 analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
                 GlobalManager.getInstance().setLoadingProgress(50);
                 Config.loadSkins();

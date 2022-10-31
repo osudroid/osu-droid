@@ -2,6 +2,7 @@ package com.reco1l;
 
 import com.reco1l.ui.fragments.BeatmapList;
 import com.reco1l.ui.fragments.BeatmapPanel;
+import com.reco1l.ui.fragments.DebugOverlay;
 import com.reco1l.ui.fragments.extras.NotificationCenter;
 import com.reco1l.ui.fragments.LoadingScene;
 import com.reco1l.ui.fragments.MainMenu;
@@ -24,6 +25,7 @@ public final class UI {
     public static SettingsMenu settingsPanel = getSettingsMenu();
     public static BeatmapPanel beatmapPanel = getBeatmapPanel();
     public static BeatmapList beatmapList = getBeatmapList();
+    public static DebugOverlay debugOverlay = getDebugOverlay();
 
     //--------------------------------------------------------------------------------------------//
 
@@ -99,5 +101,12 @@ public final class UI {
             BeatmapList.instance = new BeatmapList();
         }
         return BeatmapList.instance;
+    }
+
+    private static DebugOverlay getDebugOverlay() {
+        if (DebugOverlay.instance == null) {
+            DebugOverlay.instance = new DebugOverlay();
+        }
+        return DebugOverlay.instance;
     }
 }

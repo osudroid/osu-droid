@@ -19,37 +19,42 @@ import ru.nsu.ccfit.zuev.osu.menu.PauseMenu;
 
 // Created by Reco1l on 22/6/22 02:20
 
-public class EngineMirror extends Engine implements IReferences {
+public class GameEngine extends Engine implements IReferences {
 
-    public static boolean isGlobalManagerInit = false;
-
-    private static EngineMirror instance;
+    private static GameEngine instance;
 
     public Scenes currentScene;
     public Scenes lastScene;
+
+    public boolean canNotifyUI = false;
 
     private final List<ISceneHandler> sceneHandlers;
 
     //--------------------------------------------------------------------------------------------//
 
-    public EngineMirror(EngineOptions pEngineOptions) {
+    public GameEngine(EngineOptions pEngineOptions) {
         super(pEngineOptions);
         instance = this;
         sceneHandlers = new ArrayList<>();
     }
 
-    public static EngineMirror getInstance() {
+    public static GameEngine getInstance() {
         return instance;
     }
 
     //--------------------------------------------------------------------------------------------//
 
+    public void notifyGlobalInit() {
+        canNotifyUI = true;
+        registerUpdateHandler(Game.platform::onUpdate);
+    }
+
     @Override
     public void setScene(Scene scene) {
-        if (isGlobalManagerInit) {
-            this.lastScene = currentScene;
-            this.currentScene = parseScene(scene);
-            mActivity.runOnUiThread(this::updateUI);
+        if (canNotifyUI) {
+            lastScene = currentScene;
+            currentScene = parseScene(scene);
+            mActivity.runOnUiThread(this::notifyUI);
         }
         super.setScene(scene);
     }
@@ -107,7 +112,7 @@ public class EngineMirror extends Engine implements IReferences {
 
     //--------------------------------------------------------------------------------------------//
 
-    private void updateUI() {
+    private void notifyUI() {
         if (currentScene == null)
             return;
 

@@ -137,6 +137,13 @@
         app:cardCornerRadius="@dimen/mainMenuLogoCornerRadius"
         app:cardElevation="@dimen/mainMenuLogoElevation">
 
+        <View
+            android:id="@+id/mainM_logoRect"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#FFF"
+            android:alpha="0.3"/>
+
         <com.edlplan.ui.TriangleEffectView
             android:id="@+id/mainM_logoTriangles"
             android:layout_width="match_parent"
@@ -152,19 +159,5 @@
             android:src="@drawable/logo_overlay" />
 
     </androidx.cardview.widget.CardView>
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignStart="@id/mainM_logo"
-        android:layout_alignTop="@id/mainM_logo"
-        android:layout_alignEnd="@id/mainM_logo"
-        android:layout_alignBottom="@id/mainM_logo"
-        android:alpha="0.2"
-        android:elevation="@dimen/mainMenuLogoElevation"
-        android:scaleType="fitXY"
-        android:scaleX="1.03"
-        android:scaleY="1.03"
-        android:src="@drawable/logo_overlay" />
 
 </RelativeLayout>

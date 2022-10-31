@@ -93,6 +93,18 @@ public final class FragmentPlatform implements IReferences {
         loaderFragment = new LoaderFragment();
     }
 
+    public void onUpdate(float elapsed) {
+        for (Fragment fragment : fragments) {
+            if (fragment instanceof UIFragment) {
+                UIFragment frg = (UIFragment) fragment;
+
+                if (frg.isShowing) {
+                    mActivity.runOnUiThread(() -> frg.onUpdate(elapsed));
+                }
+            }
+        }
+    }
+
     //--------------------------------------------------------------------------------------------//
     
     public boolean addFragment(Fragment fragment, String tag) {
