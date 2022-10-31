@@ -56,12 +56,15 @@ public class MainScene extends OsuScene {
                     scatter.start();
                     particleBeginTime = position;
                 }
-                beatMarker.setAlternateMode(true);
+                beatMarker.setKiai(true);
             }
 
             @Override
             public void onKiaiEnd() {
-                beatMarker.setAlternateMode(false);
+                beatMarker.setKiai(false);
+                if (scatter.isEnabled) {
+                    scatter.end();
+                }
             }
 
             @Override
@@ -116,7 +119,11 @@ public class MainScene extends OsuScene {
     public void loadMusic() {
         Game.library.shuffleLibrary();
         MusicManager.beatmap = Game.library.getBeatmap();
-        Game.musicManager.play();
+
+        if (MusicManager.beatmap != null && Game.library.getSizeOfBeatmaps() > 0) {
+            Game.musicManager.play();
+            loadSong(MusicManager.beatmap);
+        }
     }
 
     public void playExitAnim() {

@@ -48,7 +48,7 @@
         app:iconSpaceReserved="false">
 
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="scandownload"
             android:summary="@string/opt_scandownload_summary"
             android:title="@string/opt_scandownload_title"

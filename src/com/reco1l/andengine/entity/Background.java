@@ -4,9 +4,9 @@ package com.reco1l.andengine.entity;
 
 import com.reco1l.Game;
 import com.reco1l.andengine.IAttachableEntity;
-import com.reco1l.UI;
-import com.reco1l.utils.Animation;
+import com.reco1l.utils.listeners.ModifierListener;
 
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.modifier.ScaleModifier;
 import org.anddev.andengine.entity.primitive.Rectangle;
@@ -14,8 +14,11 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseQuadInOut;
 import org.anddev.andengine.util.modifier.ease.IEaseFunction;
+
+import ru.nsu.ccfit.zuev.osu.Config;
 
 public class Background implements IAttachableEntity {
 
@@ -26,6 +29,9 @@ public class Background implements IAttachableEntity {
     private TextureRegion defaultTexture;
 
     private final IEaseFunction interpolator;
+
+    private AlphaModifier alphaModifier;
+    private ScaleModifier scaleModifier;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -62,53 +68,76 @@ public class Background implements IAttachableEntity {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void change(TextureRegion texture) {
-        Game.mActivity.runOnUpdateThread(() -> parent.detachChild(sprite));
+    // TODO Mess with AndEngine
+    public void change(String path) {
+        TextureRegion texture = defaultTexture;
 
-        if (texture == null) {
-            sprite = getScaledSprite(defaultTexture);
-        } else {
-            sprite = getScaledSprite(texture);
+        if (sprite != null) {
+            sprite.setVisible(false);
         }
 
-        new Animation().ofFloat(0, 1f)
-                .runOnUpdate(val -> sprite.setColor(val, val, val))
-                .runOnStart(() -> Game.mActivity.runOnUpdateThread(() -> parent.attachChild(sprite, 0)))
-                .play(500);
+        if (path != null && !Config.isSafeBeatmapBg()) {
+            texture = Game.resources.loadBackground(path).deepCopy();
+        }
+
+        Sprite nextSprite = getScaledSprite(texture);
+        parent.attachChild(nextSprite, 0);
+
+        nextSprite.registerEntityModifier(new AlphaModifier(0.5f, 0f, 1f, new ModifierListener() {
+            public void onModifierStarted(IModifier<IEntity> m, IEntity i) {
+                Game.mActivity.runOnUpdateThread(() -> {
+                    if (sprite != null) {
+                        sprite.detachSelf();
+                    }
+                });
+            }
+
+            public void onModifierFinished(IModifier<IEntity> m, IEntity i) {
+                sprite = (Sprite) i;
+            }
+        }));
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public void dimIn() {
-        if (layer == null)
-            return;
-
-        layer.clearEntityModifiers();
-        layer.registerEntityModifier(new AlphaModifier(0.4f, 0, 0.3f, interpolator));
+        if (layer != null) {
+            if (alphaModifier != null) {
+                layer.unregisterEntityModifier(alphaModifier);
+            }
+            alphaModifier = new AlphaModifier(0.4f, 0, 0.3f, interpolator);
+            layer.registerEntityModifier(alphaModifier);
+        }
     }
 
     public void dimOut() {
-        if (layer == null)
-            return;
-
-        layer.clearEntityModifiers();
-        layer.registerEntityModifier(new AlphaModifier(0.4f, 0.3f, 0, interpolator));
+        if (layer != null) {
+            if (alphaModifier != null) {
+                layer.unregisterEntityModifier(alphaModifier);
+            }
+            alphaModifier = new AlphaModifier(0.4f, 0.3f, 0, interpolator);
+            layer.registerEntityModifier(alphaModifier);
+        }
     }
 
     public void zoomIn() {
-        if (sprite == null)
-            return;
-
-        sprite.clearEntityModifiers();
-        sprite.registerEntityModifier(new ScaleModifier(0.4f, 1, 1.2f, interpolator));
+        if (sprite != null) {
+            if (scaleModifier != null) {
+                sprite.unregisterEntityModifier(scaleModifier);
+            }
+            scaleModifier = new ScaleModifier(0.4f, 1, 1.2f, interpolator);
+            sprite.registerEntityModifier(scaleModifier);
+        }
     }
 
     public void zoomOut() {
-        if (sprite == null || !UI.mainMenu.isMenuShowing)
-            return;
-
-        sprite.clearEntityModifiers();
-        sprite.registerEntityModifier(new ScaleModifier(0.4f, 1.2f, 1, interpolator));
+        if (sprite != null) {
+            if (scaleModifier != null) {
+                sprite.unregisterEntityModifier(scaleModifier);
+            }
+            scaleModifier = new ScaleModifier(0.4f, 1.2f, 1, interpolator);
+            sprite.registerEntityModifier(scaleModifier);
+        }
     }
 
 }

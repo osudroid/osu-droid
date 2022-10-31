@@ -8,13 +8,12 @@ import com.reco1l.game.TimingWrapper;
 import com.reco1l.interfaces.IMusicObserver;
 import com.reco1l.management.MusicManager;
 import com.reco1l.enums.MusicOption;
-import com.reco1l.utils.AsyncExec;
 
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
+import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 
 public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObserver {
@@ -32,10 +31,10 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
     //--------------------------------------------------------------------------------------------//
 
     public OsuScene() {
-        this.background = new Background();
-        this.timingWrapper = new TimingWrapper();
+        timingWrapper = new TimingWrapper();
 
-        this.background.draw(this, 2);
+        background = new Background();
+        background.draw(this, 2);
 
         Game.engine.registerSceneHandler(this);
         onCreate();
@@ -103,34 +102,30 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
 
         if (option == MusicOption.PLAY) {
             if (status == Status.STOPPED) {
-                timingWrapper.loadPointsFrom(MusicManager.beatmap);
-
-                if (timingWrapper.computeFirstBpmLength()) {
-                    timingWrapper.computeOffset();
-                }
+                loadSong(MusicManager.beatmap);
             }
         }
 
         if (option == MusicOption.PREVIOUS || option == MusicOption.NEXT) {
-            timingWrapper.loadPointsFrom(MusicManager.beatmap);
-
-            String path = MusicManager.beatmap.getTrack(0).getBackground();
-            background.sprite.setColor(0, 0, 0);
-
-            new AsyncExec() {
-                TextureRegion texture;
-
-                public void run() {
-                    texture = Game.resources.loadBackground(path);
-                }
-                public void onComplete() {
-                    background.change(texture);
-                }
-            }.execute();
+            BeatmapInfo beatmap = MusicManager.beatmap;
+            loadSong(beatmap);
         }
 
         if (option == MusicOption.STOP || option == MusicOption.PAUSE) {
             timingWrapper.setBPMLength(1000);
+        }
+    }
+
+    protected void loadSong(BeatmapInfo beatmap) {
+        if (beatmap != null) {
+            timingWrapper.loadPointsFrom(beatmap);
+
+            if (timingWrapper.computeFirstBpmLength()) {
+                timingWrapper.computeOffset();
+            }
+
+            String path = beatmap.getTrack(0).getBackground();
+            background.change(path);
         }
     }
 

@@ -77,9 +77,7 @@ public class ListScene extends OsuScene {
         UI.beatmapPanel.updateProperties(track);
         UI.beatmapPanel.updateScoreboard();
 
-        TextureRegion texture = Game.resources.loadBackground(track.getBackground());
-
-        background.change(texture);
+        background.change(track.getBackground());
         currentTrack = track;
     }
 

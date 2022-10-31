@@ -48,6 +48,10 @@ public class TimingWrapper {
                 Log.i("TimingWrapper", "Parsed points from: " + track.getPublicName());
                 timingPoints = new LinkedList<>();
                 currentPoint = null;
+                isContinuousKiai = false;
+                if (observer != null) {
+                    observer.onKiaiEnd();
+                }
                 parsePoints(parser.readData());
             }
         }
@@ -90,14 +94,12 @@ public class TimingWrapper {
     public void computeCurrentBpmLength() {
         if (currentPoint != null) {
             BPMLength = currentPoint.getBeatLength() * 1000;
-            Log.i("TimingWrapper", "Current BPM length: " + BPMLength);
         }
     }
 
     public boolean computeFirstBpmLength() {
         if (firstPoint != null) {
             BPMLength = firstPoint.getBeatLength() * 1000;
-            Log.i("TimingWrapper", "Current BPM length: " + BPMLength);
             return true;
         }
         return false;
@@ -106,14 +108,12 @@ public class TimingWrapper {
     public void computeOffset() {
         if (lastPoint != null) {
             offset = lastPoint.getTime() * 1000f % BPMLength;
-            Log.i("TimingWrapper", "Current offset: " + offset);
         }
     }
 
     public void computeOffsetAtPosition(int position) {
         if (lastPoint != null) {
             offset = (position - lastPoint.getTime() * 1000f) % BPMLength;
-            Log.i("TimingWrapper", "Current offset: " + offset);
         }
     }
 
@@ -140,7 +140,6 @@ public class TimingWrapper {
 
             if (observer != null) {
                 observer.onBpmUpdate(BPMLength);
-                Log.i("TimingWrapper", "BPM length: " + BPMLength);
             }
         }
 
@@ -166,10 +165,7 @@ public class TimingWrapper {
                 }
             } else {
                 currentPoint = null;
-                Log.i("TimingWrapper", "No timing points found!");
             }
-        } else if (currentPoint == null) {
-            Log.i("TimingWrapper", "Current timing point is null!");
         }
     }
 }

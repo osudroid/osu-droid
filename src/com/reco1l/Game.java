@@ -23,26 +23,12 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public final class Game implements IReferences {
 
-    public static MainScene mainScene = getMainScene();
-    public static ListScene listScene = getListScene();
+    public static MainScene mainScene = global.getMainScene();
+    public static ListScene listScene = global.getSongMenu();
 
     public static SongService songService = getSongService();
 
     //----------------------------------------------------------------------------------------//
-
-    private static MainScene getMainScene() {
-        if (MainScene.instance == null) {
-            MainScene.instance = new MainScene();
-        }
-        return MainScene.instance;
-    }
-
-    private static ListScene getListScene() {
-        if (ListScene.instance == null) {
-            ListScene.instance = new ListScene();
-        }
-        return ListScene.instance;
-    }
 
     private static SongService getSongService() {
         return global.getSongService();

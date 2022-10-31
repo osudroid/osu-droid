@@ -202,7 +202,7 @@ public class Config {
 
         // beatmaps
         DELETE_OSZ = prefs.getBoolean("deleteosz", true);
-        SCAN_DOWNLOAD = prefs.getBoolean("scandownload", false);
+        SCAN_DOWNLOAD = prefs.getBoolean("scandownload", true);
         forceRomanized = prefs.getBoolean("forceromanized", false);
         beatmapPath = prefs.getString("directory", corePath + "Songs/");
         if (beatmapPath.length() == 0) {
