@@ -33,7 +33,7 @@ public abstract class AsyncExec {
     //--------------------------------------------------------------------------------------------//
 
     public abstract void run();
-    public abstract void onComplete();
+    public void onComplete() {}
 
     public void onCancel(boolean wasForced) {}
 

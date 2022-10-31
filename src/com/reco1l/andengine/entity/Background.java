@@ -4,6 +4,7 @@ package com.reco1l.andengine.entity;
 
 import com.reco1l.Game;
 import com.reco1l.andengine.IAttachableEntity;
+import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.listeners.ModifierListener;
 
 import org.anddev.andengine.entity.IEntity;
@@ -19,6 +20,7 @@ import org.anddev.andengine.util.modifier.ease.EaseQuadInOut;
 import org.anddev.andengine.util.modifier.ease.IEaseFunction;
 
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 
 public class Background implements IAttachableEntity {
 
@@ -68,34 +70,44 @@ public class Background implements IAttachableEntity {
 
     //--------------------------------------------------------------------------------------------//
 
-    // TODO Mess with AndEngine
-    public void change(String path) {
-        TextureRegion texture = defaultTexture;
-
+    public synchronized void change(String path) {
         if (sprite != null) {
             sprite.setVisible(false);
         }
 
-        if (path != null && !Config.isSafeBeatmapBg()) {
-            texture = Game.resources.loadBackground(path).deepCopy();
-        }
+        new AsyncExec() {
+            public void run() {
+                TextureRegion texture = defaultTexture;
 
-        Sprite nextSprite = getScaledSprite(texture);
-        parent.attachChild(nextSprite, 0);
+                if (path != null && !Config.isSafeBeatmapBg()) {
+                    texture = Game.resources.loadBackground(path);
+                }
 
-        nextSprite.registerEntityModifier(new AlphaModifier(0.5f, 0f, 1f, new ModifierListener() {
-            public void onModifierStarted(IModifier<IEntity> m, IEntity i) {
-                Game.mActivity.runOnUpdateThread(() -> {
-                    if (sprite != null) {
-                        sprite.detachSelf();
-                    }
+                Sprite nextSprite = getScaledSprite(texture);
+
+                SyncTaskManager.getInstance().run(() -> {
+                    parent.attachChild(nextSprite, 0);
+
+                    ModifierListener listener = new ModifierListener() {
+                        @Override
+                        public void onModifierStarted(IModifier<IEntity> m, IEntity i) {
+                            Game.mActivity.runOnUpdateThread(() -> {
+                                if (sprite != null) {
+                                    sprite.detachSelf();
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onModifierFinished(IModifier<IEntity> m, IEntity i) {
+                            sprite = (Sprite) i;
+
+                        }
+                    };
+                    nextSprite.registerEntityModifier(new AlphaModifier(0.5f, 0f, 1f, listener));
                 });
             }
-
-            public void onModifierFinished(IModifier<IEntity> m, IEntity i) {
-                sprite = (Sprite) i;
-            }
-        }));
+        }.execute();
     }
 
     //--------------------------------------------------------------------------------------------//
