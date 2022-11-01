@@ -14,134 +14,176 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/mp_body"
         style="@style/panel"
+        android:layout_width="wrap_content"
         android:layout_height="@dimen/musicPlayerHeight">
 
         <LinearLayout
-            android:id="@+id/mp_innerBody"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
             <LinearLayout
-                android:id="@+id/mp_songBody"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:id="@+id/mp_innerBody"
+                android:layout_width="@dimen/panelWidth"
+                android:layout_height="match_parent"
                 android:orientation="vertical">
 
                 <LinearLayout
+                    android:id="@+id/mp_songBody"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/panelMargins"
-                    android:layout_marginVertical="@dimen/panelMargins"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/mp_title"
-                        style="@style/text"
-                        android:singleLine="true"
-                        android:text="FUWA FUWA TIME"
-                        android:textSize="@dimen/textM"
-                        android:textStyle="bold" />
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/panelMargins"
+                        android:layout_marginVertical="@dimen/panelMargins"
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/mp_artist"
-                        style="@style/text"
-                        android:layout_marginTop="@dimen/_4sdp"
-                        android:singleLine="true"
-                        android:text="HOKAGO TEA TIME" />
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_toStartOf="@+id/mp_list"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/mp_title"
+                                style="@style/text"
+                                android:singleLine="true"
+                                android:text="song title"
+                                android:textSize="@dimen/textM"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/mp_artist"
+                                style="@style/text"
+                                android:layout_marginTop="@dimen/_4sdp"
+                                android:singleLine="true"
+                                android:text="song artist" />
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:id="@+id/mp_list"
+                            style="@style/icon_button"
+                            android:layout_width="@dimen/vectorL"
+                            android:layout_height="@dimen/vectorL"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:background="@drawable/round_shape"
+                            android:src="@drawable/v_queue" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginHorizontal="@dimen/songSeekBarHorizontalPadding"
+                            app:cardBackgroundColor="@color/musicPlayerSeekbarCardBackground"
+                            app:cardCornerRadius="@dimen/songSeekBarCornerRadius"
+                            app:cardElevation="@dimen/musicPlayerSeekbarElevation">
+
+                            <ImageView
+                                android:id="@+id/mp_songImage"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/musicPlayerSongShapeHeight"
+                                android:background="@color/songSeekBarBackground"
+                                android:scaleType="centerCrop" />
+
+                        </androidx.cardview.widget.CardView>
+
+                        <SeekBar
+                            android:id="@+id/mp_seekBar"
+                            style="@style/song_seek_bar"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/songSeekBarHeight"
+                            android:layout_centerVertical="true"
+                            android:elevation="@dimen/musicPlayerSeekbarElevation"
+                            android:paddingHorizontal="@dimen/songSeekBarHorizontalPadding"
+                            tool:progress="50" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/S"
+                        android:paddingHorizontal="@dimen/panelMargins">
+
+                        <TextView
+                            android:id="@+id/mp_songProgress"
+                            style="@style/text"
+                            android:text="00:00"
+                            android:textSize="@dimen/textS" />
+
+                        <TextView
+                            android:id="@+id/mp_songLength"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:text="00:00"
+                            android:textColor="#CCFFFFFF"
+                            android:textSize="@dimen/textS" />
+
+                    </RelativeLayout>
 
                 </LinearLayout>
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginHorizontal="@dimen/songSeekBarHorizontalPadding"
-                        app:cardBackgroundColor="@color/musicPlayerSeekbarCardBackground"
-                        app:cardCornerRadius="@dimen/songSeekBarCornerRadius"
-                        app:cardElevation="@dimen/musicPlayerSeekbarElevation">
-
-                        <ImageView
-                            android:id="@+id/mp_songImage"
-                            android:layout_width="match_parent"
-                            android:layout_height="@dimen/musicPlayerSongShapeHeight"
-                            android:background="@color/songSeekBarBackground"
-                            android:scaleType="centerCrop" />
-
-                    </androidx.cardview.widget.CardView>
-
-                    <SeekBar
-                        android:id="@+id/mp_seekBar"
-                        style="@style/song_seek_bar"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/songSeekBarHeight"
-                        android:layout_centerVertical="true"
-                        android:elevation="@dimen/musicPlayerSeekbarElevation"
-                        android:paddingHorizontal="@dimen/songSeekBarHorizontalPadding"
-                        tool:progress="50" />
-
-                </RelativeLayout>
-
-                <RelativeLayout
+                <LinearLayout
+                    android:id="@+id/mp_buttons"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/S"
-                    android:paddingHorizontal="@dimen/panelMargins">
+                    android:layout_marginTop="@dimen/musicPlayerButtonsMargin"
+                    android:gravity="center">
 
-                    <TextView
-                        android:id="@+id/mp_songProgress"
-                        style="@style/text"
-                        android:text="00:00"
-                        android:textSize="@dimen/textS" />
+                    <ImageView
+                        android:id="@+id/mp_prev"
+                        style="@style/icon_button"
+                        android:layout_width="@dimen/vectorXL"
+                        android:layout_height="@dimen/vectorXL"
+                        android:background="@drawable/round_shape"
+                        android:src="@drawable/v_prev_l" />
 
-                    <TextView
-                        android:id="@+id/mp_songLength"
+                    <ImageView
+                        android:id="@+id/mp_play"
+                        style="@style/icon_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:text="00:00"
-                        android:textColor="#CCFFFFFF"
-                        android:textSize="@dimen/textS" />
+                        android:layout_marginHorizontal="@dimen/musicPlayerPlayButtonMargin"
+                        android:background="@drawable/round_shape"
+                        android:src="@drawable/v_pause_xl" />
 
-                </RelativeLayout>
+                    <ImageView
+                        android:id="@+id/mp_next"
+                        style="@style/icon_button"
+                        android:layout_width="@dimen/vectorXL"
+                        android:layout_height="@dimen/vectorXL"
+                        android:background="@drawable/round_shape"
+                        android:src="@drawable/v_next_l" />
+                </LinearLayout>
 
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/mp_buttons"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/musicPlayerButtonsMargin"
-                android:gravity="center">
+                android:id="@+id/mp_listBody"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:background="@color/panelTopBar"
+                android:orientation="vertical"
+                android:padding="@dimen/M">
 
-                <ImageView
-                    android:id="@+id/mp_prev"
-                    style="@style/icon_button"
-                    android:layout_width="@dimen/vectorXL"
-                    android:layout_height="@dimen/vectorXL"
-                    android:background="@drawable/round_shape"
-                    android:src="@drawable/v_prev_l" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/mp_listRv"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
 
-                <ImageView
-                    android:id="@+id/mp_play"
-                    style="@style/icon_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/musicPlayerPlayButtonMargin"
-                    android:background="@drawable/round_shape"
-                    android:src="@drawable/v_pause_xl" />
-
-                <ImageView
-                    android:id="@+id/mp_next"
-                    style="@style/icon_button"
-                    android:layout_width="@dimen/vectorXL"
-                    android:layout_height="@dimen/vectorXL"
-                    android:background="@drawable/round_shape"
-                    android:src="@drawable/v_next_l" />
             </LinearLayout>
 
         </LinearLayout>

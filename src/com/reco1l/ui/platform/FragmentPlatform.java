@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.reco1l.Game;
 import com.reco1l.enums.Scenes;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Resources;
@@ -99,7 +100,7 @@ public final class FragmentPlatform implements IReferences {
                 UIFragment frg = (UIFragment) fragment;
 
                 if (frg.isShowing) {
-                    mActivity.runOnUiThread(() -> frg.onUpdate(elapsed));
+                    Game.runOnUiThread(() -> frg.onUpdate(elapsed));
                 }
             }
         }

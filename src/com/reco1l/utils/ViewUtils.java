@@ -65,6 +65,14 @@ public class ViewUtils {
             this.params = (MarginLayoutParams) view.getLayoutParams();
         }
 
+        public void all(int size) {
+            this.params.topMargin = size;
+            this.params.bottomMargin = size;
+            this.params.leftMargin = size;
+            this.params.rightMargin = size;
+            this.view.requestLayout();
+        }
+
         public MarginUtils vertical(int top, int bottom) {
             this.params.topMargin = top;
             this.params.bottomMargin = bottom;

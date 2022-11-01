@@ -6,7 +6,6 @@ import com.reco1l.Game;
 import com.reco1l.andengine.entity.Background;
 import com.reco1l.game.TimingWrapper;
 import com.reco1l.interfaces.IMusicObserver;
-import com.reco1l.management.MusicManager;
 import com.reco1l.enums.MusicOption;
 
 import org.anddev.andengine.entity.scene.Scene;
@@ -86,7 +85,7 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
         if (option == MusicOption.PLAY) {
             if (current == Status.PAUSED) {
                 timingWrapper.restoreBPMLength();
-                timingWrapper.computeOffsetAtPosition(Game.global.getSongService().getPosition());
+                timingWrapper.computeOffsetAtPosition(Game.songService.getPosition());
             }
         }
 
@@ -97,26 +96,15 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
 
     @Override
     public void onMusicControlChanged(MusicOption option, Status status) {
-        if (!isUsingTimingWrapper)
-            return;
-
-        if (option == MusicOption.PLAY) {
-            if (status == Status.STOPPED) {
-                loadSong(MusicManager.beatmap);
+        if (isUsingTimingWrapper) {
+            if (option == MusicOption.STOP || option == MusicOption.PAUSE) {
+                timingWrapper.setBeatLength(1000);
             }
-        }
-
-        if (option == MusicOption.PREVIOUS || option == MusicOption.NEXT) {
-            BeatmapInfo beatmap = MusicManager.beatmap;
-            loadSong(beatmap);
-        }
-
-        if (option == MusicOption.STOP || option == MusicOption.PAUSE) {
-            timingWrapper.setBeatLength(1000);
         }
     }
 
-    protected void loadSong(BeatmapInfo beatmap) {
+    @Override
+    public void onMusicChange(BeatmapInfo beatmap) {
         if (beatmap != null) {
             timingWrapper.loadPointsFrom(beatmap);
 
@@ -132,7 +120,7 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
     @Override
     public void onMusicSync(Status status) {
         if (isUsingTimingWrapper) {
-            timingWrapper.computeOffsetAtPosition(Game.global.getSongService().getPosition());
+            timingWrapper.computeOffsetAtPosition(Game.songService.getPosition());
         }
     }
 

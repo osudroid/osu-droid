@@ -225,7 +225,7 @@ public class TopBar extends UIFragment {
             UI.topBar.bindTouchListener(view, UI.musicPlayer::altShow);
         }
 
-        public void update(BeatmapInfo beatmap) {
+        public void changeMusic(BeatmapInfo beatmap) {
             if (!parent.isShowing)
                 return;
 

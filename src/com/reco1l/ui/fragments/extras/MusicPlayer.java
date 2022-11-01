@@ -1,15 +1,26 @@
 package com.reco1l.ui.fragments.extras;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
+
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.edlplan.framework.easing.Easing;
 import com.reco1l.Game;
@@ -21,10 +32,10 @@ import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.Resources;
-import com.reco1l.interfaces.IReferences;
 import com.reco1l.utils.listeners.TouchListener;
 
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.TimeZone;
 
 import ru.nsu.ccfit.zuev.audio.Status;
@@ -48,13 +59,16 @@ public class MusicPlayer extends UIFragment {
 
     private Bitmap songBitmap;
     private SimpleDateFormat sdf;
-    private BeatmapInfo lastBeatmap;
     private Drawable playDrawable, pauseDrawable;
 
     private AsyncExec bitmapTask;
 
     private int length, position, toPosition;
-    private boolean isTrackingTouch = false;
+
+    private boolean
+            isListVisible = false,
+            isTrackingTouch = false,
+            wasChangedFromList = false;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -101,19 +115,22 @@ public class MusicPlayer extends UIFragment {
                 .runOnEnd(() ->
                         new Animation(find("buttons")).fade(0, 1).play(100))
                 .play(100);
-        
-        seekBar = find("seekBar");
+
+        RecyclerView list = find("listRv");
         songImage = find("songImage");
         songBody = find("songBody");
+        seekBar = find("seekBar");
 
-        titleTv = find("title");
-        artistTv = find("artist");
         lengthTv = find("songLength");
         timeTv = find("songProgress");
+        artistTv = find("artist");
+        titleTv = find("title");
         play = find("play");
 
         bindTouchListener(play, new TouchListener() {
-            public boolean hasTouchEffect() { return false; }
+            public boolean hasTouchEffect() {
+                return false;
+            }
 
             public void onPressUp() {
                 if (global.getSongService().getStatus() == Status.PLAYING) {
@@ -124,10 +141,11 @@ public class MusicPlayer extends UIFragment {
             }
         });
 
+        bindTouchListener(find("list"), this::switchListVisibility);
         bindTouchListener(find("prev"), Game.musicManager::previous);
         bindTouchListener(find("next"), Game.musicManager::next);
 
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 isTrackingTouch = true;
@@ -136,7 +154,7 @@ public class MusicPlayer extends UIFragment {
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromTouch) {
-                if (global.getSongService() != null && fromTouch) {
+                if (Game.songService != null && fromTouch) {
                     toPosition = progress;
                     timeTv.setText(sdf.format(progress));
                 }
@@ -144,63 +162,70 @@ public class MusicPlayer extends UIFragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                global.getSongService().setPosition(toPosition);
-                Log.i("MusicPlayer", "Skipped song position to " + sdf.format(toPosition));
+                Game.songService.setPosition(toPosition);
                 isTrackingTouch = false;
+                Log.i("MusicPlayer", "Skipped song position to " + sdf.format(toPosition));
                 onTouchEventNotified(MotionEvent.ACTION_UP);
             }
         });
 
-        loadMetadata(library.getBeatmap());
+        list.setLayoutManager(new LinearLayoutManager(Game.mActivity, VERTICAL, false));
+        list.setAdapter(new PlaylistAdapter(Game.library.getLibrary()));
+
+        loadMetadata(MusicManager.beatmap);
         loadSeekbarImage();
     }
 
-    public void update() {
-        length = global.getSongService().getLength();
-        position = global.getSongService().getPosition();
-
-        mActivity.runOnUiThread(() -> {
-
-            if (MusicManager.beatmap != lastBeatmap) {
-                lastBeatmap = MusicManager.beatmap;
-                change();
-                return;
-            }
-
-            if (!isShowing || !isVisible())
-                return;
-
-            if (!isTrackingTouch) {
-                seekBar.setMax(length);
-                seekBar.setProgress(position);
-                timeTv.setText(sdf.format(position));
-            }
-
-            if (global.getSongService().getStatus() == Status.PLAYING) {
-                if (play.getDrawable() != pauseDrawable) {
-                    new Animation(play).rotation(180, 0)
-                            .runOnEnd(() -> play.setImageDrawable(pauseDrawable))
-                            .play(160);
-                }
-            }
-            else if (play.getDrawable() != playDrawable) {
-                new Animation(play).rotation(180, 0)
-                        .runOnEnd(() -> play.setImageDrawable(playDrawable))
-                        .play(160);
-            }
-        });
+    private void switchListVisibility() {
+        if (!isListVisible) {
+            isListVisible = true;
+            new Animation(find("listBody")).width(0, Resources.dimen(R.dimen.panelWidth))
+                    .play(300);
+        } else {
+            isListVisible = false;
+            new Animation(find("listBody")).width(Resources.dimen(R.dimen.panelWidth), 0)
+                    .play(300);
+        }
     }
 
-    private void change() {
-        BeatmapInfo beatmap = MusicManager.beatmap;
-
-        if (UI.topBar.isShowing) {
-            UI.topBar.musicButton.update(beatmap);
+    @Override
+    protected void onUpdate(float elapsed) {
+        if (Game.songService != null) {
+            length = Game.songService.getLength();
+            position = Game.songService.getPosition();
         }
+
+        if (!isShowing || Game.songService == null)
+            return;
+
+        if (!isTrackingTouch) {
+            seekBar.setMax(length);
+            seekBar.setProgress(position);
+            timeTv.setText(sdf.format(position));
+        }
+
+        if (Game.songService.getStatus() == Status.PLAYING) {
+            if (play.getDrawable() != pauseDrawable) {
+                new Animation(play).rotation(180, 0)
+                        .runOnEnd(() -> play.setImageDrawable(pauseDrawable))
+                        .play(160);
+            }
+        } else if (play.getDrawable() != playDrawable) {
+            new Animation(play).rotation(180, 0)
+                    .runOnEnd(() -> play.setImageDrawable(playDrawable))
+                    .play(160);
+        }
+    }
+
+    public void changeMusic(BeatmapInfo beatmap) {
         changeBitmap(beatmap.getTrack(0));
 
         if (isShowing) {
-            if (currentOption == MusicOption.NEXT) {
+            loadMetadata(beatmap);
+
+            if (currentOption == MusicOption.NEXT || wasChangedFromList) {
+                wasChangedFromList = false;
+
                 new Animation(songBody).moveX(0, -10).fade(1, 0)
                         .play(200);
 
@@ -236,6 +261,7 @@ public class MusicPlayer extends UIFragment {
             public void run() {
                 BeatmapHelper.loadCompressedBackground(track);
             }
+
             public void onComplete() {
                 songBitmap = BeatmapHelper.getCompressedBackground(track);
                 loadSeekbarImage();
@@ -251,26 +277,26 @@ public class MusicPlayer extends UIFragment {
     }
 
     private void loadSeekbarImage() {
-        if (!isShowing)
-            return;
-        ((View) songImage).setAlpha(0);
+        if (isShowing) {
+            ((View) songImage).setAlpha(0);
 
-        if (songBitmap != null) {
-            songImage.setImageBitmap(songBitmap);
-            new Animation(songImage).fade(0, 1).play(200);
-        } else {
-            songImage.setImageDrawable(null);
+            if (songBitmap != null) {
+                songImage.setImageBitmap(songBitmap);
+                new Animation(songImage).fade(0, 1).play(200);
+            } else {
+                songImage.setImageDrawable(null);
+            }
         }
     }
 
     //--------------------------------------------------------------------------------------------//
 
-
     @Override
     public void show() {
         if (isShowing)
             return;
-        platform.close(UI.getExtras());
+
+        Game.platform.close(UI.getExtras());
         UI.topBar.musicButton.playAnimation(true);
         super.show();
     }
@@ -279,6 +305,10 @@ public class MusicPlayer extends UIFragment {
     public void close() {
         if (!isShowing)
             return;
+
+        if (isListVisible) {
+            switchListVisibility();
+        }
 
         UI.topBar.musicButton.playAnimation(false);
 
@@ -292,5 +322,84 @@ public class MusicPlayer extends UIFragment {
                 .moveY(0, -30)
                 .fade(1, 0)
                 .play(240);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public static class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.VH> {
+
+        private final List<BeatmapInfo> songs;
+
+        //----------------------------------------------------------------------------------------//
+
+        public PlaylistAdapter(List<BeatmapInfo> songs) {
+            this.songs = songs;
+            setHasStableIds(true);
+        }
+
+        //----------------------------------------------------------------------------------------//
+
+        @NonNull
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            TextView view = new TextView(Game.mActivity);
+
+            view.setLayoutParams(new LayoutParams(MATCH_PARENT, WRAP_CONTENT));
+            view.setBackground(Resources.drw(R.drawable.round_shape));
+            view.setEllipsize(TextUtils.TruncateAt.END);
+            view.setSingleLine(true);
+
+            int m = (int) Resources.dimen(R.dimen.M);
+            int s = (int) Resources.dimen(R.dimen.S);
+            view.setPadding(m, s, m, s);
+
+            return new VH(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH holder, int position) {
+            holder.assign(songs.get(position));
+        }
+
+        //----------------------------------------------------------------------------------------//
+
+        @Override
+        public int getItemCount() {
+            return songs.size();
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            return position;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        //----------------------------------------------------------------------------------------//
+
+        public static class VH extends RecyclerView.ViewHolder {
+
+            private final TextView text;
+
+            //------------------------------------------------------------------------------------//
+
+            public VH(@NonNull View itemView) {
+                super(itemView);
+                text = (TextView) itemView;
+            }
+
+            //------------------------------------------------------------------------------------//
+
+            public void assign(BeatmapInfo song) {
+                text.setText(BeatmapHelper.getArtist(song) + " - " + BeatmapHelper.getTitle(song));
+
+                UI.musicPlayer.bindTouchListener(text, () -> {
+                    UI.musicPlayer.wasChangedFromList = true;
+                    Game.musicManager.change(song);
+                });
+            }
+        }
     }
 }

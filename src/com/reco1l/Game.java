@@ -84,4 +84,8 @@ public final class Game implements IReferences {
             }
         }
     }
+
+    public static void runOnUiThread(Runnable task) {
+        mActivity.runOnUiThread(task);
+    }
 }

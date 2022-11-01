@@ -16,6 +16,7 @@ import com.reco1l.UI;
 import org.anddev.andengine.entity.primitive.Rectangle;
 
 import ru.nsu.ccfit.zuev.audio.Status;
+import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierFactory;
 
@@ -111,8 +112,16 @@ public class MainScene extends OsuScene {
                 scatter.end();
             }
         }
+    }
 
-        UI.musicPlayer.update();
+    @Override
+    public void onMusicChange(BeatmapInfo beatmap) {
+        super.onMusicChange(beatmap);
+
+        Game.runOnUiThread(() -> {
+            UI.topBar.musicButton.changeMusic(beatmap);
+            UI.musicPlayer.changeMusic(beatmap);
+        });
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -123,7 +132,6 @@ public class MainScene extends OsuScene {
 
         if (MusicManager.beatmap != null && Game.library.getSizeOfBeatmaps() > 0) {
             Game.musicManager.play();
-            loadSong(MusicManager.beatmap);
         }
         UI.debugOverlay.show();
     }

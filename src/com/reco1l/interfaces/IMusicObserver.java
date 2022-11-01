@@ -13,6 +13,8 @@ public interface IMusicObserver {
 
     default void onMusicControlChanged(MusicOption option, Status status) {}
 
+    default void onMusicChange(BeatmapInfo newBeatmap) {}
+
     default void onMusicSync(Status status) {}
 
     default void onMusicEnd() {}
