@@ -9,8 +9,8 @@ import com.edlplan.framework.math.FMath;
 import com.reco1l.Game;
 import com.reco1l.enums.Scenes;
 import com.reco1l.management.MusicManager;
-import com.reco1l.ui.data.beatmaps.BeatmapListAdapter;
-import com.reco1l.ui.data.beatmaps.TrackListAdapter;
+import com.reco1l.ui.data.BeatmapListAdapter;
+import com.reco1l.ui.data.TrackListAdapter;
 import com.reco1l.ui.platform.UIFragment;
 
 import java.util.ArrayList;

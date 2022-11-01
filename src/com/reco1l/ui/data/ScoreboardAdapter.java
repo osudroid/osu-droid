@@ -1,4 +1,4 @@
-package com.reco1l.ui.data.scoreboard;
+package com.reco1l.ui.data;
 
 import android.view.LayoutInflater;
 import android.view.View;

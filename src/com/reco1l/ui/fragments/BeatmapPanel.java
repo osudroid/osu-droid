@@ -11,7 +11,7 @@ import androidx.cardview.widget.CardView;
 import com.reco1l.enums.Scenes;
 import com.reco1l.ui.data.BeatmapProperty;
 import com.reco1l.utils.helpers.BeatmapHelper;
-import com.reco1l.ui.data.scoreboard.Scoreboard;
+import com.reco1l.ui.data.Scoreboard;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Resources;

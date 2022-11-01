@@ -1,4 +1,4 @@
-package com.reco1l.ui.data.beatmaps;
+package com.reco1l.ui.data;
 
 // Created by Reco1l on 18/9/22 00:01
 

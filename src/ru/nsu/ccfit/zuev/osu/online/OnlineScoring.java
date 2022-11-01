@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu.online;
 
 import android.os.AsyncTask;
 
-import com.reco1l.ui.data.tables.NotificationTable;
+import com.reco1l.ui.data.NotificationTable;
 import com.reco1l.interfaces.IReferences;
 
 import org.anddev.andengine.util.Debug;

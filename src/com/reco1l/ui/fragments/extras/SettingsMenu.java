@@ -18,7 +18,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.reco1l.enums.Scenes;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
-import com.reco1l.ui.data.tables.DialogTable;
+import com.reco1l.ui.data.DialogTable;
 import com.reco1l.UI;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;

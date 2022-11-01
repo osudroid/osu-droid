@@ -1,4 +1,4 @@
-package com.reco1l.ui.data.tables;
+package com.reco1l.ui.data;
 
 // Created by Reco1l on 30/6/22 19:20
 

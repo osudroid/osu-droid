@@ -11,7 +11,7 @@ import com.reco1l.enums.Scenes;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.UI;
 import com.reco1l.utils.helpers.BeatmapHelper;
-import com.reco1l.ui.data.tables.DialogTable;
+import com.reco1l.ui.data.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Resources;
