@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
 
-import com.reco1l.enums.Scenes;
+import com.reco1l.enums.Screens;
 import com.reco1l.ui.data.BeatmapProperty;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.data.Scoreboard;
@@ -91,8 +91,8 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
     }
 
     @Override
-    protected Scenes getParent() {
-        return Scenes.LIST;
+    protected Screens getParent() {
+        return Screens.LIST;
     }
 
     //--------------------------------------------------------------------------------------------//

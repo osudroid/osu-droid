@@ -7,7 +7,7 @@ import static com.reco1l.enums.MusicOption.*;
 import android.util.Log;
 
 import com.reco1l.Game;
-import com.reco1l.enums.Scenes;
+import com.reco1l.enums.Screens;
 import com.reco1l.andengine.ISceneHandler;
 import com.reco1l.interfaces.IMusicObserver;
 import com.reco1l.enums.MusicOption;
@@ -26,7 +26,7 @@ public final class MusicManager {
 
     private static MusicManager instance;
 
-    private final Map<Scenes, IMusicObserver> observers;
+    private final Map<Screens, IMusicObserver> observers;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -73,7 +73,7 @@ public final class MusicManager {
     }
 
     public IMusicObserver getCurrentObserver() {
-        return observers.get(Game.engine.currentScene);
+        return observers.get(Game.engine.currentScreen);
     }
 
     //--------------------------------------------------------------------------------------------//

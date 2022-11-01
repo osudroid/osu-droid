@@ -21,6 +21,7 @@ import androidx.preference.PreferenceManager;
 import androidx.core.content.PermissionChecker;
 
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -36,8 +37,11 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.GameEngine;
 import com.reco1l.Game;
 import com.reco1l.management.MusicManager;
+import com.reco1l.ui.custom.Dialog;
+import com.reco1l.ui.data.DialogTable;
 import com.reco1l.ui.fragments.SplashScene;
 import com.reco1l.ui.platform.FragmentPlatform;
+import com.reco1l.utils.KeyInputHandler;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
@@ -665,113 +669,12 @@ public class MainActivity extends BaseGameActivity implements
             return false;
         }
 
-        if(autoclickerDialogShown) {
-            return false;
-        }
-
-        if (event.getAction() != KeyEvent.ACTION_DOWN) {
-            return super.onKeyDown(keyCode, event);
-        }
         if (GlobalManager.getInstance().getEngine() == null) {
             return super.onKeyDown(keyCode, event);
         }
 
-        if (event.getAction() == TouchEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_BACK && ActivityOverlay.onBackPress()) {
-            return true;
-        }
-
-        if (GlobalManager.getInstance().getGameScene() != null
-                && (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
-            if (GlobalManager.getInstance().getGameScene().isPaused()) {
-                GlobalManager.getInstance().getGameScene().resume();
-            } else {
-                GlobalManager.getInstance().getGameScene().pause();
-            }
-            return true;
-        }
-        if (GlobalManager.getInstance().getScoring() != null && keyCode == KeyEvent.KEYCODE_BACK
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getScoring().getScene()) {
-            GlobalManager.getInstance().getScoring().replayMusic();
-            GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getSongMenu());
-            // GlobalManager.getInstance().getSongMenu().updateScore();
-            ResourceManager.getInstance().getSound("applause").stop();
-            GlobalManager.getInstance().getScoring().setReplayID(-1);
-            return true;
-        }
-        if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ENTER)
-                && GlobalManager.getInstance().getEngine() != null
-                && GlobalManager.getInstance().getSongMenu() != null
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu()
-                && GlobalManager.getInstance().getSongMenu().hasChildScene()) {
-            if (FilterMenu.getInstance().getClass() == FilterMenu.class) {
-                if (GlobalManager.getInstance().getSongMenu().getChildScene() == FilterMenu.getInstance()
-                        .getScene()) {
-                    if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                        InputManager.getInstance().toggleKeyboard();
-                    }
-                    FilterMenu.getInstance().hideMenu();
-                }
-            }
-
-            /*if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == PropsMenu.getInstance()
-                    .getScene()) {
-                PropsMenu.getInstance().saveChanges();
-                if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                    InputManager.getInstance().toggleKeyboard();
-                }
-            }*/
-
-            if (GlobalManager.getInstance().getSongMenu().getChildScene() == ModMenu.getInstance().getScene()) {
-                ModMenu.getInstance().hide();
-            }
-
-            return true;
-        }
-        if (GlobalManager.getInstance().getSongMenu() != null && GlobalManager.getInstance().getEngine() != null
-                && keyCode == KeyEvent.KEYCODE_MENU
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu()
-                && GlobalManager.getInstance().getSongMenu().hasChildScene() == false) {
-            // GlobalManager.getInstance().getSongMenu().stopScroll(0);
-            //GlobalManager.getInstance().getSongMenu().showPropertiesMenu(null);
-            return true;
-        }
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (GlobalManager.getInstance().getEngine() != null && GlobalManager.getInstance().getSongMenu() != null &&
-                    GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu()) {
-
-                //SongMenu 界面按返回按钮（系统按钮）
-                GlobalManager.getInstance().getSongMenu().back();
-            } else {
-
-                if (GlobalManager.getInstance().getEngine().getScene() instanceof LoadingScreen.LoadingScene) {
-                    return true;
-                }
-
-                // GlobalManager.getInstance().getMainScene().showExitDialog();
-            }
-            return true;
-        }
-
-        if (InputManager.getInstance().isStarted()) {
-            if (keyCode == KeyEvent.KEYCODE_DEL) {
-                InputManager.getInstance().pop();
-            } else if (keyCode != KeyEvent.KEYCODE_ENTER) {
-                final char c = (char) event.getUnicodeChar();
-                if (c != 0) {
-                    InputManager.getInstance().append(c);
-                }
-            }
-        }
-        return super.onKeyDown(keyCode, event);
-    }
-
-    private void forcedExit() {
-        if(GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
-            GlobalManager.getInstance().getGameScene().quit();
-        }
-        GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene());
-        Game.exit();
+        Log.i("KeyInputHandler", "Key input detected: " + event.toString());
+        return KeyInputHandler.handle(keyCode, event.getAction());
     }
 
     private void initAccessibilityDetector() {
@@ -790,12 +693,7 @@ public class MainActivity extends BaseGameActivity implements
                     if((AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES & capabilities)
                             == AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES) {
                         if(!autoclickerDialogShown && activityVisible) {
-                            runOnUiThread(() -> {
-                                ConfirmDialogFragment dialog = new ConfirmDialogFragment()
-                                    .setMessage(R.string.message_autoclicker_detected);
-                                dialog.setOnDismissListener(() -> forcedExit());
-                                dialog.showForResult(isAccepted -> forcedExit());
-                            });
+                            new Dialog(DialogTable.auto_clicker()).show();
                             autoclickerDialogShown = true;
                         }
                     }

@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.cardview.widget.CardView;
 
 import com.edlplan.framework.easing.Easing;
+import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
@@ -26,12 +27,13 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class Dialog extends UIFragment {
 
+    public final DialogBuilder builder;
+
     private CardView body;
     private TextView title;
     private ScrollView bodyParent;
     private LinearLayout container, buttonsContainer;
 
-    private final DialogBuilder builder;
     private boolean closeExtras = true;
 
     //--------------------------------------------------------------------------------------------//
@@ -156,6 +158,10 @@ public class Dialog extends UIFragment {
 
     @Override
     public void close() {
+        if (!isShowing)
+            return;
+
+        Game.platform.dialogs.remove(this);
 
         new Animation(rootBackground).fade(1, 0)
                 .play(500);
@@ -188,9 +194,12 @@ public class Dialog extends UIFragment {
 
     @Override
     public void show() {
-        if (closeExtras)
-            platform.close(UI.getExtras());
-
+        if (!isShowing) {
+            if (closeExtras) {
+                platform.close(UI.getExtras());
+            }
+            Game.platform.dialogs.add(this);
+        }
         super.show();
     }
 

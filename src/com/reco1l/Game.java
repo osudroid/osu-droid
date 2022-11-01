@@ -14,7 +14,9 @@ import java.util.concurrent.TimeUnit;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -25,6 +27,8 @@ public final class Game implements IReferences {
 
     public static MainScene mainScene = global.getMainScene();
     public static ListScene listScene = global.getSongMenu();
+    public static GameScene gameScene = global.getGameScene();
+    public static ScoringScene scoringScene = global.getScoring();
 
     public static SongService songService = getSongService();
 
@@ -62,6 +66,14 @@ public final class Game implements IReferences {
                 mActivity.finish();
             }
         }, 3000, TimeUnit.MILLISECONDS);
+    }
+
+    public static void forcedExit() {
+        if(engine.getScene() == gameScene.getScene()) {
+            gameScene.quit();
+        }
+        engine.setScene(mainScene);
+        Game.exit();
     }
 
     public static void watchReplay(String path) {

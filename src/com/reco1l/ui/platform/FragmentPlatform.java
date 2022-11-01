@@ -19,7 +19,8 @@ import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.Game;
-import com.reco1l.enums.Scenes;
+import com.reco1l.enums.Screens;
+import com.reco1l.ui.custom.Dialog;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Resources;
 import com.reco1l.interfaces.IReferences;
@@ -39,10 +40,13 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public final class FragmentPlatform implements IReferences {
 
     private static FragmentPlatform instance;
+
     private static final int containerId = 0x999999;
 
+    public final List<Dialog> dialogs;
+
     private final List<Fragment> fragments;
-    private final Map<Scenes, List<UIFragment>> sceneFragments;
+    private final Map<Screens, List<UIFragment>> screenFragments;
 
     public RenderSurfaceView renderView;
     public FragmentManager manager;
@@ -54,11 +58,12 @@ public final class FragmentPlatform implements IReferences {
     //--------------------------------------------------------------------------------------------//
 
     public FragmentPlatform() {
+        this.dialogs = new ArrayList<>();
         this.fragments = new ArrayList<>();
-        this.sceneFragments = new HashMap<>();
+        this.screenFragments = new HashMap<>();
 
-        for (Scenes scene : Scenes.values()) {
-            sceneFragments.put(scene, new ArrayList<>());
+        for (Screens scene : Screens.values()) {
+            screenFragments.put(scene, new ArrayList<>());
         }
     }
 
@@ -129,21 +134,21 @@ public final class FragmentPlatform implements IReferences {
 
     //--------------------------------------------------------------------------------------------//
 
-    private List<UIFragment> getFragmentList(Scenes scene) {
-        List<UIFragment> list = sceneFragments.get(scene);
+    private List<UIFragment> getFragmentList(Screens scene) {
+        List<UIFragment> list = screenFragments.get(scene);
         if (list == null) {
             list = new ArrayList<>();
-            sceneFragments.put(scene, list);
+            screenFragments.put(scene, list);
         }
         return list;
     }
 
-    public void assignToScene(Scenes scene, UIFragment fragment) {
+    public void assignToScene(Screens scene, UIFragment fragment) {
         getFragmentList(scene).add(fragment);
     }
 
 
-    public UIFragment[] getFragmentsFrom(Scenes scene) {
+    public UIFragment[] getFragmentsFrom(Screens scene) {
         UIFragment[] array = new UIFragment[getFragmentList(scene).size()];
         getFragmentList(scene).toArray(array);
         return array;
@@ -151,7 +156,7 @@ public final class FragmentPlatform implements IReferences {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void showAll(Scenes scene) {
+    public void showAll(Screens scene) {
         for (UIFragment fragment : getFragmentList(scene)) {
             fragment.show();
         }
@@ -177,11 +182,11 @@ public final class FragmentPlatform implements IReferences {
         }
     }
 
-    public void notifySceneChange(Scenes oldScene, Scenes newScene) {
+    public void notifyScreenChange(Screens lastScreen, Screens newScreen) {
         for (Fragment fragment: fragments) {
             if (fragment instanceof UIFragment) {
                 UIFragment frg = (UIFragment) fragment;
-                mActivity.runOnUiThread(() -> frg.onSceneChange(oldScene, newScene));
+                mActivity.runOnUiThread(() -> frg.onScreenChange(lastScreen, newScreen));
             }
         }
     }

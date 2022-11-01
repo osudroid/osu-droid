@@ -15,7 +15,7 @@ import androidx.preference.SeekBarPreference;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.SkinPathPreference;
 import com.google.android.material.snackbar.Snackbar;
-import com.reco1l.enums.Scenes;
+import com.reco1l.enums.Screens;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
 import com.reco1l.ui.data.DialogTable;
@@ -175,7 +175,7 @@ public class SettingsMenu extends UIFragment {
         onlineHelper.update();
         OnlineScoring.getInstance().login();
 
-        if (reloadBackground && engine.currentScene == Scenes.MAIN) {
+        if (reloadBackground && engine.currentScreen == Screens.MAIN) {
             // global.getMainScene().loadTimeingPoints(false);
             reloadBackground = false;
         }

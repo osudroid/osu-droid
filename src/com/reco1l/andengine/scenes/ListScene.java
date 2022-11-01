@@ -6,12 +6,10 @@ import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.replay.OdrDatabase;
 import com.reco1l.Game;
 import com.reco1l.UI;
-import com.reco1l.enums.Scenes;
+import com.reco1l.enums.Screens;
 import com.reco1l.andengine.OsuScene;
 import com.reco1l.management.MusicManager;
 import com.reco1l.utils.Animation;
-
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -26,8 +24,8 @@ public class ListScene extends OsuScene {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public Scenes getIdentifier() {
-        return Scenes.LIST;
+    public Screens getIdentifier() {
+        return Screens.LIST;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -99,6 +97,12 @@ public class ListScene extends OsuScene {
     @Override
     public void onMusicEnd() {
         playMusic(MusicManager.beatmap);
+    }
+
+    @Override
+    public boolean onBackPress() {
+        Game.engine.setScene(Game.mainScene);
+        return true;
     }
 
     //--------------------------------------------------------------------------------------------//

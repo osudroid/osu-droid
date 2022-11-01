@@ -7,7 +7,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.material.imageview.ShapeableImageView;
-import com.reco1l.enums.Scenes;
+import com.reco1l.enums.Screens;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.UI;
 import com.reco1l.utils.helpers.BeatmapHelper;
@@ -39,7 +39,7 @@ public class TopBar extends UIFragment {
     private LinearLayout container;
     private ButtonsLayout buttons;
 
-    private Scenes lastScene;
+    private Screens lastScene;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -54,19 +54,19 @@ public class TopBar extends UIFragment {
     }
 
     @Override
-    protected Scenes[] getParents() {
-        return new Scenes[] {Scenes.MAIN, Scenes.LIST, Scenes.SCORING};
+    protected Screens[] getParents() {
+        return new Screens[] {Screens.MAIN, Screens.LIST, Screens.SCORING};
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    protected void onSceneChange(Scenes oldScene, Scenes newScene) {
+    protected void onScreenChange(Screens lastScreen, Screens newScene) {
         reload();
     }
 
     public void reload() {
-        if (lastScene == engine.currentScene || !isShowing)
+        if (lastScene == engine.currentScreen || !isShowing)
             return;
 
         new Animation(container).moveX(0, -60).fade(1, 0).runOnEnd(() -> {
@@ -76,7 +76,7 @@ public class TopBar extends UIFragment {
         }).play(190);
 
         new Animation(container).moveX(-60, 0).fade(0, 1).runOnStart(() -> {
-            switch (engine.currentScene) {
+            switch (engine.currentScreen) {
 
                 case MAIN:
                     musicButton.setVisibility(true);
@@ -90,11 +90,11 @@ public class TopBar extends UIFragment {
                     // Nothing
                     break;
             }
-            buttons.update(engine.currentScene);
+            buttons.update(engine.currentScreen);
         }).delay(200).play(200);
 
-        showAuthorText(engine.currentScene == Scenes.MAIN);
-        lastScene = engine.currentScene;
+        showAuthorText(engine.currentScreen == Screens.MAIN);
+        lastScene = engine.currentScreen;
     }
 
     @Override
@@ -116,7 +116,7 @@ public class TopBar extends UIFragment {
                 .play(300);
 
         author.setAlpha(0);
-        showAuthorText(engine.currentScene == Scenes.MAIN);
+        showAuthorText(engine.currentScreen == Screens.MAIN);
 
         if (library.getSizeOfBeatmaps() <= 0) {
             musicButton.setVisibility(false);
@@ -196,11 +196,11 @@ public class TopBar extends UIFragment {
             }
         }
 
-        protected void update(Scenes scene) {
+        protected void update(Screens scene) {
             if (!parent.isShowing)
                 return;
 
-            if (scene == Scenes.LIST) {
+            if (scene == Screens.LIST) {
                 mods.setVisibility(View.VISIBLE);
                 search.setVisibility(View.VISIBLE);
                 shuffle.setVisibility(View.VISIBLE);

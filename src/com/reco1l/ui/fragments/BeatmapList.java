@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.edlplan.framework.math.FMath;
 import com.reco1l.Game;
-import com.reco1l.enums.Scenes;
+import com.reco1l.enums.Screens;
 import com.reco1l.management.MusicManager;
 import com.reco1l.ui.data.BeatmapListAdapter;
 import com.reco1l.ui.data.TrackListAdapter;
@@ -57,8 +57,8 @@ public class BeatmapList extends UIFragment {
     }
 
     @Override
-    protected Scenes getParent() {
-        return Scenes.LIST;
+    protected Screens getParent() {
+        return Screens.LIST;
     }
 
     //--------------------------------------------------------------------------------------------//
