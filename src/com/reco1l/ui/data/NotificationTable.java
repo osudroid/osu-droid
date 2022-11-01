@@ -2,10 +2,9 @@ package com.reco1l.ui.data;
 
 // Created by Reco1l on 30/6/22 19:20
 
-import com.reco1l.enums.Scenes;
+import com.reco1l.enums.Screens;
 import com.reco1l.UI;
 import com.reco1l.interfaces.IReferences;
-import com.reco1l.ui.data.GameNotification;
 
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
@@ -36,7 +35,7 @@ public class NotificationTable implements IReferences {
     private static int beatmapsFounded = 0;
 
     public static void beatmapImport(String state, int i, String s) {
-        if (engine.currentScene != Scenes.LOADING)
+        if (engine.currentScreen != Screens.LOADING)
             return;
 
         if (importing == null)

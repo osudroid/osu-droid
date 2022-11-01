@@ -15,7 +15,7 @@ import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 import com.edlplan.ui.TriangleEffectView;
 import com.reco1l.Game;
-import com.reco1l.enums.Scenes;
+import com.reco1l.enums.Screens;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.data.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
@@ -83,8 +83,8 @@ public class MainMenu extends UIFragment {
     }
 
     @Override
-    protected Scenes getParent() {
-        return Scenes.MAIN;
+    protected Screens getParent() {
+        return Screens.MAIN;
     }
 
     //--------------------------------------------------------------------------------------------//

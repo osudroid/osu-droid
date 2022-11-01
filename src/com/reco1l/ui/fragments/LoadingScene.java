@@ -4,7 +4,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.reco1l.enums.Scenes;
+import com.reco1l.enums.Screens;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 
@@ -49,8 +49,8 @@ public class LoadingScene extends UIFragment implements IUpdateHandler {
     }
 
     @Override
-    protected Scenes getParent() {
-        return Scenes.LOADING;
+    protected Screens getParent() {
+        return Screens.LOADING;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -67,8 +67,8 @@ public class LoadingScene extends UIFragment implements IUpdateHandler {
     }
 
     @Override
-    protected void onSceneChange(Scenes oldScene, Scenes newScene) {
-        if (newScene != Scenes.LOADING) {
+    protected void onScreenChange(Screens lastScreen, Screens newScene) {
+        if (newScene != Screens.LOADING) {
             close();
         }
     }

@@ -6,12 +6,14 @@ import com.reco1l.Game;
 import com.reco1l.andengine.OsuScene;
 import com.reco1l.andengine.entity.BeatMarker;
 import com.reco1l.game.TimingWrapper;
-import com.reco1l.enums.Scenes;
+import com.reco1l.enums.Screens;
 import com.reco1l.andengine.entity.ParticleScatter;
 import com.reco1l.andengine.entity.Spectrum;
 import com.reco1l.management.MusicManager;
 import com.reco1l.enums.MusicOption;
 import com.reco1l.UI;
+import com.reco1l.ui.custom.Dialog;
+import com.reco1l.ui.data.DialogTable;
 
 import org.anddev.andengine.entity.primitive.Rectangle;
 
@@ -33,8 +35,8 @@ public class MainScene extends OsuScene {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public Scenes getIdentifier() {
-        return Scenes.MAIN;
+    public Screens getIdentifier() {
+        return Screens.MAIN;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -122,6 +124,12 @@ public class MainScene extends OsuScene {
             UI.topBar.musicButton.changeMusic(beatmap);
             UI.musicPlayer.changeMusic(beatmap);
         });
+    }
+
+    @Override
+    public boolean onBackPress() {
+        new Dialog(DialogTable.exit()).show();
+        return true;
     }
 
     //--------------------------------------------------------------------------------------------//

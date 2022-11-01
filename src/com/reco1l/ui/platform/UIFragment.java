@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.reco1l.enums.Scenes;
+import com.reco1l.enums.Screens;
 import com.reco1l.utils.listeners.TouchListener;
 import com.reco1l.utils.ViewTouchHandler;
 import com.reco1l.utils.Resources;
@@ -56,7 +56,7 @@ public abstract class UIFragment extends Fragment implements IReferences {
             platform.assignToScene(getParent(), this);
         }
         if (getParents() != null) {
-            for (Scenes scene : getParents()) {
+            for (Screens scene : getParents()) {
                 platform.assignToScene(scene, this);
             }
         }
@@ -69,7 +69,7 @@ public abstract class UIFragment extends Fragment implements IReferences {
      */
     protected abstract void onLoad();
 
-    protected void onSceneChange(Scenes oldScene, Scenes newScene) { }
+    protected void onScreenChange(Screens lastScreen, Screens newScene) { }
 
     /**
      * Simplifies the way views are got with the method {@link #find(String)}, every layout XML file have an
@@ -81,7 +81,7 @@ public abstract class UIFragment extends Fragment implements IReferences {
     /**
      * Defines which scene the fragment belongs to.
      */
-    protected Scenes getParent() { return null; }
+    protected Screens getParent() { return null; }
 
     /**
      * Does the same that {@link #getParent()} but in this case this is intended to those fragments
@@ -89,7 +89,7 @@ public abstract class UIFragment extends Fragment implements IReferences {
      * <p>Note: in case the fragment is intended to show on every scene (like overlays) you can
      * return <code>Scenes.values()</code></p>
      */
-    protected Scenes[] getParents() { return null; }
+    protected Screens[] getParents() { return null; }
 
     /**
      * Sets the time of inactivity that need to be reached to close the fragment.

@@ -5,7 +5,7 @@ import android.util.Log;
 import com.reco1l.andengine.ISceneHandler;
 import com.reco1l.andengine.OsuScene;
 import com.reco1l.interfaces.IReferences;
-import com.reco1l.enums.Scenes;
+import com.reco1l.enums.Screens;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.options.EngineOptions;
@@ -23,10 +23,10 @@ public class GameEngine extends Engine implements IReferences {
 
     private static GameEngine instance;
 
-    public Scenes currentScene;
-    public Scenes lastScene;
+    public Screens currentScreen, lastScreen;
+    public Scene lastScene;
 
-    public boolean canNotifyUI = false;
+    public boolean isGlobalInitialized = false;
 
     private final List<ISceneHandler> sceneHandlers;
 
@@ -45,45 +45,42 @@ public class GameEngine extends Engine implements IReferences {
     //--------------------------------------------------------------------------------------------//
 
     public void notifyGlobalInit() {
-        canNotifyUI = true;
+        isGlobalInitialized = true;
         registerUpdateHandler(Game.platform::onUpdate);
     }
 
     @Override
     public void setScene(Scene scene) {
-        if (canNotifyUI) {
-            lastScene = currentScene;
-            currentScene = parseScene(scene);
-            mActivity.runOnUiThread(this::notifyUI);
+        if (isGlobalInitialized) {
+            lastScreen = currentScreen;
+            currentScreen = parseScreen(scene);
+            mActivity.runOnUiThread(() -> notifyUI(lastScreen));
         }
+        lastScene = getScene();
         super.setScene(scene);
     }
 
-    private Scenes parseScene(Scene scene) {
-        Scenes type = null;
+    private Screens parseScreen(Scene scene) {
+        Screens type = null;
 
         if (scene instanceof OsuScene) {
             type = ((OsuScene) scene).getIdentifier();
         }
         if (scene.hasChildScene() && scene.getChildScene() == PauseMenu.getInstance().getScene()) {
-            type = Scenes.PAUSE;
+            type = Screens.PAUSE;
         }
         else if (scene == LoadingScreen.getInstance().getScene() || scene == UI.loadingScene.scene) {
-            type = Scenes.LOADING;
+            type = Screens.LOADING;
         }
         else if (scene == global.getScoring().getScene()) {
-            type = Scenes.SCORING;
+            type = Screens.SCORING;
         }
         else if (scene == global.getGameScene().getScene()) {
-            type = Scenes.GAME;
+            type = Screens.GAME;
         }
 
         if (type != null) {
-            if (lastScene != null) {
-                Log.i("Engine", "Setting scene to " + type.name() + " last scene was " + lastScene.name());
-            } else {
-                Log.i("Engine", "Setting scene to " + type.name());
-            }
+            Log.i("Engine", "Setting scene to " + type.name());
         }
         return type;
     }
@@ -94,7 +91,7 @@ public class GameEngine extends Engine implements IReferences {
     public void onResume() {
         super.onResume();
         for (ISceneHandler handler : sceneHandlers) {
-            if (currentScene == handler.getIdentifier()) {
+            if (currentScreen == handler.getIdentifier()) {
                 handler.onResume();
             }
         }
@@ -104,7 +101,7 @@ public class GameEngine extends Engine implements IReferences {
     public void onPause() {
         super.onPause();
         for (ISceneHandler handler : sceneHandlers) {
-            if (currentScene == handler.getIdentifier()) {
+            if (currentScreen == handler.getIdentifier()) {
                 handler.onPause();
             }
         }
@@ -112,22 +109,31 @@ public class GameEngine extends Engine implements IReferences {
 
     //--------------------------------------------------------------------------------------------//
 
-    private void notifyUI() {
-        if (currentScene == null)
+    private void notifyUI(Screens oldScene) {
+        if (currentScreen == null)
             return;
 
         platform.close(UI.getExtras());
-        platform.closeAllExcept(platform.getFragmentsFrom(currentScene));
-        platform.showAll(currentScene);
+        platform.closeAllExcept(platform.getFragmentsFrom(currentScreen));
+        platform.showAll(currentScreen);
 
-        UI.notificationCenter.allowBadgeNotificator(currentScene == Scenes.GAME);
+        UI.notificationCenter.allowBadgeNotificator(currentScreen == Screens.GAME);
 
-        platform.notifySceneChange(lastScene, currentScene);
+        platform.notifyScreenChange(oldScene, currentScreen);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public void registerSceneHandler(ISceneHandler sceneHandler) {
         this.sceneHandlers.add(sceneHandler);
+    }
+
+    public ISceneHandler getCurrentSceneHandler() {
+        for (ISceneHandler handler : sceneHandlers) {
+            if (handler.getIdentifier() == currentScreen) {
+                return handler;
+            }
+        }
+        return null;
     }
 }
