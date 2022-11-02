@@ -39,9 +39,9 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
         onCreate();
         registerUpdateHandler(elapsed -> {
             if (isUsingTimingWrapper) {
-                int position = getSongService().getPosition();
+                int position = Game.songService.getPosition();
 
-                if (getSongService().getStatus() == Status.PLAYING) {
+                if (Game.songService.getStatus() == Status.PLAYING) {
                     timingWrapper.update(elapsed, position);
                 } else {
                     timingWrapper.setBeatLength(1000);
@@ -57,22 +57,19 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
     //--------------------------------------------------------------------------------------------//
 
     protected abstract void onCreate();
+
     protected abstract void onSceneUpdate(float secondsElapsed);
+
+    public void onSceneShow(Scene lastScene) {}
 
     //--------------------------------------------------------------------------------------------//
 
-    protected void setTimingWrapper(boolean bool) {
+    protected final void setTimingWrapper(boolean bool) {
         this.isUsingTimingWrapper = bool;
     }
 
-    protected void setContinuousPlay(boolean bool) {
+    protected final void setContinuousPlay(boolean bool) {
         this.isContinuousPlay = bool;
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    protected SongService getSongService() {
-        return Game.global.getSongService();
     }
 
     //--------------------------------------------------------------------------------------------//

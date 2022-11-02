@@ -16,6 +16,7 @@ import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.data.DialogTable;
 
 import org.anddev.andengine.entity.primitive.Rectangle;
+import org.anddev.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
@@ -90,6 +91,11 @@ public class MainScene extends OsuScene {
         Game.onlineScoring.login();
 
         setTouchAreaBindingEnabled(true);
+    }
+
+    @Override
+    public void onSceneShow(Scene lastScene) {
+
     }
 
     @Override

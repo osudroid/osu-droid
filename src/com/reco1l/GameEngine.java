@@ -58,6 +58,11 @@ public class GameEngine extends Engine implements IReferences {
         }
         lastScene = getScene();
         super.setScene(scene);
+
+        if (scene instanceof OsuScene) {
+            OsuScene osuScene = (OsuScene) scene;
+            osuScene.onSceneShow(lastScene);
+        }
     }
 
     private Screens parseScreen(Scene scene) {

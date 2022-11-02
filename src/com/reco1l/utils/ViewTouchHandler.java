@@ -12,7 +12,6 @@ import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Vibrator;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -57,7 +56,6 @@ public class ViewTouchHandler {
             if (vibrator != null) {
                 vibrator.vibrate(50);
             }
-            Log.i("ViewTouchHandler", "onLongPress() actioned");
         };
     }
 
@@ -124,7 +122,6 @@ public class ViewTouchHandler {
                     this.handler.postDelayed(this.longPress, LONG_PRESS_TIMEOUT);
                 }
                 this.listener.onPressDown();
-                Log.i("ViewTouchHandler", "onPressDown() actioned");
                 return true;
             }
 
@@ -140,7 +137,6 @@ public class ViewTouchHandler {
                     view.setOnTouchListener(null);
                 }
 
-                Log.i("ViewTouchHandler", "onPressUp() actioned");
                 this.listener.onPressUp();
                 return true;
             }

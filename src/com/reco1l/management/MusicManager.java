@@ -119,12 +119,18 @@ public final class MusicManager {
             return;
 
         notifyControl(PLAY);
+
+        boolean wasMusicChanged = false;
         if (beatmap != null && getState() == Status.STOPPED) {
-            getService().preLoad(beatmap.getMusic());
-            notifyMusicChange(beatmap);
+            wasMusicChanged = getService().preLoad(beatmap.getMusic());
         }
+
         getService().play();
         getService().setVolume(Config.getBgmVolume());
+
+        if (wasMusicChanged) {
+            notifyMusicChange(beatmap);
+        }
         notifyStateChange(PLAY);
     }
 
@@ -156,8 +162,8 @@ public final class MusicManager {
         }
         beatmap = Game.library.getPrevBeatmap();
         getService().preLoad(beatmap.getMusic());
-        notifyMusicChange(beatmap);
         getService().play();
+        notifyMusicChange(beatmap);
         getService().setVolume(Config.getBgmVolume());
         notifyStateChange(PREVIOUS);
     }
@@ -169,8 +175,8 @@ public final class MusicManager {
         }
         beatmap = Game.library.getNextBeatmap();
         getService().preLoad(beatmap.getMusic());
-        notifyMusicChange(beatmap);
         getService().play();
+        notifyMusicChange(beatmap);
         getService().setVolume(Config.getBgmVolume());
         notifyStateChange(NEXT);
     }

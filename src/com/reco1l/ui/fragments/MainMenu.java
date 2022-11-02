@@ -195,7 +195,6 @@ public class MainMenu extends UIFragment {
     private final OsuAsyncCallback asyncCallback = new OsuAsyncCallback() {
         public void run() {
             engine.setScene(UI.loadingScene.scene);
-            mActivity.checkNewSkins();
             mActivity.checkNewBeatmaps();
             if (!library.loadLibraryCache(mActivity, true)) {
                 library.scanLibrary(mActivity);

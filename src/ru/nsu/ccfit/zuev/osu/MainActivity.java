@@ -29,13 +29,12 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.EditText;
 
 import android.widget.Toast;
-import com.edlplan.ui.ActivityOverlay;
-import com.edlplan.ui.fragment.ConfirmDialogFragment;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.GameEngine;
 import com.reco1l.Game;
+import com.reco1l.game.BeatmapImport;
 import com.reco1l.management.MusicManager;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.data.DialogTable;
@@ -52,7 +51,6 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.extension.input.touch.controller.MultiTouch;
 import org.anddev.andengine.extension.input.touch.controller.MultiTouchController;
 import org.anddev.andengine.extension.input.touch.exception.MultiTouchException;
-import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 import org.anddev.andengine.sensor.accelerometer.AccelerometerData;
 import org.anddev.andengine.sensor.accelerometer.IAccelerometerListener;
@@ -81,9 +79,6 @@ import ru.nsu.ccfit.zuev.osu.game.SpritePool;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.InputManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osu.menu.FilterMenu;
-import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -348,83 +343,17 @@ public class MainActivity extends BaseGameActivity implements
 
     public void checkNewBeatmaps() {
         GlobalManager.getInstance().setInfo("Checking for new maps...");
-        final File mainDir = new File(Config.getCorePath());
+
         if (beatmapToAdd != null) {
             File file = new File(beatmapToAdd);
-            if (file.getName().toLowerCase().endsWith(".osz")) {
-                ToastLogger.showText(
-                        StringTable.get(R.string.message_lib_importing),
-                        false);
 
-                if(FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath())) {
-                    String folderName = beatmapToAdd.substring(0, beatmapToAdd.length() - 4);
-                    // We have imported the beatmap!
-                    ToastLogger.showText(
-                            StringTable.format(R.string.message_lib_imported, folderName),
-                            true);
-                }
-
-                // LibraryManager.getInstance().sort();
-                LibraryManager.getInstance().savetoCache(MainActivity.this);
-            } else if (file.getName().endsWith(".odr")) {
+            if (file.getName().endsWith(".odr")) {
                 willReplay = true;
-            }
-        } else if (mainDir.exists() && mainDir.isDirectory()) {
-            File[] filelist = FileUtils.listFiles(mainDir, ".osz");
-            final ArrayList<String> beatmaps = new ArrayList<String>();
-            for (final File file : filelist) {
-                ZipFile zip = new ZipFile(file);
-                if(zip.isValidZipFile()) {
-                    beatmaps.add(file.getPath());
-                }
-            }
-
-            File beatmapDir = new File(Config.getBeatmapPath());
-            if (beatmapDir.exists()
-                    && beatmapDir.isDirectory()) {
-                filelist = FileUtils.listFiles(beatmapDir, ".osz");
-                for (final File file : filelist) {
-                    ZipFile zip = new ZipFile(file);
-                    if(zip.isValidZipFile()) {
-                        beatmaps.add(file.getPath());
-                    }
-                }
-            }
-
-            File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            if (Config.isSCAN_DOWNLOAD()
-                    && downloadDir.exists()
-                    && downloadDir.isDirectory()) {
-                filelist = FileUtils.listFiles(downloadDir, ".osz");
-                for (final File file : filelist) {
-                    ZipFile zip = new ZipFile(file);
-                    if(zip.isValidZipFile()) {
-                        beatmaps.add(file.getPath());
-                    }
-                }
-            }
-
-            if (beatmaps.size() > 0) {
-                // final boolean deleteOsz = Config.isDELETE_OSZ();
-                // Config.setDELETE_OSZ(true);
-                ToastLogger.showText(StringTable.format(
-                        R.string.message_lib_importing_several,
-                        beatmaps.size()), false);
-                for (final String beatmap : beatmaps) {
-                    if(FileUtils.extractZip(beatmap, Config.getBeatmapPath())) {
-                        String folderName = beatmap.substring(0, beatmap.length() - 4);
-                        // We have imported the beatmap!
-                        ToastLogger.showText(
-                                StringTable.format(R.string.message_lib_imported, folderName),
-                                true);
-                    }
-                }
-                // Config.setDELETE_OSZ(deleteOsz);
-
-                // LibraryManager.getInstance().sort();
-                LibraryManager.getInstance().savetoCache(MainActivity.this);
+            } else {
+                BeatmapImport.getInstance().Import(file, true);
             }
         }
+        BeatmapImport.getInstance().scan();
     }
 
     public void checkNewSkins() {
