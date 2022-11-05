@@ -28,7 +28,7 @@
     <dimen name="_XXL">@dimen/_minus20sdp</dimen>
 
     <!--Text-->
-    <dimen name="textXXS">@dimen/_5sdp</dimen>
+    <dimen name="textXXS">@dimen/_6sdp</dimen>
     <dimen name="textXS">@dimen/_8sdp</dimen>
     <dimen name="textS">@dimen/_10sdp</dimen>
     <dimen name="textM">@dimen/_12sdp</dimen>
@@ -36,7 +36,7 @@
     <dimen name="textXL">@dimen/_18sdp</dimen>
 
     <!--Vectors-->
-    <dimen name="vectorXXS">@dimen/_6sdp</dimen>
+    <dimen name="vectorXXS">@dimen/_8sdp</dimen>
     <dimen name="vectorXS">@dimen/_10sdp</dimen>
     <dimen name="vectorS">@dimen/_14sdp</dimen>
     <dimen name="vectorM">@dimen/_18sdp</dimen>
@@ -89,7 +89,7 @@
     <!--Top Bar-->
     <dimen name="topBarButtonWidth">@dimen/_62sdp</dimen>
     <dimen name="topBarHeight">@dimen/_40sdp</dimen>
-    <dimen name="topBarMusicButtonHeight">@dimen/_26sdp</dimen>
+    <dimen name="topBarMusicButtonHeight">@dimen/_28sdp</dimen>
     <dimen name="topBarAvatarSize">@dimen/_24sdp</dimen>
     <dimen name="topBarAvatarCorners">@dimen/_8sdp</dimen>
     <dimen name="topBarShadowHeight">@dimen/_12sdp</dimen>
@@ -145,15 +145,15 @@
     <dimen name="dialogButtonElevation">@dimen/_4sdp</dimen>
     
     <!--Beatmap Panel-->
-    <dimen name="beatmapPanelContentWidth">@dimen/_240sdp</dimen>
-    <dimen name="beatmapPanelBannerWidth">@dimen/_270sdp</dimen>
+    <dimen name="beatmapPanelContentWidth">@dimen/_220sdp</dimen>
+    <dimen name="beatmapPanelBannerWidth">@dimen/_240sdp</dimen>
     <dimen name="beatmapPanelPropertiesLayoutHeight">@dimen/_80sdp</dimen>
     <dimen name="beatmapPanelExpandButtonSize">@dimen/_26sdp</dimen>
-    <dimen name="beatmapPanelTabButtonWidth">@dimen/_111sdp</dimen>
+    <dimen name="beatmapPanelTabButtonWidth">@dimen/_100sdp</dimen>
     <dimen name="beatmapPanelTabLayoutHeight">@dimen/_28sdp</dimen>
 
     <!--Scoreboard-->
-    <dimen name="scoreboardItemHeight">@dimen/_40sdp</dimen>
+    <dimen name="scoreboardItemHeight">@dimen/_44sdp</dimen>
     <dimen name="scoreboardItemAvatarSize">@dimen/_24sdp</dimen>
     <dimen name="scoreboardItemRankLayoutWidth">@dimen/_24sdp</dimen>
     <dimen name="scoreboardItemMarkSize">@dimen/_16sdp</dimen>

@@ -62,6 +62,12 @@ public abstract class UIFragment extends Fragment implements IReferences {
         }
     }
 
+    //--------------------------------------------------------------------------------------------//
+    // Please use this instead of directly referring to the variable.
+    public boolean isShowing() {
+        return isShowing;
+    }
+
     // To override
     //--------------------------------------------------------------------------------------------//
     /**

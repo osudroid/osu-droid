@@ -28,7 +28,7 @@
                 style="@style/text"
                 android:layout_width="@dimen/scoreboardItemRankLayoutWidth"
                 android:layout_height="match_parent"
-                android:alpha="0.6"
+                android:alpha="0.8"
                 android:gravity="center"
                 android:text="50"
                 android:textStyle="bold" />
@@ -66,53 +66,33 @@
                     android:gravity="center_vertical"
                     android:orientation="vertical">
 
-                    <RelativeLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="@dimen/M"
+                    <TextView
+                        android:id="@+id/sb_name"
+                        style="@style/text"
                         android:layout_marginLeft="@dimen/_1sdp"
-                        android:layout_marginBottom="@dimen/_3sdp">
-
-                        <TextView
-                            android:id="@+id/sb_name"
-                            style="@style/text"
-                            android:layout_centerVertical="true"
-                            android:text="[player]"
-                            android:textSize="@dimen/textXS" />
-
-                        <LinearLayout
-                            android:id="@+id/sb_mods"
-                            android:layout_width="wrap_content"
-                            android:layout_height="@dimen/scoreboardItemModSize"
-                            android:layout_centerVertical="true"
-                            android:layout_marginLeft="@dimen/_3sdp"
-                            android:layout_toRightOf="@id/sb_name"
-                            android:orientation="horizontal">
-
-                            <!--Mods drawables here-->
-
-                        </LinearLayout>
-
-                    </RelativeLayout>
+                        android:layout_marginBottom="@dimen/XXS"
+                        android:text="Acivev"
+                        android:textSize="@dimen/textS" />
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content">
 
                         <TextView
-                            android:id="@+id/sb_score"
+                            android:id="@+id/sb_accuracy"
                             style="@style/smallPropertyBadge"
-                            android:layout_marginStart="0dp"
+                            android:layout_marginLeft="0dp"
                             android:backgroundTint="@color/scoreboardItemBadgeBackground"
-                            android:drawableStart="@drawable/v_score_xxs"
-                            android:text="000,000,000" />
+                            android:drawableStart="@drawable/v_touch_xxs"
+                            android:text="100.00%" />
 
                         <TextView
-                            android:id="@+id/sb_difference"
+                            android:id="@+id/sb_combo"
                             style="@style/smallPropertyBadge"
                             android:layout_marginLeft="@dimen/XXS"
                             android:backgroundTint="@color/scoreboardItemBadgeBackground"
-                            android:drawableStart="@drawable/v_upgrade_xxs"
-                            android:text="0000000" />
+                            android:drawableStart="@drawable/v_combo_xxs"
+                            android:text="1000x" />
 
                     </LinearLayout>
 
@@ -125,28 +105,43 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:layout_marginEnd="@dimen/XS"
+                android:layout_marginEnd="@dimen/S"
                 android:gravity="right"
                 android:orientation="vertical"
                 android:paddingRight="@dimen/XXS">
 
-                <TextView
-                    android:id="@+id/sb_accuracy"
-                    style="@style/smallPropertyBadge"
-                    android:layout_marginLeft="@dimen/XXS"
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/XXS"
-                    android:backgroundTint="@color/scoreboardItemBadgeBackground"
-                    android:drawableStart="@drawable/v_touch_xxs"
-                    android:text="100.00%" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/sb_mods"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/scoreboardItemModSize"
+                        android:orientation="horizontal" />
+
+                    <TextView
+                        android:id="@+id/sb_difference"
+                        style="@style/smallPropertyBadge"
+                        android:layout_marginLeft="@dimen/XXS"
+                        android:backgroundTint="@color/scoreboardItemBadgeBackground"
+                        android:drawableStart="@drawable/v_upgrade_xxs"
+                        android:text="0" />
+
+                </LinearLayout>
 
                 <TextView
-                    android:id="@+id/sb_combo"
-                    style="@style/smallPropertyBadge"
-                    android:backgroundTint="@color/scoreboardItemBadgeBackground"
-                    android:drawableStart="@drawable/v_combo_xxs"
-                    android:text="0000x" />
+                    android:id="@+id/sb_score"
+                    style="@style/text"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
+                    android:text="000,000,000" />
 
             </LinearLayout>
+
 
         </RelativeLayout>
 

@@ -37,7 +37,7 @@ public class ListScene extends OsuScene {
 
         background.layer.setAlpha(0.3f);
 
-        load();
+        bindDataBaseChangedListener();
         setTouchAreaBindingEnabled(true);
     }
 
@@ -46,14 +46,10 @@ public class ListScene extends OsuScene {
         UI.beatmapList.update();
     }
 
-    public void reload() {
-        setTouchAreaBindingEnabled(false);
-        load();
-        Game.global.getGameScene().setOldScene(this);
-    }
-
     public void load() {
+        setTouchAreaBindingEnabled(false);
         bindDataBaseChangedListener();
+        Game.global.getGameScene().setOldScene(this);
     }
 
     //--------------------------------------------------------------------------------------------//

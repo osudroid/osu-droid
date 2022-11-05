@@ -60,8 +60,6 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
 
     protected abstract void onSceneUpdate(float secondsElapsed);
 
-    public void onSceneShow(Scene lastScene) {}
-
     //--------------------------------------------------------------------------------------------//
 
     protected final void setTimingWrapper(boolean bool) {
@@ -126,5 +124,9 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
         if (isContinuousPlay) {
             Game.musicManager.next();
         }
+    }
+
+    public void show() {
+        Game.engine.setScene(this);
     }
 }

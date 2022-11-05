@@ -15,9 +15,11 @@ import com.reco1l.UI;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.data.DialogTable;
 
+import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 
+import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -94,11 +96,6 @@ public class MainScene extends OsuScene {
     }
 
     @Override
-    public void onSceneShow(Scene lastScene) {
-
-    }
-
-    @Override
     public void onMusicControlRequest(MusicOption option, Status current) {
         UI.musicPlayer.currentOption = option;
         super.onMusicControlRequest(option, current);
@@ -150,10 +147,13 @@ public class MainScene extends OsuScene {
         UI.debugOverlay.show();
     }
 
-    public void playExitAnim() {
+    public void onExit() {
         Rectangle dim = new Rectangle(0, 0, screenWidth, screenHeight);
-        dim.setColor(0, 0, 0, 0.0f);
+        dim.setColor(0, 0, 0, 0f);
         attachChild(dim, 2);
-        dim.registerEntityModifier(ModifierFactory.newAlphaModifier(3.0f, 0, 1));
+
+        UI.mainMenu.playExitAnim();
+        Game.resources.getSound("seeya").play();
+        dim.registerEntityModifier(new AlphaModifier(3.0f, 0, 1));
     }
 }

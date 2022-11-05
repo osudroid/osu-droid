@@ -18,31 +18,20 @@ import java.util.ArrayList;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
-public class BeatmapImport {
+public class LibraryImport {
 
     public static boolean isConcurrentImport = false;
-
-    private static BeatmapImport instance;
-
+    
     //--------------------------------------------------------------------------------------------//
 
-    public static BeatmapImport getInstance() {
-        if (instance == null) {
-            instance = new BeatmapImport();
-        }
-        return instance;
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public synchronized void scan() {
+    public synchronized static void scan(boolean updateLibrary) {
         isConcurrentImport = true;
 
         ArrayList<File> foundFiles = new ArrayList<>();
         File mainDir = new File(Config.getCorePath());
 
         if (!mainDir.exists() || !mainDir.isDirectory()) {
-            Log.e("BI", "Main directory doesn't exist!");
+            Log.e("BeatmapImport", "Main directory doesn't exist!");
             return;
         }
 
@@ -54,20 +43,22 @@ public class BeatmapImport {
             scanFolder(dlDir, foundFiles);
         }
 
-        Log.i("BI", "Scanning complete, found " + foundFiles.size() + " beatmaps");
+        Log.i("BeatmapImport", "Scanning complete, found " + foundFiles.size() + " beatmaps");
 
         if (foundFiles.size() > 0) {
             for (int i = 0; i < foundFiles.size(); i++) {
                 File beatmap = foundFiles.get(i);
-                Log.i("BI", "Importing " + beatmap.getName());
+                Log.i("BeatmapImport", "Importing " + beatmap.getName());
                 Import(beatmap, false);
             }
-            updateLibrary();
+            if (updateLibrary) {
+                updateLibrary();
+            }
         }
         isConcurrentImport = false;
     }
 
-    public void Import(File file, boolean saveCache) {
+    public static void Import(File file, boolean saveCache) {
         if (!file.getName().toLowerCase().endsWith(".osz"))
             return;
 
@@ -94,9 +85,9 @@ public class BeatmapImport {
         notification.update();
     }
 
-    public void scanFolder(File directory, ArrayList<File> list) {
+    public static void scanFolder(File directory, ArrayList<File> list) {
         if (!directory.exists() || !directory.isDirectory()) {
-            Log.e("BI", "Invalid directory: " + directory.getPath());
+            Log.e("BeatmapImport", "Invalid directory: " + directory.getPath());
             return;
         }
 
@@ -105,28 +96,28 @@ public class BeatmapImport {
         for (File file : files) {
             if (isValid(file)) {
                 list.add(file);
-                Log.i("BI", "Found beatmap: " + file.getName());
+                Log.i("BeatmapImport", "Found beatmap: " + file.getName());
             } else {
-                Log.e("BI", "Invalid beatmap file: " + file.getName());
+                Log.e("BeatmapImport", "Invalid beatmap file: " + file.getName());
             }
         }
     }
 
-    private boolean isValid(File file) {
+    private static boolean isValid(File file) {
         try (ZipFile zip = new ZipFile(file)) {
             if (zip.isValidZipFile()) {
                 return true;
             } else {
-                Log.e("BI", file.getName() + " is not a valid ZIP file!");
+                Log.e("BeatmapImport", file.getName() + " is not a valid ZIP file!");
                 return false;
             }
         } catch (IOException e) {
-            Log.e("BI", "Error trying to check file " + file.getName() + "\n" + e.getMessage());
+            Log.e("BeatmapImport", "Error trying to check file " + file.getName() + "\n" + e.getMessage());
             return false;
         }
     }
 
-    public void updateLibrary() {
+    public static void updateLibrary() {
         Game.library.savetoCache(Game.mActivity);
         if (!Game.library.loadLibraryCache(Game.mActivity, true)) {
             Game.library.scanLibrary(Game.mActivity);

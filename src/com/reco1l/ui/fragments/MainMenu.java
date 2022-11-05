@@ -16,10 +16,12 @@ import com.edlplan.ui.EasingHelper;
 import com.edlplan.ui.TriangleEffectView;
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
+import com.reco1l.game.LibraryImport;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.data.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.Resources;
 import com.reco1l.UI;
 import com.reco1l.utils.ViewUtils;
@@ -192,23 +194,6 @@ public class MainMenu extends UIFragment {
 
     //--------------------------------------------------------------------------------------------//
 
-    private final OsuAsyncCallback asyncCallback = new OsuAsyncCallback() {
-        public void run() {
-            engine.setScene(UI.loadingScene.scene);
-            mActivity.checkNewBeatmaps();
-            if (!library.loadLibraryCache(mActivity, true)) {
-                library.scanLibrary(mActivity);
-                System.gc();
-            }
-            global.getSongMenu().reload();
-        }
-
-        public void onComplete() {
-            Game.musicManager.play();
-            UI.loadingScene.complete(() -> engine.setScene(global.getSongMenu()));
-        }
-    };
-
     private void playTransitionAnim() {
 
         new Animation(rootView)
@@ -217,7 +202,15 @@ public class MainMenu extends UIFragment {
                     global.getMainScene().spectrum.clear(true);
                 })
                 .runOnEnd(() -> {
-                    new AsyncTaskLoader().execute(asyncCallback);
+                    Game.listScene.load();
+                    Game.listScene.show();
+                    Game.musicManager.play();
+                    new AsyncExec() {
+                        @Override
+                        public void run() {
+                            LibraryImport.scan(true);
+                        }
+                    }.execute();
                     isMenuShowing = false;
                 })
                 .moveY(0, Resources.dimen(R.dimen._80sdp))

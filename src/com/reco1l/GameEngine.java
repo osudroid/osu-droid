@@ -59,9 +59,8 @@ public class GameEngine extends Engine implements IReferences {
         lastScene = getScene();
         super.setScene(scene);
 
-        if (scene instanceof OsuScene) {
-            OsuScene osuScene = (OsuScene) scene;
-            osuScene.onSceneShow(lastScene);
+        for (ISceneHandler handler : sceneHandlers) {
+            handler.onSceneChange(lastScene, scene);
         }
     }
 
@@ -71,6 +70,7 @@ public class GameEngine extends Engine implements IReferences {
         if (scene instanceof OsuScene) {
             type = ((OsuScene) scene).getIdentifier();
         }
+
         if (scene.hasChildScene() && scene.getChildScene() == PauseMenu.getInstance().getScene()) {
             type = Screens.PAUSE;
         }

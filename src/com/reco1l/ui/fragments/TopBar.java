@@ -1,10 +1,11 @@
 package com.reco1l.ui.fragments;
 
-import android.animation.ValueAnimator;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.cardview.widget.CardView;
 
 import com.google.android.material.imageview.ShapeableImageView;
 import com.reco1l.enums.Screens;
@@ -28,14 +29,14 @@ public class TopBar extends UIFragment {
 
     public static TopBar instance;
 
-    public View body;
+    public CardView body;
     public TextView author;
     public UserBox userBox;
     public MusicButton musicButton;
 
     public int barHeight;
 
-    private View bar, back;
+    private View back;
     private LinearLayout container;
     private ButtonsLayout buttons;
 
@@ -72,7 +73,7 @@ public class TopBar extends UIFragment {
         new Animation(container).moveX(0, -60).fade(1, 0).runOnEnd(() -> {
             back.setVisibility(View.GONE);
             musicButton.setVisibility(false);
-            buttons.gone();
+            //buttons.gone();
         }).play(190);
 
         new Animation(container).moveX(-60, 0).fade(0, 1).runOnStart(() -> {
@@ -90,7 +91,7 @@ public class TopBar extends UIFragment {
                     // Nothing
                     break;
             }
-            buttons.update(engine.currentScreen);
+            //buttons.update(engine.currentScreen);
         }).delay(200).play(200);
 
         showAuthorText(engine.currentScreen == Screens.MAIN);
@@ -110,7 +111,6 @@ public class TopBar extends UIFragment {
         author = find("author");
         body = find("body");
         back = find("back");
-        bar = find("bar");
 
         new Animation(body).moveY(-barHeight, 0)
                 .play(300);
@@ -156,18 +156,6 @@ public class TopBar extends UIFragment {
             return;
         }
         new Animation(author).fade(1, 0).moveY(0, 50).play(200);
-    }
-
-    public void switchColor(boolean isFromTab) {
-
-        int from = Resources.color(isFromTab ? R.color.backgroundPrimary : R.color.topBarBackground);
-        int to = Resources.color(isFromTab ? R.color.topBarBackground : R.color.backgroundPrimary);
-
-        ValueAnimator anim = ValueAnimator.ofArgb(from, to);
-
-        anim.addUpdateListener(val -> bar.setBackgroundColor((int) val.getAnimatedValue()));
-        anim.setDuration(300);
-        anim.start();
     }
 
     //--------------------------------------------------------------------------------------------//

@@ -34,7 +34,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.GameEngine;
 import com.reco1l.Game;
-import com.reco1l.game.BeatmapImport;
+import com.reco1l.game.LibraryImport;
 import com.reco1l.management.MusicManager;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.data.DialogTable;
@@ -286,10 +286,6 @@ public class MainActivity extends BaseGameActivity implements
                 Config.loadSkins();
                 checkNewSkins();
                 checkNewBeatmaps();
-                if (!LibraryManager.getInstance().loadLibraryCache(MainActivity.this, true)) {
-                    LibraryManager.getInstance().scanLibrary(MainActivity.this);
-                    System.gc();
-                }
             }
 
             public void onComplete() {  
@@ -350,10 +346,10 @@ public class MainActivity extends BaseGameActivity implements
             if (file.getName().endsWith(".odr")) {
                 willReplay = true;
             } else {
-                BeatmapImport.getInstance().Import(file, true);
+                LibraryImport.Import(file, true);
             }
         }
-        BeatmapImport.getInstance().scan();
+        LibraryImport.scan(true);
     }
 
     public void checkNewSkins() {

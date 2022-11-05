@@ -4,6 +4,8 @@ package com.reco1l.andengine;
 
 import com.reco1l.enums.Screens;
 
+import org.anddev.andengine.entity.scene.Scene;
+
 public interface ISceneHandler {
 
     Screens getIdentifier();
@@ -11,6 +13,8 @@ public interface ISceneHandler {
     default void onPause() {}
 
     default void onResume() {}
+
+    default void onSceneChange(Scene oldScene, Scene newScene) {}
 
     default boolean onBackPress() {
         return false;

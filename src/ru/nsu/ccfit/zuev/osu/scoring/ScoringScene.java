@@ -211,7 +211,7 @@ public class ScoringScene {
                 if (pSceneTouchEvent.isActionUp()) {
                     ResourceManager.getInstance().getSound("applause").stop();
                     GlobalManager.getInstance().getScoring().setReplayID(-1);
-                    menu.updateScore();
+                    //menu.updateScore();
 //					stopMusic();
                     replayMusic();
                     engine.setScene(menu.getScene());

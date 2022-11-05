@@ -9,79 +9,8 @@
     android:gravity="center_vertical">
     <!--tool:background="@color/topBarBackground">-->
 
-    <!--Music-->
-    <RelativeLayout
-        android:id="@+id/tb_music"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/topBarMusicButtonHeight"
-        android:layout_marginHorizontal="@dimen/S"
-        android:background="@drawable/round_shape"
-        android:backgroundTint="@color/topBarMusicButtonBackground"
-        android:paddingLeft="@dimen/M"
-        android:paddingRight="@dimen/L"
-        android:visibility="gone">
 
-        <ImageView
-            android:id="@+id/tb_musicArrow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:alpha="0"
-            android:rotation="180"
-            android:src="@drawable/v_arrow_s" />
 
-        <LinearLayout
-            android:id="@+id/tb_musicBody"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/v_music_s" />
-
-            <TextView
-                android:id="@+id/tb_musicText"
-                style="@style/text"
-                android:layout_marginLeft="@dimen/S"
-                android:maxLength="32"
-                android:singleLine="true"
-                android:text="[Song title]" />
-
-        </LinearLayout>
-
-    </RelativeLayout>
-
-    <!--Back-->
-    <RelativeLayout
-        android:id="@+id/tb_back"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:visibility="gone">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginHorizontal="@dimen/XL">
-
-            <ImageView
-                style="@style/icon_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/v_back" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/S"
-                android:text="@string/top_bar_back"
-                android:textSize="@dimen/textM" />
-
-        </LinearLayout>
-
-    </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="wrap_content"

@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.Game;
@@ -100,7 +101,13 @@ public final class FragmentPlatform implements IReferences {
     }
 
     public void onUpdate(float elapsed) {
-        for (Fragment fragment : fragments) {
+        int i = 0;
+        while (i < fragments.size()) {
+            Fragment fragment = fragments.get(i);
+
+            if (fragment == null)
+                return;
+
             if (fragment instanceof UIFragment) {
                 UIFragment frg = (UIFragment) fragment;
 
@@ -108,6 +115,7 @@ public final class FragmentPlatform implements IReferences {
                     Game.runOnUiThread(() -> frg.onUpdate(elapsed));
                 }
             }
+            i++;
         }
     }
 
@@ -118,8 +126,7 @@ public final class FragmentPlatform implements IReferences {
             return false;
 
         fragments.add(fragment);
-        mActivity.runOnUiThread(() ->
-                manager.beginTransaction().add(container.getId(), fragment, tag).commitAllowingStateLoss());
+        commitTransaction(fragment, tag);
         return true;
     }
 
@@ -128,8 +135,21 @@ public final class FragmentPlatform implements IReferences {
             return false;
 
         fragments.remove(fragment);
-        mActivity.runOnUiThread(() -> manager.beginTransaction().remove(fragment).commitAllowingStateLoss());
+        Game.runOnUpdateThread(() -> commitTransaction(fragment, null));
         return true;
+    }
+
+    private void commitTransaction(Fragment fragment, String tag) {
+        mActivity.runOnUiThread(() -> {
+            FragmentTransaction transaction = manager.beginTransaction();
+
+            if (tag == null) {
+                transaction.remove(fragment);
+            } else {
+                transaction.add(container.getId(), fragment, tag);
+            }
+            transaction.commitAllowingStateLoss();
+        });
     }
 
     //--------------------------------------------------------------------------------------------//

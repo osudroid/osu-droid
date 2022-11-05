@@ -28,10 +28,8 @@
     <color name="backgroundDimmed">#99000000</color>
 
     <!--Top bar-->
-    <color name="topBarUserBoxBackground">#25000000</color>
     <color name="topBarBackground">#A6000000</color>
-    <color name="topBarMusicButtonBackground">#40000000</color>
-    <color name="topBarButtonsBackground">#19000000</color>
+    <color name="topBarButtonsBackground">#25000000</color>
 
     <!--ProgressBar & SeekBar-->
     <color name="progressBarIndicatorColor">#FFFFFF</color>

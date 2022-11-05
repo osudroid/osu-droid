@@ -4,28 +4,32 @@
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:translationZ="@dimen/topLayer">
+    android:translationZ="@dimen/topLayer"
+    tools:background="#FFF">
 
-    <RelativeLayout
+    <androidx.cardview.widget.CardView
         android:id="@+id/tb_body"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/topBarHeight"
+        app:cardBackgroundColor="@color/backgroundPrimary"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="@dimen/L"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.edlplan.ui.TriangleEffectView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/tb_bar"
-            android:alpha="0.5"
+            android:alpha="0.2"
             app:layout_constraintTop_toTopOf="parent" />
 
         <RelativeLayout
             android:id="@+id/tb_bar"
             android:layout_width="match_parent"
             android:layout_height="@dimen/topBarHeight"
-            android:background="@color/topBarBackground"
             android:gravity="center_vertical">
 
             <!--Settings-->
@@ -44,7 +48,7 @@
                 android:layout_width="@dimen/topBarButtonWidth"
                 android:layout_height="match_parent"
                 android:layout_toStartOf="@id/tb_userBox"
-                android:src="@drawable/v_inbox" />
+                android:src="@drawable/v_notifications" />
 
             <!--User box-->
             <RelativeLayout
@@ -52,14 +56,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_toStartOf="@+id/tb_settings"
-                android:background="@color/topBarUserBoxBackground">
+                android:background="@color/topBarButtonsBackground">
 
                 <TextView
                     android:id="@+id/tb_playerRank"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
-                    android:layout_marginLeft="@dimen/XXS"
+                    android:layout_marginLeft="@dimen/XS"
                     android:text="@string/top_bar_offline"
                     android:textColor="@color/textTertiary"
                     android:textSize="@dimen/textXL" />
@@ -92,18 +96,90 @@
 
             </RelativeLayout>
 
-            <include layout="@layout/top_bar_buttons" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <!--Back-->
+                <LinearLayout
+                    android:id="@+id/tb_back"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_centerVertical="true"
+                    android:gravity="center"
+                    android:paddingHorizontal="@dimen/XL">
+
+                    <ImageView
+                        style="@style/icon_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/v_back" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/S"
+                        android:text="@string/top_bar_back"
+                        android:textSize="@dimen/textM" />
+
+                </LinearLayout>
+
+                <!--Music-->
+                <RelativeLayout
+                    android:id="@+id/tb_music"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/topBarMusicButtonHeight"
+                    android:layout_marginHorizontal="@dimen/S"
+                    android:background="@drawable/round_shape"
+                    android:backgroundTint="@color/topBarButtonsBackground">
+
+                    <ImageView
+                        android:id="@+id/tb_musicArrow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:alpha="0"
+                        android:rotation="180"
+                        android:src="@drawable/v_arrow_s" />
+
+                    <LinearLayout
+                        android:id="@+id/tb_musicBody"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:layout_marginHorizontal="@dimen/M">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/v_music_s" />
+
+                        <TextView
+                            android:id="@+id/tb_musicText"
+                            style="@style/text"
+                            android:layout_marginLeft="@dimen/S"
+                            android:layout_marginRight="@dimen/XS"
+                            android:maxLength="32"
+                            android:singleLine="true"
+                            android:text="song" />
+
+                    </LinearLayout>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tb_buttonsContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal" />
 
         </RelativeLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/topBarShadowHeight"
-            android:layout_below="@+id/tb_bar"
-            android:alpha="0.3"
-            android:background="@drawable/shadow_horizontal" />
-
-    </RelativeLayout>
+    </androidx.cardview.widget.CardView>
 
     <TextView
         android:id="@+id/tb_author"
