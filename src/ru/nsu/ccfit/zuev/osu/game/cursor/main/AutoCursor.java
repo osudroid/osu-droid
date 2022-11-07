@@ -1,3 +1,4 @@
+// Nothing here
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
 import org.anddev.andengine.entity.modifier.MoveModifier;
