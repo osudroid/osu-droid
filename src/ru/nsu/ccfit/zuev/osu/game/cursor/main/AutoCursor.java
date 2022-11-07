@@ -21,7 +21,7 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
     /**
      * The Easing function to be used on the cursor.
      */
-    private final IEaseFunction easeFunction = EaseQuadOut.getInstance();
+    private final IEaseFunction easeFunction = EaseCircularOut.getInstance();
 
     public AutoCursor() {
         super();
