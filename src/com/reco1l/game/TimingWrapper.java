@@ -45,6 +45,7 @@ public class TimingWrapper {
     public void loadPointsFrom(BeatmapInfo beatmap) {
         TrackInfo track = beatmap.getTrack(0);
 
+
         if (track != null) {
             OSUParser parser = new OSUParser(track.getFilename());
 
@@ -147,7 +148,7 @@ public class TimingWrapper {
                     beat++;
                     cancel(); // Cleaning timer
                 }
-            }, (long) BeatLength);
+            }, Math.max(1, (long) BeatLength));
 
             if (beat > 3) {
                 beat = 0;
@@ -166,6 +167,8 @@ public class TimingWrapper {
                 if (!isContinuousKiai && currentPoint.isKiai()) {
                     observer.onKiaiStart();
                 } else if (isContinuousKiai && !currentPoint.isKiai()) {
+                    observer.onKiaiEnd();
+                } else if (!currentPoint.isKiai()) {
                     observer.onKiaiEnd();
                 }
             }

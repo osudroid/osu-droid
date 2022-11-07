@@ -56,7 +56,7 @@ public class TopBar extends UIFragment {
 
     @Override
     protected Screens[] getParents() {
-        return new Screens[] {Screens.MAIN, Screens.LIST, Screens.SCORING};
+        return new Screens[] {Screens.MAIN, Screens.SONG_MENU, Screens.SCORING, Screens.PLAYER_LOADER};
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -83,7 +83,7 @@ public class TopBar extends UIFragment {
                     musicButton.setVisibility(true);
                     break;
 
-                case LIST:
+                case SONG_MENU:
                     back.setVisibility(View.VISIBLE);
                     break;
 
@@ -188,7 +188,7 @@ public class TopBar extends UIFragment {
             if (!parent.isShowing)
                 return;
 
-            if (scene == Screens.LIST) {
+            if (scene == Screens.SONG_MENU) {
                 mods.setVisibility(View.VISIBLE);
                 search.setVisibility(View.VISIBLE);
                 shuffle.setVisibility(View.VISIBLE);

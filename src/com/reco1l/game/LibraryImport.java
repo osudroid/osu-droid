@@ -51,9 +51,9 @@ public class LibraryImport {
                 Log.i("BeatmapImport", "Importing " + beatmap.getName());
                 Import(beatmap, false);
             }
-            if (updateLibrary) {
-                updateLibrary();
-            }
+        }
+        if (updateLibrary) {
+            updateLibrary();
         }
         isConcurrentImport = false;
     }

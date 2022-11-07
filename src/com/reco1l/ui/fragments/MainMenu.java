@@ -21,6 +21,7 @@ import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.data.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.Animation.ValueAnimationListener;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.Resources;
 import com.reco1l.UI;
@@ -30,8 +31,6 @@ import com.reco1l.utils.listeners.TouchListener;
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 9/7/22 18:09
@@ -45,22 +44,14 @@ public class MainMenu extends UIFragment {
             menuAnimInProgress = false,
             isExitAnimInProgress = false;
 
-    private boolean
-            isKiai = false,
-            wasPlaying = false,
-            clearAnimInProgress = false,
-            isBounceAnimInProgress = false;
+    private boolean isKiai = false;
 
     private CardView logo;
     private View logoInnerRect;
     private MenuButton play, settings, exit;
-    private TriangleEffectView logoTriangles;
+    private TriangleEffectView triangles1, triangles2;
 
-    private Animation
-            logoBounceAnim,
-            triangleSpeedUp,
-            triangleSpeedDown;
-
+    private ValueAnimationListener<Float> triangleListener;
     private ValueAnimator logoShow, logoHide;
     private LayoutParams logoParams;
 
@@ -69,10 +60,7 @@ public class MainMenu extends UIFragment {
             smallLogoSize,
             showPassTime = 0;
 
-    private float currentScale = 1f;
-
     //--------------------------------------------------------------------------------------------//
-
 
     @Override
     protected String getPrefix() {
@@ -91,41 +79,11 @@ public class MainMenu extends UIFragment {
 
     //--------------------------------------------------------------------------------------------//
 
-    private void loadAnimations() {
-        logoBounceAnim = new Animation(logo)
-                .runOnStart(() -> isBounceAnimInProgress = true)
-                .runOnEnd(() -> isBounceAnimInProgress = false);
-
-        // Logo bounce effect
-        TimeInterpolator easeInOutQuad = EasingHelper.asInterpolator(Easing.InOutQuad);
-
-        // Triangles speed up effect
-        triangleSpeedDown = new Animation().ofFloat(2f, 10f)
-                .runOnUpdate(logoTriangles::setTriangleSpeed);
-
-        triangleSpeedUp = new Animation().ofFloat(10f, 2f)
-                .runOnUpdate(logoTriangles::setTriangleSpeed)
-                .runOnEnd(triangleSpeedDown::play);
-
-        // Logo size effect
-        AnimatorUpdateListener logoResize = val -> {
-            logoParams.width = (int) val.getAnimatedValue();
-            logoParams.height = (int) val.getAnimatedValue();
-            logo.setLayoutParams(logoParams);
-        };
-
-        logoShow = ValueAnimator.ofInt(logoNormalSize, smallLogoSize);
-        logoShow.setDuration(300);
-        logoShow.setInterpolator(easeInOutQuad);
-        logoShow.removeAllUpdateListeners();
-        logoShow.addUpdateListener(logoResize);
-
-        logoHide = ValueAnimator.ofInt(smallLogoSize, logoNormalSize);
-        logoHide.setDuration(300);
-        logoHide.setInterpolator(easeInOutQuad);
-        logoHide.removeAllUpdateListeners();
-        logoHide.addUpdateListener(logoResize);
+    public void setLogoKiai(boolean bool) {
+        this.isKiai = bool;
     }
+
+    //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onLoad() {
@@ -136,7 +94,8 @@ public class MainMenu extends UIFragment {
 
         logo = find("logo");
         logoInnerRect = find("logoRect");
-        logoTriangles = find("logoTriangles");
+        triangles1 = find("triangles1");
+        triangles2 = find("triangles2");
 
         play = new MenuButton(
                 find("play"),
@@ -149,7 +108,8 @@ public class MainMenu extends UIFragment {
                 find("settingsView"));
 
         loadAnimations();
-        logoTriangles.setTriangleColor(0xFFFFFFFF);
+        triangles1.setTriangleColor(Resources.color(R.color.mainMenuTriangles1));
+        triangles2.setTriangleColor(Resources.color(R.color.mainMenuTriangles2));
         logoInnerRect.setAlpha(0);
 
         logoParams = logo.getLayoutParams();
@@ -162,8 +122,13 @@ public class MainMenu extends UIFragment {
         settings.setWidth(0);
 
         bindTouchListener(logo, new TouchListener() {
-            public BassSoundProvider getClickSound() { return resources.getSound("menuhit"); }
-            public boolean hasTouchEffect() { return false; }
+            public BassSoundProvider getClickSound() {
+                return resources.getSound("menuhit");
+            }
+
+            public boolean hasTouchEffect() {
+                return false;
+            }
 
             public void onPressUp() {
                 if (!isMenuShowing) {
@@ -175,7 +140,9 @@ public class MainMenu extends UIFragment {
         });
 
         bindTouchListener(play.view, new TouchListener() {
-            public boolean isOnlyOnce() { return true; }
+            public boolean isOnlyOnce() {
+                return true;
+            }
 
             public void onPressUp() {
                 Utils.setAccelerometerSign(global.getCamera().getRotation() == 0 ? 1 : -1);
@@ -202,8 +169,8 @@ public class MainMenu extends UIFragment {
                     global.getMainScene().spectrum.clear(true);
                 })
                 .runOnEnd(() -> {
-                    Game.listScene.load();
-                    Game.listScene.show();
+                    Game.songMenu.load();
+                    Game.songMenu.show();
                     Game.musicManager.play();
                     new AsyncExec() {
                         @Override
@@ -239,7 +206,6 @@ public class MainMenu extends UIFragment {
             return;
 
         global.getMainScene().background.zoomIn();
-        global.getMainScene().background.dimIn();
 
         logoShow.removeAllListeners();
         logoShow.addListener(new BaseAnimationListener() {
@@ -260,7 +226,6 @@ public class MainMenu extends UIFragment {
             return;
 
         global.getMainScene().background.zoomOut();
-        global.getMainScene().background.dimOut();
 
         logoHide.removeAllListeners();
         logoHide.addListener(new BaseAnimationListener() {
@@ -280,39 +245,60 @@ public class MainMenu extends UIFragment {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void setLogoKiai(boolean bool) {
-        this.isKiai = bool;
+    private void loadAnimations() {
+        TimeInterpolator easeInOutQuad = EasingHelper.asInterpolator(Easing.InOutQuad);
+
+        // Triangles
+        triangleListener = value -> {
+            triangles1.setTriangleSpeed(value);
+            triangles2.setTriangleSpeed(value);
+        };
+
+        // Logo size effect
+        AnimatorUpdateListener logoResize = val -> {
+            logoParams.width = (int) val.getAnimatedValue();
+            logoParams.height = (int) val.getAnimatedValue();
+            logo.setLayoutParams(logoParams);
+        };
+
+        logoShow = ValueAnimator.ofInt(logoNormalSize, smallLogoSize);
+        logoShow.setDuration(300);
+        logoShow.setInterpolator(easeInOutQuad);
+        logoShow.removeAllUpdateListeners();
+        logoShow.addUpdateListener(logoResize);
+
+        logoHide = ValueAnimator.ofInt(smallLogoSize, logoNormalSize);
+        logoHide.setDuration(300);
+        logoHide.setInterpolator(easeInOutQuad);
+        logoHide.removeAllUpdateListeners();
+        logoHide.addUpdateListener(logoResize);
     }
 
-    public void onBeatUpdate(float beatLength, final int beat) {
+    public void onBeatUpdate(float beatLength) {
         if (logo == null || isExitAnimInProgress)
             return;
 
-        long upTime = (long) (beatLength * 0.07f);
-        long downTime = (long) (beatLength * 0.9f);
-
-        if (logoBounceAnim != null) {
-            logoBounceAnim.scale(currentScale, currentScale * 0.99f).play((long) (beatLength * 0.8f));
-        }
-
         if (logoInnerRect != null && isKiai) {
-            Animation fadeOut = new Animation(logoInnerRect).fade(0.2f, 0f);
+
+            Animation fadeOut = new Animation(logoInnerRect).fade(0.2f, 0f)
+                    .cancelPending(false)
+                    .duration((long) (beatLength * 0.9f));
 
             new Animation(logoInnerRect).fade(0f, 0.2f)
-                    .runOnEnd(() -> fadeOut.cancelPending(false).play(downTime))
-                    .play(upTime);
+                    .runOnEnd(fadeOut::play)
+                    .play((long) (beatLength * 0.7f));
         }
 
-        // Nullability checks to avoid NPE before views initialization
-        if (logoTriangles != null) {
-            if (triangleSpeedUp != null && triangleSpeedDown != null) {
-                triangleSpeedUp.duration(upTime);
-                triangleSpeedDown.duration(downTime);
+        if (triangles1 != null) {
 
-                if (beat == 0) {
-                    triangleSpeedUp.play();
-                }
-            }
+            Animation speedDown = new Animation().ofFloat(isKiai ? 14f : 8f, 0.25f)
+                    .runOnUpdate(triangleListener)
+                    .duration((long) (beatLength / 4f));
+
+            new Animation().ofFloat(0.25f, isKiai ? 14f : 8f)
+                    .runOnUpdate(triangleListener)
+                    .runOnEnd(speedDown::play)
+                    .play((long) (beatLength / 6f));
         }
     }
 
@@ -321,22 +307,22 @@ public class MainMenu extends UIFragment {
         if (!isShowing)
             return;
 
-        float multiplier = Game.songService.getLevel() * 2f;
-        currentScale = Math.min(0.93f + (0.07f * multiplier), 1f);
+        float[] fft = Game.songService.getSpectrum();
+
+        float level = 0;
+        if (fft != null) {
+            for (int i = 0; i < 8; i++) {
+                level += fft[i] * 0.15f;
+            }
+            level /= 8;
+        }
+
+        float peak = Math.max(0.9f, 1f - level);
+        UI.debugOverlay.logo_scale = peak;
 
         if (logo != null) {
             if (Game.songService.getStatus() == Status.PLAYING) {
-                wasPlaying = true;
-                if (!isBounceAnimInProgress && !clearAnimInProgress) {
-                    logo.animate().cancel();
-                    ViewUtils.scale(logo, currentScale);
-                }
-            } else if (wasPlaying) {
-                wasPlaying = false;
-                new Animation(logo).scale(currentScale, 0.93f)
-                        .runOnStart(() -> clearAnimInProgress = true)
-                        .runOnEnd(() -> clearAnimInProgress = false)
-                        .play(100);
+                ViewUtils.scale(logo, peak);
             }
         }
 

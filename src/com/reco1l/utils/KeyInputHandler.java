@@ -60,7 +60,7 @@ public class KeyInputHandler {
             }
 
             if (currentScene == Game.scoringScene.getScene() && lastScene == Game.gameScene.getScene()) {
-                Game.engine.setScene(Game.listScene);
+                Game.engine.setScene(Game.songMenu);
                 return true;
             }
 

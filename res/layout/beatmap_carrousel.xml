@@ -7,7 +7,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:translationZ="@dimen/middleLayer"
-    tools:background="#FFF">
+    tools:background="#FFF"
+    android:layout_marginTop="@dimen/topBarHeight">
 
     <RelativeLayout
         android:layout_width="match_parent"

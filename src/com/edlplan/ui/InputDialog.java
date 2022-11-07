@@ -11,12 +11,12 @@ public class InputDialog extends Dialog {
 
     public InputDialog(@NonNull Context context) {
         super(context, R.style.Theme_Design_BottomSheetDialog);
-        setContentView(R.layout.dialog_for_input);
+        setContentView(null);
     }
 
     public void showForResult(OnResult onResult) {
-        findViewById(R.id.button3).setOnClickListener(view -> {
-            onResult.onResult(((EditText) findViewById(R.id.editText)).getText().toString());
+        findViewById(0).setOnClickListener(view -> {
+            onResult.onResult(((EditText) findViewById(0)).getText().toString());
             dismiss();
         });
         show();

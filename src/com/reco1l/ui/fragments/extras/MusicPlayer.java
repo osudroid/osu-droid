@@ -26,7 +26,6 @@ import com.edlplan.framework.easing.Easing;
 import com.reco1l.Game;
 import com.reco1l.enums.MusicOption;
 import com.reco1l.UI;
-import com.reco1l.management.MusicManager;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
@@ -172,7 +171,7 @@ public class MusicPlayer extends UIFragment {
         list.setLayoutManager(new LinearLayoutManager(Game.mActivity, VERTICAL, false));
         list.setAdapter(new PlaylistAdapter(Game.library.getLibrary()));
 
-        loadMetadata(MusicManager.beatmap);
+        loadMetadata(Game.musicManager.beatmap);
         loadSeekbarImage();
     }
 

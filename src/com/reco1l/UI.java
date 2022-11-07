@@ -1,6 +1,6 @@
 package com.reco1l;
 
-import com.reco1l.ui.fragments.BeatmapList;
+import com.reco1l.ui.fragments.BeatmapCarrousel;
 import com.reco1l.ui.fragments.BeatmapPanel;
 import com.reco1l.ui.fragments.DebugOverlay;
 import com.reco1l.ui.fragments.extras.NotificationCenter;
@@ -24,7 +24,7 @@ public final class UI {
     public static UserProfile userProfile = getUserProfile();
     public static SettingsMenu settingsPanel = getSettingsMenu();
     public static BeatmapPanel beatmapPanel = getBeatmapPanel();
-    public static BeatmapList beatmapList = getBeatmapList();
+    public static BeatmapCarrousel beatmapCarrousel = getBeatmapList();
     public static DebugOverlay debugOverlay = getDebugOverlay();
 
     //--------------------------------------------------------------------------------------------//
@@ -96,11 +96,11 @@ public final class UI {
         return BeatmapPanel.instance;
     }
 
-    private static BeatmapList getBeatmapList() {
-        if (BeatmapList.instance == null) {
-            BeatmapList.instance = new BeatmapList();
+    private static BeatmapCarrousel getBeatmapList() {
+        if (BeatmapCarrousel.instance == null) {
+            BeatmapCarrousel.instance = new BeatmapCarrousel();
         }
-        return BeatmapList.instance;
+        return BeatmapCarrousel.instance;
     }
 
     private static DebugOverlay getDebugOverlay() {

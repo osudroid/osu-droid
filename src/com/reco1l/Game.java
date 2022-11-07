@@ -3,17 +3,14 @@ package com.reco1l;
 import android.content.Intent;
 import android.os.PowerManager;
 
-import com.reco1l.andengine.scenes.ListScene;
+import com.reco1l.andengine.scenes.PlayerLoader;
+import com.reco1l.andengine.scenes.SongMenu;
 import com.reco1l.andengine.scenes.MainScene;
 import com.reco1l.interfaces.IReferences;
 
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
-import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
@@ -26,9 +23,10 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 public final class Game implements IReferences {
 
     public static MainScene mainScene = global.getMainScene();
-    public static ListScene listScene = global.getSongMenu();
+    public static SongMenu songMenu = global.getSongMenu();
     public static GameScene gameScene = global.getGameScene();
     public static ScoringScene scoringScene = global.getScoring();
+    public static PlayerLoader playerLoader = global.getPlayerLoader();
 
     public static SongService songService = getSongService();
 
@@ -78,7 +76,7 @@ public final class Game implements IReferences {
                 TrackInfo track = library.findTrackByFileNameAndMD5(replay.getMapFile(), replay.getMd5());
 
                 if (track != null) {
-                    UI.beatmapList.setSelected(track.getBeatmap());
+                    UI.beatmapCarrousel.setSelected(track.getBeatmap());
                     resources.loadBackground(track.getBackground());
                     global.getSongService().preLoad(track.getBeatmap().getMusic());
                     global.getSongService().play();

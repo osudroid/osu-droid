@@ -7,7 +7,7 @@
 
     <PreferenceCategory
         android:title="Library"
-        android:layout="@null"
+        android:layout="@layout/custom_preference_category_big"
         app:iconSpaceReserved="false"/>
 
     <PreferenceCategory

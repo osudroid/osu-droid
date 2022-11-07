@@ -9,9 +9,9 @@ import com.reco1l.interfaces.IMusicObserver;
 import com.reco1l.enums.MusicOption;
 
 import org.anddev.andengine.entity.scene.Scene;
+import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 
@@ -33,11 +33,12 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
         timingWrapper = new TimingWrapper();
 
         background = new Background();
-        background.draw(this, 2);
+        background.draw(this, 0);
 
         Game.engine.registerSceneHandler(this);
         onCreate();
         registerUpdateHandler(elapsed -> {
+            background.update();
             if (isUsingTimingWrapper) {
                 int position = Game.songService.getPosition();
 
@@ -108,7 +109,7 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
             }
 
             String path = beatmap.getTrack(0).getBackground();
-            background.change(path);
+            background.setTexture(path, true);
         }
     }
 
@@ -124,6 +125,22 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
         if (isContinuousPlay) {
             Game.musicManager.next();
         }
+    }
+
+    @Override
+    public void onSceneChange(Scene oldScene, Scene newScene) {
+        if (newScene == this) {
+            TextureRegion texture = Game.resources.getTexture("::background");
+            background.setTexture(texture, false);
+        }
+    }
+
+    @Override
+    public boolean onBackPress() {
+        if (Game.engine.lastScene != null) {
+            Game.engine.setScene(Game.engine.lastScene);
+        }
+        return true;
     }
 
     public void show() {

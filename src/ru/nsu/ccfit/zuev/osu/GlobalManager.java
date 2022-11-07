@@ -2,7 +2,8 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.util.DisplayMetrics;
 
-import com.reco1l.andengine.scenes.ListScene;
+import com.reco1l.andengine.scenes.PlayerLoader;
+import com.reco1l.andengine.scenes.SongMenu;
 import com.reco1l.andengine.scenes.MainScene;
 import com.reco1l.management.BitmapManager;
 
@@ -12,7 +13,6 @@ import org.anddev.andengine.engine.camera.Camera;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
-import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 
@@ -26,7 +26,7 @@ public class GlobalManager {
     private GameScene gameScene;
     private MainScene mainScene;
     private ScoringScene scoring;
-    private ListScene songMenu;
+    private SongMenu songMenu;
     private MainActivity mainActivity;
     private int loadingProgress;
     private String info;
@@ -34,6 +34,7 @@ public class GlobalManager {
     private TrackInfo selectedTrack;
     private SaveServiceObject saveServiceObject;
     private String skinNow;
+    private PlayerLoader playerLoader;
 
     public static GlobalManager getInstance() {
         if (instance == null) {
@@ -65,7 +66,8 @@ public class GlobalManager {
         PropertiesLibrary.getInstance().load(mainActivity);
         setLoadingProgress(30);
         setGameScene(new GameScene(getEngine()));
-        setSongMenu(new ListScene());
+        setSongMenu(new SongMenu());
+        setPlayerLoader(new PlayerLoader());
         setLoadingProgress(40);
         setScoring(new ScoringScene(getEngine(), getGameScene(), null)); // TODO SCORING
         getGameScene().setScoringScene(getScoring());
@@ -124,11 +126,11 @@ public class GlobalManager {
         this.scoring = scoring;
     }
 
-    public ListScene getSongMenu() {
+    public SongMenu getSongMenu() {
         return songMenu;
     }
 
-    public void setSongMenu(ListScene songMenu) {
+    public void setSongMenu(SongMenu songMenu) {
         this.songMenu = songMenu;
     }
 
@@ -176,5 +178,13 @@ public class GlobalManager {
         final DisplayMetrics dm = new DisplayMetrics();
         mainActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
         return dm;
+    }
+
+    public PlayerLoader getPlayerLoader() {
+        return playerLoader;
+    }
+
+    public void setPlayerLoader(PlayerLoader playerLoader) {
+        this.playerLoader = playerLoader;
     }
 }

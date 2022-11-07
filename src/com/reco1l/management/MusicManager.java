@@ -22,7 +22,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
 
 public final class MusicManager {
 
-    public static BeatmapInfo beatmap;
+    public BeatmapInfo beatmap;
 
     private static MusicManager instance;
 
@@ -104,13 +104,13 @@ public final class MusicManager {
     //--------------------------------------------------------------------------------------------//
 
     public void change(BeatmapInfo beatmap) {
-        if (isInvalidRequest())
+        if (isInvalidRequest() || beatmap == null)
             return;
 
         if (getState() != Status.STOPPED) {
             getService().stop();
         }
-        MusicManager.beatmap = beatmap;
+        this.beatmap = beatmap;
         play();
     }
 

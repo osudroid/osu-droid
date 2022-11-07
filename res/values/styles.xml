@@ -44,13 +44,49 @@
         <item name="android:layout_height">@dimen/settingsPanelButtonHeight</item>
     </style>
 
-    <!--ProgressBar & SeekBar-->
+    <!--Seek bar-->
     <style name="song_seek_bar">
         <item name="android:progressDrawable">@drawable/song_seek_bar_progress</item>
         <item name="android:thumb">@drawable/song_seek_bar_thumb</item>
         <item name="android:maxHeight">@dimen/musicPlayerSongShapeHeight</item>
         <item name="android:thumbOffset">@dimen/songSeekBarThumbOffset</item>
         <item name="android:splitTrack">false</item>
+    </style>
+
+    <style name="seek_bar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:thumbOffset">0dp</item>
+        <item name="android:maxHeight">@dimen/seekBarHeight</item>
+        <item name="android:minHeight">@dimen/seekBarHeight</item>
+        <item name="android:progressDrawable">@drawable/seek_bar_progress</item>
+        <item name="android:thumb">@drawable/seek_bar_thumb</item>
+        <item name="android:splitTrack">false</item>
+    </style>
+
+    <!--Check box-->
+    <style name="check_box">
+        <item name="android:layout_width">@dimen/L</item>
+        <item name="android:layout_height">@dimen/L</item>
+        <item name="android:button">@drawable/check_box_button</item>
+    </style>
+
+    <!--Preferences-->
+    <style name="seek_bar_preference">
+        <item name="android:layout">@layout/custom_seekbar_preference</item>
+    </style>
+
+    <style name="category_preference">
+        <item name="android:layout">@layout/custom_preference_category</item>
+    </style>
+
+    <style name="check_box_preference">
+        <item name="android:layout">@layout/custom_checkbox_preference</item>
+    </style>
+
+    <style name="preference">
+        <item name="android:layout">@layout/custom_preference</item>
     </style>
 
     <!--Shape overlays-->

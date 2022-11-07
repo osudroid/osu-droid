@@ -1,10 +1,14 @@
 package com.reco1l.ui.fragments.extras;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
@@ -222,6 +226,14 @@ public class SettingsMenu extends UIFragment {
     //--------------------------------------------------------------------------------------------//
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
+
+        @Override
+        public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+
+            setDivider(new ColorDrawable(Color.TRANSPARENT));
+            setDividerHeight(0);
+        }
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {

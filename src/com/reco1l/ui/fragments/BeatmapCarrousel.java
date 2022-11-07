@@ -5,13 +5,15 @@ import android.view.View;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
-import com.reco1l.management.MusicManager;
 import com.reco1l.ui.data.BeatmapListAdapter;
 import com.reco1l.ui.data.TrackListAdapter;
 import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.utils.Animation;
+import com.reco1l.utils.AsyncExec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,16 +24,15 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 22/8/22 00:31
 
-public class BeatmapList extends UIFragment {
+public class BeatmapCarrousel extends UIFragment {
 
-    public static BeatmapList instance;
+    public static BeatmapCarrousel instance;
 
     public List<BeatmapInfo> beatmaps = new ArrayList<>();
 
     public BeatmapListAdapter.VH selectedBeatmapHolder;
     public TrackListAdapter.VH selectedTrackHolder;
 
-    public BeatmapInfo selectedBeatmap;
     public TrackInfo selectedTrack;
     public RecyclerView trackList;
 
@@ -45,7 +46,6 @@ public class BeatmapList extends UIFragment {
 
     //--------------------------------------------------------------------------------------------//
 
-
     @Override
     protected String getPrefix() {
         return "bl";
@@ -53,12 +53,12 @@ public class BeatmapList extends UIFragment {
 
     @Override
     protected int getLayout() {
-        return R.layout.beatmap_list;
+        return R.layout.beatmap_carrousel;
     }
 
     @Override
     protected Screens getParent() {
-        return Screens.LIST;
+        return Screens.SONG_MENU;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -82,10 +82,10 @@ public class BeatmapList extends UIFragment {
         if (beatmap == null)
             return;
 
-        if (selectedBeatmap == null || !selectedBeatmap.equals(beatmap)) {
+        if (Game.musicManager.beatmap == null || !Game.musicManager.beatmap.equals(beatmap)) {
             navigate(beatmap);
         }
-        this.selectedBeatmap = beatmap;
+        Game.musicManager.beatmap = beatmap;
         this.selectedTrack = beatmap.getTrack(0);
         setSelected(this.selectedTrack);
     }
@@ -94,7 +94,7 @@ public class BeatmapList extends UIFragment {
         if (track == null)
             return;
 
-        if (selectedBeatmap == null || !selectedBeatmap.equals(track.getBeatmap())) {
+        if (Game.musicManager.beatmap == null || !Game.musicManager.beatmap.equals(track.getBeatmap())) {
             navigate(track.getBeatmap());
         }
 
@@ -102,14 +102,15 @@ public class BeatmapList extends UIFragment {
             selectedBeatmapHolder.navigateTrack(track);
         }
 
-        this.selectedBeatmap = track.getBeatmap();
+        Game.musicManager.beatmap = track.getBeatmap();
         this.selectedTrack = track;
-        Game.listScene.onTrackSelect(track);
+        Game.songMenu.onTrackSelect(track);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void update() {
+    @Override
+    public void onUpdate(float elapsed) {
         if (!isShowing)
             return;
 
@@ -118,10 +119,20 @@ public class BeatmapList extends UIFragment {
                 View child = recyclerView.getChildAt(i);
 
                 if (child != null) {
-                    mActivity.runOnUiThread(() -> child.setTranslationX(computeTranslationX(child)));
+                    child.setTranslationX(computeTranslationX(child));
                 }
             }
         }
+
+        /*if (selectedBeatmapHolder != null && selectedBeatmapHolder.trackList != null) {
+            for (int i = 0; i < selectedBeatmapHolder.trackList.getChildCount(); i++) {
+                View trackView = selectedBeatmapHolder.trackList.getChildAt(i);
+
+                if (trackView != null) {
+                    trackView.setTranslationX(computeTranslationX(trackView));
+                }
+            }
+        }*/
     }
 
     public float computeTranslationX(View view) {
@@ -152,17 +163,25 @@ public class BeatmapList extends UIFragment {
     @Override
     protected void onLoad() {
         recyclerView = find("recycler");
-        loadBeatmaps();
-
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
 
-        recyclerView.post(() -> {
-            if (Game.listScene.lastTrack != null) {
-                setSelected(Game.listScene.lastTrack);
-            } else {
-                setSelected(MusicManager.beatmap);
+        new AsyncExec() {
+            @Override
+            public void run() {
+                loadBeatmaps();
+
+                recyclerView.post(() -> {
+                    if (Game.songMenu.lastTrack != null) {
+                        setSelected(Game.songMenu.lastTrack);
+                    } else {
+                        setSelected(Game.musicManager.beatmap);
+                    }
+                });
             }
-        });
+        }.execute();
+
+        new Animation(recyclerView).moveX(80, 0).fade(0, 1).interpolator(Easing.OutExpo)
+                .play(500);
     }
 
     @Override

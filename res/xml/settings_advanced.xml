@@ -5,7 +5,7 @@
 
     <PreferenceCategory
         android:title="Advanced"
-        android:layout="@null" />
+        android:layout="@layout/custom_preference_category_big" />
 
     <PreferenceCategory
         android:title="Location"

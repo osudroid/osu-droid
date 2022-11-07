@@ -223,9 +223,13 @@ public final class FragmentPlatform implements IReferences {
                 .play(500);
     }
 
+    //--------------------------------------------------------------------------------------------//
+
     public static class LoaderFragment extends Fragment implements IReferences {
 
         protected RelativeLayout layout;
+
+        //----------------------------------------------------------------------------------------//
 
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle bundle) {

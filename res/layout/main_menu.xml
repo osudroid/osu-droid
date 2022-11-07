@@ -4,6 +4,7 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:edl="http://ui.edlplan.com/customview"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
@@ -137,18 +138,24 @@
         app:cardCornerRadius="@dimen/mainMenuLogoCornerRadius"
         app:cardElevation="@dimen/mainMenuLogoElevation">
 
+        <com.edlplan.ui.TriangleEffectView
+            android:id="@+id/mainM_triangles1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            edl:edgeClampRate="1.9" />
+
+        <com.edlplan.ui.TriangleEffectView
+            android:id="@+id/mainM_triangles2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            edl:edgeClampRate="1.9" />
+
         <View
             android:id="@+id/mainM_logoRect"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#FFF"
-            android:alpha="0.3"/>
-
-        <com.edlplan.ui.TriangleEffectView
-            android:id="@+id/mainM_logoTriangles"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:alpha="0.4" />
+            android:alpha="0.3"
+            android:background="#FFF" />
 
         <ImageView
             android:layout_width="wrap_content"

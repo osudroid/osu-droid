@@ -8,16 +8,17 @@ import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.enums.Screens;
 import com.reco1l.andengine.OsuScene;
-import com.reco1l.management.MusicManager;
 import com.reco1l.utils.Animation;
+
+import org.anddev.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
-public class ListScene extends OsuScene {
+public class SongMenu extends OsuScene {
 
-    public static ListScene instance;
+    public static SongMenu instance;
 
     public TrackInfo currentTrack, lastTrack;
 
@@ -25,7 +26,7 @@ public class ListScene extends OsuScene {
 
     @Override
     public Screens getIdentifier() {
-        return Screens.LIST;
+        return Screens.SONG_MENU;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -35,15 +36,12 @@ public class ListScene extends OsuScene {
         setTimingWrapper(true);
         setContinuousPlay(false);
 
-        background.layer.setAlpha(0.3f);
-
         bindDataBaseChangedListener();
         setTouchAreaBindingEnabled(true);
     }
 
     @Override
     protected void onSceneUpdate(float secondsElapsed) {
-        UI.beatmapList.update();
     }
 
     public void load() {
@@ -71,7 +69,7 @@ public class ListScene extends OsuScene {
         UI.beatmapPanel.updateProperties(track);
         UI.beatmapPanel.updateScoreboard();
 
-        background.change(track.getBackground());
+        background.setTexture(track.getBackground(), true);
         currentTrack = track;
     }
 
@@ -92,13 +90,20 @@ public class ListScene extends OsuScene {
 
     @Override
     public void onMusicEnd() {
-        playMusic(MusicManager.beatmap);
+        playMusic(Game.musicManager.beatmap);
     }
 
     @Override
     public boolean onBackPress() {
         Game.engine.setScene(Game.mainScene);
         return true;
+    }
+
+    @Override
+    public void onSceneChange(Scene oldScene, Scene newScene) {
+        if (newScene != this) {
+            currentTrack = null;
+        }
     }
 
     //--------------------------------------------------------------------------------------------//

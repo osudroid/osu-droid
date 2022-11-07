@@ -15,7 +15,7 @@ public class LoadingFragment extends BaseFragment {
 
     @Override
     protected int getLayoutID() {
-        return R.layout.fragment_loading;
+        return 0;
     }
 
     @Override

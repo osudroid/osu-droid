@@ -56,7 +56,17 @@
     <dimen name="tabIndicatorSize">@dimen/_2sdp</dimen>
     <dimen name="verticalShadowWidth">@dimen/_8sdp</dimen>
 
-    <!--ProgressBar & SeekBar-->
+    <!--Custom views-->
+    <dimen name="circularLoadingBarSize">@dimen/_32sdp</dimen>
+    <dimen name="circularLoadingBarTrackCornerRadius">@dimen/_2sdp</dimen>
+
+    <!--Seek bar-->
+    <dimen name="seekBarProgressCornerRadius">@dimen/_8sdp</dimen>
+    <dimen name="seekBarThumbCornerRadius">@dimen/_10sdp</dimen>
+    <dimen name="seekBarThumbSize">@dimen/_10sdp</dimen>
+    <dimen name="seekBarHeight">@dimen/_6sdp</dimen>
+
+    <!--ProgressBar & SeekBar (OLD)-->
     <dimen name="circularProgressBarThickness">8</dimen>
     <dimen name="circularProgressIndicatorThickness">@dimen/_6sdp</dimen>
     <dimen name="smallCircularProgressBarSize">@dimen/_16sdp</dimen>

@@ -35,7 +35,6 @@
         
                 <ImageButton
                     android:id="@+id/close_button"
-                    android:src="@drawable/close_black"
                     android:background="@android:color/transparent"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>

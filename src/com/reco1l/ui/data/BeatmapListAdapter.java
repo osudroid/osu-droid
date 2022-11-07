@@ -92,9 +92,10 @@ public class BeatmapListAdapter extends RecyclerView.Adapter<BeatmapListAdapter.
 
         public BeatmapInfo beatmap;
 
+        public final RecyclerView trackList;
+
         private final CardView body;
         private final TextView title, artist, mapper;
-        private final RecyclerView trackList;
 
         private ImageView background;
         private AsyncExec imageTask;
@@ -190,14 +191,14 @@ public class BeatmapListAdapter extends RecyclerView.Adapter<BeatmapListAdapter.
         //----------------------------------------------------------------------------------------//
 
         public void select() {
-            if (UI.beatmapList.selectedBeatmapHolder != this) {
-                if (UI.beatmapList.selectedBeatmapHolder != null) {
-                    UI.beatmapList.selectedBeatmapHolder.deselect();
+            if (UI.beatmapCarrousel.selectedBeatmapHolder != this) {
+                if (UI.beatmapCarrousel.selectedBeatmapHolder != null) {
+                    UI.beatmapCarrousel.selectedBeatmapHolder.deselect();
                 }
-                UI.beatmapList.selectedBeatmapHolder = this;
-                UI.beatmapList.trackList = this.trackList;
+                UI.beatmapCarrousel.selectedBeatmapHolder = this;
+                UI.beatmapCarrousel.trackList = this.trackList;
 
-                Game.listScene.playMusic(beatmap);
+                Game.songMenu.playMusic(beatmap);
 
                 trackList.post(() -> {
                     trackList.setVisibility(View.VISIBLE);
@@ -216,12 +217,12 @@ public class BeatmapListAdapter extends RecyclerView.Adapter<BeatmapListAdapter.
         private void bind(BeatmapInfo beatmap) {
             this.beatmap = beatmap;
             new ViewTouchHandler(() -> {
-                if (UI.beatmapList.selectedBeatmap != beatmap) {
-                    UI.beatmapList.setSelected(beatmap);
+                if (Game.musicManager.beatmap != beatmap) {
+                    UI.beatmapCarrousel.setSelected(beatmap);
                 }
             }).apply(body);
 
-            trackList.setLayoutManager(new LinearLayoutManager(UI.beatmapList.getContext(), VERTICAL, false));
+            trackList.setLayoutManager(new LinearLayoutManager(UI.beatmapCarrousel.getContext(), VERTICAL, false));
 
             title.setText(BeatmapHelper.getTitle(beatmap));
             artist.setText("by " + BeatmapHelper.getArtist(beatmap));

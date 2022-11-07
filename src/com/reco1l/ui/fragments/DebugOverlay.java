@@ -6,13 +6,18 @@ import com.reco1l.Game;
 import com.reco1l.andengine.OsuScene;
 import com.reco1l.ui.platform.UIFragment;
 
+import java.text.DecimalFormat;
+
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class DebugOverlay extends UIFragment {
 
     public static DebugOverlay instance;
 
+    public float logo_scale = 0;
+
     private TextView text;
+    private final DecimalFormat df = new DecimalFormat("#.###");
 
     //--------------------------------------------------------------------------------------------//
 
@@ -49,7 +54,7 @@ public class DebugOverlay extends UIFragment {
         }
 
         String string =
-                "audio_level: " + Game.songService.getLevel() + "\n" +
+                "logo_scale: " + df.format(logo_scale) + "\n" +
                 "current_beat: " + beat;
 
         text.setText(string);

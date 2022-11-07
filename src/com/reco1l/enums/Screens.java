@@ -4,7 +4,8 @@ package com.reco1l.enums;
 
 public enum Screens {
     MAIN,
-    LIST,
+    SONG_MENU,
+    PLAYER_LOADER,
     LOADING,
     SCORING,
     PAUSE,

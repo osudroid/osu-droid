@@ -1,68 +1,53 @@
 package com.reco1l.andengine.entity;
 
-// Created by Reco1l on 26/6/22 18:22
-
 import com.reco1l.Game;
 import com.reco1l.andengine.IAttachableEntity;
 import com.reco1l.utils.AsyncExec;
-import com.reco1l.utils.listeners.ModifierListener;
 
-import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.modifier.ScaleModifier;
-import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseQuadInOut;
-import org.anddev.andengine.util.modifier.ease.IEaseFunction;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 
 public class Background implements IAttachableEntity {
 
-    public Rectangle layer;
     public Sprite sprite;
 
-    private Scene parent;
-    private TextureRegion defaultTexture;
-
-    private final IEaseFunction interpolator;
-
-    private AlphaModifier alphaModifier;
+    private Scene scene;
+    private TextureRegion texture;
     private ScaleModifier scaleModifier;
-
-    //--------------------------------------------------------------------------------------------//
-
-    public Background() {
-        this.interpolator = EaseQuadInOut.getInstance();
-    }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     public void draw(Scene scene, int index) {
-        parent = scene;
-        defaultTexture = Game.resources.getTexture("menu-background");
+        this.scene = scene;
 
         scene.setBackground(new ColorBackground(0, 0, 0));
+        sprite = getScaledSprite();
+        scene.attachChild(sprite, index);
+    }
 
-        sprite = new Sprite(0, 0, defaultTexture);
-
-        layer = new Rectangle(0, 0, screenWidth, screenHeight);
-        layer.setColor(0, 0, 0);
-        layer.setAlpha(0);
-
-        scene.attachChild(sprite, 0);
-        scene.attachChild(layer, index);
+    @Override
+    public void update() {
+        if (sprite != null && sprite.getAlpha() == 0) {
+            sprite.registerEntityModifier(new AlphaModifier(0.5f, 0f, 1f));
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    private Sprite getScaledSprite(TextureRegion texture) {
+    private Sprite getScaledSprite() {
+        if (texture == null) {
+            texture = Game.resources.getTexture("menu-background");
+        }
+
         float h = texture.getHeight() * (screenWidth / (float) texture.getWidth());
 
         return new Sprite(0, (screenHeight - h) / 2f, screenWidth, h, texture);
@@ -70,74 +55,56 @@ public class Background implements IAttachableEntity {
 
     //--------------------------------------------------------------------------------------------//
 
-    public synchronized void change(String path) {
-        if (sprite != null) {
-            sprite.setVisible(false);
-        }
+    public void setTexture(String path, boolean animate) {
+        texture = null;
 
         new AsyncExec() {
             public void run() {
-                TextureRegion texture = defaultTexture;
-
-                if (path != null && !Config.isSafeBeatmapBg()) {
+                if (!Config.isSafeBeatmapBg()) {
                     texture = Game.resources.loadBackground(path);
                 }
+                reloadTexture(animate);
+            }
+        }.execute();
+    }
 
-                Sprite nextSprite = getScaledSprite(texture);
+    public void setTexture(TextureRegion texture, boolean animate) {
+        this.texture = texture;
 
-                SyncTaskManager.getInstance().run(() -> {
-                    parent.attachChild(nextSprite, 0);
-
-                    ModifierListener listener = new ModifierListener() {
-                        @Override
-                        public void onModifierStarted(IModifier<IEntity> m, IEntity i) {
-                            Game.mActivity.runOnUpdateThread(() -> {
-                                if (sprite != null) {
-                                    sprite.detachSelf();
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onModifierFinished(IModifier<IEntity> m, IEntity i) {
-                            sprite = (Sprite) i;
-
-                        }
-                    };
-                    nextSprite.registerEntityModifier(new AlphaModifier(0.5f, 0f, 1f, listener));
-                });
+        new AsyncExec() {
+            public void run() {
+                reloadTexture(animate);
             }
         }.execute();
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void dimIn() {
-        if (layer != null) {
-            if (alphaModifier != null) {
-                layer.unregisterEntityModifier(alphaModifier);
-            }
-            alphaModifier = new AlphaModifier(0.4f, 0, 0.3f, interpolator);
-            layer.registerEntityModifier(alphaModifier);
+    private void reloadTexture(boolean animate) {
+        if (sprite != null) {
+            Game.runOnUpdateThread(sprite::detachSelf);
         }
+
+        Sprite newSprite = getScaledSprite();
+
+        SyncTaskManager.getInstance().run(() -> {
+            scene.attachChild(newSprite, 0);
+
+            if (animate) {
+                newSprite.setAlpha(0);
+            }
+            sprite = newSprite;
+        });
     }
 
-    public void dimOut() {
-        if (layer != null) {
-            if (alphaModifier != null) {
-                layer.unregisterEntityModifier(alphaModifier);
-            }
-            alphaModifier = new AlphaModifier(0.4f, 0.3f, 0, interpolator);
-            layer.registerEntityModifier(alphaModifier);
-        }
-    }
+    //--------------------------------------------------------------------------------------------//
 
     public void zoomIn() {
         if (sprite != null) {
             if (scaleModifier != null) {
                 sprite.unregisterEntityModifier(scaleModifier);
             }
-            scaleModifier = new ScaleModifier(0.4f, 1, 1.2f, interpolator);
+            scaleModifier = new ScaleModifier(0.4f, 1, 1.2f, EaseQuadInOut.getInstance());
             sprite.registerEntityModifier(scaleModifier);
         }
     }
@@ -147,9 +114,8 @@ public class Background implements IAttachableEntity {
             if (scaleModifier != null) {
                 sprite.unregisterEntityModifier(scaleModifier);
             }
-            scaleModifier = new ScaleModifier(0.4f, 1.2f, 1, interpolator);
+            scaleModifier = new ScaleModifier(0.4f, 1.2f, 1, EaseQuadInOut.getInstance());
             sprite.registerEntityModifier(scaleModifier);
         }
     }
-
 }

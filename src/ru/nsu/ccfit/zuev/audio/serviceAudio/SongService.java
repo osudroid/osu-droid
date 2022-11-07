@@ -8,6 +8,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.reco1l.Game;
 import com.reco1l.management.MusicManager;
 import com.reco1l.notification.NotificationPlayer;
 
@@ -204,7 +205,7 @@ public class SongService extends Service {
             return;
         }
         notify.show();
-        notify.updateSong(MusicManager.beatmap);
+        notify.updateSong(Game.musicManager.beatmap);
         notify.updateState();
     }
 

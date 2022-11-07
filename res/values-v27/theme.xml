@@ -19,6 +19,16 @@
 
         <!--Styles-->
         <item name="android:textViewStyle">@style/text</item>
+        <item name="android:seekBarStyle">@style/seek_bar</item>
+        <item name="android:checkboxStyle">@style/check_box</item>
+
+        <!--Preference Styles-->
+        <item name="seekBarPreferenceStyle">@style/seek_bar_preference</item>
+        <item name="preferenceCategoryStyle">@style/category_preference</item>
+        <item name="checkBoxPreferenceStyle">@style/check_box_preference</item>
+        <item name="editTextPreferenceStyle">@style/preference</item>
+        <item name="preferenceStyle">@style/preference</item>
+        <item name="dialogPreferenceStyle">@style/preference</item>
 
     </style>
 </resources>

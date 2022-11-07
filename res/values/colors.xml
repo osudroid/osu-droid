@@ -27,6 +27,16 @@
     <color name="backgroundTertiary">#1F1F1F</color>
     <color name="backgroundDimmed">#99000000</color>
 
+    <!--Custom views-->
+    <color name="circularLoadingBarBackground">#34000000</color>
+    <color name="circularLoadingBarIndicator">#FFFFFF</color>
+
+    <!--Seek bar-->
+    <color name="seekBarThumbColor">#FFFFFF</color>
+
+    <!--Check box-->
+    <color name="checkBoxOffColor">#20000000</color>
+
     <!--Top bar-->
     <color name="topBarBackground">#A6000000</color>
     <color name="topBarButtonsBackground">#25000000</color>
@@ -50,7 +60,9 @@
     <color name="notificationDismissButtonTint">#B3FFFFFF</color>
 
     <!--Main Menu-->
-    <color name="mainMenuLogoBackground">#E866A0</color>
+    <color name="mainMenuLogoBackground">#E967A1</color>
+    <color name="mainMenuTriangles1">#FE7CB6</color>
+    <color name="mainMenuTriangles2">#E05D97</color>
 
     <!--Loading Scene-->
     <color name="loadingSceneViewsBackground">#34000000</color>

@@ -119,7 +119,11 @@ public class Animation implements IReferences {
         @SuppressWarnings("unchecked")
         public Animation runOnUpdate(ValueAnimationListener<T> listener) {
             valueAnimator.removeAllUpdateListeners();
-            valueAnimator.addUpdateListener(val -> listener.onUpdate((T) val.getAnimatedValue()));
+            valueAnimator.addUpdateListener(val -> {
+                if (listener != null) {
+                    listener.onUpdate((T) val.getAnimatedValue());
+                }
+            });
             return instance;
         }
 

@@ -91,14 +91,14 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.VH> 
         //----------------------------------------------------------------------------------------//
 
         public void select() {
-            if (UI.beatmapList.selectedTrackHolder == this)
+            if (UI.beatmapCarrousel.selectedTrackHolder == this)
                 return;
 
-            if (UI.beatmapList.selectedTrackHolder != null) {
-                UI.beatmapList.selectedTrackHolder.deselect();
+            if (UI.beatmapCarrousel.selectedTrackHolder != null) {
+                UI.beatmapCarrousel.selectedTrackHolder.deselect();
             }
 
-            triangles = new TriangleEffectView(UI.beatmapList.getContext());
+            triangles = new TriangleEffectView(UI.beatmapCarrousel.getContext());
             triangles.setTriangleColor(color);
             triangles.setAlpha(0);
 
@@ -109,7 +109,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.VH> 
             new Animation(triangles).fade(0, 0.3f)
                     .play(200);
 
-            UI.beatmapList.selectedTrackHolder = this;
+            UI.beatmapCarrousel.selectedTrackHolder = this;
         }
 
         public void deselect() {
@@ -128,7 +128,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.VH> 
         private void bind(TrackInfo track) {
             this.track = track;
 
-            new ViewTouchHandler(() -> UI.beatmapList.setSelected(track)).apply(body);
+            new ViewTouchHandler(() -> UI.beatmapCarrousel.setSelected(track)).apply(body);
 
             difficulty.setText(track.getMode());
             stars.setText("" + GameHelper.Round(track.getDifficulty(), 2));

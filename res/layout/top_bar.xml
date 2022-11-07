@@ -2,7 +2,8 @@
 
 <!-- Created by Reco1l on 24/6/22 21:26 -->
 
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -16,15 +17,13 @@
         android:layout_height="@dimen/topBarHeight"
         app:cardBackgroundColor="@color/backgroundPrimary"
         app:cardCornerRadius="0dp"
-        app:cardElevation="@dimen/L"
-        app:layout_constraintTop_toTopOf="parent">
+        app:cardElevation="@dimen/L">
 
         <com.edlplan.ui.TriangleEffectView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/tb_bar"
-            android:alpha="0.2"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:alpha="0.2"/>
 
         <RelativeLayout
             android:id="@+id/tb_bar"
@@ -191,8 +190,7 @@
         android:paddingHorizontal="@dimen/S"
         android:paddingVertical="@dimen/XXS"
         android:text="[Author information]"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>

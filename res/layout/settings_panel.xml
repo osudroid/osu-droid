@@ -173,11 +173,6 @@
 
             </LinearLayout>
 
-            <com.edlplan.ui.TriangleEffectView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:alpha="0.2" />
-
             <FrameLayout
                 android:id="@+id/sm_container"
                 android:layout_width="match_parent"

@@ -107,8 +107,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="@dimen/S"
                 android:gravity="right"
-                android:orientation="vertical"
-                android:paddingRight="@dimen/XXS">
+                android:orientation="vertical">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -138,7 +137,8 @@
                     style="@style/text"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentBottom="true"
-                    android:text="000,000,000" />
+                    android:text="000,000,000"
+                    android:layout_marginRight="@dimen/_1sdp"/>
 
             </LinearLayout>
 

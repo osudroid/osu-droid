@@ -92,7 +92,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
     @Override
     protected Screens getParent() {
-        return Screens.LIST;
+        return Screens.SONG_MENU;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -112,7 +112,6 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         body = find("body");
 
         new Animation(body)
-                .marginTop(0, (int) Resources.dimen(R.dimen.topBarHeight))
                 .moveX(-bodyWidth, 0)
                 .fade(0, 1)
                 .play(300);
