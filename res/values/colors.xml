@@ -30,6 +30,8 @@
     <!--Custom views-->
     <color name="circularLoadingBarBackground">#34000000</color>
     <color name="circularLoadingBarIndicator">#FFFFFF</color>
+    
+    <color name="barButtonIndicatorColor">#FFFFFF</color>
 
     <!--Seek bar-->
     <color name="seekBarThumbColor">#FFFFFF</color>

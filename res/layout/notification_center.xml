@@ -74,7 +74,7 @@
                     android:id="@+id/nc_clear"
                     style="@style/icon_button"
                     android:layout_width="@dimen/barButtonWidth"
-                    android:layout_height="@dimen/barButtonHeight"
+                    android:layout_height="@dimen/topBarButtonHeight"
                     android:src="@drawable/v_clear"
                     app:tint="@color/vectorSecondary" />
 
@@ -82,7 +82,7 @@
                     android:id="@+id/nc_close"
                     style="@style/icon_button"
                     android:layout_width="@dimen/barButtonWidth"
-                    android:layout_height="@dimen/barButtonHeight"
+                    android:layout_height="@dimen/topBarButtonHeight"
                     android:src="@drawable/v_close"
                     app:tint="@color/vectorSecondary" />
 

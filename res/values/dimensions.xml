@@ -45,7 +45,7 @@
 
     <!--Buttons-->
     <dimen name="barButtonWidth">@dimen/_50sdp</dimen>
-    <dimen name="barButtonHeight">@dimen/_40sdp</dimen>
+    <dimen name="topBarButtonHeight">@dimen/_40sdp</dimen>
 
     <dimen name="buttonCornerRadius">@dimen/_8sdp</dimen>
     <dimen name="buttonHeight">@dimen/_28sdp</dimen>
@@ -59,6 +59,9 @@
     <!--Custom views-->
     <dimen name="circularLoadingBarSize">@dimen/_32sdp</dimen>
     <dimen name="circularLoadingBarTrackCornerRadius">@dimen/_2sdp</dimen>
+
+    <dimen name="topBarButtonWidth">@dimen/_62sdp</dimen>
+    <dimen name="topBarButtonIndicatorHeight">@dimen/_2sdp</dimen>
 
     <!--Seek bar-->
     <dimen name="seekBarProgressCornerRadius">@dimen/_8sdp</dimen>
@@ -97,12 +100,10 @@
     <dimen name="musicPlayerSeekbarElevation">@dimen/_6sdp</dimen>
     
     <!--Top Bar-->
-    <dimen name="topBarButtonWidth">@dimen/_62sdp</dimen>
     <dimen name="topBarHeight">@dimen/_40sdp</dimen>
     <dimen name="topBarMusicButtonHeight">@dimen/_28sdp</dimen>
     <dimen name="topBarAvatarSize">@dimen/_24sdp</dimen>
     <dimen name="topBarAvatarCorners">@dimen/_8sdp</dimen>
-    <dimen name="topBarShadowHeight">@dimen/_12sdp</dimen>
 
     <!--Panels-->
     <dimen name="panelCardElevation">@dimen/_16sdp</dimen>
@@ -128,7 +129,7 @@
 
     <dimen name="mainMenuLogoCornerRadius">600dip</dimen>
     <dimen name="mainMenuSmallLogoSize">@dimen/_160sdp</dimen>
-    <dimen name="mainMenuLogoSize">@dimen/_240sdp</dimen>
+    <dimen name="mainMenuLogoSize">@dimen/_250sdp</dimen>
     <dimen name="mainMenuLogoElevation">@dimen/_20sdp</dimen>
 
     <dimen name="mainMenuExitElevation">2dp</dimen>

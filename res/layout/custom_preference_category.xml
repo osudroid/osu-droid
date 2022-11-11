@@ -7,7 +7,7 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="@dimen/M"
+        android:layout_height="@dimen/S"
         android:background="@color/backgroundTertiary" />
 
     <TextView

@@ -10,7 +10,7 @@
         android:id="@android:id/title"
         style="@style/text"
         android:layout_width="match_parent"
-        android:layout_marginTop="@dimen/M"
+        android:layout_marginTop="@dimen/S"
         android:paddingHorizontal="@dimen/L"
         android:paddingVertical="@dimen/S"
         android:textColor="#FFF"
