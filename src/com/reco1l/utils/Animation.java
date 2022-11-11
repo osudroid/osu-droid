@@ -89,6 +89,13 @@ public class Animation implements IReferences {
         valueAnimators = new ArrayList<>();
     }
 
+    //--------------------------------------------------------------------------------------------//
+
+    @FunctionalInterface
+    public interface IAnimationHandler {
+        void onAnimate(Animation animation);
+    }
+
     // ValueAnimator based animations
     //--------------------------------------------------------------------------------------------//
 
@@ -373,14 +380,16 @@ public class Animation implements IReferences {
     //--------------------------------------------------------------------------------------------//
 
     public void play() {
-        play(-1);
+        if (duration < 0) {
+            duration = DEFAULT_DURATION;
+        }
+        play(duration);
     }
 
     /**
-     * @param duration duration of animation in milliseconds.
+     * @param fDuration duration of animation in milliseconds.
      */
-    public void play(long duration) {
-        this.duration = duration >= 0 ? duration : DEFAULT_DURATION;
+    public void play(final long fDuration) {
 
         if (view == null || !mActivity.hasWindowFocus()) {
             mActivity.runOnUiThread(() -> {
@@ -393,7 +402,7 @@ public class Animation implements IReferences {
                             }
                         }
                         valueAnimator.setStartDelay(delay);
-                        valueAnimator.setDuration(this.duration);
+                        valueAnimator.setDuration(fDuration);
                         valueAnimator.start();
                     }
                 }
@@ -413,7 +422,7 @@ public class Animation implements IReferences {
                     }
                 });
                 animator.setStartDelay(delay);
-                animator.setDuration(this.duration);
+                animator.setDuration(fDuration);
                 animator.start();
             });
             return;
@@ -465,7 +474,7 @@ public class Animation implements IReferences {
                         }
                     }
                     valueAnimator.setStartDelay(delay);
-                    valueAnimator.setDuration(this.duration);
+                    valueAnimator.setDuration(fDuration);
                     valueAnimator.start();
                 }
             }
@@ -493,7 +502,7 @@ public class Animation implements IReferences {
             });
 
             anim.setStartDelay(delay);
-            anim.setDuration(this.duration);
+            anim.setDuration(fDuration);
             anim.start();
         });
     }
