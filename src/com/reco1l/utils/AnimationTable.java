@@ -36,4 +36,19 @@ public class AnimationTable {
         fadeOut.runOnEnd(fadeIn::play);
         fadeOut.play(150);
     }
+
+    public static void fadeOutScaleOut(View view) {
+        Animation anim = new Animation(view);
+
+        anim.fade(0, 1);
+        anim.scale(1, 0.8f);
+        anim.play(200);
+    }
+
+    public static void fadeIn(View view) {
+        Animation anim = new Animation(view);
+
+        anim.fade(0, 1);
+        anim.play(300);
+    }
 }

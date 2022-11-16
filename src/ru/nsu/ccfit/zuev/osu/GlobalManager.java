@@ -2,9 +2,8 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.util.DisplayMetrics;
 
-import com.reco1l.andengine.scenes.PlayerLoader;
 import com.reco1l.andengine.scenes.SongMenu;
-import com.reco1l.andengine.scenes.MainScene;
+import com.reco1l.andengine.MainScene;
 import com.reco1l.management.BitmapManager;
 
 import org.anddev.andengine.engine.Engine;
@@ -34,7 +33,6 @@ public class GlobalManager {
     private TrackInfo selectedTrack;
     private SaveServiceObject saveServiceObject;
     private String skinNow;
-    private PlayerLoader playerLoader;
 
     public static GlobalManager getInstance() {
         if (instance == null) {
@@ -67,7 +65,6 @@ public class GlobalManager {
         setLoadingProgress(30);
         setGameScene(new GameScene(getEngine()));
         setSongMenu(new SongMenu());
-        setPlayerLoader(new PlayerLoader());
         setLoadingProgress(40);
         setScoring(new ScoringScene(getEngine(), getGameScene(), null)); // TODO SCORING
         getGameScene().setScoringScene(getScoring());
@@ -178,13 +175,5 @@ public class GlobalManager {
         final DisplayMetrics dm = new DisplayMetrics();
         mainActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
         return dm;
-    }
-
-    public PlayerLoader getPlayerLoader() {
-        return playerLoader;
-    }
-
-    public void setPlayerLoader(PlayerLoader playerLoader) {
-        this.playerLoader = playerLoader;
     }
 }

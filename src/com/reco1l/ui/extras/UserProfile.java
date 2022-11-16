@@ -1,4 +1,4 @@
-package com.reco1l.ui.fragments.extras;
+package com.reco1l.ui.extras;
 
 import android.view.View;
 import android.widget.TextView;

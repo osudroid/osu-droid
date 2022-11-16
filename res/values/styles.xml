@@ -90,14 +90,10 @@
     </style>
 
     <!--Shape overlays-->
+    <!--TODO Replace all with CardView to avoid scrub-->
     <style name="avatar_shape">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">@dimen/topBarAvatarCorners</item>
-    </style>
-
-    <style name="song_seekbar_shape">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">@dimen/songSeekBarCornerRadius</item>
     </style>
 
     <!--Layouts-->
@@ -147,6 +143,19 @@
         <item name="android:backgroundTint">@color/scoreboardItemBadgeBackground</item>
         <item name="android:background">@drawable/round_shape</item>
         <item name="android:textSize">@dimen/textXXS</item>
+    </style>
+
+    <!--Elements-->
+    <style name="loading_circle">
+        <item name="android:layout_width">@dimen/loadingScreenProgressBarSize</item>
+        <item name="android:layout_height">@dimen/loadingScreenProgressBarSize</item>
+        <item name="android:layout_centerInParent">true</item>
+        <item name="android:background">@drawable/round_shape</item>
+        <item name="android:backgroundTint">@color/loadingSceneViewsBackground</item>
+        <item name="android:indeterminate">true</item>
+        <item name="android:padding">@dimen/XS</item>
+        <item name="indicatorColor">@color/progressBarIndicatorColor</item>
+        <item name="trackCornerRadius">@dimen/progressBarTrackCornerRadius</item>
     </style>
 
 </resources>

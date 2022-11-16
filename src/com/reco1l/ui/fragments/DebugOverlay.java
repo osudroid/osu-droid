@@ -3,7 +3,7 @@ package com.reco1l.ui.fragments;
 import android.widget.TextView;
 
 import com.reco1l.Game;
-import com.reco1l.andengine.OsuScene;
+import com.reco1l.andengine.BaseScene;
 import com.reco1l.ui.platform.UIFragment;
 
 import java.text.DecimalFormat;
@@ -45,8 +45,8 @@ public class DebugOverlay extends UIFragment {
 
         short beat = 0;
 
-        if(Game.engine.getScene() instanceof OsuScene) {
-            OsuScene scene = (OsuScene) Game.engine.getScene();
+        if(Game.engine.getScene() instanceof BaseScene) {
+            BaseScene scene = (BaseScene) Game.engine.getScene();
 
             if (scene.timingWrapper != null) {
                 beat = (short) scene.timingWrapper.beat;

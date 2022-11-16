@@ -7,18 +7,19 @@ import com.edlplan.replay.OdrDatabase;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.enums.Screens;
-import com.reco1l.andengine.OsuScene;
+import com.reco1l.andengine.BaseScene;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.Resources;
+import com.reco1l.view.BarButton;
 
 import org.anddev.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class SongMenu extends OsuScene {
-
-    public static SongMenu instance;
+public class SongMenu extends BaseScene {
 
     public TrackInfo currentTrack, lastTrack;
 
@@ -38,10 +39,32 @@ public class SongMenu extends OsuScene {
 
         bindDataBaseChangedListener();
         setTouchAreaBindingEnabled(true);
+        createTopBarButtons();
+    }
+
+    private void createTopBarButtons() {
+        BarButton mods = new BarButton(Game.mActivity);
+
+        mods.setAsToggle(true);
+        mods.setIcon(Resources.drw(R.drawable.v_tune));
+
+        BarButton search = new BarButton(Game.mActivity);
+
+        search.setAsToggle(true);
+        search.setIcon(Resources.drw(R.drawable.v_search));
+
+        BarButton random = new BarButton(Game.mActivity);
+
+        random.setIcon(Resources.drw(R.drawable.v_random));
+
+        UI.topBar.addButton(getIdentifier(), mods);
+        UI.topBar.addButton(getIdentifier(), search);
+        UI.topBar.addButton(getIdentifier(), random);
     }
 
     @Override
     protected void onSceneUpdate(float secondsElapsed) {
+
     }
 
     public void load() {
@@ -69,7 +92,7 @@ public class SongMenu extends OsuScene {
         UI.beatmapPanel.updateProperties(track);
         UI.beatmapPanel.updateScoreboard();
 
-        background.setTexture(track.getBackground(), true);
+        UI.background.change(track.getBackground());
         currentTrack = track;
     }
 

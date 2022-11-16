@@ -14,164 +14,103 @@
         android:layout_height="match_parent"
         android:background="@color/backgroundDimmed" />
 
-    <LinearLayout
+    <androidx.cardview.widget.CardView
         android:id="@+id/sm_layer"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/settingsPanelWidth"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
-        android:orientation="horizontal">
+        app:cardBackgroundColor="@color/backgroundTertiary"
+        app:cardElevation="@dimen/L" />
 
-        <View
-            android:layout_width="@dimen/verticalShadowWidth"
-            android:layout_height="match_parent"
-            android:alpha="0.1"
-            android:background="@drawable/shadow_vertical"
-            android:rotation="180" />
-
-        <View
-            android:layout_width="@dimen/settingsPanelWidth"
-            android:layout_height="match_parent"
-            android:background="@color/backgroundTertiary"
-            android:orientation="vertical" />
-
-    </LinearLayout>
-
-    <LinearLayout
+    <androidx.cardview.widget.CardView
         android:id="@+id/sm_navbar"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/settingsPanelNavBarWidth"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
-        android:translationZ="1dp">
+        android:translationZ="1dp"
+        app:cardBackgroundColor="@color/backgroundPrimary"
+        app:cardElevation="@dimen/L">
 
-        <View
-            android:layout_width="@dimen/verticalShadowWidth"
-            android:layout_height="match_parent"
-            android:alpha="0.1"
-            android:background="@drawable/shadow_vertical"
-            android:rotation="180" />
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:overScrollMode="never"
+            android:scrollbars="none">
 
-        <RelativeLayout
-            android:layout_width="@dimen/settingsPanelNavBarWidth"
-            android:layout_height="match_parent"
-            android:layout_centerVertical="true"
-            android:background="@color/backgroundPrimary"
-            android:orientation="vertical">
-
-            <ImageView
-                android:id="@+id/sm_close"
-                style="@style/settings_panel_tab_button"
-                android:layout_margin="@dimen/XS"
-                android:background="@drawable/round_shape"
-                android:backgroundTint="#14000000"
-                android:paddingLeft="0dp"
-                android:src="@drawable/v_close" />
-
-            <ScrollView
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/sm_close"
-                android:layout_alignParentBottom="true"
-                android:overScrollMode="never"
-                android:scrollbars="none">
+                android:layout_height="match_parent">
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                <View
+                    android:id="@+id/sm_tabIndicator"
+                    android:layout_width="@dimen/tabIndicatorSize"
+                    android:layout_height="@dimen/settingsPanelButtonHeight"
+                    android:background="@drawable/round_shape"
+                    android:backgroundTint="@color/vectorPrimary" />
 
-                    <View
-                        android:id="@+id/sm_tabIndicator"
-                        android:layout_width="@dimen/tabIndicatorSize"
-                        android:layout_height="@dimen/settingsPanelButtonHeight"
-                        android:background="@drawable/round_shape"
-                        android:backgroundTint="@color/vectorPrimary" />
+                <ImageView
+                    android:id="@+id/sm_general"
+                    style="@style/settings_panel_tab_button"
+                    android:src="@drawable/v_general" />
 
-                    <ImageView
-                        android:id="@+id/sm_general"
-                        style="@style/settings_panel_tab_button"
-                        android:src="@drawable/v_general" />
+                <ImageView
+                    android:id="@+id/sm_gameplay"
+                    style="@style/settings_panel_tab_button"
+                    android:layout_below="@id/sm_general"
+                    android:src="@drawable/v_gameplay" />
 
-                    <ImageView
-                        android:id="@+id/sm_gameplay"
-                        style="@style/settings_panel_tab_button"
-                        android:layout_below="@id/sm_general"
-                        android:src="@drawable/v_gameplay" />
+                <ImageView
+                    android:id="@+id/sm_appearance"
+                    style="@style/settings_panel_tab_button"
+                    android:layout_below="@id/sm_gameplay"
+                    android:src="@drawable/v_appearance" />
 
-                    <ImageView
-                        android:id="@+id/sm_appearance"
-                        style="@style/settings_panel_tab_button"
-                        android:layout_below="@id/sm_gameplay"
-                        android:src="@drawable/v_appearance" />
+                <ImageView
+                    android:id="@+id/sm_graphics"
+                    style="@style/settings_panel_tab_button"
+                    android:layout_below="@id/sm_appearance"
+                    android:src="@drawable/v_graphics" />
 
-                    <ImageView
-                        android:id="@+id/sm_graphics"
-                        style="@style/settings_panel_tab_button"
-                        android:layout_below="@id/sm_appearance"
-                        android:src="@drawable/v_graphics" />
+                <ImageView
+                    android:id="@+id/sm_sounds"
+                    style="@style/settings_panel_tab_button"
+                    android:layout_below="@id/sm_graphics"
+                    android:src="@drawable/v_sounds" />
 
-                    <ImageView
-                        android:id="@+id/sm_sounds"
-                        style="@style/settings_panel_tab_button"
-                        android:layout_below="@id/sm_graphics"
-                        android:src="@drawable/v_sounds" />
+                <ImageView
+                    android:id="@+id/sm_library"
+                    style="@style/settings_panel_tab_button"
+                    android:layout_below="@id/sm_sounds"
+                    android:src="@drawable/v_library" />
 
-                    <ImageView
-                        android:id="@+id/sm_library"
-                        style="@style/settings_panel_tab_button"
-                        android:layout_below="@id/sm_sounds"
-                        android:src="@drawable/v_library" />
+                <ImageView
+                    android:id="@+id/sm_advanced"
+                    style="@style/settings_panel_tab_button"
+                    android:layout_below="@id/sm_library"
+                    android:src="@drawable/v_advanced" />
 
-                    <ImageView
-                        android:id="@+id/sm_advanced"
-                        style="@style/settings_panel_tab_button"
-                        android:layout_below="@id/sm_library"
-                        android:src="@drawable/v_advanced" />
+            </RelativeLayout>
 
-                </RelativeLayout>
+        </ScrollView>
 
-            </ScrollView>
+    </androidx.cardview.widget.CardView>
 
-        </RelativeLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
+    <androidx.cardview.widget.CardView
         android:id="@+id/sm_body"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/settingsPanelWidth"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
-        android:orientation="horizontal">
-
-        <View
-            android:layout_width="@dimen/verticalShadowWidth"
-            android:layout_height="match_parent"
-            android:layout_alignParentEnd="true"
-            android:alpha="0.2"
-            android:background="@drawable/shadow_vertical"
-            android:rotation="180" />
+        app:cardBackgroundColor="@color/backgroundSecondary"
+        app:cardElevation="@dimen/L">
 
         <RelativeLayout
-            android:layout_width="@dimen/settingsPanelWidth"
-            android:layout_height="match_parent"
-            android:background="@color/backgroundSecondary">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-            <LinearLayout
+            <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/sm_loading"
-                android:alpha="0"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:background="@drawable/round_shape"
-                android:backgroundTint="@color/loadingSceneViewsBackground">
-
-                <com.google.android.material.progressindicator.CircularProgressIndicator
-                    android:layout_width="@dimen/loadingScreenProgressBarSize"
-                    android:layout_height="@dimen/loadingScreenProgressBarSize"
-                    android:layout_margin="@dimen/XS"
-                    android:indeterminate="true"
-                    app:indicatorColor="@color/progressBarIndicatorColor"
-                    app:trackCornerRadius="@dimen/progressBarTrackCornerRadius" />
-
-            </LinearLayout>
+                style="@style/loading_circle" />
 
             <FrameLayout
                 android:id="@+id/sm_container"
@@ -181,6 +120,6 @@
 
         </RelativeLayout>
 
-    </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
 </RelativeLayout>

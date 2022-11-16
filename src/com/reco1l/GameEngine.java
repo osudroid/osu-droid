@@ -3,7 +3,7 @@ package com.reco1l;
 import android.util.Log;
 
 import com.reco1l.andengine.ISceneHandler;
-import com.reco1l.andengine.OsuScene;
+import com.reco1l.andengine.BaseScene;
 import com.reco1l.interfaces.IReferences;
 import com.reco1l.enums.Screens;
 
@@ -67,8 +67,8 @@ public class GameEngine extends Engine implements IReferences {
     private Screens parseScreen(Scene scene) {
         Screens type = null;
 
-        if (scene instanceof OsuScene) {
-            type = ((OsuScene) scene).getIdentifier();
+        if (scene instanceof BaseScene) {
+            type = ((BaseScene) scene).getIdentifier();
         }
 
         if (scene.hasChildScene() && scene.getChildScene() == PauseMenu.getInstance().getScene()) {
@@ -138,6 +138,13 @@ public class GameEngine extends Engine implements IReferences {
             if (handler.getIdentifier() == currentScreen) {
                 return handler;
             }
+        }
+        return null;
+    }
+
+    public BaseScene getCurrentScene() {
+        if (getScene() instanceof BaseScene) {
+            return (BaseScene) getScene();
         }
         return null;
     }

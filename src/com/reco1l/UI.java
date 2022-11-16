@@ -1,15 +1,16 @@
 package com.reco1l;
 
+import com.reco1l.ui.fragments.Background;
 import com.reco1l.ui.fragments.BeatmapCarrousel;
 import com.reco1l.ui.fragments.BeatmapPanel;
 import com.reco1l.ui.fragments.DebugOverlay;
-import com.reco1l.ui.fragments.extras.NotificationCenter;
+import com.reco1l.ui.extras.NotificationCenter;
 import com.reco1l.ui.fragments.LoadingScene;
 import com.reco1l.ui.fragments.MainMenu;
-import com.reco1l.ui.fragments.extras.MusicPlayer;
-import com.reco1l.ui.fragments.extras.SettingsMenu;
+import com.reco1l.ui.extras.MusicPlayer;
+import com.reco1l.ui.extras.SettingsMenu;
 import com.reco1l.ui.fragments.TopBar;
-import com.reco1l.ui.fragments.extras.UserProfile;
+import com.reco1l.ui.extras.UserProfile;
 import com.reco1l.ui.platform.UIFragment;
 
 // Created by Reco1l on 29/6/22 22:38
@@ -26,6 +27,7 @@ public final class UI {
     public static BeatmapPanel beatmapPanel = getBeatmapPanel();
     public static BeatmapCarrousel beatmapCarrousel = getBeatmapList();
     public static DebugOverlay debugOverlay = getDebugOverlay();
+    public static Background background = getBackground();
 
     //--------------------------------------------------------------------------------------------//
 
@@ -108,5 +110,12 @@ public final class UI {
             DebugOverlay.instance = new DebugOverlay();
         }
         return DebugOverlay.instance;
+    }
+
+    private static Background getBackground() {
+        if (Background.instance == null) {
+            Background.instance = new Background();
+        }
+        return Background.instance;
     }
 }

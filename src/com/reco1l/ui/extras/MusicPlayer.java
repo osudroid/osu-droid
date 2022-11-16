@@ -1,4 +1,4 @@
-package com.reco1l.ui.fragments.extras;
+package com.reco1l.ui.extras;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -296,7 +296,7 @@ public class MusicPlayer extends UIFragment {
             return;
 
         Game.platform.close(UI.getExtras());
-        UI.topBar.musicButton.playAnimation(true);
+        UI.topBar.musicButton.animateButton(true);
         super.show();
     }
 
@@ -309,7 +309,7 @@ public class MusicPlayer extends UIFragment {
             switchListVisibility();
         }
 
-        UI.topBar.musicButton.playAnimation(false);
+        UI.topBar.musicButton.animateButton(false);
 
         new Animation(find("innerBody")).fade(1, 0).play(100);
 

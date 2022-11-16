@@ -1,22 +1,34 @@
 package com.reco1l.ui.fragments;
 
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
 
-import com.google.android.material.imageview.ShapeableImageView;
+import com.edlplan.framework.easing.Easing;
+import com.edlplan.ui.TriangleEffectView;
+import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.UI;
+import com.reco1l.utils.Animation2;
+import com.reco1l.utils.AnimationTable;
+import com.reco1l.utils.KeyInputHandler;
+import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.data.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Resources;
-import com.reco1l.utils.listeners.TouchListener;
+import com.reco1l.view.BarButton;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -29,18 +41,25 @@ public class TopBar extends UIFragment {
 
     public static TopBar instance;
 
+    private View back;
     public CardView body;
     public TextView author;
+    private LinearLayout container, buttonsContainer;
+
     public UserBox userBox;
     public MusicButton musicButton;
 
+    private final Map<Screens, ArrayList<BarButton>> buttons;
+
     public int barHeight;
 
-    private View back;
-    private LinearLayout container;
-    private ButtonsLayout buttons;
+    private boolean isAuthorVisible = false;
 
-    private Screens lastScene;
+    //--------------------------------------------------------------------------------------------//
+
+    public TopBar() {
+        buttons = new HashMap<>();
+    }
 
     //--------------------------------------------------------------------------------------------//
 
@@ -56,46 +75,65 @@ public class TopBar extends UIFragment {
 
     @Override
     protected Screens[] getParents() {
-        return new Screens[] {Screens.MAIN, Screens.SONG_MENU, Screens.SCORING, Screens.PLAYER_LOADER};
+        return new Screens[] { Screens.SONG_MENU, Screens.SCORING, Screens.PLAYER_LOADER};
+    }
+
+    @Override
+    protected boolean isOverlay() {
+        return true;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onScreenChange(Screens lastScreen, Screens newScene) {
-        reload();
+        if (isShowing) {
+            reloadButtons(newScene);
+        }
     }
 
-    public void reload() {
-        if (lastScene == engine.currentScreen || !isShowing)
+    public void reloadButtons(Screens current) {
+        showAuthorText(current == Screens.MAIN);
+
+        if (container == null || buttonsContainer == null)
             return;
 
-        new Animation(container).moveX(0, -60).fade(1, 0).runOnEnd(() -> {
-            back.setVisibility(View.GONE);
-            musicButton.setVisibility(false);
-            //buttons.gone();
-        }).play(190);
+        Animation fadeIn = new Animation(container);
 
-        new Animation(container).moveX(-60, 0).fade(0, 1).runOnStart(() -> {
-            switch (engine.currentScreen) {
+        fadeIn.duration(200);
+        fadeIn.moveX(-60, 0);
+        fadeIn.fade(0, 1);
 
-                case MAIN:
-                    musicButton.setVisibility(true);
-                    break;
+        fadeIn.runOnStart(() -> {
+            ArrayList<BarButton> toAdd = buttons.get(current);
 
-                case SONG_MENU:
-                    back.setVisibility(View.VISIBLE);
-                    break;
-
-                default:
-                    // Nothing
-                    break;
+            if (toAdd != null) {
+                for (BarButton button : toAdd) {
+                    buttonsContainer.addView(button);
+                    bindTouchListener(button, button.getTouchListener());
+                }
             }
-            //buttons.update(engine.currentScreen);
-        }).delay(200).play(200);
+        });
 
-        showAuthorText(engine.currentScreen == Screens.MAIN);
-        lastScene = engine.currentScreen;
+        Animation fadeOut = new Animation(container);
+
+        fadeOut.moveX(0, -60);
+        fadeOut.fade(1f, 0);
+        fadeOut.runOnEnd(() -> {
+            buttonsContainer.removeAllViews();
+
+            if (current == Screens.MAIN) {
+                musicButton.setVisibility(true);
+                back.setVisibility(View.GONE);
+            } else {
+                musicButton.setVisibility(false);
+                back.setVisibility(View.VISIBLE);
+                bindTouchListener(back, KeyInputHandler::performBack);
+            }
+
+            fadeIn.play();
+        });
+        fadeOut.play(200);
     }
 
     @Override
@@ -103,20 +141,15 @@ public class TopBar extends UIFragment {
         setDismissMode(false, false);
         barHeight = (int) Resources.dimen(R.dimen.topBarHeight);
 
+        body = find("body");
+
         musicButton = new MusicButton(this);
-        buttons = new ButtonsLayout(this);
         userBox = new UserBox(this);
 
+        buttonsContainer = find("buttons");
         container = find("container");
         author = find("author");
-        body = find("body");
         back = find("back");
-
-        new Animation(body).moveY(-barHeight, 0)
-                .play(300);
-
-        author.setAlpha(0);
-        showAuthorText(engine.currentScreen == Screens.MAIN);
 
         if (library.getSizeOfBeatmaps() <= 0) {
             musicButton.setVisibility(false);
@@ -127,80 +160,107 @@ public class TopBar extends UIFragment {
         bindTouchListener(find("inbox"), UI.notificationCenter::altShow);
         bindTouchListener(find("settings"), UI.settingsPanel::altShow);
 
-        bindTouchListener(author, new TouchListener() {
-            public void onPressUp() {
-                new Dialog(DialogTable.author()).show();
-            }
-        });
+        bindTouchListener(author, () -> new Dialog(DialogTable.author()).show());
 
-        userBox.update(false);
+        userBox.loadUserData(false);
+
+        reloadButtons(Game.engine.currentScreen);
+    }
+
+    @Override
+    public void show() {
+        super.show();
+
+        if (isShowing && body != null) {
+            Animation show = new Animation(body);
+
+            show.moveY(-barHeight, 0);
+            show.interpolator(Easing.OutExpo);
+
+            Game.platform.animateRender(anim -> {
+                anim.moveY(0, barHeight);
+                anim.interpolator(Easing.OutExpo);
+                anim.duration(200);
+            });
+
+            Game.platform.animateScreen(animation -> {
+                animation.toTopMargin = barHeight;
+                animation.duration = 200;
+                animation.interpolator = Easing.OutExpo;
+            });
+
+            show.play(200);
+        }
     }
 
     @Override
     public void close() {
-        if (!isShowing)
-            return;
-        lastScene = null;
-        showAuthorText(false);
-        new Animation(body).moveY(0, -barHeight).runOnEnd(super::close).play(300);
+        if (isShowing) {
+            showAuthorText(false);
+
+            Animation close = new Animation(body);
+
+            close.moveY(0, -barHeight);
+            close.interpolator(Easing.OutExpo);
+            close.runOnEnd(super::close);
+
+            Game.platform.animateRender(anim -> {
+                anim.moveY(Resources.dimen(R.dimen.topBarHeight), 0);
+                anim.interpolator(Easing.OutExpo);
+                anim.duration(200);
+            });
+
+            Game.platform.animateScreen(animation -> {
+                animation.toTopMargin = 0;
+                animation.duration = 200;
+                animation.interpolator = Easing.OutExpo;
+            });
+
+            close.play(200);
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
 
     private void showAuthorText(boolean bool) {
-        if (author == null || bool && author.getAlpha() == 1 || !bool && author.getAlpha() == 0)
+        if (author == null || bool == isAuthorVisible)
             return;
 
+        isAuthorVisible = bool;
+        Animation anim = new Animation(author);
+
         if (bool) {
-            new Animation(author).fade(0, 1).moveY(50, 0).play(200);
-            return;
+            anim.fade(0, 1);
+            anim.moveY(50, 0);
+            anim.runOnStart(() -> author.setVisibility(View.VISIBLE));
+        } else {
+            anim.fade(1, 0);
+            anim.moveY(0, 50);
+            anim.runOnEnd(() -> author.setVisibility(View.GONE));
         }
-        new Animation(author).fade(1, 0).moveY(0, 50).play(200);
+        anim.play(200);
+    }
+
+    public void addButton(Screens screen, BarButton button) {
+        if (buttons.get(screen) == null) {
+            buttons.put(screen, new ArrayList<>());
+        }
+        ArrayList<BarButton> list = buttons.get(screen);
+
+        if (list != null) {
+            list.add(button);
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
-
-    public static class ButtonsLayout {
-
-        private final TopBar parent;
-        private final LinearLayout container;
-
-        // Song menu
-        private final ImageView mods, search, shuffle;
-
-        public ButtonsLayout(TopBar parent) {
-            this.parent = parent;
-
-            container = parent.find("buttons");
-
-            mods = parent.find("mods");
-            search = parent.find("search");
-            shuffle = parent.find("shuffle");
-        }
-
-        protected void gone() {
-            for (int i = 0; i < container.getChildCount(); i++) {
-                container.getChildAt(i).setVisibility(View.GONE);
-            }
-        }
-
-        protected void update(Screens scene) {
-            if (!parent.isShowing)
-                return;
-
-            if (scene == Screens.SONG_MENU) {
-                mods.setVisibility(View.VISIBLE);
-                search.setVisibility(View.VISIBLE);
-                shuffle.setVisibility(View.VISIBLE);
-            }
-        }
-    }
 
     public static class MusicButton {
 
         private final TopBar parent;
         private final View view, body, arrow;
         private final TextView text;
+
+        //----------------------------------------------------------------------------------------//
 
         public MusicButton(TopBar parent) {
             this.parent = parent;
@@ -210,47 +270,55 @@ public class TopBar extends UIFragment {
             arrow = parent.find("musicArrow");
             text = parent.find("musicText");
 
-            UI.topBar.bindTouchListener(view, UI.musicPlayer::altShow);
+            parent.bindTouchListener(view, UI.musicPlayer::altShow);
         }
+
+        //----------------------------------------------------------------------------------------//
 
         public void changeMusic(BeatmapInfo beatmap) {
-            if (!parent.isShowing)
-                return;
-
-            new Animation(text).fade(1, 0)
-                    .play(150);
-            new Animation(text).fade(0, 1)
-                    .runOnStart(() -> text.setText(BeatmapHelper.getTitle(beatmap)))
-                    .delay(150)
-                    .play(150);
+            if (parent.isShowing) {
+                AnimationTable.textChange(text, BeatmapHelper.getTitle(beatmap));
+            }
         }
 
-        public void playAnimation(boolean show) {
+        public void animateButton(boolean show) {
             Animation bodyAnim = new Animation(body);
             Animation arrowAnim = new Animation(arrow);
 
             if (show) {
-                bodyAnim.moveY(0, -10).fade(1, 0);
-                arrowAnim.rotation(180, 180).moveY(10, 0).fade(0, 1);
+                bodyAnim.moveY(0, -10);
+                bodyAnim.fade(1, 0);
+
+                arrowAnim.moveY(10, 0);
+                arrowAnim.fade(0, 1);
             } else {
-                bodyAnim.moveY(10, 0).fade(0, 1);
-                arrowAnim.rotation(180, 180).moveY(0, -10).fade(1, 0);
+                bodyAnim.moveY(10, 0);
+                bodyAnim.fade(0, 1);
+
+                arrowAnim.moveY(0, -10);
+                arrowAnim.fade(1, 0);
             }
+            arrowAnim.rotation(180, 180);
+            arrowAnim.duration(150);
+
+            bodyAnim.runOnEnd(arrowAnim::play);
             bodyAnim.play(150);
-            arrowAnim.delay(150).play(150);
         }
 
         protected void setVisibility(boolean bool) {
             view.setVisibility(bool ? View.VISIBLE : View.GONE);
         }
-
     }
+
+    //--------------------------------------------------------------------------------------------//
 
     public static class UserBox {
 
         private final TopBar parent;
+        private final ImageView avatar;
         private final TextView rank, name;
-        private final ShapeableImageView avatar;
+
+        //----------------------------------------------------------------------------------------//
 
         public UserBox(TopBar parent) {
             this.parent = parent;
@@ -260,25 +328,33 @@ public class TopBar extends UIFragment {
             name = parent.find("playerName");
             avatar = parent.find("avatar");
 
-            UI.topBar.bindTouchListener(body, UI.userProfile::altShow);
+            TriangleEffectView triangles = parent.find("userBoxTriangles");
+            triangles.setTriangleColor(0xFFFFFFFF);
+
+            parent.bindTouchListener(body, UI.userProfile::altShow);
         }
 
-        public void update(boolean clear) {
+        //----------------------------------------------------------------------------------------//
+
+        public void loadUserData(boolean clear) {
             if (!parent.isShowing)
                 return;
 
-            avatar.setImageResource(R.drawable.default_avatar);
-            name.setText(Config.getLocalUsername());
-            rank.setText(Resources.str(R.string.top_bar_offline));
+            AnimationTable.fadeOutIn(avatar, () -> avatar.setImageResource(R.drawable.default_avatar));
 
-            if (!online.isStayOnline() || clear)
-                return;
+            AnimationTable.textChange(rank, Resources.str(R.string.top_bar_offline));
+            AnimationTable.textChange(name, Config.getLocalUsername());
 
-            name.setText(online.getUsername());
-            rank.setText(String.format("#%d", online.getRank()));
+            if (online.isStayOnline() && !clear) {
+                AnimationTable.textChange(name, online.getUsername());
+                AnimationTable.textChange(rank, "#" + online.getRank());
 
-            if (onlineHelper.getPlayerAvatar() != null)
-                avatar.setImageDrawable(onlineHelper.getPlayerAvatar());
+                AnimationTable.fadeOutIn(avatar, () -> {
+                    if (onlineHelper.getPlayerAvatar() != null) {
+                        avatar.setImageDrawable(onlineHelper.getPlayerAvatar());
+                    }
+                });
+            }
         }
     }
 }

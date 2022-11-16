@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 13/11/2022, 21:15 -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:elevation="@dimen/backLayer">
+
+    <ImageView
+        android:id="@+id/b_image0"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="1dp"
+        android:scaleType="centerCrop" />
+
+    <ImageView
+        android:id="@+id/b_image1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="0dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone" />
+
+    <com.reco1l.view.SpectrumView
+        android:id="@+id/b_spectrum"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="2dp" />
+
+    <com.reco1l.view.KiaiView
+        android:id="@+id/b_kiai"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="2dp" />
+
+</RelativeLayout>

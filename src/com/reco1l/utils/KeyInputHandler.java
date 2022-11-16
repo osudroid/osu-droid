@@ -19,10 +19,13 @@ public class KeyInputHandler {
 
     //--------------------------------------------------------------------------------------------//
 
+    public static void performBack() {
+        handle(KeyEvent.KEYCODE_BACK, MotionEvent.ACTION_DOWN);
+    }
+
     public static boolean handle(final int key, final int action) {
-        if (!Game.engine.isGlobalInitialized) {
+        if (!Game.engine.isGlobalInitialized)
             return false;
-        }
 
         Scene currentScene = Game.engine.getScene();
         Scene lastScene = Game.engine.lastScene;

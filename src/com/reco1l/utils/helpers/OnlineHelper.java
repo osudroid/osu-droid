@@ -63,11 +63,11 @@ public class OnlineHelper implements IReferences {
     //--------------------------------------------------------------------------------------------//
 
     public void clear() {
-        UI.topBar.userBox.update(true);
+        UI.topBar.userBox.loadUserData(true);
     }
 
     public void update() {
-        UI.topBar.userBox.update(false);
+        UI.topBar.userBox.loadUserData(false);
     }
 
 }

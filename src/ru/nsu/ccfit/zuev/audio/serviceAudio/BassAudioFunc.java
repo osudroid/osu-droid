@@ -229,14 +229,6 @@ public class BassAudioFunc {
         }
     }
 
-    public float getLevel() {
-        float[] levels = {0};
-        if (channel != 0) {
-            BASS.BASS_ChannelGetLevelEx(channel, levels, 1, BASS.BASS_LEVEL_RMS);
-        }
-        return levels[0];
-    }
-
     public float getVolume() {
         BASS.FloatValue volume = new BASS.FloatValue();
         if (channel != 0) {

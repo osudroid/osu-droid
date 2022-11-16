@@ -10,6 +10,7 @@ import android.view.ViewPropertyAnimator;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
+import com.reco1l.Game;
 import com.reco1l.interfaces.IReferences;
 
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ import java.util.TimerTask;
 /**
  * Simplifies the usage of ViewPropertyAnimator and ValueAnimator.
  */
-public class Animation implements IReferences {
+public class Animation {
 
     private final static long DEFAULT_DURATION = 1000;
 
@@ -104,7 +105,7 @@ public class Animation implements IReferences {
         void onUpdate(T value);
     }
 
-    public static class ValueAnimation <T extends Number> {
+    public static class ValueAnimation<T extends Number> {
 
         private final ValueAnimator valueAnimator;
         private final Animation instance;
@@ -342,7 +343,7 @@ public class Animation implements IReferences {
     // Alpha
     //--------------------------------------------------------------------------------------------//
 
-    public Animation fade(float from, float to){
+    public Animation fade(float from, float to) {
         fromAlpha = from;
         toAlpha = to;
         return this;
@@ -391,46 +392,47 @@ public class Animation implements IReferences {
      */
     public void play(final long fDuration) {
 
-        if (view == null || !mActivity.hasWindowFocus()) {
-            mActivity.runOnUiThread(() -> {
+        if (view == null || !Game.mActivity.hasWindowFocus()) {
 
-                if (valueAnimators != null) {
-                    for (ValueAnimator valueAnimator : valueAnimators) {
-                        if (interpolator != null) {
-                            if (interpolatorMode == Interpolate.VALUE_ANIMATOR || interpolatorMode == Interpolate.BOTH) {
-                                valueAnimator.setInterpolator(EasingHelper.asInterpolator(interpolator));
-                            }
+            if (valueAnimators != null) {
+                for (ValueAnimator valueAnimator : valueAnimators) {
+                    if (interpolator != null) {
+                        if (interpolatorMode == Interpolate.VALUE_ANIMATOR || interpolatorMode == Interpolate.BOTH) {
+                            valueAnimator.setInterpolator(EasingHelper.asInterpolator(interpolator));
                         }
-                        valueAnimator.setStartDelay(delay);
-                        valueAnimator.setDuration(fDuration);
-                        valueAnimator.start();
+                    }
+                    valueAnimator.setStartDelay(delay);
+                    valueAnimator.setDuration(fDuration);
+
+                    Game.mActivity.runOnUiThread(valueAnimator::start);
+                }
+            }
+
+            ValueAnimator animator = ValueAnimator.ofFloat(0, 1f);
+
+            animator.addListener(new BaseAnimationListener() {
+                public void onAnimationStart(Animator animation) {
+                    if (onStart != null) {
+                        onStart.run();
                     }
                 }
 
-                ValueAnimator animator = ValueAnimator.ofFloat(0, 1f);
-                animator.addListener(new BaseAnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        if (onStart != null)
-                            onStart.run();
+                public void onAnimationEnd(Animator animation) {
+                    if (onEnd != null) {
+                        onEnd.run();
                     }
-
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        if (onEnd != null)
-                            onEnd.run();
-                    }
-                });
-                animator.setStartDelay(delay);
-                animator.setDuration(fDuration);
-                animator.start();
+                }
             });
+            animator.setStartDelay(delay);
+            animator.setDuration(fDuration);
+
+            Game.mActivity.runOnUiThread(animator::start);
             return;
         }
 
-        mActivity.runOnUiThread(() -> {
-
+        Game.mActivity.runOnUiThread(() -> {
             if (cancelPendingAnimations) {
+                view.animate().setListener(null);
                 view.animate().cancel();
             }
             anim = view.animate();
@@ -486,6 +488,7 @@ public class Animation implements IReferences {
                         onStart.run();
                     }
                 }
+
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     if (onEnd != null) {
@@ -535,7 +538,7 @@ public class Animation implements IReferences {
         private Runnable onStart, onEnd;
         private long delay = 0;
 
-        public ViewGroupAnimation (ViewGroup view, IChildViewAnimation childAnimation) {
+        public ViewGroupAnimation(ViewGroup view, IChildViewAnimation childAnimation) {
             this.view = view;
             this.childAnimation = childAnimation;
         }
@@ -564,11 +567,11 @@ public class Animation implements IReferences {
             if (view == null)
                 return;
 
-            view.postDelayed(() ->{
+            view.postDelayed(() -> {
                 int childCount = view.getChildCount();
                 int goneCount = 0;
 
-                for (int i = countFromLast ? childCount - 1 : 0; countFromLast ? i >= 0 : i < childCount;) {
+                for (int i = countFromLast ? childCount - 1 : 0; countFromLast ? i >= 0 : i < childCount; ) {
                     View child = view.getChildAt(i);
 
                     if (child.getVisibility() == View.GONE) {

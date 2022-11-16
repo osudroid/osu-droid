@@ -1,4 +1,4 @@
-package com.reco1l.ui.fragments.extras;
+package com.reco1l.ui.extras;
 
 import static android.view.ViewGroup.*;
 
@@ -306,7 +306,7 @@ public class NotificationCenter extends UIFragment {
             if (isAdded())
                 return;
             mActivity.runOnUiThread(() -> platform.manager.beginTransaction()
-                    .add(platform.container.getId(), this, null)
+                    .add(platform.screenContainer.getId(), this, null)
                     .commit());
         }
 

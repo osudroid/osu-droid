@@ -2,8 +2,7 @@
 
 <!-- Created by Reco1l on 24/6/22 21:26 -->
 
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -15,15 +14,9 @@
         android:id="@+id/tb_body"
         android:layout_width="match_parent"
         android:layout_height="@dimen/topBarHeight"
-        app:cardBackgroundColor="@color/backgroundPrimary"
+        app:cardBackgroundColor="@color/backgroundTertiary"
         app:cardCornerRadius="0dp"
         app:cardElevation="@dimen/L">
-
-        <com.edlplan.ui.TriangleEffectView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/tb_bar"
-            android:alpha="0.2"/>
 
         <RelativeLayout
             android:id="@+id/tb_bar"
@@ -57,6 +50,13 @@
                 android:layout_toStartOf="@+id/tb_settings"
                 android:background="@color/topBarButtonsBackground">
 
+                <com.edlplan.ui.TriangleEffectView
+                    android:id="@+id/tb_userBoxTriangles"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignEnd="@id/tb_userBoxBody"
+                    android:alpha="0.05" />
+
                 <TextView
                     android:id="@+id/tb_playerRank"
                     android:layout_width="wrap_content"
@@ -68,6 +68,7 @@
                     android:textSize="@dimen/textXL" />
 
                 <LinearLayout
+                    android:id="@+id/tb_userBoxBody"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:gravity="center"
@@ -83,65 +84,71 @@
                         android:textColor="@color/textPrimary"
                         android:textSize="@dimen/textM" />
 
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/tb_avatar"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="@dimen/topBarAvatarSize"
                         android:layout_height="@dimen/topBarAvatarSize"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/default_avatar"
-                        app:shapeAppearanceOverlay="@style/avatar_shape" />
+                        app:cardCornerRadius="@dimen/topBarAvatarCorners">
+
+                        <ImageView
+                            android:id="@+id/tb_avatar"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/default_avatar" />
+
+                    </androidx.cardview.widget.CardView>
 
                 </LinearLayout>
 
             </RelativeLayout>
 
             <LinearLayout
+                android:id="@+id/tb_container"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
                 <!--Back-->
-                <LinearLayout
+                <RelativeLayout
                     android:id="@+id/tb_back"
+                    android:visibility="gone"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_centerVertical="true"
                     android:gravity="center"
                     android:paddingHorizontal="@dimen/XL">
 
-                    <ImageView
-                        style="@style/icon_button"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/v_back" />
+                        android:layout_centerInParent="true"
+                        android:gravity="center_vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/S"
-                        android:text="@string/top_bar_back"
-                        android:textSize="@dimen/textM" />
+                        <ImageView
+                            style="@style/icon_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/v_back" />
 
-                </LinearLayout>
+                        <TextView
+                            style="@style/text"
+                            android:layout_marginLeft="@dimen/S"
+                            android:text="@string/top_bar_back"
+                            android:textSize="@dimen/textM" />
+
+                    </LinearLayout>
+
+                </RelativeLayout>
 
                 <!--Music-->
                 <RelativeLayout
                     android:id="@+id/tb_music"
+                    android:visibility="gone"
                     android:layout_width="wrap_content"
                     android:layout_height="@dimen/topBarMusicButtonHeight"
                     android:layout_marginHorizontal="@dimen/S"
                     android:background="@drawable/round_shape"
                     android:backgroundTint="@color/topBarButtonsBackground">
-
-                    <ImageView
-                        android:id="@+id/tb_musicArrow"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:alpha="0"
-                        android:rotation="180"
-                        android:src="@drawable/v_arrow_s" />
 
                     <LinearLayout
                         android:id="@+id/tb_musicBody"
@@ -166,15 +173,24 @@
 
                     </LinearLayout>
 
+                    <ImageView
+                        android:id="@+id/tb_musicArrow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:alpha="0"
+                        android:src="@drawable/v_arrow_s" />
+
                 </RelativeLayout>
 
-            </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/tb_buttons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="@color/topBarButtonsBackground"
+                    android:orientation="horizontal" />
 
-            <LinearLayout
-                android:id="@+id/tb_buttonsContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="horizontal" />
+            </LinearLayout>
 
         </RelativeLayout>
 
@@ -182,15 +198,12 @@
 
     <TextView
         android:id="@+id/tb_author"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/propertyBadge"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:layout_marginBottom="@dimen/XS"
-        android:background="@drawable/round_shape"
         android:backgroundTint="@color/badgeTextBackground"
         android:paddingHorizontal="@dimen/S"
-        android:paddingVertical="@dimen/XXS"
-        android:text="[Author information]"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:text="version number" />
 
 </RelativeLayout>

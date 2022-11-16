@@ -9,6 +9,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 
 import androidx.cardview.widget.CardView;
+import androidx.core.math.MathUtils;
 
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
@@ -27,6 +28,7 @@ import com.reco1l.utils.Resources;
 import com.reco1l.UI;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.listeners.TouchListener;
+import com.reco1l.view.SpectrumView;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
@@ -52,13 +54,9 @@ public class MainMenu extends UIFragment {
     private TriangleEffectView triangles1, triangles2;
 
     private ValueAnimationListener<Float> triangleListener;
-    private ValueAnimator logoShow, logoHide;
-    private LayoutParams logoParams;
+    private Animation logoShow, logoHide;
 
-    private int
-            logoNormalSize,
-            smallLogoSize,
-            showPassTime = 0;
+    private int showPassTime = 0;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -89,9 +87,6 @@ public class MainMenu extends UIFragment {
     protected void onLoad() {
         setDismissMode(false, false);
 
-        logoNormalSize = (int) Resources.dimen(R.dimen.mainMenuLogoSize);
-        smallLogoSize = (int) Resources.dimen(R.dimen.mainMenuSmallLogoSize);
-
         logo = find("logo");
         logoInnerRect = find("logoRect");
         triangles1 = find("triangles1");
@@ -112,10 +107,7 @@ public class MainMenu extends UIFragment {
         triangles2.setTriangleColor(Resources.color(R.color.mainMenuTriangles2));
         logoInnerRect.setAlpha(0);
 
-        logoParams = logo.getLayoutParams();
-        logoParams.width = logoNormalSize;
-        logoParams.height = logoNormalSize;
-        logo.setLayoutParams(logoParams);
+        ViewUtils.size(logo, (int) Resources.dimen(R.dimen.mainMenuLogoSize));
 
         play.setWidth(0);
         exit.setWidth(0);
@@ -164,10 +156,7 @@ public class MainMenu extends UIFragment {
     private void playTransitionAnim() {
 
         new Animation(rootView)
-                .runOnStart(() -> {
-                    global.getMainScene().background.zoomOut();
-                    global.getMainScene().spectrum.clear(true);
-                })
+                //.runOnStart(() -> global.getMainScene().spectrum.clear(true))
                 .runOnEnd(() -> {
                     Game.songMenu.load();
                     Game.songMenu.show();
@@ -202,52 +191,30 @@ public class MainMenu extends UIFragment {
     //--------------------------------------------------------------------------------------------//
 
     private void showMenu() {
-        if (menuAnimInProgress || isMenuShowing)
-            return;
+        if (!menuAnimInProgress && !isMenuShowing) {
+            logoShow.play();
 
-        global.getMainScene().background.zoomIn();
-
-        logoShow.removeAllListeners();
-        logoShow.addListener(new BaseAnimationListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                menuAnimInProgress = true;
-            }
-        });
-        logoShow.start();
-
-        play.show(0);
-        settings.show(60);
-        exit.show(120);
+            play.show(0);
+            settings.show(60);
+            exit.show(120);
+        }
     }
 
     private void hideMenu() {
-        if (menuAnimInProgress || !isMenuShowing)
-            return;
+        if (!menuAnimInProgress && isMenuShowing) {
+            logoHide.play();
 
-        global.getMainScene().background.zoomOut();
+            exit.hide(0);
+            settings.hide(60);
+            play.hide(120);
 
-        logoHide.removeAllListeners();
-        logoHide.addListener(new BaseAnimationListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                menuAnimInProgress = true;
-            }
-        });
-        logoHide.start();
-
-        exit.hide(0);
-        settings.hide(60);
-        play.hide(120);
-
-        showPassTime = 0;
+            showPassTime = 0;
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
 
     private void loadAnimations() {
-        TimeInterpolator easeInOutQuad = EasingHelper.asInterpolator(Easing.InOutQuad);
-
         // Triangles
         triangleListener = value -> {
             triangles1.setTriangleSpeed(value);
@@ -255,23 +222,28 @@ public class MainMenu extends UIFragment {
         };
 
         // Logo size effect
-        AnimatorUpdateListener logoResize = val -> {
-            logoParams.width = (int) val.getAnimatedValue();
-            logoParams.height = (int) val.getAnimatedValue();
-            logo.setLayoutParams(logoParams);
-        };
+        int logoNormalSize = (int) Resources.dimen(R.dimen.mainMenuLogoSize);
+        int smallLogoSize = (int) Resources.dimen(R.dimen.mainMenuSmallLogoSize);
 
-        logoShow = ValueAnimator.ofInt(logoNormalSize, smallLogoSize);
-        logoShow.setDuration(300);
-        logoShow.setInterpolator(easeInOutQuad);
-        logoShow.removeAllUpdateListeners();
-        logoShow.addUpdateListener(logoResize);
+        ValueAnimationListener<Integer> listener = value -> ViewUtils.size(logo, value);
 
-        logoHide = ValueAnimator.ofInt(smallLogoSize, logoNormalSize);
-        logoHide.setDuration(300);
-        logoHide.setInterpolator(easeInOutQuad);
-        logoHide.removeAllUpdateListeners();
-        logoHide.addUpdateListener(logoResize);
+        logoShow = new Animation().ofInt(logoNormalSize, smallLogoSize)
+                .runOnUpdate(listener)
+                .interpolator(Easing.InOutQuad)
+                .runOnStart(() -> {
+                    menuAnimInProgress = true;
+                    UI.topBar.show();
+                })
+                .duration(300);
+
+        logoHide = new Animation().ofInt(smallLogoSize, logoNormalSize)
+                .runOnUpdate(listener)
+                //.interpolator(Easing.InOutQuad)
+                .runOnStart(() -> {
+                    menuAnimInProgress = true;
+                    UI.topBar.close();
+                })
+                .duration(300);
     }
 
     public void onBeatUpdate(float beatLength) {
@@ -291,11 +263,11 @@ public class MainMenu extends UIFragment {
 
         if (triangles1 != null) {
 
-            Animation speedDown = new Animation().ofFloat(isKiai ? 14f : 8f, 0.25f)
+            Animation speedDown = new Animation().ofFloat(isKiai ? 14f : 8f, 1f)
                     .runOnUpdate(triangleListener)
-                    .duration((long) (beatLength / 4f));
+                    .duration((long) (beatLength / 2f));
 
-            new Animation().ofFloat(0.25f, isKiai ? 14f : 8f)
+            new Animation().ofFloat(1f, isKiai ? 14f : 8f)
                     .runOnUpdate(triangleListener)
                     .runOnEnd(speedDown::play)
                     .play((long) (beatLength / 6f));
@@ -307,17 +279,9 @@ public class MainMenu extends UIFragment {
         if (!isShowing)
             return;
 
-        float[] fft = Game.songService.getSpectrum();
+        float level = Game.songService.getLevel();
+        float peak = Math.max(0.9f, 0.9f + level);
 
-        float level = 0;
-        if (fft != null) {
-            for (int i = 0; i < 8; i++) {
-                level += fft[i] * 0.15f;
-            }
-            level /= 8;
-        }
-
-        float peak = Math.max(0.9f, 1f - level);
         UI.debugOverlay.logo_scale = peak;
 
         if (logo != null) {

@@ -21,7 +21,7 @@ public class TimingWrapper {
     public int beat;
 
     public float
-            BeatLength, lastBeatLength,
+            beatLength, lastBeatLength,
             beatPassTime, lastBeatPassTime,
             offset;
 
@@ -80,31 +80,31 @@ public class TimingWrapper {
         firstPoint = timingPoints.removeFirst();
         currentPoint = firstPoint;
         lastPoint = currentPoint;
-        BeatLength = firstPoint.getBeatLength() * 1000f;
+        beatLength = firstPoint.getBeatLength() * 1000f;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public void setBeatLength(float length) {
-        lastBeatLength = BeatLength;
-        BeatLength = length;
+        lastBeatLength = beatLength;
+        beatLength = length;
     }
 
     public void restoreBPMLength() {
-        BeatLength = lastBeatLength;
+        beatLength = lastBeatLength;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public void computeCurrentBpmLength() {
         if (currentPoint != null) {
-            BeatLength = currentPoint.getBeatLength() * 1000;
+            beatLength = currentPoint.getBeatLength() * 1000;
         }
     }
 
     public boolean computeFirstBpmLength() {
         if (firstPoint != null) {
-            BeatLength = firstPoint.getBeatLength() * 1000;
+            beatLength = firstPoint.getBeatLength() * 1000;
             return true;
         }
         return false;
@@ -112,13 +112,13 @@ public class TimingWrapper {
 
     public void computeOffset() {
         if (lastPoint != null) {
-            offset = lastPoint.getTime() * 1000f % BeatLength;
+            offset = lastPoint.getTime() * 1000f % beatLength;
         }
     }
 
     public void computeOffsetAtPosition(int position) {
         if (lastPoint != null) {
-            offset = (position - lastPoint.getTime() * 1000f) % BeatLength;
+            offset = (position - lastPoint.getTime() * 1000f) % beatLength;
         }
     }
 
@@ -139,7 +139,7 @@ public class TimingWrapper {
     public void update(float elapsed, int position) {
         beatPassTime += elapsed * 1000f;
 
-        if (beatPassTime - lastBeatPassTime >= BeatLength - offset) {
+        if (beatPassTime - lastBeatPassTime >= beatLength - offset) {
             this.lastBeatPassTime = beatPassTime;
             this.offset = 0;
 
@@ -148,14 +148,14 @@ public class TimingWrapper {
                     beat++;
                     cancel(); // Cleaning timer
                 }
-            }, Math.max(1, (long) BeatLength));
+            }, Math.max(1, (long) beatLength));
 
             if (beat > 3) {
                 beat = 0;
             }
 
             if (observer != null) {
-                observer.onBeatUpdate(BeatLength, beat);
+                observer.onBeatUpdate(beatLength, beat);
             }
         }
 

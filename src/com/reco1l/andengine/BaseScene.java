@@ -3,43 +3,36 @@ package com.reco1l.andengine;
 // Created by Reco1l on 26/9/22 13:38
 
 import com.reco1l.Game;
-import com.reco1l.andengine.entity.Background;
+import com.reco1l.UI;
 import com.reco1l.game.TimingWrapper;
 import com.reco1l.interfaces.IMusicObserver;
 import com.reco1l.enums.MusicOption;
 
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 
-public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObserver {
-
-    public Background background;
+public abstract class BaseScene extends Scene implements ISceneHandler, IMusicObserver {
 
     public TimingWrapper timingWrapper;
 
     protected int screenWidth = Config.getRES_WIDTH();
     protected int screenHeight = Config.getRES_HEIGHT();
 
-    private boolean isUsingTimingWrapper = false;
+    private boolean isTimingWrapperEnabled = false;
     private boolean isContinuousPlay = true;
 
     //--------------------------------------------------------------------------------------------//
 
-    public OsuScene() {
+    public BaseScene() {
         timingWrapper = new TimingWrapper();
-
-        background = new Background();
-        background.draw(this, 0);
 
         Game.engine.registerSceneHandler(this);
         onCreate();
         registerUpdateHandler(elapsed -> {
-            background.update();
-            if (isUsingTimingWrapper) {
+            if (isTimingWrapperEnabled) {
                 int position = Game.songService.getPosition();
 
                 if (Game.songService.getStatus() == Status.PLAYING) {
@@ -64,7 +57,7 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
     //--------------------------------------------------------------------------------------------//
 
     protected final void setTimingWrapper(boolean bool) {
-        this.isUsingTimingWrapper = bool;
+        this.isTimingWrapperEnabled = bool;
     }
 
     protected final void setContinuousPlay(boolean bool) {
@@ -75,7 +68,7 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
 
     @Override
     public void onMusicControlRequest(MusicOption option, Status current) {
-        if (!isUsingTimingWrapper)
+        if (!isTimingWrapperEnabled)
             return;
 
         if (option == MusicOption.PLAY) {
@@ -92,7 +85,7 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
 
     @Override
     public void onMusicControlChanged(MusicOption option, Status status) {
-        if (isUsingTimingWrapper) {
+        if (isTimingWrapperEnabled) {
             if (option == MusicOption.STOP || option == MusicOption.PAUSE) {
                 timingWrapper.setBeatLength(1000);
             }
@@ -109,13 +102,13 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
             }
 
             String path = beatmap.getTrack(0).getBackground();
-            background.setTexture(path, true);
+            UI.background.change(path);
         }
     }
 
     @Override
     public void onMusicSync(Status status) {
-        if (isUsingTimingWrapper) {
+        if (isTimingWrapperEnabled) {
             timingWrapper.computeOffsetAtPosition(Game.songService.getPosition());
         }
     }
@@ -129,10 +122,7 @@ public abstract class OsuScene extends Scene implements ISceneHandler, IMusicObs
 
     @Override
     public void onSceneChange(Scene oldScene, Scene newScene) {
-        if (newScene == this) {
-            TextureRegion texture = Game.resources.getTexture("::background");
-            background.setTexture(texture, false);
-        }
+
     }
 
     @Override

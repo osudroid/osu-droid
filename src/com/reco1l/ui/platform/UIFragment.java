@@ -64,7 +64,7 @@ public abstract class UIFragment extends Fragment implements IReferences {
 
     //--------------------------------------------------------------------------------------------//
     // Please use this instead of directly referring to the variable.
-    public boolean isShowing() {
+    public final boolean isShowing() {
         return isShowing;
     }
 
@@ -97,6 +97,12 @@ public abstract class UIFragment extends Fragment implements IReferences {
      */
     protected Screens[] getParents() { return null; }
 
+
+    /**
+     * Override and set this to true if the fragment is a overlay (they are attached to a different layer.
+     */
+    protected boolean isOverlay() { return false; }
+
     /**
      * Sets the time of inactivity that need to be reached to close the fragment.
      * <p>Note: Use this only on extras dialogs.</p>
@@ -107,7 +113,7 @@ public abstract class UIFragment extends Fragment implements IReferences {
     //--------------------------------------------------------------------------------------------//
 
     @Nullable @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle bundle) {
+    public final View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle bundle) {
 
         rootView = inflater.inflate(getLayout(), container, false);
 
@@ -173,7 +179,7 @@ public abstract class UIFragment extends Fragment implements IReferences {
             return;
         }
         isLoaded = false;
-        if (platform.addFragment(this, tag)) {
+        if (platform.addFragment(this, tag, isOverlay())) {
             Log.i("FragmentPlatform", "Added fragment " + tag);
         } else {
             Log.i("FragmentPlatform", "Unable to add fragment " + tag);
@@ -256,10 +262,12 @@ public abstract class UIFragment extends Fragment implements IReferences {
         }
     }
 
-    protected final void bindTouchListener(View view, @NonNull Runnable onSingleTapUp) {
+    protected final void bindTouchListener(View view, Runnable onSingleTapUp) {
         bindTouchListener(view, new TouchListener() {
             public void onPressUp() {
-                onSingleTapUp.run();
+                if (onSingleTapUp != null) {
+                    onSingleTapUp.run();
+                }
             }
         });
     }
@@ -274,6 +282,10 @@ public abstract class UIFragment extends Fragment implements IReferences {
         }
         vth.linkToFragment(this);
         vth.apply(view);
+    }
+
+    protected final void unbindTouchListener(View view) {
+        registeredViews.remove(view);
     }
 
     protected final void unbindTouchListeners() {

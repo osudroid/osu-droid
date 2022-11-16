@@ -4,6 +4,7 @@ import static android.widget.RelativeLayout.LayoutParams.*;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,17 +15,17 @@ import android.widget.RelativeLayout.LayoutParams;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.Animation2;
 import com.reco1l.utils.Resources;
-import com.reco1l.interfaces.IReferences;
 
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 
@@ -38,30 +39,37 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 22/6/22 02:25
 
-public final class FragmentPlatform implements IReferences {
+public final class FragmentPlatform {
 
     private static FragmentPlatform instance;
 
-    private static final int containerId = 0x999999;
+    private static final int SCREEN_CONTAINER_ID = 0x999999;
+    private static final int OVERLAY_CONTAINER_ID = 0x999990;
 
     public final List<Dialog> dialogs;
 
     private final List<Fragment> fragments;
     private final Map<Screens, List<UIFragment>> screenFragments;
 
+    private final LayoutParams params;
+
     public RenderSurfaceView renderView;
     public FragmentManager manager;
-    public FrameLayout container;
     public Context context;
+
+    public FrameLayout screenContainer;
+    public FrameLayout overlayContainer;
 
     private LoaderFragment loaderFragment;
 
     //--------------------------------------------------------------------------------------------//
 
     public FragmentPlatform() {
-        this.dialogs = new ArrayList<>();
-        this.fragments = new ArrayList<>();
-        this.screenFragments = new HashMap<>();
+        dialogs = new ArrayList<>();
+        fragments = new ArrayList<>();
+        screenFragments = new HashMap<>();
+
+        params = new LayoutParams(MATCH_PARENT, MATCH_PARENT);
 
         for (Screens scene : Screens.values()) {
             screenFragments.put(scene, new ArrayList<>());
@@ -69,33 +77,33 @@ public final class FragmentPlatform implements IReferences {
     }
 
     public static FragmentPlatform getInstance() {
+        if (instance == null) {
+            instance = new FragmentPlatform();
+        }
         return instance;
     }
-
-    private final LayoutParams params = new LayoutParams(MATCH_PARENT, MATCH_PARENT);
 
     //--------------------------------------------------------------------------------------------//
 
     public void load(AppCompatActivity activity, Context context, RenderSurfaceView renderView) {
-        instance = this;
+
+        this.manager = activity.getSupportFragmentManager();
         this.renderView = renderView;
         this.context = context;
 
-        params.addRule(RelativeLayout.CENTER_IN_PARENT);
+        ConstraintLayout platform = new ConstraintLayout(context);
 
-        RelativeLayout platform = new RelativeLayout(context);
-        container = new FrameLayout(context);
-        View view = new View(context);
+        screenContainer = new FrameLayout(context);
+        overlayContainer = new FrameLayout(context);
 
-        container.setId(containerId);
-        view.setBackgroundColor(Color.argb(0, 0, 0, 0));
+        screenContainer.setId(SCREEN_CONTAINER_ID);
+        overlayContainer.setId(OVERLAY_CONTAINER_ID);
 
         platform.addView(renderView, params);
-        platform.addView(container, params);
-        platform.addView(view, params);
+        platform.addView(screenContainer, params);
+        platform.addView(overlayContainer, params);
 
-        mActivity.setContentView(platform, params);
-        manager = activity.getSupportFragmentManager();
+        Game.mActivity.setContentView(platform, params);
 
         loaderFragment = new LoaderFragment();
     }
@@ -112,7 +120,7 @@ public final class FragmentPlatform implements IReferences {
                 UIFragment frg = (UIFragment) fragment;
 
                 if (frg.isShowing) {
-                    Game.runOnUiThread(() -> frg.onUpdate(elapsed));
+                    Game.mActivity.runOnUiThread(() -> frg.onUpdate(elapsed));
                 }
             }
             i++;
@@ -120,13 +128,29 @@ public final class FragmentPlatform implements IReferences {
     }
 
     //--------------------------------------------------------------------------------------------//
+
+    public void animateRender(Animation.IAnimationHandler animation) {
+        Animation anim = new Animation(renderView);
+        animation.onAnimate(anim);
+        anim.cancelPending(false);
+        anim.play();
+    }
+
+    public void animateScreen(Animation2.BehaviorHandler handler) {
+        Animation2 animation = Animation2.of(screenContainer);
+        handler.onAnimate(animation);
+        animation.cancelCurrentAnimations = false;
+        animation.play();
+    }
+
+    //--------------------------------------------------------------------------------------------//
     
-    public boolean addFragment(Fragment fragment, String tag) {
+    public boolean addFragment(Fragment fragment, String tag, boolean isOverlay) {
         if (fragment.isAdded() || fragments.contains(fragment) || manager.findFragmentByTag(tag) != null)
             return false;
 
         fragments.add(fragment);
-        commitTransaction(fragment, tag);
+        commitTransaction(fragment, tag, isOverlay);
         return true;
     }
 
@@ -135,18 +159,20 @@ public final class FragmentPlatform implements IReferences {
             return false;
 
         fragments.remove(fragment);
-        Game.runOnUpdateThread(() -> commitTransaction(fragment, null));
+        Game.mActivity.runOnUpdateThread(() -> commitTransaction(fragment, null, false));
         return true;
     }
 
-    private void commitTransaction(Fragment fragment, String tag) {
-        mActivity.runOnUiThread(() -> {
+    private void commitTransaction(Fragment fragment, String tag, boolean isOverlay) {
+        Game.mActivity.runOnUiThread(() -> {
             FragmentTransaction transaction = manager.beginTransaction();
+
+            int containerId = isOverlay ? overlayContainer.getId() : screenContainer.getId();
 
             if (tag == null) {
                 transaction.remove(fragment);
             } else {
-                transaction.add(container.getId(), fragment, tag);
+                transaction.add(containerId, fragment, tag);
             }
             transaction.commitAllowingStateLoss();
         });
@@ -185,7 +211,7 @@ public final class FragmentPlatform implements IReferences {
     public void close(UIFragment... toClose) {
         for (UIFragment fragment : toClose) {
            if (fragment != null) {
-               mActivity.runOnUiThread(fragment::close);
+               Game.mActivity.runOnUiThread(fragment::close);
            }
         }
     }
@@ -197,7 +223,7 @@ public final class FragmentPlatform implements IReferences {
         for (Fragment fragment: toClose) {
             if (fragment instanceof UIFragment) {
                 UIFragment frg = (UIFragment) fragment;
-                mActivity.runOnUiThread(frg::close);
+                Game.mActivity.runOnUiThread(frg::close);
             }
         }
     }
@@ -206,7 +232,7 @@ public final class FragmentPlatform implements IReferences {
         for (Fragment fragment: fragments) {
             if (fragment instanceof UIFragment) {
                 UIFragment frg = (UIFragment) fragment;
-                mActivity.runOnUiThread(() -> frg.onScreenChange(lastScreen, newScreen));
+                Game.mActivity.runOnUiThread(() -> frg.onScreenChange(lastScreen, newScreen));
             }
         }
     }
@@ -214,18 +240,21 @@ public final class FragmentPlatform implements IReferences {
     //--------------------------------------------------------------------------------------------//
     public void handleWindowFocus(boolean isResumed) {
         if (!isResumed) {
-            addFragment(loaderFragment, "loaderFragment@" + loaderFragment.hashCode());
+            addFragment(loaderFragment, "loaderFragment@" + loaderFragment.hashCode(), true);
             return;
         }
-        new Animation(loaderFragment.layout).fade(1, 0)
-                .runOnEnd(() -> removeFragment(loaderFragment))
-                .delay(50)
-                .play(500);
+
+        Animation anim = new Animation(loaderFragment.layout);
+
+        anim.fade(1, 0);
+        anim.runOnEnd(() -> removeFragment(loaderFragment));
+        anim.delay(50);
+        anim.play(500);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public static class LoaderFragment extends Fragment implements IReferences {
+    public static class LoaderFragment extends Fragment {
 
         protected RelativeLayout layout;
 
@@ -233,29 +262,10 @@ public final class FragmentPlatform implements IReferences {
 
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle bundle) {
-
-            layout = new RelativeLayout(platform.context);
-            layout.setLayoutParams(platform.params);
+            layout = new RelativeLayout(Game.platform.context);
+            layout.setLayoutParams(Game.platform.params);
             layout.setElevation(Resources.dimen(R.dimen.imposedLayer));
-
-            CircularProgressIndicator indicator = new CircularProgressIndicator(platform.context);
-            indicator.setTrackCornerRadius((int) Resources.dimen(R.dimen.progressBarTrackCornerRadius));
-            indicator.setIndicatorColor(Resources.color(R.color.progressBarIndicatorColor));
-            indicator.setIndeterminate(true);
-
-            View background = new View(platform.context);
-            background.setBackgroundColor(Color.BLACK);
-
-            float size = Resources.dimen(R.dimen.loadingScreenProgressBarSize);
-
-            LayoutParams params = new LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
-            params.addRule(RelativeLayout.CENTER_IN_PARENT);
-            params.width = (int) size;
-            params.height = (int) size;
-
-            layout.addView(background, platform.params);
-            layout.addView(indicator, params);
-
+            layout.setBackground(new ColorDrawable(Color.BLACK));
             return layout;
         }
     }

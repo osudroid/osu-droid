@@ -8,8 +8,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:translationZ="@dimen/middleLayer"
-    tool:background="#FFFFFFFF"
-    android:layout_marginTop="@dimen/topBarHeight">
+    tool:background="#FFFFFFFF">
 
     <View
         android:id="@+id/background"

@@ -167,4 +167,12 @@
 
     </androidx.cardview.widget.CardView>
 
+    <!--<com.chibde.visualizer.CircleBarVisualizerSmooth
+        android:id="@+id/mainM_spectrum"
+        android:layout_width="@dimen/mainMenuLogoSize"
+        android:layout_height="@dimen/mainMenuLogoSize"
+        />-->
+
+
+
 </RelativeLayout>

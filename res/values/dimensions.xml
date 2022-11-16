@@ -44,8 +44,6 @@
     <dimen name="vectorXL">@dimen/_46sdp</dimen>
 
     <!--Buttons-->
-    <dimen name="barButtonWidth">@dimen/_50sdp</dimen>
-    <dimen name="topBarButtonHeight">@dimen/_40sdp</dimen>
 
     <dimen name="buttonCornerRadius">@dimen/_8sdp</dimen>
     <dimen name="buttonHeight">@dimen/_28sdp</dimen>
@@ -61,7 +59,7 @@
     <dimen name="circularLoadingBarTrackCornerRadius">@dimen/_2sdp</dimen>
 
     <dimen name="topBarButtonWidth">@dimen/_62sdp</dimen>
-    <dimen name="topBarButtonIndicatorHeight">@dimen/_2sdp</dimen>
+    <dimen name="topBarButtonHeight">@dimen/_40sdp</dimen>
 
     <!--Seek bar-->
     <dimen name="seekBarProgressCornerRadius">@dimen/_8sdp</dimen>

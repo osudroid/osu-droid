@@ -334,7 +334,7 @@ public class MainActivity extends BaseGameActivity implements
         }
         this.mRenderSurfaceView.setRenderer(this.mEngine);
 
-        new FragmentPlatform().load(this, this, mRenderSurfaceView);
+        Game.platform.load(this, this, mRenderSurfaceView);
     }
 
     public void checkNewBeatmaps() {

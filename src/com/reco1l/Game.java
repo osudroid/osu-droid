@@ -3,9 +3,8 @@ package com.reco1l;
 import android.content.Intent;
 import android.os.PowerManager;
 
-import com.reco1l.andengine.scenes.PlayerLoader;
 import com.reco1l.andengine.scenes.SongMenu;
-import com.reco1l.andengine.scenes.MainScene;
+import com.reco1l.andengine.MainScene;
 import com.reco1l.interfaces.IReferences;
 
 import java.util.Timer;
@@ -26,7 +25,6 @@ public final class Game implements IReferences {
     public static SongMenu songMenu = global.getSongMenu();
     public static GameScene gameScene = global.getGameScene();
     public static ScoringScene scoringScene = global.getScoring();
-    public static PlayerLoader playerLoader = global.getPlayerLoader();
 
     public static SongService songService = getSongService();
 
@@ -85,13 +83,5 @@ public final class Game implements IReferences {
                 }
             }
         }
-    }
-
-    public static void runOnUiThread(Runnable task) {
-        mActivity.runOnUiThread(task);
-    }
-
-    public static void runOnUpdateThread(Runnable task) {
-        mActivity.runOnUpdateThread(task);
     }
 }

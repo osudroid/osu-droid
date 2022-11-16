@@ -180,10 +180,15 @@ public class SongService extends Service {
     }
 
     public float getLevel() {
-        if (audioFunc != null) {
-            return audioFunc.getLevel();
+        if (getSpectrum() == null) {
+            return 0;
         }
-        return 0;
+        float level = 1;
+
+        for (int i = 0; i < 6; i++) {
+            level += getSpectrum()[i] * 0.15f;
+        }
+        return level / 6;
     }
 
     public float getVolume() {

@@ -1,4 +1,4 @@
-package com.reco1l.ui.fragments.extras;
+package com.reco1l.ui.extras;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -9,6 +9,8 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
@@ -18,7 +20,9 @@ import androidx.preference.SeekBarPreference;
 
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.SkinPathPreference;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
+import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
@@ -26,6 +30,8 @@ import com.reco1l.ui.data.DialogTable;
 import com.reco1l.UI;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.AnimationTable;
+import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.Resources;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
@@ -35,8 +41,6 @@ import java.io.File;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineInitializer;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
@@ -50,9 +54,11 @@ public class SettingsMenu extends UIFragment {
 
     protected Tabs currentTab;
 
+    private View tabIndicator;
     private FrameLayout container;
     private SettingsFragment fragment;
-    private View body, navbar, tabIndicator, layer, loading;
+    private CardView body, navbar, layer;
+    private CircularProgressIndicator loading;
 
     private int panelWidth, navbarWidth;
     private boolean reloadBackground = false;
@@ -81,13 +87,15 @@ public class SettingsMenu extends UIFragment {
 
     //--------------------------------------------------------------------------------------------//
 
-    private final OsuAsyncCallback loadSettings = new OsuAsyncCallback() {
+    private final AsyncExec loadSettings = new AsyncExec() {
         @Override
         public void run() {
-            mActivity.runOnUiThread(() ->
-                    platform.manager.beginTransaction()
-                            .replace(container.getId(), fragment)
-                            .commit());
+            Game.mActivity.runOnUiThread(() -> {
+                FragmentTransaction transaction = Game.platform.manager.beginTransaction();
+
+                transaction.replace(container.getId(), fragment);
+                transaction.commit();
+            });
         }
 
         @Override
@@ -107,8 +115,9 @@ public class SettingsMenu extends UIFragment {
         panelWidth = (int) Resources.dimen(R.dimen.settingsPanelWidth);
         navbarWidth = (int) Resources.dimen(R.dimen.settingsPanelNavBarWidth);
 
-        if (fragment == null)
+        if (fragment == null) {
             fragment = new SettingsFragment();
+        }
 
         tabIndicator = find("tabIndicator");
         container = find("container");
@@ -116,10 +125,7 @@ public class SettingsMenu extends UIFragment {
         layer = find("layer");
         body = find("body");
 
-        new Animation(rootBackground).fade(0, 1)
-                .play(300);
-        new Animation(platform.renderView).moveX(0, -80)
-                .play(300);
+        AnimationTable.fadeIn(rootBackground);
 
         new Animation(navbar).moveX(navbarWidth, 0)
                 .interpolator(Easing.OutExpo)
@@ -137,14 +143,9 @@ public class SettingsMenu extends UIFragment {
         currentTab = Tabs.general;
 
         new Animation(loading).fade(0, 1).scale(0.8f, 1)
-                .runOnEnd(() -> new AsyncTaskLoader().execute(loadSettings))
+                .runOnEnd(loadSettings::execute)
                 .delay(200)
                 .play(200);
-
-        bindTouchListener(find("close"), () -> {
-            unbindTouchListeners();
-            close();
-        });
 
         for (Tabs tab : Tabs.values()) {
             bindTouchListener(find(tab.name()), () -> navigateTo(tab));
@@ -156,6 +157,7 @@ public class SettingsMenu extends UIFragment {
             return;
 
         currentTab = tab;
+
         final boolean toTop = tabIndicator.getTranslationY() > find(tab.name()).getY();
 
         new Animation(tabIndicator)
@@ -197,7 +199,12 @@ public class SettingsMenu extends UIFragment {
         currentTab = null;
 
         new Animation(container).fade(1, 0)
-                .runOnEnd(() -> platform.manager.beginTransaction().remove(fragment).commit())
+                .runOnEnd(() -> {
+                    FragmentTransaction transaction = Game.platform.manager.beginTransaction();
+
+                    transaction.remove(fragment);
+                    transaction.commit();
+                })
                 .play(300);
 
         new Animation(platform.renderView).moveX(-80, 0)
@@ -242,19 +249,26 @@ public class SettingsMenu extends UIFragment {
 
         public void navigate(Tabs tab) {
             switch (tab) {
-                case general: setPreferencesFromResource(R.xml.settings_general, null);
+                case general:
+                    setPreferencesFromResource(R.xml.settings_general, null);
                     break;
-                case appearance: setPreferencesFromResource(R.xml.settings_appearance, null);
+                case appearance:
+                    setPreferencesFromResource(R.xml.settings_appearance, null);
                     break;
-                case gameplay: setPreferencesFromResource(R.xml.settings_gameplay, null);
+                case gameplay:
+                    setPreferencesFromResource(R.xml.settings_gameplay, null);
                     break;
-                case graphics: setPreferencesFromResource(R.xml.settings_graphics, null);
+                case graphics:
+                    setPreferencesFromResource(R.xml.settings_graphics, null);
                     break;
-                case sounds: setPreferencesFromResource(R.xml.settings_sounds, null);
+                case sounds:
+                    setPreferencesFromResource(R.xml.settings_sounds, null);
                     break;
-                case library: setPreferencesFromResource(R.xml.settings_library, null);
+                case library:
+                    setPreferencesFromResource(R.xml.settings_library, null);
                     break;
-                case advanced: setPreferencesFromResource(R.xml.settings_advanced, null);
+                case advanced:
+                    setPreferencesFromResource(R.xml.settings_advanced, null);
                     break;
             }
             loadPreferences(tab);

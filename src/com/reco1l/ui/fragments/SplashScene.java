@@ -12,14 +12,13 @@ import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.Animation2;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.Resources;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.scene.Scene;
 
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -159,18 +158,23 @@ public class SplashScene extends UIFragment implements IUpdateHandler {
     //--------------------------------------------------------------------------------------------//
 
     private final Runnable onComplete = () -> {
-        new Animation(loadingLayout).fade(1, 0)
-                .play(300);
+
+        Animation2 fadeOut = Animation2.of(loadingLayout);
+
+        fadeOut.toAlpha = 0f;
+        fadeOut.play(300);
 
         buildText.removeCallbacks(hideBuildText);
         hideBuildText.run();
 
         rootView.postDelayed(() -> {
 
-            new Animation(trianglesBottom).scale(1, 1.2f).fade(0.05f, 0)
-                    .play(400);
-            new Animation(trianglesTop).scale(1, 1.2f).fade(0.05f, 0).rotation(180, 180)
-                    .play(400);
+
+            Animation2 trianglesFadeOut = Animation2.of(trianglesBottom, trianglesTop);
+
+            trianglesFadeOut.toScale = 1.2f;
+            trianglesFadeOut.toAlpha = 0f;
+            trianglesFadeOut.play(400);
 
             new Animation(logo).size(Resources.dimen(R.dimen.splashScreenLogoSize), logoSize)
                     .runOnEnd(() -> new Animation(effect).size(logoSize, logoSize * 1.5f).fade(0.1f, 0).play(300))
@@ -179,7 +183,6 @@ public class SplashScene extends UIFragment implements IUpdateHandler {
             new Animation(background).fade(1, 0)
                     .runOnEnd(() -> {
                         super.close();
-                        new Animation(UI.topBar.body).moveY(-UI.topBar.barHeight, 0).play(300);
                         new Animation(UI.topBar.author).fade(0, 1).moveY(50, 0).play(200);
                     })
                     .play(700);

@@ -22,13 +22,6 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <View
-            android:layout_width="@dimen/verticalShadowWidth"
-            android:layout_height="match_parent"
-            android:alpha="0.1"
-            android:background="@drawable/shadow_vertical"
-            android:rotation="180" />
-
-        <View
             android:layout_width="@dimen/notificationCenterWidth"
             android:layout_height="match_parent"
             android:background="@color/backgroundTertiary"
@@ -73,7 +66,7 @@
                 <ImageView
                     android:id="@+id/nc_clear"
                     style="@style/icon_button"
-                    android:layout_width="@dimen/barButtonWidth"
+                    android:layout_width="@dimen/topBarButtonWidth"
                     android:layout_height="@dimen/topBarButtonHeight"
                     android:src="@drawable/v_clear"
                     app:tint="@color/vectorSecondary" />
@@ -81,7 +74,7 @@
                 <ImageView
                     android:id="@+id/nc_close"
                     style="@style/icon_button"
-                    android:layout_width="@dimen/barButtonWidth"
+                    android:layout_width="@dimen/topBarButtonWidth"
                     android:layout_height="@dimen/topBarButtonHeight"
                     android:src="@drawable/v_close"
                     app:tint="@color/vectorSecondary" />
