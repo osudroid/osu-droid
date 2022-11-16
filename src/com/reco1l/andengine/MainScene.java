@@ -12,6 +12,7 @@ import com.reco1l.ui.data.DialogTable;
 
 import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.primitive.Rectangle;
+import org.anddev.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
@@ -116,5 +117,12 @@ public class MainScene extends BaseScene {
         UI.mainMenu.playExitAnim();
         Game.resources.getSound("seeya").play();
         dim.registerEntityModifier(new AlphaModifier(3.0f, 0, 1));
+    }
+
+    @Override
+    public void onSceneChange(Scene oldScene, Scene newScene) {
+        if (newScene == this) {
+            UI.background.setBlur(false);
+        }
     }
 }

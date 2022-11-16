@@ -54,9 +54,10 @@ public class SettingsMenu extends UIFragment {
 
     protected Tabs currentTab;
 
-    private View tabIndicator;
     private FrameLayout container;
     private SettingsFragment fragment;
+
+    private View tabIndicator;
     private CardView body, navbar, layer;
     private CircularProgressIndicator loading;
 

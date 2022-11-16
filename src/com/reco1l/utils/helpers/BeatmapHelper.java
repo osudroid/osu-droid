@@ -159,6 +159,7 @@ public class BeatmapHelper implements IReferences {
         return null;
     }
 
+
     //--------------------------------------------------------------------------------------------//
     private static String getBackgroundKey(TrackInfo track) {
         if (track == null) {

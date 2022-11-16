@@ -102,7 +102,7 @@ public abstract class BaseScene extends Scene implements ISceneHandler, IMusicOb
             }
 
             String path = beatmap.getTrack(0).getBackground();
-            UI.background.change(path);
+            UI.background.changeFrom(path);
         }
     }
 

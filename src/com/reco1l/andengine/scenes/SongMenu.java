@@ -92,7 +92,7 @@ public class SongMenu extends BaseScene {
         UI.beatmapPanel.updateProperties(track);
         UI.beatmapPanel.updateScoreboard();
 
-        UI.background.change(track.getBackground());
+        //UI.background.changeFrom(track.getBackground());
         currentTrack = track;
     }
 
@@ -126,6 +126,9 @@ public class SongMenu extends BaseScene {
     public void onSceneChange(Scene oldScene, Scene newScene) {
         if (newScene != this) {
             currentTrack = null;
+        }
+        if (newScene == this) {
+            UI.background.setBlur(true);
         }
     }
 

@@ -58,9 +58,6 @@ public class BitmapManager implements IReferences {
             Log.e("BitmapManager", "Failed to load game assets! \n");
             e.printStackTrace();
         }
-
-        global.setInfo("Loading song backgrounds...");
-        global.setLoadingProgress(15);
     }
 
     //--------------------------------------------------------------------------------------------//
