@@ -1163,7 +1163,7 @@ public class MainScene implements IUpdateHandler {
                     GlobalManager.getInstance().getMainActivity().stopService(new Intent(GlobalManager.getInstance().getMainActivity(), SongService.class));
                     musicStarted = false;
                 }
-                android.os.Process.killProcess(android.os.Process.myPid());
+                GlobalManager.getInstance().getMainActivity().finish();
             }
         }, 3000, TimeUnit.MILLISECONDS);
     }

@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu;
 
+import static android.widget.LinearLayout.LayoutParams.*;
+
 import android.Manifest;
 import android.content.Intent;
 import android.os.Build;
@@ -7,6 +9,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
 import android.net.Uri;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,7 +29,12 @@ public class PermissionActivity extends AppCompatActivity implements EasyPermiss
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_opening);
+
+        LinearLayout view = new LinearLayout(this);
+        view.setLayoutParams(new LayoutParams(MATCH_PARENT, MATCH_PARENT));
+        view.setBackgroundColor(0x00000000);
+
+        setContentView(view);
     }
 
     private void startGameActivity() {
