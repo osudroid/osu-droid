@@ -1256,7 +1256,7 @@ public class Slider extends GameObject {
         startCircle.registerEntityModifier(new AlphaModifier(realDuration,
             startCircle.getAlpha(), 0, easing));
         startOverlay.registerEntityModifier(new AlphaModifier(realDuration,
-            startCircle.getAlpha(), 0, easing));
+            startOverlay.getAlpha(), 0, easing));
         endCircle.registerEntityModifier(new AlphaModifier(realDuration,
             endCircle.getAlpha(), 0, easing));
         endOverlay.registerEntityModifier(new AlphaModifier(realDuration,
