@@ -1999,6 +1999,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
             ModMenu.getInstance().setForceAR(Replay.oldForceAR);
             ModMenu.getInstance().setEnableForceAR(Replay.oldEnableForceAR);
+            ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
         }
     }
 
