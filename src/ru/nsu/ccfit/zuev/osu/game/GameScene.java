@@ -699,6 +699,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final String rfile = track != null ? replayFile : this.replayFile;
 
+        Replay.oldMod = ModMenu.getInstance().getMod();
+        Replay.oldChangeSpeed = ModMenu.getInstance().getChangeSpeed();
+        Replay.oldForceAR = ModMenu.getInstance().getForceAR();
+        Replay.oldEnableForceAR = ModMenu.getInstance().isEnableForceAR();
+        Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
+
         new AsyncTaskLoader().execute(new OsuAsyncCallback() {
 
             public void run() {
@@ -2000,6 +2006,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
             ModMenu.getInstance().setForceAR(Replay.oldForceAR);
             ModMenu.getInstance().setEnableForceAR(Replay.oldEnableForceAR);
+            ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
         }
     }
 
