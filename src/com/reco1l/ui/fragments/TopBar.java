@@ -5,9 +5,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.cardview.widget.CardView;
-
-import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.TriangleEffectView;
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
@@ -19,7 +16,6 @@ import com.reco1l.utils.KeyInputHandler;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.data.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
-import com.reco1l.utils.AnimationOld;
 import com.reco1l.utils.Resources;
 import com.reco1l.view.BarButton;
 
@@ -229,6 +225,10 @@ public class TopBar extends UIFragment {
             text = parent.find("musicText");
 
             parent.bindTouchListener(view, UI.musicPlayer::altShow);
+
+            if (Game.musicManager.beatmap != null) {
+                text.setText(BeatmapHelper.getTitle(Game.musicManager.beatmap.getTrack(0)));
+            }
         }
 
         //----------------------------------------------------------------------------------------//

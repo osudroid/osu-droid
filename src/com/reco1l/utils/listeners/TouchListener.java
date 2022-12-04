@@ -1,8 +1,8 @@
 package com.reco1l.utils.listeners;
 
-import static com.reco1l.interfaces.IReferences.resources;
-
 import android.graphics.drawable.GradientDrawable;
+
+import com.reco1l.Game;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 
@@ -15,7 +15,7 @@ public class TouchListener {
     //--------------------------------------------------------------------------------------------//
 
     public BassSoundProvider getClickSound() {
-        return resources.getSound(DEFAULT_SOUND);
+        return Game.resources.getSound(DEFAULT_SOUND);
     }
 
     public GradientDrawable getCustomTouchEffect() {
@@ -31,7 +31,7 @@ public class TouchListener {
     }
 
     public int getEffectMaxAlpha() {
-        return 60;
+        return 100;
     }
 
     //--------------------------------------------------------------------------------------------//

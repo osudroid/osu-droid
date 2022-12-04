@@ -50,8 +50,7 @@ public class MainMenu extends UIFragment {
     private boolean
             isKiai = false,
             isMenuShowing = false,
-            isMenuAnimInProgress = false,
-            isExitAnimInProgress = false;
+            isMenuAnimInProgress = false;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -169,9 +168,9 @@ public class MainMenu extends UIFragment {
     private void showMenu() {
         if (!isMenuAnimInProgress && !isMenuShowing) {
             isMenuAnimInProgress = true;
+            showPassTime = 0;
 
             UI.topBar.show();
-            isMenuShowing = true;
 
             Animation.of(logo, expandEffect)
                     .toSize((int) Resources.dimen(R.dimen.mainMenuSmallLogoSize))
@@ -187,6 +186,8 @@ public class MainMenu extends UIFragment {
                     .runOnEnd(() -> isMenuAnimInProgress = false)
                     .toAlpha(1)
                     .play(300);
+
+            isMenuShowing = true;
         }
     }
 
@@ -197,7 +198,6 @@ public class MainMenu extends UIFragment {
             if (!isTransition) {
                 UI.topBar.close();
             }
-            isMenuShowing = false;
 
             Animation.of(logo, expandEffect)
                     .toSize((int) Resources.dimen(R.dimen.mainMenuLogoSize))
@@ -213,6 +213,8 @@ public class MainMenu extends UIFragment {
                     .runOnEnd(() -> isMenuAnimInProgress = false)
                     .toAlpha(0)
                     .play(300);
+
+            isMenuShowing = false;
         }
     }
 
@@ -246,9 +248,7 @@ public class MainMenu extends UIFragment {
         if (isShowing) {
             Animation.of(logo)
                     .runOnStart(() -> {
-                        isExitAnimInProgress = true;
-
-                        platform.closeAllExcept(this);
+                        Game.platform.closeAllExcept(this);
                         unbindTouchListeners();
                         hideMenu(false);
                     })
@@ -267,16 +267,17 @@ public class MainMenu extends UIFragment {
     //--------------------------------------------------------------------------------------------//
 
     public void onBeatUpdate(float beatLength) {
-        if (!isShowing || isExitAnimInProgress)
+        if (!isShowing) {
             return;
+        }
 
         long in = (long) (beatLength * 0.07f);
         long out = (long) (beatLength * 0.9f);
 
         if (Game.musicManager.isPlaying()) {
             if (isKiai) {
-                logoEffectOut.delay(in).play(out);
-                logoEffectIn.play(in);
+                logoEffectOut.duration(out);
+                logoEffectIn.runOnEnd(logoEffectOut::play).play(in);
             }
 
             if (expandEffect != null) {

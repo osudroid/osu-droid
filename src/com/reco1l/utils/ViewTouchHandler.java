@@ -42,7 +42,7 @@ public class ViewTouchHandler {
 
     public ViewTouchHandler(TouchListener listener) {
         this.listener = listener;
-        this.vibrator = (Vibrator) Game.activity.getSystemService(Context.VIBRATOR_SERVICE);
+        this.vibrator = (Vibrator) Game.platform.context.getSystemService(Context.VIBRATOR_SERVICE);
         this.handler = new Handler();
 
         this.hasCustomEffectDrawable = listener.getCustomTouchEffect() != null;
@@ -217,11 +217,11 @@ public class ViewTouchHandler {
 
             downAnim = Animation.ofInt(0, listener.getEffectMaxAlpha())
                     .runOnUpdate(onUpdate)
-                    .duration(200);
+                    .duration(100);
 
             upAnim = Animation.ofInt(listener.getEffectMaxAlpha(), 0)
                     .runOnUpdate(onUpdate)
-                    .duration(100);
+                    .duration(300);
         }
     }
 }
