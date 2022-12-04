@@ -136,7 +136,6 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/mp_buttons"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/musicPlayerButtonsMargin"

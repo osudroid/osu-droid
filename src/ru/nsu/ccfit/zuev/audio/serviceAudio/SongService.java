@@ -199,7 +199,7 @@ public class SongService extends Service {
             return;
         }
         notify.show();
-        notify.updateSong(Game.musicManager.beatmap);
+        notify.updateSong(Game.library.getBeatmap());
         notify.updateState();
     }
 

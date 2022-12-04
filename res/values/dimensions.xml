@@ -97,6 +97,7 @@
     <dimen name="musicPlayerHeight">@dimen/_215sdp</dimen>
     <dimen name="musicPlayerButtonsMargin">@dimen/_16sdp</dimen>
     <dimen name="musicPlayerSeekbarElevation">@dimen/_6sdp</dimen>
+    <dimen name="musicPlayerListWidth">@dimen/_240sdp</dimen>
     
     <!--Top Bar-->
     <dimen name="topBarHeight">@dimen/_40sdp</dimen>

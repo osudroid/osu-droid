@@ -132,7 +132,7 @@ public class SelectorScene extends BaseScene {
 
     @Override
     public void onMusicEnd() {
-        playMusic(Game.musicManager.beatmap);
+        playMusic(Game.library.getBeatmap());
     }
 
     @Override

@@ -138,23 +138,4 @@ public class BeatmapHelper implements IReferences {
         }
         return null;
     }
-
-    //--------------------------------------------------------------------------------------------//
-    private static String getBackgroundKey(TrackInfo track) {
-        if (track == null) {
-            return null;
-        }
-        return "compressed@" + track.getBeatmapID() + "/" + track.getPublicName();
-    }
-
-    public static Bitmap getCompressedBackground(TrackInfo track) {
-        return bitmapManager.get(getBackgroundKey(track));
-    }
-
-    public static void loadCompressedBackground(TrackInfo track) {
-        if (!bitmapManager.contains(getBackgroundKey(track))) {
-            Bitmap bitmap = BitmapHelper.compress(BitmapFactory.decodeFile(track.getBackground()), 10);
-            bitmapManager.put(getBackgroundKey(track), bitmap);
-        }
-    }
 }

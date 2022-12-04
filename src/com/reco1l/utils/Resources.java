@@ -2,8 +2,6 @@ package com.reco1l.utils;
 
 // Created by Reco1l on 2/7/22 06:18
 
-import static com.reco1l.interfaces.IReferences.activity;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
@@ -38,8 +36,8 @@ public class Resources {
 
     //--------------------------------------------------------------------------------------------//
 
-    public static float dimen(@DimenRes int id) {
-        return Game.activity.getResources().getDimension(id);
+    public static int dimen(@DimenRes int id) {
+        return (int) Game.activity.getResources().getDimension(id);
     }
 
     public static float sdp(int dp) {

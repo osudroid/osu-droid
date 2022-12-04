@@ -22,11 +22,11 @@ import ru.nsu.ccfit.zuev.osu.Config;
 
 public final class MusicManager {
 
-    public BeatmapInfo beatmap;
-
     private static MusicManager instance;
 
     private final Map<Screens, IMusicObserver> observers;
+
+    private BeatmapInfo beatmap;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -114,11 +114,16 @@ public final class MusicManager {
         if (getState() != Status.STOPPED) {
             getService().stop();
         }
-        this.beatmap = beatmap;
+        int index = Game.library.findBeatmap(beatmap);
+        this.beatmap = Game.library.getBeatmapByIndex(index);
         play();
     }
 
     public void play() {
+        if (beatmap == null) {
+            beatmap = Game.library.getBeatmap();
+        }
+
         if (isInvalidRequest(Status.PAUSED, Status.STOPPED))
             return;
 

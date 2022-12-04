@@ -31,7 +31,7 @@ public class TouchListener {
     }
 
     public int getEffectMaxAlpha() {
-        return 100;
+        return 80;
     }
 
     //--------------------------------------------------------------------------------------------//
