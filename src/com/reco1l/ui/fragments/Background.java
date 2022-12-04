@@ -11,20 +11,22 @@ import android.widget.ImageView;
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.platform.UIFragment;
-import com.reco1l.utils.Animation2;
+import com.reco1l.utils.AnimationTable;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.BlurEffect;
 import com.reco1l.utils.Resources;
-import com.reco1l.view.KiaiView;
+import com.reco1l.utils.helpers.BitmapHelper;
+import com.reco1l.view.SidesEffectView;
 import com.reco1l.view.SpectrumView;
 
+import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class Background extends UIFragment {
 
     public static Background instance;
 
-    private KiaiView kiaiView;
+    private SidesEffectView kiaiView;
     private SpectrumView spectrum;
 
     private ImageView image0, image1;
@@ -34,7 +36,10 @@ public class Background extends UIFragment {
     private String imagePath;
     private Bitmap bitmap;
 
-    private boolean isBlur = false;
+    private boolean
+            isReload = false,
+            isBlurEnabled = false,
+            areEffectsEnabled = true;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -50,7 +55,7 @@ public class Background extends UIFragment {
 
     @Override
     protected Screens[] getParents() {
-        return new Screens[] {Screens.MAIN, Screens.SONG_MENU};
+        return new Screens[] {Screens.Main, Screens.Selector, Screens.Loader, Screens.Summary};
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -67,30 +72,42 @@ public class Background extends UIFragment {
         kiaiView = find("kiai");
         kiaiView.setPaintColor(Color.WHITE);
 
-        changeFrom(imagePath);
+        if (!areEffectsEnabled) {
+            kiaiView.setAlpha(0);
+            spectrum.setAlpha(0);
+        }
+
+        if (bitmap != null) {
+            image0.setImageBitmap(bitmap);
+        }
     }
 
     @Override
     protected void onUpdate(float secondsElapsed) {
+        if (areEffectsEnabled) {
+            float[] fft = Game.songService.getSpectrum();
+            float level = Game.songService.getLevel() * 2;
 
-        float[] fft = Game.songService.getSpectrum();
-        float level = Game.songService.getLevel() * 2;
+            if (spectrum != null) {
+                spectrum.setFft(fft);
+            }
 
-        if (spectrum != null) {
-            spectrum.setFft(fft);
-        }
-
-        if (kiaiView != null) {
-            kiaiView.setAlpha(level);
+            if (kiaiView != null) {
+                kiaiView.setAlpha(level);
+            }
         }
     }
 
     public void onBeatUpdate(float beatLength, int beat) {
-        Game.mActivity.runOnUiThread(() -> {
-            if (kiaiView != null) {
-                kiaiView.onBeatUpdate(beatLength, beat);
-            }
-        });
+        if (!areEffectsEnabled) {
+            return;
+        }
+
+        if (kiaiView != null) {
+            Game.activity.runOnUiThread(() ->
+                    kiaiView.onBeatUpdate(beatLength, beat)
+            );
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -102,16 +119,47 @@ public class Background extends UIFragment {
     }
 
     public void setBlur(boolean bool) {
-        if (bool == isBlur) {
+        if (bool == isBlurEnabled) {
             return;
         }
-        isBlur = bool;
+        isBlurEnabled = bool;
+        isReload = true;
         changeFrom(imagePath);
+    }
+
+    public void setEffects(boolean bool) {
+        if (bool == areEffectsEnabled) {
+            return;
+        }
+        areEffectsEnabled = bool;
+
+        if (bool) {
+            if (kiaiView != null) {
+                AnimationTable.fadeIn(kiaiView).play();
+            }
+            if (spectrum != null) {
+                AnimationTable.fadeIn(spectrum).play();
+            }
+        } else {
+            if (kiaiView != null) {
+                AnimationTable.fadeOut(kiaiView).play();
+            }
+            if (spectrum != null) {
+                AnimationTable.fadeOut(spectrum).play();
+            }
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
 
+
     public void changeFrom(String path) {
+        if (!isReload) {
+            if (path == null || path.equals(imagePath)) {
+                return;
+            }
+        }
+        isReload = false;
         imagePath = path;
 
         if (backgroundTask != null) {
@@ -119,20 +167,21 @@ public class Background extends UIFragment {
         }
 
         backgroundTask = new AsyncExec() {
-            Bitmap decoded;
+            Bitmap newBitmap;
 
             public void run() {
-                if (path != null) {
-                    decoded = BitmapFactory.decodeFile(imagePath);
+                int quality = Math.max(Config.getBackgroundQuality(), 1);
 
-                    if (isBlur) {
-                        decoded = BlurEffect.applyTo(decoded, 25);
-                    }
+                newBitmap = BitmapFactory.decodeFile(imagePath);
+                newBitmap = BitmapHelper.compress(newBitmap, 100 / quality);
+
+                if (isBlurEnabled) {
+                    newBitmap = BlurEffect.applyTo(newBitmap, 25);
                 }
             }
 
             public void onComplete() {
-                handleChange(decoded);
+                handleChange(newBitmap);
                 Game.resources.loadBackground(path);
             }
         };
@@ -143,31 +192,35 @@ public class Background extends UIFragment {
 
         boolean cursor = image0.getVisibility() == View.VISIBLE;
 
-        Game.mActivity.runOnUiThread(() -> {
-            ImageView front = cursor ? image0 : image1;
-            ImageView back = cursor ? image1 : image0;
+        ImageView front = cursor ? image0 : image1;
+        ImageView back = cursor ? image1 : image0;
 
+        Game.activity.runOnUiThread(() -> {
             back.setImageBitmap(newBitmap);
             back.setVisibility(View.VISIBLE);
             back.setAlpha(1f);
-
-            Animation2 anim = Animation2.of(front);
-
-            anim.toAlpha = 0f;
-            anim.runOnEnd =() -> {
-                front.setImageBitmap(null);
-                front.setVisibility(View.GONE);
-                front.setElevation(0f);
-
-                back.setElevation(1f);
-
-                if (bitmap != null) {
-                    bitmap.recycle();
-                }
-                bitmap = newBitmap;
-            };
-
-            anim.play(500);
         });
+
+        AnimationTable.fadeOut(front)
+                .runOnEnd(() -> {
+                    front.setImageBitmap(null);
+                    front.setVisibility(View.GONE);
+                    front.setElevation(0f);
+
+                    back.setElevation(1f);
+
+                    if (bitmap != null) {
+                        bitmap.recycle();
+                    }
+                    bitmap = newBitmap;
+                })
+                .play(500);
+    }
+
+    public void reload() {
+        if (isShowing && imagePath != null) {
+            isReload = true;
+            changeFrom(imagePath);
+        }
     }
 }

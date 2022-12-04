@@ -21,8 +21,10 @@ public abstract class BaseScene extends Scene implements ISceneHandler, IMusicOb
     protected int screenWidth = Config.getRES_WIDTH();
     protected int screenHeight = Config.getRES_HEIGHT();
 
-    private boolean isTimingWrapperEnabled = false;
-    private boolean isContinuousPlay = true;
+    private boolean
+            isTimingWrapperEnabled = false,
+            isBackgroundAutoChange = true,
+            isContinuousPlay = true;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -64,6 +66,10 @@ public abstract class BaseScene extends Scene implements ISceneHandler, IMusicOb
         this.isContinuousPlay = bool;
     }
 
+    protected final void setBackgroundAutoChange(boolean bool) {
+        this.isBackgroundAutoChange = bool;
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     @Override
@@ -101,8 +107,10 @@ public abstract class BaseScene extends Scene implements ISceneHandler, IMusicOb
                 timingWrapper.computeOffset();
             }
 
-            String path = beatmap.getTrack(0).getBackground();
-            UI.background.changeFrom(path);
+            if (isBackgroundAutoChange) {
+                String path = beatmap.getTrack(0).getBackground();
+                UI.background.changeFrom(path);
+            }
         }
     }
 

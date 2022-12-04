@@ -22,7 +22,7 @@
             android:layout_width="@dimen/panelWidth"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/panelMargins"
-            android:background="@drawable/round_shape"
+            android:background="@drawable/shape_rounded"
             android:backgroundTint="@color/backgroundDimmed">
 
         </RelativeLayout>

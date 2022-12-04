@@ -25,7 +25,6 @@ public class BassAudioFunc {
     private long skipPosition;
     private ByteBuffer buffer = null;
     private int playflag = BASS.BASS_STREAM_PRESCAN;
-    private boolean isGaming = false;
     private BroadcastReceiver receiver;
     private LocalBroadcastManager broadcastManager;
 
@@ -241,11 +240,6 @@ public class BassAudioFunc {
         if (channel != 0) {
             BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_VOL, volume);
         }
-    }
-
-    public void setGaming(boolean isGaming) {
-        System.out.println("Audio Service Running In Game: " + isGaming);
-        this.isGaming = isGaming;
     }
 
     public void setReciverStuff(BroadcastReceiver receiver, IntentFilter filter, Context context) {

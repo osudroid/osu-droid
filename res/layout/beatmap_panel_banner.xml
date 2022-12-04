@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignTop="@+id/bp_content"
                 android:layout_alignBottom="@+id/bp_content"
-                android:background="@drawable/double_gradient" />
+                android:background="@drawable/shape_double_gradient" />
 
             <LinearLayout
                 android:id="@+id/bp_content"
@@ -57,7 +57,7 @@
                         android:layout_height="@dimen/beatmapPanelExpandButtonSize"
                         android:layout_alignParentTop="true"
                         android:layout_alignParentEnd="true"
-                        android:background="@drawable/round_shape"
+                        android:background="@drawable/shape_rounded"
                         android:src="@drawable/v_arrow_s" />
 
                     <LinearLayout
@@ -218,7 +218,6 @@
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="@dimen/S"
                 android:layout_toEndOf="@+id/bp_stars"
-                android:gravity="center_vertical"
                 android:text="[Difficulty name]"
                 android:textColor="@color/textSecondary"
                 android:textSize="@dimen/textXS" />

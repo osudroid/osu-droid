@@ -36,6 +36,9 @@
     <dimen name="textXL">@dimen/_18sdp</dimen>
 
     <!--Vectors-->
+    <dimen name="vector40">@dimen/_40sdp</dimen>
+    <dimen name="vector18">@dimen/_18sdp</dimen>
+
     <dimen name="vectorXXS">@dimen/_8sdp</dimen>
     <dimen name="vectorXS">@dimen/_10sdp</dimen>
     <dimen name="vectorS">@dimen/_14sdp</dimen>
@@ -44,7 +47,6 @@
     <dimen name="vectorXL">@dimen/_46sdp</dimen>
 
     <!--Buttons-->
-
     <dimen name="buttonCornerRadius">@dimen/_8sdp</dimen>
     <dimen name="buttonHeight">@dimen/_28sdp</dimen>
     <dimen name="buttonCardElevation">@dimen/_6sdp</dimen>
@@ -52,29 +54,29 @@
     <!--Shapes-->
     <dimen name="globalCorners">@dimen/_12sdp</dimen>
     <dimen name="tabIndicatorSize">@dimen/_2sdp</dimen>
-    <dimen name="verticalShadowWidth">@dimen/_8sdp</dimen>
 
     <!--Custom views-->
-    <dimen name="circularLoadingBarSize">@dimen/_32sdp</dimen>
-    <dimen name="circularLoadingBarTrackCornerRadius">@dimen/_2sdp</dimen>
-
     <dimen name="topBarButtonWidth">@dimen/_62sdp</dimen>
     <dimen name="topBarButtonHeight">@dimen/_40sdp</dimen>
+
+    <!--Progress indicator-->
+    <dimen name="progressIndicatorCornerRadius">@dimen/M</dimen>
+    <dimen name="progressIndicatorThickness">@dimen/_3sdp</dimen>
+    <dimen name="progressIndicatorThicknessM">@dimen/_4sdp</dimen>
+
+    <dimen name="circularIndicatorSizeS">@dimen/_16sdp</dimen>
+    <dimen name="circularIndicatorSizeM">@dimen/_30sdp</dimen>
+    <dimen name="circularIndicatorSizeL">@dimen/_40sdp</dimen>
+    <dimen name="circularIndicatorSizeXL">@dimen/_58sdp</dimen>
+
+    <dimen name="loadingIndicatorSize">@dimen/_24sdp</dimen>
+    <dimen name="loadingIndicatorPadding">@dimen/_8sdp</dimen>
 
     <!--Seek bar-->
     <dimen name="seekBarProgressCornerRadius">@dimen/_8sdp</dimen>
     <dimen name="seekBarThumbCornerRadius">@dimen/_10sdp</dimen>
     <dimen name="seekBarThumbSize">@dimen/_10sdp</dimen>
     <dimen name="seekBarHeight">@dimen/_6sdp</dimen>
-
-    <!--ProgressBar & SeekBar (OLD)-->
-    <dimen name="circularProgressBarThickness">8</dimen>
-    <dimen name="circularProgressIndicatorThickness">@dimen/_6sdp</dimen>
-    <dimen name="smallCircularProgressBarSize">@dimen/_16sdp</dimen>
-    <dimen name="smallCircularProgressBarThickness">@dimen/_2sdp</dimen>
-
-    <dimen name="linearProgressBarHeight">@dimen/_3sdp</dimen>
-    <dimen name="progressBarTrackCornerRadius">@dimen/_2sdp</dimen>
 
     <!--Scrollbar-->
     <dimen name="scrollbarIndicatorWidth">@dimen/_4sdp</dimen>
@@ -86,9 +88,8 @@
     <dimen name="songSeekBarThumbOffset">@dimen/_minus2sdp</dimen>
     <dimen name="songSeekBarHorizontalPadding">@dimen/_12sdp</dimen>
 
-    <!--Splash & Loading screen-->
+    <!--Splash Screen-->
     <dimen name="splashScreenLogoSize">@dimen/_48sdp</dimen>
-    <dimen name="loadingScreenProgressBarSize">@dimen/_32sdp</dimen>
 
     <!--Music Player-->
     <dimen name="musicPlayerSongShapeHeight">@dimen/_44sdp</dimen>
@@ -117,22 +118,16 @@
     <dimen name="popupNotificationHeight">@dimen/_26sdp</dimen>
 
     <!--Main menu-->
-    <dimen name="mainMenuButtonSize">@dimen/_120sdp</dimen>
-    <dimen name="mainMenuButtonZ">8dp</dimen>
-
-    <dimen name="mainMenuButtonShapeLeftRadius">@dimen/_200sdp</dimen>
-
-    <dimen name="mainMenuButtonLayoutLeftMargin">@dimen/_80sdp</dimen>
-    <dimen name="mainMenuButtonLayoutWidth">@dimen/_180sdp</dimen>
+    <dimen name="mainMenuButtonSize">@dimen/_130sdp</dimen>
+    <dimen name="mainMenuButtonElevation">8dp</dimen>
+    <dimen name="mainMenuButtonShapeRadius">@dimen/_80sdp</dimen>
+    <dimen name="mainMenuButtonMargin">@dimen/_80sdp</dimen>
+    <dimen name="mainMenuButtonLayoutWidth">@dimen/_440sdp</dimen>
 
     <dimen name="mainMenuLogoCornerRadius">600dip</dimen>
     <dimen name="mainMenuSmallLogoSize">@dimen/_160sdp</dimen>
     <dimen name="mainMenuLogoSize">@dimen/_250sdp</dimen>
     <dimen name="mainMenuLogoElevation">@dimen/_20sdp</dimen>
-
-    <dimen name="mainMenuExitElevation">2dp</dimen>
-    <dimen name="mainMenuSettingsElevation">4dp</dimen>
-    <dimen name="mainMenuPlayElevation">6dp</dimen>
 
     <!--User panel-->
     <dimen name="userPanelAvatarSize">@dimen/_36sdp</dimen>
@@ -168,10 +163,23 @@
     <dimen name="scoreboardItemMarkSize">@dimen/_16sdp</dimen>
     <dimen name="scoreboardItemModSize">@dimen/_10sdp</dimen>
 
-    <!--Beatmap List-->
+    <!--Beatmap Carrousel-->
     <dimen name="beatmapListLeftMargin">@dimen/_40sdp</dimen>
     <dimen name="beatmapListItemHeight">@dimen/_52sdp</dimen>
     <dimen name="beatmapListChildItemHeight">@dimen/_42sdp</dimen>
     <dimen name="beatmapListTrackLeftMargin">@dimen/_50sdp</dimen>
+    <dimen name="beatmapListTrackMarkSize">@dimen/_20sdp</dimen>
+
+    <!--Game Results-->
+    <dimen name="gameResultsCardWidth">@dimen/_350sdp</dimen>
+    <dimen name="gameResultsMarkSize">@dimen/_104sdp</dimen>
+    <dimen name="gameResultsAvatarSize">@dimen/_18sdp</dimen>
+    <dimen name="gameResultsAvatarCornerRadius">@dimen/_6sdp</dimen>
+    <dimen name="gameResultsModImageSize">@dimen/_26sdp</dimen>
+    <dimen name="gameResultsRankingLayoutsWidth">@dimen/_110sdp</dimen>
+    <dimen name="gameResultsRankingLayoutsHeight">@dimen/_34sdp</dimen>
+
+    <!--Hit badge-->
+    <dimen name="hitBadgeSize">@dimen/_20sdp</dimen>
 
 </resources>

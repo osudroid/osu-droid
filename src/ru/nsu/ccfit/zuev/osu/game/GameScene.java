@@ -13,7 +13,6 @@ import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
 import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.Game;
-import com.reco1l.UI;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -86,7 +85,6 @@ import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierFactory;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.PauseMenu;
 import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
@@ -94,7 +92,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
-import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
+import com.reco1l.andengine.scenes.SummaryScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
@@ -113,7 +111,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Scene oldScene;
     private BeatmapData beatmapData;
     private TrackInfo lastTrack;
-    private ScoringScene scoringScene;
+    private SummaryScene summaryScene;
     private TimingPoint currentTimingPoint;
     private TimingPoint soundTimingPoint;
     private TimingPoint firstTimingPoint;
@@ -200,8 +198,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         scene.attachChild(fgScene);
     }
 
-    public void setScoringScene(final ScoringScene sc) {
-        scoringScene = sc;
+    public void setScoringScene(final SummaryScene sc) {
+        summaryScene = sc;
     }
 
     public void setOldScene(final Scene oscene) {
@@ -697,7 +695,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         isFirst = true;
         failcount = 0;
         mainCursorId = -1;
-        engine.setScene(LoadingScreen.getInstance().getScene());
+        Game.loaderScene.show();
 
         final String rfile = track != null ? replayFile : this.replayFile;
 
@@ -708,17 +706,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             public void onComplete() {
-                if (loadComplete == true) {
-                    Game.mActivity.runOnUiThread(UI.loadingScene::close);
-                    prepareScene();
-                } else {
-                    ModMenu.getInstance().setMod(Replay.oldMod);
-                    ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
-                    ModMenu.getInstance().setForceAR(Replay.oldForceAR);
-                    ModMenu.getInstance().setEnableForceAR(Replay.oldEnableForceAR);
-                    ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
-                    quit();
-                }
+                Game.loaderScene.complete(() -> {
+                    if (loadComplete) {
+                        prepareScene();
+                    } else {
+                        ModMenu.getInstance().setMod(Replay.oldMod);
+                        ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
+                        ModMenu.getInstance().setForceAR(Replay.oldForceAR);
+                        ModMenu.getInstance().setEnableForceAR(Replay.oldEnableForceAR);
+                        ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
+                        quit();
+                    }
+                });
             }
         });
         ResourceManager.getInstance().getSound("failsound").stop();
@@ -1260,7 +1259,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         replayText.setAlpha(0.7f);
         fgScene.attachChild(replayText, 0);
         if (stat.getMod().contains(GameMod.MOD_AUTO) || replaying) {
-            playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStat().getPlayerName() : "osu!";
+            playname = replaying ? GlobalManager.getInstance().getScoring().replayStats.getPlayerName() : "osu!";
             replayText.setText("Watching " + playname + " play " + artist + " - " + title + " [" + version + "]");
             replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(40,
                     Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
@@ -1876,7 +1875,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     camera.setCenterDirect(Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT() / 2);
                 }
             }
-            if (scoringScene != null) {
+            if (summaryScene != null) {
                 if (replaying) {
                     ModMenu.getInstance().setMod(Replay.oldMod);
                     ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
@@ -1886,7 +1885,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
 
                 if (replaying)
-                    scoringScene.load(scoringScene.getReplayStat(), null, GlobalManager.getInstance().getSongService(), replayFile, null, lastTrack);
+                    summaryScene.load(lastTrack, summaryScene.replayStats, replayFile, true);
                 else {
                     if (stat.getMod().contains(GameMod.MOD_AUTO)) {
                         stat.setPlayerName("osu!");
@@ -1899,10 +1898,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         storyboardOverlayProxy.setDrawProxy(null);
                     }
 
-                    scoringScene.load(stat, lastTrack, GlobalManager.getInstance().getSongService(), replayFile, trackMD5, null);
+                    summaryScene.load(lastTrack, stat, replayFile, false);
                 }
                 GlobalManager.getInstance().getSongService().setVolume(0.2f);
-                engine.setScene(scoringScene.getScene());
+                engine.setScene(summaryScene);
             } else {
                 engine.setScene(oldScene);
             }
@@ -2662,7 +2661,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         stat.addHitOffset(acc);
 
         if (replaying) {
-            scoringScene.getReplayStat().addHitOffset(acc);
+            summaryScene.replayStats.addHitOffset(acc);
         }
     }
 

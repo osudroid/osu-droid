@@ -2,9 +2,10 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.util.DisplayMetrics;
 
-import com.reco1l.andengine.scenes.SongMenu;
-import com.reco1l.andengine.MainScene;
-import com.reco1l.management.BitmapManager;
+import com.reco1l.Game;
+import com.reco1l.andengine.scenes.LoaderScene;
+import com.reco1l.andengine.scenes.SelectorScene;
+import com.reco1l.andengine.scenes.MainScene;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
@@ -13,7 +14,7 @@ import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
-import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
+import com.reco1l.andengine.scenes.SummaryScene;
 
 /**
  * Created by Fuuko on 2015/4/24.
@@ -22,10 +23,13 @@ public class GlobalManager {
     private static GlobalManager instance;
     private Engine engine;
     private Camera camera;
+
     private GameScene gameScene;
     private MainScene mainScene;
-    private ScoringScene scoring;
-    private SongMenu songMenu;
+    private SummaryScene scoring;
+    private SelectorScene selectorScene;
+    private LoaderScene loaderScene;
+
     private MainActivity mainActivity;
     private int loadingProgress;
     private String info;
@@ -58,15 +62,18 @@ public class GlobalManager {
         setInfo("Loading skin...");
         skinNow = Config.getSkinPath();
         ResourceManager.getInstance().loadSkin(skinNow);
-        BitmapManager.getInstance().loadAssets(skinNow);
+        Game.bitmapManager.loadAssets(skinNow);
         ScoreLibrary.getInstance().load(mainActivity);
         setLoadingProgress(20);
         PropertiesLibrary.getInstance().load(mainActivity);
         setLoadingProgress(30);
         setGameScene(new GameScene(getEngine()));
-        setSongMenu(new SongMenu());
+
+        setSongMenu(new SelectorScene());
+        setScoring(new SummaryScene());
+        setLoadingScene(new LoaderScene());
+
         setLoadingProgress(40);
-        setScoring(new ScoringScene(getEngine(), getGameScene(), null)); // TODO SCORING
         getGameScene().setScoringScene(getScoring());
         getGameScene().setOldScene(getSongMenu());
         if (songService != null) {
@@ -115,20 +122,20 @@ public class GlobalManager {
         this.mainScene = mainScene;
     }
 
-    public ScoringScene getScoring() {
+    public SummaryScene getScoring() {
         return scoring;
     }
 
-    public void setScoring(ScoringScene scoring) {
+    public void setScoring(SummaryScene scoring) {
         this.scoring = scoring;
     }
 
-    public SongMenu getSongMenu() {
-        return songMenu;
+    public SelectorScene getSongMenu() {
+        return selectorScene;
     }
 
-    public void setSongMenu(SongMenu songMenu) {
-        this.songMenu = songMenu;
+    public void setSongMenu(SelectorScene selectorScene) {
+        this.selectorScene = selectorScene;
     }
 
     public MainActivity getMainActivity() {
@@ -175,5 +182,13 @@ public class GlobalManager {
         final DisplayMetrics dm = new DisplayMetrics();
         mainActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
         return dm;
+    }
+
+    public LoaderScene getLoadingScene() {
+        return loaderScene;
+    }
+
+    public void setLoadingScene(LoaderScene loaderScene) {
+        this.loaderScene = loaderScene;
     }
 }

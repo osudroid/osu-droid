@@ -1,9 +1,13 @@
-package com.reco1l.andengine;
+package com.reco1l.andengine.scenes;
+
+
+// Created by Reco1l on 19/11/2022, 23:31
 
 // Created by Reco1l on 18/9/22 19:28
 
 import com.reco1l.Game;
 import com.reco1l.UI;
+import com.reco1l.andengine.BaseScene;
 import com.reco1l.enums.MusicOption;
 import com.reco1l.enums.Screens;
 import com.reco1l.game.TimingWrapper;
@@ -25,7 +29,7 @@ public class MainScene extends BaseScene {
 
     @Override
     public Screens getIdentifier() {
-        return Screens.MAIN;
+        return Screens.Main;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -55,10 +59,10 @@ public class MainScene extends BaseScene {
             }
         });
 
-        Game.library.loadLibraryCache(Game.mActivity, false);
+        Game.library.loadLibraryCache(Game.activity, false);
 
-        Config.loadOnlineConfig(Game.mActivity);
-        Game.online.Init(Game.mActivity);
+        Config.loadOnlineConfig(Game.activity);
+        Game.online.Init(Game.activity);
         Game.onlineScoring.login();
 
         setTouchAreaBindingEnabled(true);
@@ -72,18 +76,14 @@ public class MainScene extends BaseScene {
 
     @Override
     protected void onSceneUpdate(float secondsElapsed) {
-        if (Game.songService != null) {
-            if (Game.songService.getStatus() == Status.PLAYING) {
-                //beatMarker.update();
-            }
-        }
+
     }
 
     @Override
     public void onMusicChange(BeatmapInfo beatmap) {
         super.onMusicChange(beatmap);
 
-        Game.mActivity.runOnUiThread(() -> {
+        Game.activity.runOnUiThread(() -> {
             if (UI.topBar.musicButton != null) {
                 UI.topBar.musicButton.changeMusic(beatmap);
             }
@@ -114,13 +114,14 @@ public class MainScene extends BaseScene {
         dim.setColor(0, 0, 0, 0f);
         attachChild(dim, 2);
 
-        UI.mainMenu.playExitAnim();
+        UI.mainMenu.onExit();
         Game.resources.getSound("seeya").play();
         dim.registerEntityModifier(new AlphaModifier(3.0f, 0, 1));
     }
 
     @Override
     public void onSceneChange(Scene oldScene, Scene newScene) {
+        super.onSceneChange(oldScene, newScene);
         if (newScene == this) {
             UI.background.setBlur(false);
         }

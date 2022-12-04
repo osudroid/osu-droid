@@ -40,6 +40,14 @@
                     android:drawableStart="@drawable/v_star_xs"
                     android:text="00.00" />
 
+                <ImageView
+                    android:id="@+id/bl_mark"
+                    android:layout_width="@dimen/beatmapListTrackMarkSize"
+                    android:layout_height="@dimen/beatmapListTrackMarkSize"
+                    android:layout_marginLeft="@dimen/S"
+                    android:src="@drawable/ranking_sample_small"
+                    android:visibility="gone" />
+
                 <TextView
                     android:id="@+id/bl_difficulty"
                     style="@style/text"

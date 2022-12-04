@@ -22,7 +22,6 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.sql.DBOpenHelper;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
-import ru.nsu.ccfit.zuev.osu.online.SendingPanel;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class ScoreLibrary {
@@ -143,11 +142,10 @@ public class ScoreLibrary {
 
     }
 
-    public void sendScoreOnline(final StatisticV2 stat, final String replay,
-                                final SendingPanel panel) {
+    public void sendScoreOnline(final StatisticV2 stat, final String replay) {
         Debug.i("Preparing for online!");
         if (stat.getModifiedTotalScore() <= 0) return;
-        OnlineScoring.getInstance().sendRecord(stat, panel, replay);
+        OnlineScoring.getInstance().sendRecord(stat, replay);
     }
 
     public void addScore(final String trackPath, final StatisticV2 stat, final String replay) {

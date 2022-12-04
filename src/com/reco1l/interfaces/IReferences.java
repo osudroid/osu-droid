@@ -22,7 +22,7 @@ import ru.nsu.ccfit.zuev.skins.SkinManager;
 public interface IReferences {
 
     GlobalManager global = GlobalManager.getInstance();
-    MainActivity mActivity = global.getMainActivity();
+    MainActivity activity = global.getMainActivity();
 
     ModMenu modMenu = ModMenu.getInstance();
     GameEngine engine = GameEngine.getInstance();

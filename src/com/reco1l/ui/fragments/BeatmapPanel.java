@@ -13,7 +13,7 @@ import com.reco1l.ui.data.BeatmapProperty;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.data.Scoreboard;
 import com.reco1l.ui.platform.UIFragment;
-import com.reco1l.utils.Animation;
+import com.reco1l.utils.AnimationOld;
 import com.reco1l.utils.Resources;
 import com.reco1l.interfaces.IGameMods;
 
@@ -92,7 +92,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
     @Override
     protected Screens getParent() {
-        return Screens.SONG_MENU;
+        return Screens.Selector;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -111,7 +111,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
         body = find("body");
 
-        new Animation(body)
+        new AnimationOld(body)
                 .moveX(-bodyWidth, 0)
                 .fade(0, 1)
                 .play(300);
@@ -287,7 +287,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         if (track == null || !isLoaded )
             return;
 
-        mActivity.runOnUiThread(() -> {
+        activity.runOnUiThread(() -> {
 
             pStars.set(track.getDifficulty());
             pCircles.set(track.getHitCircleCount());
@@ -300,7 +300,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
             new Thread(() -> {
                 DifficultyReCalculator math = new DifficultyReCalculator();
                 pStars.value = math.recalculateStar(track, math.getCS(track), modMenu.getSpeed());
-                mActivity.runOnUiThread(pStars::update);
+                activity.runOnUiThread(pStars::update);
             }).start();
 
             if (!isShowing)
@@ -344,7 +344,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
             int lastColor = BeatmapHelper.Palette.getColor(lastDifficulty);
             lastDifficulty = pStars.value;
 
-            new Animation().ofArgb(lastTextColor, textColor)
+            new AnimationOld().ofArgb(lastTextColor, textColor)
                     .runOnUpdate(value -> {
                         pStars.view.setTextColor(value);
                         if (pStars.view.getCompoundDrawablesRelative()[0] != null) {
@@ -352,11 +352,11 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
                         }
                     }).play(500);
 
-            new Animation().ofArgb(lastColor, color)
+            new AnimationOld().ofArgb(lastColor, color)
                     .runOnUpdate(value -> pStars.view.getBackground().setTint(value))
                     .play(500);
 
-            new Animation(banner).ofArgb(lastDarkerColor, darkerColor)
+            new AnimationOld(banner).ofArgb(lastDarkerColor, darkerColor)
                     .runOnUpdate(value -> {
                         banner.setCardBackgroundColor(value);
                         mapper.getBackground().setTint(value);
@@ -372,12 +372,12 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
         boolean toRight = tabIndicator.getTranslationX() < button.getX();
 
-        new Animation(tabIndicator).moveX(tabIndicator.getTranslationX(), button.getX())
+        new AnimationOld(tabIndicator).moveX(tabIndicator.getTranslationX(), button.getX())
                 .play(150);
-        new Animation(pageContainer).moveX(0, toRight ? -60 : 60).fade(1, 0)
+        new AnimationOld(pageContainer).moveX(0, toRight ? -60 : 60).fade(1, 0)
                 .runOnStart(() -> isTabAnimInProgress = true)
                 .play(200);
-        new Animation(pageContainer).moveX(toRight ? 60 : -60, 0).fade(0, 1)
+        new AnimationOld(pageContainer).moveX(toRight ? 60 : -60, 0).fade(0, 1)
                 .runOnEnd(() -> isTabAnimInProgress = false)
                 .delay(200)
                 .play(200);
@@ -392,7 +392,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         if (!isShowing || !isLoaded)
             return;
 
-        mActivity.runOnUiThread(() -> {
+        activity.runOnUiThread(() -> {
             if (scoreboard.loadScores(global.getSelectedTrack(), isOnlineBoard)) {
                 message.setVisibility(View.GONE);
             } else {
@@ -410,7 +410,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
             return;
         scoreboard.setContainer(null);
 
-        new Animation(body).moveX(0, -bodyWidth)
+        new AnimationOld(body).moveX(0, -bodyWidth)
                 .marginTop((int) Resources.dimen(R.dimen.topBarHeight), 0)
                 .fade(1, 0)
                 .runOnEnd(super::close)

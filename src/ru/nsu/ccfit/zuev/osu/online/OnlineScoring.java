@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu.online;
 
 import android.os.AsyncTask;
 
+import com.reco1l.Game;
+import com.reco1l.UI;
 import com.reco1l.ui.data.NotificationTable;
 import com.reco1l.interfaces.IReferences;
 
@@ -17,7 +19,7 @@ import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
-public class OnlineScoring implements IReferences {
+public class OnlineScoring {
     private static final int attemptCount = 5;
     private static OnlineScoring instance = null;
     private Boolean onlineMutex = new Boolean(false);
@@ -42,7 +44,7 @@ public class OnlineScoring implements IReferences {
             public void run() {
                 synchronized (onlineMutex) {
                     boolean success = false;
-                    onlineHelper.clear();
+                    Game.onlineHelper.clear();
                     //Trying to send request
                     for (int i = 0; i < 3; i++) {
                         NotificationTable.accountLogIn("try", i);
@@ -72,7 +74,7 @@ public class OnlineScoring implements IReferences {
             }
 
             public void onComplete() {
-                onlineHelper.update();
+                Game.onlineHelper.update();
             }
         });
     }
@@ -110,7 +112,7 @@ public class OnlineScoring implements IReferences {
         });
     }
 
-    public void sendRecord(final StatisticV2 record, final SendingPanel panel, final String replay) {
+    public void sendRecord(final StatisticV2 record, final String replay) {
         if (OnlineManager.getInstance().isStayOnline() == false)
             return;
         if (OnlineManager.getInstance().isReadyToSend() == false)
@@ -144,9 +146,8 @@ public class OnlineScoring implements IReferences {
                             if (OnlineManager.getInstance().getFailMessage().equals("Invalid record data"))
                                 i = attemptCount;
                         } else if (success) {
-                            onlineHelper.update();
-                            OnlineManager mgr = OnlineManager.getInstance();
-                            panel.show(mgr.getMapRank(), mgr.getScore(), mgr.getRank(), mgr.getAccuracy());
+                            Game.onlineHelper.update();
+                            UI.gameSummary.updateOnlineData(true);
                             OnlineManager.getInstance().sendReplay(replay);
                             break;
                         }
@@ -157,11 +158,7 @@ public class OnlineScoring implements IReferences {
                         } catch (InterruptedException e) {
                         }
                     }
-
-                    if (!success) {
-                        panel.setFail();
-                    }
-
+                    UI.gameSummary.updateOnlineData(false);
                 }
             }
 

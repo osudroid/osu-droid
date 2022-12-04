@@ -123,19 +123,6 @@ public class SongService extends Service {
         System.out.println(audioFunc.jump(time));
     }
 
-    public boolean isGaming() {
-        return isGaming;
-    }
-
-    public void setGaming(boolean isGaming) {
-        audioFunc.setGaming(isGaming);
-        if (!isGaming) {
-            hideNotification();
-        }
-        Log.w("Gaming Mode", "In Gamming mode :" + isGaming);
-        this.isGaming = isGaming;
-    }
-
     /*
     public boolean isSettingMenu() {
         return isSettingMenu;
@@ -179,14 +166,16 @@ public class SongService extends Service {
         return new float[0];
     }
 
+    // It isn't the real level of sound but it's better for animations
     public float getLevel() {
-        if (getSpectrum() == null) {
+        final float[] fft = getSpectrum();
+        if (fft == null) {
             return 0;
         }
         float level = 1;
 
         for (int i = 0; i < 6; i++) {
-            level += getSpectrum()[i] * 0.15f;
+            level += fft[i] * 0.15f;
         }
         return level / 6;
     }

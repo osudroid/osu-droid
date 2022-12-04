@@ -37,7 +37,7 @@
             style="@style/text"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:background="@drawable/round_shape"
+            android:background="@drawable/shape_rounded"
             android:backgroundTint="@color/checkBoxOffColor"
             android:paddingVertical="@dimen/XS"
             android:paddingHorizontal="@dimen/S"

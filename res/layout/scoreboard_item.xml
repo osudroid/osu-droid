@@ -137,6 +137,7 @@
                     style="@style/text"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentBottom="true"
+                    android:textStyle="bold"
                     android:text="000,000,000"
                     android:layout_marginRight="@dimen/_1sdp"/>
 

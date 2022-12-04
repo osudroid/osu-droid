@@ -2,7 +2,7 @@ package com.reco1l.utils;
 
 // Created by Reco1l on 2/7/22 06:18
 
-import static com.reco1l.interfaces.IReferences.mActivity;
+import static com.reco1l.interfaces.IReferences.activity;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +14,8 @@ import androidx.annotation.DimenRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
 
+import com.reco1l.Game;
+
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class Resources {
@@ -21,23 +23,23 @@ public class Resources {
     //--------------------------------------------------------------------------------------------//
 
     public static int id(String name, String type) {
-        return mActivity.getResources().getIdentifier(name, type, mActivity.getPackageName());
+        return Game.activity.getResources().getIdentifier(name, type, Game.activity.getPackageName());
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public static Drawable drw(@DrawableRes int id) {
-        return mActivity.getDrawable(id);
+        return Game.activity.getDrawable(id);
     }
 
     public static Bitmap drwAsBitmap(@DrawableRes int id) {
-        return BitmapFactory.decodeResource(mActivity.getResources(), id);
+        return BitmapFactory.decodeResource(Game.activity.getResources(), id);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public static float dimen(@DimenRes int id) {
-        return mActivity.getResources().getDimension(id);
+        return Game.activity.getResources().getDimension(id);
     }
 
     public static float sdp(int dp) {
@@ -63,19 +65,19 @@ public class Resources {
             }
             id = id("_" + dp + "sdp", "dimen");
         }
-        return mActivity.getResources().getDimension(id);
+        return Game.activity.getResources().getDimension(id);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public static String str(@StringRes int id) {
-        return mActivity.getString(id);
+        return Game.activity.getString(id);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public static int color(@ColorRes int id) {
-        return mActivity.getResources().getColor(id);
+        return Game.activity.getResources().getColor(id);
     }
 
     public static ColorDrawable colorAsDrw(@ColorRes int id) {

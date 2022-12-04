@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
-import com.reco1l.utils.Animation;
+import com.reco1l.utils.AnimationOld;
 import com.reco1l.utils.ViewTouchHandler;
 import com.reco1l.interfaces.IReferences;
 import com.reco1l.UI;
@@ -49,7 +49,7 @@ public class GameNotification implements IReferences {
         this.header = header;
         if (icon == null) {
             try {
-                InputStream asset = mActivity.getAssets().open("music_list.png");
+                InputStream asset = activity.getAssets().open("music_list.png");
                 icon = Drawable.createFromStream(asset, null);
             } catch (IOException ignored) { }
         }
@@ -119,15 +119,15 @@ public class GameNotification implements IReferences {
      * Note: To update the progress of the ProgressBar use {@link #updateProgress(int)} instead.
      */
     public void update() {
-        mActivity.runOnUiThread(() -> {
+        activity.runOnUiThread(() -> {
             if (!UI.notificationCenter.isShowing) {
                 UI.notificationCenter.createBadgeNotification(this);
                 return;
             }
-            new Animation(innerBody).moveX(0, -50).fade(1, 0)
+            new AnimationOld(innerBody).moveX(0, -50).fade(1, 0)
                     .runOnEnd(() -> {
                         load();
-                        new Animation(innerBody).moveX(50, 0).fade(0, 1).play(120);
+                        new AnimationOld(innerBody).moveX(50, 0).fade(0, 1).play(120);
                     })
                     .play(120);
         });
@@ -136,6 +136,6 @@ public class GameNotification implements IReferences {
     public void updateProgress(int progress) {
         this.progress = progress;
         if (UI.notificationCenter.isShowing && progressBar != null)
-            mActivity.runOnUiThread(() -> progressBar.setProgress(progress));
+            activity.runOnUiThread(() -> progressBar.setProgress(progress));
     }
 }

@@ -62,6 +62,10 @@ public final class MusicManager {
         return false;
     }
 
+    public boolean isPlaying() {
+        return Game.songService != null && Game.songService.getStatus() == Status.PLAYING;
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     private Status getState() {

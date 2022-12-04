@@ -3,18 +3,20 @@ package com.reco1l;
 import android.content.Intent;
 import android.os.PowerManager;
 
-import com.reco1l.andengine.scenes.SongMenu;
-import com.reco1l.andengine.MainScene;
+import com.reco1l.andengine.scenes.LoaderScene;
+import com.reco1l.andengine.scenes.SelectorScene;
+import com.reco1l.andengine.scenes.MainScene;
+import com.reco1l.andengine.scenes.SummaryScene;
 import com.reco1l.interfaces.IReferences;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
+import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
-import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 // Created by Reco1l on 26/9/22 19:10
@@ -22,9 +24,10 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 public final class Game implements IReferences {
 
     public static MainScene mainScene = global.getMainScene();
-    public static SongMenu songMenu = global.getSongMenu();
+    public static SelectorScene selectorScene = global.getSongMenu();
     public static GameScene gameScene = global.getGameScene();
-    public static ScoringScene scoringScene = global.getScoring();
+    public static SummaryScene summaryScene = global.getScoring();
+    public static LoaderScene loaderScene = global.getLoadingScene();
 
     public static SongService songService = getSongService();
 
@@ -39,7 +42,7 @@ public final class Game implements IReferences {
     public static void exit() {
         engine.setScene(mainScene);
 
-        PowerManager.WakeLock wakeLock = mActivity.getWakeLock();
+        PowerManager.WakeLock wakeLock = activity.getWakeLock();
         if (wakeLock != null && wakeLock.isHeld()) {
             wakeLock.release();
         }
@@ -49,10 +52,10 @@ public final class Game implements IReferences {
         new Timer().schedule(new TimerTask() {
             public void run() {
                 if (global.getSongService() != null) {
-                    mActivity.unbindService(mActivity.connection);
-                    mActivity.stopService(new Intent(mActivity, SongService.class));
+                    activity.unbindService(activity.connection);
+                    activity.stopService(new Intent(activity, SongService.class));
                 }
-                mActivity.finish();
+                activity.finish();
             }
         }, 3000);
     }
@@ -74,12 +77,9 @@ public final class Game implements IReferences {
                 TrackInfo track = library.findTrackByFileNameAndMD5(replay.getMapFile(), replay.getMd5());
 
                 if (track != null) {
-                    UI.beatmapCarrousel.setSelected(track.getBeatmap());
-                    resources.loadBackground(track.getBackground());
-                    global.getSongService().preLoad(track.getBeatmap().getMusic());
-                    global.getSongService().play();
-                    scoringScene.load(stat, null, global.getSongService(), path, null, track);
-                    engine.setScene(scoringScene.getScene());
+                    UI.beatmapCarrousel.setSelected(null, track);
+                    musicManager.change(track.getBeatmap());
+                    summaryScene.load(track, stat, path, true);
                 }
             }
         }

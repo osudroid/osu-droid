@@ -1,8 +1,6 @@
 package com.reco1l.ui.fragments;
 
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -15,14 +13,13 @@ import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.UI;
-import com.reco1l.utils.Animation2;
+import com.reco1l.utils.Animation;
 import com.reco1l.utils.AnimationTable;
 import com.reco1l.utils.KeyInputHandler;
-import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.data.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
-import com.reco1l.utils.Animation;
+import com.reco1l.utils.AnimationOld;
 import com.reco1l.utils.Resources;
 import com.reco1l.view.BarButton;
 
@@ -41,19 +38,16 @@ public class TopBar extends UIFragment {
 
     public static TopBar instance;
 
-    private View back;
-    public CardView body;
-    public TextView author;
-    private LinearLayout container, buttonsContainer;
-
     public UserBox userBox;
     public MusicButton musicButton;
 
+    private View back, body;
+    private TextView author;
+    private LinearLayout container, buttonsContainer;
+
     private final Map<Screens, ArrayList<BarButton>> buttons;
 
-    public int barHeight;
-
-    private boolean isAuthorVisible = false;
+    private int barHeight;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -75,7 +69,7 @@ public class TopBar extends UIFragment {
 
     @Override
     protected Screens[] getParents() {
-        return new Screens[] { Screens.SONG_MENU, Screens.SCORING, Screens.PLAYER_LOADER};
+        return new Screens[]{Screens.Selector, Screens.Summary};
     }
 
     @Override
@@ -86,62 +80,20 @@ public class TopBar extends UIFragment {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    protected void onScreenChange(Screens lastScreen, Screens newScene) {
-        if (isShowing) {
-            reloadButtons(newScene);
-        }
-    }
-
-    public void reloadButtons(Screens current) {
-        showAuthorText(current == Screens.MAIN);
-
-        if (container == null || buttonsContainer == null)
-            return;
-
-        Animation fadeIn = new Animation(container);
-
-        fadeIn.duration(200);
-        fadeIn.moveX(-60, 0);
-        fadeIn.fade(0, 1);
-
-        fadeIn.runOnStart(() -> {
-            ArrayList<BarButton> toAdd = buttons.get(current);
-
-            if (toAdd != null) {
-                for (BarButton button : toAdd) {
-                    buttonsContainer.addView(button);
-                    bindTouchListener(button, button.getTouchListener());
-                }
-            }
-        });
-
-        Animation fadeOut = new Animation(container);
-
-        fadeOut.moveX(0, -60);
-        fadeOut.fade(1f, 0);
-        fadeOut.runOnEnd(() -> {
-            buttonsContainer.removeAllViews();
-
-            if (current == Screens.MAIN) {
-                musicButton.setVisibility(true);
-                back.setVisibility(View.GONE);
-            } else {
-                musicButton.setVisibility(false);
-                back.setVisibility(View.VISIBLE);
-                bindTouchListener(back, KeyInputHandler::performBack);
-            }
-
-            fadeIn.play();
-        });
-        fadeOut.play(200);
-    }
-
-    @Override
     protected void onLoad() {
         setDismissMode(false, false);
         barHeight = (int) Resources.dimen(R.dimen.topBarHeight);
 
         body = find("body");
+
+        Animation.of(body)
+                .fromY(-barHeight)
+                .toY(0)
+                .play(200);
+
+        Game.platform.animate(true, true)
+                .toTopMargin(barHeight)
+                .play(200);
 
         musicButton = new MusicButton(this);
         userBox = new UserBox(this);
@@ -159,6 +111,7 @@ public class TopBar extends UIFragment {
 
         bindTouchListener(find("inbox"), UI.notificationCenter::altShow);
         bindTouchListener(find("settings"), UI.settingsPanel::altShow);
+        bindTouchListener(back, KeyInputHandler::performBack);
 
         bindTouchListener(author, () -> new Dialog(DialogTable.author()).show());
 
@@ -168,29 +121,46 @@ public class TopBar extends UIFragment {
     }
 
     @Override
-    public void show() {
-        super.show();
-
-        if (isShowing && body != null) {
-            Animation show = new Animation(body);
-
-            show.moveY(-barHeight, 0);
-            show.interpolator(Easing.OutExpo);
-
-            Game.platform.animateRender(anim -> {
-                anim.moveY(0, barHeight);
-                anim.interpolator(Easing.OutExpo);
-                anim.duration(200);
-            });
-
-            Game.platform.animateScreen(animation -> {
-                animation.toTopMargin = barHeight;
-                animation.duration = 200;
-                animation.interpolator = Easing.OutExpo;
-            });
-
-            show.play(200);
+    protected void onScreenChange(Screens lastScreen, Screens newScreen) {
+        if (isShowing) {
+            reloadButtons(newScreen);
+            showAuthorText(newScreen == Screens.Main);
         }
+    }
+
+    public void reloadButtons(Screens current) {
+        if (container == null || buttonsContainer == null) {
+            return;
+        }
+
+        Animation.of(container)
+                .toX(-60)
+                .toAlpha(0)
+                .runOnEnd(() -> {
+                    buttonsContainer.removeAllViews();
+
+                    if (current == Screens.Main) {
+                        musicButton.setVisibility(true);
+                        back.setVisibility(View.GONE);
+                    } else {
+                        musicButton.setVisibility(false);
+                        back.setVisibility(View.VISIBLE);
+                    }
+
+                    ArrayList<BarButton> toAdd = buttons.get(current);
+                    if (toAdd != null) {
+                        for (BarButton button : toAdd) {
+                            buttonsContainer.addView(button);
+                            bindTouchListener(button, button.getTouchListener());
+                        }
+                    }
+
+                    Animation.of(container)
+                            .toX(0)
+                            .toAlpha(1)
+                            .play(200);
+                })
+                .play(200);
     }
 
     @Override
@@ -198,44 +168,32 @@ public class TopBar extends UIFragment {
         if (isShowing) {
             showAuthorText(false);
 
-            Animation close = new Animation(body);
+            Animation.of(body)
+                    .toY(-barHeight)
+                    .runOnEnd(super::close)
+                    .play(200);
 
-            close.moveY(0, -barHeight);
-            close.interpolator(Easing.OutExpo);
-            close.runOnEnd(super::close);
-
-            Game.platform.animateRender(anim -> {
-                anim.moveY(Resources.dimen(R.dimen.topBarHeight), 0);
-                anim.interpolator(Easing.OutExpo);
-                anim.duration(200);
-            });
-
-            Game.platform.animateScreen(animation -> {
-                animation.toTopMargin = 0;
-                animation.duration = 200;
-                animation.interpolator = Easing.OutExpo;
-            });
-
-            close.play(200);
+            Game.platform.animate(true, true)
+                    .toTopMargin(0)
+                    .play(200);
         }
     }
 
     //--------------------------------------------------------------------------------------------//
 
     private void showAuthorText(boolean bool) {
-        if (author == null || bool == isAuthorVisible)
+        if (author == null)
             return;
 
-        isAuthorVisible = bool;
-        Animation anim = new Animation(author);
+        Animation anim = Animation.of(author);
 
-        if (bool) {
-            anim.fade(0, 1);
-            anim.moveY(50, 0);
+        if (bool && author.getVisibility() != View.VISIBLE) {
+            anim.toAlpha(1);
+            anim.toY(0);
             anim.runOnStart(() -> author.setVisibility(View.VISIBLE));
         } else {
-            anim.fade(1, 0);
-            anim.moveY(0, 50);
+            anim.toAlpha(0);
+            anim.toY(50);
             anim.runOnEnd(() -> author.setVisibility(View.GONE));
         }
         anim.play(200);
@@ -282,23 +240,30 @@ public class TopBar extends UIFragment {
         }
 
         public void animateButton(boolean show) {
-            Animation bodyAnim = new Animation(body);
-            Animation arrowAnim = new Animation(arrow);
+            Animation bodyAnim = Animation.of(body);
+            Animation arrowAnim = Animation.of(arrow);
 
             if (show) {
-                bodyAnim.moveY(0, -10);
-                bodyAnim.fade(1, 0);
+                bodyAnim.fromY(0)
+                        .toY(-10)
+                        .fromAlpha(1)
+                        .toAlpha(0);
 
-                arrowAnim.moveY(10, 0);
-                arrowAnim.fade(0, 1);
+                arrowAnim.fromY(10)
+                        .toY(0)
+                        .fromAlpha(0)
+                        .toAlpha(1);
             } else {
-                bodyAnim.moveY(10, 0);
-                bodyAnim.fade(0, 1);
+                bodyAnim.fromY(10)
+                        .toY(0)
+                        .fromAlpha(0)
+                        .toAlpha(1);
 
-                arrowAnim.moveY(0, -10);
-                arrowAnim.fade(1, 0);
+                arrowAnim.fromY(0)
+                        .toY(-10)
+                        .fromAlpha(1)
+                        .toAlpha(0);
             }
-            arrowAnim.rotation(180, 180);
             arrowAnim.duration(150);
 
             bodyAnim.runOnEnd(arrowAnim::play);

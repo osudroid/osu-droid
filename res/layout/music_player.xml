@@ -71,7 +71,7 @@
                             android:layout_height="@dimen/vectorL"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:background="@drawable/round_shape"
+                            android:background="@drawable/shape_rounded"
                             android:src="@drawable/v_queue" />
 
                     </RelativeLayout>
@@ -147,7 +147,7 @@
                         style="@style/icon_button"
                         android:layout_width="@dimen/vectorXL"
                         android:layout_height="@dimen/vectorXL"
-                        android:background="@drawable/round_shape"
+                        android:background="@drawable/shape_rounded"
                         android:src="@drawable/v_prev_l" />
 
                     <ImageView
@@ -156,7 +156,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="@dimen/musicPlayerPlayButtonMargin"
-                        android:background="@drawable/round_shape"
+                        android:background="@drawable/shape_rounded"
                         android:src="@drawable/v_pause_xl" />
 
                     <ImageView
@@ -164,7 +164,7 @@
                         style="@style/icon_button"
                         android:layout_width="@dimen/vectorXL"
                         android:layout_height="@dimen/vectorXL"
-                        android:background="@drawable/round_shape"
+                        android:background="@drawable/shape_rounded"
                         android:src="@drawable/v_next_l" />
                 </LinearLayout>
 

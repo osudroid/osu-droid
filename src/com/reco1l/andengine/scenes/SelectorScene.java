@@ -19,23 +19,22 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class SongMenu extends BaseScene {
-
-    public TrackInfo currentTrack, lastTrack;
+public class SelectorScene extends BaseScene {
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     public Screens getIdentifier() {
-        return Screens.SONG_MENU;
+        return Screens.Selector;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onCreate() {
-        setTimingWrapper(true);
+        setTimingWrapper(false);
         setContinuousPlay(false);
+        setBackgroundAutoChange(false);
 
         bindDataBaseChangedListener();
         setTouchAreaBindingEnabled(true);
@@ -43,17 +42,17 @@ public class SongMenu extends BaseScene {
     }
 
     private void createTopBarButtons() {
-        BarButton mods = new BarButton(Game.mActivity);
+        BarButton mods = new BarButton(Game.activity);
 
         mods.setAsToggle(true);
         mods.setIcon(Resources.drw(R.drawable.v_tune));
 
-        BarButton search = new BarButton(Game.mActivity);
+        BarButton search = new BarButton(Game.activity);
 
         search.setAsToggle(true);
         search.setIcon(Resources.drw(R.drawable.v_search));
 
-        BarButton random = new BarButton(Game.mActivity);
+        BarButton random = new BarButton(Game.activity);
 
         random.setIcon(Resources.drw(R.drawable.v_random));
 
@@ -67,48 +66,68 @@ public class SongMenu extends BaseScene {
 
     }
 
-    public void load() {
+    @Override
+    public void show() {
+        super.show();
+
         setTouchAreaBindingEnabled(false);
         bindDataBaseChangedListener();
-        Game.global.getGameScene().setOldScene(this);
+        Game.gameScene.setOldScene(this);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void onTrackSelect(TrackInfo track) {
+    public void onTrackSelect(TrackInfo track, boolean isAlreadySelected) {
         Game.global.setSelectedTrack(track);
 
-        if (currentTrack == track) {
+        if (isAlreadySelected) {
             Game.resources.getSound("menuhit").play();
             Game.musicManager.stop();
             Game.global.getGameScene().startGame(track, null);
-            lastTrack = currentTrack;
-            currentTrack = null;
             return;
         }
 
-        EdExtensionHelper.onSelectTrack(track);
+        // EdExtensionHelper.onSelectTrack(track);
 
         UI.beatmapPanel.updateProperties(track);
         UI.beatmapPanel.updateScoreboard();
-
-        //UI.background.changeFrom(track.getBackground());
-        currentTrack = track;
+        UI.background.changeFrom(track.getBackground());
     }
 
     public void playMusic(BeatmapInfo beatmap) {
         Game.musicManager.change(beatmap);
-        Game.global.getSongService().setVolume(0);
+        Game.songService.setVolume(0);
 
         if (beatmap.getPreviewTime() >= 0) {
-            Game.global.getSongService().seekTo(beatmap.getPreviewTime());
+            Game.songService.seekTo(beatmap.getPreviewTime());
         } else {
-            Game.global.getSongService().seekTo(Game.global.getSongService().getLength() / 2);
+            Game.songService.seekTo(Game.songService.getLength() / 2);
         }
 
-        new Animation().ofFloat(0, Config.getBgmVolume())
-                .runOnUpdate(Game.global.getSongService()::setVolume)
+        Animation.ofFloat(0, Config.getBgmVolume())
+                .runOnUpdate(value -> Game.songService.setVolume((float) value))
                 .play(400);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public void loadScore(int id, String player) {
+        boolean isOnline = UI.beatmapPanel.isOnlineBoard;
+
+        Game.summaryScene.loadFromBoard(UI.beatmapCarrousel.selectedTrack, id, isOnline, player);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+
+    @Override
+    public void onMusicChange(BeatmapInfo beatmap) {
+        if (Game.engine.getCurrentScene() != this) {
+            if (beatmap != null) {
+                UI.beatmapCarrousel.selectedTrack = beatmap.getTrack(0);
+            }
+        }
+        super.onMusicChange(beatmap);
     }
 
     @Override
@@ -124,11 +143,10 @@ public class SongMenu extends BaseScene {
 
     @Override
     public void onSceneChange(Scene oldScene, Scene newScene) {
-        if (newScene != this) {
-            currentTrack = null;
-        }
         if (newScene == this) {
             UI.background.setBlur(true);
+        } else {
+            UI.beatmapCarrousel.selectedTrack = null;
         }
     }
 

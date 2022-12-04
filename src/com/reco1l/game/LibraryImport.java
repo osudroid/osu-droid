@@ -72,7 +72,7 @@ public class LibraryImport {
         if (isValid(file)) {
             if (FileUtils.extractZip(file.getPath(), Config.getBeatmapPath())) {
                 if (saveCache) {
-                    Game.library.savetoCache(Game.mActivity);
+                    Game.library.savetoCache(Game.activity);
                 }
                 notification.message = "Beatmap " + file.getName() + " successfully imported!";
                 notification.showDismissButton = true;
@@ -118,9 +118,9 @@ public class LibraryImport {
     }
 
     public static void updateLibrary() {
-        Game.library.savetoCache(Game.mActivity);
-        if (!Game.library.loadLibraryCache(Game.mActivity, true)) {
-            Game.library.scanLibrary(Game.mActivity);
+        Game.library.savetoCache(Game.activity);
+        if (!Game.library.loadLibraryCache(Game.activity, true)) {
+            Game.library.scanLibrary(Game.activity);
             System.gc();
         }
     }

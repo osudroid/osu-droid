@@ -147,7 +147,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="@dimen/topBarMusicButtonHeight"
                     android:layout_marginHorizontal="@dimen/S"
-                    android:background="@drawable/round_shape"
+                    android:background="@drawable/shape_rounded"
                     android:backgroundTint="@color/topBarButtonsBackground">
 
                     <LinearLayout

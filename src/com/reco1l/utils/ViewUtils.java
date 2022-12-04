@@ -29,6 +29,9 @@ public class ViewUtils {
     //--------------------------------------------------------------------------------------------//
 
     public static void scale(View view, float scale) {
+        if (view == null) {
+            return;
+        }
         view.setScaleX(scale);
         view.setScaleY(scale);
     }

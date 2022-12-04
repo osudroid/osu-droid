@@ -17,7 +17,7 @@ import com.edlplan.framework.easing.Easing;
 import com.reco1l.ui.data.GameNotification;
 import com.reco1l.UI;
 import com.reco1l.ui.platform.UIFragment;
-import com.reco1l.utils.Animation;
+import com.reco1l.utils.AnimationOld;
 import com.reco1l.utils.ViewTouchHandler;
 import com.reco1l.utils.Resources;
 import com.reco1l.utils.ViewUtils;
@@ -85,13 +85,14 @@ public class NotificationCenter extends UIFragment {
             }
         });
 
-        new Animation(rootBackground).fade(0, 1)
+        new AnimationOld(rootBackground).fade(0, 1)
                 .play(300);
-        new Animation(platform.renderView).moveX(0, -60)
+        new AnimationOld(platform.renderView).moveX(0, -60)
                 .play(300);
-        new Animation(layer).moveX(bodyWidth, 0).interpolator(Easing.OutExpo)
+
+        new AnimationOld(layer).moveX(bodyWidth, 0).interpolator(Easing.OutExpo)
                 .play(350);
-        new Animation(body).moveX(bodyWidth, 0).interpolator(Easing.OutExpo)
+        new AnimationOld(body).moveX(bodyWidth, 0).interpolator(Easing.OutExpo)
                 .delay(50)
                 .play(400);
 
@@ -118,7 +119,7 @@ public class NotificationCenter extends UIFragment {
                 return;
             }
             // If there's a pending BadgeNotification while they were not allowed, it will be shown instantly.
-            mActivity.runOnUiThread(() -> {
+            activity.runOnUiThread(() -> {
                 if (!currentPopup.isAdded())
                     currentPopup.show();
             });
@@ -145,7 +146,7 @@ public class NotificationCenter extends UIFragment {
     public void clear(boolean onlyVisually) {
 
         if (onlyVisually) {
-            new Animation(container).moveX(0, 80).fade(1, 0)
+            new AnimationOld(container).moveX(0, 80).fade(1, 0)
                     .runOnEnd(container::removeAllViews)
                     .play(200);
             return;
@@ -168,7 +169,7 @@ public class NotificationCenter extends UIFragment {
 
         notifications.add(notification.hasPriority() ? 0 : notifications.size(), notification);
 
-        mActivity.runOnUiThread(() -> {
+        activity.runOnUiThread(() -> {
             if (isShowing) {
                 emptyText.setVisibility(View.GONE);
                 display(0, notification);
@@ -187,7 +188,7 @@ public class NotificationCenter extends UIFragment {
             currentPopup.dismiss();
 
         if (isShowing)
-            mActivity.runOnUiThread(() -> dismiss(0, notification));
+            activity.runOnUiThread(() -> dismiss(0, notification));
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -205,16 +206,16 @@ public class NotificationCenter extends UIFragment {
         if (!isShowing)
             return;
 
-        mActivity.runOnUiThread(() -> {
+        activity.runOnUiThread(() -> {
             clear(true);
 
-            new Animation(platform.renderView).moveX(-50, 0)
+            new AnimationOld(platform.renderView).moveX(-50, 0)
                     .play(400);
-            new Animation(body).moveX(0, Resources.dimen(R.dimen.notificationCenterWidth))
+            new AnimationOld(body).moveX(0, Resources.dimen(R.dimen.notificationCenterWidth))
                     .interpolator(Easing.InExpo)
-                    .runOnStart(() -> new Animation(rootBackground).fade(1, 0).play(300))
+                    .runOnStart(() -> new AnimationOld(rootBackground).fade(1, 0).play(300))
                     .play(350);
-            new Animation(layer).moveX(0, bodyWidth).interpolator(Easing.InExpo)
+            new AnimationOld(layer).moveX(0, bodyWidth).interpolator(Easing.InExpo)
                     .runOnEnd(super::close)
                     .delay(50)
                     .play(400);
@@ -226,7 +227,7 @@ public class NotificationCenter extends UIFragment {
     private void display(long delay, GameNotification notification) {
         container.postDelayed(() -> {
             container.addView(notification.build());
-            new Animation(notification.layout).fade(0, 1).moveX(80, 0)
+            new AnimationOld(notification.layout).fade(0, 1).moveX(80, 0)
                     .runOnStart(notification::load)
                     .play(100);
         }, delay);
@@ -247,7 +248,7 @@ public class NotificationCenter extends UIFragment {
             notification.layout.setLayoutParams(params);
         });
 
-        new Animation(notification.layout).fade(1, 0).moveX(0, notification.layout.getWidth())
+        new AnimationOld(notification.layout).fade(1, 0).moveX(0, notification.layout.getWidth())
                 .runOnStart(anim::start)
                 .runOnEnd(() -> {
                     container.removeView(notification.layout);
@@ -294,7 +295,7 @@ public class NotificationCenter extends UIFragment {
                 dismiss();
                 UI.notificationCenter.currentPopup = null;
                 }, 3000);
-            new Animation(body).moveY(-50, 0).fade(0, 1).play(150);
+            new AnimationOld(body).moveY(-50, 0).fade(0, 1).play(150);
 
             return root;
         }
@@ -305,14 +306,14 @@ public class NotificationCenter extends UIFragment {
             UI.notificationCenter.currentPopup = this;
             if (isAdded())
                 return;
-            mActivity.runOnUiThread(() -> platform.manager.beginTransaction()
+            activity.runOnUiThread(() -> platform.manager.beginTransaction()
                     .add(platform.screenContainer.getId(), this, null)
                     .commit());
         }
 
         public void dismiss() {
             UI.notificationCenter.currentPopup = null;
-            new Animation(body).moveY(0, -50).fade(1, 0)
+            new AnimationOld(body).moveY(0, -50).fade(1, 0)
                     .runOnEnd(() -> platform.manager.beginTransaction().remove(this).commit())
                     .play(150);
         }

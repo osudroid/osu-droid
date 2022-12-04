@@ -11,7 +11,7 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.UI;
 import com.reco1l.ui.platform.UIFragment;
-import com.reco1l.utils.Animation;
+import com.reco1l.utils.AnimationOld;
 import com.reco1l.utils.Resources;
 
 import java.text.DecimalFormat;
@@ -52,16 +52,16 @@ public class UserProfile extends UIFragment {
         body = find("body");
         body.postDelayed(closeTask, 8000);
 
-        new Animation(body)
+        new AnimationOld(body)
                 .height(Resources.sdp(30), Resources.dimen(online.isStayOnline() ?
                         R.dimen.userPanelHeight : R.dimen.userPanelSmallHeight))
-                .interpolatorMode(Animation.Interpolate.VALUE_ANIMATOR)
+                .interpolatorMode(AnimationOld.Interpolate.VALUE_ANIMATOR)
                 .interpolator(Easing.OutExpo)
                 .moveY(-30, 0)
                 .fade(0, 1)
                 .play(240);
 
-        new Animation(find("userBox")).fade(0, 1).play(200);
+        new AnimationOld(find("userBox")).fade(0, 1).play(200);
 
         View message = find("messageLayout");
         View infoContainer = find("info");
@@ -73,7 +73,7 @@ public class UserProfile extends UIFragment {
             message.setVisibility(View.VISIBLE);
 
             name.setText(Config.getLocalUsername());
-            new Animation(message).fade(0, 1).play(200);
+            new AnimationOld(message).fade(0, 1).play(200);
             updateMessage(null);
             return;
         }
@@ -86,9 +86,9 @@ public class UserProfile extends UIFragment {
                 score = find("score"),
                 accuracy = find("acc");
 
-        new Animation(find("infoBody"))
+        new AnimationOld(find("infoBody"))
                 .forChildView(child ->
-                        new Animation(child)
+                        new AnimationOld(child)
                                 .cancelPending(child == accuracy || child == accuracyBar)
                                 .fade(0, child.getAlpha()))
                 .play(200);
@@ -106,14 +106,14 @@ public class UserProfile extends UIFragment {
         name.setText(online.getUsername());
         rank.setText(String.format("#%d", online.getRank()));
 
-        new Animation().ofFloat(0, online.getAccuracy() * 100f)
+        new AnimationOld().ofFloat(0, online.getAccuracy() * 100f)
                 .runOnUpdate(val -> accuracy.setText(String.format("%.2f%%", val)))
                 .interpolator(Easing.OutExpo)
                 .cancelPending(false)
                 .delay(200)
                 .play(1000);
 
-        new Animation().ofInt(0, (int) (online.getAccuracy() * 100))
+        new AnimationOld().ofInt(0, (int) (online.getAccuracy() * 100))
                 .runOnUpdate(accuracyBar::setProgress)
                 .interpolator(Easing.OutExpo)
                 .cancelPending(false)
@@ -132,7 +132,7 @@ public class UserProfile extends UIFragment {
             message = text != null ? text : Resources.str(R.string.user_profile_debug_message);
         if (!isShowing)
             return;
-        mActivity.runOnUiThread(() -> errorText.setText(message));
+        activity.runOnUiThread(() -> errorText.setText(message));
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -149,15 +149,15 @@ public class UserProfile extends UIFragment {
             return;
 
         body.removeCallbacks(closeTask);
-        new Animation(find("innerBody")).fade(1, 0)
+        new AnimationOld(find("innerBody")).fade(1, 0)
                 .play(100);
-        new Animation(errorText).fade(1, 0)
+        new AnimationOld(errorText).fade(1, 0)
                 .play(100);
 
-        new Animation(body)
+        new AnimationOld(body)
                 .height(Resources.dimen(online.isStayOnline() ?
                         R.dimen.userPanelHeight : R.dimen.userPanelSmallHeight), Resources.sdp(30))
-                .interpolatorMode(Animation.Interpolate.VALUE_ANIMATOR)
+                .interpolatorMode(AnimationOld.Interpolate.VALUE_ANIMATOR)
                 .interpolator(Easing.OutExpo)
                 .runOnEnd(super::close)
                 .moveY(0, -30)

@@ -28,7 +28,7 @@ import com.reco1l.enums.MusicOption;
 import com.reco1l.UI;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.platform.UIFragment;
-import com.reco1l.utils.Animation;
+import com.reco1l.utils.AnimationOld;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.Resources;
 import com.reco1l.utils.listeners.TouchListener;
@@ -99,20 +99,20 @@ public class MusicPlayer extends UIFragment {
         playDrawable = Resources.drw(R.drawable.v_play_xl_circle);
         pauseDrawable = Resources.drw(R.drawable.v_pause_xl);
 
-        new Animation(body)
+        new AnimationOld(body)
                 .height((int) Resources.dimen(R.dimen._30sdp), (int) Resources.dimen(R.dimen.musicPlayerHeight))
-                .interpolatorMode(Animation.Interpolate.VALUE_ANIMATOR)
+                .interpolatorMode(AnimationOld.Interpolate.VALUE_ANIMATOR)
                 .interpolator(Easing.OutExpo)
                 .moveY(-30, 0)
                 .fade(0, 1)
                 .play(240);
 
-        new Animation(find("songBody"))
-                .forChildView(child -> new Animation(child).fade(0, child.getAlpha()))
+        new AnimationOld(find("songBody"))
+                .forChildView(child -> new AnimationOld(child).fade(0, child.getAlpha()))
                 .runOnStart(() ->
                         find("buttons").setAlpha(0))
                 .runOnEnd(() ->
-                        new Animation(find("buttons")).fade(0, 1).play(100))
+                        new AnimationOld(find("buttons")).fade(0, 1).play(100))
                 .play(100);
 
         RecyclerView list = find("listRv");
@@ -168,7 +168,7 @@ public class MusicPlayer extends UIFragment {
             }
         });
 
-        list.setLayoutManager(new LinearLayoutManager(Game.mActivity, VERTICAL, false));
+        list.setLayoutManager(new LinearLayoutManager(Game.activity, VERTICAL, false));
         list.setAdapter(new PlaylistAdapter(Game.library.getLibrary()));
 
         loadMetadata(Game.musicManager.beatmap);
@@ -178,11 +178,11 @@ public class MusicPlayer extends UIFragment {
     private void switchListVisibility() {
         if (!isListVisible) {
             isListVisible = true;
-            new Animation(find("listBody")).width(0, Resources.dimen(R.dimen.panelWidth))
+            new AnimationOld(find("listBody")).width(0, Resources.dimen(R.dimen.panelWidth))
                     .play(300);
         } else {
             isListVisible = false;
-            new Animation(find("listBody")).width(Resources.dimen(R.dimen.panelWidth), 0)
+            new AnimationOld(find("listBody")).width(Resources.dimen(R.dimen.panelWidth), 0)
                     .play(300);
         }
     }
@@ -205,12 +205,12 @@ public class MusicPlayer extends UIFragment {
 
         if (Game.songService.getStatus() == Status.PLAYING) {
             if (play.getDrawable() != pauseDrawable) {
-                new Animation(play).rotation(180, 0)
+                new AnimationOld(play).rotation(180, 0)
                         .runOnEnd(() -> play.setImageDrawable(pauseDrawable))
                         .play(160);
             }
         } else if (play.getDrawable() != playDrawable) {
-            new Animation(play).rotation(180, 0)
+            new AnimationOld(play).rotation(180, 0)
                     .runOnEnd(() -> play.setImageDrawable(playDrawable))
                     .play(160);
         }
@@ -225,18 +225,18 @@ public class MusicPlayer extends UIFragment {
             if (currentOption == MusicOption.NEXT || wasChangedFromList) {
                 wasChangedFromList = false;
 
-                new Animation(songBody).moveX(0, -10).fade(1, 0)
+                new AnimationOld(songBody).moveX(0, -10).fade(1, 0)
                         .play(200);
 
-                new Animation(songBody).moveX(10, 0).fade(0, 1)
+                new AnimationOld(songBody).moveX(10, 0).fade(0, 1)
                         .runOnStart(() -> loadMetadata(beatmap))
                         .delay(200)
                         .play(200);
             }
             if (currentOption == MusicOption.PREVIOUS) {
-                new Animation(songBody).moveX(0, 10).fade(1, 0)
+                new AnimationOld(songBody).moveX(0, 10).fade(1, 0)
                         .play(200);
-                new Animation(songBody).moveX(-10, 0).fade(0, 1)
+                new AnimationOld(songBody).moveX(-10, 0).fade(0, 1)
                         .runOnStart(() -> loadMetadata(beatmap))
                         .delay(200)
                         .play(200);
@@ -281,7 +281,7 @@ public class MusicPlayer extends UIFragment {
 
             if (songBitmap != null) {
                 songImage.setImageBitmap(songBitmap);
-                new Animation(songImage).fade(0, 1).play(200);
+                new AnimationOld(songImage).fade(0, 1).play(200);
             } else {
                 songImage.setImageDrawable(null);
             }
@@ -311,11 +311,11 @@ public class MusicPlayer extends UIFragment {
 
         UI.topBar.musicButton.animateButton(false);
 
-        new Animation(find("innerBody")).fade(1, 0).play(100);
+        new AnimationOld(find("innerBody")).fade(1, 0).play(100);
 
-        new Animation(body)
+        new AnimationOld(body)
                 .height((int) Resources.dimen(R.dimen.musicPlayerHeight), (int) Resources.dimen(R.dimen._30sdp))
-                .interpolatorMode(Animation.Interpolate.VALUE_ANIMATOR)
+                .interpolatorMode(AnimationOld.Interpolate.VALUE_ANIMATOR)
                 .interpolator(Easing.OutExpo)
                 .runOnEnd(super::close)
                 .moveY(0, -30)
@@ -340,10 +340,10 @@ public class MusicPlayer extends UIFragment {
 
         @NonNull
         public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            TextView view = new TextView(Game.mActivity);
+            TextView view = new TextView(Game.activity);
 
             view.setLayoutParams(new LayoutParams(MATCH_PARENT, WRAP_CONTENT));
-            view.setBackground(Resources.drw(R.drawable.round_shape));
+            view.setBackground(Resources.drw(R.drawable.shape_rounded));
             view.setEllipsize(TextUtils.TruncateAt.END);
             view.setSingleLine(true);
 

@@ -5,7 +5,7 @@ import com.reco1l.ui.fragments.BeatmapCarrousel;
 import com.reco1l.ui.fragments.BeatmapPanel;
 import com.reco1l.ui.fragments.DebugOverlay;
 import com.reco1l.ui.extras.NotificationCenter;
-import com.reco1l.ui.fragments.LoadingScene;
+import com.reco1l.ui.fragments.GameSummary;
 import com.reco1l.ui.fragments.MainMenu;
 import com.reco1l.ui.extras.MusicPlayer;
 import com.reco1l.ui.extras.SettingsMenu;
@@ -20,7 +20,6 @@ public final class UI {
     public static TopBar topBar = getTopBar();
     public static NotificationCenter notificationCenter = getNotificationCenter();
     public static MusicPlayer musicPlayer = getMusicPlayer();
-    public static LoadingScene loadingScene = getLoadingScene();
     public static MainMenu mainMenu = getMainMenu();
     public static UserProfile userProfile = getUserProfile();
     public static SettingsMenu settingsPanel = getSettingsMenu();
@@ -28,6 +27,7 @@ public final class UI {
     public static BeatmapCarrousel beatmapCarrousel = getBeatmapList();
     public static DebugOverlay debugOverlay = getDebugOverlay();
     public static Background background = getBackground();
+    public static GameSummary gameSummary = getGameSummary();
 
     //--------------------------------------------------------------------------------------------//
 
@@ -61,13 +61,6 @@ public final class UI {
             MusicPlayer.instance = new MusicPlayer();
         }
         return MusicPlayer.instance;
-    }
-
-    private static LoadingScene getLoadingScene() {
-        if (LoadingScene.instance == null) {
-            LoadingScene.instance = new LoadingScene();
-        }
-        return LoadingScene.instance;
     }
 
     private static MainMenu getMainMenu() {
@@ -117,5 +110,12 @@ public final class UI {
             Background.instance = new Background();
         }
         return Background.instance;
+    }
+
+    private static GameSummary getGameSummary() {
+        if (GameSummary.instance == null) {
+            GameSummary.instance = new GameSummary();
+        }
+        return GameSummary.instance;
     }
 }

@@ -2,11 +2,8 @@ package com.reco1l.utils;
 
 import static android.view.MotionEvent.*;
 
-import static com.reco1l.interfaces.IReferences.platform;
-
-import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
@@ -16,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
+import com.reco1l.Game;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.listeners.TouchListener;
 
@@ -25,30 +23,29 @@ import org.jetbrains.annotations.NotNull;
 
 public class ViewTouchHandler {
 
-    private static final int
-            HIGHLIGHT_COLOR = 0x2FFFFFFF,
-            DOWN_ANIM_DURATION = 100,
-            UP_ANIM_DURATION = 100;
-
     private static final long LONG_PRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
 
     public TouchListener listener;
 
     private UIFragment linkedFragment;
-    private ValueAnimator downAnim, upAnim;
+    private Animation downAnim, upAnim;
 
     private Handler handler;
     private Runnable longPress;
     private Vibrator vibrator;
 
-    private boolean isLongPressActioned = false;
+    private boolean
+            isLongPressActioned = false,
+            hasCustomEffectDrawable = false;
 
     //--------------------------------------------------------------------------------------------//
 
     public ViewTouchHandler(TouchListener listener) {
         this.listener = listener;
-        this.vibrator = (Vibrator) platform.context.getSystemService(Context.VIBRATOR_SERVICE);
+        this.vibrator = (Vibrator) Game.activity.getSystemService(Context.VIBRATOR_SERVICE);
         this.handler = new Handler();
+
+        this.hasCustomEffectDrawable = listener.getCustomTouchEffect() != null;
 
         this.longPress = () -> {
             this.isLongPressActioned = true;
@@ -77,13 +74,15 @@ public class ViewTouchHandler {
         switch (event.getAction()) {
             case ACTION_DOWN:
                 if (downAnim != null) {
-                    downAnim.start();
+                    upAnim.cancel();
+                    downAnim.play();
                 }
                 break;
             case ACTION_CANCEL:
             case ACTION_UP:
                 if (upAnim != null) {
-                    upAnim.start();
+                    downAnim.cancel();
+                    upAnim.play();
                 }
                 break;
         }
@@ -163,15 +162,16 @@ public class ViewTouchHandler {
 
     //--------------------------------------------------------------------------------------------//
 
-    private GradientDrawable getViewForeground(View view) {
+    private GradientDrawable getEffectDrawable(View view) {
         if (Build.VERSION.SDK_INT < 24 || view == null)
             return null;
 
-        if (view.getForeground() == null || !(view.getForeground() instanceof GradientDrawable)) {
-            GradientDrawable drawable = new GradientDrawable();
-            view.setForeground(drawable);
-        }
-        return (GradientDrawable) view.getForeground();
+        GradientDrawable drawable = new GradientDrawable();
+
+        drawable.setColor(Color.WHITE);
+        drawable.setCornerRadii(getViewCornerRadius(view));
+
+        return drawable;
     }
 
     private float[] getViewCornerRadius(View view) {
@@ -191,30 +191,37 @@ public class ViewTouchHandler {
                 return drawable.getCornerRadii();
             }
         }
-        return new float[] {0, 0, 0, 0, 0, 0, 0, 0};
+        return new float[]{0, 0, 0, 0, 0, 0, 0, 0};
     }
 
     private void createTouchEffect(View view) {
-        GradientDrawable shape = getViewForeground(view);
-
         // Unfortunately this doesn't work on API < 24
-        if (Build.VERSION.SDK_INT < 24 || shape == null)
+        if (Build.VERSION.SDK_INT < 24) {
             return;
+        }
 
-        downAnim = ValueAnimator.ofArgb(0, HIGHLIGHT_COLOR);
-        downAnim.setDuration(DOWN_ANIM_DURATION);
+        GradientDrawable drawable;
+        if (hasCustomEffectDrawable) {
+            drawable = listener.getCustomTouchEffect();
+        } else {
+            drawable = getEffectDrawable(view);
+        }
 
-        upAnim = ValueAnimator.ofArgb(HIGHLIGHT_COLOR, 0);
-        upAnim.setDuration(UP_ANIM_DURATION);
+        if (drawable != null) {
+            drawable.setAlpha(0);
 
-        shape.setCornerRadii(getViewCornerRadius(view));
+            Animation.UpdateListener onUpdate = value -> {
+                drawable.setAlpha((int) value);
+                view.setForeground(drawable);
+            };
 
-        AnimatorUpdateListener update = val -> {
-            shape.setColor((int) val.getAnimatedValue());
-            view.setForeground(shape);
-        };
+            downAnim = Animation.ofInt(0, listener.getEffectMaxAlpha())
+                    .runOnUpdate(onUpdate)
+                    .duration(200);
 
-        downAnim.addUpdateListener(update);
-        upAnim.addUpdateListener(update);
+            upAnim = Animation.ofInt(listener.getEffectMaxAlpha(), 0)
+                    .runOnUpdate(onUpdate)
+                    .duration(100);
+        }
     }
 }

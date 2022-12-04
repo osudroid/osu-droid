@@ -43,7 +43,6 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class SongMenu implements IUpdateHandler {
     private final static Boolean musicMutex = true;
-    private final Boolean backgroundMutex = true;
     public Scene scene;
     SortOrder sortOrder = SortOrder.Title;
     private Engine engine;
@@ -52,9 +51,6 @@ public class SongMenu implements IUpdateHandler {
     private Activity context;
     private MenuItem selectedItem = null;
     private TrackInfo selectedTrack;
-    private Sprite bg = null;
-    private Boolean bgLoaded = false;
-    private String bgName = "";
     private String filterText = "";
     private boolean favsOnly = false;
     private Set<String> limitC;
@@ -81,41 +77,24 @@ public class SongMenu implements IUpdateHandler {
     }
 
     public void reload() {
-        scene.unregisterUpdateHandler(this);
-        scene.setTouchAreaBindingEnabled(false);
         load();
-        GlobalManager.getInstance().getGameScene().setOldScene(scene);
+        GlobalManager.getInstance().getGameScene().setOldScene(null);
     }
 
     public synchronized void load() {
-        scene = new Scene();
         selectedItem = null;
         selectedTrack = null;
-        bgLoaded = true;
         SongMenuPool.getInstance().init();
         FilterMenu.getInstance().loadConfig(context);
         ModMenu.getInstance().reload();
         bindDataBaseChangedListener();
 
-        final TextureRegion tex = ResourceManager.getInstance().getTexture("menu-background");
-        float height = tex.getHeight();
-        height *= Config.getRES_WIDTH() / (float) tex.getWidth();
-        final Sprite bg = new Sprite(0, (Config.getRES_HEIGHT() - height) / 2,
-                Config.getRES_WIDTH(), height, tex);
-        scene.setBackground(new SpriteBackground(bg));
-
-        final Rectangle bgDimRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
-        bgDimRect.setColor(0, 0, 0, 0.2f);
-
         sortOrder = SortOrder.Title;
         sort();
-
-        scene.registerUpdateHandler(this);
-        scene.setTouchAreaBindingEnabled(true);
     }
 
     public Scene getScene() {
-        return scene;
+        return null;
     }
 
     public void setFilter(final String filter, final SortOrder order,
@@ -207,47 +186,8 @@ public class SongMenu implements IUpdateHandler {
         }
     }
 
-    public void openScore(final int id, boolean showOnline, final String playerName) {
-        if (showOnline) {
-            engine.setScene(LoadingScreen.getInstance().getScene());
-            ToastLogger.showTextId(R.string.online_loadrecord, false);
-            new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
-
-                public void run() {
-                    try {
-                        String scorePack = OnlineManager.getInstance().getScorePack(id);
-                        String[] params = scorePack.split("\\s+");
-                        if (params.length < 11) return;
-
-                        StatisticV2 stat = new StatisticV2(params);
-                        stat.setPlayerName(playerName);
-                        scoreScene.load(stat, null, null, OnlineManager.getReplayURL(id), null, selectedTrack);
-                        engine.setScene(scoreScene.getScene());
-
-                    } catch (OnlineManagerException e) {
-                        Debug.e("Cannot load play info: " + e.getMessage(), e);
-                        engine.setScene(scene);
-                    }
-
-                }
-
-                public void onComplete() {
-                    // TODO Auto-generated method stub
-                }
-            });
-            return;
-        }
-
-
-        StatisticV2 stat = ScoreLibrary.getInstance().getScore(id);
-        scoreScene.load(stat, null, null, stat.getReplayName(), null, selectedTrack);
-        engine.setScene(scoreScene.getScene());
-    }
-
     public void back() {
         unbindDataBaseChangedListener();
-        GlobalManager.getInstance().getSongService().setGaming(false);
         GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene());
     }
 

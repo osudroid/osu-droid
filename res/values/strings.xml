@@ -11,8 +11,8 @@
 	<string name="notification_center_title">Notifications</string>
 	<string name="notification_center_empty">There is nothing to show</string>
 
-	<string name="main_menu_play">Play</string>
-	<string name="main_menu_settings">Settings</string>
+	<string name="main_menu_solo">Solo</string>
+	<string name="main_menu_multi">Multiplayer</string>
 	<string name="main_menu_exit">Exit</string>
 
 	<string name="user_profile_accuracy">Accuracy</string>

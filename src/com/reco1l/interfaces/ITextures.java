@@ -10,14 +10,14 @@ public interface ITextures {
 
     String[] fileNames = {
             // Ranking marks
-            /*"ranking-A",
+            "ranking-A",
             "ranking-B",
             "ranking-C",
             "ranking-D",
             "ranking-S",
             "ranking-SH",
             "ranking-X",
-            "ranking-XH",*/
+            "ranking-XH",
 
             // Small ranking marks
             "ranking-A-small",
@@ -47,7 +47,14 @@ public interface ITextures {
             "selection-mod-scorev2",
             "selection-mod-smallcircle",
             "selection-mod-speedup",
-            "selection-mod-suddendeath"
+            "selection-mod-suddendeath",
+
+            "hit300",
+            "hit300g",
+            "hit100",
+            "hit100k",
+            "hit50",
+            "hit0"
     };
 
 }

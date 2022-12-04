@@ -15,13 +15,12 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import androidx.annotation.Nullable;
-import androidx.core.math.MathUtils;
 
-import com.reco1l.utils.Animation2;
+import com.reco1l.utils.Animation;
 
-public class KiaiView extends View {
+public class SidesEffectView extends View {
 
-    private Animation2 fadeUp, fadeDown;
+    private Animation fadeUp, fadeDown;
 
     private Paint leftPaint, rightPaint;
 
@@ -35,12 +34,12 @@ public class KiaiView extends View {
             cursor;
     //--------------------------------------------------------------------------------------------//
 
-    public KiaiView(Context context) {
+    public SidesEffectView(Context context) {
         super(context);
         init();
     }
 
-    public KiaiView(Context context, @Nullable AttributeSet attrs) {
+    public SidesEffectView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init();
     }
@@ -64,16 +63,16 @@ public class KiaiView extends View {
             rightPaint.setBlendMode(BlendMode.SCREEN);
         }
 
-        fadeUp = Animation2.ofInt(0, 255);
-        fadeDown = Animation2.ofInt(255, 0);
-
-        Animation2.UpdateListener<Object> listener = value -> {
+        Animation.UpdateListener listener = value -> {
             rightPaint.setAlpha((int) value);
             leftPaint.setAlpha((int) value);
         };
 
-        fadeUp.runOnUpdate = listener;
-        fadeDown.runOnUpdate = listener;
+        fadeUp = Animation.ofInt(0, 255)
+                .runOnUpdate(listener);
+
+        fadeDown = Animation.ofInt(255, 0)
+                .runOnUpdate(listener);
     }
 
     private void drawShaders(int color) {
@@ -120,21 +119,21 @@ public class KiaiView extends View {
             downTime *= 1.4f;
         }
 
-        fadeUp.runOnStart = () -> {
-            if (isKiai) {
-                cursor = cursor == 0 ? 1 : 0;
+        fadeUp.runOnStart(() -> {
+                    if (isKiai) {
+                        cursor = cursor == 0 ? 1 : 0;
 
-                drawLeft = cursor == 0;
-                drawRight = cursor == 1;
-            } else {
-                drawLeft = beat == 0;
-                drawRight = beat == 0;
-            }
-        };
+                        drawLeft = cursor == 0;
+                        drawRight = cursor == 1;
+                    } else {
+                        drawLeft = beat == 0;
+                        drawRight = beat == 0;
+                    }
+                })
+                .play(upTime);
 
-        fadeUp.play(upTime);
-        fadeDown.delay = upTime;
-        fadeDown.play(downTime);
+        fadeDown.delay(upTime)
+                .play(downTime);
     }
 
     @Override

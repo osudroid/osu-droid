@@ -18,7 +18,7 @@ public class BlurEffect {
             return null;
         }
 
-        RenderScript renderScript = RenderScript.create(Game.mActivity);
+        RenderScript renderScript = RenderScript.create(Game.activity);
 
         Bitmap newBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
 

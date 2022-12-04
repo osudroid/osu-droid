@@ -16,7 +16,7 @@
         android:layout_alignParentEnd="true"
         android:layout_marginTop="@dimen/S"
         android:layout_marginRight="@dimen/S"
-        android:background="@drawable/round_shape"
+        android:background="@drawable/shape_rounded"
         android:backgroundTint="@color/backgroundSecondary"
         android:gravity="center_vertical"
         android:orientation="horizontal"

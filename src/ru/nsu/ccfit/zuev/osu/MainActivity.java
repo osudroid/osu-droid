@@ -34,12 +34,11 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.GameEngine;
 import com.reco1l.Game;
+import com.reco1l.andengine.scenes.IntroScene;
 import com.reco1l.game.LibraryImport;
 import com.reco1l.management.MusicManager;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.data.DialogTable;
-import com.reco1l.ui.fragments.SplashScene;
-import com.reco1l.ui.platform.FragmentPlatform;
 import com.reco1l.utils.KeyInputHandler;
 
 import org.anddev.andengine.engine.Engine;
@@ -272,7 +271,7 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public Scene onLoadScene() {
-        return new SplashScene().scene;
+        return new IntroScene();
     }
 
     @Override
@@ -519,7 +518,7 @@ public class MainActivity extends BaseGameActivity implements
         }
         if (GlobalManager.getInstance().getMainScene() != null) {
             BeatmapInfo beatmapInfo = Game.musicManager.beatmap;
-            if (songService != null && beatmapInfo != null && !songService.isGaming()) {
+            if (songService != null && beatmapInfo != null) {
                 songService.showNotification();
 
                 if (wakeLock == null) {
@@ -564,16 +563,6 @@ public class MainActivity extends BaseGameActivity implements
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         }
-    }
-
-    @Override
-    public void onResumeGame() {
-        FragmentPlatform.getInstance().handleWindowFocus(true);
-    }
-
-    @Override
-    public void onPauseGame() {
-        FragmentPlatform.getInstance().handleWindowFocus(false);
     }
 
     @Override

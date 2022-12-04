@@ -123,6 +123,7 @@ public class Scoreboard implements IReferences {
 
                     long currentScore = cursor.getLong(cursor.getColumnIndexOrThrow("score"));
 
+                    item.id = cursor.getInt(cursor.getColumnIndexOrThrow("id"));
                     item.rank = "" + (i + 1);
                     item.mark = cursor.getString(cursor.getColumnIndexOrThrow("mark"));
                     item.name = cursor.getString(cursor.getColumnIndexOrThrow("playername"));
@@ -241,7 +242,6 @@ public class Scoreboard implements IReferences {
         public long rawScore;
 
         public String rank, avatar, mark, name;
-        public Runnable onClick, onLongClick;
 
         private List<GameMod> mods;
         private String score, difference, combo, accuracy;

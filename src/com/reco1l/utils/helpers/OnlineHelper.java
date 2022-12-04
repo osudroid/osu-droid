@@ -18,7 +18,7 @@ public class OnlineHelper implements IReferences {
     // This class translates contains tools to translate online data for the new UI.
 
     private static OnlineHelper instance;
-    public static final Drawable defaultAvatar = mActivity.getDrawable(R.drawable.default_avatar);
+    public static final Drawable defaultAvatar = activity.getDrawable(R.drawable.default_avatar);
 
     //--------------------------------------------------------------------------------------------//
 

@@ -114,7 +114,7 @@ public class PauseMenu implements IOnMenuItemClickListener {
                 return true;
 
             case ITEM_BACK:
-                GlobalManager.getInstance().getScoring().setReplayID(-1);
+                GlobalManager.getInstance().getScoring().replayID = -1;
                 playSnd = ResourceManager.getInstance().getSound("menuback");
                 if (playSnd != null) {
                     playSnd.play();

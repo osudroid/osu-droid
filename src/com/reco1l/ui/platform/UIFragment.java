@@ -28,8 +28,6 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public abstract class UIFragment extends Fragment implements IReferences {
 
-    public static UIFragment instance;
-
     public boolean isShowing = false;
 
     protected View rootView, rootBackground;
@@ -75,7 +73,7 @@ public abstract class UIFragment extends Fragment implements IReferences {
      */
     protected abstract void onLoad();
 
-    protected void onScreenChange(Screens lastScreen, Screens newScene) { }
+    protected void onScreenChange(Screens lastScreen, Screens newScreen) { }
 
     /**
      * Simplifies the way views are got with the method {@link #find(String)}, every layout XML file have an
@@ -262,7 +260,7 @@ public abstract class UIFragment extends Fragment implements IReferences {
         }
     }
 
-    protected final void bindTouchListener(View view, Runnable onSingleTapUp) {
+    public final void bindTouchListener(View view, Runnable onSingleTapUp) {
         bindTouchListener(view, new TouchListener() {
             public void onPressUp() {
                 if (onSingleTapUp != null) {
@@ -272,7 +270,7 @@ public abstract class UIFragment extends Fragment implements IReferences {
         });
     }
 
-    protected final void bindTouchListener(View view, TouchListener listener) {
+    public final void bindTouchListener(View view, TouchListener listener) {
         ViewTouchHandler vth = registeredViews.get(view);
         if (vth == null) {
             vth = new ViewTouchHandler(listener);

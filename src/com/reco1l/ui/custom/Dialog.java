@@ -13,7 +13,7 @@ import com.edlplan.framework.easing.Easing;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.ui.platform.UIFragment;
-import com.reco1l.utils.Animation;
+import com.reco1l.utils.AnimationOld;
 import com.reco1l.utils.Resources;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.ViewUtils.MarginUtils;
@@ -76,15 +76,15 @@ public class Dialog extends UIFragment {
 
         TextView message = find("message");
 
-        new Animation(rootBackground).fade(0, 1)
+        new AnimationOld(rootBackground).fade(0, 1)
                 .play(500);
-        new Animation(body).fade(0, 1)
+        new AnimationOld(body).fade(0, 1)
                 .interpolator(Easing.OutExpo)
                 .play(500);
-        new Animation(bodyParent).moveY(screenHeight / 0.85f, 0)
+        new AnimationOld(bodyParent).moveY(screenHeight / 0.85f, 0)
                 .interpolator(Easing.OutExpo)
                 .play(500);
-        new Animation(title).fade(0, 1)
+        new AnimationOld(title).fade(0, 1)
                 .play(300);
 
 
@@ -93,8 +93,8 @@ public class Dialog extends UIFragment {
             platform.manager.beginTransaction()
                     .add(find("fragmentContainer").getId(), builder.customFragment)
                     .runOnCommit(() ->
-                            new Animation(builder.customFragment.root)
-                                    .forChildView(child -> new Animation(child).fade(0, 1))
+                            new AnimationOld(builder.customFragment.root)
+                                    .forChildView(child -> new AnimationOld(child).fade(0, 1))
                                     .play(100))
                     .commit();
         }
@@ -120,7 +120,7 @@ public class Dialog extends UIFragment {
                 button.inflate(buttonsContainer);
                 button.load(this);
 
-                new Animation(button.view).fade(0, 1).delay(200L * i)
+                new AnimationOld(button.view).fade(0, 1).delay(200L * i)
                         .play(200);
 
                 MarginUtils margins = ViewUtils.margins(button.view);
@@ -163,11 +163,11 @@ public class Dialog extends UIFragment {
 
         Game.platform.dialogs.remove(this);
 
-        new Animation(rootBackground).fade(1, 0)
+        new AnimationOld(rootBackground).fade(1, 0)
                 .play(500);
-        new Animation(body).fade(1, 0).interpolator(Easing.InExpo)
+        new AnimationOld(body).fade(1, 0).interpolator(Easing.InExpo)
                 .play(500);
-        new Animation(bodyParent).moveY(0, screenHeight / 0.85f).interpolator(Easing.InExpo)
+        new AnimationOld(bodyParent).moveY(0, screenHeight / 0.85f).interpolator(Easing.InExpo)
                 .runOnEnd(() -> {
                     super.close();
                     if (builder.onClose != null)
@@ -175,13 +175,13 @@ public class Dialog extends UIFragment {
                 })
                 .play(500);
 
-        new Animation(title).fade(1, 0)
+        new AnimationOld(title).fade(1, 0)
                 .play(400);
-        new Animation(container).fade(1, 0)
+        new AnimationOld(container).fade(1, 0)
                 .play(400);
 
         if (builder.buttons != null && !builder.buttons.isEmpty()) {
-            new Animation(buttonsContainer).fade(1, 0)
+            new AnimationOld(buttonsContainer).fade(1, 0)
                     .play(300);
         }
 

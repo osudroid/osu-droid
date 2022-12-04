@@ -27,12 +27,17 @@
     <color name="backgroundTertiary">#1F1F1F</color>
     <color name="backgroundDimmed">#99000000</color>
 
-    <!--Custom views-->
-    <color name="circularLoadingBarBackground">#34000000</color>
-    <color name="circularLoadingBarIndicator">#FFFFFF</color>
-    
+    <!--Progress indicator-->
+    <color name="progressIndicatorColor">#FFFFFF</color>
+    <color name="progressIndicatorTrackColor">#27FFFFFF</color>
+
+    <color name="loadingIndicatorBackground">#34000000</color>
+
     <!--Seek bar-->
     <color name="seekBarThumbColor">#FFFFFF</color>
+
+    <color name="songSeekBarIndicatorColor">#5CFFFFFF</color>
+    <color name="songSeekBarBackground">#30000000</color>
 
     <!--Check box-->
     <color name="checkBoxOffColor">#20000000</color>
@@ -40,12 +45,6 @@
     <!--Top bar-->
     <color name="topBarBackground">#A6000000</color>
     <color name="topBarButtonsBackground">#25000000</color>
-
-    <!--ProgressBar & SeekBar-->
-    <color name="progressBarIndicatorColor">#FFFFFF</color>
-    <color name="progressBarTrackColor">#20FFFFFF</color>
-    <color name="songSeekBarIndicatorColor">#5CFFFFFF</color>
-    <color name="songSeekBarBackground">#30000000</color>
 
     <!--Music Player-->
     <color name="musicPlayerSeekbarCardBackground">#292929</color>
@@ -64,9 +63,6 @@
     <color name="mainMenuTriangles1">#FE7CB6</color>
     <color name="mainMenuTriangles2">#E05D97</color>
 
-    <!--Loading Scene-->
-    <color name="loadingSceneViewsBackground">#34000000</color>
-
     <!--Buttons-->
     <color name="buttonBackground">#2E2E2E</color>
 
@@ -74,11 +70,18 @@
     <color name="beatmapPanelBackground">#80000000</color>
     <color name="beatmapPanelTabBackground">#20000000</color>
 
+    <!--Text/Image badges-->
+    <color name="badgeBackground">#0F000000</color>
+
     <color name="propertyBackground">#66000000</color>
     <color name="propertyTextGreen">#2E8B56</color>
     <color name="propertyTextRed">#CD5555</color>
 
     <!--Scoreboard-->
     <color name="scoreboardItemBadgeBackground">#24000000</color>
+
+    <!--Game Results-->
+    <color name="gameResultsCardColor">#33000000</color>
+    <color name="gameResultsBadgeBackground">#1A000000</color>
 
 </resources>

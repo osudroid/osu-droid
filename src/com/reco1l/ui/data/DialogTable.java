@@ -45,9 +45,9 @@ public class DialogTable implements IReferences {
         builder.message = "The game will be restarted to apply changes";
         builder.setCloseMode(false);
         builder.addButton("Accept", dialog -> {
-            Intent intent = new Intent(mActivity, MainActivity.class);
+            Intent intent = new Intent(activity, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            mActivity.startActivity(intent);
+            activity.startActivity(intent);
             System.exit(0);
         });
 

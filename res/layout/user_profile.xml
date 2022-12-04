@@ -71,7 +71,6 @@
             <!--User stats-->
             <ScrollView
                 android:id="@+id/UC_info"
-                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="@dimen/XXS"
@@ -110,15 +109,9 @@
 
                             <com.google.android.material.progressindicator.CircularProgressIndicator
                                 android:id="@+id/UC_accProgress"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:progress="60"
-                                app:indicatorColor="@color/progressBarIndicatorColor"
-                                app:indicatorDirectionCircular="counterclockwise"
-                                app:indicatorSize="@dimen/userPanelAccuracyProgressBarSize"
-                                app:trackColor="@color/progressBarTrackColor"
-                                app:trackCornerRadius="@dimen/progressBarTrackCornerRadius"
-                                app:trackThickness="@dimen/circularProgressIndicatorThickness" />
+                                style="@style/big_circular_indicator"
+                                android:indeterminate="false"
+                                android:progress="60" />
 
                             <TextView
                                 android:id="@+id/UC_acc"

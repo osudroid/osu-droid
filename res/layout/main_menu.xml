@@ -7,133 +7,73 @@
     xmlns:edl="http://ui.edlplan.com/customview"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
+    android:gravity="center_horizontal"
     android:translationZ="@dimen/topLayer">
 
-    <!--Exit button-->
-    <View
-        android:id="@+id/mainM_exitView"
-        android:layout_width="wrap_content"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/mainM_buttonsLayout"
+        android:layout_width="@dimen/mainMenuButtonLayoutWidth"
         android:layout_height="@dimen/mainMenuButtonSize"
-        android:layout_alignStart="@id/mainM_logo"
-        android:layout_alignEnd="@id/mainM_exit"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="@dimen/mainMenuButtonLayoutLeftMargin"
-        android:background="@drawable/main_menu_button_shape"
-        android:elevation="@dimen/mainMenuExitElevation" />
+        android:layout_centerInParent="true"
+        app:cardBackgroundColor="@color/backgroundSecondary"
+        app:cardCornerRadius="@dimen/mainMenuButtonShapeRadius"
+        app:cardElevation="@dimen/mainMenuButtonElevation">
 
-    <LinearLayout
-        android:id="@+id/mainM_exit"
-        android:layout_width="@dimen/mainMenuButtonSize"
-        android:layout_height="@dimen/mainMenuButtonSize"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@id/mainM_settings"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:translationZ="@dimen/mainMenuButtonZ">
-
-        <ImageView
+        <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:elevation="@dimen/M"
-            android:scaleX="0.72"
-            android:scaleY="0.72"
-            android:src="@drawable/v_exit_xl" />
+            android:layout_height="match_parent">
 
-        <TextView
-            style="@style/text"
-            android:layout_marginTop="@dimen/XXS"
-            android:ellipsize="none"
-            android:singleLine="true"
-            android:text="@string/main_menu_exit"
-            android:textColor="@color/textSecondary" />
+            <LinearLayout
+                android:id="@+id/mainM_solo"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:paddingHorizontal="@dimen/M">
 
-    </LinearLayout>
+                <TextView
+                    style="@style/text"
+                    android:layout_width="@dimen/mainMenuButtonSize"
+                    android:drawableTop="@drawable/v40_solo"
+                    android:drawablePadding="@dimen/XS"
+                    android:ellipsize="none"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:text="@string/main_menu_solo"
+                    android:textColor="@color/textSecondary" />
 
-    <!--Settings button-->
-    <View
-        android:id="@+id/mainM_settingsView"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/mainMenuButtonSize"
-        android:layout_alignStart="@id/mainM_logo"
-        android:layout_alignEnd="@id/mainM_settings"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="@dimen/mainMenuButtonLayoutLeftMargin"
-        android:background="@drawable/main_menu_button_shape"
-        android:elevation="@dimen/mainMenuSettingsElevation" />
+            </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/mainM_settings"
-        android:layout_width="@dimen/mainMenuButtonSize"
-        android:layout_height="@dimen/mainMenuButtonSize"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@id/mainM_play"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:translationZ="@dimen/mainMenuButtonZ">
+            <LinearLayout
+                android:id="@+id/mainM_multi"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:gravity="center"
+                android:paddingHorizontal="@dimen/M">
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:elevation="@dimen/M"
-            android:scaleX="0.72"
-            android:scaleY="0.72"
-            android:src="@drawable/v_settings_xl" />
+                <TextView
+                    style="@style/text"
+                    android:layout_width="@dimen/mainMenuButtonSize"
+                    android:drawableTop="@drawable/v40_multi"
+                    android:drawablePadding="@dimen/XS"
+                    android:ellipsize="none"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:text="@string/main_menu_multi"
+                    android:textColor="@color/textSecondary" />
 
-        <TextView
-            style="@style/text"
-            android:layout_marginTop="@dimen/XXS"
-            android:ellipsize="none"
-            android:singleLine="true"
-            android:text="@string/main_menu_settings"
-            android:textColor="@color/textSecondary" />
+            </LinearLayout>
 
-    </LinearLayout>
+        </RelativeLayout>
 
-    <!--Play button-->
-    <View
-        android:id="@+id/mainM_playView"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/mainMenuButtonSize"
-        android:layout_alignStart="@id/mainM_logo"
-        android:layout_alignEnd="@id/mainM_play"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="@dimen/mainMenuButtonLayoutLeftMargin"
-        android:background="@drawable/main_menu_button_shape"
-        android:elevation="@dimen/mainMenuPlayElevation" />
-
-    <LinearLayout
-        android:id="@+id/mainM_play"
-        android:layout_width="@dimen/mainMenuButtonSize"
-        android:layout_height="@dimen/mainMenuButtonSize"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@id/mainM_logo"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:translationZ="@dimen/mainMenuButtonZ">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:elevation="@dimen/M"
-            android:src="@drawable/v_play_xl" />
-
-        <TextView
-            style="@style/text"
-            android:layout_marginTop="@dimen/XXS"
-            android:ellipsize="none"
-            android:singleLine="true"
-            android:text="@string/main_menu_play"
-            android:textColor="@color/textSecondary" />
-
-    </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
     <!--Logo-->
     <androidx.cardview.widget.CardView
         android:id="@+id/mainM_logo"
         android:layout_width="@dimen/mainMenuSmallLogoSize"
         android:layout_height="@dimen/mainMenuSmallLogoSize"
-        android:layout_centerVertical="true"
+        android:layout_centerInParent="true"
         app:cardBackgroundColor="@color/mainMenuLogoBackground"
         app:cardCornerRadius="@dimen/mainMenuLogoCornerRadius"
         app:cardElevation="@dimen/mainMenuLogoElevation">
@@ -167,12 +107,14 @@
 
     </androidx.cardview.widget.CardView>
 
-    <!--<com.chibde.visualizer.CircleBarVisualizerSmooth
-        android:id="@+id/mainM_spectrum"
-        android:layout_width="@dimen/mainMenuLogoSize"
-        android:layout_height="@dimen/mainMenuLogoSize"
-        />-->
-
-
+    <com.reco1l.view.ExpandEffectView
+        android:id="@+id/mainM_expandEffect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/mainM_logo"
+        android:layout_alignTop="@id/mainM_logo"
+        android:layout_alignEnd="@id/mainM_logo"
+        android:layout_alignBottom="@id/mainM_logo"
+        android:elevation="@dimen/mainMenuButtonElevation" />
 
 </RelativeLayout>

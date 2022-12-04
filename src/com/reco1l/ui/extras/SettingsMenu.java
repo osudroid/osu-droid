@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -57,11 +58,11 @@ public class SettingsMenu extends UIFragment {
     private FrameLayout container;
     private SettingsFragment fragment;
 
-    private View tabIndicator;
-    private CardView body, navbar, layer;
+    private View tabIndicator, layer;
+    private CardView body, navigationBar;
     private CircularProgressIndicator loading;
 
-    private int panelWidth, navbarWidth;
+    private int panelWidth, navBarWidth;
     private boolean reloadBackground = false;
 
     //--------------------------------------------------------------------------------------------//
@@ -74,6 +75,11 @@ public class SettingsMenu extends UIFragment {
         sounds,
         library,
         advanced,
+    }
+
+    @Override
+    protected boolean isOverlay() {
+        return true;
     }
 
     @Override
@@ -91,7 +97,7 @@ public class SettingsMenu extends UIFragment {
     private final AsyncExec loadSettings = new AsyncExec() {
         @Override
         public void run() {
-            Game.mActivity.runOnUiThread(() -> {
+            Game.activity.runOnUiThread(() -> {
                 FragmentTransaction transaction = Game.platform.manager.beginTransaction();
 
                 transaction.replace(container.getId(), fragment);
@@ -101,9 +107,14 @@ public class SettingsMenu extends UIFragment {
 
         @Override
         public void onComplete() {
-            new Animation(loading).fade(1, 0).scale(1, 0.8f)
+
+            Animation.of(loading)
+                    .toAlpha(0)
+                    .toScale(0.8f)
                     .play(200);
-            new Animation(container).fade(0, 1)
+
+            Animation.of(container)
+                    .toAlpha(1)
                     .delay(200)
                     .play(200);
         }
@@ -113,39 +124,53 @@ public class SettingsMenu extends UIFragment {
     protected void onLoad() {
         setDismissMode(true, true);
 
-        panelWidth = (int) Resources.dimen(R.dimen.settingsPanelWidth);
-        navbarWidth = (int) Resources.dimen(R.dimen.settingsPanelNavBarWidth);
-
         if (fragment == null) {
             fragment = new SettingsFragment();
         }
+        currentTab = Tabs.general;
+
+        panelWidth = (int) Resources.dimen(R.dimen.settingsPanelWidth);
+        navBarWidth = (int) Resources.dimen(R.dimen.settingsPanelNavBarWidth);
 
         tabIndicator = find("tabIndicator");
+        navigationBar = find("navbar");
         container = find("container");
-        navbar = find("navbar");
+        loading = find("loading");
         layer = find("layer");
         body = find("body");
 
-        AnimationTable.fadeIn(rootBackground);
+        Game.platform.animate(true, true)
+                .toX(-navBarWidth)
+                .duration(400);
 
-        new Animation(navbar).moveX(navbarWidth, 0)
+        AnimationTable.fadeIn(rootBackground).play();
+
+        Animation.of(navigationBar)
+                .fromX(navBarWidth)
+                .toX(0f)
                 .interpolator(Easing.OutExpo)
                 .play(350);
 
-        new Animation(layer).moveX(panelWidth + navbarWidth, -navbarWidth)
+        Animation.of(layer)
+                .fromX(panelWidth + navBarWidth)
+                .toX(0f)
                 .interpolator(Easing.OutExpo)
                 .play(350);
-        new Animation(body).moveX(panelWidth + navbarWidth, -navbarWidth)
+
+        Animation.of(body)
+                .fromX(panelWidth + navBarWidth)
+                .toX(0f)
                 .interpolator(Easing.OutExpo)
                 .delay(50)
                 .play(400);
 
-        loading = find("loading");
-        currentTab = Tabs.general;
-
-        new Animation(loading).fade(0, 1).scale(0.8f, 1)
+        Animation.of(loading)
+                .fromAlpha(0)
+                .toAlpha(1)
+                .fromScale(0.8f)
+                .toScale(1)
                 .runOnEnd(loadSettings::execute)
-                .delay(200)
+                .delay(300)
                 .play(200);
 
         for (Tabs tab : Tabs.values()) {
@@ -154,52 +179,59 @@ public class SettingsMenu extends UIFragment {
     }
 
     private void navigateTo(Tabs tab) {
-        if (currentTab == tab)
+        if (currentTab == tab) {
             return;
-
+        }
         currentTab = tab;
 
-        final boolean toTop = tabIndicator.getTranslationY() > find(tab.name()).getY();
+        float y = find(tab.name()).getY();
 
-        new Animation(tabIndicator)
-                .moveY(tabIndicator.getTranslationY(), find(tab.name()).getY())
-                .play(400);
+        AnimationTable.moveY(tabIndicator, y)
+                .play(200);
 
-        new Animation(container).moveY(0, toTop ? 80 : -80).fade(1, 0)
-                .runOnEnd(() -> fragment.navigate(tab))
-                .play(160);
+        Animation.of(container)
+                .runOnEnd(() -> {
+                    Log.i("SettingsMenu", "Switched to tab " + tab.name());
+                    fragment.navigate(tab);
 
-        new Animation(container).moveY(toTop ? -80 : 80, 0).fade(0, 1)
-                .delay(160)
-                .play(300);
-
+                    Animation.of(container)
+                            .fromX(80)
+                            .toX(0)
+                            .toAlpha(1)
+                            .play(100);
+                })
+                .toX(-80f)
+                .toAlpha(0)
+                .play(100);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     private void applySettings() {
-        Config.loadConfig(mActivity);
+        Config.loadConfig(activity);
         onlineHelper.update();
         OnlineScoring.getInstance().login();
 
-        if (reloadBackground && engine.currentScreen == Screens.MAIN) {
-            // global.getMainScene().loadTimeingPoints(false);
+        if (reloadBackground && engine.currentScreen == Screens.Main) {
+            UI.background.reload();
             reloadBackground = false;
         }
-
-        global.getSongService().setGaming(false);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     public void close() {
-        if (!isShowing)
+        if (!isShowing) {
             return;
-
+        }
         currentTab = null;
 
-        new Animation(container).fade(1, 0)
+        Game.platform.animate(true, true)
+                .toX(0)
+                .play(400);
+
+        AnimationTable.fadeOut(container)
                 .runOnEnd(() -> {
                     FragmentTransaction transaction = Game.platform.manager.beginTransaction();
 
@@ -208,26 +240,28 @@ public class SettingsMenu extends UIFragment {
                 })
                 .play(300);
 
-        new Animation(platform.renderView).moveX(-80, 0)
-                .play(400);
-        new Animation(rootBackground).fade(1, 0)
-                .play(300);
+        AnimationTable.fadeOut(rootBackground)
+                .play();
 
-        new Animation(body).moveX(-navbarWidth, panelWidth + navbarWidth)
-                .interpolator(Easing.InExpo)
+        Animation.of(body)
+                .toX(panelWidth + navBarWidth)
+                .interpolator(Easing.OutExpo)
                 .play(350);
-        new Animation(layer).moveX(-navbarWidth, panelWidth + navbarWidth)
-                .interpolator(Easing.InExpo)
+
+        Animation.of(layer)
+                .toX(panelWidth + navBarWidth)
+                .interpolator(Easing.OutExpo)
                 .delay(50)
                 .play(400);
 
-        new Animation(navbar).moveX(0, navbarWidth)
+        Animation.of(navigationBar)
+                .toX(navBarWidth)
                 .interpolator(Easing.OutExpo)
+                .delay(400)
                 .runOnEnd(() -> {
                     super.close();
                     applySettings();
                 })
-                .delay(400)
                 .play(200);
     }
 
@@ -308,9 +342,9 @@ public class SettingsMenu extends UIFragment {
                         skinManager.clearSkin();
                         resources.loadSkin(newValue.toString());
                         engine.getTextureManager().reloadTextures();
-                        mActivity.startActivity(new Intent(mActivity, MainActivity.class));
+                        activity.startActivity(new Intent(activity, MainActivity.class));
 
-                        Snackbar.make(mActivity.findViewById(android.R.id.content),
+                        Snackbar.make(activity.findViewById(android.R.id.content),
                                 StringTable.get(R.string.message_loaded_skin), 1500).show();
                         return true;
                     });
@@ -388,7 +422,7 @@ public class SettingsMenu extends UIFragment {
                 });
 
                 clearCache.setOnPreferenceClickListener(p -> {
-                    properties.clear(mActivity);
+                    properties.clear(activity);
                     return true;
                 });
             }
@@ -404,7 +438,7 @@ public class SettingsMenu extends UIFragment {
 
                     if (newValue.toString().trim().length() == 0) {
                         skinTopPath.setText(Config.getCorePath() + "Skin/");
-                        Config.loadConfig(mActivity);
+                        Config.loadConfig(activity);
                         return false;
                     }
 
@@ -415,7 +449,7 @@ public class SettingsMenu extends UIFragment {
                     }
 
                     skinTopPath.setText(newValue.toString());
-                    Config.loadConfig(mActivity);
+                    Config.loadConfig(activity);
                     return false;
                 });
             }

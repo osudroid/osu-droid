@@ -14,7 +14,7 @@
         android:id="@+id/n_body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/round_shape"
+        android:background="@drawable/shape_rounded"
         android:backgroundTint="@color/notificationBackground"
         android:elevation="@dimen/M"
         android:padding="@dimen/S">
@@ -58,15 +58,10 @@
 
                 <com.google.android.material.progressindicator.LinearProgressIndicator
                     android:id="@+id/n_progress"
+                    style="@style/progress_indicator"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/linearProgressBarHeight"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/XS"
-                    android:indeterminate="true"
-                    android:theme="@style/AppTheme"
-                    android:visibility="gone"
-                    app:indicatorColor="@color/progressBarIndicatorColor"
-                    app:trackColor="@color/progressBarTrackColor"
-                    app:trackCornerRadius="@dimen/progressBarTrackCornerRadius"
                     tool:progress="40" />
 
             </LinearLayout>
@@ -78,7 +73,7 @@
                 android:layout_height="@dimen/XXL"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:background="@drawable/round_shape"
+                android:background="@drawable/shape_rounded"
                 android:src="@drawable/v_close_s"
                 app:tint="@color/notificationDismissButtonTint" />
 

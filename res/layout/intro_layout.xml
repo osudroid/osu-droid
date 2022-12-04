@@ -10,7 +10,7 @@
     android:translationZ="@dimen/imposedLayer">
 
     <View
-        android:id="@+id/background"
+        android:id="@+id/ss_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#000000" />
@@ -27,13 +27,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:alpha="0.05" />
-
-    <View
-        android:id="@+id/ss_effect"
-        android:layout_width="@dimen/mainMenuLogoSize"
-        android:layout_height="@dimen/mainMenuLogoSize"
-        android:layout_centerInParent="true"
-        android:alpha="0"/>
 
     <ImageView
         android:id="@+id/ss_logo"
@@ -58,26 +51,18 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_margin="@dimen/S"
-        android:background="@drawable/round_shape"
-        android:backgroundTint="@color/loadingSceneViewsBackground"
+        android:background="@drawable/shape_rounded"
+        android:backgroundTint="@color/badgeBackground"
         android:gravity="center_vertical"
         android:paddingLeft="@dimen/XS"
         android:paddingRight="@dimen/M">
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/ss_progress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/small_circular_indicator"
             android:layout_margin="@dimen/XS"
             android:max="100"
-            android:progress="0"
-            app:indicatorColor="@color/progressBarIndicatorColor"
-            app:indicatorDirectionCircular="counterclockwise"
-            app:indicatorInset="0dp"
-            app:indicatorSize="@dimen/smallCircularProgressBarSize"
-            app:trackCornerRadius="@dimen/progressBarTrackCornerRadius"
-            app:trackThickness="@dimen/smallCircularProgressBarThickness"
-            tools:progress="40" />
+            android:progress="0"/>
 
         <TextView
             android:id="@+id/ss_percent"

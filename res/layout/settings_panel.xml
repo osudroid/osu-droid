@@ -14,13 +14,12 @@
         android:layout_height="match_parent"
         android:background="@color/backgroundDimmed" />
 
-    <androidx.cardview.widget.CardView
+    <View
         android:id="@+id/sm_layer"
         android:layout_width="@dimen/settingsPanelWidth"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
-        app:cardBackgroundColor="@color/backgroundTertiary"
-        app:cardElevation="@dimen/L" />
+        android:background="@color/backgroundTertiary" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/sm_navbar"
@@ -29,7 +28,7 @@
         android:layout_alignParentEnd="true"
         android:translationZ="1dp"
         app:cardBackgroundColor="@color/backgroundPrimary"
-        app:cardElevation="@dimen/L">
+        app:cardElevation="@dimen/XL">
 
         <ScrollView
             android:layout_width="match_parent"
@@ -46,49 +45,49 @@
                     android:id="@+id/sm_tabIndicator"
                     android:layout_width="@dimen/tabIndicatorSize"
                     android:layout_height="@dimen/settingsPanelButtonHeight"
-                    android:background="@drawable/round_shape"
+                    android:background="@drawable/shape_rounded"
                     android:backgroundTint="@color/vectorPrimary" />
 
                 <ImageView
                     android:id="@+id/sm_general"
                     style="@style/settings_panel_tab_button"
-                    android:src="@drawable/v_general" />
+                    android:src="@drawable/v18_general" />
 
                 <ImageView
                     android:id="@+id/sm_gameplay"
                     style="@style/settings_panel_tab_button"
                     android:layout_below="@id/sm_general"
-                    android:src="@drawable/v_gameplay" />
+                    android:src="@drawable/v18_gameplay" />
 
                 <ImageView
                     android:id="@+id/sm_appearance"
                     style="@style/settings_panel_tab_button"
                     android:layout_below="@id/sm_gameplay"
-                    android:src="@drawable/v_appearance" />
+                    android:src="@drawable/v18_appearance" />
 
                 <ImageView
                     android:id="@+id/sm_graphics"
                     style="@style/settings_panel_tab_button"
                     android:layout_below="@id/sm_appearance"
-                    android:src="@drawable/v_graphics" />
+                    android:src="@drawable/v18_graphics" />
 
                 <ImageView
                     android:id="@+id/sm_sounds"
                     style="@style/settings_panel_tab_button"
                     android:layout_below="@id/sm_graphics"
-                    android:src="@drawable/v_sounds" />
+                    android:src="@drawable/v18_sounds" />
 
                 <ImageView
                     android:id="@+id/sm_library"
                     style="@style/settings_panel_tab_button"
                     android:layout_below="@id/sm_sounds"
-                    android:src="@drawable/v_library" />
+                    android:src="@drawable/v18_library" />
 
                 <ImageView
                     android:id="@+id/sm_advanced"
                     style="@style/settings_panel_tab_button"
                     android:layout_below="@id/sm_library"
-                    android:src="@drawable/v_advanced" />
+                    android:src="@drawable/v18_advanced" />
 
             </RelativeLayout>
 
@@ -101,6 +100,7 @@
         android:layout_width="@dimen/settingsPanelWidth"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
+        android:layout_marginRight="@dimen/settingsPanelNavBarWidth"
         app:cardBackgroundColor="@color/backgroundSecondary"
         app:cardElevation="@dimen/L">
 
@@ -110,7 +110,8 @@
 
             <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/sm_loading"
-                style="@style/loading_circle" />
+                style="@style/loading_indicator"
+                android:layout_centerInParent="true"/>
 
             <FrameLayout
                 android:id="@+id/sm_container"

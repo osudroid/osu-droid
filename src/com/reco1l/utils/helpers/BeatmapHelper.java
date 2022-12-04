@@ -6,10 +6,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
 import com.edlplan.framework.math.FMath;
-import com.reco1l.management.BitmapManager;
 import com.reco1l.interfaces.IReferences;
-
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,8 +19,6 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 // Created by Reco1l on 1/8/22 05:27
 
 public class BeatmapHelper implements IReferences {
-
-    private static final String COMPRESSED_BG_SUFFIX = "bg@";
 
     // Title
     //--------------------------------------------------------------------------------------------//
@@ -124,21 +119,6 @@ public class BeatmapHelper implements IReferences {
     // Background
     //--------------------------------------------------------------------------------------------//
 
-    public static TextureRegion getBackgroundAsTexture(BeatmapInfo beatmap) {
-        if (beatmap != null) {
-            String path = null;
-
-            for (TrackInfo track : beatmap.getTracks()) {
-                if (track.getBackground() != null) {
-                    path = track.getBackground();
-                    break;
-                }
-            }
-            return resources.loadBackground(path);
-        }
-        return null;
-    }
-
     public static Drawable getBackground(TrackInfo track) {
         if (track == null)
             return null;
@@ -149,7 +129,7 @@ public class BeatmapHelper implements IReferences {
         InputStream is;
 
         try {
-            is = mActivity.getAssets().open("gfx/menu-background.png");
+            is = activity.getAssets().open("gfx/menu-background.png");
         } catch (IOException e) {
             return null;
         }
@@ -159,13 +139,12 @@ public class BeatmapHelper implements IReferences {
         return null;
     }
 
-
     //--------------------------------------------------------------------------------------------//
     private static String getBackgroundKey(TrackInfo track) {
         if (track == null) {
             return null;
         }
-        return COMPRESSED_BG_SUFFIX + track.getBeatmapID() + "/" + track.getPublicName();
+        return "compressed@" + track.getBeatmapID() + "/" + track.getPublicName();
     }
 
     public static Bitmap getCompressedBackground(TrackInfo track) {
@@ -174,7 +153,7 @@ public class BeatmapHelper implements IReferences {
 
     public static void loadCompressedBackground(TrackInfo track) {
         if (!bitmapManager.contains(getBackgroundKey(track))) {
-            Bitmap bitmap = BitmapManager.compress(BitmapFactory.decodeFile(track.getBackground()), 10);
+            Bitmap bitmap = BitmapHelper.compress(BitmapFactory.decodeFile(track.getBackground()), 10);
             bitmapManager.put(getBackgroundKey(track), bitmap);
         }
     }

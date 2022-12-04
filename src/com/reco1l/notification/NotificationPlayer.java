@@ -2,7 +2,7 @@ package com.reco1l.notification;
 
 import static androidx.media.app.NotificationCompat.MediaStyle;
 
-import static com.reco1l.interfaces.IReferences.mActivity;
+import static com.reco1l.interfaces.IReferences.activity;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -70,7 +70,7 @@ public class NotificationPlayer {
         filter.addAction(ACTION_NEXT);
         filter.addAction(ACTION_CLOSE);
 
-        defaultIcon = BitmapFactory.decodeResource(mActivity.getResources(), R.drawable.osut);
+        defaultIcon = BitmapFactory.decodeResource(activity.getResources(), R.drawable.osut);
 
         prev = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_PREV), 0);
         next = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_NEXT), 0);

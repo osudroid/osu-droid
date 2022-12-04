@@ -1,9 +1,12 @@
 package com.reco1l.utils;
 
+// Created by Reco1l on 14/11/2022, 23:08
+
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewPropertyAnimator;
 
@@ -11,660 +14,684 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 import com.reco1l.Game;
-import com.reco1l.interfaces.IReferences;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
-// Created by Reco1l on 23/6/22 20:44
+public final class Animation {
 
-/**
- * Simplifies the usage of ViewPropertyAnimator and ValueAnimator.
- */
-public class Animation {
+    // Animation data
+    private long duration = 300;
+    private long delay = 0;
 
-    private final static long DEFAULT_DURATION = 1000;
+    private Float
+            fromX,
+            fromY,
+            fromAlpha,
+            fromScale,
+            fromScaleX,
+            fromScaleY,
+            fromRotation;
 
-    public Runnable onStart, onEnd;
+    private Integer
+            fromSize,
+            fromWidth,
+            fromHeight,
+            fromMargins,
+            fromTopMargin,
+            fromLeftMargin,
+            fromRightMargin,
+            fromBottomMargin,
+            fromVerticalMargins,
+            fromHorizontalMargins;
 
-    private View view;
+    private Float
+            toX,
+            toY,
+            toAlpha,
+            toScale,
+            toScaleX,
+            toScaleY,
+            toRotation;
+
+    private Integer
+            toSize,
+            toWidth,
+            toHeight,
+            toMargins,
+            toTopMargin,
+            toLeftMargin,
+            toRightMargin,
+            toBottomMargin,
+            toVerticalMargins,
+            toHorizontalMargins;
+    // End
+
+    // Behavior
     private Easing interpolator;
-    private ViewPropertyAnimator anim;
-    private List<ValueAnimator> valueAnimators;
 
-    private float fromX, toX;
-    private float fromY, toY;
-    private float fromAlpha, toAlpha;
-    private float fromScaleX, toScaleX;
-    private float fromScaleY, toScaleY;
-    private float fromRotation, toRotation;
-    private long duration = -1, delay = 0;
+    private boolean
+            fromPropertiesWithDelay = false,
+            cancelCurrentAnimations = true,
+            playWithLayer = false;
+    // End
 
-    private boolean cancelPendingAnimations = true;
-    private Interpolate interpolatorMode = Interpolate.BOTH;
+    // Listeners
+    private Runnable
+            runOnStart,
+            runOnEnd;
+
+    private UpdateListener runOnUpdate;
+    // End
+
+    private ArrayList<View> views;
+    private ArrayList<ValueAnimator> valueAnimators;
+
+    private boolean isViewAnimation = false;
 
     //--------------------------------------------------------------------------------------------//
 
-    public enum Interpolate {
-        PROPERTY_ANIMATOR,
-        VALUE_ANIMATOR,
-        BOTH
+    private Animation(View... views) {
+        this.views = new ArrayList<>();
+        isViewAnimation = true;
+
+        for (View view : views) {
+            if (view == null) {
+                Log.i("Animation", "View is null, the animation will not apply properly!");
+                continue;
+            }
+            this.views.add(view);
+        }
     }
 
-    //--------------------------------------------------------------------------------------------//
-
-    /**
-     * This constructor is intended to be used for multiple Animations.
-     */
-    public Animation() {
+    private Animation(ValueAnimator valueAnimator) {
         valueAnimators = new ArrayList<>();
+        valueAnimators.add(valueAnimator);
     }
 
-    /**
-     * Don't forget to call {@link #play(long)} to start the animation
-     *
-     * @param view View to animate.
-     */
-    public Animation(View view) {
-        this.view = view;
-        if (view == null)
+    //--------------------------------------------------------------------------------------------//
+
+    public static Animation of(View... view) {
+        return new Animation(view);
+    }
+
+    public static Animation ofFloat(float from, float to) {
+        return new Animation(ValueAnimator.ofFloat(from, to));
+    }
+
+    public static Animation ofInt(int from, int to) {
+        return new Animation(ValueAnimator.ofInt(from, to));
+    }
+
+    public static Animation ofArgb(int from, int to) {
+        return new Animation(ValueAnimator.ofArgb(from, to));
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    @FunctionalInterface
+    public interface UpdateListener {
+        void onUpdate(Object value);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    private void cancelViewAnimators() {
+        int i = 0;
+        while (i < views.size()) {
+            View view = views.get(i);
+
+            if (view != null) {
+                view.animate().setListener(null);
+                view.animate().cancel();
+            }
+            i++;
+        }
+    }
+
+    private void cancelValueAnimations() {
+        int i = 0;
+        while (i < valueAnimators.size()) {
+            ValueAnimator valueAnimator = valueAnimators.get(i);
+
+            if (valueAnimator != null) {
+                valueAnimator.removeAllListeners();
+                valueAnimator.removeAllUpdateListeners();
+                valueAnimator.cancel();
+            }
+            i++;
+        }
+    }
+
+    public void cancel() {
+        Game.activity.runOnUiThread(() -> {
+            if (views != null) {
+                cancelViewAnimators();
+            }
+            if (valueAnimators != null) {
+                cancelValueAnimations();
+            }
+        });
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public void play() {
+        play(duration);
+    }
+
+    public void play(long duration) {
+        this.duration = duration;
+
+        if (this.duration < 100) {
+            this.duration = 100;
+        }
+
+        if (cancelCurrentAnimations) {
+            cancel();
+        }
+        if (views != null && !views.isEmpty()) {
+            handleViewAnimations();
             return;
-
-        // Initial values
-
-        fromX = view.getTranslationX();
-        toX = fromX;
-        fromY = view.getTranslationY();
-        toY = fromY;
-
-        fromScaleX = view.getScaleX();
-        toScaleX = fromScaleX;
-        fromScaleY = view.getScaleY();
-        toScaleY = fromScaleY;
-
-        fromAlpha = view.getAlpha();
-        toAlpha = fromAlpha;
-
-        valueAnimators = new ArrayList<>();
+        }
+        if (valueAnimators != null && !valueAnimators.isEmpty()) {
+            handleValueAnimations();
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    @FunctionalInterface
-    public interface IAnimationHandler {
-        void onAnimate(Animation animation);
-    }
+    private void handleValueAnimations() {
+        Game.activity.runOnUiThread(() -> {
+            int i = 0;
+            while (i < valueAnimators.size()) {
+                ValueAnimator valueAnimator = valueAnimators.get(i);
 
-    // ValueAnimator based animations
-    //--------------------------------------------------------------------------------------------//
+                if (i == 0 && !isViewAnimation) {
+                    valueAnimator.addListener(new BaseAnimationListener() {
 
-    @FunctionalInterface
-    public interface ValueAnimationListener<T extends Number> {
-        void onUpdate(T value);
-    }
+                        public void onAnimationStart(Animator animation) {
+                            if (runOnStart != null) {
+                                runOnStart.run();
+                            }
+                        }
 
-    public static class ValueAnimation<T extends Number> {
+                        public void onAnimationEnd(Animator animation) {
+                            if (runOnEnd != null) {
+                                runOnEnd.run();
+                            }
 
-        private final ValueAnimator valueAnimator;
-        private final Animation instance;
+                            valueAnimator.removeAllListeners();
+                            valueAnimator.removeAllUpdateListeners();
+                        }
+                    });
 
-        //----------------------------------------------------------------------------------------//
-
-        public ValueAnimation(ValueAnimator valueAnimator, Animation instance) {
-            this.valueAnimator = valueAnimator;
-            this.instance = instance;
-        }
-
-        //----------------------------------------------------------------------------------------//
-
-        public ValueAnimation<T> interpolator(Easing interpolator) {
-            valueAnimator.setInterpolator(EasingHelper.asInterpolator(interpolator));
-            return this;
-        }
-
-        @SuppressWarnings("unchecked")
-        public Animation runOnUpdate(ValueAnimationListener<T> listener) {
-            valueAnimator.removeAllUpdateListeners();
-            valueAnimator.addUpdateListener(val -> {
-                if (listener != null) {
-                    listener.onUpdate((T) val.getAnimatedValue());
+                    valueAnimator.addUpdateListener(animation -> {
+                        if (runOnUpdate != null) {
+                            runOnUpdate.onUpdate(animation.getAnimatedValue());
+                        }
+                    });
                 }
-            });
-            return instance;
+
+                if (interpolator != null) {
+                    valueAnimator.setInterpolator(EasingHelper.asInterpolator(interpolator));
+                }
+
+                valueAnimator.setStartDelay(delay);
+                valueAnimator.setDuration(duration);
+                valueAnimator.start();
+                i++;
+            }
+        });
+    }
+
+    private void handleViewAnimations() {
+        Game.activity.runOnUiThread(() -> {
+            int i = 0;
+            while (i < views.size()) {
+
+                View view = views.get(i);
+                ViewPropertyAnimator viewAnimator = view.animate();
+
+                handleFirstProperties(view);
+
+                // Setting this to first view, otherwise will duplicate listeners
+                if (i == 0) {
+                    viewAnimator.setListener(new BaseAnimationListener() {
+                        public void onAnimationStart(Animator animation) {
+                            if (runOnStart != null) {
+                                runOnStart.run();
+                            }
+                        }
+
+                        public void onAnimationEnd(Animator animation) {
+                            if (runOnEnd != null) {
+                                runOnEnd.run();
+                            }
+                        }
+                    });
+                }
+
+                if (interpolator != null) {
+                    viewAnimator.setInterpolator(EasingHelper.asInterpolator(interpolator));
+                }
+                if (playWithLayer) {
+                    viewAnimator.withLayer();
+                }
+
+                applyFinalProperties(viewAnimator);
+
+                viewAnimator.setStartDelay(delay);
+                viewAnimator.setDuration(duration);
+                viewAnimator.start();
+                i++;
+            }
+            handleValueAnimations();
+        });
+    }
+
+    private void handleFirstProperties(View view) {
+        if (fromPropertiesWithDelay && delay > 0) {
+            view.postDelayed(() -> {
+                applyInitialProperties(view);
+                createParameterAnimations(view);
+            }, delay - 1);
+        } else {
+            applyInitialProperties(view);
+            createParameterAnimations(view);
+        }
+    }
+
+    private void createParameterAnimations(View view) {
+        if (valueAnimators == null) {
+            valueAnimators = new ArrayList<>();
         }
 
-        public Animation build() {
-            return instance;
+        LayoutParams params = view.getLayoutParams();
+
+        if (fromSize != null) {
+            fromHeight = fromSize;
+            fromWidth = fromSize;
+        }
+        if (toSize != null) {
+            toHeight = toSize;
+            toWidth = toSize;
+        }
+
+        if (toHeight != null) {
+            if (fromHeight == null) {
+                fromHeight = view.getHeight();
+            }
+            createParameterAnimator(view, params, fromHeight, toHeight, value ->
+                    params.height = (int) value
+            );
+        }
+
+        if (toWidth != null) {
+            if (fromWidth == null) {
+                fromWidth = view.getWidth();
+            }
+            createParameterAnimator(view, params, fromWidth, toWidth, value ->
+                    params.width = (int) value
+            );
+        }
+
+        MarginLayoutParams margins = (MarginLayoutParams) view.getLayoutParams();
+
+        if (toMargins != null) {
+            toVerticalMargins = toMargins;
+            toHorizontalMargins = toMargins;
+        }
+        if (toVerticalMargins != null) {
+            toTopMargin = toVerticalMargins;
+            toBottomMargin = toVerticalMargins;
+        }
+        if (toHorizontalMargins != null) {
+            toLeftMargin = toHorizontalMargins;
+            toRightMargin = toHorizontalMargins;
+        }
+
+        if (toTopMargin != null) {
+            if (fromTopMargin == null) {
+                fromTopMargin = margins.topMargin;
+            }
+            createParameterAnimator(view, margins, fromTopMargin, toTopMargin, value ->
+                    margins.topMargin = (int) value
+            );
+        }
+
+        if (toBottomMargin != null) {
+            if (fromBottomMargin == null) {
+                fromBottomMargin = margins.bottomMargin;
+            }
+            createParameterAnimator(view, margins, fromBottomMargin, toBottomMargin, value ->
+                    margins.bottomMargin = (int) value
+            );
+        }
+
+        if (toLeftMargin != null) {
+            if (fromLeftMargin == null) {
+                fromLeftMargin = margins.leftMargin;
+            }
+            createParameterAnimator(view, margins, fromLeftMargin, toLeftMargin, value ->
+                    margins.leftMargin = (int) value
+            );
+        }
+
+        if (toRightMargin != null) {
+            if (fromRightMargin == null) {
+                fromRightMargin = margins.rightMargin;
+            }
+            createParameterAnimator(view, margins, fromRightMargin, toRightMargin, value ->
+                    margins.rightMargin = (int) value
+            );
+        }
+    }
+
+
+    private void createParameterAnimator(View view, LayoutParams params, int from, int to, UpdateListener listener) {
+        ValueAnimator animator = ValueAnimator.ofInt(from, to);
+
+        animator.addUpdateListener(animation -> {
+            listener.onUpdate((int) animation.getAnimatedValue());
+            view.setLayoutParams(params);
+        });
+
+        valueAnimators.add(animator);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    private void applyFinalProperties(ViewPropertyAnimator viewAnimator) {
+
+        if (toX != null) {
+            viewAnimator.translationX(toX);
+        }
+        if (toY != null) {
+            viewAnimator.translationY(toY);
+        }
+        if (toAlpha != null) {
+            viewAnimator.alpha(toAlpha);
+        }
+        if (toRotation != null) {
+            viewAnimator.rotation(toRotation);
+        }
+
+        if (toScale != null) {
+            toScaleX = toScale;
+            toScaleY = toScale;
+        }
+
+        if (toScaleX != null) {
+            viewAnimator.scaleX(toScaleX);
+        }
+        if (toScaleY != null) {
+            viewAnimator.scaleY(toScaleY);
+        }
+    }
+
+    private void applyInitialProperties(View view) {
+        if (view == null) {
+            return;
+        }
+
+        if (fromX != null) {
+            view.setTranslationX(fromX);
+        }
+        if (fromY != null) {
+            view.setTranslationY(fromY);
+        }
+        if (fromAlpha != null) {
+            view.setAlpha(fromAlpha);
+        }
+        if (fromRotation != null) {
+            view.setRotation(fromRotation);
+        }
+
+        if (fromScale != null) {
+            fromScaleX = fromScale;
+            fromScaleY = fromScale;
+        }
+
+        if (fromScaleX != null) {
+            view.setScaleX(fromScaleX);
+        }
+        if (fromScaleY != null) {
+            view.setScaleY(fromScaleY);
+        }
+
+        if (fromSize != null) {
+            fromWidth = fromSize;
+            fromHeight = fromSize;
+        }
+
+        if (fromMargins != null) {
+            fromVerticalMargins = fromMargins;
+            fromHorizontalMargins = fromMargins;
+        }
+        if (fromVerticalMargins != null) {
+            fromTopMargin = fromVerticalMargins;
+            fromBottomMargin = fromVerticalMargins;
+        }
+        if (fromHorizontalMargins != null) {
+            fromLeftMargin = fromHorizontalMargins;
+            fromRightMargin = fromHorizontalMargins;
         }
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public ValueAnimation<Integer> ofInt(int from, int to) {
-        ValueAnimator valueAnimator = ValueAnimator.ofInt(from, to);
-        valueAnimators.add(valueAnimator);
-        return new ValueAnimation<>(valueAnimator, this);
-    }
-
-    public ValueAnimation<Float> ofFloat(float from, float to) {
-        ValueAnimator valueAnimator = ValueAnimator.ofFloat(from, to);
-        valueAnimators.add(valueAnimator);
-        return new ValueAnimation<>(valueAnimator, this);
-    }
-
-    public ValueAnimation<Integer> ofArgb(int from, int to) {
-        ValueAnimator valueAnimator = ValueAnimator.ofArgb(from, to);
-        valueAnimators.add(valueAnimator);
-        return new ValueAnimation<>(valueAnimator, this);
-    }
-
-    // Size
-    //--------------------------------------------------------------------------------------------//
-
-    public Animation size(float from, float to) {
-        ValueAnimator valueAnimator = ValueAnimator.ofInt((int) from, (int) to);
-        valueAnimator.addUpdateListener(animation -> {
-            if (view == null)
-                return;
-            view.getLayoutParams().height = (int) animation.getAnimatedValue();
-            view.getLayoutParams().width = (int) animation.getAnimatedValue();
-            view.requestLayout();
-        });
-        valueAnimators.add(valueAnimator);
+    public Animation duration(long duration) {
+        this.duration = duration;
         return this;
     }
 
-    public Animation height(float from, float to) {
-        ValueAnimator valueAnimator = ValueAnimator.ofInt((int) from, (int) to);
-        valueAnimator.addUpdateListener(animation -> {
-            if (view == null)
-                return;
-            view.getLayoutParams().height = (int) animation.getAnimatedValue();
-            view.requestLayout();
-        });
-        valueAnimators.add(valueAnimator);
+    public Animation delay(long delay) {
+        this.delay = delay;
         return this;
     }
 
-    public Animation width(float from, float to) {
-        ValueAnimator valueAnimator = ValueAnimator.ofInt((int) from, (int) to);
-        valueAnimator.addUpdateListener(animation -> {
-            if (view == null)
-                return;
-            view.getLayoutParams().width = (int) animation.getAnimatedValue();
-            view.requestLayout();
-        });
-        valueAnimators.add(valueAnimator);
+    public Animation fromX(float fromX) {
+        this.fromX = fromX;
         return this;
     }
 
-    // Margins
-    //--------------------------------------------------------------------------------------------//
-
-    public Animation marginTop(int from, int to) {
-        ValueAnimator valueAnimator = ValueAnimator.ofInt(from, to);
-        valueAnimator.addUpdateListener(animation -> {
-            if (view == null)
-                return;
-            MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
-            params.topMargin = (int) animation.getAnimatedValue();
-            view.requestLayout();
-        });
-        valueAnimators.add(valueAnimator);
+    public Animation fromY(float fromY) {
+        this.fromY = fromY;
         return this;
     }
 
-    public Animation marginBottom(int from, int to) {
-        ValueAnimator valueAnimator = ValueAnimator.ofInt(from, to);
-        valueAnimator.addUpdateListener(animation -> {
-            if (view == null)
-                return;
-            MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
-            params.bottomMargin = (int) animation.getAnimatedValue();
-            view.requestLayout();
-        });
-        valueAnimators.add(valueAnimator);
+    public Animation fromAlpha(float fromAlpha) {
+        this.fromAlpha = fromAlpha;
         return this;
     }
 
-    public Animation marginLeft(int from, int to) {
-        ValueAnimator valueAnimator = ValueAnimator.ofInt(from, to);
-        valueAnimator.addUpdateListener(animation -> {
-            if (view == null)
-                return;
-            MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
-            params.leftMargin = (int) animation.getAnimatedValue();
-            view.requestLayout();
-        });
-        valueAnimators.add(valueAnimator);
+    public Animation fromScale(float fromScale) {
+        this.fromScale = fromScale;
         return this;
     }
 
-    public Animation marginRight(int from, int to) {
-        ValueAnimator valueAnimator = ValueAnimator.ofInt(from, to);
-        valueAnimator.addUpdateListener(animation -> {
-            if (view == null)
-                return;
-            MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
-            params.rightMargin = (int) animation.getAnimatedValue();
-            view.requestLayout();
-        });
-        valueAnimators.add(valueAnimator);
+    public Animation fromScaleX(float fromScaleX) {
+        this.fromScaleX = fromScaleX;
         return this;
     }
 
-    // Elevation
-    //--------------------------------------------------------------------------------------------//
-
-    public Animation elevation(float from, float to) {
-        ValueAnimator valueAnimator = ValueAnimator.ofFloat(from, to);
-        valueAnimator.addUpdateListener(animation -> {
-            if (view == null)
-                return;
-            view.setElevation((float) animation.getAnimatedValue());
-        });
-        valueAnimators.add(valueAnimator);
+    public Animation fromScaleY(float fromScaleY) {
+        this.fromScaleY = fromScaleY;
         return this;
     }
 
-    // Scale
-    //--------------------------------------------------------------------------------------------//
-
-    public Animation pivot(Float X, Float Y) {
-        if (view == null)
-            return this;
-        view.setPivotX(X);
-        view.setPivotY(Y);
+    public Animation fromRotation(float fromRotation) {
+        this.fromRotation = fromRotation;
         return this;
     }
 
-    public Animation scaleY(float from, float to) {
-        fromScaleY = from;
-        toScaleY = to;
+    public Animation fromSize(int fromSize) {
+        this.fromSize = fromSize;
         return this;
     }
 
-    public Animation scaleX(float from, float to) {
-        fromScaleX = from;
-        toScaleX = to;
+    public Animation fromWidth(int fromWidth) {
+        this.fromWidth = fromWidth;
         return this;
     }
 
-    /**
-     * This method sets ScaleX and ScaleY at the same time.
-     */
-    public Animation scale(float from, float to) {
-        fromScaleX = from;
-        fromScaleY = from;
-        toScaleX = to;
-        toScaleY = to;
+    public Animation fromHeight(int fromHeight) {
+        this.fromHeight = fromHeight;
         return this;
     }
 
-    // Translation
-    //--------------------------------------------------------------------------------------------//
-
-    public Animation moveX(float from, float to) {
-        fromX = from;
-        toX = to;
+    public Animation fromMargins(int fromMargins) {
+        this.fromMargins = fromMargins;
         return this;
     }
 
-    public Animation moveY(float from, float to) {
-        fromY = from;
-        toY = to;
+    public Animation fromTopMargin(int fromTopMargin) {
+        this.fromTopMargin = fromTopMargin;
         return this;
     }
 
-    // Interpolation
-    //--------------------------------------------------------------------------------------------//
+    public Animation fromLeftMargin(int fromLeftMargin) {
+        this.fromLeftMargin = fromLeftMargin;
+        return this;
+    }
+
+    public Animation fromRightMargin(int fromRightMargin) {
+        this.fromRightMargin = fromRightMargin;
+        return this;
+    }
+
+    public Animation fromBottomMargin(int fromBottomMargin) {
+        this.fromBottomMargin = fromBottomMargin;
+        return this;
+    }
+
+    public Animation fromVerticalMargins(int fromVerticalMargins) {
+        this.fromVerticalMargins = fromVerticalMargins;
+        return this;
+    }
+
+    public Animation fromHorizontalMargins(int fromHorizontalMargins) {
+        this.fromHorizontalMargins = fromHorizontalMargins;
+        return this;
+    }
+
+    public Animation toX(float toX) {
+        this.toX = toX;
+        return this;
+    }
+
+    public Animation toY(float toY) {
+        this.toY = toY;
+        return this;
+    }
+
+    public Animation toAlpha(float toAlpha) {
+        this.toAlpha = toAlpha;
+        return this;
+    }
+
+    public Animation toScale(float toScale) {
+        this.toScale = toScale;
+        return this;
+    }
+
+    public Animation toScaleX(float toScaleX) {
+        this.toScaleX = toScaleX;
+        return this;
+    }
+
+    public Animation toScaleY(float toScaleY) {
+        this.toScaleY = toScaleY;
+        return this;
+    }
+
+    public Animation toRotation(float toRotation) {
+        this.toRotation = toRotation;
+        return this;
+    }
+
+    public Animation toSize(int toSize) {
+        this.toSize = toSize;
+        return this;
+    }
+
+    public Animation toWidth(int toWidth) {
+        this.toWidth = toWidth;
+        return this;
+    }
+
+    public Animation toHeight(int toHeight) {
+        this.toHeight = toHeight;
+        return this;
+    }
+
+    public Animation toMargins(int toMargins) {
+        this.toMargins = toMargins;
+        return this;
+    }
+
+    public Animation toTopMargin(int toTopMargin) {
+        this.toTopMargin = toTopMargin;
+        return this;
+    }
+
+    public Animation toLeftMargin(int toLeftMargin) {
+        this.toLeftMargin = toLeftMargin;
+        return this;
+    }
+
+    public Animation toRightMargin(int toRightMargin) {
+        this.toRightMargin = toRightMargin;
+        return this;
+    }
+
+    public Animation toBottomMargin(int toBottomMargin) {
+        this.toBottomMargin = toBottomMargin;
+        return this;
+    }
+
+    public Animation toVerticalMargins(int toVerticalMargins) {
+        this.toVerticalMargins = toVerticalMargins;
+        return this;
+    }
+
+    public Animation toHorizontalMargins(int toHorizontalMargins) {
+        this.toHorizontalMargins = toHorizontalMargins;
+        return this;
+    }
 
     public Animation interpolator(Easing interpolator) {
         this.interpolator = interpolator;
         return this;
     }
 
-    public Animation interpolatorMode(Interpolate mode) {
-        interpolatorMode = mode;
+    public Animation fromPropertiesWithDelay(boolean fromPropertiesWithDelay) {
+        this.fromPropertiesWithDelay = fromPropertiesWithDelay;
         return this;
     }
 
-    // Rotation
-    //--------------------------------------------------------------------------------------------//
-
-    public Animation rotation(float from, float to) {
-        fromRotation = from;
-        toRotation = to;
+    public Animation cancelCurrentAnimations(boolean cancelCurrentAnimations) {
+        this.cancelCurrentAnimations = cancelCurrentAnimations;
         return this;
     }
 
-    // Alpha
-    //--------------------------------------------------------------------------------------------//
-
-    public Animation fade(float from, float to) {
-        fromAlpha = from;
-        toAlpha = to;
+    public Animation playWithLayer(boolean playWithLayer) {
+        this.playWithLayer = playWithLayer;
         return this;
     }
 
-    //--------------------------------------------------------------------------------------------//
-
-    public Animation runOnStart(Runnable task) {
-        onStart = task;
+    public Animation runOnStart(Runnable runOnStart) {
+        this.runOnStart = runOnStart;
         return this;
     }
 
-    public Animation runOnEnd(Runnable task) {
-        onEnd = task;
+    public Animation runOnEnd(Runnable runOnEnd) {
+        this.runOnEnd = runOnEnd;
         return this;
     }
 
-    //--------------------------------------------------------------------------------------------//
-
-    public Animation cancelPending(boolean bool) {
-        cancelPendingAnimations = bool;
+    public Animation runOnUpdate(UpdateListener runOnUpdate) {
+        this.runOnUpdate = runOnUpdate;
         return this;
-    }
-
-    public Animation delay(long ms) {
-        delay = ms;
-        return this;
-    }
-
-    public Animation duration(long ms) {
-        duration = ms;
-        return this;
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public void play() {
-        if (duration < 0) {
-            duration = DEFAULT_DURATION;
-        }
-        play(duration);
-    }
-
-    /**
-     * @param fDuration duration of animation in milliseconds.
-     */
-    public void play(final long fDuration) {
-
-        if (view == null || !Game.mActivity.hasWindowFocus()) {
-
-            if (valueAnimators != null) {
-                for (ValueAnimator valueAnimator : valueAnimators) {
-                    if (interpolator != null) {
-                        if (interpolatorMode == Interpolate.VALUE_ANIMATOR || interpolatorMode == Interpolate.BOTH) {
-                            valueAnimator.setInterpolator(EasingHelper.asInterpolator(interpolator));
-                        }
-                    }
-                    valueAnimator.setStartDelay(delay);
-                    valueAnimator.setDuration(fDuration);
-
-                    Game.mActivity.runOnUiThread(valueAnimator::start);
-                }
-            }
-
-            ValueAnimator animator = ValueAnimator.ofFloat(0, 1f);
-
-            animator.addListener(new BaseAnimationListener() {
-                public void onAnimationStart(Animator animation) {
-                    if (onStart != null) {
-                        onStart.run();
-                    }
-                }
-
-                public void onAnimationEnd(Animator animation) {
-                    if (onEnd != null) {
-                        onEnd.run();
-                    }
-                }
-            });
-            animator.setStartDelay(delay);
-            animator.setDuration(fDuration);
-
-            Game.mActivity.runOnUiThread(animator::start);
-            return;
-        }
-
-        Game.mActivity.runOnUiThread(() -> {
-            if (cancelPendingAnimations) {
-                view.animate().setListener(null);
-                view.animate().cancel();
-            }
-            anim = view.animate();
-
-            // Translation X
-            view.setTranslationX(fromX);
-            anim.translationX(toX);
-
-            // Translation Y
-            view.setTranslationY(fromY);
-            anim.translationY(toY);
-
-            // Scale X
-            view.setScaleX(fromScaleX);
-            anim.scaleX(toScaleX);
-
-            // Scale Y
-            view.setScaleY(fromScaleY);
-            anim.scaleY(toScaleY);
-
-            // Alpha
-            view.setAlpha(fromAlpha);
-            anim.alpha(toAlpha);
-
-            // Rotation
-            view.setRotation(fromRotation);
-            anim.rotation(toRotation);
-
-            // Interpolator
-            if (interpolator != null) {
-                if (interpolatorMode == Interpolate.PROPERTY_ANIMATOR || interpolatorMode == Interpolate.BOTH) {
-                    anim.setInterpolator(EasingHelper.asInterpolator(interpolator));
-                }
-            }
-
-            if (valueAnimators != null) {
-                for (ValueAnimator valueAnimator : valueAnimators) {
-                    if (interpolator != null) {
-                        if (interpolatorMode == Interpolate.VALUE_ANIMATOR || interpolatorMode == Interpolate.BOTH) {
-                            valueAnimator.setInterpolator(EasingHelper.asInterpolator(interpolator));
-                        }
-                    }
-                    valueAnimator.setStartDelay(delay);
-                    valueAnimator.setDuration(fDuration);
-                    valueAnimator.start();
-                }
-            }
-
-            anim.setListener(new BaseAnimationListener() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    if (onStart != null) {
-                        onStart.run();
-                    }
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    if (onEnd != null) {
-                        onEnd.run();
-                    }
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animation) {
-                    if (onEnd != null) {
-                        onEnd.run();
-                    }
-                }
-            });
-
-            anim.setStartDelay(delay);
-            anim.setDuration(fDuration);
-            anim.start();
-        });
-    }
-
-    // Animation for layouts childs
-    //--------------------------------------------------------------------------------------------//
-
-    public ViewGroupAnimation forChildView(IChildViewAnimation childAnimation) {
-        if (view == null)
-            return null;
-
-        if (view instanceof ViewGroup) {
-            ViewGroup viewGroup = (ViewGroup) view;
-            return new ViewGroupAnimation(viewGroup, childAnimation);
-        }
-        return null;
-    }
-
-    @FunctionalInterface
-    public interface IChildViewAnimation {
-        Animation forChild(View child);
-    }
-
-    public static class ViewGroupAnimation {
-
-        private final ViewGroup view;
-        private final IChildViewAnimation childAnimation;
-
-        private boolean countFromLast = false;
-        private Runnable onStart, onEnd;
-        private long delay = 0;
-
-        public ViewGroupAnimation(ViewGroup view, IChildViewAnimation childAnimation) {
-            this.view = view;
-            this.childAnimation = childAnimation;
-        }
-
-        public ViewGroupAnimation delay(long ms) {
-            delay = ms;
-            return this;
-        }
-
-        public ViewGroupAnimation invertOrder(boolean countFromLast) {
-            this.countFromLast = countFromLast;
-            return this;
-        }
-
-        public ViewGroupAnimation runOnStart(Runnable task) {
-            this.onStart = task;
-            return this;
-        }
-
-        public ViewGroupAnimation runOnEnd(Runnable task) {
-            onEnd = task;
-            return this;
-        }
-
-        public void play(long duration) {
-            if (view == null)
-                return;
-
-            view.postDelayed(() -> {
-                int childCount = view.getChildCount();
-                int goneCount = 0;
-
-                for (int i = countFromLast ? childCount - 1 : 0; countFromLast ? i >= 0 : i < childCount; ) {
-                    View child = view.getChildAt(i);
-
-                    if (child.getVisibility() == View.GONE) {
-                        goneCount++;
-                        i += countFromLast ? -1 : 1;
-                        continue;
-                    }
-
-                    Animation anim = childAnimation.forChild(child);
-
-                    if (countFromLast ? i == childCount - 1 : i == 0) {
-                        anim.runOnStart(onStart);
-                    }
-                    if (countFromLast ? i == 0 : i == view.getChildCount() - 1) {
-                        anim.runOnEnd(onEnd);
-                    }
-
-                    long delayPerChild = duration * (i - goneCount);
-
-                    anim.delay(delayPerChild > 0 ? delayPerChild : 0);
-                    anim.play(duration);
-                    i += countFromLast ? -1 : 1;
-                }
-            }, delay);
-        }
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public MultipleAnimation multi(Animation... animations) {
-        return new MultipleAnimation(view, animations);
-    }
-
-    public static class MultipleAnimation {
-
-        private final View view;
-
-        private final Animation[] animations;
-        private boolean sequential = false;
-        private long delay = 0;
-
-        //----------------------------------------------------------------------------------------//
-
-        public MultipleAnimation(View view, Animation... animations) {
-            this.animations = animations;
-            this.view = view;
-        }
-
-        //----------------------------------------------------------------------------------------//
-
-        public MultipleAnimation delay(long ms) {
-            delay = ms;
-            return this;
-        }
-
-        public MultipleAnimation sequential(boolean bool) {
-            sequential = bool;
-            return this;
-        }
-
-        public void play() {
-            play(-1);
-        }
-
-        public void play(long duration) {
-            if (animations.length == 0)
-                return;
-            Timer timer = new Timer();
-
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    long delayCount = 0;
-
-                    for (Animation anim : animations) {
-                        if (anim.view == null && view != null) {
-                            anim.view = view;
-                            if (!sequential) {
-                                anim.cancelPending(false);
-                            }
-                        }
-                        if (duration > 0 && anim.duration <= 0) {
-                            anim.duration = duration;
-                        }
-                        if (sequential) {
-                            anim.delay += delayCount;
-                            delayCount += anim.duration > 0 ? anim.duration : Animation.DEFAULT_DURATION;
-                        }
-                        anim.play();
-                    }
-                    timer.cancel();
-                }
-            }, delay);
-        }
     }
 }

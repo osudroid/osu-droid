@@ -43,7 +43,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="@dimen/beatmapPanelTabLayoutHeight"
                         android:layout_marginVertical="@dimen/S"
-                        android:background="@drawable/round_shape"
+                        android:background="@drawable/shape_rounded"
                         android:backgroundTint="@color/beatmapPanelTabBackground"
                         android:gravity="center_horizontal">
 
@@ -52,7 +52,7 @@
                             android:layout_width="@dimen/beatmapPanelTabButtonWidth"
                             android:layout_height="match_parent"
                             android:alpha="0.2"
-                            android:background="@drawable/round_shape"
+                            android:background="@drawable/shape_rounded"
                             android:backgroundTint="#FFFFFF" />
 
                         <TextView
@@ -60,7 +60,7 @@
                             style="@style/text"
                             android:layout_width="@dimen/beatmapPanelTabButtonWidth"
                             android:layout_height="match_parent"
-                            android:background="@drawable/round_shape"
+                            android:background="@drawable/shape_rounded"
                             android:gravity="center"
                             android:text="Local"
                             android:textSize="@dimen/textS" />
@@ -71,7 +71,7 @@
                             android:layout_width="@dimen/beatmapPanelTabButtonWidth"
                             android:layout_height="match_parent"
                             android:layout_toEndOf="@+id/bp_localTab"
-                            android:background="@drawable/round_shape"
+                            android:background="@drawable/shape_rounded"
                             android:gravity="center"
                             android:text="Global"
                             android:textSize="@dimen/textS" />

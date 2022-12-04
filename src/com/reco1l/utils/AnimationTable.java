@@ -9,12 +9,12 @@ public class AnimationTable {
         if (view == null)
             return;
 
-        Animation fadeIn = new Animation(view);
+        AnimationOld fadeIn = new AnimationOld(view);
 
         fadeIn.runOnStart(() -> view.setText(newText));
         fadeIn.duration(150);
 
-        Animation fadeOut = new Animation(view);
+        AnimationOld fadeOut = new AnimationOld(view);
 
         fadeOut.fade(1, 0);
         fadeOut.runOnEnd(fadeIn::play);
@@ -25,12 +25,12 @@ public class AnimationTable {
         if (view == null)
             return;
 
-        Animation fadeIn = new Animation(view);
+        AnimationOld fadeIn = new AnimationOld(view);
 
         fadeIn.runOnStart(onStart);
         fadeIn.duration(150);
 
-        Animation fadeOut = new Animation(view);
+        AnimationOld fadeOut = new AnimationOld(view);
 
         fadeOut.fade(1, 0);
         fadeOut.runOnEnd(fadeIn::play);
@@ -38,17 +38,22 @@ public class AnimationTable {
     }
 
     public static void fadeOutScaleOut(View view) {
-        Animation anim = new Animation(view);
+        AnimationOld anim = new AnimationOld(view);
 
         anim.fade(0, 1);
         anim.scale(1, 0.8f);
         anim.play(200);
     }
 
-    public static void fadeIn(View view) {
-        Animation anim = new Animation(view);
+    public static Animation moveY(View view, float to) {
+        return Animation.of(view).toY(to);
+    }
 
-        anim.fade(0, 1);
-        anim.play(300);
+    public static Animation fadeIn(View... views) {
+        return Animation.of(views).toAlpha(1);
+    }
+
+    public static Animation fadeOut(View... views) {
+        return Animation.of(views).toAlpha(0);
     }
 }

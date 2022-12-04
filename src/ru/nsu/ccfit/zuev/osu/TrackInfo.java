@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu;
 
+import androidx.annotation.Nullable;
+
 import java.io.Serializable;
 
 public class TrackInfo implements Serializable {
@@ -199,5 +201,16 @@ public class TrackInfo implements Serializable {
 
     public void setMaxCombo(int maxCombo) {
         this.maxCombo = maxCombo;
+    }
+
+    public boolean equals(@Nullable TrackInfo obj) {
+        if (obj != null
+                && obj.getFilename() != null
+                && obj.getMode() != null) {
+
+            return obj.getFilename().equals(getFilename())
+                    && obj.getMode().equals(getMode());
+        }
+        return false;
     }
 }

@@ -14,7 +14,7 @@ import android.widget.RelativeLayout;
 
 import androidx.annotation.Nullable;
 
-import com.reco1l.utils.Animation;
+import com.reco1l.utils.AnimationOld;
 import com.reco1l.utils.Resources;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -82,7 +82,7 @@ public final class BarButton extends RelativeLayout {
         if (bool != isActivated) {
             isActivated = bool;
 
-            Animation anim = new Animation(indicator);
+            AnimationOld anim = new AnimationOld(indicator);
 
             if (bool) {
                 anim.fade(0, 1);

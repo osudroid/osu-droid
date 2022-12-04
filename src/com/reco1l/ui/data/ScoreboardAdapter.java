@@ -11,7 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.imageview.ShapeableImageView;
-import com.reco1l.utils.Animation;
+import com.reco1l.Game;
+import com.reco1l.UI;
+import com.reco1l.utils.AnimationOld;
 import com.reco1l.utils.Resources;
 import com.reco1l.utils.ViewTouchHandler;
 import com.reco1l.interfaces.IReferences;
@@ -20,6 +22,7 @@ import com.reco1l.utils.listeners.TouchListener;
 
 import java.util.List;
 
+import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -50,7 +53,7 @@ public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.V
     public void onBindViewHolder(@NonNull VH holder, int position) {
         holder.assign(data.get(position));
         holder.body.setAlpha(0);
-        holder.body.postDelayed(() -> new Animation(holder.body).fade(0f, 1f).play(300), 20L * position);
+        holder.body.postDelayed(() -> new AnimationOld(holder.body).fade(0f, 1f).play(300), 20L * position);
     }
 
     @Override
@@ -94,14 +97,7 @@ public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.V
             new ViewTouchHandler(new TouchListener() {
 
                 public void onPressUp() {
-                    if (data.onClick != null) {
-                        data.onClick.run();
-                    }
-                }
-                public void onLongPress() {
-                    if (data.onLongClick != null) {
-                        data.onLongClick.run();
-                    }
+                    Game.selectorScene.loadScore(data.id, data.name);
                 }
             }).apply(body);
 

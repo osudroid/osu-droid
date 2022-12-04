@@ -6,12 +6,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
-import androidx.core.math.MathUtils;
-
+import com.reco1l.Game;
 import com.reco1l.interfaces.IReferences;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -22,11 +19,16 @@ import java.util.Map;
 // Created by Reco1l on 22/8/22 21:38
 
 public class BitmapManager implements IReferences {
+
     public static BitmapManager instance;
 
-    private final Map<String, Bitmap> bitmaps = new HashMap<>();
+    private final Map<String, Bitmap> bitmaps;
 
     //--------------------------------------------------------------------------------------------//
+
+    public BitmapManager() {
+        bitmaps = new HashMap<>();
+    }
 
     public static BitmapManager getInstance() {
         if (instance == null) {
@@ -37,46 +39,37 @@ public class BitmapManager implements IReferences {
 
     //--------------------------------------------------------------------------------------------//
 
+    private InputStream tryGetAsset(String file) {
+        try {
+            return Game.activity.getAssets().open(file);
+        }
+        catch (IOException exception) {
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
     public void loadAssets(String folder) {
         List<String> valid = Arrays.asList(fileNames);
 
         try {
-            for (String asset : mActivity.getAssets().list("gfx")) {
+            for (String asset : Game.activity.getAssets().list("gfx")) {
                 final String name = asset.substring(0, asset.length() - 4);
 
                 if (valid.contains(name)) {
-                    try {
-                        InputStream stream = mActivity.getAssets().open("gfx/" + asset);
-                        bitmaps.put(name, BitmapFactory.decodeStream(stream));
-                    } catch (IOException e) {
+                    InputStream stream = tryGetAsset("gfx/" + asset);
+
+                    if (stream == null) {
                         Log.e("BitmapManager", "Failed to load asset: " + name);
-                        e.printStackTrace();
+                        continue;
                     }
+                    bitmaps.put(name, BitmapFactory.decodeStream(stream));
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException exception) {
             Log.e("BitmapManager", "Failed to load game assets! \n");
-            e.printStackTrace();
+            exception.printStackTrace();
         }
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public static Bitmap compress(Bitmap raw, int quality) {
-        if (raw == null)
-            return null;
-
-        quality = MathUtils.clamp(quality, 1, 100);
-
-        if (quality < 100) {
-            final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            raw.compress(Bitmap.CompressFormat.JPEG, quality, stream);
-
-            Bitmap compressed = BitmapFactory.decodeStream(new ByteArrayInputStream(stream.toByteArray()));
-            raw.recycle();
-            return compressed;
-        }
-        return raw;
     }
 
     //--------------------------------------------------------------------------------------------//

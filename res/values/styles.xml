@@ -124,7 +124,7 @@
         <item name="android:paddingRight">@dimen/S</item>
 
         <item name="android:backgroundTint">@color/propertyBackground</item>
-        <item name="android:background">@drawable/round_shape</item>
+        <item name="android:background">@drawable/shape_rounded</item>
         <item name="android:textSize">@dimen/textXS</item>
         <item name="android:textStyle">bold</item>
     </style>
@@ -141,21 +141,47 @@
         <item name="android:drawablePadding">@dimen/_3sdp</item>
 
         <item name="android:backgroundTint">@color/scoreboardItemBadgeBackground</item>
-        <item name="android:background">@drawable/round_shape</item>
+        <item name="android:background">@drawable/shape_rounded</item>
         <item name="android:textSize">@dimen/textXXS</item>
     </style>
 
-    <!--Elements-->
-    <style name="loading_circle">
-        <item name="android:layout_width">@dimen/loadingScreenProgressBarSize</item>
-        <item name="android:layout_height">@dimen/loadingScreenProgressBarSize</item>
-        <item name="android:layout_centerInParent">true</item>
-        <item name="android:background">@drawable/round_shape</item>
-        <item name="android:backgroundTint">@color/loadingSceneViewsBackground</item>
+    <!--Progress indicators-->
+    <style name="progress_indicator">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="indicatorColor">@color/progressIndicatorColor</item>
+        <item name="trackThickness">@dimen/progressIndicatorThickness</item>
+        <item name="trackCornerRadius">@dimen/progressIndicatorCornerRadius</item>
+        <item name="trackColor">@color/progressIndicatorTrackColor</item>
+        <item name="indicatorDirectionCircular">counterclockwise</item>
+        <item name="indicatorInset">0dp</item>
+    </style>
+
+    <style name="circular_indicator" parent="progress_indicator">
+        <item name="indicatorSize">@dimen/circularIndicatorSizeM</item>
+    </style>
+
+    <style name="small_circular_indicator" parent="progress_indicator">
+        <item name="indicatorSize">@dimen/circularIndicatorSizeS</item>
+    </style>
+
+    <style name="big_circular_indicator" parent="progress_indicator">
+        <item name="indicatorSize">@dimen/circularIndicatorSizeXL</item>
+    </style>
+
+    <style name="loading_indicator" parent="circular_indicator">
+        <item name="android:backgroundTint">@color/loadingIndicatorBackground</item>
+        <item name="android:background">@drawable/shape_rounded</item>
+        <item name="android:padding">@dimen/loadingIndicatorPadding</item>
         <item name="android:indeterminate">true</item>
-        <item name="android:padding">@dimen/XS</item>
-        <item name="indicatorColor">@color/progressBarIndicatorColor</item>
-        <item name="trackCornerRadius">@dimen/progressBarTrackCornerRadius</item>
+        <item name="trackColor">#0000</item>
+    </style>
+
+    <!--Custom-->
+    <style name="hit_badge">
+        <item name="android:layout_height">@dimen/hitBadgeSize</item>
+        <item name="android:layout_width">@dimen/hitBadgeSize</item>
+        <item name="android:scaleType">fitCenter</item>
     </style>
 
 </resources>

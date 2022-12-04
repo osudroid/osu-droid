@@ -1,0 +1,726 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 19/11/2022, 23:42 -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:background="#FFF">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/backgroundDimmed">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <!--Map title-->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_gradient"
+                android:padding="@dimen/M">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginRight="@dimen/M"
+                    android:layout_toStartOf="@+id/gr_mapper"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/gr_title"
+                        style="@style/largeText"
+                        android:singleLine="true"
+                        android:text="title title title" />
+
+                    <TextView
+                        android:id="@+id/gr_artist"
+                        style="@style/text"
+                        android:layout_marginTop="@dimen/XXS"
+                        android:singleLine="true"
+                        android:text="by artist artist artist" />
+
+                    <!--Map difficulty-->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/S"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/gr_stars"
+                            style="@style/propertyBadge"
+                            android:layout_marginStart="0dp"
+                            android:backgroundTint="@color/gameResultsBadgeBackground"
+                            android:drawableStart="@drawable/v_star_xs"
+                            android:text="00.00" />
+
+                        <TextView
+                            android:id="@+id/gr_difficulty"
+                            style="@style/text"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="@dimen/S"
+                            android:layout_toEndOf="@+id/gr_stars"
+                            android:text="difficulty"
+                            android:textColor="@color/textSecondary"
+                            android:textSize="@dimen/textXS" />
+
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/gr_mapper"
+                    style="@style/propertyBadge"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="0dp"
+                    android:backgroundTint="@color/gameResultsBadgeBackground"
+                    android:drawableStart="@drawable/v_person_xs"
+                    android:text="mapper" />
+
+            </RelativeLayout>
+
+            <!--Main data-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/XS"
+                android:background="@color/badgeBackground"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/XXL"
+                android:paddingVertical="@dimen/XL">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/XXL">
+
+                    <!--Left side-->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <!--Player-->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:paddingHorizontal="@dimen/M"
+                            android:paddingVertical="@dimen/XXS">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center">
+
+                                <androidx.cardview.widget.CardView
+                                    android:layout_width="@dimen/gameResultsAvatarSize"
+                                    android:layout_height="@dimen/gameResultsAvatarSize"
+                                    app:cardCornerRadius="@dimen/gameResultsAvatarCornerRadius">
+
+                                    <ImageView
+                                        android:id="@+id/gr_avatar"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:src="@drawable/default_avatar" />
+
+                                </androidx.cardview.widget.CardView>
+
+                                <TextView
+                                    android:id="@+id/gr_username"
+                                    style="@style/text"
+                                    android:layout_marginLeft="@dimen/S"
+                                    android:text="Username" />
+
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/gr_date"
+                                style="@style/text"
+                                android:layout_marginTop="@dimen/XS"
+                                android:text="Played on 2022/20/11 at 20:22"
+                                android:textColor="@color/textSecondary"
+                                android:textSize="@dimen/textXS" />
+
+                        </LinearLayout>
+
+                        <!--Hit count-->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginVertical="@dimen/S"
+                            android:orientation="horizontal">
+
+                            <!--300s-->
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginRight="@dimen/S"
+                                android:orientation="vertical">
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="@dimen/S"
+                                    android:background="@drawable/shape_rounded"
+                                    android:backgroundTint="@color/badgeBackground"
+                                    android:gravity="center"
+                                    android:paddingHorizontal="@dimen/M"
+                                    android:paddingVertical="@dimen/XS">
+
+                                    <ImageView
+                                        android:id="@+id/gr_300iv"
+                                        style="@style/hit_badge"
+                                        android:src="@drawable/hit_sample" />
+
+                                    <TextView
+                                        android:id="@+id/gr_300"
+                                        style="@style/text"
+                                        android:layout_marginLeft="@dimen/S"
+                                        android:text="0000" />
+
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/shape_rounded"
+                                    android:backgroundTint="@color/badgeBackground"
+                                    android:gravity="center"
+                                    android:paddingHorizontal="@dimen/M"
+                                    android:paddingVertical="@dimen/XS">
+
+                                    <ImageView
+                                        android:id="@+id/gr_300kiv"
+                                        style="@style/hit_badge"
+                                        android:src="@drawable/hit_sample" />
+
+                                    <TextView
+                                        android:id="@+id/gr_300k"
+                                        style="@style/text"
+                                        android:layout_marginLeft="@dimen/S"
+                                        android:text="0000" />
+
+                                </LinearLayout>
+
+                            </LinearLayout>
+
+                            <!--100s-->
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginRight="@dimen/S"
+                                android:orientation="vertical">
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="@dimen/S"
+                                    android:background="@drawable/shape_rounded"
+                                    android:backgroundTint="@color/badgeBackground"
+                                    android:gravity="center"
+                                    android:paddingHorizontal="@dimen/M"
+                                    android:paddingVertical="@dimen/XS">
+
+                                    <ImageView
+                                        android:id="@+id/gr_100iv"
+                                        style="@style/hit_badge"
+                                        android:src="@drawable/hit_sample" />
+
+                                    <TextView
+                                        android:id="@+id/gr_100"
+                                        style="@style/text"
+                                        android:layout_marginLeft="@dimen/S"
+                                        android:text="0000" />
+
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/shape_rounded"
+                                    android:backgroundTint="@color/badgeBackground"
+                                    android:gravity="center"
+                                    android:paddingHorizontal="@dimen/M"
+                                    android:paddingVertical="@dimen/XS">
+
+                                    <ImageView
+                                        android:id="@+id/gr_100kiv"
+                                        style="@style/hit_badge"
+                                        android:src="@drawable/hit_sample" />
+
+                                    <TextView
+                                        android:id="@+id/gr_100k"
+                                        style="@style/text"
+                                        android:layout_marginLeft="@dimen/S"
+                                        android:text="0000" />
+
+                                </LinearLayout>
+
+                            </LinearLayout>
+
+                            <!--50 & 0-->
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="@dimen/S"
+                                    android:background="@drawable/shape_rounded"
+                                    android:backgroundTint="@color/badgeBackground"
+                                    android:gravity="center"
+                                    android:paddingHorizontal="@dimen/M"
+                                    android:paddingVertical="@dimen/XS">
+
+                                    <ImageView
+                                        android:id="@+id/gr_50iv"
+                                        style="@style/hit_badge"
+                                        android:src="@drawable/hit_sample" />
+
+                                    <TextView
+                                        android:id="@+id/gr_50"
+                                        style="@style/text"
+                                        android:layout_marginLeft="@dimen/S"
+                                        android:text="0000" />
+
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/shape_rounded"
+                                    android:backgroundTint="@color/badgeBackground"
+                                    android:gravity="center"
+                                    android:paddingHorizontal="@dimen/M"
+                                    android:paddingVertical="@dimen/XS">
+
+                                    <ImageView
+                                        android:id="@+id/gr_0iv"
+                                        style="@style/hit_badge"
+                                        android:src="@drawable/hit_sample" />
+
+                                    <TextView
+                                        android:id="@+id/gr_0"
+                                        style="@style/text"
+                                        android:layout_marginLeft="@dimen/S"
+                                        android:text="0000" />
+
+                                </LinearLayout>
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <!--Accuracy & Max combo-->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+
+                            <!--Accuracy-->
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:paddingHorizontal="@dimen/XL"
+                                android:paddingVertical="@dimen/S">
+
+                                <com.google.android.material.progressindicator.CircularProgressIndicator
+                                    android:id="@+id/gr_accuracyIndicator"
+                                    style="@style/circular_indicator"
+                                    android:indeterminate="false"
+                                    app:indicatorSize="@dimen/circularIndicatorSizeM"
+                                    app:trackThickness="@dimen/progressIndicatorThicknessM" />
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="@dimen/S"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:id="@+id/gr_accuracy"
+                                        style="@style/text"
+                                        android:layout_marginBottom="@dimen/XXS"
+                                        android:text="100.00%" />
+
+                                    <TextView
+                                        style="@style/text"
+                                        android:drawableStart="@drawable/v_touch_xxs"
+                                        android:drawablePadding="@dimen/XXS"
+                                        android:drawableTint="@color/textSecondary"
+                                        android:text="Accuracy"
+                                        android:textColor="@color/textSecondary"
+                                        android:textSize="@dimen/textXS" />
+
+                                </LinearLayout>
+
+                            </LinearLayout>
+
+                            <!--Accuracy-->
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:paddingHorizontal="@dimen/XL"
+                                android:paddingVertical="@dimen/S">
+
+                                <com.google.android.material.progressindicator.CircularProgressIndicator
+                                    android:id="@+id/gr_comboIndicator"
+                                    style="@style/circular_indicator"
+                                    android:indeterminate="false"
+                                    app:indicatorSize="@dimen/circularIndicatorSizeM"
+                                    app:trackThickness="@dimen/progressIndicatorThicknessM" />
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="@dimen/S"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:id="@+id/gr_combo"
+                                        style="@style/text"
+                                        android:layout_marginBottom="@dimen/XXS"
+                                        android:text="1000/1000" />
+
+                                    <TextView
+                                        style="@style/text"
+                                        android:drawableStart="@drawable/v_combo_xs"
+                                        android:drawablePadding="@dimen/XXS"
+                                        android:drawableTint="@color/textSecondary"
+                                        android:text="Combo"
+                                        android:textColor="@color/textSecondary"
+                                        android:textSize="@dimen/textXS" />
+
+                                </LinearLayout>
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:gravity="right"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="right">
+
+                            <LinearLayout
+                                android:id="@+id/gr_mods"
+                                android:layout_width="@dimen/gameResultsModImageSize"
+                                android:layout_height="wrap_content"
+                                android:layout_marginVertical="@dimen/M"
+                                android:gravity="right"
+                                android:orientation="horizontal" />
+
+                            <ImageView
+                                android:id="@+id/gr_markIv"
+                                android:layout_width="@dimen/gameResultsMarkSize"
+                                android:layout_height="@dimen/gameResultsMarkSize"
+                                android:layout_margin="@dimen/M"
+                                android:src="@drawable/ranking_sample" />
+
+                        </LinearLayout>
+
+                        <!--Score-->
+                        <TextView
+                            android:id="@+id/gr_score"
+                            style="@style/largeText"
+                            android:layout_width="wrap_content"
+                            android:layout_marginRight="@dimen/M"
+                            android:text="9,999,999,999"
+                            android:textSize="@dimen/XXL" />
+
+                    </LinearLayout>
+
+                </RelativeLayout>
+
+                <!--Performance data-->
+                <LinearLayout
+                    android:id="@+id/gr_performance"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/L"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <!--UR-->
+                    <LinearLayout
+                        android:id="@+id/gr_urLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/shape_rounded"
+                        android:backgroundTint="@color/gameResultsBadgeBackground"
+                        android:paddingHorizontal="@dimen/S"
+                        android:paddingVertical="@dimen/XXS">
+
+                        <TextView
+                            style="@style/text"
+                            android:text="UR"
+                            android:textColor="@color/textSecondary"
+                            android:textSize="@dimen/textXS"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/gr_ur"
+                            style="@style/text"
+                            android:layout_centerInParent="true"
+                            android:layout_marginLeft="@dimen/S"
+                            android:text="100.00"
+                            android:textSize="@dimen/textXS" />
+
+                    </LinearLayout>
+
+                    <!--PP-->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_above="@id/gr_score"
+                        android:layout_marginHorizontal="@dimen/S"
+                        android:background="@drawable/shape_rounded"
+                        android:backgroundTint="@color/gameResultsBadgeBackground"
+                        android:paddingHorizontal="@dimen/S"
+                        android:paddingVertical="@dimen/XXS">
+
+                        <TextView
+                            style="@style/text"
+                            android:text="DPP"
+                            android:textColor="@color/textSecondary"
+                            android:textSize="@dimen/textXS"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/gr_pp"
+                            style="@style/text"
+                            android:layout_centerInParent="true"
+                            android:layout_marginLeft="@dimen/S"
+                            android:text="100.00/100.00"
+                            android:textSize="@dimen/textXS" />
+
+                    </LinearLayout>
+
+                    <!--Error-->
+                    <LinearLayout
+                        android:id="@+id/gr_errorLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_above="@id/gr_score"
+                        android:background="@drawable/shape_rounded"
+                        android:backgroundTint="@color/gameResultsBadgeBackground"
+                        android:paddingHorizontal="@dimen/S"
+                        android:paddingVertical="@dimen/XXS">
+
+                        <TextView
+                            style="@style/text"
+                            android:text="Error"
+                            android:textColor="@color/textSecondary"
+                            android:textSize="@dimen/textXS"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/gr_error"
+                            style="@style/text"
+                            android:layout_centerInParent="true"
+                            android:layout_marginLeft="@dimen/S"
+                            android:text="-99,99ms / 99,67ms"
+                            android:textSize="@dimen/textXS" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!--Overall ranking-->
+            <RelativeLayout
+                android:id="@+id/gr_ranking"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/XL"
+                android:background="@color/badgeBackground"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/XXL"
+                android:paddingVertical="@dimen/L"
+                android:visibility="gone">
+
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/gr_rankingLoading"
+                    style="@style/loading_indicator"
+                    android:layout_centerInParent="true"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/gr_rankingFail"
+                    style="@style/text"
+                    android:layout_centerInParent="true"
+                    android:drawableTop="@drawable/v_info_l"
+                    android:drawablePadding="@dimen/S"
+                    android:text="Failed to submit score!" />
+
+
+                <LinearLayout
+                    android:id="@+id/gr_rankingStats"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        style="@style/text"
+                        android:layout_marginBottom="@dimen/M"
+                        android:text="Overall Ranking"
+                        android:textColor="@color/textTertiary" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                        <LinearLayout
+                            android:layout_width="@dimen/gameResultsRankingLayoutsWidth"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="@dimen/S"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/gr_mapRank"
+                                style="@style/text"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/gameResultsRankingLayoutsHeight"
+                                android:layout_marginBottom="@dimen/XS"
+                                android:background="@drawable/shape_rounded"
+                                android:backgroundTint="@color/badgeBackground"
+                                android:gravity="center"
+                                android:paddingHorizontal="@dimen/L"
+                                android:paddingVertical="@dimen/XS"
+                                android:text="#99999" />
+
+                            <TextView
+                                style="@style/text"
+                                android:layout_width="match_parent"
+                                android:gravity="center"
+                                android:text="Beatmap rank"
+                                android:textColor="@color/textSecondary"
+                                android:textSize="@dimen/textXS" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="@dimen/gameResultsRankingLayoutsWidth"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="@dimen/S"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/gr_overallRank"
+                                style="@style/text"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/gameResultsRankingLayoutsHeight"
+                                android:layout_marginBottom="@dimen/XS"
+                                android:background="@drawable/shape_rounded"
+                                android:backgroundTint="@color/badgeBackground"
+                                android:gravity="center"
+                                android:paddingHorizontal="@dimen/L"
+                                android:paddingVertical="@dimen/XS"
+                                android:text="#99999" />
+
+                            <TextView
+                                style="@style/text"
+                                android:layout_width="match_parent"
+                                android:gravity="center"
+                                android:text="Overall rank"
+                                android:textColor="@color/textSecondary"
+                                android:textSize="@dimen/textXS" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="@dimen/gameResultsRankingLayoutsWidth"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="@dimen/S"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/gr_overallAccuracy"
+                                style="@style/text"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/gameResultsRankingLayoutsHeight"
+                                android:layout_marginBottom="@dimen/XS"
+                                android:background="@drawable/shape_rounded"
+                                android:backgroundTint="@color/badgeBackground"
+                                android:gravity="center"
+                                android:paddingHorizontal="@dimen/L"
+                                android:paddingVertical="@dimen/XS"
+                                android:text="100.00%" />
+
+                            <TextView
+                                style="@style/text"
+                                android:layout_width="match_parent"
+                                android:gravity="center"
+                                android:text="Overall accuracy"
+                                android:textColor="@color/textSecondary"
+                                android:textSize="@dimen/textXS" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="@dimen/gameResultsRankingLayoutsWidth"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="@dimen/S"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/gr_overallScore"
+                                style="@style/text"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/gameResultsRankingLayoutsHeight"
+                                android:layout_marginBottom="@dimen/XS"
+                                android:background="@drawable/shape_rounded"
+                                android:backgroundTint="@color/badgeBackground"
+                                android:gravity="center"
+                                android:paddingHorizontal="@dimen/L"
+                                android:paddingVertical="@dimen/XS"
+                                android:text="9,999,999,999" />
+
+                            <TextView
+                                style="@style/text"
+                                android:layout_width="match_parent"
+                                android:gravity="center"
+                                android:text="Overall score"
+                                android:textColor="@color/textSecondary"
+                                android:textSize="@dimen/textXS" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</RelativeLayout>

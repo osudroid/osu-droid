@@ -1,7 +1,5 @@
 package com.reco1l;
 
-import android.util.Log;
-
 import com.reco1l.andengine.ISceneHandler;
 import com.reco1l.andengine.BaseScene;
 import com.reco1l.interfaces.IReferences;
@@ -13,9 +11,6 @@ import org.anddev.andengine.entity.scene.Scene;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
-import ru.nsu.ccfit.zuev.osu.menu.PauseMenu;
 
 // Created by Reco1l on 22/6/22 02:20
 
@@ -54,7 +49,7 @@ public class GameEngine extends Engine implements IReferences {
         if (isGlobalInitialized) {
             lastScreen = currentScreen;
             currentScreen = parseScreen(scene);
-            mActivity.runOnUiThread(() -> notifyUI(lastScreen));
+            activity.runOnUiThread(() -> notifyUI(lastScreen));
         }
         lastScene = getScene();
         super.setScene(scene);
@@ -70,22 +65,8 @@ public class GameEngine extends Engine implements IReferences {
         if (scene instanceof BaseScene) {
             type = ((BaseScene) scene).getIdentifier();
         }
-
-        if (scene.hasChildScene() && scene.getChildScene() == PauseMenu.getInstance().getScene()) {
-            type = Screens.PAUSE;
-        }
-        else if (scene == LoadingScreen.getInstance().getScene() || scene == UI.loadingScene.scene) {
-            type = Screens.LOADING;
-        }
-        else if (scene == global.getScoring().getScene()) {
-            type = Screens.SCORING;
-        }
-        else if (scene == global.getGameScene().getScene()) {
-            type = Screens.GAME;
-        }
-
-        if (type != null) {
-            Log.i("Engine", "Setting scene to " + type.name());
+        else if (scene == Game.gameScene.getScene()) {
+            type = Screens.Game;
         }
         return type;
     }
@@ -122,7 +103,7 @@ public class GameEngine extends Engine implements IReferences {
         platform.closeAllExcept(platform.getFragmentsFrom(currentScreen));
         platform.showAll(currentScreen);
 
-        UI.notificationCenter.allowBadgeNotificator(currentScreen == Screens.GAME);
+        UI.notificationCenter.allowBadgeNotificator(currentScreen == Screens.Game);
 
         platform.notifyScreenChange(oldScene, currentScreen);
     }

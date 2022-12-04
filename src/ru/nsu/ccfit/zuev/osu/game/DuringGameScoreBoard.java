@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.opengl.GLES20;
 
+import com.reco1l.Game;
 import com.reco1l.ui.data.Scoreboard;
 import com.reco1l.UI;
 
@@ -38,7 +39,7 @@ public class DuringGameScoreBoard extends GameObject {
     public DuringGameScoreBoard(final Scene scene, final StatisticV2 stat, String isNotMe) {
         final Scoreboard.Item[] items = UI.beatmapPanel.getBoard();
         this.stat = stat;
-        int replayid = GlobalManager.getInstance().getScoring().getReplayID();
+        int replayid = GlobalManager.getInstance().getScoring().replayID;
         if (replayid == -1) scoreBoardDatas = items;
         else {
             int replayIndex = -1;
@@ -53,7 +54,7 @@ public class DuringGameScoreBoard extends GameObject {
         }
         posNow = scoreBoardDatas.length;
         currentUsername = isNotMe != null ? isNotMe :
-                !OnlineScoring.online.isStayOnline() ?
+                !Game.online.isStayOnline() ?
                         Config.getLocalUsername() :
                         Config.getOnlineUsername();
         TextureRegion tex = ResourceManager.getInstance().getTexture("menu-button-background").deepCopy();
