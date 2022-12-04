@@ -5,7 +5,6 @@ package com.reco1l.andengine.scenes;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.andengine.BaseScene;
-import com.reco1l.enums.MusicOption;
 import com.reco1l.enums.Screens;
 import com.reco1l.game.TimingWrapper;
 import com.reco1l.ui.custom.Dialog;
@@ -15,7 +14,6 @@ import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 
-import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 
@@ -68,11 +66,6 @@ public class MainScene extends BaseScene {
     @Override
     protected void onSceneUpdate(float secondsElapsed) {
 
-    }
-
-    @Override
-    public void onMusicControlChanged(MusicOption option, Status status) {
-        super.onMusicControlChanged(option, status);
     }
 
     @Override
