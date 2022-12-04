@@ -237,7 +237,7 @@ public class BeatmapListAdapter extends RecyclerView.Adapter<BeatmapListAdapter.
             this.beatmap = beatmap;
 
             UI.beatmapCarrousel.bindTouchListener(body, () -> {
-                if (!Game.musicManager.beatmap.equals(beatmap)) {
+                if (!Game.library.getBeatmap().equals(beatmap)) {
                     UI.beatmapCarrousel.setSelected(beatmap, null);
                 }
             });

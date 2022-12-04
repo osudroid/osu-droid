@@ -1,9 +1,6 @@
 package com.reco1l.andengine.scenes;
 
-
 // Created by Reco1l on 19/11/2022, 23:31
-
-// Created by Reco1l on 18/9/22 19:28
 
 import com.reco1l.Game;
 import com.reco1l.UI;
@@ -69,14 +66,14 @@ public class MainScene extends BaseScene {
     }
 
     @Override
-    public void onMusicControlRequest(MusicOption option, Status current) {
-        UI.musicPlayer.currentOption = option;
-        super.onMusicControlRequest(option, current);
+    protected void onSceneUpdate(float secondsElapsed) {
+
     }
 
     @Override
-    protected void onSceneUpdate(float secondsElapsed) {
-
+    public void onMusicControlChanged(MusicOption option, Status status) {
+        super.onMusicControlChanged(option, status);
+        UI.musicPlayer.notifyMusicControl(option);
     }
 
     @Override
@@ -84,10 +81,11 @@ public class MainScene extends BaseScene {
         super.onMusicChange(beatmap);
 
         Game.activity.runOnUiThread(() -> {
+            UI.musicPlayer.changeMusic(beatmap);
+
             if (UI.topBar.musicButton != null) {
                 UI.topBar.musicButton.changeMusic(beatmap);
             }
-            UI.musicPlayer.changeMusic(beatmap);
         });
     }
 
@@ -101,9 +99,8 @@ public class MainScene extends BaseScene {
 
     public void loadMusic() {
         Game.library.shuffleLibrary();
-        Game.musicManager.beatmap = Game.library.getBeatmap();
 
-        if (Game.musicManager.beatmap != null && Game.library.getSizeOfBeatmaps() > 0) {
+        if (Game.library.getLibrary() != null && Game.library.getSizeOfBeatmaps() > 0) {
             Game.musicManager.play();
         }
         UI.debugOverlay.show();

@@ -226,8 +226,8 @@ public class TopBar extends UIFragment {
 
             parent.bindTouchListener(view, UI.musicPlayer::altShow);
 
-            if (Game.musicManager.beatmap != null) {
-                text.setText(BeatmapHelper.getTitle(Game.musicManager.beatmap.getTrack(0)));
+            if (Game.library.getBeatmap() != null) {
+                text.setText(BeatmapHelper.getTitle(Game.library.getBeatmap().getTrack(0)));
             }
         }
 

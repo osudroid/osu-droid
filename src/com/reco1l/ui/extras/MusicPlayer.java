@@ -5,9 +5,10 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,24 +19,25 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.edlplan.framework.easing.Easing;
 import com.reco1l.Game;
 import com.reco1l.enums.MusicOption;
 import com.reco1l.UI;
+import com.reco1l.ui.extras.MusicPlayer.PlaylistAdapter.ViewHolder;
+import com.reco1l.utils.Animation;
+import com.reco1l.utils.ScheduledTask;
+import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.platform.UIFragment;
-import com.reco1l.utils.AnimationOld;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.Resources;
+import com.reco1l.utils.helpers.BitmapHelper;
 import com.reco1l.utils.listeners.TouchListener;
 
 import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
@@ -48,26 +50,21 @@ public class MusicPlayer extends UIFragment {
 
     public static MusicPlayer instance;
 
-    public MusicOption currentOption;
-
-    private CardView body;
-    private View songBody;
     private SeekBar seekBar;
+    private RecyclerView list;
+    private View body, songBody;
     private ImageView play, songImage;
-    private TextView titleTv, artistTv, timeTv, lengthTv;
-
-    private Bitmap songBitmap;
-    private SimpleDateFormat sdf;
-    private Drawable playDrawable, pauseDrawable;
+    private TextView title, artist, time, length;
 
     private AsyncExec bitmapTask;
+    private SimpleDateFormat sdf;
 
-    private int length, position, toPosition;
+    private int toPosition;
 
     private boolean
             isListVisible = false,
             isTrackingTouch = false,
-            wasChangedFromList = false;
+            wasPlaying = false;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -83,48 +80,43 @@ public class MusicPlayer extends UIFragment {
 
     @Override
     protected long getDismissTime() {
-        return 8000;
+        return 10000;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onLoad() {
+        isListVisible = false;
+
         setDismissMode(true, true);
         sdf = new SimpleDateFormat("mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
 
         body = find("body");
-
-        playDrawable = Resources.drw(R.drawable.v_play_xl_circle);
-        pauseDrawable = Resources.drw(R.drawable.v_pause_xl);
-
-        new AnimationOld(body)
-                .height((int) Resources.dimen(R.dimen._30sdp), (int) Resources.dimen(R.dimen.musicPlayerHeight))
-                .interpolatorMode(AnimationOld.Interpolate.VALUE_ANIMATOR)
-                .interpolator(Easing.OutExpo)
-                .moveY(-30, 0)
-                .fade(0, 1)
-                .play(240);
-
-        new AnimationOld(find("songBody"))
-                .forChildView(child -> new AnimationOld(child).fade(0, child.getAlpha()))
-                .runOnStart(() ->
-                        find("buttons").setAlpha(0))
-                .runOnEnd(() ->
-                        new AnimationOld(find("buttons")).fade(0, 1).play(100))
-                .play(100);
-
-        RecyclerView list = find("listRv");
-        songImage = find("songImage");
-        songBody = find("songBody");
+        list = find("listRv");
         seekBar = find("seekBar");
+        songBody = find("songBody");
+        songImage = find("songImage");
 
-        lengthTv = find("songLength");
-        timeTv = find("songProgress");
-        artistTv = find("artist");
-        titleTv = find("title");
+        length = find("songLength");
+        time = find("songProgress");
+        artist = find("artist");
+        title = find("title");
         play = find("play");
+
+        Animation.of(body)
+                .fromHeight(Resources.dimen(R.dimen._30sdp))
+                .toHeight(Resources.dimen(R.dimen.musicPlayerHeight))
+                .fromY(-30)
+                .toY(0)
+                .fromAlpha(0)
+                .toAlpha(1)
+                .play(200);
+
+        Animation.of(find("innerBody"))
+                .fromAlpha(0)
+                .toAlpha(1)
+                .play(200);
 
         bindTouchListener(play, new TouchListener() {
             public boolean hasTouchEffect() {
@@ -145,146 +137,172 @@ public class MusicPlayer extends UIFragment {
         bindTouchListener(find("next"), Game.musicManager::next);
 
         seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-            @Override
+
             public void onStartTrackingTouch(SeekBar seekBar) {
                 isTrackingTouch = true;
                 onTouchEventNotified(MotionEvent.ACTION_DOWN);
             }
 
-            @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromTouch) {
-                if (Game.songService != null && fromTouch) {
+                if (fromTouch) {
                     toPosition = progress;
-                    timeTv.setText(sdf.format(progress));
+                    time.setText(sdf.format(progress));
                 }
             }
 
-            @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                Game.songService.setPosition(toPosition);
                 isTrackingTouch = false;
-                Log.i("MusicPlayer", "Skipped song position to " + sdf.format(toPosition));
+                Game.songService.setPosition(toPosition);
                 onTouchEventNotified(MotionEvent.ACTION_UP);
             }
         });
 
+        ViewUtils.width(find("listBody"), 0);
+
+        BeatmapInfo beatmap = Game.library.getBeatmap();
+
         list.setLayoutManager(new LinearLayoutManager(Game.activity, VERTICAL, false));
         list.setAdapter(new PlaylistAdapter(Game.library.getLibrary()));
 
-        loadMetadata(Game.musicManager.beatmap);
-        loadSeekbarImage();
-    }
+        if (beatmap != null) {
+            loadMetadata(beatmap);
 
-    private void switchListVisibility() {
-        if (!isListVisible) {
-            isListVisible = true;
-            new AnimationOld(find("listBody")).width(0, Resources.dimen(R.dimen.panelWidth))
-                    .play(300);
-        } else {
-            isListVisible = false;
-            new AnimationOld(find("listBody")).width(Resources.dimen(R.dimen.panelWidth), 0)
-                    .play(300);
+            ScheduledTask.run(() -> loadBitmap(beatmap.getTrack(0)), 200);
+            list.postDelayed(() -> select(beatmap), 200);
         }
     }
 
     @Override
     protected void onUpdate(float elapsed) {
-        if (Game.songService != null) {
-            length = Game.songService.getLength();
-            position = Game.songService.getPosition();
-        }
-
-        if (!isShowing || Game.songService == null)
-            return;
+        int length = Game.songService.getLength();
+        int position = Game.songService.getPosition();
 
         if (!isTrackingTouch) {
             seekBar.setMax(length);
             seekBar.setProgress(position);
-            timeTv.setText(sdf.format(position));
+            time.setText(sdf.format(position));
         }
 
-        if (Game.songService.getStatus() == Status.PLAYING) {
-            if (play.getDrawable() != pauseDrawable) {
-                new AnimationOld(play).rotation(180, 0)
-                        .runOnEnd(() -> play.setImageDrawable(pauseDrawable))
-                        .play(160);
-            }
-        } else if (play.getDrawable() != playDrawable) {
-            new AnimationOld(play).rotation(180, 0)
-                    .runOnEnd(() -> play.setImageDrawable(playDrawable))
+        if (Game.musicManager.isPlaying() && !wasPlaying) {
+            wasPlaying = true;
+
+            Animation.of(play)
+                    .fromRotation(180)
+                    .toRotation(0)
+                    .runOnEnd(() -> play.setImageDrawable(Resources.drw(R.drawable.v_pause_xl)))
+                    .play(160);
+
+        } else if (!Game.musicManager.isPlaying() && wasPlaying) {
+            wasPlaying = false;
+
+            Animation.of(play)
+                    .fromRotation(180)
+                    .toRotation(0)
+                    .runOnEnd(() -> play.setImageDrawable(Resources.drw(R.drawable.v_play_xl_circle)))
                     .play(160);
         }
     }
 
-    public void changeMusic(BeatmapInfo beatmap) {
-        changeBitmap(beatmap.getTrack(0));
+    //--------------------------------------------------------------------------------------------//
 
-        if (isShowing) {
-            loadMetadata(beatmap);
-
-            if (currentOption == MusicOption.NEXT || wasChangedFromList) {
-                wasChangedFromList = false;
-
-                new AnimationOld(songBody).moveX(0, -10).fade(1, 0)
-                        .play(200);
-
-                new AnimationOld(songBody).moveX(10, 0).fade(0, 1)
-                        .runOnStart(() -> loadMetadata(beatmap))
-                        .delay(200)
-                        .play(200);
-            }
-            if (currentOption == MusicOption.PREVIOUS) {
-                new AnimationOld(songBody).moveX(0, 10).fade(1, 0)
-                        .play(200);
-                new AnimationOld(songBody).moveX(-10, 0).fade(0, 1)
-                        .runOnStart(() -> loadMetadata(beatmap))
-                        .delay(200)
-                        .play(200);
-            }
+    private void switchListVisibility() {
+        if (!isListVisible) {
+            isListVisible = true;
+            Animation.of(find("listBody"))
+                    .toWidth(Resources.dimen(R.dimen.musicPlayerListWidth))
+                    .play(300);
+        } else {
+            isListVisible = false;
+            Animation.of(find("listBody"))
+                    .toWidth(0)
+                    .play(300);
         }
     }
 
-    private void changeBitmap(TrackInfo track) {
-        if (bitmapTask != null) {
-            bitmapTask.cancel(true);
-            bitmapTask = null;
-        }
+    //--------------------------------------------------------------------------------------------//
 
-        if (track.getBackground() == null) {
-            songBitmap = null;
-            loadSeekbarImage();
+    public void notifyMusicControl(MusicOption option) {
+        if (!isShowing) {
             return;
         }
 
+        if (option == MusicOption.PLAY || option == MusicOption.PAUSE) {
+
+        }
+    }
+
+    public void changeMusic(BeatmapInfo beatmap) {
+        if (isShowing()) {
+            select(beatmap);
+            loadBitmap(beatmap.getTrack(0));
+
+            Animation.of(songBody)
+                    .toAlpha(0)
+                    .runOnEnd(() -> {
+                        loadMetadata(beatmap);
+
+                        Animation.of(songBody)
+                                .toX(0)
+                                .toAlpha(1)
+                                .play(200);
+                    })
+                    .play(200);
+        }
+    }
+
+    private void loadMetadata(BeatmapInfo beatmap) {
+        title.setText(BeatmapHelper.getTitle(beatmap));
+        artist.setText(BeatmapHelper.getArtist(beatmap));
+        length.setText(sdf.format(Game.songService.getLength()));
+    }
+
+    private void loadBitmap(TrackInfo track) {
+        if (bitmapTask != null) {
+            bitmapTask.cancel(true);
+        }
+
         bitmapTask = new AsyncExec() {
+            Bitmap bitmap;
+
             public void run() {
-                BeatmapHelper.loadCompressedBackground(track);
+                if (track.getBackground() != null) {
+                    bitmap = BitmapFactory.decodeFile(track.getBackground());
+
+                    float scale = (float) songImage.getWidth() / bitmap.getWidth();
+
+                    bitmap = BitmapHelper.resize(bitmap, bitmap.getWidth() * scale, bitmap.getHeight() * scale);
+                    bitmap = BitmapHelper.cropInCenter(bitmap, songImage.getWidth(), songImage.getHeight());
+                }
             }
 
             public void onComplete() {
-                songBitmap = BeatmapHelper.getCompressedBackground(track);
-                loadSeekbarImage();
+                Animation.of(songImage)
+                        .toAlpha(0)
+                        .runOnEnd(() -> {
+                            songImage.setImageBitmap(bitmap);
+
+                            Animation.of(songImage)
+                                    .toAlpha(1)
+                                    .play(200);
+                        })
+                        .play(100);
             }
         };
         bitmapTask.execute();
     }
 
-    private void loadMetadata(BeatmapInfo beatmap) {
-        titleTv.setText(BeatmapHelper.getTitle(beatmap));
-        artistTv.setText(BeatmapHelper.getArtist(beatmap));
-        lengthTv.setText(sdf.format(length));
-    }
+    //--------------------------------------------------------------------------------------------//
 
-    private void loadSeekbarImage() {
-        if (isShowing) {
-            ((View) songImage).setAlpha(0);
+    public void select(BeatmapInfo beatmap) {
+        int i = 0;
+        while (i < list.getChildCount()) {
+            View child = list.getChildAt(i);
+            ViewHolder holder = (ViewHolder) list.getChildViewHolder(child);
 
-            if (songBitmap != null) {
-                songImage.setImageBitmap(songBitmap);
-                new AnimationOld(songImage).fade(0, 1).play(200);
-            } else {
-                songImage.setImageDrawable(null);
+            if (beatmap.equals(holder.beatmap)) {
+                holder.onSelect();
             }
+            ++i;
         }
     }
 
@@ -292,78 +310,85 @@ public class MusicPlayer extends UIFragment {
 
     @Override
     public void show() {
-        if (isShowing)
-            return;
-
-        Game.platform.close(UI.getExtras());
-        UI.topBar.musicButton.animateButton(true);
-        super.show();
+        if (!isShowing) {
+            Game.platform.close(UI.getExtras());
+            UI.topBar.musicButton.animateButton(true);
+            super.show();
+        }
     }
 
     @Override
     public void close() {
-        if (!isShowing)
-            return;
+        if (isShowing) {
 
-        if (isListVisible) {
-            switchListVisibility();
+            if (isListVisible) {
+                switchListVisibility();
+            }
+            UI.topBar.musicButton.animateButton(false);
+
+            Animation.of(find("innerBody"))
+                    .toAlpha(0)
+                    .play(100);
+
+            Animation.of(body)
+                    .fromHeight(Resources.dimen(R.dimen.musicPlayerHeight))
+                    .toHeight(Resources.dimen(R.dimen._30sdp))
+                    .runOnEnd(super::close)
+                    .toY(-30)
+                    .toAlpha(0)
+                    .play(240);
         }
-
-        UI.topBar.musicButton.animateButton(false);
-
-        new AnimationOld(find("innerBody")).fade(1, 0).play(100);
-
-        new AnimationOld(body)
-                .height((int) Resources.dimen(R.dimen.musicPlayerHeight), (int) Resources.dimen(R.dimen._30sdp))
-                .interpolatorMode(AnimationOld.Interpolate.VALUE_ANIMATOR)
-                .interpolator(Easing.OutExpo)
-                .runOnEnd(super::close)
-                .moveY(0, -30)
-                .fade(1, 0)
-                .play(240);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public static class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.VH> {
+    static class PlaylistAdapter extends RecyclerView.Adapter<ViewHolder> {
 
-        private final List<BeatmapInfo> songs;
+        private final ArrayList<BeatmapInfo> beatmaps;
+
+        private ViewHolder selected;
 
         //----------------------------------------------------------------------------------------//
 
-        public PlaylistAdapter(List<BeatmapInfo> songs) {
-            this.songs = songs;
+        public PlaylistAdapter(ArrayList<BeatmapInfo> beatmaps) {
+            this.beatmaps = beatmaps;
+
             setHasStableIds(true);
         }
 
         //----------------------------------------------------------------------------------------//
 
         @NonNull
-        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             TextView view = new TextView(Game.activity);
 
             view.setLayoutParams(new LayoutParams(MATCH_PARENT, WRAP_CONTENT));
-            view.setBackground(Resources.drw(R.drawable.shape_rounded));
+
+            Drawable drawable = Resources.drw(R.drawable.shape_rounded).mutate();
+            drawable.setTint(Resources.color(R.color.accent));
+            drawable.setAlpha(0);
+
+            view.setBackground(drawable);
             view.setEllipsize(TextUtils.TruncateAt.END);
             view.setSingleLine(true);
 
-            int m = (int) Resources.dimen(R.dimen.M);
-            int s = (int) Resources.dimen(R.dimen.S);
+            int m = Resources.dimen(R.dimen.M);
+            int s = Resources.dimen(R.dimen.S);
             view.setPadding(m, s, m, s);
 
-            return new VH(view);
+            return new ViewHolder(view, this);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull VH holder, int position) {
-            holder.assign(songs.get(position));
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            holder.bind(beatmaps.get(position));
         }
 
         //----------------------------------------------------------------------------------------//
 
         @Override
         public int getItemCount() {
-            return songs.size();
+            return beatmaps.size();
         }
 
         @Override
@@ -378,26 +403,79 @@ public class MusicPlayer extends UIFragment {
 
         //----------------------------------------------------------------------------------------//
 
-        public static class VH extends RecyclerView.ViewHolder {
+        static class ViewHolder extends RecyclerView.ViewHolder {
 
+            private final PlaylistAdapter parent;
             private final TextView text;
+
+            private BeatmapInfo beatmap;
 
             //------------------------------------------------------------------------------------//
 
-            public VH(@NonNull View itemView) {
+            public ViewHolder(@NonNull View itemView, PlaylistAdapter parent) {
                 super(itemView);
-                text = (TextView) itemView;
+                this.parent = parent;
+                this.text = (TextView) itemView;
             }
 
             //------------------------------------------------------------------------------------//
 
-            public void assign(BeatmapInfo song) {
-                text.setText(BeatmapHelper.getArtist(song) + " - " + BeatmapHelper.getTitle(song));
+            public void bind(BeatmapInfo beatmap) {
+                this.beatmap = beatmap;
+
+                text.setText(BeatmapHelper.getArtist(beatmap) + " - " + BeatmapHelper.getTitle(beatmap));
 
                 UI.musicPlayer.bindTouchListener(text, () -> {
-                    UI.musicPlayer.wasChangedFromList = true;
-                    Game.musicManager.change(song);
+                    if (Game.library.getBeatmap() != beatmap) {
+                        Game.musicManager.change(beatmap);
+                        onSelect();
+                    }
                 });
+            }
+
+            //------------------------------------------------------------------------------------//
+
+            public void onSelect() {
+                if (parent.selected != null && parent.selected != this) {
+                    parent.selected.onDeselect();
+                }
+                if (parent.selected == this) {
+                    return;
+                }
+                parent.selected = this;
+
+                Drawable background = text.getBackground();
+
+                Animation.ofInt(background.getAlpha(), 60)
+                        .runOnUpdate(value -> {
+                            background.setAlpha((int) value);
+                            text.setBackground(background);
+                        })
+                        .play(200);
+
+                Animation.ofArgb(Color.WHITE, Resources.color(R.color.accent))
+                        .runOnUpdate(value -> text.setTextColor((int) value))
+                        .play(200);
+            }
+
+            public void onDeselect() {
+                if (parent.selected != this) {
+                    return;
+                }
+                parent.selected = null;
+
+                Drawable background = text.getBackground();
+
+                Animation.ofInt(background.getAlpha(), 0)
+                        .runOnUpdate(value -> {
+                            background.setAlpha((int) value);
+                            text.setBackground(background);
+                        })
+                        .play(200);
+
+                Animation.ofArgb(Resources.color(R.color.accent), Color.WHITE)
+                        .runOnUpdate(value -> text.setTextColor((int) value))
+                        .play(200);
             }
         }
     }

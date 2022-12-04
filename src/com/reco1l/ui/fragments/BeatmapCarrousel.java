@@ -80,7 +80,7 @@ public class BeatmapCarrousel extends UIFragment {
                 if (selectedTrack != null) {
                     setSelected(null, selectedTrack);
                 } else {
-                    setSelected(Game.musicManager.beatmap, null);
+                    setSelected(Game.library.getBeatmap(), null);
                 }
             }
         }.execute());
@@ -132,7 +132,7 @@ public class BeatmapCarrousel extends UIFragment {
         }
 
         if (beatmap != null) {
-            if (!beatmap.equals(Game.musicManager.beatmap)) {
+            if (!beatmap.equals(Game.library.getBeatmap())) {
                 Game.selectorScene.playMusic(track.getBeatmap());
             }
             navigate(beatmap);
