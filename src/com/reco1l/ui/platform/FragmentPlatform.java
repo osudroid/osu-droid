@@ -219,7 +219,9 @@ public final class FragmentPlatform {
     }
 
     public void notifyScreenChange(Screens lastScreen, Screens newScreen) {
-        for (Fragment fragment: fragments) {
+        for (int i = 0; i < fragments.size(); ++i) {
+            Fragment fragment = fragments.get(i);
+
             if (fragment instanceof UIFragment) {
                 UIFragment frg = (UIFragment) fragment;
                 Game.activity.runOnUiThread(() -> frg.onScreenChange(lastScreen, newScreen));
