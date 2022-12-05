@@ -2,7 +2,6 @@ package com.reco1l.andengine.scenes;
 // Created by Reco1l on 26/11/2022, 06:20
 
 import android.graphics.Color;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -33,7 +32,7 @@ public class IntroScene extends BaseScene {
 
     @Override
     protected void onCreate() {
-        new Fragment().show();
+        new IntroFragment().show();
     }
 
     @Override
@@ -41,7 +40,7 @@ public class IntroScene extends BaseScene {
 
     //----------------------------------------------------------------------------------------//
 
-    public static class Fragment extends UIFragment {
+    public static class IntroFragment extends UIFragment {
 
         private View
                 loadingLayout,
@@ -74,6 +73,8 @@ public class IntroScene extends BaseScene {
         }
 
         //----------------------------------------------------------------------------------------//
+
+
 
         @Override
         protected void onLoad() {
@@ -189,10 +190,7 @@ public class IntroScene extends BaseScene {
 
             Animation.of(background)
                     .toAlpha(0)
-                    .runOnEnd(() -> {
-                        super.close();
-                        Log.i("IS", "Tried to close");
-                    })
+                    .runOnEnd(super::close)
                     .delay(300)
                     .play(500);
         }

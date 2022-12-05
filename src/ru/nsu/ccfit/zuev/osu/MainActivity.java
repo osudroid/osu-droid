@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -11,6 +12,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.ConfigurationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -716,5 +718,12 @@ public class MainActivity extends BaseGameActivity implements
             finish();
             return false;
         }
+    }
+
+    public String getRenderer() {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        ConfigurationInfo config = manager.getDeviceConfigurationInfo();
+
+        return config.getGlEsVersion();
     }
 }

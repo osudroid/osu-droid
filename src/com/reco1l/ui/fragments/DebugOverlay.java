@@ -8,6 +8,7 @@ import com.reco1l.ui.platform.UIFragment;
 
 import java.text.DecimalFormat;
 
+import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class DebugOverlay extends UIFragment {
@@ -54,6 +55,7 @@ public class DebugOverlay extends UIFragment {
         }
 
         String string =
+                Game.activity.getRenderer() + "\n" +
                 "logo_scale: " + df.format(logo_scale) + "\n" +
                 "current_beat: " + beat;
 

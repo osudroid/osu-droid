@@ -45,8 +45,7 @@
         app:iconSpaceReserved="false">
 
         <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="trianglesAnimation"
+            android:key="ui_advancedEffects"
             android:summary="@string/opt_triangles_animation_summary"
             android:title="@string/opt_triangles_animation_title"
             app:iconSpaceReserved="false" />

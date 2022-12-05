@@ -96,7 +96,7 @@ public class TriangleDrawable extends Drawable {
     }
 
     protected void onDraw(Canvas canvas) {
-        if(!Config.isTrianglesAnimation()) {
+        if(!Config.isUIAdvancedEffects()) {
             return;
         }
 

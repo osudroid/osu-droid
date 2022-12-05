@@ -1,9 +1,11 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.ConfigurationInfo;
 import android.os.Environment;
 import android.util.DisplayMetrics;
 
@@ -11,6 +13,7 @@ import androidx.preference.PreferenceManager;
 
 import com.edlplan.favorite.FavoriteLibrary;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.reco1l.Game;
 
 import java.io.File;
 import java.util.HashMap;
@@ -75,7 +78,7 @@ public class Config {
         useSuperSlider,
         enableStoryboard,
         safeBeatmapBg,
-        trianglesAnimation,
+        isUIAdvancedEffects,
         showItemBackground;
 
     private static int RES_WIDTH,
@@ -119,9 +122,9 @@ public class Config {
         metronomeSwitch = Integer.parseInt(prefs.getString("metronomeswitch", "1"));
         showScoreboard = prefs.getBoolean("showscoreboard", true);
         enableStoryboard = prefs.getBoolean("enableStoryboard", false);
-        trianglesAnimation = prefs.getBoolean("trianglesAnimation", true);
 
         // UI
+        isUIAdvancedEffects = prefs.getBoolean("ui_advancedEffects", true);
         showItemBackground = prefs.getBoolean("ui_showItemBackground", true);
 
         setSize();
@@ -751,12 +754,8 @@ public class Config {
         Config.safeBeatmapBg = safeBeatmapBg;
     }
 
-    public static boolean isTrianglesAnimation() {
-        return trianglesAnimation;
-    }
-
-    public static void setTrianglesAnimation(boolean trianglesAnimation) {
-        Config.trianglesAnimation = trianglesAnimation;
+    public static boolean isUIAdvancedEffects() {
+        return isUIAdvancedEffects;
     }
 
     public static String getDefaultCorePath() {

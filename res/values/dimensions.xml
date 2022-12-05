@@ -123,7 +123,7 @@
     <!--Main menu-->
     <dimen name="mainMenuButtonSize">@dimen/_130sdp</dimen>
     <dimen name="mainMenuButtonElevation">8dp</dimen>
-    <dimen name="mainMenuButtonShapeRadius">@dimen/_80sdp</dimen>
+    <dimen name="mainMenuButtonShapeRadius">@dimen/_65sdp</dimen>
     <dimen name="mainMenuButtonMargin">@dimen/_80sdp</dimen>
     <dimen name="mainMenuButtonLayoutWidth">@dimen/_440sdp</dimen>
 

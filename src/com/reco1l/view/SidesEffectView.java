@@ -18,6 +18,8 @@ import androidx.annotation.Nullable;
 
 import com.reco1l.utils.Animation;
 
+import ru.nsu.ccfit.zuev.osu.Config;
+
 public class SidesEffectView extends View {
 
     private Animation fadeUp, fadeDown;
@@ -138,6 +140,9 @@ public class SidesEffectView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if (!Config.isUIAdvancedEffects()) {
+            return;
+        }
         int width = canvas.getWidth();
         int height = canvas.getHeight();
 

@@ -14,6 +14,8 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.core.math.MathUtils;
 
+import ru.nsu.ccfit.zuev.osu.Config;
+
 public class SpectrumView extends View {
 
     private Paint paint;
@@ -111,6 +113,10 @@ public class SpectrumView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if (!Config.isUIAdvancedEffects()) {
+            return;
+        }
+
         if (lines == -1) {
             computeLines(canvas);
         }

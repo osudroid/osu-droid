@@ -330,8 +330,8 @@
     <string name="opt_receive_announcements_title">Receive announcements</string>
     <string name="opt_receive_announcements_summary">Receive notifications of announcements, events, etc.</string>
 
-    <string name="opt_triangles_animation_title">Triangle Animation</string>
-    <string name="opt_triangles_animation_summary">Disable this if you are having frame rate problems while a UI with the triangles animation is visible</string>
+    <string name="opt_triangles_animation_title">Advanced UI effects and animations</string>
+    <string name="opt_triangles_animation_summary">Disable this if you\'re having frame rate problems (less Android 9 devices may have this disabled)</string>
 
     <string name="opt_safe_beatmap_bg_title">Safe beatmap background</string>
     <string name="opt_safe_beatmap_bg_summary">Change all of the beatmaps\' background to the menu-background image from your skin</string>
