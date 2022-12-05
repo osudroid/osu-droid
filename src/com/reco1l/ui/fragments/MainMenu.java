@@ -291,7 +291,7 @@ public class MainMenu extends UIFragment {
             }
         }
 
-        if (triangles1 != null) {
+        if (triangleSpeedOut != null && triangleSpeedIn != null) {
             triangleSpeedOut.delay(in).play(out);
             triangleSpeedIn.play(in);
         }

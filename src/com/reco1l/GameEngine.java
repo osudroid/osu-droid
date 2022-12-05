@@ -103,7 +103,7 @@ public class GameEngine extends Engine implements IReferences {
         platform.closeAllExcept(platform.getFragmentsFrom(currentScreen));
         platform.showAll(currentScreen);
 
-        UI.notificationCenter.allowBadgeNotificator(currentScreen == Screens.Game);
+        UI.notificationCenter.allowPopupNotifications(currentScreen != Screens.Game);
 
         platform.notifyScreenChange(oldScene, currentScreen);
     }

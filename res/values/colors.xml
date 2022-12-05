@@ -54,9 +54,8 @@
     <color name="panelSeparator">#33000000</color>
 
     <!--Notifications-->
-    <color name="notificationBackground">#1F000000</color>
+    <color name="notificationBackground">#353535</color>
     <color name="notificationDrawableBackground">#1F000000</color>
-    <color name="notificationDismissButtonTint">#B3FFFFFF</color>
 
     <!--Main Menu-->
     <color name="mainMenuLogoBackground">#E967A1</color>

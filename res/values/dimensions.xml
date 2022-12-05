@@ -114,9 +114,11 @@
     <dimen name="panelViewsMargin">@dimen/_6sdp</dimen>
 
     <!--Notifications-->
-    <dimen name="notificationCenterWidth">@dimen/_220sdp</dimen>
+    <dimen name="notificationCenterWidth">@dimen/_250sdp</dimen>
     <dimen name="popupNotificationWidth">@dimen/_240sdp</dimen>
-    <dimen name="popupNotificationHeight">@dimen/_26sdp</dimen>
+
+    <dimen name="notificationIconWidth">@dimen/_40sdp</dimen>
+    <dimen name="notificationCloseWidth">@dimen/_32sdp</dimen>
 
     <!--Main menu-->
     <dimen name="mainMenuButtonSize">@dimen/_130sdp</dimen>

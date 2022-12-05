@@ -249,6 +249,13 @@ public abstract class UIFragment extends Fragment implements IReferences {
 
     //--------------------------------------------------------------------------------------------//
 
+    public void resetDismissTimer() {
+        rootView.removeCallbacks(close);
+        rootView.postDelayed(close, getDismissTime());
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
     public void onTouchEventNotified(int action) {
         if (getDismissTime() > 0) {
             if (action == MotionEvent.ACTION_DOWN) {

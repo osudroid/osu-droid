@@ -19,7 +19,6 @@ public class NotificationTable {
     public static void debug(String text) {
         GameNotification notification = new GameNotification("Debug");
         notification.message = text;
-        notification.isSilent = true;
         UI.notificationCenter.add(notification);
     }
 
@@ -31,8 +30,8 @@ public class NotificationTable {
 
         if (state == null) {
             online.message = "Logging in...";
-            online.showProgressBar = true;
-            online.isProgressBarIndeterminate = true;
+            online.showProgress = true;
+            online.hasIndeterminateProgress = true;
             UI.notificationCenter.add(online);
             return;
         }
@@ -47,11 +46,11 @@ public class NotificationTable {
                 break;
             case "success":
                 online.message = "Logged in successfully";
-                online.showProgressBar = false;
+                online.showProgress = false;
                 break;
             case "error":
                 online.message = "Cannot log in\n" + OnlineManager.getInstance().getFailMessage();
-                online.showProgressBar = false;
+                online.showProgress = false;
                 break;
         }
         online.update();

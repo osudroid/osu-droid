@@ -9,6 +9,8 @@ import com.reco1l.enums.Screens;
 import com.reco1l.game.TimingWrapper;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.data.DialogTable;
+import com.reco1l.utils.NotificationTable;
+import com.reco1l.utils.helpers.BeatmapHelper;
 
 import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.primitive.Rectangle;
@@ -78,6 +80,13 @@ public class MainScene extends BaseScene {
             if (UI.topBar.musicButton != null) {
                 UI.topBar.musicButton.changeMusic(beatmap);
             }
+
+            String text = "Now playing: "
+                    + BeatmapHelper.getTitle(beatmap)
+                    + " by "
+                    + BeatmapHelper.getArtist(beatmap);
+
+            NotificationTable.debug(text);
         });
     }
 

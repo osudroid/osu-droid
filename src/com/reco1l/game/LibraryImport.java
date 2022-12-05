@@ -65,7 +65,7 @@ public class LibraryImport {
         GameNotification notification = new GameNotification("Beatmap Import");
 
         notification.message = "Importing beatmap " + file.getName() + "...";
-        notification.showDismissButton = false;
+        notification.showCloseButton = false;
 
         UI.notificationCenter.add(notification);
 
@@ -75,13 +75,13 @@ public class LibraryImport {
                     Game.library.savetoCache(Game.activity);
                 }
                 notification.message = "Beatmap " + file.getName() + " successfully imported!";
-                notification.showDismissButton = true;
+                notification.showCloseButton = true;
                 notification.update();
                 return;
             }
         }
         notification.message = "Unable to import beatmap " + file.getName();
-        notification.showDismissButton = true;
+        notification.showCloseButton = true;
         notification.update();
     }
 
