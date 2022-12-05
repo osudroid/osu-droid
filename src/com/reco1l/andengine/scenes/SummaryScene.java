@@ -36,7 +36,7 @@ public class SummaryScene extends BaseScene {
     @Override
     protected void onCreate() {
         setTimingWrapper(false);
-        setContinuousPlay(true);
+        setContinuousPlay(false);
 
         createTopBarButtons();
     }
