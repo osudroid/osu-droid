@@ -178,6 +178,9 @@ public final class MusicManager {
     }
 
     public void next() {
+        if (isInvalidRequest())
+            return;
+
         notifyControl(NEXT);
         if (getState() == Status.PLAYING || getState() == Status.PAUSED) {
             getService().stop();
