@@ -695,7 +695,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         isFirst = true;
         failcount = 0;
         mainCursorId = -1;
-        Game.loaderScene.show();
+        Game.loaderScene.show(true);
 
         final String rfile = track != null ? replayFile : this.replayFile;
 
@@ -712,7 +712,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             public void onComplete() {
-                Game.loaderScene.complete(() -> {
+                Game.loaderScene.runOnComplete(() -> {
                     if (loadComplete) {
                         prepareScene();
                     } else {
@@ -724,6 +724,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         quit();
                     }
                 });
+                Game.loaderScene.notifyComplete();
             }
         });
         ResourceManager.getInstance().getSound("failsound").stop();

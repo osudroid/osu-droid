@@ -1,4 +1,5 @@
 package com.reco1l.andengine.scenes;
+
 // Created by Reco1l on 26/11/2022, 04:58
 
 import android.view.View;
@@ -6,11 +7,11 @@ import android.widget.TextView;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.Game;
+import com.reco1l.UI;
 import com.reco1l.andengine.BaseScene;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.ScheduledTask;
 
 import java.util.ArrayList;
 
@@ -19,7 +20,13 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class LoaderScene extends BaseScene {
 
-    private Layout layout;
+    private Fragment fragment;
+    private Runnable runOnComplete;
+
+    private boolean
+            isImmersive = false,
+            isTaskCompleted = false,
+            isAnimInProgress = false;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -30,24 +37,56 @@ public class LoaderScene extends BaseScene {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void complete(Runnable task) {
-        layout.onComplete(task);
+    public void runOnComplete(Runnable task) {
+        runOnComplete = task;
+    }
+
+    public void notifyComplete() {
+        isTaskCompleted = true;
+    }
+
+    public boolean isImmersive() {
+        return isImmersive;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onCreate() {
-        layout = new Layout();
+        fragment = new Fragment();
     }
 
     @Override
     protected void onSceneUpdate(float secondsElapsed) {
+        if (!fragment.isShowing()) {
+            return;
+        }
+
+        if (!isAnimInProgress && isTaskCompleted) {
+            isTaskCompleted = false;
+            fragment.onFinish(runOnComplete);
+            runOnComplete = null;
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public static class Layout extends UIFragment {
+    public void show(boolean immersive) {
+        isImmersive = immersive;
+        if (immersive) {
+            UI.topBar.close();
+        }
+        super.show();
+    }
+
+    @Override
+    public void show() {
+        show(false);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public static class Fragment extends UIFragment {
 
         private final ArrayList<String> log;
 
@@ -75,7 +114,7 @@ public class LoaderScene extends BaseScene {
 
         //----------------------------------------------------------------------------------------//
 
-        public Layout() {
+        public Fragment() {
             log = ToastLogger.getLog();
         }
 
@@ -83,20 +122,22 @@ public class LoaderScene extends BaseScene {
 
         @Override
         protected void onLoad() {
-            setDismissMode(false, false);
-
             indicator = find("progress");
             text = find("text");
 
-            if (log != null)
+            if (log != null) {
                 log.clear();
+            }
 
             ToastLogger.setPercentage(-1);
             percentage = -1;
 
+            Game.loaderScene.isAnimInProgress = true;
+
             Animation.of(indicator)
                     .fromAlpha(0)
                     .toAlpha(1)
+                    .runOnEnd(() -> Game.loaderScene.isAnimInProgress = false)
                     .fromScale(0.8f)
                     .toScale(1)
                     .play(200);
@@ -107,7 +148,6 @@ public class LoaderScene extends BaseScene {
             if (!isShowing || ToastLogger.getPercentage() == percentage) {
                 return;
             }
-
             percentage = ToastLogger.getPercentage();
 
             if (indicator != null) {
@@ -132,7 +172,7 @@ public class LoaderScene extends BaseScene {
             }
         }
 
-        public void onComplete(Runnable onEnd) {
+        public void onFinish(final Runnable onEnd) {
             if (isShowing) {
                 Game.activity.runOnUiThread(() -> {
 
@@ -146,12 +186,16 @@ public class LoaderScene extends BaseScene {
                     Animation.of(indicator)
                             .toAlpha(0)
                             .toScale(0.8f)
-                            .runOnEnd(super::close)
+                            .runOnEnd(() -> {
+                                super.close();
+
+                                if (onEnd != null) {
+                                    onEnd.run();
+                                }
+                            })
                             .play(200);
                 });
             }
-
-            ScheduledTask.run(onEnd, 200);
         }
     }
 }

@@ -13,7 +13,6 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.TriangleEffectView;
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
-import com.reco1l.game.LibraryImport;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.AsyncExec;
@@ -34,7 +33,7 @@ public class MainMenu extends UIFragment {
     public static MainMenu instance;
 
     private CardView logo, buttons;
-    private View logoEffect, solo, multi;
+    private View logoEffect, single, multi;
 
     private ExpandEffectView expandEffect;
     private TriangleEffectView triangles1, triangles2;
@@ -79,7 +78,7 @@ public class MainMenu extends UIFragment {
         setDismissMode(false, false);
 
         logo = find("logo");
-        solo = find("solo");
+        single = find("solo");
         multi = find("multi");
         logoEffect = find("logoRect");
         buttons = find("buttonsLayout");
@@ -93,10 +92,10 @@ public class MainMenu extends UIFragment {
         triangles2.setTriangleColor(Resources.color(R.color.mainMenuTriangles2));
 
         logoEffect.setAlpha(0);
-        solo.setAlpha(0);
+        single.setAlpha(0);
         multi.setAlpha(0);
 
-        int logoSize = (int) Resources.dimen(R.dimen.mainMenuLogoSize);
+        int logoSize = Resources.dimen(R.dimen.mainMenuLogoSize);
 
         ViewUtils.size(logo, logoSize);
         ViewUtils.size(expandEffect, logoSize);
@@ -120,7 +119,7 @@ public class MainMenu extends UIFragment {
 
         int[] gradient = {Color.WHITE, Color.TRANSPARENT};
 
-        bindTouchListener(solo, new TouchListener() {
+        bindTouchListener(single, new TouchListener() {
 
             public GradientDrawable getCustomTouchEffect() {
                 return new GradientDrawable(LEFT_RIGHT, gradient);
@@ -173,16 +172,16 @@ public class MainMenu extends UIFragment {
             UI.topBar.show();
 
             Animation.of(logo, expandEffect)
-                    .toSize((int) Resources.dimen(R.dimen.mainMenuSmallLogoSize))
+                    .toSize(Resources.dimen(R.dimen.mainMenuSmallLogoSize))
                     .interpolator(Easing.InOutQuad)
                     .play(300);
 
             Animation.of(buttons)
-                    .toWidth((int) Resources.dimen(R.dimen.mainMenuButtonLayoutWidth))
+                    .toWidth(Resources.dimen(R.dimen.mainMenuButtonLayoutWidth))
                     .interpolator(Easing.InOutQuad)
                     .play(300);
 
-            Animation.of(solo, multi)
+            Animation.of(single, multi)
                     .runOnEnd(() -> isMenuAnimInProgress = false)
                     .toAlpha(1)
                     .play(300);
@@ -200,7 +199,7 @@ public class MainMenu extends UIFragment {
             }
 
             Animation.of(logo, expandEffect)
-                    .toSize((int) Resources.dimen(R.dimen.mainMenuLogoSize))
+                    .toSize(Resources.dimen(R.dimen.mainMenuLogoSize))
                     .interpolator(Easing.InOutQuad)
                     .play(300);
 
@@ -209,7 +208,7 @@ public class MainMenu extends UIFragment {
                     .interpolator(Easing.InOutQuad)
                     .play(300);
 
-            Animation.of(solo, multi)
+            Animation.of(single, multi)
                     .runOnEnd(() -> isMenuAnimInProgress = false)
                     .toAlpha(0)
                     .play(300);
@@ -225,12 +224,19 @@ public class MainMenu extends UIFragment {
 
         Animation.of(rootView)
                 .runOnEnd(() -> {
-                    Game.selectorScene.show();
-                    Game.musicManager.play();
+                    Game.loaderScene.show();
+                    Game.loaderScene.runOnComplete(() -> {
+                        Game.selectorScene.show();
+                        Game.musicManager.play();
+                    });
 
                     new AsyncExec() {
                         public void run() {
-                            LibraryImport.scan(true);
+                            Game.activity.checkNewBeatmaps();
+                        }
+
+                        public void onComplete() {
+                            Game.loaderScene.notifyComplete();
                         }
                     }.execute();
                 })

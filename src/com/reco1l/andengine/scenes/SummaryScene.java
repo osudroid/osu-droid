@@ -7,7 +7,6 @@ import com.reco1l.andengine.BaseScene;
 import com.reco1l.enums.Screens;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.Resources;
-import com.reco1l.utils.ScheduledTask;
 import com.reco1l.view.BarButton;
 
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -69,13 +68,13 @@ public class SummaryScene extends BaseScene {
             return;
         }
 
+        Game.loaderScene.show();
+
         new AsyncExec() {
             StatisticV2 stats;
             String replay;
 
             public void run() {
-                Game.loaderScene.show();
-
                 try {
                     String pack = Game.online.getScorePack(id);
                     String[] params = pack.split("\\s+");
@@ -86,18 +85,18 @@ public class SummaryScene extends BaseScene {
 
                         replay = OnlineManager.getReplayURL(id);
                     }
-                } catch (OnlineManagerException ignored) {
-                }
+                } catch (OnlineManagerException ignored) {}
             }
 
             public void onComplete() {
-                Game.loaderScene.complete(() -> {
+                Game.loaderScene.runOnComplete(() -> {
                     if (replay != null && stats != null) {
                         load(track, stats, replay, true);
                     } else {
                         Game.selectorScene.show();
                     }
                 });
+                Game.loaderScene.notifyComplete();
             }
         }.execute();
     }

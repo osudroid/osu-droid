@@ -65,7 +65,7 @@ public class TopBar extends UIFragment {
 
     @Override
     protected Screens[] getParents() {
-        return new Screens[]{Screens.Selector, Screens.Summary};
+        return new Screens[]{Screens.Selector, Screens.Summary, Screens.Loader};
     }
 
     @Override
@@ -140,7 +140,9 @@ public class TopBar extends UIFragment {
                         back.setVisibility(View.GONE);
                     } else {
                         musicButton.setVisibility(false);
-                        back.setVisibility(View.VISIBLE);
+                        if (current != Screens.Loader) {
+                            back.setVisibility(View.VISIBLE);
+                        }
                     }
 
                     ArrayList<BarButton> toAdd = buttons.get(current);
@@ -175,6 +177,15 @@ public class TopBar extends UIFragment {
         }
     }
 
+    @Override
+    public void show() {
+        if (Game.engine.currentScreen == Screens.Loader) {
+            if (Game.loaderScene.isImmersive()) {
+                return;
+            }
+        }
+        super.show();
+    }
     //--------------------------------------------------------------------------------------------//
 
     private void showAuthorText(boolean bool) {

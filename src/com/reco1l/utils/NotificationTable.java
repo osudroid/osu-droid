@@ -1,12 +1,11 @@
-package com.reco1l.ui.data;
+package com.reco1l.utils;
 
 // Created by Reco1l on 30/6/22 19:20
 
 import com.reco1l.UI;
+import com.reco1l.ui.data.GameNotification;
 
-import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 /**
  * This class contains easy access to show notifications from other classes without adding a lot of lines.

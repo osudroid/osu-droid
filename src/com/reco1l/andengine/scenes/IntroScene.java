@@ -33,7 +33,7 @@ public class IntroScene extends BaseScene {
 
     @Override
     protected void onCreate() {
-        new Layout().show();
+        new Fragment().show();
     }
 
     @Override
@@ -41,7 +41,7 @@ public class IntroScene extends BaseScene {
 
     //----------------------------------------------------------------------------------------//
 
-    public static class Layout extends UIFragment {
+    public static class Fragment extends UIFragment {
 
         private View
                 loadingLayout,
@@ -183,7 +183,7 @@ public class IntroScene extends BaseScene {
                     .play(400);
 
             Animation.of(logo)
-                    .toSize((int) Resources.dimen(R.dimen.mainMenuLogoSize))
+                    .toSize(Resources.dimen(R.dimen.mainMenuLogoSize))
                     .delay(300)
                     .play(300);
 

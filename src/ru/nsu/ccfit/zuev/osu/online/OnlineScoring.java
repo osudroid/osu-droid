@@ -4,7 +4,7 @@ import android.os.AsyncTask;
 
 import com.reco1l.Game;
 import com.reco1l.UI;
-import com.reco1l.ui.data.NotificationTable;
+import com.reco1l.utils.NotificationTable;
 import com.reco1l.interfaces.IReferences;
 
 import org.anddev.andengine.util.Debug;

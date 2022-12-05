@@ -35,7 +35,6 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.GameEngine;
 import com.reco1l.Game;
 import com.reco1l.andengine.scenes.IntroScene;
-import com.reco1l.game.LibraryImport;
 import com.reco1l.management.MusicManager;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.data.DialogTable;
@@ -338,17 +337,83 @@ public class MainActivity extends BaseGameActivity implements
 
     public void checkNewBeatmaps() {
         GlobalManager.getInstance().setInfo("Checking for new maps...");
-
+        final File mainDir = new File(Config.getCorePath());
         if (beatmapToAdd != null) {
             File file = new File(beatmapToAdd);
+            if (file.getName().toLowerCase().endsWith(".osz")) {
+                ToastLogger.showText(
+                        StringTable.get(R.string.message_lib_importing),
+                        false);
 
-            if (file.getName().endsWith(".odr")) {
+                if(FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath())) {
+                    String folderName = beatmapToAdd.substring(0, beatmapToAdd.length() - 4);
+                    // We have imported the beatmap!
+                    ToastLogger.showText(
+                            StringTable.format(R.string.message_lib_imported, folderName),
+                            true);
+                }
+
+                // LibraryManager.getInstance().sort();
+                LibraryManager.getInstance().savetoCache(MainActivity.this);
+            } else if (file.getName().endsWith(".odr")) {
                 willReplay = true;
-            } else {
-                LibraryImport.Import(file, true);
+            }
+        } else if (mainDir.exists() && mainDir.isDirectory()) {
+            File[] filelist = FileUtils.listFiles(mainDir, ".osz");
+            final ArrayList<String> beatmaps = new ArrayList<String>();
+            for (final File file : filelist) {
+                ZipFile zip = new ZipFile(file);
+                if(zip.isValidZipFile()) {
+                    beatmaps.add(file.getPath());
+                }
+            }
+
+            File beatmapDir = new File(Config.getBeatmapPath());
+            if (beatmapDir.exists()
+                    && beatmapDir.isDirectory()) {
+                filelist = FileUtils.listFiles(beatmapDir, ".osz");
+                for (final File file : filelist) {
+                    ZipFile zip = new ZipFile(file);
+                    if(zip.isValidZipFile()) {
+                        beatmaps.add(file.getPath());
+                    }
+                }
+            }
+
+            File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            if (Config.isSCAN_DOWNLOAD()
+                    && downloadDir.exists()
+                    && downloadDir.isDirectory()) {
+                filelist = FileUtils.listFiles(downloadDir, ".osz");
+                for (final File file : filelist) {
+                    ZipFile zip = new ZipFile(file);
+                    if(zip.isValidZipFile()) {
+                        beatmaps.add(file.getPath());
+                    }
+                }
+            }
+
+            if (beatmaps.size() > 0) {
+                // final boolean deleteOsz = Config.isDELETE_OSZ();
+                // Config.setDELETE_OSZ(true);
+                ToastLogger.showText(StringTable.format(
+                        R.string.message_lib_importing_several,
+                        beatmaps.size()), false);
+                for (final String beatmap : beatmaps) {
+                    if(FileUtils.extractZip(beatmap, Config.getBeatmapPath())) {
+                        String folderName = beatmap.substring(0, beatmap.length() - 4);
+                        // We have imported the beatmap!
+                        ToastLogger.showText(
+                                StringTable.format(R.string.message_lib_imported, folderName),
+                                true);
+                    }
+                }
+                // Config.setDELETE_OSZ(deleteOsz);
+
+                // LibraryManager.getInstance().sort();
+                LibraryManager.getInstance().savetoCache(MainActivity.this);
             }
         }
-        LibraryImport.scan(true);
     }
 
     public void checkNewSkins() {
