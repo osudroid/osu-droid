@@ -54,7 +54,9 @@ public interface ITextures {
             "hit100",
             "hit100k",
             "hit50",
-            "hit0"
+            "hit0",
+
+            "menu-background"
     };
 
 }

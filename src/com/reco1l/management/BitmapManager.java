@@ -39,9 +39,9 @@ public class BitmapManager implements IReferences {
 
     //--------------------------------------------------------------------------------------------//
 
-    private InputStream tryGetAsset(String file) {
+    public InputStream tryGetAsset(String file) {
         try {
-            return Game.activity.getAssets().open(file);
+            return Game.activity.getAssets().open("gfx/" + file);
         }
         catch (IOException exception) {
             exception.printStackTrace();
@@ -57,7 +57,7 @@ public class BitmapManager implements IReferences {
                 final String name = asset.substring(0, asset.length() - 4);
 
                 if (valid.contains(name)) {
-                    InputStream stream = tryGetAsset("gfx/" + asset);
+                    InputStream stream = tryGetAsset(asset);
 
                     if (stream == null) {
                         Log.e("BitmapManager", "Failed to load asset: " + name);

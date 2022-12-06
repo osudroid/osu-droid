@@ -80,6 +80,10 @@ public final class MusicManager {
         return observers.get(Game.engine.currentScreen);
     }
 
+    public BeatmapInfo getBeatmap() {
+        return beatmap;
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     public void bindMusicObserver(ISceneHandler handledScene, IMusicObserver observer) {

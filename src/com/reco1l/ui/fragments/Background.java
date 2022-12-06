@@ -2,6 +2,8 @@ package com.reco1l.ui.fragments;
 
 // Created by Reco1l on 13/11/2022, 21:13
 
+import static android.graphics.Bitmap.Config.ARGB_8888;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -152,10 +154,9 @@ public class Background extends UIFragment {
 
     //--------------------------------------------------------------------------------------------//
 
-
     public void changeFrom(String path) {
         if (!isReload) {
-            if (path == null || path.equals(imagePath)) {
+            if (path != null && path.equals(imagePath)) {
                 return;
             }
         }
@@ -172,7 +173,11 @@ public class Background extends UIFragment {
             public void run() {
                 int quality = Math.max(Config.getBackgroundQuality(), 1);
 
-                newBitmap = BitmapFactory.decodeFile(imagePath);
+                if (imagePath == null) {
+                    newBitmap = Game.bitmapManager.get("menu-background").copy(ARGB_8888, true);
+                } else {
+                    newBitmap = BitmapFactory.decodeFile(imagePath);
+                }
                 newBitmap = BitmapHelper.compress(newBitmap, 100 / quality);
 
                 if (isBlurEnabled) {

@@ -240,6 +240,7 @@ public class MainMenu extends UIFragment {
                             if (!Game.library.loadLibraryCache(Game.activity, true)) {
                                 Game.library.scanLibrary(Game.activity);
                             }
+                            Game.library.findBeatmap(Game.musicManager.getBeatmap());
                         }
 
                         public void onComplete() {
