@@ -78,32 +78,38 @@
         app:cardCornerRadius="@dimen/mainMenuLogoCornerRadius"
         app:cardElevation="@dimen/mainMenuLogoElevation">
 
-        <com.edlplan.ui.TriangleEffectView
-            android:id="@+id/mainM_triangles1"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            edl:edgeClampRate="1.9" />
+            android:layout_height="match_parent">
 
-        <com.edlplan.ui.TriangleEffectView
-            android:id="@+id/mainM_triangles2"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            edl:edgeClampRate="1.9" />
+            <com.edlplan.ui.TriangleEffectView
+                android:id="@+id/mainM_triangles1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                edl:edgeClampRate="1.9" />
 
-        <View
-            android:id="@+id/mainM_logoRect"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:alpha="0.3"
-            android:background="#FFF" />
+            <com.edlplan.ui.TriangleEffectView
+                android:id="@+id/mainM_triangles2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                edl:edgeClampRate="1.9" />
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:scaleType="fitXY"
-            android:scaleX="1.03"
-            android:scaleY="1.03"
-            android:src="@drawable/logo_overlay" />
+            <View
+                android:id="@+id/mainM_logoRect"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0.3"
+                android:background="#FFF" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="fitXY"
+                android:scaleX="1.03"
+                android:scaleY="1.03"
+                android:src="@drawable/logo_overlay" />
+
+        </RelativeLayout>
 
     </androidx.cardview.widget.CardView>
 

@@ -68,11 +68,9 @@ public class GlobalManager {
         PropertiesLibrary.getInstance().load(mainActivity);
         setLoadingProgress(30);
         setGameScene(new GameScene(getEngine()));
-
         setSongMenu(new SelectorScene());
         setScoring(new SummaryScene());
         setLoadingScene(new LoaderScene());
-
         setLoadingProgress(40);
         getGameScene().setScoringScene(getScoring());
         getGameScene().setOldScene(getSongMenu());

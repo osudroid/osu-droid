@@ -23,6 +23,8 @@ import com.reco1l.utils.listeners.TouchListener;
 import com.reco1l.view.ExpandEffectView;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
+import ru.nsu.ccfit.zuev.osu.LibraryManager;
+import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -233,6 +235,9 @@ public class MainMenu extends UIFragment {
                     new AsyncExec() {
                         public void run() {
                             Game.activity.checkNewBeatmaps();
+                            if (!Game.library.loadLibraryCache(Game.activity, true)) {
+                                Game.library.scanLibrary(Game.activity);
+                            }
                         }
 
                         public void onComplete() {
@@ -317,6 +322,11 @@ public class MainMenu extends UIFragment {
             } else {
                 showPassTime += secondsElapsed * 1000f;
             }
+        }
+
+        // Workaround for not Skia compatible devices
+        if (logo != null) {
+            logo.setRadius(logo.getWidth() / 2f);
         }
     }
 

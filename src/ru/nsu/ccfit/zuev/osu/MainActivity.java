@@ -255,7 +255,6 @@ public class MainActivity extends BaseGameActivity implements
     public void onLoadResources() {
         Config.setTextureQuality(1);
         ResourceManager.getInstance().Init(mEngine, this);
-        ResourceManager.getInstance().loadHighQualityAsset("star", "gfx/star.png");
         File bg;
         if ((bg = new File(Config.getSkinPath() + "menu-background.png")).exists()
                 || (bg = new File(Config.getSkinPath() + "menu-background.jpg")).exists()) {
@@ -286,6 +285,10 @@ public class MainActivity extends BaseGameActivity implements
                 Config.loadSkins();
                 checkNewSkins();
                 checkNewBeatmaps();
+                if (!LibraryManager.getInstance().loadLibraryCache(MainActivity.this, true)) {
+                    LibraryManager.getInstance().scanLibrary(MainActivity.this);
+                    System.gc();
+                }
             }
 
             public void onComplete() {  
@@ -562,10 +565,8 @@ public class MainActivity extends BaseGameActivity implements
         if (GlobalManager.getInstance().getMainScene() != null) {
             if (songService != null && Build.VERSION.SDK_INT > 10) {
                 if (songService.hideNotification()) {
-                    if (wakeLock != null && wakeLock.isHeld()) {
-                        wakeLock.release();
-                    }
-                    MusicManager.getInstance().sync();
+                    if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
+                    Game.musicManager.sync();
                 }
             }
         }

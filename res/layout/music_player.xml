@@ -86,8 +86,7 @@
                             android:layout_centerVertical="true"
                             android:layout_marginHorizontal="@dimen/songSeekBarHorizontalPadding"
                             app:cardBackgroundColor="@color/musicPlayerSeekbarCardBackground"
-                            app:cardCornerRadius="@dimen/songSeekBarCornerRadius"
-                            app:cardElevation="@dimen/musicPlayerSeekbarElevation">
+                            app:cardCornerRadius="@dimen/songSeekBarCornerRadius">
 
                             <ImageView
                                 android:id="@+id/mp_songImage"
@@ -104,7 +103,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="@dimen/songSeekBarHeight"
                             android:layout_centerVertical="true"
-                            android:elevation="@dimen/musicPlayerSeekbarElevation"
+                            android:elevation="@dimen/XS"
                             android:paddingHorizontal="@dimen/songSeekBarHorizontalPadding"
                             tool:progress="50" />
 
@@ -180,7 +179,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/mp_listRv"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="match_parent" />
 
             </LinearLayout>
 

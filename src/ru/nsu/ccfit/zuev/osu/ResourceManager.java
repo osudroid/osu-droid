@@ -422,7 +422,7 @@ public class ResourceManager {
         while (th < source.getHeight()) {
             th *= 2;
         }
-        if (!source.preload()) {
+        if (source.preload() == false) {
             textures.put("::background", textures.get("menu-background"));
             return textures.get("::background");
         }

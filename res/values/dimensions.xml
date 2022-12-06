@@ -96,7 +96,6 @@
     <dimen name="musicPlayerPlayButtonMargin">@dimen/_16sdp</dimen>
     <dimen name="musicPlayerHeight">@dimen/_215sdp</dimen>
     <dimen name="musicPlayerButtonsMargin">@dimen/_16sdp</dimen>
-    <dimen name="musicPlayerSeekbarElevation">@dimen/_6sdp</dimen>
     <dimen name="musicPlayerListWidth">@dimen/_240sdp</dimen>
     
     <!--Top Bar-->
@@ -127,7 +126,7 @@
     <dimen name="mainMenuButtonMargin">@dimen/_80sdp</dimen>
     <dimen name="mainMenuButtonLayoutWidth">@dimen/_440sdp</dimen>
 
-    <dimen name="mainMenuLogoCornerRadius">600dip</dimen>
+    <dimen name="mainMenuLogoCornerRadius">@dimen/_125sdp</dimen>
     <dimen name="mainMenuSmallLogoSize">@dimen/_160sdp</dimen>
     <dimen name="mainMenuLogoSize">@dimen/_250sdp</dimen>
     <dimen name="mainMenuLogoElevation">@dimen/_20sdp</dimen>
