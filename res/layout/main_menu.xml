@@ -113,7 +113,7 @@
 
     </androidx.cardview.widget.CardView>
 
-    <com.reco1l.view.ExpandEffectView
+   <!-- <com.reco1l.view.ExpandEffectView
         android:id="@+id/mainM_expandEffect"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -121,6 +121,6 @@
         android:layout_alignTop="@id/mainM_logo"
         android:layout_alignEnd="@id/mainM_logo"
         android:layout_alignBottom="@id/mainM_logo"
-        android:elevation="@dimen/mainMenuButtonElevation" />
+        android:elevation="@dimen/mainMenuButtonElevation" />-->
 
 </RelativeLayout>

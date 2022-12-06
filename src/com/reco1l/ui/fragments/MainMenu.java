@@ -20,11 +20,8 @@ import com.reco1l.utils.Resources;
 import com.reco1l.UI;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.listeners.TouchListener;
-import com.reco1l.view.ExpandEffectView;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
-import ru.nsu.ccfit.zuev.osu.LibraryManager;
-import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -37,7 +34,6 @@ public class MainMenu extends UIFragment {
     private CardView logo, buttons;
     private View logoEffect, single, multi;
 
-    private ExpandEffectView expandEffect;
     private TriangleEffectView triangles1, triangles2;
 
     private Animation
@@ -46,12 +42,14 @@ public class MainMenu extends UIFragment {
             triangleSpeedIn,
             triangleSpeedOut;
 
-    private int showPassTime = 0;
+    private Animation.UpdateListener logoUpdateListener;
 
     private boolean
             isKiai = false,
             isMenuShowing = false,
             isMenuAnimInProgress = false;
+
+    private int showPassTime = 0;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -86,7 +84,6 @@ public class MainMenu extends UIFragment {
         buttons = find("buttonsLayout");
         triangles1 = find("triangles1");
         triangles2 = find("triangles2");
-        expandEffect = find("expandEffect");
 
         loadAnimations();
 
@@ -100,8 +97,6 @@ public class MainMenu extends UIFragment {
         int logoSize = Resources.dimen(R.dimen.mainMenuLogoSize);
 
         ViewUtils.size(logo, logoSize);
-        ViewUtils.size(expandEffect, logoSize);
-
         ViewUtils.width(buttons, 0);
 
         bindTouchListener(logo, new TouchListener() {
@@ -162,6 +157,13 @@ public class MainMenu extends UIFragment {
 
         triangleSpeedIn = Animation.ofFloat(1f, 8f).runOnUpdate(onUpdate);
         triangleSpeedOut = Animation.ofFloat(8f, 1f).runOnUpdate(onUpdate);
+
+        logoUpdateListener = value -> {
+            int size = (int) value;
+
+            ViewUtils.size(logo, size);
+            logo.setRadius(size / 2f);
+        };
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -173,8 +175,8 @@ public class MainMenu extends UIFragment {
 
             UI.topBar.show();
 
-            Animation.of(logo, expandEffect)
-                    .toSize(Resources.dimen(R.dimen.mainMenuSmallLogoSize))
+            Animation.ofInt(logo.getWidth(), Resources.dimen(R.dimen.mainMenuSmallLogoSize))
+                    .runOnUpdate(logoUpdateListener)
                     .interpolator(Easing.InOutQuad)
                     .play(300);
 
@@ -200,8 +202,8 @@ public class MainMenu extends UIFragment {
                 UI.topBar.close();
             }
 
-            Animation.of(logo, expandEffect)
-                    .toSize(Resources.dimen(R.dimen.mainMenuLogoSize))
+            Animation.ofInt(logo.getWidth(), Resources.dimen(R.dimen.mainMenuLogoSize))
+                    .runOnUpdate(logoUpdateListener)
                     .interpolator(Easing.InOutQuad)
                     .play(300);
 
@@ -290,10 +292,6 @@ public class MainMenu extends UIFragment {
                 logoEffectOut.duration(out);
                 logoEffectIn.runOnEnd(logoEffectOut::play).play(in);
             }
-
-            if (expandEffect != null) {
-                expandEffect.play((int) beatLength);
-            }
         }
 
         if (triangleSpeedOut != null && triangleSpeedIn != null) {
@@ -312,7 +310,6 @@ public class MainMenu extends UIFragment {
 
         if (Game.musicManager.isPlaying()) {
             ViewUtils.scale(logo, peak);
-            ViewUtils.scale(expandEffect, peak + 0.2f);
         }
 
         if (isMenuShowing) {
@@ -322,11 +319,6 @@ public class MainMenu extends UIFragment {
             } else {
                 showPassTime += secondsElapsed * 1000f;
             }
-        }
-
-        // Workaround for not Skia compatible devices
-        if (logo != null) {
-            logo.setRadius(logo.getWidth() / 2f);
         }
     }
 
