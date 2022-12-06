@@ -195,12 +195,8 @@ public class ViewTouchHandler {
     }
 
     private void createTouchEffect(View view) {
-        // Unfortunately this doesn't work on API < 24
-        if (Build.VERSION.SDK_INT < 24) {
-            return;
-        }
-
         GradientDrawable drawable;
+
         if (hasCustomEffectDrawable) {
             drawable = listener.getCustomTouchEffect();
         } else {
