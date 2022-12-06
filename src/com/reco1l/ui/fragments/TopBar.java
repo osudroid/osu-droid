@@ -103,7 +103,7 @@ public class TopBar extends UIFragment {
             musicButton.setVisibility(false);
         }
 
-        author.setText(String.format("osu!droid %s", BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")"));
+        author.setText(Resources.str(R.string.app_name) + " " + BuildConfig.VERSION_NAME);
 
         bindTouchListener(find("inbox"), UI.notificationCenter::altShow);
         bindTouchListener(find("settings"), UI.settingsPanel::altShow);
@@ -207,9 +207,8 @@ public class TopBar extends UIFragment {
     }
 
     public void addButton(Screens screen, BarButton button) {
-        if (buttons.get(screen) == null) {
-            buttons.put(screen, new ArrayList<>());
-        }
+        buttons.computeIfAbsent(screen, k -> new ArrayList<>());
+
         ArrayList<BarButton> list = buttons.get(screen);
 
         if (list != null) {

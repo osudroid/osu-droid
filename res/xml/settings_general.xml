@@ -39,7 +39,7 @@
 
     <PreferenceCategory
         android:key="onlineOption_normal"
-        android:title="osu!droid"
+        android:title="@string/game_name"
         app:iconSpaceReserved="false">
 
         <CheckBoxPreference

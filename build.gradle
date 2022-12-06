@@ -30,7 +30,7 @@ def getReleaseVersionCode() {
 }
 
 def getReleaseVersionName() {
-    def baseline = '1.6.8'
+    def baseline = '1.7.0'
     def versionName = baseline + new Date().format('(yyMMdd)')
     println('versionName: ' + versionName)
     return versionName
@@ -88,7 +88,7 @@ android {
 
     buildTypes {
         debug {
-            resValue "string", "app_name", "osu!droid-debug"
+            resValue "string", "app_name", "rimu!-debug"
             applicationIdSuffix '.debug'
             firebaseCrashlytics {
                 mappingFileUploadEnabled false
@@ -96,7 +96,7 @@ android {
         }
 
         release {
-            resValue "string", "app_name", "osu!droid"
+            resValue "string", "app_name", "rimu!"
             zipAlignEnabled true
 //            minifyEnabled true
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
@@ -108,7 +108,7 @@ android {
 
         pre_release {
             matchingFallbacks = ['release']
-            resValue "string", "app_name", "osu!droid"
+            resValue "string", "app_name", "rimu!"
             zipAlignEnabled true
 //            minifyEnabled true
 //            debuggable true
@@ -147,7 +147,7 @@ android {
     android.applicationVariants.all { variant ->
         variant.outputs.all { output ->
             def releaseTime = new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
-            def fileName = "osu!droid-${defaultConfig.versionName}-${variant.buildType.name}-${releaseTime}.apk"
+            def fileName = "rimu!-${defaultConfig.versionName}-${variant.buildType.name}-${releaseTime}.apk"
             outputFileName = fileName
         }
     }

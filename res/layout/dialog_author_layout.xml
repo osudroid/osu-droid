@@ -29,17 +29,12 @@
 
             <TextView
                 style="@style/text"
-                android:text="osu!droid"
+                android:text="@string/game_name"
                 android:textStyle="bold" />
 
             <TextView
                 style="@style/text"
-                android:text="by osu!droid team"
-                android:textColor="@color/textSecondary" />
-
-            <TextView
-                style="@style/text"
-                android:text="re-designed by Reco1l"
+                android:text="@string/team_text"
                 android:textColor="@color/textSecondary" />
 
             <TextView

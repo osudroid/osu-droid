@@ -2,6 +2,9 @@
 <resources>
 
 	<!--New UI-->
+	<string name="game_name">rimu!</string>
+	<string name="team_text">by rimu! team</string>
+
 	<string name="splash_screen_debug_build">This is a <font color='#FFFFFF'>debug</font> build, online features are not available!</string>
 	<string name="splash_screen_pre_release_build">This is a <font color='#FFFFFF'>pre release</font> build, this build contains experimental features.</string>
 
