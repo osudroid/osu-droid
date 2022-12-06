@@ -31,7 +31,7 @@ def getReleaseVersionCode() {
 
 def getReleaseVersionName() {
     def baseline = '1.7.0'
-    def versionName = baseline + new Date().format('(yyMMdd)')
+    def versionName = baseline + '.' + new Date().format('yyMMdd')
     println('versionName: ' + versionName)
     return versionName
 }
@@ -146,8 +146,7 @@ android {
 
     android.applicationVariants.all { variant ->
         variant.outputs.all { output ->
-            def releaseTime = new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
-            def fileName = "rimu!-${defaultConfig.versionName}-${variant.buildType.name}-${releaseTime}.apk"
+            def fileName = "rimu!-${defaultConfig.versionName}-${variant.buildType.name}.apk"
             outputFileName = fileName
         }
     }
