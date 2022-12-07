@@ -10,7 +10,6 @@ import android.view.View;
 import androidx.cardview.widget.CardView;
 
 import com.edlplan.framework.easing.Easing;
-import com.edlplan.ui.TriangleEffectView;
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.platform.UIFragment;
@@ -20,6 +19,7 @@ import com.reco1l.utils.Resources;
 import com.reco1l.UI;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.listeners.TouchListener;
+import com.reco1l.view.LogoView;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
@@ -31,21 +31,11 @@ public class MainMenu extends UIFragment {
 
     public static MainMenu instance;
 
-    private CardView logo, buttons;
-    private View logoEffect, single, multi;
-
-    private TriangleEffectView triangles1, triangles2;
-
-    private Animation
-            logoEffectIn,
-            logoEffectOut,
-            triangleSpeedIn,
-            triangleSpeedOut;
-
-    private Animation.UpdateListener logoUpdateListener;
+    private LogoView logo;
+    private CardView buttons;
+    private View single, multi;
 
     private boolean
-            isKiai = false,
             isMenuShowing = false,
             isMenuAnimInProgress = false;
 
@@ -80,23 +70,12 @@ public class MainMenu extends UIFragment {
         logo = find("logo");
         single = find("solo");
         multi = find("multi");
-        logoEffect = find("logoRect");
         buttons = find("buttonsLayout");
-        triangles1 = find("triangles1");
-        triangles2 = find("triangles2");
 
-        loadAnimations();
-
-        triangles1.setTriangleColor(Resources.color(R.color.mainMenuTriangles1));
-        triangles2.setTriangleColor(Resources.color(R.color.mainMenuTriangles2));
-
-        logoEffect.setAlpha(0);
         single.setAlpha(0);
         multi.setAlpha(0);
 
-        int logoSize = Resources.dimen(R.dimen.mainMenuLogoSize);
-
-        ViewUtils.size(logo, logoSize);
+        ViewUtils.size(logo, Resources.dimen(R.dimen.mainMenuLogoSize));
         ViewUtils.width(buttons, 0);
 
         bindTouchListener(logo, new TouchListener() {
@@ -139,33 +118,6 @@ public class MainMenu extends UIFragment {
         });
     }
 
-    private void loadAnimations() {
-        // Logo
-        logoEffectIn = Animation.of(logoEffect).toAlpha(0.2f);
-        logoEffectOut = Animation.of(logoEffect).toAlpha(0);
-
-        // Triangles
-        Animation.UpdateListener onUpdate = value -> {
-            float speed = (float) value;
-
-            if (isKiai) {
-                speed *= 2f;
-            }
-            triangles1.setTriangleSpeed(speed);
-            triangles2.setTriangleSpeed(speed);
-        };
-
-        triangleSpeedIn = Animation.ofFloat(1f, 8f).runOnUpdate(onUpdate);
-        triangleSpeedOut = Animation.ofFloat(8f, 1f).runOnUpdate(onUpdate);
-
-        logoUpdateListener = value -> {
-            int size = (int) value;
-
-            ViewUtils.size(logo, size);
-            logo.setRadius(size / 2f);
-        };
-    }
-
     //--------------------------------------------------------------------------------------------//
 
     private void showMenu() {
@@ -175,8 +127,8 @@ public class MainMenu extends UIFragment {
 
             UI.topBar.show();
 
-            Animation.ofInt(logo.getWidth(), Resources.dimen(R.dimen.mainMenuSmallLogoSize))
-                    .runOnUpdate(logoUpdateListener)
+            Animation.of(logo)
+                    .toSize(Resources.dimen(R.dimen.mainMenuSmallLogoSize))
                     .interpolator(Easing.InOutQuad)
                     .play(300);
 
@@ -202,8 +154,8 @@ public class MainMenu extends UIFragment {
                 UI.topBar.close();
             }
 
-            Animation.ofInt(logo.getWidth(), Resources.dimen(R.dimen.mainMenuLogoSize))
-                    .runOnUpdate(logoUpdateListener)
+            Animation.of(logo)
+                    .toSize(Resources.dimen(R.dimen.mainMenuLogoSize))
                     .interpolator(Easing.InOutQuad)
                     .play(300);
 
@@ -274,43 +226,24 @@ public class MainMenu extends UIFragment {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void setLogoKiai(boolean bool) {
-        this.isKiai = bool;
+    public void setKiai(boolean bool) {
+        if (logo != null) {
+            logo.setKiai(bool);
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public void onBeatUpdate(float beatLength) {
-        if (!isShowing) {
-            return;
-        }
-
-        long in = (long) (beatLength * 0.07f);
-        long out = (long) (beatLength * 0.9f);
-
-        if (Game.musicManager.isPlaying()) {
-            if (isKiai) {
-                logoEffectOut.duration(out);
-                logoEffectIn.runOnEnd(logoEffectOut::play).play(in);
-            }
-        }
-
-        if (triangleSpeedOut != null && triangleSpeedIn != null) {
-            triangleSpeedOut.delay(in).play(out);
-            triangleSpeedIn.play(in);
+        if (isShowing && logo != null) {
+            logo.onBeatUpdate(beatLength);
         }
     }
 
     @Override
     protected void onUpdate(float secondsElapsed) {
-
-        float level = Game.songService.getLevel();
-        float peak = Math.max(0.9f, 0.9f + level);
-
-        UI.debugOverlay.logo_scale = peak;
-
-        if (Game.musicManager.isPlaying()) {
-            ViewUtils.scale(logo, peak);
+        if (logo != null) {
+            logo.setPeak(Game.songService.getLevel());
         }
 
         if (isMenuShowing) {

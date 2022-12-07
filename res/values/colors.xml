@@ -57,11 +57,6 @@
     <color name="notificationBackground">#353535</color>
     <color name="notificationDrawableBackground">#1F000000</color>
 
-    <!--Main Menu-->
-    <color name="mainMenuLogoBackground">#E967A1</color>
-    <color name="mainMenuTriangles1">#FE7CB6</color>
-    <color name="mainMenuTriangles2">#E05D97</color>
-
     <!--Buttons-->
     <color name="buttonBackground">#2E2E2E</color>
 
@@ -82,5 +77,7 @@
     <!--Game Results-->
     <color name="gameResultsCardColor">#33000000</color>
     <color name="gameResultsBadgeBackground">#1A000000</color>
+
+    <color name="colorTest">#FF292929</color>
 
 </resources>

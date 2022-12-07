@@ -41,7 +41,6 @@ public class ExpandEffectView extends View {
     }
 
     private void init() {
-        //setWillNotDraw(false);
         setLayerType(LAYER_TYPE_HARDWARE, null);
 
         backPaint = new Paint();

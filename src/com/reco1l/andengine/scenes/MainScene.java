@@ -39,13 +39,13 @@ public class MainScene extends BaseScene {
         timingWrapper.setObserver(new TimingWrapper.Observer() {
             @Override
             public void onKiaiStart() {
-                UI.mainMenu.setLogoKiai(true);
+                UI.mainMenu.setKiai(true);
                 UI.background.setKiai(true);
             }
 
             @Override
             public void onKiaiEnd() {
-                UI.mainMenu.setLogoKiai(false);
+                UI.mainMenu.setKiai(false);
                 UI.background.setKiai(false);
             }
 

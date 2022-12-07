@@ -121,15 +121,12 @@
 
     <!--Main menu-->
     <dimen name="mainMenuButtonSize">@dimen/_130sdp</dimen>
-    <dimen name="mainMenuButtonElevation">8dp</dimen>
     <dimen name="mainMenuButtonShapeRadius">@dimen/_65sdp</dimen>
     <dimen name="mainMenuButtonMargin">@dimen/_80sdp</dimen>
     <dimen name="mainMenuButtonLayoutWidth">@dimen/_440sdp</dimen>
 
-    <dimen name="mainMenuLogoCornerRadius">@dimen/_125sdp</dimen>
     <dimen name="mainMenuSmallLogoSize">@dimen/_160sdp</dimen>
     <dimen name="mainMenuLogoSize">@dimen/_250sdp</dimen>
-    <dimen name="mainMenuLogoElevation">@dimen/_20sdp</dimen>
 
     <!--User panel-->
     <dimen name="userPanelAvatarSize">@dimen/_36sdp</dimen>

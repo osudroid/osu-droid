@@ -4,13 +4,16 @@ package com.reco1l.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
 
 import androidx.annotation.ColorRes;
 import androidx.annotation.DimenRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
+import androidx.core.content.res.ResourcesCompat;
 
 import com.reco1l.Game;
 
@@ -40,7 +43,7 @@ public class Resources {
         return (int) Game.activity.getResources().getDimension(id);
     }
 
-    public static float sdp(int dp) {
+    public static int sdp(int dp) {
         if (dp == 0)
             return 0;
 
@@ -54,7 +57,7 @@ public class Resources {
                         break;
                     count -= dimen(R.dimen._1sdp);
                 }
-                return count;
+                return (int) count;
             }
             id = id("_minus" + dp + "sdp", "dimen");
         } else {
@@ -63,7 +66,7 @@ public class Resources {
             }
             id = id("_" + dp + "sdp", "dimen");
         }
-        return Game.activity.getResources().getDimension(id);
+        return (int) Game.activity.getResources().getDimension(id);
     }
 
     //--------------------------------------------------------------------------------------------//
