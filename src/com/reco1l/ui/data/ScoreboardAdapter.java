@@ -106,7 +106,7 @@ public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.V
                 avatar.setImageDrawable(onlineHelper.getAvatarFromURL(AVATAR_URL + data.avatar, data.name));
             }
 
-            mark.setImageBitmap(bitmapManager.get("ranking-" + data.mark + "-small"));
+            mark.setImageBitmap(bitmapManager.get("ranking-" + data.mark));
 
             // Loading mods icons
             for (GameMod mod : data.getMods()) {

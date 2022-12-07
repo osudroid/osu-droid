@@ -153,7 +153,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
             String markTex = Game.scoreLibrary.getBestMark(track.getFilename());
 
             if (markTex != null) {
-                mark.setImageBitmap(Game.bitmapManager.get("ranking-" + markTex + "-small"));
+                mark.setImageBitmap(Game.bitmapManager.get("ranking-" + markTex));
                 mark.setVisibility(View.VISIBLE);
             }
 
