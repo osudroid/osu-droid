@@ -8,6 +8,7 @@ import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.enums.Screens;
 import com.reco1l.andengine.BaseScene;
+import com.reco1l.game.TimingWrapper;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Resources;
 import com.reco1l.view.BarButton;
@@ -32,9 +33,29 @@ public class SelectorScene extends BaseScene {
 
     @Override
     protected void onCreate() {
-        setTimingWrapper(false);
+        setTimingWrapper(true);
         setContinuousPlay(false);
         setBackgroundAutoChange(false);
+
+        timingWrapper.setObserver(new TimingWrapper.Observer() {
+            @Override
+            public void onKiaiStart() {
+                UI.beatmapCarrousel.setKiai(true);
+                UI.background.setKiai(true);
+            }
+
+            @Override
+            public void onKiaiEnd() {
+                UI.beatmapCarrousel.setKiai(false);
+                UI.background.setKiai(false);
+            }
+
+            @Override
+            public void onBeatUpdate(float BPMLength, int beat) {
+                UI.beatmapCarrousel.onBeatUpdate(BPMLength);
+                UI.background.onBeatUpdate(BPMLength, beat);
+            }
+        });
 
         bindDataBaseChangedListener();
         setTouchAreaBindingEnabled(true);
@@ -149,6 +170,7 @@ public class SelectorScene extends BaseScene {
             UI.beatmapCarrousel.selectedTrack = null;
         }
     }
+
 
     //--------------------------------------------------------------------------------------------//
 

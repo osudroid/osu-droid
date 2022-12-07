@@ -242,10 +242,6 @@ public class MainMenu extends UIFragment {
 
     @Override
     protected void onUpdate(float secondsElapsed) {
-        if (logo != null) {
-            logo.setPeak(Game.songService.getLevel());
-        }
-
         if (isMenuShowing) {
             if (showPassTime > 10000f) {
                 hideMenu(false);

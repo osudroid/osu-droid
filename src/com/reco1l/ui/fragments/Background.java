@@ -112,6 +112,11 @@ public class Background extends UIFragment {
         }
     }
 
+    @Override
+    protected void onScreenChange(Screens lastScreen, Screens newScreen) {
+        setEffects(newScreen == Screens.Main);
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     public void setKiai(boolean bool) {

@@ -14,6 +14,9 @@ import com.reco1l.ui.data.BeatmapListAdapter;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.AnimationOld;
 import com.reco1l.utils.AsyncExec;
+import com.reco1l.utils.Resources;
+import com.reco1l.utils.ViewUtils;
+import com.reco1l.view.LogoView;
 
 import java.util.ArrayList;
 
@@ -34,6 +37,8 @@ public class BeatmapCarrousel extends UIFragment {
 
     private BaseViewHolder currentHolder;
     private RecyclerView recyclerView;
+
+    private LogoView logo;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -70,6 +75,12 @@ public class BeatmapCarrousel extends UIFragment {
     @Override
     protected void onLoad() {
         recyclerView = find("recycler");
+        logo = find("logo");
+
+        ViewUtils.margins(logo)
+                .bottom(-Resources.sdp(42))
+                .right(-Resources.sdp(22));
+
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(adapter);
 
@@ -114,6 +125,22 @@ public class BeatmapCarrousel extends UIFragment {
             }
         }
     }
+
+    public void onBeatUpdate(float beatLength) {
+        if (isShowing && logo != null) {
+            logo.onBeatUpdate(beatLength);
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public void setKiai(boolean bool) {
+        if (logo != null) {
+            logo.setKiai(bool);
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------//
 
     public float computeTranslationX(View view) {
         int oy = (int) ((screenHeight - view.getHeight()) * 1f / 2);

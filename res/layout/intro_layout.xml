@@ -33,17 +33,7 @@
         android:layout_width="@dimen/splashScreenLogoSize"
         android:layout_height="@dimen/splashScreenLogoSize"
         android:layout_centerInParent="true"
-        android:src="@drawable/logo_overlay" />
-
-    <TextView
-        style="@style/text"
-        android:id="@+id/ss_buildText"
-        android:layout_below="@id/ss_logo"
-        android:layout_marginTop="@dimen/XS"
-        android:padding="@dimen/S"
-        android:layout_centerHorizontal="true"
-        android:text="[build information]"
-        android:textColor="@color/textSecondary" />
+        android:src="@drawable/logo_brand" />
 
     <LinearLayout
         android:id="@+id/ss_bottom"

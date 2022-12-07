@@ -15,7 +15,6 @@ import com.reco1l.utils.Animation;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.Resources;
 
-import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class IntroScene extends BaseScene {
@@ -49,16 +48,13 @@ public class IntroScene extends BaseScene {
 
         private TextView
                 percentText,
-                loadingText,
-                buildText;
+                loadingText;
 
         private TriangleEffectView
                 trianglesBottom,
                 trianglesTop;
 
         private CircularProgressIndicator progressIndicator;
-
-        private Runnable post;
 
         //----------------------------------------------------------------------------------------//
 
@@ -74,8 +70,6 @@ public class IntroScene extends BaseScene {
 
         //----------------------------------------------------------------------------------------//
 
-
-
         @Override
         protected void onLoad() {
             setDismissMode(false, false);
@@ -83,7 +77,6 @@ public class IntroScene extends BaseScene {
             Game.resources.loadSound("welcome_piano", "sfx/welcome_piano.ogg", false);
 
             logo = find("logo");
-            buildText = find("buildText");
             background = find("background");
 
             progressIndicator = find("progress");
@@ -120,34 +113,6 @@ public class IntroScene extends BaseScene {
                     .toAlpha(1)
                     .delay(1000)
                     .play(300);
-
-            //noinspection ConstantConditions
-            if (BuildConfig.DEBUG || BuildConfig.BUILD_TYPE.equals("pre_release")) {
-
-                //noinspection ConstantConditions
-                if (BuildConfig.DEBUG) {
-                    buildText.setText(R.string.splash_screen_debug_build);
-                } else {
-                    buildText.setText(R.string.splash_screen_pre_release_build);
-                }
-
-                post = () -> Animation.of(buildText)
-                        .toY(-20)
-                        .toAlpha(0)
-                        .play(300);
-
-                Animation.of(buildText)
-                        .fromY(20)
-                        .toY(0)
-                        .fromAlpha(0)
-                        .toAlpha(1)
-                        .delay(1000)
-                        .play(500);
-
-                buildText.postDelayed(post, 5000);
-            } else {
-                buildText.setVisibility(View.GONE);
-            }
         }
 
         //--------------------------------------------------------------------------------------------//
@@ -167,15 +132,6 @@ public class IntroScene extends BaseScene {
             Animation.of(loadingLayout)
                     .toAlpha(0)
                     .play(300);
-
-            if (buildText.getAlpha() == 1) {
-                buildText.removeCallbacks(post);
-                buildText.animate().cancel();
-
-                if (post != null) {
-                    post.run();
-                }
-            }
 
             Animation.of(trianglesBottom, trianglesTop)
                     .toScale(1.2f)

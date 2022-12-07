@@ -4,20 +4,17 @@ package com.reco1l.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.VectorDrawable;
+import android.util.Log;
 
 import androidx.annotation.ColorRes;
 import androidx.annotation.DimenRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
-import androidx.core.content.res.ResourcesCompat;
+import androidx.core.math.MathUtils;
 
 import com.reco1l.Game;
-
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class Resources {
 
@@ -44,29 +41,12 @@ public class Resources {
     }
 
     public static int sdp(int dp) {
-        if (dp == 0)
+        if (dp <= 0) {
             return 0;
-
-        int id;
-        if (dp < 0) {
-            if (dp < -60) { // This because Scalable DP doesn't support negative values less than -60
-                float count = dimen(R.dimen._minus60sdp);
-
-                for (int i = -60; i >= dp; i--) {
-                    if (i < -600)
-                        break;
-                    count -= dimen(R.dimen._1sdp);
-                }
-                return (int) count;
-            }
-            id = id("_minus" + dp + "sdp", "dimen");
-        } else {
-            if (dp > 600) {
-                return dimen(R.dimen._600sdp); // This because Scalable DP doesn't support values greater than 600
-            }
-            id = id("_" + dp + "sdp", "dimen");
         }
-        return (int) Game.activity.getResources().getDimension(id);
+        String id = "_" + dp + "sdp";
+
+        return (int) Game.activity.getResources().getDimension(id(id, "dimen"));
     }
 
     //--------------------------------------------------------------------------------------------//

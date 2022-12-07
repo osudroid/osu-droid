@@ -89,7 +89,7 @@
     <dimen name="songSeekBarHorizontalPadding">@dimen/_12sdp</dimen>
 
     <!--Splash Screen-->
-    <dimen name="splashScreenLogoSize">@dimen/_48sdp</dimen>
+    <dimen name="splashScreenLogoSize">@dimen/_80sdp</dimen>
 
     <!--Music Player-->
     <dimen name="musicPlayerSongShapeHeight">@dimen/_44sdp</dimen>
@@ -168,6 +168,8 @@
     <dimen name="beatmapListChildItemHeight">@dimen/_42sdp</dimen>
     <dimen name="beatmapListTrackLeftMargin">@dimen/_50sdp</dimen>
     <dimen name="beatmapListTrackMarkSize">@dimen/_20sdp</dimen>
+
+    <dimen name="beatmapListLogoSize">@dimen/_120sdp</dimen>
 
     <!--Game Results-->
     <dimen name="gameResultsCardWidth">@dimen/_350sdp</dimen>

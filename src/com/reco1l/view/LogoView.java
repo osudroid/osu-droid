@@ -4,6 +4,7 @@ package com.reco1l.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -15,7 +16,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 
-import com.edlplan.framework.easing.Easing;
 import com.reco1l.Game;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Animation.UpdateListener;
@@ -55,12 +55,16 @@ public class LogoView extends CardView {
 
     private void init(Context context) {
         setCardBackgroundColor(0xFF1E1E1E);
-        setCardElevation(Resources.sdp(20));
+        if (!isInEditMode()) {
+            setCardElevation(Resources.sdp(20));
+        }
 
         ViewGroup.LayoutParams params = ViewUtils.match_parent();
 
         stripsEffect = new StripsEffectView(context);
-        stripsEffect.setStripWidth(Resources.sdp(20));
+        if (!isInEditMode()) {
+            stripsEffect.setStripWidth(Resources.sdp(20));
+        }
         stripsEffect.setRotation(30);
 
         highlight = new View(context);
@@ -84,7 +88,7 @@ public class LogoView extends CardView {
     }
 
     private void createAnimations() {
-        lightIn = Animation.of(highlight).toAlpha(0.2f);
+        lightIn = Animation.of(highlight).toAlpha(0.1f);
         lightOut = Animation.of(highlight).toAlpha(0);
 
         UpdateListener onUpdate = value -> {
@@ -109,6 +113,10 @@ public class LogoView extends CardView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         setRadius(canvas.getHeight() / 2f);
+        if (!isInEditMode()) {
+            updatePeak();
+            invalidate();
+        }
     }
 
     public void onBeatUpdate(float beatLength) {
@@ -136,21 +144,21 @@ public class LogoView extends CardView {
         speedIn.play(in);
     }
 
+    private void updatePeak() {
+        if (!Game.musicManager.isPlaying()) {
+            return;
+        }
+        float level = Game.songService.getLevel();
+
+        float peak = Math.max(0.9f, 0.9f + level);
+        setScaleX(peak);
+        setScaleY(peak);
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     public void setKiai(boolean isKiai) {
         this.isKiai = isKiai;
         this.stripsEffect.setSpawnTime(isKiai ? 300 : 600);
-    }
-
-    public void setPeak(float level) {
-        if (!Game.musicManager.isPlaying()) {
-            return;
-        }
-
-        float peak = Math.max(0.9f, 0.9f + level);
-
-        setScaleX(peak);
-        setScaleY(peak);
     }
 }
