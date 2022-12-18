@@ -22,7 +22,16 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class SelectorScene extends BaseScene {
 
+    private static SelectorScene instance;
+
     //--------------------------------------------------------------------------------------------//
+
+    public static SelectorScene getInstance() {
+        if (instance == null) {
+            instance = new SelectorScene();
+        }
+        return instance;
+    }
 
     @Override
     public Screens getIdentifier() {
@@ -33,29 +42,8 @@ public class SelectorScene extends BaseScene {
 
     @Override
     protected void onCreate() {
-        setTimingWrapper(true);
         setContinuousPlay(false);
         setBackgroundAutoChange(false);
-
-        timingWrapper.setObserver(new TimingWrapper.Observer() {
-            @Override
-            public void onKiaiStart() {
-                UI.beatmapCarrousel.setKiai(true);
-                UI.background.setKiai(true);
-            }
-
-            @Override
-            public void onKiaiEnd() {
-                UI.beatmapCarrousel.setKiai(false);
-                UI.background.setKiai(false);
-            }
-
-            @Override
-            public void onBeatUpdate(float BPMLength, int beat) {
-                UI.beatmapCarrousel.onBeatUpdate(BPMLength);
-                UI.background.onBeatUpdate(BPMLength, beat);
-            }
-        });
 
         bindDataBaseChangedListener();
         setTouchAreaBindingEnabled(true);

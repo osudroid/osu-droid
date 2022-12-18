@@ -20,11 +20,20 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class SummaryScene extends BaseScene {
 
+    public static SummaryScene instance;
+
     public StatisticV2 replayStats;
 
     public int replayID = -1;
 
     //--------------------------------------------------------------------------------------------//
+
+    public static SummaryScene getInstance() {
+        if (instance == null) {
+            instance = new SummaryScene();
+        }
+        return instance;
+    }
 
     @Override
     public Screens getIdentifier() {
@@ -35,7 +44,6 @@ public class SummaryScene extends BaseScene {
 
     @Override
     protected void onCreate() {
-        setTimingWrapper(false);
         setContinuousPlay(false);
 
         createTopBarButtons();

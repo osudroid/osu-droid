@@ -126,20 +126,6 @@ public class BeatmapCarrousel extends UIFragment {
         }
     }
 
-    public void onBeatUpdate(float beatLength) {
-        if (isShowing && logo != null) {
-            logo.onBeatUpdate(beatLength);
-        }
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public void setKiai(boolean bool) {
-        if (logo != null) {
-            logo.setKiai(bool);
-        }
-    }
-
     //--------------------------------------------------------------------------------------------//
 
     public float computeTranslationX(View view) {

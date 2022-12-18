@@ -7,13 +7,10 @@ import static com.reco1l.enums.MusicOption.*;
 import android.util.Log;
 
 import com.reco1l.Game;
-import com.reco1l.enums.Screens;
-import com.reco1l.andengine.ISceneHandler;
 import com.reco1l.interfaces.IMusicObserver;
 import com.reco1l.enums.MusicOption;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
@@ -24,14 +21,14 @@ public final class MusicManager {
 
     private static MusicManager instance;
 
-    private final Map<Screens, IMusicObserver> observers;
+    private final ArrayList<IMusicObserver> observers;
 
     private BeatmapInfo beatmap;
 
     //--------------------------------------------------------------------------------------------//
 
     public MusicManager() {
-        this.observers = new HashMap<>();
+        this.observers = new ArrayList<>();
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -76,37 +73,59 @@ public final class MusicManager {
         return Game.songService;
     }
 
-    public IMusicObserver getCurrentObserver() {
-        return observers.get(Game.engine.currentScreen);
-    }
-
     public BeatmapInfo getBeatmap() {
         return beatmap;
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void bindMusicObserver(ISceneHandler handledScene, IMusicObserver observer) {
-        this.observers.put(handledScene.getIdentifier(), observer);
+    public void bindMusicObserver(IMusicObserver observer) {
+        observers.add(observer);
     }
 
-    private void notifyControl(MusicOption option) {
+    //--------------------------------------------------------------------------------------------//
+
+    private void notifyControlRequest(MusicOption option) {
         Log.i("MusicManager", "Option " + option.name() + " was received");
-        if (getCurrentObserver() != null) {
-            getCurrentObserver().onMusicControlRequest(option, getState());
-        }
+        observers.forEach(observer -> {
+            if (isValidObserver(observer)) {
+                observer.onMusicControlRequest(option, getState());
+            }
+        });
     }
 
     private void notifyStateChange(MusicOption option) {
-        if (getCurrentObserver() != null) {
-            getCurrentObserver().onMusicControlChanged(option, getState());
-        }
+        observers.forEach(observer -> {
+            if (isValidObserver(observer)) {
+                observer.onMusicStateChange(option, getState());
+            }
+        });
     }
 
     private void notifyMusicChange(BeatmapInfo newBeatmap) {
-        if (getCurrentObserver() != null) {
-            getCurrentObserver().onMusicChange(newBeatmap);
+        observers.forEach(observer -> {
+            if (isValidObserver(observer)) {
+                observer.onMusicChange(newBeatmap);
+            }
+        });
+    }
+
+    public void onMusicEnd() {
+        observers.forEach(observer -> {
+            if (isValidObserver(observer)) {
+                observer.onMusicEnd();
+            }
+        });
+    }
+
+    private boolean isValidObserver(IMusicObserver observer) {
+        if (observer != null) {
+            if (observer.getAttachedScreen() != null) {
+                return observer.getAttachedScreen() == Game.engine.currentScreen;
+            }
+            return true;
         }
+        return false;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -131,7 +150,7 @@ public final class MusicManager {
         if (isInvalidRequest(Status.PAUSED, Status.STOPPED))
             return;
 
-        notifyControl(PLAY);
+        notifyControlRequest(PLAY);
 
         boolean wasMusicChanged = false;
         if (beatmap != null && getState() == Status.STOPPED) {
@@ -151,7 +170,7 @@ public final class MusicManager {
         if (isInvalidRequest(Status.PLAYING))
             return;
 
-        notifyControl(PAUSE);
+        notifyControlRequest(PAUSE);
         getService().pause();
         notifyStateChange(PAUSE);
     }
@@ -160,7 +179,7 @@ public final class MusicManager {
         if (isInvalidRequest(Status.PLAYING, Status.PAUSED))
             return;
 
-        notifyControl(STOP);
+        notifyControlRequest(STOP);
         getService().stop();
         notifyStateChange(STOP);
     }
@@ -169,7 +188,7 @@ public final class MusicManager {
         if (isInvalidRequest())
             return;
 
-        notifyControl(PREVIOUS);
+        notifyControlRequest(PREVIOUS);
         if (getState() == Status.PLAYING || getState() == Status.PAUSED) {
             getService().stop();
         }
@@ -185,7 +204,7 @@ public final class MusicManager {
         if (isInvalidRequest())
             return;
 
-        notifyControl(NEXT);
+        notifyControlRequest(NEXT);
         if (getState() == Status.PLAYING || getState() == Status.PAUSED) {
             getService().stop();
         }
@@ -201,17 +220,12 @@ public final class MusicManager {
         if (isInvalidRequest(Status.PLAYING))
             return;
 
-        if (getCurrentObserver() != null) {
-            getCurrentObserver().onMusicSync(getState());
+        for (int i = 0; i < observers.size(); ++i) {
+            observers.get(i).onMusicSync(getState());
         }
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void onMusicEnd() {
-        if (getCurrentObserver() != null) {
-            getCurrentObserver().onMusicEnd();
-        }
-    }
 
 }

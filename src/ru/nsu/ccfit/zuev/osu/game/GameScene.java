@@ -61,6 +61,7 @@ import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
+import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osu.OSUParser;
 import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.RGBAColor;
@@ -100,6 +101,9 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class GameScene implements IUpdateHandler, GameObjectListener,
         IOnSceneTouchListener {
+
+    public static GameScene instance;
+
     public static final int CursorCount = 10;
     private final Engine engine;
     private final Cursor[] cursors = new Cursor[CursorCount];
@@ -197,6 +201,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         scene.attachChild(mgScene);
         scene.attachChild(fgScene);
     }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public static GameScene getInstance() {
+        if (instance == null) {
+            instance = new GameScene(GlobalManager.getInstance().getEngine());
+        }
+        return instance;
+    }
+
+    //--------------------------------------------------------------------------------------------//
 
     public void setScoringScene(final SummaryScene sc) {
         summaryScene = sc;

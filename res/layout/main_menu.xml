@@ -72,6 +72,7 @@
         android:id="@+id/mainM_logo"
         android:layout_width="@dimen/mainMenuLogoSize"
         android:layout_height="@dimen/mainMenuLogoSize"
+        android:elevation="@dimen/M"
         android:layout_centerInParent="true"/>
 
    <!-- <com.reco1l.view.ExpandEffectView

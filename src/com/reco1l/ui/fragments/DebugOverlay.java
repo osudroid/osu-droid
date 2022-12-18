@@ -4,6 +4,7 @@ import android.widget.TextView;
 
 import com.reco1l.Game;
 import com.reco1l.andengine.BaseScene;
+import com.reco1l.enums.Screens;
 import com.reco1l.ui.platform.UIFragment;
 
 import java.text.DecimalFormat;
@@ -14,8 +15,6 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class DebugOverlay extends UIFragment {
 
     public static DebugOverlay instance;
-
-    public float logo_scale = 0;
 
     private TextView text;
     private final DecimalFormat df = new DecimalFormat("#.###");
@@ -44,20 +43,9 @@ public class DebugOverlay extends UIFragment {
         if (text == null)
             return;
 
-        short beat = 0;
-
-        if(Game.engine.getScene() instanceof BaseScene) {
-            BaseScene scene = (BaseScene) Game.engine.getScene();
-
-            if (scene.timingWrapper != null) {
-                beat = (short) scene.timingWrapper.beat;
-            }
-        }
-
         String string =
                 Game.activity.getRenderer() + "\n" +
-                "logo_scale: " + df.format(logo_scale) + "\n" +
-                "current_beat: " + beat;
+                "current_beat: " + Game.timingWrapper.getBeat();
 
         text.setText(string);
     }

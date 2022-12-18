@@ -16,33 +16,45 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import com.reco1l.Game;
 import com.reco1l.utils.Animation;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 
-public class SidesEffectView extends View {
+public class FlashEffectView extends View implements BaseView {
 
     private Animation fadeUp, fadeDown;
 
     private Paint leftPaint, rightPaint;
 
     private boolean
-            isKiai = false,
+            isEnabled = true,
             drawLeft = true,
             drawRight = true;
 
     private int
             color,
             cursor;
+
     //--------------------------------------------------------------------------------------------//
 
-    public SidesEffectView(Context context) {
+    public FlashEffectView(Context context) {
         super(context);
         init();
     }
 
-    public SidesEffectView(Context context, @Nullable AttributeSet attrs) {
+    public FlashEffectView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        init();
+    }
+
+    public FlashEffectView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init();
+    }
+
+    public FlashEffectView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
 
@@ -57,8 +69,8 @@ public class SidesEffectView extends View {
         leftPaint.setColor(color);
         rightPaint.setColor(color);
 
-        leftPaint.setDither(true);
-        rightPaint.setDither(true);
+        leftPaint.setDither(Config.isUseDither());
+        rightPaint.setDither(Config.isUseDither());
 
         if (Build.VERSION.SDK_INT >= 29) {
             leftPaint.setBlendMode(BlendMode.SCREEN);
@@ -70,11 +82,8 @@ public class SidesEffectView extends View {
             leftPaint.setAlpha((int) value);
         };
 
-        fadeUp = Animation.ofInt(0, 255)
-                .runOnUpdate(listener);
-
-        fadeDown = Animation.ofInt(255, 0)
-                .runOnUpdate(listener);
+        fadeUp = Animation.ofInt(0, 255).runOnUpdate(listener);
+        fadeDown = Animation.ofInt(255, 0).runOnUpdate(listener);
     }
 
     private void drawShaders(int color) {
@@ -88,11 +97,12 @@ public class SidesEffectView extends View {
         rightPaint.setShader(rShader);
     }
 
-    //--------------------------------------------------------------------------------------------//
-
-    public void setKiai(boolean isKiai) {
-        this.isKiai = isKiai;
+    @Override
+    protected void onSizeChanged(int w, int h, int oldW, int oldH) {
+        drawShaders(color);
     }
+
+    //--------------------------------------------------------------------------------------------//
 
     public void setPaintColor(int color) {
         this.color = color;
@@ -107,16 +117,13 @@ public class SidesEffectView extends View {
 
     //--------------------------------------------------------------------------------------------//
 
+    public void onBeatUpdate() {
+        float beatLength = Game.timingWrapper.getBeatLength();
 
-    @Override
-    protected void onSizeChanged(int w, int h, int oldW, int oldH) {
-        drawShaders(color);
-    }
-
-    public void onBeatUpdate(float beatLength, int beat) {
         long upTime = (long) (beatLength * 0.07f);
         long downTime = (long) (beatLength * 0.9f);
 
+        boolean isKiai = Game.timingWrapper.isKiai();
         if (!isKiai) {
             downTime *= 1.4f;
         }
@@ -128,21 +135,28 @@ public class SidesEffectView extends View {
                         drawLeft = cursor == 0;
                         drawRight = cursor == 1;
                     } else {
+                        short beat = Game.timingWrapper.getBeat();
+
                         drawLeft = beat == 0;
                         drawRight = beat == 0;
                     }
                 })
                 .play(upTime);
 
-        fadeDown.delay(upTime)
-                .play(downTime);
+        fadeDown.delay(upTime).play(downTime);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (!Config.isUIAdvancedEffects()) {
+        if (!isEnabled)
             return;
+
+        if (!isInEditMode()) {
+            if (Game.timingWrapper.isNextBeat()) {
+                onBeatUpdate();
+            }
         }
+
         int width = canvas.getWidth();
         int height = canvas.getHeight();
 
@@ -156,5 +170,10 @@ public class SidesEffectView extends View {
         }
 
         super.onDraw(canvas);
+        invalidate();
+    }
+
+    public void setEnabled(boolean bool) {
+        isEnabled = bool;
     }
 }

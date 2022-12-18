@@ -3,19 +3,31 @@ package com.reco1l.utils;
 // Created by Reco1l on 6/9/22 13:31
 
 import static android.view.ViewGroup.*;
+import static android.view.ViewGroup.LayoutParams.*;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.view.View;
+import android.widget.RelativeLayout;
 
 public class ViewUtils {
+
+    public static LayoutParams match_parent = match_parent();
+    public static LayoutParams wrap_content = wrap_content();
 
     //--------------------------------------------------------------------------------------------//
 
     public static LayoutParams match_parent() {
-        return new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        return new LayoutParams(MATCH_PARENT, MATCH_PARENT);
     }
 
     public static LayoutParams wrap_content() {
-        return new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        return new LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+    }
+
+    public static RelativeLayout.LayoutParams align(int align) {
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        params.addRule(align);
+        return params;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -34,6 +46,12 @@ public class ViewUtils {
         }
         view.setScaleX(scale);
         view.setScaleY(scale);
+    }
+
+    public static void size(View view, int width, int height) {
+        view.getLayoutParams().width = width;
+        view.getLayoutParams().height = height;
+        view.requestLayout();
     }
 
     public static void size(View view, int size) {

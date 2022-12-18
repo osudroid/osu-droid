@@ -6,14 +6,11 @@ import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.andengine.BaseScene;
 import com.reco1l.enums.Screens;
-import com.reco1l.game.TimingWrapper;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.data.DialogTable;
 import com.reco1l.utils.NotificationTable;
 import com.reco1l.utils.helpers.BeatmapHelper;
 
-import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
@@ -21,8 +18,16 @@ import ru.nsu.ccfit.zuev.osu.Config;
 
 public class MainScene extends BaseScene {
 
+    private static MainScene instance;
 
     //--------------------------------------------------------------------------------------------//
+
+    public static MainScene getInstance() {
+        if (instance == null) {
+            instance = new MainScene();
+        }
+        return instance;
+    }
 
     @Override
     public Screens getIdentifier() {
@@ -34,27 +39,6 @@ public class MainScene extends BaseScene {
     @Override
     protected void onCreate() {
         setContinuousPlay(true);
-        setTimingWrapper(true);
-
-        timingWrapper.setObserver(new TimingWrapper.Observer() {
-            @Override
-            public void onKiaiStart() {
-                UI.mainMenu.setKiai(true);
-                UI.background.setKiai(true);
-            }
-
-            @Override
-            public void onKiaiEnd() {
-                UI.mainMenu.setKiai(false);
-                UI.background.setKiai(false);
-            }
-
-            @Override
-            public void onBeatUpdate(float BPMLength, int beat) {
-                UI.mainMenu.onBeatUpdate(BPMLength);
-                UI.background.onBeatUpdate(BPMLength, beat);
-            }
-        });
 
         Game.library.loadLibraryCache(Game.activity, false);
 
@@ -70,9 +54,14 @@ public class MainScene extends BaseScene {
 
     }
 
+    //--------------------------------------------------------------------------------------------//
+
     @Override
     public void onMusicChange(BeatmapInfo beatmap) {
         super.onMusicChange(beatmap);
+
+        if (Game.engine.getScene() != this)
+            return;
 
         Game.activity.runOnUiThread(() -> {
             UI.musicPlayer.changeMusic(beatmap);
@@ -108,18 +97,13 @@ public class MainScene extends BaseScene {
     }
 
     public void onExit() {
-        Rectangle dim = new Rectangle(0, 0, screenWidth, screenHeight);
-        dim.setColor(0, 0, 0, 0f);
-        attachChild(dim, 2);
-
-        UI.mainMenu.onExit();
+        Game.musicManager.stop();
         Game.resources.getSound("seeya").play();
-        dim.registerEntityModifier(new AlphaModifier(3.0f, 0, 1));
+        UI.mainMenu.onExit();
     }
 
     @Override
     public void onSceneChange(Scene oldScene, Scene newScene) {
-        super.onSceneChange(oldScene, newScene);
         if (newScene == this) {
             UI.background.setBlur(false);
         }

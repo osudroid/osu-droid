@@ -18,8 +18,6 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.edlplan.framework.math.FMath;
-
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
@@ -28,24 +26,25 @@ import ru.nsu.ccfit.zuev.osu.Config;
 
 public class StripsDrawable extends Drawable {
 
-    private final LinkedList<Strip> strips;
-    private final Random random;
+    public int
+            spawnTime = 200,
+            limit = 60;
 
-    private long time = -1;
-
-    private int width, height, spawnClock;
-
-    private int spawnTime = 700;
-
-    private float
-            speed = 3f,
+    public float
+            speed = 9f,
             stripWidth = 80;
 
-    private int[] colors = {
+    public int[] colors = {
             0xFF292929,
             0xFF242424,
             0xFF1A1A1A,
     };
+
+    private final LinkedList<Strip> strips;
+    private final Random random;
+
+    private int width, height, spawnClock;
+    private long time = -1;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -59,26 +58,6 @@ public class StripsDrawable extends Drawable {
     public void reset() {
         time = -1;
         strips.clear();
-    }
-
-    public void setStripColors(int[] colors) {
-        if (colors != null && colors.length >= 1) {
-            this.colors = colors;
-            reset();
-        }
-    }
-
-    public void setStripWidth(float width) {
-        stripWidth = width;
-        reset();
-    }
-
-    public void setStripSpeed(float speed) {
-        this.speed = speed;
-    }
-
-    public void setSpawnTime(int spawnTime) {
-        this.spawnTime = Math.max(100, spawnTime);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -118,8 +97,11 @@ public class StripsDrawable extends Drawable {
 
         float radius = stripWidth / 2;
         for (Strip strip : strips) {
+            canvas.save();
+            canvas.rotate(30);
             canvas.drawRoundRect(strip.rectF, radius, radius, strip.backPaint);
             canvas.drawRoundRect(strip.rectF, radius, radius, strip.paint);
+            canvas.restore();
         }
     }
 
@@ -130,7 +112,7 @@ public class StripsDrawable extends Drawable {
     }
 
     private PointF nextPosition() {
-        return new PointF(width, random.nextInt(height));
+        return new PointF(width, random.nextInt(width + height + height / 3) - width);
     }
 
     private float nextLength() {
@@ -141,7 +123,6 @@ public class StripsDrawable extends Drawable {
 
     private Paint getPaint() {
         Paint paint = new Paint();
-
         paint.setDither(Config.isUseDither());
 
         if (Build.VERSION.SDK_INT >= 29) {
@@ -155,7 +136,7 @@ public class StripsDrawable extends Drawable {
     private void spawnNewStrips(int dt) {
         spawnClock += dt;
 
-        while (spawnClock > spawnTime) {
+        while (spawnClock > spawnTime && strips.size() < limit) {
             float length = nextLength();
 
             if (length < stripWidth) {
@@ -209,8 +190,7 @@ public class StripsDrawable extends Drawable {
             rectF.top = center.y + stripWidth / 2;
             rectF.bottom = center.y - stripWidth / 2;
 
-            center.x += length / 2;
-            update(0);
+            center.x += length;
         }
 
         //----------------------------------------------------------------------------------------//

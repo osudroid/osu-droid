@@ -226,20 +226,6 @@ public class MainMenu extends UIFragment {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void setKiai(boolean bool) {
-        if (logo != null) {
-            logo.setKiai(bool);
-        }
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public void onBeatUpdate(float beatLength) {
-        if (isShowing && logo != null) {
-            logo.onBeatUpdate(beatLength);
-        }
-    }
-
     @Override
     protected void onUpdate(float secondsElapsed) {
         if (isMenuShowing) {

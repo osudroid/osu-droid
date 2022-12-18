@@ -1,5 +1,6 @@
 package com.reco1l.interfaces;
 
+import com.reco1l.game.TimingWrapper;
 import com.reco1l.management.BitmapManager;
 import com.reco1l.GameEngine;
 import com.reco1l.management.MusicManager;
@@ -21,8 +22,10 @@ import ru.nsu.ccfit.zuev.skins.SkinManager;
 
 public interface IReferences {
 
+    // TODO Remove this, GlobalManager is useless now.
     GlobalManager global = GlobalManager.getInstance();
-    MainActivity activity = global.getMainActivity();
+
+    MainActivity activity = MainActivity.getInstance();
 
     ModMenu modMenu = ModMenu.getInstance();
     GameEngine engine = GameEngine.getInstance();
@@ -39,4 +42,5 @@ public interface IReferences {
     OnlineHelper onlineHelper = OnlineHelper.getInstance();
 
     MusicManager musicManager = MusicManager.getInstance();
+    TimingWrapper timingWrapper = TimingWrapper.getInstance();
 }

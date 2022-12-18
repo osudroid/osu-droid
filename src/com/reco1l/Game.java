@@ -14,6 +14,7 @@ import java.util.TimerTask;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
@@ -23,11 +24,11 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public final class Game implements IReferences {
 
-    public static MainScene mainScene = global.getMainScene();
-    public static SelectorScene selectorScene = global.getSongMenu();
-    public static GameScene gameScene = global.getGameScene();
-    public static SummaryScene summaryScene = global.getScoring();
-    public static LoaderScene loaderScene = global.getLoadingScene();
+    public static GameScene gameScene = GameScene.getInstance();
+    public static MainScene mainScene = MainScene.getInstance();
+    public static SelectorScene selectorScene = SelectorScene.getInstance();
+    public static SummaryScene summaryScene = SummaryScene.getInstance();
+    public static LoaderScene loaderScene = LoaderScene.getInstance();
 
     public static SongService songService = getSongService();
 

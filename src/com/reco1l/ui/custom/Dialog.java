@@ -1,5 +1,7 @@
 package com.reco1l.ui.custom;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
@@ -18,6 +20,7 @@ import com.reco1l.utils.Resources;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.ViewUtils.MarginUtils;
 import com.reco1l.utils.listeners.TouchListener;
+import com.reco1l.view.TextButton;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -117,7 +120,7 @@ public class Dialog extends UIFragment {
             for (int i = 0; i < builder.buttons.size(); i++) {
 
                 Button button = builder.buttons.get(i);
-                button.inflate(buttonsContainer);
+                button.build(buttonsContainer);
                 button.load(this);
 
                 new AnimationOld(button.view).fade(0, 1).delay(200L * i)
@@ -215,7 +218,7 @@ public class Dialog extends UIFragment {
         protected String text;
         protected Integer color;
         protected OnButtonClick onClick;
-        private View view;
+        private TextButton view;
 
         public Button(String text, Integer color, OnButtonClick onClick) {
             this.text = text;
@@ -223,21 +226,18 @@ public class Dialog extends UIFragment {
             this.onClick = onClick;
         }
 
-        private void inflate(LinearLayout container) {
-            LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, (int) Resources.dimen(R.dimen.dialogButtonHeight));
-            view = LayoutInflater.from(platform.context).inflate(R.layout.dialog_button, null);
-            container.addView(view, params);
+        private void build(LinearLayout container) {
+            view = new TextButton(Game.activity);
+            container.addView(view, new LayoutParams(MATCH_PARENT, (int) Resources.dimen(R.dimen.dialogButtonHeight)));
         }
 
         private void load(Dialog dialog) {
             dialog.bindTouchListener(view, () -> onClick.onButtonClick(dialog));
 
             if (color != null) {
-                ((CardView) view).setCardBackgroundColor(color);
+                view.setButtonColor(color);
             }
-
-            TextView buttonText = view.findViewById(R.id.d_buttonText);
-            buttonText.setText(text);
+            view.setButtonText(text);
         }
     }
 }

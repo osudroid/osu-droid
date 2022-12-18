@@ -4,50 +4,34 @@ package com.reco1l.andengine;
 
 import com.reco1l.Game;
 import com.reco1l.UI;
-import com.reco1l.game.TimingWrapper;
+import com.reco1l.enums.Screens;
 import com.reco1l.interfaces.IMusicObserver;
-import com.reco1l.enums.MusicOption;
 
 import org.anddev.andengine.entity.scene.Scene;
 
-import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 
 public abstract class BaseScene extends Scene implements ISceneHandler, IMusicObserver {
 
-    public TimingWrapper timingWrapper;
-
     protected int screenWidth = Config.getRES_WIDTH();
     protected int screenHeight = Config.getRES_HEIGHT();
 
     private boolean
-            isTimingWrapperEnabled = false,
             isBackgroundAutoChange = true,
             isContinuousPlay = true;
 
     //--------------------------------------------------------------------------------------------//
 
     public BaseScene() {
-        timingWrapper = new TimingWrapper();
 
         Game.engine.registerSceneHandler(this);
         onCreate();
         registerUpdateHandler(elapsed -> {
-            if (isTimingWrapperEnabled) {
-                int position = Game.songService.getPosition();
-
-                if (Game.songService.getStatus() == Status.PLAYING) {
-                    timingWrapper.update(elapsed, position);
-                } else {
-                    timingWrapper.setBeatLength(1000);
-                    timingWrapper.update(elapsed, -1);
-                }
-            }
             onSceneUpdate(elapsed);
         });
 
-        Game.musicManager.bindMusicObserver(this, this);
+        Game.musicManager.bindMusicObserver(this);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -57,10 +41,6 @@ public abstract class BaseScene extends Scene implements ISceneHandler, IMusicOb
     protected abstract void onSceneUpdate(float secondsElapsed);
 
     //--------------------------------------------------------------------------------------------//
-
-    protected final void setTimingWrapper(boolean bool) {
-        this.isTimingWrapperEnabled = bool;
-    }
 
     protected final void setContinuousPlay(boolean bool) {
         this.isContinuousPlay = bool;
@@ -72,52 +52,22 @@ public abstract class BaseScene extends Scene implements ISceneHandler, IMusicOb
 
     //--------------------------------------------------------------------------------------------//
 
-    @Override
-    public void onMusicControlRequest(MusicOption option, Status current) {
-        if (!isTimingWrapperEnabled)
-            return;
-
-        if (option == MusicOption.PLAY) {
-            if (current == Status.PAUSED) {
-                timingWrapper.restoreBPMLength();
-                timingWrapper.computeOffsetAtPosition(Game.songService.getPosition());
-            }
-        }
-
-        if (option == MusicOption.PREVIOUS || option == MusicOption.NEXT) {
-            timingWrapper.firstPoint = null;
-        }
-    }
 
     @Override
-    public void onMusicControlChanged(MusicOption option, Status status) {
-        if (isTimingWrapperEnabled) {
-            if (option == MusicOption.STOP || option == MusicOption.PAUSE) {
-                timingWrapper.setBeatLength(1000);
-            }
-        }
+    public Screens getAttachedScreen() {
+        return getIdentifier();
     }
 
     @Override
     public void onMusicChange(BeatmapInfo beatmap) {
-        if (beatmap != null) {
-            timingWrapper.loadPointsFrom(beatmap);
+        if (Game.engine.getScene() != this)
+            return;
 
-            if (timingWrapper.computeFirstBpmLength()) {
-                timingWrapper.computeOffset();
-            }
-
-            if (isBackgroundAutoChange) {
+        if (isBackgroundAutoChange) {
+            if (beatmap != null) {
                 String path = beatmap.getTrack(0).getBackground();
                 UI.background.changeFrom(path);
             }
-        }
-    }
-
-    @Override
-    public void onMusicSync(Status status) {
-        if (isTimingWrapperEnabled) {
-            timingWrapper.computeOffsetAtPosition(Game.songService.getPosition());
         }
     }
 
@@ -126,11 +76,6 @@ public abstract class BaseScene extends Scene implements ISceneHandler, IMusicOb
         if (isContinuousPlay) {
             Game.musicManager.next();
         }
-    }
-
-    @Override
-    public void onSceneChange(Scene oldScene, Scene newScene) {
-
     }
 
     @Override

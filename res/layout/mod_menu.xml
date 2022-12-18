@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Written by Reco1l on 12/6/22 23:21
+  ~ Last modified: 12/6/22 22:57
+  -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:translationZ="@dimen/topLayer">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/mm_body"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:cardCornerRadius="0dp"
+        app:cardBackgroundColor="@color/backgroundTertiary"
+        android:clickable="true">
+
+
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/mm_panel"
+            android:translationX="@dimen/_284sdp"
+            android:layout_width="@dimen/_270sdp"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="18dp"
+            android:layout_marginRight="@dimen/L"
+            android:layout_marginBottom="@dimen/L"
+            android:background="@drawable/shape_rounded"
+            android:backgroundTint="@color/backgroundPrimary"
+            android:clipToOutline="true"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#20000000"
+                android:gravity="center_horizontal"
+                android:paddingHorizontal="@dimen/panelMargins"
+                android:paddingVertical="@dimen/M">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Customization"
+                    android:textSize="@dimen/textS" />
+
+            </LinearLayout>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+               <!--     <include layout="@layout/mod_menu_custom" />-->
+
+                </FrameLayout>
+
+            </ScrollView>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:cardBackgroundColor="@color/backgroundPrimary">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/topBarHeight">
+
+            <androidx.cardview.widget.CardView
+                style="@style/button"
+                android:layout_width="wrap_content">
+
+                <TextView
+                    style="@style/text"/>
+
+            </androidx.cardview.widget.CardView>
+
+        </RelativeLayout>
+
+
+    </androidx.cardview.widget.CardView>
+
+</RelativeLayout>

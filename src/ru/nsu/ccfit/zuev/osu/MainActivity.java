@@ -37,7 +37,6 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.GameEngine;
 import com.reco1l.Game;
 import com.reco1l.andengine.scenes.IntroScene;
-import com.reco1l.management.MusicManager;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.data.DialogTable;
 import com.reco1l.utils.KeyInputHandler;
@@ -85,6 +84,9 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class MainActivity extends BaseGameActivity implements
         IAccelerometerListener {
+
+    public static MainActivity instance;
+
     public static SongService songService;
     public ServiceConnection connection;
     private PowerManager.WakeLock wakeLock = null;
@@ -96,6 +98,19 @@ public class MainActivity extends BaseGameActivity implements
     private boolean willReplay = false;
     private static boolean activityVisible = true;
     private boolean autoclickerDialogShown = false;
+
+    //--------------------------------------------------------------------------------------------//
+
+    public MainActivity() {
+        instance = this;
+    }
+
+    public static MainActivity getInstance() {
+        // MainActivity instance should be one per game instance.
+        return instance;
+    }
+
+    //--------------------------------------------------------------------------------------------//
 
     @Override
     public Engine onLoadEngine() {
@@ -279,7 +294,6 @@ public class MainActivity extends BaseGameActivity implements
         new AsyncTaskLoader().execute(new OsuAsyncCallback() {
             public void run() {
                 GlobalManager.getInstance().init();
-                Game.engine.notifyGlobalInit();
                 analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
                 GlobalManager.getInstance().setLoadingProgress(50);
                 Config.loadSkins();
@@ -291,7 +305,8 @@ public class MainActivity extends BaseGameActivity implements
                 }
             }
 
-            public void onComplete() {  
+            public void onComplete() {
+                Game.engine.notifyLoadCompleted();
                 GlobalManager.getInstance().setInfo("Starting...");
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);

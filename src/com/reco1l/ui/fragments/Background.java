@@ -18,7 +18,7 @@ import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.BlurEffect;
 import com.reco1l.utils.Resources;
 import com.reco1l.utils.helpers.BitmapHelper;
-import com.reco1l.view.SidesEffectView;
+import com.reco1l.view.FlashEffectView;
 import com.reco1l.view.SpectrumView;
 
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -28,7 +28,7 @@ public class Background extends UIFragment {
 
     public static Background instance;
 
-    private SidesEffectView kiaiView;
+    private FlashEffectView flashEffect;
     private SpectrumView spectrum;
 
     private ImageView image0, image1;
@@ -71,11 +71,11 @@ public class Background extends UIFragment {
         spectrum.setLinesWidth(Resources.sdp(6));
         spectrum.setLineDistance(Resources.sdp(1));
 
-        kiaiView = find("kiai");
-        kiaiView.setPaintColor(Color.WHITE);
+        flashEffect = find("kiai");
+        flashEffect.setPaintColor(Color.WHITE);
 
         if (!areEffectsEnabled) {
-            kiaiView.setAlpha(0);
+            flashEffect.setAlpha(0);
             spectrum.setAlpha(0);
         }
 
@@ -94,21 +94,9 @@ public class Background extends UIFragment {
                 spectrum.setFft(fft);
             }
 
-            if (kiaiView != null) {
-                kiaiView.setAlpha(level);
+            if (flashEffect != null) {
+                flashEffect.setAlpha(level);
             }
-        }
-    }
-
-    public void onBeatUpdate(float beatLength, int beat) {
-        if (!areEffectsEnabled) {
-            return;
-        }
-
-        if (kiaiView != null) {
-            Game.activity.runOnUiThread(() ->
-                    kiaiView.onBeatUpdate(beatLength, beat)
-            );
         }
     }
 
@@ -118,12 +106,6 @@ public class Background extends UIFragment {
     }
 
     //--------------------------------------------------------------------------------------------//
-
-    public void setKiai(boolean bool) {
-        if (kiaiView != null) {
-            kiaiView.setKiai(bool);
-        }
-    }
 
     public void setBlur(boolean bool) {
         if (bool == isBlurEnabled) {
@@ -141,15 +123,15 @@ public class Background extends UIFragment {
         areEffectsEnabled = bool;
 
         if (bool) {
-            if (kiaiView != null) {
-                AnimationTable.fadeIn(kiaiView).play();
+            if (flashEffect != null) {
+                AnimationTable.fadeIn(flashEffect).play();
             }
             if (spectrum != null) {
                 AnimationTable.fadeIn(spectrum).play();
             }
         } else {
-            if (kiaiView != null) {
-                AnimationTable.fadeOut(kiaiView).play();
+            if (flashEffect != null) {
+                AnimationTable.fadeOut(flashEffect).play();
             }
             if (spectrum != null) {
                 AnimationTable.fadeOut(spectrum).play();
