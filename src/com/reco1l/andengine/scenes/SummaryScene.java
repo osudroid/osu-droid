@@ -45,7 +45,6 @@ public class SummaryScene extends BaseScene {
     @Override
     protected void onCreate() {
         setContinuousPlay(false);
-
         createTopBarButtons();
     }
 

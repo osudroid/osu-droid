@@ -159,7 +159,6 @@ public class SelectorScene extends BaseScene {
         }
     }
 
-
     //--------------------------------------------------------------------------------------------//
 
     public void bindDataBaseChangedListener() {

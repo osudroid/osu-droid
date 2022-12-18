@@ -136,4 +136,8 @@ public class GameEngine extends Engine implements IReferences {
         }
         return null;
     }
+
+    public Screens getCurrentScreen() {
+        return currentScreen;
+    }
 }

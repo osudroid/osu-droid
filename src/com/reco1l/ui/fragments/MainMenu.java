@@ -20,6 +20,7 @@ import com.reco1l.UI;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.listeners.TouchListener;
 import com.reco1l.view.LogoView;
+import com.reco1l.view.CircularSpectrumView;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
@@ -71,6 +72,9 @@ public class MainMenu extends UIFragment {
         single = find("solo");
         multi = find("multi");
         buttons = find("buttonsLayout");
+
+        CircularSpectrumView spectrum = find("spectrum");
+        spectrum.attachToLogo(logo);
 
         single.setAlpha(0);
         multi.setAlpha(0);

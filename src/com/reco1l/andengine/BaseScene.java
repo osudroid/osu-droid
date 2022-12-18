@@ -14,9 +14,6 @@ import ru.nsu.ccfit.zuev.osu.Config;
 
 public abstract class BaseScene extends Scene implements ISceneHandler, IMusicObserver {
 
-    protected int screenWidth = Config.getRES_WIDTH();
-    protected int screenHeight = Config.getRES_HEIGHT();
-
     private boolean
             isBackgroundAutoChange = true,
             isContinuousPlay = true;
@@ -24,14 +21,10 @@ public abstract class BaseScene extends Scene implements ISceneHandler, IMusicOb
     //--------------------------------------------------------------------------------------------//
 
     public BaseScene() {
-
         Game.engine.registerSceneHandler(this);
-        onCreate();
-        registerUpdateHandler(elapsed -> {
-            onSceneUpdate(elapsed);
-        });
-
         Game.musicManager.bindMusicObserver(this);
+        onCreate();
+        registerUpdateHandler(this::onSceneUpdate);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -51,7 +44,6 @@ public abstract class BaseScene extends Scene implements ISceneHandler, IMusicOb
     }
 
     //--------------------------------------------------------------------------------------------//
-
 
     @Override
     public Screens getAttachedScreen() {

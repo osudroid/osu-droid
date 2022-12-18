@@ -280,7 +280,7 @@ public final class Animation {
 
                 applyFinalProperties(viewAnimator);
 
-                viewAnimator.setStartDelay(delay);
+                viewAnimator.setStartDelay(Math.max(delay, 0));
                 viewAnimator.setDuration(duration);
                 viewAnimator.start();
                 i++;

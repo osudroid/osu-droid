@@ -16,10 +16,8 @@ import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.AnimationTable;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.BlurEffect;
-import com.reco1l.utils.Resources;
 import com.reco1l.utils.helpers.BitmapHelper;
 import com.reco1l.view.FlashEffectView;
-import com.reco1l.view.SpectrumView;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -29,7 +27,6 @@ public class Background extends UIFragment {
     public static Background instance;
 
     private FlashEffectView flashEffect;
-    private SpectrumView spectrum;
 
     private ImageView image0, image1;
 
@@ -57,7 +54,7 @@ public class Background extends UIFragment {
 
     @Override
     protected Screens[] getParents() {
-        return new Screens[] {Screens.Main, Screens.Selector, Screens.Loader, Screens.Summary};
+        return new Screens[]{Screens.Main, Screens.Selector, Screens.Loader, Screens.Summary};
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -67,16 +64,11 @@ public class Background extends UIFragment {
         image0 = find("image0");
         image1 = find("image1");
 
-        spectrum = find("spectrum");
-        spectrum.setLinesWidth(Resources.sdp(6));
-        spectrum.setLineDistance(Resources.sdp(1));
-
         flashEffect = find("kiai");
         flashEffect.setPaintColor(Color.WHITE);
 
         if (!areEffectsEnabled) {
             flashEffect.setAlpha(0);
-            spectrum.setAlpha(0);
         }
 
         if (bitmap != null) {
@@ -87,12 +79,7 @@ public class Background extends UIFragment {
     @Override
     protected void onUpdate(float secondsElapsed) {
         if (areEffectsEnabled) {
-            float[] fft = Game.songService.getSpectrum();
             float level = Game.songService.getLevel() * 2;
-
-            if (spectrum != null) {
-                spectrum.setFft(fft);
-            }
 
             if (flashEffect != null) {
                 flashEffect.setAlpha(level);
@@ -122,19 +109,11 @@ public class Background extends UIFragment {
         }
         areEffectsEnabled = bool;
 
-        if (bool) {
-            if (flashEffect != null) {
+        if (flashEffect != null) {
+            if (bool) {
                 AnimationTable.fadeIn(flashEffect).play();
-            }
-            if (spectrum != null) {
-                AnimationTable.fadeIn(spectrum).play();
-            }
-        } else {
-            if (flashEffect != null) {
+            } else {
                 AnimationTable.fadeOut(flashEffect).play();
-            }
-            if (spectrum != null) {
-                AnimationTable.fadeOut(spectrum).play();
             }
         }
     }

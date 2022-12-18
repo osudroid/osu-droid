@@ -16,13 +16,11 @@ import androidx.core.math.MathUtils;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 
-public class SpectrumView extends View {
+public class LinearSpectrumView extends View {
 
     private Paint paint;
 
     private int
-            radius,
-            linesRadius,
             lines = -1,
             peakRate = 900,
             peakDownRate = 20;
@@ -38,12 +36,12 @@ public class SpectrumView extends View {
 
     //--------------------------------------------------------------------------------------------//
 
-    public SpectrumView(Context context) {
+    public LinearSpectrumView(Context context) {
         super(context);
         init();
     }
 
-    public SpectrumView(Context context, @Nullable AttributeSet attrs) {
+    public LinearSpectrumView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init();
     }
@@ -126,12 +124,6 @@ public class SpectrumView extends View {
         super.onDraw(canvas);
     }
 
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        radius = Math.min(w, h) / 4;
-        radius = Math.abs((int) (2 * radius * Math.sin(Math.PI / lines / 3)));
-    }
-
     private void update(Canvas canvas) {
         int i = 1;
         while (i <= lines && i < fft.length) {
@@ -153,3 +145,4 @@ public class SpectrumView extends View {
         }
     }
 }
+

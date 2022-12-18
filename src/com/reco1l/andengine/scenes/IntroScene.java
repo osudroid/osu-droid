@@ -24,7 +24,7 @@ public class IntroScene extends BaseScene {
 
     @Override
     public Screens getIdentifier() {
-        return null;
+        return Screens.Intro;
     }
 
     //----------------------------------------------------------------------------------------//

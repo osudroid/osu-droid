@@ -121,7 +121,7 @@ public final class MusicManager {
     private boolean isValidObserver(IMusicObserver observer) {
         if (observer != null) {
             if (observer.getAttachedScreen() != null) {
-                return observer.getAttachedScreen() == Game.engine.currentScreen;
+                return observer.getAttachedScreen() == Game.engine.getCurrentScreen();
             }
             return true;
         }
