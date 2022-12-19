@@ -19,6 +19,7 @@ import com.reco1l.utils.Resources;
 import com.reco1l.UI;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.listeners.TouchListener;
+import com.reco1l.view.ExpandEffectView;
 import com.reco1l.view.LogoView;
 import com.reco1l.view.CircularSpectrumView;
 
@@ -75,6 +76,9 @@ public class MainMenu extends UIFragment {
 
         CircularSpectrumView spectrum = find("spectrum");
         spectrum.attachToLogo(logo);
+
+        ExpandEffectView expand = find("expand");
+        expand.attachToLogo(logo);
 
         single.setAlpha(0);
         multi.setAlpha(0);

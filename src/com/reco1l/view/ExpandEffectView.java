@@ -1,32 +1,38 @@
 package com.reco1l.view;
 // Created by Reco1l on 18/11/2022, 23:01
 
+import static android.graphics.Paint.*;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.util.AttributeSet;
 import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import com.edlplan.framework.easing.Easing;
+import com.reco1l.Game;
+import com.reco1l.UI;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.Resources;
 
-import ru.nsu.ccfit.zuev.osu.Config;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class ExpandEffectView extends View {
 
-    private Paint backPaint, frontPaint;
+    private LogoView logo;
 
     private float
             minRadius,
-            backRadius,
-            frontRadius;
+            strokeWidth;
 
-    private boolean isFadeEnabled = true;
+    private int
+            color,
+            alpha;
+
+    private ArrayList<Circle> circles;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -41,86 +47,121 @@ public class ExpandEffectView extends View {
     }
 
     private void init() {
-        setLayerType(LAYER_TYPE_HARDWARE, null);
+        circles = new ArrayList<>();
 
-        backPaint = new Paint();
-        backPaint.setColor(Color.WHITE);
-        backPaint.setAntiAlias(true);
+        if (!isInEditMode()) {
+            strokeWidth = Resources.sdp(2);
+        }
+        alpha = 80;
+    }
 
-        frontPaint = new Paint();
-        frontPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-        frontPaint.setAntiAlias(true);
+    private void setPaintColor(int color) {
+        if (this.color == color) {
+            return;
+        }
+        this.color = color;
+
+        int i = 0;
+        while (i < circles.size()) {
+            circles.get(i).paint.setColor(color);
+            ++i;
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (!Config.isUIAdvancedEffects()) {
+        if (isInEditMode()) {
             return;
         }
 
-        int width = canvas.getWidth();
-        int height = canvas.getHeight();
+        int centerX = canvas.getWidth() / 2;
+        int centerY = canvas.getHeight() / 2;
 
-        if (backRadius <= getMaxRadius()) {
-            canvas.drawCircle(width / 2f, height / 2f, backRadius, backPaint);
+        if (logo != null) {
+            minRadius = logo.getHeight() / 2f;
+
+            centerX = (int) (logo.getX() + logo.getWidth() / 2);
+            centerY = (int) (logo.getY() + logo.getHeight() / 2);
         }
 
-        if (frontRadius <= getMaxRadius()) {
-            canvas.drawCircle(width / 2f, height / 2f, frontRadius, frontPaint);
+        if (UI.background.isDark()) {
+            setPaintColor(Color.WHITE);
+        } else {
+            setPaintColor(Color.BLACK);
         }
+
+        if (Game.timingWrapper.isNextBeat()) {
+            circles.add(new Circle());
+        }
+
+        Iterator<Circle> iterator = circles.iterator();
+        while (iterator.hasNext()) {
+            Circle circle = iterator.next();
+
+            canvas.drawCircle(centerX, centerY, circle.radius, circle.paint);
+            if (circle.paint.getAlpha() < 1) {
+                iterator.remove();
+            }
+        }
+
         super.onDraw(canvas);
+        invalidate();
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void setMinRadius(int min) {
-        minRadius = min;
+    public void attachToLogo(LogoView logo) {
+        this.logo = logo;
     }
-
-    public void setPaintColor(int color) {
-        backPaint.setColor(color);
-    }
-
-    public void setFadeEffect(boolean bool) {
-        isFadeEnabled = bool;
-    }
-
-    //--------------------------------------------------------------------------------------------//
 
     public float getMaxRadius() {
+        if (logo != null) {
+            return logo.getHeight() * 0.75f;
+        }
+
         if (getHeight() <= getWidth()) {
             return getHeight() / 2f;
         }
         return getWidth() / 2f;
     }
 
-    public void play(int ms) {
-        backRadius = minRadius;
-        frontRadius = minRadius;
+    private Paint createPaint() {
+        Paint paint = new Paint();
 
-        Animation.ofFloat(minRadius, getMaxRadius())
-                .runOnUpdate(value -> {
-                    backRadius = (float) value;
-                    invalidate();
-                })
-                .play(ms);
+        paint.setAlpha(alpha);
+        paint.setColor(color);
+        paint.setStyle(Style.STROKE);
+        paint.setStrokeWidth(strokeWidth);
+        paint.setAntiAlias(true);
 
-        Animation.ofFloat(0, getMaxRadius())
-                .runOnUpdate(value -> {
-                    frontRadius = (float) value;
-                    invalidate();
-                })
-                .interpolator(Easing.OutExpo)
-                .play(ms);
+        return paint;
+    }
 
-        if (isFadeEnabled) {
-            Animation.ofInt(255, 0)
-                    .runOnUpdate(value -> backPaint.setAlpha((int) value))
-                    .interpolator(Easing.OutExpo)
-                    .play(ms);
+    //--------------------------------------------------------------------------------------------//
+
+    private class Circle {
+
+        private final Paint paint;
+
+        private float radius;
+
+        //----------------------------------------------------------------------------------------//
+
+        private Circle() {
+            paint = createPaint();
+            radius = minRadius;
+
+            long time = (long) Game.timingWrapper.getBeatLength();
+
+            Animation.ofFloat(radius, getMaxRadius())
+                    .runOnUpdate(value -> radius = (float) value)
+                    .play(time * 3);
+
+            Animation.ofInt(alpha, 0)
+                    .runOnUpdate(value -> paint.setAlpha((int) value))
+                    .play(time * 3);
         }
-
     }
 }

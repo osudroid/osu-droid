@@ -78,6 +78,12 @@
         android:layout_height="match_parent"
         android:elevation="@dimen/M" />
 
+    <com.reco1l.view.ExpandEffectView
+        android:id="@+id/mainM_expand"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="@dimen/M" />
+
     <!--Logo-->
     <com.reco1l.view.LogoView
         android:id="@+id/mainM_logo"
