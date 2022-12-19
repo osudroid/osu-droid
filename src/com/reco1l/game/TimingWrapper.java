@@ -36,7 +36,9 @@ public class TimingWrapper implements IMusicObserver {
             beatPassTime, lastBeatPassTime,
             offset;
 
-    private boolean isNextBeat = false;
+    private boolean
+            isNextBeat = false,
+            isKiaiSection = false;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -57,6 +59,7 @@ public class TimingWrapper implements IMusicObserver {
     private void clear() {
         timingPoints = new LinkedList<>();
         currentPoint = null;
+        isKiaiSection = false;
     }
 
     public void loadPointsFrom(BeatmapInfo beatmap) {
@@ -136,7 +139,7 @@ public class TimingWrapper implements IMusicObserver {
     //--------------------------------------------------------------------------------------------//
 
     public boolean isKiai() {
-        return currentPoint != null && currentPoint.isKiai();
+        return isKiaiSection;
     }
 
     public boolean isNextBeat() {
@@ -215,10 +218,9 @@ public class TimingWrapper implements IMusicObserver {
             isNextBeat = false;
         }
 
-        if (position < 0 || currentPoint == null)
-            return;
+        if (currentPoint != null && position > currentPoint.getTime() * 1000) {
+            isKiaiSection = currentPoint.isKiai();
 
-        if (position > currentPoint.getTime() * 1000) {
             if (timingPoints.size() == 0) {
                 currentPoint = null;
                 return;
