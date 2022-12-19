@@ -2,8 +2,6 @@ package com.reco1l.view;
 
 // Created by Reco1l on 13/11/2022, 20:54
 
-import static android.graphics.Paint.Style.*;
-
 import android.content.Context;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
@@ -18,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.core.math.MathUtils;
 
 import com.reco1l.Game;
+import com.reco1l.UI;
 import com.reco1l.utils.Resources;
 
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -32,8 +31,8 @@ public class CircularSpectrumView extends View {
     private int
             radius = 300,
             lineWidth = 8,
-            peakRate = 900,
-            peakDownRate = 20;
+            peakRate = 600,
+            peakDownRate = 30;
 
     private int rotationIndex;
 
@@ -56,19 +55,7 @@ public class CircularSpectrumView extends View {
     }
 
     private void init() {
-        paint = new Paint();
-
-        paint.setColor(Color.WHITE);
-        paint.setStyle(FILL);
-        paint.setDither(Config.isUseDither());
-
-        if (Build.VERSION.SDK_INT >= 29) {
-            paint.setBlendMode(BlendMode.SCREEN);
-        }
-        paint.setAlpha(125);
-
-        paint.setStrokeJoin(Paint.Join.ROUND);
-        paint.setStrokeCap(Paint.Cap.ROUND);
+        createPaint(false);
 
         if (!isInEditMode()) {
             lineWidth = Resources.sdp(5);
@@ -77,6 +64,22 @@ public class CircularSpectrumView extends View {
         peakLevel = new float[lines];
         peakDownLevel = new float[lines];
         rectF = new RectF[lines];
+    }
+
+    private void createPaint(boolean dark) {
+        if (paint != null) {
+            if (dark && paint.getColor() == Color.WHITE) {
+                return;
+            }
+            if (!dark && paint.getColor() == Color.BLACK) {
+                return;
+            }
+        }
+        paint = new Paint();
+
+        paint.setColor(dark ? Color.WHITE : Color.BLACK);
+        paint.setDither(Config.isUseDither());
+        paint.setAlpha(64);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -115,6 +118,10 @@ public class CircularSpectrumView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if (isInEditMode()) {
+            return;
+        }
+
         if (logo != null) {
             setScaleX(logo.getScaleX());
             setScaleY(logo.getScaleY());
@@ -125,6 +132,7 @@ public class CircularSpectrumView extends View {
         if (Game.musicManager.isPlaying()) {
             handleRotation();
         }
+        createPaint(UI.background.isDark());
 
         if (Game.songService != null) {
             float[] fft = getFft();
@@ -135,7 +143,6 @@ public class CircularSpectrumView extends View {
                 update(canvas, new float[lines]);
             }
         }
-
         super.onDraw(canvas);
         invalidate();
     }
@@ -144,11 +151,11 @@ public class CircularSpectrumView extends View {
         if (!Game.timingWrapper.isNextBeat()) {
             return;
         }
+        rotationIndex += 10;
 
-        if (rotationIndex + 12 > lines) {
-            rotationIndex = 0;
+        if (rotationIndex > lines) {
+            rotationIndex -= lines;
         }
-        rotationIndex += 12;
     }
 
     private float[] getFft() {

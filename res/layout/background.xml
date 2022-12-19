@@ -22,10 +22,4 @@
         android:scaleType="centerCrop"
         android:visibility="gone" />
 
-    <com.reco1l.view.FlashEffectView
-        android:id="@+id/b_kiai"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:elevation="2dp" />
-
 </RelativeLayout>

@@ -5,36 +5,36 @@ package com.reco1l.view;
 import static android.graphics.Shader.TileMode.*;
 
 import android.content.Context;
-import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 
 import androidx.annotation.Nullable;
 
 import com.reco1l.Game;
+import com.reco1l.UI;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.Animation.UpdateListener;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 
 public class FlashEffectView extends View implements BaseView {
 
+    private Paint paint;
     private Animation fadeUp, fadeDown;
 
-    private Paint leftPaint, rightPaint;
-
     private boolean
-            isEnabled = true,
             drawLeft = true,
             drawRight = true;
 
     private int
             color,
             cursor;
+
+    private float rectWidth;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -53,69 +53,72 @@ public class FlashEffectView extends View implements BaseView {
         init();
     }
 
-    public FlashEffectView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        init();
-    }
-
     //--------------------------------------------------------------------------------------------//
 
     private void init() {
         color = Color.WHITE;
 
-        leftPaint = new Paint();
-        rightPaint = new Paint();
+        paint = new Paint();
+        paint.setDither(Config.isUseDither());
 
-        leftPaint.setColor(color);
-        rightPaint.setColor(color);
-
-        leftPaint.setDither(Config.isUseDither());
-        rightPaint.setDither(Config.isUseDither());
-
-        if (Build.VERSION.SDK_INT >= 29) {
-            leftPaint.setBlendMode(BlendMode.SCREEN);
-            rightPaint.setBlendMode(BlendMode.SCREEN);
-        }
-
-        Animation.UpdateListener listener = value -> {
-            rightPaint.setAlpha((int) value);
-            leftPaint.setAlpha((int) value);
-        };
+        UpdateListener listener = value -> paint.setAlpha((int) value);
 
         fadeUp = Animation.ofInt(0, 255).runOnUpdate(listener);
         fadeDown = Animation.ofInt(255, 0).runOnUpdate(listener);
     }
 
-    private void drawShaders(int color) {
-        int transparent = Color.TRANSPARENT;
-        int width = getWidth();
+    //--------------------------------------------------------------------------------------------//
 
-        LinearGradient lShader = new LinearGradient(0, 0, width / 4f, 0, color, transparent, CLAMP);
-        leftPaint.setShader(lShader);
+    private void handleColor(boolean dark) {
+        if (dark && color == Color.WHITE || !dark && color == Color.BLACK) {
+            return;
+        }
+        color = dark ? Color.WHITE : Color.BLACK;
+        createShader();
+    }
 
-        LinearGradient rShader = new LinearGradient(width, 0, width - (width / 4f), 0, color, transparent, CLAMP);
-        rightPaint.setShader(rShader);
+    private void createShader() {
+        LinearGradient shader = new LinearGradient(0, 0, rectWidth, 0, color, Color.TRANSPARENT, CLAMP);
+        paint.setShader(shader);
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldW, int oldH) {
-        drawShaders(color);
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        rectWidth = w / 5f;
+        createShader();
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void setPaintColor(int color) {
-        this.color = color;
-        drawShaders(color);
-    }
-
     @Override
-    public void setAlpha(float alpha) {
-        super.setAlpha(alpha);
+    protected void onDraw(Canvas canvas) {
+        if (isInEditMode()) {
+            return;
+        }
+
+        if (Game.timingWrapper.isNextBeat()) {
+            onBeatUpdate();
+        }
+        handleColor(UI.background.isDark());
+
+        int h = canvas.getHeight();
+        int w = canvas.getWidth();
+
+        if (drawLeft) {
+            canvas.drawRect(0, 0, rectWidth, h, paint);
+        }
+        if (drawRight) {
+            canvas.save();
+            canvas.rotate(180, w / 2f, h / 2f);
+            canvas.drawRect(0, 0, rectWidth, h, paint);
+            canvas.restore();
+        }
+
+        super.onDraw(canvas);
         invalidate();
-    }
 
-    //--------------------------------------------------------------------------------------------//
+        setAlpha(Game.songService.getLevel() * 2);
+    }
 
     public void onBeatUpdate() {
         float beatLength = Game.timingWrapper.getBeatLength();
@@ -144,36 +147,5 @@ public class FlashEffectView extends View implements BaseView {
                 .play(upTime);
 
         fadeDown.delay(upTime).play(downTime);
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        if (!isEnabled)
-            return;
-
-        if (!isInEditMode()) {
-            if (Game.timingWrapper.isNextBeat()) {
-                onBeatUpdate();
-            }
-        }
-
-        int width = canvas.getWidth();
-        int height = canvas.getHeight();
-
-        float rectWidth = width / 4f;
-
-        if (drawLeft) {
-            canvas.drawRect(0, 0, rectWidth, height, leftPaint);
-        }
-        if (drawRight) {
-            canvas.drawRect(width - rectWidth, 0, width, height, rightPaint);
-        }
-
-        super.onDraw(canvas);
-        invalidate();
-    }
-
-    public void setEnabled(boolean bool) {
-        isEnabled = bool;
     }
 }

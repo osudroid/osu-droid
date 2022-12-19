@@ -9,6 +9,11 @@
     android:gravity="center_horizontal"
     android:translationZ="@dimen/topLayer">
 
+    <com.reco1l.view.FlashEffectView
+        android:id="@+id/mainM_kiai"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <androidx.cardview.widget.CardView
         android:id="@+id/mainM_buttonsLayout"
         android:layout_width="@dimen/mainMenuButtonLayoutWidth"

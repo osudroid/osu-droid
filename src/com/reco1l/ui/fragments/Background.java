@@ -10,6 +10,8 @@ import android.graphics.Color;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.palette.graphics.Palette;
+
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.platform.UIFragment;
@@ -17,7 +19,6 @@ import com.reco1l.utils.AnimationTable;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.BlurEffect;
 import com.reco1l.utils.helpers.BitmapHelper;
-import com.reco1l.view.FlashEffectView;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -25,8 +26,6 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class Background extends UIFragment {
 
     public static Background instance;
-
-    private FlashEffectView flashEffect;
 
     private ImageView image0, image1;
 
@@ -36,9 +35,9 @@ public class Background extends UIFragment {
     private Bitmap bitmap;
 
     private boolean
+            isDark = false,
             isReload = false,
-            isBlurEnabled = false,
-            areEffectsEnabled = true;
+            isBlurEnabled = false;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -64,32 +63,9 @@ public class Background extends UIFragment {
         image0 = find("image0");
         image1 = find("image1");
 
-        flashEffect = find("kiai");
-        flashEffect.setPaintColor(Color.WHITE);
-
-        if (!areEffectsEnabled) {
-            flashEffect.setAlpha(0);
-        }
-
         if (bitmap != null) {
             image0.setImageBitmap(bitmap);
         }
-    }
-
-    @Override
-    protected void onUpdate(float secondsElapsed) {
-        if (areEffectsEnabled) {
-            float level = Game.songService.getLevel() * 2;
-
-            if (flashEffect != null) {
-                flashEffect.setAlpha(level);
-            }
-        }
-    }
-
-    @Override
-    protected void onScreenChange(Screens lastScreen, Screens newScreen) {
-        setEffects(newScreen == Screens.Main);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -103,19 +79,8 @@ public class Background extends UIFragment {
         changeFrom(imagePath);
     }
 
-    public void setEffects(boolean bool) {
-        if (bool == areEffectsEnabled) {
-            return;
-        }
-        areEffectsEnabled = bool;
-
-        if (flashEffect != null) {
-            if (bool) {
-                AnimationTable.fadeIn(flashEffect).play();
-            } else {
-                AnimationTable.fadeOut(flashEffect).play();
-            }
-        }
+    public boolean isDark() {
+        return isDark;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -145,6 +110,7 @@ public class Background extends UIFragment {
                     newBitmap = BitmapFactory.decodeFile(imagePath);
                 }
                 newBitmap = BitmapHelper.compress(newBitmap, 100 / quality);
+                parseColor(newBitmap);
 
                 if (isBlurEnabled) {
                     newBitmap = BlurEffect.applyTo(newBitmap, 25);
@@ -157,6 +123,13 @@ public class Background extends UIFragment {
             }
         };
         backgroundTask.execute();
+    }
+
+    private void parseColor(Bitmap bitmap) {
+        Palette palette = Palette.from(bitmap).generate();
+
+        int color = palette.getDominantColor(Color.BLACK);
+        isDark = Color.luminance(color) < 0.5;
     }
 
     private void handleChange(Bitmap newBitmap) {
