@@ -101,7 +101,8 @@ public class ExpandEffectView extends View {
             Circle circle = iterator.next();
 
             canvas.drawCircle(centerX, centerY, circle.radius, circle.paint);
-            if (circle.paint.getAlpha() < 1) {
+
+            if (circle.paint.getAlpha() < 1 || circle.radius == getMaxRadius()) {
                 iterator.remove();
             }
         }

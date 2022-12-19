@@ -117,7 +117,7 @@ public class FlashEffectView extends View implements BaseView {
         super.onDraw(canvas);
         invalidate();
 
-        setAlpha(Game.songService.getLevel() * 2);
+        setAlpha(Game.songService.getLevel());
     }
 
     public void onBeatUpdate() {
