@@ -820,7 +820,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setHardrock(stat.getMod().contains(GameMod.MOD_HARDROCK));
         GameHelper.setDoubleTime(stat.getMod().contains(GameMod.MOD_DOUBLETIME));
         GameHelper.setNightCore(stat.getMod().contains(GameMod.MOD_NIGHTCORE));
-        GameHelper.setSpeedUp(stat.getMod().contains(GameMod.MOD_SPEEDUP));
         GameHelper.setHalfTime(stat.getMod().contains(GameMod.MOD_HALFTIME));
         GameHelper.setHidden(stat.getMod().contains(GameMod.MOD_HIDDEN));
         GameHelper.setFlashLight(stat.getMod().contains(GameMod.MOD_FLASHLIGHT));

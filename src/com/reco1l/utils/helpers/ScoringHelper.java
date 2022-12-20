@@ -68,8 +68,6 @@ public class ScoringHelper implements IGameMods {
                     break;
                 case 'f': list.add(PF);
                     break;
-                case 'b': list.add(SU);
-                    break;
                 case 'v': list.add(SV2);
                     break;
             }

@@ -19,7 +19,6 @@ public interface IGameMods {
             PF = GameMod.MOD_PERFECT,
             SC = GameMod.MOD_SMALLCIRCLE,
             REZ = GameMod.MOD_REALLYEASY,
-            SU = GameMod.MOD_SPEEDUP,
             SV2 = GameMod.MOD_SCOREV2,
             NC = GameMod.MOD_NIGHTCORE,
             PR = GameMod.MOD_PRECISE,

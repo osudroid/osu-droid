@@ -21,8 +21,7 @@ public enum GameMod {
     MOD_PRECISE("pr", 1.06f, "precise"),
     MOD_SMALLCIRCLE("sc", 1.06f, true, "smallcircle"),
     MOD_REALLYEASY("re", 0.5f, true, "reallyeasy"),
-    MOD_SCOREV2("v2", 1, true, "scorev2"),
-    MOD_SPEEDUP("su", 1.06f, true, "speedup");
+    MOD_SCOREV2("v2", 1, true, "scorev2");
 
     public final String shortName;
     public final float scoreMultiplier;
