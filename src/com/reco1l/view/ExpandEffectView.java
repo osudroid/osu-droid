@@ -15,7 +15,7 @@ import androidx.annotation.Nullable;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -50,7 +50,7 @@ public class ExpandEffectView extends View {
         circles = new ArrayList<>();
 
         if (!isInEditMode()) {
-            strokeWidth = Resources.sdp(2);
+            strokeWidth = Res.sdp(2);
         }
         alpha = 80;
     }

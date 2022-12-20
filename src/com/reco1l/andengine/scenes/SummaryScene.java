@@ -6,7 +6,7 @@ import com.reco1l.UI;
 import com.reco1l.andengine.BaseScene;
 import com.reco1l.enums.Screens;
 import com.reco1l.utils.AsyncExec;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 import com.reco1l.view.BarButton;
 
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -51,7 +51,7 @@ public class SummaryScene extends BaseScene {
     private void createTopBarButtons() {
         BarButton retry = new BarButton(Game.activity);
 
-        retry.setIcon(Resources.drw(R.drawable.v_tune));
+        retry.setIcon(Res.drw(R.drawable.v_tune));
         retry.runOnTouch(() -> {
             Game.resources.getSound("applause").stop();
             Game.gameScene.startGame(null, null);
@@ -59,7 +59,7 @@ public class SummaryScene extends BaseScene {
 
         BarButton watchReplay = new BarButton(Game.activity);
 
-        watchReplay.setIcon(Resources.drw(R.drawable.v_search));
+        watchReplay.setIcon(Res.drw(R.drawable.v_search));
 
         UI.topBar.addButton(getIdentifier(), retry);
         UI.topBar.addButton(getIdentifier(), watchReplay);

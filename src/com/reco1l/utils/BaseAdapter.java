@@ -1,10 +1,31 @@
 package com.reco1l.utils;
 // Created by Reco1l on 05/12/2022, 06:23
 
-import androidx.recyclerview.widget.RecyclerView.Adapter;
-import androidx.recyclerview.widget.RecyclerView.ViewHolder;
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
-public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView.Adapter;
+
+import java.util.ArrayList;
+
+public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapter<VH> {
+
+    public ArrayList<T> list;
+
+    protected RecyclerView recyclerView;
+
+    //--------------------------------------------------------------------------------------------//
+
+    public BaseAdapter(ArrayList<T> list) {
+        this.list = list;
+        setHasStableIds(true);
+    }
+
+    //--------------------------------------------------------------------------------------------//
 
     @Override
     public int getItemViewType(int position) {
@@ -14,5 +35,57 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
     @Override
     public long getItemId(int position) {
         return position;
+    }
+
+    @Override
+    public int getItemCount() {
+        return list != null ? list.size() : 0;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    protected abstract int getLayout();
+    
+    protected abstract VH getViewHolder(View root);
+
+    //--------------------------------------------------------------------------------------------//
+
+    @NonNull
+    @Override
+    public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        Context context = parent.getContext();
+        
+        View root = LayoutInflater.from(context).inflate(getLayout(), parent, false);
+
+        VH holder = getViewHolder(root);
+        holder.context = context;
+        return holder;
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull VH holder, int position) {
+        holder.bind(list.get(position));
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
+    public void onViewAttachedToWindow(@NonNull VH holder) {
+        holder.onAttachmentChange(true);
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(@NonNull VH holder) {
+        holder.onAttachmentChange(false);
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        this.recyclerView = recyclerView;
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        this.recyclerView = null;
     }
 }

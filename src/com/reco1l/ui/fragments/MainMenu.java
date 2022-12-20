@@ -15,7 +15,7 @@ import com.reco1l.enums.Screens;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.AsyncExec;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 import com.reco1l.UI;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.listeners.TouchListener;
@@ -83,7 +83,7 @@ public class MainMenu extends UIFragment {
         single.setAlpha(0);
         multi.setAlpha(0);
 
-        ViewUtils.size(logo, Resources.dimen(R.dimen.mainMenuLogoSize));
+        ViewUtils.size(logo, Res.dimen(R.dimen.mainMenuLogoSize));
         ViewUtils.width(buttons, 0);
 
         bindTouchListener(logo, new TouchListener() {
@@ -136,12 +136,12 @@ public class MainMenu extends UIFragment {
             UI.topBar.show();
 
             Animation.of(logo)
-                    .toSize(Resources.dimen(R.dimen.mainMenuSmallLogoSize))
+                    .toSize(Res.dimen(R.dimen.mainMenuSmallLogoSize))
                     .interpolator(Easing.InOutQuad)
                     .play(300);
 
             Animation.of(buttons)
-                    .toWidth(Resources.dimen(R.dimen.mainMenuButtonLayoutWidth))
+                    .toWidth(Res.dimen(R.dimen.mainMenuButtonLayoutWidth))
                     .interpolator(Easing.InOutQuad)
                     .play(300);
 
@@ -163,7 +163,7 @@ public class MainMenu extends UIFragment {
             }
 
             Animation.of(logo)
-                    .toSize(Resources.dimen(R.dimen.mainMenuLogoSize))
+                    .toSize(Res.dimen(R.dimen.mainMenuLogoSize))
                     .interpolator(Easing.InOutQuad)
                     .play(300);
 
@@ -208,7 +208,7 @@ public class MainMenu extends UIFragment {
                         }
                     }.execute();
                 })
-                .toX(Resources.dimen(R.dimen._80sdp))
+                .toX(Res.dimen(R.dimen._80sdp))
                 .toAlpha(0)
                 .play(400);
     }

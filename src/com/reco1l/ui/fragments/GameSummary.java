@@ -12,7 +12,7 @@ import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.AnimationTable;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 import com.reco1l.utils.helpers.BeatmapHelper;
 
 import java.text.DecimalFormat;
@@ -263,7 +263,7 @@ public class GameSummary extends UIFragment {
         //----------------------------------------------------------------------------------------//
 
         private void applyColoring(TextView text, Difference difference) {
-            Drawable background = Resources.drw(R.drawable.shape_rounded).mutate();
+            Drawable background = Res.drw(R.drawable.shape_rounded).mutate();
             background.setTint(difference.backgroundColor);
 
             text.setTextColor(difference.textColor);

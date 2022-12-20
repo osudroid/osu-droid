@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 20/12/2022, 02:37 -->
+
+<com.reco1l.view.PanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/panelWidth"
+    android:layout_height="match_parent"
+    android:layout_marginRight="@dimen/M"
+    app:panelTitle="Section">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/mm_modContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/S"
+            android:layout_marginVertical="@dimen/M"
+            tools:itemCount="4"
+            tools:listitem="@layout/mod_menu_item" />
+
+    </ScrollView>
+
+</com.reco1l.view.PanelLayout>

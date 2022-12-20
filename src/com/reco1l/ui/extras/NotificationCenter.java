@@ -19,7 +19,7 @@ import com.reco1l.ui.data.NotificationListAdapter.ViewHolder;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.AnimationOld;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 import com.reco1l.utils.ViewUtils;
 
 import java.util.ArrayList;
@@ -48,6 +48,7 @@ public class NotificationCenter extends UIFragment {
     //--------------------------------------------------------------------------------------------//
 
     public NotificationCenter() {
+        super();
         notifications = new ArrayList<>();
         adapter = new NotificationListAdapter(notifications);
         popupFragment = new PopupFragment();
@@ -75,7 +76,7 @@ public class NotificationCenter extends UIFragment {
     @Override
     protected void onLoad() {
         setDismissMode(true, true);
-        bodyWidth = Resources.dimen(R.dimen.notificationCenterWidth);
+        bodyWidth = Res.dimen(R.dimen.notificationCenterWidth);
 
         body = find("body");
         layer = find("layer");
@@ -238,7 +239,7 @@ public class NotificationCenter extends UIFragment {
 
             new AnimationOld(platform.renderView).moveX(-50, 0)
                     .play(400);
-            new AnimationOld(body).moveX(0, Resources.dimen(R.dimen.notificationCenterWidth))
+            new AnimationOld(body).moveX(0, Res.dimen(R.dimen.notificationCenterWidth))
                     .interpolator(Easing.InExpo)
                     .runOnStart(() -> new AnimationOld(rootBackground).fade(1, 0).play(300))
                     .play(350);
@@ -295,10 +296,10 @@ public class NotificationCenter extends UIFragment {
 
         @Override
         protected void onLoad() {
-            int xs = Resources.dimen(R.dimen.XS);
+            int xs = Res.dimen(R.dimen.XS);
 
             rootView.setPadding(xs, xs, xs, xs);
-            rootView.setElevation(Resources.dimen(R.dimen.XXL));
+            rootView.setElevation(Res.dimen(R.dimen.XXL));
             bind();
         }
 
@@ -307,7 +308,7 @@ public class NotificationCenter extends UIFragment {
 
             LayoutParams params = (LayoutParams) holder.body.getLayoutParams();
 
-            params.width = Resources.dimen(R.dimen.popupNotificationWidth);
+            params.width = Res.dimen(R.dimen.popupNotificationWidth);
             params.addRule(ALIGN_PARENT_END);
             holder.body.setLayoutParams(params);
 

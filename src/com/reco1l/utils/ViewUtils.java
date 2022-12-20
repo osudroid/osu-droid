@@ -135,4 +135,51 @@ public class ViewUtils {
 
     //--------------------------------------------------------------------------------------------//
 
+    public static RuleUtils rule(View view) {
+        return new RuleUtils(view);
+    }
+
+    public static class RuleUtils {
+
+        private final View view;
+        private final RelativeLayout.LayoutParams params;
+
+        private int[] rules;
+
+        //----------------------------------------------------------------------------------------//
+
+        private RuleUtils(View view) {
+            this.view = view;
+            if (!(view.getLayoutParams() instanceof RelativeLayout.LayoutParams)) {
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(0, 0);
+
+                params.width = view.getLayoutParams().width;
+                params.height = view.getLayoutParams().height;
+                view.setLayoutParams(params);
+            }
+            params = (RelativeLayout.LayoutParams) view.getLayoutParams();
+        }
+
+        //----------------------------------------------------------------------------------------//
+
+        public RuleUtils add(int... rules) {
+            this.rules = rules;
+            return this;
+        }
+
+        public void apply() {
+            apply(null);
+        }
+
+        public void apply(Integer subject) {
+            for (int verb : rules) {
+                if (subject != null) {
+                    params.addRule(verb, subject);
+                } else {
+                    params.addRule(verb);
+                }
+            }
+            view.setLayoutParams(params);
+        }
+    }
 }

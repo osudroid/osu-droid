@@ -12,9 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.imageview.ShapeableImageView;
 import com.reco1l.Game;
-import com.reco1l.UI;
 import com.reco1l.utils.AnimationOld;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 import com.reco1l.utils.ViewTouchHandler;
 import com.reco1l.interfaces.IReferences;
 import com.reco1l.utils.ViewUtils;
@@ -22,7 +21,6 @@ import com.reco1l.utils.listeners.TouchListener;
 
 import java.util.List;
 
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -115,11 +113,11 @@ public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.V
 
                 image.setImageBitmap(bitmapManager.get("selection-mod-" + mod.texture));
 
-                ViewUtils.size(image, (int) Resources.dimen(R.dimen.scoreboardItemModSize));
+                ViewUtils.size(image, (int) Res.dimen(R.dimen.scoreboardItemModSize));
                 image.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
                 if (data.getMods().indexOf(mod) > 0) {
-                    ViewUtils.margins(image).left((int) Resources.dimen(R.dimen.XXS));
+                    ViewUtils.margins(image).left((int) Res.dimen(R.dimen.XXS));
                 }
             }
 

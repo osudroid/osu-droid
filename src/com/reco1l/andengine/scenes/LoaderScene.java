@@ -124,6 +124,7 @@ public class LoaderScene extends BaseScene {
         //----------------------------------------------------------------------------------------//
 
         public Fragment() {
+            super();
             log = ToastLogger.getLog();
         }
 

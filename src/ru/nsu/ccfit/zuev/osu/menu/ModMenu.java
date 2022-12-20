@@ -1,6 +1,9 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
+import static ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*;
+
 import com.edlplan.ui.fragment.InGameSettingMenu;
+import com.reco1l.UI;
 
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
@@ -62,7 +65,6 @@ public class ModMenu implements IModSwitcher {
     }
 
     public void reload() {
-        mod = EnumSet.noneOf(GameMod.class);
         init();
     }
 
@@ -123,27 +125,27 @@ public class ModMenu implements IModSwitcher {
         final TextureRegion button = ResourceManager.getInstance().getTexture("selection-mod-easy");
 
         //line 1
-        addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-easy", GameMod.MOD_EASY);
-        addButton(offset + offsetGrowth, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-nofail", GameMod.MOD_NOFAIL);
-        addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-halftime", GameMod.MOD_HALFTIME);
-        addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-reallyeasy", GameMod.MOD_REALLYEASY);
+        addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-easy", MOD_EASY);
+        addButton(offset + offsetGrowth, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-nofail", MOD_NOFAIL);
+        addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-halftime", MOD_HALFTIME);
+        addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-reallyeasy", MOD_REALLYEASY);
 
         //line 2
-        addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hardrock", GameMod.MOD_HARDROCK);
-        addButton(offset + offsetGrowth, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-doubletime", GameMod.MOD_DOUBLETIME);
-        addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-nightcore", GameMod.MOD_NIGHTCORE);
-        addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hidden", GameMod.MOD_HIDDEN);
-        addButton(offset + offsetGrowth * 4, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-flashlight", GameMod.MOD_FLASHLIGHT);
-        addButton(offset + offsetGrowth * 5, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-suddendeath", GameMod.MOD_SUDDENDEATH);
-        addButton(offset + offsetGrowth * 6, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-perfect", GameMod.MOD_PERFECT);
+        addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hardrock", MOD_HARDROCK);
+        addButton(offset + offsetGrowth, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-doubletime", MOD_DOUBLETIME);
+        addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-nightcore", MOD_NIGHTCORE);
+        addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hidden", MOD_HIDDEN);
+        addButton(offset + offsetGrowth * 4, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-flashlight", MOD_FLASHLIGHT);
+        addButton(offset + offsetGrowth * 5, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-suddendeath", MOD_SUDDENDEATH);
+        addButton(offset + offsetGrowth * 6, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-perfect", MOD_PERFECT);
         //addButton(offset + offsetGrowth * 6, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-speedup", GameMod.MOD_SPEEDUP);
         //line 3
-        addButton(offset, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax", GameMod.MOD_RELAX);
-        addButton(offset + offsetGrowth, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax2", GameMod.MOD_AUTOPILOT);
-        addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-autoplay", GameMod.MOD_AUTO);
-        addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-scorev2", GameMod.MOD_SCOREV2);
-        addButton(offset + offsetGrowth * 4, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-precise", GameMod.MOD_PRECISE);
-        addButton(offset + offsetGrowth * 5, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-smallcircle", GameMod.MOD_SMALLCIRCLE);
+        addButton(offset, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax", MOD_RELAX);
+        addButton(offset + offsetGrowth, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax2", MOD_AUTOPILOT);
+        addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-autoplay", MOD_AUTO);
+        addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-scorev2", MOD_SCOREV2);
+        addButton(offset + offsetGrowth * 4, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-precise", MOD_PRECISE);
+        addButton(offset + offsetGrowth * 5, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-smallcircle", MOD_SMALLCIRCLE);
 
 
         final TextButton resetText = new TextButton(ResourceManager
@@ -204,7 +206,7 @@ public class ModMenu implements IModSwitcher {
     }
 
     public EnumSet<GameMod> getMod() {
-        return mod.clone();
+        return UI.modMenu.mods;
     }
 
     public void setMod(EnumSet<GameMod> mod) {
@@ -254,17 +256,17 @@ public class ModMenu implements IModSwitcher {
         } else {
             mod.add(flag);
 
-            handleModFlags(flag, GameMod.MOD_HARDROCK, new GameMod[]{GameMod.MOD_EASY});
-            handleModFlags(flag, GameMod.MOD_EASY, new GameMod[]{GameMod.MOD_HARDROCK});
-            handleModFlags(flag, GameMod.MOD_AUTOPILOT, new GameMod[]{GameMod.MOD_RELAX, GameMod.MOD_PERFECT, GameMod.MOD_SUDDENDEATH, GameMod.MOD_AUTO, GameMod.MOD_NOFAIL});
-            handleModFlags(flag, GameMod.MOD_AUTO, new GameMod[]{GameMod.MOD_RELAX, GameMod.MOD_AUTOPILOT, GameMod.MOD_PERFECT, GameMod.MOD_SUDDENDEATH});
-            handleModFlags(flag, GameMod.MOD_RELAX, new GameMod[]{GameMod.MOD_AUTO, GameMod.MOD_PERFECT, GameMod.MOD_SUDDENDEATH, GameMod.MOD_NOFAIL, GameMod.MOD_AUTOPILOT});
-            handleModFlags(flag, GameMod.MOD_DOUBLETIME, new GameMod[]{GameMod.MOD_NIGHTCORE, GameMod.MOD_HALFTIME});
-            handleModFlags(flag, GameMod.MOD_NIGHTCORE, new GameMod[]{GameMod.MOD_DOUBLETIME, GameMod.MOD_HALFTIME});
-            handleModFlags(flag, GameMod.MOD_HALFTIME, new GameMod[]{GameMod.MOD_DOUBLETIME, GameMod.MOD_NIGHTCORE});
-            handleModFlags(flag, GameMod.MOD_SUDDENDEATH, new GameMod[]{GameMod.MOD_NOFAIL, GameMod.MOD_PERFECT, GameMod.MOD_AUTOPILOT, GameMod.MOD_RELAX, GameMod.MOD_AUTO});
-            handleModFlags(flag, GameMod.MOD_PERFECT, new GameMod[]{GameMod.MOD_NOFAIL, GameMod.MOD_SUDDENDEATH, GameMod.MOD_AUTOPILOT, GameMod.MOD_RELAX, GameMod.MOD_AUTO});
-            handleModFlags(flag, GameMod.MOD_NOFAIL, new GameMod[]{GameMod.MOD_PERFECT, GameMod.MOD_SUDDENDEATH, GameMod.MOD_AUTOPILOT, GameMod.MOD_RELAX});
+            handleModFlags(flag, MOD_HARDROCK, new GameMod[]{MOD_EASY});
+            handleModFlags(flag, MOD_EASY, new GameMod[]{MOD_HARDROCK});
+            handleModFlags(flag, MOD_AUTOPILOT, new GameMod[]{MOD_RELAX, MOD_PERFECT, MOD_SUDDENDEATH, MOD_AUTO, MOD_NOFAIL});
+            handleModFlags(flag, MOD_AUTO, new GameMod[]{MOD_RELAX, MOD_AUTOPILOT, MOD_PERFECT, MOD_SUDDENDEATH});
+            handleModFlags(flag, MOD_RELAX, new GameMod[]{MOD_AUTO, MOD_PERFECT, MOD_SUDDENDEATH, MOD_NOFAIL, MOD_AUTOPILOT});
+            handleModFlags(flag, MOD_DOUBLETIME, new GameMod[]{MOD_NIGHTCORE, MOD_HALFTIME});
+            handleModFlags(flag, MOD_NIGHTCORE, new GameMod[]{MOD_DOUBLETIME, MOD_HALFTIME});
+            handleModFlags(flag, MOD_HALFTIME, new GameMod[]{MOD_DOUBLETIME, MOD_NIGHTCORE});
+            handleModFlags(flag, MOD_SUDDENDEATH, new GameMod[]{MOD_NOFAIL, MOD_PERFECT, MOD_AUTOPILOT, MOD_RELAX, MOD_AUTO});
+            handleModFlags(flag, MOD_PERFECT, new GameMod[]{MOD_NOFAIL, MOD_SUDDENDEATH, MOD_AUTOPILOT, MOD_RELAX, MOD_AUTO});
+            handleModFlags(flag, MOD_NOFAIL, new GameMod[]{MOD_PERFECT, MOD_SUDDENDEATH, MOD_AUTOPILOT, MOD_RELAX});
 
             if (modsRemoved) {
                 for (GameMod gameMod : modButtons.keySet()) {
@@ -287,9 +289,9 @@ public class ModMenu implements IModSwitcher {
 
     public float getSpeed(){
         float speed = changeSpeed;
-        if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
+        if (mod.contains(MOD_DOUBLETIME) || mod.contains(MOD_NIGHTCORE)){
             speed *= 1.5f;
-        } else if (mod.contains(GameMod.MOD_HALFTIME)){
+        } else if (mod.contains(MOD_HALFTIME)){
             speed *= 0.75f;
         }
 

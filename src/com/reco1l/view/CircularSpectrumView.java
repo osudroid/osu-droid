@@ -3,12 +3,10 @@ package com.reco1l.view;
 // Created by Reco1l on 13/11/2022, 20:54
 
 import android.content.Context;
-import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -17,7 +15,7 @@ import androidx.core.math.MathUtils;
 
 import com.reco1l.Game;
 import com.reco1l.UI;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 
@@ -58,7 +56,7 @@ public class CircularSpectrumView extends View {
         createPaint(false);
 
         if (!isInEditMode()) {
-            lineWidth = Resources.sdp(5);
+            lineWidth = Res.sdp(5);
         }
 
         peakLevel = new float[lines];

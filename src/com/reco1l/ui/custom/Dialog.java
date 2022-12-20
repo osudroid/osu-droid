@@ -2,7 +2,6 @@ package com.reco1l.ui.custom;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
@@ -16,7 +15,7 @@ import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.AnimationOld;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.ViewUtils.MarginUtils;
 import com.reco1l.utils.listeners.TouchListener;
@@ -42,6 +41,7 @@ public class Dialog extends UIFragment {
     //--------------------------------------------------------------------------------------------//
 
     public Dialog(@NotNull DialogBuilder builder) {
+        super();
         this.builder = builder;
     }
 
@@ -68,8 +68,8 @@ public class Dialog extends UIFragment {
     protected void onLoad() {
         setDismissMode(builder.closeOnBackgroundClick, builder.closeOnBackPress);
 
-        int m = (int) Resources.dimen(R.dimen.M);
-        int xs = (int) Resources.dimen(R.dimen.XS);
+        int m = (int) Res.dimen(R.dimen.M);
+        int xs = (int) Res.dimen(R.dimen.XS);
 
         buttonsContainer = find("buttonsContainer");
         bodyParent = find("bodyParent");
@@ -228,14 +228,14 @@ public class Dialog extends UIFragment {
 
         private void build(LinearLayout container) {
             view = new TextButton(Game.activity);
-            container.addView(view, new LayoutParams(MATCH_PARENT, (int) Resources.dimen(R.dimen.dialogButtonHeight)));
+            container.addView(view, new LayoutParams(MATCH_PARENT, (int) Res.dimen(R.dimen.dialogButtonHeight)));
         }
 
         private void load(Dialog dialog) {
             dialog.bindTouchListener(view, () -> onClick.onButtonClick(dialog));
 
             if (color != null) {
-                view.setButtonColor(color);
+                view.setCardBackgroundColor(color);
             }
             view.setButtonText(text);
         }

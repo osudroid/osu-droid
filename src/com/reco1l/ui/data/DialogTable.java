@@ -8,7 +8,7 @@ import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
 import com.reco1l.ui.custom.DialogFragment;
 import com.reco1l.interfaces.IReferences;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
@@ -77,7 +77,7 @@ public class DialogTable implements IReferences {
         DialogBuilder builder = new DialogBuilder();
 
         builder.title = "Warning";
-        builder.message = Resources.str(R.string.message_autoclicker_detected);
+        builder.message = Res.str(R.string.message_autoclicker_detected);
         builder.setCloseMode(false);
         builder.addButton("Exit", dialog -> {
             dialog.close();

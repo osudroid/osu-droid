@@ -31,7 +31,7 @@ import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.AsyncExec;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 import com.reco1l.utils.helpers.BitmapHelper;
 import com.reco1l.utils.listeners.TouchListener;
 
@@ -104,8 +104,8 @@ public class MusicPlayer extends UIFragment {
         play = find("play");
 
         Animation.of(body)
-                .fromHeight(Resources.dimen(R.dimen._30sdp))
-                .toHeight(Resources.dimen(R.dimen.musicPlayerHeight))
+                .fromHeight(Res.dimen(R.dimen._30sdp))
+                .toHeight(Res.dimen(R.dimen.musicPlayerHeight))
                 .fromY(-30)
                 .toY(0)
                 .fromAlpha(0)
@@ -188,7 +188,7 @@ public class MusicPlayer extends UIFragment {
             Animation.of(play)
                     .fromRotation(180)
                     .toRotation(0)
-                    .runOnEnd(() -> play.setImageDrawable(Resources.drw(R.drawable.v_pause_xl)))
+                    .runOnEnd(() -> play.setImageDrawable(Res.drw(R.drawable.v_pause_xl)))
                     .play(160);
 
         } else if (!Game.musicManager.isPlaying() && wasPlaying) {
@@ -197,7 +197,7 @@ public class MusicPlayer extends UIFragment {
             Animation.of(play)
                     .fromRotation(180)
                     .toRotation(0)
-                    .runOnEnd(() -> play.setImageDrawable(Resources.drw(R.drawable.v_play_xl_circle)))
+                    .runOnEnd(() -> play.setImageDrawable(Res.drw(R.drawable.v_play_xl_circle)))
                     .play(160);
         }
     }
@@ -208,7 +208,7 @@ public class MusicPlayer extends UIFragment {
         if (!isListVisible) {
             isListVisible = true;
             Animation.of(find("listBody"))
-                    .toWidth(Resources.dimen(R.dimen.musicPlayerListWidth))
+                    .toWidth(Res.dimen(R.dimen.musicPlayerListWidth))
                     .play(300);
         } else {
             isListVisible = false;
@@ -320,8 +320,8 @@ public class MusicPlayer extends UIFragment {
                     .play(100);
 
             Animation.of(body)
-                    .fromHeight(Resources.dimen(R.dimen.musicPlayerHeight))
-                    .toHeight(Resources.dimen(R.dimen._30sdp))
+                    .fromHeight(Res.dimen(R.dimen.musicPlayerHeight))
+                    .toHeight(Res.dimen(R.dimen._30sdp))
                     .runOnEnd(super::close)
                     .toY(-30)
                     .toAlpha(0)
@@ -353,16 +353,16 @@ public class MusicPlayer extends UIFragment {
 
             view.setLayoutParams(new LayoutParams(MATCH_PARENT, WRAP_CONTENT));
 
-            Drawable drawable = Resources.drw(R.drawable.shape_rounded).mutate();
-            drawable.setTint(Resources.color(R.color.accent));
+            Drawable drawable = Res.drw(R.drawable.shape_rounded).mutate();
+            drawable.setTint(Res.color(R.color.accent));
             drawable.setAlpha(0);
 
             view.setBackground(drawable);
             view.setEllipsize(TextUtils.TruncateAt.END);
             view.setSingleLine(true);
 
-            int m = Resources.dimen(R.dimen.M);
-            int s = Resources.dimen(R.dimen.S);
+            int m = Res.dimen(R.dimen.M);
+            int s = Res.dimen(R.dimen.S);
             view.setPadding(m, s, m, s);
 
             return new ViewHolder(view, this);
@@ -442,7 +442,7 @@ public class MusicPlayer extends UIFragment {
                         })
                         .play(200);
 
-                Animation.ofArgb(Color.WHITE, Resources.color(R.color.accent))
+                Animation.ofColor(Color.WHITE, Res.color(R.color.accent))
                         .runOnUpdate(value -> text.setTextColor((int) value))
                         .play(200);
             }
@@ -462,7 +462,7 @@ public class MusicPlayer extends UIFragment {
                         })
                         .play(200);
 
-                Animation.ofArgb(Resources.color(R.color.accent), Color.WHITE)
+                Animation.ofColor(Res.color(R.color.accent), Color.WHITE)
                         .runOnUpdate(value -> text.setTextColor((int) value))
                         .play(200);
             }

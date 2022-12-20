@@ -12,7 +12,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.UI;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.AnimationOld;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 
 import java.text.DecimalFormat;
 
@@ -53,7 +53,7 @@ public class UserProfile extends UIFragment {
         body.postDelayed(closeTask, 8000);
 
         new AnimationOld(body)
-                .height(Resources.sdp(30), Resources.dimen(online.isStayOnline() ?
+                .height(Res.sdp(30), Res.dimen(online.isStayOnline() ?
                         R.dimen.userPanelHeight : R.dimen.userPanelSmallHeight))
                 .interpolatorMode(AnimationOld.Interpolate.VALUE_ANIMATOR)
                 .interpolator(Easing.OutExpo)
@@ -127,9 +127,9 @@ public class UserProfile extends UIFragment {
     //--------------------------------------------------------------------------------------------//
 
     public void updateMessage(String text) {
-        message = text != null ? text : Resources.str(R.string.user_profile_offline_message);
+        message = text != null ? text : Res.str(R.string.user_profile_offline_message);
         if (BuildConfig.DEBUG)
-            message = text != null ? text : Resources.str(R.string.user_profile_debug_message);
+            message = text != null ? text : Res.str(R.string.user_profile_debug_message);
         if (!isShowing)
             return;
         activity.runOnUiThread(() -> errorText.setText(message));
@@ -155,8 +155,8 @@ public class UserProfile extends UIFragment {
                 .play(100);
 
         new AnimationOld(body)
-                .height(Resources.dimen(online.isStayOnline() ?
-                        R.dimen.userPanelHeight : R.dimen.userPanelSmallHeight), Resources.sdp(30))
+                .height(Res.dimen(online.isStayOnline() ?
+                        R.dimen.userPanelHeight : R.dimen.userPanelSmallHeight), Res.sdp(30))
                 .interpolatorMode(AnimationOld.Interpolate.VALUE_ANIMATOR)
                 .interpolator(Easing.OutExpo)
                 .runOnEnd(super::close)

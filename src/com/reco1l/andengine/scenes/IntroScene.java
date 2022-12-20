@@ -13,7 +13,7 @@ import com.reco1l.enums.Screens;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.AsyncExec;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -140,7 +140,7 @@ public class IntroScene extends BaseScene {
                     .play(400);
 
             Animation.of(logo)
-                    .toSize(Resources.dimen(R.dimen.mainMenuLogoSize))
+                    .toSize(Res.dimen(R.dimen.mainMenuLogoSize))
                     .delay(300)
                     .play(300);
 

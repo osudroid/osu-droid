@@ -15,7 +15,7 @@ import android.widget.RelativeLayout;
 import androidx.annotation.Nullable;
 
 import com.reco1l.utils.AnimationOld;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -45,8 +45,8 @@ public final class BarButton extends RelativeLayout {
     private void create(Context context) {
         setLayoutParams(new LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
 
-        int width = (int) Resources.dimen(R.dimen.topBarButtonWidth);
-        int height = (int) Resources.dimen(R.dimen.topBarButtonHeight);
+        int width = (int) Res.dimen(R.dimen.topBarButtonWidth);
+        int height = (int) Res.dimen(R.dimen.topBarButtonHeight);
 
         // Icon
         icon = new ImageView(context);
@@ -58,7 +58,7 @@ public final class BarButton extends RelativeLayout {
         // Indicator
         indicator = new View(context);
 
-        indicator.setLayoutParams(new LayoutParams(width, (int) Resources.sdp(2)) {{
+        indicator.setLayoutParams(new LayoutParams(width, (int) Res.sdp(2)) {{
             addRule(ALIGN_PARENT_BOTTOM);
         }});
         indicator.setBackground(new ColorDrawable(Color.WHITE));

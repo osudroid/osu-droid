@@ -6,12 +6,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
-import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,7 +17,7 @@ import androidx.cardview.widget.CardView;
 
 import com.reco1l.Game;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 import com.reco1l.utils.ViewUtils;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -63,12 +61,12 @@ public class LogoView extends CardView implements BaseView {
 
         setCardBackgroundColor(0xFF1E1E1E);
         if (!isInEditMode()) {
-            setCardElevation(Resources.sdp(20));
+            setCardElevation(Res.sdp(20));
         }
 
         StripsEffectView stripsEffect = new StripsEffectView(context);
         if (!isInEditMode()) {
-            stripsEffect.setStripWidth(Resources.sdp(20));
+            stripsEffect.setStripWidth(Res.sdp(20));
         }
         addView(stripsEffect, params);
 

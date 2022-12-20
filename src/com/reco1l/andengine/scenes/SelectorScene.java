@@ -2,15 +2,13 @@ package com.reco1l.andengine.scenes;
 
 // Created by Reco1l on 26/9/22 17:40
 
-import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.replay.OdrDatabase;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.enums.Screens;
 import com.reco1l.andengine.BaseScene;
-import com.reco1l.game.TimingWrapper;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 import com.reco1l.view.BarButton;
 
 import org.anddev.andengine.entity.scene.Scene;
@@ -54,16 +52,17 @@ public class SelectorScene extends BaseScene {
         BarButton mods = new BarButton(Game.activity);
 
         mods.setAsToggle(true);
-        mods.setIcon(Resources.drw(R.drawable.v_tune));
+        mods.runOnTouch(UI.modMenu::altShow);
+        mods.setIcon(Res.drw(R.drawable.v_tune));
 
         BarButton search = new BarButton(Game.activity);
 
         search.setAsToggle(true);
-        search.setIcon(Resources.drw(R.drawable.v_search));
+        search.setIcon(Res.drw(R.drawable.v_search));
 
         BarButton random = new BarButton(Game.activity);
 
-        random.setIcon(Resources.drw(R.drawable.v_random));
+        random.setIcon(Res.drw(R.drawable.v_random));
 
         UI.topBar.addButton(getIdentifier(), mods);
         UI.topBar.addButton(getIdentifier(), search);

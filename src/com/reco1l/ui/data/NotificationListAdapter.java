@@ -1,74 +1,59 @@
 package com.reco1l.ui.data;
 // Created by Reco1l on 05/12/2022, 06:27
 
-import static com.reco1l.ui.data.NotificationListAdapter.*;
-
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.reco1l.UI;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.BaseAdapter;
+import com.reco1l.utils.BaseViewHolder;
 
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class NotificationListAdapter extends BaseAdapter<ViewHolder> {
-
-    private final ArrayList<GameNotification> notifications;
+public class NotificationListAdapter extends BaseAdapter<NotificationListAdapter.ViewHolder, GameNotification> {
 
     //--------------------------------------------------------------------------------------------/
 
-    public NotificationListAdapter(ArrayList<GameNotification> notifications) {
-        this.notifications = notifications;
+    public NotificationListAdapter(ArrayList<GameNotification> list) {
+        super(list);
     }
 
-    //--------------------------------------------------------------------------------------------/
+    //--------------------------------------------------------------------------------------------//
 
-    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-
-        return new ViewHolder(inflater.inflate(R.layout.notification, parent, false));
+    protected int getLayout() {
+        return R.layout.notification;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(notifications.get(position));
-    }
-
-    @Override
-    public int getItemCount() {
-        return notifications.size();
+    protected ViewHolder getViewHolder(View root) {
+        return new ViewHolder(root);
     }
 
     //--------------------------------------------------------------------------------------------/
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends BaseViewHolder<GameNotification> {
 
-        public View rootView;
         public GameNotification notification;
 
         private GameNotification.Holder holder;
 
         //----------------------------------------------------------------------------------------//
 
-        public ViewHolder(@NonNull View rootView) {
-            super(rootView);
-            this.rootView = rootView;
+        public ViewHolder(@NonNull View root) {
+            super(root);
         }
 
         //----------------------------------------------------------------------------------------//
 
-        private void bind(GameNotification notification) {
+        @Override
+        protected void bind(GameNotification notification) {
             this.notification = notification;
-            this.holder = notification.build(rootView);
+            this.holder = notification.build(root);
 
             UI.notificationCenter.bindTouchListener(holder.close, this::onDismiss);
             UI.notificationCenter.bindTouchListener(holder.body, notification.runOnClick);

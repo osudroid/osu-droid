@@ -33,7 +33,7 @@ import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.AnimationTable;
 import com.reco1l.utils.AsyncExec;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
@@ -129,8 +129,8 @@ public class SettingsMenu extends UIFragment {
         }
         currentTab = Tabs.general;
 
-        panelWidth = (int) Resources.dimen(R.dimen.settingsPanelWidth);
-        navBarWidth = (int) Resources.dimen(R.dimen.settingsPanelNavBarWidth);
+        panelWidth = (int) Res.dimen(R.dimen.settingsPanelWidth);
+        navBarWidth = (int) Res.dimen(R.dimen.settingsPanelNavBarWidth);
 
         tabIndicator = find("tabIndicator");
         navigationBar = find("navbar");

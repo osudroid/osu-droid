@@ -14,7 +14,7 @@ import com.reco1l.ui.data.BeatmapListAdapter;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.AnimationOld;
 import com.reco1l.utils.AsyncExec;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.view.LogoView;
 
@@ -49,6 +49,7 @@ public class BeatmapCarrousel extends UIFragment {
     //--------------------------------------------------------------------------------------------//
 
     public BeatmapCarrousel() {
+        super();
         beatmaps = new ArrayList<>();
         adapter = new BeatmapListAdapter(beatmaps);
     }
@@ -78,8 +79,8 @@ public class BeatmapCarrousel extends UIFragment {
         logo = find("logo");
 
         ViewUtils.margins(logo)
-                .bottom(-Resources.sdp(42))
-                .right(-Resources.sdp(22));
+                .bottom(-Res.sdp(42))
+                .right(-Res.sdp(22));
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(adapter);

@@ -39,4 +39,13 @@ public enum GameMod {
         this.unranked = unranked;
         this.texture = texture;
     }
+
+    public boolean equals(GameMod... mods) {
+        for (GameMod mod : mods) {
+            if (mod == this) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

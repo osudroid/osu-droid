@@ -16,7 +16,7 @@ import com.reco1l.utils.KeyInputHandler;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.data.DialogTable;
 import com.reco1l.ui.platform.UIFragment;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 import com.reco1l.view.BarButton;
 
 import java.util.ArrayList;
@@ -48,6 +48,7 @@ public class TopBar extends UIFragment {
     //--------------------------------------------------------------------------------------------//
 
     public TopBar() {
+        super();
         buttons = new HashMap<>();
     }
 
@@ -78,7 +79,7 @@ public class TopBar extends UIFragment {
     @Override
     protected void onLoad() {
         setDismissMode(false, false);
-        barHeight = (int) Resources.dimen(R.dimen.topBarHeight);
+        barHeight = (int) Res.dimen(R.dimen.topBarHeight);
 
         body = find("body");
 
@@ -103,7 +104,7 @@ public class TopBar extends UIFragment {
             musicButton.setVisibility(false);
         }
 
-        author.setText(Resources.str(R.string.app_name) + " " + BuildConfig.VERSION_NAME);
+        author.setText(Res.str(R.string.app_name) + " " + BuildConfig.VERSION_NAME);
 
         bindTouchListener(find("inbox"), UI.notificationCenter::altShow);
         bindTouchListener(find("settings"), UI.settingsPanel::altShow);
@@ -317,7 +318,7 @@ public class TopBar extends UIFragment {
 
             AnimationTable.fadeOutIn(avatar, () -> avatar.setImageResource(R.drawable.default_avatar));
 
-            AnimationTable.textChange(rank, Resources.str(R.string.top_bar_offline));
+            AnimationTable.textChange(rank, Res.str(R.string.top_bar_offline));
             AnimationTable.textChange(name, Config.getLocalUsername());
 
             if (online.isStayOnline() && !clear) {

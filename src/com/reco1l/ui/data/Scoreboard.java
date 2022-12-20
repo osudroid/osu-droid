@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.reco1l.interfaces.IReferences;
 import com.reco1l.utils.helpers.ScoringHelper;
 import com.reco1l.utils.AsyncExec;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 
 import java.io.File;
 import java.text.NumberFormat;
@@ -107,7 +107,7 @@ public class Scoreboard implements IReferences {
 
         if (cursor.getCount() == 0) {
             cursor.close();
-            errorMessage = Resources.str(R.string.beatmap_panel_empty_prompt);
+            errorMessage = Res.str(R.string.beatmap_panel_empty_prompt);
             return false;
         }
         cursor.moveToFirst();
@@ -155,7 +155,7 @@ public class Scoreboard implements IReferences {
     //----------------------------------------------------------------------------------------//
     private boolean loadOnlineBoard(TrackInfo track) {
         if (track == null || !online.isStayOnline() || BuildConfig.DEBUG) {
-            errorMessage = Resources.str(R.string.beatmap_panel_offline_prompt);
+            errorMessage = Res.str(R.string.beatmap_panel_offline_prompt);
             return false;
         }
 
@@ -164,12 +164,12 @@ public class Scoreboard implements IReferences {
         try {
             scores = online.getTop(file, FileUtils.getMD5Checksum(file));
         } catch (OnlineManager.OnlineManagerException exception) {
-            errorMessage = Resources.str(R.string.beatmap_panel_error_prompt) + "\n(" + exception.getMessage() + ")";
+            errorMessage = Res.str(R.string.beatmap_panel_error_prompt) + "\n(" + exception.getMessage() + ")";
             return false;
         }
 
         if (scores.size() == 0) {
-            errorMessage = Resources.str(R.string.beatmap_panel_empty_prompt);
+            errorMessage = Res.str(R.string.beatmap_panel_empty_prompt);
             return false;
         }
 

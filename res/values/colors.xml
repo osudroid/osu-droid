@@ -78,6 +78,7 @@
     <color name="gameResultsCardColor">#33000000</color>
     <color name="gameResultsBadgeBackground">#1A000000</color>
 
-    <color name="colorTest">#FF292929</color>
+    <!--Mod menu-->
+    <color name="modMenuSelected">#222F3D</color>
 
 </resources>

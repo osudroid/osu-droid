@@ -9,6 +9,7 @@ import com.reco1l.ui.fragments.GameSummary;
 import com.reco1l.ui.fragments.MainMenu;
 import com.reco1l.ui.extras.MusicPlayer;
 import com.reco1l.ui.extras.SettingsMenu;
+import com.reco1l.ui.fragments.ModMenu;
 import com.reco1l.ui.fragments.TopBar;
 import com.reco1l.ui.extras.UserProfile;
 import com.reco1l.ui.platform.UIFragment;
@@ -28,6 +29,7 @@ public final class UI {
     public static DebugOverlay debugOverlay = getDebugOverlay();
     public static Background background = getBackground();
     public static GameSummary gameSummary = getGameSummary();
+    public static ModMenu modMenu = getModMenu();
 
     //--------------------------------------------------------------------------------------------//
 
@@ -36,7 +38,8 @@ public final class UI {
                 getNotificationCenter(),
                 getMusicPlayer(),
                 getUserProfile(),
-                getSettingsMenu()
+                getSettingsMenu(),
+                getModMenu()
         };
     }
 
@@ -117,5 +120,12 @@ public final class UI {
             GameSummary.instance = new GameSummary();
         }
         return GameSummary.instance;
+    }
+
+    private static ModMenu getModMenu() {
+        if (ModMenu.instance == null) {
+            ModMenu.instance = new ModMenu();
+        }
+        return ModMenu.instance;
     }
 }

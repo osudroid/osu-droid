@@ -9,9 +9,12 @@
 
     <!--Views-->
     <declare-styleable name="TextButton">
+        <attr name="beatSync"/>
         <attr name="buttonText" format="string"/>
         <attr name="buttonColor" format="color"/>
-        <attr name="beatSync"/>
+        <attr name="buttonRadius" format="dimension"/>
+        <attr name="textHorizontalPadding" format="dimension"/>
+        <attr name="textVerticalPadding" format="dimension"/>
     </declare-styleable>
 
     <declare-styleable name="LogoView">
@@ -28,6 +31,14 @@
 
     <declare-styleable name="FlashEffectView">
         <attr name="beatSync"/>
+    </declare-styleable>
+
+    <declare-styleable name="PanelLayout">
+        <attr name="beatSync"/>
+        <attr name="panelColor" format="color"/>
+        <attr name="panelTitle" format="string"/>
+        <attr name="panelRadius" format="dimension"/>
+        <attr name="panelTitleHeight" format="dimension"/>
     </declare-styleable>
 
 </resources>

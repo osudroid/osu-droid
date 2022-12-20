@@ -15,7 +15,7 @@ import androidx.fragment.app.Fragment;
 import com.reco1l.enums.Screens;
 import com.reco1l.utils.listeners.TouchListener;
 import com.reco1l.utils.ViewTouchHandler;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 import com.reco1l.interfaces.IReferences;
 
 import java.util.HashMap;
@@ -222,9 +222,9 @@ public abstract class UIFragment extends Fragment implements IReferences {
 
         int identifier;
         if (getPrefix() == null || id.startsWith(getPrefix() + "_")) {
-            identifier = Resources.id(id, "id");
+            identifier = Res.id(id, "id");
         } else {
-            identifier = Resources.id(getPrefix() + "_" + id, "id");
+            identifier = Res.id(getPrefix() + "_" + id, "id");
         }
 
         Object view = rootView.findViewById(identifier);

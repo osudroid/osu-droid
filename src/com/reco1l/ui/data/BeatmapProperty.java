@@ -2,10 +2,9 @@ package com.reco1l.ui.data;
 
 // Created by Reco1l on 16/9/22 18:46
 
-import android.graphics.drawable.Drawable;
 import android.widget.TextView;
 
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 
 import java.text.SimpleDateFormat;
 
@@ -35,8 +34,8 @@ public class BeatmapProperty<T extends Number> {
     //--------------------------------------------------------------------------------------------//
 
     public enum State {
-        RED(Resources.color(R.color.propertyTextRed)),
-        GREEN(Resources.color(R.color.propertyTextGreen)),
+        RED(Res.color(R.color.propertyTextRed)),
+        GREEN(Res.color(R.color.propertyTextGreen)),
         NORMAL(0xFFFFFFFF);
 
         int color;

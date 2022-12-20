@@ -14,7 +14,7 @@ import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.data.Scoreboard;
 import com.reco1l.ui.platform.UIFragment;
 import com.reco1l.utils.AnimationOld;
-import com.reco1l.utils.Resources;
+import com.reco1l.utils.Res;
 import com.reco1l.interfaces.IGameMods;
 
 import java.util.EnumSet;
@@ -63,6 +63,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
     //--------------------------------------------------------------------------------------------//
 
     public BeatmapPanel() {
+        super();
         pBPM = new BeatmapProperty.BPM();
         pLength = new BeatmapProperty.Length();
 
@@ -101,7 +102,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         setDismissMode(false, false);
 
         track = global.getSelectedTrack();
-        bodyWidth = (int) Resources.dimen(R.dimen.beatmapPanelContentWidth);
+        bodyWidth = (int) Res.dimen(R.dimen.beatmapPanelContentWidth);
         isBannerExpanded = true;
 
         if (scoreboard == null) {
@@ -411,7 +412,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         scoreboard.setContainer(null);
 
         new AnimationOld(body).moveX(0, -bodyWidth)
-                .marginTop((int) Resources.dimen(R.dimen.topBarHeight), 0)
+                .marginTop((int) Res.dimen(R.dimen.topBarHeight), 0)
                 .fade(1, 0)
                 .runOnEnd(super::close)
                 .play(300);

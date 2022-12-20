@@ -122,7 +122,7 @@ public final class Animation {
         return new Animation(ValueAnimator.ofInt(from, to));
     }
 
-    public static Animation ofArgb(int from, int to) {
+    public static Animation ofColor(int from, int to) {
         return new Animation(ValueAnimator.ofArgb(from, to));
     }
 

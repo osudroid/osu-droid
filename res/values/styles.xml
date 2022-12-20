@@ -14,6 +14,7 @@
         <item name="android:ellipsize">end</item>
         <item name="android:textColorLink">@color/accent</item>
         <item name="android:linksClickable">true</item>
+        <item name="android:elevation">1dp</item>
     </style>
 
     <style name="largeText" parent="text">
