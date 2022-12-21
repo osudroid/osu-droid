@@ -6,7 +6,6 @@ import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewPropertyAnimator;
 
@@ -14,6 +13,8 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 import com.reco1l.Game;
+import com.reco1l.utils.ViewUtils.MarginUtils;
+import com.reco1l.utils.ViewUtils.PaddingUtils;
 
 import java.util.ArrayList;
 
@@ -36,13 +37,16 @@ public final class Animation {
             fromSize,
             fromWidth,
             fromHeight,
-            fromMargins,
+
             fromTopMargin,
             fromLeftMargin,
             fromRightMargin,
             fromBottomMargin,
-            fromVerticalMargins,
-            fromHorizontalMargins;
+
+            fromTopPadding,
+            fromLeftPadding,
+            fromRightPadding,
+            fromBottomPadding;
 
     private Float
             toX,
@@ -57,13 +61,16 @@ public final class Animation {
             toSize,
             toWidth,
             toHeight,
-            toMargins,
+
             toTopMargin,
             toLeftMargin,
             toRightMargin,
             toBottomMargin,
-            toVerticalMargins,
-            toHorizontalMargins;
+
+            toTopPadding,
+            toLeftPadding,
+            toRightPadding,
+            toBottomPadding;
     // End
 
     // Behavior
@@ -306,8 +313,6 @@ public final class Animation {
             valueAnimators = new ArrayList<>();
         }
 
-        LayoutParams params = view.getLayoutParams();
-
         if (fromSize != null) {
             fromHeight = fromSize;
             fromWidth = fromSize;
@@ -321,8 +326,8 @@ public final class Animation {
             if (fromHeight == null) {
                 fromHeight = view.getHeight();
             }
-            createParameterAnimator(view, params, fromHeight, toHeight, value ->
-                    params.height = (int) value
+            createLayoutAnimator(fromHeight, toHeight, value ->
+                    ViewUtils.height(view, (int) value)
             );
         }
 
@@ -330,72 +335,97 @@ public final class Animation {
             if (fromWidth == null) {
                 fromWidth = view.getWidth();
             }
-            createParameterAnimator(view, params, fromWidth, toWidth, value ->
-                    params.width = (int) value
+            createLayoutAnimator(fromWidth, toWidth, value ->
+                    ViewUtils.width(view, (int) value)
             );
         }
 
-        MarginLayoutParams margins = (MarginLayoutParams) view.getLayoutParams();
+        MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
+        view.setLayoutParams(params);
 
-        if (toMargins != null) {
-            toVerticalMargins = toMargins;
-            toHorizontalMargins = toMargins;
-        }
-        if (toVerticalMargins != null) {
-            toTopMargin = toVerticalMargins;
-            toBottomMargin = toVerticalMargins;
-        }
-        if (toHorizontalMargins != null) {
-            toLeftMargin = toHorizontalMargins;
-            toRightMargin = toHorizontalMargins;
-        }
+        MarginUtils margin = ViewUtils.margins(view);
 
         if (toTopMargin != null) {
             if (fromTopMargin == null) {
-                fromTopMargin = margins.topMargin;
+                fromTopMargin = params.topMargin;
             }
-            createParameterAnimator(view, margins, fromTopMargin, toTopMargin, value ->
-                    margins.topMargin = (int) value
+            createLayoutAnimator(fromTopMargin, toTopMargin, value ->
+                    margin.top((int) value)
             );
         }
 
         if (toBottomMargin != null) {
             if (fromBottomMargin == null) {
-                fromBottomMargin = margins.bottomMargin;
+                fromBottomMargin = params.bottomMargin;
             }
-            createParameterAnimator(view, margins, fromBottomMargin, toBottomMargin, value ->
-                    margins.bottomMargin = (int) value
+            createLayoutAnimator(fromBottomMargin, toBottomMargin, value ->
+                    margin.bottom((int) value)
             );
         }
 
         if (toLeftMargin != null) {
             if (fromLeftMargin == null) {
-                fromLeftMargin = margins.leftMargin;
+                fromLeftMargin = params.leftMargin;
             }
-            createParameterAnimator(view, margins, fromLeftMargin, toLeftMargin, value ->
-                    margins.leftMargin = (int) value
+            createLayoutAnimator(fromLeftMargin, toLeftMargin, value ->
+                    margin.left((int) value)
             );
         }
 
         if (toRightMargin != null) {
             if (fromRightMargin == null) {
-                fromRightMargin = margins.rightMargin;
+                fromRightMargin = params.rightMargin;
             }
-            createParameterAnimator(view, margins, fromRightMargin, toRightMargin, value ->
-                    margins.rightMargin = (int) value
+            createLayoutAnimator(fromRightMargin, toRightMargin, value ->
+                    margin.right((int) value)
+            );
+        }
+
+        PaddingUtils padding = ViewUtils.padding(view);
+
+        if (toTopPadding != null) {
+            if (fromTopPadding == null) {
+                fromTopPadding = view.getPaddingTop();
+            }
+            createLayoutAnimator(fromTopPadding, toTopPadding, value ->
+                    padding.top((int) value)
+            );
+        }
+
+        if (toBottomPadding != null) {
+            if (fromBottomPadding == null) {
+                fromBottomPadding = view.getPaddingBottom();
+            }
+            createLayoutAnimator(fromBottomPadding, toBottomPadding, value ->
+                    padding.bottom((int) value)
+            );
+        }
+
+        if (toLeftPadding != null) {
+            if (fromLeftPadding == null) {
+                fromLeftPadding = view.getPaddingLeft();
+            }
+            createLayoutAnimator(fromLeftPadding, toLeftPadding, value ->
+                    padding.left((int) value)
+            );
+        }
+
+        if (toRightPadding != null) {
+            if (fromRightPadding == null) {
+                fromRightPadding = view.getPaddingRight();
+            }
+            createLayoutAnimator(fromRightPadding, toRightPadding, value ->
+                    padding.right((int) value)
             );
         }
     }
 
-
-    private void createParameterAnimator(View view, LayoutParams params, int from, int to, UpdateListener listener) {
+    private void createLayoutAnimator(int from, int to, UpdateListener listener) {
         ValueAnimator animator = ValueAnimator.ofInt(from, to);
 
-        animator.addUpdateListener(animation -> {
-            listener.onUpdate((int) animation.getAnimatedValue());
-            view.setLayoutParams(params);
-        });
-
+        animator.addUpdateListener(animation ->
+                listener.onUpdate(animation.getAnimatedValue())
+        );
         valueAnimators.add(animator);
     }
 
@@ -464,17 +494,41 @@ public final class Animation {
             fromHeight = fromSize;
         }
 
-        if (fromMargins != null) {
-            fromVerticalMargins = fromMargins;
-            fromHorizontalMargins = fromMargins;
+        if (fromWidth != null) {
+            ViewUtils.width(view, fromWidth);
         }
-        if (fromVerticalMargins != null) {
-            fromTopMargin = fromVerticalMargins;
-            fromBottomMargin = fromVerticalMargins;
+        if (fromHeight != null) {
+            ViewUtils.height(view, fromHeight);
         }
-        if (fromHorizontalMargins != null) {
-            fromLeftMargin = fromHorizontalMargins;
-            fromRightMargin = fromHorizontalMargins;
+
+        MarginUtils margin = ViewUtils.margins(view);
+
+        if (fromTopMargin != null) {
+            margin.top(fromTopMargin);
+        }
+        if (fromLeftMargin != null) {
+            margin.left(fromLeftMargin);
+        }
+        if (fromRightMargin != null) {
+            margin.right(fromRightMargin);
+        }
+        if (fromBottomMargin != null) {
+            margin.bottom(fromBottomMargin);
+        }
+
+        PaddingUtils padding = ViewUtils.padding(view);
+
+        if (fromTopPadding != null) {
+            padding.top(fromTopPadding);
+        }
+        if (fromBottomPadding != null) {
+            padding.bottom(fromBottomPadding);
+        }
+        if (fromLeftPadding != null) {
+            padding.left(fromLeftPadding);
+        }
+        if (fromRightPadding != null) {
+            padding.right(fromRightPadding);
         }
     }
 
@@ -540,8 +594,21 @@ public final class Animation {
         return this;
     }
 
-    public Animation fromMargins(int fromMargins) {
-        this.fromMargins = fromMargins;
+    public Animation fromMargins(int from) {
+        fromVerticalMargins(from);
+        fromHorizontalMargins(from);
+        return this;
+    }
+
+    public Animation fromVerticalMargins(int from) {
+        fromTopMargin = from;
+        fromBottomMargin = from;
+        return this;
+    }
+
+    public Animation fromHorizontalMargins(int from) {
+        fromLeftMargin = from;
+        fromRightMargin = from;
         return this;
     }
 
@@ -562,16 +629,6 @@ public final class Animation {
 
     public Animation fromBottomMargin(int fromBottomMargin) {
         this.fromBottomMargin = fromBottomMargin;
-        return this;
-    }
-
-    public Animation fromVerticalMargins(int fromVerticalMargins) {
-        this.fromVerticalMargins = fromVerticalMargins;
-        return this;
-    }
-
-    public Animation fromHorizontalMargins(int fromHorizontalMargins) {
-        this.fromHorizontalMargins = fromHorizontalMargins;
         return this;
     }
 
@@ -625,8 +682,21 @@ public final class Animation {
         return this;
     }
 
-    public Animation toMargins(int toMargins) {
-        this.toMargins = toMargins;
+    public Animation toMargins(int to) {
+        toVerticalMargins(to);
+        toHorizontalMargins(to);
+        return this;
+    }
+
+    public Animation toVerticalMargins(int to) {
+        toTopMargin = to;
+        toBottomMargin = to;
+        return this;
+    }
+
+    public Animation toHorizontalMargins(int to) {
+        toLeftMargin = to;
+        toRightMargin = to;
         return this;
     }
 
@@ -650,13 +720,79 @@ public final class Animation {
         return this;
     }
 
-    public Animation toVerticalMargins(int toVerticalMargins) {
-        this.toVerticalMargins = toVerticalMargins;
+    public Animation fromPadding(int from) {
+        fromVerticalPadding(from);
+        fromHorizontalPadding(from);
         return this;
     }
 
-    public Animation toHorizontalMargins(int toHorizontalMargins) {
-        this.toHorizontalMargins = toHorizontalMargins;
+    public Animation fromVerticalPadding(int from) {
+        fromTopPadding = from;
+        fromBottomPadding = from;
+        return this;
+    }
+
+    public Animation fromHorizontalPadding(int from) {
+        fromLeftPadding = from;
+        fromRightPadding = from;
+        return this;
+    }
+
+    public Animation fromTopPadding(int fromTopPadding) {
+        this.fromTopPadding = fromTopPadding;
+        return this;
+    }
+
+    public Animation fromLeftPadding(int fromLeftPadding) {
+        this.fromLeftPadding = fromLeftPadding;
+        return this;
+    }
+
+    public Animation fromRightPadding(int fromRightPadding) {
+        this.fromRightPadding = fromRightPadding;
+        return this;
+    }
+
+    public Animation fromBottomPadding(int fromBottomPadding) {
+        this.fromBottomPadding = fromBottomPadding;
+        return this;
+    }
+
+    public Animation toPadding(int to) {
+        toVerticalPadding(to);
+        toHorizontalPadding(to);
+        return this;
+    }
+
+    public Animation toVerticalPadding(int to) {
+        toTopPadding = to;
+        toBottomPadding = to;
+        return this;
+    }
+
+    public Animation toHorizontalPadding(int to) {
+        toLeftPadding = to;
+        toRightPadding = to;
+        return this;
+    }
+
+    public Animation toTopPadding(int toTopPadding) {
+        this.toTopPadding = toTopPadding;
+        return this;
+    }
+
+    public Animation toLeftPadding(int toLeftPadding) {
+        this.toLeftPadding = toLeftPadding;
+        return this;
+    }
+
+    public Animation toRightPadding(int toRightPadding) {
+        this.toRightPadding = toRightPadding;
+        return this;
+    }
+
+    public Animation toBottomPadding(int toBottomPadding) {
+        this.toBottomPadding = toBottomPadding;
         return this;
     }
 

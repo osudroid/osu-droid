@@ -48,16 +48,14 @@ public class ViewUtils {
         view.setScaleY(scale);
     }
 
-    public static void size(View view, int width, int height) {
-        view.getLayoutParams().width = width;
-        view.getLayoutParams().height = height;
-        view.requestLayout();
-    }
 
     public static void size(View view, int size) {
-        view.getLayoutParams().width = size;
-        view.getLayoutParams().height = size;
-        view.requestLayout();
+        size(view, size, size);
+    }
+
+    public static void size(View view, int width, int height) {
+        width(view, width);
+        height(view, height);
     }
 
     public static void width(View view, int width) {
@@ -81,54 +79,51 @@ public class ViewUtils {
         private final View view;
         private final MarginLayoutParams params;
 
+        //----------------------------------------------------------------------------------------//
+
         public MarginUtils(View view) {
             this.view = view;
-            this.params = (MarginLayoutParams) view.getLayoutParams();
+            params = (MarginLayoutParams) view.getLayoutParams();
         }
+
+        //----------------------------------------------------------------------------------------//
 
         public void all(int size) {
-            this.params.topMargin = size;
-            this.params.bottomMargin = size;
-            this.params.leftMargin = size;
-            this.params.rightMargin = size;
-            this.view.requestLayout();
+            vertical(size, size);
+            horizontal(size, size);
         }
 
-        public MarginUtils vertical(int top, int bottom) {
-            this.params.topMargin = top;
-            this.params.bottomMargin = bottom;
-            this.view.requestLayout();
-            return this;
+        public void vertical(int top, int bottom) {
+            top(top);
+            bottom(bottom);
         }
 
-        public MarginUtils horizontal(int left, int right) {
-            this.params.leftMargin = left;
-            this.params.rightMargin = right;
-            this.view.requestLayout();
-            return this;
+        public void horizontal(int left, int right) {
+            left(left);
+            right(right);
         }
 
         public MarginUtils top(int size) {
-            this.params.topMargin = size;
-            this.view.requestLayout();
+            params.topMargin = size;
+            view.requestLayout();
             return this;
         }
 
         public MarginUtils bottom(int size) {
-            this.params.bottomMargin = size;
-            this.view.requestLayout();
+            params.bottomMargin = size;
+            view.requestLayout();
             return this;
         }
 
         public MarginUtils left(int size) {
-            this.params.leftMargin = size;
-            this.view.requestLayout();
+            params.leftMargin = size;
+            view.requestLayout();
             return this;
         }
 
         public MarginUtils right(int size) {
-            this.params.rightMargin = size;
-            this.view.requestLayout();
+            params.rightMargin = size;
+            view.requestLayout();
             return this;
         }
     }
@@ -162,24 +157,104 @@ public class ViewUtils {
 
         //----------------------------------------------------------------------------------------//
 
+        public RuleUtils add(int rule, int subject) {
+            params.addRule(rule, subject);
+            return this;
+        }
+
         public RuleUtils add(int... rules) {
             this.rules = rules;
             return this;
         }
+
+        //----------------------------------------------------------------------------------------//
 
         public void apply() {
             apply(null);
         }
 
         public void apply(Integer subject) {
-            for (int verb : rules) {
-                if (subject != null) {
-                    params.addRule(verb, subject);
-                } else {
+
+            if (rules != null) {
+                for (int verb : rules) {
+                    if (subject != null) {
+                        params.addRule(verb, subject);
+                        continue;
+                    }
                     params.addRule(verb);
                 }
             }
             view.setLayoutParams(params);
         }
     }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public static PaddingUtils padding(View view) {
+        return new PaddingUtils(view);
+    }
+
+    public static class PaddingUtils {
+
+        private final View view;
+
+        private int left, right, top, bottom;
+
+        //----------------------------------------------------------------------------------------//
+
+        public PaddingUtils(View view) {
+            this.view = view;
+            handlePadding();
+        }
+
+        private void handlePadding() {
+            top = view.getPaddingTop();
+            left = view.getPaddingLeft();
+            right = view.getPaddingRight();
+            bottom = view.getPaddingBottom();
+        }
+
+        //----------------------------------------------------------------------------------------//
+
+        public void all(int size) {
+            vertical(size, size);
+            horizontal(size, size);
+        }
+
+        public void vertical(int top, int bottom) {
+            top(top);
+            bottom(bottom);
+        }
+
+        public void horizontal(int left, int right) {
+            left(left);
+            right(right);
+        }
+
+        public PaddingUtils top(int size) {
+            handlePadding();
+            view.setPadding(left, size, right, bottom);
+            return this;
+        }
+
+        public PaddingUtils bottom(int size) {
+            handlePadding();
+            view.setPadding(left, top, right, size);
+            return this;
+        }
+
+        public PaddingUtils left(int size) {
+            handlePadding();
+            view.setPadding(size, top, right, bottom);
+            return this;
+        }
+
+        public PaddingUtils right(int size) {
+            handlePadding();
+            view.setPadding(left, top, size, bottom);
+            return this;
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------//
 }
