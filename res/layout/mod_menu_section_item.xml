@@ -2,27 +2,38 @@
 
 <!-- Created by Reco1l on 20/12/2022, 02:37 -->
 
-<com.reco1l.view.PanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="@dimen/panelWidth"
     android:layout_height="match_parent"
     android:layout_marginRight="@dimen/M"
-    app:panelTitle="Section">
+    android:background="@color/badgeTextBackground">
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/mm_sectionName"
+            style="@style/text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingVertical="@dimen/M"
+            android:text="Section name" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/mm_modContainer"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/S"
-            android:layout_marginVertical="@dimen/M"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/XS"
+            android:nestedScrollingEnabled="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:itemCount="4"
             tools:listitem="@layout/mod_menu_item" />
 
-    </ScrollView>
+    </LinearLayout>
 
-</com.reco1l.view.PanelLayout>
+</androidx.core.widget.NestedScrollView>

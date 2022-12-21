@@ -186,9 +186,9 @@
                 <LinearLayout
                     android:id="@+id/tb_buttons"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:background="@color/topBarButtonsBackground"
-                    android:orientation="horizontal" />
+                    android:orientation="horizontal"/>
 
             </LinearLayout>
 

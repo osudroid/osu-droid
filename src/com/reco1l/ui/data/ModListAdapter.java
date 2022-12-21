@@ -62,7 +62,7 @@ public class ModListAdapter extends BaseAdapter<ModListAdapter.ModHolder, ModMen
         //----------------------------------------------------------------------------------------//
 
         @Override
-        protected void bind(ModMenu.ModWrapper modWrapper) {
+        protected void onBind(ModMenu.ModWrapper modWrapper, int position) {
             this.modWrapper = modWrapper;
             modWrapper.holder = this;
 

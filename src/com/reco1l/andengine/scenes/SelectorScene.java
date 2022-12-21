@@ -21,7 +21,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class SelectorScene extends BaseScene {
 
     private static SelectorScene instance;
-
+    
     //--------------------------------------------------------------------------------------------//
 
     public static SelectorScene getInstance() {
@@ -49,24 +49,20 @@ public class SelectorScene extends BaseScene {
     }
 
     private void createTopBarButtons() {
-        BarButton mods = new BarButton(Game.activity);
+        BarButton mods = UI.modMenu.button = new BarButton(context);
 
-        mods.setAsToggle(true);
         mods.runOnTouch(UI.modMenu::altShow);
-        mods.setIcon(Res.drw(R.drawable.v_tune));
+        mods.setIcon(R.drawable.v_tune);
 
-        BarButton search = new BarButton(Game.activity);
+        /*BarButton search = new BarButton(context);
+        search.setIcon(R.drawable.v_search);
 
-        search.setAsToggle(true);
-        search.setIcon(Res.drw(R.drawable.v_search));
-
-        BarButton random = new BarButton(Game.activity);
-
-        random.setIcon(Res.drw(R.drawable.v_random));
+        BarButton random = new BarButton(context);
+        random.setIcon(R.drawable.v_random);*/
 
         UI.topBar.addButton(getIdentifier(), mods);
-        UI.topBar.addButton(getIdentifier(), search);
-        UI.topBar.addButton(getIdentifier(), random);
+        /*UI.topBar.addButton(getIdentifier(), search);
+        UI.topBar.addButton(getIdentifier(), random);*/
     }
 
     @Override

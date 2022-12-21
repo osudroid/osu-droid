@@ -105,7 +105,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
                     triangles.setAlpha(0);
                 }
 
-                body.addView(triangles, 0, ViewUtils.match_parent());
+                body.addView(triangles, 0, ViewUtils.match_parent);
 
                 Animation.of(body)
                         .toAlpha(1)

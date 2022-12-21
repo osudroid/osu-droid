@@ -184,7 +184,7 @@
     <dimen name="hitBadgeSize">@dimen/_20sdp</dimen>
 
     <!--Mod menu-->
-    <dimen name="modMenuModSpriteSize">@dimen/_18sdp</dimen>
+    <dimen name="modMenuModSpriteSize">@dimen/_22sdp</dimen>
     <dimen name="modMenuModItemHeight">@dimen/_40sdp</dimen>
 
 </resources>

@@ -2,6 +2,8 @@ package com.reco1l.andengine;
 
 // Created by Reco1l on 26/9/22 13:38
 
+import android.content.Context;
+
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.enums.Screens;
@@ -14,6 +16,8 @@ import ru.nsu.ccfit.zuev.osu.Config;
 
 public abstract class BaseScene extends Scene implements ISceneHandler, IMusicObserver {
 
+    protected Context context;
+
     private boolean
             isBackgroundAutoChange = true,
             isContinuousPlay = true;
@@ -21,6 +25,8 @@ public abstract class BaseScene extends Scene implements ISceneHandler, IMusicOb
     //--------------------------------------------------------------------------------------------//
 
     public BaseScene() {
+        context = Game.activity;
+
         Game.engine.registerSceneHandler(this);
         Game.musicManager.bindMusicObserver(this);
         onCreate();

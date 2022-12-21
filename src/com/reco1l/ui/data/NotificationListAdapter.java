@@ -51,7 +51,7 @@ public class NotificationListAdapter extends BaseAdapter<NotificationListAdapter
         //----------------------------------------------------------------------------------------//
 
         @Override
-        protected void bind(GameNotification notification) {
+        protected void onBind(GameNotification notification, int position) {
             this.notification = notification;
             this.holder = notification.build(root);
 
@@ -79,7 +79,7 @@ public class NotificationListAdapter extends BaseAdapter<NotificationListAdapter
                     .toX(-50)
                     .toAlpha(0)
                     .runOnEnd(() -> {
-                        bind(notification);
+                        onBind(notification);
 
                         Animation.of(holder.innerBody)
                                 .fromX(50)

@@ -9,6 +9,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder {
 
+    protected BaseAdapter<BaseViewHolder<T>, T> adapter;
+    protected T object;
+
     protected View root;
     protected Context context;
 
@@ -21,7 +24,15 @@ public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder {
 
     //--------------------------------------------------------------------------------------------//
 
-    protected abstract void bind(T object);
+    protected final void rebind() {
+        onBind(object);
+    }
+
+    protected final void onBind(T object) {
+        onBind(object, adapter.list.indexOf(object));
+    }
+
+    protected abstract void onBind(T object, int position);
 
     protected void onAttachmentChange(boolean isAttached) {
 

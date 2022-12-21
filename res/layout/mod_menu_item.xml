@@ -6,6 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="@dimen/modMenuModItemHeight"
+    android:layout_marginHorizontal="@dimen/S"
     android:layout_marginBottom="@dimen/S"
     app:cardBackgroundColor="@color/backgroundSecondary"
     app:cardCornerRadius="@dimen/globalCorners">
@@ -26,7 +27,7 @@
                 android:id="@+id/mm_modIcon"
                 android:layout_width="@dimen/modMenuModSpriteSize"
                 android:layout_height="@dimen/modMenuModSpriteSize"
-                android:layout_marginHorizontal="@dimen/XS"
+                android:layout_marginHorizontal="@dimen/XXS"
                 android:src="@drawable/mod_sample" />
 
         </LinearLayout>

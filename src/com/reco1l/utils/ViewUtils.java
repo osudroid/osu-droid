@@ -16,18 +16,16 @@ public class ViewUtils {
 
     //--------------------------------------------------------------------------------------------//
 
-    public static LayoutParams match_parent() {
+    private static LayoutParams match_parent() {
         return new LayoutParams(MATCH_PARENT, MATCH_PARENT);
     }
 
-    public static LayoutParams wrap_content() {
+    private static LayoutParams wrap_content() {
         return new LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
     }
 
-    public static RelativeLayout.LayoutParams align(int align) {
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
-        params.addRule(align);
-        return params;
+    public static LayoutParams params(int w, int h) {
+        return new LayoutParams(w, h);
     }
 
     //--------------------------------------------------------------------------------------------//

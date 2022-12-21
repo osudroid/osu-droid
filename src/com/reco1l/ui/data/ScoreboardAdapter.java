@@ -109,7 +109,7 @@ public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.V
             // Loading mods icons
             for (GameMod mod : data.getMods()) {
                 ImageView image = new ImageView(body.getContext());
-                modsLayout.addView(image, ViewUtils.wrap_content());
+                modsLayout.addView(image, ViewUtils.wrap_content);
 
                 image.setImageBitmap(bitmapManager.get("selection-mod-" + mod.texture));
 

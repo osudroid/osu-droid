@@ -17,23 +17,15 @@
         android:background="@color/backgroundDimmed"
         android:clickable="true">
 
-        <HorizontalScrollView
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/mm_sectionContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="@dimen/topBarHeight">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/mm_sectionContainer"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="@dimen/M"
-                android:nestedScrollingEnabled="false"
-                android:orientation="horizontal"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:itemCount="5"
-                tools:listitem="@layout/mod_menu_section_item" />
-
-        </HorizontalScrollView>
+            android:layout_marginBottom="@dimen/topBarHeight"
+            android:orientation="horizontal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:itemCount="5"
+            tools:listitem="@layout/mod_menu_section_item" />
 
     </LinearLayout>
 

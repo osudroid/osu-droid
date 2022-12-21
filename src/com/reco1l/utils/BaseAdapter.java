@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 
 import java.util.ArrayList;
@@ -15,8 +14,6 @@ import java.util.ArrayList;
 public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapter<VH> {
 
     public ArrayList<T> list;
-
-    protected RecyclerView recyclerView;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -50,8 +47,8 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
 
     //--------------------------------------------------------------------------------------------//
 
-    @NonNull
-    @Override
+    @Override @NonNull
+    @SuppressWarnings("unchecked")
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         
@@ -59,12 +56,14 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
 
         VH holder = getViewHolder(root);
         holder.context = context;
+        holder.adapter = (BaseAdapter<BaseViewHolder<T>, T>) this;
         return holder;
     }
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
-        holder.bind(list.get(position));
+        holder.object = list.get(position);
+        holder.onBind(list.get(position), position);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -77,15 +76,5 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
     @Override
     public void onViewDetachedFromWindow(@NonNull VH holder) {
         holder.onAttachmentChange(false);
-    }
-
-    @Override
-    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
-        this.recyclerView = recyclerView;
-    }
-
-    @Override
-    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
-        this.recyclerView = null;
     }
 }

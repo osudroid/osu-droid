@@ -1,18 +1,17 @@
 package com.reco1l.ui.data;
 // Created by Reco1l on 20/12/2022, 05:41
 
-import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
-
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.reco1l.ui.fragments.ModMenu;
 import com.reco1l.utils.BaseAdapter;
 import com.reco1l.utils.BaseViewHolder;
-import com.reco1l.view.PanelLayout;
+import com.reco1l.utils.Res;
+import com.reco1l.utils.ViewUtils;
 
 import java.util.ArrayList;
 
@@ -42,27 +41,26 @@ public class ModSectionAdapter extends BaseAdapter<ModSectionAdapter.SectionHold
 
     public static class SectionHolder extends BaseViewHolder<ModMenu.Section> {
 
-        private final PanelLayout panel;
-
-        public RecyclerView recyclerView;
-        public ModListAdapter adapter;
+        private final TextView header;
+        private final RecyclerView recyclerView;
 
         //----------------------------------------------------------------------------------------//
 
         public SectionHolder(@NonNull View root) {
             super(root);
-            panel = (PanelLayout) root;
+            header = root.findViewById(R.id.mm_sectionName);
             recyclerView = root.findViewById(R.id.mm_modContainer);
         }
 
         //----------------------------------------------------------------------------------------//
 
         @Override
-        protected void bind(ModMenu.Section section) {
-            panel.setTitle(section.title);
-            adapter = new ModListAdapter(section.modWrappers);
-            recyclerView.setLayoutManager(new LinearLayoutManager(context, VERTICAL, false));
-            recyclerView.setAdapter(adapter);
+        protected void onBind(ModMenu.Section section, int position) {
+            if (position == 0) {
+                ViewUtils.margins(root).left(Res.sdp(12));
+            }
+            header.setText(section.title);
+            recyclerView.setAdapter(new ModListAdapter(section.modWrappers));
         }
     }
 }
