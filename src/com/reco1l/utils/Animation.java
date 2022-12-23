@@ -208,6 +208,10 @@ public final class Animation {
     //--------------------------------------------------------------------------------------------//
 
     private void handleValueAnimations() {
+        if (valueAnimators == null) {
+            return;
+        }
+
         Game.activity.runOnUiThread(() -> {
             int i = 0;
             while (i < valueAnimators.size()) {
@@ -297,22 +301,16 @@ public final class Animation {
     }
 
     private void handleFirstProperties(View view) {
-        if (fromPropertiesWithDelay && delay > 0) {
-            view.postDelayed(() -> {
-                applyInitialProperties(view);
-                createParameterAnimations(view);
-            }, delay - 1);
+        createParameterAnimations(view);
+
+        if (fromPropertiesWithDelay && delay - 1 >= 0) {
+            view.postDelayed(() -> applyInitialProperties(view), delay - 1);
         } else {
             applyInitialProperties(view);
-            createParameterAnimations(view);
         }
     }
 
     private void createParameterAnimations(View view) {
-        if (valueAnimators == null) {
-            valueAnimators = new ArrayList<>();
-        }
-
         if (fromSize != null) {
             fromHeight = fromSize;
             fromWidth = fromSize;
@@ -341,8 +339,6 @@ public final class Animation {
         }
 
         MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
-        view.setLayoutParams(params);
-
         MarginUtils margin = ViewUtils.margins(view);
 
         if (toTopMargin != null) {
@@ -421,6 +417,9 @@ public final class Animation {
     }
 
     private void createLayoutAnimator(int from, int to, UpdateListener listener) {
+        if (valueAnimators == null) {
+            valueAnimators = new ArrayList<>();
+        }
         ValueAnimator animator = ValueAnimator.ofInt(from, to);
 
         animator.addUpdateListener(animation ->
