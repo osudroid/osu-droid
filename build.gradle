@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        kotlin_version = '1.5.21'
+        kotlin_version = '1.7.21'
     }
     repositories {
         google()
@@ -132,8 +132,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_19
+        targetCompatibility JavaVersion.VERSION_19
     }
 
     useLibrary 'org.apache.http.legacy'
@@ -156,20 +156,20 @@ dependencies {
     implementation project(':AndEngine')
     implementation project(':andnext_markdown')
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.preference:preference:1.1.1'
-    implementation 'com.google.android.material:material:1.6.1'
-    implementation 'com.google.firebase:firebase-crashlytics:18.2.1'
-    implementation 'com.google.firebase:firebase-analytics:19.0.1'
-    implementation 'com.google.firebase:firebase-messaging:22.0.0'
+    implementation 'androidx.preference:preference:1.2.0'
+    implementation 'com.google.android.material:material:1.7.0'
+    implementation 'com.google.firebase:firebase-crashlytics:18.3.2'
+    implementation 'com.google.firebase:firebase-analytics:21.2.0'
+    implementation 'com.google.firebase:firebase-messaging:23.1.1'
 
     // implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     // implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
-    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.10'
     // implementation 'com.squareup.retrofit2:adapter-rxjava2:2.9.0'
-    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'com.google.code.gson:gson:2.10'
     //implementation 'com.github.tbruyelle:rxpermissions:0.12'
     implementation 'pub.devrel:easypermissions:3.0.0'
-    implementation 'net.lingala.zip4j:zip4j:2.9.0'
+    implementation 'net.lingala.zip4j:zip4j:2.11.2'
 
     implementation 'com.github.EdrowsLuo:osudroidstrings:bd9507b289'
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlJavaExt:d91c53fcff'
@@ -178,5 +178,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     implementation 'androidx.palette:palette:1.0.0'
-    implementation 'com.intuit.sdp:sdp-android:1.0.6'
+    implementation 'com.intuit.sdp:sdp-android:1.1.0'
+    implementation 'com.intuit.ssp:ssp-android:1.1.0'
 }
