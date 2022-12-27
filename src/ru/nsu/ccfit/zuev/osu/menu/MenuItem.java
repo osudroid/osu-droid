@@ -334,7 +334,7 @@ public class MenuItem {
         String current = GlobalManager.getInstance().getSongMenu().music;
 
         if (current == null || !current.equals(music)) {
-            GlobalManager.getInstance().getSongMenu().playMusic(music, 0);
+            GlobalManager.getInstance().getSongMenu().playMusic(music, track.getTrack().getPreviewTime());
         }
     }
 

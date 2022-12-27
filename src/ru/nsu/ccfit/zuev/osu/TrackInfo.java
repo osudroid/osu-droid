@@ -27,6 +27,7 @@ public class TrackInfo implements Serializable {
     private int spinnerCount = 0;
     private int totalHitObjectCount = 0;
     private int maxCombo = 0;
+    private int previewTime;
 
     private BeatmapInfo beatmap;
 
@@ -208,5 +209,13 @@ public class TrackInfo implements Serializable {
 
     public String getMusic() {
         return music;
+    }
+
+    public void setPreviewTime(int previewTime) {
+        this.previewTime = previewTime;
+    }
+
+    public int getPreviewTime() {
+        return previewTime;
     }
 }

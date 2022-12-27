@@ -324,6 +324,14 @@ public class OSUParser {
             } else {
                 track.setMusic(audio.getPath());
             }
+
+            final String prevTime = data.getData("General", "PreviewTime");
+            try {
+                track.setPreviewTime(Integer.parseInt(prevTime));
+            } catch (final NumberFormatException e) {
+                Debug.e("Cannot parse preview time");
+                track.setPreviewTime(-1);
+            }
         }
         return true;
     }
