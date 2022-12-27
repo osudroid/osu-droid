@@ -257,7 +257,7 @@ public class OSUParser {
     private boolean loadMetadata(final TrackInfo track, final BeatmapInfo info, final BeatmapSection section) {
         switch (section) {
             case GENERAL:
-                return loadGeneralSection(info);
+                return loadGeneralSection(track, info);
             case METADATA:
                 return loadMetadataSection(track, info);
             case DIFFICULTY:
@@ -273,7 +273,7 @@ public class OSUParser {
         }
     }
 
-    private boolean loadGeneralSection(final BeatmapInfo info) {
+    private boolean loadGeneralSection(final TrackInfo track, final BeatmapInfo info) {
         if (info.getTitle() == null) {
             info.setTitle(data.getData("Metadata", "Title"));
         }
@@ -316,7 +316,15 @@ public class OSUParser {
                 info.setPreviewTime(-1);
             }
         }
+        if (track != null) {
+            File audio = new File(info.getPath(), data.getData("General", "AudioFilename"));
 
+            if (!audio.exists()) {
+                track.setMusic(info.getMusic());
+            } else {
+                track.setMusic(audio.getPath());
+            }
+        }
         return true;
     }
 
