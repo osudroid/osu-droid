@@ -11,6 +11,7 @@ public class TrackInfo implements Serializable {
     private String mode;
     private String creator;
     private String background = null;
+    private String music;
     private int beatmapID = 0;
     private int beatmapSetID = 0;
     private float difficulty;
@@ -199,5 +200,13 @@ public class TrackInfo implements Serializable {
 
     public void setMaxCombo(int maxCombo) {
         this.maxCombo = maxCombo;
+    }
+
+    public void setMusic(String path) {
+        music = path;
+    }
+
+    public String getMusic() {
+        return music;
     }
 }
