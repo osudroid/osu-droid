@@ -104,6 +104,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private AsyncTask<OsuAsyncCallback, Integer, Boolean> boardTask;
     private GroupType groupType = GroupType.MapSet;
 
+    public String music;
+
     public SongMenu() {
     }
 
@@ -1186,6 +1188,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (!Config.isPlayMusicPreview()) {
             return;
         }
+        music = filename;
         new AsyncTaskLoader().execute(new OsuAsyncCallback() {
 
 

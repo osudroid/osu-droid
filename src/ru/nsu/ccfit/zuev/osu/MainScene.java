@@ -229,6 +229,9 @@ public class MainScene implements IUpdateHandler {
                         public void onComplete() {
 
                             musicControl(MusicOption.PLAY);
+                            if (beatmapInfo != null) {
+                                GlobalManager.getInstance().getSongMenu().music = beatmapInfo.getMusic();
+                            }
                             GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getSongMenu().getScene());
                             GlobalManager.getInstance().getSongMenu().select();
                         }

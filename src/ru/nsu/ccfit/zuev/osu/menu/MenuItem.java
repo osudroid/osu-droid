@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -328,6 +329,13 @@ public class MenuItem {
     public void selectTrack(final MenuItemTrack track, boolean reloadBG) {
         selTrack = track;
         listener.get().selectTrack(track.getTrack(), reloadBG);
+
+        String music = track.getTrack().getMusic();
+        String current = GlobalManager.getInstance().getSongMenu().music;
+
+        if (current == null || !current.equals(music)) {
+            GlobalManager.getInstance().getSongMenu().playMusic(music, 0);
+        }
     }
 
     public boolean isTrackSelected(final MenuItemTrack track) {
