@@ -32,7 +32,7 @@ import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.execution.AsyncTask;
-import com.reco1l.data.tables.ResourceTable;
+import com.reco1l.utils.ResUtils;
 import com.reco1l.utils.helpers.BitmapHelper;
 import com.reco1l.utils.TouchListener;
 
@@ -112,8 +112,8 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
         play = find("play");
 
         Animation.of(body)
-                .fromHeight(ResourceTable.dimen(R.dimen._30sdp))
-                .toHeight(ResourceTable.dimen(R.dimen.musicPlayerHeight))
+                .fromHeight(ResUtils.dimen(R.dimen._30sdp))
+                .toHeight(ResUtils.dimen(R.dimen.musicPlayerHeight))
                 .fromY(-30)
                 .toY(0)
                 .fromAlpha(0)
@@ -196,7 +196,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
             Animation.of(play)
                     .fromRotation(180)
                     .toRotation(0)
-                    .runOnEnd(() -> play.setImageDrawable(ResourceTable.drw(R.drawable.v_pause_xl)))
+                    .runOnEnd(() -> play.setImageDrawable(ResUtils.drw(R.drawable.v_pause_xl)))
                     .play(160);
 
         } else if (!Game.musicManager.isPlaying() && wasPlaying) {
@@ -205,7 +205,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
             Animation.of(play)
                     .fromRotation(180)
                     .toRotation(0)
-                    .runOnEnd(() -> play.setImageDrawable(ResourceTable.drw(R.drawable.v_play_xl_circle)))
+                    .runOnEnd(() -> play.setImageDrawable(ResUtils.drw(R.drawable.v_play_xl_circle)))
                     .play(160);
         }
     }
@@ -216,7 +216,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
         if (!isListVisible) {
             isListVisible = true;
             Animation.of(find("listBody"))
-                    .toWidth(ResourceTable.dimen(R.dimen.musicPlayerListWidth))
+                    .toWidth(ResUtils.dimen(R.dimen.musicPlayerListWidth))
                     .play(300);
         } else {
             isListVisible = false;
@@ -332,8 +332,8 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
                     .play(100);
 
             Animation.of(body)
-                    .fromHeight(ResourceTable.dimen(R.dimen.musicPlayerHeight))
-                    .toHeight(ResourceTable.dimen(R.dimen._30sdp))
+                    .fromHeight(ResUtils.dimen(R.dimen.musicPlayerHeight))
+                    .toHeight(ResUtils.dimen(R.dimen._30sdp))
                     .runOnEnd(super::close)
                     .toY(-30)
                     .toAlpha(0)
@@ -365,16 +365,16 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
 
             view.setLayoutParams(new LayoutParams(MATCH_PARENT, WRAP_CONTENT));
 
-            Drawable drawable = ResourceTable.drw(R.drawable.shape_rounded).mutate();
-            drawable.setTint(ResourceTable.color(R.color.accent));
+            Drawable drawable = ResUtils.drw(R.drawable.shape_rounded).mutate();
+            drawable.setTint(ResUtils.color(R.color.accent));
             drawable.setAlpha(0);
 
             view.setBackground(drawable);
             view.setEllipsize(TextUtils.TruncateAt.END);
             view.setSingleLine(true);
 
-            int m = ResourceTable.dimen(R.dimen.M);
-            int s = ResourceTable.dimen(R.dimen.S);
+            int m = ResUtils.dimen(R.dimen.M);
+            int s = ResUtils.dimen(R.dimen.S);
             view.setPadding(m, s, m, s);
 
             return new ViewHolder(view, this);
@@ -454,7 +454,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
                         })
                         .play(200);
 
-                Animation.ofColor(Color.WHITE, ResourceTable.color(R.color.accent))
+                Animation.ofColor(Color.WHITE, ResUtils.color(R.color.accent))
                         .runOnUpdate(value -> text.setTextColor((int) value))
                         .play(200);
             }
@@ -474,7 +474,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
                         })
                         .play(200);
 
-                Animation.ofColor(ResourceTable.color(R.color.accent), Color.WHITE)
+                Animation.ofColor(ResUtils.color(R.color.accent), Color.WHITE)
                         .runOnUpdate(value -> text.setTextColor((int) value))
                         .play(200);
             }

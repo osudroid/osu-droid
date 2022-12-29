@@ -16,7 +16,7 @@ import com.reco1l.management.KeyInputManager;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.data.tables.DialogTable;
 import com.reco1l.ui.BaseFragment;
-import com.reco1l.data.tables.ResourceTable;
+import com.reco1l.utils.ResUtils;
 import com.reco1l.utils.helpers.OnlineHelper;
 import com.reco1l.view.IconButton;
 
@@ -80,7 +80,7 @@ public final class TopBar extends BaseFragment {
     @Override
     protected void onLoad() {
         setDismissMode(false, false);
-        barHeight = (int) ResourceTable.dimen(R.dimen.topBarHeight);
+        barHeight = (int) ResUtils.dimen(R.dimen.topBarHeight);
 
         body = find("body");
 
@@ -101,7 +101,7 @@ public final class TopBar extends BaseFragment {
         author = find("author");
         back = find("back");
 
-        author.setText(ResourceTable.str(R.string.app_name) + " " + BuildConfig.VERSION_NAME);
+        author.setText(ResUtils.str(R.string.app_name) + " " + BuildConfig.VERSION_NAME);
 
         bindTouchListener(find("inbox"), UI.notificationCenter::altShow);
         bindTouchListener(find("settings"), UI.settingsPanel::altShow);
@@ -315,7 +315,7 @@ public final class TopBar extends BaseFragment {
 
             AnimationTable.fadeOutIn(avatar, () -> avatar.setImageResource(R.drawable.default_avatar));
 
-            AnimationTable.textChange(rank, ResourceTable.str(R.string.top_bar_offline));
+            AnimationTable.textChange(rank, ResUtils.str(R.string.top_bar_offline));
             AnimationTable.textChange(name, Config.getLocalUsername());
 
             if (Game.onlineManager.isStayOnline() && !clear) {

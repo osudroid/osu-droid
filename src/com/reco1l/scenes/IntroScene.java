@@ -5,11 +5,10 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.reco1l.Game;
-import com.reco1l.scenes.BaseScene;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.data.tables.ResourceTable;
+import com.reco1l.utils.ResUtils;
 import com.reco1l.view.effects.StripsEffect;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -106,7 +105,7 @@ public class IntroScene extends BaseScene {
                     .runOnStart(() -> Game.resourcesManager.getSound("welcome_piano").play())
                     .runOnEnd(() -> {
 
-                        int size = ResourceTable.sdp(250);
+                        int size = ResUtils.sdp(250);
 
                         Animation.of(logoLines)
                                 .toScale(1)

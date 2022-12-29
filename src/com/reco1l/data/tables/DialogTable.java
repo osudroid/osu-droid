@@ -7,7 +7,7 @@ import com.reco1l.Game;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
 import com.reco1l.ui.custom.DialogFragment;
-import com.reco1l.data.tables.ResourceTable;
+import com.reco1l.utils.ResUtils;
 
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
@@ -76,7 +76,7 @@ public class DialogTable {
         DialogBuilder builder = new DialogBuilder();
 
         builder.title = "Warning";
-        builder.message = ResourceTable.str(R.string.message_autoclicker_detected);
+        builder.message = ResUtils.str(R.string.message_autoclicker_detected);
         builder.setCloseMode(false);
         builder.addButton("Exit", dialog -> {
             dialog.close();

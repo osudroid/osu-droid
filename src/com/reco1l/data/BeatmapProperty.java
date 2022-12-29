@@ -4,7 +4,7 @@ package com.reco1l.data;
 
 import android.widget.TextView;
 
-import com.reco1l.data.tables.ResourceTable;
+import com.reco1l.utils.ResUtils;
 
 import java.text.SimpleDateFormat;
 
@@ -34,8 +34,8 @@ public class BeatmapProperty<T extends Number> {
     //--------------------------------------------------------------------------------------------//
 
     public enum State {
-        RED(ResourceTable.color(R.color.propertyTextRed)),
-        GREEN(ResourceTable.color(R.color.propertyTextGreen)),
+        RED(ResUtils.color(R.color.propertyTextRed)),
+        GREEN(ResUtils.color(R.color.propertyTextGreen)),
         NORMAL(0xFFFFFFFF);
 
         int color;

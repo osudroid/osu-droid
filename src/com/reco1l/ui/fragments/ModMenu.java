@@ -23,7 +23,7 @@ import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
-import com.reco1l.data.tables.ResourceTable;
+import com.reco1l.utils.ResUtils;
 import com.reco1l.view.IconButton;
 
 import java.util.ArrayList;
@@ -208,7 +208,7 @@ public final class ModMenu extends BaseFragment implements IGameMods {
         widget.removeAllViews();
 
         Animation.of(widget)
-                .toRightPadding(ResourceTable.sdp(12))
+                .toRightPadding(ResUtils.sdp(12))
                 .play(100);
 
         for (ModWrapper wrapper : enabled) {
@@ -223,8 +223,8 @@ public final class ModMenu extends BaseFragment implements IGameMods {
 
             Animation.of(icon)
                     .fromWidth(0)
-                    .toWidth(ResourceTable.sdp(16))
-                    .toLeftMargin(ResourceTable.sdp(4))
+                    .toWidth(ResUtils.sdp(16))
+                    .toLeftMargin(ResUtils.sdp(4))
                     .play(100);
         }
     }

@@ -13,9 +13,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.reco1l.Game;
 import com.reco1l.data.Scoreboard;
-import com.reco1l.utils.AnimationOld;
-import com.reco1l.data.tables.ResourceTable;
-import com.reco1l.utils.ViewTouchHandler;
+import com.reco1l.utils.Animation;
+import com.reco1l.utils.ResUtils;
+import com.reco1l.utils.TouchHandler;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.helpers.OnlineHelper;
 import com.reco1l.utils.TouchListener;
@@ -51,7 +51,12 @@ public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.V
     public void onBindViewHolder(@NonNull VH holder, int position) {
         holder.assign(data.get(position));
         holder.body.setAlpha(0);
-        holder.body.postDelayed(() -> new AnimationOld(holder.body).fade(0f, 1f).play(300), 20L * position);
+        holder.body.postDelayed(() ->
+                Animation.of(holder.body)
+                        .fromAlpha(0)
+                        .toAlpha(1)
+                        .play(300)
+                , 20L * position);
     }
 
     @Override
@@ -92,7 +97,7 @@ public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.V
             if (body == null)
                 return;
 
-            new ViewTouchHandler(new TouchListener() {
+            new TouchHandler(new TouchListener() {
 
                 public void onPressUp() {
                     Game.selectorScene.loadScore(data.id, data.name);
@@ -113,11 +118,11 @@ public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.V
 
                 image.setImageBitmap(Game.bitmapManager.get("selection-mod-" + mod.texture));
 
-                ViewUtils.size(image, (int) ResourceTable.dimen(R.dimen.scoreboardItemModSize));
+                ViewUtils.size(image, (int) ResUtils.dimen(R.dimen.scoreboardItemModSize));
                 image.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
                 if (data.getMods().indexOf(mod) > 0) {
-                    ViewUtils.margins(image).left((int) ResourceTable.dimen(R.dimen.XXS));
+                    ViewUtils.margins(image).left((int) ResUtils.dimen(R.dimen.XXS));
                 }
             }
 

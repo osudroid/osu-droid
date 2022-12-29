@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 // Created by Reco1l on 23/6/22 20:44
 
-public class ViewTouchHandler {
+public final class TouchHandler {
 
     private static final long LONG_PRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
 
@@ -39,7 +39,7 @@ public class ViewTouchHandler {
 
     //--------------------------------------------------------------------------------------------//
 
-    public ViewTouchHandler(TouchListener listener) {
+    public TouchHandler(TouchListener listener) {
         this.listener = listener;
         this.vibrator = (Vibrator) Game.platform.context.getSystemService(Context.VIBRATOR_SERVICE);
         this.handler = new Handler();
@@ -55,7 +55,7 @@ public class ViewTouchHandler {
         };
     }
 
-    public ViewTouchHandler(@NotNull Runnable onSingleTapUp) {
+    public TouchHandler(@NotNull Runnable onSingleTapUp) {
         this.listener = new TouchListener() {
             @Override
             public void onPressUp() {

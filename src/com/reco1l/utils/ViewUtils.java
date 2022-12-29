@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-public class ViewUtils {
+public final class ViewUtils {
 
     public static LayoutParams match_parent = match_parent();
     public static LayoutParams wrap_content = wrap_content();

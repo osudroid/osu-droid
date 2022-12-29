@@ -795,7 +795,7 @@ public final class Animation {
         return this;
     }
 
-    public Animation interpolator(Easing interpolator) {
+    public Animation interpolate(Easing interpolator) {
         this.interpolator = interpolator;
         return this;
     }

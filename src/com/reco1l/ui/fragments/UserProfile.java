@@ -12,8 +12,8 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.ui.BaseFragment;
-import com.reco1l.utils.AnimationOld;
-import com.reco1l.data.tables.ResourceTable;
+import com.reco1l.utils.Animation;
+import com.reco1l.utils.ResUtils;
 import com.reco1l.utils.helpers.OnlineHelper;
 
 import java.text.DecimalFormat;
@@ -54,16 +54,21 @@ public final class UserProfile extends BaseFragment {
         body = find("body");
         body.postDelayed(closeTask, 8000);
 
-        new AnimationOld(body)
-                .height(ResourceTable.sdp(30), ResourceTable.dimen(Game.onlineManager.isStayOnline() ?
+        Animation.of(body)
+                .fromHeight(ResUtils.sdp(30))
+                .toHeight(ResUtils.dimen(Game.onlineManager.isStayOnline() ?
                         R.dimen.userPanelHeight : R.dimen.userPanelSmallHeight))
-                .interpolatorMode(AnimationOld.Interpolate.VALUE_ANIMATOR)
-                .interpolator(Easing.OutExpo)
-                .moveY(-30, 0)
-                .fade(0, 1)
+                .interpolate(Easing.OutExpo)
+                .fromY(-30)
+                .toY(0)
+                .fromAlpha(0)
+                .toAlpha(1)
                 .play(240);
 
-        new AnimationOld(find("userBox")).fade(0, 1).play(200);
+        Animation.of(find("userBox"))
+                .fromAlpha(0)
+                .toAlpha(1)
+                .play(200);
 
         View message = find("messageLayout");
         View infoContainer = find("info");
@@ -75,7 +80,12 @@ public final class UserProfile extends BaseFragment {
             message.setVisibility(View.VISIBLE);
 
             name.setText(Config.getLocalUsername());
-            new AnimationOld(message).fade(0, 1).play(200);
+
+            Animation.of(message)
+                    .fromAlpha(0)
+                    .toAlpha(1)
+                    .play(200);
+
             updateMessage(null);
             return;
         }
@@ -88,11 +98,9 @@ public final class UserProfile extends BaseFragment {
                 score = find("score"),
                 accuracy = find("acc");
 
-        new AnimationOld(find("infoBody"))
-                .forChildView(child ->
-                        new AnimationOld(child)
-                                .cancelPending(child == accuracy || child == accuracyBar)
-                                .fade(0, child.getAlpha()))
+        Animation.of(find("infoBody"))
+                .fromAlpha(0)
+                .toAlpha(1)
                 .play(200);
 
         avatar.setImageDrawable(OnlineHelper.getPlayerAvatar());
@@ -108,17 +116,17 @@ public final class UserProfile extends BaseFragment {
         name.setText(Game.onlineManager.getUsername());
         rank.setText(String.format("#%d", Game.onlineManager.getRank()));
 
-        new AnimationOld().ofFloat(0, Game.onlineManager.getAccuracy() * 100f)
-                .runOnUpdate(val -> accuracy.setText(String.format("%.2f%%", val)))
-                .interpolator(Easing.OutExpo)
-                .cancelPending(false)
+
+
+        Animation.ofFloat(0, Game.onlineManager.getAccuracy() * 100f)
+                .runOnUpdate(val -> accuracy.setText(String.format("%.2f%%", (float) val)))
+                .interpolate(Easing.OutExpo)
                 .delay(200)
                 .play(1000);
 
-        new AnimationOld().ofInt(0, (int) (Game.onlineManager.getAccuracy() * 100))
-                .runOnUpdate(accuracyBar::setProgress)
-                .interpolator(Easing.OutExpo)
-                .cancelPending(false)
+        Animation.ofInt(0, (int) Game.onlineManager.getAccuracy() * 100)
+                .runOnUpdate(v -> accuracyBar.setProgress((int) v))
+                .interpolate(Easing.OutExpo)
                 .delay(200)
                 .play(1000);
 
@@ -129,9 +137,9 @@ public final class UserProfile extends BaseFragment {
     //--------------------------------------------------------------------------------------------//
 
     public void updateMessage(String text) {
-        message = text != null ? text : ResourceTable.str(R.string.user_profile_offline_message);
+        message = text != null ? text : ResUtils.str(R.string.user_profile_offline_message);
         if (BuildConfig.DEBUG)
-            message = text != null ? text : ResourceTable.str(R.string.user_profile_debug_message);
+            message = text != null ? text : ResUtils.str(R.string.user_profile_debug_message);
         if (!isAdded())
             return;
         Game.activity.runOnUiThread(() -> errorText.setText(message));
@@ -151,19 +159,21 @@ public final class UserProfile extends BaseFragment {
             return;
 
         body.removeCallbacks(closeTask);
-        new AnimationOld(find("innerBody")).fade(1, 0)
-                .play(100);
-        new AnimationOld(errorText).fade(1, 0)
+
+        Animation.of(find("innerBody"))
+                .toAlpha(0)
                 .play(100);
 
-        new AnimationOld(body)
-                .height(ResourceTable.dimen(Game.onlineManager.isStayOnline() ?
-                        R.dimen.userPanelHeight : R.dimen.userPanelSmallHeight), ResourceTable.sdp(30))
-                .interpolatorMode(AnimationOld.Interpolate.VALUE_ANIMATOR)
-                .interpolator(Easing.OutExpo)
+        Animation.of(errorText)
+                .toAlpha(0)
+                .play(100);
+
+        Animation.of(body)
+                .toHeight(ResUtils.sdp(30))
+                .toY(-30)
+                .toAlpha(0)
+                .interpolate(Easing.OutExpo)
                 .runOnEnd(super::close)
-                .moveY(0, -30)
-                .fade(1, 0)
                 .play(240);
     }
 

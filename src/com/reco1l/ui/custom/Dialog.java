@@ -14,8 +14,8 @@ import com.edlplan.framework.easing.Easing;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.ui.BaseFragment;
-import com.reco1l.utils.AnimationOld;
-import com.reco1l.data.tables.ResourceTable;
+import com.reco1l.utils.Animation;
+import com.reco1l.utils.ResUtils;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.ViewUtils.MarginUtils;
 import com.reco1l.utils.TouchListener;
@@ -73,8 +73,8 @@ public class Dialog extends BaseFragment {
     protected void onLoad() {
         setDismissMode(builder.closeOnBackgroundClick, builder.closeOnBackPress);
 
-        int m = (int) ResourceTable.dimen(R.dimen.M);
-        int xs = (int) ResourceTable.dimen(R.dimen.XS);
+        int m = (int) ResUtils.dimen(R.dimen.M);
+        int xs = (int) ResUtils.dimen(R.dimen.XS);
 
         buttonsContainer = find("buttonsContainer");
         bodyParent = find("bodyParent");
@@ -84,26 +84,37 @@ public class Dialog extends BaseFragment {
 
         TextView message = find("message");
 
-        new AnimationOld(rootBackground).fade(0, 1)
+        Animation.of(rootBackground)
+                .fromAlpha(0)
+                .toAlpha(1)
                 .play(500);
-        new AnimationOld(body).fade(0, 1)
-                .interpolator(Easing.OutExpo)
+
+        Animation.of(body)
+                .fromAlpha(0)
+                .toAlpha(1)
+                .interpolate(Easing.OutExpo)
                 .play(500);
-        new AnimationOld(bodyParent).moveY(screenHeight / 0.85f, 0)
-                .interpolator(Easing.OutExpo)
+
+        Animation.of(bodyParent)
+                .fromY(screenHeight / 0.85f)
+                .toY(0)
+                .interpolate(Easing.OutExpo)
                 .play(500);
-        new AnimationOld(title).fade(0, 1)
+
+        Animation.of(title)
+                .fromAlpha(0)
+                .toAlpha(1)
                 .play(300);
-
-
 
         if (builder.customFragment != null) {
             Game.platform.manager.beginTransaction()
                     .add(find("fragmentContainer").getId(), builder.customFragment)
-                    .runOnCommit(() ->
-                            new AnimationOld(builder.customFragment.root)
-                                    .forChildView(child -> new AnimationOld(child).fade(0, 1))
-                                    .play(100))
+                    .runOnCommit(
+                            () -> Animation.of(builder.customFragment.root)
+                                    .fromAlpha(0)
+                                    .toAlpha(1)
+                                    .play(200)
+                    )
                     .commit();
         }
 
@@ -128,7 +139,11 @@ public class Dialog extends BaseFragment {
                 button.build(buttonsContainer);
                 button.load(this);
 
-                new AnimationOld(button.view).fade(0, 1).delay(200L * i)
+
+                Animation.of(button.view)
+                        .fromAlpha(0)
+                        .toAlpha(1)
+                        .delay(200L * i)
                         .play(200);
 
                 MarginUtils margins = ViewUtils.margins(button.view);
@@ -171,11 +186,18 @@ public class Dialog extends BaseFragment {
 
         Game.platform.dialogs.remove(this);
 
-        new AnimationOld(rootBackground).fade(1, 0)
+        Animation.of(rootBackground)
+                .toAlpha(0)
                 .play(500);
-        new AnimationOld(body).fade(1, 0).interpolator(Easing.InExpo)
+
+        Animation.of(body)
+                .toAlpha(0)
+                .interpolate(Easing.InExpo)
                 .play(500);
-        new AnimationOld(bodyParent).moveY(0, screenHeight / 0.85f).interpolator(Easing.InExpo)
+
+        Animation.of(bodyParent)
+                .toY(screenHeight / 0.85f)
+                .interpolate(Easing.InExpo)
                 .runOnEnd(() -> {
                     super.close();
                     if (builder.onClose != null)
@@ -183,13 +205,17 @@ public class Dialog extends BaseFragment {
                 })
                 .play(500);
 
-        new AnimationOld(title).fade(1, 0)
-                .play(400);
-        new AnimationOld(container).fade(1, 0)
+        Animation.of(title)
+                .toAlpha(0)
+                .play(300);
+
+        Animation.of(container)
+                .toAlpha(0)
                 .play(400);
 
         if (builder.buttons != null && !builder.buttons.isEmpty()) {
-            new AnimationOld(buttonsContainer).fade(1, 0)
+            Animation.of(buttonsContainer)
+                    .toAlpha(0)
                     .play(300);
         }
 
@@ -233,7 +259,7 @@ public class Dialog extends BaseFragment {
 
         private void build(LinearLayout container) {
             view = new ButtonView(Game.activity);
-            container.addView(view, new LayoutParams(MATCH_PARENT, (int) ResourceTable.dimen(R.dimen.dialogButtonHeight)));
+            container.addView(view, new LayoutParams(MATCH_PARENT, (int) ResUtils.dimen(R.dimen.dialogButtonHeight)));
         }
 
         private void load(Dialog dialog) {

@@ -15,8 +15,8 @@ import androidx.fragment.app.Fragment;
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.utils.TouchListener;
-import com.reco1l.utils.ViewTouchHandler;
-import com.reco1l.data.tables.ResourceTable;
+import com.reco1l.utils.TouchHandler;
+import com.reco1l.utils.ResUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +37,7 @@ public abstract class BaseFragment extends Fragment {
     protected int screenWidth = Config.getRES_WIDTH();
     protected int screenHeight = Config.getRES_HEIGHT();
 
-    private final Map<View, ViewTouchHandler> registeredViews;
+    private final Map<View, TouchHandler> registeredViews;
     private final Runnable close = this::close;
 
     private boolean isLoaded = false;
@@ -194,9 +194,9 @@ public abstract class BaseFragment extends Fragment {
 
         int identifier;
         if (getPrefix() == null || id.startsWith(getPrefix() + "_")) {
-            identifier = ResourceTable.id(id, "id");
+            identifier = ResUtils.id(id, "id");
         } else {
-            identifier = ResourceTable.id(getPrefix() + "_" + id, "id");
+            identifier = ResUtils.id(getPrefix() + "_" + id, "id");
         }
 
         Object view = rootView.findViewById(identifier);
@@ -238,9 +238,9 @@ public abstract class BaseFragment extends Fragment {
     }
 
     public final void bindTouchListener(View view, TouchListener listener) {
-        ViewTouchHandler vth = registeredViews.get(view);
+        TouchHandler vth = registeredViews.get(view);
         if (vth == null) {
-            vth = new ViewTouchHandler(listener);
+            vth = new TouchHandler(listener);
             registeredViews.put(view, vth);
         } else {
             vth.listener = listener;
@@ -261,7 +261,7 @@ public abstract class BaseFragment extends Fragment {
 
     protected final void rebindTouchListeners() {
         for (View view : registeredViews.keySet()) {
-            ViewTouchHandler touchHandler = registeredViews.get(view);
+            TouchHandler touchHandler = registeredViews.get(view);
             if (touchHandler != null) {
                 touchHandler.apply(view);
             }

@@ -1,4 +1,4 @@
-package com.reco1l.data.tables;
+package com.reco1l.utils;
 
 // Created by Reco1l on 2/7/22 06:18
 
@@ -14,10 +14,16 @@ import androidx.annotation.StringRes;
 
 import com.reco1l.Game;
 
-public class ResourceTable {
+public final class ResUtils {
 
     private static final Resources R = Game.activity.getResources();
     private static final Resources.Theme theme = Game.activity.getTheme();
+
+    //--------------------------------------------------------------------------------------------//
+
+    public ResUtils() throws Exception {
+        throw new Exception("You can't create a new instance of this class!");
+    }
 
     //--------------------------------------------------------------------------------------------//
 
@@ -26,20 +32,6 @@ public class ResourceTable {
     }
 
     //--------------------------------------------------------------------------------------------//
-
-    public static Drawable drw(@DrawableRes int id) {
-        return R.getDrawable(id, theme);
-    }
-
-    public static Bitmap drwAsBitmap(@DrawableRes int id) {
-        return BitmapFactory.decodeResource(R, id);
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public static int dimen(@DimenRes int id) {
-        return (int) R.getDimension(id);
-    }
 
     public static int sdp(int dp) {
         if (dp <= 0) {
@@ -57,11 +49,17 @@ public class ResourceTable {
 
     //--------------------------------------------------------------------------------------------//
 
+    public static int dimen(@DimenRes int id) {
+        return (int) R.getDimension(id);
+    }
+
+    public static Drawable drw(@DrawableRes int id) {
+        return R.getDrawable(id, theme);
+    }
+
     public static String str(@StringRes int id) {
         return R.getString(id);
     }
-
-    //--------------------------------------------------------------------------------------------//
 
     public static int color(@ColorRes int id) {
         return R.getColor(id, theme);

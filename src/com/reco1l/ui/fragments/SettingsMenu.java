@@ -33,7 +33,7 @@ import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.data.tables.AnimationTable;
 import com.reco1l.utils.execution.AsyncTask;
-import com.reco1l.data.tables.ResourceTable;
+import com.reco1l.utils.ResUtils;
 import com.reco1l.utils.helpers.OnlineHelper;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
@@ -130,8 +130,8 @@ public final class SettingsMenu extends BaseFragment {
         }
         currentTab = Tabs.general;
 
-        panelWidth = (int) ResourceTable.dimen(R.dimen.settingsPanelWidth);
-        navBarWidth = (int) ResourceTable.dimen(R.dimen.settingsPanelNavBarWidth);
+        panelWidth = (int) ResUtils.dimen(R.dimen.settingsPanelWidth);
+        navBarWidth = (int) ResUtils.dimen(R.dimen.settingsPanelNavBarWidth);
 
         tabIndicator = find("tabIndicator");
         navigationBar = find("navbar");
@@ -149,19 +149,19 @@ public final class SettingsMenu extends BaseFragment {
         Animation.of(navigationBar)
                 .fromX(navBarWidth)
                 .toX(0f)
-                .interpolator(Easing.OutExpo)
+                .interpolate(Easing.OutExpo)
                 .play(350);
 
         Animation.of(layer)
                 .fromX(panelWidth + navBarWidth)
                 .toX(0f)
-                .interpolator(Easing.OutExpo)
+                .interpolate(Easing.OutExpo)
                 .play(350);
 
         Animation.of(body)
                 .fromX(panelWidth + navBarWidth)
                 .toX(0f)
-                .interpolator(Easing.OutExpo)
+                .interpolate(Easing.OutExpo)
                 .delay(50)
                 .play(400);
 
@@ -187,7 +187,8 @@ public final class SettingsMenu extends BaseFragment {
 
         float y = find(tab.name()).getY();
 
-        AnimationTable.moveY(tabIndicator, y)
+        Animation.of(tabIndicator)
+                .toY(y)
                 .play(200);
 
         Animation.of(container)
@@ -246,18 +247,18 @@ public final class SettingsMenu extends BaseFragment {
 
         Animation.of(body)
                 .toX(panelWidth + navBarWidth)
-                .interpolator(Easing.OutExpo)
+                .interpolate(Easing.OutExpo)
                 .play(350);
 
         Animation.of(layer)
                 .toX(panelWidth + navBarWidth)
-                .interpolator(Easing.OutExpo)
+                .interpolate(Easing.OutExpo)
                 .delay(50)
                 .play(400);
 
         Animation.of(navigationBar)
                 .toX(navBarWidth)
-                .interpolator(Easing.OutExpo)
+                .interpolate(Easing.OutExpo)
                 .delay(400)
                 .runOnEnd(() -> {
                     super.close();

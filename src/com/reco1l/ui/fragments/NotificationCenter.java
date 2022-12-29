@@ -8,7 +8,6 @@ import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.edlplan.framework.easing.Easing;
 import com.factor.bouncy.BouncyRecyclerView;
@@ -19,8 +18,7 @@ import com.reco1l.data.adapters.NotificationListAdapter;
 import com.reco1l.data.adapters.NotificationListAdapter.ViewHolder;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.AnimationOld;
-import com.reco1l.data.tables.ResourceTable;
+import com.reco1l.utils.ResUtils;
 import com.reco1l.utils.ViewUtils;
 
 import java.util.ArrayList;
@@ -77,7 +75,7 @@ public final class NotificationCenter extends BaseFragment {
     @Override
     protected void onLoad() {
         setDismissMode(true, true);
-        bodyWidth = ResourceTable.dimen(R.dimen.notificationCenterWidth);
+        bodyWidth = ResUtils.dimen(R.dimen.notificationCenterWidth);
 
         body = find("body");
         layer = find("layer");
@@ -90,20 +88,20 @@ public final class NotificationCenter extends BaseFragment {
                 .toAlpha(1)
                 .play(300);
 
-        /*Game.platform.animateScreen()
-                .toX(-60)
-                .play(300);*/
+        Game.platform.animate(true, true)
+                .toX(-50)
+                .play(400);
 
         Animation.of(layer)
                 .fromX(bodyWidth)
                 .toX(0)
-                .interpolator(Easing.OutExpo)
+                .interpolate(Easing.OutExpo)
                 .play(350);
 
         Animation.of(body)
                 .fromX(bodyWidth)
                 .toX(0)
-                .interpolator(Easing.OutExpo)
+                .interpolate(Easing.OutExpo)
                 .delay(50)
                 .play(400);
 
@@ -238,14 +236,24 @@ public final class NotificationCenter extends BaseFragment {
 
         Game.activity.runOnUiThread(() -> {
 
-            new AnimationOld(Game.platform.renderView).moveX(-50, 0)
+            Game.platform.animate(true, true)
+                    .toX(0)
                     .play(400);
-            new AnimationOld(body).moveX(0, ResourceTable.dimen(R.dimen.notificationCenterWidth))
-                    .interpolator(Easing.InExpo)
-                    .runOnStart(() -> new AnimationOld(rootBackground).fade(1, 0).play(300))
+
+            Animation.of(body)
+                    .toX(ResUtils.dimen(R.dimen.notificationCenterWidth))
+                    .interpolate(Easing.InExpo)
+                    .runOnStart(() ->
+                            Animation.of(rootBackground)
+                                    .toAlpha(0)
+                                    .play(300)
+                    )
                     .play(350);
-            new AnimationOld(layer).moveX(0, bodyWidth).interpolator(Easing.InExpo)
+
+            Animation.of(layer)
+                    .toX(bodyWidth)
                     .runOnEnd(super::close)
+                    .interpolate(Easing.InExpo)
                     .delay(50)
                     .play(400);
         });
@@ -297,10 +305,10 @@ public final class NotificationCenter extends BaseFragment {
 
         @Override
         protected void onLoad() {
-            int xs = ResourceTable.dimen(R.dimen.XS);
+            int xs = ResUtils.dimen(R.dimen.XS);
 
             rootView.setPadding(xs, xs, xs, xs);
-            rootView.setElevation(ResourceTable.dimen(R.dimen.XXL));
+            rootView.setElevation(ResUtils.dimen(R.dimen.XXL));
             bind();
         }
 
@@ -309,7 +317,7 @@ public final class NotificationCenter extends BaseFragment {
 
             LayoutParams params = (LayoutParams) holder.body.getLayoutParams();
 
-            params.width = ResourceTable.dimen(R.dimen.popupNotificationWidth);
+            params.width = ResUtils.dimen(R.dimen.popupNotificationWidth);
             params.addRule(ALIGN_PARENT_END);
             holder.body.setLayoutParams(params);
 

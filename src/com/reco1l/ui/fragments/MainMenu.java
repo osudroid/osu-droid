@@ -15,7 +15,7 @@ import com.reco1l.enums.Screens;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.execution.AsyncTask;
-import com.reco1l.data.tables.ResourceTable;
+import com.reco1l.utils.ResUtils;
 import com.reco1l.UI;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.TouchListener;
@@ -83,7 +83,7 @@ public final class MainMenu extends BaseFragment {
         single.setAlpha(0);
         multi.setAlpha(0);
 
-        ViewUtils.size(logo, ResourceTable.dimen(R.dimen.mainMenuLogoSize));
+        ViewUtils.size(logo, ResUtils.dimen(R.dimen.mainMenuLogoSize));
         ViewUtils.width(buttons, 0);
 
         bindTouchListener(logo, new TouchListener() {
@@ -136,13 +136,13 @@ public final class MainMenu extends BaseFragment {
             UI.topBar.show();
 
             Animation.of(logo)
-                    .toSize(ResourceTable.dimen(R.dimen.mainMenuSmallLogoSize))
-                    .interpolator(Easing.InOutQuad)
+                    .toSize(ResUtils.dimen(R.dimen.mainMenuSmallLogoSize))
+                    .interpolate(Easing.InOutQuad)
                     .play(300);
 
             Animation.of(buttons)
-                    .toWidth(ResourceTable.dimen(R.dimen.mainMenuButtonLayoutWidth))
-                    .interpolator(Easing.InOutQuad)
+                    .toWidth(ResUtils.dimen(R.dimen.mainMenuButtonLayoutWidth))
+                    .interpolate(Easing.InOutQuad)
                     .play(300);
 
             Animation.of(single, multi)
@@ -163,13 +163,13 @@ public final class MainMenu extends BaseFragment {
             }
 
             Animation.of(logo)
-                    .toSize(ResourceTable.dimen(R.dimen.mainMenuLogoSize))
-                    .interpolator(Easing.InOutQuad)
+                    .toSize(ResUtils.dimen(R.dimen.mainMenuLogoSize))
+                    .interpolate(Easing.InOutQuad)
                     .play(300);
 
             Animation.of(buttons)
                     .toWidth(0)
-                    .interpolator(Easing.InOutQuad)
+                    .interpolate(Easing.InOutQuad)
                     .play(300);
 
             Animation.of(single, multi)
@@ -208,7 +208,7 @@ public final class MainMenu extends BaseFragment {
                         }
                     }.execute();
                 })
-                .toX(ResourceTable.dimen(R.dimen._80sdp))
+                .toX(ResUtils.dimen(R.dimen._80sdp))
                 .toAlpha(0)
                 .play(400);
     }

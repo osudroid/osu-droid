@@ -12,7 +12,7 @@ import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.data.tables.AnimationTable;
-import com.reco1l.data.tables.ResourceTable;
+import com.reco1l.utils.ResUtils;
 import com.reco1l.utils.helpers.BeatmapHelper;
 
 import java.text.DecimalFormat;
@@ -263,7 +263,7 @@ public final class GameSummary extends BaseFragment {
         //----------------------------------------------------------------------------------------//
 
         private void applyColoring(TextView text, Difference difference) {
-            Drawable background = ResourceTable.drw(R.drawable.shape_rounded).mutate();
+            Drawable background = ResUtils.drw(R.drawable.shape_rounded).mutate();
             background.setTint(difference.backgroundColor);
 
             text.setTextColor(difference.textColor);

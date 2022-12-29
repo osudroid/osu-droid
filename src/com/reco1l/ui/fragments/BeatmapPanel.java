@@ -11,11 +11,11 @@ import androidx.cardview.widget.CardView;
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.data.BeatmapProperty;
+import com.reco1l.utils.Animation;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.data.Scoreboard;
 import com.reco1l.ui.BaseFragment;
-import com.reco1l.utils.AnimationOld;
-import com.reco1l.data.tables.ResourceTable;
+import com.reco1l.utils.ResUtils;
 import com.reco1l.interfaces.IGameMods;
 
 import java.util.EnumSet;
@@ -107,7 +107,7 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
         setDismissMode(false, false);
 
         track = Game.musicManager.getTrack();
-        bodyWidth = ResourceTable.dimen(R.dimen.beatmapPanelContentWidth);
+        bodyWidth = ResUtils.dimen(R.dimen.beatmapPanelContentWidth);
         isBannerExpanded = true;
 
         if (scoreboard == null) {
@@ -117,9 +117,11 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
 
         body = find("body");
 
-        new AnimationOld(body)
-                .moveX(-bodyWidth, 0)
-                .fade(0, 1)
+        Animation.of(body)
+                .fromX(0)
+                .toX(-bodyWidth)
+                .fromAlpha(0)
+                .toAlpha(1)
                 .play(300);
 
         title = find("title");
@@ -143,7 +145,7 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
         bindTouchListener(globalTab, () -> switchTab(globalTab));
         bindTouchListener(localTab, () -> switchTab(localTab));
 
-        int max = ResourceTable.dimen(R.dimen._84sdp);
+        int max = ResUtils.dimen(R.dimen._84sdp);
 
         bindTouchListener(find("expand"), () -> {
             if (isBannerExpanded) {
@@ -350,24 +352,24 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
             int lastColor = BeatmapHelper.Palette.getColor(lastDifficulty);
             lastDifficulty = pStars.value;
 
-            new AnimationOld().ofArgb(lastTextColor, textColor)
+            Animation.ofColor(lastTextColor, textColor)
                     .runOnUpdate(value -> {
-                        pStars.view.setTextColor(value);
+                        pStars.view.setTextColor((int) value);
                         if (pStars.view.getCompoundDrawablesRelative()[0] != null) {
-                            pStars.view.getCompoundDrawablesRelative()[0].setTint(value);
+                            pStars.view.getCompoundDrawablesRelative()[0].setTint((int) value);
                         }
                     }).play(500);
 
-            new AnimationOld().ofArgb(lastColor, color)
-                    .runOnUpdate(value -> pStars.view.getBackground().setTint(value))
+
+            Animation.ofColor(lastColor, color)
+                    .runOnUpdate(value -> pStars.view.getBackground().setTint((int) value))
                     .play(500);
 
-            new AnimationOld(banner).ofArgb(lastDarkerColor, darkerColor)
+            Animation.ofColor(lastDarkerColor, darkerColor)
                     .runOnUpdate(value -> {
-                        banner.setCardBackgroundColor(value);
-                        mapper.getBackground().setTint(value);
+                        banner.setCardBackgroundColor((int) value);
+                        mapper.getBackground().setTint((int) value);
                     })
-                    .cancelPending(true)
                     .play(500);
         });
     }
@@ -378,12 +380,20 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
 
         boolean toRight = tabIndicator.getTranslationX() < button.getX();
 
-        new AnimationOld(tabIndicator).moveX(tabIndicator.getTranslationX(), button.getX())
+        Animation.of(tabIndicator)
+                .toX(button.getX())
                 .play(150);
-        new AnimationOld(pageContainer).moveX(0, toRight ? -60 : 60).fade(1, 0)
+
+        Animation.of(pageContainer)
+                .toX(toRight ? -60 : 60)
+                .toAlpha(0)
                 .runOnStart(() -> isTabAnimInProgress = true)
                 .play(200);
-        new AnimationOld(pageContainer).moveX(toRight ? 60 : -60, 0).fade(0, 1)
+
+        Animation.of(pageContainer)
+                .fromX(toRight ? 60 : -60)
+                .toX(0)
+                .toAlpha(1)
                 .runOnEnd(() -> isTabAnimInProgress = false)
                 .delay(200)
                 .play(200);
@@ -416,9 +426,10 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
             return;
         scoreboard.setContainer(null);
 
-        new AnimationOld(body).moveX(0, -bodyWidth)
-                .marginTop((int) ResourceTable.dimen(R.dimen.topBarHeight), 0)
-                .fade(1, 0)
+        Animation.of(body)
+                .toX(-bodyWidth)
+                .toTopMargin((int) ResUtils.dimen(R.dimen.topBarHeight))
+                .toAlpha(0)
                 .runOnEnd(super::close)
                 .play(300);
     }
