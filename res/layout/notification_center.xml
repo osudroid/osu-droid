@@ -92,7 +92,7 @@
                 android:textColor="@color/textSecondary"
                 android:visibility="gone" />
 
-            <androidx.recyclerview.widget.RecyclerView
+            <com.factor.bouncy.BouncyRecyclerView
                 android:id="@+id/nc_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

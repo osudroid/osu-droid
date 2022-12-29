@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.edlplan.framework.easing.Easing;
+import com.factor.bouncy.BouncyRecyclerView;
 import com.reco1l.Game;
 import com.reco1l.data.GameNotification;
 import com.reco1l.UI;
@@ -38,7 +39,7 @@ public final class NotificationCenter extends BaseFragment {
     private final PopupFragment popupFragment;
 
     private View body, layer;
-    private RecyclerView container;
+    private BouncyRecyclerView container;
     private TextView counter, emptyText;
 
     private boolean isAllowedPopups = true;
