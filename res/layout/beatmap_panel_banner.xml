@@ -100,7 +100,6 @@
                         <TextView
                             android:id="@+id/bp_mapper"
                             style="@style/propertyBadge"
-                            android:layout_above="@+id/bp_props_row1"
                             android:layout_marginStart="0dp"
                             android:drawableStart="@drawable/v_person_xs"
                             android:text="[mapper name]" />

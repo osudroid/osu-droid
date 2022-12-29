@@ -7,19 +7,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.reco1l.Game;
 import com.reco1l.data.BeatmapCollection;
 import com.reco1l.enums.Screens;
-import com.reco1l.ui.data.BeatmapListAdapter;
-import com.reco1l.ui.platform.BaseFragment;
+import com.reco1l.data.adapters.BeatmapListAdapter;
+import com.reco1l.ui.BaseFragment;
 import com.reco1l.view.CarrouselRecyclerView;
 
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 22/8/22 00:31
 
-public class BeatmapCarrousel extends BaseFragment implements BeatmapCollection.Listener {
+public final class BeatmapCarrousel extends BaseFragment implements BeatmapCollection.Listener {
 
     public static BeatmapCarrousel instance;
 

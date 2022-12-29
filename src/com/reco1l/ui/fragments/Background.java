@@ -14,22 +14,22 @@ import androidx.palette.graphics.Palette;
 
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
-import com.reco1l.ui.platform.BaseFragment;
-import com.reco1l.utils.AnimationTable;
-import com.reco1l.utils.AsyncExec;
-import com.reco1l.utils.BlurEffect;
+import com.reco1l.ui.BaseFragment;
+import com.reco1l.data.tables.AnimationTable;
+import com.reco1l.utils.execution.AsyncTask;
+import com.reco1l.utils.BlurRender;
 import com.reco1l.utils.helpers.BitmapHelper;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class Background extends BaseFragment {
+public final class Background extends BaseFragment {
 
     public static Background instance;
 
     private ImageView image0, image1;
 
-    private AsyncExec backgroundTask;
+    private AsyncTask backgroundTask;
 
     private String imagePath;
     private Bitmap bitmap;
@@ -99,7 +99,7 @@ public class Background extends BaseFragment {
             backgroundTask.cancel(true);
         }
 
-        backgroundTask = new AsyncExec() {
+        backgroundTask = new AsyncTask() {
             Bitmap newBitmap;
 
             public void run() {
@@ -114,7 +114,7 @@ public class Background extends BaseFragment {
                 parseColor(newBitmap);
 
                 if (isBlurEnabled) {
-                    newBitmap = BlurEffect.applyTo(newBitmap, 25);
+                    newBitmap = BlurRender.applyTo(newBitmap, 25);
                 }
             }
 

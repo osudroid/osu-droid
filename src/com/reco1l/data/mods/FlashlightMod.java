@@ -4,9 +4,6 @@ package com.reco1l.data.mods;
 import androidx.preference.SeekBarPreference;
 
 import com.reco1l.Game;
-import com.reco1l.data.LegacyModWrapper;
-import com.reco1l.data.ModProperty;
-import com.reco1l.data.ModWrapper;
 
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osuplus.R;

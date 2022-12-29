@@ -1,11 +1,11 @@
 package com.reco1l.interfaces;
 
 import com.reco1l.data.BeatmapCollection;
-import com.reco1l.game.TimingWrapper;
+import com.reco1l.tools.TimingWrapper;
 import com.reco1l.management.BitmapManager;
 import com.reco1l.GameEngine;
 import com.reco1l.management.MusicManager;
-import com.reco1l.ui.platform.FragmentPlatform;
+import com.reco1l.ui.FragmentPlatform;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;

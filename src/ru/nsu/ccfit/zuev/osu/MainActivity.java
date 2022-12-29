@@ -36,10 +36,10 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.GameEngine;
 import com.reco1l.Game;
-import com.reco1l.andengine.scenes.IntroScene;
+import com.reco1l.scenes.IntroScene;
 import com.reco1l.ui.custom.Dialog;
-import com.reco1l.ui.data.DialogTable;
-import com.reco1l.utils.KeyInputHandler;
+import com.reco1l.data.tables.DialogTable;
+import com.reco1l.management.KeyInputManager;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
@@ -664,7 +664,7 @@ public class MainActivity extends BaseGameActivity implements
         }
 
         Log.i("KeyInputHandler", "Key input detected: " + event.toString());
-        return KeyInputHandler.handle(keyCode, event.getAction());
+        return KeyInputManager.handle(keyCode, event.getAction());
     }
 
     private void initAccessibilityDetector() {

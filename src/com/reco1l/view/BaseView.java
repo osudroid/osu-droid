@@ -5,7 +5,7 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.reco1l.utils.Res;
+import com.reco1l.data.tables.ResourceTable;
 
 public interface BaseView {
 
@@ -43,6 +43,6 @@ public interface BaseView {
         if (getView() == null || getView().isInEditMode()) {
             return dp * 3;
         }
-        return Res.sdp(dp);
+        return ResourceTable.sdp(dp);
     }
 }

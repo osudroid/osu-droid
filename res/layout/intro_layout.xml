@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         android:background="#000" />
 
-    <com.reco1l.view.StripsEffectView
+    <com.reco1l.view.effects.StripsEffect
         android:id="@+id/il_effect"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

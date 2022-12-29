@@ -4,16 +4,16 @@ import com.reco1l.ui.fragments.Background;
 import com.reco1l.ui.fragments.BeatmapCarrousel;
 import com.reco1l.ui.fragments.BeatmapPanel;
 import com.reco1l.ui.fragments.DebugOverlay;
-import com.reco1l.ui.extras.NotificationCenter;
+import com.reco1l.ui.fragments.NotificationCenter;
 import com.reco1l.ui.fragments.FilterMenu;
 import com.reco1l.ui.fragments.GameSummary;
 import com.reco1l.ui.fragments.MainMenu;
-import com.reco1l.ui.extras.MusicPlayer;
-import com.reco1l.ui.extras.SettingsMenu;
+import com.reco1l.ui.fragments.MusicPlayer;
+import com.reco1l.ui.fragments.SettingsMenu;
 import com.reco1l.ui.fragments.ModMenu;
 import com.reco1l.ui.fragments.TopBar;
-import com.reco1l.ui.extras.UserProfile;
-import com.reco1l.ui.platform.BaseFragment;
+import com.reco1l.ui.fragments.UserProfile;
+import com.reco1l.ui.BaseFragment;
 
 // Created by Reco1l on 29/6/22 22:38
 

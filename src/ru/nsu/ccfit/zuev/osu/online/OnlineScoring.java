@@ -2,10 +2,8 @@ package ru.nsu.ccfit.zuev.osu.online;
 
 import android.os.AsyncTask;
 
-import com.reco1l.Game;
 import com.reco1l.UI;
-import com.reco1l.utils.NotificationTable;
-import com.reco1l.interfaces.IReferences;
+import com.reco1l.data.tables.NotificationTable;
 import com.reco1l.utils.helpers.OnlineHelper;
 
 import org.anddev.andengine.util.Debug;

@@ -3,9 +3,9 @@ package ru.nsu.ccfit.zuev.osu;
 import android.util.DisplayMetrics;
 
 import com.reco1l.Game;
-import com.reco1l.andengine.scenes.LoaderScene;
-import com.reco1l.andengine.scenes.SelectorScene;
-import com.reco1l.andengine.scenes.MainScene;
+import com.reco1l.scenes.LoaderScene;
+import com.reco1l.scenes.SelectorScene;
+import com.reco1l.scenes.MainScene;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
@@ -14,7 +14,7 @@ import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
-import com.reco1l.andengine.scenes.SummaryScene;
+import com.reco1l.scenes.SummaryScene;
 
 /**
  * Created by Fuuko on 2015/4/24.

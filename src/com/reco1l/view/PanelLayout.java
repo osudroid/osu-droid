@@ -3,8 +3,6 @@ package com.reco1l.view;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.widget.RelativeLayout.ALIGN_BOTTOM;
-import static android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM;
-import static android.widget.RelativeLayout.ALIGN_PARENT_TOP;
 import static android.widget.RelativeLayout.ALIGN_TOP;
 
 import android.annotation.SuppressLint;
@@ -24,8 +22,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 
-import com.reco1l.utils.Res;
 import com.reco1l.utils.ViewUtils;
+import com.reco1l.view.effects.StripsEffect;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -33,7 +31,7 @@ public class PanelLayout extends CardView implements BaseView {
 
     private TextView title;
     private LinearLayout layout;
-    private StripsEffectView effect;
+    private StripsEffect effect;
 
     private int titleHeight;
 
@@ -85,7 +83,7 @@ public class PanelLayout extends CardView implements BaseView {
         body.addView(title);
         title.getLayoutParams().width = MATCH_PARENT;
 
-        effect = new StripsEffectView(getContext());
+        effect = new StripsEffect(getContext());
         effect.setStripWidth(sdp(12));
         effect.setAlpha(0.5f);
         body.addView(effect);

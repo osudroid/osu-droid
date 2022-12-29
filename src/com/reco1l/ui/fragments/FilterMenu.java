@@ -8,16 +8,16 @@ import android.text.TextWatcher;
 import android.widget.EditText;
 
 import com.reco1l.Game;
-import com.reco1l.ui.platform.BaseFragment;
-import com.reco1l.view.TextButton;
+import com.reco1l.ui.BaseFragment;
+import com.reco1l.view.ButtonView;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class FilterMenu extends BaseFragment {
+public final class FilterMenu extends BaseFragment {
 
     public static FilterMenu instance;
 
-    private TextButton sort;
+    private ButtonView sort;
     private EditText field;
 
     //--------------------------------------------------------------------------------------------//

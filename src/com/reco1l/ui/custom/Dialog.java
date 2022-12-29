@@ -13,13 +13,13 @@ import androidx.cardview.widget.CardView;
 import com.edlplan.framework.easing.Easing;
 import com.reco1l.Game;
 import com.reco1l.UI;
-import com.reco1l.ui.platform.BaseFragment;
+import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.AnimationOld;
-import com.reco1l.utils.Res;
+import com.reco1l.data.tables.ResourceTable;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.ViewUtils.MarginUtils;
-import com.reco1l.utils.listeners.TouchListener;
-import com.reco1l.view.TextButton;
+import com.reco1l.utils.TouchListener;
+import com.reco1l.view.ButtonView;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -73,8 +73,8 @@ public class Dialog extends BaseFragment {
     protected void onLoad() {
         setDismissMode(builder.closeOnBackgroundClick, builder.closeOnBackPress);
 
-        int m = (int) Res.dimen(R.dimen.M);
-        int xs = (int) Res.dimen(R.dimen.XS);
+        int m = (int) ResourceTable.dimen(R.dimen.M);
+        int xs = (int) ResourceTable.dimen(R.dimen.XS);
 
         buttonsContainer = find("buttonsContainer");
         bodyParent = find("bodyParent");
@@ -223,7 +223,7 @@ public class Dialog extends BaseFragment {
         protected String text;
         protected Integer color;
         protected OnButtonClick onClick;
-        private TextButton view;
+        private ButtonView view;
 
         public Button(String text, Integer color, OnButtonClick onClick) {
             this.text = text;
@@ -232,8 +232,8 @@ public class Dialog extends BaseFragment {
         }
 
         private void build(LinearLayout container) {
-            view = new TextButton(Game.activity);
-            container.addView(view, new LayoutParams(MATCH_PARENT, (int) Res.dimen(R.dimen.dialogButtonHeight)));
+            view = new ButtonView(Game.activity);
+            container.addView(view, new LayoutParams(MATCH_PARENT, (int) ResourceTable.dimen(R.dimen.dialogButtonHeight)));
         }
 
         private void load(Dialog dialog) {

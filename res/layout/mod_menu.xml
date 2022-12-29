@@ -52,13 +52,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
 
-                    <com.reco1l.view.TextButton
+                    <com.reco1l.view.ButtonView
                         android:id="@+id/mm_custom"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:buttonText="Customizations" />
 
-                    <com.reco1l.view.TextButton
+                    <com.reco1l.view.ButtonView
                         android:id="@+id/mm_clear"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

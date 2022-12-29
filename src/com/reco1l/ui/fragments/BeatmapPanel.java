@@ -10,12 +10,12 @@ import androidx.cardview.widget.CardView;
 
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
-import com.reco1l.ui.data.BeatmapProperty;
+import com.reco1l.data.BeatmapProperty;
 import com.reco1l.utils.helpers.BeatmapHelper;
-import com.reco1l.ui.data.Scoreboard;
-import com.reco1l.ui.platform.BaseFragment;
+import com.reco1l.data.Scoreboard;
+import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.AnimationOld;
-import com.reco1l.utils.Res;
+import com.reco1l.data.tables.ResourceTable;
 import com.reco1l.interfaces.IGameMods;
 
 import java.util.EnumSet;
@@ -28,7 +28,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 13/9/22 01:22
 
-public class BeatmapPanel extends BaseFragment implements IGameMods {
+public final class BeatmapPanel extends BaseFragment implements IGameMods {
 
     public static BeatmapPanel instance;
 
@@ -107,7 +107,7 @@ public class BeatmapPanel extends BaseFragment implements IGameMods {
         setDismissMode(false, false);
 
         track = Game.musicManager.getTrack();
-        bodyWidth = Res.dimen(R.dimen.beatmapPanelContentWidth);
+        bodyWidth = ResourceTable.dimen(R.dimen.beatmapPanelContentWidth);
         isBannerExpanded = true;
 
         if (scoreboard == null) {
@@ -143,7 +143,7 @@ public class BeatmapPanel extends BaseFragment implements IGameMods {
         bindTouchListener(globalTab, () -> switchTab(globalTab));
         bindTouchListener(localTab, () -> switchTab(localTab));
 
-        int max = Res.dimen(R.dimen._84sdp);
+        int max = ResourceTable.dimen(R.dimen._84sdp);
 
         bindTouchListener(find("expand"), () -> {
             if (isBannerExpanded) {
@@ -417,7 +417,7 @@ public class BeatmapPanel extends BaseFragment implements IGameMods {
         scoreboard.setContainer(null);
 
         new AnimationOld(body).moveX(0, -bodyWidth)
-                .marginTop((int) Res.dimen(R.dimen.topBarHeight), 0)
+                .marginTop((int) ResourceTable.dimen(R.dimen.topBarHeight), 0)
                 .fade(1, 0)
                 .runOnEnd(super::close)
                 .play(300);

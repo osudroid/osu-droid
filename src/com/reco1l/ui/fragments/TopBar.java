@@ -11,14 +11,14 @@ import com.reco1l.enums.Screens;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.UI;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.AnimationTable;
-import com.reco1l.utils.KeyInputHandler;
+import com.reco1l.data.tables.AnimationTable;
+import com.reco1l.management.KeyInputManager;
 import com.reco1l.utils.helpers.BeatmapHelper;
-import com.reco1l.ui.data.DialogTable;
-import com.reco1l.ui.platform.BaseFragment;
-import com.reco1l.utils.Res;
+import com.reco1l.data.tables.DialogTable;
+import com.reco1l.ui.BaseFragment;
+import com.reco1l.data.tables.ResourceTable;
 import com.reco1l.utils.helpers.OnlineHelper;
-import com.reco1l.view.BarButton;
+import com.reco1l.view.IconButton;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +31,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 26/6/22 21:20
 
-public class TopBar extends BaseFragment {
+public final class TopBar extends BaseFragment {
 
     public static TopBar instance;
 
@@ -42,7 +42,7 @@ public class TopBar extends BaseFragment {
     private TextView author;
     private LinearLayout container, buttonsContainer;
 
-    private final Map<Screens, ArrayList<BarButton>> buttons;
+    private final Map<Screens, ArrayList<IconButton>> buttons;
 
     private int barHeight;
 
@@ -80,7 +80,7 @@ public class TopBar extends BaseFragment {
     @Override
     protected void onLoad() {
         setDismissMode(false, false);
-        barHeight = (int) Res.dimen(R.dimen.topBarHeight);
+        barHeight = (int) ResourceTable.dimen(R.dimen.topBarHeight);
 
         body = find("body");
 
@@ -101,11 +101,11 @@ public class TopBar extends BaseFragment {
         author = find("author");
         back = find("back");
 
-        author.setText(Res.str(R.string.app_name) + " " + BuildConfig.VERSION_NAME);
+        author.setText(ResourceTable.str(R.string.app_name) + " " + BuildConfig.VERSION_NAME);
 
         bindTouchListener(find("inbox"), UI.notificationCenter::altShow);
         bindTouchListener(find("settings"), UI.settingsPanel::altShow);
-        bindTouchListener(back, KeyInputHandler::performBack);
+        bindTouchListener(back, KeyInputManager::performBack);
 
         bindTouchListener(author, () -> new Dialog(DialogTable.author()).show());
 
@@ -143,9 +143,9 @@ public class TopBar extends BaseFragment {
                         }
                     }
 
-                    ArrayList<BarButton> toAdd = buttons.get(current);
+                    ArrayList<IconButton> toAdd = buttons.get(current);
                     if (toAdd != null) {
-                        for (BarButton button : toAdd) {
+                        for (IconButton button : toAdd) {
                             buttonsContainer.addView(button);
                             bindTouchListener(button, button.getTouchListener());
                         }
@@ -204,10 +204,10 @@ public class TopBar extends BaseFragment {
         anim.play(200);
     }
 
-    public void addButton(Screens screen, BarButton button) {
+    public void addButton(Screens screen, IconButton button) {
         buttons.computeIfAbsent(screen, k -> new ArrayList<>());
 
-        ArrayList<BarButton> list = buttons.get(screen);
+        ArrayList<IconButton> list = buttons.get(screen);
 
         if (list != null) {
             list.add(button);
@@ -315,7 +315,7 @@ public class TopBar extends BaseFragment {
 
             AnimationTable.fadeOutIn(avatar, () -> avatar.setImageResource(R.drawable.default_avatar));
 
-            AnimationTable.textChange(rank, Res.str(R.string.top_bar_offline));
+            AnimationTable.textChange(rank, ResourceTable.str(R.string.top_bar_offline));
             AnimationTable.textChange(name, Config.getLocalUsername());
 
             if (Game.onlineManager.isStayOnline() && !clear) {

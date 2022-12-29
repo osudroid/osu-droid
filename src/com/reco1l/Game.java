@@ -3,10 +3,10 @@ package com.reco1l;
 import android.content.Intent;
 import android.os.PowerManager;
 
-import com.reco1l.andengine.scenes.LoaderScene;
-import com.reco1l.andengine.scenes.SelectorScene;
-import com.reco1l.andengine.scenes.MainScene;
-import com.reco1l.andengine.scenes.SummaryScene;
+import com.reco1l.scenes.LoaderScene;
+import com.reco1l.scenes.SelectorScene;
+import com.reco1l.scenes.MainScene;
+import com.reco1l.scenes.SummaryScene;
 import com.reco1l.interfaces.IReferences;
 
 import java.util.Timer;
@@ -24,10 +24,10 @@ public final class Game implements IReferences {
 
     public static GameScene gameScene = GameScene.getInstance();
 
-    public static MainScene mainScene = com.reco1l.andengine.scenes.MainScene.getInstance();
-    public static LoaderScene loaderScene = com.reco1l.andengine.scenes.LoaderScene.getInstance();
-    public static SummaryScene summaryScene = com.reco1l.andengine.scenes.SummaryScene.getInstance();
-    public static SelectorScene selectorScene = com.reco1l.andengine.scenes.SelectorScene.getInstance();
+    public static MainScene mainScene = MainScene.getInstance();
+    public static LoaderScene loaderScene = LoaderScene.getInstance();
+    public static SummaryScene summaryScene = SummaryScene.getInstance();
+    public static SelectorScene selectorScene = SelectorScene.getInstance();
 
     public static SongService songService = getSongService();
 

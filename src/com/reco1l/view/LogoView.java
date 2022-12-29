@@ -18,6 +18,7 @@ import androidx.cardview.widget.CardView;
 import com.reco1l.Game;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.ViewUtils;
+import com.reco1l.view.effects.StripsEffect;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -25,7 +26,7 @@ public class LogoView extends CardView implements BaseView {
 
     private ImageView lines;
     private RelativeLayout layout;
-    private StripsEffectView effect;
+    private StripsEffect effect;
 
     private Animation
             lightOut,
@@ -67,7 +68,7 @@ public class LogoView extends CardView implements BaseView {
 
         ViewGroup.LayoutParams p = ViewUtils.match_parent;
 
-        effect = new StripsEffectView(getContext());
+        effect = new StripsEffect(getContext());
         effect.setStripWidth(sdp(20));
         layout.addView(effect, p);
 
@@ -156,7 +157,7 @@ public class LogoView extends CardView implements BaseView {
 
     //--------------------------------------------------------------------------------------------//
 
-    public StripsEffectView getStripsEffect() {
+    public StripsEffect getStripsEffect() {
         return effect;
     }
 }

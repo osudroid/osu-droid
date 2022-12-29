@@ -12,19 +12,19 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.reco1l.Game;
-import com.reco1l.data.LegacyModWrapper;
-import com.reco1l.data.ModWrapper;
+import com.reco1l.data.mods.LegacyModWrapper;
+import com.reco1l.data.mods.ModWrapper;
 import com.reco1l.data.mods.BaseSpeedMod;
-import com.reco1l.data.mods.CustomARMod;
+import com.reco1l.data.mods.DifficultyAdjustMod;
 import com.reco1l.data.mods.FlashlightMod;
 import com.reco1l.interfaces.IGameMods;
-import com.reco1l.ui.data.ModSectionAdapter;
-import com.reco1l.ui.platform.BaseFragment;
+import com.reco1l.data.adapters.ModSectionAdapter;
+import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.BaseAdapter;
-import com.reco1l.utils.BaseViewHolder;
-import com.reco1l.utils.Res;
-import com.reco1l.view.BarButton;
+import com.reco1l.data.BaseAdapter;
+import com.reco1l.data.BaseViewHolder;
+import com.reco1l.data.tables.ResourceTable;
+import com.reco1l.view.IconButton;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -34,11 +34,11 @@ import java.util.Map;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class ModMenu extends BaseFragment implements IGameMods {
+public final class ModMenu extends BaseFragment implements IGameMods {
 
     public static ModMenu instance;
 
-    public BarButton button;
+    public IconButton button;
 
     public Section
             increase,
@@ -122,7 +122,7 @@ public class ModMenu extends BaseFragment implements IGameMods {
     }
 
     private void loadCustomMods() {
-        miscellaneous.add(new CustomARMod());
+        miscellaneous.add(new DifficultyAdjustMod());
     }
 
     @Override
@@ -208,7 +208,7 @@ public class ModMenu extends BaseFragment implements IGameMods {
         widget.removeAllViews();
 
         Animation.of(widget)
-                .toRightPadding(Res.sdp(12))
+                .toRightPadding(ResourceTable.sdp(12))
                 .play(100);
 
         for (ModWrapper wrapper : enabled) {
@@ -223,8 +223,8 @@ public class ModMenu extends BaseFragment implements IGameMods {
 
             Animation.of(icon)
                     .fromWidth(0)
-                    .toWidth(Res.sdp(16))
-                    .toLeftMargin(Res.sdp(4))
+                    .toWidth(ResourceTable.sdp(16))
+                    .toLeftMargin(ResourceTable.sdp(4))
                     .play(100);
         }
     }

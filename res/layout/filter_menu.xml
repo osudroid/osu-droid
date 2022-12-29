@@ -19,7 +19,7 @@
             android:layout_height="match_parent"
             android:paddingHorizontal="@dimen/S">
 
-            <com.reco1l.view.TextButton
+            <com.reco1l.view.ButtonView
                 android:id="@+id/fm_sort"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -42,7 +42,7 @@
                 android:paddingHorizontal="@dimen/M"
                 android:textAppearance="@style/text" />
 
-            <com.reco1l.view.TextButton
+            <com.reco1l.view.ButtonView
                 android:id="@+id/fm_folders"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

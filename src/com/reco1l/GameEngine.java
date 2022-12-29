@@ -1,7 +1,7 @@
 package com.reco1l;
 
-import com.reco1l.andengine.ISceneHandler;
-import com.reco1l.andengine.BaseScene;
+import com.reco1l.interfaces.IBaseScene;
+import com.reco1l.scenes.BaseScene;
 import com.reco1l.enums.Screens;
 
 import org.anddev.andengine.engine.Engine;
@@ -13,7 +13,7 @@ import java.util.List;
 
 // Created by Reco1l on 22/6/22 02:20
 
-public class GameEngine extends Engine {
+public final class GameEngine extends Engine {
 
     private static GameEngine instance;
 
@@ -22,7 +22,7 @@ public class GameEngine extends Engine {
 
     public boolean isGlobalInitialized = false;
 
-    private final List<ISceneHandler> sceneHandlers;
+    private final List<IBaseScene> sceneHandlers;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -55,7 +55,7 @@ public class GameEngine extends Engine {
         lastScene = getScene();
         super.setScene(scene);
 
-        for (ISceneHandler handler : sceneHandlers) {
+        for (IBaseScene handler : sceneHandlers) {
             handler.onSceneChange(lastScene, scene);
         }
     }
@@ -77,7 +77,7 @@ public class GameEngine extends Engine {
     @Override
     public void onResume() {
         super.onResume();
-        for (ISceneHandler handler : sceneHandlers) {
+        for (IBaseScene handler : sceneHandlers) {
             if (currentScreen == handler.getIdentifier()) {
                 handler.onResume();
             }
@@ -88,7 +88,7 @@ public class GameEngine extends Engine {
     @Override
     public void onPause() {
         super.onPause();
-        for (ISceneHandler handler : sceneHandlers) {
+        for (IBaseScene handler : sceneHandlers) {
             if (currentScreen == handler.getIdentifier()) {
                 handler.onPause();
             }
@@ -112,12 +112,12 @@ public class GameEngine extends Engine {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void registerSceneHandler(ISceneHandler sceneHandler) {
+    public void registerSceneHandler(IBaseScene sceneHandler) {
         this.sceneHandlers.add(sceneHandler);
     }
 
-    public ISceneHandler getCurrentSceneHandler() {
-        for (ISceneHandler handler : sceneHandlers) {
+    public IBaseScene getCurrentSceneHandler() {
+        for (IBaseScene handler : sceneHandlers) {
             if (handler.getIdentifier() == currentScreen) {
                 return handler;
             }

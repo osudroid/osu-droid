@@ -14,8 +14,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.reco1l.Game;
-import com.reco1l.ui.platform.BaseFragment;
-import com.reco1l.utils.listeners.TouchListener;
+import com.reco1l.ui.BaseFragment;
 
 import org.jetbrains.annotations.NotNull;
 

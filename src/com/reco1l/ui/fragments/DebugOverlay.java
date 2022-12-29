@@ -4,13 +4,13 @@ import android.widget.TextView;
 
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
-import com.reco1l.ui.platform.BaseFragment;
+import com.reco1l.ui.BaseFragment;
 
 import java.text.DecimalFormat;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class DebugOverlay extends BaseFragment {
+public final class DebugOverlay extends BaseFragment {
 
     public static DebugOverlay instance;
 

@@ -10,9 +10,9 @@ import android.widget.TextView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
-import com.reco1l.ui.platform.BaseFragment;
-import com.reco1l.utils.AnimationTable;
-import com.reco1l.utils.Res;
+import com.reco1l.ui.BaseFragment;
+import com.reco1l.data.tables.AnimationTable;
+import com.reco1l.data.tables.ResourceTable;
 import com.reco1l.utils.helpers.BeatmapHelper;
 
 import java.text.DecimalFormat;
@@ -26,7 +26,7 @@ import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class GameSummary extends BaseFragment {
+public final class GameSummary extends BaseFragment {
 
     public static GameSummary instance;
 
@@ -263,7 +263,7 @@ public class GameSummary extends BaseFragment {
         //----------------------------------------------------------------------------------------//
 
         private void applyColoring(TextView text, Difference difference) {
-            Drawable background = Res.drw(R.drawable.shape_rounded).mutate();
+            Drawable background = ResourceTable.drw(R.drawable.shape_rounded).mutate();
             background.setTint(difference.backgroundColor);
 
             text.setTextColor(difference.textColor);

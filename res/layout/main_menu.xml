@@ -9,7 +9,7 @@
     android:gravity="center_horizontal"
     android:translationZ="@dimen/topLayer">
 
-    <com.reco1l.view.FlashEffectView
+    <com.reco1l.view.effects.FlashEffect
         android:id="@+id/mainM_kiai"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
@@ -72,13 +72,13 @@
 
     </androidx.cardview.widget.CardView>
 
-    <com.reco1l.view.CircularSpectrumView
+    <com.reco1l.view.CircularSpectrum
         android:id="@+id/mainM_spectrum"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:elevation="@dimen/M" />
 
-    <com.reco1l.view.ExpandEffectView
+    <com.reco1l.view.effects.ExpandEffect
         android:id="@+id/mainM_expand"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

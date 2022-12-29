@@ -12,16 +12,16 @@ import androidx.cardview.widget.CardView;
 import com.edlplan.framework.easing.Easing;
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
-import com.reco1l.ui.platform.BaseFragment;
+import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.AsyncExec;
-import com.reco1l.utils.Res;
+import com.reco1l.utils.execution.AsyncTask;
+import com.reco1l.data.tables.ResourceTable;
 import com.reco1l.UI;
 import com.reco1l.utils.ViewUtils;
-import com.reco1l.utils.listeners.TouchListener;
-import com.reco1l.view.ExpandEffectView;
+import com.reco1l.utils.TouchListener;
+import com.reco1l.view.effects.ExpandEffect;
 import com.reco1l.view.LogoView;
-import com.reco1l.view.CircularSpectrumView;
+import com.reco1l.view.CircularSpectrum;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
@@ -29,7 +29,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 9/7/22 18:09
 
-public class MainMenu extends BaseFragment {
+public final class MainMenu extends BaseFragment {
 
     public static MainMenu instance;
 
@@ -74,16 +74,16 @@ public class MainMenu extends BaseFragment {
         multi = find("multi");
         buttons = find("buttonsLayout");
 
-        CircularSpectrumView spectrum = find("spectrum");
+        CircularSpectrum spectrum = find("spectrum");
         spectrum.attachToLogo(logo);
 
-        ExpandEffectView expand = find("expand");
+        ExpandEffect expand = find("expand");
         expand.attachToLogo(logo);
 
         single.setAlpha(0);
         multi.setAlpha(0);
 
-        ViewUtils.size(logo, Res.dimen(R.dimen.mainMenuLogoSize));
+        ViewUtils.size(logo, ResourceTable.dimen(R.dimen.mainMenuLogoSize));
         ViewUtils.width(buttons, 0);
 
         bindTouchListener(logo, new TouchListener() {
@@ -136,12 +136,12 @@ public class MainMenu extends BaseFragment {
             UI.topBar.show();
 
             Animation.of(logo)
-                    .toSize(Res.dimen(R.dimen.mainMenuSmallLogoSize))
+                    .toSize(ResourceTable.dimen(R.dimen.mainMenuSmallLogoSize))
                     .interpolator(Easing.InOutQuad)
                     .play(300);
 
             Animation.of(buttons)
-                    .toWidth(Res.dimen(R.dimen.mainMenuButtonLayoutWidth))
+                    .toWidth(ResourceTable.dimen(R.dimen.mainMenuButtonLayoutWidth))
                     .interpolator(Easing.InOutQuad)
                     .play(300);
 
@@ -163,7 +163,7 @@ public class MainMenu extends BaseFragment {
             }
 
             Animation.of(logo)
-                    .toSize(Res.dimen(R.dimen.mainMenuLogoSize))
+                    .toSize(ResourceTable.dimen(R.dimen.mainMenuLogoSize))
                     .interpolator(Easing.InOutQuad)
                     .play(300);
 
@@ -194,7 +194,7 @@ public class MainMenu extends BaseFragment {
                         Game.musicManager.play();
                     });
 
-                    new AsyncExec() {
+                    new AsyncTask() {
                         public void run() {
                             Game.activity.checkNewBeatmaps();
                             if (!Game.libraryManager.loadLibraryCache(Game.activity, true)) {
@@ -208,7 +208,7 @@ public class MainMenu extends BaseFragment {
                         }
                     }.execute();
                 })
-                .toX(Res.dimen(R.dimen._80sdp))
+                .toX(ResourceTable.dimen(R.dimen._80sdp))
                 .toAlpha(0)
                 .play(400);
     }
