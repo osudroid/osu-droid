@@ -13,6 +13,7 @@ import org.anddev.andengine.entity.scene.Scene;
 
 import java.util.List;
 
+// This only have support for Back button.
 public class KeyInputManager {
 
     private static final List<Dialog> dialogs = Game.platform.dialogs;
