@@ -14,6 +14,7 @@
         android:id="@+id/mm_body"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/topBarHeight"
         android:background="@color/backgroundDimmed"
         android:clickable="true">
 
@@ -21,7 +22,6 @@
             android:id="@+id/mm_sectionContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="@dimen/topBarHeight"
             android:orientation="horizontal"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:itemCount="5"
@@ -33,34 +33,53 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        app:cardBackgroundColor="@color/backgroundTertiary">
+        app:cardBackgroundColor="@color/backgroundTertiary"
+        app:cardCornerRadius="0dp">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/topBarHeight"
-            android:gravity="center_vertical"
-            android:paddingHorizontal="@dimen/M">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/topBarHeight"
+                android:background="#1F000000"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="@dimen/M">
 
-                <com.reco1l.view.TextButton
+                <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:buttonText="Customizations" />
+                    android:layout_height="wrap_content">
 
-                <com.reco1l.view.TextButton
-                    android:id="@+id/mm_clear"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/M"
-                    app:buttonColor="#3D2C2C"
-                    app:buttonText="Clear all mods" />
+                    <com.reco1l.view.TextButton
+                        android:id="@+id/mm_custom"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:buttonText="Customizations" />
 
-            </LinearLayout>
+                    <com.reco1l.view.TextButton
+                        android:id="@+id/mm_clear"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/M"
+                        app:buttonColor="#3D2C2C"
+                        app:buttonText="Clear all mods" />
 
-        </RelativeLayout>
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/mm_customRv"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/modMenuCustomizationHeight"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/mod_menu_custom_item" />
+
+        </LinearLayout>
 
     </androidx.cardview.widget.CardView>
 

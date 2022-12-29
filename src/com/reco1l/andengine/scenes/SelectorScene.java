@@ -8,7 +8,6 @@ import com.reco1l.UI;
 import com.reco1l.enums.Screens;
 import com.reco1l.andengine.BaseScene;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.Res;
 import com.reco1l.view.BarButton;
 
 import org.anddev.andengine.entity.scene.Scene;
@@ -21,7 +20,9 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class SelectorScene extends BaseScene {
 
     private static SelectorScene instance;
-    
+
+    public TrackInfo selectedTrack;
+
     //--------------------------------------------------------------------------------------------//
 
     public static SelectorScene getInstance() {
@@ -54,21 +55,18 @@ public class SelectorScene extends BaseScene {
         mods.runOnTouch(UI.modMenu::altShow);
         mods.setIcon(R.drawable.v_tune);
 
-        /*BarButton search = new BarButton(context);
+        BarButton search = new BarButton(context);
+        search.runOnTouch(UI.filterMenu::altShow);
         search.setIcon(R.drawable.v_search);
 
-        BarButton random = new BarButton(context);
+        /*BarButton random = new BarButton(context);
         random.setIcon(R.drawable.v_random);*/
 
         UI.topBar.addButton(getIdentifier(), mods);
-        /*UI.topBar.addButton(getIdentifier(), search);
-        UI.topBar.addButton(getIdentifier(), random);*/
+        UI.topBar.addButton(getIdentifier(), search);
+        /*UI.topBar.addButton(getIdentifier(), random);*/
     }
 
-    @Override
-    protected void onSceneUpdate(float secondsElapsed) {
-
-    }
 
     @Override
     public void show() {
@@ -79,31 +77,21 @@ public class SelectorScene extends BaseScene {
         Game.gameScene.setOldScene(this);
     }
 
+    @Override
+    protected void onSceneUpdate(float secondsElapsed) {}
+
     //--------------------------------------------------------------------------------------------//
 
-    public void onTrackSelect(TrackInfo track, boolean isAlreadySelected) {
-        Game.global.setSelectedTrack(track);
-
-        if (isAlreadySelected) {
-            Game.resources.getSound("menuhit").play();
-            Game.musicManager.stop();
-            Game.global.getGameScene().startGame(track, null);
+    public void onTrackSelect(TrackInfo track) {
+        if (Game.musicManager.getTrack() == track) {
             return;
         }
 
-        // EdExtensionHelper.onSelectTrack(track);
-
-        UI.beatmapPanel.updateProperties(track);
-        UI.beatmapPanel.updateScoreboard();
-        UI.background.changeFrom(track.getBackground());
-    }
-
-    public void playMusic(BeatmapInfo beatmap) {
-        Game.musicManager.change(beatmap);
+        Game.musicManager.change(track);
         Game.songService.setVolume(0);
 
-        if (beatmap.getPreviewTime() >= 0) {
-            Game.songService.seekTo(beatmap.getPreviewTime());
+        if (track.getPreviewTime() >= 0) {
+            Game.songService.seekTo(track.getPreviewTime());
         } else {
             Game.songService.seekTo(Game.songService.getLength() / 2);
         }
@@ -111,6 +99,15 @@ public class SelectorScene extends BaseScene {
         Animation.ofFloat(0, Config.getBgmVolume())
                 .runOnUpdate(value -> Game.songService.setVolume((float) value))
                 .play(400);
+
+        Game.globalManager.setSelectedTrack(track);
+        UI.beatmapPanel.updateProperties(track);
+        UI.beatmapPanel.updateScoreboard();
+        UI.background.changeFrom(track.getBackground());
+    }
+
+    public void playMusic(TrackInfo track) {
+
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -118,26 +115,26 @@ public class SelectorScene extends BaseScene {
     public void loadScore(int id, String player) {
         boolean isOnline = UI.beatmapPanel.isOnlineBoard;
 
-        Game.summaryScene.loadFromBoard(UI.beatmapCarrousel.selectedTrack, id, isOnline, player);
+        Game.summaryScene.loadFromBoard(selectedTrack, id, isOnline, player);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-
     @Override
-    public void onMusicChange(BeatmapInfo beatmap) {
-        if (Game.engine.getCurrentScene() != this) {
-            if (beatmap != null) {
-                UI.beatmapCarrousel.selectedTrack = beatmap.getTrack(0);
-            }
+    public void onMusicChange(TrackInfo track, boolean wasAudioChanged) {
+        super.onMusicChange(track, wasAudioChanged);
+
+        if (track != null) {
+            onTrackSelect(track);
         }
-        super.onMusicChange(beatmap);
     }
 
     @Override
     public void onMusicEnd() {
-        playMusic(Game.library.getBeatmap());
+        playMusic(Game.musicManager.getTrack());
     }
+
+    //--------------------------------------------------------------------------------------------//
 
     @Override
     public boolean onBackPress() {
@@ -149,8 +146,6 @@ public class SelectorScene extends BaseScene {
     public void onSceneChange(Scene oldScene, Scene newScene) {
         if (newScene == this) {
             UI.background.setBlur(true);
-        } else {
-            UI.beatmapCarrousel.selectedTrack = null;
         }
     }
 

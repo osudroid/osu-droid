@@ -1,11 +1,10 @@
 package com.reco1l.utils.helpers;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
 import com.edlplan.framework.math.FMath;
+import com.reco1l.Game;
 import com.reco1l.interfaces.IReferences;
 
 import java.io.IOException;
@@ -18,7 +17,7 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 
 // Created by Reco1l on 1/8/22 05:27
 
-public class BeatmapHelper implements IReferences {
+public class BeatmapHelper {
 
     // Title
     //--------------------------------------------------------------------------------------------//
@@ -129,7 +128,7 @@ public class BeatmapHelper implements IReferences {
         InputStream is;
 
         try {
-            is = activity.getAssets().open("gfx/menu-background.png");
+            is = Game.activity.getAssets().open("gfx/menu-background.png");
         } catch (IOException e) {
             return null;
         }
@@ -137,5 +136,31 @@ public class BeatmapHelper implements IReferences {
             return Drawable.createFromStream(is, null);
         }
         return null;
+    }
+
+    // Filtering
+    //--------------------------------------------------------------------------------------------//
+
+    public static String getDataConcat(BeatmapInfo beatmap) {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append(beatmap.getTitle())
+                .append(' ')
+                .append(beatmap.getArtist())
+                .append(' ')
+                .append(beatmap.getCreator())
+                .append(' ')
+                .append(beatmap.getTags())
+                .append(' ')
+                .append(beatmap.getSource())
+                .append(' ')
+                .append(beatmap.getTracks().get(0).getBeatmapSetID());
+
+       /* for (TrackInfo track : beatmap.getTracks()) {
+            builder.append(' ')
+                    .append(track.getMode());
+        }*/
+
+        return builder.toString().toLowerCase();
     }
 }

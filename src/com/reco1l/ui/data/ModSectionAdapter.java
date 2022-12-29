@@ -21,8 +21,8 @@ public class ModSectionAdapter extends BaseAdapter<ModSectionAdapter.SectionHold
 
     //--------------------------------------------------------------------------------------------//
 
-    public ModSectionAdapter(ArrayList<ModMenu.Section> list) {
-        super(list);
+    public ModSectionAdapter(ModMenu.Section[] array) {
+        super(array);
     }
 
     //--------------------------------------------------------------------------------------------//

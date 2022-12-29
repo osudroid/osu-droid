@@ -16,7 +16,7 @@ import com.reco1l.ui.data.GameNotification;
 import com.reco1l.UI;
 import com.reco1l.ui.data.NotificationListAdapter;
 import com.reco1l.ui.data.NotificationListAdapter.ViewHolder;
-import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.ui.platform.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.AnimationOld;
 import com.reco1l.utils.Res;
@@ -28,7 +28,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 27/6/22 17:17
 
-public class NotificationCenter extends UIFragment {
+public class NotificationCenter extends BaseFragment {
 
     public static NotificationCenter instance;
 
@@ -113,7 +113,7 @@ public class NotificationCenter extends UIFragment {
     }
 
     @Override
-    protected void onUpdate(float secondsElapsed) {
+    protected void onUpdate(float sec) {
         if (emptyText != null) {
             ViewUtils.visibility(notifications.isEmpty(), emptyText);
         }
@@ -130,7 +130,7 @@ public class NotificationCenter extends UIFragment {
     }
 
     public void createPopup(GameNotification notification) {
-        if (isShowing() || !isAllowedPopups) {
+        if (isAdded() || !isAllowedPopups) {
             return;
         }
         popupFragment.load(notification);
@@ -139,25 +139,25 @@ public class NotificationCenter extends UIFragment {
     //--------------------------------------------------------------------------------------------//
 
     public void update(GameNotification notification) {
-        if (isShowing()) {
+        if (isAdded()) {
             ViewHolder holder = getViewHolder(notification);
 
             if (holder != null) {
                 holder.notifyUpdate();
             }
-        } else if (popupFragment.isShowing()) {
+        } else if (popupFragment.isAdded()) {
             popupFragment.notifyUpdate();
         }
     }
 
     public void updateProgress(GameNotification notification) {
-        if (isShowing()) {
+        if (isAdded()) {
             ViewHolder holder = getViewHolder(notification);
 
             if (holder != null) {
                 holder.notifyProgressUpdate();
             }
-        } else if (popupFragment.isShowing()) {
+        } else if (popupFragment.isAdded()) {
             popupFragment.notifyProgressUpdate();
         }
     }
@@ -232,12 +232,12 @@ public class NotificationCenter extends UIFragment {
 
     @Override
     public void close() {
-        if (!isShowing)
+        if (!isAdded())
             return;
 
-        activity.runOnUiThread(() -> {
+        Game.activity.runOnUiThread(() -> {
 
-            new AnimationOld(platform.renderView).moveX(-50, 0)
+            new AnimationOld(Game.platform.renderView).moveX(-50, 0)
                     .play(400);
             new AnimationOld(body).moveX(0, Res.dimen(R.dimen.notificationCenterWidth))
                     .interpolator(Easing.InExpo)
@@ -252,7 +252,7 @@ public class NotificationCenter extends UIFragment {
 
     //--------------------------------------------------------------------------------------------/
 
-    public static class PopupFragment extends UIFragment {
+    public static class PopupFragment extends BaseFragment {
 
         private GameNotification notification;
         private GameNotification.Holder holder;
@@ -270,7 +270,7 @@ public class NotificationCenter extends UIFragment {
         }
 
         @Override
-        protected long getDismissTime() {
+        protected long getCloseTime() {
             return 8000;
         }
 
@@ -279,7 +279,7 @@ public class NotificationCenter extends UIFragment {
         private void load(GameNotification notification) {
             this.notification = notification;
 
-            if (isShowing()) {
+            if (isAdded()) {
                 resetDismissTimer();
 
                 Animation.of(rootView)
@@ -331,7 +331,7 @@ public class NotificationCenter extends UIFragment {
 
         @Override
         public void close() {
-            if (isShowing()) {
+            if (isAdded()) {
                 Animation.of(rootView)
                         .runOnEnd(super::close)
                         .toY(-50)

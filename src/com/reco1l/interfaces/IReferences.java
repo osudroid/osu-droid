@@ -1,10 +1,10 @@
 package com.reco1l.interfaces;
 
+import com.reco1l.data.BeatmapCollection;
 import com.reco1l.game.TimingWrapper;
 import com.reco1l.management.BitmapManager;
 import com.reco1l.GameEngine;
 import com.reco1l.management.MusicManager;
-import com.reco1l.utils.helpers.OnlineHelper;
 import com.reco1l.ui.platform.FragmentPlatform;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -22,25 +22,26 @@ import ru.nsu.ccfit.zuev.skins.SkinManager;
 
 public interface IReferences {
 
-    // TODO Remove this, GlobalManager is useless now.
-    GlobalManager global = GlobalManager.getInstance();
-
+    GameEngine engine = GameEngine.getInstance();
     MainActivity activity = MainActivity.getInstance();
+    FragmentPlatform platform = FragmentPlatform.getInstance();
 
     ModMenu modMenu = ModMenu.getInstance();
-    GameEngine engine = GameEngine.getInstance();
-    OnlineManager online = OnlineManager.getInstance();
-    SkinManager skinManager = SkinManager.getInstance();
-    LibraryManager library = LibraryManager.getInstance();
-    ScoreLibrary scoreLibrary = ScoreLibrary.getInstance();
-    ResourceManager resources = ResourceManager.getInstance();
-    OnlineScoring onlineScoring = OnlineScoring.getInstance();
-    FragmentPlatform platform = FragmentPlatform.getInstance();
-    PropertiesLibrary properties = PropertiesLibrary.getInstance();
 
-    BitmapManager bitmapManager = BitmapManager.getInstance();
-    OnlineHelper onlineHelper = OnlineHelper.getInstance();
+    SkinManager skinManager = SkinManager.getInstance();
+    GlobalManager globalManager = GlobalManager.getInstance();
+    LibraryManager libraryManager = LibraryManager.getInstance();
+    ResourceManager resourcesManager = ResourceManager.getInstance();
+
+    ScoreLibrary scoreLibrary = ScoreLibrary.getInstance();
+    PropertiesLibrary propertiesLibrary = PropertiesLibrary.getInstance();
+
+    OnlineManager onlineManager = OnlineManager.getInstance();
+    OnlineScoring onlineScoring = OnlineScoring.getInstance();
 
     MusicManager musicManager = MusicManager.getInstance();
     TimingWrapper timingWrapper = TimingWrapper.getInstance();
+    BitmapManager bitmapManager = BitmapManager.getInstance();
+
+    BeatmapCollection beatmapCollection = BeatmapCollection.getInstance();
 }

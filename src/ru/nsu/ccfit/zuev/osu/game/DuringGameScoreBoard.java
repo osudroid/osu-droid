@@ -18,7 +18,6 @@ import java.util.Locale;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public class DuringGameScoreBoard extends GameObject {
@@ -54,7 +53,7 @@ public class DuringGameScoreBoard extends GameObject {
         }
         posNow = scoreBoardDatas.length;
         currentUsername = isNotMe != null ? isNotMe :
-                !Game.online.isStayOnline() ?
+                !Game.onlineManager.isStayOnline() ?
                         Config.getLocalUsername() :
                         Config.getOnlineUsername();
         TextureRegion tex = ResourceManager.getInstance().getTexture("menu-button-background").deepCopy();

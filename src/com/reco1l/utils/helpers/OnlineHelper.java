@@ -2,6 +2,7 @@ package com.reco1l.utils.helpers;
 
 import android.graphics.drawable.Drawable;
 
+import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.interfaces.IReferences;
 
@@ -14,38 +15,29 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 26/6/22 21:20
 
-public class OnlineHelper implements IReferences {
-    // This class translates contains tools to translate online data for the new UI.
+public class OnlineHelper {
 
-    private static OnlineHelper instance;
-    public static final Drawable defaultAvatar = activity.getDrawable(R.drawable.default_avatar);
-
-    //--------------------------------------------------------------------------------------------//
-
-    public static OnlineHelper getInstance() {
-        if (instance == null)
-            instance = new OnlineHelper();
-        return instance;
-    }
+    public static final Drawable defaultAvatar =
+            Game.activity.getDrawable(R.drawable.default_avatar);
 
     //--------------------------------------------------------------------------------------------//
 
-    public Drawable getPlayerAvatar() {
-        if (online == null || online.getAvatarURL() == null || online.getAvatarURL().length() == 0)
+    public static Drawable getPlayerAvatar() {
+        if (Game.onlineManager == null || Game.onlineManager.getAvatarURL() == null || Game.onlineManager.getAvatarURL().length() == 0)
             return defaultAvatar;
 
-        String name = MD5Calcuator.getStringMD5(online.getAvatarURL() + "_" + online.getUsername());
+        String name = MD5Calcuator.getStringMD5(Game.onlineManager.getAvatarURL() + "_" + Game.onlineManager.getUsername());
         File file = new File(Config.getCachePath(), name);
 
         if(!file.exists() || file.length() < 1 & file.delete()) {
-            if (OnlineFileOperator.downloadFile(online.getAvatarURL(), file.getAbsolutePath())) {
+            if (OnlineFileOperator.downloadFile(Game.onlineManager.getAvatarURL(), file.getAbsolutePath())) {
                 return Drawable.createFromPath(file.getPath());
             }
         }
         return defaultAvatar;
     }
 
-    public Drawable getAvatarFromURL(String url, String username) {
+    public static Drawable getAvatarFromURL(String url, String username) {
         if (url == null || url.length() == 0 || username == null)
             return defaultAvatar;
 
@@ -62,11 +54,11 @@ public class OnlineHelper implements IReferences {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void clear() {
+    public static void clear() {
         UI.topBar.userBox.loadUserData(true);
     }
 
-    public void update() {
+    public static void update() {
         UI.topBar.userBox.loadUserData(false);
     }
 

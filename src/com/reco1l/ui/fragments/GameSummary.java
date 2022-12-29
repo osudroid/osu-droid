@@ -10,7 +10,7 @@ import android.widget.TextView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
-import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.ui.platform.BaseFragment;
 import com.reco1l.utils.AnimationTable;
 import com.reco1l.utils.Res;
 import com.reco1l.utils.helpers.BeatmapHelper;
@@ -26,7 +26,7 @@ import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class GameSummary extends UIFragment {
+public class GameSummary extends BaseFragment {
 
     public static GameSummary instance;
 
@@ -132,7 +132,7 @@ public class GameSummary extends UIFragment {
     }
 
     public void loadData() {
-        if (track == null || stats == null || !isShowing) {
+        if (track == null || stats == null || !isAdded()) {
             return;
         }
 
@@ -273,11 +273,11 @@ public class GameSummary extends UIFragment {
         //----------------------------------------------------------------------------------------//
 
         public void retrieveOnlineData() {
-            score = Game.online.getScore();
-            accuracy = GameHelper.Round(Game.online.getAccuracy() * 100f, 2);
-            rank = Game.online.getRank();
+            score = Game.onlineManager.getScore();
+            accuracy = GameHelper.Round(Game.onlineManager.getAccuracy() * 100f, 2);
+            rank = Game.onlineManager.getRank();
 
-            if (parent.isShowing) {
+            if (parent.isAdded()) {
                 parent.find("ranking").setVisibility(View.VISIBLE);
                 parent.find("rankingStats").setAlpha(0f);
             }
@@ -289,11 +289,11 @@ public class GameSummary extends UIFragment {
                 parent.find("rankingFail").setAlpha(1f);
                 return;
             }
-            long newRank = Game.online.getRank();
-            long newScore = Game.online.getScore();
-            float newAccuracy = GameHelper.Round(Game.online.getAccuracy() * 100f, 2);
+            long newRank = Game.onlineManager.getRank();
+            long newScore = Game.onlineManager.getScore();
+            float newAccuracy = GameHelper.Round(Game.onlineManager.getAccuracy() * 100f, 2);
 
-            mapRankText.setText("#" + Game.online.getMapRank());
+            mapRankText.setText("#" + Game.onlineManager.getMapRank());
 
             if (newScore > score) {
                 applyColoring(mapRankText, Difference.Positive);

@@ -3,16 +3,14 @@ package com.reco1l.ui.fragments;
 import android.widget.TextView;
 
 import com.reco1l.Game;
-import com.reco1l.andengine.BaseScene;
 import com.reco1l.enums.Screens;
-import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.ui.platform.BaseFragment;
 
 import java.text.DecimalFormat;
 
-import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class DebugOverlay extends UIFragment {
+public class DebugOverlay extends BaseFragment {
 
     public static DebugOverlay instance;
 
@@ -31,6 +29,11 @@ public class DebugOverlay extends UIFragment {
         return "do";
     }
 
+    @Override
+    protected Screens getParent() {
+        return Screens.Main;
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     @Override
@@ -39,7 +42,7 @@ public class DebugOverlay extends UIFragment {
     }
 
     @Override
-    protected void onUpdate(float secondsElapsed) {
+    protected void onUpdate(float sec) {
         if (text == null)
             return;
 

@@ -4,72 +4,45 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:translationZ="@dimen/imposedLayer">
 
     <View
-        android:id="@+id/ss_background"
+        android:id="@+id/background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#000000" />
+        android:background="#000" />
 
-    <com.edlplan.ui.TriangleEffectView
-        android:id="@+id/ss_triangles2"
+    <com.reco1l.view.StripsEffectView
+        android:id="@+id/il_effect"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:rotation="180"
-        android:alpha="0.05" />
-
-    <com.edlplan.ui.TriangleEffectView
-        android:id="@+id/ss_triangles1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:alpha="0.05" />
+        android:alpha="0.5"
+        app:beatSync="false" />
 
     <ImageView
-        android:id="@+id/ss_logo"
+        android:id="@+id/il_logoBrand"
         android:layout_width="@dimen/splashScreenLogoSize"
         android:layout_height="@dimen/splashScreenLogoSize"
         android:layout_centerInParent="true"
         android:src="@drawable/logo_brand" />
 
-    <LinearLayout
-        android:id="@+id/ss_bottom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <ImageView
+        android:id="@+id/il_logoLines"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:alpha="0"
+        android:src="@drawable/logo_lines" />
+
+    <TextView
+        android:id="@+id/il_loading"
+        style="@style/text"
+        android:layout_width="match_parent"
         android:layout_alignParentBottom="true"
-        android:layout_margin="@dimen/S"
-        android:background="@drawable/shape_rounded"
-        android:backgroundTint="@color/badgeBackground"
-        android:gravity="center_vertical"
-        android:paddingLeft="@dimen/XS"
-        android:paddingRight="@dimen/M">
-
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:id="@+id/ss_progress"
-            style="@style/small_circular_indicator"
-            android:layout_margin="@dimen/XS"
-            android:max="100"
-            android:progress="0"/>
-
-        <TextView
-            android:id="@+id/ss_percent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/XXS"
-            android:text="0%" />
-
-        <TextView
-            android:id="@+id/ss_info"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/XS"
-            android:maxLength="70"
-            android:text="Loading..."
-            android:textColor="@color/textSecondary" />
-
-    </LinearLayout>
+        android:gravity="center"
+        android:padding="@dimen/M"
+        android:text="Loading..." />
 
 </RelativeLayout>

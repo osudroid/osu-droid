@@ -29,37 +29,80 @@ import com.reco1l.utils.ViewUtils;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class PanelLayout extends CardView {
+public class PanelLayout extends CardView implements BaseView {
 
     private TextView title;
     private LinearLayout layout;
     private StripsEffectView effect;
 
-    private int titleHeight = 40 * 3;
-
-    private float radius = 12 * 3;
+    private int titleHeight;
 
     //--------------------------------------------------------------------------------------------//
 
     public PanelLayout(@NonNull Context context) {
-        super(context);
-        init(context, null);
+        this(context, null);
     }
 
     public PanelLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init(context, attrs);
+        onCreate(attrs);
     }
 
     public PanelLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context, attrs);
+        onCreate(attrs);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    private void handleAttributes(Context context, AttributeSet attrs) {
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PanelLayout);
+    @Override
+    public View getView() {
+        return this;
+    }
+
+    @Override
+    public int[] getStyleable() {
+        return R.styleable.PanelLayout;
+    }
+
+
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
+    @SuppressLint("ResourceType")
+    public void onCreate(AttributeSet attrs) {
+        layout = new LinearLayout(getContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+        addView(layout);
+
+        RelativeLayout body = new RelativeLayout(getContext());
+        body.setBackground(new ColorDrawable(0x19000000));
+        layout.addView(body);
+
+        title = new TextView(new ContextThemeWrapper(getContext(), R.style.text));
+        title.setId(0x11);
+        title.setGravity(Gravity.CENTER);
+        body.addView(title);
+        title.getLayoutParams().width = MATCH_PARENT;
+
+        effect = new StripsEffectView(getContext());
+        effect.setStripWidth(sdp(12));
+        effect.setAlpha(0.5f);
+        body.addView(effect);
+
+        ViewUtils.rule(effect)
+                .add(ALIGN_TOP)
+                .add(ALIGN_BOTTOM)
+                .apply(title.getId());
+
+        View separator = new View(new ContextThemeWrapper(getContext(), R.style.panelSeparatorView));
+        layout.addView(separator);
+
+        handleAttributes(attrs);
+    }
+
+    @Override
+    public void onManageAttributes(TypedArray a) {
 
         String string = a.getString(R.styleable.PanelLayout_panelTitle);
         title.setText(string);
@@ -67,61 +110,21 @@ public class PanelLayout extends CardView {
         boolean sync = a.getBoolean(R.styleable.PanelLayout_beatSync, true);
         effect.setBeatSyncing(sync);
 
-        titleHeight = (int) a.getDimension(R.styleable.PanelLayout_panelTitleHeight, titleHeight);
+        titleHeight = (int) a.getDimension(R.styleable.PanelLayout_panelTitleHeight, sdp(40));
         title.getLayoutParams().height = titleHeight;
 
         int color = a.getInt(R.styleable.PanelLayout_panelColor, 0xFC262626);
         setCardBackgroundColor(color);
 
-        radius = a.getDimension(R.styleable.PanelLayout_panelRadius, radius);
+        float radius = a.getDimension(R.styleable.PanelLayout_panelRadius, sdp(12));
         setRadius(radius);
-
-        a.recycle();
-    }
-
-    @SuppressLint("ResourceType")
-    private void init(Context context, AttributeSet attrs) {
-        layout = new LinearLayout(context);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        addView(layout);
-
-        RelativeLayout body = new RelativeLayout(context);
-        body.setBackground(new ColorDrawable(0x19000000));
-        layout.addView(body);
-
-        title = new TextView(new ContextThemeWrapper(context, R.style.text));
-        title.setId(0x11);
-        title.setGravity(Gravity.CENTER);
-        body.addView(title);
-        title.getLayoutParams().width = MATCH_PARENT;
-
-        effect = new StripsEffectView(context);
-        effect.setAlpha(0.5f);
-        body.addView(effect);
-
-        ViewUtils.rule(effect)
-                .add(ALIGN_TOP, ALIGN_BOTTOM)
-                .apply(title.getId());
-
-        View separator = new View(context);
-        separator.setBackground(new ColorDrawable(0x33000000));
-        layout.addView(separator);
-        separator.getLayoutParams().width = MATCH_PARENT;
-
-        if (!isInEditMode()) {
-            effect.setStripWidth(Res.sdp(12));
-
-            titleHeight = Res.sdp(40);
-            radius = Res.sdp(12);
-        }
-        handleAttributes(context, attrs);
     }
 
     @Override
     public void addView(View child, int index, ViewGroup.LayoutParams params) {
         super.addView(child, index, params);
 
-        if (child != layout && indexOfChild(child) > 0) {
+        if (child != layout) {
             ViewUtils.margins(child).top(titleHeight);
         }
     }

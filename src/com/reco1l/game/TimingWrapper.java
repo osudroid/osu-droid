@@ -5,20 +5,17 @@ package com.reco1l.game;
 import android.util.Log;
 
 import com.reco1l.Game;
-import com.reco1l.enums.MusicOption;
-import com.reco1l.interfaces.IMusicObserver;
+import com.reco1l.interfaces.MusicObserver;
 import com.reco1l.utils.ScheduledTask;
 
 import java.util.LinkedList;
 
-import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapData;
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.OSUParser;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.game.TimingPoint;
 
-public class TimingWrapper implements IMusicObserver {
+public class TimingWrapper implements MusicObserver {
 
     private static TimingWrapper instance;
 
@@ -43,6 +40,7 @@ public class TimingWrapper implements IMusicObserver {
     //--------------------------------------------------------------------------------------------//
 
     public TimingWrapper() {
+        beatLength = 1000;
         this.timingPoints = new LinkedList<>();
         Game.musicManager.bindMusicObserver(this);
     }
@@ -62,17 +60,12 @@ public class TimingWrapper implements IMusicObserver {
         isKiaiSection = false;
     }
 
-    public void loadPointsFrom(BeatmapInfo beatmap) {
-        clear();
-        TrackInfo track = beatmap.getTrack(0);
+    private void loadPointsFrom(TrackInfo track) {
+        OSUParser parser = new OSUParser(track.getFilename());
 
-        if (track != null) {
-            OSUParser parser = new OSUParser(track.getFilename());
-
-            if (parser.openFile()) {
-                Log.i("TimingWrapper", "Parsed points from: " + track.getPublicName());
-                parsePoints(parser.readData());
-            }
+        if (parser.openFile()) {
+            Log.i("TimingWrapper", "Parsed points from: " + track.getPublicName());
+            parsePoints(parser.readData());
         }
     }
 
@@ -157,9 +150,11 @@ public class TimingWrapper implements IMusicObserver {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public void onMusicChange(BeatmapInfo beatmap) {
-        if (beatmap != null) {
-            loadPointsFrom(beatmap);
+    public void onMusicChange(TrackInfo track, boolean wasAudioChanged) {
+        clear();
+
+        if (track != null) {
+            loadPointsFrom(track);
 
             if (computeFirstBpmLength()) {
                 computeOffset();
@@ -168,28 +163,25 @@ public class TimingWrapper implements IMusicObserver {
     }
 
     @Override
-    public void onMusicControlRequest(MusicOption option, Status current) {
+    public void onMusicPlay() {
+        restoreBPMLength();
+        computeOffsetAtPosition(Game.songService.getPosition());
+    }
 
-        if (option == MusicOption.PLAY && current == Status.PAUSED) {
-            restoreBPMLength();
+    @Override
+    public void onMusicPause() {
+        setBeatLength(1000);
+    }
+
+    @Override
+    public void onMusicStop() {
+        setBeatLength(1000);
+    }
+
+    public void sync() {
+        if (Game.musicManager.isPlaying()) {
             computeOffsetAtPosition(Game.songService.getPosition());
         }
-
-        if (option == MusicOption.PREVIOUS || option == MusicOption.NEXT) {
-            firstPoint = null;
-        }
-    }
-
-    @Override
-    public void onMusicStateChange(MusicOption option, Status status) {
-        if (option == MusicOption.STOP || option == MusicOption.PAUSE) {
-            setBeatLength(1000);
-        }
-    }
-
-    @Override
-    public void onMusicSync(Status status) {
-        computeOffsetAtPosition(Game.songService.getPosition());
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -209,10 +201,13 @@ public class TimingWrapper implements IMusicObserver {
             lastBeatPassTime = beatPassTime;
             offset = 0;
 
-            ScheduledTask.run(() -> beat++, Math.max(1, (long) beatLength));
-            if (beat > 3) {
-                beat = 0;
-            }
+            ScheduledTask.run(() -> {
+                beat++;
+
+                if (beat > 3) {
+                    beat = 0;
+                }
+            }, Math.max(1, (long) beatLength));
             isNextBeat = true;
         } else {
             isNextBeat = false;

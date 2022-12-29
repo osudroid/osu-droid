@@ -75,7 +75,7 @@
 
     <!--Preferences-->
     <style name="seek_bar_preference">
-        <item name="android:layout">@layout/custom_seekbar_preference</item>
+        <item name="android:layout">@layout/custom_preference_seekbar</item>
     </style>
 
     <style name="category_preference">
@@ -83,7 +83,7 @@
     </style>
 
     <style name="check_box_preference">
-        <item name="android:layout">@layout/custom_checkbox_preference</item>
+        <item name="android:layout">@layout/custom_preference_checkbox</item>
     </style>
 
     <style name="preference">

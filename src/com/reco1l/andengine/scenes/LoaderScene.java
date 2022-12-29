@@ -10,7 +10,7 @@ import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.andengine.BaseScene;
 import com.reco1l.enums.Screens;
-import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.ui.platform.BaseFragment;
 import com.reco1l.utils.Animation;
 
 import java.util.ArrayList;
@@ -67,7 +67,7 @@ public class LoaderScene extends BaseScene {
 
     @Override
     protected void onSceneUpdate(float secondsElapsed) {
-        if (!fragment.isShowing()) {
+        if (!fragment.isAdded()) {
             return;
         }
 
@@ -95,7 +95,7 @@ public class LoaderScene extends BaseScene {
 
     //--------------------------------------------------------------------------------------------//
 
-    public static class Fragment extends UIFragment {
+    public static class Fragment extends BaseFragment {
 
         private final ArrayList<String> log;
 
@@ -154,8 +154,8 @@ public class LoaderScene extends BaseScene {
         }
 
         @Override
-        public void onUpdate(float elapsed) {
-            if (!isShowing || ToastLogger.getPercentage() == percentage) {
+        public void onUpdate(float sec) {
+            if (!isLoaded() || ToastLogger.getPercentage() == percentage) {
                 return;
             }
             percentage = ToastLogger.getPercentage();
@@ -183,7 +183,7 @@ public class LoaderScene extends BaseScene {
         }
 
         public void onFinish(final Runnable onEnd) {
-            if (isShowing) {
+            if (isAdded()) {
                 Game.activity.runOnUiThread(() -> {
 
                     if (text.getVisibility() == View.VISIBLE) {

@@ -50,7 +50,6 @@ public class ScoringScene {
                 }
                 if (pSceneTouchEvent.isActionUp()) {
                     ResourceManager.getInstance().getSound("applause").stop();
-                    SongMenu.stopMusicStatic();
                     engine.setScene(menu.getScene());
 
 //					Replay.mod = stat.getMod();

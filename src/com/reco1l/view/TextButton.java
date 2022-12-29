@@ -1,7 +1,6 @@
 package com.reco1l.view;
 // Created by Reco1l on 08/12/2022, 16:43
 
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.widget.RelativeLayout.*;
 
 import android.annotation.SuppressLint;
@@ -11,15 +10,15 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 
-import com.reco1l.utils.Res;
+import com.reco1l.utils.ViewUtils;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -28,95 +27,82 @@ public class TextButton extends CardView implements BaseView {
     private StripsEffectView effect;
     private TextView text;
 
-    private int
-            paddingV = 8 * 3,
-            paddingH = 20 * 3;
-
-    private float radius = 12 * 3;
-
     //--------------------------------------------------------------------------------------------//
 
-    public TextButton(@NonNull Context context) {
-        super(context);
-        init(context, null);
+    public TextButton(Context context) {
+        this(context, null);
     }
 
-    public TextButton(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public TextButton(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init(context, attrs);
+        onCreate(attrs);
     }
 
-    public TextButton(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public TextButton(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context, attrs);
+        onCreate(attrs);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    private void handleAttributes(Context context, AttributeSet attrs) {
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.TextButton);
+    @Override
+    public View getView() {
+        return this;
+    }
 
+    @Override
+    public int[] getStyleable() {
+        return R.styleable.TextButton;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
+    @SuppressLint("ResourceType")
+    public void onCreate(AttributeSet attrs) {
+        RelativeLayout layout = new RelativeLayout(getContext());
+        addView(layout);
+
+        effect = new StripsEffectView(getContext());
+        effect.setStripWidth(sdp(12));
+        effect.setAlpha(0.5f);
+        layout.addView(effect);
+
+        int h = sdp(20);
+        int v = sdp(8);
+
+        text = new TextView(new ContextThemeWrapper(getContext(), R.style.text));
+        text.setId(0x11);
+        text.setPadding(h, v, h, v);
+        text.setGravity(Gravity.CENTER);
+        layout.addView(text);
+
+        ViewUtils.rule(effect)
+                .add(ALIGN_TOP, ALIGN_BOTTOM, ALIGN_END, ALIGN_START)
+                .apply(text.getId());
+
+        handleAttributes(attrs);
+    }
+
+    @Override
+    public void onManageAttributes(TypedArray a) {
         String string = a.getString(R.styleable.TextButton_buttonText);
         text.setText(string);
 
         boolean sync = a.getBoolean(R.styleable.TextButton_beatSync, true);
         effect.setBeatSyncing(sync);
 
-        paddingV = (int) a.getDimension(R.styleable.TextButton_textVerticalPadding, paddingV);
-        paddingH = (int) a.getDimension(R.styleable.TextButton_textHorizontalPadding, paddingH);
-
-        text.setPadding(paddingH, paddingV, paddingH, paddingV);
-
         int color = a.getColor(R.styleable.TextButton_buttonColor, 0xFF2E2E2E);
         setCardBackgroundColor(color);
 
-        radius = a.getDimension(R.styleable.TextButton_buttonRadius, radius);
+        float radius = a.getDimension(R.styleable.TextButton_buttonRadius, sdp(12));
         setRadius(radius);
-
-        a.recycle();
-    }
-
-    @SuppressLint("ResourceType")
-    private void init(Context context, AttributeSet attrs) {
-        RelativeLayout layout = new RelativeLayout(context);
-        addView(layout);
-
-        text = new TextView(new ContextThemeWrapper(context, R.style.text));
-        text.setId(0x11);
-        text.setElevation(1);
-        text.setGravity(Gravity.CENTER);
-
-        layout.addView(text);
-
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
-        params.addRule(ALIGN_TOP, text.getId());
-        params.addRule(ALIGN_BOTTOM, text.getId());
-        params.addRule(ALIGN_END, text.getId());
-        params.addRule(ALIGN_START, text.getId());
-
-        effect = new StripsEffectView(context);
-        effect.setAlpha(0.5f);
-
-        layout.addView(effect, params);
-
-        if (!isInEditMode()) {
-            effect.setStripWidth(Res.sdp(12));
-
-            paddingV = Res.sdp(8);
-            paddingH = Res.sdp(20);
-            radius = Res.sdp(12);
-        }
-        handleAttributes(context, attrs);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        resize(w, h);
-    }
-
-    private void resize(int w, int h) {
+    public void onResize(int w, int h) {
         ViewGroup.LayoutParams params = text.getLayoutParams();
         params.width = w;
         params.height = h;
@@ -125,7 +111,7 @@ public class TextButton extends CardView implements BaseView {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        resize(getWidth(), getHeight());
+        onResize(getWidth(), getHeight());
         super.onDraw(canvas);
     }
 
@@ -135,7 +121,7 @@ public class TextButton extends CardView implements BaseView {
         this.text.setText(text);
     }
 
-    public void setBeatSyncing(boolean bool) {
-        effect.setBeatSyncing(bool);
+    public StripsEffectView getStripsEffect() {
+        return effect;
     }
 }

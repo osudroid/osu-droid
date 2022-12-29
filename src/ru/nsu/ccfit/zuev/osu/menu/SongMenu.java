@@ -21,6 +21,7 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 
+import java.util.Collections;
 import java.util.Set;
 
 import ru.nsu.ccfit.zuev.audio.Status;
@@ -61,14 +62,6 @@ public class SongMenu implements IUpdateHandler {
     private GroupType groupType = GroupType.MapSet;
 
     public SongMenu() {
-    }
-
-    public static void stopMusicStatic() {
-        synchronized (musicMutex) {
-            if (GlobalManager.getInstance().getSongService() != null) {
-                GlobalManager.getInstance().getSongService().stop();
-            }
-        }
     }
 
     public void loadFilter(IFilterMenu filterMenu) {
@@ -116,10 +109,6 @@ public class SongMenu implements IUpdateHandler {
         }
         limitC = limit;
         filterText = filter;
-        final String lowerFilter = filter.toLowerCase();
-        /*for (final MenuItem item : items) {
-            item.applyFilter(lowerFilter, favsOnly, limit); //TODO filtering
-        }*/
         if (favsOnly != this.favsOnly) {
             this.favsOnly = favsOnly;
         } else {
@@ -133,10 +122,10 @@ public class SongMenu implements IUpdateHandler {
     }
 
     public void sort() {
-       /* if (!sortOrder.equals(FilterMenu.getInstance().getOrder())) {
+       if (!sortOrder.equals(FilterMenu.getInstance().getOrder())) {
             sortOrder = FilterMenu.getInstance().getOrder();
         }
-        Collections.sort(items, (i1, i2) -> {
+       /* items.sort((i1, i2) -> {
             String s1;
             String s2;
             switch (sortOrder) {

@@ -16,14 +16,12 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.game.mods.IModSwitcher;
 import ru.nsu.ccfit.zuev.osu.game.mods.ModButton;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.TextButton;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;

@@ -10,7 +10,6 @@ import android.widget.RelativeLayout.LayoutParams;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -38,8 +37,8 @@ public final class FragmentPlatform {
 
     public final List<Dialog> dialogs;
 
-    private final List<Fragment> fragments;
-    private final Map<Screens, List<UIFragment>> screenFragments;
+    private final List<BaseFragment> fragments;
+    private final Map<Screens, List<BaseFragment>> screenFragments;
 
     public RenderSurfaceView renderView;
     public FragmentManager manager;
@@ -99,17 +98,14 @@ public final class FragmentPlatform {
     public void onUpdate(float elapsed) {
         int i = 0;
         while (i < fragments.size()) {
-            Fragment fragment = fragments.get(i);
+            BaseFragment fragment = fragments.get(i);
 
-            if (fragment == null)
+            if (fragment == null) {
                 return;
+            }
 
-            if (fragment instanceof UIFragment) {
-                UIFragment frg = (UIFragment) fragment;
-
-                if (frg.isShowing) {
-                    Game.activity.runOnUiThread(() -> frg.onUpdate(elapsed));
-                }
+            if (fragment.isAdded()) {
+                Game.activity.runOnUiThread(() -> fragment.onUpdate(elapsed));
             }
             i++;
         }
@@ -134,58 +130,59 @@ public final class FragmentPlatform {
     }
 
     //--------------------------------------------------------------------------------------------//
-    
-    public boolean addFragment(Fragment fragment, String tag, boolean isOverlay) {
-        if (fragment.isAdded() || fragments.contains(fragment) || manager.findFragmentByTag(tag) != null)
-            return false;
 
-        fragments.add(fragment);
-        commitTransaction(fragment, tag, isOverlay);
-        return true;
+    public void addFragment(BaseFragment fragment) {
+        if (fragment.isAdded()
+                || fragments.contains(fragment)
+                || manager.findFragmentByTag(fragment.getTag()) != null) {
+            return;
+        }
+        commitTransaction(fragment);
     }
 
-    public boolean removeFragment(Fragment fragment) {
-        if (!fragment.isAdded() || !fragments.contains(fragment))
-            return false;
-
-        fragments.remove(fragment);
-        Game.activity.runOnUpdateThread(() -> commitTransaction(fragment, null, false));
-        return true;
+    public void removeFragment(BaseFragment fragment) {
+        if (!fragment.isAdded()) {
+            return;
+        }
+        commitTransaction(fragment);
     }
 
-    private void commitTransaction(Fragment fragment, String tag, boolean isOverlay) {
-        Game.activity.runOnUiThread(() -> {
-            FragmentTransaction transaction = manager.beginTransaction();
+    private void commitTransaction(BaseFragment fragment) {
+        FragmentTransaction transaction = manager.beginTransaction();
 
-            int containerId = isOverlay ? overlayContainer.getId() : screenContainer.getId();
+        FrameLayout container = fragment.isOverlay() ? overlayContainer : screenContainer;
 
-            if (tag == null) {
-                transaction.remove(fragment);
-            } else {
-                transaction.add(containerId, fragment, tag);
-            }
-            transaction.commitAllowingStateLoss();
-        });
+        if (fragment.isAdded()) {
+            transaction.remove(fragment);
+            transaction.runOnCommit(() -> {
+                Game.activity.runOnUpdateThread(() -> fragments.remove(fragment));
+                fragment.onTransition();
+            });
+        }
+
+        if (!fragment.isAdded()) {
+            transaction.add(container.getId(), fragment, fragment.generateTag());
+            transaction.runOnCommit(() -> {
+                Game.activity.runOnUpdateThread(() -> fragments.add(fragment));
+                fragment.onTransition();
+            });
+        }
+        transaction.commitAllowingStateLoss();
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    private List<UIFragment> getFragmentList(Screens scene) {
-        List<UIFragment> list = screenFragments.get(scene);
-        if (list == null) {
-            list = new ArrayList<>();
-            screenFragments.put(scene, list);
-        }
-        return list;
+    private List<BaseFragment> getFragmentList(Screens screen) {
+        return screenFragments.computeIfAbsent(screen, k -> new ArrayList<>());
     }
 
-    public void assignToScene(Screens scene, UIFragment fragment) {
+    public void assignToScene(Screens scene, BaseFragment fragment) {
         getFragmentList(scene).add(fragment);
     }
 
 
-    public UIFragment[] getFragmentsFrom(Screens scene) {
-        UIFragment[] array = new UIFragment[getFragmentList(scene).size()];
+    public BaseFragment[] getFragmentsFrom(Screens scene) {
+        BaseFragment[] array = new BaseFragment[getFragmentList(scene).size()];
         getFragmentList(scene).toArray(array);
         return array;
     }
@@ -193,39 +190,31 @@ public final class FragmentPlatform {
     //--------------------------------------------------------------------------------------------//
 
     public void showAll(Screens scene) {
-        for (UIFragment fragment : getFragmentList(scene)) {
-            fragment.show();
+        for (BaseFragment fragment : getFragmentList(scene)) {
+            Game.activity.runOnUiThread(fragment::show);
         }
     }
 
-    public void close(UIFragment... toClose) {
-        for (UIFragment fragment : toClose) {
-           if (fragment != null) {
-               Game.activity.runOnUiThread(fragment::close);
-           }
+    public void close(BaseFragment... toClose) {
+        for (BaseFragment fragment : toClose) {
+            Game.activity.runOnUiThread(fragment::close);
         }
     }
 
-    public void closeAllExcept(UIFragment... toExclude) {
-        List<Fragment> toClose = new ArrayList<>(fragments);
+    public void closeAllExcept(BaseFragment... toExclude) {
+        List<BaseFragment> toClose = new ArrayList<>(fragments);
         toClose.removeAll(Arrays.asList(toExclude));
 
-        for (Fragment fragment: toClose) {
-            if (fragment instanceof UIFragment) {
-                UIFragment frg = (UIFragment) fragment;
-                Game.activity.runOnUiThread(frg::close);
-            }
+        for (BaseFragment fragment : toClose) {
+            Game.activity.runOnUiThread(fragment::close);
         }
     }
 
     public void notifyScreenChange(Screens lastScreen, Screens newScreen) {
         for (int i = 0; i < fragments.size(); ++i) {
-            Fragment fragment = fragments.get(i);
+            BaseFragment fragment = fragments.get(i);
 
-            if (fragment instanceof UIFragment) {
-                UIFragment frg = (UIFragment) fragment;
-                Game.activity.runOnUiThread(() -> frg.onScreenChange(lastScreen, newScreen));
-            }
+            Game.activity.runOnUiThread(() -> fragment.onScreenChange(lastScreen, newScreen));
         }
     }
 }

@@ -2,15 +2,15 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.app.Activity;
 
+import com.reco1l.Game;
+
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -21,12 +21,11 @@ import java.util.Comparator;
 // import java.util.HashSet;
 // import java.util.Set;
 
-import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class LibraryManager {
-    private static final String VERSION = "library3.4";
+    private static final String VERSION = "library3.5";
     private static LibraryManager mgr = new LibraryManager();
     private ArrayList<BeatmapInfo> library;
     private Integer fileCount = 0;
@@ -114,6 +113,7 @@ public class LibraryManager {
                     checkLibrary(activity);
                     //Log.i("ed-d", "load cache step 7");
                 }
+                Game.beatmapCollection.notifyLibraryChange();
                 return true;
             }
             istream.close();
@@ -144,7 +144,7 @@ public class LibraryManager {
         int fileCached = 0;
         LinkedList<String> cachedFiles = new LinkedList<String>();
         for (final File f : files) {
-            GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / fileCount);
+            GlobalManager.getInstance().setLoadingProgress(100 * fileCached / fileCount);
             ToastLogger.setPercentage(fileCached * 100f / fileCount);
             fileCached++;
             addBeatmap(f, cachedFiles);
@@ -192,14 +192,14 @@ public class LibraryManager {
         this.fileCount = fileCount;
         int fileCached = 0;
         for (final File file : filelist) {
-            GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / fileCount);
+            GlobalManager.getInstance().setLoadingProgress(100 * fileCached / fileCount);
             ToastLogger.setPercentage(fileCached * 100f / fileCount);
             fileCached++;
             if (!file.isDirectory()) {
                 continue;
             }
 
-            GlobalManager.getInstance().setInfo("Loading " + file.getName() + "...");
+            GlobalManager.getInstance().setInfo("Importing " + file.getName() + "...");
             final BeatmapInfo info = new BeatmapInfo();
             info.setPath(file.getPath());
             scanFolder(info);
@@ -224,9 +224,10 @@ public class LibraryManager {
         // sort();
 
         savetoCache(activity);
-        ToastLogger.showText(
+        /*ToastLogger.showText(
                 StringTable.format(R.string.message_lib_complete, totalMaps),
-                true);
+                true);*/
+        Game.beatmapCollection.notifyLibraryChange();
     }
 
     /* 
@@ -341,7 +342,7 @@ public class LibraryManager {
         if (file.isDirectory() == false) {
             return;
         }
-        GlobalManager.getInstance().setInfo("Loading " + file.getName() + " ...");
+        GlobalManager.getInstance().setInfo("Importing " + file.getName() + " ...");
         final BeatmapInfo info = new BeatmapInfo();
         info.setPath(file.getPath());
         for (final BeatmapInfo i : library) {

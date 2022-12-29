@@ -24,12 +24,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.reco1l.Game;
 import com.reco1l.UI;
+import com.reco1l.interfaces.MusicObserver;
 import com.reco1l.ui.extras.MusicPlayer.PlaylistAdapter.ViewHolder;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.ScheduledTask;
 import com.reco1l.utils.ViewUtils;
 import com.reco1l.utils.helpers.BeatmapHelper;
-import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.ui.platform.BaseFragment;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.Res;
 import com.reco1l.utils.helpers.BitmapHelper;
@@ -38,14 +39,13 @@ import com.reco1l.utils.listeners.TouchListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 1/7/22 22:45
 
-public class MusicPlayer extends UIFragment {
+public class MusicPlayer extends BaseFragment implements MusicObserver {
 
     public static MusicPlayer instance;
 
@@ -67,6 +67,14 @@ public class MusicPlayer extends UIFragment {
 
     //--------------------------------------------------------------------------------------------//
 
+
+    public MusicPlayer() {
+        super();
+        Game.musicManager.bindMusicObserver(this);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
     @Override
     protected int getLayout() {
         return R.layout.music_player;
@@ -78,7 +86,7 @@ public class MusicPlayer extends UIFragment {
     }
 
     @Override
-    protected long getDismissTime() {
+    protected long getCloseTime() {
         return 10000;
     }
 
@@ -123,7 +131,7 @@ public class MusicPlayer extends UIFragment {
             }
 
             public void onPressUp() {
-                if (global.getSongService().getStatus() == Status.PLAYING) {
+                if (Game.musicManager.isPlaying()) {
                     Game.musicManager.pause();
                 } else {
                     Game.musicManager.play();
@@ -158,10 +166,10 @@ public class MusicPlayer extends UIFragment {
 
         ViewUtils.width(find("listBody"), 0);
 
-        BeatmapInfo beatmap = Game.library.getBeatmap();
+        BeatmapInfo beatmap = Game.libraryManager.getBeatmap();
 
         list.setLayoutManager(new LinearLayoutManager(Game.activity, VERTICAL, false));
-        list.setAdapter(new PlaylistAdapter(Game.library.getLibrary()));
+        list.setAdapter(new PlaylistAdapter(Game.libraryManager.getLibrary()));
 
         if (beatmap != null) {
             loadMetadata(beatmap);
@@ -172,7 +180,7 @@ public class MusicPlayer extends UIFragment {
     }
 
     @Override
-    protected void onUpdate(float elapsed) {
+    protected void onUpdate(float sec) {
         int length = Game.songService.getLength();
         int position = Game.songService.getPosition();
 
@@ -220,15 +228,17 @@ public class MusicPlayer extends UIFragment {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void changeMusic(BeatmapInfo beatmap) {
-        if (isShowing()) {
-            select(beatmap);
-            loadBitmap(beatmap.getTrack(0));
+
+    @Override
+    public void onMusicChange(TrackInfo track, boolean wasAudioChanged) {
+        if (isAdded()) {
+            loadBitmap(track);
+            //select(track);
 
             Animation.of(songBody)
                     .toAlpha(0)
                     .runOnEnd(() -> {
-                        loadMetadata(beatmap);
+                        loadMetadata(track.getBeatmap());
 
                         Animation.of(songBody)
                                 .toX(0)
@@ -265,16 +275,18 @@ public class MusicPlayer extends UIFragment {
             }
 
             public void onComplete() {
-                Animation.of(songImage)
-                        .toAlpha(0)
-                        .runOnEnd(() -> {
-                            songImage.setImageBitmap(bitmap);
+                if (isAdded()) {
+                    Animation.of(songImage)
+                            .toAlpha(0)
+                            .runOnEnd(() -> {
+                                songImage.setImageBitmap(bitmap);
 
-                            Animation.of(songImage)
-                                    .toAlpha(1)
-                                    .play(200);
-                        })
-                        .play(100);
+                                Animation.of(songImage)
+                                        .toAlpha(1)
+                                        .play(200);
+                            })
+                            .play(100);
+                }
             }
         };
         bitmapTask.execute();
@@ -299,7 +311,7 @@ public class MusicPlayer extends UIFragment {
 
     @Override
     public void show() {
-        if (!isShowing) {
+        if (!isAdded()) {
             Game.platform.close(UI.getExtras());
             UI.topBar.musicButton.animateButton(true);
             super.show();
@@ -308,7 +320,7 @@ public class MusicPlayer extends UIFragment {
 
     @Override
     public void close() {
-        if (isShowing) {
+        if (isAdded()) {
 
             if (isListVisible) {
                 switchListVisibility();
@@ -415,8 +427,8 @@ public class MusicPlayer extends UIFragment {
                 text.setText(BeatmapHelper.getArtist(beatmap) + " - " + BeatmapHelper.getTitle(beatmap));
 
                 UI.musicPlayer.bindTouchListener(text, () -> {
-                    if (Game.library.getBeatmap() != beatmap) {
-                        Game.musicManager.change(beatmap);
+                    if (Game.libraryManager.getBeatmap() != beatmap) {
+                        Game.musicManager.change(beatmap.getTrack(0));
                         onSelect();
                     }
                 });

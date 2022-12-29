@@ -18,6 +18,7 @@
         android:padding="@dimen/M"
         android:textAllCaps="true"
         android:textStyle="bold"
+        tools:background="@color/backgroundSecondary"
         tools:text="category name" />
 
 </LinearLayout>

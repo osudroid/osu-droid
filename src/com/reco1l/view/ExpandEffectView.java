@@ -15,12 +15,11 @@ import androidx.annotation.Nullable;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.Res;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class ExpandEffectView extends View {
+public class ExpandEffectView extends View implements BaseView {
 
     private LogoView logo;
 
@@ -37,35 +36,29 @@ public class ExpandEffectView extends View {
     //--------------------------------------------------------------------------------------------//
 
     public ExpandEffectView(Context context) {
-        super(context);
-        init();
+        this(context, null);
     }
 
     public ExpandEffectView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init();
+        onCreate(attrs);
     }
 
-    private void init() {
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
+    public View getView() {
+        return this;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
+    public void onCreate(AttributeSet attrs) {
         circles = new ArrayList<>();
 
-        if (!isInEditMode()) {
-            strokeWidth = Res.sdp(2);
-        }
+        strokeWidth = sdp(2);
         alpha = 80;
-    }
-
-    private void setPaintColor(int color) {
-        if (this.color == color) {
-            return;
-        }
-        this.color = color;
-
-        int i = 0;
-        while (i < circles.size()) {
-            circles.get(i).paint.setColor(color);
-            ++i;
-        }
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -117,7 +110,22 @@ public class ExpandEffectView extends View {
         this.logo = logo;
     }
 
-    public float getMaxRadius() {
+    private void setPaintColor(int color) {
+        if (this.color == color) {
+            return;
+        }
+        this.color = color;
+
+        int i = 0;
+        while (i < circles.size()) {
+            circles.get(i).paint.setColor(color);
+            ++i;
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    private float getMaxRadius() {
         if (logo != null) {
             return logo.getHeight() * 0.75f;
         }

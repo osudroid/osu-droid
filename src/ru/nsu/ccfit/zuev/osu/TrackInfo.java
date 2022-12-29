@@ -13,6 +13,7 @@ public class TrackInfo implements Serializable {
     private String mode;
     private String creator;
     private String background = null;
+    private String music;
     private int beatmapID = 0;
     private int beatmapSetID = 0;
     private float difficulty;
@@ -28,6 +29,7 @@ public class TrackInfo implements Serializable {
     private int spinnerCount = 0;
     private int totalHitObjectCount = 0;
     private int maxCombo = 0;
+    private int previewTime;
 
     private BeatmapInfo beatmap;
 
@@ -212,5 +214,21 @@ public class TrackInfo implements Serializable {
                     && obj.getMode().equals(getMode());
         }
         return false;
+    }
+
+    public void setMusic(String path) {
+        music = path;
+    }
+
+    public String getMusic() {
+        return music;
+    }
+
+    public void setPreviewTime(int previewTime) {
+        this.previewTime = previewTime;
+    }
+
+    public int getPreviewTime() {
+        return previewTime;
     }
 }

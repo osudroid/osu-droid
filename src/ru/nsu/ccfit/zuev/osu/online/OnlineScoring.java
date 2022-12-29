@@ -6,6 +6,7 @@ import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.utils.NotificationTable;
 import com.reco1l.interfaces.IReferences;
+import com.reco1l.utils.helpers.OnlineHelper;
 
 import org.anddev.andengine.util.Debug;
 
@@ -23,9 +24,6 @@ public class OnlineScoring {
     private static final int attemptCount = 5;
     private static OnlineScoring instance = null;
     private Boolean onlineMutex = new Boolean(false);
-    private OnlinePanel panel = null;
-    private OnlinePanel secondPanel = null;
-    private boolean avatarLoaded = false;
 
     public static OnlineScoring getInstance() {
         if (instance == null)
@@ -37,14 +35,13 @@ public class OnlineScoring {
         if (OnlineManager.getInstance().isStayOnline() == false)
             return;
         NotificationTable.accountLogIn(null, 0);
-        avatarLoaded = false;
 
         new AsyncTaskLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new OsuAsyncCallback() {
 
             public void run() {
                 synchronized (onlineMutex) {
                     boolean success = false;
-                    Game.onlineHelper.clear();
+                    OnlineHelper.clear();
                     //Trying to send request
                     for (int i = 0; i < 3; i++) {
                         NotificationTable.accountLogIn("try", i);
@@ -74,7 +71,7 @@ public class OnlineScoring {
             }
 
             public void onComplete() {
-                Game.onlineHelper.update();
+                OnlineHelper.update();
             }
         });
     }
@@ -146,7 +143,7 @@ public class OnlineScoring {
                             if (OnlineManager.getInstance().getFailMessage().equals("Invalid record data"))
                                 i = attemptCount;
                         } else if (success) {
-                            Game.onlineHelper.update();
+                            OnlineHelper.update();
                             UI.gameSummary.updateOnlineData(true);
                             OnlineManager.getInstance().sendReplay(replay);
                             break;

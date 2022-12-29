@@ -21,7 +21,7 @@ import com.reco1l.utils.Animation;
 import com.reco1l.utils.Res;
 import com.reco1l.utils.ViewUtils;
 
-public final class BarButton extends RelativeLayout {
+public final class BarButton extends RelativeLayout implements BaseView {
 
     private View indicator;
     private ImageView icon;
@@ -36,53 +36,55 @@ public final class BarButton extends RelativeLayout {
     //--------------------------------------------------------------------------------------------//
 
     public BarButton(Context context) {
-        super(context);
-        init(context);
+        this(context, null);
     }
 
     public BarButton(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init(context);
+        onCreate(attrs);
     }
 
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
+    public View getView() {
+        return this;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
     @SuppressLint("ResourceType")
-    private void init(Context context) {
-        icon = new ImageView(context);
+    public void onCreate(AttributeSet attrs) {
+        icon = new ImageView(getContext());
         icon.setId(0x11);
         icon.setScaleType(ScaleType.CENTER);
         addView(icon);
 
-        // Indicator
-        indicator = new View(context);
+        indicator = new View(getContext());
         indicator.setBackground(new ColorDrawable(Color.WHITE));
         indicator.setAlpha(0);
         addView(indicator);
 
-        widget = new LinearLayout(context);
+        widget = new LinearLayout(getContext());
         widget.setGravity(Gravity.CENTER);
         widget.setId(0x12);
         addView(widget);
 
         ViewUtils.rule(widget)
-                .add(RIGHT_OF, icon.getId())
-                .apply();
+                .add(RIGHT_OF)
+                .apply(icon.getId());
 
         ViewUtils.rule(indicator)
                 .add(ALIGN_BOTTOM, icon.getId())
                 .add(ALIGN_END, widget.getId())
                 .apply();
 
-        indicator.getLayoutParams().height = 4;
+        indicator.getLayoutParams().height = sdp(2);
 
-        int w = 62 * 3;
-        int h = 40 * 3;
+        int w = sdp(62);
+        int h = sdp(40);
 
-        if (!isInEditMode()) {
-            w = Res.sdp(62);
-            h = Res.sdp(40);
-
-            indicator.getLayoutParams().height = Res.sdp(2);
-        }
         ViewUtils.size(icon, w, h);
         ViewUtils.height(widget, h);
     }

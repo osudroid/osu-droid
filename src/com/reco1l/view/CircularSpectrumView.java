@@ -15,11 +15,10 @@ import androidx.core.math.MathUtils;
 
 import com.reco1l.Game;
 import com.reco1l.UI;
-import com.reco1l.utils.Res;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 
-public class CircularSpectrumView extends View {
+public class CircularSpectrumView extends View implements BaseView {
 
     private Paint paint;
     private LogoView logo;
@@ -43,21 +42,28 @@ public class CircularSpectrumView extends View {
     //--------------------------------------------------------------------------------------------//
 
     public CircularSpectrumView(Context context) {
-        super(context);
-        init();
+        this(context, null);
     }
 
     public CircularSpectrumView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init();
+        onCreate(attrs);
     }
 
-    private void init() {
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
+    public View getView() {
+        return this;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
+    public void onCreate(AttributeSet attrs) {
         createPaint(false);
 
-        if (!isInEditMode()) {
-            lineWidth = Res.sdp(5);
-        }
+        lineWidth = sdp(5);
 
         peakLevel = new float[lines];
         peakDownLevel = new float[lines];
@@ -149,11 +155,7 @@ public class CircularSpectrumView extends View {
         if (!Game.timingWrapper.isNextBeat()) {
             return;
         }
-        rotationIndex += 10;
-
-        if (rotationIndex > lines) {
-            rotationIndex -= lines;
-        }
+        rotationIndex = (rotationIndex + 10) % lines;
     }
 
     private float[] getFft() {

@@ -295,7 +295,6 @@ public class MainActivity extends BaseGameActivity implements
             public void run() {
                 GlobalManager.getInstance().init();
                 analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
-                GlobalManager.getInstance().setLoadingProgress(50);
                 Config.loadSkins();
                 checkNewSkins();
                 checkNewBeatmaps();
@@ -307,8 +306,6 @@ public class MainActivity extends BaseGameActivity implements
 
             public void onComplete() {
                 Game.engine.notifyLoadCompleted();
-                GlobalManager.getInstance().setInfo("Starting...");
-                GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
                 GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene());
                 initPreferences();
@@ -356,21 +353,20 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     public void checkNewBeatmaps() {
-        GlobalManager.getInstance().setInfo("Checking for new maps...");
         final File mainDir = new File(Config.getCorePath());
         if (beatmapToAdd != null) {
             File file = new File(beatmapToAdd);
             if (file.getName().toLowerCase().endsWith(".osz")) {
-                ToastLogger.showText(
+                /*ToastLogger.showText(
                         StringTable.get(R.string.message_lib_importing),
-                        false);
+                        false);*/
 
                 if(FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath())) {
                     String folderName = beatmapToAdd.substring(0, beatmapToAdd.length() - 4);
                     // We have imported the beatmap!
-                    ToastLogger.showText(
+                    /*ToastLogger.showText(
                             StringTable.format(R.string.message_lib_imported, folderName),
-                            true);
+                            true);*/
                 }
 
                 // LibraryManager.getInstance().sort();
@@ -416,16 +412,16 @@ public class MainActivity extends BaseGameActivity implements
             if (beatmaps.size() > 0) {
                 // final boolean deleteOsz = Config.isDELETE_OSZ();
                 // Config.setDELETE_OSZ(true);
-                ToastLogger.showText(StringTable.format(
+                /*ToastLogger.showText(StringTable.format(
                         R.string.message_lib_importing_several,
-                        beatmaps.size()), false);
+                        beatmaps.size()), false);*/
                 for (final String beatmap : beatmaps) {
                     if(FileUtils.extractZip(beatmap, Config.getBeatmapPath())) {
                         String folderName = beatmap.substring(0, beatmap.length() - 4);
                         // We have imported the beatmap!
-                        ToastLogger.showText(
+                        /*ToastLogger.showText(
                                 StringTable.format(R.string.message_lib_imported, folderName),
-                                true);
+                                true);*/
                     }
                 }
                 // Config.setDELETE_OSZ(deleteOsz);
@@ -437,7 +433,6 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     public void checkNewSkins() {
-        GlobalManager.getInstance().setInfo("Checking new skins...");
 
         final ArrayList<String> skins = new ArrayList<>();
 
@@ -581,7 +576,6 @@ public class MainActivity extends BaseGameActivity implements
             if (songService != null && Build.VERSION.SDK_INT > 10) {
                 if (songService.hideNotification()) {
                     if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
-                    Game.musicManager.sync();
                 }
             }
         }
@@ -600,7 +594,7 @@ public class MainActivity extends BaseGameActivity implements
             GlobalManager.getInstance().getGameScene().pause();
         }
         if (GlobalManager.getInstance().getMainScene() != null) {
-            if (songService != null && Game.library.getBeatmap() != null) {
+            if (songService != null && Game.libraryManager.getBeatmap() != null) {
                 songService.showNotification();
 
                 if (wakeLock == null) {

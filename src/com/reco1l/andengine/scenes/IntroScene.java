@@ -1,19 +1,16 @@
 package com.reco1l.andengine.scenes;
 // Created by Reco1l on 26/11/2022, 06:20
 
-import android.graphics.Color;
 import android.view.View;
 import android.widget.TextView;
 
-import com.edlplan.ui.TriangleEffectView;
-import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.Game;
 import com.reco1l.andengine.BaseScene;
 import com.reco1l.enums.Screens;
-import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.ui.platform.BaseFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.Res;
+import com.reco1l.view.StripsEffectView;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -35,26 +32,18 @@ public class IntroScene extends BaseScene {
     }
 
     @Override
-    protected void onSceneUpdate(float secondsElapsed) { }
+    protected void onSceneUpdate(float secondsElapsed) {}
 
     //----------------------------------------------------------------------------------------//
 
-    public static class IntroFragment extends UIFragment {
+    public static class IntroFragment extends BaseFragment {
 
         private View
-                loadingLayout,
-                background,
-                logo;
+                logoBrand,
+                logoLines;
 
-        private TextView
-                percentText,
-                loadingText;
-
-        private TriangleEffectView
-                trianglesBottom,
-                trianglesTop;
-
-        private CircularProgressIndicator progressIndicator;
+        private TextView loading;
+        private StripsEffectView effect;
 
         //----------------------------------------------------------------------------------------//
 
@@ -65,7 +54,12 @@ public class IntroScene extends BaseScene {
 
         @Override
         protected String getPrefix() {
-            return "ss";
+            return "il";
+        }
+
+        @Override
+        protected boolean isOverlay() {
+            return true;
         }
 
         //----------------------------------------------------------------------------------------//
@@ -74,95 +68,89 @@ public class IntroScene extends BaseScene {
         protected void onLoad() {
             setDismissMode(false, false);
 
-            Game.resources.loadSound("welcome_piano", "sfx/welcome_piano.ogg", false);
+            Game.resourcesManager.loadSound("welcome_piano", "sfx/welcome_piano.ogg", false);
 
-            logo = find("logo");
-            background = find("background");
-
-            progressIndicator = find("progress");
-            loadingLayout = find("bottom");
-            percentText = find("percent");
-            loadingText = find("info");
-
-            trianglesBottom = find("triangles1");
-            trianglesTop = find("triangles2");
-
-            trianglesTop.setTriangleColor(Color.WHITE);
-            trianglesBottom.setTriangleColor(Color.WHITE);
+            logoBrand = find("logoBrand");
+            logoLines = find("logoLines");
+            loading = find("loading");
+            effect = find("effect");
 
             Animation.of(rootView)
-                    .runOnStart(() -> Game.resources.getSound("welcome_piano").play())
                     .fromAlpha(0)
                     .toAlpha(1)
                     .play(1000);
-
-            Animation.ofFloat(8f, 1f)
-                    .runOnUpdate(val -> {
-                        trianglesBottom.setTriangleSpeed((float) val);
-                        trianglesTop.setTriangleSpeed((float) val);
-                    })
-                    .play(1000);
-
-            Animation.of(trianglesTop, trianglesBottom)
-                    .fromScale(1.2f)
-                    .toScale(1)
-                    .play(1000);
-
-            Animation.of(loadingLayout)
-                    .fromAlpha(0)
-                    .toAlpha(1)
-                    .delay(1000)
-                    .play(300);
         }
 
         //--------------------------------------------------------------------------------------------//
 
         @Override
         public void close() {
-            if (!isShowing) {
+            if (!isAdded()) {
                 return;
             }
+            Game.libraryManager.shuffleLibrary();
 
-            new AsyncExec() {
-                public void run() {
-                    Game.mainScene.loadMusic();
-                }
-            }.execute();
+            if (loading.getVisibility() == View.VISIBLE) {
+                Animation.of(loading)
+                        .toY(20)
+                        .toAlpha(0)
+                        .play(300);
+            }
 
-            Animation.of(loadingLayout)
-                    .toAlpha(0)
-                    .play(300);
+            Animation.of(logoLines)
+                    .fromScale(2)
+                    .toScale(2.15f)
+                    .fromRotation(-50)
+                    .toRotation(-70)
+                    .toAlpha(0.5f)
+                    .runOnStart(() -> Game.resourcesManager.getSound("welcome_piano").play())
+                    .runOnEnd(() -> {
 
-            Animation.of(trianglesBottom, trianglesTop)
-                    .toScale(1.2f)
-                    .toAlpha(0)
-                    .delay(300)
-                    .play(400);
+                        int size = Res.sdp(250);
 
-            Animation.of(logo)
-                    .toSize(Res.dimen(R.dimen.mainMenuLogoSize))
-                    .delay(300)
-                    .play(300);
+                        Animation.of(logoLines)
+                                .toScale(1)
+                                .toSize(size)
+                                .toRotation(0)
+                                .toAlpha(1)
+                                .play(300);
 
-            Animation.of(background)
-                    .toAlpha(0)
-                    .runOnEnd(super::close)
-                    .delay(300)
-                    .play(500);
+                        Animation.of(effect)
+                                .toAlpha(0)
+                                .play(300);
+
+                        Animation.of(logoBrand)
+                                .toSize(size)
+                                .runOnEnd(super::close)
+                                .play(300);
+
+                        Game.musicManager.play();
+                    })
+                    .delay(loading.getVisibility() == View.VISIBLE ? 300 : 0)
+                    .play(2000);
         }
 
         //--------------------------------------------------------------------------------------------//
 
         @Override
-        public void onUpdate(float elapsed) {
-            if (!isShowing || isNull(loadingText, progressIndicator, percentText)) {
+        public void onUpdate(float sec) {
+            if (!isLoaded()) {
                 return;
             }
-            int progress = Game.global.getLoadingProgress();
+            int progress = Game.globalManager.getLoadingProgress();
+            String info = Game.globalManager.getInfo();
 
-            loadingText.setText(Game.global.getInfo());
-            progressIndicator.setProgress(progress);
-            percentText.setText(progress + "%");
+            if (info != null && loading.getVisibility() != View.VISIBLE) {
+                loading.setVisibility(View.VISIBLE);
+
+                Animation.of(loading)
+                        .fromY(20)
+                        .toY(0)
+                        .fromAlpha(0)
+                        .toAlpha(1)
+                        .play(300);
+            }
+            loading.setText(info + "\n(" + progress + "%)");
         }
     }
 }

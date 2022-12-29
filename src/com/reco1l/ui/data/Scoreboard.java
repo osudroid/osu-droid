@@ -8,6 +8,7 @@ import android.util.Log;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.reco1l.Game;
 import com.reco1l.interfaces.IReferences;
 import com.reco1l.utils.helpers.ScoringHelper;
 import com.reco1l.utils.AsyncExec;
@@ -29,7 +30,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 18/9/22 12:40
 
-public class Scoreboard implements IReferences {
+public class Scoreboard {
 
     public String errorMessage;
     public final List<Item> boardScores;
@@ -49,7 +50,7 @@ public class Scoreboard implements IReferences {
         this.container = container;
 
         if (container != null) {
-            container.setLayoutManager(new LinearLayoutManager(platform.context, VERTICAL, true));
+            container.setLayoutManager(new LinearLayoutManager(Game.activity, VERTICAL, true));
             container.setAdapter(adapter);
             container.setNestedScrollingEnabled(false);
         } else {
@@ -102,7 +103,7 @@ public class Scoreboard implements IReferences {
         }
 
         String[] columns = {"id", "playername", "score", "combo", "mark", "accuracy", "mode"};
-        Cursor cursor = scoreLibrary.getMapScores(columns, track.getFilename());
+        Cursor cursor = Game.scoreLibrary.getMapScores(columns, track.getFilename());
         currentCursor = cursor;
 
         if (cursor.getCount() == 0) {
@@ -154,7 +155,7 @@ public class Scoreboard implements IReferences {
     // From online
     //----------------------------------------------------------------------------------------//
     private boolean loadOnlineBoard(TrackInfo track) {
-        if (track == null || !online.isStayOnline() || BuildConfig.DEBUG) {
+        if (track == null || !Game.onlineManager.isStayOnline() || BuildConfig.DEBUG) {
             errorMessage = Res.str(R.string.beatmap_panel_offline_prompt);
             return false;
         }
@@ -162,7 +163,7 @@ public class Scoreboard implements IReferences {
         File file = new File(track.getFilename());
         ArrayList<String> scores;
         try {
-            scores = online.getTop(file, FileUtils.getMD5Checksum(file));
+            scores = Game.onlineManager.getTop(file, FileUtils.getMD5Checksum(file));
         } catch (OnlineManager.OnlineManagerException exception) {
             errorMessage = Res.str(R.string.beatmap_panel_error_prompt) + "\n(" + exception.getMessage() + ")";
             return false;
@@ -214,7 +215,7 @@ public class Scoreboard implements IReferences {
     }
 
     // Debug
-    private void printScore(Scoreboard.Item s) {
+    /*private void printScore(Scoreboard.Item s) {
         StringBuilder b = new StringBuilder();
 
         b.append("\n");
@@ -232,7 +233,7 @@ public class Scoreboard implements IReferences {
         }
 
         Log.i("Scoreboard", b.toString());
-    }
+    }*/
 
     //----------------------------------------------------------------------------------------//
 

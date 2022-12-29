@@ -8,18 +8,18 @@ import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
 
+import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.data.BeatmapProperty;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.data.Scoreboard;
-import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.ui.platform.BaseFragment;
 import com.reco1l.utils.AnimationOld;
 import com.reco1l.utils.Res;
 import com.reco1l.interfaces.IGameMods;
 
 import java.util.EnumSet;
 
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
@@ -28,7 +28,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 13/9/22 01:22
 
-public class BeatmapPanel extends UIFragment implements IGameMods {
+public class BeatmapPanel extends BaseFragment implements IGameMods {
 
     public static BeatmapPanel instance;
 
@@ -96,13 +96,18 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         return Screens.Selector;
     }
 
+    @Override
+    protected boolean getConditionToShow() {
+        return Game.libraryManager.getSizeOfBeatmaps() != 0;
+    }
+
     //--------------------------------------------------------------------------------------------//
     @Override
     protected void onLoad() {
         setDismissMode(false, false);
 
-        track = global.getSelectedTrack();
-        bodyWidth = (int) Res.dimen(R.dimen.beatmapPanelContentWidth);
+        track = Game.musicManager.getTrack();
+        bodyWidth = Res.dimen(R.dimen.beatmapPanelContentWidth);
         isBannerExpanded = true;
 
         if (scoreboard == null) {
@@ -138,7 +143,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         bindTouchListener(globalTab, () -> switchTab(globalTab));
         bindTouchListener(localTab, () -> switchTab(localTab));
 
-        int max = (int) GlobalManager.getInstance().getMainActivity().getResources().getDimension(R.dimen._84sdp);
+        int max = Res.dimen(R.dimen._84sdp);
 
         bindTouchListener(find("expand"), () -> {
             if (isBannerExpanded) {
@@ -195,7 +200,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         if (track == null)
             return;
 
-        EnumSet<GameMod> mod = modMenu.getMod();
+        EnumSet<GameMod> mod = Game.modMenu.getMod();
 
         pOD.set(track.getOverallDifficulty());
         pAR.set(track.getApproachRate());
@@ -223,8 +228,8 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
                 pAR.value -= 0.5f;
             }
             pAR.value -= 0.5f;
-            if (modMenu.getChangeSpeed() != 1) {
-                pAR.value -= modMenu.getSpeed() - 1.0f;
+            if (Game.modMenu.getChangeSpeed() != 1) {
+                pAR.value -= Game.modMenu.getSpeed() - 1.0f;
             }
             else if (mod.contains(DT) || mod.contains(NC)) {
                 pAR.value -= 0.5f;
@@ -237,8 +242,8 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
             pCS.value += 4f;
         }
 
-        if (modMenu.getChangeSpeed() != 1) {
-            float speed = modMenu.getSpeed();
+        if (Game.modMenu.getChangeSpeed() != 1) {
+            float speed = Game.modMenu.getSpeed();
             pBPM.multiply(speed);
             pLength.value = (long) (pLength.value / speed);
         } else {
@@ -257,8 +262,8 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
         pCS.value = Math.min(15.f, pCS.value);
         pHP.value = Math.min(10.f, pHP.value);
 
-        if (modMenu.getChangeSpeed() != 1) {
-            float speed = modMenu.getSpeed();
+        if (Game.modMenu.getChangeSpeed() != 1) {
+            float speed = Game.modMenu.getSpeed();
             pAR.value = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(pAR.value) / speed), 2);
             pOD.value = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(pOD.value) / speed), 2);
         } else if (mod.contains(DT) || mod.contains(NC)) {
@@ -268,11 +273,11 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
             pAR.value = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(pAR.value) * 4 / 3), 2);
             pOD.value = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(pOD.value) * 4 / 3), 2);
         }
-        if (modMenu.isEnableForceAR()) {
-            pAR.value = modMenu.getForceAR();
+        if (Game.modMenu.isEnableForceAR()) {
+            pAR.value = Game.modMenu.getForceAR();
         }
 
-        if (isShowing) {
+        if (isAdded()) {
             pOD.update();
             pAR.update();
             pCS.update();
@@ -285,10 +290,10 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
     public void updateProperties(TrackInfo track) {
         this.track = track;
-        if (track == null || !isLoaded )
+        if (track == null || !isLoaded())
             return;
 
-        activity.runOnUiThread(() -> {
+        Game.activity.runOnUiThread(() -> {
 
             pStars.set(track.getDifficulty());
             pCircles.set(track.getHitCircleCount());
@@ -300,11 +305,11 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
             new Thread(() -> {
                 DifficultyReCalculator math = new DifficultyReCalculator();
-                pStars.value = math.recalculateStar(track, math.getCS(track), modMenu.getSpeed());
-                activity.runOnUiThread(pStars::update);
+                pStars.value = math.recalculateStar(track, math.getCS(track), Game.modMenu.getSpeed());
+                Game.activity.runOnUiThread(pStars::update);
             }).start();
 
-            if (!isShowing)
+            if (!isAdded())
                 return;
 
             title.setText(BeatmapHelper.getTitle(track));
@@ -390,11 +395,11 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
     }
 
     public void updateScoreboard() {
-        if (!isShowing || !isLoaded)
+        if (!isAdded() || !isLoaded())
             return;
 
-        activity.runOnUiThread(() -> {
-            if (scoreboard.loadScores(global.getSelectedTrack(), isOnlineBoard)) {
+        Game.activity.runOnUiThread(() -> {
+            if (scoreboard.loadScores(Game.musicManager.getTrack(), isOnlineBoard)) {
                 message.setVisibility(View.GONE);
             } else {
                 message.setVisibility(View.VISIBLE);
@@ -407,7 +412,7 @@ public class BeatmapPanel extends UIFragment implements IGameMods {
 
     @Override
     public void close() {
-        if (!isShowing)
+        if (!isAdded())
             return;
         scoreboard.setContainer(null);
 

@@ -61,7 +61,6 @@ import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osu.OSUParser;
 import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.RGBAColor;
@@ -341,10 +340,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         try {
-            final File musicFile = new File(beatmapData.getFolder(),
-                    beatmapData.getData("General", "AudioFilename"));
+            final File musicFile = new File(track.getMusic());
 
-            if (musicFile.exists() == false) {
+            if (!musicFile.exists()) {
                 throw new FileNotFoundException(musicFile.getPath());
             }
 

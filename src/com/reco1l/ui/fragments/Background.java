@@ -14,7 +14,7 @@ import androidx.palette.graphics.Palette;
 
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
-import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.ui.platform.BaseFragment;
 import com.reco1l.utils.AnimationTable;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.BlurEffect;
@@ -23,7 +23,7 @@ import com.reco1l.utils.helpers.BitmapHelper;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class Background extends UIFragment {
+public class Background extends BaseFragment {
 
     public static Background instance;
 
@@ -63,9 +63,10 @@ public class Background extends UIFragment {
         image0 = find("image0");
         image1 = find("image1");
 
-        if (bitmap != null) {
-            image0.setImageBitmap(bitmap);
+        if (bitmap == null) {
+            bitmap = Game.bitmapManager.get("menu-background").copy(ARGB_8888, true);
         }
+        image0.setImageBitmap(bitmap);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -119,7 +120,7 @@ public class Background extends UIFragment {
 
             public void onComplete() {
                 handleChange(newBitmap);
-                Game.resources.loadBackground(path);
+                Game.resourcesManager.loadBackground(path);
             }
         };
         backgroundTask.execute();
@@ -162,7 +163,7 @@ public class Background extends UIFragment {
     }
 
     public void reload() {
-        if (isShowing && imagePath != null) {
+        if (isAdded() && imagePath != null) {
             isReload = true;
             changeFrom(imagePath);
         }

@@ -2,36 +2,43 @@ package com.reco1l.ui.fragments;
 
 // Created by Reco1l on 20/12/2022, 05:40
 
+import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.reco1l.Game;
+import com.reco1l.data.LegacyModWrapper;
+import com.reco1l.data.ModWrapper;
+import com.reco1l.data.mods.BaseSpeedMod;
+import com.reco1l.data.mods.CustomARMod;
+import com.reco1l.data.mods.FlashlightMod;
 import com.reco1l.interfaces.IGameMods;
-import com.reco1l.ui.data.ModListAdapter;
 import com.reco1l.ui.data.ModSectionAdapter;
-import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.ui.platform.BaseFragment;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.BaseAdapter;
+import com.reco1l.utils.BaseViewHolder;
 import com.reco1l.utils.Res;
 import com.reco1l.view.BarButton;
-import com.reco1l.view.TextButton;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class ModMenu extends UIFragment implements IGameMods {
+public class ModMenu extends BaseFragment implements IGameMods {
 
     public static ModMenu instance;
 
     public BarButton button;
-
-    public EnumSet<GameMod> mods;
-    public ArrayList<ModWrapper> enabled;
-    public ArrayList<Section> sections;
 
     public Section
             increase,
@@ -39,14 +46,22 @@ public class ModMenu extends UIFragment implements IGameMods {
             automation,
             miscellaneous;
 
+    public final ArrayList<ModWrapper> enabled;
+    public final EnumSet<GameMod> mods;
+
+    private final Map<String, Object> properties;
+
+    private CustomizationAdapter customAdapter;
+    private RecyclerView customization;
     private ModSectionAdapter adapter;
+
 
     //--------------------------------------------------------------------------------------------//
 
     public ModMenu() {
         super();
         enabled = new ArrayList<>();
-        sections = new ArrayList<>();
+        properties = new HashMap<>();
         mods = EnumSet.noneOf(GameMod.class);
     }
 
@@ -65,10 +80,12 @@ public class ModMenu extends UIFragment implements IGameMods {
     //--------------------------------------------------------------------------------------------//
 
     private void loadMods() {
-        sections.add(increase = new Section("Difficulty Increase"));
-        sections.add(reduction = new Section("Difficulty Reduction"));
-        sections.add(automation = new Section("Automation"));
-        sections.add(miscellaneous = new Section("Miscellaneous"));
+        Section[] sections = {
+                increase = new Section("Difficulty Increase"),
+                reduction = new Section("Difficulty Reduction"),
+                automation = new Section("Automation"),
+                miscellaneous = new Section("Miscellaneous")
+        };
 
         for (int i = 0; i < GameMod.values().length; ++i) {
             GameMod mod = GameMod.values()[i];
@@ -76,17 +93,36 @@ public class ModMenu extends UIFragment implements IGameMods {
 
             if (mod.equals(EZ, NF, HT, REZ)) {
                 section = reduction;
+
+                if (mod.equals(HT)) {
+                    section.add(new BaseSpeedMod(mod));
+                    continue;
+                }
             }
             if (mod.equals(HR, DT, NC, HD, PR, SD, SC, PF, FL)) {
                 section = increase;
+
+                if (mod.equals(DT, NC)) {
+                    section.add(new BaseSpeedMod(mod));
+                    continue;
+                }
+                if (mod.equals(FL)) {
+                    section.add(new FlashlightMod());
+                    continue;
+                }
             }
             if (mod.equals(RX, AU, AP)) {
                 section = automation;
             }
-            section.modWrappers.add(new ModWrapper(mod));
+            section.add(new LegacyModWrapper(mod));
         }
+        loadCustomMods();
 
         adapter = new ModSectionAdapter(sections);
+    }
+
+    private void loadCustomMods() {
+        miscellaneous.add(new CustomARMod());
     }
 
     @Override
@@ -100,65 +136,56 @@ public class ModMenu extends UIFragment implements IGameMods {
         RecyclerView recyclerView = find("sectionContainer");
         recyclerView.setAdapter(adapter);
 
-        TextButton clear = find("clear");
-        bindTouchListener(clear, this::clear);
+        if (customAdapter == null) {
+            customAdapter = new CustomizationAdapter(enabled);
+        }
+
+        customization = find("customRv");
+        customization.setAdapter(customAdapter);
+
+        bindTouchListener(find("clear"), this::clear);
+        bindTouchListener(find("custom"), this::switchCustomVisibility);
     }
 
     //--------------------------------------------------------------------------------------------//
 
+    private void switchCustomVisibility() {
+        if (customization.getVisibility() != View.VISIBLE) {
+            customization.setVisibility(View.VISIBLE);
+        } else {
+            customization.setVisibility(View.GONE);
+        }
+    }
+
     public void clear() {
         for (ModWrapper mod : enabled) {
-            mod.holder.setEnabledVisually(false);
+            mod.holder.onSelect(false);
         }
         enabled.clear();
         mods.clear();
         updateButtonWidget();
     }
 
-    //--------------------------------------------------------------------------------------------//
-
-    public void onModSelect(ModWrapper mod) {
-        if (enabled.contains(mod)) {
-            mod.holder.setEnabledVisually(false);
-            enabled.remove(mod);
-
-            if (mod.gameMod != null) {
-                mods.remove(mod.gameMod);
-            }
-        } else {
-            handleFlags(mod);
-            mod.holder.setEnabledVisually(true);
-            enabled.add(mod);
-            if (mod.gameMod != null) {
-                mods.add(mod.gameMod);
-            }
+    public void onModSelect(ModWrapper wrapper, boolean byFlag) {
+        if (enabled.remove(wrapper)) {
+            wrapper.onSelect(false);
         }
+        else if (enabled.add(wrapper) && !byFlag) {
+            wrapper.onSelect(true);
+        }
+        customAdapter.notifyDataSetChanged();
         updateButtonWidget();
     }
 
-    private void handleFlags(ModWrapper modWrapper) {
-        if (modWrapper.flags == null) {
-            // This means the mod is compatible with every one
-            return;
-        }
-
-        for (GameMod mod : modWrapper.flags) {
-            ModWrapper target = getWrapperByGameMod(mod);
-
-            if (target != null) {
-                target.holder.setEnabledVisually(false);
-                enabled.remove(target);
-                if (target.gameMod != null) {
-                    mods.remove(target.gameMod);
-                }
-            }
-        }
-    }
-
-    private ModWrapper getWrapperByGameMod(GameMod mod) {
+    public LegacyModWrapper getWrapperByGameMod(GameMod mod) {
         for (ModWrapper wrapper : enabled) {
-            if (wrapper.gameMod == mod) {
-                return wrapper;
+
+            if (wrapper instanceof LegacyModWrapper) {
+                LegacyModWrapper legacyWrapper = (LegacyModWrapper) wrapper;
+
+                if (legacyWrapper.mod == mod) {
+                    return legacyWrapper;
+                }
             }
         }
         return null;
@@ -185,19 +212,20 @@ public class ModMenu extends UIFragment implements IGameMods {
                 .play(100);
 
         for (ModWrapper wrapper : enabled) {
-            if (wrapper.gameMod != null) {
-
-                ImageView icon = new ImageView(getContext());
-                icon.setImageBitmap(Game.bitmapManager.get("selection-mod-" + wrapper.gameMod.texture));
-
-                widget.addView(icon);
-
-                Animation.of(icon)
-                        .fromWidth(0)
-                        .toWidth(Res.sdp(16))
-                        .toLeftMargin(Res.sdp(4))
-                        .play(100);
+            if (wrapper.getIcon() == null) {
+                continue;
             }
+
+            ImageView icon = new ImageView(getContext());
+            icon.setImageBitmap(Game.bitmapManager.get(wrapper.getIcon()));
+
+            widget.addView(icon);
+
+            Animation.of(icon)
+                    .fromWidth(0)
+                    .toWidth(Res.sdp(16))
+                    .toLeftMargin(Res.sdp(4))
+                    .play(100);
         }
     }
 
@@ -205,6 +233,57 @@ public class ModMenu extends UIFragment implements IGameMods {
     public void close() {
         super.close();
         button.setActivated(false);
+    }
+    //--------------------------------------------------------------------------------------------//
+
+    public static class CustomizationAdapter extends BaseAdapter<CustomizationAdapter.VH, ModWrapper> {
+
+        //----------------------------------------------------------------------------------------//
+
+        public CustomizationAdapter(ArrayList<ModWrapper> list) {
+            super(list);
+        }
+
+        //----------------------------------------------------------------------------------------//
+
+        @Override
+        protected int getLayout() {
+            return R.layout.mod_menu_custom_item;
+        }
+
+        @Override
+        protected VH getViewHolder(View root) {
+            return new VH(root);
+        }
+
+        //----------------------------------------------------------------------------------------//
+
+        public static class VH extends BaseViewHolder<ModWrapper> {
+
+            private final TextView name;
+            private final FrameLayout container;
+
+            //------------------------------------------------------------------------------------//
+
+            public VH(@NonNull View root) {
+                super(root);
+                name = root.findViewById(R.id.mm_customName);
+                container = root.findViewById(R.id.mm_customContainer);
+            }
+
+            //------------------------------------------------------------------------------------//
+
+            @Override
+            protected void onBind(ModWrapper mod, int position) {
+                if (mod.getProperties() == null) {
+                    root.setVisibility(View.GONE);
+                    return;
+                }
+
+                name.setText(mod.getName());
+                mod.getProperties().show(container);
+            }
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -220,55 +299,46 @@ public class ModMenu extends UIFragment implements IGameMods {
             this.title = title;
             this.modWrappers = new ArrayList<>();
         }
+
+        private void add(ModWrapper wrapper) {
+            modWrappers.add(wrapper);
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public static class ModWrapper {
-
-        public GameMod gameMod;
-        public EnumSet<GameMod> flags;
-        public ModListAdapter.ModHolder holder;
-
-        //----------------------------------------------------------------------------------------//
-
-        public ModWrapper(GameMod gameMod) {
-            this.gameMod = gameMod;
-            setFlags(gameMod);
+    public Integer getIntProperty(String key, int def) {
+        if (properties.containsKey(key)) {
+            return (Integer) properties.get(key);
         }
+        return def;
+    }
 
-        public ModWrapper() {
+    public Float getFloatProperty(String key, float def) {
+        if (properties.containsKey(key)) {
+            return (Float) properties.get(key);
         }
+        return def;
+    }
 
-        //----------------------------------------------------------------------------------------//
-
-        private void setFlags(GameMod mod) {
-            switch (mod) {
-                case MOD_HARDROCK:
-                case MOD_EASY:
-                    flags = EnumSet.of(EZ, HR);
-                    break;
-
-                case MOD_DOUBLETIME:
-                case MOD_NIGHTCORE:
-                case MOD_HALFTIME:
-                    flags = EnumSet.of(NC, HT, DT);
-                    break;
-
-                case MOD_AUTO:
-                case MOD_RELAX:
-                case MOD_NOFAIL:
-                case MOD_PERFECT:
-                case MOD_AUTOPILOT:
-                case MOD_SUDDENDEATH:
-                    flags = EnumSet.of(AU, RX, NF, PF, AP, SD);
-                    break;
-            }
-
-            if (flags != null) {
-                flags.remove(mod);
-            }
+    public Boolean getBoolProperty(String key, boolean def) {
+        if (properties.containsKey(key)) {
+            return (Boolean) properties.get(key);
         }
+        return def;
+    }
 
+    //----------------------------------------------------------------------------------------//
+
+    public void setIntProperty(String key, int value) {
+        properties.put(key, value);
+    }
+
+    public void setFloatProperty(String key, float value) {
+        properties.put(key, value);
+    }
+
+    public void setBoolProperty(String key, boolean value) {
+        properties.put(key, value);
     }
 }

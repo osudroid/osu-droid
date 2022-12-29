@@ -15,8 +15,9 @@ import com.reco1l.utils.AnimationTable;
 import com.reco1l.utils.KeyInputHandler;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.data.DialogTable;
-import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.ui.platform.BaseFragment;
 import com.reco1l.utils.Res;
+import com.reco1l.utils.helpers.OnlineHelper;
 import com.reco1l.view.BarButton;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 26/6/22 21:20
 
-public class TopBar extends UIFragment {
+public class TopBar extends BaseFragment {
 
     public static TopBar instance;
 
@@ -100,10 +101,6 @@ public class TopBar extends UIFragment {
         author = find("author");
         back = find("back");
 
-        if (library.getSizeOfBeatmaps() <= 0) {
-            musicButton.setVisibility(false);
-        }
-
         author.setText(Res.str(R.string.app_name) + " " + BuildConfig.VERSION_NAME);
 
         bindTouchListener(find("inbox"), UI.notificationCenter::altShow);
@@ -119,7 +116,7 @@ public class TopBar extends UIFragment {
 
     @Override
     protected void onScreenChange(Screens lastScreen, Screens newScreen) {
-        if (isShowing) {
+        if (isAdded()) {
             reloadButtons(newScreen);
             showAuthorText(newScreen == Screens.Main);
         }
@@ -137,7 +134,7 @@ public class TopBar extends UIFragment {
                     buttonsContainer.removeAllViews();
 
                     if (current == Screens.Main) {
-                        musicButton.setVisibility(true);
+                        musicButton.setVisibility(Game.libraryManager.getSizeOfBeatmaps() != 0);
                         back.setVisibility(View.GONE);
                     } else {
                         musicButton.setVisibility(false);
@@ -164,7 +161,7 @@ public class TopBar extends UIFragment {
 
     @Override
     public void close() {
-        if (isShowing) {
+        if (isAdded()) {
             showAuthorText(false);
 
             Animation.of(body)
@@ -237,15 +234,15 @@ public class TopBar extends UIFragment {
 
             parent.bindTouchListener(view, UI.musicPlayer::altShow);
 
-            if (Game.library.getBeatmap() != null) {
-                text.setText(BeatmapHelper.getTitle(Game.library.getBeatmap().getTrack(0)));
+            if (Game.libraryManager.getBeatmap() != null) {
+                text.setText(BeatmapHelper.getTitle(Game.libraryManager.getBeatmap().getTrack(0)));
             }
         }
 
         //----------------------------------------------------------------------------------------//
 
         public void changeMusic(BeatmapInfo beatmap) {
-            if (parent.isShowing) {
+            if (parent.isAdded()) {
                 AnimationTable.textChange(text, BeatmapHelper.getTitle(beatmap));
             }
         }
@@ -313,7 +310,7 @@ public class TopBar extends UIFragment {
         //----------------------------------------------------------------------------------------//
 
         public void loadUserData(boolean clear) {
-            if (!parent.isShowing)
+            if (!parent.isAdded())
                 return;
 
             AnimationTable.fadeOutIn(avatar, () -> avatar.setImageResource(R.drawable.default_avatar));
@@ -321,13 +318,13 @@ public class TopBar extends UIFragment {
             AnimationTable.textChange(rank, Res.str(R.string.top_bar_offline));
             AnimationTable.textChange(name, Config.getLocalUsername());
 
-            if (online.isStayOnline() && !clear) {
-                AnimationTable.textChange(name, online.getUsername());
-                AnimationTable.textChange(rank, "#" + online.getRank());
+            if (Game.onlineManager.isStayOnline() && !clear) {
+                AnimationTable.textChange(name, Game.onlineManager.getUsername());
+                AnimationTable.textChange(rank, "#" + Game.onlineManager.getRank());
 
                 AnimationTable.fadeOutIn(avatar, () -> {
-                    if (onlineHelper.getPlayerAvatar() != null) {
-                        avatar.setImageDrawable(onlineHelper.getPlayerAvatar());
+                    if (OnlineHelper.getPlayerAvatar() != null) {
+                        avatar.setImageDrawable(OnlineHelper.getPlayerAvatar());
                     }
                 });
             }

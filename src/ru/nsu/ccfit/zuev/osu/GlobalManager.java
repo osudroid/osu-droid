@@ -57,21 +57,16 @@ public class GlobalManager {
     public void init() {
         saveServiceObject = (SaveServiceObject) mainActivity.getApplication();
         songService = saveServiceObject.getSongService();
-        setLoadingProgress(10);
         setMainScene(MainScene.getInstance());
-        setInfo("Loading skin...");
         skinNow = Config.getSkinPath();
         ResourceManager.getInstance().loadSkin(skinNow);
         Game.bitmapManager.loadAssets(skinNow);
         ScoreLibrary.getInstance().load(mainActivity);
-        setLoadingProgress(20);
         PropertiesLibrary.getInstance().load(mainActivity);
-        setLoadingProgress(30);
         setGameScene(GameScene.getInstance());
         setSongMenu(SelectorScene.getInstance());
         setScoring(SummaryScene.getInstance());
         setLoadingScene(LoaderScene.getInstance());
-        setLoadingProgress(40);
         getGameScene().setScoringScene(getScoring());
         getGameScene().setOldScene(getSongMenu());
         if (songService != null) {

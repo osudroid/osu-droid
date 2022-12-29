@@ -4,36 +4,23 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="@dimen/M">
+    android:padding="@dimen/M"
+    tools:background="@color/backgroundSecondary">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <TextView
+            android:id="@android:id/title"
+            style="@style/text"
             android:layout_alignParentStart="true"
             android:layout_toStartOf="@android:id/checkbox"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@android:id/title"
-                style="@style/text"
-                tools:text="title title" />
-
-            <TextView
-                android:id="@android:id/summary"
-                style="@style/text"
-                android:layout_marginTop="@dimen/XS"
-                android:textColor="@color/textSecondary"
-                tools:text="summary summary" />
-
-        </LinearLayout>
+            tools:text="title title" />
 
         <CheckBox
-            style="@style/check_box"
             android:id="@android:id/checkbox"
+            style="@style/check_box"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginHorizontal="@dimen/M" />

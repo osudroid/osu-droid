@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.reco1l.Game;
-import com.reco1l.interfaces.IReferences;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +17,7 @@ import java.util.Map;
 
 // Created by Reco1l on 22/8/22 21:38
 
-public class BitmapManager implements IReferences {
+public class BitmapManager {
 
     public static BitmapManager instance;
 

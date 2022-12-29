@@ -13,7 +13,7 @@ import com.reco1l.interfaces.IReferences;
 
 // Created by Reco1l on 25/7/22 21:51
 
-public class DialogFragment extends Fragment implements IReferences {
+public class DialogFragment extends Fragment {
 
     public View root;
 

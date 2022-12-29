@@ -9,7 +9,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,119 +17,107 @@ import androidx.cardview.widget.CardView;
 
 import com.reco1l.Game;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.Res;
 import com.reco1l.utils.ViewUtils;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class LogoView extends CardView implements BaseView {
 
-    private ImageView overlay;
+    private ImageView lines;
+    private RelativeLayout layout;
+    private StripsEffectView effect;
 
     private Animation
-            lightIn,
             lightOut,
-            rotateIn,
-            rotateOut;
-
-    private boolean
-            _syncToBeat = true;
+            lightIn,
+            rotate;
 
     //--------------------------------------------------------------------------------------------//
 
     public LogoView(@NonNull Context context) {
-        super(context);
-        init(context, null);
+        this(context, null);
     }
 
     public LogoView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init(context, attrs);
+        onCreate(attrs);
     }
 
     public LogoView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context, attrs);
-    }
-
-    private void init(Context context, AttributeSet attrs) {
-        if (attrs != null) {
-            _syncToBeat = attrs.getAttributeBooleanValue(NS, "beatSync", true);
-        }
-
-        ViewGroup.LayoutParams params = ViewUtils.match_parent;
-
-        setCardBackgroundColor(0xFF1E1E1E);
-        if (!isInEditMode()) {
-            setCardElevation(Res.sdp(20));
-        }
-
-        StripsEffectView stripsEffect = new StripsEffectView(context);
-        if (!isInEditMode()) {
-            stripsEffect.setStripWidth(Res.sdp(20));
-        }
-        addView(stripsEffect, params);
-
-        View highlight = new View(context);
-        highlight.setBackground(new ColorDrawable(Color.WHITE));
-        highlight.setAlpha(0);
-        addView(highlight, params);
-
-        overlay = new ImageView(context);
-        overlay.setImageResource(R.drawable.logo_overlay);
-        overlay.setScaleType(ScaleType.FIT_XY);
-        addView(overlay, params);
-
-        ImageView brand = new ImageView(context);
-        brand.setImageResource(R.drawable.logo_brand);
-        brand.setScaleType(ScaleType.FIT_XY);
-        addView(brand, params);
-
-        lightIn = Animation.of(highlight).toAlpha(0.1f);
-        lightOut = Animation.of(highlight).toAlpha(0);
-
-        rotateIn = Animation.of(overlay);
-        rotateOut = Animation.of(overlay);
+        onCreate(attrs);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
+    public View getView() {
+        return this;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
+    public void onCreate(AttributeSet attrs) {
+        layout = new RelativeLayout(getContext());
+        addView(layout);
+
+        setCardBackgroundColor(0xFF1E1E1E);
+        setCardElevation(sdp(20));
+
+        ViewGroup.LayoutParams p = ViewUtils.match_parent;
+
+        effect = new StripsEffectView(getContext());
+        effect.setStripWidth(sdp(20));
+        layout.addView(effect, p);
+
+        View flash = new View(getContext());
+        flash.setBackground(new ColorDrawable(Color.WHITE));
+        flash.setAlpha(0);
+        layout.addView(flash, p);
+
+        ImageView overlay = new ImageView(getContext());
+        overlay.setImageResource(R.drawable.logo_overlay);
+        layout.addView(overlay, p);
+
+        lines = new ImageView(getContext());
+        lines.setImageResource(R.drawable.logo_lines);
+        layout.addView(lines, p);
+
+        ImageView brand = new ImageView(getContext());
+        brand.setImageResource(R.drawable.logo_brand);
+        layout.addView(brand, p);
+
+        lightIn = Animation.of(flash).toAlpha(0.1f);
+        lightOut = Animation.of(flash).toAlpha(0);
+
+        rotate = Animation.of(lines);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
+    public void onResize(int w, int h) {
+        int size = Math.max(w, h);
+
+        layout.getLayoutParams().width = size;
+        layout.getLayoutParams().height = size;
+        layout.requestLayout();
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        invalidate();
         setRadius(canvas.getHeight() / 2f);
 
         if (!isInEditMode()) {
-            if (_syncToBeat && Game.timingWrapper.isNextBeat()) {
-                onBeatUpdate();
+            if (Game.timingWrapper.isNextBeat()) {
+                onNextBeat();
             }
             updatePeak();
         }
-    }
 
-    private void onBeatUpdate() {
-        float beatLength = Game.timingWrapper.getBeatLength();
-
-        long in = (long) (beatLength * 0.07f);
-        long out = (long) (beatLength * 0.9f);
-
-        if (Game.musicManager.isPlaying()) {
-            if (Game.timingWrapper.isKiai()) {
-                lightOut.duration(out);
-                lightIn.runOnEnd(lightOut::play).play(in);
-            }
-        }
-
-        float increment = overlay.getRotation();
-        if (Game.timingWrapper.isKiai()) {
-            increment += 25;
-        } else {
-            increment += 10;
-        }
-
-        rotateOut.toRotation(increment).delay(in).play(out);
-        rotateIn.toRotation(increment).play(in);
+        super.onDraw(canvas);
+        invalidate();
     }
 
     private void updatePeak() {
@@ -143,9 +131,32 @@ public class LogoView extends CardView implements BaseView {
         setScaleY(peak);
     }
 
+    private void onNextBeat() {
+        float beatLength = Game.timingWrapper.getBeatLength();
+
+        long in = (long) (beatLength * 0.07f);
+        long out = (long) (beatLength * 0.9f);
+
+        if (Game.musicManager.isPlaying()) {
+            if (Game.timingWrapper.isKiai()) {
+                lightOut.duration(out);
+                lightIn.runOnEnd(lightOut::play).play(in);
+            }
+        }
+
+        float increment = lines.getRotation();
+        if (Game.timingWrapper.isKiai()) {
+            increment += 25;
+        } else {
+            increment += 10;
+        }
+
+        rotate.toRotation(increment).play((long) beatLength);
+    }
+
     //--------------------------------------------------------------------------------------------//
 
-    public void setBeatSyncing(boolean bool) {
-        _syncToBeat = bool;
+    public StripsEffectView getStripsEffect() {
+        return effect;
     }
 }

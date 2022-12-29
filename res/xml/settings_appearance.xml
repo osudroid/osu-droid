@@ -29,7 +29,7 @@
             android:title="@string/opt_skin_title"
             app:iconSpaceReserved="false" />
 
-        <ListPreference
+        <DropDownPreference
             android:defaultValue="1"
             android:entries="@array/spinner_style_names"
             android:entryValues="@array/spinner_style_values"

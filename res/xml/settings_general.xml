@@ -29,12 +29,6 @@
             android:title="@string/opt_loadavatar_title"
             app:iconSpaceReserved="false" />
 
-        <Preference
-            android:key="login"
-            android:summary="Sign in to your account"
-            android:title="@string/opt_login_title"
-            app:iconSpaceReserved="false" />
-
     </PreferenceCategory>
 
     <PreferenceCategory

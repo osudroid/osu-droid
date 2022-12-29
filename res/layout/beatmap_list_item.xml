@@ -87,6 +87,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/M"
+        android:nestedScrollingEnabled="false"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:itemCount="3"
         tools:listitem="@layout/beatmap_list_child_item" />
 

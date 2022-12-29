@@ -12,7 +12,7 @@ import androidx.cardview.widget.CardView;
 import com.edlplan.framework.easing.Easing;
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
-import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.ui.platform.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.Res;
@@ -29,7 +29,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 9/7/22 18:09
 
-public class MainMenu extends UIFragment {
+public class MainMenu extends BaseFragment {
 
     public static MainMenu instance;
 
@@ -89,7 +89,7 @@ public class MainMenu extends UIFragment {
         bindTouchListener(logo, new TouchListener() {
 
             public BassSoundProvider getClickSound() {
-                return Game.resources.getSound("menuhit");
+                return Game.resourcesManager.getSound("menuhit");
             }
 
             public void onPressUp() {
@@ -197,10 +197,10 @@ public class MainMenu extends UIFragment {
                     new AsyncExec() {
                         public void run() {
                             Game.activity.checkNewBeatmaps();
-                            if (!Game.library.loadLibraryCache(Game.activity, true)) {
-                                Game.library.scanLibrary(Game.activity);
+                            if (!Game.libraryManager.loadLibraryCache(Game.activity, true)) {
+                                Game.libraryManager.scanLibrary(Game.activity);
                             }
-                            Game.library.findBeatmap(Game.musicManager.getBeatmap());
+                            Game.libraryManager.findBeatmap(Game.musicManager.getTrack().getBeatmap());
                         }
 
                         public void onComplete() {
@@ -219,7 +219,7 @@ public class MainMenu extends UIFragment {
     }
 
     public void onExit() {
-        if (isShowing) {
+        if (isAdded()) {
             Animation.of(logo)
                     .runOnStart(() -> {
                         Game.platform.closeAllExcept(this);
@@ -235,13 +235,13 @@ public class MainMenu extends UIFragment {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    protected void onUpdate(float secondsElapsed) {
+    protected void onUpdate(float sec) {
         if (isMenuShowing) {
             if (showPassTime > 10000f) {
                 hideMenu(false);
                 showPassTime = 0;
             } else {
-                showPassTime += secondsElapsed * 1000f;
+                showPassTime += sec * 1000f;
             }
         }
     }
@@ -250,7 +250,7 @@ public class MainMenu extends UIFragment {
     public void close() {
         super.close();
 
-        if (isShowing) {
+        if (isAdded()) {
             isMenuShowing = false;
         }
     }

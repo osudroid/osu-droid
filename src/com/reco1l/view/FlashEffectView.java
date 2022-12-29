@@ -39,23 +39,18 @@ public class FlashEffectView extends View implements BaseView {
     //--------------------------------------------------------------------------------------------//
 
     public FlashEffectView(Context context) {
-        super(context);
-        init();
+        this(context, null);
     }
 
     public FlashEffectView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init();
-    }
-
-    public FlashEffectView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init();
+        onCreate(attrs);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    private void init() {
+    @Override
+    public void onCreate(AttributeSet attrs) {
         color = Color.WHITE;
 
         paint = new Paint();
@@ -117,7 +112,9 @@ public class FlashEffectView extends View implements BaseView {
         super.onDraw(canvas);
         invalidate();
 
-        setAlpha(Game.songService.getLevel());
+        if (Game.songService != null) {
+            setAlpha(Game.songService.getLevel());
+        }
     }
 
     public void onBeatUpdate() {

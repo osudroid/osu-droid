@@ -13,12 +13,6 @@
         <attr name="buttonText" format="string"/>
         <attr name="buttonColor" format="color"/>
         <attr name="buttonRadius" format="dimension"/>
-        <attr name="textHorizontalPadding" format="dimension"/>
-        <attr name="textVerticalPadding" format="dimension"/>
-    </declare-styleable>
-
-    <declare-styleable name="LogoView">
-        <attr name="beatSync"/>
     </declare-styleable>
 
     <declare-styleable name="StripsEffectView">
@@ -27,10 +21,6 @@
         <attr name="stripSpeed" format="float"/>
         <attr name="spawnTime" format="integer"/>
         <attr name="spawnLimit" format="integer"/>
-    </declare-styleable>
-
-    <declare-styleable name="FlashEffectView">
-        <attr name="beatSync"/>
     </declare-styleable>
 
     <declare-styleable name="PanelLayout">

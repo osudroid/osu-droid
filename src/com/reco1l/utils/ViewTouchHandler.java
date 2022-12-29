@@ -14,7 +14,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.reco1l.Game;
-import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.ui.platform.BaseFragment;
 import com.reco1l.utils.listeners.TouchListener;
 
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +27,7 @@ public class ViewTouchHandler {
 
     public TouchListener listener;
 
-    private UIFragment linkedFragment;
+    private BaseFragment linkedFragment;
     private Animation downAnim, upAnim;
 
     private Handler handler;
@@ -156,7 +156,7 @@ public class ViewTouchHandler {
         }
     }
 
-    public void linkToFragment(UIFragment fragment) {
+    public void linkToFragment(BaseFragment fragment) {
         this.linkedFragment = fragment;
     }
 

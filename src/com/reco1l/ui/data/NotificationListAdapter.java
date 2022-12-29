@@ -79,7 +79,7 @@ public class NotificationListAdapter extends BaseAdapter<NotificationListAdapter
                     .toX(-50)
                     .toAlpha(0)
                     .runOnEnd(() -> {
-                        onBind(notification);
+                        rebind();
 
                         Animation.of(holder.innerBody)
                                 .fromX(50)

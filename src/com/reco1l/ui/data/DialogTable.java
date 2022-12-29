@@ -16,7 +16,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 25/7/22 22:30
 
-public class DialogTable implements IReferences {
+public class DialogTable {
 
     // Builder for Author dialog
     //--------------------------------------------------------------------------------------------//
@@ -45,9 +45,9 @@ public class DialogTable implements IReferences {
         builder.message = "The game will be restarted to apply changes";
         builder.setCloseMode(false);
         builder.addButton("Accept", dialog -> {
-            Intent intent = new Intent(activity, MainActivity.class);
+            Intent intent = new Intent(Game.activity, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            activity.startActivity(intent);
+            Game.activity.startActivity(intent);
             System.exit(0);
         });
 

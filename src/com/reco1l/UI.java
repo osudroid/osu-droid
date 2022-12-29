@@ -5,6 +5,7 @@ import com.reco1l.ui.fragments.BeatmapCarrousel;
 import com.reco1l.ui.fragments.BeatmapPanel;
 import com.reco1l.ui.fragments.DebugOverlay;
 import com.reco1l.ui.extras.NotificationCenter;
+import com.reco1l.ui.fragments.FilterMenu;
 import com.reco1l.ui.fragments.GameSummary;
 import com.reco1l.ui.fragments.MainMenu;
 import com.reco1l.ui.extras.MusicPlayer;
@@ -12,7 +13,7 @@ import com.reco1l.ui.extras.SettingsMenu;
 import com.reco1l.ui.fragments.ModMenu;
 import com.reco1l.ui.fragments.TopBar;
 import com.reco1l.ui.extras.UserProfile;
-import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.ui.platform.BaseFragment;
 
 // Created by Reco1l on 29/6/22 22:38
 
@@ -30,11 +31,12 @@ public final class UI {
     public static Background background = getBackground();
     public static GameSummary gameSummary = getGameSummary();
     public static ModMenu modMenu = getModMenu();
+    public static FilterMenu filterMenu = getFilterMenu();
 
     //--------------------------------------------------------------------------------------------//
 
-    public static UIFragment[] getExtras() {
-        return new UIFragment[] {
+    public static BaseFragment[] getExtras() {
+        return new BaseFragment[] {
                 getNotificationCenter(),
                 getMusicPlayer(),
                 getUserProfile(),
@@ -127,5 +129,12 @@ public final class UI {
             ModMenu.instance = new ModMenu();
         }
         return ModMenu.instance;
+    }
+
+    private static FilterMenu getFilterMenu() {
+        if (FilterMenu.instance == null) {
+            FilterMenu.instance = new FilterMenu();
+        }
+        return FilterMenu.instance;
     }
 }

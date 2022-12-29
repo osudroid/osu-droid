@@ -9,6 +9,10 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import android.view.View;
 import android.widget.RelativeLayout;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
 public class ViewUtils {
 
     public static LayoutParams match_parent = match_parent();
@@ -137,12 +141,14 @@ public class ViewUtils {
         private final View view;
         private final RelativeLayout.LayoutParams params;
 
-        private int[] rules;
+        private ArrayList<Integer> rules;
 
         //----------------------------------------------------------------------------------------//
 
         private RuleUtils(View view) {
             this.view = view;
+            this.rules = new ArrayList<>();
+
             if (!(view.getLayoutParams() instanceof RelativeLayout.LayoutParams)) {
                 RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(0, 0);
 
@@ -160,8 +166,15 @@ public class ViewUtils {
             return this;
         }
 
+        public RuleUtils add(int rule) {
+            rules.add(rule);
+            return this;
+        }
+
         public RuleUtils add(int... rules) {
-            this.rules = rules;
+            for (int rule : rules) {
+                this.rules.add(rule);
+            }
             return this;
         }
 

@@ -5,9 +5,9 @@ public enum GameMod {
      * Temporarily unranked mods (until adjusted):
      * sd, pf, sc, re, fl
      */
+    MOD_EASY("es", 0.5f, "easy"),
     MOD_NOFAIL("nf", 0.5f, "nofail"),
     MOD_AUTO("auto", 0, true, "autoplay"),
-    MOD_EASY("es", 0.5f, "easy"),
     MOD_HARDROCK("hr", 1.06f, "hardrock"),
     MOD_HIDDEN("hd", 1.06f, "hidden"),
     MOD_RELAX("relax", 0.001f, true, "relax"),

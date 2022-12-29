@@ -63,7 +63,11 @@ public abstract class AsyncExec {
         return this.isCompleted;
     }
 
-    public final boolean isCanceled() {
+    public final boolean isTerminated() {
         return this.executor.isTerminated();
+    }
+
+    public final boolean isShutdown() {
+        return this.executor.isShutdown();
     }
 }

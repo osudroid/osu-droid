@@ -13,7 +13,7 @@ import androidx.cardview.widget.CardView;
 import com.edlplan.framework.easing.Easing;
 import com.reco1l.Game;
 import com.reco1l.UI;
-import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.ui.platform.BaseFragment;
 import com.reco1l.utils.AnimationOld;
 import com.reco1l.utils.Res;
 import com.reco1l.utils.ViewUtils;
@@ -27,7 +27,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 23/7/22 20:43
 
-public class Dialog extends UIFragment {
+public class Dialog extends BaseFragment {
 
     public final DialogBuilder builder;
 
@@ -58,8 +58,13 @@ public class Dialog extends UIFragment {
     }
 
     @Override
-    protected long getDismissTime() {
+    protected long getCloseTime() {
         return builder.dismissTime;
+    }
+
+    @Override
+    protected boolean isOverlay() {
+        return true;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -93,7 +98,7 @@ public class Dialog extends UIFragment {
 
 
         if (builder.customFragment != null) {
-            platform.manager.beginTransaction()
+            Game.platform.manager.beginTransaction()
                     .add(find("fragmentContainer").getId(), builder.customFragment)
                     .runOnCommit(() ->
                             new AnimationOld(builder.customFragment.root)
@@ -161,7 +166,7 @@ public class Dialog extends UIFragment {
 
     @Override
     public void close() {
-        if (!isShowing)
+        if (!isAdded())
             return;
 
         Game.platform.dialogs.remove(this);
@@ -197,9 +202,9 @@ public class Dialog extends UIFragment {
 
     @Override
     public void show() {
-        if (!isShowing) {
+        if (!isAdded()) {
             if (closeExtras) {
-                platform.close(UI.getExtras());
+                Game.platform.close(UI.getExtras());
             }
             Game.platform.dialogs.add(this);
         }

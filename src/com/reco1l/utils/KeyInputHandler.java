@@ -7,7 +7,7 @@ import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.andengine.ISceneHandler;
 import com.reco1l.ui.custom.Dialog;
-import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.ui.platform.BaseFragment;
 
 import org.anddev.andengine.entity.scene.Scene;
 
@@ -24,16 +24,21 @@ public class KeyInputHandler {
     }
 
     public static boolean handle(final int key, final int action) {
-        if (!Game.engine.isGlobalInitialized)
+        if (!Game.engine.isGlobalInitialized) {
             return false;
+        }
 
         Scene currentScene = Game.engine.getScene();
         Scene lastScene = Game.engine.lastScene;
 
+        if (currentScene == Game.loaderScene) {
+            return false;
+        }
+
         if (key == KeyEvent.KEYCODE_BACK && action == MotionEvent.ACTION_DOWN) {
 
-            for (UIFragment fragment : UI.getExtras()) {
-                if (fragment.isShowing) {
+            for (BaseFragment fragment : UI.getExtras()) {
+                if (fragment.isAdded()) {
                     fragment.close();
                     return true;
                 }

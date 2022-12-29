@@ -9,10 +9,12 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.fragment.WebViewFragment;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.reco1l.Game;
 import com.reco1l.UI;
-import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.ui.platform.BaseFragment;
 import com.reco1l.utils.AnimationOld;
 import com.reco1l.utils.Res;
+import com.reco1l.utils.helpers.OnlineHelper;
 
 import java.text.DecimalFormat;
 
@@ -22,7 +24,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 13/9/22 01:22
 
-public class UserProfile extends UIFragment {
+public class UserProfile extends BaseFragment {
 
     public static UserProfile instance;
     public static String message;
@@ -53,7 +55,7 @@ public class UserProfile extends UIFragment {
         body.postDelayed(closeTask, 8000);
 
         new AnimationOld(body)
-                .height(Res.sdp(30), Res.dimen(online.isStayOnline() ?
+                .height(Res.sdp(30), Res.dimen(Game.onlineManager.isStayOnline() ?
                         R.dimen.userPanelHeight : R.dimen.userPanelSmallHeight))
                 .interpolatorMode(AnimationOld.Interpolate.VALUE_ANIMATOR)
                 .interpolator(Easing.OutExpo)
@@ -68,7 +70,7 @@ public class UserProfile extends UIFragment {
         TextView name = find("name");
         errorText = find("message");
 
-        if (!online.isStayOnline()) {
+        if (!Game.onlineManager.isStayOnline()) {
             infoContainer.setVisibility(View.GONE);
             message.setVisibility(View.VISIBLE);
 
@@ -93,27 +95,27 @@ public class UserProfile extends UIFragment {
                                 .fade(0, child.getAlpha()))
                 .play(200);
 
-        avatar.setImageDrawable(onlineHelper.getPlayerAvatar());
+        avatar.setImageDrawable(OnlineHelper.getPlayerAvatar());
 
         infoContainer.setVisibility(View.VISIBLE);
         message.setVisibility(View.GONE);
 
         bindTouchListener(goProfile, () -> {
-            new WebViewFragment().setURL(WebViewFragment.PROFILE_URL + online.getUserId()).show();
+            new WebViewFragment().setURL(WebViewFragment.PROFILE_URL + Game.onlineManager.getUserId()).show();
             close();
         });
 
-        name.setText(online.getUsername());
-        rank.setText(String.format("#%d", online.getRank()));
+        name.setText(Game.onlineManager.getUsername());
+        rank.setText(String.format("#%d", Game.onlineManager.getRank()));
 
-        new AnimationOld().ofFloat(0, online.getAccuracy() * 100f)
+        new AnimationOld().ofFloat(0, Game.onlineManager.getAccuracy() * 100f)
                 .runOnUpdate(val -> accuracy.setText(String.format("%.2f%%", val)))
                 .interpolator(Easing.OutExpo)
                 .cancelPending(false)
                 .delay(200)
                 .play(1000);
 
-        new AnimationOld().ofInt(0, (int) (online.getAccuracy() * 100))
+        new AnimationOld().ofInt(0, (int) (Game.onlineManager.getAccuracy() * 100))
                 .runOnUpdate(accuracyBar::setProgress)
                 .interpolator(Easing.OutExpo)
                 .cancelPending(false)
@@ -121,7 +123,7 @@ public class UserProfile extends UIFragment {
                 .play(1000);
 
         DecimalFormat df = new DecimalFormat("###,###,###,###");
-        score.setText(df.format(online.getScore()));
+        score.setText(df.format(Game.onlineManager.getScore()));
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -130,22 +132,22 @@ public class UserProfile extends UIFragment {
         message = text != null ? text : Res.str(R.string.user_profile_offline_message);
         if (BuildConfig.DEBUG)
             message = text != null ? text : Res.str(R.string.user_profile_debug_message);
-        if (!isShowing)
+        if (!isAdded())
             return;
-        activity.runOnUiThread(() -> errorText.setText(message));
+        Game.activity.runOnUiThread(() -> errorText.setText(message));
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     public void show() {
-        platform.close(UI.getExtras());
+        Game.platform.close(UI.getExtras());
         super.show();
     }
 
     @Override
     public void close() {
-        if (!isShowing)
+        if (!isAdded())
             return;
 
         body.removeCallbacks(closeTask);
@@ -155,7 +157,7 @@ public class UserProfile extends UIFragment {
                 .play(100);
 
         new AnimationOld(body)
-                .height(Res.dimen(online.isStayOnline() ?
+                .height(Res.dimen(Game.onlineManager.isStayOnline() ?
                         R.dimen.userPanelHeight : R.dimen.userPanelSmallHeight), Res.sdp(30))
                 .interpolatorMode(AnimationOld.Interpolate.VALUE_ANIMATOR)
                 .interpolator(Easing.OutExpo)

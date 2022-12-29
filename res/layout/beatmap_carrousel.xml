@@ -15,7 +15,7 @@
         android:layout_alignParentRight="true"
         android:layout_marginLeft="@dimen/beatmapPanelContentWidth">
 
-        <androidx.recyclerview.widget.RecyclerView
+        <com.reco1l.view.CarrouselRecyclerView
             android:id="@+id/bl_recycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -29,8 +29,8 @@
         android:id="@+id/bl_logo"
         android:layout_width="@dimen/beatmapListLogoSize"
         android:layout_height="@dimen/beatmapListLogoSize"
-        android:layout_marginRight="@dimen/_minus24sdp"
-        android:layout_marginBottom="@dimen/_minus40sdp"
+        android:layout_marginRight="@dimen/_minus22sdp"
+        android:layout_marginBottom="@dimen/_minus42sdp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true" />
 

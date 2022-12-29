@@ -53,7 +53,7 @@ public class SummaryScene extends BaseScene {
 
         retry.setIcon(Res.drw(R.drawable.v_tune));
         retry.runOnTouch(() -> {
-            Game.resources.getSound("applause").stop();
+            Game.resourcesManager.getSound("applause").stop();
             Game.gameScene.startGame(null, null);
         });
 
@@ -83,7 +83,7 @@ public class SummaryScene extends BaseScene {
 
             public void run() {
                 try {
-                    String pack = Game.online.getScorePack(id);
+                    String pack = Game.onlineManager.getScorePack(id);
                     String[] params = pack.split("\\s+");
 
                     if (params.length >= 11) {
@@ -118,10 +118,10 @@ public class SummaryScene extends BaseScene {
         }
 
         if (!isReplaying) {
-            Game.resources.getSound("applause").play();
+            Game.resourcesManager.getSound("applause").play();
             Game.scoreLibrary.addScore(track.getFilename(), stats, replayPath);
 
-            if (Game.online.isStayOnline() && Game.online.isReadyToSend()) {
+            if (Game.onlineManager.isStayOnline() && Game.onlineManager.isReadyToSend()) {
                 UI.gameSummary.retrieveOnlineData();
                 upload(stats, replayPath);
             }

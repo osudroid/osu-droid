@@ -15,6 +15,7 @@ import org.anddev.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
 public class MainScene extends BaseScene {
 
@@ -40,10 +41,10 @@ public class MainScene extends BaseScene {
     protected void onCreate() {
         setContinuousPlay(true);
 
-        Game.library.loadLibraryCache(Game.activity, false);
+        Game.libraryManager.loadLibraryCache(Game.activity, false);
 
         Config.loadOnlineConfig(Game.activity);
-        Game.online.Init(Game.activity);
+        Game.onlineManager.Init(Game.activity);
         Game.onlineScoring.login();
 
         setTouchAreaBindingEnabled(true);
@@ -57,23 +58,22 @@ public class MainScene extends BaseScene {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public void onMusicChange(BeatmapInfo beatmap) {
-        super.onMusicChange(beatmap);
+    public void onMusicChange(TrackInfo track, boolean wasAudioChanged) {
+        super.onMusicChange(track, wasAudioChanged);
 
-        if (Game.engine.getScene() != this)
+        if (Game.engine.getScene() != this) {
             return;
+        }
 
         Game.activity.runOnUiThread(() -> {
-            UI.musicPlayer.changeMusic(beatmap);
-
             if (UI.topBar.musicButton != null) {
-                UI.topBar.musicButton.changeMusic(beatmap);
+                UI.topBar.musicButton.changeMusic(track.getBeatmap());
             }
 
             String text = "Now playing: "
-                    + BeatmapHelper.getTitle(beatmap)
+                    + BeatmapHelper.getTitle(track)
                     + " by "
-                    + BeatmapHelper.getArtist(beatmap);
+                    + BeatmapHelper.getArtist(track);
 
             NotificationTable.debug(text);
         });
@@ -87,18 +87,9 @@ public class MainScene extends BaseScene {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void loadMusic() {
-        Game.library.shuffleLibrary();
-
-        if (Game.library.getLibrary() != null && Game.library.getSizeOfBeatmaps() > 0) {
-            Game.musicManager.play();
-        }
-        UI.debugOverlay.show();
-    }
-
     public void onExit() {
         Game.musicManager.stop();
-        Game.resources.getSound("seeya").play();
+        Game.resourcesManager.getSound("seeya").play();
         UI.mainMenu.onExit();
     }
 

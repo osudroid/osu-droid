@@ -29,11 +29,12 @@ import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
 import com.reco1l.ui.data.DialogTable;
 import com.reco1l.UI;
-import com.reco1l.ui.platform.UIFragment;
+import com.reco1l.ui.platform.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.AnimationTable;
 import com.reco1l.utils.AsyncExec;
 import com.reco1l.utils.Res;
+import com.reco1l.utils.helpers.OnlineHelper;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
@@ -49,7 +50,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 18/7/22 22:13
 
-public class SettingsMenu extends UIFragment {
+public class SettingsMenu extends BaseFragment {
 
     public static SettingsMenu instance;
 
@@ -208,11 +209,11 @@ public class SettingsMenu extends UIFragment {
     //--------------------------------------------------------------------------------------------//
 
     private void applySettings() {
-        Config.loadConfig(activity);
-        onlineHelper.update();
+        Config.loadConfig(Game.activity);
+        OnlineHelper.update();
         OnlineScoring.getInstance().login();
 
-        if (reloadBackground && engine.currentScreen == Screens.Main) {
+        if (reloadBackground && Game.engine.currentScreen == Screens.Main) {
             UI.background.reload();
             reloadBackground = false;
         }
@@ -222,7 +223,7 @@ public class SettingsMenu extends UIFragment {
 
     @Override
     public void close() {
-        if (!isShowing) {
+        if (!isAdded()) {
             return;
         }
         currentTab = null;
@@ -335,16 +336,16 @@ public class SettingsMenu extends UIFragment {
                 if (skinPath != null) {
                     skinPath.reloadSkinList();
                     skinPath.setOnPreferenceChangeListener((preference, newValue) -> {
-                        if (global.getSkinNow().equals(newValue.toString()))
+                        if (Game.globalManager.getSkinNow().equals(newValue.toString()))
                             return true;
 
-                        global.setSkinNow(Config.getSkinPath());
-                        skinManager.clearSkin();
-                        resources.loadSkin(newValue.toString());
-                        engine.getTextureManager().reloadTextures();
-                        activity.startActivity(new Intent(activity, MainActivity.class));
+                        Game.globalManager.setSkinNow(Config.getSkinPath());
+                        Game.skinManager.clearSkin();
+                        Game.resourcesManager.loadSkin(newValue.toString());
+                        Game.engine.getTextureManager().reloadTextures();
+                        Game.activity.startActivity(new Intent(Game.activity, MainActivity.class));
 
-                        Snackbar.make(activity.findViewById(android.R.id.content),
+                        Snackbar.make(Game.activity.findViewById(android.R.id.content),
                                 StringTable.get(R.string.message_loaded_skin), 1500).show();
                         return true;
                     });
@@ -402,7 +403,7 @@ public class SettingsMenu extends UIFragment {
 
                 if (bgmVolume != null) {
                     bgmVolume.setOnPreferenceChangeListener((p, val) -> {
-                        global.getSongService().setVolume(Float.parseFloat(val.toString()) / 100f);
+                        Game.globalManager.getSongService().setVolume(Float.parseFloat(val.toString()) / 100f);
                         return true;
                     });
                 }
@@ -417,12 +418,12 @@ public class SettingsMenu extends UIFragment {
                     return;
 
                 clearProperties.setOnPreferenceClickListener(p -> {
-                    library.clearCache();
+                    Game.libraryManager.clearCache();
                     return true;
                 });
 
                 clearCache.setOnPreferenceClickListener(p -> {
-                    properties.clear(activity);
+                    Game.propertiesLibrary.clear(Game.activity);
                     return true;
                 });
             }
@@ -438,7 +439,7 @@ public class SettingsMenu extends UIFragment {
 
                     if (newValue.toString().trim().length() == 0) {
                         skinTopPath.setText(Config.getCorePath() + "Skin/");
-                        Config.loadConfig(activity);
+                        Config.loadConfig(Game.activity);
                         return false;
                     }
 
@@ -449,7 +450,7 @@ public class SettingsMenu extends UIFragment {
                     }
 
                     skinTopPath.setText(newValue.toString());
-                    Config.loadConfig(activity);
+                    Config.loadConfig(Game.activity);
                     return false;
                 });
             }

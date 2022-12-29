@@ -17,6 +17,7 @@ import com.reco1l.utils.Res;
 import com.reco1l.utils.ViewTouchHandler;
 import com.reco1l.interfaces.IReferences;
 import com.reco1l.utils.ViewUtils;
+import com.reco1l.utils.helpers.OnlineHelper;
 import com.reco1l.utils.listeners.TouchListener;
 
 import java.util.List;
@@ -27,8 +28,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 18/6/22 01:20
 
-public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.VH>
-        implements IReferences {
+public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.VH> {
 
     private static final String AVATAR_URL = "https://" + OnlineManager.hostname + "/user/avatar/?s=100&id=";
     private final List<Scoreboard.Item> data;
@@ -100,18 +100,18 @@ public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.V
             }).apply(body);
 
             rank.setText(data.rank);
-            if (data.avatar != null && online.isStayOnline()) {
-                avatar.setImageDrawable(onlineHelper.getAvatarFromURL(AVATAR_URL + data.avatar, data.name));
+            if (data.avatar != null && Game.onlineManager.isStayOnline()) {
+                avatar.setImageDrawable(OnlineHelper.getAvatarFromURL(AVATAR_URL + data.avatar, data.name));
             }
 
-            mark.setImageBitmap(bitmapManager.get("ranking-" + data.mark));
+            mark.setImageBitmap(Game.bitmapManager.get("ranking-" + data.mark));
 
             // Loading mods icons
             for (GameMod mod : data.getMods()) {
                 ImageView image = new ImageView(body.getContext());
                 modsLayout.addView(image, ViewUtils.wrap_content);
 
-                image.setImageBitmap(bitmapManager.get("selection-mod-" + mod.texture));
+                image.setImageBitmap(Game.bitmapManager.get("selection-mod-" + mod.texture));
 
                 ViewUtils.size(image, (int) Res.dimen(R.dimen.scoreboardItemModSize));
                 image.setScaleType(ImageView.ScaleType.CENTER_CROP);

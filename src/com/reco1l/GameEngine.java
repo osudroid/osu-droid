@@ -1,25 +1,19 @@
 package com.reco1l;
 
-import android.util.Log;
-
 import com.reco1l.andengine.ISceneHandler;
 import com.reco1l.andengine.BaseScene;
-import com.reco1l.interfaces.IReferences;
 import com.reco1l.enums.Screens;
 
 import org.anddev.andengine.engine.Engine;
-import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.entity.scene.Scene;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
-
 // Created by Reco1l on 22/6/22 02:20
 
-public class GameEngine extends Engine implements IReferences {
+public class GameEngine extends Engine {
 
     private static GameEngine instance;
 
@@ -56,7 +50,7 @@ public class GameEngine extends Engine implements IReferences {
         if (isGlobalInitialized) {
             lastScreen = currentScreen;
             currentScreen = parseScreen(scene);
-            activity.runOnUiThread(() -> notifyUI(lastScreen));
+            Game.activity.runOnUiThread(() -> notifyUI(lastScreen));
         }
         lastScene = getScene();
         super.setScene(scene);
@@ -88,6 +82,7 @@ public class GameEngine extends Engine implements IReferences {
                 handler.onResume();
             }
         }
+        Game.timingWrapper.sync();
     }
 
     @Override
@@ -106,13 +101,13 @@ public class GameEngine extends Engine implements IReferences {
         if (currentScreen == null)
             return;
 
-        platform.close(UI.getExtras());
-        platform.closeAllExcept(platform.getFragmentsFrom(currentScreen));
-        platform.showAll(currentScreen);
+        Game.platform.close(UI.getExtras());
+        Game.platform.closeAllExcept(Game.platform.getFragmentsFrom(currentScreen));
+        Game.platform.showAll(currentScreen);
 
         UI.notificationCenter.allowPopupNotifications(currentScreen != Screens.Game);
 
-        platform.notifyScreenChange(oldScene, currentScreen);
+        Game.platform.notifyScreenChange(oldScene, currentScreen);
     }
 
     //--------------------------------------------------------------------------------------------//

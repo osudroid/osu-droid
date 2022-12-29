@@ -9,13 +9,11 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.reco1l.Game;
-import com.reco1l.management.MusicManager;
 import com.reco1l.notification.NotificationPlayer;
 
 import java.io.File;
 
 import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 
 
@@ -199,7 +197,7 @@ public class SongService extends Service {
             return;
         }
         notify.show();
-        notify.updateSong(Game.library.getBeatmap());
+        notify.updateSong(Game.libraryManager.getBeatmap());
         notify.updateState();
     }
 

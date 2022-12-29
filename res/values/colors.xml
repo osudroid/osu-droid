@@ -23,7 +23,7 @@
 
     <!--Backgrounds-->
     <color name="backgroundPrimary">#242424</color>
-    <color name="backgroundSecondary">#FC262626</color>
+    <color name="backgroundSecondary">#262626</color>
     <color name="backgroundTertiary">#1F1F1F</color>
     <color name="backgroundDimmed">#99000000</color>
 

@@ -11,37 +11,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toStartOf="@id/seekbar_value"
+        <TextView
+            android:id="@android:id/title"
+            style="@style/text"
             android:layout_alignParentStart="true"
-            android:orientation="vertical">
+            android:layout_toStartOf="@id/seekbar_value"
+            android:layout_centerVertical="true"
+            tools:text="title title" />
 
-            <TextView
-                android:id="@android:id/title"
-                style="@style/text"
-                tools:text="title title" />
-
-            <TextView
-                android:id="@android:id/summary"
-                style="@style/text"
-                android:layout_marginTop="@dimen/XS"
-                android:textColor="@color/textSecondary"
-                tools:text="summary summary" />
-
-        </LinearLayout>
 
         <TextView
             android:id="@+id/seekbar_value"
             style="@style/text"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
+            android:layout_marginHorizontal="@dimen/M"
             android:background="@drawable/shape_rounded"
             android:backgroundTint="@color/checkBoxOffColor"
-            android:paddingVertical="@dimen/XS"
             android:paddingHorizontal="@dimen/S"
-            android:layout_marginHorizontal="@dimen/M"
+            android:paddingVertical="@dimen/XS"
             tools:text="40%" />
 
     </RelativeLayout>

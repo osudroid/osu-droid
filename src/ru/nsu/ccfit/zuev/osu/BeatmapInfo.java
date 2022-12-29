@@ -132,4 +132,8 @@ public class BeatmapInfo implements Serializable {
         BeatmapInfo that = (BeatmapInfo) o;
         return Objects.equals(title, that.title) && Objects.equals(artist, that.artist) && Objects.equals(path, that.path);
     }
+
+    public TrackInfo getLastTrack() {
+        return tracks.get(tracks.size() - 1);
+    }
 }

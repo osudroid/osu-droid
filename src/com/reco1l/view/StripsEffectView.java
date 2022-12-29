@@ -2,6 +2,7 @@ package com.reco1l.view;
 // Created by Reco1l on 06/12/2022, 23:23
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
@@ -11,6 +12,8 @@ import androidx.annotation.Nullable;
 import com.reco1l.Game;
 import com.reco1l.utils.Animation;
 
+import ru.nsu.ccfit.zuev.osuplus.R;
+
 public class StripsEffectView extends View implements BaseView {
 
     private StripsDrawable drawable;
@@ -19,47 +22,48 @@ public class StripsEffectView extends View implements BaseView {
             speedIn,
             speedOut;
 
-    private boolean
-            _syncToBeat = true;
+    private boolean syncToBeat = true;
 
     //--------------------------------------------------------------------------------------------//
 
     public StripsEffectView(Context context) {
-        super(context);
-        init(null);
+        this(context, null);
     }
 
     public StripsEffectView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init(attrs);
+        onCreate(attrs);
     }
 
     public StripsEffectView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(attrs);
+        onCreate(attrs);
     }
 
-    public StripsEffectView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        init(attrs);
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
+    public View getView() {
+        return this;
     }
 
-    private void init(AttributeSet attrs) {
+    @Override
+    public int[] getStyleable() {
+        return R.styleable.StripsEffectView;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
+    public void onCreate(AttributeSet attrs) {
         drawable = new StripsDrawable();
-
-        if (attrs != null) {
-            _syncToBeat = attrs.getAttributeBooleanValue(NS, "beatSync", true);
-
-            drawable.stripWidth = attrs.getAttributeIntValue(NS, "stripWidth", 80);
-            drawable.speed = attrs.getAttributeFloatValue(NS, "stripSpeed", 9f);
-            drawable.spawnTime = attrs.getAttributeIntValue(NS, "spawnTime", 200);
-            drawable.limit = attrs.getAttributeIntValue(NS, "spawnLimit", 60);
-        }
 
         setLayerType(LAYER_TYPE_HARDWARE, null);
         setBackground(drawable);
 
-        if (_syncToBeat) {
+        handleAttributes(attrs);
+
+        if (syncToBeat) {
             Animation.UpdateListener onUpdate = value -> {
                 float speed = (float) value;
 
@@ -74,20 +78,31 @@ public class StripsEffectView extends View implements BaseView {
         }
     }
 
+    @Override
+    public void onManageAttributes(TypedArray a) {
+        syncToBeat = a.getBoolean(R.styleable.StripsEffectView_beatSync, true);
+
+        drawable.stripWidth = a.getDimension(R.styleable.StripsEffectView_stripWidth, 80);
+        drawable.speed = a.getFloat(R.styleable.StripsEffectView_stripSpeed, 2f);
+        drawable.spawnTime = a.getInt(R.styleable.StripsEffectView_spawnTime, 200);
+        drawable.limit = a.getInt(R.styleable.StripsEffectView_spawnLimit, 60);
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
         if (!isInEditMode()) {
-            if (Game.timingWrapper.isNextBeat()) {
-                onBeatUpdate();
+            if (syncToBeat && Game.timingWrapper.isNextBeat()) {
+                onNextBeat();
             }
         }
+
+        super.onDraw(canvas);
         invalidate();
     }
 
-    private void onBeatUpdate() {
+    private void onNextBeat() {
         setSpawnTime(Game.timingWrapper.isKiai() ? 200 : 400);
 
         float beatLength = Game.timingWrapper.getBeatLength();
@@ -95,8 +110,10 @@ public class StripsEffectView extends View implements BaseView {
         long in = (long) (beatLength * 0.07f);
         long out = (long) (beatLength * 0.9f);
 
-        speedOut.delay(in).play(out);
-        speedIn.play(in);
+        if (speedOut != null && speedIn != null) {
+            speedOut.delay(in).play(out);
+            speedIn.play(in);
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -128,6 +145,6 @@ public class StripsEffectView extends View implements BaseView {
     }
 
     public void setBeatSyncing(boolean bool) {
-        _syncToBeat = bool;
+        syncToBeat = bool;
     }
 }

@@ -28,12 +28,12 @@
     <dimen name="_XXL">@dimen/_minus20sdp</dimen>
 
     <!--Text-->
-    <dimen name="textXXS">@dimen/_6sdp</dimen>
-    <dimen name="textXS">@dimen/_8sdp</dimen>
-    <dimen name="textS">@dimen/_10sdp</dimen>
-    <dimen name="textM">@dimen/_12sdp</dimen>
-    <dimen name="textL">@dimen/_14sdp</dimen>
-    <dimen name="textXL">@dimen/_18sdp</dimen>
+    <dimen name="textXXS">@dimen/_6ssp</dimen>
+    <dimen name="textXS">@dimen/_8ssp</dimen>
+    <dimen name="textS">@dimen/_10ssp</dimen>
+    <dimen name="textM">@dimen/_12ssp</dimen>
+    <dimen name="textL">@dimen/_14ssp</dimen>
+    <dimen name="textXL">@dimen/_18ssp</dimen>
 
     <!--Vectors-->
     <dimen name="vector40">@dimen/_40sdp</dimen>
@@ -186,5 +186,7 @@
     <!--Mod menu-->
     <dimen name="modMenuModSpriteSize">@dimen/_22sdp</dimen>
     <dimen name="modMenuModItemHeight">@dimen/_40sdp</dimen>
+    <dimen name="modMenuCustomizationHeight">@dimen/_150sdp</dimen>
+    <dimen name="modMenuCustomizationTabWidth">@dimen/_180sdp</dimen>
 
 </resources>

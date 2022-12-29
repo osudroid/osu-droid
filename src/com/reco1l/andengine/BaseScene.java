@@ -7,14 +7,13 @@ import android.content.Context;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.enums.Screens;
-import com.reco1l.interfaces.IMusicObserver;
+import com.reco1l.interfaces.MusicObserver;
 
 import org.anddev.andengine.entity.scene.Scene;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
-public abstract class BaseScene extends Scene implements ISceneHandler, IMusicObserver {
+public abstract class BaseScene extends Scene implements ISceneHandler, MusicObserver {
 
     protected Context context;
 
@@ -57,14 +56,14 @@ public abstract class BaseScene extends Scene implements ISceneHandler, IMusicOb
     }
 
     @Override
-    public void onMusicChange(BeatmapInfo beatmap) {
-        if (Game.engine.getScene() != this)
+    public void onMusicChange(TrackInfo track, boolean wasAudioChanged) {
+        if (Game.engine.getScene() != this) {
             return;
+        }
 
         if (isBackgroundAutoChange) {
-            if (beatmap != null) {
-                String path = beatmap.getTrack(0).getBackground();
-                UI.background.changeFrom(path);
+            if (track != null) {
+                UI.background.changeFrom(track.getBackground());
             }
         }
     }

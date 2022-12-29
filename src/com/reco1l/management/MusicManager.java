@@ -2,28 +2,27 @@ package com.reco1l.management;
 
 // Created by Reco1l on 18/9/22 20:15
 
-import static com.reco1l.enums.MusicOption.*;
-
 import android.util.Log;
 
 import com.reco1l.Game;
-import com.reco1l.interfaces.IMusicObserver;
-import com.reco1l.enums.MusicOption;
+import com.reco1l.interfaces.MusicObserver;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
 public final class MusicManager {
 
     private static MusicManager instance;
 
-    private final ArrayList<IMusicObserver> observers;
+    private final ArrayList<MusicObserver> observers;
 
-    private BeatmapInfo beatmap;
+    private TrackInfo track;
+    private String musicPath;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -43,7 +42,7 @@ public final class MusicManager {
     //--------------------------------------------------------------------------------------------//
 
     public boolean isInvalidRequest(Status... toCheck) {
-        if (getService() == null) {
+        if (Game.songService == null) {
             Log.e("MusicManager", "InvalidRequest: SongService is not initialized!");
             return true;
         }
@@ -69,56 +68,41 @@ public final class MusicManager {
         return Game.songService.getStatus();
     }
 
-    public SongService getService() {
-        return Game.songService;
-    }
-
-    public BeatmapInfo getBeatmap() {
-        return beatmap;
+    public TrackInfo getTrack() {
+        return track;
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void bindMusicObserver(IMusicObserver observer) {
+    public void bindMusicObserver(MusicObserver observer) {
         observers.add(observer);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    private void notifyControlRequest(MusicOption option) {
-        Log.i("MusicManager", "Option " + option.name() + " was received");
-        observers.forEach(observer -> {
-            if (isValidObserver(observer)) {
-                observer.onMusicControlRequest(option, getState());
-            }
-        });
-    }
-
-    private void notifyStateChange(MusicOption option) {
-        observers.forEach(observer -> {
-            if (isValidObserver(observer)) {
-                observer.onMusicStateChange(option, getState());
-            }
-        });
-    }
-
-    private void notifyMusicChange(BeatmapInfo newBeatmap) {
-        observers.forEach(observer -> {
-            if (isValidObserver(observer)) {
-                observer.onMusicChange(newBeatmap);
-            }
-        });
-    }
-
     public void onMusicEnd() {
+        notify(MusicObserver::onMusicEnd);
+    }
+
+    private void onMusicChange(TrackInfo track, boolean wasAudioChanged) {
+        notify(o -> o.onMusicChange(track, wasAudioChanged));
+
+        if (track != null) {
+            musicPath = track.getMusic();
+        } else {
+            musicPath = null;
+        }
+    }
+
+    private void notify(Consumer<MusicObserver> consumer) {
         observers.forEach(observer -> {
             if (isValidObserver(observer)) {
-                observer.onMusicEnd();
+                consumer.accept(observer);
             }
         });
     }
 
-    private boolean isValidObserver(IMusicObserver observer) {
+    private boolean isValidObserver(MusicObserver observer) {
         if (observer != null) {
             if (observer.getAttachedScreen() != null) {
                 return observer.getAttachedScreen() == Game.engine.getCurrentScreen();
@@ -130,102 +114,89 @@ public final class MusicManager {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void change(BeatmapInfo beatmap) {
-        if (isInvalidRequest() || beatmap == null)
-            return;
-
-        if (getState() != Status.STOPPED) {
-            getService().stop();
+    public boolean change(BeatmapInfo beatmap) {
+        if (beatmap != null) {
+            return change(beatmap.getTrack(0));
         }
-        int index = Game.library.findBeatmap(beatmap);
-        this.beatmap = Game.library.getBeatmapByIndex(index);
-        play();
+        stop();
+        onMusicChange(null, true);
+        return false;
+    }
+
+    public boolean change(TrackInfo newTrack) {
+        if (isInvalidRequest() || newTrack == null) {
+            stop();
+            onMusicChange(null, true);
+            return false;
+        }
+        if (newTrack.equals(track)) {
+            return false;
+        }
+        track = newTrack;
+        String newMusic = track.getMusic();
+
+        if (!newMusic.equals(musicPath)) {
+            Game.songService.stop();
+            Game.songService.preLoad(newMusic);
+        }
+
+        Game.libraryManager.findBeatmap(track.getBeatmap());
+        onMusicChange(track, newMusic.equals(musicPath));
+
+        if (getState() == Status.STOPPED) {
+            Game.songService.play();
+            Game.songService.setVolume(Config.getBgmVolume());
+        }
+        return true;
     }
 
     public void play() {
-        if (beatmap == null) {
-            beatmap = Game.library.getBeatmap();
-        }
-
-        if (isInvalidRequest(Status.PAUSED, Status.STOPPED))
+        if (isInvalidRequest(Status.PAUSED, Status.STOPPED)) {
             return;
-
-        notifyControlRequest(PLAY);
-
-        boolean wasMusicChanged = false;
-        if (beatmap != null && getState() == Status.STOPPED) {
-            wasMusicChanged = getService().preLoad(beatmap.getMusic());
+        }
+        if (track == null) {
+            change(Game.libraryManager.getBeatmap());
+            return;
         }
 
-        getService().play();
-        getService().setVolume(Config.getBgmVolume());
-
-        if (wasMusicChanged) {
-            notifyMusicChange(beatmap);
+        if (getState() == Status.STOPPED) {
+            Game.songService.preLoad(track.getMusic());
         }
-        notifyStateChange(PLAY);
+        Game.songService.play();
+        Game.songService.setVolume(Config.getBgmVolume());
+
+        notify(MusicObserver::onMusicPlay);
     }
 
     public void pause() {
-        if (isInvalidRequest(Status.PLAYING))
+        if (isInvalidRequest(Status.PLAYING)) {
             return;
-
-        notifyControlRequest(PAUSE);
-        getService().pause();
-        notifyStateChange(PAUSE);
+        }
+        Game.songService.pause();
+        notify(MusicObserver::onMusicPause);
     }
 
     public void stop() {
-        if (isInvalidRequest(Status.PLAYING, Status.PAUSED))
+        if (isInvalidRequest(Status.PLAYING, Status.PAUSED)) {
             return;
-
-        notifyControlRequest(STOP);
-        getService().stop();
-        notifyStateChange(STOP);
+        }
+        Game.songService.stop();
+        notify(MusicObserver::onMusicStop);
     }
 
     public void previous() {
-        if (isInvalidRequest())
+        if (isInvalidRequest()) {
             return;
-
-        notifyControlRequest(PREVIOUS);
-        if (getState() == Status.PLAYING || getState() == Status.PAUSED) {
-            getService().stop();
         }
-        beatmap = Game.library.getPrevBeatmap();
-        getService().preLoad(beatmap.getMusic());
-        getService().play();
-        notifyMusicChange(beatmap);
-        getService().setVolume(Config.getBgmVolume());
-        notifyStateChange(PREVIOUS);
+        TrackInfo prev = Game.libraryManager.getPrevBeatmap().getTrack(0);
+        change(prev);
     }
 
     public void next() {
-        if (isInvalidRequest())
+        if (isInvalidRequest()) {
             return;
-
-        notifyControlRequest(NEXT);
-        if (getState() == Status.PLAYING || getState() == Status.PAUSED) {
-            getService().stop();
         }
-        beatmap = Game.library.getNextBeatmap();
-        getService().preLoad(beatmap.getMusic());
-        getService().play();
-        notifyMusicChange(beatmap);
-        getService().setVolume(Config.getBgmVolume());
-        notifyStateChange(NEXT);
+        TrackInfo next = Game.libraryManager.getNextBeatmap().getTrack(0);
+        change(next);
     }
-
-    public void sync() {
-        if (isInvalidRequest(Status.PLAYING))
-            return;
-
-        for (int i = 0; i < observers.size(); ++i) {
-            observers.get(i).onMusicSync(getState());
-        }
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-
 }

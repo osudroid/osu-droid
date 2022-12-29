@@ -15,7 +15,7 @@ public class TouchListener {
     //--------------------------------------------------------------------------------------------//
 
     public BassSoundProvider getClickSound() {
-        return Game.resources.getSound(DEFAULT_SOUND);
+        return Game.resourcesManager.getSound(DEFAULT_SOUND);
     }
 
     public GradientDrawable getCustomTouchEffect() {
