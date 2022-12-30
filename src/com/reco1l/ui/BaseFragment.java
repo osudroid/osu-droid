@@ -18,49 +18,41 @@ import com.reco1l.utils.TouchListener;
 import com.reco1l.utils.TouchHandler;
 import com.reco1l.utils.ResUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 22/6/22 02:26
 
 public abstract class BaseFragment extends Fragment {
 
-    protected View rootView, rootBackground;
+    protected final Screens[] parents;
 
-    protected boolean
-            isDismissOnBackgroundPress = false,
-            isDismissOnBackPress = true;
-
-    protected int screenWidth = Config.getRES_WIDTH();
-    protected int screenHeight = Config.getRES_HEIGHT();
+    protected View
+            rootView,
+            rootBackground;
 
     private final Map<View, TouchHandler> registeredViews;
     private final Runnable close = this::close;
 
-    private boolean isLoaded = false;
+    private boolean
+            isLoaded = false,
+            closeOnBackgroundClick = false;
 
     //--------------------------------------------------------------------------------------------//
 
     public BaseFragment() {
-        registeredViews = new HashMap<>();
-
-        if (getParent() != null) {
-            Game.platform.assignToScene(getParent(), this);
-        }
-        if (getParents() != null) {
-            for (Screens scene : getParents()) {
-                Game.platform.assignToScene(scene, this);
-            }
-        }
+        this((Screens) null);
     }
 
-    //--------------------------------------------------------------------------------------------//
+    public BaseFragment(Screens... parents) {
+        this.registeredViews = new HashMap<>();
+        this.parents = parents;
 
-    public final boolean isLoaded() {
-        return isLoaded;
+        Game.platform.onFragmentCreated(this);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -73,17 +65,21 @@ public abstract class BaseFragment extends Fragment {
 
     //--------------------------------------------------------------------------------------------//
 
-    protected Screens getParent() {
-        return null;
-    }
-
-    protected Screens[] getParents() {
-        return null;
-    }
-
     protected boolean isOverlay() {
         return false;
     }
+
+    protected boolean isExtra() {
+        return false;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    protected final void closeOnBackgroundClick(boolean bool) {
+        closeOnBackgroundClick = bool;
+    }
+
+    //--------------------------------------------------------------------------------------------//
 
     protected long getCloseTime() {
         return 0;
@@ -105,9 +101,23 @@ public abstract class BaseFragment extends Fragment {
 
     //--------------------------------------------------------------------------------------------//
 
+    public final boolean isLoaded() {
+        return isLoaded;
+    }
+
+    protected final int getWidth() {
+        return rootView.getWidth();
+    }
+
+    protected final int getHeight() {
+        return rootView.getHeight();
+    }
+
     protected final String generateTag() {
         return getClass().getSimpleName() + "@" + hashCode();
     }
+
+    //--------------------------------------------------------------------------------------------//
 
     @Nullable
     @Override
@@ -118,7 +128,7 @@ public abstract class BaseFragment extends Fragment {
         rootBackground = rootView.findViewById(R.id.background);
         onLoad();
         isLoaded = true;
-        if (isDismissOnBackgroundPress && rootBackground != null) {
+        if (closeOnBackgroundClick && rootBackground != null) {
             rootBackground.setClickable(true);
 
             if (!rootBackground.hasOnClickListeners()) {
@@ -141,7 +151,7 @@ public abstract class BaseFragment extends Fragment {
 
     //---------------------------------------Management-------------------------------------------//
 
-    protected void onTransition() {
+    protected void notifyTransition() {
         String name = getClass().getSimpleName();
 
         if (isAdded()) {
@@ -165,6 +175,10 @@ public abstract class BaseFragment extends Fragment {
     }
 
     public void show() {
+        if (isExtra()) {
+            Game.platform.closeExtras();
+        }
+
         if (isAdded() || !getConditionToShow()) {
             onShowAttempt();
             return;
@@ -178,11 +192,6 @@ public abstract class BaseFragment extends Fragment {
         } else {
             show();
         }
-    }
-
-    protected final void setDismissMode(boolean onBackgroundPress, boolean onBackPress) {
-        isDismissOnBackgroundPress = onBackgroundPress;
-        isDismissOnBackPress = onBackPress;
     }
 
     //--------------------------------------------------------------------------------------------//

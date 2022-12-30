@@ -35,18 +35,6 @@ public final class UI {
 
     //--------------------------------------------------------------------------------------------//
 
-    public static BaseFragment[] getExtras() {
-        return new BaseFragment[] {
-                getNotificationCenter(),
-                getMusicPlayer(),
-                getUserProfile(),
-                getSettingsMenu(),
-                getModMenu()
-        };
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
     private static TopBar getTopBar() {
         if (TopBar.instance == null) {
             TopBar.instance = new TopBar();

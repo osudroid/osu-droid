@@ -1,4 +1,4 @@
-package com.reco1l.data;
+package com.reco1l.management;
 
 import android.content.SharedPreferences;
 import android.util.Log;

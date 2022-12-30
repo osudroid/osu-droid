@@ -19,6 +19,12 @@ public final class DebugOverlay extends BaseFragment {
 
     //--------------------------------------------------------------------------------------------//
 
+    public DebugOverlay() {
+        super(Screens.Main);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
     @Override
     protected int getLayout() {
         return R.layout.debug_overlay;
@@ -27,11 +33,6 @@ public final class DebugOverlay extends BaseFragment {
     @Override
     protected String getPrefix() {
         return "do";
-    }
-
-    @Override
-    protected Screens getParent() {
-        return Screens.Main;
     }
 
     //--------------------------------------------------------------------------------------------//

@@ -41,6 +41,12 @@ public final class Background extends BaseFragment {
 
     //--------------------------------------------------------------------------------------------//
 
+    public Background() {
+        super(Screens.Main, Screens.Selector, Screens.Loader, Screens.Summary);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
     @Override
     protected String getPrefix() {
         return "b";
@@ -49,11 +55,6 @@ public final class Background extends BaseFragment {
     @Override
     protected int getLayout() {
         return R.layout.background;
-    }
-
-    @Override
-    protected Screens[] getParents() {
-        return new Screens[]{Screens.Main, Screens.Selector, Screens.Loader, Screens.Summary};
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -134,6 +135,9 @@ public final class Background extends BaseFragment {
     }
 
     private void handleChange(Bitmap newBitmap) {
+        if (!isLoaded()) {
+            return;
+        }
 
         boolean cursor = image0.getVisibility() == View.VISIBLE;
 

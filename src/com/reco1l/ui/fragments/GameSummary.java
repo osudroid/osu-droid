@@ -52,6 +52,12 @@ public final class GameSummary extends BaseFragment {
 
     //--------------------------------------------------------------------------------------------//
 
+    public GameSummary() {
+        super(Screens.Summary);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
     @Override
     protected String getPrefix() {
         return "gr";
@@ -60,11 +66,6 @@ public final class GameSummary extends BaseFragment {
     @Override
     protected int getLayout() {
         return R.layout.game_results;
-    }
-
-    @Override
-    protected Screens getParent() {
-        return Screens.Summary;
     }
 
     //--------------------------------------------------------------------------------------------//

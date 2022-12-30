@@ -45,6 +45,13 @@ public final class MainMenu extends BaseFragment {
 
     //--------------------------------------------------------------------------------------------//
 
+    public MainMenu() {
+        super(Screens.Main);
+    }
+
+
+    //--------------------------------------------------------------------------------------------//
+
     @Override
     protected String getPrefix() {
         return "mainM";
@@ -55,19 +62,12 @@ public final class MainMenu extends BaseFragment {
         return R.layout.main_menu;
     }
 
-    @Override
-    protected Screens getParent() {
-        return Screens.Main;
-    }
-
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onLoad() {
         isMenuShowing = false;
         showPassTime = 0;
-
-        setDismissMode(false, false);
 
         logo = find("logo");
         single = find("solo");

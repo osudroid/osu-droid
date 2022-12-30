@@ -16,7 +16,7 @@ import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
 public abstract class BaseScene extends Scene implements IBaseScene, MusicObserver {
 
-    protected Context context;
+    protected final Context context;
 
     private boolean
             isBackgroundAutoChange = true,
@@ -51,6 +51,12 @@ public abstract class BaseScene extends Scene implements IBaseScene, MusicObserv
 
     //--------------------------------------------------------------------------------------------//
 
+    protected boolean isShowing() {
+        return Game.engine.getScene() == this;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
     @Override
     public Screens getAttachedScreen() {
         return getIdentifier();
@@ -58,7 +64,7 @@ public abstract class BaseScene extends Scene implements IBaseScene, MusicObserv
 
     @Override
     public void onMusicChange(TrackInfo track, boolean wasAudioChanged) {
-        if (Game.engine.getScene() != this) {
+        if (!isShowing()) {
             return;
         }
 
@@ -71,6 +77,10 @@ public abstract class BaseScene extends Scene implements IBaseScene, MusicObserv
 
     @Override
     public void onMusicEnd() {
+        if (!isShowing()) {
+            return;
+        }
+
         if (isContinuousPlay) {
             Game.musicManager.next();
         }
@@ -78,10 +88,7 @@ public abstract class BaseScene extends Scene implements IBaseScene, MusicObserv
 
     @Override
     public boolean onBackPress() {
-        if (Game.engine.lastScene != null) {
-            Game.engine.setScene(Game.engine.lastScene);
-        }
-        return true;
+        return Game.engine.backToLastScene();
     }
 
     public void show() {

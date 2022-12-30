@@ -65,8 +65,6 @@ public class IntroScene extends BaseScene {
 
         @Override
         protected void onLoad() {
-            setDismissMode(false, false);
-
             Game.resourcesManager.loadSound("welcome_piano", "sfx/welcome_piano.ogg", false);
 
             logoBrand = find("logoBrand");

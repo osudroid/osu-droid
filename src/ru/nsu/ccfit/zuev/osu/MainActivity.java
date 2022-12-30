@@ -305,7 +305,7 @@ public class MainActivity extends BaseGameActivity implements
             }
 
             public void onComplete() {
-                Game.engine.notifyLoadCompleted();
+                Game.engine.onLoadComplete();
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
                 GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene());
                 initPreferences();
@@ -349,7 +349,7 @@ public class MainActivity extends BaseGameActivity implements
         }
         this.mRenderSurfaceView.setRenderer(this.mEngine);
 
-        Game.platform.load(this, this, mRenderSurfaceView);
+        Game.platform.load(this, mRenderSurfaceView);
     }
 
     public void checkNewBeatmaps() {

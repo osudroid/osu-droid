@@ -17,21 +17,19 @@ public final class GameEngine extends Engine {
 
     private static GameEngine instance;
 
-    public Screens currentScreen, lastScreen;
-    public Scene lastScene;
+    private final List<IBaseScene> handlers;
 
-    public boolean isGlobalInitialized = false;
+    private Scene lastScene;
+    private Screens currentScreen, lastScreen;
 
-    private final List<IBaseScene> sceneHandlers;
+    private boolean isGameLoaded = false;
 
     //--------------------------------------------------------------------------------------------//
 
     public GameEngine(EngineOptions pEngineOptions) {
         super(pEngineOptions);
         instance = this;
-        sceneHandlers = new ArrayList<>();
-
-        registerUpdateHandler(Game.timingWrapper::onUpdate);
+        handlers = new ArrayList<>();
     }
 
     public static GameEngine getInstance() {
@@ -40,36 +38,67 @@ public final class GameEngine extends Engine {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void notifyLoadCompleted() {
-        isGlobalInitialized = true;
-        registerUpdateHandler(Game.platform::onUpdate);
+    public Screens getScreen() {
+        return currentScreen;
+    }
+
+    public Screens getLastScreen() {
+        return lastScreen;
+    }
+
+    public Scene getLastScene() {
+        return lastScene;
+    }
+
+    public boolean isGameLoaded() {
+        return isGameLoaded;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public void onLoadComplete() {
+        isGameLoaded = true;
+
+        registerUpdateHandler(sec -> {
+            Game.platform.onEngineUpdate(sec);
+            Game.timingWrapper.onUpdate(sec);
+        });
+    }
+
+    public boolean backToLastScene() {
+        if (lastScene != null) {
+            setScene(lastScene);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public void setScene(Scene scene) {
-        if (isGlobalInitialized) {
-            lastScreen = currentScreen;
+        if (isGameLoaded) {
+            lastScreen = getScreen();
             currentScreen = parseScreen(scene);
-            Game.activity.runOnUiThread(() -> notifyUI(lastScreen));
+
+            Game.activity.runOnUiThread(() ->
+                    Game.platform.onScreenChange(lastScreen, currentScreen)
+            );
         }
         lastScene = getScene();
         super.setScene(scene);
 
-        for (IBaseScene handler : sceneHandlers) {
-            handler.onSceneChange(lastScene, scene);
-        }
+        handlers.forEach(handler -> handler.onSceneChange(lastScene, scene));
     }
 
     private Screens parseScreen(Scene scene) {
-        Screens type = null;
+
+        if (scene == Game.gameScene.getScene()) {
+            return Screens.Game;
+        }
 
         if (scene instanceof BaseScene) {
-            type = ((BaseScene) scene).getIdentifier();
+            return ((BaseScene) scene).getIdentifier();
         }
-        else if (scene == Game.gameScene.getScene()) {
-            type = Screens.Game;
-        }
-        return type;
+        return null;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -77,62 +106,38 @@ public final class GameEngine extends Engine {
     @Override
     public void onResume() {
         super.onResume();
-        for (IBaseScene handler : sceneHandlers) {
+
+        handlers.forEach(handler -> {
             if (currentScreen == handler.getIdentifier()) {
                 handler.onResume();
             }
-        }
+        });
         Game.timingWrapper.sync();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        for (IBaseScene handler : sceneHandlers) {
+
+        handlers.forEach(handler -> {
             if (currentScreen == handler.getIdentifier()) {
                 handler.onPause();
             }
-        }
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    private void notifyUI(Screens oldScene) {
-        if (currentScreen == null)
-            return;
-
-        Game.platform.close(UI.getExtras());
-        Game.platform.closeAllExcept(Game.platform.getFragmentsFrom(currentScreen));
-        Game.platform.showAll(currentScreen);
-
-        UI.notificationCenter.allowPopupNotifications(currentScreen != Screens.Game);
-
-        Game.platform.notifyScreenChange(oldScene, currentScreen);
+        });
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public void registerSceneHandler(IBaseScene sceneHandler) {
-        this.sceneHandlers.add(sceneHandler);
+        this.handlers.add(sceneHandler);
     }
 
     public IBaseScene getCurrentSceneHandler() {
-        for (IBaseScene handler : sceneHandlers) {
+        for (IBaseScene handler : handlers) {
             if (handler.getIdentifier() == currentScreen) {
                 return handler;
             }
         }
         return null;
-    }
-
-    public BaseScene getCurrentScene() {
-        if (getScene() instanceof BaseScene) {
-            return (BaseScene) getScene();
-        }
-        return null;
-    }
-
-    public Screens getCurrentScreen() {
-        return currentScreen;
     }
 }

@@ -5,7 +5,7 @@ import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.reco1l.Game;
-import com.reco1l.data.BeatmapCollection;
+import com.reco1l.management.BeatmapCollection;
 import com.reco1l.enums.Screens;
 import com.reco1l.data.adapters.BeatmapListAdapter;
 import com.reco1l.ui.BaseFragment;
@@ -29,7 +29,7 @@ public final class BeatmapCarrousel extends BaseFragment implements BeatmapColle
     //--------------------------------------------------------------------------------------------//
 
     public BeatmapCarrousel() {
-        super();
+        super(Screens.Selector);
         Game.beatmapCollection.addListener(this);
     }
 
@@ -43,11 +43,6 @@ public final class BeatmapCarrousel extends BaseFragment implements BeatmapColle
     @Override
     protected String getPrefix() {
         return "bl";
-    }
-
-    @Override
-    protected Screens getParent() {
-        return Screens.Selector;
     }
 
     @Override

@@ -16,6 +16,7 @@ import com.reco1l.data.GameNotification;
 import com.reco1l.UI;
 import com.reco1l.data.adapters.NotificationListAdapter;
 import com.reco1l.data.adapters.NotificationListAdapter.ViewHolder;
+import com.reco1l.enums.Screens;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.ResUtils;
@@ -39,8 +40,6 @@ public final class NotificationCenter extends BaseFragment {
     private View body, layer;
     private BouncyRecyclerView container;
     private TextView counter, emptyText;
-
-    private boolean isAllowedPopups = true;
 
     private float bodyWidth;
 
@@ -74,7 +73,7 @@ public final class NotificationCenter extends BaseFragment {
 
     @Override
     protected void onLoad() {
-        setDismissMode(true, true);
+        closeOnBackgroundClick(true);
         bodyWidth = ResUtils.dimen(R.dimen.notificationCenterWidth);
 
         body = find("body");
@@ -124,12 +123,8 @@ public final class NotificationCenter extends BaseFragment {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void allowPopupNotifications(boolean bool) {
-        isAllowedPopups = bool;
-    }
-
     public void createPopup(GameNotification notification) {
-        if (isAdded() || !isAllowedPopups) {
+        if (isAdded()) {
             return;
         }
         popupFragment.load(notification);
@@ -224,7 +219,6 @@ public final class NotificationCenter extends BaseFragment {
 
     @Override
     public void show() {
-        Game.platform.close(UI.getExtras());
         popupFragment.close();
         super.show();
     }
@@ -281,6 +275,11 @@ public final class NotificationCenter extends BaseFragment {
         @Override
         protected long getCloseTime() {
             return 8000;
+        }
+
+        @Override
+        protected boolean getConditionToShow() {
+            return Game.engine.getScreen() != Screens.Game;
         }
 
         //----------------------------------------------------------------------------------------//

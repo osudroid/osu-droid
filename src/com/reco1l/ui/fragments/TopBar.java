@@ -49,7 +49,7 @@ public final class TopBar extends BaseFragment {
     //--------------------------------------------------------------------------------------------//
 
     public TopBar() {
-        super();
+        super(Screens.Selector, Screens.Summary, Screens.Loader);
         buttons = new HashMap<>();
     }
 
@@ -66,11 +66,6 @@ public final class TopBar extends BaseFragment {
     }
 
     @Override
-    protected Screens[] getParents() {
-        return new Screens[]{Screens.Selector, Screens.Summary, Screens.Loader};
-    }
-
-    @Override
     protected boolean isOverlay() {
         return true;
     }
@@ -79,7 +74,6 @@ public final class TopBar extends BaseFragment {
 
     @Override
     protected void onLoad() {
-        setDismissMode(false, false);
         barHeight = (int) ResUtils.dimen(R.dimen.topBarHeight);
 
         body = find("body");
@@ -111,7 +105,7 @@ public final class TopBar extends BaseFragment {
 
         userBox.loadUserData(false);
 
-        reloadButtons(Game.engine.currentScreen);
+        reloadButtons(Game.engine.getScreen());
     }
 
     @Override
@@ -177,7 +171,7 @@ public final class TopBar extends BaseFragment {
 
     @Override
     public void show() {
-        if (Game.engine.currentScreen == Screens.Loader) {
+        if (Game.engine.getScreen() == Screens.Loader) {
             if (Game.loaderScene.isImmersive()) {
                 return;
             }

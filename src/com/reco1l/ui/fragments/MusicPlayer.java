@@ -94,9 +94,9 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
 
     @Override
     protected void onLoad() {
+        closeOnBackgroundClick(true);
         isListVisible = false;
 
-        setDismissMode(true, true);
         sdf = new SimpleDateFormat("mm:ss");
 
         body = find("body");
@@ -312,7 +312,6 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
     @Override
     public void show() {
         if (!isAdded()) {
-            Game.platform.close(UI.getExtras());
             UI.topBar.musicButton.animateButton(true);
             super.show();
         }

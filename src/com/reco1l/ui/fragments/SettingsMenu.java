@@ -123,7 +123,7 @@ public final class SettingsMenu extends BaseFragment {
 
     @Override
     protected void onLoad() {
-        setDismissMode(true, true);
+        closeOnBackgroundClick(true);
 
         if (fragment == null) {
             fragment = new SettingsFragment();
@@ -214,7 +214,7 @@ public final class SettingsMenu extends BaseFragment {
         OnlineHelper.update();
         OnlineScoring.getInstance().login();
 
-        if (reloadBackground && Game.engine.currentScreen == Screens.Main) {
+        if (reloadBackground && Game.engine.getScreen() == Screens.Main) {
             UI.background.reload();
             reloadBackground = false;
         }

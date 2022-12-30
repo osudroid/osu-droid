@@ -21,7 +21,7 @@ public class LoaderScene extends BaseScene {
 
     private static LoaderScene instance;
 
-    private Fragment fragment;
+    private LoaderFragment fragment;
     private Runnable runOnComplete;
 
     private boolean
@@ -61,7 +61,7 @@ public class LoaderScene extends BaseScene {
 
     @Override
     protected void onCreate() {
-        fragment = new Fragment();
+        fragment = new LoaderFragment();
     }
 
     @Override
@@ -94,7 +94,7 @@ public class LoaderScene extends BaseScene {
 
     //--------------------------------------------------------------------------------------------//
 
-    public static class Fragment extends BaseFragment {
+    public static class LoaderFragment extends BaseFragment {
 
         private final ArrayList<String> log;
 
@@ -115,15 +115,10 @@ public class LoaderScene extends BaseScene {
             return R.layout.loader_layout;
         }
 
-        @Override
-        protected Screens getParent() {
-            return Screens.Loader;
-        }
-
         //----------------------------------------------------------------------------------------//
 
-        public Fragment() {
-            super();
+        public LoaderFragment() {
+            super(Screens.Loader);
             log = ToastLogger.getLog();
         }
 

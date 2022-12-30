@@ -63,7 +63,7 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
     //--------------------------------------------------------------------------------------------//
 
     public BeatmapPanel() {
-        super();
+        super(Screens.Selector);
         pBPM = new BeatmapProperty.BPM();
         pLength = new BeatmapProperty.Length();
 
@@ -92,11 +92,6 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
     }
 
     @Override
-    protected Screens getParent() {
-        return Screens.Selector;
-    }
-
-    @Override
     protected boolean getConditionToShow() {
         return Game.libraryManager.getSizeOfBeatmaps() != 0;
     }
@@ -104,7 +99,7 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
     //--------------------------------------------------------------------------------------------//
     @Override
     protected void onLoad() {
-        setDismissMode(false, false);
+        closeOnBackgroundClick(false);
 
         track = Game.musicManager.getTrack();
         bodyWidth = ResUtils.dimen(R.dimen.beatmapPanelContentWidth);
@@ -118,8 +113,8 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
         body = find("body");
 
         Animation.of(body)
-                .fromX(0)
-                .toX(-bodyWidth)
+                .fromX(-bodyWidth)
+                .toX(0)
                 .fromAlpha(0)
                 .toAlpha(1)
                 .play(300);

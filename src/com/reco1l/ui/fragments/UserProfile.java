@@ -49,7 +49,7 @@ public final class UserProfile extends BaseFragment {
 
     @Override
     protected void onLoad() {
-        setDismissMode(true, true);
+        closeOnBackgroundClick(true);
 
         body = find("body");
         body.postDelayed(closeTask, 8000);
@@ -146,12 +146,6 @@ public final class UserProfile extends BaseFragment {
     }
 
     //--------------------------------------------------------------------------------------------//
-
-    @Override
-    public void show() {
-        Game.platform.close(UI.getExtras());
-        super.show();
-    }
 
     @Override
     public void close() {

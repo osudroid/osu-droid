@@ -16,21 +16,20 @@ import java.util.List;
 // This only have support for Back button.
 public class KeyInputManager {
 
-    private static final List<Dialog> dialogs = Game.platform.dialogs;
-
     //--------------------------------------------------------------------------------------------//
 
     public static void performBack() {
         handle(KeyEvent.KEYCODE_BACK, MotionEvent.ACTION_DOWN);
     }
 
+    //--------------------------------------------------------------------------------------------//
+
     public static boolean handle(final int key, final int action) {
-        if (!Game.engine.isGlobalInitialized) {
+        if (!Game.engine.isGameLoaded()) {
             return false;
         }
 
         Scene currentScene = Game.engine.getScene();
-        Scene lastScene = Game.engine.lastScene;
 
         if (currentScene == Game.loaderScene) {
             return false;
@@ -38,20 +37,15 @@ public class KeyInputManager {
 
         if (key == KeyEvent.KEYCODE_BACK && action == MotionEvent.ACTION_DOWN) {
 
-            for (BaseFragment fragment : UI.getExtras()) {
-                if (fragment.isAdded()) {
-                    fragment.close();
-                    return true;
-                }
+            if (Game.platform.closeExtras()) {
+                return true;
             }
 
-            if (dialogs.size() > 0) {
-                Dialog dialog = dialogs.get(dialogs.size() - 1);
+            for (Dialog dialog : Game.platform.getDialogs()) {
                 if (dialog.builder.closeOnBackPress) {
                     dialog.close();
                     return true;
                 }
-                return true;
             }
 
             IBaseScene currentHandler = Game.engine.getCurrentSceneHandler();
@@ -68,11 +62,9 @@ public class KeyInputManager {
                 return true;
             }
 
-            if (lastScene != null) {
-                Game.engine.setScene(lastScene);
-                return true;
+            if (!Game.engine.backToLastScene()) {
+                Game.engine.setScene(Game.mainScene);
             }
-            Game.engine.setScene(Game.mainScene);
             return true;
         }
         return false;

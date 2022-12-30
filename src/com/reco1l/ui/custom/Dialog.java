@@ -71,7 +71,7 @@ public class Dialog extends BaseFragment {
 
     @Override
     protected void onLoad() {
-        setDismissMode(builder.closeOnBackgroundClick, builder.closeOnBackPress);
+        closeOnBackgroundClick(builder.closeOnBackgroundClick);
 
         int m = (int) ResUtils.dimen(R.dimen.M);
         int xs = (int) ResUtils.dimen(R.dimen.XS);
@@ -96,7 +96,7 @@ public class Dialog extends BaseFragment {
                 .play(500);
 
         Animation.of(bodyParent)
-                .fromY(screenHeight / 0.85f)
+                .fromY(getHeight() / 0.85f)
                 .toY(0)
                 .interpolate(Easing.OutExpo)
                 .play(500);
@@ -184,8 +184,6 @@ public class Dialog extends BaseFragment {
         if (!isAdded())
             return;
 
-        Game.platform.dialogs.remove(this);
-
         Animation.of(rootBackground)
                 .toAlpha(0)
                 .play(500);
@@ -196,7 +194,7 @@ public class Dialog extends BaseFragment {
                 .play(500);
 
         Animation.of(bodyParent)
-                .toY(screenHeight / 0.85f)
+                .toY(getHeight() / 0.85f)
                 .interpolate(Easing.InExpo)
                 .runOnEnd(() -> {
                     super.close();
@@ -230,9 +228,8 @@ public class Dialog extends BaseFragment {
     public void show() {
         if (!isAdded()) {
             if (closeExtras) {
-                Game.platform.close(UI.getExtras());
+                Game.platform.closeExtras();
             }
-            Game.platform.dialogs.add(this);
         }
         super.show();
     }
