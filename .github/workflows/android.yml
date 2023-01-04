@@ -1,4 +1,4 @@
-name: Android CI
+name: Create Debug Release
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
     steps:
     - uses: actions/checkout@v2
 
@@ -21,7 +22,43 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Build apk
+    - name: Create debug build
       uses: gradle/gradle-build-action@v2
       with:
         arguments: build
+
+    - name: Set environment variables
+      run: |
+        echo "APK_PATH=$(find build/outputs/apk/debug/*.apk)" >> $GITHUB_ENV
+        echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+        sha=`sha256sum ${{ env.APK_PATH }} | awk '{ print $1 }'`
+        echo "APK_SHA256=$sha" >> $GITHUB_ENV
+
+    - name: Get apk info
+      id: apk-info
+      uses: hkusu/apk-info-action@v1
+      with:
+        apk-path: ${{ env.APK_PATH }}
+
+    - name: Create info.json
+      run: |
+        version_code="${{ steps.apk-info.outputs.version-code }}"
+        echo "{\"version_code\": $version_code}" > info.json
+
+    - name: Upload binaries to a release
+      uses: softprops/action-gh-release@v1
+      with:
+        body: |
+          Commit message: ${{ github.event.head_commit.message }}
+          APK SHA-256 Checksum: ${{ env.APK_SHA256 }}
+        files: |
+          info.json
+          ${{ env.APK_PATH }}
+        tag_name: "${{ github.run_number }}-${{ github.run_id }}_${{ steps.apk-info.outputs.version-code }}"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: osu-droid
+        path: ${{ env.APK_PATH }}
