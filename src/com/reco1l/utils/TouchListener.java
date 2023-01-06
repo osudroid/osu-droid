@@ -1,7 +1,5 @@
 package com.reco1l.utils;
 
-import android.graphics.drawable.GradientDrawable;
-
 import com.reco1l.Game;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
@@ -10,28 +8,30 @@ import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 
 public class TouchListener {
 
-    private static final String DEFAULT_SOUND = "menuclick";
-
     //--------------------------------------------------------------------------------------------//
 
-    public BassSoundProvider getClickSound() {
-        return Game.resourcesManager.getSound(DEFAULT_SOUND);
-    }
-
-    public GradientDrawable getCustomTouchEffect() {
+    public BassSoundProvider getPressDownSound() {
         return null;
     }
 
-    public boolean hasTouchEffect() {
-        return true;
+    public BassSoundProvider getPressUpSound() {
+        return Game.resourcesManager.getSound("menuclick");
     }
 
-    public boolean isOnlyOnce() {
+    public BassSoundProvider getLongPressSound() {
+        return null;
+    }
+
+    public boolean useOnlyOnce() {
         return false;
     }
 
-    public int getEffectMaxAlpha() {
-        return 80;
+    public boolean useTouchEffect() {
+        return true;
+    }
+
+    public boolean useBorderlessEffect() {
+        return false;
     }
 
     //--------------------------------------------------------------------------------------------//

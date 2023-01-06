@@ -3,17 +3,15 @@ package com.reco1l.utils;
 import static android.view.MotionEvent.*;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.reco1l.Game;
+import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
 
 import org.jetbrains.annotations.NotNull;
@@ -27,28 +25,23 @@ public final class TouchHandler {
     public TouchListener listener;
 
     private BaseFragment linkedFragment;
-    private Animation downAnim, upAnim;
 
     private Handler handler;
     private Runnable longPress;
     private Vibrator vibrator;
 
-    private boolean
-            isLongPressActioned = false,
-            hasCustomEffectDrawable = false;
+    private boolean isLongPressActioned = false;
 
     //--------------------------------------------------------------------------------------------//
 
     public TouchHandler(TouchListener listener) {
         this.listener = listener;
-        this.vibrator = (Vibrator) Game.platform.context.getSystemService(Context.VIBRATOR_SERVICE);
-        this.handler = new Handler();
+        vibrator = (Vibrator) Game.activity.getSystemService(Context.VIBRATOR_SERVICE);
+        handler = new Handler();
 
-        this.hasCustomEffectDrawable = listener.getCustomTouchEffect() != null;
-
-        this.longPress = () -> {
-            this.isLongPressActioned = true;
-            this.listener.onLongPress();
+        longPress = () -> {
+            isLongPressActioned = true;
+            listener.onLongPress();
             if (vibrator != null) {
                 vibrator.vibrate(50);
             }
@@ -56,8 +49,7 @@ public final class TouchHandler {
     }
 
     public TouchHandler(@NotNull Runnable onSingleTapUp) {
-        this.listener = new TouchListener() {
-            @Override
+        listener = new TouchListener() {
             public void onPressUp() {
                 onSingleTapUp.run();
             }
@@ -66,30 +58,35 @@ public final class TouchHandler {
 
     //--------------------------------------------------------------------------------------------//
 
-    private void handleAnimation(MotionEvent event) {
-        if (!listener.hasTouchEffect())
-            return;
+    private void handleEffects(View view, MotionEvent event) {
 
         switch (event.getAction()) {
             case ACTION_DOWN:
-                if (downAnim != null) {
-                    upAnim.cancel();
-                    downAnim.play();
-                }
-                break;
-            case ACTION_CANCEL:
-            case ACTION_UP:
-                if (upAnim != null) {
-                    downAnim.cancel();
-                    upAnim.play();
-                }
-                break;
-        }
-    }
+                view.setPressed(true);
 
-    private void handleSfx() {
-        if (listener.getClickSound() != null) {
-            listener.getClickSound().play();
+                if (listener.getPressDownSound() != null) {
+                    listener.getPressDownSound().play();
+                }
+                break;
+
+            case ACTION_UP:
+                view.setPressed(false);
+
+                if (isLongPressActioned) {
+                    if (listener.getLongPressSound() != null) {
+                        listener.getLongPressSound().play();
+                    }
+                    break;
+                }
+                if (listener.getPressUpSound() != null) {
+                    listener.getPressUpSound().play();
+                }
+                break;
+
+            case ACTION_MOVE:
+            case ACTION_CANCEL:
+                view.setPressed(false);
+                break;
         }
     }
 
@@ -102,40 +99,39 @@ public final class TouchHandler {
     //--------------------------------------------------------------------------------------------//
 
     public void apply(View view) {
-        if (this.listener == null)
+        if (listener == null) {
             return;
+        }
 
-        if (this.listener.hasTouchEffect()) {
-            createTouchEffect(view);
+        if (listener.useTouchEffect()) {
+            handleRippleEffect(view);
         }
 
         view.setOnTouchListener((v, event) -> {
-            final int action = event.getAction();
+            int action = event.getAction();
 
             notifyTouchEvent(event);
-            handleAnimation(event);
+            handleEffects(view, event);
 
             if (action == ACTION_DOWN) {
-                if (this.handler != null) {
-                    this.handler.postDelayed(this.longPress, LONG_PRESS_TIMEOUT);
+                if (handler != null) {
+                    handler.postDelayed(longPress, LONG_PRESS_TIMEOUT);
                 }
-                this.listener.onPressDown();
+                listener.onPressDown();
                 return true;
             }
 
             if (action == ACTION_UP) {
-                if (this.isLongPressActioned) {
-                    this.isLongPressActioned = false;
+                if (isLongPressActioned) {
+                    isLongPressActioned = false;
                     return false;
                 }
                 removeCallbacks();
-                handleSfx();
 
-                if (this.listener.isOnlyOnce()) {
+                if (listener.useOnlyOnce()) {
                     view.setOnTouchListener(null);
                 }
-
-                this.listener.onPressUp();
+                listener.onPressUp();
                 return true;
             }
 
@@ -156,67 +152,23 @@ public final class TouchHandler {
     }
 
     public void linkToFragment(BaseFragment fragment) {
-        this.linkedFragment = fragment;
+        linkedFragment = fragment;
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    private GradientDrawable getEffectDrawable(View view) {
-        if (Build.VERSION.SDK_INT < 24 || view == null)
-            return null;
-
-        GradientDrawable drawable = new GradientDrawable();
-
-        drawable.setColor(Color.WHITE);
-        drawable.setCornerRadii(getViewCornerRadius(view));
-
-        return drawable;
-    }
-
-    private float[] getViewCornerRadius(View view) {
-        if (Build.VERSION.SDK_INT >= 24 && view.getBackground() != null) {
-
-            // We can only get the view's corner radius if the background is a ShapeDrawable or a GradientDrawable.
-            if (view.getBackground() instanceof GradientDrawable || view.getBackground() instanceof ShapeDrawable) {
-
-                GradientDrawable drawable = (GradientDrawable) view.getBackground().mutate();
-                float R = drawable.getCornerRadius();
-
-                // 'android:radius' property will override any corner radius set in the XML.
-                if (R > 0) {
-                    float[] radii = {R, R, R, R, R, R, R, R};
-                    drawable.setCornerRadii(radii);
-                }
-                return drawable.getCornerRadii();
-            }
+    private void handleRippleEffect(View view) {
+        if (view.getForeground() != null) {
+            return;
         }
-        return new float[]{0, 0, 0, 0, 0, 0, 0, 0};
-    }
+        TypedValue outValue = new TypedValue();
 
-    private void createTouchEffect(View view) {
-        GradientDrawable drawable;
-
-        if (hasCustomEffectDrawable) {
-            drawable = listener.getCustomTouchEffect();
-        } else {
-            drawable = getEffectDrawable(view);
+        int id = android.R.attr.selectableItemBackground;
+        if (listener.useBorderlessEffect()) {
+            id = android.R.attr.selectableItemBackgroundBorderless;
         }
 
-        if (drawable != null) {
-            drawable.setAlpha(0);
-
-            Animation.UpdateListener onUpdate = value -> {
-                drawable.setAlpha((int) value);
-                view.setForeground(drawable);
-            };
-
-            downAnim = Animation.ofInt(0, listener.getEffectMaxAlpha())
-                    .runOnUpdate(onUpdate)
-                    .duration(100);
-
-            upAnim = Animation.ofInt(listener.getEffectMaxAlpha(), 0)
-                    .runOnUpdate(onUpdate)
-                    .duration(300);
-        }
+        Game.activity.getTheme().resolveAttribute(id, outValue, true);
+        view.setForeground(Res.drw(outValue.resourceId));
     }
 }
