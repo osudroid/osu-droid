@@ -1,7 +1,7 @@
 package com.reco1l.interfaces;
 
 import com.reco1l.management.BeatmapCollection;
-import com.reco1l.tools.TimingWrapper;
+import com.reco1l.management.TimingWrapper;
 import com.reco1l.management.BitmapManager;
 import com.reco1l.GameEngine;
 import com.reco1l.management.MusicManager;
