@@ -59,7 +59,7 @@ public class SkinManager {
     }
 
     public void presetFrameCount() {
-        stdframeCount.put("sliderb", 10);
+        stdframeCount.put("sliderb", 1);
         stdframeCount.put("followpoint", 1);
         stdframeCount.put("scorebar-colour", 4);
         stdframeCount.put("play-skip", 1);
