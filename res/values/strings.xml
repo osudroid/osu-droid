@@ -5,8 +5,7 @@
 	<string name="game_name">rimu!</string>
 	<string name="team_text">by rimu! team</string>
 
-	<string name="splash_screen_debug_build">This is a <font color='#FFFFFF'>debug</font> build, online features are not available!</string>
-	<string name="splash_screen_pre_release_build">This is a <font color='#FFFFFF'>pre release</font> build, this build contains experimental features.</string>
+	<string name="author_names">Made with love by <font color='#FF98ADDF'>Dekyoura</font>, <font color='#FFE39AB3'>Acivev</font> and <font color='#FF98ADDF'>Reco1l</font></string>
 
 	<string name="top_bar_offline">offline</string> <!--Always lowercase-->
 	<string name="top_bar_back">Back</string>

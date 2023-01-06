@@ -59,7 +59,12 @@
 
         <TextView
             style="@style/text"
+            android:text="@string/author_names"/>
+
+        <TextView
+            style="@style/text"
             android:autoLink="web"
+            android:layout_marginTop="@dimen/S"
             android:text="Visit our website:\nosudroid.moe" />
 
         <TextView
