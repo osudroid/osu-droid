@@ -15,7 +15,7 @@ import com.reco1l.utils.Animation;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.data.Scoreboard;
 import com.reco1l.ui.BaseFragment;
-import com.reco1l.utils.ResUtils;
+import com.reco1l.tables.Res;
 import com.reco1l.interfaces.IGameMods;
 
 import java.util.EnumSet;
@@ -102,7 +102,7 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
         closeOnBackgroundClick(false);
 
         track = Game.musicManager.getTrack();
-        bodyWidth = ResUtils.dimen(R.dimen.beatmapPanelContentWidth);
+        bodyWidth = Res.dimen(R.dimen.beatmapPanelContentWidth);
         isBannerExpanded = true;
 
         if (scoreboard == null) {
@@ -137,12 +137,12 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
 
         message.setVisibility(View.GONE);
 
-        bindTouchListener(globalTab, () -> switchTab(globalTab));
-        bindTouchListener(localTab, () -> switchTab(localTab));
+        bindTouch(globalTab, () -> switchTab(globalTab));
+        bindTouch(localTab, () -> switchTab(localTab));
 
-        int max = ResUtils.dimen(R.dimen._84sdp);
+        int max = Res.dimen(R.dimen._84sdp);
 
-        bindTouchListener(find("expand"), () -> {
+        bindTouch(find("expand"), () -> {
             if (isBannerExpanded) {
                 ValueAnimator anim = ValueAnimator.ofInt(max, 0);
                 anim.setDuration(300);
@@ -423,7 +423,7 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
 
         Animation.of(body)
                 .toX(-bodyWidth)
-                .toTopMargin((int) ResUtils.dimen(R.dimen.topBarHeight))
+                .toTopMargin((int) Res.dimen(R.dimen.topBarHeight))
                 .toAlpha(0)
                 .runOnEnd(super::close)
                 .play(300);

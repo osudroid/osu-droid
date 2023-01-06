@@ -10,15 +10,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder {
 
+    boolean isAttached = false;
+
     protected BaseAdapter<BaseViewHolder<T>, T> adapter;
     protected T item;
 
     protected View root;
     protected Context context;
 
-    boolean isAttached = false;
-
-    private boolean isSelected = false;
+    private boolean wasSelected = false;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -35,7 +35,7 @@ public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder {
     }
 
     protected final void rebind() {
-        onBind(item, getAdapterPosition());
+        onBind(item, getBindingAdapterPosition());
     }
 
     protected abstract void onBind(T item, int position);
@@ -43,7 +43,7 @@ public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder {
     //--------------------------------------------------------------------------------------------//
 
     protected final boolean isSelected() {
-        return item == adapter.getSelectedItem();
+        return adapter.getSelectedPosition() == getBindingAdapterPosition();
     }
 
     protected final boolean isAttached() {
@@ -52,36 +52,29 @@ public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder {
 
     //--------------------------------------------------------------------------------------------//
 
-    final void invalidateSelection() {
-        if (isSelected) {
-            onDeselectVisually();
-        }
-        isSelected = false;
-    }
-
-    protected final void deselect() {
-        if (isSelected) {
-            isSelected = false;
-            onDeselectVisually();
-        }
-    }
-
     protected final boolean select() {
-        if (!isSelected) {
-            isSelected = true;
-            onSelectVisually();
-            adapter.handleSelection(this);
-            return true;
+        return !wasSelected && adapter.select(getBindingAdapterPosition());
+    }
+
+    final void handleSelection() {
+        if (isSelected() && !wasSelected) {
+            wasSelected = true;
+            onSelect();
         }
-        Log.e(getClass().getSimpleName(), "Already selected!");
-        return false;
+    }
+
+    final void handleDeselection() {
+        if (!isSelected() && wasSelected) {
+            wasSelected = false;
+            onDeselect();
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    protected void onSelectVisually() {}
+    protected void onSelect() {}
 
-    protected void onDeselectVisually() {}
+    protected void onDeselect() {}
 
     protected void onAttachmentChange(boolean isAttached) {}
 }

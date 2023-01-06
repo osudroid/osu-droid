@@ -30,7 +30,7 @@ public class ModListAdapter extends BaseAdapter<ModListAdapter.ModViewHolder, Mo
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    protected int getLayout() {
+    protected int getItemLayout() {
         return R.layout.mod_menu_item;
     }
 
@@ -66,7 +66,7 @@ public class ModListAdapter extends BaseAdapter<ModListAdapter.ModViewHolder, Mo
             icon.setImageBitmap(Game.bitmapManager.get(modWrapper.getIcon()));
             name.setText(modWrapper.getName());
 
-            UI.modMenu.bindTouchListener(root, () -> UI.modMenu.onModSelect(modWrapper, false));
+            UI.modMenu.bindTouch(root, () -> UI.modMenu.onModSelect(modWrapper, false));
 
             if (isEnabled()) {
                 body.setCardBackgroundColor(0xFF222F3D);

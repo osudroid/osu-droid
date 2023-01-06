@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -92,6 +93,8 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
+
+import com.reco1l.UI;
 import com.reco1l.scenes.SummaryScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
@@ -758,45 +761,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (Config.isShowFPS()) {
             final Font font = ResourceManager.getInstance().getFont(
                     "smallFont");
-            final ChangeableText fpsText = new ChangeableText(Utils.toRes(790),
-                    Utils.toRes(520), font, "00.00 FPS");
             final ChangeableText urText = new ChangeableText(Utils.toRes(720),
                     Utils.toRes(480), font, "00.00 UR    ");
-            /* final ChangeableText accText = new ChangeableText(Utils.toRes(720),
-                    Utils.toRes(440), font, "Avg offset: 0ms     ");  */
-            fpsText.setPosition(Config.getRES_WIDTH() - fpsText.getWidth() - 5, Config.getRES_HEIGHT() - fpsText.getHeight() - 10);
-            // accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
-            urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, fpsText.getY() - urText.getHeight());
-            fgScene.attachChild(fpsText);
-            // fgScene.attachChild(accText);
             fgScene.attachChild(urText);
-
-            ChangeableText memText = null;
-            if (BuildConfig.DEBUG) {
-                memText = new ChangeableText(Utils.toRes(780),
-                        Utils.toRes(520), font, "0 MB/0 MB    ");
-                fgScene.attachChild(memText);
-            }
-
-            final ChangeableText fmemText = memText;
             fgScene.registerUpdateHandler(new FPSCounter() {
                 @Override
                 public void onUpdate(final float pSecondsElapsed) {
                     super.onUpdate(pSecondsElapsed);
-                    fpsText.setText(Math.round(this.getFPS()) + " FPS");
+                    float ms = pSecondsElapsed * 1000;
+
+                    UI.mainOverlay.updateEngineFPS(getFPS(), ms);
+
                     urText.setText(String.format(Locale.ENGLISH, "%.2f UR    ", stat.getUnstableRate()));
-
-                    fpsText.setPosition(Config.getRES_WIDTH() - fpsText.getWidth() - 5, Config.getRES_HEIGHT() - fpsText.getHeight() - 10);
-                    urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, fpsText.getY() - urText.getHeight());
-
-                    if (fmemText != null) {
-                        Runtime runtime = Runtime.getRuntime();
-                        fmemText.setText(
-                            ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB"
-                            + "/" + (Runtime.getRuntime().totalMemory() / 1024 / 1024) + " MB    ");
-                        fmemText.setPosition(Config.getRES_WIDTH() - fmemText.getWidth() - 5, urText.getY() - fmemText.getHeight());
-                    }
-
+                    urText.setPosition(Config.getRES_WIDTH() - urText.getWidth(), Config.getRES_HEIGHT() - urText.getHeight());
                 }
             });
         }

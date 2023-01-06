@@ -6,14 +6,15 @@ import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.custom.Dialog;
-import com.reco1l.data.tables.DialogTable;
-import com.reco1l.data.tables.NotificationTable;
+import com.reco1l.tables.DialogTable;
+import com.reco1l.tables.NotificationTable;
 import com.reco1l.utils.helpers.BeatmapHelper;
 
 import org.anddev.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import ru.nsu.ccfit.zuev.osu.Updater;
 
 public class MainScene extends BaseScene {
 
@@ -43,14 +44,17 @@ public class MainScene extends BaseScene {
 
         Config.loadOnlineConfig(Game.activity);
         Game.onlineManager.Init(Game.activity);
-        Game.onlineScoring.login();
-
-        setTouchAreaBindingEnabled(true);
     }
 
     @Override
     protected void onSceneUpdate(float secondsElapsed) {
 
+    }
+
+    @Override
+    protected void onFirstShow() {
+        Game.onlineScoring.login();
+        Updater.getInstance().checkForUpdates();
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -93,6 +97,7 @@ public class MainScene extends BaseScene {
 
     @Override
     public void onSceneChange(Scene oldScene, Scene newScene) {
+        super.onSceneChange(oldScene, newScene);
         if (newScene == this) {
             UI.background.setBlur(false);
         }

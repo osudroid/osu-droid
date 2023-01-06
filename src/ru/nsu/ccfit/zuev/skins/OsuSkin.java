@@ -15,27 +15,27 @@ public class OsuSkin {
     private static final OsuSkin skinJson = new OsuSkin();
 
     protected final FloatSkinData comboTextScale = new FloatSkinData("comboTextScale", 1f);
-    protected final FloatSkinData sliderHintWidth = new FloatSkinData("sliderHintWidth", 3f);
+    protected final FloatSkinData sliderHintWidth = new FloatSkinData("sliderHintWidth", 16f);
     protected final FloatSkinData sliderBodyWidth = new FloatSkinData("sliderBodyWidth", 61f);
-    protected final FloatSkinData sliderBorderWidth = new FloatSkinData("sliderBorderWidth", 5.2f);
+    protected final FloatSkinData sliderBorderWidth = new FloatSkinData("sliderBorderWidth", 6f);
     protected final FloatSkinData sliderBodyBaseAlpha = new FloatSkinData("sliderBodyBaseAlpha", 0.7f);
-    protected final FloatSkinData sliderHintAlpha = new FloatSkinData("sliderHintAlpha");
-    protected final FloatSkinData sliderHintShowMinLength = new FloatSkinData("sliderHintShowMinLength", 300f);
+    protected final FloatSkinData sliderHintAlpha = new FloatSkinData("sliderHintAlpha", 1f);
+    protected final FloatSkinData sliderHintShowMinLength = new FloatSkinData("sliderHintShowMinLength", 100f);
 
     protected final BooleanSkinData limitComboTextLength = new BooleanSkinData("limitComboTextLength");
-    protected final BooleanSkinData disableKiai = new BooleanSkinData("disableKiai");
-    protected final BooleanSkinData sliderHintEnable = new BooleanSkinData("sliderHintEnable");
-    protected final BooleanSkinData sliderFollowComboColor = new BooleanSkinData("sliderFollowComboColor", true);
+    protected final BooleanSkinData disableKiai = new BooleanSkinData("disableKiai", true);
+    protected final BooleanSkinData sliderHintEnable = new BooleanSkinData("sliderHintEnable", true);
+    protected final BooleanSkinData sliderFollowComboColor = new BooleanSkinData("sliderFollowComboColor", false);
     protected final BooleanSkinData useNewLayout = new BooleanSkinData("useNewLayout");
-    protected final BooleanSkinData forceOverrideComboColor = new BooleanSkinData("forceOverride");
+    protected final BooleanSkinData forceOverrideComboColor = new BooleanSkinData("forceOverride", true);
     protected final BooleanSkinData rotateCursor = new BooleanSkinData("rotateCursor", true);
 
-    protected final String DEFAULT_COLOR_HEX = "#FFFFFF";
+    protected final String DEFAULT_COLOR_HEX = "#3d3d57ff";
     protected final ArrayList<RGBColor> comboColor = new ArrayList<>();
 
-    protected final ColorSkinData sliderBorderColor = new ColorSkinData("sliderBorderColor", DEFAULT_COLOR_HEX);
-    protected final ColorSkinData sliderBodyColor = new ColorSkinData("sliderBodyColor", DEFAULT_COLOR_HEX);
-    protected final ColorSkinData sliderHintColor = new ColorSkinData("sliderHintColor", DEFAULT_COLOR_HEX);
+    protected final ColorSkinData sliderBorderColor = new ColorSkinData("sliderBorderColor", "#333333");
+    protected final ColorSkinData sliderBodyColor = new ColorSkinData("sliderBodyColor", "#3d3d57ff");
+    protected final ColorSkinData sliderHintColor = new ColorSkinData("sliderHintColor", "#1A1924");
 
     protected final SkinSliderType skinSliderType = SkinSliderType.FLAT;
 

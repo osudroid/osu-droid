@@ -3,9 +3,9 @@ package com.reco1l;
 import com.reco1l.ui.fragments.Background;
 import com.reco1l.ui.fragments.BeatmapCarrousel;
 import com.reco1l.ui.fragments.BeatmapPanel;
-import com.reco1l.ui.fragments.DebugOverlay;
+import com.reco1l.ui.fragments.MainOverlay;
 import com.reco1l.ui.fragments.NotificationCenter;
-import com.reco1l.ui.fragments.FilterMenu;
+import com.reco1l.ui.fragments.FilterBar;
 import com.reco1l.ui.fragments.GameSummary;
 import com.reco1l.ui.fragments.MainMenu;
 import com.reco1l.ui.fragments.MusicPlayer;
@@ -13,7 +13,6 @@ import com.reco1l.ui.fragments.SettingsMenu;
 import com.reco1l.ui.fragments.ModMenu;
 import com.reco1l.ui.fragments.TopBar;
 import com.reco1l.ui.fragments.UserProfile;
-import com.reco1l.ui.BaseFragment;
 
 // Created by Reco1l on 29/6/22 22:38
 
@@ -27,11 +26,11 @@ public final class UI {
     public static SettingsMenu settingsPanel = getSettingsMenu();
     public static BeatmapPanel beatmapPanel = getBeatmapPanel();
     public static BeatmapCarrousel beatmapCarrousel = getBeatmapList();
-    public static DebugOverlay debugOverlay = getDebugOverlay();
+    public static MainOverlay mainOverlay = getDebugOverlay();
     public static Background background = getBackground();
     public static GameSummary gameSummary = getGameSummary();
     public static ModMenu modMenu = getModMenu();
-    public static FilterMenu filterMenu = getFilterMenu();
+    public static FilterBar filterBar = getFilterBar();
 
     //--------------------------------------------------------------------------------------------//
 
@@ -91,11 +90,11 @@ public final class UI {
         return BeatmapCarrousel.instance;
     }
 
-    private static DebugOverlay getDebugOverlay() {
-        if (DebugOverlay.instance == null) {
-            DebugOverlay.instance = new DebugOverlay();
+    private static MainOverlay getDebugOverlay() {
+        if (MainOverlay.instance == null) {
+            MainOverlay.instance = new MainOverlay();
         }
-        return DebugOverlay.instance;
+        return MainOverlay.instance;
     }
 
     private static Background getBackground() {
@@ -119,10 +118,10 @@ public final class UI {
         return ModMenu.instance;
     }
 
-    private static FilterMenu getFilterMenu() {
-        if (FilterMenu.instance == null) {
-            FilterMenu.instance = new FilterMenu();
+    private static FilterBar getFilterBar() {
+        if (FilterBar.instance == null) {
+            FilterBar.instance = new FilterBar();
         }
-        return FilterMenu.instance;
+        return FilterBar.instance;
     }
 }

@@ -1,10 +1,8 @@
-package com.reco1l.utils;
+package com.reco1l.tables;
 
 // Created by Reco1l on 2/7/22 06:18
 
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 
 import androidx.annotation.ColorRes;
@@ -14,14 +12,14 @@ import androidx.annotation.StringRes;
 
 import com.reco1l.Game;
 
-public final class ResUtils {
+public final class Res {
 
     private static final Resources R = Game.activity.getResources();
     private static final Resources.Theme theme = Game.activity.getTheme();
 
     //--------------------------------------------------------------------------------------------//
 
-    public ResUtils() throws Exception {
+    public Res() throws Exception {
         throw new Exception("You can't create a new instance of this class!");
     }
 

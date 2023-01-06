@@ -11,8 +11,17 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.edlplan.framework.math.FMath;
+import com.reco1l.Game;
+import com.reco1l.tables.Res;
+
+import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class CarrouselRecyclerView extends RecyclerView {
+
+    private View window;
+
+    private int yOffset = 0;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -55,11 +64,31 @@ public class CarrouselRecyclerView extends RecyclerView {
     }
 
     public float computeTranslationX(View view) {
-        int oy = (int) ((getHeight() - view.getHeight()) * 1f / 2);
+        int[] location = new int[2];
+        view.getLocationInWindow(location);
 
-        float fx = 1 - Math.abs(view.getY() - oy) / Math.abs(oy + view.getHeight() / 0.025f);
-        float val = view.getWidth() - view.getWidth() * FMath.clamp(fx, 0f, 1f);
+        location[1] += yOffset;
+
+        int oy = (int) ((getWindowHeight() - view.getHeight()) * 1f / 2);
+
+        float dx = 1 - Math.abs(location[1] - oy) / Math.abs(oy + view.getHeight() / 0.025f);
+        float val = view.getWidth() - view.getWidth() * FMath.clamp(dx, 0f, 1f);
 
         return FMath.clamp(val, 0, view.getWidth());
+    }
+
+    private int getWindowHeight() {
+        if (window != null) {
+            return window.getHeight();
+        }
+        return getHeight();
+    }
+
+    public void setParentWindow(View window) {
+        this.window = window;
+    }
+
+    public void setYOffset(int yOffset) {
+        this.yOffset = yOffset;
     }
 }

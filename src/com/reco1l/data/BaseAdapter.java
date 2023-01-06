@@ -7,27 +7,24 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
+// TODO [BaseAdapter] make compatible with multiple selection
 public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapter<VH> {
 
     public ArrayList<T> items;
 
-    protected final ArrayList<VH> holders;
-    protected RecyclerView recyclerView;
+    private SelectionListener listener;
 
-    private ItemComparator<T> comparator;
-    private T selectedItem;
+    int selectedPosition = -1;
 
     //--------------------------------------------------------------------------------------------//
 
     public BaseAdapter(ArrayList<T> items) {
         this.items = items;
-        holders = new ArrayList<>();
         setHasStableIds(true);
     }
 
@@ -54,11 +51,11 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
 
     //--------------------------------------------------------------------------------------------//
 
-    protected abstract int getLayout();
+    protected int getItemLayout() {
+        return 0;
+    }
 
     protected abstract VH getViewHolder(View root);
-
-    protected void onItemSelect(VH holder, T item) {}
 
     //--------------------------------------------------------------------------------------------//
 
@@ -67,66 +64,42 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
         notifyDataSetChanged();
     }
 
-    public final void setItemComparator(ItemComparator<T> comparator) {
-        this.comparator = comparator;
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
     public final void select(T item) {
-        selectedItem = item;
+        int index = items.indexOf(item);
 
-        for (VH holder : holders) {
-            if (compareItems(holder.item, item)) {
-                holder.select();
-            }
+        if (index >= 0) {
+            select(index);
         }
     }
 
-    protected final void handleSelection(VH holder) {
-        for (VH vh : holders) {
-            if (vh != holder) {
-                vh.deselect();
-            }
-        }
-
-        onItemSelect(holder, holder.item);
-    }
-
-    private boolean compareItems(T i1, T i2) {
-        if (i1 == null || i2 == null) {
+    public final boolean select(int position) {
+        if (position < 0 || position == selectedPosition) {
             return false;
         }
-        if (comparator != null) {
-            return comparator.compare(i1, i2);
+
+        notifyItemChanged(selectedPosition);
+        selectedPosition = position;
+        notifyItemChanged(selectedPosition);
+
+        if (listener != null) {
+            listener.onPositionChange(selectedPosition);
         }
-        return i1 == i2;
+        return true;
+    }
+
+    public void setSelectionListener(SelectionListener listener) {
+        this.listener = listener;
+    }
+
+    public int getSelectedPosition() {
+        return selectedPosition;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @FunctionalInterface
-    public interface ItemComparator<T> {
-        boolean compare(T i1, T i2);
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public T getSelectedItem() {
-        return selectedItem;
-    }
-
-    public VH getSelectedHolder() {
-        return getHolderOf(selectedItem);
-    }
-
-    public VH getHolderOf(T item) {
-        for (VH holder : holders) {
-            if (compareItems(holder.item, item)) {
-                return holder;
-            }
-        }
-        return null;
+    public interface SelectionListener {
+        void onPositionChange(int position);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -137,13 +110,14 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Context context = parent.getContext();
 
-        View root = LayoutInflater.from(context).inflate(getLayout(), parent, false);
+        View root = null;
+        if (getItemLayout() != 0) {
+            root = LayoutInflater.from(context).inflate(getItemLayout(), parent, false);
+        }
 
         VH holder = getViewHolder(root);
         holder.context = context;
         holder.adapter = (BaseAdapter<BaseViewHolder<T>, T>) this;
-
-        holders.add(holder);
         return holder;
     }
 
@@ -152,12 +126,11 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
         T item = items.get(i);
 
         holder.bind(item, i);
-        holder.invalidateSelection();
 
-        if (compareItems(item, selectedItem)) {
-            holder.select();
+        if (selectedPosition == i) {
+            holder.handleSelection();
         } else {
-            holder.deselect();
+            holder.handleDeselection();
         }
     }
 
@@ -173,16 +146,5 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
     public void onViewDetachedFromWindow(@NonNull VH holder) {
         holder.isAttached = false;
         holder.onAttachmentChange(false);
-    }
-
-    @Override
-    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
-        this.recyclerView = recyclerView;
-        select(selectedItem);
-    }
-
-    @Override
-    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
-        this.recyclerView = null;
     }
 }

@@ -28,11 +28,11 @@ import com.reco1l.interfaces.MusicObserver;
 import com.reco1l.ui.fragments.MusicPlayer.PlaylistAdapter.ViewHolder;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.execution.ScheduledTask;
-import com.reco1l.utils.ViewUtils;
+import com.reco1l.utils.Views;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.execution.AsyncTask;
-import com.reco1l.utils.ResUtils;
+import com.reco1l.tables.Res;
 import com.reco1l.utils.helpers.BitmapHelper;
 import com.reco1l.utils.TouchListener;
 
@@ -112,8 +112,8 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
         play = find("play");
 
         Animation.of(body)
-                .fromHeight(ResUtils.dimen(R.dimen._30sdp))
-                .toHeight(ResUtils.dimen(R.dimen.musicPlayerHeight))
+                .fromHeight(Res.dimen(R.dimen._30sdp))
+                .toHeight(Res.dimen(R.dimen.musicPlayerHeight))
                 .fromY(-30)
                 .toY(0)
                 .fromAlpha(0)
@@ -125,8 +125,8 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
                 .toAlpha(1)
                 .play(200);
 
-        bindTouchListener(play, new TouchListener() {
-            public boolean hasTouchEffect() {
+        bindTouch(play, new TouchListener() {
+            public boolean useTouchEffect() {
                 return false;
             }
 
@@ -139,9 +139,9 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
             }
         });
 
-        bindTouchListener(find("list"), this::switchListVisibility);
-        bindTouchListener(find("prev"), Game.musicManager::previous);
-        bindTouchListener(find("next"), Game.musicManager::next);
+        bindTouch(find("list"), this::switchListVisibility);
+        bindTouch(find("prev"), Game.musicManager::previous);
+        bindTouch(find("next"), Game.musicManager::next);
 
         seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
@@ -164,7 +164,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
             }
         });
 
-        ViewUtils.width(find("listBody"), 0);
+        Views.width(find("listBody"), 0);
 
         BeatmapInfo beatmap = Game.libraryManager.getBeatmap();
 
@@ -196,7 +196,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
             Animation.of(play)
                     .fromRotation(180)
                     .toRotation(0)
-                    .runOnEnd(() -> play.setImageDrawable(ResUtils.drw(R.drawable.v_pause_xl)))
+                    .runOnEnd(() -> play.setImageDrawable(Res.drw(R.drawable.v_pause_xl)))
                     .play(160);
 
         } else if (!Game.musicManager.isPlaying() && wasPlaying) {
@@ -205,7 +205,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
             Animation.of(play)
                     .fromRotation(180)
                     .toRotation(0)
-                    .runOnEnd(() -> play.setImageDrawable(ResUtils.drw(R.drawable.v_play_xl_circle)))
+                    .runOnEnd(() -> play.setImageDrawable(Res.drw(R.drawable.v_play_xl_circle)))
                     .play(160);
         }
     }
@@ -216,7 +216,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
         if (!isListVisible) {
             isListVisible = true;
             Animation.of(find("listBody"))
-                    .toWidth(ResUtils.dimen(R.dimen.musicPlayerListWidth))
+                    .toWidth(Res.dimen(R.dimen.musicPlayerListWidth))
                     .play(300);
         } else {
             isListVisible = false;
@@ -331,8 +331,8 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
                     .play(100);
 
             Animation.of(body)
-                    .fromHeight(ResUtils.dimen(R.dimen.musicPlayerHeight))
-                    .toHeight(ResUtils.dimen(R.dimen._30sdp))
+                    .fromHeight(Res.dimen(R.dimen.musicPlayerHeight))
+                    .toHeight(Res.dimen(R.dimen._30sdp))
                     .runOnEnd(super::close)
                     .toY(-30)
                     .toAlpha(0)
@@ -364,16 +364,16 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
 
             view.setLayoutParams(new LayoutParams(MATCH_PARENT, WRAP_CONTENT));
 
-            Drawable drawable = ResUtils.drw(R.drawable.shape_rounded).mutate();
-            drawable.setTint(ResUtils.color(R.color.accent));
+            Drawable drawable = Res.drw(R.drawable.shape_rounded).mutate();
+            drawable.setTint(Res.color(R.color.accent));
             drawable.setAlpha(0);
 
             view.setBackground(drawable);
             view.setEllipsize(TextUtils.TruncateAt.END);
             view.setSingleLine(true);
 
-            int m = ResUtils.dimen(R.dimen.M);
-            int s = ResUtils.dimen(R.dimen.S);
+            int m = Res.dimen(R.dimen.M);
+            int s = Res.dimen(R.dimen.S);
             view.setPadding(m, s, m, s);
 
             return new ViewHolder(view, this);
@@ -425,7 +425,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
 
                 text.setText(BeatmapHelper.getArtist(beatmap) + " - " + BeatmapHelper.getTitle(beatmap));
 
-                UI.musicPlayer.bindTouchListener(text, () -> {
+                UI.musicPlayer.bindTouch(text, () -> {
                     if (Game.libraryManager.getBeatmap() != beatmap) {
                         Game.musicManager.change(beatmap.getTrack(0));
                         onSelect();
@@ -453,7 +453,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
                         })
                         .play(200);
 
-                Animation.ofColor(Color.WHITE, ResUtils.color(R.color.accent))
+                Animation.ofColor(Color.WHITE, Res.color(R.color.accent))
                         .runOnUpdate(value -> text.setTextColor((int) value))
                         .play(200);
             }
@@ -473,7 +473,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
                         })
                         .play(200);
 
-                Animation.ofColor(ResUtils.color(R.color.accent), Color.WHITE)
+                Animation.ofColor(Res.color(R.color.accent), Color.WHITE)
                         .runOnUpdate(value -> text.setTextColor((int) value))
                         .play(200);
             }

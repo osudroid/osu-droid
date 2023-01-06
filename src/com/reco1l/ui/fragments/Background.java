@@ -15,7 +15,7 @@ import androidx.palette.graphics.Palette;
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.BaseFragment;
-import com.reco1l.data.tables.AnimationTable;
+import com.reco1l.tables.AnimationTable;
 import com.reco1l.utils.execution.AsyncTask;
 import com.reco1l.utils.BlurRender;
 import com.reco1l.utils.helpers.BitmapHelper;

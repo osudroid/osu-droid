@@ -15,9 +15,9 @@ import com.reco1l.enums.Screens;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.execution.AsyncTask;
-import com.reco1l.utils.ResUtils;
+import com.reco1l.tables.Res;
 import com.reco1l.UI;
-import com.reco1l.utils.ViewUtils;
+import com.reco1l.utils.Views;
 import com.reco1l.utils.TouchListener;
 import com.reco1l.view.effects.ExpandEffect;
 import com.reco1l.view.LogoView;
@@ -83,12 +83,12 @@ public final class MainMenu extends BaseFragment {
         single.setAlpha(0);
         multi.setAlpha(0);
 
-        ViewUtils.size(logo, ResUtils.dimen(R.dimen.mainMenuLogoSize));
-        ViewUtils.width(buttons, 0);
+        Views.size(logo, Res.dimen(R.dimen.mainMenuLogoSize));
+        Views.width(buttons, 0);
 
-        bindTouchListener(logo, new TouchListener() {
+        bindTouch(logo, new TouchListener() {
 
-            public BassSoundProvider getClickSound() {
+            public BassSoundProvider getPressUpSound() {
                 return Game.resourcesManager.getSound("menuhit");
             }
 
@@ -101,12 +101,10 @@ public final class MainMenu extends BaseFragment {
             }
         });
 
-        int[] gradient = {Color.WHITE, Color.TRANSPARENT};
+        bindTouch(single, new TouchListener() {
 
-        bindTouchListener(single, new TouchListener() {
-
-            public GradientDrawable getCustomTouchEffect() {
-                return new GradientDrawable(LEFT_RIGHT, gradient);
+            public boolean useBorderlessEffect() {
+                return true;
             }
 
             public void onPressUp() {
@@ -114,10 +112,10 @@ public final class MainMenu extends BaseFragment {
             }
         });
 
-        bindTouchListener(multi, new TouchListener() {
+        bindTouch(multi, new TouchListener() {
 
-            public GradientDrawable getCustomTouchEffect() {
-                return new GradientDrawable(RIGHT_LEFT, gradient);
+            public boolean useBorderlessEffect() {
+                return true;
             }
 
             public void onPressUp() {
@@ -136,12 +134,12 @@ public final class MainMenu extends BaseFragment {
             UI.topBar.show();
 
             Animation.of(logo)
-                    .toSize(ResUtils.dimen(R.dimen.mainMenuSmallLogoSize))
+                    .toSize(Res.dimen(R.dimen.mainMenuSmallLogoSize))
                     .interpolate(Easing.InOutQuad)
                     .play(300);
 
             Animation.of(buttons)
-                    .toWidth(ResUtils.dimen(R.dimen.mainMenuButtonLayoutWidth))
+                    .toWidth(Res.dimen(R.dimen.mainMenuButtonLayoutWidth))
                     .interpolate(Easing.InOutQuad)
                     .play(300);
 
@@ -163,7 +161,7 @@ public final class MainMenu extends BaseFragment {
             }
 
             Animation.of(logo)
-                    .toSize(ResUtils.dimen(R.dimen.mainMenuLogoSize))
+                    .toSize(Res.dimen(R.dimen.mainMenuLogoSize))
                     .interpolate(Easing.InOutQuad)
                     .play(300);
 
@@ -208,7 +206,7 @@ public final class MainMenu extends BaseFragment {
                         }
                     }.execute();
                 })
-                .toX(ResUtils.dimen(R.dimen._80sdp))
+                .toX(Res.dimen(R.dimen._80sdp))
                 .toAlpha(0)
                 .play(400);
     }
@@ -223,7 +221,7 @@ public final class MainMenu extends BaseFragment {
             Animation.of(logo)
                     .runOnStart(() -> {
                         Game.platform.closeAllExcept(this);
-                        unbindTouchListeners();
+                        unbindTouchHandlers();
                         hideMenu(false);
                     })
                     .toScale(1)

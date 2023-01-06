@@ -2,6 +2,7 @@ package com.reco1l.view;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -17,7 +18,9 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.ViewUtils;
+import com.reco1l.utils.Views;
+
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class IconButton extends RelativeLayout implements BaseView {
 
@@ -33,6 +36,13 @@ public class IconButton extends RelativeLayout implements BaseView {
 
     //--------------------------------------------------------------------------------------------//
 
+    public enum IndicatorAnchor {
+        BOTTOM,
+        TOP
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
     public IconButton(Context context) {
         this(context, null);
     }
@@ -42,11 +52,21 @@ public class IconButton extends RelativeLayout implements BaseView {
         onCreate(attrs);
     }
 
+    public IconButton(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        onCreate(attrs);
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     @Override
     public View getView() {
         return this;
+    }
+
+    @Override
+    public int[] getStyleable() {
+        return R.styleable.IconButton;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -69,12 +89,11 @@ public class IconButton extends RelativeLayout implements BaseView {
         widget.setId(0x12);
         addView(widget);
 
-        ViewUtils.rule(widget)
+        Views.rule(widget)
                 .add(RIGHT_OF)
                 .apply(icon.getId());
 
-        ViewUtils.rule(indicator)
-                .add(ALIGN_BOTTOM, icon.getId())
+        Views.rule(indicator)
                 .add(ALIGN_END, widget.getId())
                 .apply();
 
@@ -83,8 +102,30 @@ public class IconButton extends RelativeLayout implements BaseView {
         int w = sdp(62);
         int h = sdp(40);
 
-        ViewUtils.size(icon, w, h);
-        ViewUtils.height(widget, h);
+        Views.size(icon, w, h);
+        Views.height(widget, h);
+
+        handleAttributes(attrs);
+    }
+
+    @Override
+    public void onManageAttributes(TypedArray a) {
+        Drawable drw = a.getDrawable(R.styleable.IconButton_iconSrc);
+        icon.setImageDrawable(drw);
+
+        int index = a.getInt(R.styleable.IconButton_indicatorPosition, 0);
+        IndicatorAnchor anchor = IndicatorAnchor.values()[index];
+
+        Views.RuleUtils rule = Views.rule(indicator);
+        if (anchor == IndicatorAnchor.TOP) {
+            rule.add(ALIGN_TOP);
+        } else {
+            rule.add(ALIGN_BOTTOM);
+        }
+        rule.apply(icon.getId());
+
+        boolean bool = a.getBoolean(R.styleable.IconButton_activated, false);
+        setActivated(bool);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -94,6 +135,11 @@ public class IconButton extends RelativeLayout implements BaseView {
             return;
         }
 
+        if (isInEditMode()) {
+            indicator.setAlpha(bool ? 1 : 0);
+            isActivated = bool;
+            return;
+        }
         Animation.of(indicator)
                 .toAlpha(bool ? 1 : 0)
                 .runOnEnd(() -> isActivated = bool)

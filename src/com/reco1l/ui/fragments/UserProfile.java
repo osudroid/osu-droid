@@ -6,19 +6,18 @@ import android.widget.TextView;
 import androidx.cardview.widget.CardView;
 
 import com.edlplan.framework.easing.Easing;
-import com.edlplan.ui.fragment.WebViewFragment;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.Game;
-import com.reco1l.UI;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.ResUtils;
+import com.reco1l.tables.Res;
 import com.reco1l.utils.helpers.OnlineHelper;
 
 import java.text.DecimalFormat;
 
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -26,12 +25,15 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public final class UserProfile extends BaseFragment {
 
+    public static final String PROFILE_URL = "https://" + OnlineManager.hostname + "/game/profile.php?uid=";
+
     public static UserProfile instance;
     public static String message;
 
     private View body;
     private TextView errorText;
     private final Runnable closeTask = this::close;
+
 
     //--------------------------------------------------------------------------------------------//
 
@@ -55,8 +57,8 @@ public final class UserProfile extends BaseFragment {
         body.postDelayed(closeTask, 8000);
 
         Animation.of(body)
-                .fromHeight(ResUtils.sdp(30))
-                .toHeight(ResUtils.dimen(Game.onlineManager.isStayOnline() ?
+                .fromHeight(Res.sdp(30))
+                .toHeight(Res.dimen(Game.onlineManager.isStayOnline() ?
                         R.dimen.userPanelHeight : R.dimen.userPanelSmallHeight))
                 .interpolate(Easing.OutExpo)
                 .fromY(-30)
@@ -108,8 +110,8 @@ public final class UserProfile extends BaseFragment {
         infoContainer.setVisibility(View.VISIBLE);
         message.setVisibility(View.GONE);
 
-        bindTouchListener(goProfile, () -> {
-            new WebViewFragment().setURL(WebViewFragment.PROFILE_URL + Game.onlineManager.getUserId()).show();
+        bindTouch(goProfile, () -> {
+            new WebViewPanel().show(PROFILE_URL + Game.onlineManager.getUserId());
             close();
         });
 
@@ -137,9 +139,9 @@ public final class UserProfile extends BaseFragment {
     //--------------------------------------------------------------------------------------------//
 
     public void updateMessage(String text) {
-        message = text != null ? text : ResUtils.str(R.string.user_profile_offline_message);
+        message = text != null ? text : Res.str(R.string.user_profile_offline_message);
         if (BuildConfig.DEBUG)
-            message = text != null ? text : ResUtils.str(R.string.user_profile_debug_message);
+            message = text != null ? text : Res.str(R.string.user_profile_debug_message);
         if (!isAdded())
             return;
         Game.activity.runOnUiThread(() -> errorText.setText(message));
@@ -163,7 +165,7 @@ public final class UserProfile extends BaseFragment {
                 .play(100);
 
         Animation.of(body)
-                .toHeight(ResUtils.sdp(30))
+                .toHeight(Res.sdp(30))
                 .toY(-30)
                 .toAlpha(0)
                 .interpolate(Easing.OutExpo)

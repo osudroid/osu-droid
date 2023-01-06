@@ -1,13 +1,12 @@
-package com.reco1l.data.tables;
+package com.reco1l.tables;
 
 import android.content.Intent;
 import android.widget.TextView;
 
 import com.reco1l.Game;
+import com.reco1l.ui.SimpleFragment;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
-import com.reco1l.ui.custom.DialogFragment;
-import com.reco1l.utils.ResUtils;
 
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
@@ -22,17 +21,24 @@ public class DialogTable {
     public static DialogBuilder author() {
         DialogBuilder builder = new DialogBuilder();
 
-        DialogFragment fragment = new DialogFragment(R.layout.dialog_author_layout, root -> {
-            TextView versionTv = root.findViewById(R.id.d_author_version);
-            versionTv.setText(String.format("%s", BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")"));
-        });
-
         builder.title = "Information";
-        builder.customFragment = fragment;
+        builder.customFragment = new AuthorFragment();
         builder.setCloseMode(true);
         builder.addButton("Close", Dialog::close);
 
         return builder;
+    }
+
+    public static class AuthorFragment extends SimpleFragment {
+
+        public AuthorFragment() {
+            super(R.layout.dialog_author_layout);
+        }
+
+        protected void onLoad() {
+            TextView versionTv = find(R.id.d_author_version);
+            versionTv.setText(String.format("%s", BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")"));
+        }
     }
 
     // Builder for restart dialog
@@ -76,7 +82,7 @@ public class DialogTable {
         DialogBuilder builder = new DialogBuilder();
 
         builder.title = "Warning";
-        builder.message = ResUtils.str(R.string.message_autoclicker_detected);
+        builder.message = Res.str(R.string.message_autoclicker_detected);
         builder.setCloseMode(false);
         builder.addButton("Exit", dialog -> {
             dialog.close();

@@ -70,7 +70,7 @@ public class NotificationPlayer {
         filter.addAction(ACTION_NEXT);
         filter.addAction(ACTION_CLOSE);
 
-        defaultIcon = BitmapFactory.decodeResource(activity.getResources(), R.drawable.osut);
+        defaultIcon = Game.bitmapManager.get("menu-background");
 
         prev = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_PREV), 0);
         next = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_NEXT), 0);
@@ -200,7 +200,7 @@ public class NotificationPlayer {
                 PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class), 0);
 
         builder = new NotificationCompat.Builder(context, channelId)
-                .setSmallIcon(R.drawable.notify_inso)
+                .setSmallIcon(R.drawable.v_app_icon)
                 .setLargeIcon(defaultIcon)
                 .setContentTitle("title")
                 .setContentText("artist")

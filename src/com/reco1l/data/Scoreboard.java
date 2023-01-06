@@ -11,7 +11,7 @@ import com.reco1l.Game;
 import com.reco1l.data.adapters.ScoreboardAdapter;
 import com.reco1l.utils.helpers.ScoringHelper;
 import com.reco1l.utils.execution.AsyncTask;
-import com.reco1l.utils.ResUtils;
+import com.reco1l.tables.Res;
 
 import java.io.File;
 import java.text.NumberFormat;
@@ -107,7 +107,7 @@ public class Scoreboard {
 
         if (cursor.getCount() == 0) {
             cursor.close();
-            errorMessage = ResUtils.str(R.string.beatmap_panel_empty_prompt);
+            errorMessage = Res.str(R.string.beatmap_panel_empty_prompt);
             return false;
         }
         cursor.moveToFirst();
@@ -155,7 +155,7 @@ public class Scoreboard {
     //----------------------------------------------------------------------------------------//
     private boolean loadOnlineBoard(TrackInfo track) {
         if (track == null || !Game.onlineManager.isStayOnline() || BuildConfig.DEBUG) {
-            errorMessage = ResUtils.str(R.string.beatmap_panel_offline_prompt);
+            errorMessage = Res.str(R.string.beatmap_panel_offline_prompt);
             return false;
         }
 
@@ -164,12 +164,12 @@ public class Scoreboard {
         try {
             scores = Game.onlineManager.getTop(file, FileUtils.getMD5Checksum(file));
         } catch (OnlineManager.OnlineManagerException exception) {
-            errorMessage = ResUtils.str(R.string.beatmap_panel_error_prompt) + "\n(" + exception.getMessage() + ")";
+            errorMessage = Res.str(R.string.beatmap_panel_error_prompt) + "\n(" + exception.getMessage() + ")";
             return false;
         }
 
         if (scores.size() == 0) {
-            errorMessage = ResUtils.str(R.string.beatmap_panel_empty_prompt);
+            errorMessage = Res.str(R.string.beatmap_panel_empty_prompt);
             return false;
         }
 

@@ -1,5 +1,7 @@
 package com.reco1l.ui.custom;
 
+import com.reco1l.ui.SimpleFragment;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +12,7 @@ public class DialogBuilder {
     public List<Dialog.Button> buttons;
 
     public String title, message;
-    public DialogFragment customFragment;
+    public SimpleFragment customFragment;
 
     public Runnable onClose;
     public boolean

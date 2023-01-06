@@ -30,7 +30,6 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class ModMenu implements IModSwitcher {
     private static final ModMenu instance = new ModMenu();
     private Scene scene = null;
-    private SongMenu menu;
     private EnumSet<GameMod> mod;
     private ChangeableText multiplierText;
     private TrackInfo selectedTrack;
@@ -58,35 +57,11 @@ public class ModMenu implements IModSwitcher {
         return instance;
     }
 
-    public void setSongMenu(final SongMenu menu) {
-        this.menu = menu;
-    }
-
-    public void reload() {
-        init();
-    }
-
-    public void show(SongMenu songMenu, TrackInfo selectedTrack) {
-        setSongMenu(songMenu);
-        setSelectedTrack(selectedTrack);
-        songMenu.scene.setChildScene(getScene(),
-                false, true, true);
-        InGameSettingMenu.getInstance().show();
-    }
-
     public void hide() {
-        if (menu != null) {
-            menu.getScene().clearChildScene();
-            menu = null;
-        }
         InGameSettingMenu.getInstance().dismiss();
     }
 
     public void hideByFrag() {
-        if (menu != null) {
-            menu.getScene().clearChildScene();
-            menu = null;
-        }
     }
 
     private void addButton(int x, int y, String texture, GameMod mod) {
@@ -176,7 +151,6 @@ public class ModMenu implements IModSwitcher {
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionUp()) {
-                    hide();
                     return true;
                 }
                 return false;

@@ -26,7 +26,7 @@ public class NotificationListAdapter extends BaseAdapter<NotificationListAdapter
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    protected int getLayout() {
+    protected int getItemLayout() {
         return R.layout.notification;
     }
 
@@ -56,8 +56,8 @@ public class NotificationListAdapter extends BaseAdapter<NotificationListAdapter
             this.notification = notification;
             this.holder = notification.build(root);
 
-            UI.notificationCenter.bindTouchListener(holder.close, this::onDismiss);
-            UI.notificationCenter.bindTouchListener(holder.body, notification.runOnClick);
+            UI.notificationCenter.bindTouch(holder.close, this::onDismiss);
+            UI.notificationCenter.bindTouch(holder.body, notification.runOnClick);
 
             if (notification.hasPriority()) {
                 holder.close.setVisibility(View.GONE);

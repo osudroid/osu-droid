@@ -5,6 +5,7 @@ import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.reco1l.Game;
+import com.reco1l.UI;
 import com.reco1l.management.BeatmapCollection;
 import com.reco1l.enums.Screens;
 import com.reco1l.data.adapters.BeatmapListAdapter;
@@ -57,6 +58,7 @@ public final class BeatmapCarrousel extends BaseFragment implements BeatmapColle
         recyclerView = find("recycler");
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), VERTICAL, false));
+        recyclerView.setYOffset(-UI.topBar.getHeight());
         recyclerView.setAdapter(adapter);
 
         restoreSelection();
@@ -66,7 +68,9 @@ public final class BeatmapCarrousel extends BaseFragment implements BeatmapColle
     public void onCollectionChange(ArrayList<BeatmapInfo> list) {
         if (adapter == null) {
             adapter = new BeatmapListAdapter(list);
-            adapter.setItemComparator(BeatmapInfo::equals);
+            adapter.setSelectionListener(pos ->
+                    recyclerView.scrollToPosition(pos)
+            );
         }
         adapter.setData(list);
     }

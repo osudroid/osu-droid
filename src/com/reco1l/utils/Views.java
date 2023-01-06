@@ -10,10 +10,8 @@ import android.view.View;
 import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 
-public final class ViewUtils {
+public final class Views {
 
     public static LayoutParams match_parent = match_parent();
     public static LayoutParams wrap_content = wrap_content();
@@ -95,14 +93,16 @@ public final class ViewUtils {
             horizontal(size, size);
         }
 
-        public void vertical(int top, int bottom) {
+        public MarginUtils vertical(int top, int bottom) {
             top(top);
             bottom(bottom);
+            return this;
         }
 
-        public void horizontal(int left, int right) {
+        public MarginUtils horizontal(int left, int right) {
             left(left);
             right(right);
+            return this;
         }
 
         public MarginUtils top(int size) {

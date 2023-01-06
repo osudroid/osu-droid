@@ -13,12 +13,12 @@ import android.widget.RelativeLayout.LayoutParams;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.DrawFPSHandler;
 
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 
@@ -87,6 +87,8 @@ public final class FragmentPlatform {
 
         renderLayout.setGravity(Gravity.CENTER);
         renderLayout.addView(renderView, params);
+
+        DrawFPSHandler.startCounter();
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -108,25 +110,27 @@ public final class FragmentPlatform {
     }
 
     public void onScreenChange(Screens last, Screens current) {
-        closeExtras();
+        Game.activity.runOnUiThread(() -> {
+            closeExtras();
 
-        synchronized (listMutex) {
-            showing.forEach(f -> {
-                if (f.parents == null) {
+            synchronized (listMutex) {
+                showing.forEach(f -> {
+                    if (f.parents == null) {
+                        f.close();
+                    }
+                });
+
+                created.forEach(f -> {
+                    if (Arrays.asList(f.parents).contains(current)) {
+                        f.show();
+                        return;
+                    }
                     f.close();
-                }
-            });
+                });
+            }
 
-            created.forEach(f -> {
-                if (Arrays.asList(f.parents).contains(current)) {
-                    f.show();
-                    return;
-                }
-                f.close();
-            });
-        }
-
-        notifyScreenChange(last, current);
+            notifyScreenChange(last, current);
+        });
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -147,61 +151,50 @@ public final class FragmentPlatform {
     //--------------------------------------------------------------------------------------------//
 
     public void addFragment(BaseFragment fragment) {
-        if (fragment.isAdded()
-                || showing.contains(fragment)
-                || manager.findFragmentByTag(fragment.getTag()) != null) {
-            return;
+        synchronized (listMutex) {
+            if (fragment.isAdded() || showing.contains(fragment)) {
+                return;
+            }
+
+            showing.add(fragment);
+            if (fragment instanceof Dialog) {
+                dialogs.add((Dialog) fragment);
+            }
+
+            FrameLayout container = fragment.isOverlay() ? overlayContainer : screenContainer;
+
+            manager.beginTransaction()
+                    .add(container.getId(), fragment)
+                    .runOnCommit(fragment::onTransaction)
+                    .commitAllowingStateLoss();
         }
-        commitTransaction(fragment);
     }
 
     public void removeFragment(BaseFragment fragment) {
-        if (!fragment.isAdded()) {
-            return;
+        synchronized (listMutex) {
+            if (!fragment.isAdded()) {
+                return;
+            }
+
+            showing.remove(fragment);
+            if (fragment instanceof Dialog) {
+                dialogs.remove((Dialog) fragment);
+            }
+
+            manager.beginTransaction()
+                    .remove(fragment)
+                    .runOnCommit(fragment::onTransaction)
+                    .commitAllowingStateLoss();
         }
-        commitTransaction(fragment);
-    }
-
-    private void commitTransaction(BaseFragment fragment) {
-        FragmentTransaction transaction = manager.beginTransaction();
-
-        FrameLayout container = fragment.isOverlay() ? overlayContainer : screenContainer;
-
-        if (!fragment.isAdded()) {
-            transaction.add(container.getId(), fragment, fragment.generateTag());
-            transaction.runOnCommit(() -> {
-                synchronized (listMutex) {
-                    showing.add(fragment);
-
-                    if (fragment instanceof Dialog) {
-                        dialogs.add((Dialog) fragment);
-                    }
-                }
-                fragment.notifyTransition();
-            });
-        } else {
-            transaction.remove(fragment);
-            transaction.runOnCommit(() -> {
-                synchronized (listMutex) {
-                    showing.remove(fragment);
-
-                    if (fragment instanceof Dialog) {
-                        dialogs.remove((Dialog) fragment);
-                    }
-                }
-                fragment.notifyTransition();
-            });
-        }
-        transaction.commitAllowingStateLoss();
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public boolean closeExtras() {
         synchronized (listMutex) {
-            for (BaseFragment fragment : showing) {
-                if (fragment.isExtra()) {
-                    fragment.close();
+            for (BaseFragment f : showing) {
+                if (f.isExtra()) {
+                    f.close();
                     return true;
                 }
             }

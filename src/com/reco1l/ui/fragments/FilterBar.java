@@ -8,17 +8,24 @@ import android.text.TextWatcher;
 import android.widget.EditText;
 
 import com.reco1l.Game;
+import com.reco1l.enums.Screens;
 import com.reco1l.ui.BaseFragment;
-import com.reco1l.view.ButtonView;
+import com.reco1l.view.IconButton;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public final class FilterMenu extends BaseFragment {
+public final class FilterBar extends BaseFragment {
 
-    public static FilterMenu instance;
+    public static FilterBar instance;
 
-    private ButtonView sort;
+    private IconButton sort;
     private EditText field;
+
+    //--------------------------------------------------------------------------------------------//
+
+    public FilterBar() {
+        super(Screens.Selector);
+    }
 
     //--------------------------------------------------------------------------------------------//
 
@@ -29,7 +36,7 @@ public final class FilterMenu extends BaseFragment {
 
     @Override
     protected int getLayout() {
-        return R.layout.filter_menu;
+        return R.layout.filter_bar;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -40,7 +47,6 @@ public final class FilterMenu extends BaseFragment {
         field = find("search");
 
         field.addTextChangedListener(new TextWatcher() {
-
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
@@ -50,7 +56,7 @@ public final class FilterMenu extends BaseFragment {
             }
         });
 
-        bindTouchListener(sort, Game.beatmapCollection::nextOrder);
+        bindTouch(sort, Game.beatmapCollection::nextOrder);
     }
 
     @Override
@@ -58,6 +64,8 @@ public final class FilterMenu extends BaseFragment {
         if (!isLoaded()) {
             return;
         }
-        sort.setButtonText(Game.beatmapCollection.getOrder().name());
     }
+
+    //--------------------------------------------------------------------------------------------//
+
 }

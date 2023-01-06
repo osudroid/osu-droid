@@ -1,18 +1,21 @@
-package com.reco1l.data.tables;
+package com.reco1l.tables;
 
 // Created by Reco1l on 30/6/22 19:20
 
+import android.content.Intent;
+import android.net.Uri;
+
+import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.data.GameNotification;
 
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
-/**
- * This class contains easy access to show notifications from other classes without adding a lot of lines.
- */
 public class NotificationTable {
 
-    private static GameNotification online;
+    private static GameNotification
+            online;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -56,4 +59,17 @@ public class NotificationTable {
         online.update();
     }
 
+    //--------------------------------------------------------------------------------------------//
+
+    public static void update(String url) {
+        GameNotification update = new GameNotification("Update");
+
+        update.message = Res.str(R.string.update_dialog_message) + "\nClick to update!";
+        update.runOnClick = () -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            Game.activity.startActivity(intent);
+        };
+
+        UI.notificationCenter.add(update);
+    }
 }

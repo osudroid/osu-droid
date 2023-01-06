@@ -19,8 +19,8 @@ import com.reco1l.data.adapters.NotificationListAdapter.ViewHolder;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.ResUtils;
-import com.reco1l.utils.ViewUtils;
+import com.reco1l.tables.Res;
+import com.reco1l.utils.Views;
 
 import java.util.ArrayList;
 
@@ -74,7 +74,7 @@ public final class NotificationCenter extends BaseFragment {
     @Override
     protected void onLoad() {
         closeOnBackgroundClick(true);
-        bodyWidth = ResUtils.dimen(R.dimen.notificationCenterWidth);
+        bodyWidth = Res.dimen(R.dimen.notificationCenterWidth);
 
         body = find("body");
         layer = find("layer");
@@ -107,13 +107,13 @@ public final class NotificationCenter extends BaseFragment {
         container.setLayoutManager(new LinearLayoutManager(getContext(), VERTICAL, false));
         container.setAdapter(adapter);
 
-        bindTouchListener(find("clear"), this::clear);
+        bindTouch(find("clear"), this::clear);
     }
 
     @Override
     protected void onUpdate(float sec) {
         if (emptyText != null) {
-            ViewUtils.visibility(notifications.isEmpty(), emptyText);
+            Views.visibility(notifications.isEmpty(), emptyText);
         }
 
         if (counter != null) {
@@ -235,7 +235,7 @@ public final class NotificationCenter extends BaseFragment {
                     .play(400);
 
             Animation.of(body)
-                    .toX(ResUtils.dimen(R.dimen.notificationCenterWidth))
+                    .toX(Res.dimen(R.dimen.notificationCenterWidth))
                     .interpolate(Easing.InExpo)
                     .runOnStart(() ->
                             Animation.of(rootBackground)
@@ -304,10 +304,10 @@ public final class NotificationCenter extends BaseFragment {
 
         @Override
         protected void onLoad() {
-            int xs = ResUtils.dimen(R.dimen.XS);
+            int xs = Res.dimen(R.dimen.XS);
 
             rootView.setPadding(xs, xs, xs, xs);
-            rootView.setElevation(ResUtils.dimen(R.dimen.XXL));
+            rootView.setElevation(Res.dimen(R.dimen.XXL));
             bind();
         }
 
@@ -316,15 +316,15 @@ public final class NotificationCenter extends BaseFragment {
 
             LayoutParams params = (LayoutParams) holder.body.getLayoutParams();
 
-            params.width = ResUtils.dimen(R.dimen.popupNotificationWidth);
+            params.width = Res.dimen(R.dimen.popupNotificationWidth);
             params.addRule(ALIGN_PARENT_END);
             holder.body.setLayoutParams(params);
 
             if (holder != null) {
-                unbindTouchListeners();
+                unbindTouchHandlers();
 
-                bindTouchListener(holder.close, this::close);
-                bindTouchListener(holder.body, UI.notificationCenter::show);
+                bindTouch(holder.close, this::close);
+                bindTouch(holder.body, UI.notificationCenter::show);
 
                 Animation.of(rootView)
                         .fromY(-50)

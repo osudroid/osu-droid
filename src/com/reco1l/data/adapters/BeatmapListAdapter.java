@@ -8,8 +8,10 @@ import static com.reco1l.data.adapters.BeatmapListAdapter.*;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -20,15 +22,24 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.reco1l.Game;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
+import com.reco1l.tables.Res;
+import com.reco1l.ui.SimpleFragment;
+import com.reco1l.ui.custom.ContextMenuBuilder;
+import com.reco1l.ui.custom.Dialog;
+import com.reco1l.ui.custom.DialogBuilder;
+import com.reco1l.ui.custom.ContextMenu;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.TouchListener;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.UI;
 import com.reco1l.utils.execution.AsyncTask;
 import com.reco1l.utils.helpers.BitmapHelper;
+import com.reco1l.view.CarrouselRecyclerView;
 
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
+import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -47,19 +58,8 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
     }
 
     @Override
-    protected int getLayout() {
+    protected int getItemLayout() {
         return R.layout.beatmap_list_item;
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-
-    @Override
-    protected void onItemSelect(BeatmapViewHolder holder, BeatmapInfo item) {
-        if (recyclerView != null) {
-            recyclerView.scrollToPosition(holder.getAdapterPosition());
-            holder.tracksAdapter.select(Game.musicManager.getTrack());
-        }
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -73,6 +73,7 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
 
         private final Runnable backgroundCallback;
 
+        private BeatmapProperties properties;
         private AsyncTask backgroundTask;
 
         //----------------------------------------------------------------------------------------//
@@ -86,7 +87,7 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
             background = root.findViewById(R.id.bl_songBackground);
 
             CardView body = root.findViewById(R.id.bl_item);
-            RecyclerView trackList = root.findViewById(R.id.bl_trackList);
+            CarrouselRecyclerView trackList = root.findViewById(R.id.bl_trackList);
 
             backgroundCallback = () -> {
                 if (backgroundTask != null && !backgroundTask.isShutdown()) {
@@ -95,14 +96,76 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
             };
             tracksAdapter = new TrackListAdapter(null);
 
-            trackList.setLayoutManager(new LinearLayoutManager(Game.activity, VERTICAL, false));
+            trackList.setParentWindow(UI.beatmapCarrousel.recyclerView);
+            trackList.setYOffset(-UI.topBar.getHeight());
+
+            trackList.setLayoutManager(new LinearLayoutManager(Game.activity));
             trackList.setAdapter(tracksAdapter);
 
-            UI.beatmapCarrousel.bindTouchListener(body, () -> {
-                if (select()) {
-                    Game.musicManager.change(item.getTrack(0));
+            UI.beatmapCarrousel.bindTouch(body, new TouchListener() {
+
+                public void onPressUp() {
+                    if (select()) {
+                        Game.musicManager.change(item.getTrack(0));
+                    }
+                }
+
+                public void onLongPress() {
+
+                    ContextMenuBuilder builder = new ContextMenuBuilder();
+
+                    String itemText = properties.isFavorite() ? "Remove from favorites" : Res.str(R.string.menu_properties_tofavs);
+                    builder.addItem(new ContextMenu.Item(itemText, () -> {
+                        properties.setFavorite(!properties.isFavorite());
+                        saveProperties();
+                    }));
+
+
+                    builder.addItem(new ContextMenu.Item("Offset", () -> {
+
+                        DialogBuilder dialog = new DialogBuilder();
+
+                        SeekBar seekBar = new SeekBar(new ContextThemeWrapper(Game.activity, R.style.seek_bar));
+                        seekBar.setMax(500);
+                        seekBar.setProgress(250 - properties.getOffset());
+
+                        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+                            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                                properties.setOffset(progress - 250);
+                                saveProperties();
+                            }
+
+                            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+                            public void onStopTrackingTouch(SeekBar seekBar) {}
+                        });
+
+                        dialog.customFragment = new SimpleFragment(seekBar);
+
+                        new Dialog(dialog).show();
+                    }));
+
+
+                    builder.addItem(new ContextMenu.Item("Delete...", () -> {
+
+                        DialogBuilder dialog = new DialogBuilder();
+
+                        dialog.message = "Are you sure you want to delete this beatmap?";
+                        dialog.addButton("Yes", d -> Game.libraryManager.deleteMap(item));
+                        dialog.addButton("No", Dialog::close);
+
+                        new Dialog(dialog).show();
+                    }));
+
+                    new ContextMenu(builder).show(body);
                 }
             });
+        }
+
+        private void saveProperties() {
+            Game.propertiesLibrary.setProperties(item.getPath(), properties);
+            Game.propertiesLibrary.save();
         }
 
         //----------------------------------------------------------------------------------------//
@@ -110,6 +173,12 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
         @Override
         protected void onBind(BeatmapInfo item, int position) {
             loadBackground(false);
+
+            properties = Game.propertiesLibrary.getProperties(item.getPath());
+            if (properties == null) {
+                properties = new BeatmapProperties();
+            }
+
             title.setText(BeatmapHelper.getTitle(item));
             artist.setText("by " + BeatmapHelper.getArtist(item));
             mapper.setText(item.getCreator());
@@ -131,12 +200,12 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
         //----------------------------------------------------------------------------------------//
 
         @Override
-        public void onSelectVisually() {
+        public void onSelect() {
             tracksAdapter.setData(item.getTracks());
         }
 
         @Override
-        public void onDeselectVisually() {
+        public void onDeselect() {
             tracksAdapter.setData(null);
         }
 

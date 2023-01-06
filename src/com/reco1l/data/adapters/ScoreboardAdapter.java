@@ -1,5 +1,7 @@
 package com.reco1l.data.adapters;
 
+import android.content.Intent;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,22 +10,33 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.edlplan.replay.OdrDatabase;
+import com.edlplan.replay.OsuDroidReplay;
+import com.edlplan.replay.OsuDroidReplayPack;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.reco1l.Game;
+import com.reco1l.UI;
+import com.reco1l.data.GameNotification;
 import com.reco1l.data.Scoreboard;
-import com.reco1l.utils.Animation;
-import com.reco1l.utils.ResUtils;
+import com.reco1l.ui.custom.ContextMenuBuilder;
+import com.reco1l.ui.custom.Dialog;
+import com.reco1l.ui.custom.DialogBuilder;
+import com.reco1l.ui.custom.ContextMenu;
+import com.reco1l.tables.Res;
 import com.reco1l.utils.TouchHandler;
-import com.reco1l.utils.ViewUtils;
+import com.reco1l.utils.Views;
 import com.reco1l.utils.helpers.OnlineHelper;
 import com.reco1l.utils.TouchListener;
 
+import java.io.File;
 import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
+import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 18/6/22 01:20
@@ -50,13 +63,6 @@ public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.V
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
         holder.assign(data.get(position));
-        holder.body.setAlpha(0);
-        holder.body.postDelayed(() ->
-                Animation.of(holder.body)
-                        .fromAlpha(0)
-                        .toAlpha(1)
-                        .play(300)
-                , 20L * position);
     }
 
     @Override
@@ -98,9 +104,86 @@ public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.V
                 return;
 
             new TouchHandler(new TouchListener() {
-
                 public void onPressUp() {
                     Game.selectorScene.loadScore(data.id, data.name);
+                }
+
+                @Override
+                public void onLongPress() {
+                    ContextMenuBuilder builder = new ContextMenuBuilder();
+
+
+                    builder.addItem(new ContextMenu.Item("Export", () -> {
+                        List<OsuDroidReplay> replays = OdrDatabase.get().getReplayById(data.id);
+
+                        if (replays.size() > 0) {
+                            GameNotification notification = new GameNotification("replay export");
+
+                            try {
+                                OsuDroidReplay r = replays.get(0);
+                                File parent = new File(Environment.getExternalStorageDirectory(), "osu!droid/export");
+
+                                CharSequence name = r.getFileName().subSequence(
+                                        r.getFileName().indexOf('/') + 1,
+                                        r.getFileName().lastIndexOf('.')
+                                );
+
+                                File file = new File(parent, String.format( "%s [%s]-%d.edr", name, r.getPlayerName(), r.getTime()));
+
+                                if (file.getParentFile() != null) {
+                                    file.getParentFile().mkdirs();
+                                }
+                                OsuDroidReplayPack.packTo(file, r);
+
+
+                                notification.runOnClick = () -> {
+                                    Intent intent = new Intent();
+                                    intent.setAction(Intent.ACTION_VIEW);
+                                    intent.setDataAndType(FileProvider.getUriForFile(Game.activity, BuildConfig.APPLICATION_ID + ".fileProvider", file), "*/*");
+                                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                    Game.activity.startActivityForResult(intent, 0);
+                                };
+
+                                notification.message = String.format(Res.str(R.string.frg_score_menu_export_succeed), file.getAbsolutePath());
+                            } catch (Exception exception) {
+                                exception.printStackTrace();
+                                notification.message = Res.str(R.string.frg_score_menu_export_failed) + "\n" + exception.getMessage();
+                            }
+
+                            UI.notificationCenter.add(notification);
+                        }
+                    }));
+
+                    builder.addItem(new ContextMenu.Item("Delete", () -> {
+
+                        DialogBuilder dialog = new DialogBuilder();
+
+                        dialog.title = "Delete replay";
+                        dialog.message = "Are you sure?";
+                        dialog.addButton("Yes", d -> {
+                            List<OsuDroidReplay> replays = OdrDatabase.get().getReplayById(data.id);
+                            if (replays.size() > 0) {
+
+                                GameNotification notification = new GameNotification("replay delete");
+                                notification.message = "Failed to delete replay!";
+
+                                try {
+                                    if (OdrDatabase.get().deleteReplay(data.id) != 0) {
+                                        notification.message = Res.str(R.string.menu_deletescore_delete_success);
+                                    }
+                                } catch (Exception exception) {
+                                    exception.printStackTrace();
+                                    notification.message += "\n" + exception.getMessage();
+                                }
+                                UI.notificationCenter.add(notification);
+                            }
+                            d.close();
+                        });
+
+                        new Dialog(dialog).show();
+                    }));
+
+                    new ContextMenu(builder).show(body);
                 }
             }).apply(body);
 
@@ -114,15 +197,15 @@ public class ScoreboardAdapter extends RecyclerView.Adapter <ScoreboardAdapter.V
             // Loading mods icons
             for (GameMod mod : data.getMods()) {
                 ImageView image = new ImageView(body.getContext());
-                modsLayout.addView(image, ViewUtils.wrap_content);
+                modsLayout.addView(image, Views.wrap_content);
 
                 image.setImageBitmap(Game.bitmapManager.get("selection-mod-" + mod.texture));
 
-                ViewUtils.size(image, (int) ResUtils.dimen(R.dimen.scoreboardItemModSize));
+                Views.size(image, (int) Res.dimen(R.dimen.scoreboardItemModSize));
                 image.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
                 if (data.getMods().indexOf(mod) > 0) {
-                    ViewUtils.margins(image).left((int) ResUtils.dimen(R.dimen.XXS));
+                    Views.margins(image).left((int) Res.dimen(R.dimen.XXS));
                 }
             }
 

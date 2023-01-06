@@ -35,7 +35,7 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    protected int getLayout() {
+    protected int getItemLayout() {
         return R.layout.beatmap_list_child_item;
     }
 
@@ -63,7 +63,7 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
             body = root.findViewById(R.id.bl_childBody);
             difficulty = root.findViewById(R.id.bl_difficulty);
 
-            UI.beatmapCarrousel.bindTouchListener(body, () -> {
+            UI.beatmapCarrousel.bindTouch(body, () -> {
                 if(!select()) {
                     Game.musicManager.stop();
                     Game.resourcesManager.getSound("menuhit").play();
@@ -101,14 +101,14 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
         //----------------------------------------------------------------------------------------//
 
         @Override
-        public void onSelectVisually() {
+        public void onSelect() {
             Animation.of(body)
                     .toAlpha(1)
                     .play(200);
         }
 
         @Override
-        public void onDeselectVisually() {
+        public void onDeselect() {
             Animation.of(body)
                     .toAlpha(0.8f)
                     .play(200);

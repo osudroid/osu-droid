@@ -11,12 +11,12 @@ import com.reco1l.enums.Screens;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.UI;
 import com.reco1l.utils.Animation;
-import com.reco1l.data.tables.AnimationTable;
+import com.reco1l.tables.AnimationTable;
 import com.reco1l.management.KeyInputManager;
 import com.reco1l.utils.helpers.BeatmapHelper;
-import com.reco1l.data.tables.DialogTable;
+import com.reco1l.tables.DialogTable;
 import com.reco1l.ui.BaseFragment;
-import com.reco1l.utils.ResUtils;
+import com.reco1l.tables.Res;
 import com.reco1l.utils.helpers.OnlineHelper;
 import com.reco1l.view.IconButton;
 
@@ -39,7 +39,6 @@ public final class TopBar extends BaseFragment {
     public MusicButton musicButton;
 
     private View back, body;
-    private TextView author;
     private LinearLayout container, buttonsContainer;
 
     private final Map<Screens, ArrayList<IconButton>> buttons;
@@ -74,7 +73,7 @@ public final class TopBar extends BaseFragment {
 
     @Override
     protected void onLoad() {
-        barHeight = (int) ResUtils.dimen(R.dimen.topBarHeight);
+        barHeight = (int) Res.dimen(R.dimen.topBarHeight);
 
         body = find("body");
 
@@ -92,16 +91,12 @@ public final class TopBar extends BaseFragment {
 
         buttonsContainer = find("buttons");
         container = find("container");
-        author = find("author");
         back = find("back");
 
-        author.setText(ResUtils.str(R.string.app_name) + " " + BuildConfig.VERSION_NAME);
 
-        bindTouchListener(find("inbox"), UI.notificationCenter::altShow);
-        bindTouchListener(find("settings"), UI.settingsPanel::altShow);
-        bindTouchListener(back, KeyInputManager::performBack);
-
-        bindTouchListener(author, () -> new Dialog(DialogTable.author()).show());
+        bindTouch(find("inbox"), UI.notificationCenter::altShow);
+        bindTouch(find("settings"), UI.settingsPanel::altShow);
+        bindTouch(back, KeyInputManager::performBack);
 
         userBox.loadUserData(false);
 
@@ -112,7 +107,6 @@ public final class TopBar extends BaseFragment {
     protected void onScreenChange(Screens lastScreen, Screens newScreen) {
         if (isAdded()) {
             reloadButtons(newScreen);
-            showAuthorText(newScreen == Screens.Main);
         }
     }
 
@@ -141,7 +135,7 @@ public final class TopBar extends BaseFragment {
                     if (toAdd != null) {
                         for (IconButton button : toAdd) {
                             buttonsContainer.addView(button);
-                            bindTouchListener(button, button.getTouchListener());
+                            bindTouch(button, button.getTouchListener());
                         }
                     }
 
@@ -156,7 +150,6 @@ public final class TopBar extends BaseFragment {
     @Override
     public void close() {
         if (isAdded()) {
-            showAuthorText(false);
 
             Animation.of(body)
                     .toY(-barHeight)
@@ -179,24 +172,6 @@ public final class TopBar extends BaseFragment {
         super.show();
     }
     //--------------------------------------------------------------------------------------------//
-
-    private void showAuthorText(boolean bool) {
-        if (author == null)
-            return;
-
-        Animation anim = Animation.of(author);
-
-        if (bool && author.getVisibility() != View.VISIBLE) {
-            anim.toAlpha(1);
-            anim.toY(0);
-            anim.runOnStart(() -> author.setVisibility(View.VISIBLE));
-        } else {
-            anim.toAlpha(0);
-            anim.toY(50);
-            anim.runOnEnd(() -> author.setVisibility(View.GONE));
-        }
-        anim.play(200);
-    }
 
     public void addButton(Screens screen, IconButton button) {
         buttons.computeIfAbsent(screen, k -> new ArrayList<>());
@@ -226,7 +201,7 @@ public final class TopBar extends BaseFragment {
             arrow = parent.find("musicArrow");
             text = parent.find("musicText");
 
-            parent.bindTouchListener(view, UI.musicPlayer::altShow);
+            parent.bindTouch(view, UI.musicPlayer::altShow);
 
             if (Game.libraryManager.getBeatmap() != null) {
                 text.setText(BeatmapHelper.getTitle(Game.libraryManager.getBeatmap().getTrack(0)));
@@ -298,7 +273,7 @@ public final class TopBar extends BaseFragment {
             TriangleEffectView triangles = parent.find("userBoxTriangles");
             triangles.setTriangleColor(0xFFFFFFFF);
 
-            parent.bindTouchListener(body, UI.userProfile::altShow);
+            parent.bindTouch(body, UI.userProfile::altShow);
         }
 
         //----------------------------------------------------------------------------------------//
@@ -309,7 +284,7 @@ public final class TopBar extends BaseFragment {
 
             AnimationTable.fadeOutIn(avatar, () -> avatar.setImageResource(R.drawable.default_avatar));
 
-            AnimationTable.textChange(rank, ResUtils.str(R.string.top_bar_offline));
+            AnimationTable.textChange(rank, Res.str(R.string.top_bar_offline));
             AnimationTable.textChange(name, Config.getLocalUsername());
 
             if (Game.onlineManager.isStayOnline() && !clear) {

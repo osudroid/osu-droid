@@ -23,7 +23,7 @@ import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
-import com.reco1l.utils.ResUtils;
+import com.reco1l.tables.Res;
 import com.reco1l.view.IconButton;
 
 import java.util.ArrayList;
@@ -75,6 +75,11 @@ public final class ModMenu extends BaseFragment implements IGameMods {
     @Override
     protected String getPrefix() {
         return "mm";
+    }
+
+    @Override
+    protected boolean isExtra() {
+        return true;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -143,8 +148,8 @@ public final class ModMenu extends BaseFragment implements IGameMods {
         customization = find("customRv");
         customization.setAdapter(customAdapter);
 
-        bindTouchListener(find("clear"), this::clear);
-        bindTouchListener(find("custom"), this::switchCustomVisibility);
+        bindTouch(find("clear"), this::clear);
+        bindTouch(find("custom"), this::switchCustomVisibility);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -208,7 +213,7 @@ public final class ModMenu extends BaseFragment implements IGameMods {
         widget.removeAllViews();
 
         Animation.of(widget)
-                .toRightPadding(ResUtils.sdp(12))
+                .toRightPadding(Res.sdp(12))
                 .play(100);
 
         for (ModWrapper wrapper : enabled) {
@@ -223,8 +228,8 @@ public final class ModMenu extends BaseFragment implements IGameMods {
 
             Animation.of(icon)
                     .fromWidth(0)
-                    .toWidth(ResUtils.sdp(16))
-                    .toLeftMargin(ResUtils.sdp(4))
+                    .toWidth(Res.sdp(16))
+                    .toLeftMargin(Res.sdp(4))
                     .play(100);
         }
     }
@@ -247,7 +252,7 @@ public final class ModMenu extends BaseFragment implements IGameMods {
         //----------------------------------------------------------------------------------------//
 
         @Override
-        protected int getLayout() {
+        protected int getItemLayout() {
             return R.layout.mod_menu_custom_item;
         }
 

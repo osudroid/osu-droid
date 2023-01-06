@@ -17,7 +17,7 @@ import androidx.cardview.widget.CardView;
 
 import com.reco1l.Game;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.ViewUtils;
+import com.reco1l.utils.Views;
 import com.reco1l.view.effects.StripsEffect;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -66,7 +66,7 @@ public class LogoView extends CardView implements BaseView {
         setCardBackgroundColor(0xFF1E1E1E);
         setCardElevation(sdp(20));
 
-        ViewGroup.LayoutParams p = ViewUtils.match_parent;
+        ViewGroup.LayoutParams p = Views.match_parent;
 
         effect = new StripsEffect(getContext());
         effect.setStripWidth(sdp(20));

@@ -12,12 +12,11 @@ import androidx.cardview.widget.CardView;
 
 import com.edlplan.framework.easing.Easing;
 import com.reco1l.Game;
-import com.reco1l.UI;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.ResUtils;
-import com.reco1l.utils.ViewUtils;
-import com.reco1l.utils.ViewUtils.MarginUtils;
+import com.reco1l.tables.Res;
+import com.reco1l.utils.Views;
+import com.reco1l.utils.Views.MarginUtils;
 import com.reco1l.utils.TouchListener;
 import com.reco1l.view.ButtonView;
 
@@ -73,8 +72,8 @@ public class Dialog extends BaseFragment {
     protected void onLoad() {
         closeOnBackgroundClick(builder.closeOnBackgroundClick);
 
-        int m = (int) ResUtils.dimen(R.dimen.M);
-        int xs = (int) ResUtils.dimen(R.dimen.XS);
+        int m = (int) Res.dimen(R.dimen.M);
+        int xs = (int) Res.dimen(R.dimen.XS);
 
         buttonsContainer = find("buttonsContainer");
         bodyParent = find("bodyParent");
@@ -110,7 +109,7 @@ public class Dialog extends BaseFragment {
             Game.platform.manager.beginTransaction()
                     .add(find("fragmentContainer").getId(), builder.customFragment)
                     .runOnCommit(
-                            () -> Animation.of(builder.customFragment.root)
+                            () -> Animation.of(builder.customFragment.getView())
                                     .fromAlpha(0)
                                     .toAlpha(1)
                                     .play(200)
@@ -119,9 +118,9 @@ public class Dialog extends BaseFragment {
         }
 
         if (builder.closeOnBackgroundClick) {
-            bindTouchListener(find("scrollBackground"), new TouchListener() {
-                public boolean hasTouchEffect() { return false; }
-                public boolean isOnlyOnce() { return true; }
+            bindTouch(find("scrollBackground"), new TouchListener() {
+                public boolean useTouchEffect() { return false; }
+                public boolean useOnlyOnce() { return true; }
 
                 public void onPressUp() {
                     close();
@@ -146,7 +145,7 @@ public class Dialog extends BaseFragment {
                         .delay(200L * i)
                         .play(200);
 
-                MarginUtils margins = ViewUtils.margins(button.view);
+                MarginUtils margins = Views.margins(button.view);
                 margins.horizontal(m, m);
 
                 if (builder.buttons.size() > 1) {
@@ -256,11 +255,11 @@ public class Dialog extends BaseFragment {
 
         private void build(LinearLayout container) {
             view = new ButtonView(Game.activity);
-            container.addView(view, new LayoutParams(MATCH_PARENT, (int) ResUtils.dimen(R.dimen.dialogButtonHeight)));
+            container.addView(view, new LayoutParams(MATCH_PARENT, Res.dimen(R.dimen.dialogButtonHeight)));
         }
 
         private void load(Dialog dialog) {
-            dialog.bindTouchListener(view, () -> onClick.onButtonClick(dialog));
+            dialog.bindTouch(view, () -> onClick.onButtonClick(dialog));
 
             if (color != null) {
                 view.setCardBackgroundColor(color);

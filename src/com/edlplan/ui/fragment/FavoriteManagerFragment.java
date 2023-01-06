@@ -1,6 +1,7 @@
 package com.edlplan.ui.fragment;
 
 import android.animation.Animator;
+import android.content.Context;
 import android.graphics.Color;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -25,7 +26,7 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class FavoriteManagerFragment extends BaseFragment {
+public class FavoriteManagerFragment {
 
     private String selected;
 
@@ -33,14 +34,15 @@ public class FavoriteManagerFragment extends BaseFragment {
 
     private Runnable onLoadViewFunc;
 
-    @Override
-    protected int getLayoutID() {
-        return R.layout.favorite_manager_dialog;
+    private <T extends View> T findViewById(int id) {
+        return null;
     }
 
-    @Override
+    private Context getContext() {
+        return null;
+    }
+
     protected void onLoadView() {
-        setDismissOnBackgroundClick(true);
         GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
         ((RecyclerView) findViewById(R.id.main_recycler_view)).setLayoutManager(layoutManager);
         layoutManager.setOrientation(RecyclerView.VERTICAL);
@@ -72,7 +74,6 @@ public class FavoriteManagerFragment extends BaseFragment {
                 .translationY(0)
                 .setDuration(200)
                 .start();
-        playBackgroundHideInAnim(200);
     }
 
     private void playEndAnim(Runnable action) {
@@ -92,12 +93,9 @@ public class FavoriteManagerFragment extends BaseFragment {
                     }
                 })
                 .start();
-        playBackgroundHideOutAnim(200);
     }
 
-    @Override
     public void dismiss() {
-        playEndAnim(super::dismiss);
     }
 
     public String getSelected() {
@@ -109,7 +107,6 @@ public class FavoriteManagerFragment extends BaseFragment {
             adapter = new SelectAdapter(onSelectListener);
             ((RecyclerView) findViewById(R.id.main_recycler_view)).setAdapter(adapter);
         };
-        show();
     }
 
     public void showToAddToFloder(String track) {
@@ -117,7 +114,6 @@ public class FavoriteManagerFragment extends BaseFragment {
             adapter = new AddAdapter(track);
             ((RecyclerView) findViewById(R.id.main_recycler_view)).setAdapter(adapter);
         };
-        show();
     }
 
     public interface OnSelectListener {

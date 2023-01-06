@@ -7,19 +7,20 @@ import android.content.Context;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.enums.Screens;
-import com.reco1l.interfaces.IBaseScene;
+import com.reco1l.interfaces.SceneHandler;
 import com.reco1l.interfaces.MusicObserver;
 
 import org.anddev.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
-public abstract class BaseScene extends Scene implements IBaseScene, MusicObserver {
+public abstract class BaseScene extends Scene implements SceneHandler, MusicObserver {
 
     protected final Context context;
 
     private boolean
             isBackgroundAutoChange = true,
+            isFirstTimeShowing = true,
             isContinuousPlay = true;
 
     //--------------------------------------------------------------------------------------------//
@@ -38,6 +39,8 @@ public abstract class BaseScene extends Scene implements IBaseScene, MusicObserv
     protected abstract void onCreate();
 
     protected abstract void onSceneUpdate(float secondsElapsed);
+
+    protected void onFirstShow() {}
 
     //--------------------------------------------------------------------------------------------//
 
@@ -90,6 +93,16 @@ public abstract class BaseScene extends Scene implements IBaseScene, MusicObserv
     public boolean onBackPress() {
         return Game.engine.backToLastScene();
     }
+
+    @Override
+    public void onSceneChange(Scene oldScene, Scene newScene) {
+        if (newScene == this && isFirstTimeShowing) {
+            isFirstTimeShowing = false;
+            onFirstShow();
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------//
 
     public void show() {
         Game.engine.setScene(this);

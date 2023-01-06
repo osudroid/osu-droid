@@ -7,6 +7,15 @@
     <!--Global attributes-->
     <attr name="beatSync" format="boolean"/>
 
+    <declare-styleable name="IconButton">
+        <attr name="iconSrc" format="reference"/>
+        <attr name="indicatorPosition" format="enum">
+            <enum name="bottom" value="0"/>
+            <enum name="top" value="1"/>
+        </attr>
+        <attr name="activated" format="boolean"/>
+    </declare-styleable>
+
     <!--Views-->
     <declare-styleable name="TextButton">
         <attr name="beatSync"/>

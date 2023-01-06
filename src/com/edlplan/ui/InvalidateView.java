@@ -9,6 +9,9 @@ import android.util.AttributeSet;
 import android.view.View;
 
 public class InvalidateView extends View {
+
+    private Runnable runOnUpdate;
+
     public InvalidateView(Context context) {
         super(context);
     }
@@ -21,14 +24,17 @@ public class InvalidateView extends View {
         super(context, attrs, defStyleAttr);
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public InvalidateView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         invalidate();
+
+        if (runOnUpdate != null) {
+            runOnUpdate.run();
+        }
     }
+
+   public void runOnUpdate(Runnable task) {
+        this.runOnUpdate = task;
+   }
 }

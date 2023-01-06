@@ -13,8 +13,8 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 import com.reco1l.Game;
-import com.reco1l.utils.ViewUtils.MarginUtils;
-import com.reco1l.utils.ViewUtils.PaddingUtils;
+import com.reco1l.utils.Views.MarginUtils;
+import com.reco1l.utils.Views.PaddingUtils;
 
 import java.util.ArrayList;
 
@@ -325,7 +325,7 @@ public final class Animation {
                 fromHeight = view.getHeight();
             }
             createLayoutAnimator(fromHeight, toHeight, value ->
-                    ViewUtils.height(view, (int) value)
+                    Views.height(view, (int) value)
             );
         }
 
@@ -334,12 +334,12 @@ public final class Animation {
                 fromWidth = view.getWidth();
             }
             createLayoutAnimator(fromWidth, toWidth, value ->
-                    ViewUtils.width(view, (int) value)
+                    Views.width(view, (int) value)
             );
         }
 
         MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
-        MarginUtils margin = ViewUtils.margins(view);
+        MarginUtils margin = Views.margins(view);
 
         if (toTopMargin != null) {
             if (fromTopMargin == null) {
@@ -377,7 +377,7 @@ public final class Animation {
             );
         }
 
-        PaddingUtils padding = ViewUtils.padding(view);
+        PaddingUtils padding = Views.padding(view);
 
         if (toTopPadding != null) {
             if (fromTopPadding == null) {
@@ -494,13 +494,13 @@ public final class Animation {
         }
 
         if (fromWidth != null) {
-            ViewUtils.width(view, fromWidth);
+            Views.width(view, fromWidth);
         }
         if (fromHeight != null) {
-            ViewUtils.height(view, fromHeight);
+            Views.height(view, fromHeight);
         }
 
-        MarginUtils margin = ViewUtils.margins(view);
+        MarginUtils margin = Views.margins(view);
 
         if (fromTopMargin != null) {
             margin.top(fromTopMargin);
@@ -515,7 +515,7 @@ public final class Animation {
             margin.bottom(fromBottomMargin);
         }
 
-        PaddingUtils padding = ViewUtils.padding(view);
+        PaddingUtils padding = Views.padding(view);
 
         if (fromTopPadding != null) {
             padding.top(fromTopPadding);

@@ -54,7 +54,7 @@ public class SelectorScene extends BaseScene {
         mods.setIcon(R.drawable.v_tune);
 
         IconButton search = new IconButton(context);
-        search.runOnTouch(UI.filterMenu::altShow);
+        search.runOnTouch(UI.filterBar::altShow);
         search.setIcon(R.drawable.v_search);
 
         /*BarButton random = new BarButton(context);

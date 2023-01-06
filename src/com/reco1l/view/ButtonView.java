@@ -18,7 +18,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 
-import com.reco1l.utils.ViewUtils;
+import com.reco1l.utils.Views;
 import com.reco1l.view.effects.StripsEffect;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -78,7 +78,7 @@ public class ButtonView extends CardView implements BaseView {
         text.setGravity(Gravity.CENTER);
         layout.addView(text);
 
-        ViewUtils.rule(effect)
+        Views.rule(effect)
                 .add(ALIGN_TOP, ALIGN_BOTTOM, ALIGN_END, ALIGN_START)
                 .apply(text.getId());
 

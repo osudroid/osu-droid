@@ -6,7 +6,7 @@ import com.reco1l.enums.Screens;
 
 import org.anddev.andengine.entity.scene.Scene;
 
-public interface IBaseScene {
+public interface SceneHandler {
 
     Screens getIdentifier();
 

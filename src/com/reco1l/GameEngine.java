@@ -1,15 +1,17 @@
 package com.reco1l;
 
-import com.reco1l.interfaces.IBaseScene;
+import com.reco1l.interfaces.SceneHandler;
 import com.reco1l.scenes.BaseScene;
 import com.reco1l.enums.Screens;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.entity.scene.Scene;
+import org.anddev.andengine.entity.util.FPSCounter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 // Created by Reco1l on 22/6/22 02:20
 
@@ -17,12 +19,16 @@ public final class GameEngine extends Engine {
 
     private static GameEngine instance;
 
-    private final List<IBaseScene> handlers;
+    private final List<SceneHandler> handlers;
 
     private Scene lastScene;
     private Screens currentScreen, lastScreen;
 
     private boolean isGameLoaded = false;
+
+    private float
+            fps,
+            frameTime;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -37,6 +43,14 @@ public final class GameEngine extends Engine {
     }
 
     //--------------------------------------------------------------------------------------------//
+
+    public float getFPS() {
+        return fps;
+    }
+
+    public float getFrameTime() {
+        return frameTime;
+    }
 
     public Screens getScreen() {
         return currentScreen;
@@ -63,6 +77,15 @@ public final class GameEngine extends Engine {
             Game.platform.onEngineUpdate(sec);
             Game.timingWrapper.onUpdate(sec);
         });
+
+        registerUpdateHandler(new FPSCounter() {
+            @Override
+            public void onUpdate(float pSecondsElapsed) {
+                super.onUpdate(pSecondsElapsed);
+                frameTime = pSecondsElapsed * 1000;
+                fps = getFPS();
+            }
+        });
     }
 
     public boolean backToLastScene() {
@@ -79,14 +102,14 @@ public final class GameEngine extends Engine {
             lastScreen = getScreen();
             currentScreen = parseScreen(scene);
 
-            Game.activity.runOnUiThread(() ->
-                    Game.platform.onScreenChange(lastScreen, currentScreen)
-            );
+            Game.platform.onScreenChange(lastScreen, currentScreen);
         }
         lastScene = getScene();
         super.setScene(scene);
 
-        handlers.forEach(handler -> handler.onSceneChange(lastScene, scene));
+        synchronized (handlers) {
+            handlers.forEach(handler -> handler.onSceneChange(lastScene, scene));
+        }
     }
 
     private Screens parseScreen(Scene scene) {
@@ -107,11 +130,13 @@ public final class GameEngine extends Engine {
     public void onResume() {
         super.onResume();
 
-        handlers.forEach(handler -> {
-            if (currentScreen == handler.getIdentifier()) {
-                handler.onResume();
-            }
-        });
+        synchronized (handlers) {
+            handlers.forEach(handler -> {
+                if (currentScreen == handler.getIdentifier()) {
+                    handler.onResume();
+                }
+            });
+        }
         Game.timingWrapper.sync();
     }
 
@@ -119,23 +144,29 @@ public final class GameEngine extends Engine {
     public void onPause() {
         super.onPause();
 
-        handlers.forEach(handler -> {
-            if (currentScreen == handler.getIdentifier()) {
-                handler.onPause();
-            }
-        });
+        synchronized (handlers) {
+            handlers.forEach(handler -> {
+                if (currentScreen == handler.getIdentifier()) {
+                    handler.onPause();
+                }
+            });
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void registerSceneHandler(IBaseScene sceneHandler) {
-        this.handlers.add(sceneHandler);
+    public void registerSceneHandler(SceneHandler sceneHandler) {
+        synchronized (handlers) {
+            this.handlers.add(sceneHandler);
+        }
     }
 
-    public IBaseScene getCurrentSceneHandler() {
-        for (IBaseScene handler : handlers) {
-            if (handler.getIdentifier() == currentScreen) {
-                return handler;
+    public SceneHandler getCurrentSceneHandler() {
+        synchronized (handlers) {
+            for (SceneHandler handler : handlers) {
+                if (handler.getIdentifier() == currentScreen) {
+                    return handler;
+                }
             }
         }
         return null;

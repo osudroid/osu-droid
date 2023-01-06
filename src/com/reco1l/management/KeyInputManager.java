@@ -4,14 +4,10 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import com.reco1l.Game;
-import com.reco1l.UI;
-import com.reco1l.interfaces.IBaseScene;
+import com.reco1l.interfaces.SceneHandler;
 import com.reco1l.ui.custom.Dialog;
-import com.reco1l.ui.BaseFragment;
 
 import org.anddev.andengine.entity.scene.Scene;
-
-import java.util.List;
 
 // This only have support for Back button.
 public class KeyInputManager {
@@ -48,7 +44,7 @@ public class KeyInputManager {
                 }
             }
 
-            IBaseScene currentHandler = Game.engine.getCurrentSceneHandler();
+            SceneHandler currentHandler = Game.engine.getCurrentSceneHandler();
             if (currentHandler != null) {
                 return currentHandler.onBackPress();
             }

@@ -2,7 +2,9 @@ package com.edlplan.ui.fragment;
 
 import android.animation.Animator;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.Color;
+import android.view.ContextMenu;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.SeekBar;
@@ -24,7 +26,7 @@ import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class InGameSettingMenu extends BaseFragment {
+public class InGameSettingMenu {
 
     private static InGameSettingMenu menu;
     private CheckBox enableStoryboard;
@@ -46,29 +48,12 @@ public class InGameSettingMenu extends BaseFragment {
         return menu;
     }
 
-    @Override
-    protected int getLayoutID() {
-        return R.layout.fragment_in_game_option;
+    private Context getContext() {
+        return null;
     }
 
-    @Override
-    protected void onLoadView() {
-        reload();
-        findViewById(R.id.frg_header).animate().cancel();
-        findViewById(R.id.frg_header).setAlpha(0);
-        findViewById(R.id.frg_header).setTranslationY(100);
-        findViewById(R.id.frg_header).animate()
-                .alpha(1)
-                .translationY(0)
-                .setDuration(200)
-                .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-                .start();
-    }
-
-    private void applyCustomModColor() {
-        final TextView customizedModsText = findViewById(R.id.customize_mods);
-        int color = ModMenu.getInstance().getFLfollowDelay() != FlashLightEntity.defaultMoveDelayS ? Color.RED : greenColor;
-        customizedModsText.setTextColor(color);
+    private <T extends View> T findViewById(int id) {
+        return null;
     }
 
     @SuppressLint({"ClickableViewAccessibility", "ApplySharedPref"})
@@ -268,7 +253,6 @@ public class InGameSettingMenu extends BaseFragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 ModMenu.getInstance().setFLfollowDelay((float) Math.round(progress * 1200f) / (10f * 1000f));
-                applyCustomModColor();
                 ((TextView) findViewById(R.id.flashlightFollowDelayText))
                     .setText(String.format(Locale.getDefault(), "%.1fms", progress * FlashLightEntity.defaultMoveDelayMS));
             }
@@ -282,14 +266,10 @@ public class InGameSettingMenu extends BaseFragment {
         ((TextView) findViewById(R.id.forceARText)).setText(String.format("AR%.1f", ModMenu.getInstance().getForceAR()));
     }
 
-    @Override
     public void show() {
-        super.show();
     }
 
-    @Override
     public void dismiss() {
-        super.dismiss();
         ModMenu.getInstance().hideByFrag();
     }
 

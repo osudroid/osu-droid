@@ -27,13 +27,13 @@ import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
-import com.reco1l.data.tables.DialogTable;
+import com.reco1l.tables.DialogTable;
 import com.reco1l.UI;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.data.tables.AnimationTable;
+import com.reco1l.tables.AnimationTable;
 import com.reco1l.utils.execution.AsyncTask;
-import com.reco1l.utils.ResUtils;
+import com.reco1l.tables.Res;
 import com.reco1l.utils.helpers.OnlineHelper;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
@@ -84,6 +84,11 @@ public final class SettingsMenu extends BaseFragment {
     }
 
     @Override
+    protected boolean isExtra() {
+        return true;
+    }
+
+    @Override
     protected String getPrefix() {
         return "sm";
     }
@@ -130,8 +135,8 @@ public final class SettingsMenu extends BaseFragment {
         }
         currentTab = Tabs.general;
 
-        panelWidth = (int) ResUtils.dimen(R.dimen.settingsPanelWidth);
-        navBarWidth = (int) ResUtils.dimen(R.dimen.settingsPanelNavBarWidth);
+        panelWidth = (int) Res.dimen(R.dimen.settingsPanelWidth);
+        navBarWidth = (int) Res.dimen(R.dimen.settingsPanelNavBarWidth);
 
         tabIndicator = find("tabIndicator");
         navigationBar = find("navbar");
@@ -175,7 +180,7 @@ public final class SettingsMenu extends BaseFragment {
                 .play(200);
 
         for (Tabs tab : Tabs.values()) {
-            bindTouchListener(find(tab.name()), () -> navigateTo(tab));
+            bindTouch(find(tab.name()), () -> navigateTo(tab));
         }
     }
 

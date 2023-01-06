@@ -38,7 +38,7 @@ import com.reco1l.GameEngine;
 import com.reco1l.Game;
 import com.reco1l.scenes.IntroScene;
 import com.reco1l.ui.custom.Dialog;
-import com.reco1l.data.tables.DialogTable;
+import com.reco1l.tables.DialogTable;
 import com.reco1l.management.KeyInputManager;
 
 import org.anddev.andengine.engine.Engine;
@@ -728,12 +728,5 @@ public class MainActivity extends BaseGameActivity implements
             finish();
             return false;
         }
-    }
-
-    public String getRenderer() {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        ConfigurationInfo config = manager.getDeviceConfigurationInfo();
-
-        return config.getGlEsVersion();
     }
 }

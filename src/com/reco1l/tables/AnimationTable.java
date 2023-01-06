@@ -1,4 +1,4 @@
-package com.reco1l.data.tables;
+package com.reco1l.tables;
 
 import android.view.View;
 import android.widget.TextView;

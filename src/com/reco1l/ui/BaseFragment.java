@@ -16,10 +16,8 @@ import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.utils.TouchListener;
 import com.reco1l.utils.TouchHandler;
-import com.reco1l.utils.ResUtils;
+import com.reco1l.tables.Res;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,9 +55,18 @@ public abstract class BaseFragment extends Fragment {
 
     //--------------------------------------------------------------------------------------------//
 
-    protected abstract @LayoutRes int getLayout();
+    protected @LayoutRes int getLayout() {
+        return 0;
+    }
 
-    protected abstract String getPrefix();
+    protected String getPrefix() {
+        return null;
+    }
+
+    protected View getRootView() {
+        return null;
+    }
+
 
     protected abstract void onLoad();
 
@@ -91,13 +98,17 @@ public abstract class BaseFragment extends Fragment {
 
     //--------------------------------------------------------------------------------------------//
 
-    protected void onUpdate(float sec) {}
+    protected void onUpdate(float sec) {
+    }
 
-    protected void onShowAttempt() {}
+    protected void onShowAttempt() {
+    }
 
-    protected void onCloseAttempt() {}
+    protected void onCloseAttempt() {
+    }
 
-    protected void onScreenChange(Screens lastScreen, Screens newScreen) {}
+    protected void onScreenChange(Screens lastScreen, Screens newScreen) {
+    }
 
     //--------------------------------------------------------------------------------------------//
 
@@ -105,16 +116,16 @@ public abstract class BaseFragment extends Fragment {
         return isLoaded;
     }
 
-    protected final int getWidth() {
+    public final int getWidth() {
         return rootView.getWidth();
     }
 
-    protected final int getHeight() {
+    public final int getHeight() {
         return rootView.getHeight();
     }
 
     protected final String generateTag() {
-        return getClass().getSimpleName() + "@" + hashCode();
+        return getClass().getSimpleName() + "@" + this.hashCode();
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -122,43 +133,63 @@ public abstract class BaseFragment extends Fragment {
     @Nullable
     @Override
     public final View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle bundle) {
+        rootView = getRootView();
 
-        rootView = inflater.inflate(getLayout(), container, false);
+        if (rootView != null && getLayout() != 0) {
+            throw new RuntimeException("You can't override getRootView() and getLayout() at the same time!");
+        } else if (rootView == null && getLayout() == 0) {
+            throw new RuntimeException("You've to override getRootView() or getLayout() to create the fragment view!");
+        }
 
+        if (getLayout() != 0) {
+            rootView = inflater.inflate(getLayout(), container, false);
+        }
         rootBackground = rootView.findViewById(R.id.background);
+
         onLoad();
         isLoaded = true;
-        if (closeOnBackgroundClick && rootBackground != null) {
-            rootBackground.setClickable(true);
 
-            if (!rootBackground.hasOnClickListeners()) {
-                bindTouchListener(rootBackground, new TouchListener() {
-                    public boolean hasTouchEffect() {
-                        return false;
-                    }
+        if (rootView != null) {
+            if (rootBackground != null) {
+                handleBackground();
+            }
 
-                    public void onPressUp() {
-                        close();
-                    }
-                });
+            if (getCloseTime() > 0) {
+                rootView.postDelayed(close, getCloseTime());
             }
         }
-        if (getCloseTime() > 0) {
-            rootView.postDelayed(close, getCloseTime());
-        }
+
         return rootView;
+    }
+
+    private void handleBackground() {
+        if (!closeOnBackgroundClick || rootBackground.hasOnClickListeners()) {
+            return;
+        }
+        rootBackground.setClickable(true);
+
+        bindTouch(rootBackground, new TouchListener() {
+
+            public boolean useTouchEffect() {
+                return false;
+            }
+
+            public void onPressUp() {
+                close();
+            }
+        });
     }
 
     //---------------------------------------Management-------------------------------------------//
 
-    protected void notifyTransition() {
-        String name = getClass().getSimpleName();
+    protected void onTransaction() {
+        final String tag = generateTag();
 
         if (isAdded()) {
-            Log.i("FragmentPlatform", "Added fragment " + name);
+            Log.i("FragmentPlatform", "Added fragment " + tag);
             return;
         }
-        Log.i("FragmentPlatform", "Removed fragment " + name);
+        Log.i("FragmentPlatform", "Removed fragment " + tag);
         System.gc();
     }
 
@@ -169,7 +200,7 @@ public abstract class BaseFragment extends Fragment {
         }
         isLoaded = false;
         rootView.removeCallbacks(close);
-        unbindTouchListeners();
+        unbindTouchHandlers();
         registeredViews.clear();
         Game.platform.removeFragment(this);
     }
@@ -203,9 +234,9 @@ public abstract class BaseFragment extends Fragment {
 
         int identifier;
         if (getPrefix() == null || id.startsWith(getPrefix() + "_")) {
-            identifier = ResUtils.id(id, "id");
+            identifier = Res.id(id, "id");
         } else {
-            identifier = ResUtils.id(getPrefix() + "_" + id, "id");
+            identifier = Res.id(getPrefix() + "_" + id, "id");
         }
 
         Object view = rootView.findViewById(identifier);
@@ -236,8 +267,8 @@ public abstract class BaseFragment extends Fragment {
         }
     }
 
-    public final void bindTouchListener(View view, Runnable onSingleTapUp) {
-        bindTouchListener(view, new TouchListener() {
+    public final void bindTouch(View view, Runnable onSingleTapUp) {
+        bindTouch(view, new TouchListener() {
             public void onPressUp() {
                 if (onSingleTapUp != null) {
                     onSingleTapUp.run();
@@ -246,7 +277,7 @@ public abstract class BaseFragment extends Fragment {
         });
     }
 
-    public final void bindTouchListener(View view, TouchListener listener) {
+    public final void bindTouch(View view, TouchListener listener) {
         TouchHandler vth = registeredViews.get(view);
         if (vth == null) {
             vth = new TouchHandler(listener);
@@ -258,17 +289,17 @@ public abstract class BaseFragment extends Fragment {
         vth.apply(view);
     }
 
-    protected final void unbindTouchListener(View view) {
+    protected final void unbindTouch(View view) {
         registeredViews.remove(view);
     }
 
-    protected final void unbindTouchListeners() {
+    protected final void unbindTouchHandlers() {
         for (View view : registeredViews.keySet()) {
             view.setOnTouchListener(null);
         }
     }
 
-    protected final void rebindTouchListeners() {
+    protected final void rebindTouchHandlers() {
         for (View view : registeredViews.keySet()) {
             TouchHandler touchHandler = registeredViews.get(view);
             if (touchHandler != null) {
@@ -279,5 +310,6 @@ public abstract class BaseFragment extends Fragment {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void init() {}
+    public void init() {
+    }
 }

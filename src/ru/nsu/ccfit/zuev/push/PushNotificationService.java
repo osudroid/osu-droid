@@ -48,7 +48,7 @@ public class PushNotificationService extends FirebaseMessagingService {
 
             NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
-                    .setSmallIcon(R.drawable.notify_inso)
+                    .setSmallIcon(R.drawable.v_app_icon)
                     .setContentTitle(title)
                     .setContentText(message)
                     .setAutoCancel(true)
