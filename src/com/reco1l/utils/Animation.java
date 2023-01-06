@@ -25,6 +25,8 @@ public final class Animation {
     private long delay = 0;
 
     private Float
+            fromPosX,
+            fromPosY,
             fromX,
             fromY,
             fromAlpha,
@@ -49,6 +51,8 @@ public final class Animation {
             fromBottomPadding;
 
     private Float
+            toPosX,
+            toPosY,
             toX,
             toY,
             toAlpha,
@@ -432,6 +436,13 @@ public final class Animation {
 
     private void applyFinalProperties(ViewPropertyAnimator viewAnimator) {
 
+        if (toPosX != null) {
+            viewAnimator.x(toPosX);
+        }
+        if (toPosY != null) {
+            viewAnimator.y(toPosY);
+        }
+
         if (toX != null) {
             viewAnimator.translationX(toX);
         }
@@ -461,6 +472,13 @@ public final class Animation {
     private void applyInitialProperties(View view) {
         if (view == null) {
             return;
+        }
+
+        if (fromPosX != null) {
+            view.setX(fromPosX);
+        }
+        if (fromPosY != null) {
+            view.setY(fromPosY);
         }
 
         if (fromX != null) {
@@ -540,6 +558,26 @@ public final class Animation {
 
     public Animation delay(long delay) {
         this.delay = delay;
+        return this;
+    }
+
+    public Animation fromPosX(Float fromPosX) {
+        this.fromPosX = fromPosX;
+        return this;
+    }
+
+    public Animation fromPosY(Float fromPosY) {
+        this.fromPosY = fromPosY;
+        return this;
+    }
+
+    public Animation toPosX(Float toPosX) {
+        this.toPosX = toPosX;
+        return this;
+    }
+
+    public Animation toPosY(Float toPosY) {
+        this.toPosY = toPosY;
         return this;
     }
 
