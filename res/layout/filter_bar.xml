@@ -18,14 +18,14 @@
             android:id="@+id/fm_sort"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:iconSrc="@drawable/v_clear"
+            app:iconSrc="@drawable/v18_clear"
             app:indicatorPosition="top" />
 
         <com.reco1l.view.IconButton
             android:id="@+id/fm_folders"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:iconSrc="@drawable/v_clear"
+            app:iconSrc="@drawable/v18_clear"
             app:indicatorPosition="top" />
 
         <EditText
@@ -36,7 +36,7 @@
             android:layout_marginLeft="@dimen/XS"
             android:background="@drawable/shape_rounded"
             android:backgroundTint="@color/badgeBackground"
-            android:drawableStart="@drawable/v_search"
+            android:drawableStart="@drawable/v18_search"
             android:drawablePadding="@dimen/S"
             android:hint="@string/menu_search_filter"
             android:imeOptions="flagNoExtractUi|flagNoFullscreen"

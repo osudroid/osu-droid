@@ -34,15 +34,10 @@ public class LegacyModWrapper extends ModWrapper implements IGameMods {
     }
 
     @Override
-    public Properties getProperties() {
-        switch (mod) {
-            case MOD_DOUBLETIME:
-            case MOD_NIGHTCORE:
-            case MOD_HALFTIME:
-                return new BaseSpeedMod.Properties();
-        }
+    public Properties createProperties() {
         return null;
     }
+
     //----------------------------------------------------------------------------------------//
 
     @Override

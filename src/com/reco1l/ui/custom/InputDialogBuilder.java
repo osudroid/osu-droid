@@ -6,7 +6,7 @@ import android.text.TextWatcher;
 public class InputDialogBuilder extends DialogBuilder {
 
     TextWatcher textWatcher;
-    String hint, summary;
+    String hint;
 
     int inputType;
 
@@ -17,11 +17,6 @@ public class InputDialogBuilder extends DialogBuilder {
 
     public InputDialogBuilder setHint(String hint) {
         this.hint = hint;
-        return this;
-    }
-
-    public InputDialogBuilder setSummary(String summary) {
-        this.summary = summary;
         return this;
     }
 

@@ -75,7 +75,7 @@
                     android:layout_width="@dimen/topBarButtonWidth"
                     android:layout_height="@dimen/topBarButtonHeight"
                     android:layout_alignParentRight="true"
-                    android:src="@drawable/v_clear"
+                    android:src="@drawable/v18_clear"
                     app:tint="@color/vectorSecondary" />
 
             </RelativeLayout>

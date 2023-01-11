@@ -4,6 +4,7 @@ import static android.widget.RelativeLayout.LayoutParams.*;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.transition.Transition;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -13,6 +14,7 @@ import android.widget.RelativeLayout.LayoutParams;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
@@ -74,8 +76,8 @@ public final class FragmentPlatform {
         screenContainer = new FrameLayout(context);
         overlayContainer = new FrameLayout(context);
 
-        screenContainer.setId(0x999999);
-        overlayContainer.setId(0x999990);
+        screenContainer.setId(Identifiers.Platform_ScreenFrame);
+        overlayContainer.setId(Identifiers.Platform_OverlayFrame);
 
         LayoutParams params = new LayoutParams(MATCH_PARENT, MATCH_PARENT);
 
@@ -89,6 +91,16 @@ public final class FragmentPlatform {
         renderLayout.addView(renderView, params);
 
         DrawFPSHandler.startCounter();
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public FragmentTransaction transaction() {
+        return manager.beginTransaction();
+    }
+
+    public FragmentManager getManager() {
+        return manager;
     }
 
     //--------------------------------------------------------------------------------------------//

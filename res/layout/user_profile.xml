@@ -48,7 +48,7 @@
                         android:layout_width="@dimen/userPanelAvatarSize"
                         android:layout_height="@dimen/userPanelAvatarSize"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/default_avatar"
+                        android:src="@drawable/placeholder_avatar"
                         app:shapeAppearanceOverlay="@style/avatar_shape" />
 
                     <TextView
@@ -76,7 +76,7 @@
                 android:paddingTop="@dimen/XXS"
                 android:paddingEnd="@dimen/XS"
                 android:scrollbarSize="@dimen/scrollbarIndicatorWidth"
-                android:scrollbarThumbVertical="@drawable/scrollbar_thumb">
+                android:scrollbarThumbVertical="@drawable/layers_scrollbar_thumb">
 
                 <LinearLayout
                     android:id="@+id/UC_infoBody"
@@ -176,7 +176,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
-                                android:src="@drawable/v_open_s" />
+                                android:src="@drawable/v14_open" />
 
                             <TextView
                                 style="@style/text"

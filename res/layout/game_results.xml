@@ -60,7 +60,7 @@
                             style="@style/propertyBadge"
                             android:layout_marginStart="0dp"
                             android:backgroundTint="@color/gameResultsBadgeBackground"
-                            android:drawableStart="@drawable/v_star_xs"
+                            android:drawableStart="@drawable/v10_star"
                             android:text="00.00" />
 
                         <TextView
@@ -83,7 +83,7 @@
                     android:layout_alignParentEnd="true"
                     android:layout_marginStart="0dp"
                     android:backgroundTint="@color/gameResultsBadgeBackground"
-                    android:drawableStart="@drawable/v_person_xs"
+                    android:drawableStart="@drawable/v10_person"
                     android:text="mapper" />
 
             </RelativeLayout>
@@ -133,7 +133,7 @@
                                         android:id="@+id/gr_avatar"
                                         android:layout_width="match_parent"
                                         android:layout_height="match_parent"
-                                        android:src="@drawable/default_avatar" />
+                                        android:src="@drawable/placeholder_avatar" />
 
                                 </androidx.cardview.widget.CardView>
 
@@ -182,7 +182,7 @@
                                     <ImageView
                                         android:id="@+id/gr_300iv"
                                         style="@style/hit_badge"
-                                        android:src="@drawable/hit_sample" />
+                                        android:src="@drawable/placeholder_hit_score" />
 
                                     <TextView
                                         android:id="@+id/gr_300"
@@ -204,7 +204,7 @@
                                     <ImageView
                                         android:id="@+id/gr_300kiv"
                                         style="@style/hit_badge"
-                                        android:src="@drawable/hit_sample" />
+                                        android:src="@drawable/placeholder_hit_score" />
 
                                     <TextView
                                         android:id="@+id/gr_300k"
@@ -236,7 +236,7 @@
                                     <ImageView
                                         android:id="@+id/gr_100iv"
                                         style="@style/hit_badge"
-                                        android:src="@drawable/hit_sample" />
+                                        android:src="@drawable/placeholder_hit_score" />
 
                                     <TextView
                                         android:id="@+id/gr_100"
@@ -258,7 +258,7 @@
                                     <ImageView
                                         android:id="@+id/gr_100kiv"
                                         style="@style/hit_badge"
-                                        android:src="@drawable/hit_sample" />
+                                        android:src="@drawable/placeholder_hit_score" />
 
                                     <TextView
                                         android:id="@+id/gr_100k"
@@ -289,7 +289,7 @@
                                     <ImageView
                                         android:id="@+id/gr_50iv"
                                         style="@style/hit_badge"
-                                        android:src="@drawable/hit_sample" />
+                                        android:src="@drawable/placeholder_hit_score" />
 
                                     <TextView
                                         android:id="@+id/gr_50"
@@ -311,7 +311,7 @@
                                     <ImageView
                                         android:id="@+id/gr_0iv"
                                         style="@style/hit_badge"
-                                        android:src="@drawable/hit_sample" />
+                                        android:src="@drawable/placeholder_hit_score" />
 
                                     <TextView
                                         android:id="@+id/gr_0"
@@ -359,7 +359,7 @@
 
                                     <TextView
                                         style="@style/text"
-                                        android:drawableStart="@drawable/v_touch_xxs"
+                                        android:drawableStart="@drawable/v8_touch"
                                         android:drawablePadding="@dimen/XXS"
                                         android:drawableTint="@color/textSecondary"
                                         android:text="Accuracy"
@@ -399,7 +399,7 @@
 
                                     <TextView
                                         style="@style/text"
-                                        android:drawableStart="@drawable/v_combo_xs"
+                                        android:drawableStart="@drawable/v10_combo"
                                         android:drawablePadding="@dimen/XXS"
                                         android:drawableTint="@color/textSecondary"
                                         android:text="Combo"
@@ -439,7 +439,7 @@
                                 android:layout_width="@dimen/gameResultsMarkSize"
                                 android:layout_height="@dimen/gameResultsMarkSize"
                                 android:layout_margin="@dimen/M"
-                                android:src="@drawable/ranking_sample" />
+                                android:src="@drawable/placeholder_ranking" />
 
                         </LinearLayout>
 
@@ -574,7 +574,7 @@
                     android:id="@+id/gr_rankingFail"
                     style="@style/text"
                     android:layout_centerInParent="true"
-                    android:drawableTop="@drawable/v_info_l"
+                    android:drawableTop="@drawable/v28_info"
                     android:drawablePadding="@dimen/S"
                     android:text="Failed to submit score!" />
 

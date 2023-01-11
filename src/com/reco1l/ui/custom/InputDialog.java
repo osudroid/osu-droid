@@ -28,9 +28,8 @@ public class InputDialog extends Dialog {
         layout.setGravity(Gravity.CENTER);
 
         TextView textView = new TextView(new ContextThemeWrapper(getContext(), R.style.text));
-        textView.setText(builder.summary);
+        textView.setText(builder.message);
         layout.addView(textView);
-
 
         EditText edit = new EditText(getContext());
         edit.setInputType(builder.inputType);

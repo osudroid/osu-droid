@@ -19,13 +19,13 @@ public class OsuSkin {
     protected final FloatSkinData sliderBodyWidth = new FloatSkinData("sliderBodyWidth", 61f);
     protected final FloatSkinData sliderBorderWidth = new FloatSkinData("sliderBorderWidth", 6f);
     protected final FloatSkinData sliderBodyBaseAlpha = new FloatSkinData("sliderBodyBaseAlpha", 0.7f);
-    protected final FloatSkinData sliderHintAlpha = new FloatSkinData("sliderHintAlpha", 1f);
+    protected final FloatSkinData sliderHintAlpha = new FloatSkinData("sliderHintAlpha", 0.15f);
     protected final FloatSkinData sliderHintShowMinLength = new FloatSkinData("sliderHintShowMinLength", 100f);
 
     protected final BooleanSkinData limitComboTextLength = new BooleanSkinData("limitComboTextLength");
     protected final BooleanSkinData disableKiai = new BooleanSkinData("disableKiai", true);
     protected final BooleanSkinData sliderHintEnable = new BooleanSkinData("sliderHintEnable", true);
-    protected final BooleanSkinData sliderFollowComboColor = new BooleanSkinData("sliderFollowComboColor", false);
+    protected final BooleanSkinData sliderFollowComboColor = new BooleanSkinData("sliderFollowComboColor", true);
     protected final BooleanSkinData useNewLayout = new BooleanSkinData("useNewLayout");
     protected final BooleanSkinData forceOverrideComboColor = new BooleanSkinData("forceOverride", true);
     protected final BooleanSkinData rotateCursor = new BooleanSkinData("rotateCursor", true);
@@ -35,7 +35,7 @@ public class OsuSkin {
 
     protected final ColorSkinData sliderBorderColor = new ColorSkinData("sliderBorderColor", "#333333");
     protected final ColorSkinData sliderBodyColor = new ColorSkinData("sliderBodyColor", "#3d3d57ff");
-    protected final ColorSkinData sliderHintColor = new ColorSkinData("sliderHintColor", "#1A1924");
+    protected final ColorSkinData sliderHintColor = new ColorSkinData("sliderHintColor", "#00000050");
 
     protected final SkinSliderType skinSliderType = SkinSliderType.FLAT;
 
@@ -112,7 +112,8 @@ public class OsuSkin {
 
     public ArrayList<RGBColor> getComboColor() {
         if (comboColor.isEmpty()) {
-            comboColor.add(RGBColor.hex2Rgb(DEFAULT_COLOR_HEX));
+            comboColor.add(RGBColor.hex2Rgb("#9c4b74ff"));
+            comboColor.add(RGBColor.hex2Rgb("#5e5e89ff"));
         }
         return comboColor;
     }

@@ -2,16 +2,11 @@
 
 <!-- Created by Reco1l on 21/12/2022, 05:31 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <SeekBarPreference
-        android:defaultValue="1"
-        android:key="mod_fl_delay"
-        app:min="1"
-        android:max="10"
-        android:title="Follow delay"
-        tools:layout="@layout/custom_preference_seekbar" />
+    <com.reco1l.preference.GameSekBarPreference
+        android:key="mod_flashlight_delay"
+        android:title="Follow delay" />
 
 </PreferenceScreen>

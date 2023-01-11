@@ -18,23 +18,20 @@
             android:entries="@array/placeholder_array"
             android:entryValues="@array/placeholder_array"
             android:key="skinPath"
-            android:summary="@string/opt_skinpath_summary"
             android:title="@string/opt_skinpath_title"
             app:iconSpaceReserved="false" />
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"
             android:key="skin"
-            android:summary="@string/opt_skin_summary"
             android:title="@string/opt_skin_title"
-            app:iconSpaceReserved="false" />
+            />
 
-        <DropDownPreference
+        <ListPreference
             android:defaultValue="1"
             android:entries="@array/spinner_style_names"
             android:entryValues="@array/spinner_style_values"
             android:key="spinnerstyle"
-            android:summary="@string/opt_spinner_style_summary"
             android:title="@string/opt_spinner_style_title"
             app:iconSpaceReserved="false" />
 
@@ -44,18 +41,15 @@
         android:title="UI"
         app:iconSpaceReserved="false">
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
+            android:defaultValue="true"
             android:key="ui_advancedEffects"
-            android:summary="@string/opt_triangles_animation_summary"
-            android:title="@string/opt_triangles_animation_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_triangles_animation_title" />
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="true"
             android:key="ui_showItemBackground"
-            android:title="Disable backgrounds in list items"
-            android:summary="Disable background in song list items (Increase performance)"
-            app:iconSpaceReserved="false" />
+            android:title="Disable backgrounds in list items" />
 
     </PreferenceCategory>
 
@@ -64,11 +58,10 @@
         android:title="Combo colors"
         app:iconSpaceReserved="false">
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
+            android:defaultValue="false"
             android:key="useCustomColors"
-            android:summary="@string/opt_combo_colors_summary"
-            android:title="@string/opt_combo_colors_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_combo_colors_title" />
 
         <net.margaritov.preference.colorpicker.ColorPickerPreference
             android:defaultValue="@integer/COLOR_GREEN"

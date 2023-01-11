@@ -2,25 +2,16 @@
 
 <!-- Created by Reco1l on 21/12/2022, 05:31 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <Preference
-        android:key="mod_speed_reset"
-        android:title="Reset"
-        tools:layout="@layout/custom_preference"/>
-
-    <SeekBarPreference
-        android:defaultValue="10"
+    <!--This is in float, 100 means 1.0f-->
+    <com.reco1l.preference.GameSekBarPreference
         android:key="mod_speed"
-        android:title="Speed modify"
-        android:max="30"
-        tools:layout="@layout/custom_preference_seekbar" />
+        android:title="Speed modify" />
 
-    <CheckBoxPreference
-        android:defaultValue="false"
+    <com.reco1l.preference.GameCheckBoxPreference
         android:key="mod_speed_pitch"
-        android:title="Enable pitch shift with speed modify"
-        tools:layout="@layout/custom_preference_checkbox" />
+        android:title="Enable pitch shift" />
 
 </PreferenceScreen>

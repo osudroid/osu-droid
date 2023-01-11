@@ -2,8 +2,6 @@ package com.reco1l.notification;
 
 import static androidx.media.app.NotificationCompat.MediaStyle;
 
-import static com.reco1l.interfaces.IReferences.activity;
-
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -212,7 +210,7 @@ public class NotificationPlayer {
                 .addAction(R.drawable.v_prev, ACTION_PREV, prev)
                 .addAction(R.drawable.v_play, ACTION_PLAY, play)
                 .addAction(R.drawable.v_next, ACTION_NEXT, next)
-                .addAction(R.drawable.v_close, ACTION_CLOSE, close)
+                .addAction(R.drawable.v18_close, ACTION_CLOSE, close)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setStyle(new MediaStyle()
                         .setShowActionsInCompactView(0, 1, 2)

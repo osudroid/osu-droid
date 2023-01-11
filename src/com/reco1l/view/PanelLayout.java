@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 
+import com.reco1l.ui.Identifiers;
 import com.reco1l.utils.Views;
 import com.reco1l.view.effects.StripsEffect;
 
@@ -78,7 +79,7 @@ public class PanelLayout extends CardView implements BaseView {
         layout.addView(body);
 
         title = new TextView(new ContextThemeWrapper(getContext(), R.style.text));
-        title.setId(0x11);
+        title.setId(Identifiers.PanelLayout_Title);
         title.setGravity(Gravity.CENTER);
         body.addView(title);
         title.getLayoutParams().width = MATCH_PARENT;

@@ -1,9 +1,8 @@
 package com.reco1l.data.mods;
 // Created by Reco1l on 21/12/2022, 09:45
 
-import androidx.preference.SeekBarPreference;
-
 import com.reco1l.Game;
+import com.reco1l.preference.GameSekBarPreference;
 
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -17,7 +16,7 @@ public class FlashlightMod extends LegacyModWrapper {
     }
 
     @Override
-    public ModWrapper.Properties getProperties() {
+    public ModWrapper.Properties createProperties() {
         return new Properties();
     }
 
@@ -36,13 +35,22 @@ public class FlashlightMod extends LegacyModWrapper {
 
         @Override
         protected void onLoad() {
-            SeekBarPreference delay = find("mod_fl_delay");
+            super.onLoad();
 
-            delay.setValue(getIntProperty(ModProperty.FlDelay, 1));
+            GameSekBarPreference delay = find("mod_flashlight_delay");
+
+            delay.setValueFormatter(v -> 120 * v + "ms");
+            delay.setDefaultValue(1);
+            delay.setMax(10);
+            delay.setMin(1);
+
+            float currentValue = (float) getProperty(ModProperty.Flashlight_Delay, 0.12f);
+            delay.setValue((int) (currentValue * 1000 / 120));
+
             delay.setOnPreferenceChangeListener((p, v) -> {
-                float value = Math.round(((int) v) * 1200f) / (10f * 1000f);
+                float value = 120 * ((int) v) / 1000f;
 
-                setIntProperty(ModProperty.FlDelay, (int) v);
+                setProperty(ModProperty.Flashlight_Delay, value);
                 Game.modMenu.setFLfollowDelay(value);
                 return true;
             });

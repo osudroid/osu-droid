@@ -50,7 +50,7 @@ public class SummaryScene extends BaseScene {
     private void createTopBarButtons() {
         IconButton retry = new IconButton(Game.activity);
 
-        retry.setIcon(Res.drw(R.drawable.v_tune));
+        retry.setIcon(Res.drw(R.drawable.v18_tune));
         retry.runOnTouch(() -> {
             Game.resourcesManager.getSound("applause").stop();
             Game.gameScene.startGame(null, null);
@@ -58,7 +58,7 @@ public class SummaryScene extends BaseScene {
 
         IconButton watchReplay = new IconButton(Game.activity);
 
-        watchReplay.setIcon(Res.drw(R.drawable.v_search));
+        watchReplay.setIcon(Res.drw(R.drawable.v18_search));
 
         UI.topBar.addButton(getIdentifier(), retry);
         UI.topBar.addButton(getIdentifier(), watchReplay);

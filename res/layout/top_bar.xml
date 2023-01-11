@@ -31,7 +31,7 @@
                 android:layout_width="@dimen/topBarButtonWidth"
                 android:layout_height="match_parent"
                 android:layout_alignParentEnd="true"
-                android:src="@drawable/v_settings" />
+                android:src="@drawable/v18_settings" />
 
             <!--Inbox-->
             <ImageView
@@ -40,7 +40,7 @@
                 android:layout_width="@dimen/topBarButtonWidth"
                 android:layout_height="match_parent"
                 android:layout_toStartOf="@id/tb_userBox"
-                android:src="@drawable/v_notifications" />
+                android:src="@drawable/v18_notifications" />
 
             <!--User box-->
             <RelativeLayout
@@ -94,7 +94,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:scaleType="centerCrop"
-                            android:src="@drawable/default_avatar" />
+                            android:src="@drawable/placeholder_avatar" />
 
                     </androidx.cardview.widget.CardView>
 
@@ -128,7 +128,7 @@
                             style="@style/icon_button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:src="@drawable/v_back" />
+                            android:src="@drawable/v18_back" />
 
                         <TextView
                             style="@style/text"
@@ -160,7 +160,7 @@
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:src="@drawable/v_music_s" />
+                            android:src="@drawable/v14_music" />
 
                         <TextView
                             android:id="@+id/tb_musicText"
@@ -179,7 +179,7 @@
                         android:layout_height="wrap_content"
                         android:layout_centerInParent="true"
                         android:alpha="0"
-                        android:src="@drawable/v_arrow_s" />
+                        android:src="@drawable/v14_arrow" />
 
                 </RelativeLayout>
 

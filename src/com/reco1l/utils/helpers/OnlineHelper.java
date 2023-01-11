@@ -4,7 +4,6 @@ import android.graphics.drawable.Drawable;
 
 import com.reco1l.Game;
 import com.reco1l.UI;
-import com.reco1l.interfaces.IReferences;
 
 import java.io.File;
 
@@ -18,7 +17,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class OnlineHelper {
 
     public static final Drawable defaultAvatar =
-            Game.activity.getDrawable(R.drawable.default_avatar);
+            Game.activity.getDrawable(R.drawable.placeholder_avatar);
 
     //--------------------------------------------------------------------------------------------//
 

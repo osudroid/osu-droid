@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 21/12/2022, 05:31 -->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.reco1l.preference.GameSekBarPreference
+        android:key="mod_custom_ar"
+        android:title="Approach Rate" />
+
+</PreferenceScreen>

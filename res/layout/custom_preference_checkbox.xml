@@ -1,20 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="@dimen/M"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:background="@color/backgroundSecondary">
 
+    <LinearLayout
+        android:id="@+id/pref_reset"
+        android:layout_width="@dimen/M"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/pref_main_layout"
+        android:layout_alignBottom="@id/pref_main_layout"
+        android:alpha="0"
+        android:gravity="center"
+        android:paddingHorizontal="@dimen/XS">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:cardBackgroundColor="@color/textTertiary"
+            app:cardCornerRadius="@dimen/globalCorners" />
+
+    </LinearLayout>
+
     <RelativeLayout
+        android:id="@+id/pref_main_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/M">
 
         <TextView
             android:id="@android:id/title"
             style="@style/text"
             android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
             android:layout_toStartOf="@android:id/checkbox"
             tools:text="title title" />
 
@@ -27,4 +47,4 @@
 
     </RelativeLayout>
 
-</LinearLayout>
+</RelativeLayout>

@@ -8,13 +8,11 @@ import android.widget.TextView;
 import com.edlplan.ui.TriangleEffectView;
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
-import com.reco1l.ui.custom.Dialog;
 import com.reco1l.UI;
 import com.reco1l.utils.Animation;
 import com.reco1l.tables.AnimationTable;
 import com.reco1l.management.KeyInputManager;
 import com.reco1l.utils.helpers.BeatmapHelper;
-import com.reco1l.tables.DialogTable;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.tables.Res;
 import com.reco1l.utils.helpers.OnlineHelper;
@@ -26,7 +24,6 @@ import java.util.Map;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 26/6/22 21:20
@@ -282,7 +279,7 @@ public final class TopBar extends BaseFragment {
             if (!parent.isAdded())
                 return;
 
-            AnimationTable.fadeOutIn(avatar, () -> avatar.setImageResource(R.drawable.default_avatar));
+            AnimationTable.fadeOutIn(avatar, () -> avatar.setImageResource(R.drawable.placeholder_avatar));
 
             AnimationTable.textChange(rank, Res.str(R.string.top_bar_offline));
             AnimationTable.textChange(name, Config.getLocalUsername());

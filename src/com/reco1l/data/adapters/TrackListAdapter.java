@@ -17,6 +17,7 @@ import com.reco1l.data.BaseViewHolder;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.UI;
+import com.reco1l.view.effects.StripsEffect;
 
 import java.util.ArrayList;
 
@@ -52,12 +53,17 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
         private final ImageView mark;
         private final TextView stars, difficulty;
 
+        private final StripsEffect stripsEffect;
+
         private int color;
 
         //----------------------------------------------------------------------------------------//
 
         public TrackViewHolder(@NonNull View root) {
             super(root);
+
+            stripsEffect = new StripsEffect(root.getContext());
+
             mark = root.findViewById(R.id.bl_mark);
             stars = root.findViewById(R.id.bl_stars);
             body = root.findViewById(R.id.bl_childBody);
@@ -105,6 +111,8 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
             Animation.of(body)
                     .toAlpha(1)
                     .play(200);
+
+            body.addView(stripsEffect, 0);
         }
 
         @Override
@@ -112,6 +120,8 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
             Animation.of(body)
                     .toAlpha(0.8f)
                     .play(200);
+
+            body.removeView(stripsEffect);
         }
     }
 }

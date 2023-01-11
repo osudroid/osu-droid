@@ -3,10 +3,10 @@ package com.reco1l.data.mods;
 
 public interface ModProperty {
 
-    String SpeedChange = "speedChange";
-    String ShiftPitch = "shiftPitch";
+    String CustomSpeed_Value = "customSpeed_value";
+    String CustomSpeed_ShiftPitch = "customSpeed_shiftPitch";
 
-    String FlDelay = "flDelay";
+    String Flashlight_Delay = "flashlight_delay";
 
-    String ForceAR = "forceAr";
+    String CustomDiff_AR = "diffAdjust_AR";
 }

@@ -2,43 +2,26 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import static ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*;
 
-import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.UI;
 
-import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import java.util.EnumSet;
-import java.util.Map;
-import java.util.TreeMap;
 
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.game.mods.IModSwitcher;
-import ru.nsu.ccfit.zuev.osu.game.mods.ModButton;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osu.helper.TextButton;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class ModMenu implements IModSwitcher {
+public class ModMenu {
     private static final ModMenu instance = new ModMenu();
-    private Scene scene = null;
     private EnumSet<GameMod> mod;
     private ChangeableText multiplierText;
-    private TrackInfo selectedTrack;
-    private final Map<GameMod, ModButton> modButtons = new TreeMap<>();
     private float changeSpeed = 1.0f;
     private float forceAR = 9.0f;
     private boolean enableForceAR = false;
     private boolean enableNCWhenSpeedChange = false;
-    private boolean modsRemoved = false;
     private float FLfollowDelay = 0.12f;
 
     private ModMenu() {
@@ -57,126 +40,6 @@ public class ModMenu implements IModSwitcher {
         return instance;
     }
 
-    public void hide() {
-        InGameSettingMenu.getInstance().dismiss();
-    }
-
-    public void hideByFrag() {
-    }
-
-    private void addButton(int x, int y, String texture, GameMod mod) {
-        ModButton mButton;
-
-        mButton = new ModButton(x, y, texture, mod);
-        mButton.setModEnabled(this.mod.contains(mod));
-        mButton.setSwitcher(this);
-        scene.attachChild(mButton);
-        scene.registerTouchArea(mButton);
-        modButtons.put(mod, mButton);
-    }
-
-    public void init() {
-
-        modButtons.clear();
-        scene = new Scene();
-        scene.setBackgroundEnabled(false);
-        final Rectangle bg = new Rectangle(0, 0, Config.getRES_WIDTH(),
-                Config.getRES_HEIGHT());
-        bg.setColor(0, 0, 0, 0.7f);
-        scene.attachChild(bg);
-
-        multiplierText = new ChangeableText(0, Utils.toRes(50),
-                ResourceManager.getInstance().getFont("CaptionFont"),
-                StringTable.format(R.string.menu_mod_multiplier, 1f));
-        multiplierText.setScale(1.2f);
-        scene.attachChild(multiplierText);
-
-        changeMultiplierText();
-
-        final int offset = 100;
-        final int offsetGrowth = 130;
-        final TextureRegion button = ResourceManager.getInstance().getTexture("selection-mod-easy");
-
-        //line 1
-        addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-easy", MOD_EASY);
-        addButton(offset + offsetGrowth, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-nofail", MOD_NOFAIL);
-        addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-halftime", MOD_HALFTIME);
-        addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-reallyeasy", MOD_REALLYEASY);
-
-        //line 2
-        addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hardrock", MOD_HARDROCK);
-        addButton(offset + offsetGrowth, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-doubletime", MOD_DOUBLETIME);
-        addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-nightcore", MOD_NIGHTCORE);
-        addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hidden", MOD_HIDDEN);
-        addButton(offset + offsetGrowth * 4, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-flashlight", MOD_FLASHLIGHT);
-        addButton(offset + offsetGrowth * 5, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-suddendeath", MOD_SUDDENDEATH);
-        addButton(offset + offsetGrowth * 6, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-perfect", MOD_PERFECT);
-        //addButton(offset + offsetGrowth * 6, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-speedup", GameMod.MOD_SPEEDUP);
-        //line 3
-        addButton(offset, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax", MOD_RELAX);
-        addButton(offset + offsetGrowth, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax2", MOD_AUTOPILOT);
-        addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-autoplay", MOD_AUTO);
-        addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-scorev2", MOD_SCOREV2);
-        addButton(offset + offsetGrowth * 4, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-precise", MOD_PRECISE);
-        addButton(offset + offsetGrowth * 5, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-smallcircle", MOD_SMALLCIRCLE);
-
-
-        final TextButton resetText = new TextButton(ResourceManager
-                .getInstance().getFont("CaptionFont"),
-                StringTable.get(R.string.menu_mod_reset)) {
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionUp()) {
-                    mod.clear();
-                    changeMultiplierText();
-                    for (ModButton btn : modButtons.values()) {
-                        btn.setModEnabled(false);
-                    }
-                    return true;
-                }
-                return false;
-            }
-        };
-        scene.attachChild(resetText);
-        scene.registerTouchArea(resetText);
-        resetText.setScale(1.2f);
-
-        final TextButton back = new TextButton(ResourceManager
-                .getInstance().getFont("CaptionFont"),
-                StringTable.get(R.string.menu_mod_back)) {
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionUp()) {
-                    return true;
-                }
-                return false;
-            }
-        };
-        back.setScale(1.2f);
-        back.setWidth(resetText.getWidth());
-        back.setHeight(resetText.getHeight());
-        back.setPosition(Config.getRES_WIDTH() - back.getWidth() - 60, Config.getRES_HEIGHT() - back.getHeight() - 30);
-        back.setColor(66 / 255f, 76 / 255f, 80 / 255f);
-        resetText.setPosition(Config.getRES_WIDTH() - resetText.getWidth() - 60, back.getY() - resetText.getHeight() - 20);
-//		multiplierText.setPosition(back.getX() + (back.getWidth() / 2 - multiplierText.getWidth() / 2), resetText.getY() - multiplierText.getHeight() - 40);
-
-        scene.attachChild(back);
-        scene.registerTouchArea(back);
-
-        scene.setTouchAreaBindingEnabled(true);
-    }
-
-    public Scene getScene() {
-        if (scene == null) {
-            init();
-        }
-        return scene;
-    }
-
     public EnumSet<GameMod> getMod() {
         return UI.modMenu.mods;
     }
@@ -186,8 +49,6 @@ public class ModMenu implements IModSwitcher {
     }
 
     private void changeMultiplierText() {
-        //GlobalManager.getInstance().getSongMenu().updateInfo(selectedTrack);
-        //calculateAble = true;
         float mult = 1;
         for (GameMod m : mod) {
             mult *= m.scoreMultiplier;
@@ -210,60 +71,11 @@ public class ModMenu implements IModSwitcher {
         }
     }
 
-    public void handleModFlags(GameMod flag, GameMod modToCheck, GameMod[] modsToRemove) {
-        if (flag.equals(modToCheck)) {
-            for (GameMod modToRemove: modsToRemove) {
-                mod.remove(modToRemove);
-                modsRemoved = true;
-            }
-        }
-    }
-
-    public boolean switchMod(GameMod flag) {
-        boolean returnValue = true;
-
-        if (mod.contains(flag)) {
-            mod.remove(flag);
-            returnValue = false;
-        } else {
-            mod.add(flag);
-
-            handleModFlags(flag, MOD_HARDROCK, new GameMod[]{MOD_EASY});
-            handleModFlags(flag, MOD_EASY, new GameMod[]{MOD_HARDROCK});
-            handleModFlags(flag, MOD_AUTOPILOT, new GameMod[]{MOD_RELAX, MOD_PERFECT, MOD_SUDDENDEATH, MOD_AUTO, MOD_NOFAIL});
-            handleModFlags(flag, MOD_AUTO, new GameMod[]{MOD_RELAX, MOD_AUTOPILOT, MOD_PERFECT, MOD_SUDDENDEATH});
-            handleModFlags(flag, MOD_RELAX, new GameMod[]{MOD_AUTO, MOD_PERFECT, MOD_SUDDENDEATH, MOD_NOFAIL, MOD_AUTOPILOT});
-            handleModFlags(flag, MOD_DOUBLETIME, new GameMod[]{MOD_NIGHTCORE, MOD_HALFTIME});
-            handleModFlags(flag, MOD_NIGHTCORE, new GameMod[]{MOD_DOUBLETIME, MOD_HALFTIME});
-            handleModFlags(flag, MOD_HALFTIME, new GameMod[]{MOD_DOUBLETIME, MOD_NIGHTCORE});
-            handleModFlags(flag, MOD_SUDDENDEATH, new GameMod[]{MOD_NOFAIL, MOD_PERFECT, MOD_AUTOPILOT, MOD_RELAX, MOD_AUTO});
-            handleModFlags(flag, MOD_PERFECT, new GameMod[]{MOD_NOFAIL, MOD_SUDDENDEATH, MOD_AUTOPILOT, MOD_RELAX, MOD_AUTO});
-            handleModFlags(flag, MOD_NOFAIL, new GameMod[]{MOD_PERFECT, MOD_SUDDENDEATH, MOD_AUTOPILOT, MOD_RELAX});
-
-            if (modsRemoved) {
-                for (GameMod gameMod : modButtons.keySet()) {
-                    modButtons.get(gameMod).setModEnabled(mod.contains(gameMod));
-                }
-            }
-        }
-
-        changeMultiplierText();
-
-        return returnValue;
-    }
-
-    public void setSelectedTrack(TrackInfo selectedTrack) {
-        this.selectedTrack = selectedTrack;
-        if (selectedTrack != null) {
-            changeMultiplierText();
-        }
-    }
-
     public float getSpeed(){
         float speed = changeSpeed;
         if (mod.contains(MOD_DOUBLETIME) || mod.contains(MOD_NIGHTCORE)){
             speed *= 1.5f;
-        } else if (mod.contains(MOD_HALFTIME)){
+        } else if (mod.contains(MOD_HALFTIME)) {
             speed *= 0.75f;
         }
 

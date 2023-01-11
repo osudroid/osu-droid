@@ -1,43 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="@dimen/M"
+    android:paddingVertical="@dimen/M"
+    android:paddingRight="@dimen/M"
     tools:background="@color/backgroundSecondary">
 
-    <RelativeLayout
+    <LinearLayout
+        android:id="@+id/pref_reset"
+        android:layout_width="@dimen/M"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/pref_main_layout"
+        android:layout_alignBottom="@id/pref_main_layout"
+        android:alpha="0"
+        android:gravity="center"
+        android:paddingHorizontal="@dimen/XS"
+        android:paddingVertical="@dimen/XXS">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:cardBackgroundColor="@color/textTertiary"
+            app:cardCornerRadius="@dimen/globalCorners" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/pref_main_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/M"
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@android:id/title"
-            style="@style/text"
-            android:layout_alignParentStart="true"
-            android:layout_toStartOf="@id/seekbar_value"
-            android:layout_centerVertical="true"
-            tools:text="title title" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@android:id/title"
+                style="@style/text"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@id/seekbar_value"
+                tools:text="title title" />
 
 
-        <TextView
-            android:id="@+id/seekbar_value"
-            style="@style/text"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginHorizontal="@dimen/M"
-            android:background="@drawable/shape_rounded"
-            android:backgroundTint="@color/checkBoxOffColor"
-            android:paddingHorizontal="@dimen/S"
-            android:paddingVertical="@dimen/XS"
-            tools:text="40%" />
+            <TextView
+                android:id="@+id/seekbar_value"
+                style="@style/text"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginHorizontal="@dimen/XS"
+                android:background="@drawable/shape_rounded"
+                android:backgroundTint="@color/checkBoxOffColor"
+                android:paddingHorizontal="@dimen/S"
+                android:paddingVertical="@dimen/XS"
+                tools:text="40%" />
 
-    </RelativeLayout>
+        </RelativeLayout>
 
-    <SeekBar
-        android:id="@+id/seekbar"
-        style="@style/seek_bar"
-        android:layout_marginTop="@dimen/M"
-        tools:progress="50" />
+        <SeekBar
+            android:id="@+id/seekbar"
+            style="@style/seek_bar"
+            android:layout_marginTop="@dimen/M"
+            tools:progress="50" />
 
-</LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

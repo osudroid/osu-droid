@@ -10,19 +10,31 @@ public abstract class ModWrapper {
 
     public ModViewHolder holder;
 
+    private Properties properties;
+
+    //----------------------------------------------------------------------------------------//
+
+    public ModWrapper() {
+        properties = createProperties();
+    }
+
     //----------------------------------------------------------------------------------------//
 
     public abstract String getName();
 
     public abstract String getIcon();
 
-    public abstract Properties getProperties();
+    protected abstract Properties createProperties();
+
+    public final Properties getProperties() {
+        return properties;
+    }
 
     //----------------------------------------------------------------------------------------//
 
     public void onSelect(boolean isEnabled) {
         if (holder != null) {
-            holder.onSelect(isEnabled);
+            holder.onModSelect(isEnabled);
         }
     }
 
@@ -30,30 +42,21 @@ public abstract class ModWrapper {
 
     public abstract static class Properties extends BasePreferenceFragment {
 
-        public Integer getIntProperty(String key, int def) {
-            return UI.modMenu.getIntProperty(key, def);
-        }
+        //----------------------------------------------------------------------------------------//
 
-        public Float getFloatProperty(String key, float def) {
-            return UI.modMenu.getFloatProperty(key, def);
-        }
-
-        public Boolean getBoolProperty(String key, boolean def) {
-            return UI.modMenu.getBoolProperty(key, def);
+        @Override
+        protected void onLoad() {
+            getListView().setNestedScrollingEnabled(false);
         }
 
         //----------------------------------------------------------------------------------------//
 
-        public void setIntProperty(String key, int value) {
-            UI.modMenu.setIntProperty(key, value);
+        public Object getProperty(String key, Object def) {
+            return UI.modMenu.getProperty(key, def);
         }
 
-        public void setFloatProperty(String key, float value) {
-            UI.modMenu.setFloatProperty(key, value);
-        }
-
-        public void setBoolProperty(String key, boolean value) {
-            UI.modMenu.setBoolProperty(key, value);
+        public void setProperty(String key, Object value) {
+            UI.modMenu.setProperty(key, value);
         }
     }
 }

@@ -67,12 +67,12 @@
                         <ImageView
                             android:id="@+id/mp_list"
                             style="@style/icon_button"
-                            android:layout_width="@dimen/vectorL"
-                            android:layout_height="@dimen/vectorL"
+                            android:layout_width="@dimen/vector28"
+                            android:layout_height="@dimen/vector28"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
                             android:background="@drawable/shape_rounded"
-                            android:src="@drawable/v_queue" />
+                            android:src="@drawable/v18_queue" />
 
                     </RelativeLayout>
 
@@ -143,10 +143,10 @@
                     <ImageView
                         android:id="@+id/mp_prev"
                         style="@style/icon_button"
-                        android:layout_width="@dimen/vectorXL"
-                        android:layout_height="@dimen/vectorXL"
+                        android:layout_width="@dimen/vector32"
+                        android:layout_height="@dimen/vector32"
                         android:background="@drawable/shape_rounded"
-                        android:src="@drawable/v_prev_l" />
+                        android:src="@drawable/v28_prev" />
 
                     <ImageView
                         android:id="@+id/mp_play"
@@ -155,15 +155,15 @@
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="@dimen/musicPlayerPlayButtonMargin"
                         android:background="@drawable/shape_rounded"
-                        android:src="@drawable/v_pause_xl" />
+                        android:src="@drawable/v32_pause_circle" />
 
                     <ImageView
                         android:id="@+id/mp_next"
                         style="@style/icon_button"
-                        android:layout_width="@dimen/vectorXL"
-                        android:layout_height="@dimen/vectorXL"
+                        android:layout_width="@dimen/vector32"
+                        android:layout_height="@dimen/vector32"
                         android:background="@drawable/shape_rounded"
-                        android:src="@drawable/v_next_l" />
+                        android:src="@drawable/v28_next" />
                 </LinearLayout>
 
             </LinearLayout>

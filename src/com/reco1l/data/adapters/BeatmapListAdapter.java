@@ -2,8 +2,6 @@ package com.reco1l.data.adapters;
 
 // Created by Reco1l on 18/9/22 00:01
 
-import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
-
 import static com.reco1l.data.adapters.BeatmapListAdapter.*;
 
 import android.graphics.Bitmap;
@@ -17,7 +15,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.reco1l.Game;
 import com.reco1l.data.BaseAdapter;
@@ -106,7 +103,7 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
 
                 public void onPressUp() {
                     if (select()) {
-                        Game.musicManager.change(item.getTrack(0));
+                        Game.selectorScene.onTrackSelect(item.getTrack(0));
                     }
                 }
 
@@ -202,6 +199,7 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
         @Override
         public void onSelect() {
             tracksAdapter.setData(item.getTracks());
+            tracksAdapter.select(Game.musicManager.getTrack());
         }
 
         @Override
@@ -250,7 +248,7 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
             String key = "itemBackground@" + track.getBeatmapID() + "/" + track.getPublicName();
 
             if (!Game.bitmapManager.contains(key)) {
-                Bitmap bm = BitmapFactory.decodeFile(track.getBackground());
+                Bitmap bm = BitmapFactory.decodeFile(track.getBackground()).copy(Bitmap.Config.ARGB_8888, true);
 
                 float scale = (float) background.getWidth() / bm.getWidth();
 

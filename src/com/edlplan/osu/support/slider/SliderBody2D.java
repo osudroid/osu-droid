@@ -10,6 +10,8 @@ import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
+import javax.microedition.khronos.opengles.GL10;
+
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 
 public class SliderBody2D extends AbstractSliderBody {
@@ -162,7 +164,7 @@ public class SliderBody2D extends AbstractSliderBody {
 
         if (enableHint) {
             hint = SpriteCache.trianglePackCache.get();
-            hint.setDepthTest(true);
+            hint.setDepthTest(false);
             hint.setClearDepthOnStart(true);
             hint.setColor(hintColor.r(), hintColor.g(), hintColor.b());
         }
@@ -210,11 +212,11 @@ public class SliderBody2D extends AbstractSliderBody {
             endLength = path.getMeasurer().maxLength();
         }
 
-        scene.attachChild(border, 0);
-        scene.attachChild(body, 0);
         if (hint != null) {
             scene.attachChild(hint, 0);
         }
+        scene.attachChild(border, 0);
+        scene.attachChild(body, 0);
     }
 
     @Override

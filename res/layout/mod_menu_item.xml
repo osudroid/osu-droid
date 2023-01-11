@@ -28,7 +28,7 @@
                 android:layout_width="@dimen/modMenuModSpriteSize"
                 android:layout_height="@dimen/modMenuModSpriteSize"
                 android:layout_marginHorizontal="@dimen/XXS"
-                android:src="@drawable/mod_sample" />
+                android:src="@drawable/placeholder_mod" />
 
         </LinearLayout>
 

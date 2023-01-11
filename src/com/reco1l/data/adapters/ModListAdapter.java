@@ -77,7 +77,7 @@ public class ModListAdapter extends BaseAdapter<ModListAdapter.ModViewHolder, Mo
             return UI.modMenu.enabled.contains(item);
         }
 
-        public void onSelect(boolean isEnabled) {
+        public void onModSelect(boolean isEnabled) {
             int color = body.getCardBackgroundColor().getDefaultColor();
 
             Animation.ofColor(color, isEnabled ? 0xFF222F3D : 0xFF242424)

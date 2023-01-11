@@ -22,7 +22,6 @@
         app:cardElevation="0dp">
 
         <RelativeLayout
-
             android:layout_width="match_parent"
             android:layout_height="@dimen/beatmapListChildItemHeight">
 
@@ -36,7 +35,7 @@
                     android:id="@+id/bl_stars"
                     style="@style/propertyBadge"
                     android:layout_marginStart="@dimen/M"
-                    android:drawableStart="@drawable/v_star_xs"
+                    android:drawableStart="@drawable/v10_star"
                     android:text="00.00" />
 
                 <ImageView
@@ -44,7 +43,7 @@
                     android:layout_width="@dimen/beatmapListTrackMarkSize"
                     android:layout_height="@dimen/beatmapListTrackMarkSize"
                     android:layout_marginLeft="@dimen/S"
-                    android:src="@drawable/ranking_sample_small"
+                    android:src="@drawable/placeholder_ranking_small"
                     android:visibility="gone" />
 
                 <TextView

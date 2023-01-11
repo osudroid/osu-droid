@@ -232,14 +232,25 @@ public final class Views {
             horizontal(size, size);
         }
 
-        public void vertical(int top, int bottom) {
-            top(top);
-            bottom(bottom);
+        public PaddingUtils vertical(int size) {
+            vertical(size, size);
+            return this;
         }
 
-        public void horizontal(int left, int right) {
+        public PaddingUtils horizontal(int size) {
+            return horizontal(size, size);
+        }
+
+        public PaddingUtils vertical(int top, int bottom) {
+            top(top);
+            bottom(bottom);
+            return this;
+        }
+
+        public PaddingUtils horizontal(int left, int right) {
             left(left);
             right(right);
+            return this;
         }
 
         public PaddingUtils top(int size) {

@@ -6,9 +6,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory
-        android:title="Gameplay"
         android:layout="@layout/custom_preference_category_big"
-        app:iconSpaceReserved="false"/>
+        android:title="Gameplay"
+        app:iconSpaceReserved="false" />
 
     <PreferenceCategory
         android:title="Background"
@@ -17,7 +17,6 @@
         <SeekBarPreference
             android:defaultValue="25"
             android:key="bgbrightness"
-            android:summary="@string/opt_bgbrightness_summary"
             android:title="@string/opt_bgbrightness_title"
             app:iconSpaceReserved="false"
             app:min="1"
@@ -34,23 +33,18 @@
             android:entries="@array/set_playfield_names"
             android:entryValues="@array/set_playfield_values"
             android:key="playfieldsize"
-            android:summary="@string/opt_setplayfield_summary"
             android:title="@string/opt_setplayfield_title"
             app:iconSpaceReserved="false" />
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"
             android:key="shrinkPlayfieldDownwards"
-            android:summary="@string/opt_shrink_playfield_downwards_summary"
-            android:title="@string/opt_shrink_playfield_downwards_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_shrink_playfield_downwards_title" />
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"
             android:key="hidenavibar"
-            android:summary="@string/opt_hide_navibar_summary"
-            android:title="@string/opt_hide_navibar_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_hide_navibar_title" />
 
     </PreferenceCategory>
 
@@ -58,18 +52,15 @@
         android:title="Cursor"
         app:iconSpaceReserved="false">
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"
             android:key="showcursor"
-            android:summary="@string/opt_showcursor_summary"
-            android:title="@string/opt_showcursor_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_showcursor_title" />
 
         <SeekBarPreference
             android:defaultValue="50"
             android:key="cursorSize"
             android:max="300"
-            android:summary="@string/opt_cursor_size_summary"
             android:title="@string/opt_cursor_size"
             app:iconSpaceReserved="false"
             app:min="25"
@@ -81,26 +72,21 @@
         android:title="HUD"
         app:iconSpaceReserved="false">
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"
             android:key="hideInGameUI"
-            android:summary="@string/opt_hide_ingame_ui_summary"
-            android:title="@string/opt_hide_ingame_ui_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_hide_ingame_ui_title" />
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"
             android:key="hideReplayMarquee"
-            android:summary="@string/opt_hide_replay_marquee_summary"
-            android:title="@string/opt_hide_replay_marquee_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_hide_replay_marquee_title" />
 
         <ListPreference
             android:defaultValue="0"
             android:entries="@array/error_meter_display_names"
             android:entryValues="@array/error_meter_display_values"
             android:key="errormeter"
-            android:summary="@string/opt_error_meter_display_summary"
             android:title="@string/opt_error_meter_display_title"
             app:iconSpaceReserved="false" />
 
@@ -110,19 +96,15 @@
         android:title="Objects"
         app:iconSpaceReserved="false">
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"
             android:key="images"
-            android:summary="@string/opt_largeimages_summary"
-            android:title="@string/opt_largeimages_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_largeimages_title" />
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"
             android:key="showfirstapproachcircle"
-            android:summary="@string/opt_show_first_approach_circle_summary"
-            android:title="@string/opt_show_first_approach_circle_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_show_first_approach_circle_title" />
 
     </PreferenceCategory>
 

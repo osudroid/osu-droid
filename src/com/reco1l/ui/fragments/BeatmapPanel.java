@@ -2,21 +2,25 @@ package com.reco1l.ui.fragments;
 
 import android.animation.ValueAnimator;
 import android.view.View;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.data.BeatmapProperty;
+import com.reco1l.interfaces.MusicObserver;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.data.Scoreboard;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.tables.Res;
 import com.reco1l.interfaces.IGameMods;
+import com.reco1l.view.BadgeText;
 
 import java.util.EnumSet;
 
@@ -28,7 +32,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 13/9/22 01:22
 
-public final class BeatmapPanel extends BaseFragment implements IGameMods {
+public final class BeatmapPanel extends BaseFragment implements IGameMods, MusicObserver {
 
     public static BeatmapPanel instance;
 
@@ -47,8 +51,8 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
             isBannerExpanded = true;
 
     // Map properties
-    private TrackInfo track;
-    private TextView title, artist, mapper, difficulty;
+    private TextView title, artist, difficulty;
+    private BadgeText mapper;
 
     private final BeatmapProperty.BPM pBPM;
     private final BeatmapProperty.Length pLength;
@@ -60,10 +64,14 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
 
     private float lastDifficulty = -1;
 
+    private int propertiesHeight;
+
     //--------------------------------------------------------------------------------------------//
 
     public BeatmapPanel() {
         super(Screens.Selector);
+        Game.musicManager.bindMusicObserver(this);
+
         pBPM = new BeatmapProperty.BPM();
         pLength = new BeatmapProperty.Length();
 
@@ -101,7 +109,6 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
     protected void onLoad() {
         closeOnBackgroundClick(false);
 
-        track = Game.musicManager.getTrack();
         bodyWidth = Res.dimen(R.dimen.beatmapPanelContentWidth);
         isBannerExpanded = true;
 
@@ -140,27 +147,19 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
         bindTouch(globalTab, () -> switchTab(globalTab));
         bindTouch(localTab, () -> switchTab(localTab));
 
-        int max = Res.dimen(R.dimen._84sdp);
-
         bindTouch(find("expand"), () -> {
             if (isBannerExpanded) {
-                ValueAnimator anim = ValueAnimator.ofInt(max, 0);
-                anim.setDuration(300);
-                anim.addUpdateListener(value -> {
-                    songProperties.getLayoutParams().height = (int) value.getAnimatedValue();
-                    songProperties.requestLayout();
-                });
-                anim.start();
                 isBannerExpanded = false;
+
+                Animation.of(songProperties)
+                        .toHeight(0)
+                        .play(300);
             } else {
-                ValueAnimator anim = ValueAnimator.ofInt(0, max);
-                anim.setDuration(300);
-                anim.addUpdateListener(value -> {
-                    songProperties.getLayoutParams().height = (int) value.getAnimatedValue();
-                    songProperties.requestLayout();
-                });
-                anim.start();
                 isBannerExpanded = true;
+
+                Animation.of(songProperties)
+                        .toHeight(propertiesHeight)
+                        .play(300);
             }
         });
 
@@ -181,21 +180,107 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
         pCS.view = find("cs");
         pHP.view = find("hp");
 
-        pAR.format = val -> GameHelper.Round(val, 2);
-        pOD.format = val -> GameHelper.Round(val, 2);
-        pCS.format = val -> GameHelper.Round(val, 2);
-        pHP.format = val -> GameHelper.Round(val, 2);
+        pAR.format = val -> GameHelper.Round(val, 1);
+        pOD.format = val -> GameHelper.Round(val, 1);
+        pCS.format = val -> GameHelper.Round(val, 1);
+        pHP.format = val -> GameHelper.Round(val, 1);
 
-        updateProperties(track);
+        updateProperties(Game.musicManager.getTrack());
         switchTab(localTab);
+
+        songProperties.post(() -> propertiesHeight = songProperties.getHeight());
+    }
+
+    @Override
+    public void onMusicChange(@Nullable TrackInfo newTrack, boolean wasAudioChanged) {
+        if (isLoaded()) {
+            updateProperties(newTrack);
+            updateScoreboard();
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    // Code transformed from old SongMenu
-    private void updateDimensionProperties() {
-        if (track == null)
+    public void updateProperties(TrackInfo track) {
+        if (track == null) {
             return;
+        }
+
+        Game.activity.runOnUiThread(() -> {
+
+            pStars.set(track.getDifficulty());
+            pCircles.set(track.getHitCircleCount());
+            pSpinners.set(track.getSpinnerCount());
+            pSliders.set(track.getSliderCount());
+            pCombo.set(track.getMaxCombo());
+
+            updateDimensionProperties(track);
+
+            new Thread(() -> {
+                DifficultyReCalculator math = new DifficultyReCalculator();
+                pStars.value = math.recalculateStar(track, math.getCS(track), Game.modMenu.getSpeed());
+                Game.activity.runOnUiThread(pStars::update);
+            }).start();
+
+            title.setText(BeatmapHelper.getTitle(track));
+            artist.setText("by " + BeatmapHelper.getArtist(track));
+            mapper.setText(track.getCreator());
+            difficulty.setText(track.getMode());
+
+            if (track.getBackground() != null) {
+                songBackground.setVisibility(View.VISIBLE);
+                songBackground.setImageDrawable(BeatmapHelper.getBackground(track));
+                find("gradient").setAlpha(1);
+            } else {
+                songBackground.setVisibility(View.INVISIBLE);
+                find("gradient").setAlpha(0);
+            }
+
+            pStars.update();
+            pCircles.update();
+            pSpinners.update();
+            pSliders.update();
+            pCombo.update();
+
+            int darkerColor = BeatmapHelper.Palette.getDarkerColor(pStars.value);
+            int textColor = BeatmapHelper.Palette.getTextColor(pStars.value);
+            int color = BeatmapHelper.Palette.getColor(pStars.value);
+
+            if (lastDifficulty == -1) {
+                pStars.view.getBackground().setTint(color);
+                pStars.view.getTextView().setTextColor(textColor);
+                banner.setCardBackgroundColor(darkerColor);
+
+                lastDifficulty = pStars.value;
+                return;
+            }
+
+            int lastDarkerColor = BeatmapHelper.Palette.getDarkerColor(lastDifficulty);
+            int lastTextColor = BeatmapHelper.Palette.getTextColor(lastDifficulty);
+            int lastColor = BeatmapHelper.Palette.getColor(lastDifficulty);
+            lastDifficulty = pStars.value;
+
+            Animation.ofColor(lastTextColor, textColor)
+                    .runOnUpdate(value -> pStars.view.setTextColor((int) value))
+                    .play(500);
+
+            Animation.ofColor(lastColor, color)
+                    .runOnUpdate(value -> pStars.view.setCardBackgroundColor((int) value))
+                    .play(500);
+
+            Animation.ofColor(lastDarkerColor, darkerColor)
+                    .runOnUpdate(value -> {
+                        banner.setCardBackgroundColor((int) value);
+                        mapper.setCardBackgroundColor((int) value);
+                    })
+                    .play(500);
+        });
+    }
+
+    private void updateDimensionProperties(TrackInfo track) {
+        if (track == null) {
+            return;
+        }
 
         EnumSet<GameMod> mod = Game.modMenu.getMod();
 
@@ -285,90 +370,6 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
         }
     }
 
-    public void updateProperties(TrackInfo track) {
-        this.track = track;
-        if (track == null || !isLoaded())
-            return;
-
-        Game.activity.runOnUiThread(() -> {
-
-            pStars.set(track.getDifficulty());
-            pCircles.set(track.getHitCircleCount());
-            pSpinners.set(track.getSpinnerCount());
-            pSliders.set(track.getSliderCount());
-            pCombo.set(track.getMaxCombo());
-
-            updateDimensionProperties();
-
-            new Thread(() -> {
-                DifficultyReCalculator math = new DifficultyReCalculator();
-                pStars.value = math.recalculateStar(track, math.getCS(track), Game.modMenu.getSpeed());
-                Game.activity.runOnUiThread(pStars::update);
-            }).start();
-
-            if (!isAdded())
-                return;
-
-            title.setText(BeatmapHelper.getTitle(track));
-            artist.setText("by " + BeatmapHelper.getArtist(track));
-            mapper.setText(track.getCreator());
-            difficulty.setText(track.getMode());
-
-            if (track.getBackground() != null) {
-                songBackground.setVisibility(View.VISIBLE);
-                songBackground.setImageDrawable(BeatmapHelper.getBackground(track));
-                find("gradient").setAlpha(1);
-            } else {
-                songBackground.setVisibility(View.INVISIBLE);
-                find("gradient").setAlpha(0);
-            }
-
-            pStars.update();
-            pCircles.update();
-            pSpinners.update();
-            pSliders.update();
-            pCombo.update();
-
-            int darkerColor = BeatmapHelper.Palette.getDarkerColor(pStars.value);
-            int textColor = BeatmapHelper.Palette.getTextColor(pStars.value);
-            int color = BeatmapHelper.Palette.getColor(pStars.value);
-
-            if (lastDifficulty == -1) {
-                pStars.view.getBackground().setTint(color);
-                pStars.view.setTextColor(textColor);
-                banner.setCardBackgroundColor(darkerColor);
-
-                lastDifficulty = pStars.value;
-                return;
-            }
-
-            int lastDarkerColor = BeatmapHelper.Palette.getDarkerColor(lastDifficulty);
-            int lastTextColor = BeatmapHelper.Palette.getTextColor(lastDifficulty);
-            int lastColor = BeatmapHelper.Palette.getColor(lastDifficulty);
-            lastDifficulty = pStars.value;
-
-            Animation.ofColor(lastTextColor, textColor)
-                    .runOnUpdate(value -> {
-                        pStars.view.setTextColor((int) value);
-                        if (pStars.view.getCompoundDrawablesRelative()[0] != null) {
-                            pStars.view.getCompoundDrawablesRelative()[0].setTint((int) value);
-                        }
-                    }).play(500);
-
-
-            Animation.ofColor(lastColor, color)
-                    .runOnUpdate(value -> pStars.view.getBackground().setTint((int) value))
-                    .play(500);
-
-            Animation.ofColor(lastDarkerColor, darkerColor)
-                    .runOnUpdate(value -> {
-                        banner.setCardBackgroundColor((int) value);
-                        mapper.getBackground().setTint((int) value);
-                    })
-                    .play(500);
-        });
-    }
-
     private void switchTab(View button) {
         if (isTabAnimInProgress || tabIndicator.getTranslationX() == button.getX())
             return;
@@ -400,9 +401,6 @@ public final class BeatmapPanel extends BaseFragment implements IGameMods {
     }
 
     public void updateScoreboard() {
-        if (!isAdded() || !isLoaded())
-            return;
-
         Game.activity.runOnUiThread(() -> {
             if (scoreboard.loadScores(Game.musicManager.getTrack(), isOnlineBoard)) {
                 message.setVisibility(View.GONE);

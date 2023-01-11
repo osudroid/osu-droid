@@ -70,7 +70,7 @@
 
             </RelativeLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
+            <com.factor.bouncy.BouncyRecyclerView
                 android:id="@+id/mm_customRv"
                 android:visibility="gone"
                 android:layout_width="match_parent"

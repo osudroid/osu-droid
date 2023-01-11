@@ -59,16 +59,26 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
 
     //--------------------------------------------------------------------------------------------//
 
+    public final void clear() {
+        items.clear();
+        selectedPosition = -1;
+        notifyDataSetChanged();
+    }
+
     public final void setData(ArrayList<T> newList) {
         items = newList;
         notifyDataSetChanged();
     }
 
-    public final void select(T item) {
-        int index = items.indexOf(item);
+    public final ArrayList<T> getData() {
+        return items;
+    }
 
-        if (index >= 0) {
-            select(index);
+    public final void select(T item) {
+        for (T i : items) {
+            if (i.equals(item)) {
+                select(items.indexOf(i));
+            }
         }
     }
 
@@ -118,8 +128,11 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
         VH holder = getViewHolder(root);
         holder.context = context;
         holder.adapter = (BaseAdapter<BaseViewHolder<T>, T>) this;
+        onHolderCreated(holder);
         return holder;
     }
+
+    protected void onHolderCreated(VH holder) {}
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int i) {

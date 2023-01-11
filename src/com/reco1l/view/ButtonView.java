@@ -18,6 +18,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 
+import com.reco1l.ui.Identifiers;
 import com.reco1l.utils.Views;
 import com.reco1l.view.effects.StripsEffect;
 
@@ -73,7 +74,7 @@ public class ButtonView extends CardView implements BaseView {
         int v = sdp(8);
 
         text = new TextView(new ContextThemeWrapper(getContext(), R.style.text));
-        text.setId(0x11);
+        text.setId(Identifiers.ButtonView_TextView);
         text.setPadding(h, v, h, v);
         text.setGravity(Gravity.CENTER);
         layout.addView(text);
@@ -118,8 +119,12 @@ public class ButtonView extends CardView implements BaseView {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void setButtonText(String text) {
-        this.text.setText(text);
+    public void setButtonText(CharSequence charSequence) {
+        text.setText(charSequence);
+    }
+
+    public TextView getTextView() {
+        return text;
     }
 
     public StripsEffect getStripsEffect() {

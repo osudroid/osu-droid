@@ -4,7 +4,20 @@
 
 <resources>
 
-    <!--Global attributes-->
+    <attr name="badgeTextStyle" format="reference"/>
+
+    <declare-styleable name="BaseRoundedView">
+        <attr name="maxRounded" format="boolean"/>
+        <attr name="clampToSquare" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="BadgeText">
+        <attr name="android:text"/>
+        <attr name="icon"/>
+    </declare-styleable>
+
+    <!--_________________________________________________________________________________________-->
+
     <attr name="beatSync" format="boolean"/>
 
     <declare-styleable name="IconButton">

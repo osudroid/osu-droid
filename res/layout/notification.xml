@@ -39,7 +39,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/v_notifications" />
+                        android:src="@drawable/v18_notifications" />
 
                 </LinearLayout>
 
@@ -85,7 +85,7 @@
                     android:layout_alignBottom="@id/n_innerBody"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true"
-                    android:src="@drawable/v_close_s"
+                    android:src="@drawable/v14_close"
                     app:tint="@color/vectorSecondary" />
 
             </RelativeLayout>

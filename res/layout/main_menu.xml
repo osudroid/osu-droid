@@ -6,73 +6,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_horizontal"
     android:translationZ="@dimen/topLayer">
 
-    <com.reco1l.view.effects.FlashEffect
-        android:id="@+id/mainM_kiai"
+    <View
+        android:id="@+id/mainM_buttonsBackground"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="@dimen/mainMenuButtonHeight"
+        android:layout_centerVertical="true"
+        android:background="@color/backgroundTertiary" />
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/mainM_buttonsLayout"
-        android:layout_width="@dimen/mainMenuButtonLayoutWidth"
-        android:layout_height="@dimen/mainMenuButtonSize"
-        android:layout_centerInParent="true"
-        app:cardBackgroundColor="@color/backgroundSecondary"
-        app:cardCornerRadius="@dimen/mainMenuButtonShapeRadius"
-        app:cardElevation="@dimen/S">
-
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent">
-
-            <LinearLayout
-                android:id="@+id/mainM_solo"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:paddingHorizontal="@dimen/M">
-
-                <TextView
-                    style="@style/text"
-                    android:layout_width="@dimen/mainMenuButtonSize"
-                    android:drawableTop="@drawable/v40_solo"
-                    android:drawablePadding="@dimen/XS"
-                    android:ellipsize="none"
-                    android:gravity="center"
-                    android:singleLine="true"
-                    android:text="@string/main_menu_solo"
-                    android:textColor="@color/textSecondary" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/mainM_multi"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:gravity="center"
-                android:paddingHorizontal="@dimen/M">
-
-                <TextView
-                    style="@style/text"
-                    android:layout_width="@dimen/mainMenuButtonSize"
-                    android:drawableTop="@drawable/v40_multi"
-                    android:drawablePadding="@dimen/XS"
-                    android:ellipsize="none"
-                    android:gravity="center"
-                    android:singleLine="true"
-                    android:text="@string/main_menu_multi"
-                    android:textColor="@color/textSecondary" />
-
-            </LinearLayout>
-
-        </RelativeLayout>
-
-    </androidx.cardview.widget.CardView>
-
-    <com.reco1l.view.CircularSpectrum
+    <com.reco1l.view.effects.CircularSpectrum
         android:id="@+id/mainM_spectrum"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -84,12 +27,85 @@
         android:layout_height="match_parent"
         android:elevation="@dimen/M" />
 
-    <!--Logo-->
     <com.reco1l.view.LogoView
         android:id="@+id/mainM_logo"
-        android:layout_width="@dimen/mainMenuLogoSize"
-        android:layout_height="@dimen/mainMenuLogoSize"
-        android:layout_centerInParent="true"
+        android:layout_width="@dimen/mainMenuSmallLogoSize"
+        android:layout_height="@dimen/mainMenuSmallLogoSize"
+        android:layout_centerVertical="true"
         app:cardElevation="@dimen/L" />
+
+    <LinearLayout
+        android:id="@+id/mainM_buttonsLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/mainMenuButtonHeight"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/mainM_logo">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/mainM_solo"
+            android:layout_width="@dimen/mainMenuButtonWidth"
+            android:layout_height="match_parent"
+            app:cardBackgroundColor="@color/backgroundSecondary"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="@dimen/XXL">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/XS"
+                    android:src="@drawable/v32_solo" />
+
+                <TextView
+                    style="@style/text"
+                    android:text="@string/main_menu_solo"
+                    android:textColor="@color/textSecondary" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/mainM_multi"
+            android:layout_width="@dimen/mainMenuButtonWidth"
+            android:layout_height="match_parent"
+            app:cardBackgroundColor="@color/backgroundSecondary"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="@dimen/XL">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/XS"
+                    android:src="@drawable/v32_multi" />
+
+                <TextView
+                    style="@style/text"
+                    android:text="@string/main_menu_multi"
+                    android:textColor="@color/textSecondary" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+    <com.reco1l.view.effects.FlashEffect
+        android:id="@+id/mainM_kiai"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
 
 </RelativeLayout>

@@ -36,15 +36,12 @@
     <dimen name="textXL">@dimen/_18ssp</dimen>
 
     <!--Vectors-->
-    <dimen name="vector40">@dimen/_40sdp</dimen>
+    <dimen name="vector32">@dimen/_32sdp</dimen>
+    <dimen name="vector28">@dimen/_28sdp</dimen>
     <dimen name="vector18">@dimen/_18sdp</dimen>
-
-    <dimen name="vectorXXS">@dimen/_8sdp</dimen>
-    <dimen name="vectorXS">@dimen/_10sdp</dimen>
-    <dimen name="vectorS">@dimen/_14sdp</dimen>
-    <dimen name="vectorM">@dimen/_18sdp</dimen>
-    <dimen name="vectorL">@dimen/_28sdp</dimen>
-    <dimen name="vectorXL">@dimen/_46sdp</dimen>
+    <dimen name="vector14">@dimen/_14sdp</dimen>
+    <dimen name="vector10">@dimen/_10sdp</dimen>
+    <dimen name="vector8">@dimen/_8sdp</dimen>
 
     <!--Buttons-->
     <dimen name="buttonCornerRadius">@dimen/_8sdp</dimen>
@@ -120,12 +117,12 @@
     <dimen name="notificationCloseWidth">@dimen/_32sdp</dimen>
 
     <!--Main menu-->
-    <dimen name="mainMenuButtonSize">@dimen/_130sdp</dimen>
+    <dimen name="mainMenuButtonHeight">@dimen/_90sdp</dimen>
+    <dimen name="mainMenuButtonWidth">@dimen/_120sdp</dimen>
     <dimen name="mainMenuButtonShapeRadius">@dimen/_65sdp</dimen>
     <dimen name="mainMenuButtonMargin">@dimen/_80sdp</dimen>
-    <dimen name="mainMenuButtonLayoutWidth">@dimen/_440sdp</dimen>
 
-    <dimen name="mainMenuSmallLogoSize">@dimen/_160sdp</dimen>
+    <dimen name="mainMenuSmallLogoSize">@dimen/_150sdp</dimen>
     <dimen name="mainMenuLogoSize">@dimen/_250sdp</dimen>
 
     <!--User panel-->

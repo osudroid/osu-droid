@@ -71,7 +71,7 @@
                         android:id="@+id/bl_mapper"
                         style="@style/propertyBadge"
                         android:layout_alignParentRight="true"
-                        android:drawableStart="@drawable/v_person_xs"
+                        android:drawableStart="@drawable/v10_person"
                         android:text="mapper" />
 
                 </RelativeLayout>

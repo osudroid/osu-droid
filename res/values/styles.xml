@@ -17,6 +17,7 @@
         <item name="android:elevation">1dp</item>
     </style>
 
+    <!--TODO remove this-->
     <style name="largeText" parent="text">
         <item name="android:textSize">@dimen/textM</item>
         <item name="android:textStyle">bold</item>
@@ -47,8 +48,8 @@
 
     <!--Seek bar-->
     <style name="song_seek_bar">
-        <item name="android:progressDrawable">@drawable/song_seek_bar_progress</item>
-        <item name="android:thumb">@drawable/song_seek_bar_thumb</item>
+        <item name="android:progressDrawable">@drawable/layers_song_seek_bar_progress</item>
+        <item name="android:thumb">@drawable/shape_song_seek_bar_thumb</item>
         <item name="android:maxHeight">@dimen/musicPlayerSongShapeHeight</item>
         <item name="android:thumbOffset">@dimen/songSeekBarThumbOffset</item>
         <item name="android:splitTrack">false</item>
@@ -61,16 +62,19 @@
         <item name="android:thumbOffset">0dp</item>
         <item name="android:maxHeight">@dimen/seekBarHeight</item>
         <item name="android:minHeight">@dimen/seekBarHeight</item>
-        <item name="android:progressDrawable">@drawable/seek_bar_progress</item>
-        <item name="android:thumb">@drawable/seek_bar_thumb</item>
+        <item name="android:progressDrawable">@drawable/layers_seek_bar_progress</item>
+        <item name="android:thumb">@drawable/shape_seek_bar_thumb</item>
         <item name="android:splitTrack">false</item>
     </style>
 
     <!--Check box-->
     <style name="check_box">
-        <item name="android:layout_width">@dimen/L</item>
-        <item name="android:layout_height">@dimen/L</item>
-        <item name="android:button">@drawable/check_box_button</item>
+        <item name="android:layout_width">@dimen/XL</item>
+        <item name="android:layout_height">@dimen/XL</item>
+
+        <item name="android:background">@drawable/abc_btn_radio_material_anim</item>
+        <item name="android:backgroundTint">#FFF</item>
+        <item name="android:button">@null</item>
     </style>
 
     <!--Preferences-->
@@ -116,7 +120,6 @@
     <!--Text badges-->
     <style name="propertyBadge" parent="text">
         <item name="android:gravity">center_vertical</item>
-        <item name="android:layout_marginStart">@dimen/XS</item>
         <item name="android:drawablePadding">@dimen/XS</item>
 
         <item name="android:paddingTop">@dimen/XXS</item>

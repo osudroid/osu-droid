@@ -51,11 +51,11 @@ public class SelectorScene extends BaseScene {
         IconButton mods = UI.modMenu.button = new IconButton(context);
 
         mods.runOnTouch(UI.modMenu::altShow);
-        mods.setIcon(R.drawable.v_tune);
+        mods.setIcon(R.drawable.v18_tune);
 
         IconButton search = new IconButton(context);
         search.runOnTouch(UI.filterBar::altShow);
-        search.setIcon(R.drawable.v_search);
+        search.setIcon(R.drawable.v18_search);
 
         /*BarButton random = new BarButton(context);
         random.setIcon(R.drawable.v_random);*/
@@ -84,11 +84,16 @@ public class SelectorScene extends BaseScene {
         if (Game.musicManager.getTrack() == track) {
             return;
         }
-
         Game.musicManager.change(track);
+        Game.globalManager.setSelectedTrack(track);
+    }
+
+    public void onAudioChange() {
+        TrackInfo track = Game.musicManager.getTrack();
+
         Game.songService.setVolume(0);
 
-        if (track.getPreviewTime() >= 0) {
+        if (track.getPreviewTime() != -1) {
             Game.songService.seekTo(track.getPreviewTime());
         } else {
             Game.songService.seekTo(Game.songService.getLength() / 2);
@@ -97,15 +102,6 @@ public class SelectorScene extends BaseScene {
         Animation.ofFloat(0, Config.getBgmVolume())
                 .runOnUpdate(value -> Game.songService.setVolume((float) value))
                 .play(400);
-
-        Game.globalManager.setSelectedTrack(track);
-        UI.beatmapPanel.updateProperties(track);
-        UI.beatmapPanel.updateScoreboard();
-        UI.background.changeFrom(track.getBackground());
-    }
-
-    public void playMusic(TrackInfo track) {
-
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -122,14 +118,15 @@ public class SelectorScene extends BaseScene {
     public void onMusicChange(TrackInfo track, boolean wasAudioChanged) {
         super.onMusicChange(track, wasAudioChanged);
 
-        if (track != null) {
-            onTrackSelect(track);
+        UI.background.changeFrom(track.getBackground());
+        if (wasAudioChanged) {
+            onAudioChange();
         }
     }
 
     @Override
     public void onMusicEnd() {
-        playMusic(Game.musicManager.getTrack());
+        onAudioChange();
     }
 
     //--------------------------------------------------------------------------------------------//

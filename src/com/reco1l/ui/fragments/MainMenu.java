@@ -1,13 +1,7 @@
 package com.reco1l.ui.fragments;
 
-import static android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT;
-import static android.graphics.drawable.GradientDrawable.Orientation.RIGHT_LEFT;
-
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.view.View;
-
-import androidx.cardview.widget.CardView;
+import android.widget.LinearLayout;
 
 import com.edlplan.framework.easing.Easing;
 import com.reco1l.Game;
@@ -21,7 +15,7 @@ import com.reco1l.utils.Views;
 import com.reco1l.utils.TouchListener;
 import com.reco1l.view.effects.ExpandEffect;
 import com.reco1l.view.LogoView;
-import com.reco1l.view.CircularSpectrum;
+import com.reco1l.view.effects.CircularSpectrum;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
@@ -34,8 +28,8 @@ public final class MainMenu extends BaseFragment {
     public static MainMenu instance;
 
     private LogoView logo;
-    private CardView buttons;
-    private View single, multi;
+    private LinearLayout buttonsLayout;
+    private View single, multi, buttonsBackground;
 
     private boolean
             isMenuShowing = false,
@@ -48,7 +42,6 @@ public final class MainMenu extends BaseFragment {
     public MainMenu() {
         super(Screens.Main);
     }
-
 
     //--------------------------------------------------------------------------------------------//
 
@@ -72,7 +65,8 @@ public final class MainMenu extends BaseFragment {
         logo = find("logo");
         single = find("solo");
         multi = find("multi");
-        buttons = find("buttonsLayout");
+        buttonsLayout = find("buttonsLayout");
+        buttonsBackground = find("buttonsBackground");
 
         CircularSpectrum spectrum = find("spectrum");
         spectrum.attachToLogo(logo);
@@ -80,11 +74,15 @@ public final class MainMenu extends BaseFragment {
         ExpandEffect expand = find("expand");
         expand.attachToLogo(logo);
 
-        single.setAlpha(0);
-        multi.setAlpha(0);
-
         Views.size(logo, Res.dimen(R.dimen.mainMenuLogoSize));
-        Views.width(buttons, 0);
+        Views.height(buttonsBackground, 0);
+        Views.height(buttonsLayout, 0);
+
+        Views.margins(buttonsLayout).left(Res.dimen(R.dimen.mainMenuSmallLogoSize) / 3);
+
+        logo.post(() ->
+                logo.setX(getWidth() / 2f - logo.getWidth() / 2f)
+        );
 
         bindTouch(logo, new TouchListener() {
 
@@ -96,32 +94,13 @@ public final class MainMenu extends BaseFragment {
                 if (!isMenuShowing) {
                     showMenu();
                 } else {
-                    hideMenu(false);
+                    hideMenu();
                 }
             }
         });
 
-        bindTouch(single, new TouchListener() {
-
-            public boolean useBorderlessEffect() {
-                return true;
-            }
-
-            public void onPressUp() {
-                onSingle();
-            }
-        });
-
-        bindTouch(multi, new TouchListener() {
-
-            public boolean useBorderlessEffect() {
-                return true;
-            }
-
-            public void onPressUp() {
-                onMulti();
-            }
-        });
+        bindTouch(single, this::onSingle);
+        bindTouch(multi, this::onMulti);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -134,46 +113,39 @@ public final class MainMenu extends BaseFragment {
             UI.topBar.show();
 
             Animation.of(logo)
+                    .toPosX((float) Res.sdp(48))
                     .toSize(Res.dimen(R.dimen.mainMenuSmallLogoSize))
                     .interpolate(Easing.InOutQuad)
-                    .play(300);
-
-            Animation.of(buttons)
-                    .toWidth(Res.dimen(R.dimen.mainMenuButtonLayoutWidth))
-                    .interpolate(Easing.InOutQuad)
-                    .play(300);
-
-            Animation.of(single, multi)
                     .runOnEnd(() -> isMenuAnimInProgress = false)
+                    .play(200);
+
+            Animation.of(buttonsLayout, buttonsBackground)
+                    .toHeight(Res.dimen(R.dimen.mainMenuButtonHeight))
                     .toAlpha(1)
-                    .play(300);
+                    .play(200);
 
             isMenuShowing = true;
         }
     }
 
-    private void hideMenu(boolean isTransition) {
+    private void hideMenu() {
         if (!isMenuAnimInProgress && isMenuShowing) {
             isMenuAnimInProgress = true;
 
-            if (!isTransition) {
-                UI.topBar.close();
-            }
+            UI.topBar.close();
+            int maxSize = Res.dimen(R.dimen.mainMenuLogoSize);
 
             Animation.of(logo)
-                    .toSize(Res.dimen(R.dimen.mainMenuLogoSize))
+                    .toPosX((float) getWidth() / 2 - maxSize / 2)
+                    .toSize(maxSize)
                     .interpolate(Easing.InOutQuad)
-                    .play(300);
-
-            Animation.of(buttons)
-                    .toWidth(0)
-                    .interpolate(Easing.InOutQuad)
-                    .play(300);
-
-            Animation.of(single, multi)
                     .runOnEnd(() -> isMenuAnimInProgress = false)
+                    .play(200);
+
+            Animation.of(buttonsLayout, buttonsBackground)
+                    .toHeight(0)
                     .toAlpha(0)
-                    .play(300);
+                    .play(200);
 
             isMenuShowing = false;
         }
@@ -182,8 +154,6 @@ public final class MainMenu extends BaseFragment {
     //--------------------------------------------------------------------------------------------//
 
     private void onSingle() {
-        hideMenu(true);
-
         Animation.of(rootView)
                 .runOnEnd(() -> {
                     Game.loaderScene.show();
@@ -198,7 +168,6 @@ public final class MainMenu extends BaseFragment {
                             if (!Game.libraryManager.loadLibraryCache(Game.activity, true)) {
                                 Game.libraryManager.scanLibrary(Game.activity);
                             }
-                            Game.libraryManager.findBeatmap(Game.musicManager.getTrack().getBeatmap());
                         }
 
                         public void onComplete() {
@@ -206,14 +175,14 @@ public final class MainMenu extends BaseFragment {
                         }
                     }.execute();
                 })
-                .toX(Res.dimen(R.dimen._80sdp))
+                .toY(Res.sdp(40))
                 .toAlpha(0)
-                .play(400);
+                .play(200);
     }
 
     private void onMulti() {
         ToastLogger.showText("WIP", false);
-        hideMenu(false);
+        hideMenu();
     }
 
     public void onExit() {
@@ -222,7 +191,7 @@ public final class MainMenu extends BaseFragment {
                     .runOnStart(() -> {
                         Game.platform.closeAllExcept(this);
                         unbindTouchHandlers();
-                        hideMenu(false);
+                        hideMenu();
                     })
                     .toScale(1)
                     .toAlpha(0)
@@ -236,7 +205,7 @@ public final class MainMenu extends BaseFragment {
     protected void onUpdate(float sec) {
         if (isMenuShowing) {
             if (showPassTime > 10000f) {
-                hideMenu(false);
+                hideMenu();
                 showPassTime = 0;
             } else {
                 showPassTime += sec * 1000f;

@@ -15,19 +15,15 @@
         android:title="@string/opt_onlineOpt_normal"
         app:iconSpaceReserved="false">
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"
             android:key="stayOnline"
-            android:summary="@string/opt_stayonline_summary"
-            android:title="@string/opt_stayonline_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_stayonline_title" />
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"
             android:key="loadAvatar"
-            android:summary="@string/opt_loadavatar_summary"
-            android:title="@string/opt_loadavatar_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_loadavatar_title" />
 
     </PreferenceCategory>
 
@@ -42,7 +38,6 @@
             android:summary="@string/opt_receive_announcements_summary"
             android:title="@string/opt_receive_announcements_title"
             app:iconSpaceReserved="false" />
-
 
     </PreferenceCategory>
 

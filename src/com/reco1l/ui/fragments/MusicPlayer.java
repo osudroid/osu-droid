@@ -196,7 +196,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
             Animation.of(play)
                     .fromRotation(180)
                     .toRotation(0)
-                    .runOnEnd(() -> play.setImageDrawable(Res.drw(R.drawable.v_pause_xl)))
+                    .runOnEnd(() -> play.setImageDrawable(Res.drw(R.drawable.v32_pause_circle)))
                     .play(160);
 
         } else if (!Game.musicManager.isPlaying() && wasPlaying) {
@@ -205,7 +205,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
             Animation.of(play)
                     .fromRotation(180)
                     .toRotation(0)
-                    .runOnEnd(() -> play.setImageDrawable(Res.drw(R.drawable.v_play_xl_circle)))
+                    .runOnEnd(() -> play.setImageDrawable(Res.drw(R.drawable.v32_play_circle)))
                     .play(160);
         }
     }

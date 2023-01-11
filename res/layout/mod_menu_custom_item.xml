@@ -9,6 +9,7 @@
     android:background="#14000000">
 
     <LinearLayout
+        android:id="@+id/mm_customBody"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
@@ -20,13 +21,8 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:paddingVertical="@dimen/S"
-            android:text="Section name" />
-
-        <FrameLayout
-            android:id="@+id/mm_customContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/XS" />
+            android:text="Section name"
+            android:layout_marginBottom="@dimen/XS" />
 
     </LinearLayout>
 

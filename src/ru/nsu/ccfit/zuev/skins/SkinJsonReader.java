@@ -69,7 +69,8 @@ public class SkinJsonReader extends SkinReader {
         skin.comboColor.clear();
         JSONArray array = data.optJSONArray("colors");
         if (array == null || array.length() == 0) {
-            skin.comboColor.add(RGBColor.hex2Rgb(skin.DEFAULT_COLOR_HEX));
+            skin.comboColor.add(RGBColor.hex2Rgb("#9c4b74ff"));
+            skin.comboColor.add(RGBColor.hex2Rgb("#5e5e89ff"));
         } else {
             for (int i = 0; i < array.length(); i++) {
                 String hex = array.optString(i, skin.DEFAULT_COLOR_HEX);

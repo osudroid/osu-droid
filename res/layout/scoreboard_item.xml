@@ -40,7 +40,7 @@
                 android:layout_centerVertical="true"
                 android:layout_toRightOf="@id/sb_rank"
                 android:scaleType="centerCrop"
-                android:src="@drawable/default_avatar"
+                android:src="@drawable/placeholder_avatar"
                 app:shapeAppearanceOverlay="@style/avatar_shape" />
 
             <ImageView
@@ -83,7 +83,7 @@
                             style="@style/smallPropertyBadge"
                             android:layout_marginLeft="0dp"
                             android:backgroundTint="@color/scoreboardItemBadgeBackground"
-                            android:drawableStart="@drawable/v_touch_xxs"
+                            android:drawableStart="@drawable/v8_touch"
                             android:text="100.00%" />
 
                         <TextView
@@ -91,7 +91,7 @@
                             style="@style/smallPropertyBadge"
                             android:layout_marginLeft="@dimen/XXS"
                             android:backgroundTint="@color/scoreboardItemBadgeBackground"
-                            android:drawableStart="@drawable/v_combo_xxs"
+                            android:drawableStart="@drawable/v8_combo"
                             android:text="1000x" />
 
                     </LinearLayout>
@@ -127,7 +127,7 @@
                         style="@style/smallPropertyBadge"
                         android:layout_marginLeft="@dimen/XXS"
                         android:backgroundTint="@color/scoreboardItemBadgeBackground"
-                        android:drawableStart="@drawable/v_upgrade_xxs"
+                        android:drawableStart="@drawable/v8_upgrade"
                         android:text="0" />
 
                 </LinearLayout>

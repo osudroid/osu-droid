@@ -4,6 +4,7 @@
 
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/bp_banner"
     android:layout_width="@dimen/beatmapPanelBannerWidth"
     android:layout_height="wrap_content"
@@ -11,7 +12,8 @@
     android:layout_marginTop="@dimen/XS"
     android:orientation="vertical"
     app:cardBackgroundColor="@color/backgroundSecondary"
-    app:cardCornerRadius="@dimen/globalCorners">
+    app:cardCornerRadius="@dimen/globalCorners"
+    tools:background="#FFF">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -58,7 +60,7 @@
                         android:layout_alignParentTop="true"
                         android:layout_alignParentEnd="true"
                         android:background="@drawable/shape_rounded"
-                        android:src="@drawable/v_arrow_s" />
+                        android:src="@drawable/v14_arrow" />
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -86,109 +88,102 @@
                 <LinearLayout
                     android:id="@+id/bp_properties"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/beatmapPanelPropertiesLayoutHeight"
-                    android:gravity="bottom|left"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!--First row-->
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <com.reco1l.view.BadgeText
+                        android:id="@+id/bp_mapper"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="@dimen/XS"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/bp_mapper"
-                            style="@style/propertyBadge"
-                            android:layout_marginStart="0dp"
-                            android:drawableStart="@drawable/v_person_xs"
-                            android:text="[mapper name]" />
-
-                    </LinearLayout>
+                        android:text="Mapper"
+                        app:icon="@drawable/v10_person" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="@dimen/XS"
-                        android:orientation="horizontal">
+                        android:layout_height="wrap_content">
 
-                        <TextView
+                        <com.reco1l.view.BadgeText
                             android:id="@+id/bp_length"
-                            style="@style/propertyBadge"
-                            android:layout_marginStart="0dp"
-                            android:drawableStart="@drawable/v_time_xs"
-                            android:text="00:00" />
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="00:00"
+                            app:icon="@drawable/v10_time" />
 
-                        <TextView
-                            android:id="@+id/bp_beatspersecond"
-                            style="@style/propertyBadge"
-                            android:drawableStart="@drawable/v_bpm_xs"
-                            android:text="000.0-000.0" />
+                        <com.reco1l.view.BadgeText
+                            android:id="@+id/bp_bpm"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="000.0-000.0"
+                            app:icon="@drawable/v10_bpm" />
 
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="@dimen/XS"
-                        android:orientation="horizontal">
+                        android:layout_height="wrap_content">
 
-                        <TextView
+                        <com.reco1l.view.BadgeText
                             android:id="@+id/bp_combo"
-                            style="@style/propertyBadge"
-                            android:layout_marginStart="0dp"
-                            android:drawableStart="@drawable/v_combo_xs"
-                            android:text="0000" />
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0000"
+                            app:icon="@drawable/v10_combo" />
 
-                        <TextView
+                        <com.reco1l.view.BadgeText
                             android:id="@+id/bp_circles"
-                            style="@style/propertyBadge"
-                            android:drawableStart="@drawable/v_circle_xs"
-                            android:text="0000" />
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0000"
+                            app:icon="@drawable/v10_circle" />
 
-                        <TextView
+                        <com.reco1l.view.BadgeText
                             android:id="@+id/bp_sliders"
-                            style="@style/propertyBadge"
-                            android:drawableStart="@drawable/v_slider_xs"
-                            android:text="0000" />
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0000"
+                            app:icon="@drawable/v10_slider" />
 
-                        <TextView
+                        <com.reco1l.view.BadgeText
                             android:id="@+id/bp_spinners"
-                            style="@style/propertyBadge"
-                            android:drawableStart="@drawable/v_spinner_xs"
-                            android:text="00" />
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="00"
+                            app:icon="@drawable/v10_spinner" />
 
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:layout_height="wrap_content">
 
-                        <TextView
+                        <com.reco1l.view.BadgeText
                             android:id="@+id/bp_ar"
-                            style="@style/propertyBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:layout_marginStart="0dp"
-                            android:drawableStart="@drawable/v_ar_xs"
-                            android:text="00.0" />
+                            android:text="00.0"
+                            app:icon="@drawable/v10_ar" />
 
-                        <TextView
+                        <com.reco1l.view.BadgeText
                             android:id="@+id/bp_od"
-                            style="@style/propertyBadge"
-                            android:drawableStart="@drawable/v_od_xs"
-                            android:text="00.0" />
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="00.0"
+                            app:icon="@drawable/v10_od" />
 
-                        <TextView
+                        <com.reco1l.view.BadgeText
                             android:id="@+id/bp_cs"
-                            style="@style/propertyBadge"
-                            android:drawableStart="@drawable/v_cs_xs"
-                            android:text="00.0" />
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="00.0"
+                            app:icon="@drawable/v10_cs" />
 
-                        <TextView
+                        <com.reco1l.view.BadgeText
                             android:id="@+id/bp_hp"
-                            style="@style/propertyBadge"
-                            android:drawableStart="@drawable/v_hp_xs"
-                            android:text="00.0" />
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="00.0"
+                            app:icon="@drawable/v10_hp" />
 
                     </LinearLayout>
 
@@ -204,12 +199,12 @@
             android:orientation="horizontal"
             android:padding="@dimen/S">
 
-            <TextView
+            <com.reco1l.view.BadgeText
                 android:id="@+id/bp_stars"
-                style="@style/propertyBadge"
-                android:layout_marginStart="0dp"
-                android:drawableStart="@drawable/v_star_xs"
-                android:text="00.00" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="00.00"
+                app:icon="@drawable/v10_star" />
 
             <TextView
                 android:id="@+id/bp_difficulty"

@@ -109,7 +109,7 @@ public final class Background extends BaseFragment {
                 if (imagePath == null) {
                     newBitmap = Game.bitmapManager.get("menu-background").copy(ARGB_8888, true);
                 } else {
-                    newBitmap = BitmapFactory.decodeFile(imagePath);
+                    newBitmap = BitmapFactory.decodeFile(imagePath).copy(ARGB_8888, true);
                 }
                 newBitmap = BitmapHelper.compress(newBitmap, 100 / quality);
                 parseColor(newBitmap);

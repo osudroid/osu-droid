@@ -2,9 +2,8 @@ package com.reco1l.data;
 
 // Created by Reco1l on 16/9/22 18:46
 
-import android.widget.TextView;
-
 import com.reco1l.tables.Res;
+import com.reco1l.view.BadgeText;
 
 import java.text.SimpleDateFormat;
 
@@ -14,7 +13,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class BeatmapProperty<T extends Number> {
 
     public T value;
-    public TextView view;
+    public BadgeText view;
     public ExpressionFormat<T> format;
 
     public boolean lessIsBetter = false;
@@ -38,7 +37,7 @@ public class BeatmapProperty<T extends Number> {
         GREEN(Res.color(R.color.propertyTextGreen)),
         NORMAL(0xFFFFFFFF);
 
-        int color;
+        final int color;
 
         State(int color) {
             this.color = color;
@@ -112,11 +111,6 @@ public class BeatmapProperty<T extends Number> {
 
         view.setText("" + value);
         view.setTextColor(state.color);
-
-        // It only work with drawableStart.
-        if (view.getCompoundDrawablesRelative()[0] != null) {
-            view.getCompoundDrawablesRelative()[0].setTint(state.color);
-        }
     }
 
     public void set(T value) {
@@ -142,7 +136,7 @@ public class BeatmapProperty<T extends Number> {
 
     public static class BPM {
 
-        public TextView view;
+        public BadgeText view;
 
         private final BeatmapProperty<Float> min;
         private final BeatmapProperty<Float> max;
@@ -190,10 +184,6 @@ public class BeatmapProperty<T extends Number> {
 
             if (min.state != null) {
                 view.setTextColor(min.state.color);
-
-                if (view.getCompoundDrawablesRelative()[0] != null) {
-                    view.getCompoundDrawablesRelative()[0].setTint(min.state.color);
-                }
             }
         }
 
@@ -212,11 +202,6 @@ public class BeatmapProperty<T extends Number> {
 
             view.setText(sdf.format(value));
             view.setTextColor(state.color);
-
-            // It only work with drawableStart.
-            if (view.getCompoundDrawablesRelative()[0] != null) {
-                view.getCompoundDrawablesRelative()[0].setTint(state.color);
-            }
         }
     }
 }

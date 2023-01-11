@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
+import com.reco1l.Game;
+
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.particle.ParticleSystem;
 import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
@@ -27,9 +29,11 @@ public class CursorEntity extends Entity {
             particleOffsetX = -trailTex.getWidth() / 2f;
             particleOffsetY = -trailTex.getHeight() / 2f;
 
+            int rate = (int) Game.activity.getRefreshRate() * 3;
+
             emitter = new PointParticleEmitter(particleOffsetX, particleOffsetY);
             particles = new CursorTrail(
-                    emitter, 30, 2, 4, cursorSprite.baseSize, trailTex
+                    emitter, rate, rate, 1000, cursorSprite.baseSize, trailTex
             );
         }
 

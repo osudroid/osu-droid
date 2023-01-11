@@ -17,6 +17,7 @@ import android.widget.RelativeLayout;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 
+import com.reco1l.ui.Identifiers;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Views;
 
@@ -75,7 +76,7 @@ public class IconButton extends RelativeLayout implements BaseView {
     @SuppressLint("ResourceType")
     public void onCreate(AttributeSet attrs) {
         icon = new ImageView(getContext());
-        icon.setId(0x11);
+        icon.setId(Identifiers.IconButton_Icon);
         icon.setScaleType(ScaleType.CENTER);
         addView(icon);
 
@@ -86,7 +87,7 @@ public class IconButton extends RelativeLayout implements BaseView {
 
         widget = new LinearLayout(getContext());
         widget.setGravity(Gravity.CENTER);
-        widget.setId(0x12);
+        widget.setId(Identifiers.IconButton_Widget);
         addView(widget);
 
         Views.rule(widget)

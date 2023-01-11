@@ -19,10 +19,8 @@
             android:entries="@array/bg_quality_names"
             android:entryValues="@array/bg_quality_values"
             android:key="background"
-            android:summary="@string/opt_bg_summary"
             android:title="@string/opt_bg_title"
             app:iconSpaceReserved="false" />
-
 
     </PreferenceCategory>
 
@@ -30,19 +28,15 @@
         android:title="Sliders"
         app:iconSpaceReserved="false">
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="true"
             android:key="sliderborders"
-            android:summary="@string/opt_sliderborders_summary"
-            android:title="@string/opt_sliderborders_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_sliderborders_title" />
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="true"
             android:key="superSlider"
-            android:summary="@string/opt_superSlider_summary"
-            android:title="@string/opt_superSlider_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_superSlider_title" />
 
     </PreferenceCategory>
 
@@ -50,47 +44,35 @@
         android:title="Effects"
         app:iconSpaceReserved="false">
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"
             android:key="comboburst"
-            android:summary="@string/opt_combo_burst_summary"
-            android:title="@string/opt_combo_burst_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_combo_burst_title" />
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="true"
             android:key="complexanimations"
-            android:summary="@string/opt_complexanimations_summary"
-            android:title="@string/opt_complexanimations_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_complexanimations_title" />
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="true"
             android:key="bursts"
-            android:summary="@string/opt_bursts_summary"
-            android:title="@string/opt_bursts_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_bursts_title" />
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"
             android:key="hitlighting"
-            android:summary="@string/opt_hitlighting_summary"
-            android:title="@string/opt_hitlighting_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_hitlighting_title" />
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"
             android:key="particles"
-            android:summary="@string/opt_particles_summary"
-            android:title="@string/opt_particles_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_particles_title" />
 
-        <CheckBoxPreference
+        <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="true"
             android:key="dither"
-            android:summary="@string/opt_dither_summary"
-            android:title="@string/opt_dither_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_dither_title" />
 
     </PreferenceCategory>
 
