@@ -1,15 +1,16 @@
 package com.reco1l.utils.helpers;
 
-import com.reco1l.interfaces.IGameMods;
+import com.reco1l.interfaces.IGameMod;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
 // Created by Reco1l on 8/8/22 21:35
 
-public class ScoringHelper implements IGameMods {
+public class ScoringHelper implements IGameMod {
 
     public static String getCustomMods(String data) {
         String[] mods = data.split("\\|", 2);
@@ -30,9 +31,9 @@ public class ScoringHelper implements IGameMods {
         return null;
     }
 
-    public static List<GameMod> parseMods(String data) {
-        String[] mods = data.split("\\|", 2);
-        List<GameMod> list = new ArrayList<>();
+    public static EnumSet<GameMod> parseMods(String pData) {
+        String[] mods = pData.split("\\|", 2);
+        EnumSet<GameMod> list = EnumSet.noneOf(GameMod.class);
 
         for (int i = 0; i < mods[0].length(); i++) {
             switch (mods[0].charAt(i)) {

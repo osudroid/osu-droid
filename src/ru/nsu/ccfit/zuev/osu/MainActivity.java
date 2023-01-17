@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -12,7 +11,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.ConfigurationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -724,7 +722,6 @@ public class MainActivity extends BaseGameActivity implements
         } else {
             Intent grantPermission = new Intent(this, PermissionActivity.class);
             startActivity(grantPermission);
-            overridePendingTransition(R.anim.fast_activity_swap, R.anim.fast_activity_swap);
             finish();
             return false;
         }

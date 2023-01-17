@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Written by Reco1l on 12/6/22 23:21
+  ~ Last modified: 12/6/22 22:57
+  -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:translationZ="@dimen/mm_layer">
+
+    <LinearLayout
+        android:id="@+id/mm_body"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/mm_bodyBottomMargin"
+        android:background="@color/mm_body"
+        android:clickable="true">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/mm_sectionContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:itemCount="5"
+            tools:listitem="@layout/item_mod_section" />
+
+    </LinearLayout>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:cardBackgroundColor="@color/mm_bottomCard"
+        app:cardCornerRadius="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/mm_bottomBarHeight"
+                android:background="@color/mm_bottomBar"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="@dimen/M">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <com.reco1l.view.ButtonView
+                        android:id="@+id/mm_custom"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:buttonText="Customizations" />
+
+                    <com.reco1l.view.ButtonView
+                        android:id="@+id/mm_clear"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/M"
+                        app:buttonText="Clear all mods" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <com.factor.bouncy.BouncyRecyclerView
+                android:id="@+id/mm_customRv"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/mm_bottomListHeight"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_mod_customization" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</RelativeLayout>

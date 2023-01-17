@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.PreferenceViewHolder;

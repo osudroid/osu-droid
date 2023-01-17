@@ -9,9 +9,10 @@ import com.edlplan.framework.easing.Easing;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.Game;
+import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.tables.Res;
+
 import com.reco1l.utils.helpers.OnlineHelper;
 
 import java.text.DecimalFormat;
@@ -39,7 +40,7 @@ public final class UserProfile extends BaseFragment {
 
     @Override
     protected int getLayout() {
-        return R.layout.user_profile;
+        return R.layout.extra_user_card;
     }
 
     @Override

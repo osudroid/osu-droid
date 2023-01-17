@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 24/6/22 02:42 -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:translationZ="@dimen/top_layer">
+
+    <View
+        android:id="@+id/background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000" />
+
+    <com.reco1l.view.effects.StripsEffect
+        android:id="@+id/il_effect"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.5"
+        app:beatSync="false" />
+
+    <ImageView
+        android:id="@+id/il_logoBrand"
+        android:layout_width="@dimen/splashScreenLogoSize"
+        android:layout_height="@dimen/splashScreenLogoSize"
+        android:layout_centerInParent="true"
+        android:src="@drawable/logo_brand" />
+
+    <ImageView
+        android:id="@+id/il_logoLines"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:alpha="0"
+        android:src="@drawable/logo_lines" />
+
+    <TextView
+        android:id="@+id/il_loading"
+        style="@style/text"
+        android:layout_width="match_parent"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:padding="@dimen/M"
+        android:text="Loading..." />
+
+</RelativeLayout>

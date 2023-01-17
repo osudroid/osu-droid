@@ -2,10 +2,7 @@ package com.reco1l.ui.fragments;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
@@ -25,16 +22,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.interfaces.MusicObserver;
-import com.reco1l.ui.fragments.MusicPlayer.PlaylistAdapter.ViewHolder;
-import com.reco1l.utils.Animation;
-import com.reco1l.utils.execution.ScheduledTask;
-import com.reco1l.utils.Views;
-import com.reco1l.utils.helpers.BeatmapHelper;
+import com.reco1l.tables.ResourceTable;
 import com.reco1l.ui.BaseFragment;
-import com.reco1l.utils.execution.AsyncTask;
-import com.reco1l.tables.Res;
-import com.reco1l.utils.helpers.BitmapHelper;
+import com.reco1l.utils.Animation;
 import com.reco1l.utils.TouchListener;
+import com.reco1l.utils.Views;
+import com.reco1l.view.IconButton;
+import com.reco1l.ui.fragments.MusicPlayer.PlaylistAdapter.ViewHolder;
+import com.reco1l.utils.helpers.BeatmapHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -47,37 +42,46 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public final class MusicPlayer extends BaseFragment implements MusicObserver {
 
-    public static MusicPlayer instance;
+    public static final MusicPlayer instance = new MusicPlayer();
 
-    private SeekBar seekBar;
-    private RecyclerView list;
-    private View body, songBody;
-    private ImageView play, songImage;
-    private TextView title, artist, time, length;
+    public IconButton button;
 
-    private AsyncTask bitmapTask;
-    private SimpleDateFormat sdf;
+    private View
+            mBody,
+            mSongBody,
+            mListBody;
 
-    private int toPosition;
+    private SeekBar mSeekBar;
+    private ImageView mPlayButton;
+    private RecyclerView mPlaylist;
+
+    private TextView
+            mTime,
+            mTitle,
+            mArtist,
+            mLength;
 
     private boolean
-            isListVisible = false,
-            isTrackingTouch = false,
-            wasPlaying = false;
+            mIsPlaylistVisible = false,
+            mIsTrackingTouch = false,
+            mWasPlaying = false;
+
+    private final SimpleDateFormat mTimeFormat;
 
     //--------------------------------------------------------------------------------------------//
-
 
     public MusicPlayer() {
         super();
         Game.musicManager.bindMusicObserver(this);
+
+        mTimeFormat = new SimpleDateFormat("mm:ss");
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected int getLayout() {
-        return R.layout.music_player;
+        return R.layout.extra_music_player;
     }
 
     @Override
@@ -90,30 +94,35 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
         return 10000;
     }
 
+    @Override
+    public int getHeight() {
+        return dimen(R.dimen.mp_height);
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onLoad() {
         closeOnBackgroundClick(true);
-        isListVisible = false;
+        mIsPlaylistVisible = false;
 
-        sdf = new SimpleDateFormat("mm:ss");
+        mBody = find("body");
+        mListBody = find("listBody");
+        mSongBody = find("songBody");
 
-        body = find("body");
-        list = find("listRv");
-        seekBar = find("seekBar");
-        songBody = find("songBody");
-        songImage = find("songImage");
+        mLength = find("songLength");
+        mTime = find("songProgress");
+        mSeekBar = find("seekBar");
+        mPlayButton = find("play");
+        mPlaylist = find("listRv");
+        mArtist = find("artist");
+        mTitle = find("title");
 
-        length = find("songLength");
-        time = find("songProgress");
-        artist = find("artist");
-        title = find("title");
-        play = find("play");
+        Views.width(mListBody, 0);
 
-        Animation.of(body)
-                .fromHeight(Res.dimen(R.dimen._30sdp))
-                .toHeight(Res.dimen(R.dimen.musicPlayerHeight))
+        Animation.of(mBody)
+                .fromHeight(sdp(30))
+                .toHeight(getHeight())
                 .fromY(-30)
                 .toY(0)
                 .fromAlpha(0)
@@ -125,7 +134,41 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
                 .toAlpha(1)
                 .play(200);
 
-        bindTouch(play, new TouchListener() {
+        mPlaylist.setLayoutManager(new LinearLayoutManager(getContext()));
+        mPlaylist.setAdapter(new PlaylistAdapter(Game.libraryManager.getLibrary()));
+
+        mSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+
+            private int newPosition;
+
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                mIsTrackingTouch = true;
+                onTouchEventNotified(MotionEvent.ACTION_DOWN);
+            }
+
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromTouch) {
+                if (fromTouch) {
+                    newPosition = progress;
+                    mTime.setText(mTimeFormat.format(progress));
+                }
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                mIsTrackingTouch = false;
+                Game.songService.setPosition(newPosition);
+                onTouchEventNotified(MotionEvent.ACTION_UP);
+            }
+        });
+
+        bindTouch(find("list"), new TouchListener() {
+            public boolean useBorderlessEffect() { return true; }
+
+            public void onPressUp() {
+                switchListVisibility();
+            }
+        });
+
+        bindTouch(mPlayButton, new TouchListener() {
             public boolean useTouchEffect() {
                 return false;
             }
@@ -139,108 +182,63 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
             }
         });
 
-        bindTouch(find("list"), this::switchListVisibility);
-        bindTouch(find("prev"), Game.musicManager::previous);
-        bindTouch(find("next"), Game.musicManager::next);
+        bindTouch(find("prev"), new TouchListener() {
+            public boolean useBorderlessEffect() { return true; }
 
-        seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                isTrackingTouch = true;
-                onTouchEventNotified(MotionEvent.ACTION_DOWN);
-            }
-
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromTouch) {
-                if (fromTouch) {
-                    toPosition = progress;
-                    time.setText(sdf.format(progress));
-                }
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                isTrackingTouch = false;
-                Game.songService.setPosition(toPosition);
-                onTouchEventNotified(MotionEvent.ACTION_UP);
+            public void onPressUp() {
+                Game.musicManager.previous();
             }
         });
 
-        Views.width(find("listBody"), 0);
+        bindTouch(find("next"), new TouchListener() {
+            public boolean useBorderlessEffect() { return true; }
 
-        BeatmapInfo beatmap = Game.libraryManager.getBeatmap();
+            public void onPressUp() {
+                Game.musicManager.next();
+            }
+        });
 
-        list.setLayoutManager(new LinearLayoutManager(Game.activity, VERTICAL, false));
-        list.setAdapter(new PlaylistAdapter(Game.libraryManager.getLibrary()));
+        rootView.post(() -> {
+            BeatmapInfo beatmap = Game.libraryManager.getBeatmap();
 
-        if (beatmap != null) {
-            loadMetadata(beatmap);
-
-            ScheduledTask.run(() -> loadBitmap(beatmap.getTrack(0)), 200);
-            list.postDelayed(() -> select(beatmap), 200);
-        }
+            if (beatmap != null) {
+                loadMetadata(beatmap);
+                mPlaylist.post(() -> selectAtList(beatmap));
+            }
+        });
     }
 
     @Override
-    protected void onUpdate(float sec) {
+    protected void onUpdate(float pSecElapsed) {
         int length = Game.songService.getLength();
         int position = Game.songService.getPosition();
 
-        if (!isTrackingTouch) {
-            seekBar.setMax(length);
-            seekBar.setProgress(position);
-            time.setText(sdf.format(position));
+        if (!mIsTrackingTouch) {
+            mSeekBar.setMax(length);
+            mSeekBar.setProgress(position);
+            mTime.setText(mTimeFormat.format(position));
         }
 
-        if (Game.musicManager.isPlaying() && !wasPlaying) {
-            wasPlaying = true;
-
-            Animation.of(play)
-                    .fromRotation(180)
-                    .toRotation(0)
-                    .runOnEnd(() -> play.setImageDrawable(Res.drw(R.drawable.v32_pause_circle)))
-                    .play(160);
-
-        } else if (!Game.musicManager.isPlaying() && wasPlaying) {
-            wasPlaying = false;
-
-            Animation.of(play)
-                    .fromRotation(180)
-                    .toRotation(0)
-                    .runOnEnd(() -> play.setImageDrawable(Res.drw(R.drawable.v32_play_circle)))
-                    .play(160);
+        if (Game.musicManager.isPlaying() && !mWasPlaying) {
+            mWasPlaying = true;
+            mPlayButton.setImageDrawable(drw(R.drawable.v32_pause_circle));
+        }
+        else if (!Game.musicManager.isPlaying() && mWasPlaying) {
+            mWasPlaying = false;
+            mPlayButton.setImageDrawable(drw(R.drawable.v32_play_circle));
         }
     }
-
-    //--------------------------------------------------------------------------------------------//
-
-    private void switchListVisibility() {
-        if (!isListVisible) {
-            isListVisible = true;
-            Animation.of(find("listBody"))
-                    .toWidth(Res.dimen(R.dimen.musicPlayerListWidth))
-                    .play(300);
-        } else {
-            isListVisible = false;
-            Animation.of(find("listBody"))
-                    .toWidth(0)
-                    .play(300);
-        }
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
 
     @Override
-    public void onMusicChange(TrackInfo track, boolean wasAudioChanged) {
+    public void onMusicChange(TrackInfo pNewTrack, boolean pWasAudioChanged) {
         if (isAdded()) {
-            loadBitmap(track);
-            //select(track);
-
-            Animation.of(songBody)
+            Animation.of(mSongBody)
                     .toAlpha(0)
                     .runOnEnd(() -> {
-                        loadMetadata(track.getBeatmap());
+                        loadMetadata(pNewTrack.getBeatmap());
+                        selectAtList(pNewTrack.getBeatmap());
 
-                        Animation.of(songBody)
+                        Animation.of(mSongBody)
                                 .toX(0)
                                 .toAlpha(1)
                                 .play(200);
@@ -249,58 +247,37 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
         }
     }
 
-    private void loadMetadata(BeatmapInfo beatmap) {
-        title.setText(BeatmapHelper.getTitle(beatmap));
-        artist.setText(BeatmapHelper.getArtist(beatmap));
-        length.setText(sdf.format(Game.songService.getLength()));
-    }
-
-    private void loadBitmap(TrackInfo track) {
-        if (bitmapTask != null) {
-            bitmapTask.cancel(true);
-        }
-
-        bitmapTask = new AsyncTask() {
-            Bitmap bitmap;
-
-            public void run() {
-                if (track.getBackground() != null) {
-                    bitmap = BitmapFactory.decodeFile(track.getBackground());
-
-                    float scale = (float) songImage.getWidth() / bitmap.getWidth();
-
-                    bitmap = BitmapHelper.resize(bitmap, bitmap.getWidth() * scale, bitmap.getHeight() * scale);
-                    bitmap = BitmapHelper.cropInCenter(bitmap, songImage.getWidth(), songImage.getHeight());
-                }
-            }
-
-            public void onComplete() {
-                if (isAdded()) {
-                    Animation.of(songImage)
-                            .toAlpha(0)
-                            .runOnEnd(() -> {
-                                songImage.setImageBitmap(bitmap);
-
-                                Animation.of(songImage)
-                                        .toAlpha(1)
-                                        .play(200);
-                            })
-                            .play(100);
-                }
-            }
-        };
-        bitmapTask.execute();
-    }
-
     //--------------------------------------------------------------------------------------------//
 
-    public void select(BeatmapInfo beatmap) {
-        int i = 0;
-        while (i < list.getChildCount()) {
-            View child = list.getChildAt(i);
-            ViewHolder holder = (ViewHolder) list.getChildViewHolder(child);
+    private void loadMetadata(BeatmapInfo pBeatmap) {
+        mTitle.setText(BeatmapHelper.getTitle(pBeatmap));
+        mArtist.setText(BeatmapHelper.getArtist(pBeatmap));
+        mLength.setText(mTimeFormat.format(Game.songService.getLength()));
+    }
 
-            if (beatmap.equals(holder.beatmap)) {
+    private void switchListVisibility() {
+        if (!mIsPlaylistVisible) {
+            mIsPlaylistVisible = true;
+
+            Animation.of(mListBody)
+                    .toWidth(dimen(R.dimen.musicPlayerListWidth))
+                    .play(300);
+        } else {
+            mIsPlaylistVisible = false;
+
+            Animation.of(mListBody)
+                    .toWidth(0)
+                    .play(300);
+        }
+    }
+
+    private void selectAtList(BeatmapInfo pBeatmap) {
+        int i = 0;
+        while (i < mPlaylist.getChildCount()) {
+            View child = mPlaylist.getChildAt(i);
+            ViewHolder holder = (ViewHolder) mPlaylist.getChildViewHolder(child);
+
+            if (pBeatmap.equals(holder.beatmap)) {
                 holder.onSelect();
             }
             ++i;
@@ -310,39 +287,41 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public void show() {
-        if (!isAdded()) {
-            UI.topBar.musicButton.animateButton(true);
-            super.show();
+    public boolean show() {
+        if (super.show()) {
+            button.setActivated(true);
+            return true;
         }
+        return false;
     }
 
     @Override
     public void close() {
         if (isAdded()) {
+            button.setActivated(false);
 
-            if (isListVisible) {
+            if (mIsPlaylistVisible) {
                 switchListVisibility();
             }
-            UI.topBar.musicButton.animateButton(false);
 
             Animation.of(find("innerBody"))
                     .toAlpha(0)
                     .play(100);
 
-            Animation.of(body)
-                    .fromHeight(Res.dimen(R.dimen.musicPlayerHeight))
-                    .toHeight(Res.dimen(R.dimen._30sdp))
-                    .runOnEnd(super::close)
-                    .toY(-30)
+            Animation.of(mBody)
+                    .toHeight(sdp(30))
                     .toAlpha(0)
+                    .toY(-30)
+                    .runOnEnd(super::close)
                     .play(240);
         }
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    static class PlaylistAdapter extends RecyclerView.Adapter<ViewHolder> {
+    // TODO [MusicPlayer] Rework it extending BaseAdapter & BaseViewHolder
+    @Deprecated
+    static class PlaylistAdapter extends RecyclerView.Adapter<ViewHolder> implements ResourceTable {
 
         private final ArrayList<BeatmapInfo> beatmaps;
 
@@ -364,16 +343,16 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
 
             view.setLayoutParams(new LayoutParams(MATCH_PARENT, WRAP_CONTENT));
 
-            Drawable drawable = Res.drw(R.drawable.shape_rounded).mutate();
-            drawable.setTint(Res.color(R.color.accent));
+            Drawable drawable = drw(R.drawable.shape_rounded).mutate();
+            drawable.setTint(color(R.color.accent));
             drawable.setAlpha(0);
 
             view.setBackground(drawable);
             view.setEllipsize(TextUtils.TruncateAt.END);
             view.setSingleLine(true);
 
-            int m = Res.dimen(R.dimen.M);
-            int s = Res.dimen(R.dimen.S);
+            int m = dimen(R.dimen.M);
+            int s = dimen(R.dimen.S);
             view.setPadding(m, s, m, s);
 
             return new ViewHolder(view, this);
@@ -403,7 +382,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
 
         //----------------------------------------------------------------------------------------//
 
-        static class ViewHolder extends RecyclerView.ViewHolder {
+        static class ViewHolder extends RecyclerView.ViewHolder implements ResourceTable {
 
             private final PlaylistAdapter parent;
             private final TextView text;
@@ -453,7 +432,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
                         })
                         .play(200);
 
-                Animation.ofColor(Color.WHITE, Res.color(R.color.accent))
+                Animation.ofColor(Color.WHITE, color(R.color.accent))
                         .runOnUpdate(value -> text.setTextColor((int) value))
                         .play(200);
             }
@@ -473,7 +452,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
                         })
                         .play(200);
 
-                Animation.ofColor(Res.color(R.color.accent), Color.WHITE)
+                Animation.ofColor(color(R.color.accent), Color.WHITE)
                         .runOnUpdate(value -> text.setTextColor((int) value))
                         .play(200);
             }

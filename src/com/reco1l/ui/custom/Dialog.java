@@ -12,12 +12,11 @@ import androidx.cardview.widget.CardView;
 
 import com.edlplan.framework.easing.Easing;
 import com.reco1l.Game;
+import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.tables.Res;
-import com.reco1l.utils.Views;
-import com.reco1l.utils.Views.MarginUtils;
 import com.reco1l.utils.TouchListener;
+import com.reco1l.utils.Views;
 import com.reco1l.view.ButtonView;
 
 import org.jetbrains.annotations.NotNull;
@@ -53,12 +52,7 @@ public class Dialog extends BaseFragment {
 
     @Override
     protected int getLayout() {
-        return R.layout.dialog;
-    }
-
-    @Override
-    protected long getCloseTime() {
-        return builder.dismissTime;
+        return R.layout.overlay_dialog;
     }
 
     @Override
@@ -119,8 +113,13 @@ public class Dialog extends BaseFragment {
 
         if (builder.closeOnBackgroundClick) {
             bindTouch(find("scrollBackground"), new TouchListener() {
-                public boolean useTouchEffect() { return false; }
-                public boolean useOnlyOnce() { return true; }
+                public boolean useTouchEffect() {
+                    return false;
+                }
+
+                public boolean useOnlyOnce() {
+                    return true;
+                }
 
                 public void onPressUp() {
                     close();
@@ -145,7 +144,7 @@ public class Dialog extends BaseFragment {
                         .delay(200L * i)
                         .play(200);
 
-                MarginUtils margins = Views.margins(button.view);
+                Views.MarginUtils margins = Views.margins(button.view);
                 margins.horizontal(m, m);
 
                 if (builder.buttons.size() > 1) {
@@ -223,14 +222,11 @@ public class Dialog extends BaseFragment {
         return this;
     }
 
-    @Override
-    public void show() {
-        if (!isAdded()) {
-            if (closeExtras) {
-                Game.platform.closeExtras();
-            }
+    public boolean show() {
+        if (!isAdded() && closeExtras) {
+            Game.platform.closeExtras();
         }
-        super.show();
+        return super.show();
     }
 
 

@@ -2,35 +2,38 @@ package com.reco1l.data.mods;
 
 // Created by Reco1l on 21/12/2022, 04:42
 
+import com.reco1l.Game;
 import com.reco1l.UI;
-import com.reco1l.interfaces.IGameMods;
+import com.reco1l.interfaces.IGameMod;
+import com.reco1l.management.ModManager;
 
 import java.util.EnumSet;
 
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
-public class LegacyModWrapper extends ModWrapper implements IGameMods {
+public class LegacyModWrapper extends ModWrapper implements IGameMod {
 
-    public GameMod mod;
-    public EnumSet<GameMod> flags;
+    private final GameMod mMod;
+
+    private EnumSet<GameMod> mFlags;
 
     //----------------------------------------------------------------------------------------//
 
-    public LegacyModWrapper(GameMod mod) {
-        this.mod = mod;
-        parseFlags(mod);
+    public LegacyModWrapper(GameMod pMod) {
+        mMod = pMod;
+        parseFlags();
     }
 
     //----------------------------------------------------------------------------------------//
 
     @Override
     public String getName() {
-        return mod.name().toLowerCase().replace("mod_", "");
+        return mMod.name().toLowerCase().replace("mod_", "");
     }
 
     @Override
     public String getIcon() {
-        return "selection-mod-" + mod.texture;
+        return "selection-mod-" + mMod.texture;
     }
 
     @Override
@@ -38,32 +41,57 @@ public class LegacyModWrapper extends ModWrapper implements IGameMods {
         return null;
     }
 
+    public GameMod getEntry() {
+        return mMod;
+    }
+
+    @Override
+    public EnumSet<GameMod> getFlags() {
+        return mFlags;
+    }
+
     //----------------------------------------------------------------------------------------//
 
     @Override
     public void onSelect(boolean isEnabled) {
         super.onSelect(isEnabled);
+
         if (isEnabled) {
-            handleFlags();
-            UI.modMenu.mods.add(mod);
+            switch (mMod) {
+                case MOD_DOUBLETIME:
+                    Game.musicManager.setPlayback(1.5f, false);
+                    break;
+                case MOD_NIGHTCORE:
+                    Game.musicManager.setPlayback(1.5f, true);
+                    break;
+                case MOD_HALFTIME:
+                    Game.musicManager.setPlayback(0.75f, false);
+                    break;
+            }
         } else {
-            UI.modMenu.mods.remove(mod);
+            switch (mMod) {
+                case MOD_DOUBLETIME:
+                case MOD_NIGHTCORE:
+                case MOD_HALFTIME:
+                    Game.musicManager.setPlayback(1f, false);
+                    break;
+            }
         }
     }
 
     //----------------------------------------------------------------------------------------//
 
-    private void parseFlags(GameMod mod) {
-        switch (mod) {
+    private void parseFlags() {
+        switch (mMod) {
             case MOD_HARDROCK:
             case MOD_EASY:
-                flags = EnumSet.of(EZ, HR);
+                mFlags = EnumSet.of(EZ, HR);
                 break;
 
             case MOD_DOUBLETIME:
             case MOD_NIGHTCORE:
             case MOD_HALFTIME:
-                flags = EnumSet.of(NC, HT, DT);
+                mFlags = EnumSet.of(NC, HT, DT);
                 break;
 
             case MOD_AUTO:
@@ -72,27 +100,12 @@ public class LegacyModWrapper extends ModWrapper implements IGameMods {
             case MOD_PERFECT:
             case MOD_AUTOPILOT:
             case MOD_SUDDENDEATH:
-                flags = EnumSet.of(AU, RX, NF, PF, AP, SD);
+                mFlags = EnumSet.of(AU, RX, NF, PF, AP, SD);
                 break;
         }
 
-        if (flags != null) {
-            flags.remove(mod);
+        if (mFlags != null) {
+            mFlags.remove(mMod);
         }
     }
-
-    private void handleFlags() {
-        if (flags == null) {
-            return;
-        }
-
-        for (GameMod mod : flags) {
-            LegacyModWrapper target = UI.modMenu.getWrapperByGameMod(mod);
-
-            if (target != null) {
-                UI.modMenu.onModSelect(target, true);
-            }
-        }
-    }
-
 }

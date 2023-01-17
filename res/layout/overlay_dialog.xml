@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:translationZ="@dimen/top_layer">
+
+    <View
+        android:id="@+id/background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/backgroundDimmed" />
+
+    <ScrollView
+        android:id="@+id/d_bodyParent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:fadeScrollbars="false"
+        android:overScrollMode="never">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <View
+                android:id="@+id/d_scrollBackground"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/d_body"
+                android:layout_alignBottom="@+id/d_body" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/d_body"
+                android:layout_width="@dimen/dialogWidth"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginVertical="@dimen/L"
+                android:clickable="true"
+                app:cardBackgroundColor="@color/backgroundSecondary"
+                app:cardCornerRadius="@dimen/app_corners"
+                app:cardElevation="@dimen/dialogCardElevation">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/topBarHeight"
+                        android:background="@color/panelTopBar"
+                        android:gravity="center_vertical">
+
+                        <com.edlplan.ui.TriangleEffectView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:alpha="0.15" />
+
+                        <TextView
+                            android:id="@+id/d_title"
+                            style="@style/largeText"
+                            android:layout_centerInParent="true"
+                            android:text="[Dialog title]" />
+
+                    </RelativeLayout>
+
+                    <View style="@style/panelSeparatorView" />
+
+                    <LinearLayout
+                        android:id="@+id/d_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:minHeight="@dimen/dialogContainerMinHeight"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/d_message"
+                            style="@style/text"
+                            android:layout_width="match_parent"
+                            android:gravity="center"
+                            android:padding="@dimen/XL"
+                            android:text="[Dialog message]"
+                            android:visibility="gone" />
+
+                        <FrameLayout
+                            android:id="@+id/d_fragmentContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
+                    </LinearLayout>
+
+                    <View style="@style/panelSeparatorView" />
+
+                    <LinearLayout
+                        android:id="@+id/d_buttonsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+        </RelativeLayout>
+
+    </ScrollView>
+
+</RelativeLayout>

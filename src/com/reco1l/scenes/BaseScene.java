@@ -9,12 +9,13 @@ import com.reco1l.UI;
 import com.reco1l.enums.Screens;
 import com.reco1l.interfaces.SceneHandler;
 import com.reco1l.interfaces.MusicObserver;
+import com.reco1l.tables.ResourceTable;
 
 import org.anddev.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
-public abstract class BaseScene extends Scene implements SceneHandler, MusicObserver {
+public abstract class BaseScene extends Scene implements SceneHandler, MusicObserver, ResourceTable {
 
     protected final Context context;
 
@@ -66,14 +67,14 @@ public abstract class BaseScene extends Scene implements SceneHandler, MusicObse
     }
 
     @Override
-    public void onMusicChange(TrackInfo track, boolean wasAudioChanged) {
+    public void onMusicChange(TrackInfo pNewTrack, boolean pWasAudioChanged) {
         if (!isShowing()) {
             return;
         }
 
         if (isBackgroundAutoChange) {
-            if (track != null) {
-                UI.background.changeFrom(track.getBackground());
+            if (pNewTrack != null) {
+                UI.background.changeFrom(pNewTrack.getBackground());
             }
         }
     }

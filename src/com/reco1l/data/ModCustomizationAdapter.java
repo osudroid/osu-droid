@@ -5,9 +5,10 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+
 import com.reco1l.Game;
-import com.reco1l.data.mods.ModWrapper;
 import com.reco1l.ui.Identifiers;
+import com.reco1l.data.mods.ModWrapper;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 import java.util.ArrayList;
@@ -26,21 +27,21 @@ public class ModCustomizationAdapter extends BaseAdapter<ModCustomizationAdapter
 
     @Override
     protected int getItemLayout() {
-        return R.layout.mod_menu_custom_item;
+        return R.layout.item_mod_customization;
     }
 
     @Override
-    protected VH getViewHolder(View root) {
-        return new VH(root);
+    protected VH getViewHolder(View pRootView) {
+        return new VH(pRootView);
     }
 
     @Override
-    protected void onHolderCreated(VH holder) {
+    protected void onHolderCreated(VH pHolder) {
         holderCount++;
 
-        holder.frame = new FrameLayout(Game.activity);
-        holder.frame.setId(Identifiers.ModMenu_CustomizationFrames + holderCount);
-        holder.body.addView(holder.frame);
+        pHolder.frame = new FrameLayout(Game.activity);
+        pHolder.frame.setId(Identifiers.ModMenu_CustomizationFrames + holderCount);
+        pHolder.body.addView(pHolder.frame);
     }
 
     //----------------------------------------------------------------------------------------//

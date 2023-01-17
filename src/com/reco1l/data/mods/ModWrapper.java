@@ -2,20 +2,27 @@ package com.reco1l.data.mods;
 
 // Created by Reco1l on 21/12/2022, 04:43
 
-import com.reco1l.UI;
+import com.reco1l.data.BaseViewHolder;
+import com.reco1l.interfaces.IGameMod;
+import com.reco1l.legacy.Legacy;
+import com.reco1l.management.ModManager;
 import com.reco1l.ui.BasePreferenceFragment;
-import com.reco1l.data.adapters.ModListAdapter.ModViewHolder;
 
-public abstract class ModWrapper {
+import java.util.EnumSet;
 
-    public ModViewHolder holder;
+import ru.nsu.ccfit.zuev.audio.serviceAudio.PlayMode;
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
-    private Properties properties;
+public abstract class ModWrapper implements IGameMod {
+
+    public BaseViewHolder<ModWrapper> holder;
+
+    private final Properties mProperties;
 
     //----------------------------------------------------------------------------------------//
 
     public ModWrapper() {
-        properties = createProperties();
+        mProperties = createProperties();
     }
 
     //----------------------------------------------------------------------------------------//
@@ -26,15 +33,26 @@ public abstract class ModWrapper {
 
     protected abstract Properties createProperties();
 
+    @Legacy
+    public EnumSet<GameMod> getFlags() {
+        return null;
+    }
+
+    //----------------------------------------------------------------------------------------//
+
     public final Properties getProperties() {
-        return properties;
+        return mProperties;
     }
 
     //----------------------------------------------------------------------------------------//
 
     public void onSelect(boolean isEnabled) {
         if (holder != null) {
-            holder.onModSelect(isEnabled);
+            if (isEnabled) {
+                holder.onSelect();
+            } else {
+                holder.onDeselect();
+            }
         }
     }
 
@@ -52,11 +70,11 @@ public abstract class ModWrapper {
         //----------------------------------------------------------------------------------------//
 
         public Object getProperty(String key, Object def) {
-            return UI.modMenu.getProperty(key, def);
+            return ModManager.getProperty(key, def);
         }
 
         public void setProperty(String key, Object value) {
-            UI.modMenu.setProperty(key, value);
+            ModManager.setProperty(key, value);
         }
     }
 }

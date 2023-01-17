@@ -9,9 +9,9 @@ import com.reco1l.enums.Screens;
 import com.reco1l.tables.DialogTable;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
-import com.reco1l.utils.DrawFPSHandler;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.NativeFrameCounter;
 
 import java.text.DecimalFormat;
 
@@ -43,7 +43,7 @@ public final class MainOverlay extends BaseFragment {
 
     @Override
     protected int getLayout() {
-        return R.layout.main_overlay;
+        return R.layout.overlay_main;
     }
 
     @Override
@@ -87,7 +87,7 @@ public final class MainOverlay extends BaseFragment {
     }
 
     @Override
-    protected void onUpdate(float sec) {
+    protected void onUpdate(float pSecElapsed) {
         if (!isLoaded()) {
             return;
         }
@@ -99,8 +99,8 @@ public final class MainOverlay extends BaseFragment {
     }
 
     @Override
-    protected void onScreenChange(Screens lastScreen, Screens newScreen) {
-        showAuthorText(newScreen == Screens.Main);
+    protected void onScreenChange(Screens pLastScreen, Screens pNewScreen) {
+        showAuthorText(pNewScreen == Screens.Main);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -132,8 +132,8 @@ public final class MainOverlay extends BaseFragment {
     }
 
     private void updateDrawFPS() {
-        float fps = GameHelper.Round(DrawFPSHandler.getFPS(), 1);
-        float ft = DrawFPSHandler.getFrameTime();
+        float fps = GameHelper.Round(NativeFrameCounter.getFPS(), 1);
+        float ft = NativeFrameCounter.getFrameTime();
 
         drawFPS.setTextColor(getFpsColorJudgment(fps));
         drawFPS.setText("UI: " + fps + "/" + getHz() + "fps - " + ft + "ms");

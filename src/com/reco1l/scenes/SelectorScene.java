@@ -60,8 +60,8 @@ public class SelectorScene extends BaseScene {
         /*BarButton random = new BarButton(context);
         random.setIcon(R.drawable.v_random);*/
 
-        UI.topBar.addButton(getIdentifier(), mods);
-        UI.topBar.addButton(getIdentifier(), search);
+        UI.topBar.bindButton(getIdentifier(), mods);
+        UI.topBar.bindButton(getIdentifier(), search);
         /*UI.topBar.addButton(getIdentifier(), random);*/
     }
 
@@ -115,11 +115,11 @@ public class SelectorScene extends BaseScene {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public void onMusicChange(TrackInfo track, boolean wasAudioChanged) {
-        super.onMusicChange(track, wasAudioChanged);
+    public void onMusicChange(TrackInfo pNewTrack, boolean pWasAudioChanged) {
+        super.onMusicChange(pNewTrack, pWasAudioChanged);
 
-        UI.background.changeFrom(track.getBackground());
-        if (wasAudioChanged) {
+        UI.background.changeFrom(pNewTrack.getBackground());
+        if (pWasAudioChanged) {
             onAudioChange();
         }
     }

@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 1/8/22 06:36 -->
+
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bp_banner"
+    android:layout_width="@dimen/beatmapPanelBannerWidth"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/_L"
+    android:layout_marginTop="@dimen/XS"
+    android:orientation="vertical"
+    app:cardBackgroundColor="@color/backgroundSecondary"
+    app:cardCornerRadius="@dimen/app_corners"
+    tools:background="#FFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/L">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/bp_songBackground"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/bp_content"
+                android:layout_alignBottom="@+id/bp_content"
+                android:scaleType="centerCrop" />
+
+            <View
+                android:id="@+id/bp_gradient"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/bp_content"
+                android:layout_alignBottom="@+id/bp_content"
+                android:background="@drawable/shape_double_gradient" />
+
+            <LinearLayout
+                android:id="@+id/bp_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/S">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/bp_expand"
+                        style="@style/icon_button"
+                        android:layout_width="@dimen/beatmapPanelExpandButtonSize"
+                        android:layout_height="@dimen/beatmapPanelExpandButtonSize"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:background="@drawable/shape_rounded"
+                        android:src="@drawable/v14_arrow" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_toStartOf="@+id/bp_expand"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/bp_title"
+                            style="@style/largeText"
+                            android:text="[title]" />
+
+                        <TextView
+                            android:id="@+id/bp_artist"
+                            style="@style/text"
+                            android:layout_below="@+id/bp_title"
+                            android:layout_marginTop="@dimen/XXS"
+                            android:text="[artist]" />
+
+                    </LinearLayout>
+
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:id="@+id/bp_properties"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <com.reco1l.view.BadgeText
+                        android:id="@+id/bp_mapper"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Mapper"
+                        app:icon="@drawable/v10_person" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.reco1l.view.BadgeText
+                            android:id="@+id/bp_length"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="00:00"
+                            app:icon="@drawable/v10_time" />
+
+                        <com.reco1l.view.BadgeText
+                            android:id="@+id/bp_bpm"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="000.0-000.0"
+                            app:icon="@drawable/v10_bpm" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.reco1l.view.BadgeText
+                            android:id="@+id/bp_combo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0000"
+                            app:icon="@drawable/v10_combo" />
+
+                        <com.reco1l.view.BadgeText
+                            android:id="@+id/bp_circles"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0000"
+                            app:icon="@drawable/v10_circle" />
+
+                        <com.reco1l.view.BadgeText
+                            android:id="@+id/bp_sliders"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0000"
+                            app:icon="@drawable/v10_slider" />
+
+                        <com.reco1l.view.BadgeText
+                            android:id="@+id/bp_spinners"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="00"
+                            app:icon="@drawable/v10_spinner" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.reco1l.view.BadgeText
+                            android:id="@+id/bp_ar"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="0dp"
+                            android:text="00.0"
+                            app:icon="@drawable/v10_ar" />
+
+                        <com.reco1l.view.BadgeText
+                            android:id="@+id/bp_od"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="00.0"
+                            app:icon="@drawable/v10_od" />
+
+                        <com.reco1l.view.BadgeText
+                            android:id="@+id/bp_cs"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="00.0"
+                            app:icon="@drawable/v10_cs" />
+
+                        <com.reco1l.view.BadgeText
+                            android:id="@+id/bp_hp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="00.0"
+                            app:icon="@drawable/v10_hp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/S">
+
+            <com.reco1l.view.BadgeText
+                android:id="@+id/bp_stars"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="00.00"
+                app:icon="@drawable/v10_star" />
+
+            <TextView
+                android:id="@+id/bp_difficulty"
+                style="@style/text"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/S"
+                android:layout_toEndOf="@+id/bp_stars"
+                android:text="[Difficulty name]"
+                android:textColor="@color/textSecondary"
+                android:textSize="@dimen/textXS" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+
+</androidx.cardview.widget.CardView>

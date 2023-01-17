@@ -1,6 +1,5 @@
 package com.reco1l.ui.custom;
 
-import android.text.InputType;
 import android.text.TextWatcher;
 
 public class InputDialogBuilder extends DialogBuilder {

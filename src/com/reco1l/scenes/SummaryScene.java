@@ -4,9 +4,8 @@ package com.reco1l.scenes;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.enums.Screens;
-import com.reco1l.utils.execution.AsyncTask;
-import com.reco1l.tables.Res;
 import com.reco1l.view.IconButton;
+import com.reco1l.utils.execution.AsyncTask;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
@@ -50,7 +49,7 @@ public class SummaryScene extends BaseScene {
     private void createTopBarButtons() {
         IconButton retry = new IconButton(Game.activity);
 
-        retry.setIcon(Res.drw(R.drawable.v18_tune));
+        retry.setIcon(drw(R.drawable.v18_tune));
         retry.runOnTouch(() -> {
             Game.resourcesManager.getSound("applause").stop();
             Game.gameScene.startGame(null, null);
@@ -58,10 +57,10 @@ public class SummaryScene extends BaseScene {
 
         IconButton watchReplay = new IconButton(Game.activity);
 
-        watchReplay.setIcon(Res.drw(R.drawable.v18_search));
+        watchReplay.setIcon(drw(R.drawable.v18_search));
 
-        UI.topBar.addButton(getIdentifier(), retry);
-        UI.topBar.addButton(getIdentifier(), watchReplay);
+        UI.topBar.bindButton(getIdentifier(), retry);
+        UI.topBar.bindButton(getIdentifier(), watchReplay);
     }
 
     //--------------------------------------------------------------------------------------------//

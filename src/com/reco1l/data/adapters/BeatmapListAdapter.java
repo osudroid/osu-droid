@@ -17,21 +17,21 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.reco1l.Game;
+import com.reco1l.UI;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.SimpleFragment;
+import com.reco1l.ui.custom.ContextMenu;
 import com.reco1l.ui.custom.ContextMenuBuilder;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
-import com.reco1l.ui.custom.ContextMenu;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.TouchListener;
+import com.reco1l.view.CarrouselRecyclerView;
 import com.reco1l.utils.helpers.BeatmapHelper;
-import com.reco1l.UI;
 import com.reco1l.utils.execution.AsyncTask;
 import com.reco1l.utils.helpers.BitmapHelper;
-import com.reco1l.view.CarrouselRecyclerView;
 
 import java.util.ArrayList;
 
@@ -50,13 +50,13 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    protected BeatmapViewHolder getViewHolder(View root) {
-        return new BeatmapViewHolder(root);
+    protected BeatmapViewHolder getViewHolder(View pRootView) {
+        return new BeatmapViewHolder(pRootView);
     }
 
     @Override
     protected int getItemLayout() {
-        return R.layout.beatmap_list_item;
+        return R.layout.item_beatmap;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -93,7 +93,7 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
             };
             tracksAdapter = new TrackListAdapter(null);
 
-            trackList.setParentWindow(UI.beatmapCarrousel.recyclerView);
+            trackList.setParentWindow(Game.platform.screenContainer);
             trackList.setYOffset(-UI.topBar.getHeight());
 
             trackList.setLayoutManager(new LinearLayoutManager(Game.activity));

@@ -20,7 +20,7 @@ public class BeatmapCollection {
 
     private static BeatmapCollection instance;
 
-    private final ArrayList<Listener> listeners;
+    private final ArrayList<Scoreboard.Observer<BeatmapInfo>> listeners;
 
     private ArrayList<BeatmapInfo> beatmaps;
     private Comparator<BeatmapInfo> comparator;
@@ -231,7 +231,7 @@ public class BeatmapCollection {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void addListener(Listener listener) {
+    public void addListener(Scoreboard.Observer<BeatmapInfo> listener) {
         listeners.add(listener);
     }
 
@@ -249,13 +249,9 @@ public class BeatmapCollection {
     }
 
     public void notifyChange() {
-        listeners.forEach(listener -> listener.onCollectionChange(beatmaps));
+        listeners.forEach(listener -> listener.onScoreboardChange(beatmaps));
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    @FunctionalInterface
-    public interface Listener {
-        void onCollectionChange(ArrayList<BeatmapInfo> list);
-    }
 }

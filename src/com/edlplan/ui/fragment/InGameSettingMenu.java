@@ -50,10 +50,6 @@ public class InGameSettingMenu {
         return null;
     }
 
-    private <T extends View> T findViewById(int id) {
-        return null;
-    }
-
     @SuppressLint({"ClickableViewAccessibility", "ApplySharedPref"})
     private void reload() {
 

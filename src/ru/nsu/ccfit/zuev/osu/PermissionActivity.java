@@ -40,7 +40,6 @@ public class PermissionActivity extends AppCompatActivity implements EasyPermiss
     private void startGameActivity() {
         Intent game = new Intent(this, MainActivity.class);
         startActivity(game);
-        overridePendingTransition(R.anim.fast_activity_swap, R.anim.fast_activity_swap);
         finish();
     }
 

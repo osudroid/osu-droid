@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 20/12/2022, 02:50 -->
+
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/mm_modItemHeight"
+    android:layout_marginHorizontal="@dimen/S"
+    android:layout_marginBottom="@dimen/S"
+    app:cardBackgroundColor="@color/mm_modItem"
+    app:cardCornerRadius="@dimen/mm_modItemRadius">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="#1A000000"
+            android:gravity="center"
+            android:paddingHorizontal="@dimen/M">
+
+            <ImageView
+                android:id="@+id/mm_modIcon"
+                android:layout_width="@dimen/mm_modItemIconSize"
+                android:layout_height="@dimen/mm_modItemIconSize"
+                android:layout_marginHorizontal="@dimen/XXS"
+                android:src="@drawable/placeholder_mod" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/mm_modName"
+            style="@style/text"
+            android:layout_marginLeft="@dimen/M"
+            android:text="mod name" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

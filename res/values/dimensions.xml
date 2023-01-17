@@ -5,10 +5,8 @@
 <resources> <!--This resource file is intended to globally contain all dimensions from UI-->
 
     <!--Layers-->
-    <dimen name="imposedLayer">3dp</dimen>
-    <dimen name="topLayer">2dp</dimen>
-    <dimen name="middleLayer">1dp</dimen>
-    <dimen name="backLayer">0dp</dimen>
+    <dimen name="top_layer">2dp</dimen>
+    <dimen name="middle_layer">1dp</dimen>
 
     <!--Predefined dimensions-->
     <dimen name="XXS">@dimen/_2sdp</dimen>
@@ -43,13 +41,22 @@
     <dimen name="vector10">@dimen/_10sdp</dimen>
     <dimen name="vector8">@dimen/_8sdp</dimen>
 
+    <!--Global-->
+    <dimen name="app_barHeight">@dimen/_40sdp</dimen>
+    <dimen name="app_panelWidth">@dimen/_200sdp</dimen>
+    <dimen name="app_buttonHeight">@dimen/_32sdp</dimen>
+    <dimen name="app_corners">@dimen/_12sdp</dimen>
+
+
+
+
+
+
     <!--Buttons-->
     <dimen name="buttonCornerRadius">@dimen/_8sdp</dimen>
-    <dimen name="buttonHeight">@dimen/_28sdp</dimen>
     <dimen name="buttonCardElevation">@dimen/_6sdp</dimen>
 
     <!--Shapes-->
-    <dimen name="globalCorners">@dimen/_12sdp</dimen>
     <dimen name="tabIndicatorSize">@dimen/_2sdp</dimen>
 
     <!--Custom views-->
@@ -61,7 +68,7 @@
     <dimen name="progressIndicatorThickness">@dimen/_3sdp</dimen>
     <dimen name="progressIndicatorThicknessM">@dimen/_4sdp</dimen>
 
-    <dimen name="circularIndicatorSizeS">@dimen/_16sdp</dimen>
+    <dimen name="circularIndicatorSizeS">@dimen/_18sdp</dimen>
     <dimen name="circularIndicatorSizeM">@dimen/_30sdp</dimen>
     <dimen name="circularIndicatorSizeL">@dimen/_40sdp</dimen>
     <dimen name="circularIndicatorSizeXL">@dimen/_58sdp</dimen>
@@ -78,20 +85,11 @@
     <!--Scrollbar-->
     <dimen name="scrollbarIndicatorWidth">@dimen/_4sdp</dimen>
 
-    <dimen name="songSeekBarHeight">@dimen/_54sdp</dimen>
-    <dimen name="songSeekBarCornerRadius">@dimen/_8sdp</dimen>
-    <dimen name="songSeekBarThumbHeight">@dimen/_48sdp</dimen>
-    <dimen name="songSeekBarThumbWidth">@dimen/_10sdp</dimen>
-    <dimen name="songSeekBarThumbOffset">@dimen/_minus2sdp</dimen>
-    <dimen name="songSeekBarHorizontalPadding">@dimen/_12sdp</dimen>
-
     <!--Splash Screen-->
     <dimen name="splashScreenLogoSize">@dimen/_80sdp</dimen>
 
     <!--Music Player-->
-    <dimen name="musicPlayerSongShapeHeight">@dimen/_44sdp</dimen>
     <dimen name="musicPlayerPlayButtonMargin">@dimen/_16sdp</dimen>
-    <dimen name="musicPlayerHeight">@dimen/_215sdp</dimen>
     <dimen name="musicPlayerButtonsMargin">@dimen/_16sdp</dimen>
     <dimen name="musicPlayerListWidth">@dimen/_240sdp</dimen>
     
@@ -103,7 +101,6 @@
 
     <!--Panels-->
     <dimen name="panelCardElevation">@dimen/_16sdp</dimen>
-    <dimen name="panelWidth">@dimen/_200sdp</dimen>
     <dimen name="panelMargins">@dimen/_14sdp</dimen>
     <dimen name="panelShadowWidth">@dimen/_8sdp</dimen>
     <dimen name="panelSeparatorHeight">@dimen/_1sdp</dimen>
@@ -179,11 +176,5 @@
 
     <!--Hit badge-->
     <dimen name="hitBadgeSize">@dimen/_20sdp</dimen>
-
-    <!--Mod menu-->
-    <dimen name="modMenuModSpriteSize">@dimen/_22sdp</dimen>
-    <dimen name="modMenuModItemHeight">@dimen/_40sdp</dimen>
-    <dimen name="modMenuCustomizationHeight">@dimen/_150sdp</dimen>
-    <dimen name="modMenuCustomizationTabWidth">@dimen/_180sdp</dimen>
 
 </resources>

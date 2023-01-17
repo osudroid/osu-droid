@@ -10,9 +10,10 @@ import android.widget.TextView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
-import com.reco1l.ui.BaseFragment;
 import com.reco1l.tables.AnimationTable;
 import com.reco1l.tables.Res;
+import com.reco1l.ui.BaseFragment;
+
 import com.reco1l.utils.helpers.BeatmapHelper;
 
 import java.text.DecimalFormat;
@@ -65,7 +66,7 @@ public final class GameSummary extends BaseFragment {
 
     @Override
     protected int getLayout() {
-        return R.layout.game_results;
+        return R.layout.summary_layout;
     }
 
     //--------------------------------------------------------------------------------------------//

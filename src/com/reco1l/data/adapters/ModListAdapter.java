@@ -12,8 +12,9 @@ import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
-import com.reco1l.data.mods.ModWrapper;
+import com.reco1l.management.ModManager;
 import com.reco1l.utils.Animation;
+import com.reco1l.data.mods.ModWrapper;
 
 import java.util.ArrayList;
 
@@ -23,65 +24,74 @@ public class ModListAdapter extends BaseAdapter<ModListAdapter.ModViewHolder, Mo
 
     //--------------------------------------------------------------------------------------------//
 
-    public ModListAdapter(ArrayList<ModWrapper> list) {
-        super(list);
+    public ModListAdapter(ArrayList<ModWrapper> pList) {
+        super(pList);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected int getItemLayout() {
-        return R.layout.mod_menu_item;
+        return R.layout.item_mod;
     }
 
     @Override
-    protected ModViewHolder getViewHolder(View root) {
-        return new ModViewHolder(root);
+    protected ModViewHolder getViewHolder(View pRootView) {
+        return new ModViewHolder(pRootView);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public static class ModViewHolder extends BaseViewHolder<ModWrapper> {
 
-        private final CardView body;
-
-        private final ImageView icon;
-        private final TextView name;
+        private final CardView mBody;
+        private final TextView mName;
+        private final ImageView mIcon;
 
         //----------------------------------------------------------------------------------------//
 
         public ModViewHolder(@NonNull View root) {
             super(root);
-            body = (CardView) root;
-            icon = root.findViewById(R.id.mm_modIcon);
-            name = root.findViewById(R.id.mm_modName);
+            mBody = (CardView) root;
+            mIcon = root.findViewById(R.id.mm_modIcon);
+            mName = root.findViewById(R.id.mm_modName);
         }
 
         //----------------------------------------------------------------------------------------//
 
         @Override
-        protected void onBind(ModWrapper modWrapper, int position) {
-            modWrapper.holder = this;
+        protected void onBind(ModWrapper pModWrapper, int pPosition) {
+            pModWrapper.holder = this;
 
-            icon.setImageBitmap(Game.bitmapManager.get(modWrapper.getIcon()));
-            name.setText(modWrapper.getName());
+            mIcon.setImageBitmap(Game.bitmapManager.get(pModWrapper.getIcon()));
+            mName.setText(pModWrapper.getName());
 
-            UI.modMenu.bindTouch(root, () -> UI.modMenu.onModSelect(modWrapper, false));
+            UI.modMenu.bindTouch(root, () -> UI.modMenu.onModSelect(pModWrapper, false));
 
             if (isEnabled()) {
-                body.setCardBackgroundColor(0xFF222F3D);
+                mBody.setCardBackgroundColor(0xFF222F3D);
             }
         }
 
         private boolean isEnabled() {
-            return UI.modMenu.enabled.contains(item);
+            return ModManager.modList.contains(item);
         }
 
-        public void onModSelect(boolean isEnabled) {
-            int color = body.getCardBackgroundColor().getDefaultColor();
+        @Override
+        public void onSelect() {
+            int color = mBody.getCardBackgroundColor().getDefaultColor();
 
-            Animation.ofColor(color, isEnabled ? 0xFF222F3D : 0xFF242424)
-                    .runOnUpdate(value -> body.setCardBackgroundColor((int) value))
+            Animation.ofColor(color, 0xFF222F3D)
+                    .runOnUpdate(value -> mBody.setCardBackgroundColor((int) value))
+                    .play(100);
+        }
+
+        @Override
+        public void onDeselect() {
+            int color = mBody.getCardBackgroundColor().getDefaultColor();
+
+            Animation.ofColor(color, 0xFF242424)
+                    .runOnUpdate(value -> mBody.setCardBackgroundColor((int) value))
                     .play(100);
         }
     }

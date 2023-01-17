@@ -18,14 +18,8 @@ public final class FilterBar extends BaseFragment {
 
     public static FilterBar instance;
 
-    private IconButton sort;
-    private EditText field;
-
-    //--------------------------------------------------------------------------------------------//
-
-    public FilterBar() {
-        super(Screens.Selector);
-    }
+    private IconButton mSortButton;
+    private EditText mSearchField;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -36,17 +30,17 @@ public final class FilterBar extends BaseFragment {
 
     @Override
     protected int getLayout() {
-        return R.layout.filter_bar;
+        return R.layout.selector_filter_bar;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onLoad() {
-        sort = find("sort");
-        field = find("search");
+        mSortButton = find("sort");
+        mSearchField = find("search");
 
-        field.addTextChangedListener(new TextWatcher() {
+        mSearchField.addTextChangedListener(new TextWatcher() {
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
@@ -56,16 +50,6 @@ public final class FilterBar extends BaseFragment {
             }
         });
 
-        bindTouch(sort, Game.beatmapCollection::nextOrder);
+        bindTouch(mSortButton, Game.beatmapCollection::nextOrder);
     }
-
-    @Override
-    protected void onUpdate(float sec) {
-        if (!isLoaded()) {
-            return;
-        }
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
 }

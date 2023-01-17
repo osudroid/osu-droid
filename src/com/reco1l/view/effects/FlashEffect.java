@@ -17,7 +17,6 @@ import androidx.annotation.Nullable;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.Animation.UpdateListener;
 import com.reco1l.view.BaseView;
 
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -57,7 +56,7 @@ public class FlashEffect extends View implements BaseView {
         paint = new Paint();
         paint.setDither(Config.isUseDither());
 
-        UpdateListener listener = value -> paint.setAlpha((int) value);
+        Animation.UpdateListener listener = value -> paint.setAlpha((int) value);
 
         fadeUp = Animation.ofInt(0, 255).runOnUpdate(listener);
         fadeDown = Animation.ofInt(255, 0).runOnUpdate(listener);

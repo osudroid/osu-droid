@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--Mod Menu-->
+    <dimen name="mm_layer">@dimen/top_layer</dimen>
+    <dimen name="mm_bodyBottomMargin">@dimen/app_barHeight</dimen>
+    <dimen name="mm_bottomBarHeight">@dimen/app_barHeight</dimen>
+    <dimen name="mm_bottomListHeight">@dimen/_150sdp</dimen>
+    <dimen name="mm_customizationItemWidth">@dimen/_190sdp</dimen>
+    <dimen name="mm_sectionItemWidth">@dimen/app_panelWidth</dimen>
+    <dimen name="mm_modItemHeight">@dimen/_40sdp</dimen>
+    <dimen name="mm_modItemRadius">@dimen/app_corners</dimen>
+    <dimen name="mm_modItemIconSize">@dimen/_24sdp</dimen>
+
+    <!--Music Player-->
+    <dimen name="mp_layer">@dimen/top_layer</dimen>
+    <dimen name="mp_height">@dimen/_158sdp</dimen>
+
+
+</resources>

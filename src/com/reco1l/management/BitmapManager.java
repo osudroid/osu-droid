@@ -1,12 +1,11 @@
 package com.reco1l.management;
 
-import static com.reco1l.interfaces.ITextures.fileNames;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.reco1l.Game;
+import com.reco1l.interfaces.ITextures;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,7 +48,7 @@ public class BitmapManager {
     }
 
     public void loadAssets(String folder) {
-        List<String> valid = Arrays.asList(fileNames);
+        List<String> valid = Arrays.asList(ITextures.fileNames);
 
         try {
             for (String asset : Game.activity.getAssets().list("gfx")) {

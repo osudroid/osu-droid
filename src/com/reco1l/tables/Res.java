@@ -20,12 +20,6 @@ public final class Res {
 
     //--------------------------------------------------------------------------------------------//
 
-    public Res() throws Exception {
-        throw new Exception("You can't create a new instance of this class!");
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
     public static int id(String name, String type) {
         return R.getIdentifier(name, type, Game.activity.getPackageName());
     }

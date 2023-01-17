@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--ModMenu-->
+    <color name="mm_body">@color/backgroundDimmed</color>
+    <color name="mm_bottomCard">@color/backgroundTertiary</color>
+    <color name="mm_bottomBar">#1F000000</color>
+    <color name="mm_customizationItem">#14000000</color>
+    <color name="mm_modItem">@color/backgroundSecondary</color>
+
+</resources>

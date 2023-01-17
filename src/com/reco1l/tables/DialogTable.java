@@ -23,7 +23,7 @@ public class DialogTable {
 
         builder.title = "Information";
         builder.customFragment = new AuthorFragment();
-        builder.setCloseMode(true);
+        //builder.setCloseMode(true);
         builder.addButton("Close", Dialog::close);
 
         return builder;
@@ -32,7 +32,7 @@ public class DialogTable {
     public static class AuthorFragment extends SimpleFragment {
 
         public AuthorFragment() {
-            super(R.layout.dialog_author_layout);
+            super(R.layout.layout_author);
         }
 
         protected void onLoad() {
@@ -48,7 +48,7 @@ public class DialogTable {
 
         builder.title = "Restart";
         builder.message = "The game will be restarted to apply changes";
-        builder.setCloseMode(false);
+        //builder.setCloseMode(false);
         builder.addButton("Accept", dialog -> {
             Intent intent = new Intent(Game.activity, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -66,7 +66,7 @@ public class DialogTable {
 
         builder.title = "Exit";
         builder.message = "Are you sure you want to exit the game?";
-        builder.setCloseMode(true);
+        //builder.setCloseMode(true);
         builder.addButton("Accept", dialog -> {
             dialog.close();
             Game.exit();
@@ -83,7 +83,7 @@ public class DialogTable {
 
         builder.title = "Warning";
         builder.message = Res.str(R.string.message_autoclicker_detected);
-        builder.setCloseMode(false);
+        //builder.setCloseMode(false);
         builder.addButton("Exit", dialog -> {
             dialog.close();
             Game.forcedExit();

@@ -10,61 +10,52 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.factor.bouncy.BouncyRecyclerView;
+
 import com.reco1l.Game;
+import com.reco1l.UI;
 import com.reco1l.data.ModCustomizationAdapter;
-import com.reco1l.data.mods.*;
-import com.reco1l.interfaces.IGameMods;
-import com.reco1l.data.adapters.ModSectionAdapter;
+import com.reco1l.interfaces.IGameMod;
+import com.reco1l.management.ModManager;
+import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.tables.Res;
 import com.reco1l.view.IconButton;
 
+import com.reco1l.data.mods.CustomDifficultyMod;
+import com.reco1l.data.mods.CustomSpeedMod;
+import com.reco1l.data.mods.FlashlightMod;
+import com.reco1l.data.mods.LegacyModWrapper;
+import com.reco1l.data.mods.ModWrapper;
+import com.reco1l.data.adapters.ModSectionAdapter;
+
 import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
 
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 import static androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL;
 
-public final class ModMenu extends BaseFragment implements IGameMods {
+public final class ModMenu extends BaseFragment implements IGameMod {
 
     public static ModMenu instance;
 
     public IconButton button;
 
-    public Section
-            increase,
-            reduction,
-            automation,
-            miscellaneous;
+    private Section
+            mIncrease,
+            mReduction,
+            mAutomation,
+            mMiscellaneous;
 
-    public final ArrayList<ModWrapper> enabled;
-    public final EnumSet<GameMod> mods;
-
-    private final Map<String, Object> properties;
-
-    private ModCustomizationAdapter customAdapter;
-    private BouncyRecyclerView customization;
-    private ModSectionAdapter adapter;
-
-    //--------------------------------------------------------------------------------------------//
-
-    public ModMenu() {
-        super();
-        enabled = new ArrayList<>();
-        properties = new HashMap<>();
-        mods = EnumSet.noneOf(GameMod.class);
-    }
+    private ModCustomizationAdapter mCustomizationAdapter;
+    private ModSectionAdapter mSectionAdapter;
+    private BouncyRecyclerView mCustomization;
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected int getLayout() {
-        return R.layout.mod_menu;
+        return R.layout.extra_mod_menu;
     }
 
     @Override
@@ -81,21 +72,21 @@ public final class ModMenu extends BaseFragment implements IGameMods {
 
     private void loadMods() {
         Section[] sections = {
-                increase = new Section("Difficulty Increase"),
-                reduction = new Section("Difficulty Reduction"),
-                automation = new Section("Automation"),
-                miscellaneous = new Section("Miscellaneous")
+                mIncrease = new Section("Difficulty Increase"),
+                mReduction = new Section("Difficulty Reduction"),
+                mAutomation = new Section("Automation"),
+                mMiscellaneous = new Section("Miscellaneous")
         };
 
         for (int i = 0; i < GameMod.values().length; ++i) {
             GameMod mod = GameMod.values()[i];
-            Section section = miscellaneous;
+            Section section = mMiscellaneous;
 
             if (mod.equals(EZ, NF, HT, REZ)) {
-                section = reduction;
+                section = mReduction;
             }
             if (mod.equals(HR, DT, NC, HD, PR, SD, SC, PF, FL)) {
-                section = increase;
+                section = mIncrease;
 
                 if (mod.equals(FL)) {
                     section.add(new FlashlightMod());
@@ -103,95 +94,81 @@ public final class ModMenu extends BaseFragment implements IGameMods {
                 }
             }
             if (mod.equals(RX, AU, AP)) {
-                section = automation;
+                section = mAutomation;
             }
             section.add(new LegacyModWrapper(mod));
         }
         loadCustomMods();
 
-        adapter = new ModSectionAdapter(sections);
-        customAdapter = new ModCustomizationAdapter(new ArrayList<>());
+        mSectionAdapter = new ModSectionAdapter(sections);
+        mCustomizationAdapter = new ModCustomizationAdapter(new ArrayList<>());
     }
 
     private void loadCustomMods() {
-        miscellaneous.add(new CustomDifficultyMod());
-        miscellaneous.add(new CustomSpeedMod());
+        mMiscellaneous.add(new CustomDifficultyMod());
+        mMiscellaneous.add(new CustomSpeedMod());
     }
 
     @Override
     protected void onLoad() {
         button.setActivated(true);
 
-        if (adapter == null) {
+        if (mSectionAdapter == null) {
             loadMods();
         }
 
         RecyclerView recyclerView = find("sectionContainer");
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(mSectionAdapter);
 
-        customization = find("customRv");
-        customization.setLayoutManager(new LinearLayoutManager(getContext(), HORIZONTAL, false));
-        customization.setAdapter(customAdapter);
+        mCustomization = find("customRv");
+        mCustomization.setLayoutManager(new LinearLayoutManager(getContext(), HORIZONTAL, false));
+        mCustomization.setAdapter(mCustomizationAdapter);
 
         bindTouch(find("clear"), this::clear);
-        bindTouch(find("custom"), this::switchCustomVisibility);
+        bindTouch(find("custom"), this::switchCustomizationVisibility);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    private void switchCustomVisibility() {
-        if (customization.getVisibility() != View.VISIBLE) {
-            customization.setVisibility(View.VISIBLE);
+    public void onModSelect(ModWrapper pWrapper, boolean pByFlag) {
+        if (ModManager.remove(pWrapper)) {
+            pWrapper.onSelect(false);
+        } else if (ModManager.add(pWrapper) && !pByFlag) {
+            pWrapper.onSelect(true);
+        }
+        updateCustomizations();
+        updateButtonWidget();
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    private void clear() {
+        for (ModWrapper mod : ModManager.modList) {
+            mod.holder.onDeselect();
+        }
+        ModManager.clear();
+
+        updateCustomizations();
+        updateButtonWidget();
+    }
+
+    private void switchCustomizationVisibility() {
+        if (mCustomization.getVisibility() != View.VISIBLE) {
+            mCustomization.setVisibility(View.VISIBLE);
         } else {
-            customization.setVisibility(View.GONE);
+            mCustomization.setVisibility(View.GONE);
         }
-    }
-
-    public void clear() {
-        for (ModWrapper mod : enabled) {
-            mod.holder.onModSelect(false);
-        }
-        enabled.clear();
-        mods.clear();
-
-        updateCustomizations();
-        updateButtonWidget();
-    }
-
-    public void onModSelect(ModWrapper wrapper, boolean byFlag) {
-        if (enabled.remove(wrapper)) {
-            wrapper.onSelect(false);
-        }
-        else if (enabled.add(wrapper) && !byFlag) {
-            wrapper.onSelect(true);
-        }
-        updateCustomizations();
-        updateButtonWidget();
-    }
-
-    public LegacyModWrapper getWrapperByGameMod(GameMod mod) {
-        for (ModWrapper wrapper : enabled) {
-
-            if (wrapper instanceof LegacyModWrapper) {
-                LegacyModWrapper legacyWrapper = (LegacyModWrapper) wrapper;
-
-                if (legacyWrapper.mod == mod) {
-                    return legacyWrapper;
-                }
-            }
-        }
-        return null;
     }
 
     private void updateCustomizations() {
-        customAdapter.clear();
+        mCustomizationAdapter.clear();
 
-        for (ModWrapper wrapper : enabled) {
+        for (ModWrapper wrapper : ModManager.modList) {
             if (wrapper.getProperties() != null) {
-                customAdapter.getData().add(wrapper);
+                mCustomizationAdapter.getData().add(wrapper);
             }
         }
-        customAdapter.notifyDataSetChanged();
+        mCustomizationAdapter.notifyDataSetChanged();
     }
 
     private void updateButtonWidget() {
@@ -200,7 +177,7 @@ public final class ModMenu extends BaseFragment implements IGameMods {
         }
 
         LinearLayout widget = button.getWidget();
-        if (enabled.isEmpty()) {
+        if (ModManager.isListEmpty()) {
             Animation.of(widget)
                     .toRightPadding(0)
                     .play(100);
@@ -214,7 +191,7 @@ public final class ModMenu extends BaseFragment implements IGameMods {
                 .toRightPadding(Res.sdp(12))
                 .play(100);
 
-        for (ModWrapper wrapper : enabled) {
+        for (ModWrapper wrapper : ModManager.modList) {
             if (wrapper.getIcon() == null) {
                 continue;
             }
@@ -232,24 +209,13 @@ public final class ModMenu extends BaseFragment implements IGameMods {
         }
     }
 
+    //--------------------------------------------------------------------------------------------//
+
     @Override
     public void close() {
         super.close();
+        UI.beatmapPanel.updateAttributes();
         button.setActivated(false);
-    }
-
-
-    //--------------------------------------------------------------------------------------------//
-
-    public Object getProperty(String key, Object def) {
-        if (properties.containsKey(key)) {
-            return properties.get(key);
-        }
-        return def;
-    }
-
-    public void setProperty(String key, Object value) {
-        properties.put(key, value);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -257,19 +223,19 @@ public final class ModMenu extends BaseFragment implements IGameMods {
     public static class Section {
 
         public final String title;
-        public final ArrayList<ModWrapper> modWrappers;
+        public final ArrayList<ModWrapper> childs;
 
         //----------------------------------------------------------------------------------------//
 
-        public Section(String title) {
-            this.title = title;
-            this.modWrappers = new ArrayList<>();
+        public Section(String pTitle) {
+            title = pTitle;
+            childs = new ArrayList<>();
         }
 
         //----------------------------------------------------------------------------------------//
 
-        private void add(ModWrapper wrapper) {
-            modWrappers.add(wrapper);
+        private void add(ModWrapper pWrapper) {
+            childs.add(pWrapper);
         }
     }
 

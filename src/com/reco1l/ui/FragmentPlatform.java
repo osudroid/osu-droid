@@ -4,7 +4,6 @@ import static android.widget.RelativeLayout.LayoutParams.*;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.transition.Transition;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -20,7 +19,7 @@ import com.reco1l.Game;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.DrawFPSHandler;
+import com.reco1l.utils.NativeFrameCounter;
 
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 
@@ -90,7 +89,7 @@ public final class FragmentPlatform {
         renderLayout.setGravity(Gravity.CENTER);
         renderLayout.addView(renderView, params);
 
-        DrawFPSHandler.startCounter();
+        NativeFrameCounter.startCounter();
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -162,10 +161,10 @@ public final class FragmentPlatform {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void addFragment(BaseFragment fragment) {
+    public boolean addFragment(BaseFragment fragment) {
         synchronized (listMutex) {
             if (fragment.isAdded() || showing.contains(fragment)) {
-                return;
+                return false;
             }
 
             showing.add(fragment);
@@ -179,6 +178,8 @@ public final class FragmentPlatform {
                     .add(container.getId(), fragment)
                     .runOnCommit(fragment::onTransaction)
                     .commitAllowingStateLoss();
+
+            return true;
         }
     }
 

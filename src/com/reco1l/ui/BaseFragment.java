@@ -14,9 +14,9 @@ import androidx.fragment.app.Fragment;
 
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
+import com.reco1l.tables.ResourceTable;
 import com.reco1l.utils.TouchListener;
 import com.reco1l.utils.TouchHandler;
-import com.reco1l.tables.Res;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,57 +25,67 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 22/6/22 02:26
 
-public abstract class BaseFragment extends Fragment {
+public abstract class BaseFragment extends Fragment implements ResourceTable {
 
-    protected final Screens[] parents;
+    final Screens[] parents;
 
-    protected View
-            rootView,
-            rootBackground;
+    protected View rootView;
 
-    private final Map<View, TouchHandler> registeredViews;
-    private final Runnable close = this::close;
+    // The background view of the layout, take care that if the root view doesn't have a child view
+    // identified as "background" it'll be null.
+    protected View rootBackground;
+
+    private final Map<View, TouchHandler> mRegisteredViews;
+    private final Runnable mCloseTask = this::close;
 
     private boolean
-            isLoaded = false,
-            closeOnBackgroundClick = false;
+            mIsLoaded = false,
+            mCloseOnBackgroundClick = false;
 
     //--------------------------------------------------------------------------------------------//
 
+    // Use this constructor if the fragment has no parents screens
     public BaseFragment() {
-        this((Screens) null);
+        this((Screens[]) null);
     }
 
-    public BaseFragment(Screens... parents) {
-        this.registeredViews = new HashMap<>();
-        this.parents = parents;
+    // This constructor defines the parent screens where the fragment should be added automatically
+    public BaseFragment(Screens... pParents) {
+        parents = pParents;
+        mRegisteredViews = new HashMap<>();
 
         Game.platform.onFragmentCreated(this);
     }
 
     //--------------------------------------------------------------------------------------------//
 
+    // Override this to set the layout resource to be inflated and set it as root view
     protected @LayoutRes int getLayout() {
         return 0;
     }
 
+    // Set the prefix which the resources identifiers start of, this is helpful to a proper usage
+    // of find() method
     protected String getPrefix() {
         return null;
     }
 
+    // Override this to set the root view directly instead of inflate a layout resource
     protected View getRootView() {
         return null;
     }
-
 
     protected abstract void onLoad();
 
     //--------------------------------------------------------------------------------------------//
 
+    // If the fragment is an overlay it'll be added to the overlay container
     protected boolean isOverlay() {
         return false;
     }
 
+    // If the fragment is an extra means that is not attached to a screen and can be closed by other
+    // fragments or by user pressing back button.
     protected boolean isExtra() {
         return false;
     }
@@ -83,11 +93,12 @@ public abstract class BaseFragment extends Fragment {
     //--------------------------------------------------------------------------------------------//
 
     protected final void closeOnBackgroundClick(boolean bool) {
-        closeOnBackgroundClick = bool;
+        mCloseOnBackgroundClick = bool;
     }
 
     //--------------------------------------------------------------------------------------------//
 
+    // Override this to define the time to automatically close this fragment.
     protected long getCloseTime() {
         return 0;
     }
@@ -98,7 +109,7 @@ public abstract class BaseFragment extends Fragment {
 
     //--------------------------------------------------------------------------------------------//
 
-    protected void onUpdate(float sec) {
+    protected void onUpdate(float pSecElapsed) {
     }
 
     protected void onShowAttempt() {
@@ -107,24 +118,25 @@ public abstract class BaseFragment extends Fragment {
     protected void onCloseAttempt() {
     }
 
-    protected void onScreenChange(Screens lastScreen, Screens newScreen) {
+    protected void onScreenChange(Screens pLastScreen, Screens pNewScreen) {
     }
 
     //--------------------------------------------------------------------------------------------//
 
+    // Return if onLoad() was previously called
     public final boolean isLoaded() {
-        return isLoaded;
+        return mIsLoaded;
     }
 
-    public final int getWidth() {
+    public int getWidth() {
         return rootView.getWidth();
     }
 
-    public final int getHeight() {
+    public int getHeight() {
         return rootView.getHeight();
     }
 
-    protected final String generateTag() {
+    final String generateTag() {
         return getClass().getSimpleName() + "@" + this.hashCode();
     }
 
@@ -132,7 +144,7 @@ public abstract class BaseFragment extends Fragment {
 
     @Nullable
     @Override
-    public final View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle bundle) {
+    public final View onCreateView(@NonNull LayoutInflater pInflater, ViewGroup pContainer, Bundle pBundle) {
         rootView = getRootView();
 
         if (rootView != null && getLayout() != 0) {
@@ -142,12 +154,12 @@ public abstract class BaseFragment extends Fragment {
         }
 
         if (getLayout() != 0) {
-            rootView = inflater.inflate(getLayout(), container, false);
+            rootView = pInflater.inflate(getLayout(), pContainer, false);
         }
         rootBackground = rootView.findViewById(R.id.background);
 
         onLoad();
-        isLoaded = true;
+        mIsLoaded = true;
 
         if (rootView != null) {
             if (rootBackground != null) {
@@ -155,7 +167,7 @@ public abstract class BaseFragment extends Fragment {
             }
 
             if (getCloseTime() > 0) {
-                rootView.postDelayed(close, getCloseTime());
+                rootView.postDelayed(mCloseTask, getCloseTime());
             }
         }
 
@@ -163,7 +175,7 @@ public abstract class BaseFragment extends Fragment {
     }
 
     private void handleBackground() {
-        if (!closeOnBackgroundClick || rootBackground.hasOnClickListeners()) {
+        if (!mCloseOnBackgroundClick || rootBackground.hasOnClickListeners()) {
             return;
         }
         rootBackground.setClickable(true);
@@ -182,7 +194,7 @@ public abstract class BaseFragment extends Fragment {
 
     //---------------------------------------Management-------------------------------------------//
 
-    protected void onTransaction() {
+    void onTransaction() {
         final String tag = generateTag();
 
         if (isAdded()) {
@@ -198,25 +210,26 @@ public abstract class BaseFragment extends Fragment {
             onCloseAttempt();
             return;
         }
-        isLoaded = false;
-        rootView.removeCallbacks(close);
+        mIsLoaded = false;
+        rootView.removeCallbacks(mCloseTask);
         unbindTouchHandlers();
-        registeredViews.clear();
+        mRegisteredViews.clear();
         Game.platform.removeFragment(this);
     }
 
-    public void show() {
+    public boolean show() {
         if (isExtra()) {
             Game.platform.closeExtras();
         }
 
         if (isAdded() || !getConditionToShow()) {
             onShowAttempt();
-            return;
+            return false;
         }
-        Game.platform.addFragment(this);
+        return Game.platform.addFragment(this);
     }
 
+    // If added it calls show(), otherwise calls close()
     public final void altShow() {
         if (isAdded()) {
             close();
@@ -227,83 +240,87 @@ public abstract class BaseFragment extends Fragment {
 
     //--------------------------------------------------------------------------------------------//
 
+    // Find a view by its string format identifier, if you previously defined the prefix you don't
+    // have to write the fragment prefix here
     @SuppressWarnings("unchecked")
-    protected <T extends View> T find(String id) {
-        if (rootView == null || id == null)
+    protected <T extends View> T find(String pId) {
+        if (rootView == null || pId == null) {
             return null;
-
-        int identifier;
-        if (getPrefix() == null || id.startsWith(getPrefix() + "_")) {
-            identifier = Res.id(id, "id");
-        } else {
-            identifier = Res.id(getPrefix() + "_" + id, "id");
         }
 
-        Object view = rootView.findViewById(identifier);
+        int resId;
+        if (getPrefix() == null || pId.startsWith(getPrefix() + "_")) {
+            resId = id(pId, "id");
+        } else {
+            resId = id(getPrefix() + "_" + pId, "id");
+        }
 
-        if (view != null && !registeredViews.containsKey((T) view)) {
-            registeredViews.put((T) view, null);
+        Object view = rootView.findViewById(resId);
+
+        if (view != null && !mRegisteredViews.containsKey((T) view)) {
+            mRegisteredViews.put((T) view, null);
         }
         return (T) view;
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void resetDismissTimer() {
-        rootView.removeCallbacks(close);
-        rootView.postDelayed(close, getCloseTime());
+    public final void resetCloseTimer() {
+        rootView.removeCallbacks(mCloseTask);
+        rootView.postDelayed(mCloseTask, getCloseTime());
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void onTouchEventNotified(int action) {
+    public void onTouchEventNotified(int pAction) {
         if (getCloseTime() > 0) {
-            if (action == MotionEvent.ACTION_DOWN) {
-                rootView.removeCallbacks(close);
+            if (pAction == MotionEvent.ACTION_DOWN) {
+                rootView.removeCallbacks(mCloseTask);
             }
-            if (action == MotionEvent.ACTION_UP) {
-                rootView.postDelayed(close, getCloseTime());
+            if (pAction == MotionEvent.ACTION_UP) {
+                rootView.postDelayed(mCloseTask, getCloseTime());
             }
         }
     }
 
-    public final void bindTouch(View view, Runnable onSingleTapUp) {
-        bindTouch(view, new TouchListener() {
+    // Bind a touch listener to the view and link it to the fragment
+    public final void bindTouch(View pView, TouchListener pListener) {
+        TouchHandler handler = mRegisteredViews.get(pView);
+        if (handler == null) {
+            handler = new TouchHandler(pListener);
+            mRegisteredViews.put(pView, handler);
+        } else {
+            handler.listener = pListener;
+        }
+        handler.linkToFragment(this);
+        handler.apply(pView);
+    }
+
+    public final void bindTouch(View pView, Runnable pOnActionUp) {
+        bindTouch(pView, new TouchListener() {
             public void onPressUp() {
-                if (onSingleTapUp != null) {
-                    onSingleTapUp.run();
+                if (pOnActionUp != null) {
+                    pOnActionUp.run();
                 }
             }
         });
     }
 
-    public final void bindTouch(View view, TouchListener listener) {
-        TouchHandler vth = registeredViews.get(view);
-        if (vth == null) {
-            vth = new TouchHandler(listener);
-            registeredViews.put(view, vth);
-        } else {
-            vth.listener = listener;
-        }
-        vth.linkToFragment(this);
-        vth.apply(view);
-    }
-
-    protected final void unbindTouch(View view) {
-        registeredViews.remove(view);
+    protected final void unbindTouch(View pView) {
+        mRegisteredViews.remove(pView);
     }
 
     protected final void unbindTouchHandlers() {
-        for (View view : registeredViews.keySet()) {
+        for (View view : mRegisteredViews.keySet()) {
             view.setOnTouchListener(null);
         }
     }
 
     protected final void rebindTouchHandlers() {
-        for (View view : registeredViews.keySet()) {
-            TouchHandler touchHandler = registeredViews.get(view);
-            if (touchHandler != null) {
-                touchHandler.apply(view);
+        for (View view : mRegisteredViews.keySet()) {
+            TouchHandler handler = mRegisteredViews.get(view);
+            if (handler != null) {
+                handler.apply(view);
             }
         }
     }

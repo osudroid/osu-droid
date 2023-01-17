@@ -5,24 +5,25 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.edlplan.ui.TriangleEffectView;
 import com.reco1l.Game;
-import com.reco1l.enums.Screens;
 import com.reco1l.UI;
-import com.reco1l.utils.Animation;
-import com.reco1l.tables.AnimationTable;
+import com.reco1l.enums.Screens;
 import com.reco1l.management.KeyInputManager;
-import com.reco1l.utils.helpers.BeatmapHelper;
-import com.reco1l.ui.BaseFragment;
+import com.reco1l.tables.AnimationTable;
 import com.reco1l.tables.Res;
-import com.reco1l.utils.helpers.OnlineHelper;
+import com.reco1l.ui.BaseFragment;
+import com.reco1l.utils.Animation;
 import com.reco1l.view.IconButton;
+
+import com.reco1l.utils.helpers.OnlineHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -30,23 +31,31 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public final class TopBar extends BaseFragment {
 
-    public static TopBar instance;
+    public static final TopBar instance = new TopBar();
 
     public UserBox userBox;
-    public MusicButton musicButton;
 
-    private View back, body;
-    private LinearLayout container, buttonsContainer;
+    private final Map<Screens, ArrayList<IconButton>> mButtons;
 
-    private final Map<Screens, ArrayList<IconButton>> buttons;
+    private View
+            mBody,
+            mBackButton;
 
-    private int barHeight;
+    private LinearLayout
+            mLeftAnchorLayout,
+            mButtonsContainer;
+
+    private boolean mIsClosing = false;
 
     //--------------------------------------------------------------------------------------------//
 
     public TopBar() {
         super(Screens.Selector, Screens.Summary, Screens.Loader);
-        buttons = new HashMap<>();
+        mButtons = new HashMap<>();
+
+        for (Screens screen : Screens.values()) {
+            mButtons.put(screen, new ArrayList<>());
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -58,7 +67,7 @@ public final class TopBar extends BaseFragment {
 
     @Override
     protected int getLayout() {
-        return R.layout.top_bar;
+        return R.layout.overlay_top_bar;
     }
 
     @Override
@@ -66,91 +75,90 @@ public final class TopBar extends BaseFragment {
         return true;
     }
 
+    @Override
+    public int getHeight() {
+        return Res.dimen(R.dimen.topBarHeight);
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onLoad() {
-        barHeight = (int) Res.dimen(R.dimen.topBarHeight);
-
-        body = find("body");
-
-        Animation.of(body)
-                .fromY(-barHeight)
-                .toY(0)
-                .play(200);
-
-        Game.platform.animate(true, true)
-                .toTopMargin(barHeight)
-                .play(200);
-
-        musicButton = new MusicButton(this);
         userBox = new UserBox(this);
 
-        buttonsContainer = find("buttons");
-        container = find("container");
-        back = find("back");
+        mBody = find("body");
+        mBackButton = find("back");
+        mButtonsContainer = find("buttons");
+        mLeftAnchorLayout = find("container");
+
+        rootView.post(() -> {
+            Animation.of(mBody)
+                    .fromY(-getHeight())
+                    .toY(0)
+                    .play(200);
+
+            Game.platform.animate(true, true)
+                    .toTopMargin(getHeight())
+                    .play(200);
+        });
 
 
-        bindTouch(find("inbox"), UI.notificationCenter::altShow);
+        bindTouch(mBackButton, KeyInputManager::performBack);
         bindTouch(find("settings"), UI.settingsPanel::altShow);
-        bindTouch(back, KeyInputManager::performBack);
+        bindTouch(find("inbox"), UI.notificationCenter::altShow);
 
         userBox.loadUserData(false);
-
-        reloadButtons(Game.engine.getScreen());
+        handleButtons(Game.engine.getScreen());
     }
 
     @Override
-    protected void onScreenChange(Screens lastScreen, Screens newScreen) {
+    protected void onScreenChange(Screens pLastScreen, Screens pNewScreen) {
         if (isAdded()) {
-            reloadButtons(newScreen);
+
+            Animation.of(mLeftAnchorLayout)
+                    .toX(-60)
+                    .toAlpha(0)
+                    .runOnEnd(() -> {
+                        if (!mIsClosing) {
+                            handleButtons(pNewScreen);
+
+                            Animation.of(mLeftAnchorLayout)
+                                    .toX(0)
+                                    .toAlpha(1)
+                                    .play(200);
+                        }
+                    })
+                    .play(200);
         }
     }
 
-    public void reloadButtons(Screens current) {
-        if (container == null || buttonsContainer == null) {
-            return;
+    private void handleButtons(@NonNull Screens pCurrent) {
+        mButtonsContainer.removeAllViews();
+
+        if (pCurrent == Screens.Main || pCurrent == Screens.Loader) {
+            mBackButton.setVisibility(View.GONE);
+        } else {
+            mBackButton.setVisibility(View.VISIBLE);
         }
 
-        Animation.of(container)
-                .toX(-60)
-                .toAlpha(0)
-                .runOnEnd(() -> {
-                    buttonsContainer.removeAllViews();
-
-                    if (current == Screens.Main) {
-                        musicButton.setVisibility(Game.libraryManager.getSizeOfBeatmaps() != 0);
-                        back.setVisibility(View.GONE);
-                    } else {
-                        musicButton.setVisibility(false);
-                        if (current != Screens.Loader) {
-                            back.setVisibility(View.VISIBLE);
-                        }
-                    }
-
-                    ArrayList<IconButton> toAdd = buttons.get(current);
-                    if (toAdd != null) {
-                        for (IconButton button : toAdd) {
-                            buttonsContainer.addView(button);
-                            bindTouch(button, button.getTouchListener());
-                        }
-                    }
-
-                    Animation.of(container)
-                            .toX(0)
-                            .toAlpha(1)
-                            .play(200);
-                })
-                .play(200);
+        //noinspection ConstantConditions
+        for (IconButton button : mButtons.get(pCurrent)) {
+            mButtonsContainer.addView(button);
+            bindTouch(button, button.getTouchListener());
+        }
     }
 
     @Override
     public void close() {
         if (isAdded()) {
+            mIsClosing = true;
 
-            Animation.of(body)
-                    .toY(-barHeight)
-                    .runOnEnd(super::close)
+            Animation.of(mBody)
+                    .toY(-getHeight())
+                    .runOnEnd(() -> {
+                        mButtonsContainer.removeAllViews();
+                        super.close();
+                    })
                     .play(200);
 
             Game.platform.animate(true, true)
@@ -160,97 +168,29 @@ public final class TopBar extends BaseFragment {
     }
 
     @Override
-    public void show() {
+    public boolean show() {
         if (Game.engine.getScreen() == Screens.Loader) {
             if (Game.loaderScene.isImmersive()) {
-                return;
+                return false;
             }
         }
-        super.show();
+        mIsClosing = false;
+        return super.show();
     }
     //--------------------------------------------------------------------------------------------//
 
-    public void addButton(Screens screen, IconButton button) {
-        buttons.computeIfAbsent(screen, k -> new ArrayList<>());
-
-        ArrayList<IconButton> list = buttons.get(screen);
-
-        if (list != null) {
-            list.add(button);
-        }
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public static class MusicButton {
-
-        private final TopBar parent;
-        private final View view, body, arrow;
-        private final TextView text;
-
-        //----------------------------------------------------------------------------------------//
-
-        public MusicButton(TopBar parent) {
-            this.parent = parent;
-
-            view = parent.find("music");
-            body = parent.find("musicBody");
-            arrow = parent.find("musicArrow");
-            text = parent.find("musicText");
-
-            parent.bindTouch(view, UI.musicPlayer::altShow);
-
-            if (Game.libraryManager.getBeatmap() != null) {
-                text.setText(BeatmapHelper.getTitle(Game.libraryManager.getBeatmap().getTrack(0)));
-            }
-        }
-
-        //----------------------------------------------------------------------------------------//
-
-        public void changeMusic(BeatmapInfo beatmap) {
-            if (parent.isAdded()) {
-                AnimationTable.textChange(text, BeatmapHelper.getTitle(beatmap));
-            }
-        }
-
-        public void animateButton(boolean show) {
-            Animation bodyAnim = Animation.of(body);
-            Animation arrowAnim = Animation.of(arrow);
-
-            if (show) {
-                bodyAnim.fromY(0)
-                        .toY(-10)
-                        .fromAlpha(1)
-                        .toAlpha(0);
-
-                arrowAnim.fromY(10)
-                        .toY(0)
-                        .fromAlpha(0)
-                        .toAlpha(1);
-            } else {
-                bodyAnim.fromY(10)
-                        .toY(0)
-                        .fromAlpha(0)
-                        .toAlpha(1);
-
-                arrowAnim.fromY(0)
-                        .toY(-10)
-                        .fromAlpha(1)
-                        .toAlpha(0);
-            }
-            arrowAnim.duration(150);
-
-            bodyAnim.runOnEnd(arrowAnim::play);
-            bodyAnim.play(150);
-        }
-
-        protected void setVisibility(boolean bool) {
-            view.setVisibility(bool ? View.VISIBLE : View.GONE);
+    // Bind a button to be displayed on the desired screen
+    public void bindButton(Screens pScreen, IconButton pButton) {
+        if (pButton != null) {
+            //noinspection ConstantConditions
+            mButtons.get(pScreen).add(pButton);
         }
     }
 
     //--------------------------------------------------------------------------------------------//
 
+    // TODO [TopBar] Replace this with a custom view
+    @Deprecated
     public static class UserBox {
 
         private final TopBar parent;

@@ -2,6 +2,7 @@ package com.reco1l.data.mods;
 // Created by Reco1l on 21/12/2022, 09:45
 
 import com.reco1l.Game;
+import com.reco1l.management.ModProperty;
 import com.reco1l.preference.GameSekBarPreference;
 
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;

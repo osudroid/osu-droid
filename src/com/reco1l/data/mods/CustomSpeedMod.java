@@ -1,12 +1,14 @@
 package com.reco1l.data.mods;
 // Created by Reco1l on 21/12/2022, 09:45
 
-import androidx.preference.CheckBoxPreference;
-
 import com.reco1l.Game;
-
+import com.reco1l.management.ModProperty;
 import com.reco1l.preference.GameCheckBoxPreference;
 import com.reco1l.preference.GameSekBarPreference;
+
+import java.util.EnumSet;
+
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class CustomSpeedMod extends ModWrapper {
@@ -28,6 +30,13 @@ public class CustomSpeedMod extends ModWrapper {
     public String getIcon() {
         return null;
     }
+
+    @Override
+    public EnumSet<GameMod> getFlags() {
+        return EnumSet.of(DT, NC, HT);
+    }
+
+    //--------------------------------------------------------------------------------------------//
 
     @Override
     public ModWrapper.Properties createProperties() {
@@ -56,6 +65,19 @@ public class CustomSpeedMod extends ModWrapper {
         protected void onLoad() {
             super.onLoad();
 
+            GameCheckBoxPreference pitch = find("mod_speed_pitch");
+
+            pitch.setDefaultValue(false);
+            pitch.setChecked((boolean) getProperty(ModProperty.CustomSpeed_ShiftPitch, false));
+
+            pitch.setOnPreferenceChangeListener((p, v) -> {
+                setProperty(ModProperty.CustomSpeed_ShiftPitch, v);
+                Game.modMenu.setEnableNCWhenSpeedChange((boolean) v);
+
+                updatePlayback();
+                return true;
+            });
+
             GameSekBarPreference speed = find("mod_speed");
 
             speed.setDefaultValue(100);
@@ -69,19 +91,15 @@ public class CustomSpeedMod extends ModWrapper {
                 setProperty(ModProperty.CustomSpeed_Value, ((int) v) / (float) 100);
 
                 Game.modMenu.setChangeSpeed(((int) v) / (float) 100);
+                updatePlayback();
                 return true;
             });
+        }
 
-            GameCheckBoxPreference pitch = find("mod_speed_pitch");
-
-            pitch.setDefaultValue(false);
-            pitch.setChecked((boolean) getProperty(ModProperty.CustomSpeed_ShiftPitch, false));
-
-            pitch.setOnPreferenceChangeListener((p, v) -> {
-                setProperty(ModProperty.CustomSpeed_ShiftPitch, v);
-                Game.modMenu.setEnableNCWhenSpeedChange((boolean) v);
-                return true;
-            });
+        private void updatePlayback() {
+            Game.musicManager.setPlayback(
+                    (float) getProperty(ModProperty.CustomSpeed_Value, 1.0f),
+                    (boolean) getProperty(ModProperty.CustomSpeed_ShiftPitch, false));
         }
     }
 }

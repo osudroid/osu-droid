@@ -19,23 +19,6 @@ public class DialogBuilder {
             closeOnBackPress = false,
             closeOnBackgroundClick = false;
 
-    public long dismissTime = 0;
-
-    //--------------------------------------------------------------------------------------------//
-
-    /**
-     * @param onBoth if true, dialog will be closed on back press and background click.
-     */
-    public void setCloseMode(boolean onBoth) {
-        closeOnBackPress = onBoth;
-        closeOnBackgroundClick = onBoth;
-    }
-
-    public void setCloseMode(boolean closeOnBackPress, boolean closeOnBackgroundClick) {
-        this.closeOnBackPress = closeOnBackPress;
-        this.closeOnBackgroundClick = closeOnBackgroundClick;
-    }
-
     //--------------------------------------------------------------------------------------------//
 
     public void addButton(String text, Dialog.OnButtonClick onClick) {
@@ -50,4 +33,40 @@ public class DialogBuilder {
             return;
         buttons.add(new Dialog.Button(text, color, onClick));
     }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public DialogBuilder setTitle(String title) {
+        this.title = title;
+        return this;
+    }
+
+    public DialogBuilder setMessage(String message) {
+        this.message = message;
+        return this;
+    }
+
+    public DialogBuilder setCustomFragment(SimpleFragment customFragment) {
+        this.customFragment = customFragment;
+        return this;
+    }
+
+    public DialogBuilder setOnClose(Runnable onClose) {
+        this.onClose = onClose;
+        return this;
+    }
+
+    public DialogBuilder setCloseOnBackPress(boolean close) {
+        this.closeOnBackPress = close;
+        return this;
+    }
+
+    public DialogBuilder closeOnBackgroundClick(boolean bool) {
+        this.closeOnBackgroundClick = bool;
+        return this;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+
 }

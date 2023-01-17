@@ -8,6 +8,7 @@ import com.reco1l.Game;
 import com.reco1l.interfaces.MusicObserver;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import ru.nsu.ccfit.zuev.audio.Status;
@@ -22,7 +23,10 @@ public final class MusicManager {
     private final ArrayList<MusicObserver> observers;
 
     private TrackInfo track;
-    private String musicPath;
+    private String mLastPath;
+
+    private float mSpeed = 1f;
+    private boolean mShiftPitch = false;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -88,9 +92,9 @@ public final class MusicManager {
         notify(o -> o.onMusicChange(track, wasAudioChanged));
 
         if (track != null) {
-            musicPath = track.getMusic();
+            mLastPath = track.getMusic();
         } else {
-            musicPath = null;
+            mLastPath = null;
         }
     }
 
@@ -113,6 +117,17 @@ public final class MusicManager {
     }
 
     //--------------------------------------------------------------------------------------------//
+    public void setPlayback(float pSpeed, boolean pPitchShift) {
+        mSpeed = pSpeed;
+        mShiftPitch = pPitchShift;
+
+        int lastPosition = Game.songService.getPosition();
+
+        Game.songService.stop();
+        Game.songService.preLoad(mLastPath, pSpeed, pPitchShift);
+        Game.songService.play();
+        Game.songService.setPosition(lastPosition);
+    }
 
     public boolean change(BeatmapInfo beatmap) {
         if (beatmap != null) {
@@ -133,15 +148,17 @@ public final class MusicManager {
             return false;
         }
         track = newTrack;
-        String newMusic = track.getMusic();
+        String newPath = track.getMusic();
 
-        if (!newMusic.equals(musicPath)) {
+        if (!Objects.equals(newPath, mLastPath)) {
             Game.songService.stop();
-            Game.songService.preLoad(newMusic);
+            Game.songService.preLoad(newPath, mSpeed, mShiftPitch);
         }
 
         Game.libraryManager.findBeatmap(track.getBeatmap());
-        onMusicChange(track, newMusic.equals(musicPath));
+        onMusicChange(track, Objects.equals(newPath, mLastPath));
+
+        mLastPath = newPath;
 
         if (getState() == Status.STOPPED) {
             Game.songService.play();
@@ -161,6 +178,7 @@ public final class MusicManager {
 
         if (getState() == Status.STOPPED) {
             Game.songService.preLoad(track.getMusic());
+            Game.songService.preLoad(track.getMusic(), mSpeed, mShiftPitch);
         }
         Game.songService.play();
         Game.songService.setVolume(Config.getBgmVolume());

@@ -150,11 +150,11 @@ public class TimingWrapper implements MusicObserver {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public void onMusicChange(TrackInfo track, boolean wasAudioChanged) {
+    public void onMusicChange(TrackInfo pNewTrack, boolean pWasAudioChanged) {
         clear();
 
-        if (track != null) {
-            loadPointsFrom(track);
+        if (pNewTrack != null) {
+            loadPointsFrom(pNewTrack);
 
             if (computeFirstBpmLength()) {
                 computeOffset();

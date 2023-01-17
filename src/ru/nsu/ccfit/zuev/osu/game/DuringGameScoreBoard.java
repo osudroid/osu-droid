@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.opengl.GLES20;
 
 import com.reco1l.Game;
-import com.reco1l.data.Scoreboard;
+import com.reco1l.data.ScoreInfo;
 import com.reco1l.UI;
 
 import org.anddev.andengine.entity.scene.Scene;
@@ -24,7 +24,7 @@ public class DuringGameScoreBoard extends GameObject {
     private final StatisticV2 stat;
     private Sprite[] boards;
     private ChangeableText[] ranks;
-    private Scoreboard.Item[] scoreBoardDatas;
+    private ScoreInfo[] scoreBoardDatas;
     private int posNow;
     private String currentUsername;
     private ChangeableText playerRank;
@@ -36,15 +36,15 @@ public class DuringGameScoreBoard extends GameObject {
     private float paddingTop = 15, paddingLeft = 10;
 
     public DuringGameScoreBoard(final Scene scene, final StatisticV2 stat, String isNotMe) {
-        final Scoreboard.Item[] items = UI.beatmapPanel.getBoard();
+        final ScoreInfo[] items = UI.beatmapPanel.getBoard();
         this.stat = stat;
         int replayid = GlobalManager.getInstance().getScoring().replayID;
         if (replayid == -1) scoreBoardDatas = items;
         else {
             int replayIndex = -1;
-            scoreBoardDatas = new Scoreboard.Item[items.length - 1];
+            scoreBoardDatas = new ScoreInfo[items.length - 1];
             for (int i = 0; i < items.length; i++) {
-                if (replayid == items[i].id) {
+                if (replayid == items[i].getId()) {
                     replayIndex = i;
                     continue;
                 }
@@ -64,7 +64,7 @@ public class DuringGameScoreBoard extends GameObject {
         for (int i = 0; i < scoreBoardDatas.length; i++) {
             Sprite s = new Sprite(0, 0, tex);
             s.setAlpha(0.5f);
-            s.setColor(scoreBoardDatas[i].name.equals(currentUsername) && !currentUsername.equals("osu!") ? 1 : 0.5f, 0.5f, 0.5f);
+            s.setColor(scoreBoardDatas[i].getName().equals(currentUsername) && !currentUsername.equals("osu!") ? 1 : 0.5f, 0.5f, 0.5f);
             final Text info = new Text(paddingLeft, paddingTop,
                     ResourceManager.getInstance().getFont("font"), scoreBoardDatas[i].get());
             info.setScaleCenter(0, 0);
@@ -123,7 +123,7 @@ public class DuringGameScoreBoard extends GameObject {
         playerText.setScaleCenter(0, 0);
         playerText.setScale(0.65f);
         for (int i = posNow - 1; i >= 0; i--) {
-            if (score > scoreBoardDatas[i].rawScore) {
+            if (score > scoreBoardDatas[i].getScore()) {
                 posNow = i;
                 ranks[i].setText("#" + (i + 2));
                 ranks[i].setPosition(100 - ranks[i].getWidth(), paddingTop * 2);

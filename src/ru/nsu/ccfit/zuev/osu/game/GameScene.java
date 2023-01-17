@@ -49,7 +49,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
 import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -98,7 +97,6 @@ import com.reco1l.UI;
 import com.reco1l.scenes.SummaryScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
-import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class GameScene implements IUpdateHandler, GameObjectListener,

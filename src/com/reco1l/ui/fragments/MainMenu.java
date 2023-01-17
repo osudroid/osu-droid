@@ -5,16 +5,16 @@ import android.widget.LinearLayout;
 
 import com.edlplan.framework.easing.Easing;
 import com.reco1l.Game;
+import com.reco1l.UI;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.execution.AsyncTask;
-import com.reco1l.tables.Res;
-import com.reco1l.UI;
-import com.reco1l.utils.Views;
 import com.reco1l.utils.TouchListener;
-import com.reco1l.view.effects.ExpandEffect;
+import com.reco1l.utils.Views;
 import com.reco1l.view.LogoView;
+
+import com.reco1l.utils.execution.AsyncTask;
+import com.reco1l.view.effects.ExpandEffect;
 import com.reco1l.view.effects.CircularSpectrum;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
@@ -25,7 +25,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public final class MainMenu extends BaseFragment {
 
-    public static MainMenu instance;
+    public static final MainMenu instance = new MainMenu();
 
     private LogoView logo;
     private LinearLayout buttonsLayout;
@@ -74,11 +74,11 @@ public final class MainMenu extends BaseFragment {
         ExpandEffect expand = find("expand");
         expand.attachToLogo(logo);
 
-        Views.size(logo, Res.dimen(R.dimen.mainMenuLogoSize));
+        Views.size(logo, dimen(R.dimen.mainMenuLogoSize));
         Views.height(buttonsBackground, 0);
         Views.height(buttonsLayout, 0);
 
-        Views.margins(buttonsLayout).left(Res.dimen(R.dimen.mainMenuSmallLogoSize) / 3);
+        Views.margins(buttonsLayout).left(dimen(R.dimen.mainMenuSmallLogoSize) / 3);
 
         logo.post(() ->
                 logo.setX(getWidth() / 2f - logo.getWidth() / 2f)
@@ -113,14 +113,14 @@ public final class MainMenu extends BaseFragment {
             UI.topBar.show();
 
             Animation.of(logo)
-                    .toPosX((float) Res.sdp(48))
-                    .toSize(Res.dimen(R.dimen.mainMenuSmallLogoSize))
+                    .toPosX((float) sdp(48))
+                    .toSize(dimen(R.dimen.mainMenuSmallLogoSize))
                     .interpolate(Easing.InOutQuad)
                     .runOnEnd(() -> isMenuAnimInProgress = false)
                     .play(200);
 
             Animation.of(buttonsLayout, buttonsBackground)
-                    .toHeight(Res.dimen(R.dimen.mainMenuButtonHeight))
+                    .toHeight(dimen(R.dimen.mainMenuButtonHeight))
                     .toAlpha(1)
                     .play(200);
 
@@ -133,7 +133,7 @@ public final class MainMenu extends BaseFragment {
             isMenuAnimInProgress = true;
 
             UI.topBar.close();
-            int maxSize = Res.dimen(R.dimen.mainMenuLogoSize);
+            int maxSize = dimen(R.dimen.mainMenuLogoSize);
 
             Animation.of(logo)
                     .toPosX((float) getWidth() / 2 - maxSize / 2)
@@ -175,7 +175,7 @@ public final class MainMenu extends BaseFragment {
                         }
                     }.execute();
                 })
-                .toY(Res.sdp(40))
+                .toY(sdp(40))
                 .toAlpha(0)
                 .play(200);
     }
@@ -202,13 +202,13 @@ public final class MainMenu extends BaseFragment {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    protected void onUpdate(float sec) {
+    protected void onUpdate(float pSecElapsed) {
         if (isMenuShowing) {
             if (showPassTime > 10000f) {
                 hideMenu();
                 showPassTime = 0;
             } else {
-                showPassTime += sec * 1000f;
+                showPassTime += pSecElapsed * 1000f;
             }
         }
     }

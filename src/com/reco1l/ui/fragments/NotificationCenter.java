@@ -1,7 +1,6 @@
 package com.reco1l.ui.fragments;
 
 import static android.widget.RelativeLayout.ALIGN_PARENT_END;
-import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
 
 import android.view.View;
 import android.widget.RelativeLayout.LayoutParams;
@@ -12,17 +11,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.edlplan.framework.easing.Easing;
 import com.factor.bouncy.BouncyRecyclerView;
 import com.reco1l.Game;
-import com.reco1l.data.GameNotification;
 import com.reco1l.UI;
-import com.reco1l.data.adapters.NotificationListAdapter;
-import com.reco1l.data.adapters.NotificationListAdapter.ViewHolder;
+import com.reco1l.data.GameNotification;
 import com.reco1l.enums.Screens;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.tables.Res;
 import com.reco1l.utils.Views;
 
+import com.reco1l.data.adapters.NotificationListAdapter;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -30,26 +30,34 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public final class NotificationCenter extends BaseFragment {
 
-    public static NotificationCenter instance;
+    public static final NotificationCenter instance = new NotificationCenter();
 
-    private final NotificationListAdapter adapter;
-    private final ArrayList<GameNotification> notifications;
+    private final PopupFragment pPopupFragment;
+    private final NotificationListAdapter mAdapter;
 
-    private final PopupFragment popupFragment;
+    private final ArrayList<GameNotification> mNotifications;
+    private final Map<String, GameNotification> mNotificationMap;
 
-    private View body, layer;
-    private BouncyRecyclerView container;
-    private TextView counter, emptyText;
+    private View
+            mBody,
+            mLayer;
 
-    private float bodyWidth;
+    private TextView
+            mEmptyText,
+            mCounterText;
+
+    private BouncyRecyclerView mListView;
 
     //--------------------------------------------------------------------------------------------//
 
     public NotificationCenter() {
         super();
-        notifications = new ArrayList<>();
-        adapter = new NotificationListAdapter(notifications);
-        popupFragment = new PopupFragment();
+        mNotifications = new ArrayList<>();
+        mNotificationMap = new HashMap<>();
+        pPopupFragment = new PopupFragment();
+        mAdapter = new NotificationListAdapter(mNotifications);
+
+        closeOnBackgroundClick(true);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -61,7 +69,7 @@ public final class NotificationCenter extends BaseFragment {
 
     @Override
     protected int getLayout() {
-        return R.layout.notification_center;
+        return R.layout.extra_notification_center;
     }
 
     @Override
@@ -69,173 +77,140 @@ public final class NotificationCenter extends BaseFragment {
         return true;
     }
 
+    @Override
+    public int getWidth() {
+        return dimen(R.dimen.notificationCenterWidth);
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onLoad() {
-        closeOnBackgroundClick(true);
-        bodyWidth = Res.dimen(R.dimen.notificationCenterWidth);
 
-        body = find("body");
-        layer = find("layer");
-        counter = find("counter");
-        emptyText = find("emptyText");
-        container = find("container");
+        mBody = find("body");
+        mLayer = find("layer");
+        mListView = find("container");
+        mCounterText = find("counter");
+        mEmptyText = find("emptyText");
+
+        Game.platform.animate(true, true)
+                .toX(-50)
+                .play(400);
 
         Animation.of(rootBackground)
                 .fromAlpha(0)
                 .toAlpha(1)
                 .play(300);
 
-        Game.platform.animate(true, true)
-                .toX(-50)
-                .play(400);
-
-        Animation.of(layer)
-                .fromX(bodyWidth)
+        Animation.of(mLayer)
+                .fromX(getWidth())
                 .toX(0)
                 .interpolate(Easing.OutExpo)
                 .play(350);
 
-        Animation.of(body)
-                .fromX(bodyWidth)
+        Animation.of(mBody)
+                .fromX(getWidth())
                 .toX(0)
                 .interpolate(Easing.OutExpo)
                 .delay(50)
                 .play(400);
 
-        container.setLayoutManager(new LinearLayoutManager(getContext(), VERTICAL, false));
-        container.setAdapter(adapter);
+        mListView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mListView.setAdapter(mAdapter);
 
         bindTouch(find("clear"), this::clear);
     }
 
     @Override
-    protected void onUpdate(float sec) {
-        if (emptyText != null) {
-            Views.visibility(notifications.isEmpty(), emptyText);
+    protected void onUpdate(float pSecElapsed) {
+        if (mEmptyText != null) {
+            Views.visibility(mNotifications.isEmpty(), mEmptyText);
         }
 
-        if (counter != null) {
-            counter.setText("" + notifications.size());
+        if (mCounterText != null) {
+            mCounterText.setText("" + mNotifications.size());
         }
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void createPopup(GameNotification notification) {
-        if (isAdded()) {
+    public void clear() {
+        for (int i = 0; i < mNotifications.size(); ++i) {
+            GameNotification n = mNotifications.get(i);
+
+            if (n != null && !n.hasPriority()) {
+                remove(n);
+            }
+        }
+    }
+
+    public void add(GameNotification n) {
+        if (mNotifications.contains(n)) {
             return;
         }
-        popupFragment.load(notification);
-    }
 
-    //--------------------------------------------------------------------------------------------//
-
-    public void update(GameNotification notification) {
-        if (isAdded()) {
-            ViewHolder holder = getViewHolder(notification);
-
-            if (holder != null) {
-                holder.notifyUpdate();
-            }
-        } else if (popupFragment.isAdded()) {
-            popupFragment.notifyUpdate();
+        if (n.hasPriority()) {
+            mNotifications.add(0, n);
+        } else {
+            mNotifications.add(n);
         }
-    }
+        mNotificationMap.put(n.getKey(), n);
 
-    public void updateProgress(GameNotification notification) {
-        if (isAdded()) {
-            ViewHolder holder = getViewHolder(notification);
-
-            if (holder != null) {
-                holder.notifyProgressUpdate();
-            }
-        } else if (popupFragment.isAdded()) {
-            popupFragment.notifyProgressUpdate();
+        if (!n.isSilent() && !isAdded()) {
+            pPopupFragment.load(n);
         }
+
+        Game.activity.runOnUiThread(mAdapter::notifyDataSetChanged);
+        n.onNotify();
     }
 
-    private ViewHolder getViewHolder(GameNotification notification) {
-        int i = 0;
-        while (i < notifications.size()) {
-            ViewHolder holder = (ViewHolder) container.findViewHolderForAdapterPosition(i);
+    public void remove(GameNotification n) {
+        if (!mNotifications.remove(n)) {
+            return;
+        }
+        mNotificationMap.remove(n.getKey());
 
-            if (holder != null && holder.notification == notification) {
-                return holder;
+        if (pPopupFragment.mNotification == n) {
+            pPopupFragment.close();
+        }
+        Game.activity.runOnUiThread(mAdapter::notifyDataSetChanged);
+        n.onDismiss();
+    }
+
+    public boolean contains(GameNotification n) {
+        return mNotifications.contains(n);
+    }
+
+    public GameNotification get(String pKey) {
+        for (String key : mNotificationMap.keySet()) {
+            if (key.equals(pKey)) {
+                return mNotificationMap.get(key);
             }
-            ++i;
         }
         return null;
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void clear() {
-        ArrayList<GameNotification> toRemove = new ArrayList<>();
-
-        for (int i = 0; i < notifications.size(); ++i) {
-            GameNotification notification = notifications.get(i);
-
-            if (notification != null && !notification.hasPriority()) {
-                toRemove.add(notification);
-            }
-        }
-        remove(toRemove.toArray(new GameNotification[0]));
-    }
-
-    public void add(GameNotification notification) {
-        if (notifications.contains(notification)) {
-            return;
-        }
-
-        if (notification.hasPriority()) {
-            notifications.add(0, notification);
-        } else {
-            notifications.add(notification);
-        }
-
-        if (notification.showPopupOnNotify) {
-            createPopup(notification);
-        }
-
-        Game.activity.runOnUiThread(adapter::notifyDataSetChanged);
-    }
-
-    public void remove(GameNotification... toRemove) {
-        for (GameNotification notification : toRemove) {
-            if (!notifications.remove(notification)) {
-                return;
-            }
-
-            if (popupFragment.notification == notification) {
-                popupFragment.close();
-            }
-            Game.activity.runOnUiThread(adapter::notifyDataSetChanged);
-        }
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
     @Override
-    public void show() {
-        popupFragment.close();
-        super.show();
+    public boolean show() {
+        pPopupFragment.close();
+        return super.show();
     }
 
     @Override
     public void close() {
-        if (!isAdded())
+        if (!isAdded()) {
             return;
+        }
 
         Game.activity.runOnUiThread(() -> {
-
             Game.platform.animate(true, true)
                     .toX(0)
                     .play(400);
 
-            Animation.of(body)
-                    .toX(Res.dimen(R.dimen.notificationCenterWidth))
+            Animation.of(mBody)
+                    .toX(dimen(R.dimen.notificationCenterWidth))
                     .interpolate(Easing.InExpo)
                     .runOnStart(() ->
                             Animation.of(rootBackground)
@@ -244,8 +219,8 @@ public final class NotificationCenter extends BaseFragment {
                     )
                     .play(350);
 
-            Animation.of(layer)
-                    .toX(bodyWidth)
+            Animation.of(mLayer)
+                    .toX(dimen(R.dimen.notificationCenterWidth))
                     .runOnEnd(super::close)
                     .interpolate(Easing.InExpo)
                     .delay(50)
@@ -257,8 +232,8 @@ public final class NotificationCenter extends BaseFragment {
 
     public static class PopupFragment extends BaseFragment {
 
-        private GameNotification notification;
-        private GameNotification.Holder holder;
+        private GameNotification mNotification;
+        private GameNotification.Holder mHolder;
 
         //----------------------------------------------------------------------------------------//
 
@@ -269,7 +244,7 @@ public final class NotificationCenter extends BaseFragment {
 
         @Override
         protected int getLayout() {
-            return R.layout.notification;
+            return R.layout.item_notification;
         }
 
         @Override
@@ -284,11 +259,11 @@ public final class NotificationCenter extends BaseFragment {
 
         //----------------------------------------------------------------------------------------//
 
-        private void load(GameNotification notification) {
-            this.notification = notification;
+        private void load(GameNotification n) {
+            mNotification = n;
 
             if (isAdded()) {
-                resetDismissTimer();
+                resetCloseTimer();
 
                 Animation.of(rootView)
                         .runOnEnd(this::bind)
@@ -304,27 +279,27 @@ public final class NotificationCenter extends BaseFragment {
 
         @Override
         protected void onLoad() {
-            int xs = Res.dimen(R.dimen.XS);
+            int xs = dimen(R.dimen.XS);
 
             rootView.setPadding(xs, xs, xs, xs);
-            rootView.setElevation(Res.dimen(R.dimen.XXL));
+            rootView.setElevation(dimen(R.dimen.XXL));
             bind();
         }
 
         private void bind() {
-            holder = notification.build(this.rootView);
+            mHolder = mNotification.build(this.rootView);
 
-            LayoutParams params = (LayoutParams) holder.body.getLayoutParams();
+            LayoutParams params = (LayoutParams) mHolder.body.getLayoutParams();
 
-            params.width = Res.dimen(R.dimen.popupNotificationWidth);
+            params.width = dimen(R.dimen.popupNotificationWidth);
             params.addRule(ALIGN_PARENT_END);
-            holder.body.setLayoutParams(params);
+            mHolder.body.requestLayout();
 
-            if (holder != null) {
+            if (mHolder != null) {
                 unbindTouchHandlers();
 
-                bindTouch(holder.close, this::close);
-                bindTouch(holder.body, UI.notificationCenter::show);
+                bindTouch(mHolder.closeButton, this::close);
+                bindTouch(mHolder.body, UI.notificationCenter::show);
 
                 Animation.of(rootView)
                         .fromY(-50)
@@ -345,30 +320,6 @@ public final class NotificationCenter extends BaseFragment {
                         .toY(-50)
                         .toAlpha(0)
                         .play(150);
-            }
-        }
-
-        //----------------------------------------------------------------------------------------//
-
-        public void notifyUpdate() {
-            Animation.of(holder.innerBody)
-                    .toX(-50)
-                    .toAlpha(0)
-                    .runOnEnd(() -> {
-                        bind();
-
-                        Animation.of(holder.innerBody)
-                                .fromX(50)
-                                .toX(0)
-                                .toAlpha(1)
-                                .play(120);
-                    })
-                    .play(120);
-        }
-
-        public void notifyProgressUpdate() {
-            if (holder.progressIndicator != null) {
-                holder.progressIndicator.setProgress(notification.progress);
             }
         }
     }

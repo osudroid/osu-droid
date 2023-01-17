@@ -18,10 +18,11 @@ import com.reco1l.ui.fragments.UserProfile;
 
 public final class UI {
 
-    public static TopBar topBar = getTopBar();
-    public static NotificationCenter notificationCenter = getNotificationCenter();
-    public static MusicPlayer musicPlayer = getMusicPlayer();
-    public static MainMenu mainMenu = getMainMenu();
+    public static final TopBar topBar = TopBar.instance;
+    public static NotificationCenter notificationCenter = NotificationCenter.instance;
+    public static MusicPlayer musicPlayer = MusicPlayer.instance;
+    public static MainMenu mainMenu = MainMenu.instance;
+
     public static UserProfile userProfile = getUserProfile();
     public static SettingsMenu settingsPanel = getSettingsMenu();
     public static BeatmapPanel beatmapPanel = getBeatmapPanel();
@@ -33,34 +34,6 @@ public final class UI {
     public static FilterBar filterBar = getFilterBar();
 
     //--------------------------------------------------------------------------------------------//
-
-    private static TopBar getTopBar() {
-        if (TopBar.instance == null) {
-            TopBar.instance = new TopBar();
-        }
-        return TopBar.instance;
-    }
-
-    private static NotificationCenter getNotificationCenter() {
-        if (NotificationCenter.instance == null) {
-            NotificationCenter.instance = new NotificationCenter();
-        }
-        return NotificationCenter.instance;
-    }
-
-    private static MusicPlayer getMusicPlayer() {
-        if (MusicPlayer.instance == null) {
-            MusicPlayer.instance = new MusicPlayer();
-        }
-        return MusicPlayer.instance;
-    }
-
-    private static MainMenu getMainMenu() {
-        if (MainMenu.instance == null) {
-            MainMenu.instance = new MainMenu();
-        }
-        return MainMenu.instance;
-    }
 
     private static UserProfile getUserProfile() {
         if (UserProfile.instance == null) {

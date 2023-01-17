@@ -2,7 +2,6 @@ package com.reco1l.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -11,11 +10,6 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.edlplan.framework.math.FMath;
-import com.reco1l.Game;
-import com.reco1l.tables.Res;
-
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class CarrouselRecyclerView extends RecyclerView {
 

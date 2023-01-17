@@ -1,11 +1,9 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.ConfigurationInfo;
 import android.os.Environment;
 import android.util.DisplayMetrics;
 
@@ -13,7 +11,6 @@ import androidx.preference.PreferenceManager;
 
 import com.edlplan.favorite.FavoriteLibrary;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.reco1l.Game;
 
 import java.io.File;
 import java.util.HashMap;

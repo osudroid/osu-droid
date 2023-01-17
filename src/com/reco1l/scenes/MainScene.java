@@ -5,6 +5,7 @@ package com.reco1l.scenes;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.enums.Screens;
+import com.reco1l.view.IconButton;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.tables.DialogTable;
 import com.reco1l.tables.NotificationTable;
@@ -15,6 +16,7 @@ import org.anddev.andengine.entity.scene.Scene;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Updater;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class MainScene extends BaseScene {
 
@@ -44,6 +46,14 @@ public class MainScene extends BaseScene {
 
         Config.loadOnlineConfig(Game.activity);
         Game.onlineManager.Init(Game.activity);
+
+        IconButton music = new IconButton(Game.activity);
+
+        music.setIcon(R.drawable.v14_music);
+        music.runOnTouch(UI.musicPlayer::altShow);
+
+        UI.musicPlayer.button = music;
+        UI.topBar.bindButton(getIdentifier(), music);
     }
 
     @Override
@@ -60,22 +70,18 @@ public class MainScene extends BaseScene {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public void onMusicChange(TrackInfo track, boolean wasAudioChanged) {
-        super.onMusicChange(track, wasAudioChanged);
+    public void onMusicChange(TrackInfo pNewTrack, boolean pWasAudioChanged) {
+        super.onMusicChange(pNewTrack, pWasAudioChanged);
 
         if (Game.engine.getScene() != this) {
             return;
         }
 
         Game.activity.runOnUiThread(() -> {
-            if (UI.topBar.musicButton != null) {
-                UI.topBar.musicButton.changeMusic(track.getBeatmap());
-            }
-
             String text = "Now playing: "
-                    + BeatmapHelper.getTitle(track)
+                    + BeatmapHelper.getTitle(pNewTrack)
                     + " by "
-                    + BeatmapHelper.getArtist(track);
+                    + BeatmapHelper.getArtist(pNewTrack);
 
             NotificationTable.debug(text);
         });

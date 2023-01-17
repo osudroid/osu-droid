@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import static ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*;
 
-import com.reco1l.UI;
+import com.reco1l.management.ModManager;
 
 import org.anddev.andengine.entity.text.ChangeableText;
 
@@ -41,7 +41,7 @@ public class ModMenu {
     }
 
     public EnumSet<GameMod> getMod() {
-        return UI.modMenu.mods;
+        return ModManager.modSet;
     }
 
     public void setMod(EnumSet<GameMod> mod) {

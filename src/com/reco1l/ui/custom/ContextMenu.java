@@ -8,11 +8,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.factor.bouncy.BouncyRecyclerView;
 import com.reco1l.Game;
-import com.reco1l.data.adapters.ContextMenuAdapter;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Views;
+
+import com.reco1l.data.adapters.ContextMenuAdapter;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -51,14 +52,14 @@ public class ContextMenu extends BaseFragment {
     @Override
     protected View getRootView() {
         RelativeLayout layout = new RelativeLayout(getContext());
-        layout.setElevation(Res.dimen(R.dimen.imposedLayer));
+        layout.setElevation(Res.dimen(R.dimen.top_layer));
         layout.setLayoutParams(Views.match_parent);
         layout.setId(R.id.background);
 
         card = new CardView(Game.activity);
 
         card.setCardBackgroundColor(Res.color(R.color.backgroundSecondary));
-        card.setRadius(Res.dimen(R.dimen.globalCorners));
+        card.setRadius(Res.dimen(R.dimen.app_corners));
         card.setAlpha(0);
         layout.addView(card);
 
@@ -91,7 +92,7 @@ public class ContextMenu extends BaseFragment {
     }
 
     @Override
-    protected void onUpdate(float sec) {
+    protected void onUpdate(float pSecElapsed) {
         fixLocation();
     }
 
@@ -119,7 +120,7 @@ public class ContextMenu extends BaseFragment {
     }
 
     @Override
-    public void show() {
+    public boolean show() {
         throw new RuntimeException("You have to set parent view by calling show(View) instead");
     }
 

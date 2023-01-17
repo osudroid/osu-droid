@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 27/6/22 17:28 -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="@dimen/S"
+    android:paddingBottom="@dimen/XS">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/n_body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/notificationBackground"
+        app:cardCornerRadius="@dimen/app_corners"
+        app:cardElevation="@dimen/M">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:id="@+id/n_imageLayout"
+                    android:layout_width="@dimen/notificationIconWidth"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/n_dataBody"
+                    android:layout_alignParentTop="true"
+                    android:background="#24000000"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/n_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:scaleType="fitCenter"
+                        android:scaleX="0.8"
+                        android:scaleY="0.8"
+                        android:src="@drawable/v18_notifications" />
+
+                    <com.google.android.material.progressindicator.CircularProgressIndicator
+                        android:id="@+id/n_progress"
+                        style="@style/small_circular_indicator"
+                        android:visibility="gone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/n_dataBody"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toStartOf="@id/n_close"
+                    android:layout_toEndOf="@id/n_imageLayout"
+                    android:orientation="vertical"
+                    android:padding="@dimen/S">
+
+                    <TextView
+                        android:id="@+id/n_header"
+                        style="@style/text"
+                        android:layout_marginBottom="@dimen/XXS"
+                        android:text="[Header]"
+                        android:textColor="@color/textSecondary"
+                        android:textSize="@dimen/textXS"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/n_message"
+                        style="@style/text"
+                        android:text="[Message]"
+                        android:textSize="@dimen/textXS" />
+
+                    <TextView
+                        android:id="@+id/n_percent"
+                        style="@style/text"
+                        android:layout_marginTop="@dimen/XXS"
+                        android:text="100%"
+                        android:textColor="@color/textTertiary"
+                        android:textSize="@dimen/textXS"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/n_close"
+                    style="@style/icon_button"
+                    android:layout_width="@dimen/notificationCloseWidth"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/n_dataBody"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:src="@drawable/v14_close"
+                    app:tint="@color/vectorSecondary" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</RelativeLayout>

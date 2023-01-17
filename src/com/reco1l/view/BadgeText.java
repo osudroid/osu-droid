@@ -6,7 +6,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -94,9 +93,7 @@ public class BadgeText extends BaseRoundedView {
 
     public void setTextColor(int color) {
         text.setTextColor(color);
-        if (icon.getDrawable() != null) {
-            icon.getDrawable().setTint(color);
-        }
+        icon.setColorFilter(color);
     }
 
     public TextView getTextView() {

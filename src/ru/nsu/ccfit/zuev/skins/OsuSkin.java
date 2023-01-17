@@ -28,7 +28,7 @@ public class OsuSkin {
     protected final BooleanSkinData sliderFollowComboColor = new BooleanSkinData("sliderFollowComboColor", true);
     protected final BooleanSkinData useNewLayout = new BooleanSkinData("useNewLayout");
     protected final BooleanSkinData forceOverrideComboColor = new BooleanSkinData("forceOverride", true);
-    protected final BooleanSkinData rotateCursor = new BooleanSkinData("rotateCursor", true);
+    protected final BooleanSkinData rotateCursor = new BooleanSkinData("rotateCursor", false);
 
     protected final String DEFAULT_COLOR_HEX = "#3d3d57ff";
     protected final ArrayList<RGBColor> comboColor = new ArrayList<>();

@@ -19,7 +19,7 @@
     <!--Text-->
     <color name="textPrimary">#FFFFFF</color>
     <color name="textSecondary">#CCFFFFFF</color>
-    <color name="textTertiary">#33FFFFFF</color>
+    <color name="textTertiary">#42FFFFFF</color>
 
     <color name="badgeTextBackground">#50000000</color>
 
@@ -38,18 +38,12 @@
     <!--Seek bar-->
     <color name="seekBarThumbColor">#FFFFFF</color>
 
-    <color name="songSeekBarIndicatorColor">#5CFFFFFF</color>
-    <color name="songSeekBarBackground">#30000000</color>
-
     <!--Check box-->
     <color name="checkBoxOffColor">#20000000</color>
 
     <!--Top bar-->
     <color name="topBarBackground">#A6000000</color>
     <color name="topBarButtonsBackground">#25000000</color>
-
-    <!--Music Player-->
-    <color name="musicPlayerSeekbarCardBackground">#292929</color>
 
     <!--Panels-->
     <color name="panelTopBar">#19000000</color>

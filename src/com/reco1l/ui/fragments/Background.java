@@ -14,10 +14,10 @@ import androidx.palette.graphics.Palette;
 
 import com.reco1l.Game;
 import com.reco1l.enums.Screens;
-import com.reco1l.ui.BaseFragment;
 import com.reco1l.tables.AnimationTable;
-import com.reco1l.utils.execution.AsyncTask;
+import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.BlurRender;
+import com.reco1l.utils.execution.AsyncTask;
 import com.reco1l.utils.helpers.BitmapHelper;
 
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -27,17 +27,19 @@ public final class Background extends BaseFragment {
 
     public static Background instance;
 
-    private ImageView image0, image1;
+    private ImageView
+            mImage0,
+            mImage1;
 
-    private AsyncTask backgroundTask;
+    private AsyncTask mBitmapTask;
 
-    private String imagePath;
-    private Bitmap bitmap;
+    private String mImagePath;
+    private Bitmap mBitmap;
 
     private boolean
-            isDark = false,
-            isReload = false,
-            isBlurEnabled = false;
+            mIsDark = false,
+            mIsReload = false,
+            mIsBlurEnabled = false;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -61,91 +63,92 @@ public final class Background extends BaseFragment {
 
     @Override
     protected void onLoad() {
-        image0 = find("image0");
-        image1 = find("image1");
+        mImage0 = find("image0");
+        mImage1 = find("image1");
 
-        if (bitmap == null) {
-            bitmap = Game.bitmapManager.get("menu-background").copy(ARGB_8888, true);
+        if (mBitmap == null) {
+            mBitmap = Game.bitmapManager.get("menu-background").copy(ARGB_8888, true);
         }
-        image0.setImageBitmap(bitmap);
+        mImage0.setImageBitmap(mBitmap);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void setBlur(boolean bool) {
-        if (bool == isBlurEnabled) {
+    public void setBlur(boolean pEnabled) {
+        if (pEnabled == mIsBlurEnabled) {
             return;
         }
-        isBlurEnabled = bool;
-        isReload = true;
-        changeFrom(imagePath);
+        mIsBlurEnabled = pEnabled;
+        mIsReload = true;
+        changeFrom(mImagePath);
     }
 
+    // Returns if the current background predominant color is dark
     public boolean isDark() {
-        return isDark;
+        return mIsDark;
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void changeFrom(String path) {
-        if (!isReload) {
-            if (path != null && path.equals(imagePath)) {
+    public synchronized void changeFrom(String pPath) {
+        if (!mIsReload) {
+            if (pPath != null && pPath.equals(mImagePath)) {
                 return;
             }
         }
-        isReload = false;
-        imagePath = path;
+        mIsReload = false;
+        mImagePath = pPath;
 
-        if (backgroundTask != null) {
-            backgroundTask.cancel(true);
+        if (mBitmapTask != null) {
+            mBitmapTask.cancel(true);
         }
 
-        backgroundTask = new AsyncTask() {
+        mBitmapTask = new AsyncTask() {
             Bitmap newBitmap;
 
             public void run() {
                 int quality = Math.max(Config.getBackgroundQuality(), 1);
 
-                if (imagePath == null) {
+                if (mImagePath == null) {
                     newBitmap = Game.bitmapManager.get("menu-background").copy(ARGB_8888, true);
                 } else {
-                    newBitmap = BitmapFactory.decodeFile(imagePath).copy(ARGB_8888, true);
+                    newBitmap = BitmapFactory.decodeFile(mImagePath).copy(ARGB_8888, true);
                 }
                 newBitmap = BitmapHelper.compress(newBitmap, 100 / quality);
                 parseColor(newBitmap);
 
-                if (isBlurEnabled) {
+                if (mIsBlurEnabled) {
                     newBitmap = BlurRender.applyTo(newBitmap, 25);
                 }
             }
 
             public void onComplete() {
                 handleChange(newBitmap);
-                Game.resourcesManager.loadBackground(path);
+                Game.resourcesManager.loadBackground(pPath);
             }
         };
-        backgroundTask.execute();
+        mBitmapTask.execute();
     }
 
-    private void parseColor(Bitmap bitmap) {
-        Palette palette = Palette.from(bitmap).generate();
+    private void parseColor(Bitmap pBitmap) {
+        Palette palette = Palette.from(pBitmap).generate();
 
         int color = palette.getDominantColor(Color.BLACK);
-        isDark = Color.luminance(color) < 0.5;
+        mIsDark = Color.luminance(color) < 0.5;
     }
 
-    private void handleChange(Bitmap newBitmap) {
+    private void handleChange(Bitmap pNewBitmap) {
         if (!isLoaded()) {
             return;
         }
 
-        boolean cursor = image0.getVisibility() == View.VISIBLE;
+        boolean cursor = mImage0.getVisibility() == View.VISIBLE;
 
-        ImageView front = cursor ? image0 : image1;
-        ImageView back = cursor ? image1 : image0;
+        ImageView front = cursor ? mImage0 : mImage1;
+        ImageView back = cursor ? mImage1 : mImage0;
 
         Game.activity.runOnUiThread(() -> {
-            back.setImageBitmap(newBitmap);
+            back.setImageBitmap(pNewBitmap);
             back.setVisibility(View.VISIBLE);
             back.setAlpha(1f);
         });
@@ -158,18 +161,18 @@ public final class Background extends BaseFragment {
 
                     back.setElevation(1f);
 
-                    if (bitmap != null) {
-                        bitmap.recycle();
+                    if (mBitmap != null) {
+                        mBitmap.recycle();
                     }
-                    bitmap = newBitmap;
+                    mBitmap = pNewBitmap;
                 })
                 .play(500);
     }
 
     public void reload() {
-        if (isAdded() && imagePath != null) {
-            isReload = true;
-            changeFrom(imagePath);
+        if (isAdded() && mImagePath != null) {
+            mIsReload = true;
+            changeFrom(mImagePath);
         }
     }
 }

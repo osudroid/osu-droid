@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
-import com.reco1l.ui.fragments.ModMenu;
 import com.reco1l.tables.Res;
+import com.reco1l.ui.fragments.ModMenu;
 import com.reco1l.utils.Views;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -27,12 +27,12 @@ public class ModSectionAdapter extends BaseAdapter<ModSectionAdapter.SectionHold
 
     @Override
     protected int getItemLayout() {
-        return R.layout.mod_menu_section_item;
+        return R.layout.item_mod_section;
     }
 
     @Override
-    protected SectionHolder getViewHolder(View root) {
-        return new SectionHolder(root);
+    protected SectionHolder getViewHolder(View pRootView) {
+        return new SectionHolder(pRootView);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -58,7 +58,7 @@ public class ModSectionAdapter extends BaseAdapter<ModSectionAdapter.SectionHold
                 Views.margins(root).left(Res.sdp(12));
             }
             header.setText(section.title);
-            recyclerView.setAdapter(new ModListAdapter(section.modWrappers));
+            recyclerView.setAdapter(new ModListAdapter(section.childs));
         }
     }
 }

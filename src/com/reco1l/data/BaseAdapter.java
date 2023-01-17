@@ -9,22 +9,26 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 
+import com.reco1l.tables.ResourceTable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
 // TODO [BaseAdapter] make compatible with multiple selection
-public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapter<VH> {
+public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapter<VH>
+        implements ResourceTable {
 
-    public ArrayList<T> items;
+    private ArrayList<T> mItems;
+    private SelectionListener mListener;
 
-    private SelectionListener listener;
+    private int mSelectedPosition = -1;
 
-    int selectedPosition = -1;
+    private final ArrayList<VH> mHolders = new ArrayList<>();
 
     //--------------------------------------------------------------------------------------------//
 
-    public BaseAdapter(ArrayList<T> items) {
-        this.items = items;
+    public BaseAdapter(ArrayList<T> pItems) {
+        mItems = pItems;
         setHasStableIds(true);
     }
 
@@ -46,7 +50,7 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
 
     @Override
     public int getItemCount() {
-        return items != null ? items.size() : 0;
+        return mItems != null ? mItems.size() : 0;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -55,61 +59,74 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
         return 0;
     }
 
-    protected abstract VH getViewHolder(View root);
+    protected abstract VH getViewHolder(View pRootView);
 
     //--------------------------------------------------------------------------------------------//
 
     public final void clear() {
-        items.clear();
-        selectedPosition = -1;
+        mItems.clear();
+        mSelectedPosition = -1;
         notifyDataSetChanged();
     }
 
-    public final void setData(ArrayList<T> newList) {
-        items = newList;
+    public final void setData(ArrayList<T> pItems) {
+        mItems = pItems;
         notifyDataSetChanged();
     }
 
     public final ArrayList<T> getData() {
-        return items;
+        return mItems;
     }
 
-    public final void select(T item) {
-        for (T i : items) {
-            if (i.equals(item)) {
-                select(items.indexOf(i));
+    //--------------------------------------------------------------------------------------------//
+
+    public final void select(T pItem) {
+        for (T item : mItems) {
+            if (item.equals(pItem)) {
+                select(mItems.indexOf(item));
             }
         }
     }
 
-    public final boolean select(int position) {
-        if (position < 0 || position == selectedPosition) {
+    public final boolean select(int pPosition) {
+        if (pPosition < 0 || pPosition == mSelectedPosition) {
             return false;
         }
 
-        notifyItemChanged(selectedPosition);
-        selectedPosition = position;
-        notifyItemChanged(selectedPosition);
+        notifyItemChanged(mSelectedPosition);
+        mSelectedPosition = pPosition;
+        notifyItemChanged(mSelectedPosition);
 
-        if (listener != null) {
-            listener.onPositionChange(selectedPosition);
+        if (mListener != null) {
+            mListener.onPositionChange(mSelectedPosition);
         }
         return true;
     }
 
-    public void setSelectionListener(SelectionListener listener) {
-        this.listener = listener;
+    //--------------------------------------------------------------------------------------------//
+
+    public void setSelectionListener(SelectionListener pListener) {
+        mListener = pListener;
     }
 
     public int getSelectedPosition() {
-        return selectedPosition;
+        return mSelectedPosition;
+    }
+
+    public VH getHolderOf(T pItem) {
+        for (VH holder : mHolders) {
+            if (holder.item.equals(pItem)) {
+                return holder;
+            }
+        }
+        return null;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @FunctionalInterface
     public interface SelectionListener {
-        void onPositionChange(int position);
+        void onPositionChange(int pPosition);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -117,33 +134,34 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
     @NonNull
     @Override
     @SuppressWarnings("unchecked")
-    public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Context context = parent.getContext();
+    public VH onCreateViewHolder(@NonNull ViewGroup pParent, int pType) {
+        Context context = pParent.getContext();
 
         View root = null;
         if (getItemLayout() != 0) {
-            root = LayoutInflater.from(context).inflate(getItemLayout(), parent, false);
+            root = LayoutInflater.from(context).inflate(getItemLayout(), pParent, false);
         }
 
         VH holder = getViewHolder(root);
         holder.context = context;
         holder.adapter = (BaseAdapter<BaseViewHolder<T>, T>) this;
         onHolderCreated(holder);
+        mHolders.add(holder);
         return holder;
     }
 
-    protected void onHolderCreated(VH holder) {}
+    protected void onHolderCreated(VH pHolder) {}
 
     @Override
-    public void onBindViewHolder(@NonNull VH holder, int i) {
-        T item = items.get(i);
+    public void onBindViewHolder(@NonNull VH pHolder, int i) {
+        T item = mItems.get(i);
 
-        holder.bind(item, i);
+        pHolder.bind(item, i);
 
-        if (selectedPosition == i) {
-            holder.handleSelection();
+        if (mSelectedPosition == i) {
+            pHolder.handleSelection();
         } else {
-            holder.handleDeselection();
+            pHolder.handleDeselection();
         }
     }
 

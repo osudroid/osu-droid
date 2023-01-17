@@ -14,62 +14,54 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class NotificationTable {
 
-    private static GameNotification
-            online;
-
     //--------------------------------------------------------------------------------------------//
 
     public static void debug(String text) {
-        GameNotification notification = new GameNotification("Debug");
-        notification.message = text;
-        UI.notificationCenter.add(notification);
+        GameNotification.of("Debug")
+                .setMessage(text)
+                .commit();
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public static void accountLogIn(String state, int i) {
-        if (online == null)
-            online = new GameNotification("Online Account");
+        GameNotification n = GameNotification.of("Online");
 
         if (state == null) {
-            online.message = "Logging in...";
-            online.showProgress = true;
-            online.hasIndeterminateProgress = true;
-            UI.notificationCenter.add(online);
+            n.setMessage("Logging in...");
+            n.showProgress(true);
+            n.setProgress(-1);
+            n.commit();
             return;
         }
 
         switch (state) {
             case "try":
-                online.message = "Logging in...\n(Try: " + (i + 1) + ")";
-                online.update();
+                n.setMessage("Logging in...\n(Try: " + (i + 1) + ")");
                 break;
             case "fail":
-                online.message = "Login failed, retrying in 5 seconds...";
+                n.setMessage("Login failed, retrying in 5 seconds...");
                 break;
             case "success":
-                online.message = "Logged in successfully";
-                online.showProgress = false;
+                n.setMessage("Logged in successfully");
+                n.showProgress(false);
                 break;
             case "error":
-                online.message = "Cannot log in\n" + OnlineManager.getInstance().getFailMessage();
-                online.showProgress = false;
+                n.setMessage("Cannot log in\n" + OnlineManager.getInstance().getFailMessage());
+                n.showProgress(false);
                 break;
         }
-        online.update();
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public static void update(String url) {
-        GameNotification update = new GameNotification("Update");
-
-        update.message = Res.str(R.string.update_dialog_message) + "\nClick to update!";
-        update.runOnClick = () -> {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            Game.activity.startActivity(intent);
-        };
-
-        UI.notificationCenter.add(update);
+        GameNotification.of("Update")
+                .setMessage(Res.str(R.string.update_dialog_message) + "\nClick to update!")
+                .runOnClick(() -> {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    Game.activity.startActivity(intent);
+                })
+                .commit();
     }
 }

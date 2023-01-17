@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 21/8/22 23:40 -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    tools:background="#FFF">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/bl_childBody"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/XXS"
+        android:layout_marginRight="@dimen/_M"
+        android:alpha="0.85"
+        app:cardBackgroundColor="@color/backgroundDimmed"
+        app:cardCornerRadius="@dimen/app_corners"
+        app:cardElevation="0dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/beatmapListChildItemHeight">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center|left"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/bl_stars"
+                    style="@style/propertyBadge"
+                    android:layout_marginStart="@dimen/M"
+                    android:drawableStart="@drawable/v10_star"
+                    android:text="00.00" />
+
+                <ImageView
+                    android:id="@+id/bl_mark"
+                    android:layout_width="@dimen/beatmapListTrackMarkSize"
+                    android:layout_height="@dimen/beatmapListTrackMarkSize"
+                    android:layout_marginLeft="@dimen/S"
+                    android:src="@drawable/placeholder_ranking_small"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/bl_difficulty"
+                    style="@style/text"
+                    android:layout_width="match_parent"
+                    android:layout_marginLeft="@dimen/S"
+                    android:layout_marginRight="@dimen/XXL"
+                    android:maxLines="2"
+                    android:paddingLeft="@dimen/XXS"
+                    android:text="difficulty" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>

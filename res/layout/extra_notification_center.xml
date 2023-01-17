@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 27/6/22 03:33 -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:translationZ="@dimen/top_layer">
+
+    <View
+        android:id="@+id/background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/backgroundDimmed" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/nc_layer"
+        android:layout_width="@dimen/notificationCenterWidth"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        app:cardBackgroundColor="@color/backgroundTertiary"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="@dimen/XL" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/nc_body"
+        android:layout_width="@dimen/notificationCenterWidth"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        app:cardBackgroundColor="@color/backgroundSecondary"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="@dimen/XXL">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/topBarHeight"
+                android:background="@color/panelTopBar"
+                android:gravity="center_vertical">
+
+                <com.edlplan.ui.TriangleEffectView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:alpha="0.15" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginHorizontal="@dimen/panelMargins"
+                    android:gravity="center">
+
+                    <TextView
+                        style="@style/largeText"
+                        android:text="@string/notification_center_title" />
+
+                    <TextView
+                        android:id="@+id/nc_counter"
+                        style="@style/propertyBadge"
+                        android:layout_alignParentEnd="true"
+                        android:paddingHorizontal="@dimen/XS"
+                        android:text="9" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/nc_clear"
+                    style="@style/icon_button"
+                    android:layout_width="@dimen/topBarButtonWidth"
+                    android:layout_height="@dimen/topBarButtonHeight"
+                    android:layout_alignParentRight="true"
+                    android:src="@drawable/v18_clear"
+                    app:tint="@color/vectorSecondary" />
+
+            </RelativeLayout>
+
+            <View style="@style/panelSeparatorView" />
+
+            <TextView
+                android:id="@+id/nc_emptyText"
+                style="@style/text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/notification_center_empty"
+                android:textColor="@color/textSecondary"
+                android:visibility="gone" />
+
+            <com.factor.bouncy.BouncyRecyclerView
+                android:id="@+id/nc_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:paddingVertical="@dimen/S"
+                tools:itemCount="2"
+                tools:listitem="@layout/item_notification" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</RelativeLayout>

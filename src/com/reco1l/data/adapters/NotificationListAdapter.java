@@ -1,6 +1,8 @@
 package com.reco1l.data.adapters;
 // Created by Reco1l on 05/12/2022, 06:27
 
+import static com.reco1l.data.GameNotification.*;
+
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -27,21 +29,19 @@ public class NotificationListAdapter extends BaseAdapter<NotificationListAdapter
 
     @Override
     protected int getItemLayout() {
-        return R.layout.notification;
+        return R.layout.item_notification;
     }
 
     @Override
-    protected ViewHolder getViewHolder(View root) {
-        return new ViewHolder(root);
+    protected ViewHolder getViewHolder(View pRootView) {
+        return new ViewHolder(pRootView);
     }
 
     //--------------------------------------------------------------------------------------------/
 
     public static class ViewHolder extends BaseViewHolder<GameNotification> {
 
-        public GameNotification notification;
-
-        private GameNotification.Holder holder;
+        private Holder mHolder;
 
         //----------------------------------------------------------------------------------------//
 
@@ -52,49 +52,23 @@ public class NotificationListAdapter extends BaseAdapter<NotificationListAdapter
         //----------------------------------------------------------------------------------------//
 
         @Override
-        protected void onBind(GameNotification notification, int position) {
-            this.notification = notification;
-            this.holder = notification.build(root);
+        protected void onBind(GameNotification n, int position) {
+            mHolder = n.build(root);
 
-            UI.notificationCenter.bindTouch(holder.close, this::onDismiss);
-            UI.notificationCenter.bindTouch(holder.body, notification.runOnClick);
+            UI.notificationCenter.bindTouch(mHolder.closeButton, item::remove);
+            UI.notificationCenter.bindTouch(mHolder.body, n::onClick);
 
-            if (notification.hasPriority()) {
-                holder.close.setVisibility(View.GONE);
+            if (n.hasPriority()) {
+                mHolder.closeButton.setVisibility(View.GONE);
             } else {
-                holder.close.setVisibility(View.VISIBLE);
+                mHolder.closeButton.setVisibility(View.VISIBLE);
             }
         }
 
         //----------------------------------------------------------------------------------------//
 
-        private void onDismiss() {
-            if (notification.onDismiss != null) {
-                notification.onDismiss.run();
-            }
-            UI.notificationCenter.remove(notification);
-        }
-
         public void notifyUpdate() {
-            Animation.of(holder.innerBody)
-                    .toX(-50)
-                    .toAlpha(0)
-                    .runOnEnd(() -> {
-                        rebind();
-
-                        Animation.of(holder.innerBody)
-                                .fromX(50)
-                                .toX(0)
-                                .toAlpha(1)
-                                .play(120);
-                    })
-                    .play(120);
-        }
-
-        public void notifyProgressUpdate() {
-            if (holder.progressIndicator != null) {
-                holder.progressIndicator.setProgress(notification.progress);
-            }
+            mHolder.handleUpdate();
         }
     }
 }

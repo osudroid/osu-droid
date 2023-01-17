@@ -32,7 +32,7 @@
 
     <style name="button">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">@dimen/buttonHeight</item>
+        <item name="android:layout_height">@dimen/app_buttonHeight</item>
         <item name="cardElevation">@dimen/buttonCardElevation</item>
         <item name="cardBackgroundColor">@color/buttonBackground</item>
         <item name="cardCornerRadius">@dimen/buttonCornerRadius</item>
@@ -47,14 +47,6 @@
     </style>
 
     <!--Seek bar-->
-    <style name="song_seek_bar">
-        <item name="android:progressDrawable">@drawable/layers_song_seek_bar_progress</item>
-        <item name="android:thumb">@drawable/shape_song_seek_bar_thumb</item>
-        <item name="android:maxHeight">@dimen/musicPlayerSongShapeHeight</item>
-        <item name="android:thumbOffset">@dimen/songSeekBarThumbOffset</item>
-        <item name="android:splitTrack">false</item>
-    </style>
-
     <style name="seek_bar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -103,9 +95,9 @@
 
     <!--Layouts-->
     <style name="panel">
-        <item name="android:layout_width">@dimen/panelWidth</item>
+        <item name="android:layout_width">@dimen/app_panelWidth</item>
         <item name="android:clickable">true</item>
-        <item name="cardCornerRadius">@dimen/globalCorners</item>
+        <item name="cardCornerRadius">@dimen/app_corners</item>
         <item name="cardBackgroundColor">@color/backgroundSecondary</item>
         <item name="cardElevation">@dimen/panelCardElevation</item>
         <item name="android:layout_margin">@dimen/panelMargins</item>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 20/12/2022, 02:37 -->
+
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/mm_customizationItemWidth"
+    android:layout_height="match_parent"
+    android:layout_marginRight="@dimen/S"
+    android:background="@color/mm_customizationItem">
+
+    <LinearLayout
+        android:id="@+id/mm_customBody"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/mm_customName"
+            style="@style/text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/XS"
+            android:gravity="center"
+            android:paddingVertical="@dimen/S"
+            android:text="Section name" />
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

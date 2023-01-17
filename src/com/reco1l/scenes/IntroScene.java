@@ -48,7 +48,7 @@ public class IntroScene extends BaseScene {
 
         @Override
         protected int getLayout() {
-            return R.layout.intro_layout;
+            return R.layout.layout_intro;
         }
 
         @Override
@@ -130,7 +130,7 @@ public class IntroScene extends BaseScene {
         //--------------------------------------------------------------------------------------------//
 
         @Override
-        public void onUpdate(float sec) {
+        public void onUpdate(float pSecElapsed) {
             if (!isLoaded()) {
                 return;
             }

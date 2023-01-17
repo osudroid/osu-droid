@@ -24,16 +24,17 @@ import com.edlplan.ui.SkinPathPreference;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.reco1l.Game;
+import com.reco1l.UI;
 import com.reco1l.enums.Screens;
+import com.reco1l.tables.AnimationTable;
+import com.reco1l.tables.DialogTable;
+import com.reco1l.tables.Res;
+import com.reco1l.ui.BaseFragment;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
-import com.reco1l.tables.DialogTable;
-import com.reco1l.UI;
-import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.tables.AnimationTable;
+
 import com.reco1l.utils.execution.AsyncTask;
-import com.reco1l.tables.Res;
 import com.reco1l.utils.helpers.OnlineHelper;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
@@ -95,7 +96,7 @@ public final class SettingsMenu extends BaseFragment {
 
     @Override
     protected int getLayout() {
-        return R.layout.settings_panel;
+        return R.layout.extra_settings_panel;
     }
 
     //--------------------------------------------------------------------------------------------//

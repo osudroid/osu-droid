@@ -12,11 +12,11 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 
 import com.reco1l.Game;
+import com.reco1l.UI;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.helpers.BeatmapHelper;
-import com.reco1l.UI;
 import com.reco1l.view.effects.StripsEffect;
 
 import java.util.ArrayList;
@@ -37,12 +37,12 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
 
     @Override
     protected int getItemLayout() {
-        return R.layout.beatmap_list_child_item;
+        return R.layout.item_beatmap_child;
     }
 
     @Override
-    protected TrackViewHolder getViewHolder(View root) {
-        return new TrackViewHolder(root);
+    protected TrackViewHolder getViewHolder(View pRootView) {
+        return new TrackViewHolder(pRootView);
     }
 
     //--------------------------------------------------------------------------------------------//

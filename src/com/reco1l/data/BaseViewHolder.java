@@ -2,13 +2,15 @@ package com.reco1l.data;
 // Created by Reco1l on 20/12/2022, 05:07
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder {
+import com.reco1l.tables.ResourceTable;
+
+public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder
+        implements ResourceTable {
 
     boolean isAttached = false;
 
@@ -72,9 +74,9 @@ public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder {
 
     //--------------------------------------------------------------------------------------------//
 
-    protected void onSelect() {}
+    public void onSelect() {}
 
-    protected void onDeselect() {}
+    public void onDeselect() {}
 
     protected void onAttachmentChange(boolean isAttached) {}
 }

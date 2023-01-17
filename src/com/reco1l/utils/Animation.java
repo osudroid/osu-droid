@@ -13,8 +13,6 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 import com.reco1l.Game;
-import com.reco1l.utils.Views.MarginUtils;
-import com.reco1l.utils.Views.PaddingUtils;
 
 import java.util.ArrayList;
 
@@ -343,7 +341,7 @@ public final class Animation {
         }
 
         MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
-        MarginUtils margin = Views.margins(view);
+        Views.MarginUtils margin = Views.margins(view);
 
         if (toTopMargin != null) {
             if (fromTopMargin == null) {
@@ -381,7 +379,7 @@ public final class Animation {
             );
         }
 
-        PaddingUtils padding = Views.padding(view);
+        Views.PaddingUtils padding = Views.padding(view);
 
         if (toTopPadding != null) {
             if (fromTopPadding == null) {
@@ -518,7 +516,7 @@ public final class Animation {
             Views.height(view, fromHeight);
         }
 
-        MarginUtils margin = Views.margins(view);
+        Views.MarginUtils margin = Views.margins(view);
 
         if (fromTopMargin != null) {
             margin.top(fromTopMargin);
@@ -533,7 +531,7 @@ public final class Animation {
             margin.bottom(fromBottomMargin);
         }
 
-        PaddingUtils padding = Views.padding(view);
+        Views.PaddingUtils padding = Views.padding(view);
 
         if (fromTopPadding != null) {
             padding.top(fromTopPadding);

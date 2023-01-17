@@ -112,7 +112,7 @@ public class LoaderScene extends BaseScene {
 
         @Override
         protected int getLayout() {
-            return R.layout.loader_layout;
+            return R.layout.layout_loader;
         }
 
         //----------------------------------------------------------------------------------------//
@@ -148,7 +148,7 @@ public class LoaderScene extends BaseScene {
         }
 
         @Override
-        public void onUpdate(float sec) {
+        public void onUpdate(float pSecElapsed) {
             if (!isLoaded() || ToastLogger.getPercentage() == percentage) {
                 return;
             }

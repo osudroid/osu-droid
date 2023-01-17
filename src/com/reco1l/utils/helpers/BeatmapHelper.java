@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable;
 
 import com.edlplan.framework.math.FMath;
 import com.reco1l.Game;
-import com.reco1l.interfaces.IReferences;
 
 import java.io.IOException;
 import java.io.InputStream;

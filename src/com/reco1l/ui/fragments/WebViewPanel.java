@@ -17,7 +17,7 @@ public class WebViewPanel extends BaseFragment {
 
     @Override
     protected int getLayout() {
-        return R.layout.webview;
+        return R.layout.overlay_webview;
     }
 
     @Override
@@ -63,13 +63,13 @@ public class WebViewPanel extends BaseFragment {
     }
 
 
-    public void show(String url) {
+    public boolean show(String url) {
         this.url = url;
-        super.show();
+        return super.show();
     }
 
     @Override
-    public void show() {
+    public boolean show() {
         throw new RuntimeException("Call show(url) instead of this, URL cannot be null");
     }
 }
