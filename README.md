@@ -1,45 +1,77 @@
-![osudroid](https://cdn.discordapp.com/attachments/259754869626241024/844308468327514152/BannerGithub.png)
+<p align="center">
+    <img width="500" src="/assets/logo.png">
+</p>
 
-#  osu-droid
-[![Official International Discord](https://discordapp.com/api/guilds/316545691545501706/widget.png?style=shield)](https://discord.gg/nyD92cE)
+# rimu!
+
 [![Android CI](https://github.com/osudroid/osu-droid/workflows/Android%20CI/badge.svg?branch=master)](https://github.com/osudroid/osu-droid/actions?query=workflow%3A"Android+CI")
 [![CodeFactor](https://www.codefactor.io/repository/github/osudroid/osu-droid/badge)](https://www.codefactor.io/repository/github/osudroid/osu-droid)
-[![Patreon](https://cdn.discordapp.com/attachments/259754869626241024/844311810211708928/Patreon.png)](https://www.patreon.com/osudroid)
+[![Official International Discord](https://discordapp.com/api/guilds/316545691545501706/widget.png?style=shield)](https://discord.gg/nyD92cE)
 
-osu!droid is a free-to-play circle clicking rhythm game for Android devices. It was a game hatched many years ago by the [osu!](https://osu.ppy.sh/home) community. This project is now being developed by a small group of fans and also with the help of foreign friends.
+**rimu!** is a free-to-play rhythm game for Android devices based on [osu!](https://github.com/ppy/osu) made by peppy.  
+This is the next osu!droid update to come up with a new user interface and new features!
 
 ## Status
 
-osu!droid is still work-in-progress. Some features are going to be implemented in the future but it's still playable and fun!
+This project stills under development in an unstable state at this moment, and it's intended to replace current client
+in the future, of course
+we're currently accepting feedback and bug reports.
+
+You can try it by downloading and installing the latest build available
+in [releases](https://github.com/reco1I/rimu/releases) section.
+
+## Requirements
+
+rimu! will come with compatibility changes, that means older Android devices that are compatible with osu!droid will no
+longer be compatible with rimu!
+
+|           Minimum            |           Target            |
+|:----------------------------:|:---------------------------:|
+| Android 7.0 Nougat or higher | Android 9.0 Pie or higher * |
+
+_Android 9 Pie or higher is recommended due to native Skia library support which UI heavily relies on to draw complex effects._
+
+## Support
+
+You can support the project by donating to our official [Patreon](https://www.patreon.com/osudroid) and become a rimu! supporter with exclusive in-game and website features.
+
+## Contributing
+
+If you have knowledge about programming with Java or Kotlin you can contribute to the project creating a pull request.
+
+We recommend to use [Android Studio](https://developer.android.com/studio) or [Intellij IDEA](https://www.jetbrains.com/idea/) as IDE.
 
 ### Downloading the source code
 
 Clone the repository:
 
-```sh
+```shell
 git clone https://github.com/osudroid/osu-droid.git
 ```
-Open the folder in Android Studio.
 
-To update the source code to the latest commit, run the following command inside the osu-droid directory:
+To update the source code to the latest commit, run the following command inside the `rimu` directory:
 
 ```she
 git pull
 ```
-Coding Languages:
-
-You can code for the project in `Java` or `Kotlin`.
 
 ### Building
 
-In Android Studio you can `Build` a debug release to test your changes. The output directory of your `.apk` is inside `build/output` of osu-droid's directory.
 
-Or if you prefer the command line and you are on Linux, run `chmod +x gradlew` and `./gradlew assembleDebug` inside the directory to build the debug `.apk` files but make sure that you are using Java 8.
+#### IDE
+For the recommended IDEs you can directly build your own debug to test your changes, it will be located inside `build/output` directory of the source root.
 
-## Contributing
+#### Terminal
+If you are on Linux and prefer using the terminal, run the following commands inside the directory to build your own debug: 
+```she
+chmod +x gradlew 
 
-We welcome any sort of contributions, as long as they're helpful. Those who aren't able to contribute code may instead suggest small changes like grammar fixes, new features or report client issues via [Feature request](https://github.com/osudroid/osu-droid/issues/11) or [GitHub issues](https://github.com/osudroid/osu-droid/issues).
+./gradlew assembleDebug
+```
+
+_Make sure that you have JDK 8 or 11 installed on your system_
 
 ## License
 
-osu-droid is licensed under the [Apache License 2.0](https://opensource.org/licenses/Apache-2.0). Please see the licence file for more information.
+**rimu!** is licensed under the [Apache License 2.0](https://opensource.org/licenses/Apache-2.0). Please see the licence
+file for more information.
