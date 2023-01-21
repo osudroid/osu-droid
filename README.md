@@ -1,5 +1,5 @@
 <p align="center">
-    <img width="500" src="/assets/logo.png">
+    <img width="300" src="/assets/logo.png">
 </p>
 
 # rimu!
