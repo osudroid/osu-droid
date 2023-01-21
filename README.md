@@ -14,16 +14,14 @@ This project is the next osu!droid update to come up with a new user interface a
 
 ## Status
 
-This project still under development in a unstable state, and it's intended to replace current client
-in the future, of course we're currently accepting feedback and bug reports.
+This project still under development in a unstable state, and it's intended to replace current client in the future, of course we're currently accepting feedback and bug reports.
 
 You can try it by downloading and installing the latest build available
 in [releases](https://github.com/reco1I/rimu/releases) section.
 
 ## Requirements
 
-rimu! will come with compatibility changes, some older Android devices that are compatible with osu!droid will no
-longer be compatible with rimu!
+rimu! will come with compatibility changes, some older Android devices were compatible with osu!droid will no longer be compatible with rimu!
 
 |           Minimum            |           Target            |
 |:----------------------------:|:---------------------------:|
@@ -35,11 +33,14 @@ _Android 9 Pie or higher is recommended due to native Skia library support which
 
 You can support the project by donating to our official [Patreon](https://www.patreon.com/osudroid) and become a rimu! supporter with exclusive in-game and website features.
 
-## Contributing
+## Development
 
 If you have knowledge about programming with Java or Kotlin you can contribute to the project creating a pull request.
 
-We recommend to use [Android Studio](https://developer.android.com/studio) or [Intellij IDEA](https://www.jetbrains.com/idea/) as IDE.
+### Prerequesites:
+
+* We recommend to use [Android Studio](https://developer.android.com/studio) or [Intellij IDEA](https://www.jetbrains.com/idea/) as IDE.
+* Java Development Kit 8 or 11 installed on your system (if you're using some of the IDEs listed above it will be installed automatically).
 
 ### Downloading the source code
 
@@ -57,19 +58,13 @@ git pull
 
 ### Building
 
+Build your own rimu! APK to test your changes or test latest commit in the repository, make sure you meets the system requirements listed above.
 
-#### IDE
-For the recommended IDEs you can directly build your own debug to test your changes, it will be located inside `build/output` directory of the source root.
+* If you're using Android Studio or Intellij IDEA you can directly build rimu! using `Build` feature or you can build and run in an AVD emulator using `Run` feature.
 
-#### Terminal
-If you are on Linux and prefer using the terminal, run the following commands inside the directory to build your own debug: 
-```she
-chmod +x gradlew 
+* If you're in Linux you can use the terminal to build rimu! running the command `chmod +x gradlew` and `./gradlew assembleDebug` at the rimu! source root.
 
-./gradlew assembleDebug
-```
-
-_Make sure that you have JDK 8 or 11 installed on your system_
+_Keep in mind that debug builds aren't capable of online features!_
 
 ## License
 
