@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
 import com.reco1l.Game;
 import com.reco1l.data.TrackCard;
 import com.reco1l.data.ScoreInfo;
-import com.reco1l.management.Scoreboard;
+import com.reco1l.management.BoardManager;
 import com.reco1l.enums.Screens;
 import com.reco1l.interfaces.IGameMod;
 import com.reco1l.interfaces.MusicObserver;
@@ -26,7 +26,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public final class BeatmapPanel extends BaseFragment implements
         IGameMod,
         MusicObserver,
-        Scoreboard.Observer<ScoreInfo> {
+        BoardManager.Listener {
 
     public static BeatmapPanel instance;
 
@@ -106,11 +106,12 @@ public final class BeatmapPanel extends BaseFragment implements
     public void onMusicChange(@Nullable TrackInfo pNewTrack, boolean pWasAudioChanged) {
         if (isLoaded()) {
             mTrackCard.onMusicChange(pNewTrack);
+            Game.boardManager.load(pNewTrack);
         }
     }
 
     @Override
-    public void onScoreboardChange(ArrayList<ScoreInfo> pList) {
+    public void onBoardChange(ArrayList<ScoreInfo> pList) {
         if (!isLoaded()) {
             return;
         }
@@ -121,10 +122,6 @@ public final class BeatmapPanel extends BaseFragment implements
 
     public void updateAttributes() {
         mTrackCard.handleModifications();
-    }
-
-    public void updateScoreboard() {
-        Scoreboard.load(Game.musicManager.getTrack(), isOnlineBoard);
     }
 
     private void switchTab(View button) {
@@ -153,14 +150,14 @@ public final class BeatmapPanel extends BaseFragment implements
 
         pageContainer.postDelayed(() -> {
             isOnlineBoard = button == globalTab;
-            updateScoreboard();
+            Game.boardManager.load(Game.musicManager.getTrack());
         }, 200);
     }
 
     private void handleScoreboard() {
-        if (Scoreboard.isEmpty()) {
+        if (Game.boardManager.isEmpty()) {
             message.setVisibility(View.VISIBLE);
-            messageText.setText(Scoreboard.getErrorMessage());
+            messageText.setText(Game.boardManager.getErrorMessage());
         } else {
             message.setVisibility(View.GONE);
         }
@@ -186,7 +183,7 @@ public final class BeatmapPanel extends BaseFragment implements
     // Temporal workaround until DuringGameScoreBoard gets replaced (old UI)
 
     public ScoreInfo[] getBoard() {
-        return Scoreboard.getListAsArray();
+        return Game.boardManager.getListAsArray();
     }
 
     //--------------------------------------------------------------------------------------------//

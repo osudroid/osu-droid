@@ -17,18 +17,11 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class SelectorScene extends BaseScene {
 
-    private static SelectorScene instance;
+    public static final SelectorScene instance = new SelectorScene();
 
     public TrackInfo selectedTrack;
 
     //--------------------------------------------------------------------------------------------//
-
-    public static SelectorScene getInstance() {
-        if (instance == null) {
-            instance = new SelectorScene();
-        }
-        return instance;
-    }
 
     @Override
     public Screens getIdentifier() {
@@ -42,7 +35,7 @@ public class SelectorScene extends BaseScene {
         setContinuousPlay(false);
         setBackgroundAutoChange(false);
 
-        bindDataBaseChangedListener();
+        //bindDataBaseChangedListener();
         setTouchAreaBindingEnabled(true);
         createTopBarButtons();
     }
@@ -76,7 +69,8 @@ public class SelectorScene extends BaseScene {
     }
 
     @Override
-    protected void onSceneUpdate(float secondsElapsed) {}
+    protected void onSceneUpdate(float secondsElapsed) {
+    }
 
     //--------------------------------------------------------------------------------------------//
 
@@ -147,7 +141,9 @@ public class SelectorScene extends BaseScene {
     //--------------------------------------------------------------------------------------------//
 
     public void bindDataBaseChangedListener() {
-        OdrDatabase.get().setOnDatabaseChangedListener(UI.beatmapPanel::updateScoreboard);
+        OdrDatabase.get().setOnDatabaseChangedListener(() ->
+                Game.boardManager.load(Game.musicManager.getTrack())
+        );
     }
 
     public void unbindDataBaseChangedListener() {

@@ -16,57 +16,67 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
 
 // Created by Reco1l on 18/9/22 12:40
 
-public final class Scoreboard {
+public final class BoardManager {
 
-    private static final ArrayList<ScoreInfo> mScores;
-    private static final ArrayList<Observer<ScoreInfo>> mListeners;
+    public static final BoardManager instance = new BoardManager();
 
-    static {
+    private final ArrayList<ScoreInfo> mScores;
+    private final ArrayList<Listener> mListeners;
+
+    private Cursor mCursor;
+    private String mErrorMessage;
+    private AsyncTask mLoadingTask;
+
+    private long mLastScore;
+    private boolean mIsOnlineBoard;
+
+    //--------------------------------------------------------------------------------------------//
+
+    public BoardManager() {
         mScores = new ArrayList<>();
         mListeners = new ArrayList<>();
     }
 
-    private static Cursor mCursor;
-    private static String mErrorMessage;
-    private static AsyncTask mLoadingTask;
-
-    private static long mLastScore;
-
     //--------------------------------------------------------------------------------------------//
 
-    private Scoreboard() {}
-
-    //--------------------------------------------------------------------------------------------//
-
-    public static void bindListener(Observer<ScoreInfo> pListener) {
+    public void bindListener(Listener pListener) {
         mListeners.add(pListener);
     }
 
-    public static void unbindListener(Observer<ScoreInfo> pListener) {
+    public void unbindListener(Listener pListener) {
         mListeners.remove(pListener);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public static String getErrorMessage() {
+    public String getErrorMessage() {
         return mErrorMessage;
     }
 
-    public static ArrayList<ScoreInfo> getList() {
+    public ArrayList<ScoreInfo> getList() {
         return mScores;
     }
 
-    public static ScoreInfo[] getListAsArray() {
+    public ScoreInfo[] getListAsArray() {
         return mScores.toArray(new ScoreInfo[0]);
     }
 
-    public static boolean isEmpty() {
+    public boolean isEmpty() {
         return mScores.isEmpty();
+    }
+
+    public boolean isOnlineBoard() {
+        return mIsOnlineBoard;
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public synchronized static void load(TrackInfo pTrack, boolean pOnline) {
+    public synchronized void setOnline(boolean bool) {
+        mIsOnlineBoard = bool;
+        load(Game.musicManager.getTrack());
+    }
+
+    public synchronized void load(TrackInfo pTrack) {
         clear();
 
         if (pTrack == null) {
@@ -75,7 +85,7 @@ public final class Scoreboard {
             return;
         }
 
-        if (pOnline) {
+        if (mIsOnlineBoard) {
             loadOnlineBoard(pTrack);
         } else {
             loadLocalBoard(pTrack);
@@ -84,11 +94,11 @@ public final class Scoreboard {
 
     //--------------------------------------------------------------------------------------------//
 
-    private static void notifyChange() {
-        mListeners.forEach(l -> l.onScoreboardChange(mScores));
+    private void notifyChange() {
+        mListeners.forEach(l -> l.onBoardChange(mScores));
     }
 
-    private static void clear() {
+    private void clear() {
         mErrorMessage = "No scores found!";
 
         if (mLoadingTask != null && !mLoadingTask.isShutdown()) {
@@ -106,11 +116,12 @@ public final class Scoreboard {
 
     //----------------------------------------Offline---------------------------------------------//
 
-    private static boolean isValidCursor() {
+    private boolean isValidCursor() {
         if (mCursor == null) {
             mErrorMessage = "Failed to get data from local database!";
             return false;
-        } else if (mCursor.getCount() == 0) {
+        }
+        else if (mCursor.getCount() == 0) {
             mCursor.close();
             mCursor = null;
             return false;
@@ -118,7 +129,7 @@ public final class Scoreboard {
         return true;
     }
 
-    private static int getColumn(String pName) throws Exception {
+    private int getColumn(String pName) throws Exception {
         int index = mCursor.getColumnIndex(pName);
         if (index == -1) {
             throw new Exception("Column " + pName + " doesn't exist!");
@@ -126,7 +137,7 @@ public final class Scoreboard {
         return index;
     }
 
-    private static ScoreInfo parseScore(int i) {
+    private ScoreInfo parseScore(int i) {
         mCursor.moveToPosition(i);
 
         try {
@@ -151,7 +162,7 @@ public final class Scoreboard {
         }
     }
 
-    private static void loadLocalBoard(TrackInfo pTrack) {
+    private void loadLocalBoard(TrackInfo pTrack) {
         mLoadingTask = new AsyncTask() {
             public void run() {
 
@@ -177,8 +188,10 @@ public final class Scoreboard {
             }
 
             public void onComplete() {
-                mCursor.close();
-                mCursor = null;
+                if (mCursor != null) {
+                    mCursor.close();
+                    mCursor = null;
+                }
                 notifyChange();
             }
 
@@ -188,7 +201,7 @@ public final class Scoreboard {
 
     //-----------------------------------------Online---------------------------------------------//
 
-    private static void loadOnlineBoard(TrackInfo pTrack) {
+    private void loadOnlineBoard(TrackInfo pTrack) {
 
         if (!Game.onlineManager.isStayOnline()) {
             mErrorMessage = "Cannot connect to server when offline mode is enabled!";
@@ -263,7 +276,7 @@ public final class Scoreboard {
     //----------------------------------------------------------------------------------------//
 
     @FunctionalInterface
-    public interface Observer<T> {
-        void onScoreboardChange(ArrayList<T> pList);
+    public interface Listener {
+        void onBoardChange(ArrayList<ScoreInfo> pList);
     }
 }
