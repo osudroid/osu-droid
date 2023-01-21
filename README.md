@@ -8,8 +8,9 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/osudroid/osu-droid/badge)](https://www.codefactor.io/repository/github/osudroid/osu-droid)
 [![Official International Discord](https://discordapp.com/api/guilds/316545691545501706/widget.png?style=shield)](https://discord.gg/nyD92cE)
 
-**rimu!** is a free-to-play rhythm game for Android devices based in the [osu!](https://github.com/ppy/osu) rhythm game made by peppy.  
-This is the next osu!droid update to come up with a new user interface and new features!
+**rimu!** is a free-to-play rhythm game for Android devices based in the PC rhythm game made by peppy [osu!](https://github.com/ppy/osu)  
+
+This project is the next osu!droid update to come up with a new user interface and new features!
 
 ## Status
 
