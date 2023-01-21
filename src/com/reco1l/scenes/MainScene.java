@@ -20,16 +20,9 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class MainScene extends BaseScene {
 
-    private static MainScene instance;
+    public static final MainScene instance = new MainScene();
 
     //--------------------------------------------------------------------------------------------//
-
-    public static MainScene getInstance() {
-        if (instance == null) {
-            instance = new MainScene();
-        }
-        return instance;
-    }
 
     @Override
     public Screens getIdentifier() {

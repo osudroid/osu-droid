@@ -37,7 +37,8 @@ import com.reco1l.Game;
 import com.reco1l.scenes.IntroScene;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.tables.DialogTable;
-import com.reco1l.management.KeyInputManager;
+import com.reco1l.management.InputManager;
+import com.reco1l.utils.execution.ScheduledTask;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
@@ -60,6 +61,8 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -74,9 +77,10 @@ import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.SpritePool;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
-import ru.nsu.ccfit.zuev.osu.helper.InputManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
+import ru.nsu.ccfit.zuev.osu.scoring.Replay;
+import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -97,18 +101,9 @@ public class MainActivity extends BaseGameActivity implements
     private static boolean activityVisible = true;
     private boolean autoclickerDialogShown = false;
 
-    //--------------------------------------------------------------------------------------------//
-
     public MainActivity() {
         instance = this;
     }
-
-    public static MainActivity getInstance() {
-        // MainActivity instance should be one per game instance.
-        return instance;
-    }
-
-    //--------------------------------------------------------------------------------------------//
 
     @Override
     public Engine onLoadEngine() {
@@ -123,7 +118,7 @@ public class MainActivity extends BaseGameActivity implements
         StringTable.setContext(this);
         ToastLogger.init(this);
         SyncTaskManager.getInstance().init(this);
-        InputManager.setContext(this);
+        ru.nsu.ccfit.zuev.osu.helper.InputManager.setContext(this);
         OnlineManager.getInstance().Init(getApplicationContext());
         crashlytics.setUserId(Config.getOnlineDeviceID());
 
@@ -310,7 +305,7 @@ public class MainActivity extends BaseGameActivity implements
                 availableInternalMemory();
                 initAccessibilityDetector();
                 if (willReplay) {
-                    Game.watchReplay(beatmapToAdd);
+                    watchReplay(beatmapToAdd);
                     willReplay = false;
                 }
             }
@@ -578,7 +573,7 @@ public class MainActivity extends BaseGameActivity implements
             }
         }
     }
-    
+
     @Override
     public void onPause() {
         super.onPause();
@@ -662,7 +657,7 @@ public class MainActivity extends BaseGameActivity implements
         }
 
         Log.i("KeyInputHandler", "Key input detected: " + event.toString());
-        return KeyInputManager.handle(keyCode, event.getAction());
+        return Game.inputManager.handleKey(keyCode, event.getAction());
     }
 
     private void initAccessibilityDetector() {
@@ -725,5 +720,44 @@ public class MainActivity extends BaseGameActivity implements
             finish();
             return false;
         }
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    private void watchReplay(String path) {
+        Replay replay = new Replay();
+
+        if (!replay.loadInfo(path) || replay.replayVersion < 3) {
+            return;
+        }
+
+        StatisticV2 stat = replay.getStat();
+        TrackInfo track = Game.libraryManager.findTrackByFileNameAndMD5(replay.getMapFile(), replay.getMd5());
+
+        if (track != null) {
+            Game.musicManager.change(track);
+            Game.summaryScene.load(track, stat, path, true);
+        }
+    }
+
+    public void exit() {
+        if(Game.engine.getScene() == Game.gameScene.getScene()) {
+            Game.gameScene.quit();
+        }
+        Game.engine.setScene(Game.mainScene);
+
+        PowerManager.WakeLock wakeLock = getWakeLock();
+        if (wakeLock != null && wakeLock.isHeld()) {
+            wakeLock.release();
+        }
+        Game.mainScene.onExit();
+
+        ScheduledTask.run(() -> {
+            if (songService != null) {
+                unbindService(connection);
+                stopService(new Intent(this, SongService.class));
+            }
+            finish();
+        }, 3000);
     }
 }

@@ -11,7 +11,6 @@ import com.edlplan.ui.TriangleEffectView;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.enums.Screens;
-import com.reco1l.management.KeyInputManager;
 import com.reco1l.tables.AnimationTable;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
@@ -103,7 +102,7 @@ public final class TopBar extends BaseFragment {
         });
 
 
-        bindTouch(mBackButton, KeyInputManager::performBack);
+        bindTouch(mBackButton, Game.inputManager::performBack);
         bindTouch(find("settings"), UI.settingsPanel::altShow);
         bindTouch(find("inbox"), UI.notificationCenter::altShow);
 

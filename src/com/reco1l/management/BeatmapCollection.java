@@ -18,9 +18,9 @@ import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
 public class BeatmapCollection {
 
-    private static BeatmapCollection instance;
+    public static final BeatmapCollection instance = new BeatmapCollection();
 
-    private final ArrayList<Scoreboard.Observer<BeatmapInfo>> listeners;
+    private final ArrayList<Listener> listeners;
 
     private ArrayList<BeatmapInfo> beatmaps;
     private Comparator<BeatmapInfo> comparator;
@@ -44,13 +44,6 @@ public class BeatmapCollection {
         SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(Game.activity);
 
         order = SortOrder.values()[p.getInt("sortorder", 0)];
-    }
-
-    public static BeatmapCollection getInstance() {
-        if (instance == null) {
-            instance = new BeatmapCollection();
-        }
-        return instance;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -231,7 +224,7 @@ public class BeatmapCollection {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void addListener(Scoreboard.Observer<BeatmapInfo> listener) {
+    public void addListener(Listener listener) {
         listeners.add(listener);
     }
 
@@ -249,9 +242,14 @@ public class BeatmapCollection {
     }
 
     public void notifyChange() {
-        listeners.forEach(listener -> listener.onScoreboardChange(beatmaps));
+        listeners.forEach(listener -> listener.onLibraryChange(beatmaps));
     }
 
     //--------------------------------------------------------------------------------------------//
 
+
+    @FunctionalInterface
+    public interface Listener {
+        void onLibraryChange(ArrayList<BeatmapInfo> pLibrary);
+    }
 }

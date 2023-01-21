@@ -69,7 +69,7 @@ public class DialogTable {
         //builder.setCloseMode(true);
         builder.addButton("Accept", dialog -> {
             dialog.close();
-            Game.exit();
+            Game.activity.exit();
         });
         builder.addButton("Cancel", Dialog::close);
 
@@ -86,7 +86,7 @@ public class DialogTable {
         //builder.setCloseMode(false);
         builder.addButton("Exit", dialog -> {
             dialog.close();
-            Game.forcedExit();
+            Game.activity.exit();
         });
 
         return builder;

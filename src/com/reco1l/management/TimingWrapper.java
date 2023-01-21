@@ -17,7 +17,7 @@ import ru.nsu.ccfit.zuev.osu.game.TimingPoint;
 
 public class TimingWrapper implements MusicObserver {
 
-    private static TimingWrapper instance;
+    public static final TimingWrapper instance = new TimingWrapper();
 
     public TimingPoint
             currentPoint,
@@ -43,13 +43,6 @@ public class TimingWrapper implements MusicObserver {
         beatLength = 1000;
         this.timingPoints = new LinkedList<>();
         Game.musicManager.bindMusicObserver(this);
-    }
-
-    public static TimingWrapper getInstance() {
-        if (instance == null) {
-            instance = new TimingWrapper();
-        }
-        return instance;
     }
 
     //--------------------------------------------------------------------------------------------//

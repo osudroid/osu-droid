@@ -58,7 +58,7 @@ public class ModSectionAdapter extends BaseAdapter<ModSectionAdapter.SectionHold
                 Views.margins(root).left(Res.sdp(12));
             }
             header.setText(section.title);
-            recyclerView.setAdapter(new ModListAdapter(section.childs));
+            recyclerView.setAdapter(new ModListAdapter(section.mods));
         }
     }
 }

@@ -3,6 +3,7 @@ package com.reco1l.management;
 import com.reco1l.UI;
 import com.reco1l.data.mods.LegacyModWrapper;
 import com.reco1l.data.mods.ModWrapper;
+import com.reco1l.legacy.Legacy;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -13,22 +14,40 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
 public final class ModManager {
 
-    public final static ArrayList<ModWrapper> modList = new ArrayList<>();
-    public final static EnumSet<GameMod> modSet = EnumSet.noneOf(GameMod.class);
+    public static final ModManager instance = new ModManager();
 
-    private final static Map<String, Object> mProperties = new HashMap<>();
+    private final Map<String, Object> mProperties;
+    private final ArrayList<ModWrapper> mModList;
+
+    @Legacy
+    private final EnumSet<GameMod> mModSet;
 
     //--------------------------------------------------------------------------------------------//
 
-    private ModManager() {}
+    public ModManager() {
+        mModList = new ArrayList<>();
+        mProperties = new HashMap<>();
+        mModSet = EnumSet.noneOf(GameMod.class);
+    }
 
     //--------------------------------------------------------------------------------------------//
 
-    public static void setProperty(String key, Object value) {
+    @Legacy
+    public ArrayList<ModWrapper> getList() {
+        return mModList;
+    }
+
+    public EnumSet<GameMod> getSet() {
+        return mModSet;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public void setProperty(String key, Object value) {
         mProperties.put(key, value);
     }
 
-    public static Object getProperty(String key, Object def) {
+    public Object getProperty(String key, Object def) {
         if (mProperties.containsKey(key) && mProperties.get(key) != null) {
             return mProperties.get(key);
         }
@@ -37,13 +56,13 @@ public final class ModManager {
 
     //--------------------------------------------------------------------------------------------//
 
-    private static void handleFlags(ModWrapper mod) {
+    private void handleFlags(ModWrapper mod) {
         if (mod.getFlags() == null) {
             return;
         }
 
         for (GameMod flag : mod.getFlags()) {
-            LegacyModWrapper target = ModManager.getWrapperByGameMod(flag);
+            LegacyModWrapper target = getWrapperByGameMod(flag);
 
             if (target != null) {
                 UI.modMenu.onModSelect(target, true);
@@ -53,46 +72,46 @@ public final class ModManager {
 
     //--------------------------------------------------------------------------------------------//
 
-    public static boolean isListEmpty() {
-        return modList.isEmpty();
+    public boolean isEmpty() {
+        return mModList.isEmpty();
     }
 
-    public static boolean contains(ModWrapper mod) {
-        return modList.contains(mod);
+    public boolean contains(ModWrapper mod) {
+        return mModList.contains(mod);
     }
 
-    public static boolean contains(GameMod mod) {
-        return modSet.contains(mod);
+    public boolean contains(GameMod mod) {
+        return mModSet.contains(mod);
     }
 
-    public static boolean add(ModWrapper mod) {
+    public boolean add(ModWrapper mod) {
         handleFlags(mod);
 
         if (mod instanceof LegacyModWrapper) {
             LegacyModWrapper legacyMod = (LegacyModWrapper) mod;
-            modSet.add(legacyMod.getEntry());
+            mModSet.add(legacyMod.getEntry());
         }
-        return modList.add(mod);
+        return mModList.add(mod);
     }
 
-    public static boolean remove(ModWrapper mod) {
+    public boolean remove(ModWrapper mod) {
         if (mod instanceof LegacyModWrapper) {
             LegacyModWrapper legacyMod = (LegacyModWrapper) mod;
 
-            modSet.remove(legacyMod.getEntry());
+            mModSet.remove(legacyMod.getEntry());
         }
-        return modList.remove(mod);
+        return mModList.remove(mod);
     }
 
-    public static void clear() {
-        modList.clear();
-        modSet.clear();
+    public void clear() {
+        mModList.clear();
+        mModSet.clear();
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public static LegacyModWrapper getWrapperByGameMod(GameMod pMod) {
-        for (ModWrapper wrapper : modList) {
+    public LegacyModWrapper getWrapperByGameMod(GameMod pMod) {
+        for (ModWrapper wrapper : mModList) {
 
             if (wrapper instanceof LegacyModWrapper) {
                 LegacyModWrapper legacyWrapper = (LegacyModWrapper) wrapper;

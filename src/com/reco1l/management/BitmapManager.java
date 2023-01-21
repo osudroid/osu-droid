@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class BitmapManager {
 
-    public static BitmapManager instance;
+    public static final BitmapManager instance = new BitmapManager();
 
     private final Map<String, Bitmap> bitmaps;
 
@@ -26,13 +26,6 @@ public class BitmapManager {
 
     public BitmapManager() {
         bitmaps = new HashMap<>();
-    }
-
-    public static BitmapManager getInstance() {
-        if (instance == null) {
-            instance = new BitmapManager();
-        }
-        return instance;
     }
 
     //--------------------------------------------------------------------------------------------//

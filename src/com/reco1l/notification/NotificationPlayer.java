@@ -103,7 +103,7 @@ public class NotificationPlayer {
                         break;
                     case ACTION_CLOSE:
                         service.stop();
-                        Game.exit();
+                        Game.activity.exit();
                         break;
                 }
             }

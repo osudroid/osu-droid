@@ -10,17 +10,19 @@ import com.reco1l.ui.custom.Dialog;
 import org.anddev.andengine.entity.scene.Scene;
 
 // This only have support for Back button.
-public class KeyInputManager {
+public class InputManager {
+
+    public static final InputManager instance = new InputManager();
 
     //--------------------------------------------------------------------------------------------//
 
-    public static void performBack() {
-        handle(KeyEvent.KEYCODE_BACK, MotionEvent.ACTION_DOWN);
+    public void performBack() {
+        handleKey(KeyEvent.KEYCODE_BACK, MotionEvent.ACTION_DOWN);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public static boolean handle(final int key, final int action) {
+    public boolean handleKey(final int key, final int action) {
         if (!Game.engine.isGameLoaded()) {
             return false;
         }

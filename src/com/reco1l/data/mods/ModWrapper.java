@@ -2,15 +2,14 @@ package com.reco1l.data.mods;
 
 // Created by Reco1l on 21/12/2022, 04:43
 
+import com.reco1l.Game;
 import com.reco1l.data.BaseViewHolder;
 import com.reco1l.interfaces.IGameMod;
 import com.reco1l.legacy.Legacy;
-import com.reco1l.management.ModManager;
 import com.reco1l.ui.BasePreferenceFragment;
 
 import java.util.EnumSet;
 
-import ru.nsu.ccfit.zuev.audio.serviceAudio.PlayMode;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
 public abstract class ModWrapper implements IGameMod {
@@ -70,11 +69,11 @@ public abstract class ModWrapper implements IGameMod {
         //----------------------------------------------------------------------------------------//
 
         public Object getProperty(String key, Object def) {
-            return ModManager.getProperty(key, def);
+            return Game.modManager.getProperty(key, def);
         }
 
         public void setProperty(String key, Object value) {
-            ModManager.setProperty(key, value);
+            Game.modManager.setProperty(key, value);
         }
     }
 }

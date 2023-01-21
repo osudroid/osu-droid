@@ -2,7 +2,6 @@ package com.reco1l.data;
 
 import com.reco1l.Game;
 import com.reco1l.interfaces.IGameMod;
-import com.reco1l.management.ModManager;
 
 import java.util.EnumSet;
 import java.util.function.Consumer;
@@ -62,7 +61,7 @@ public class TrackAttributeSet implements IGameMod {
     public void handleValues() {
         forEach(TrackAttribute::reset);
 
-        EnumSet<GameMod> mods = ModManager.modSet;
+        EnumSet<GameMod> mods = Game.modManager.getSet();
 
         if (mods.contains(EZ)) {
             get(TrackAttribute.AR).opt(v -> ((float) v) * 0.5f);

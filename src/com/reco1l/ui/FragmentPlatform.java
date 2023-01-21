@@ -30,7 +30,7 @@ import java.util.Arrays;
 
 public final class FragmentPlatform {
 
-    private static FragmentPlatform instance;
+    public static final FragmentPlatform instance = new FragmentPlatform();
 
     public RenderSurfaceView renderView;
     public FragmentManager manager;
@@ -51,13 +51,6 @@ public final class FragmentPlatform {
         showing = new ArrayList<>();
         created = new ArrayList<>();
         listMutex = new Object();
-    }
-
-    public static FragmentPlatform getInstance() {
-        if (instance == null) {
-            instance = new FragmentPlatform();
-        }
-        return instance;
     }
 
     //--------------------------------------------------------------------------------------------//

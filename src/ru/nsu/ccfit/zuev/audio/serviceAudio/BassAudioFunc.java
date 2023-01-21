@@ -127,7 +127,7 @@ public class BassAudioFunc {
             BASS.BASS_ChannelSetSync(channel, BASS.BASS_SYNC_END, 0, new BASS.SYNCPROC() {
                 @Override
                 public void SYNCPROC(int handle, int channel, int data, Object user) {
-                    MusicManager.getInstance().onMusicEnd();
+                    MusicManager.instance.onMusicEnd();
                 }
             }, 0);
             return BASS.BASS_ChannelPlay(channel, true);

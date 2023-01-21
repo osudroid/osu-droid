@@ -1,87 +1,47 @@
 package com.reco1l;
 
-import android.content.Intent;
-import android.os.PowerManager;
+import androidx.annotation.Nullable;
 
+import com.reco1l.management.BeatmapCollection;
+import com.reco1l.management.BitmapManager;
+import com.reco1l.management.BoardManager;
+import com.reco1l.management.InputManager;
+import com.reco1l.management.ModManager;
+import com.reco1l.management.MusicManager;
+import com.reco1l.management.TimingWrapper;
 import com.reco1l.scenes.LoaderScene;
 import com.reco1l.scenes.SelectorScene;
 import com.reco1l.scenes.MainScene;
 import com.reco1l.scenes.SummaryScene;
 import com.reco1l.interfaces.IReferences;
-
-import java.util.Timer;
-import java.util.TimerTask;
+import com.reco1l.ui.FragmentPlatform;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
-import ru.nsu.ccfit.zuev.osu.scoring.Replay;
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 // Created by Reco1l on 26/9/22 19:10
 
 public final class Game implements IReferences {
 
-    public static GameScene gameScene = GameScene.getInstance();
+    public static final GameEngine engine = GameEngine.instance;
+    public static final MainActivity activity = MainActivity.instance;
+    public static final FragmentPlatform platform = FragmentPlatform.instance;
 
-    public static MainScene mainScene = MainScene.getInstance();
-    public static LoaderScene loaderScene = LoaderScene.getInstance();
-    public static SummaryScene summaryScene = SummaryScene.getInstance();
-    public static SelectorScene selectorScene = SelectorScene.getInstance();
+    public static final ModManager modManager = ModManager.instance;
+    public static final BoardManager boardManager = BoardManager.instance;
+    public static final MusicManager musicManager = MusicManager.instance;
+    public static final InputManager inputManager = InputManager.instance;
+    public static final BitmapManager bitmapManager = BitmapManager.instance;
+    public static final TimingWrapper timingWrapper = TimingWrapper.instance;
+    public static final BeatmapCollection beatmapCollection = BeatmapCollection.instance;
 
-    public static SongService songService = getSongService();
+    public static final GameScene gameScene = GameScene.instance;
+    public static final MainScene mainScene = MainScene.instance;
+    public static final LoaderScene loaderScene = LoaderScene.instance;
+    public static final SummaryScene summaryScene = SummaryScene.instance;
+    public static final SelectorScene selectorScene = SelectorScene.instance;
 
-    //----------------------------------------------------------------------------------------//
-
-    private static SongService getSongService() {
-        return globalManager.getSongService();
-    }
-
-    //----------------------------------------------------------------------------------------//
-
-    public static void exit() {
-        engine.setScene(mainScene);
-
-        PowerManager.WakeLock wakeLock = activity.getWakeLock();
-        if (wakeLock != null && wakeLock.isHeld()) {
-            wakeLock.release();
-        }
-
-        mainScene.onExit();
-
-        new Timer().schedule(new TimerTask() {
-            public void run() {
-                if (songService != null) {
-                    activity.unbindService(activity.connection);
-                    activity.stopService(new Intent(activity, SongService.class));
-                }
-                activity.finish();
-            }
-        }, 3000);
-    }
-
-    public static void forcedExit() {
-        if(engine.getScene() == gameScene.getScene()) {
-            gameScene.quit();
-        }
-        Game.exit();
-    }
-
-    // TODO move this to Scoring scene
-    public static void watchReplay(String path) {
-        Replay replay = new Replay();
-
-        if (replay.loadInfo(path)) {
-            if (replay.replayVersion >= 3) {
-                StatisticV2 stat = replay.getStat();
-                TrackInfo track = libraryManager.findTrackByFileNameAndMD5(replay.getMapFile(), replay.getMd5());
-
-                if (track != null) {
-                    Game.selectorScene.onTrackSelect(track);
-                    musicManager.change(track);
-                    summaryScene.load(track, stat, path, true);
-                }
-            }
-        }
-    }
+    @Nullable
+    public static SongService songService;
 }

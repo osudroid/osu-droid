@@ -19,7 +19,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class LoaderScene extends BaseScene {
 
-    private static LoaderScene instance;
+    public static final LoaderScene instance = new LoaderScene();
 
     private LoaderFragment fragment;
     private Runnable runOnComplete;
@@ -30,13 +30,6 @@ public class LoaderScene extends BaseScene {
             isAnimInProgress = false;
 
     //--------------------------------------------------------------------------------------------//
-
-    public static LoaderScene getInstance() {
-        if (instance == null) {
-            instance = new LoaderScene();
-        }
-        return instance;
-    }
 
     @Override
     public Screens getIdentifier() {

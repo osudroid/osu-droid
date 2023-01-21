@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.enums.Screens;
-import com.reco1l.management.Scoreboard;
+import com.reco1l.management.BeatmapCollection;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.view.CarrouselRecyclerView;
 import com.reco1l.data.adapters.BeatmapListAdapter;
@@ -19,7 +19,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 22/8/22 00:31
 
-public final class BeatmapCarrousel extends BaseFragment implements Scoreboard.Observer<BeatmapInfo> {
+public final class BeatmapCarrousel extends BaseFragment implements BeatmapCollection.Listener {
 
     public static BeatmapCarrousel instance;
 
@@ -64,7 +64,7 @@ public final class BeatmapCarrousel extends BaseFragment implements Scoreboard.O
     }
 
     @Override
-    public void onScoreboardChange(ArrayList<BeatmapInfo> pList) {
+    public void onLibraryChange(ArrayList<BeatmapInfo> pList) {
         if (mAdapter == null) {
             mAdapter = new BeatmapListAdapter(pList);
             mAdapter.setSelectionListener(pos ->

@@ -18,7 +18,7 @@ import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
 public final class MusicManager {
 
-    private static MusicManager instance;
+    public static final MusicManager instance = new MusicManager();
 
     private final ArrayList<MusicObserver> observers;
 
@@ -32,15 +32,6 @@ public final class MusicManager {
 
     public MusicManager() {
         this.observers = new ArrayList<>();
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public static MusicManager getInstance() {
-        if (instance == null) {
-            instance = new MusicManager();
-        }
-        return instance;
     }
 
     //--------------------------------------------------------------------------------------------//

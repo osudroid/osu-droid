@@ -93,6 +93,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
 
+import com.reco1l.GameEngine;
 import com.reco1l.UI;
 import com.reco1l.scenes.SummaryScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -102,7 +103,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class GameScene implements IUpdateHandler, GameObjectListener,
         IOnSceneTouchListener {
 
-    public static GameScene instance;
+    public static final GameScene instance = new GameScene(Game.engine);
 
     public static final int CursorCount = 10;
     private final Engine engine;
@@ -201,17 +202,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         scene.attachChild(mgScene);
         scene.attachChild(fgScene);
     }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public static GameScene getInstance() {
-        if (instance == null) {
-            instance = new GameScene(GlobalManager.getInstance().getEngine());
-        }
-        return instance;
-    }
-
-    //--------------------------------------------------------------------------------------------//
 
     public void setScoringScene(final SummaryScene sc) {
         summaryScene = sc;

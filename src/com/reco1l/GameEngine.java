@@ -16,7 +16,7 @@ import java.util.List;
 
 public final class GameEngine extends Engine {
 
-    private static GameEngine instance;
+    public static GameEngine instance;
 
     private final List<SceneHandler> handlers;
 
@@ -35,10 +35,6 @@ public final class GameEngine extends Engine {
         super(pEngineOptions);
         instance = this;
         handlers = new ArrayList<>();
-    }
-
-    public static GameEngine getInstance() {
-        return instance;
     }
 
     //--------------------------------------------------------------------------------------------//

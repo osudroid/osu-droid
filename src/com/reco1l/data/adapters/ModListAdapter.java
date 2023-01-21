@@ -74,7 +74,7 @@ public class ModListAdapter extends BaseAdapter<ModListAdapter.ModViewHolder, Mo
         }
 
         private boolean isEnabled() {
-            return ModManager.modList.contains(item);
+            return Game.modManager.contains(item);
         }
 
         @Override

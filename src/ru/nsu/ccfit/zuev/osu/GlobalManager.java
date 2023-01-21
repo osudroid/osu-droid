@@ -73,6 +73,7 @@ public class GlobalManager {
             songService.stop();
             songService.hideNotification();
         }
+        Game.songService = songService;
     }
 
     public Engine getEngine() {

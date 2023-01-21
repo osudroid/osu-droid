@@ -15,7 +15,6 @@ import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.data.ModCustomizationAdapter;
 import com.reco1l.interfaces.IGameMod;
-import com.reco1l.management.ModManager;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
@@ -131,9 +130,9 @@ public final class ModMenu extends BaseFragment implements IGameMod {
     //--------------------------------------------------------------------------------------------//
 
     public void onModSelect(ModWrapper pWrapper, boolean pByFlag) {
-        if (ModManager.remove(pWrapper)) {
+        if (Game.modManager.remove(pWrapper)) {
             pWrapper.onSelect(false);
-        } else if (ModManager.add(pWrapper) && !pByFlag) {
+        } else if (Game.modManager.add(pWrapper) && !pByFlag) {
             pWrapper.onSelect(true);
         }
         updateCustomizations();
@@ -143,10 +142,10 @@ public final class ModMenu extends BaseFragment implements IGameMod {
     //--------------------------------------------------------------------------------------------//
 
     private void clear() {
-        for (ModWrapper mod : ModManager.modList) {
+        for (ModWrapper mod : Game.modManager.getList()) {
             mod.holder.onDeselect();
         }
-        ModManager.clear();
+        Game.modManager.clear();
 
         updateCustomizations();
         updateButtonWidget();
@@ -163,7 +162,7 @@ public final class ModMenu extends BaseFragment implements IGameMod {
     private void updateCustomizations() {
         mCustomizationAdapter.clear();
 
-        for (ModWrapper wrapper : ModManager.modList) {
+        for (ModWrapper wrapper : Game.modManager.getList()) {
             if (wrapper.getProperties() != null) {
                 mCustomizationAdapter.getData().add(wrapper);
             }
@@ -177,7 +176,7 @@ public final class ModMenu extends BaseFragment implements IGameMod {
         }
 
         LinearLayout widget = button.getWidget();
-        if (ModManager.isListEmpty()) {
+        if (Game.modManager.isEmpty()) {
             Animation.of(widget)
                     .toRightPadding(0)
                     .play(100);
@@ -191,7 +190,7 @@ public final class ModMenu extends BaseFragment implements IGameMod {
                 .toRightPadding(Res.sdp(12))
                 .play(100);
 
-        for (ModWrapper wrapper : ModManager.modList) {
+        for (ModWrapper wrapper : Game.modManager.getList()) {
             if (wrapper.getIcon() == null) {
                 continue;
             }
@@ -223,19 +222,19 @@ public final class ModMenu extends BaseFragment implements IGameMod {
     public static class Section {
 
         public final String title;
-        public final ArrayList<ModWrapper> childs;
+        public final ArrayList<ModWrapper> mods;
 
         //----------------------------------------------------------------------------------------//
 
         public Section(String pTitle) {
             title = pTitle;
-            childs = new ArrayList<>();
+            mods = new ArrayList<>();
         }
 
         //----------------------------------------------------------------------------------------//
 
         private void add(ModWrapper pWrapper) {
-            childs.add(pWrapper);
+            mods.add(pWrapper);
         }
     }
 
