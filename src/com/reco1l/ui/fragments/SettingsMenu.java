@@ -26,6 +26,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.enums.Screens;
+import com.reco1l.preference.GameEditTextPreference;
 import com.reco1l.tables.AnimationTable;
 import com.reco1l.tables.DialogTable;
 import com.reco1l.tables.Res;
@@ -386,12 +387,13 @@ public final class SettingsMenu extends BaseFragment {
                 if (dither != null)
                     dither.setOnPreferenceChangeListener((p, val) -> {
                         if (Config.isUseDither() != (boolean) val) {
-                            DialogBuilder builder = DialogTable.restart();
 
-                            builder.onClose = () -> dither.setChecked(oldValue);
-                            builder.addButton("Cancel", Dialog::close);
+                            DialogBuilder builder = DialogTable.restart()
+                                    .setOnDismiss(() -> dither.setChecked(oldValue))
+                                    .setCloseExtras(false)
+                                    .addCloseButton();
 
-                            new Dialog(builder).closeExtras(false).show();
+                            new Dialog(builder).show();
                         }
                         return true;
                     });
@@ -437,27 +439,25 @@ public final class SettingsMenu extends BaseFragment {
 
             // Advanced
             if (tab == Tabs.advanced) {
-                EditTextPreference skinTopPath = findPreference("skinTopPath");
+                GameEditTextPreference skinTopPath = findPreference("skinTopPath");
+                GameEditTextPreference corePath = findPreference("skinTopPath");
 
                 if (skinTopPath == null)
                     return;
 
-                skinTopPath.setOnPreferenceChangeListener((p, newValue) -> {
-
-                    if (newValue.toString().trim().length() == 0) {
+                skinTopPath.setOnFocusLostListener(() -> {
+                    if (skinTopPath.getText().trim().length() == 0) {
                         skinTopPath.setText(Config.getCorePath() + "Skin/");
-                        Config.loadConfig(Game.activity);
-                        return false;
                     }
 
-                    File file = new File(newValue.toString());
+                    File file = new File(skinTopPath.getText());
                     if (!file.exists() && !file.mkdirs()) {
-                        ToastLogger.showText(StringTable.get(R.string.message_error_dir_not_found), true);
-                        return false;
+                        skinTopPath.setText(Config.getCorePath() + "Skin/");
                     }
+                });
 
-                    skinTopPath.setText(newValue.toString());
-                    Config.loadConfig(Game.activity);
+                skinTopPath.setOnPreferenceChangeListener((p, newValue) -> {
+                    Config.loadPaths();
                     return false;
                 });
             }

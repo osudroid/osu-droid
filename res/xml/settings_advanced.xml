@@ -11,11 +11,11 @@
         android:title="Location"
         app:iconSpaceReserved="false">
 
-        <EditTextPreference
+        <com.reco1l.preference.GameEditTextPreference
             android:key="corePath"
             android:title="@string/opt_corepath_title" />
 
-        <EditTextPreference
+        <com.reco1l.preference.GameEditTextPreference
             android:key="skinTopPath"
             android:title="@string/opt_skin_top_path_title" />
 

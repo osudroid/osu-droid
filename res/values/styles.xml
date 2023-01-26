@@ -17,6 +17,17 @@
         <item name="android:elevation">1dp</item>
     </style>
 
+
+    <style name="edit_text" parent="text">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:background">@drawable/shape_rounded</item>
+        <item name="android:textColor">@color/textSecondary</item>
+        <item name="android:backgroundTint">#1F000000</item>
+        <item name="android:paddingLeft">@dimen/M</item>
+        <item name="android:paddingRight">@dimen/M</item>
+        <item name="android:imeOptions">actionDone</item>
+    </style>
+
     <!--TODO remove this-->
     <style name="largeText" parent="text">
         <item name="android:textSize">@dimen/textM</item>
