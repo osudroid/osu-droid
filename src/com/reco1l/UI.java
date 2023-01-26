@@ -1,18 +1,6 @@
 package com.reco1l;
 
-import com.reco1l.ui.fragments.Background;
-import com.reco1l.ui.fragments.BeatmapCarrousel;
-import com.reco1l.ui.fragments.BeatmapPanel;
-import com.reco1l.ui.fragments.MainOverlay;
-import com.reco1l.ui.fragments.NotificationCenter;
-import com.reco1l.ui.fragments.FilterBar;
-import com.reco1l.ui.fragments.GameSummary;
-import com.reco1l.ui.fragments.MainMenu;
-import com.reco1l.ui.fragments.MusicPlayer;
-import com.reco1l.ui.fragments.SettingsMenu;
-import com.reco1l.ui.fragments.ModMenu;
-import com.reco1l.ui.fragments.TopBar;
-import com.reco1l.ui.fragments.UserProfile;
+import com.reco1l.ui.fragments.*;
 
 // Created by Reco1l on 29/6/22 22:38
 
