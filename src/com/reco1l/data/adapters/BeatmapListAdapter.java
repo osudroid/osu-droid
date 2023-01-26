@@ -6,10 +6,9 @@ import static com.reco1l.data.adapters.BeatmapListAdapter.*;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.view.ContextThemeWrapper;
+import android.graphics.PointF;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -20,8 +19,7 @@ import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
-import com.reco1l.tables.Res;
-import com.reco1l.ui.SimpleFragment;
+import com.reco1l.tables.DialogTable;
 import com.reco1l.ui.custom.ContextMenu;
 import com.reco1l.ui.custom.ContextMenuBuilder;
 import com.reco1l.ui.custom.Dialog;
@@ -108,56 +106,45 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
                 }
 
                 public void onLongPress() {
-
-                    ContextMenuBuilder builder = new ContextMenuBuilder();
-
-                    String itemText = properties.isFavorite() ? "Remove from favorites" : Res.str(R.string.menu_properties_tofavs);
-                    builder.addItem(new ContextMenu.Item(itemText, () -> {
-                        properties.setFavorite(!properties.isFavorite());
-                        saveProperties();
-                    }));
-
-
-                    builder.addItem(new ContextMenu.Item("Offset", () -> {
-
-                        DialogBuilder dialog = new DialogBuilder();
-
-                        SeekBar seekBar = new SeekBar(new ContextThemeWrapper(Game.activity, R.style.seek_bar));
-                        seekBar.setMax(500);
-                        seekBar.setProgress(250 - properties.getOffset());
-
-                        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-                            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                                properties.setOffset(progress - 250);
-                                saveProperties();
-                            }
-
-                            public void onStartTrackingTouch(SeekBar seekBar) {}
-
-                            public void onStopTrackingTouch(SeekBar seekBar) {}
-                        });
-
-                        dialog.customFragment = new SimpleFragment(seekBar);
-
-                        new Dialog(dialog).show();
-                    }));
-
-
-                    builder.addItem(new ContextMenu.Item("Delete...", () -> {
-
-                        DialogBuilder dialog = new DialogBuilder();
-
-                        dialog.message = "Are you sure you want to delete this beatmap?";
-                        dialog.addButton("Yes", d -> Game.libraryManager.deleteMap(item));
-                        dialog.addButton("No", Dialog::close);
-
-                        new Dialog(dialog).show();
-                    }));
-
-                    new ContextMenu(builder).show(body);
+                    createContextMenu(getTouchPosition());
                 }
             });
+        }
+
+        private void createContextMenu(PointF pPosition) {
+            ContextMenuBuilder builder = new ContextMenuBuilder(pPosition)
+                    .addItem(new ContextMenu.Item() {
+
+                        public String getText() {
+                            if (properties.isFavorite()) {
+                                return "Remove from favorites";
+                            }
+                            return "Add to favorites";
+                        }
+
+                        public void onClick(TextView view) {
+                            properties.setFavorite(!properties.isFavorite());
+                            saveProperties();
+
+                            if (properties.isFavorite()) {
+                                view.setText("Remove from favorites");
+                            } else {
+                                view.setText("Add to favorites");
+                            }
+                        }
+                    })
+                    .addItem("Offset", () -> new Dialog(DialogTable.offset(item)).show())
+                    .addItem("Delete...", () -> {
+
+                        DialogBuilder dialog = new DialogBuilder("Delete Beatmap")
+                                .setMessage("Are you sure you want to delete this beatmap?")
+                                .addButton("Yes", d -> Game.libraryManager.deleteMap(item))
+                                .addCloseButton();
+
+                        new Dialog(dialog).show();
+                    });
+
+            new ContextMenu(builder).show();
         }
 
         private void saveProperties() {
@@ -172,9 +159,6 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
             loadBackground(false);
 
             properties = Game.propertiesLibrary.getProperties(item.getPath());
-            if (properties == null) {
-                properties = new BeatmapProperties();
-            }
 
             title.setText(BeatmapHelper.getTitle(item));
             artist.setText("by " + BeatmapHelper.getArtist(item));
