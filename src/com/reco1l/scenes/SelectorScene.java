@@ -2,6 +2,8 @@ package com.reco1l.scenes;
 
 // Created by Reco1l on 26/9/22 17:40
 
+import android.util.Log;
+
 import com.edlplan.replay.OdrDatabase;
 import com.reco1l.Game;
 import com.reco1l.UI;
@@ -82,20 +84,15 @@ public class SelectorScene extends BaseScene {
         Game.globalManager.setSelectedTrack(track);
     }
 
-    public void onAudioChange() {
-        TrackInfo track = Game.musicManager.getTrack();
-
-        Game.songService.setVolume(0);
-
-        if (track.getPreviewTime() != -1) {
-            Game.songService.seekTo(track.getPreviewTime());
-        } else {
-            Game.songService.seekTo(Game.songService.getLength() / 2);
-        }
+    public void onAudioChange(TrackInfo track) {
+        Log.i("SS", "here!");
+        Game.musicManager.setVolume(0);
+        Game.musicManager.setPosition(track.getPreviewTime());
+        Game.musicManager.play();
 
         Animation.ofFloat(0, Config.getBgmVolume())
-                .runOnUpdate(value -> Game.songService.setVolume((float) value))
-                .play(400);
+                .runOnUpdate(v -> Game.musicManager.setVolume((float) v))
+                .play(300);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -114,13 +111,15 @@ public class SelectorScene extends BaseScene {
 
         UI.background.changeFrom(newTrack.getBackground());
         if (!isSameAudio) {
-            onAudioChange();
+            onAudioChange(newTrack);
+        } else {
+            Log.i("SS", "is same audio!");
         }
     }
 
     @Override
     public void onMusicEnd() {
-        onAudioChange();
+        onAudioChange(Game.musicManager.getTrack());
     }
 
     //--------------------------------------------------------------------------------------------//
