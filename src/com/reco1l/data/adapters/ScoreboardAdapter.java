@@ -2,7 +2,6 @@ package com.reco1l.data.adapters;
 
 import static com.reco1l.data.adapters.ScoreboardAdapter.*;
 
-import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -10,21 +9,14 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.edlplan.replay.OdrDatabase;
-import com.edlplan.replay.OsuDroidReplay;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.reco1l.Game;
-import com.reco1l.UI;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
-import com.reco1l.data.GameNotification;
 import com.reco1l.data.ScoreInfo;
 import com.reco1l.interfaces.Endpoint;
-import com.reco1l.tables.Res;
 import com.reco1l.ui.custom.ContextMenu;
 import com.reco1l.ui.custom.ContextMenuBuilder;
-import com.reco1l.ui.custom.Dialog;
-import com.reco1l.ui.custom.DialogBuilder;
 import com.reco1l.utils.TouchHandler;
 import com.reco1l.utils.TouchListener;
 import com.reco1l.utils.Views;
@@ -34,7 +26,6 @@ import com.reco1l.utils.helpers.ReplayHelper;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
@@ -95,23 +86,20 @@ public class ScoreboardAdapter extends BaseAdapter<ScoreHolder, ScoreInfo> {
 
         @Override
         protected void onBind(ScoreInfo item, int position) {
+
             new TouchHandler(new TouchListener() {
+
                 public void onPressUp() {
                     Game.selectorScene.loadScore(item.getId(), item.getName());
                 }
 
                 @Override
                 public void onLongPress() {
-                    ContextMenuBuilder builder = new ContextMenuBuilder()
-                            .addItem(new ContextMenu.Item("Export", () ->
-                                    ReplayHelper.export(item.getId()))
-                            )
-                            .addItem(new ContextMenu.Item("Delete", () -> {
+                    ContextMenuBuilder builder = new ContextMenuBuilder(getTouchPosition())
+                            .addItem("Export", () -> ReplayHelper.export(item.getId()))
+                            .addItem("Delete", () -> ReplayHelper.delete(item.getId()));
 
-
-                    }));
-
-                    new ContextMenu(builder).show(body);
+                    new ContextMenu(builder).show();
                 }
             }).apply(body);
 
@@ -149,15 +137,6 @@ public class ScoreboardAdapter extends BaseAdapter<ScoreHolder, ScoreInfo> {
             } else {
                 difference.setVisibility(View.GONE);
             }
-        }
-
-        //--------------------------------------------------------------------------------------------//
-
-        public void assign(ScoreInfo data) {
-            if (body == null)
-                return;
-
-
         }
     }
 }

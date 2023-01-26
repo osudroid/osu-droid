@@ -14,6 +14,7 @@ import com.edlplan.replay.OsuDroidReplayPack;
 import com.reco1l.Game;
 import com.reco1l.UI;
 import com.reco1l.data.GameNotification;
+import com.reco1l.tables.DialogTable;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
@@ -28,7 +29,8 @@ public final class ReplayHelper {
 
     //--------------------------------------------------------------------------------------------//
 
-    private ReplayHelper() {}
+    private ReplayHelper() {
+    }
 
     //--------------------------------------------------------------------------------------------//
 
@@ -60,47 +62,52 @@ public final class ReplayHelper {
 
                 Uri uri = FileProvider.getUriForFile(Game.activity, BuildConfig.APPLICATION_ID + ".fileProvider", file);
 
-                Intent intent = new Intent()
-                        .setAction(Intent.ACTION_VIEW)
+                Intent intent = new Intent(Intent.ACTION_VIEW)
+                        .setPackage("com.edlplan.ui")
                         .setDataAndType(uri, "*/*")
                         .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-                Game.activity.registerForActivityResult(new StartActivityForResult(), result -> {})
+                Game.activity.registerForActivityResult(new StartActivityForResult(), result -> {
+                        })
                         .launch(intent);
             });
 
             notification.setMessage("Saved replay to " + file.getAbsolutePath());
         } catch (Exception exception) {
-            exception.printStackTrace();
-            notification.setMessage("Failed to export replay!\n" + exception.getMessage());
+            notification.setMessage("Failed to export replay!\n" + exception.getMessage())
+                    .runOnClick(() ->
+                            new Dialog(DialogTable.stacktrace(exception)).show()
+                    );
         }
     }
 
     public static void delete(int pId) {
-        DialogBuilder dialog = new DialogBuilder();
+        DialogBuilder builder = new DialogBuilder("Delete Replay")
+                .setMessage("Are you sure?")
+                .addButton("Yes", d -> {
 
-        dialog.title = "Delete replay";
-        dialog.message = "Are you sure?";
-        dialog.addButton("Yes", d -> {
-            List<OsuDroidReplay> replays = OdrDatabase.get().getReplayById(pId);
-            if (replays.size() > 0) {
+                    GameNotification notification = GameNotification.of("replay delete")
+                            .setMessage("Deleting score " + pId + "...")
+                            .showProgress(true);
 
-               /* GameNotification n = GameNotification.of("replay delete");
-                n.setMessage("Failed to delete replay!");
-
-                try {
-                    if (OdrDatabase.get().deleteReplay(data.id) != 0) {
-                        n.message = Res.str(R.string.menu_deletescore_delete_success);
+                    try {
+                        if (OdrDatabase.get().deleteReplay(pId) != 0) {
+                            notification.setMessage("Score " + pId + " has been successfully deleted");
+                        } else {
+                            notification.setMessage("Score " + pId + " was not found or database is null!")
+                                    .showProgress(false)
+                                    .showCloseButton(true);
+                        }
+                    } catch (Exception e) {
+                        notification
+                                .setMessage("Failed to delete replay!\n" + e.getMessage())
+                                .runOnClick(() ->
+                                        new Dialog(DialogTable.stacktrace(e)).show()
+                                );
                     }
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                    n.message += "\n" + exception.getMessage();
-                }
-                UI.notificationCenter.add(n);*/
-            }
-            d.close();
-        });
+                    d.close();
+                });
 
-        new Dialog(dialog).show();
+        new Dialog(builder).show();
     }
 }
