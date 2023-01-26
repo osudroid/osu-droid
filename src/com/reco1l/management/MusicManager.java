@@ -83,8 +83,8 @@ public final class MusicManager {
         notify(MusicObserver::onMusicEnd);
     }
 
-    private void onMusicChange(TrackInfo track, boolean wasAudioChanged) {
-        notify(o -> o.onMusicChange(track, wasAudioChanged));
+    private void onMusicChange(TrackInfo track, boolean sameAudio) {
+        notify(o -> o.onMusicChange(track, sameAudio));
     }
 
     private void notify(Consumer<MusicObserver> consumer) {
@@ -107,10 +107,20 @@ public final class MusicManager {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void setVolume(int value) {
+    public void setPosition(int position) {
         assert Game.songService != null;
 
-        Game.songService.setVolume(MathUtils.clamp(value, 0, 100) / 100f);
+        if (position < 0) {
+            Game.songService.seekTo(Game.songService.getLength() / 2);
+            return;
+        }
+        Game.songService.seekTo(position);
+    }
+
+    public void setVolume(float value) {
+        assert Game.songService != null;
+
+        Game.songService.setVolume(value);
     }
 
     public void setPlayback(float speed, boolean shiftPitch) {
@@ -150,14 +160,14 @@ public final class MusicManager {
             return change(beatmap.getTrack(0));
         }
         stop();
-        onMusicChange(null, true);
+        onMusicChange(null, false);
         return false;
     }
 
     public boolean change(TrackInfo track) {
         if (isInvalidRequest() || track == null) {
             stop();
-            onMusicChange(null, true);
+            onMusicChange(null, false);
             return false;
         }
         assert Game.songService != null;
@@ -171,12 +181,12 @@ public final class MusicManager {
         }
 
         Game.libraryManager.findBeatmap(mTrack.getBeatmap());
-        onMusicChange(mTrack, same);
 
         if (getState() == Status.STOPPED) {
             Game.songService.play();
             Game.songService.setVolume(Config.getBgmVolume());
         }
+        onMusicChange(mTrack, same);
         return true;
     }
 
