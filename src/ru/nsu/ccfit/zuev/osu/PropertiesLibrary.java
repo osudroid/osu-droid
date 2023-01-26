@@ -125,7 +125,7 @@ public class PropertiesLibrary {
         if (props.containsKey(path)) {
             return props.get(path);
         }
-        return null;
+        return new BeatmapProperties();
     }
 
     public void setProperties(final String path,
