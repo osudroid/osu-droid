@@ -26,7 +26,7 @@ public final class GameNotification {
     private BassSoundProvider mSound;
 
     private boolean
-            mSilent = true,
+            mSilent = false,
             mShowProgress = false,
             mShowDismissButton = true;
 
