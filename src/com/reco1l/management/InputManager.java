@@ -40,7 +40,7 @@ public class InputManager {
             }
 
             for (Dialog dialog : Game.platform.getDialogs()) {
-                if (dialog.builder.closeOnBackPress) {
+                if (dialog.canClose()) {
                     dialog.close();
                     return true;
                 }
