@@ -1,7 +1,9 @@
 package com.reco1l.ui.custom;
 
+import android.graphics.PointF;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,25 +21,24 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class ContextMenu extends BaseFragment {
 
-    private final ContextMenuBuilder builder;
+    private final ContextMenuBuilder mBuilder;
 
-    private View parent;
+    private PointF mPosition;
+
     private CardView card;
     private ContextMenuAdapter adapter;
     private BouncyRecyclerView recyclerView;
-
-    private boolean isChildView = false;
 
     //--------------------------------------------------------------------------------------------//
 
     public ContextMenu(ContextMenuBuilder builder) {
         super();
-        this.builder = builder;
+        mBuilder = builder;
+        mPosition = builder.position;
         closeOnBackgroundClick(true);
     }
 
     //--------------------------------------------------------------------------------------------//
-
 
     @Override
     protected boolean isOverlay() {
@@ -76,7 +77,7 @@ public class ContextMenu extends BaseFragment {
     protected void onLoad() {
         fixLocation();
         if (adapter == null) {
-            adapter = new ContextMenuAdapter(builder.items);
+            adapter = new ContextMenuAdapter(mBuilder.items);
         }
         recyclerView.setAdapter(adapter);
 
@@ -88,60 +89,34 @@ public class ContextMenu extends BaseFragment {
                     .toHeight(height)
                     .toAlpha(1)
                     .play(200);
+
+            fixLocation();
         });
     }
 
-    @Override
-    protected void onUpdate(float pSecElapsed) {
-        fixLocation();
-    }
-
     private void fixLocation() {
-        if (parent != null) {
-            int[] location = new int[2];
+        card.setX(mPosition.x);
+        card.setY(mPosition.y);
 
-            parent.getLocationInWindow(location);
+        if (card.getX() + card.getWidth() > getWidth()) {
+            card.setX(getWidth() - card.getWidth());
+        }
 
-            card.setX(location[0]);
-            card.setY(location[1]);
+        if (card.getY() + card.getHeight() > getHeight()) {
+            card.setY(getHeight() - card.getHeight());
         }
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void show(View view) {
-        if (builder == null) {
-            throw new NullPointerException("Dropdown builder can't be null!");
-        }
-        this.parent = view;
-        super.show();
+    public static abstract class Item {
 
+        public abstract String getText();
 
-    }
+        public abstract void onClick(TextView view);
 
-    @Override
-    public boolean show() {
-        throw new RuntimeException("You have to set parent view by calling show(View) instead");
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public static class Item {
-
-        private String text;
-        private Runnable onClick;
-
-        public Item(String text, Runnable onClick) {
-            this.text = text;
-            this.onClick = onClick;
-        }
-
-        public String getText() {
-            return text;
-        }
-
-        public Runnable getOnClick() {
-            return onClick;
+        public boolean isSelectable() {
+            return false;
         }
     }
 

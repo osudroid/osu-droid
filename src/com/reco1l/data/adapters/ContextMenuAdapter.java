@@ -30,10 +30,6 @@ public class ContextMenuAdapter extends BaseAdapter<ItemHolder, ContextMenu.Item
         super(items);
     }
 
-    public ContextMenuAdapter(ContextMenu.Item[] array) {
-        super(array);
-    }
-
     @Override
     protected ItemHolder getViewHolder(View pRootView) {
         TextView textView = new TextView(new ContextThemeWrapper(Game.activity, R.style.text));
@@ -62,13 +58,9 @@ public class ContextMenuAdapter extends BaseAdapter<ItemHolder, ContextMenu.Item
         protected void onBind(ContextMenu.Item item, int position) {
             ((TextView) root).setText(item.getText());
 
-            new TouchHandler(() -> {
-                if (select()) {
-                    if (item.getOnClick() != null) {
-                        item.getOnClick().run();
-                    }
-                }
-            }).apply(root);
+            new TouchHandler(() ->
+                    item.onClick((TextView) root)
+            ).apply(root);
         }
 
         @Override
