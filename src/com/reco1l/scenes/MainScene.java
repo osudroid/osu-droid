@@ -71,9 +71,9 @@ public class MainScene extends BaseScene {
             return;
         }
 
-        String text = BeatmapHelper.getTitle(newTrack) + "\n" + BeatmapHelper.getArtist(newTrack);
+        String text = BeatmapHelper.getTitle(newTrack) + " by " + BeatmapHelper.getArtist(newTrack);
 
-        GameNotification.of("music player")
+        GameNotification.of("Now playing")
                 .setMessage(text)
                 .commit();
     }
