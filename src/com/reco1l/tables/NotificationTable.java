@@ -6,8 +6,9 @@ import android.content.Intent;
 import android.net.Uri;
 
 import com.reco1l.Game;
-import com.reco1l.UI;
 import com.reco1l.data.GameNotification;
+import com.reco1l.ui.custom.Dialog;
+import com.reco1l.ui.custom.DialogBuilder;
 
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -19,6 +20,17 @@ public class NotificationTable {
     public static void debug(String text) {
         GameNotification.of("Debug")
                 .setMessage(text)
+                .commit();
+    }
+
+
+    public static void exception(Exception e) {
+        GameNotification.of(e.getClass().getSimpleName())
+                .setMessage(e.getMessage())
+                .runOnClick(() -> {
+                    DialogBuilder builder = DialogTable.stacktrace(e);
+                    new Dialog(builder).show();
+                })
                 .commit();
     }
 
@@ -59,7 +71,9 @@ public class NotificationTable {
         GameNotification.of("Update")
                 .setMessage(Res.str(R.string.update_dialog_message) + "\nClick to update!")
                 .runOnClick(() -> {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                            .setPackage("com.edlplan.ui");
+
                     Game.activity.startActivity(intent);
                 })
                 .commit();
