@@ -9,37 +9,45 @@ import java.util.List;
 
 public class DialogBuilder {
 
-    public List<Dialog.Button> buttons;
+    List<Dialog.Button> buttons;
+    SimpleFragment customFragment;
 
-    public String title, message;
-    public SimpleFragment customFragment;
+    String title, message;
+    Runnable mOnClose;
 
-    public Runnable onClose;
-    public boolean
-            closeOnBackPress = false,
-            closeOnBackgroundClick = false;
+    boolean canClose = true,
+            closeExtras = true;
 
     //--------------------------------------------------------------------------------------------//
 
-    public void addButton(String text, Dialog.OnButtonClick onClick) {
+    public DialogBuilder(String pTitle) {
+        title = pTitle;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public DialogBuilder addCloseButton() {
+        canClose = true;
+        addButton("Close", Dialog::close);
+        return this;
+    }
+
+    public DialogBuilder addButton(String text, Dialog.OnButtonClick onClick) {
         if (buttons == null)
             buttons = new ArrayList<>();
 
-        addButton(text, onClick, null);
+        return addButton(text, onClick, null);
     }
 
-    public void addButton(String text, Dialog.OnButtonClick onClick, Integer color) {
-        if (onClick == null)
-            return;
+    public DialogBuilder addButton(String text, Dialog.OnButtonClick onClick, Integer color) {
+        if (onClick == null) {
+            return this;
+        }
         buttons.add(new Dialog.Button(text, color, onClick));
+        return this;
     }
 
     //--------------------------------------------------------------------------------------------//
-
-    public DialogBuilder setTitle(String title) {
-        this.title = title;
-        return this;
-    }
 
     public DialogBuilder setMessage(String message) {
         this.message = message;
@@ -51,22 +59,19 @@ public class DialogBuilder {
         return this;
     }
 
-    public DialogBuilder setOnClose(Runnable onClose) {
-        this.onClose = onClose;
+    public DialogBuilder setOnDismiss(Runnable onClose) {
+        this.mOnClose = onClose;
         return this;
     }
 
-    public DialogBuilder setCloseOnBackPress(boolean close) {
-        this.closeOnBackPress = close;
+    // Set if user can dismiss the dialog
+    public DialogBuilder setDismiss(boolean enabled) {
+        canClose = enabled;
         return this;
     }
 
-    public DialogBuilder closeOnBackgroundClick(boolean bool) {
-        this.closeOnBackgroundClick = bool;
+    public DialogBuilder setCloseExtras(boolean bool) {
+        closeExtras = bool;
         return this;
     }
-
-    //--------------------------------------------------------------------------------------------//
-
-
 }

@@ -1,14 +1,20 @@
 package com.reco1l.tables;
 
-import android.content.Intent;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.reco1l.Game;
 import com.reco1l.ui.SimpleFragment;
-import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
+import com.reco1l.utils.Views;
+import com.reco1l.view.ButtonView;
 
-import ru.nsu.ccfit.zuev.osu.MainActivity;
+import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
+import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
+import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -16,17 +22,13 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class DialogTable {
 
-    // Builder for Author dialog
     //--------------------------------------------------------------------------------------------//
+
+    // Builder for Author dialog
     public static DialogBuilder author() {
-        DialogBuilder builder = new DialogBuilder();
-
-        builder.title = "Information";
-        builder.customFragment = new AuthorFragment();
-        //builder.setCloseMode(true);
-        builder.addButton("Close", Dialog::close);
-
-        return builder;
+        return new DialogBuilder("Information")
+                .setCustomFragment(new AuthorFragment())
+                .addCloseButton();
     }
 
     public static class AuthorFragment extends SimpleFragment {
@@ -41,54 +43,109 @@ public class DialogTable {
         }
     }
 
-    // Builder for restart dialog
     //--------------------------------------------------------------------------------------------//
+
+    public static DialogBuilder offset(BeatmapInfo map) {
+
+        BeatmapProperties props = Game.propertiesLibrary.getProperties(map.getPath());
+        OffsetFragment fragment = new OffsetFragment();
+
+        fragment.mOffset = props.getOffset();
+
+        return new DialogBuilder("Offset")
+                .addCloseButton()
+                .setCustomFragment(fragment)
+                .setOnDismiss(() -> {
+                    props.setOffset(fragment.mOffset);
+
+                    Game.propertiesLibrary.setProperties(map.getPath(), props);
+                    Game.propertiesLibrary.save();
+                });
+    }
+
+    public static class OffsetFragment extends SimpleFragment {
+
+        private int mOffset;
+
+        //----------------------------------------------------------------------------------------//
+
+        public OffsetFragment() {
+            super(R.layout.custom_preference_seekbar);
+        }
+
+        //----------------------------------------------------------------------------------------//
+
+        @Override
+        protected void onLoad() {
+            SeekBar seekBar = find(R.id.seekbar);
+            TextView title = find(android.R.id.title);
+            TextView valueText = find(R.id.seekbar_value);
+
+            title.setText("Change offset");
+
+            seekBar.setMax(500);
+            seekBar.setProgress(250 + mOffset);
+            valueText.setText(mOffset + "ms");
+
+            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    mOffset = progress - 250;
+                    valueText.setText((progress - 250) + "ms");
+                }
+
+                public void onStartTrackingTouch(SeekBar seekBar) {}
+
+                public void onStopTrackingTouch(SeekBar seekBar) {}
+            });
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    // Builder for restart dialog
     public static DialogBuilder restart() {
-        DialogBuilder builder = new DialogBuilder();
-
-        builder.title = "Restart";
-        builder.message = "The game will be restarted to apply changes";
-        //builder.setCloseMode(false);
-        builder.addButton("Accept", dialog -> {
-            Intent intent = new Intent(Game.activity, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            Game.activity.startActivity(intent);
-            System.exit(0);
-        });
-
-        return builder;
+        return new DialogBuilder("Restart")
+                .setMessage("The game will be restarted to apply changes")
+                .setDismiss(false)
+                .addButton("Accept", d -> Game.activity.exit());
     }
+
+    //--------------------------------------------------------------------------------------------//
 
     // Builder for restart dialog
-    //--------------------------------------------------------------------------------------------//
     public static DialogBuilder exit() {
-        DialogBuilder builder = new DialogBuilder();
-
-        builder.title = "Exit";
-        builder.message = "Are you sure you want to exit the game?";
-        //builder.setCloseMode(true);
-        builder.addButton("Accept", dialog -> {
-            dialog.close();
-            Game.activity.exit();
-        });
-        builder.addButton("Cancel", Dialog::close);
-
-        return builder;
+        return new DialogBuilder("Exit")
+                .setMessage("Are you sure you want to exit the game?")
+                .addButton("Accept", d -> Game.activity.exit())
+                .addCloseButton();
     }
+
+    //--------------------------------------------------------------------------------------------//
 
     // Builder for auto-clicker dialog
-    //--------------------------------------------------------------------------------------------//
     public static DialogBuilder auto_clicker() {
-        DialogBuilder builder = new DialogBuilder();
+        return new DialogBuilder("Warning")
+                .setMessage(Res.str(R.string.message_autoclicker_detected))
+                .addButton("Exit", dialog -> Game.activity.exit())
+                .setDismiss(false);
+    }
 
-        builder.title = "Warning";
-        builder.message = Res.str(R.string.message_autoclicker_detected);
-        //builder.setCloseMode(false);
-        builder.addButton("Exit", dialog -> {
-            dialog.close();
-            Game.activity.exit();
-        });
+    //--------------------------------------------------------------------------------------------//
 
-        return builder;
+    // Simple builder for print trace
+    public static DialogBuilder stacktrace(Exception e) {
+
+        StackTraceElement[] ste = e.getStackTrace();
+        StringBuilder str = new StringBuilder();
+
+        str.append(e.getMessage()).append("\n");
+        for (int i = 1; i < ste.length; ++i) {
+            str.append("\tat ").append(ste[i]).append("\n");
+        }
+
+        return new DialogBuilder("Exception")
+                .setMessage(str.toString())
+                .addCloseButton();
     }
 }

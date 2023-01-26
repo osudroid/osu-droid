@@ -27,20 +27,21 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class Dialog extends BaseFragment {
 
-    public final DialogBuilder builder;
+    private final DialogBuilder mBuilder;
 
-    private CardView body;
-    private TextView title;
-    private ScrollView bodyParent;
-    private LinearLayout container, buttonsContainer;
+    private CardView mBody;
+    private TextView mTitleText;
+    private ScrollView mScrollBody;
 
-    private boolean closeExtras = true;
+    private LinearLayout
+            mBodyContainer,
+            mButtonsContainer;
 
     //--------------------------------------------------------------------------------------------//
 
     public Dialog(@NotNull DialogBuilder builder) {
         super();
-        this.builder = builder;
+        this.mBuilder = builder;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -64,16 +65,16 @@ public class Dialog extends BaseFragment {
 
     @Override
     protected void onLoad() {
-        closeOnBackgroundClick(builder.closeOnBackgroundClick);
+        closeOnBackgroundClick(canClose());
 
         int m = (int) Res.dimen(R.dimen.M);
         int xs = (int) Res.dimen(R.dimen.XS);
 
-        buttonsContainer = find("buttonsContainer");
-        bodyParent = find("bodyParent");
-        container = find("container");
-        title = find("title");
-        body = find("body");
+        mButtonsContainer = find("buttonsContainer");
+        mScrollBody = find("bodyParent");
+        mBodyContainer = find("container");
+        mTitleText = find("title");
+        mBody = find("body");
 
         TextView message = find("message");
 
@@ -82,28 +83,28 @@ public class Dialog extends BaseFragment {
                 .toAlpha(1)
                 .play(500);
 
-        Animation.of(body)
+        Animation.of(mBody)
                 .fromAlpha(0)
                 .toAlpha(1)
                 .interpolate(Easing.OutExpo)
                 .play(500);
 
-        Animation.of(bodyParent)
+        Animation.of(mScrollBody)
                 .fromY(getHeight() / 0.85f)
                 .toY(0)
                 .interpolate(Easing.OutExpo)
                 .play(500);
 
-        Animation.of(title)
+        Animation.of(mTitleText)
                 .fromAlpha(0)
                 .toAlpha(1)
                 .play(300);
 
-        if (builder.customFragment != null) {
+        if (mBuilder.customFragment != null) {
             Game.platform.manager.beginTransaction()
-                    .add(find("fragmentContainer").getId(), builder.customFragment)
+                    .add(find("fragmentContainer").getId(), mBuilder.customFragment)
                     .runOnCommit(
-                            () -> Animation.of(builder.customFragment.getView())
+                            () -> Animation.of(mBuilder.customFragment.getView())
                                     .fromAlpha(0)
                                     .toAlpha(1)
                                     .play(200)
@@ -111,7 +112,7 @@ public class Dialog extends BaseFragment {
                     .commit();
         }
 
-        if (builder.closeOnBackgroundClick) {
+        if (canClose()) {
             bindTouch(find("scrollBackground"), new TouchListener() {
                 public boolean useTouchEffect() {
                     return false;
@@ -127,14 +128,14 @@ public class Dialog extends BaseFragment {
             });
         }
 
-        bodyParent.setSmoothScrollingEnabled(true);
+        mScrollBody.setSmoothScrollingEnabled(true);
 
-        if (builder.buttons != null) {
+        if (mBuilder.buttons != null) {
 
-            for (int i = 0; i < builder.buttons.size(); i++) {
+            for (int i = 0; i < mBuilder.buttons.size(); i++) {
 
-                Button button = builder.buttons.get(i);
-                button.build(buttonsContainer);
+                Button button = mBuilder.buttons.get(i);
+                button.build(mButtonsContainer);
                 button.load(this);
 
 
@@ -147,10 +148,10 @@ public class Dialog extends BaseFragment {
                 Views.MarginUtils margins = Views.margins(button.view);
                 margins.horizontal(m, m);
 
-                if (builder.buttons.size() > 1) {
+                if (mBuilder.buttons.size() > 1) {
                     if (i == 0) {
                         margins.vertical(m, xs);
-                    } else if (i == builder.buttons.size() - 1) {
+                    } else if (i == mBuilder.buttons.size() - 1) {
                         margins.vertical(xs, m);
                     } else {
                         margins.vertical(xs, xs);
@@ -161,11 +162,11 @@ public class Dialog extends BaseFragment {
             }
         }
 
-        title.setText(builder.title);
+        mTitleText.setText(mBuilder.title);
 
-        if (builder.customFragment == null) {
-            if (builder.message != null) {
-                message.setText(builder.message);
+        if (mBuilder.customFragment == null) {
+            if (mBuilder.message != null) {
+                message.setText(mBuilder.message);
                 message.setVisibility(View.VISIBLE);
             } else {
                 message.setVisibility(View.GONE);
@@ -173,6 +174,12 @@ public class Dialog extends BaseFragment {
         } else {
             message.setVisibility(View.GONE);
         }
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public boolean canClose() {
+        return mBuilder.canClose;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -186,44 +193,40 @@ public class Dialog extends BaseFragment {
                 .toAlpha(0)
                 .play(500);
 
-        Animation.of(body)
+        Animation.of(mBody)
                 .toAlpha(0)
                 .interpolate(Easing.InExpo)
                 .play(500);
 
-        Animation.of(bodyParent)
+        Animation.of(mScrollBody)
                 .toY(getHeight() / 0.85f)
                 .interpolate(Easing.InExpo)
                 .runOnEnd(() -> {
                     super.close();
-                    if (builder.onClose != null)
-                        builder.onClose.run();
+                    if (mBuilder.mOnClose != null)
+                        mBuilder.mOnClose.run();
                 })
                 .play(500);
 
-        Animation.of(title)
+        Animation.of(mTitleText)
                 .toAlpha(0)
                 .play(300);
 
-        Animation.of(container)
+        Animation.of(mBodyContainer)
                 .toAlpha(0)
                 .play(400);
 
-        if (builder.buttons != null && !builder.buttons.isEmpty()) {
-            Animation.of(buttonsContainer)
+        if (mBuilder.buttons != null && !mBuilder.buttons.isEmpty()) {
+            Animation.of(mButtonsContainer)
                     .toAlpha(0)
                     .play(300);
         }
 
     }
 
-    public Dialog closeExtras(boolean closeExtras) {
-        this.closeExtras = closeExtras;
-        return this;
-    }
 
     public boolean show() {
-        if (!isAdded() && closeExtras) {
+        if (!isAdded() && mBuilder.closeExtras) {
             Game.platform.closeExtras();
         }
         return super.show();
