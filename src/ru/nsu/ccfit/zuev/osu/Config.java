@@ -152,35 +152,8 @@ public class Config {
                 .commit();
             Config.loadConfig(context);
         }
-        
 
         //advanced
-        defaultCorePath = Environment.getExternalStorageDirectory() + "/osu!droid/";
-        corePath = prefs.getString("corePath", defaultCorePath);
-        if (corePath.length() == 0) {
-            corePath = defaultCorePath;
-        }
-        if (corePath.charAt(corePath.length() - 1) != '/') {
-            corePath += "/";
-        }
-        scorePath = corePath + "Scores/";
-
-        skinPath = prefs.getString("skinPath", corePath + "Skin/");
-        if (skinPath.length() == 0) {
-            skinPath = corePath + "Skin/";
-        }
-        if (skinPath.charAt(skinPath.length() - 1) != '/') {
-            skinPath += "/";
-        }
-
-        skinTopPath = prefs.getString("skinTopPath", skinPath);
-        if (skinTopPath.length() == 0) {
-            skinTopPath = skinPath;
-        }
-        if (skinTopPath.charAt(skinTopPath.length() - 1) != '/') {
-            skinTopPath += "/";
-        }
-
         syncMusic = prefs.getBoolean("syncMusic", syncMusic);
         if (prefs.getBoolean("lowDelay", true)) {
             Engine.INPUT_PAUSE_DURATION = 0;
@@ -204,13 +177,6 @@ public class Config {
         DELETE_OSZ = prefs.getBoolean("deleteosz", true);
         SCAN_DOWNLOAD = prefs.getBoolean("scandownload", true);
         forceRomanized = prefs.getBoolean("forceromanized", false);
-        beatmapPath = prefs.getString("directory", corePath + "Songs/");
-        if (beatmapPath.length() == 0) {
-            beatmapPath = corePath + "Songs/";
-        }
-        if (beatmapPath.charAt(beatmapPath.length() - 1) != '/') {
-            beatmapPath += "/";
-        }
 
         // other
         playMusicPreview = prefs.getBoolean("musicpreview", true);
@@ -245,8 +211,47 @@ public class Config {
             editor.commit();
         }
 
+        loadPaths();
         loadOnlineConfig(context);
         FavoriteLibrary.get().load();
+    }
+
+    public static void loadPaths() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+        defaultCorePath = Environment.getExternalStorageDirectory() + "/osu!droid/";
+        corePath = prefs.getString("corePath", defaultCorePath);
+        if (corePath.length() == 0) {
+            corePath = defaultCorePath;
+        }
+        if (corePath.charAt(corePath.length() - 1) != '/') {
+            corePath += "/";
+        }
+        scorePath = corePath + "Scores/";
+
+        skinPath = prefs.getString("skinPath", corePath + "Skin/");
+        if (skinPath.length() == 0) {
+            skinPath = corePath + "Skin/";
+        }
+        if (skinPath.charAt(skinPath.length() - 1) != '/') {
+            skinPath += "/";
+        }
+
+        skinTopPath = prefs.getString("skinTopPath", skinPath);
+        if (skinTopPath.length() == 0) {
+            skinTopPath = skinPath;
+        }
+        if (skinTopPath.charAt(skinTopPath.length() - 1) != '/') {
+            skinTopPath += "/";
+        }
+
+        beatmapPath = prefs.getString("directory", corePath + "Songs/");
+        if (beatmapPath.length() == 0) {
+            beatmapPath = corePath + "Songs/";
+        }
+        if (beatmapPath.charAt(beatmapPath.length() - 1) != '/') {
+            beatmapPath += "/";
+        }
     }
 
     public static void loadOnlineConfig(final Context context) {
