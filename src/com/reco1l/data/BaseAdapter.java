@@ -71,6 +71,9 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
 
     public final void setData(ArrayList<T> pItems) {
         mItems = pItems;
+        if (pItems == null) {
+            mSelectedPosition = -1;
+        }
         notifyDataSetChanged();
     }
 
