@@ -4,6 +4,7 @@ package com.reco1l.scenes;
 
 import com.reco1l.Game;
 import com.reco1l.UI;
+import com.reco1l.data.GameNotification;
 import com.reco1l.enums.Screens;
 import com.reco1l.view.IconButton;
 import com.reco1l.ui.custom.Dialog;
@@ -70,14 +71,11 @@ public class MainScene extends BaseScene {
             return;
         }
 
-        Game.activity.runOnUiThread(() -> {
-            String text = "Now playing: "
-                    + BeatmapHelper.getTitle(newTrack)
-                    + " by "
-                    + BeatmapHelper.getArtist(newTrack);
+        String text = BeatmapHelper.getTitle(newTrack) + "\n" + BeatmapHelper.getArtist(newTrack);
 
-            NotificationTable.debug(text);
-        });
+        GameNotification.of("music player")
+                .setMessage(text)
+                .commit();
     }
 
     @Override
