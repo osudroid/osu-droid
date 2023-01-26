@@ -1,5 +1,7 @@
 package com.reco1l.utils;
 
+import android.graphics.PointF;
+
 import com.reco1l.Game;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
@@ -7,6 +9,8 @@ import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 // Created by Reco1l on 23/6/22 20:44
 
 public class TouchListener {
+
+    private PointF mLastPosition;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -36,6 +40,15 @@ public class TouchListener {
 
     //--------------------------------------------------------------------------------------------//
 
+    void setPosition(float x, float y) {
+        mLastPosition = new PointF(x, y);
+    }
+
+    public PointF getTouchPosition() {
+        return mLastPosition;
+    }
+
+    //--------------------------------------------------------------------------------------------//
 
     public void onPressDown() {
         // Do something

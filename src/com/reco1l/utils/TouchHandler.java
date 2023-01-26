@@ -113,6 +113,8 @@ public final class TouchHandler {
             notifyTouchEvent(event);
             handleEffects(view, event);
 
+            listener.setPosition(event.getRawX(), event.getRawY());
+
             if (action == ACTION_DOWN) {
                 if (handler != null) {
                     handler.postDelayed(longPress, LONG_PRESS_TIMEOUT);
