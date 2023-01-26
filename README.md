@@ -10,18 +10,17 @@
 
 **rimu!** is a free-to-play rhythm game for Android devices based in the PC rhythm game made by peppy [osu!](https://github.com/ppy/osu)  
 
-This project is the next osu!droid update to come up with a new user interface and new features!
+This is the next osu!droid update to come up with new visuals, new server and new features!
 
 ## Status
 
-This project still under development in a unstable state, and it's intended to replace current client in the future, of course we're currently accepting feedback and bug reports.
+Currently rimu! is under development and still unstable, it can't be used as client yet but it's intended to replace osu!droid in the future, of course we're currently accepting feedback and bug reports.
 
-You can try it by downloading and installing the latest build available
-in [releases](https://github.com/reco1I/rimu/releases) section.
+You can try it by downloading and installing the latest build available in [releases](https://github.com/reco1I/rimu/releases) section.
 
 ## Requirements
 
-rimu! will come with compatibility changes, some older Android devices were compatible with osu!droid will no longer be compatible with rimu!
+In this project compatibility changes has been made, minimum required Android version has been increased, old devices that were compatible with osu!droid will no longer be compatible with rimu!.
 
 |           Minimum            |           Target            |
 |:----------------------------:|:---------------------------:|
