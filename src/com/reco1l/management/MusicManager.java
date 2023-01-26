@@ -4,9 +4,14 @@ package com.reco1l.management;
 
 import android.util.Log;
 
+import androidx.core.math.MathUtils;
+
 import com.reco1l.Game;
 import com.reco1l.interfaces.MusicObserver;
+import com.reco1l.tables.NotificationTable;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -20,10 +25,9 @@ public final class MusicManager {
 
     public static final MusicManager instance = new MusicManager();
 
-    private final ArrayList<MusicObserver> observers;
+    private final ArrayList<MusicObserver> mObservers;
 
-    private TrackInfo track;
-    private String mLastPath;
+    private TrackInfo mTrack;
 
     private float mSpeed = 1f;
     private boolean mShiftPitch = false;
@@ -31,7 +35,7 @@ public final class MusicManager {
     //--------------------------------------------------------------------------------------------//
 
     public MusicManager() {
-        this.observers = new ArrayList<>();
+        this.mObservers = new ArrayList<>();
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -64,13 +68,13 @@ public final class MusicManager {
     }
 
     public TrackInfo getTrack() {
-        return track;
+        return mTrack;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public void bindMusicObserver(MusicObserver observer) {
-        observers.add(observer);
+        mObservers.add(observer);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -81,16 +85,10 @@ public final class MusicManager {
 
     private void onMusicChange(TrackInfo track, boolean wasAudioChanged) {
         notify(o -> o.onMusicChange(track, wasAudioChanged));
-
-        if (track != null) {
-            mLastPath = track.getMusic();
-        } else {
-            mLastPath = null;
-        }
     }
 
     private void notify(Consumer<MusicObserver> consumer) {
-        observers.forEach(observer -> {
+        mObservers.forEach(observer -> {
             if (isValidObserver(observer)) {
                 consumer.accept(observer);
             }
@@ -108,17 +106,44 @@ public final class MusicManager {
     }
 
     //--------------------------------------------------------------------------------------------//
-    public void setPlayback(float pSpeed, boolean pPitchShift) {
-        mSpeed = pSpeed;
-        mShiftPitch = pPitchShift;
+
+    public void setVolume(int value) {
+        assert Game.songService != null;
+
+        Game.songService.setVolume(MathUtils.clamp(value, 0, 100) / 100f);
+    }
+
+    public void setPlayback(float speed, boolean shiftPitch) {
+        assert Game.songService != null;
+
+        mSpeed = speed;
+        mShiftPitch = shiftPitch;
 
         int lastPosition = Game.songService.getPosition();
 
         Game.songService.stop();
-        Game.songService.preLoad(mLastPath, pSpeed, pPitchShift);
+        Game.songService.preLoad(mTrack.getMusic(), speed, shiftPitch);
         Game.songService.play();
         Game.songService.setPosition(lastPosition);
     }
+
+    private boolean sameAudio(TrackInfo track) {
+        if (mTrack == null || track == null) {
+            return false;
+        }
+
+        File last = new File(mTrack.getMusic());
+        File New = new File(track.getMusic());
+
+        try {
+            return Objects.equals(last.getCanonicalPath(), New.getCanonicalPath());
+        } catch (IOException e) {
+            NotificationTable.exception(e);
+            return false;
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------//
 
     public boolean change(BeatmapInfo beatmap) {
         if (beatmap != null) {
@@ -129,27 +154,24 @@ public final class MusicManager {
         return false;
     }
 
-    public boolean change(TrackInfo newTrack) {
-        if (isInvalidRequest() || newTrack == null) {
+    public boolean change(TrackInfo track) {
+        if (isInvalidRequest() || track == null) {
             stop();
             onMusicChange(null, true);
             return false;
         }
-        if (newTrack.equals(track)) {
-            return false;
-        }
-        track = newTrack;
-        String newPath = track.getMusic();
+        assert Game.songService != null;
 
-        if (!Objects.equals(newPath, mLastPath)) {
+        boolean same = sameAudio(track);
+        mTrack = track;
+
+        if (!same) {
             Game.songService.stop();
-            Game.songService.preLoad(newPath, mSpeed, mShiftPitch);
+            Game.songService.preLoad(mTrack.getMusic(), mSpeed, mShiftPitch);
         }
 
-        Game.libraryManager.findBeatmap(track.getBeatmap());
-        onMusicChange(track, Objects.equals(newPath, mLastPath));
-
-        mLastPath = newPath;
+        Game.libraryManager.findBeatmap(mTrack.getBeatmap());
+        onMusicChange(mTrack, same);
 
         if (getState() == Status.STOPPED) {
             Game.songService.play();
@@ -162,14 +184,16 @@ public final class MusicManager {
         if (isInvalidRequest(Status.PAUSED, Status.STOPPED)) {
             return;
         }
-        if (track == null) {
+        assert Game.songService != null;
+
+        if (mTrack == null) {
             change(Game.libraryManager.getBeatmap());
             return;
         }
 
         if (getState() == Status.STOPPED) {
-            Game.songService.preLoad(track.getMusic());
-            Game.songService.preLoad(track.getMusic(), mSpeed, mShiftPitch);
+            Game.songService.preLoad(mTrack.getMusic());
+            Game.songService.preLoad(mTrack.getMusic(), mSpeed, mShiftPitch);
         }
         Game.songService.play();
         Game.songService.setVolume(Config.getBgmVolume());
@@ -181,6 +205,8 @@ public final class MusicManager {
         if (isInvalidRequest(Status.PLAYING)) {
             return;
         }
+        assert Game.songService != null;
+
         Game.songService.pause();
         notify(MusicObserver::onMusicPause);
     }
@@ -189,6 +215,8 @@ public final class MusicManager {
         if (isInvalidRequest(Status.PLAYING, Status.PAUSED)) {
             return;
         }
+        assert Game.songService != null;
+
         Game.songService.stop();
         notify(MusicObserver::onMusicStop);
     }

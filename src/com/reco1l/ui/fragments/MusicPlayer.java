@@ -230,13 +230,13 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
     }
 
     @Override
-    public void onMusicChange(TrackInfo pNewTrack, boolean pWasAudioChanged) {
+    public void onMusicChange(TrackInfo newTrack, boolean isSameAudio) {
         if (isAdded()) {
             Animation.of(mSongBody)
                     .toAlpha(0)
                     .runOnEnd(() -> {
-                        loadMetadata(pNewTrack.getBeatmap());
-                        selectAtList(pNewTrack.getBeatmap());
+                        loadMetadata(newTrack.getBeatmap());
+                        selectAtList(newTrack.getBeatmap());
 
                         Animation.of(mSongBody)
                                 .toX(0)

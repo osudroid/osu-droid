@@ -67,14 +67,14 @@ public abstract class BaseScene extends Scene implements SceneHandler, MusicObse
     }
 
     @Override
-    public void onMusicChange(TrackInfo pNewTrack, boolean pWasAudioChanged) {
+    public void onMusicChange(TrackInfo newTrack, boolean isSameAudio) {
         if (!isShowing()) {
             return;
         }
 
         if (isBackgroundAutoChange) {
-            if (pNewTrack != null) {
-                UI.background.changeFrom(pNewTrack.getBackground());
+            if (newTrack != null) {
+                UI.background.changeFrom(newTrack.getBackground());
             }
         }
     }

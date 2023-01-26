@@ -10,7 +10,7 @@ import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
 public interface MusicObserver {
 
-    default void onMusicChange(@Nullable TrackInfo pNewTrack, boolean pWasAudioChanged) {}
+    default void onMusicChange(@Nullable TrackInfo newTrack, boolean isSameAudio) {}
 
     default void onMusicPause() {}
 

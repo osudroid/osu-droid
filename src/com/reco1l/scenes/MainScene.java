@@ -63,8 +63,8 @@ public class MainScene extends BaseScene {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public void onMusicChange(TrackInfo pNewTrack, boolean pWasAudioChanged) {
-        super.onMusicChange(pNewTrack, pWasAudioChanged);
+    public void onMusicChange(TrackInfo newTrack, boolean isSameAudio) {
+        super.onMusicChange(newTrack, isSameAudio);
 
         if (Game.engine.getScene() != this) {
             return;
@@ -72,9 +72,9 @@ public class MainScene extends BaseScene {
 
         Game.activity.runOnUiThread(() -> {
             String text = "Now playing: "
-                    + BeatmapHelper.getTitle(pNewTrack)
+                    + BeatmapHelper.getTitle(newTrack)
                     + " by "
-                    + BeatmapHelper.getArtist(pNewTrack);
+                    + BeatmapHelper.getArtist(newTrack);
 
             NotificationTable.debug(text);
         });

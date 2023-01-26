@@ -103,10 +103,10 @@ public final class BeatmapPanel extends BaseFragment implements
     }
 
     @Override
-    public void onMusicChange(@Nullable TrackInfo pNewTrack, boolean pWasAudioChanged) {
+    public void onMusicChange(@Nullable TrackInfo newTrack, boolean isSameAudio) {
         if (isLoaded()) {
-            mTrackCard.onMusicChange(pNewTrack);
-            Game.boardManager.load(pNewTrack);
+            mTrackCard.onMusicChange(newTrack);
+            Game.boardManager.load(newTrack);
         }
     }
 

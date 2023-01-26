@@ -109,11 +109,11 @@ public class SelectorScene extends BaseScene {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public void onMusicChange(TrackInfo pNewTrack, boolean pWasAudioChanged) {
-        super.onMusicChange(pNewTrack, pWasAudioChanged);
+    public void onMusicChange(TrackInfo newTrack, boolean isSameAudio) {
+        super.onMusicChange(newTrack, isSameAudio);
 
-        UI.background.changeFrom(pNewTrack.getBackground());
-        if (pWasAudioChanged) {
+        UI.background.changeFrom(newTrack.getBackground());
+        if (!isSameAudio) {
             onAudioChange();
         }
     }
