@@ -85,7 +85,6 @@ public class SelectorScene extends BaseScene {
     }
 
     public void onAudioChange(TrackInfo track) {
-        Log.i("SS", "here!");
         Game.musicManager.setVolume(0);
         Game.musicManager.setPosition(track.getPreviewTime());
         Game.musicManager.play();
@@ -112,8 +111,6 @@ public class SelectorScene extends BaseScene {
         UI.background.changeFrom(newTrack.getBackground());
         if (!isSameAudio) {
             onAudioChange(newTrack);
-        } else {
-            Log.i("SS", "is same audio!");
         }
     }
 
