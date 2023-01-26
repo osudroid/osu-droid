@@ -13,7 +13,7 @@ import com.factor.bouncy.BouncyRecyclerView;
 
 import com.reco1l.Game;
 import com.reco1l.UI;
-import com.reco1l.data.ModCustomizationAdapter;
+import com.reco1l.data.adapters.ModCustomizationAdapter;
 import com.reco1l.interfaces.IGameMod;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;

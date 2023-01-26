@@ -1,4 +1,4 @@
-package com.reco1l.data;
+package com.reco1l.data.adapters;
 
 import android.view.View;
 import android.widget.FrameLayout;
@@ -7,6 +7,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.reco1l.Game;
+import com.reco1l.data.BaseAdapter;
+import com.reco1l.data.BaseViewHolder;
 import com.reco1l.ui.Identifiers;
 import com.reco1l.data.mods.ModWrapper;
 import ru.nsu.ccfit.zuev.osuplus.R;
