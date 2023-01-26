@@ -61,7 +61,7 @@
 
         </RelativeLayout>
 
-        <SeekBar
+        <com.reco1l.view.FixedSeekBar
             android:id="@+id/seekbar"
             style="@style/seek_bar"
             android:layout_marginTop="@dimen/M"
