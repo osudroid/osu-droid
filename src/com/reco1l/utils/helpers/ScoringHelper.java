@@ -2,9 +2,7 @@ package com.reco1l.utils.helpers;
 
 import com.reco1l.interfaces.IGameMod;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
@@ -21,8 +19,7 @@ public class ScoringHelper implements IGameMod {
             for (String mod : mods[1].split("\\|")) {
                 if (mod.startsWith("x") && mod.length() == 5) {
                     builder.append(mod.substring(1)).append("x,");
-                }
-                else if (mod.startsWith("AR")) {
+                } else if (mod.startsWith("AR")) {
                     builder.append(mod).append(",");
                 }
             }
@@ -37,42 +34,66 @@ public class ScoringHelper implements IGameMod {
 
         for (int i = 0; i < mods[0].length(); i++) {
             switch (mods[0].charAt(i)) {
-                case 'a': list.add(AU);
+                case 'a':
+                    list.add(AU);
                     break;
-                case 'x': list.add(RX);
+                case 'x':
+                    list.add(RX);
                     break;
-                case 'p': list.add(AP);
+                case 'p':
+                    list.add(AP);
                     break;
-                case 'e': list.add(EZ);
+                case 'e':
+                    list.add(EZ);
                     break;
-                case 'n': list.add(NF);
+                case 'n':
+                    list.add(NF);
                     break;
-                case 'r': list.add(HR);
+                case 'r':
+                    list.add(HR);
                     break;
-                case 'h': list.add(HD);
+                case 'h':
+                    list.add(HD);
                     break;
-                case 'i': list.add(FL);
+                case 'i':
+                    list.add(FL);
                     break;
-                case 'd': list.add(DT);
+                case 'd':
+                    list.add(DT);
                     break;
-                case 'c': list.add(NC);
+                case 'c':
+                    list.add(NC);
                     break;
-                case 't': list.add(HT);
+                case 't':
+                    list.add(HT);
                     break;
-                case 's': list.add(PR);
+                case 's':
+                    list.add(PR);
                     break;
-                case 'l': list.add(REZ);
+                case 'l':
+                    list.add(REZ);
                     break;
-                case 'm': list.add(SC);
+                case 'm':
+                    list.add(SC);
                     break;
-                case 'u': list.add(SD);
+                case 'u':
+                    list.add(SD);
                     break;
-                case 'f': list.add(PF);
+                case 'f':
+                    list.add(PF);
                     break;
-                case 'v': list.add(SV2);
+                case 'v':
+                    list.add(SV2);
                     break;
             }
         }
         return list;
+    }
+
+    public static String handleLegacyTextures(String texture) {
+        if (texture.endsWith("0g") || texture.endsWith("0k")) {
+            return texture.substring(0, texture.length() - 1);
+        }
+        return texture;
     }
 }

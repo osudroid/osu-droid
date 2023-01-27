@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
+import com.reco1l.utils.helpers.ScoringHelper;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -68,7 +70,9 @@ public class GameObjectPool {
         numbers.get(number.getNum()).add(number);
     }
 
-    public GameEffect getEffect(final String texname) {
+    public GameEffect getEffect(String texname) {
+        texname = ScoringHelper.handleLegacyTextures(texname);
+
         if (effects.containsKey(texname)
                 && effects.get(texname).isEmpty() == false) {
             return effects.get(texname).poll();
