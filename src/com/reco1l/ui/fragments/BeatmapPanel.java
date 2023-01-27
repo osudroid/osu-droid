@@ -1,5 +1,7 @@
 package com.reco1l.ui.fragments;
 
+import static android.view.View.LAYER_TYPE_HARDWARE;
+
 import android.view.View;
 import android.widget.TextView;
 
@@ -15,6 +17,7 @@ import com.reco1l.interfaces.MusicObserver;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
+import com.reco1l.view.drawables.SelectorBackground;
 
 import java.util.ArrayList;
 
@@ -70,7 +73,8 @@ public final class BeatmapPanel extends BaseFragment implements
     //--------------------------------------------------------------------------------------------//
     @Override
     protected void onLoad() {
-        closeOnBackgroundClick(false);
+        rootBackground.setLayerType(LAYER_TYPE_HARDWARE, null);
+        rootBackground.setBackground(new SelectorBackground());
 
         bodyWidth = Res.dimen(R.dimen.beatmapPanelContentWidth);
         isBannerExpanded = true;
