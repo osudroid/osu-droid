@@ -13,6 +13,7 @@ import com.reco1l.tables.ResourceTable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 // TODO [BaseAdapter] make compatible with multiple selection
 public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapter<VH>
@@ -24,6 +25,8 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
     private int mSelectedPosition = -1;
 
     private final ArrayList<VH> mHolders = new ArrayList<>();
+
+    private T mLastSelected;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -70,10 +73,18 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
     }
 
     public final void setData(ArrayList<T> pItems) {
-        mItems = pItems;
-        if (pItems == null) {
-            mSelectedPosition = -1;
+        mSelectedPosition = -1;
+
+        if (pItems != null) {
+            deselectAll();
+
+            pItems.forEach(item -> {
+                if (Objects.equals(item, mLastSelected)) {
+                    mSelectedPosition = pItems.indexOf(item);
+                }
+            });
         }
+        mItems = pItems;
         notifyDataSetChanged();
     }
 
@@ -84,17 +95,15 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
     //--------------------------------------------------------------------------------------------//
 
     public final void select(T pItem) {
-        for (T item : mItems) {
-            if (item.equals(pItem)) {
-                select(mItems.indexOf(item));
-            }
-        }
+        mLastSelected = pItem;
+        select(mItems.indexOf(pItem));
     }
 
     public final boolean select(int pPosition) {
         if (pPosition < 0 || pPosition == mSelectedPosition) {
             return false;
         }
+        mLastSelected = mItems.get(pPosition);
 
         notifyItemChanged(mSelectedPosition);
         mSelectedPosition = pPosition;
@@ -104,6 +113,12 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
             mListener.onPositionChange(mSelectedPosition);
         }
         return true;
+    }
+
+    public final void deselectAll() {
+        mSelectedPosition = -1;
+
+        mHolders.forEach(BaseViewHolder::handleDeselection);
     }
 
     //--------------------------------------------------------------------------------------------//
