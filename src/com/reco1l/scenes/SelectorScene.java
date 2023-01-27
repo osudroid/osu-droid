@@ -35,7 +35,6 @@ public class SelectorScene extends BaseScene {
     @Override
     protected void onCreate() {
         setContinuousPlay(false);
-        setBackgroundAutoChange(false);
 
         //bindDataBaseChangedListener();
         setTouchAreaBindingEnabled(true);
@@ -85,9 +84,11 @@ public class SelectorScene extends BaseScene {
     }
 
     public void onAudioChange(TrackInfo track) {
+        if (track == null) {
+            return;
+        }
         Game.musicManager.setVolume(0);
         Game.musicManager.setPosition(track.getPreviewTime());
-        Game.musicManager.play();
 
         Animation.ofFloat(0, Config.getBgmVolume())
                 .runOnUpdate(v -> Game.musicManager.setVolume((float) v))
@@ -108,7 +109,6 @@ public class SelectorScene extends BaseScene {
     public void onMusicChange(TrackInfo newTrack, boolean isSameAudio) {
         super.onMusicChange(newTrack, isSameAudio);
 
-        UI.background.changeFrom(newTrack.getBackground());
         if (!isSameAudio) {
             onAudioChange(newTrack);
         }
@@ -116,6 +116,7 @@ public class SelectorScene extends BaseScene {
 
     @Override
     public void onMusicEnd() {
+        Game.musicManager.reset();
         onAudioChange(Game.musicManager.getTrack());
     }
 
