@@ -77,9 +77,11 @@ public final class BeatmapCarrousel extends BaseFragment implements BeatmapColle
     //--------------------------------------------------------------------------------------------//
 
     private void restoreSelection() {
-        if (mAdapter != null) {
-            mAdapter.select(Game.musicManager.getTrack().getBeatmap());
-        }
+        mCarrousel.post(() -> {
+            if (mAdapter != null) {
+                mAdapter.select(Game.musicManager.getBeatmap());
+            }
+        });
     }
 
     //--------------------------------------------------------------------------------------------//
