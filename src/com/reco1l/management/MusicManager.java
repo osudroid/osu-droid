@@ -4,8 +4,6 @@ package com.reco1l.management;
 
 import android.util.Log;
 
-import androidx.core.math.MathUtils;
-
 import com.reco1l.Game;
 import com.reco1l.interfaces.MusicObserver;
 import com.reco1l.tables.NotificationTable;
@@ -30,7 +28,9 @@ public final class MusicManager {
     private TrackInfo mTrack;
 
     private float mSpeed = 1f;
-    private boolean mShiftPitch = false;
+    private boolean mPitch = false;
+
+    private int mTrackIndex = 0;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -67,8 +67,19 @@ public final class MusicManager {
         return Game.songService.getStatus();
     }
 
+    public int getTrackIndex() {
+        return mTrackIndex;
+    }
+
     public TrackInfo getTrack() {
         return mTrack;
+    }
+
+    public BeatmapInfo getBeatmap() {
+        if (mTrack == null) {
+            return null;
+        }
+        return mTrack.getBeatmap();
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -123,16 +134,16 @@ public final class MusicManager {
         Game.songService.setVolume(value);
     }
 
-    public void setPlayback(float speed, boolean shiftPitch) {
+    public void setPlayback(float speed, boolean pitch) {
         assert Game.songService != null;
 
         mSpeed = speed;
-        mShiftPitch = shiftPitch;
+        mPitch = pitch;
 
         int lastPosition = Game.songService.getPosition();
 
         Game.songService.stop();
-        Game.songService.preLoad(mTrack.getMusic(), speed, shiftPitch);
+        Game.songService.preLoad(mTrack.getMusic(), speed, pitch);
         Game.songService.play();
         Game.songService.setPosition(lastPosition);
     }
@@ -167,6 +178,9 @@ public final class MusicManager {
     public boolean change(TrackInfo track) {
         if (isInvalidRequest() || track == null) {
             stop();
+            mTrack = null;
+            mTrackIndex = 0;
+
             onMusicChange(null, false);
             return false;
         }
@@ -174,10 +188,11 @@ public final class MusicManager {
 
         boolean same = sameAudio(track);
         mTrack = track;
+        mTrackIndex = mTrack.getBeatmap().getTracks().indexOf(mTrack);
 
         if (!same) {
             Game.songService.stop();
-            Game.songService.preLoad(mTrack.getMusic(), mSpeed, mShiftPitch);
+            Game.songService.preLoad(mTrack.getMusic(), mSpeed, mPitch);
         }
 
         Game.libraryManager.findBeatmap(mTrack.getBeatmap());
@@ -188,6 +203,11 @@ public final class MusicManager {
         }
         onMusicChange(mTrack, same);
         return true;
+    }
+
+    public void reset() {
+        Game.musicManager.stop();
+        Game.musicManager.play();
     }
 
     public void play() {
@@ -203,7 +223,7 @@ public final class MusicManager {
 
         if (getState() == Status.STOPPED) {
             Game.songService.preLoad(mTrack.getMusic());
-            Game.songService.preLoad(mTrack.getMusic(), mSpeed, mShiftPitch);
+            Game.songService.preLoad(mTrack.getMusic(), mSpeed, mPitch);
         }
         Game.songService.play();
         Game.songService.setVolume(Config.getBgmVolume());
