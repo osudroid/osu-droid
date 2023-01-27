@@ -20,11 +20,11 @@ public class CarrouselRecyclerView extends RecyclerView {
     //--------------------------------------------------------------------------------------------//
 
     public CarrouselRecyclerView(@NonNull Context context) {
-        super(context);
+        this(context, null);
     }
 
     public CarrouselRecyclerView(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
     public CarrouselRecyclerView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
@@ -38,11 +38,6 @@ public class CarrouselRecyclerView extends RecyclerView {
         updateTranslations();
         super.onDraw(c);
         invalidate();
-    }
-
-    @Override
-    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-        super.onScrollChanged(l, t, oldl, oldt);
     }
 
     private void updateTranslations() {
