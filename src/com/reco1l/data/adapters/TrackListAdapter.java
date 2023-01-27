@@ -55,14 +55,13 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
 
         private final StripsEffect stripsEffect;
 
-        private int color;
-
         //----------------------------------------------------------------------------------------//
 
         public TrackViewHolder(@NonNull View root) {
             super(root);
 
             stripsEffect = new StripsEffect(root.getContext());
+
 
             mark = root.findViewById(R.id.bl_mark);
             stars = root.findViewById(R.id.bl_stars);
@@ -87,10 +86,10 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
             difficulty.setText(item.getMode());
             stars.setText("" + GameHelper.Round(item.getDifficulty(), 2));
 
-            float diff = item.getDifficulty();
+            float sr = item.getDifficulty();
 
-            int textColor = BeatmapHelper.Palette.getTextColor(diff);
-            color = BeatmapHelper.Palette.getColor(diff);
+            int color = BeatmapHelper.Palette.getColor(sr);
+            int textColor = BeatmapHelper.Palette.getTextColor(sr);
 
             String markTex = Game.scoreLibrary.getBestMark(item.getFilename());
 
@@ -102,6 +101,8 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
             stars.setTextColor(textColor);
             stars.getCompoundDrawablesRelative()[0].setTint(textColor);
             stars.getBackground().setTint(color);
+
+            stripsEffect.setStripColor(color);
         }
 
         //----------------------------------------------------------------------------------------//
