@@ -104,8 +104,6 @@
     <com.reco1l.view.effects.FlashEffect
         android:id="@+id/mainM_kiai"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
-
+        android:layout_height="match_parent" />
 
 </RelativeLayout>
