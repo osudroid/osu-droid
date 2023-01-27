@@ -136,4 +136,13 @@ public class BeatmapInfo implements Serializable {
     public TrackInfo getLastTrack() {
         return tracks.get(tracks.size() - 1);
     }
+
+    public TrackInfo getPreviewTrack() {
+        for (TrackInfo t : tracks) {
+            if (Objects.equals(getMusic(), t.getMusic())) {
+                return t;
+            }
+        }
+        return tracks.get(0);
+    }
 }
