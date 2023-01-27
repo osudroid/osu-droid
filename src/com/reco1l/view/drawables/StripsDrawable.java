@@ -34,11 +34,7 @@ public class StripsDrawable extends Drawable {
             speed = 9f,
             stripWidth = 80;
 
-    public int[] colors = {
-            0xFF292929,
-            0xFF242424,
-            0xFF1A1A1A,
-    };
+    public int color = 0xFF292929;
 
     private final LinkedList<Strip> strips;
     private final Random random;
@@ -107,8 +103,11 @@ public class StripsDrawable extends Drawable {
 
     //--------------------------------------------------------------------------------------------//
 
-    private int nextColor() {
-        return colors[random.nextInt(colors.length)];
+    private int nextAlpha() {
+        int max = 120;
+        int min = 40;
+
+        return random.nextInt(max - min) + min;
     }
 
     private PointF nextPosition() {
@@ -179,7 +178,8 @@ public class StripsDrawable extends Drawable {
             rectF = new RectF();
 
             paint = getPaint();
-            paint.setColor(nextColor());
+            paint.setColor(color);
+            paint.setAlpha(nextAlpha());
 
             backPaint = getPaint();
             backPaint.setColor(Color.TRANSPARENT);

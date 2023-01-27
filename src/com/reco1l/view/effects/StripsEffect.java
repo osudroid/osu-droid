@@ -124,8 +124,8 @@ public class StripsEffect extends View implements BaseView {
         drawable.reset();
     }
 
-    public void setStripColors(int... colors) {
-        drawable.colors = colors;
+    public void setStripColor(int color) {
+        drawable.color = color;
         reset();
     }
 
