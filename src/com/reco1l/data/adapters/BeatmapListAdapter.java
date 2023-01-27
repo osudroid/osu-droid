@@ -26,6 +26,7 @@ import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.TouchListener;
+import com.reco1l.utils.Views;
 import com.reco1l.view.CarrouselRecyclerView;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.utils.execution.AsyncTask;
@@ -105,7 +106,7 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
 
                 public void onPressUp() {
                     if (select()) {
-                        Game.selectorScene.onTrackSelect(item.getTrack(0));
+                        Game.selectorScene.onTrackSelect(item.getPreviewTrack());
                     }
                 }
 
@@ -160,9 +161,13 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
 
         @Override
         protected void onBind(BeatmapInfo item, int position) {
-            loadBackground(false);
-
             mProperties = Game.propertiesLibrary.getProperties(item.getPath());
+
+            Views.margins(root)
+                    .top(position == 0 ? sdp(32) : 0)
+                    .bottom(position == getItemCount() - 1 ? sdp(32) : 0);
+
+            loadBackground(false);
 
             mTitle.setText(BeatmapHelper.getTitle(item));
             mArtist.setText("by " + BeatmapHelper.getArtist(item));
@@ -210,7 +215,7 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
                     Bitmap bitmap;
 
                     public void run() {
-                        bitmap = getBackgroundBitmap(item.getTrack(0));
+                        bitmap = getBackgroundBitmap(item.getPreviewTrack());
                     }
 
                     public void onComplete() {
