@@ -9,8 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.reco1l.tables.ResourceTable;
 
-public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder
-        implements ResourceTable {
+public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder implements ResourceTable {
 
     boolean isAttached = false;
 
@@ -50,6 +49,10 @@ public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder
 
     protected final boolean isAttached() {
         return isAttached;
+    }
+
+    protected int getItemCount() {
+        return adapter.getItemCount();
     }
 
     //--------------------------------------------------------------------------------------------//
