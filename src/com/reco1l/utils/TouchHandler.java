@@ -22,38 +22,38 @@ public final class TouchHandler {
 
     private static final long LONG_PRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
 
-    public TouchListener listener;
+    public TouchListener mListener;
 
-    private BaseFragment linkedFragment;
+    private final Handler mHandler;
+    private final Runnable mLongPressCallback;
+    private final Vibrator mVibrator;
 
-    private Handler handler;
-    private Runnable longPress;
-    private Vibrator vibrator;
+    private BaseFragment mLinkedFragment;
 
-    private boolean isLongPressActioned = false;
+    private boolean mIsLongPressActioned = false;
 
     //--------------------------------------------------------------------------------------------//
 
     public TouchHandler(TouchListener listener) {
-        this.listener = listener;
-        vibrator = (Vibrator) Game.activity.getSystemService(Context.VIBRATOR_SERVICE);
-        handler = new Handler();
+        mListener = listener;
+        mVibrator = (Vibrator) Game.activity.getSystemService(Context.VIBRATOR_SERVICE);
+        mHandler = new Handler();
 
-        longPress = () -> {
-            isLongPressActioned = true;
+        mLongPressCallback = () -> {
+            mIsLongPressActioned = true;
             listener.onLongPress();
-            if (vibrator != null) {
-                vibrator.vibrate(50);
+            if (mVibrator != null) {
+                mVibrator.vibrate(50);
             }
         };
     }
 
-    public TouchHandler(@NotNull Runnable onSingleTapUp) {
-        listener = new TouchListener() {
+    public TouchHandler(@NotNull Runnable onUp) {
+        this(new TouchListener() {
             public void onPressUp() {
-                onSingleTapUp.run();
+                onUp.run();
             }
-        };
+        });
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -64,22 +64,22 @@ public final class TouchHandler {
             case ACTION_DOWN:
                 view.setPressed(true);
 
-                if (listener.getPressDownSound() != null) {
-                    listener.getPressDownSound().play();
+                if (mListener.getPressDownSound() != null) {
+                    mListener.getPressDownSound().play();
                 }
                 break;
 
             case ACTION_UP:
                 view.setPressed(false);
 
-                if (isLongPressActioned) {
-                    if (listener.getLongPressSound() != null) {
-                        listener.getLongPressSound().play();
+                if (mIsLongPressActioned) {
+                    if (mListener.getLongPressSound() != null) {
+                        mListener.getLongPressSound().play();
                     }
                     break;
                 }
-                if (listener.getPressUpSound() != null) {
-                    listener.getPressUpSound().play();
+                if (mListener.getPressUpSound() != null) {
+                    mListener.getPressUpSound().play();
                 }
                 break;
 
@@ -91,19 +91,19 @@ public final class TouchHandler {
     }
 
     private void removeCallbacks() {
-        if (handler != null) {
-            handler.removeCallbacks(longPress);
+        if (mHandler != null) {
+            mHandler.removeCallbacks(mLongPressCallback);
         }
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public void apply(View view) {
-        if (listener == null) {
+        if (mListener == null) {
             return;
         }
 
-        if (listener.useTouchEffect()) {
+        if (mListener.useTouchEffect()) {
             handleRippleEffect(view);
         }
 
@@ -113,27 +113,27 @@ public final class TouchHandler {
             notifyTouchEvent(event);
             handleEffects(view, event);
 
-            listener.setPosition(event.getRawX(), event.getRawY());
+            mListener.setPosition(event.getRawX(), event.getRawY());
 
             if (action == ACTION_DOWN) {
-                if (handler != null) {
-                    handler.postDelayed(longPress, LONG_PRESS_TIMEOUT);
+                if (mHandler != null) {
+                    mHandler.postDelayed(mLongPressCallback, LONG_PRESS_TIMEOUT);
                 }
-                listener.onPressDown();
+                mListener.onPressDown();
                 return true;
             }
 
             if (action == ACTION_UP) {
-                if (isLongPressActioned) {
-                    isLongPressActioned = false;
+                if (mIsLongPressActioned) {
+                    mIsLongPressActioned = false;
                     return false;
                 }
                 removeCallbacks();
 
-                if (listener.useOnlyOnce()) {
+                if (mListener.useOnlyOnce()) {
                     view.setOnTouchListener(null);
                 }
-                listener.onPressUp();
+                mListener.onPressUp();
                 return true;
             }
 
@@ -148,13 +148,13 @@ public final class TouchHandler {
     //--------------------------------------------------------------------------------------------//
 
     private void notifyTouchEvent(MotionEvent event) {
-        if (linkedFragment != null) {
-            linkedFragment.onTouchEventNotified(event.getAction());
+        if (mLinkedFragment != null) {
+            mLinkedFragment.notifyTouchEvent(event.getAction());
         }
     }
 
     public void linkToFragment(BaseFragment fragment) {
-        linkedFragment = fragment;
+        mLinkedFragment = fragment;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -166,7 +166,7 @@ public final class TouchHandler {
         TypedValue outValue = new TypedValue();
 
         int id = android.R.attr.selectableItemBackground;
-        if (listener.useBorderlessEffect()) {
+        if (mListener.useBorderlessEffect()) {
             id = android.R.attr.selectableItemBackgroundBorderless;
         }
 
