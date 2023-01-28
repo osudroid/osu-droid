@@ -18,8 +18,8 @@ public interface IUpdateHandler {
 	// Methods
 	// ===========================================================
 
-	void onUpdate(final float pSecondsElapsed);
-	default void reset() {}
+	public void onUpdate(final float pSecondsElapsed);
+	public void reset();
 	
 	// TODO Maybe add onRegister and onUnregister. (Maybe add SimpleUpdateHandler that implements all methods, but onUpdate)
 
