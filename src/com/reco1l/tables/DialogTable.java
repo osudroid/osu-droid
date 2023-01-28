@@ -1,20 +1,14 @@
 package com.reco1l.tables;
 
-import android.view.Gravity;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.reco1l.Game;
 import com.reco1l.ui.SimpleFragment;
 import com.reco1l.ui.custom.DialogBuilder;
-import com.reco1l.utils.Views;
-import com.reco1l.view.ButtonView;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
