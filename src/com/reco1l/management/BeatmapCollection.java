@@ -10,6 +10,7 @@ import com.reco1l.utils.helpers.BeatmapHelper;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,7 +50,11 @@ public class BeatmapCollection {
     //--------------------------------------------------------------------------------------------//
 
     public void setFilter(String filter) {
+        if (Objects.equals(filter, this.filter)) {
+            return;
+        }
         this.filter = filter;
+
         handleFiltering();
         notifyChange();
     }
@@ -148,11 +153,6 @@ public class BeatmapCollection {
     }
 
     //--------------------------------------------------------------------------------------------//
-
-    public void nextOrder() {
-        SortOrder next = SortOrder.values()[(order.ordinal() + 1) % SortOrder.values().length];
-        sort(next);
-    }
 
     public void sort(SortOrder order) {
         if (this.order == order) {
