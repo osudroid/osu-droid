@@ -14,6 +14,7 @@ import com.reco1l.tables.ResourceTable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 // TODO [BaseAdapter] make compatible with multiple selection
 public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapter<VH>
@@ -138,6 +139,10 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
             }
         }
         return null;
+    }
+
+    public void forEachHolder(Consumer<VH> action) {
+        mHolders.forEach(action);
     }
 
     //--------------------------------------------------------------------------------------------//
