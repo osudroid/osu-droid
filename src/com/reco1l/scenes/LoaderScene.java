@@ -2,16 +2,11 @@ package com.reco1l.scenes;
 
 // Created by Reco1l on 26/11/2022, 04:58
 
-import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.interfaces.ITask;
-import com.reco1l.ui.BaseFragment;
-import com.reco1l.utils.Animation;
+import com.reco1l.ui.custom.LoaderFragment;
 import com.reco1l.utils.execution.AsyncTask;
 
-import java.util.ArrayList;
-
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class LoaderScene extends BaseScene {
 
@@ -89,92 +84,4 @@ public class LoaderScene extends BaseScene {
         return true;
     }
 
-    //--------------------------------------------------------------------------------------------//
-
-    public static class LoaderFragment extends BaseFragment {
-
-        private CircularProgressIndicator mIndicator;
-
-        private boolean mAnimInProgress = false;
-
-        //----------------------------------------------------------------------------------------//
-
-        public LoaderFragment(BaseScene scene) {
-            super(scene);
-        }
-
-        //----------------------------------------------------------------------------------------//
-
-        @Override
-        protected String getPrefix() {
-            return "ls";
-        }
-
-        @Override
-        protected int getLayout() {
-            return R.layout.layout_loader;
-        }
-
-        //----------------------------------------------------------------------------------------//
-
-        @Override
-        protected void onLoad() {
-            mIndicator = find("progress");
-
-            mAnimInProgress = true;
-            Animation.of(mIndicator)
-                    .fromAlpha(0)
-                    .toAlpha(1)
-                    .runOnEnd(() -> mAnimInProgress = false)
-                    .fromScale(0.8f)
-                    .toScale(1)
-                    .play(200);
-        }
-
-        public void close(Runnable task) {
-            if (!isAdded()) {
-                return;
-            }
-            mAnimInProgress = true;
-
-            Animation.of(mIndicator)
-                    .toAlpha(0)
-                    .toScale(0.8f)
-                    .runOnEnd(() -> {
-                        mAnimInProgress = false;
-                        super.close();
-
-                        if (task != null) {
-                            task.run();
-                        }
-                    })
-                    .play(200);
-        }
-
-        @Override
-        public void close() {
-            close(null);
-        }
-
-        //----------------------------------------------------------------------------------------//
-
-        public boolean isConcurrentAnimation() {
-            return mAnimInProgress;
-        }
-
-        //----------------------------------------------------------------------------------------//
-
-        public void setProgress(int progress) {
-            if (mIndicator != null) {
-                mIndicator.setIndeterminate(progress < 0);
-                mIndicator.setProgress(progress);
-            }
-        }
-
-        public void setMax(int max) {
-            if (mIndicator != null) {
-                mIndicator.setMax(max);
-            }
-        }
-    }
 }
