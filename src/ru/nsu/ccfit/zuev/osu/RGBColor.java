@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.osu;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 
 import org.anddev.andengine.entity.Entity;
@@ -62,5 +63,12 @@ public class RGBColor {
         for (Entity entity : entities) {
             entity.setColor(cr, cg, cb);
         }
+    }
+
+    public @ColorInt int toInt() {
+        return ((int) (255.0f + 0.5f) << 24) |
+                ((int) (cr   * 255.0f + 0.5f) << 16) |
+                ((int) (cg * 255.0f + 0.5f) <<  8) |
+                (int) (cb  * 255.0f + 0.5f);
     }
 }
