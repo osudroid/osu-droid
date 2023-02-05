@@ -8,20 +8,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:translationZ="@dimen/middle_layer"
-    tool:background="#FFFFFFFF">
+    android:background="@color/beatmapPanelBackground">
 
     <View
         android:id="@+id/background"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/beatmapPanelBackground" />
+        android:layout_height="match_parent" />
 
     <RelativeLayout
         android:id="@+id/bp_body"
         android:layout_width="wrap_content"
         android:layout_height="match_parent">
 
-        <androidx.core.widget.NestedScrollView
+        <com.factor.bouncy.BouncyNestedScrollView
             android:id="@+id/bp_panel"
             android:layout_width="@dimen/beatmapPanelBannerWidth"
             android:layout_height="match_parent">
@@ -124,7 +123,7 @@
 
             </LinearLayout>
 
-        </androidx.core.widget.NestedScrollView>
+        </com.factor.bouncy.BouncyNestedScrollView>
 
     </RelativeLayout>
 

@@ -2,10 +2,9 @@ package com.reco1l.utils;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.Choreographer;
 
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 
 // Counts FPS from native UI using choreographer
 public final class NativeFrameCounter {

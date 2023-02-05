@@ -11,7 +11,7 @@ import androidx.annotation.DimenRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
 
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 
 public final class Res {
 

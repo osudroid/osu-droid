@@ -9,7 +9,7 @@ import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 
 // TODO [BlurRender] RenderScript is deprecated in API 31, not a big deal for now
 //  but if you want to migrate it go ahead.

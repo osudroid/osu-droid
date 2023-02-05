@@ -2,7 +2,7 @@ package com.reco1l.utils;
 
 import android.graphics.PointF;
 
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 

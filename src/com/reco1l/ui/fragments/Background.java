@@ -12,8 +12,8 @@ import android.widget.ImageView;
 
 import androidx.palette.graphics.Palette;
 
-import com.reco1l.Game;
-import com.reco1l.enums.Screens;
+import com.reco1l.global.Game;
+import com.reco1l.global.Scenes;
 import com.reco1l.tables.AnimationTable;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.BlurRender;
@@ -25,7 +25,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public final class Background extends BaseFragment {
 
-    public static Background instance;
+    public static final Background instance = new Background();
 
     private ImageView
             mImage0,
@@ -44,7 +44,7 @@ public final class Background extends BaseFragment {
     //--------------------------------------------------------------------------------------------//
 
     public Background() {
-        super(Screens.Main, Screens.Selector, Screens.Loader, Screens.Summary);
+        super(Scenes.main, Scenes.selector, Scenes.loader, Scenes.summary);
     }
 
     //--------------------------------------------------------------------------------------------//

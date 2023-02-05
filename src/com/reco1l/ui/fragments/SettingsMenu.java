@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -13,7 +12,6 @@ import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.CheckBoxPreference;
-import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -23,9 +21,9 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.SkinPathPreference;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
-import com.reco1l.Game;
-import com.reco1l.UI;
-import com.reco1l.enums.Screens;
+import com.reco1l.global.Game;
+import com.reco1l.global.UI;
+import com.reco1l.global.Scenes;
 import com.reco1l.preference.GameEditTextPreference;
 import com.reco1l.tables.AnimationTable;
 import com.reco1l.tables.DialogTable;
@@ -44,9 +42,7 @@ import java.io.File;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
-import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osu.online.OnlineInitializer;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -54,9 +50,9 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public final class SettingsMenu extends BaseFragment {
 
-    public static SettingsMenu instance;
+    public static final SettingsMenu instance = new SettingsMenu();
 
-    protected Tabs currentTab;
+    private Tabs currentTab;
 
     private FrameLayout container;
     private SettingsFragment fragment;
@@ -106,7 +102,7 @@ public final class SettingsMenu extends BaseFragment {
         @Override
         public void run() {
             Game.activity.runOnUiThread(() -> {
-                FragmentTransaction transaction = Game.platform.manager.beginTransaction();
+                FragmentTransaction transaction = Game.platform.transaction();
 
                 transaction.replace(container.getId(), fragment);
                 transaction.commit();
@@ -137,8 +133,8 @@ public final class SettingsMenu extends BaseFragment {
         }
         currentTab = Tabs.general;
 
-        panelWidth = (int) Res.dimen(R.dimen.settingsPanelWidth);
-        navBarWidth = (int) Res.dimen(R.dimen.settingsPanelNavBarWidth);
+        panelWidth = Res.dimen(R.dimen.settingsPanelWidth);
+        navBarWidth = Res.dimen(R.dimen.settingsPanelNavBarWidth);
 
         tabIndicator = find("tabIndicator");
         navigationBar = find("navbar");
@@ -198,20 +194,7 @@ public final class SettingsMenu extends BaseFragment {
                 .toY(y)
                 .play(200);
 
-        Animation.of(container)
-                .runOnEnd(() -> {
-                    Log.i("SettingsMenu", "Switched to tab " + tab.name());
-                    fragment.navigate(tab);
-
-                    Animation.of(container)
-                            .fromX(80)
-                            .toX(0)
-                            .toAlpha(1)
-                            .play(100);
-                })
-                .toX(-80f)
-                .toAlpha(0)
-                .play(100);
+        fragment.navigate(tab);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -221,7 +204,7 @@ public final class SettingsMenu extends BaseFragment {
         OnlineHelper.update();
         OnlineScoring.getInstance().login();
 
-        if (reloadBackground && Game.engine.getScreen() == Screens.Main) {
+        if (reloadBackground && Game.engine.getScene() == Scenes.main) {
             UI.background.reload();
             reloadBackground = false;
         }
@@ -242,7 +225,7 @@ public final class SettingsMenu extends BaseFragment {
 
         AnimationTable.fadeOut(container)
                 .runOnEnd(() -> {
-                    FragmentTransaction transaction = Game.platform.manager.beginTransaction();
+                    FragmentTransaction transaction = Game.platform.transaction();
 
                     transaction.remove(fragment);
                     transaction.commit();
@@ -288,149 +271,110 @@ public final class SettingsMenu extends BaseFragment {
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            setPreferencesFromResource(R.xml.settings_general, rootKey);
+            addPreferencesFromResource(R.xml.settings_general);
+            addPreferencesFromResource(R.xml.settings_appearance);
+            addPreferencesFromResource(R.xml.settings_gameplay);
+            addPreferencesFromResource(R.xml.settings_graphics);
+            addPreferencesFromResource(R.xml.settings_sounds);
+            addPreferencesFromResource(R.xml.settings_library);
+            addPreferencesFromResource(R.xml.settings_advanced);
+            loadPreferences();
         }
 
         public void navigate(Tabs tab) {
-            switch (tab) {
-                case general:
-                    setPreferencesFromResource(R.xml.settings_general, null);
-                    break;
-                case appearance:
-                    setPreferencesFromResource(R.xml.settings_appearance, null);
-                    break;
-                case gameplay:
-                    setPreferencesFromResource(R.xml.settings_gameplay, null);
-                    break;
-                case graphics:
-                    setPreferencesFromResource(R.xml.settings_graphics, null);
-                    break;
-                case sounds:
-                    setPreferencesFromResource(R.xml.settings_sounds, null);
-                    break;
-                case library:
-                    setPreferencesFromResource(R.xml.settings_library, null);
-                    break;
-                case advanced:
-                    setPreferencesFromResource(R.xml.settings_advanced, null);
-                    break;
-            }
-            loadPreferences(tab);
+            scrollToPreference("pref_" + tab.name().toLowerCase());
         }
 
-        public void loadPreferences(Tabs tab) {
+        private void loadPreferences() {
+            // Appearance
+            SkinPathPreference skinPath = findPreference("skinPath");
+            CheckBoxPreference comboColor = findPreference("useCustomColors");
 
-            // General
-            if (tab == Tabs.general) {
+            if (skinPath != null) {
+                skinPath.reloadSkinList();
+                skinPath.setOnPreferenceChangeListener((preference, newValue) -> {
+                    if (Game.globalManager.getSkinNow().equals(newValue.toString())) {
+                        return true;
+                    }
 
-                Preference register = findPreference("registerAcc");
-                // Preference login = findPreference("login"); //TODO login dialog
+                    Game.globalManager.setSkinNow(Config.getSkinPath());
+                    Game.skinManager.clearSkin();
+                    Game.resourcesManager.loadSkin(newValue.toString());
+                    Game.engine.getTextureManager().reloadTextures();
+                    Game.activity.startActivity(new Intent(Game.activity, MainActivity.class));
 
-                if (register == null)
-                    return;
-
-                register.setOnPreferenceClickListener(p -> {
-                    OnlineInitializer initializer = new OnlineInitializer(getActivity());
-                    initializer.createInitDialog();
+                    Snackbar.make(Game.activity.findViewById(android.R.id.content),
+                            StringTable.get(R.string.message_loaded_skin), 1500).show();
                     return true;
                 });
             }
 
-            // Appearance
-            if (tab == Tabs.appearance) {
-                SkinPathPreference skinPath = findPreference("skinPath");
-                CheckBoxPreference comboColor = findPreference("useCustomColors");
-
-                if (skinPath != null) {
-                    skinPath.reloadSkinList();
-                    skinPath.setOnPreferenceChangeListener((preference, newValue) -> {
-                        if (Game.globalManager.getSkinNow().equals(newValue.toString()))
-                            return true;
-
-                        Game.globalManager.setSkinNow(Config.getSkinPath());
-                        Game.skinManager.clearSkin();
-                        Game.resourcesManager.loadSkin(newValue.toString());
-                        Game.engine.getTextureManager().reloadTextures();
-                        Game.activity.startActivity(new Intent(Game.activity, MainActivity.class));
-
-                        Snackbar.make(Game.activity.findViewById(android.R.id.content),
-                                StringTable.get(R.string.message_loaded_skin), 1500).show();
-                        return true;
-                    });
+            if (comboColor != null) {
+                for (int i = 1; i <= 4; i++) {
+                    ColorPickerPreference color = findPreference("combo" + i);
+                    if (color != null)
+                        color.setEnabled(comboColor.isChecked());
                 }
 
-                if (comboColor != null) {
+                comboColor.setOnPreferenceChangeListener((p, val) -> {
                     for (int i = 1; i <= 4; i++) {
                         ColorPickerPreference color = findPreference("combo" + i);
                         if (color != null)
-                            color.setEnabled(comboColor.isChecked());
+                            color.setEnabled(Boolean.parseBoolean(val.toString()));
                     }
-
-                    comboColor.setOnPreferenceChangeListener((p, val) -> {
-                        for (int i = 1; i <= 4; i++) {
-                            ColorPickerPreference color = findPreference("combo" + i);
-                            if (color != null)
-                                color.setEnabled(Boolean.parseBoolean(val.toString()));
-                        }
-                        return true;
-                    });
-                }
+                    return true;
+                });
             }
 
             // Graphics
-            if (tab == Tabs.graphics) {
-                CheckBoxPreference dither = findPreference("dither");
-                ListPreference background = findPreference("background");
+            CheckBoxPreference dither = findPreference("dither");
+            ListPreference background = findPreference("background");
 
-                final boolean oldValue = Config.isUseDither();
+            final boolean oldValue = Config.isUseDither();
 
-                if (dither != null)
-                    dither.setOnPreferenceChangeListener((p, val) -> {
-                        if (Config.isUseDither() != (boolean) val) {
+            if (dither != null)
+                dither.setOnPreferenceChangeListener((p, val) -> {
+                    if (Config.isUseDither() != (boolean) val) {
 
-                            DialogBuilder builder = DialogTable.restart()
-                                    .setOnDismiss(() -> dither.setChecked(oldValue))
-                                    .setCloseExtras(false)
-                                    .addCloseButton();
+                        DialogBuilder builder = DialogTable.restart()
+                                .setOnDismiss(() -> dither.setChecked(oldValue))
+                                .setCloseExtras(false)
+                                .addCloseButton();
 
-                            new Dialog(builder).show();
-                        }
-                        return true;
-                    });
+                        new Dialog(builder).show();
+                    }
+                    return true;
+                });
 
-                if (background != null)
-                    background.setOnPreferenceChangeListener((p, val) -> {
-                        if (Config.getBackgroundQuality() != Integer.parseInt(val.toString()))
-                            UI.settingsPanel.reloadBackground = true;
-                        return true;
-                    });
-            }
+            if (background != null)
+                background.setOnPreferenceChangeListener((p, val) -> {
+                    if (Config.getBackgroundQuality() != Integer.parseInt(val.toString()))
+                        UI.settingsPanel.reloadBackground = true;
+                    return true;
+                });
 
             // Sounds
-            if (tab == Tabs.sounds) {
-                SeekBarPreference bgmVolume = findPreference("bgmvolume");
+            SeekBarPreference bgmVolume = findPreference("bgmvolume");
 
-                if (bgmVolume != null) {
-                    bgmVolume.setOnPreferenceChangeListener((p, val) -> {
-                        Game.globalManager.getSongService().setVolume(Float.parseFloat(val.toString()) / 100f);
-                        return true;
-                    });
-                }
+            if (bgmVolume != null) {
+                bgmVolume.setOnPreferenceChangeListener((p, val) -> {
+                    Game.musicManager.setVolume((int) val / 100f);
+                    return true;
+                });
             }
 
             // Library
-            if (tab == Tabs.library) {
-                Preference clearProperties = findPreference("clear_properties");
-                Preference clearCache = findPreference("clear");
+            Preference clearProperties = findPreference("clear_properties");
+            Preference clearCache = findPreference("clear");
 
-                if (clearProperties == null || clearCache == null)
-                    return;
-
+            if (clearProperties != null) {
                 clearProperties.setOnPreferenceClickListener(p -> {
                     Game.libraryManager.clearCache();
                     return true;
                 });
+            }
 
+            if (clearCache != null) {
                 clearCache.setOnPreferenceClickListener(p -> {
                     Game.propertiesLibrary.clear(Game.activity);
                     return true;
@@ -438,25 +382,24 @@ public final class SettingsMenu extends BaseFragment {
             }
 
             // Advanced
-            if (tab == Tabs.advanced) {
-                GameEditTextPreference skinTopPath = findPreference("skinTopPath");
-                GameEditTextPreference corePath = findPreference("skinTopPath");
+            GameEditTextPreference path = findPreference("corePath");
 
-                if (skinTopPath == null)
-                    return;
+            if (path != null) {
+                path.setDefaultValue(Config.getDefaultCorePath());
+                path.setText(Config.getCorePath());
 
-                skinTopPath.setOnFocusLostListener(() -> {
-                    if (skinTopPath.getText().trim().length() == 0) {
-                        skinTopPath.setText(Config.getCorePath() + "Skin/");
+                path.setOnFocusLostListener(() -> {
+                    if (path.getText().trim().length() == 0) {
+                        path.setText(Config.getCorePath());
                     }
 
-                    File file = new File(skinTopPath.getText());
+                    File file = new File(path.getText());
                     if (!file.exists() && !file.mkdirs()) {
-                        skinTopPath.setText(Config.getCorePath() + "Skin/");
+                        path.setText(Config.getCorePath());
                     }
                 });
 
-                skinTopPath.setOnPreferenceChangeListener((p, newValue) -> {
+                path.setOnPreferenceChangeListener((p, newValue) -> {
                     Config.loadPaths();
                     return false;
                 });

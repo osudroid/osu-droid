@@ -10,10 +10,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.edlplan.framework.easing.Easing;
 import com.factor.bouncy.BouncyRecyclerView;
-import com.reco1l.Game;
-import com.reco1l.UI;
-import com.reco1l.data.GameNotification;
-import com.reco1l.enums.Screens;
+import com.reco1l.global.Game;
+import com.reco1l.global.UI;
+import com.reco1l.data.Notification;
+import com.reco1l.global.Scenes;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Views;
@@ -35,8 +35,8 @@ public final class NotificationCenter extends BaseFragment {
     private final PopupFragment pPopupFragment;
     private final NotificationListAdapter mAdapter;
 
-    private final ArrayList<GameNotification> mNotifications;
-    private final Map<String, GameNotification> mNotificationMap;
+    private final ArrayList<Notification> mNotifications;
+    private final Map<String, Notification> mNotificationMap;
 
     private View
             mBody,
@@ -122,7 +122,7 @@ public final class NotificationCenter extends BaseFragment {
     }
 
     @Override
-    protected void onUpdate(float pSecElapsed) {
+    protected void onEngineUpdate(float pSecElapsed) {
         if (mEmptyText != null) {
             Views.visibility(mNotifications.isEmpty(), mEmptyText);
         }
@@ -136,7 +136,7 @@ public final class NotificationCenter extends BaseFragment {
 
     public void clear() {
         for (int i = 0; i < mNotifications.size(); ++i) {
-            GameNotification n = mNotifications.get(i);
+            Notification n = mNotifications.get(i);
 
             if (n != null && !n.hasPriority()) {
                 remove(n);
@@ -144,7 +144,7 @@ public final class NotificationCenter extends BaseFragment {
         }
     }
 
-    public void add(GameNotification n) {
+    public void add(Notification n) {
         if (mNotifications.contains(n)) {
             return;
         }
@@ -164,7 +164,7 @@ public final class NotificationCenter extends BaseFragment {
         n.onNotify();
     }
 
-    public void remove(GameNotification n) {
+    public void remove(Notification n) {
         if (!mNotifications.remove(n)) {
             return;
         }
@@ -177,11 +177,11 @@ public final class NotificationCenter extends BaseFragment {
         n.onDismiss();
     }
 
-    public boolean contains(GameNotification n) {
+    public boolean contains(Notification n) {
         return mNotifications.contains(n);
     }
 
-    public GameNotification get(String pKey) {
+    public Notification get(String pKey) {
         for (String key : mNotificationMap.keySet()) {
             if (key.equals(pKey)) {
                 return mNotificationMap.get(key);
@@ -232,8 +232,8 @@ public final class NotificationCenter extends BaseFragment {
 
     public static class PopupFragment extends BaseFragment {
 
-        private GameNotification mNotification;
-        private GameNotification.Holder mHolder;
+        private Notification mNotification;
+        private Notification.Holder mHolder;
 
         //----------------------------------------------------------------------------------------//
 
@@ -254,12 +254,12 @@ public final class NotificationCenter extends BaseFragment {
 
         @Override
         protected boolean getConditionToShow() {
-            return Game.engine.getScreen() != Screens.Game;
+            return Game.engine.getScene() != Scenes.player;
         }
 
         //----------------------------------------------------------------------------------------//
 
-        private void load(GameNotification n) {
+        private void load(Notification n) {
             mNotification = n;
 
             if (isAdded()) {

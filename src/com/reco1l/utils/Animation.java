@@ -12,7 +12,7 @@ import android.view.ViewPropertyAnimator;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 
 import java.util.ArrayList;
 

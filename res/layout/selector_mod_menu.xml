@@ -18,7 +18,7 @@
         android:background="@color/mm_body"
         android:clickable="true">
 
-        <androidx.recyclerview.widget.RecyclerView
+        <com.factor.bouncy.BouncyRecyclerView
             android:id="@+id/mm_sectionContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

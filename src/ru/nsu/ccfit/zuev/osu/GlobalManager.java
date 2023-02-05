@@ -2,7 +2,8 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.util.DisplayMetrics;
 
-import com.reco1l.Game;
+import com.reco1l.global.Game;
+import com.reco1l.global.Scenes;
 import com.reco1l.scenes.LoaderScene;
 import com.reco1l.scenes.SelectorScene;
 import com.reco1l.scenes.MainScene;
@@ -55,25 +56,26 @@ public class GlobalManager {
     }
 
     public void init() {
+        Game.initialize();
+
         saveServiceObject = (SaveServiceObject) mainActivity.getApplication();
         songService = saveServiceObject.getSongService();
-        setMainScene(Game.mainScene);
+        Game.songService = songService;
+        setMainScene(Scenes.main);
         skinNow = Config.getSkinPath();
         ResourceManager.getInstance().loadSkin(skinNow);
-        Game.bitmapManager.loadAssets(skinNow);
         ScoreLibrary.getInstance().load(mainActivity);
         PropertiesLibrary.getInstance().load(mainActivity);
-        setGameScene(Game.gameScene);
-        setSongMenu(Game.selectorScene);
-        setScoring(Game.summaryScene);
-        setLoadingScene(Game.loaderScene);
+        setGameScene(Scenes.player.getLegacyClass());
+        setSongMenu(Scenes.selector);
+        setScoring(Scenes.summary);
+        setLoadingScene(Scenes.loader);
         getGameScene().setScoringScene(getScoring());
         getGameScene().setOldScene(getSongMenu());
         if (songService != null) {
             songService.stop();
             songService.hideNotification();
         }
-        Game.songService = songService;
     }
 
     public Engine getEngine() {

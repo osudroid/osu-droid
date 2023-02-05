@@ -2,14 +2,14 @@ package com.reco1l.scenes;
 
 // Created by Reco1l on 19/11/2022, 23:31
 
-import com.reco1l.Game;
-import com.reco1l.UI;
-import com.reco1l.data.GameNotification;
-import com.reco1l.enums.Screens;
+import android.widget.LinearLayout;
+
+import com.reco1l.global.Game;
+import com.reco1l.global.UI;
+import com.reco1l.data.Notification;
 import com.reco1l.view.IconButton;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.tables.DialogTable;
-import com.reco1l.tables.NotificationTable;
 import com.reco1l.utils.helpers.BeatmapHelper;
 
 import org.anddev.andengine.entity.scene.Scene;
@@ -23,36 +23,28 @@ public class MainScene extends BaseScene {
 
     public static final MainScene instance = new MainScene();
 
-    //--------------------------------------------------------------------------------------------//
-
-    @Override
-    public Screens getIdentifier() {
-        return Screens.Main;
-    }
+    public final IconButton musicButton;
 
     //--------------------------------------------------------------------------------------------//
 
-    @Override
-    protected void onCreate() {
-        setContinuousPlay(true);
-
-        Game.libraryManager.loadLibraryCache(Game.activity, false);
+    public MainScene() {
+        super();
 
         Config.loadOnlineConfig(Game.activity);
+
+        Game.libraryManager.loadLibraryCache(Game.activity, false);
         Game.onlineManager.Init(Game.activity);
 
-        IconButton music = new IconButton(Game.activity);
-
-        music.setIcon(R.drawable.v14_music);
-        music.runOnTouch(UI.musicPlayer::altShow);
-
-        UI.musicPlayer.button = music;
-        UI.topBar.bindButton(getIdentifier(), music);
+        musicButton = new IconButton(Game.activity);
     }
 
     @Override
-    protected void onSceneUpdate(float secondsElapsed) {
-
+    public void onButtonContainerChange(LinearLayout layout) {
+        musicButton.setIcon(R.drawable.v14_music);
+        musicButton.setTouchListener(() ->
+            musicButton.setSelected(UI.musicPlayer.alternate())
+        );
+        layout.addView(musicButton);
     }
 
     @Override
@@ -64,18 +56,8 @@ public class MainScene extends BaseScene {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public void onMusicChange(TrackInfo newTrack, boolean isSameAudio) {
-        super.onMusicChange(newTrack, isSameAudio);
-
-        if (Game.engine.getScene() != this) {
-            return;
-        }
-
-        String text = BeatmapHelper.getTitle(newTrack) + " by " + BeatmapHelper.getArtist(newTrack);
-
-        GameNotification.of("Now playing")
-                .setMessage(text)
-                .commit();
+    public void onMusicEnd() {
+        Game.musicManager.next();
     }
 
     @Override
@@ -95,6 +77,7 @@ public class MainScene extends BaseScene {
     @Override
     public void onSceneChange(Scene oldScene, Scene newScene) {
         super.onSceneChange(oldScene, newScene);
+
         if (newScene == this) {
             UI.background.setBlur(false);
         }

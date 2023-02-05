@@ -12,8 +12,8 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import com.reco1l.Game;
-import com.reco1l.UI;
+import com.reco1l.global.Game;
+import com.reco1l.global.UI;
 import com.reco1l.utils.Animation;
 import com.reco1l.view.BaseView;
 import com.reco1l.view.LogoView;

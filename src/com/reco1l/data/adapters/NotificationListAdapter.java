@@ -1,27 +1,26 @@
 package com.reco1l.data.adapters;
 // Created by Reco1l on 05/12/2022, 06:27
 
-import static com.reco1l.data.GameNotification.*;
+import static com.reco1l.data.Notification.*;
 
 import android.view.View;
 
 import androidx.annotation.NonNull;
 
-import com.reco1l.UI;
+import com.reco1l.global.UI;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
-import com.reco1l.data.GameNotification;
-import com.reco1l.utils.Animation;
+import com.reco1l.data.Notification;
 
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class NotificationListAdapter extends BaseAdapter<NotificationListAdapter.ViewHolder, GameNotification> {
+public class NotificationListAdapter extends BaseAdapter<NotificationListAdapter.ViewHolder, Notification> {
 
     //--------------------------------------------------------------------------------------------/
 
-    public NotificationListAdapter(ArrayList<GameNotification> list) {
+    public NotificationListAdapter(ArrayList<Notification> list) {
         super(list);
     }
 
@@ -39,7 +38,7 @@ public class NotificationListAdapter extends BaseAdapter<NotificationListAdapter
 
     //--------------------------------------------------------------------------------------------/
 
-    public static class ViewHolder extends BaseViewHolder<GameNotification> {
+    public static class ViewHolder extends BaseViewHolder<Notification> {
 
         private Holder mHolder;
 
@@ -52,7 +51,7 @@ public class NotificationListAdapter extends BaseAdapter<NotificationListAdapter
         //----------------------------------------------------------------------------------------//
 
         @Override
-        protected void onBind(GameNotification n, int position) {
+        protected void onBind(Notification n, int position) {
             mHolder = n.build(root);
 
             UI.notificationCenter.bindTouch(mHolder.closeButton, item::remove);

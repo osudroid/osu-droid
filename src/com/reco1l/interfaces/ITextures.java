@@ -5,7 +5,7 @@ package com.reco1l.interfaces;
 public interface ITextures {
 
     // Place used textures here to avoid loading unnecessary textures.
-    // TODO: [ResourceManager] Use this list to load textures instead of loading every file in the
+    // TODO [ResourceManager] Use this list to load textures instead of loading every file in the
     //  skin folder, of course before that you must have to add all used file names to this list.
 
     String[] fileNames = {

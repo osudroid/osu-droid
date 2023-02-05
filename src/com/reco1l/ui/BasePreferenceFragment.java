@@ -8,7 +8,7 @@ import androidx.annotation.XmlRes;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 
 import static androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE;
 

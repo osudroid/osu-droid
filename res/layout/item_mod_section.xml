@@ -2,17 +2,21 @@
 
 <!-- Created by Reco1l on 20/12/2022, 02:37 -->
 
-<com.factor.bouncy.BouncyNestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="@dimen/mm_sectionItemWidth"
     android:layout_height="match_parent"
-    android:layout_marginRight="@dimen/M">
+    android:layout_marginRight="@dimen/M"
+    android:orientation="vertical">
 
-    <LinearLayout
+    <com.reco1l.view.RoundLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_S"
+        android:background="@color/backgroundSecondary"
+        android:paddingTop="@dimen/XS"
+        app:radius="12">
 
         <TextView
             android:id="@+id/mm_sectionName"
@@ -23,16 +27,14 @@
             android:paddingVertical="@dimen/M"
             android:text="Section name" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/mm_modContainer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="@dimen/XS"
-            android:nestedScrollingEnabled="false"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:itemCount="4"
-            tools:listitem="@layout/item_mod" />
+    </com.reco1l.view.RoundLayout>
 
-    </LinearLayout>
+    <com.factor.bouncy.BouncyRecyclerView
+        android:id="@+id/mm_modContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:itemCount="4"
+        tools:listitem="@layout/item_mod" />
 
-</com.factor.bouncy.BouncyNestedScrollView>
+</LinearLayout>

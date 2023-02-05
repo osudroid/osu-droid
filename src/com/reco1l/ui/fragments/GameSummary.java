@@ -7,20 +7,20 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.reco1l.Game;
-import com.reco1l.enums.Screens;
+import com.reco1l.global.Game;
+import com.reco1l.global.Scenes;
 import com.reco1l.tables.AnimationTable;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
 
 import com.reco1l.utils.helpers.BeatmapHelper;
+import com.reco1l.view.RoundedImageView;
+import com.reco1l.view.custom.StatisticLayout;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
@@ -29,32 +29,46 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public final class GameSummary extends BaseFragment {
 
-    public static GameSummary instance;
+    public static final GameSummary instance = new GameSummary();
 
-    private TextView title, artist, mapper, stars, difficulty;
+    private StatisticLayout
+            m0Text,
+            m50Text,
+            m100Text,
+            m300Text,
 
-    private ImageView avatar;
-    private TextView username, date;
+            mComboText,
+            mAccuracyText,
+            mPPText;
 
-    private TextView hit300, hit300k, hit100, hit100k, hit50, hit0;
+    private TextView
+            mDate,
+            mUsername,
 
-    private TextView accuracy, maxCombo;
-    private CircularProgressIndicator accuracyIndicator, comboIndicator;
+            mTitleText,
+            mStarsText,
+            mArtistText,
+            mMapperText,
+            mDifficultyText,
 
-    private ImageView mark;
-    private LinearLayout mods;
-    private TextView score, ur, pp, error;
+            mURText,
+            mErrorText,
+            mScoreText;
 
-    private RankingSection rankingSection;
-    private DifficultyReCalculator difficultyCalculator;
+    private ImageView mMarkImage;
+    private RoundedImageView mAvatarImage;
+    private LinearLayout mModsContainer;
 
-    private TrackInfo track;
-    private StatisticV2 stats;
+    private RankingSection mRankingSection;
+    private DifficultyReCalculator mCalculator;
+
+    private TrackInfo mTrack;
+    private StatisticV2 mStats;
 
     //--------------------------------------------------------------------------------------------//
 
     public GameSummary() {
-        super(Screens.Summary);
+        super(Scenes.summary);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -73,135 +87,100 @@ public final class GameSummary extends BaseFragment {
 
     @Override
     protected void onLoad() {
-        title = find("title");
-        artist = find("artist");
-        mapper = find("mapper");
-        stars = find("stars");
-        difficulty = find("difficulty");
+        mTitleText = find("title");
+        mArtistText = find("artist");
+        mMapperText = find("mapper");
+        mStarsText = find("stars");
+        mDifficultyText = find("difficulty");
 
-        username = find("username");
-        avatar = find("avatar");
+        mUsername = find("username");
+        mAvatarImage = find("avatar");
 
-        hit300 = find("300");
-        hit300k = find("300k");
-        hit100 = find("100");
-        hit100k = find("100k");
-        hit50 = find("50");
-        hit0 = find("0");
+        m300Text = find("300");
+        m100Text = find("100");
+        m50Text = find("50");
+        m0Text = find("0");
 
-        mark = find("markIv");
-        score = find("score");
+        mMarkImage = find("markIv");
+        mScoreText = find("score");
 
-        accuracy = find("accuracy");
-        maxCombo = find("combo");
+        mAccuracyText = find("accuracy");
+        mComboText = find("combo");
 
-        accuracyIndicator = find("accuracyIndicator");
-        comboIndicator = find("comboIndicator");
+        mModsContainer = find("mods");
+        mDate = find("date");
 
-        mods = find("mods");
-        date = find("date");
+        mPPText = find("dpp");
+        mURText = find("ur");
+        mErrorText = find("error");
 
-        pp = find("pp");
-        ur = find("ur");
-        error = find("error");
-
-        if (rankingSection == null) {
-            rankingSection = new RankingSection(this);
+        if (mRankingSection == null) {
+            mRankingSection = new RankingSection(this);
         }
 
-        ImageView iv300 = find("300iv"),
-                iv300k = find("300kiv"),
-                iv100k = find("100kiv"),
-                iv100 = find("100iv"),
-                iv50 = find("50iv"),
-                iv0 = find("0iv");
-
-        iv300.setImageBitmap(Game.bitmapManager.get("hit300"));
-        iv300k.setImageBitmap(Game.bitmapManager.get("hit300g"));
-        iv100.setImageBitmap(Game.bitmapManager.get("hit100"));
-        iv100k.setImageBitmap(Game.bitmapManager.get("hit100k"));
-        iv50.setImageBitmap(Game.bitmapManager.get("hit50"));
-        iv0.setImageBitmap(Game.bitmapManager.get("hit0"));
-
-        if (track != null && stats != null) {
+        if (mTrack != null && mStats != null) {
             loadData();
         }
     }
 
     public void setData(TrackInfo track, StatisticV2 stats) {
-        this.track = track;
-        this.stats = stats;
+        this.mTrack = track;
+        this.mStats = stats;
     }
 
     public void loadData() {
-        if (track == null || stats == null || !isAdded()) {
+        if (mTrack == null || mStats == null || !isAdded()) {
             return;
         }
 
-        difficultyCalculator = new DifficultyReCalculator();
+        mCalculator = new DifficultyReCalculator();
 
         Game.activity.runOnUiThread(() -> {
-            loadTrackData(track, stats);
+            loadTrackData(mTrack, mStats);
 
-            int totalScore = stats.getModifiedTotalScore();
+            int totalScore = mStats.getModifiedTotalScore();
             if (totalScore == 0) {
-                totalScore = stats.getAutoTotalScore();
+                totalScore = mStats.getAutoTotalScore();
             }
 
-            score.setText(new DecimalFormat("###,###,###,###").format(totalScore));
+            mScoreText.setText(new DecimalFormat("###,###,###,###").format(totalScore));
 
-            hit300.setText(stats.getHit300() + "x");
-            hit300k.setText(stats.getHit300k() + "x");
-            hit100.setText(stats.getHit100() + "x");
-            hit100k.setText(stats.getHit100k() + "x");
-            hit50.setText(stats.getHit50() + "x");
-            hit0.setText(stats.getMisses() + "x");
+            m300Text.setText(mStats.getHit300() + "x");
+            m100Text.setText(mStats.getHit100() + "x");
+            m50Text.setText(mStats.getHit50() + "x");
+            m0Text.setText(mStats.getMisses() + "x");
 
-            maxCombo.setText(stats.getMaxCombo() + "/" + track.getMaxCombo());
-            comboIndicator.setMax(track.getMaxCombo());
-            comboIndicator.setProgress(stats.getMaxCombo());
+            mComboText.setText(mStats.getMaxCombo() + "x");
+            mAccuracyText.setText(String.format("%.2f%%", mStats.getAccuracy() * 100f));
 
-            accuracy.setText(String.format("%.2f%%", stats.getAccuracy() * 100f));
-            accuracyIndicator.setMax(100);
-            accuracyIndicator.setProgress((int) (stats.getAccuracy() * 100f));
-
-            mark.setImageBitmap(Game.bitmapManager.get("ranking-" + stats.getMark()));
+            mMarkImage.setImageBitmap(Game.bitmapManager.get("ranking-" + mStats.getMark()));
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
-            date.setText("Played on " + sdf.format(new Date(stats.getTime())));
-            username.setText(stats.getPlayerName());
+            mDate.setText("Played on " + sdf.format(new Date(mStats.getTime())));
+            mUsername.setText(mStats.getPlayerName());
 
-            loadPerformanceStatistics(track, stats);
+            loadPerformanceStatistics(mTrack, mStats);
         });
     }
 
     private void loadTrackData(TrackInfo track, StatisticV2 stats) {
 
-        title.setText(BeatmapHelper.getTitle(track));
-        artist.setText(BeatmapHelper.getArtist(track));
-        mapper.setText(track.getBeatmap().getCreator());
-        difficulty.setText(track.getMode());
+        mTitleText.setText(BeatmapHelper.getTitle(track));
+        mArtistText.setText(BeatmapHelper.getArtist(track));
+        mMapperText.setText(track.getBeatmap().getCreator());
+        mDifficultyText.setText(track.getMode());
 
-        float cs = difficultyCalculator.getCS(stats, track);
-        float sr = difficultyCalculator.recalculateStar(track, cs, stats.getSpeed());
+        float cs = mCalculator.getCS(stats, track);
+        float sr = mCalculator.recalculateStar(track, cs, stats.getSpeed());
 
-        stars.setText("" + sr);
+        mStarsText.setText("" + sr);
     }
 
     private void loadPerformanceStatistics(TrackInfo track, StatisticV2 stats) {
-        if (!Config.isDisplayScoreStatistics()) {
-            find("performance").setVisibility(View.GONE);
-            return;
-        }
+        mCalculator.calculatePP(stats, track);
 
-        difficultyCalculator.calculatePP(stats, track);
-        double totalPP = difficultyCalculator.getTotalPP();
-
-        difficultyCalculator.calculateMaxPP(stats, track);
-        double maxPP = difficultyCalculator.getTotalPP();
-
-        pp.setText(String.format("%.2f / %.2f", totalPP, maxPP));
+        mPPText.setText(String.format("%.2f", mCalculator.getTotalPP()));
 
         if (stats.getUnstableRate() <= 0) {
             find("urLayout").setVisibility(View.GONE);
@@ -209,28 +188,46 @@ public final class GameSummary extends BaseFragment {
             return;
         }
 
-        ur.setText(String.format("%.2f", stats.getUnstableRate()));
-        error.setText(String.format("%.2fms - %.2fms", stats.getNegativeHitError(), stats.getPositiveHitError()));
+        mURText.setText(String.format("%.2f", stats.getUnstableRate()));
+        mErrorText.setText(String.format("%.2fms - %.2fms", stats.getNegativeHitError(), stats.getPositiveHitError()));
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public void retrieveOnlineData() {
-        Game.activity.runOnUiThread(rankingSection::retrieveOnlineData);
+        Game.activity.runOnUiThread(mRankingSection::retrieveOnlineData);
     }
 
     public void updateOnlineData(boolean success) {
         Game.activity.runOnUiThread(() ->
-                rankingSection.updateOnlineData(success)
+                mRankingSection.updateOnlineData(success)
         );
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public static class RankingSection {
+    private enum Difference {
+        Positive(0x4D59B32D, 0xFFBBFF99),
+        Negative(0x4DB32D2D, 0xFFFF9999);
 
-        private final GameSummary parent;
-        private final TextView mapRankText, rankText, accuracyText, scoreText;
+        final int backgroundColor;
+        final int textColor;
+
+        Difference(int backgroundColor, int textColor) {
+            this.backgroundColor = backgroundColor;
+            this.textColor = textColor;
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    private class RankingSection {
+
+        private final TextView
+                mapRankText,
+                rankText,
+                accuracyText,
+                scoreText;
 
         // Overall
         private long score, rank;
@@ -238,23 +235,7 @@ public final class GameSummary extends BaseFragment {
 
         //----------------------------------------------------------------------------------------//
 
-        private enum Difference {
-            Positive(0x4D59B32D, 0xFFBBFF99),
-            Negative(0x4DB32D2D, 0xFFFF9999);
-
-            final int backgroundColor;
-            final int textColor;
-
-            Difference(int backgroundColor, int textColor) {
-                this.backgroundColor = backgroundColor;
-                this.textColor = textColor;
-            }
-        }
-
-        //----------------------------------------------------------------------------------------//
-
         public RankingSection(GameSummary parent) {
-            this.parent = parent;
 
             mapRankText = parent.find("mapRank");
             rankText = parent.find("overallRank");
@@ -279,21 +260,22 @@ public final class GameSummary extends BaseFragment {
             accuracy = GameHelper.Round(Game.onlineManager.getAccuracy() * 100f, 2);
             rank = Game.onlineManager.getRank();
 
-            if (parent.isAdded()) {
-                parent.find("ranking").setVisibility(View.VISIBLE);
-                parent.find("rankingStats").setAlpha(0f);
+            if (isAdded()) {
+                find("ranking").setVisibility(View.VISIBLE);
+                find("rankingStats").setAlpha(0f);
             }
         }
 
         public void updateOnlineData(boolean success) {
             if (!success) {
-                parent.find("rankingStats").setAlpha(0f);
-                parent.find("rankingFail").setAlpha(1f);
+                find("rankingStats").setAlpha(0f);
+                find("rankingFail").setAlpha(1f);
                 return;
             }
+
             long newRank = Game.onlineManager.getRank();
             long newScore = Game.onlineManager.getScore();
-            float newAccuracy = GameHelper.Round(Game.onlineManager.getAccuracy() * 100f, 2);
+            float newAccuracy = Game.onlineManager.getAccuracy();
 
             mapRankText.setText("#" + Game.onlineManager.getMapRank());
 
@@ -336,8 +318,8 @@ public final class GameSummary extends BaseFragment {
             }
             scoreText.setText(df.format(newScore) + string);
 
-            AnimationTable.fadeOutScaleOut(parent.find("rankingLoading"));
-            parent.find("rankingStats").setAlpha(1f);
+            AnimationTable.fadeOutScaleOut(find("rankingLoading"));
+            find("rankingStats").setAlpha(1f);
         }
     }
 }

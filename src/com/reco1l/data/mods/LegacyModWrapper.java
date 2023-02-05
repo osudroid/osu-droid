@@ -2,15 +2,16 @@ package com.reco1l.data.mods;
 
 // Created by Reco1l on 21/12/2022, 04:42
 
-import com.reco1l.Game;
-import com.reco1l.UI;
+import com.reco1l.annotation.Legacy;
+import com.reco1l.global.Game;
 import com.reco1l.interfaces.IGameMod;
-import com.reco1l.management.ModManager;
+import com.reco1l.utils.helpers.ScoringHelper;
 
 import java.util.EnumSet;
 
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
+@Legacy // Handles mod entries from GameMod class
 public class LegacyModWrapper extends ModWrapper implements IGameMod {
 
     private final GameMod mMod;
@@ -19,9 +20,14 @@ public class LegacyModWrapper extends ModWrapper implements IGameMod {
 
     //----------------------------------------------------------------------------------------//
 
-    public LegacyModWrapper(GameMod pMod) {
-        mMod = pMod;
+    public LegacyModWrapper(Properties properties, GameMod entry) {
+        super(properties);
+        mMod = entry;
         parseFlags();
+    }
+
+    public LegacyModWrapper(GameMod entry) {
+        this(null, entry);
     }
 
     //----------------------------------------------------------------------------------------//
@@ -31,18 +37,13 @@ public class LegacyModWrapper extends ModWrapper implements IGameMod {
         return mMod.name().toLowerCase().replace("mod_", "");
     }
 
-    @Override
-    public String getIcon() {
-        return "selection-mod-" + mMod.texture;
-    }
-
-    @Override
-    public Properties createProperties() {
-        return null;
-    }
-
     public GameMod getEntry() {
         return mMod;
+    }
+
+    @Override
+    public String getAcronym() {
+        return ScoringHelper.parseAcronym(mMod);
     }
 
     @Override
@@ -82,6 +83,7 @@ public class LegacyModWrapper extends ModWrapper implements IGameMod {
     //----------------------------------------------------------------------------------------//
 
     private void parseFlags() {
+
         switch (mMod) {
             case MOD_HARDROCK:
             case MOD_EASY:

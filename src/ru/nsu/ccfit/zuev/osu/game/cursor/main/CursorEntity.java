@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.particle.ParticleSystem;
@@ -23,7 +23,7 @@ public class CursorEntity extends Entity {
         TextureRegion cursorTex = ResourceManager.getInstance().getTexture("cursor");
         cursorSprite = new CursorSprite(-cursorTex.getWidth() / 2f, -cursorTex.getWidth() / 2f, cursorTex);
 
-        if (Config.isUseParticles()) {
+        if (Config.isUseCursorTrail()) {
             TextureRegion trailTex = ResourceManager.getInstance().getTexture("cursortrail");
 
             particleOffsetX = -trailTex.getWidth() / 2f;

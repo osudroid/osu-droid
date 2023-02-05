@@ -2,8 +2,8 @@ package com.reco1l.data.mods;
 
 // Created by Reco1l on 21/12/2022, 09:44
 
-import com.reco1l.Game;
-import com.reco1l.management.ModProperty;
+import com.reco1l.global.Game;
+import com.reco1l.interfaces.fields.ModProperty;
 import com.reco1l.preference.GameSekBarPreference;
 
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
@@ -11,6 +11,11 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class CustomDifficultyMod extends ModWrapper {
 
+    //--------------------------------------------------------------------------------------------//
+
+    public CustomDifficultyMod() {
+        super(new Properties());
+    }
 
     //--------------------------------------------------------------------------------------------//
 
@@ -20,14 +25,10 @@ public class CustomDifficultyMod extends ModWrapper {
     }
 
     @Override
-    public String getIcon() {
-        return null;
+    public String getAcronym() {
+        return "cd";
     }
 
-    @Override
-    public Properties createProperties() {
-        return new Properties();
-    }
     //--------------------------------------------------------------------------------------------//
 
     @Override

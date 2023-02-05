@@ -18,7 +18,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 
-import com.reco1l.ui.Identifiers;
+import com.reco1l.interfaces.fields.Identifiers;
 import com.reco1l.utils.Views;
 import com.reco1l.view.effects.StripsEffect;
 

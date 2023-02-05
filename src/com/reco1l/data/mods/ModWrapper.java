@@ -2,10 +2,10 @@ package com.reco1l.data.mods;
 
 // Created by Reco1l on 21/12/2022, 04:43
 
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 import com.reco1l.data.BaseViewHolder;
 import com.reco1l.interfaces.IGameMod;
-import com.reco1l.legacy.Legacy;
+import com.reco1l.annotation.Legacy;
 import com.reco1l.ui.BasePreferenceFragment;
 
 import java.util.EnumSet;
@@ -20,17 +20,15 @@ public abstract class ModWrapper implements IGameMod {
 
     //----------------------------------------------------------------------------------------//
 
-    public ModWrapper() {
-        mProperties = createProperties();
+    public ModWrapper(Properties properties) {
+        mProperties = properties;
     }
 
     //----------------------------------------------------------------------------------------//
 
     public abstract String getName();
 
-    public abstract String getIcon();
-
-    protected abstract Properties createProperties();
+    public abstract String getAcronym();
 
     @Legacy
     public EnumSet<GameMod> getFlags() {

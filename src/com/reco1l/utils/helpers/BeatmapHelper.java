@@ -4,7 +4,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
 import com.edlplan.framework.math.FMath;
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,7 +79,7 @@ public class BeatmapHelper {
                 0xFFFF8068, 0xFFFF4E6F, 0xFFC645B8, 0xFF6563DE, 0xFF18158E, 0xFF000000
         };
 
-        // TODO make it as a spectrum like osu!web does.
+        // TODO [BeatmapHelper] Make it as a spectrum like osu!web does.
         public static int getColor(float stars) {
             stars = GameHelper.Round(stars, 2);
 
@@ -141,25 +141,24 @@ public class BeatmapHelper {
     //--------------------------------------------------------------------------------------------//
 
     public static String getDataConcat(BeatmapInfo beatmap) {
-        StringBuilder builder = new StringBuilder();
 
-        builder.append(beatmap.getTitle())
-                .append(' ')
-                .append(beatmap.getArtist())
-                .append(' ')
-                .append(beatmap.getCreator())
-                .append(' ')
-                .append(beatmap.getTags())
-                .append(' ')
-                .append(beatmap.getSource())
-                .append(' ')
-                .append(beatmap.getTracks().get(0).getBeatmapSetID());
+        String builder = beatmap.getTitle() +
+                ' ' +
+                beatmap.getArtist() +
+                ' ' +
+                beatmap.getCreator() +
+                ' ' +
+                beatmap.getTags() +
+                ' ' +
+                beatmap.getSource() +
+                ' ' +
+                beatmap.getTracks().get(0).getBeatmapSetID();
 
        /* for (TrackInfo track : beatmap.getTracks()) {
             builder.append(' ')
                     .append(track.getMode());
         }*/
 
-        return builder.toString().toLowerCase();
+        return builder.toLowerCase();
     }
 }

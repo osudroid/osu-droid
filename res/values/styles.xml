@@ -184,10 +184,10 @@
     </style>
 
     <!--Custom-->
-    <style name="hit_badge">
-        <item name="android:layout_height">@dimen/hitBadgeSize</item>
-        <item name="android:layout_width">@dimen/hitBadgeSize</item>
-        <item name="android:scaleType">fitCenter</item>
+    <style name="hit_score_badge">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:backgroundTint">#51000000</item>
+        <item name="size">l</item>
     </style>
 
 </resources>

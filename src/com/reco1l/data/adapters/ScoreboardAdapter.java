@@ -10,11 +10,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.google.android.material.imageview.ShapeableImageView;
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
 import com.reco1l.data.ScoreInfo;
-import com.reco1l.interfaces.Endpoint;
+import com.reco1l.global.Scenes;
+import com.reco1l.interfaces.fields.Endpoint;
 import com.reco1l.ui.custom.ContextMenu;
 import com.reco1l.ui.custom.ContextMenuBuilder;
 import com.reco1l.utils.TouchHandler;
@@ -35,7 +36,6 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 // Created by Reco1l on 18/6/22 01:20
 
 public class ScoreboardAdapter extends BaseAdapter<ScoreHolder, ScoreInfo> {
-
 
     //--------------------------------------------------------------------------------------------//
 
@@ -90,7 +90,7 @@ public class ScoreboardAdapter extends BaseAdapter<ScoreHolder, ScoreInfo> {
             new TouchHandler(new TouchListener() {
 
                 public void onPressUp() {
-                    Game.selectorScene.loadScore(item.getId(), item.getName());
+                    Scenes.selector.loadScore(item.getId(), item.getName());
                 }
 
                 @Override
@@ -126,7 +126,7 @@ public class ScoreboardAdapter extends BaseAdapter<ScoreHolder, ScoreInfo> {
             mark.setImageBitmap(Game.bitmapManager.get("ranking-" + item.getMark()));
 
             name.setText(item.getName());
-            rank.setText(item.getRank());
+            rank.setText("" + item.getRank());
             score.setText(mFormat.format(item.getScore()));
             combo.setText(mFormat.format(item.getCombo()) + "x");
             accuracy.setText(GameHelper.Round(item.getAccuracy() * 100, 2) + "%");

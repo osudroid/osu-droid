@@ -3,57 +3,45 @@
 <!-- Created by Reco1l on 18/7/22 23:13 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:key="pref_gameplay">
 
     <PreferenceCategory
         android:layout="@layout/custom_preference_category_big"
-        android:title="Gameplay"
-        app:iconSpaceReserved="false" />
+        android:title="Gameplay" />
 
-    <PreferenceCategory
-        android:title="Background"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="Background">
 
         <SeekBarPreference
             android:defaultValue="25"
             android:key="bgbrightness"
             android:title="@string/opt_bgbrightness_title"
-            app:iconSpaceReserved="false"
+
             app:min="1"
             app:showSeekBarValue="true" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="Play area"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="Play area">
 
         <ListPreference
             android:defaultValue="100"
             android:entries="@array/set_playfield_names"
             android:entryValues="@array/set_playfield_values"
             android:key="playfieldsize"
-            android:title="@string/opt_setplayfield_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_setplayfield_title" />
 
         <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"
             android:key="shrinkPlayfieldDownwards"
             android:title="@string/opt_shrink_playfield_downwards_title" />
 
-        <com.reco1l.preference.GameCheckBoxPreference
-            android:defaultValue="false"
-            android:key="hidenavibar"
-            android:title="@string/opt_hide_navibar_title" />
-
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="Cursor"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="Cursor">
 
         <com.reco1l.preference.GameCheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="showcursor"
             android:title="@string/opt_showcursor_title" />
 
@@ -62,15 +50,17 @@
             android:key="cursorSize"
             android:max="300"
             android:title="@string/opt_cursor_size"
-            app:iconSpaceReserved="false"
             app:min="25"
             app:showSeekBarValue="true" />
 
+        <com.reco1l.preference.GameCheckBoxPreference
+            android:defaultValue="true"
+            android:key="particles"
+            android:title="Show cursor trail" />
+
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="HUD"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="HUD">
 
         <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"
@@ -87,14 +77,11 @@
             android:entries="@array/error_meter_display_names"
             android:entryValues="@array/error_meter_display_values"
             android:key="errormeter"
-            android:title="@string/opt_error_meter_display_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_error_meter_display_title" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="Objects"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="Objects">
 
         <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"

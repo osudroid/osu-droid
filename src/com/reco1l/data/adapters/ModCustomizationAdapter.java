@@ -6,10 +6,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
-import com.reco1l.ui.Identifiers;
+import com.reco1l.interfaces.fields.Identifiers;
 import com.reco1l.data.mods.ModWrapper;
 import ru.nsu.ccfit.zuev.osuplus.R;
 

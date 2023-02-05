@@ -4,8 +4,7 @@ package com.reco1l.scenes;
 import android.view.View;
 import android.widget.TextView;
 
-import com.reco1l.Game;
-import com.reco1l.enums.Screens;
+import com.reco1l.global.Game;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.tables.Res;
@@ -15,23 +14,17 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class IntroScene extends BaseScene {
 
-
     //----------------------------------------------------------------------------------------//
 
-    @Override
-    public Screens getIdentifier() {
-        return Screens.Intro;
-    }
-
-    //----------------------------------------------------------------------------------------//
-
-    @Override
-    protected void onCreate() {
+    public IntroScene() {
+        super();
         new IntroFragment().show();
     }
 
     @Override
-    protected void onSceneUpdate(float secondsElapsed) {}
+    public boolean onBackPress() {
+        return true;
+    }
 
     //----------------------------------------------------------------------------------------//
 
@@ -130,7 +123,7 @@ public class IntroScene extends BaseScene {
         //--------------------------------------------------------------------------------------------//
 
         @Override
-        public void onUpdate(float pSecElapsed) {
+        public void onEngineUpdate(float pSecElapsed) {
             if (!isLoaded()) {
                 return;
             }

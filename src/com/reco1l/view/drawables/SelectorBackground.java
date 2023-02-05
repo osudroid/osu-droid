@@ -36,12 +36,11 @@ public class SelectorBackground extends Drawable implements ResourceTable {
 
     @Override
     public void draw(@NonNull Canvas canvas) {
-        RectF fillRect = new RectF(getBounds());
         Paint fillPaint = new Paint();
         fillPaint.setColor(Color.BLACK);
         fillPaint.setAlpha(45);
 
-        canvas.drawRect(fillRect, fillPaint);
+        canvas.drawRect(getBounds(), fillPaint);
 
         RectF cropRect = new RectF(getBounds());
         Paint cropPaint = new Paint();

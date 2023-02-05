@@ -3,7 +3,8 @@
 <!-- Created by Reco1l on 18/7/22 23:26 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:key="pref_graphics">
 
     <PreferenceCategory
         android:title="Graphics"
@@ -25,34 +26,8 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="Sliders"
-        app:iconSpaceReserved="false">
-
-        <com.reco1l.preference.GameCheckBoxPreference
-            android:defaultValue="true"
-            android:key="sliderborders"
-            android:title="@string/opt_sliderborders_title" />
-
-        <com.reco1l.preference.GameCheckBoxPreference
-            android:defaultValue="true"
-            android:key="superSlider"
-            android:title="@string/opt_superSlider_title" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
         android:title="Effects"
         app:iconSpaceReserved="false">
-
-        <com.reco1l.preference.GameCheckBoxPreference
-            android:defaultValue="false"
-            android:key="comboburst"
-            android:title="@string/opt_combo_burst_title" />
-
-        <com.reco1l.preference.GameCheckBoxPreference
-            android:defaultValue="true"
-            android:key="complexanimations"
-            android:title="@string/opt_complexanimations_title" />
 
         <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="true"
@@ -60,14 +35,9 @@
             android:title="@string/opt_bursts_title" />
 
         <com.reco1l.preference.GameCheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="hitlighting"
             android:title="@string/opt_hitlighting_title" />
-
-        <com.reco1l.preference.GameCheckBoxPreference
-            android:defaultValue="false"
-            android:key="particles"
-            android:title="@string/opt_particles_title" />
 
         <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="true"

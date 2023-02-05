@@ -5,24 +5,78 @@ package com.reco1l.utils.execution;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class ScheduledTask {
+public abstract class ScheduledTask {
 
-    public static void run(Runnable task, long delay) {
+    private Timer mTimer;
+    private TimerTask mCurrentTask;
+
+    //--------------------------------------------------------------------------------------------//
+
+    public ScheduledTask() {
+        mTimer = new Timer();
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    protected abstract void run();
+
+    protected void onCancel() {
+        // do something
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public final void execute(long delay) {
         if (delay <= 0) {
-            if (task != null) {
-                task.run();
+            run();
+            return;
+        }
+        if (mTimer == null) {
+            mTimer = new Timer();
+        }
+        mTimer.purge();
+        if (mCurrentTask != null) {
+            mCurrentTask.cancel();
+        }
+
+        mCurrentTask = new TimerTask() {
+            public void run() {
+                ScheduledTask.this.run();
+                cancel();
             }
+        };
+        mTimer.schedule(mCurrentTask, delay);
+    }
+
+    public final ScheduledTask cancel() {
+        if (mCurrentTask != null) {
+            mCurrentTask.cancel();
+        }
+        onCancel();
+        return this;
+    }
+
+    // Ends timer thread, useful if you plan to reuse instances
+    public final void free() {
+        if (mTimer != null) {
+            mTimer.cancel();
+            mTimer = null;
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public static void of(Runnable task, long delay) {
+        if (task == null) {
             return;
         }
 
-        new Timer().schedule(new TimerTask() {
-            @Override
+        new ScheduledTask() {
             public void run() {
-                if (task != null) {
-                    task.run();
-                }
+                task.run();
                 cancel();
+                free();
             }
-        }, delay);
+        }.execute(delay);
     }
 }

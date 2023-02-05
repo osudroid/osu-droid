@@ -1,9 +1,9 @@
 package com.reco1l.management;
 
-import com.reco1l.UI;
+import com.reco1l.global.UI;
 import com.reco1l.data.mods.LegacyModWrapper;
 import com.reco1l.data.mods.ModWrapper;
-import com.reco1l.legacy.Legacy;
+import com.reco1l.annotation.Legacy;
 
 import java.util.ArrayList;
 import java.util.EnumSet;

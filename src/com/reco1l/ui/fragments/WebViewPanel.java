@@ -17,7 +17,7 @@ public class WebViewPanel extends BaseFragment {
 
     @Override
     protected int getLayout() {
-        return R.layout.overlay_webview;
+        return R.layout.extra_webview;
     }
 
     @Override

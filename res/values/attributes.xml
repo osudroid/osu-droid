@@ -4,53 +4,70 @@
 
 <resources>
 
-    <attr name="badgeTextStyle" format="reference"/>
+    <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
-    <declare-styleable name="BaseRoundedView">
-        <attr name="maxRounded" format="boolean"/>
-        <attr name="clampToSquare" format="boolean"/>
+    <declare-styleable name="RoundLayout">
+        <attr name="radius" format="integer" />
+
+        <attr name="type" format="enum" >
+            <enum name="linear" value="0"/>
+            <enum name="relative" value="1"/>
+        </attr>
     </declare-styleable>
 
     <declare-styleable name="BadgeText">
-        <attr name="android:text"/>
-        <attr name="icon"/>
+        <attr name="icon" format="reference" />
+
+        <attr name="size" format="enum">
+            <enum name="s" value="0" />
+            <enum name="m" value="1" />
+            <enum name="l" value="2" />
+        </attr>
+
     </declare-styleable>
 
-    <!--_________________________________________________________________________________________-->
+    <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
-    <attr name="beatSync" format="boolean"/>
+    <declare-styleable name="ScoreBadge">
+        <attr name="badgeText" format="string" />
+        <attr name="badgeTextColor" format="color"/>
+    </declare-styleable>
+
+    <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+    <attr name="beatSync" format="boolean" />
 
     <declare-styleable name="IconButton">
-        <attr name="iconSrc" format="reference"/>
+        <attr name="iconSrc" format="reference" />
         <attr name="indicatorPosition" format="enum">
-            <enum name="bottom" value="0"/>
-            <enum name="top" value="1"/>
+            <enum name="bottom" value="0" />
+            <enum name="top" value="1" />
         </attr>
-        <attr name="activated" format="boolean"/>
+        <attr name="activated" format="boolean" />
     </declare-styleable>
 
     <!--Views-->
     <declare-styleable name="TextButton">
-        <attr name="beatSync"/>
-        <attr name="buttonText" format="string"/>
-        <attr name="buttonColor" format="color"/>
-        <attr name="buttonRadius" format="dimension"/>
+        <attr name="beatSync" />
+        <attr name="buttonText" format="string" />
+        <attr name="buttonColor" format="color" />
+        <attr name="buttonRadius" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="StripsEffectView">
-        <attr name="beatSync"/>
-        <attr name="stripWidth" format="dimension"/>
-        <attr name="stripSpeed" format="float"/>
-        <attr name="spawnTime" format="integer"/>
-        <attr name="spawnLimit" format="integer"/>
+        <attr name="beatSync" />
+        <attr name="stripWidth" format="dimension" />
+        <attr name="stripSpeed" format="float" />
+        <attr name="spawnTime" format="integer" />
+        <attr name="spawnLimit" format="integer" />
     </declare-styleable>
 
     <declare-styleable name="PanelLayout">
-        <attr name="beatSync"/>
-        <attr name="panelColor" format="color"/>
-        <attr name="panelTitle" format="string"/>
-        <attr name="panelRadius" format="dimension"/>
-        <attr name="panelTitleHeight" format="dimension"/>
+        <attr name="beatSync" />
+        <attr name="panelColor" format="color" />
+        <attr name="panelTitle" format="string" />
+        <attr name="panelRadius" format="dimension" />
+        <attr name="panelTitleHeight" format="dimension" />
     </declare-styleable>
 
 </resources>

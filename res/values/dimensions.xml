@@ -157,7 +157,6 @@
     <dimen name="scoreboardItemModSize">@dimen/_10sdp</dimen>
 
     <!--Beatmap Carrousel-->
-    <dimen name="beatmapListLeftMargin">@dimen/_40sdp</dimen>
     <dimen name="beatmapListItemHeight">@dimen/_52sdp</dimen>
     <dimen name="beatmapListChildItemHeight">@dimen/_42sdp</dimen>
     <dimen name="beatmapListTrackLeftMargin">@dimen/_50sdp</dimen>
@@ -174,7 +173,5 @@
     <dimen name="gameResultsRankingLayoutsWidth">@dimen/_110sdp</dimen>
     <dimen name="gameResultsRankingLayoutsHeight">@dimen/_34sdp</dimen>
 
-    <!--Hit badge-->
-    <dimen name="hitBadgeSize">@dimen/_20sdp</dimen>
 
 </resources>

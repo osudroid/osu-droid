@@ -11,10 +11,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 
-import com.reco1l.Game;
-import com.reco1l.UI;
+import com.reco1l.global.Game;
+import com.reco1l.global.UI;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
+import com.reco1l.global.Scenes;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.view.effects.StripsEffect;
@@ -72,9 +73,9 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
                 if(!select()) {
                     Game.musicManager.stop();
                     Game.resourcesManager.getSound("menuhit").play();
-                    Game.gameScene.startGame(item, null);
+                    Scenes.player.startGame(item, null);
                 } else {
-                    Game.selectorScene.onTrackSelect(item);
+                    Scenes.selector.onTrackSelect(item);
                 }
             });
         }

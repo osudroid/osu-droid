@@ -5,29 +5,29 @@ package com.reco1l.utils.execution;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.reco1l.interfaces.ITask;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * Solution to the deprecated Android AsyncTask API.
- */
-public abstract class AsyncTask {
+ // Solution to the deprecated Android AsyncTask API.
+public abstract class AsyncTask implements ITask {
 
-    private final ExecutorService executor;
-    private final Handler handler;
+    private final ExecutorService mExecutor;
+    private final Handler mHandler;
 
-    private boolean isCompleted;
+    private boolean mIsCompleted;
 
-    private final Runnable onComplete = () -> {
+    private final Runnable mOnComplete = () -> {
         this.onComplete();
-        this.isCompleted = true;
+        this.mIsCompleted = true;
     };
 
     //--------------------------------------------------------------------------------------------//
 
     public AsyncTask() {
-        executor = Executors.newSingleThreadExecutor();
-        handler = new Handler(Looper.getMainLooper());
+        mExecutor = Executors.newSingleThreadExecutor();
+        mHandler = new Handler(Looper.getMainLooper());
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -40,34 +40,34 @@ public abstract class AsyncTask {
     //--------------------------------------------------------------------------------------------//
 
     public final void execute() {
-        this.executor.execute(() -> {
-            this.isCompleted = false;
-            this.run();
-            this.handler.post(this.onComplete);
+        mExecutor.execute(() -> {
+            mIsCompleted = false;
+            run();
+            mHandler.post(this.mOnComplete);
         });
     }
 
     public final void cancel(boolean force) {
         if (force) {
-            this.executor.shutdownNow();
+            mExecutor.shutdownNow();
         } else {
-            this.executor.shutdown();
+            mExecutor.shutdown();
         }
-        this.handler.removeCallbacks(this.onComplete);
-        this.onCancel(force);
+        mHandler.removeCallbacks(this.mOnComplete);
+        onCancel(force);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public final boolean isCompleted() {
-        return this.isCompleted;
+        return mIsCompleted;
     }
 
     public final boolean isTerminated() {
-        return this.executor.isTerminated();
+        return mExecutor.isTerminated();
     }
 
     public final boolean isShutdown() {
-        return this.executor.isShutdown();
+        return mExecutor.isShutdown();
     }
 }

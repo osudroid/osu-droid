@@ -11,22 +11,22 @@
     <color name="shadowColor">#000000</color>
 
     <!--Vectors-->
-    <color name="vectorPrimary">#FFFFFF</color>
-    <color name="vectorSecondary">#CCFFFFFF</color>
+    <color name="vectorPrimary">#819DD4</color>
+    <color name="vectorSecondary">#CC819DD4</color>
 
     <color name="transparent">#00FFFFFF</color>
 
     <!--Text-->
-    <color name="textPrimary">#FFFFFF</color>
-    <color name="textSecondary">#CCFFFFFF</color>
-    <color name="textTertiary">#42FFFFFF</color>
+    <color name="textPrimary">#FF819DD4</color>
+    <color name="textSecondary">#CC819DD4</color>
+    <color name="textTertiary">#42819DD4</color>
 
     <color name="badgeTextBackground">#50000000</color>
 
     <!--Backgrounds-->
-    <color name="backgroundPrimary">#242424</color>
-    <color name="backgroundSecondary">#262626</color>
-    <color name="backgroundTertiary">#1F1F1F</color>
+    <color name="backgroundPrimary">#FF242E40</color>
+    <color name="backgroundSecondary">#FF10141C</color>
+    <color name="backgroundTertiary">#FF1A202C</color>
     <color name="backgroundDimmed">#99000000</color>
 
     <!--Progress indicator-->

@@ -7,7 +7,7 @@ import android.widget.TextView;
 import androidx.annotation.DrawableRes;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.reco1l.UI;
+import com.reco1l.global.UI;
 import com.reco1l.utils.Animation;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
@@ -15,7 +15,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 1/7/22 00:04
 
-public final class GameNotification {
+public final class Notification {
 
     private Runnable
             mOnClick,
@@ -39,17 +39,17 @@ public final class GameNotification {
 
     //--------------------------------------------------------------------------------------------//
 
-    private GameNotification(String pHeader) {
+    private Notification(String pHeader) {
         mHeader = pHeader;
     }
 
-    public static GameNotification of(String pHeader) {
-        GameNotification current = UI.notificationCenter.get(pHeader);
+    public static Notification of(String pHeader) {
+        Notification current = UI.notificationCenter.get(pHeader);
 
         if (current != null) {
             return current;
         }
-        return new GameNotification(pHeader);
+        return new Notification(pHeader);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -105,55 +105,55 @@ public final class GameNotification {
 
     //--------------------------------------------------------------------------------------------//
 
-    public GameNotification setMessage(String pMessage) {
+    public Notification setMessage(String pMessage) {
         mMessage = pMessage;
         return this;
     }
 
-    public GameNotification setIcon(@DrawableRes int pResourceId) {
+    public Notification setIcon(@DrawableRes int pResourceId) {
         mIconResource = pResourceId;
         return this;
     }
 
-    public GameNotification runOnClick(Runnable pOnClick) {
+    public Notification runOnClick(Runnable pOnClick) {
         mOnClick = pOnClick;
         return this;
     }
 
-    public GameNotification runOnDismiss(Runnable pOnDismiss) {
+    public Notification runOnDismiss(Runnable pOnDismiss) {
         mOnDismiss = pOnDismiss;
         return this;
     }
 
-    public GameNotification showCloseButton(boolean pBool) {
+    public Notification showCloseButton(boolean pBool) {
         mShowDismissButton = pBool;
         return this;
     }
 
-    public GameNotification showProgress(boolean pBool) {
+    public Notification showProgress(boolean pBool) {
         mShowProgress = pBool;
         return this;
     }
 
     // Notify without sound and without popup
-    public GameNotification setSilent(boolean bool) {
+    public Notification setSilent(boolean bool) {
         mSilent = bool;
         return this;
     }
 
-    public GameNotification setProgress(int pProgress) {
+    public Notification setProgress(int pProgress) {
         mShowProgress = true;
         mProgress = pProgress;
         return this;
     }
 
-    public GameNotification setProgressMax(int pMax) {
+    public Notification setProgressMax(int pMax) {
         mProgressMax = pMax;
         return this;
     }
 
     // Set null to notify without sound
-    public GameNotification setSound(BassSoundProvider pSound) {
+    public Notification setSound(BassSoundProvider pSound) {
         mSound = pSound;
         return this;
     }
@@ -179,11 +179,11 @@ public final class GameNotification {
         public final ImageView iconView;
         public final CircularProgressIndicator progressView;
 
-        private final GameNotification mNotification;
+        private final Notification mNotification;
 
         //----------------------------------------------------------------------------------------//
 
-        public Holder(View root, GameNotification pNotification) {
+        public Holder(View root, Notification pNotification) {
             body = root.findViewById(R.id.n_body);
             iconView = root.findViewById(R.id.n_icon);
             headerText = root.findViewById(R.id.n_header);
@@ -197,7 +197,7 @@ public final class GameNotification {
 
         //----------------------------------------------------------------------------------------//
 
-        private void bind(GameNotification n) {
+        private void bind(Notification n) {
             headerText.setText(n.mHeader);
             messageText.setText(n.mMessage);
 

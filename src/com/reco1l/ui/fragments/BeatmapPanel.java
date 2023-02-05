@@ -2,18 +2,23 @@ package com.reco1l.ui.fragments;
 
 import static android.view.View.LAYER_TYPE_HARDWARE;
 
+import static androidx.recyclerview.widget.RecyclerView.*;
+
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.reco1l.Game;
+import com.reco1l.data.adapters.ScoreboardAdapter;
+import com.reco1l.global.Game;
 import com.reco1l.data.TrackCard;
 import com.reco1l.data.ScoreInfo;
+import com.reco1l.global.Scenes;
 import com.reco1l.management.BoardManager;
-import com.reco1l.enums.Screens;
 import com.reco1l.interfaces.IGameMod;
-import com.reco1l.interfaces.MusicObserver;
+import com.reco1l.interfaces.IMusicObserver;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
@@ -28,29 +33,29 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public final class BeatmapPanel extends BaseFragment implements
         IGameMod,
-        MusicObserver,
-        BoardManager.Listener {
+        IMusicObserver,
+        BoardManager.Observer {
 
-    public static BeatmapPanel instance;
-
-    public boolean isOnlineBoard = false;
+    public static final BeatmapPanel instance = new BeatmapPanel();
 
     private int bodyWidth;
 
     private View body, message, pageContainer, tabIndicator;
     private TextView localTab, globalTab, messageText;
 
-    private boolean
-            isTabAnimInProgress = false,
-            isBannerExpanded = true;
+    private RecyclerView mScoresList;
+    private ScoreboardAdapter mScoresAdapter;
+
+    private boolean isTabAnimInProgress = false;
 
     private TrackCard mTrackCard;
 
     //--------------------------------------------------------------------------------------------//
 
     public BeatmapPanel() {
-        super(Screens.Selector);
+        super(Scenes.selector);
         Game.musicManager.bindMusicObserver(this);
+        Game.boardManager.bindBoardObserver(this);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -76,8 +81,10 @@ public final class BeatmapPanel extends BaseFragment implements
         rootBackground.setLayerType(LAYER_TYPE_HARDWARE, null);
         rootBackground.setBackground(new SelectorBackground());
 
+        mScoresList = find("scoreboard");
+        mScoresList.setLayoutManager(new LinearLayoutManager(getContext(), VERTICAL, true));
+
         bodyWidth = Res.dimen(R.dimen.beatmapPanelContentWidth);
-        isBannerExpanded = true;
         body = find("body");
 
         Animation.of(body)
@@ -107,6 +114,11 @@ public final class BeatmapPanel extends BaseFragment implements
     }
 
     @Override
+    protected void onPost() {
+        Game.boardManager.load(Game.musicManager.getTrack());
+    }
+
+    @Override
     public void onMusicChange(@Nullable TrackInfo newTrack, boolean isSameAudio) {
         if (isLoaded()) {
             mTrackCard.onMusicChange(newTrack);
@@ -115,11 +127,25 @@ public final class BeatmapPanel extends BaseFragment implements
     }
 
     @Override
-    public void onBoardChange(ArrayList<ScoreInfo> pList) {
+    public void onBoardChange(ArrayList<ScoreInfo> list) {
         if (!isLoaded()) {
             return;
         }
-        handleScoreboard();
+        if (mScoresAdapter == null) {
+            mScoresAdapter = new ScoreboardAdapter(list);
+        }
+        mScoresAdapter.setData(list);
+
+        if (isLoaded()) {
+            mScoresList.setAdapter(mScoresAdapter);
+
+            if (Game.boardManager.isEmpty()) {
+                message.setVisibility(View.VISIBLE);
+                messageText.setText(Game.boardManager.getErrorMessage());
+            } else {
+                message.setVisibility(View.GONE);
+            }
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -153,18 +179,9 @@ public final class BeatmapPanel extends BaseFragment implements
                 .play(200);
 
         pageContainer.postDelayed(() -> {
-            isOnlineBoard = button == globalTab;
+            Game.boardManager.setOnline(button == globalTab);
             Game.boardManager.load(Game.musicManager.getTrack());
         }, 200);
-    }
-
-    private void handleScoreboard() {
-        if (Game.boardManager.isEmpty()) {
-            message.setVisibility(View.VISIBLE);
-            messageText.setText(Game.boardManager.getErrorMessage());
-        } else {
-            message.setVisibility(View.GONE);
-        }
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -177,7 +194,7 @@ public final class BeatmapPanel extends BaseFragment implements
 
         Animation.of(body)
                 .toX(-bodyWidth)
-                .toTopMargin((int) Res.dimen(R.dimen.topBarHeight))
+                .toTopMargin(Res.dimen(R.dimen.topBarHeight))
                 .toAlpha(0)
                 .runOnEnd(super::close)
                 .play(300);

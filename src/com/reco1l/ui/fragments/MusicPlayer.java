@@ -19,9 +19,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.reco1l.Game;
-import com.reco1l.UI;
-import com.reco1l.interfaces.MusicObserver;
+import com.reco1l.global.Game;
+import com.reco1l.global.UI;
+import com.reco1l.interfaces.IMusicObserver;
 import com.reco1l.tables.ResourceTable;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
@@ -40,7 +40,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 1/7/22 22:45
 
-public final class MusicPlayer extends BaseFragment implements MusicObserver {
+public final class MusicPlayer extends BaseFragment implements IMusicObserver {
 
     public static final MusicPlayer instance = new MusicPlayer();
 
@@ -81,7 +81,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
 
     @Override
     protected int getLayout() {
-        return R.layout.extra_music_player;
+        return R.layout.main_music_player;
     }
 
     @Override
@@ -143,7 +143,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
 
             public void onStartTrackingTouch(SeekBar seekBar) {
                 mIsTrackingTouch = true;
-                onTouchEventNotified(MotionEvent.ACTION_DOWN);
+                notifyTouchEvent(MotionEvent.ACTION_DOWN);
             }
 
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromTouch) {
@@ -156,7 +156,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mIsTrackingTouch = false;
                 Game.songService.setPosition(newPosition);
-                onTouchEventNotified(MotionEvent.ACTION_UP);
+                notifyTouchEvent(MotionEvent.ACTION_UP);
             }
         });
 
@@ -209,7 +209,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
     }
 
     @Override
-    protected void onUpdate(float pSecElapsed) {
+    protected void onEngineUpdate(float pSecElapsed) {
         int length = Game.songService.getLength();
         int position = Game.songService.getPosition();
 
@@ -231,20 +231,24 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
 
     @Override
     public void onMusicChange(TrackInfo newTrack, boolean isSameAudio) {
-        if (isAdded()) {
-            Animation.of(mSongBody)
-                    .toAlpha(0)
-                    .runOnEnd(() -> {
+        if (!isAdded()) {
+            return;
+        }
+
+        Animation.of(mSongBody)
+                .toAlpha(0)
+                .runOnEnd(() -> {
+                    if (newTrack != null) {
                         loadMetadata(newTrack.getBeatmap());
                         selectAtList(newTrack.getBeatmap());
+                    }
 
-                        Animation.of(mSongBody)
-                                .toX(0)
-                                .toAlpha(1)
-                                .play(200);
-                    })
-                    .play(200);
-        }
+                    Animation.of(mSongBody)
+                            .toX(0)
+                            .toAlpha(1)
+                            .play(200);
+                })
+                .play(200);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -287,19 +291,8 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public boolean show() {
-        if (super.show()) {
-            button.setActivated(true);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public void close() {
         if (isAdded()) {
-            button.setActivated(false);
-
             if (mIsPlaylistVisible) {
                 switchListVisibility();
             }
@@ -406,7 +399,7 @@ public final class MusicPlayer extends BaseFragment implements MusicObserver {
 
                 UI.musicPlayer.bindTouch(text, () -> {
                     if (Game.libraryManager.getBeatmap() != beatmap) {
-                        Game.musicManager.change(beatmap.getTrack(0));
+                        Game.musicManager.change(beatmap);
                         onSelect();
                     }
                 });

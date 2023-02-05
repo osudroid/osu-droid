@@ -1,5 +1,8 @@
 package com.reco1l.utils.helpers;
 
+
+import static ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*;
+
 import com.reco1l.interfaces.IGameMod;
 
 import java.util.EnumSet;
@@ -95,5 +98,64 @@ public class ScoringHelper implements IGameMod {
             return texture.substring(0, texture.length() - 1);
         }
         return texture;
+    }
+
+    public static String parseAcronym(GameMod entry) {
+        String s = "-";
+
+        switch (entry) {
+            case MOD_EASY:
+                s = "ez";
+                break;
+            case MOD_NOFAIL:
+                s = "nf";
+                break;
+            case MOD_AUTO:
+                s = "au";
+                break;
+            case MOD_HARDROCK:
+                s = "hr";
+                break;
+            case MOD_HIDDEN:
+                s = "hd";
+                break;
+            case MOD_RELAX:
+                s = "rx";
+                break;
+            case MOD_AUTOPILOT:
+                s = "ap";
+                break;
+            case MOD_DOUBLETIME:
+                s = "dt";
+                break;
+            case MOD_NIGHTCORE:
+                s = "nc";
+                break;
+            case MOD_HALFTIME:
+                s = "ht";
+                break;
+            case MOD_SUDDENDEATH:
+                s = "sd";
+                break;
+            case MOD_PERFECT:
+                s = "pf";
+                break;
+            case MOD_FLASHLIGHT:
+                s = "fl";
+                break;
+            case MOD_PRECISE:
+                s = "pr";
+                break;
+            case MOD_SMALLCIRCLE:
+                s = "sc";
+                break;
+            case MOD_REALLYEASY:
+                s = "rez";
+                break;
+            case MOD_SCOREV2:
+                s = "sv2";
+                break;
+        }
+        return s;
     }
 }

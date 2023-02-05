@@ -12,7 +12,6 @@ import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
 import com.edlplan.ui.fragment.InGameSettingMenu;
-import com.reco1l.Game;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -93,8 +92,10 @@ import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
 
-import com.reco1l.GameEngine;
-import com.reco1l.UI;
+import com.reco1l.global.UI;
+import com.reco1l.global.Scenes;
+import com.reco1l.interfaces.ITask;
+import com.reco1l.scenes.PlayerScene;
 import com.reco1l.scenes.SummaryScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
@@ -103,15 +104,13 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class GameScene implements IUpdateHandler, GameObjectListener,
         IOnSceneTouchListener {
 
-    public static final GameScene instance = new GameScene(Game.engine);
-
     public static final int CursorCount = 10;
     private final Engine engine;
     private final Cursor[] cursors = new Cursor[CursorCount];
     private final boolean[] cursorIIsDown = new boolean[CursorCount];
     private final StringBuilder strBuilder = new StringBuilder();
     public String filePath = null;
-    private Scene scene;
+    private PlayerScene scene;
     private Scene bgScene, mgScene, fgScene;
     private Scene oldScene;
     private BeatmapData beatmapData;
@@ -194,7 +193,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public GameScene(final Engine engine) {
         this.engine = engine;
-        scene = new Scene();
+        scene = Scenes.player.New();
         bgScene = new Scene();
         fgScene = new Scene();
         mgScene = new Scene();
@@ -654,7 +653,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         return true;
     }
 
-    public Scene getScene() {
+    public PlayerScene getScene() {
         return scene;
     }
 
@@ -671,7 +670,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             EdExtensionHelper.onStartGame(track);
         }
 
-        scene = new Scene();
+        scene = Scenes.player.New();
         if (Config.isEnableStoryboard()) {
             if (storyboardSprite == null) {
                 storyboardSprite = new StoryboardSprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
@@ -699,7 +698,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         isFirst = true;
         failcount = 0;
         mainCursorId = -1;
-        Game.loaderScene.show(true);
 
         final String rfile = track != null ? replayFile : this.replayFile;
 
@@ -709,26 +707,23 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         Replay.oldEnableForceAR = ModMenu.getInstance().isEnableForceAR();
         Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
 
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
+        Scenes.loader.async(new ITask() {
 
             public void run() {
                 loadComplete = loadGame(track != null ? track : lastTrack, rfile);
             }
 
             public void onComplete() {
-                Game.loaderScene.runOnComplete(() -> {
-                    if (loadComplete) {
-                        prepareScene();
-                    } else {
-                        ModMenu.getInstance().setMod(Replay.oldMod);
-                        ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
-                        ModMenu.getInstance().setForceAR(Replay.oldForceAR);
-                        ModMenu.getInstance().setEnableForceAR(Replay.oldEnableForceAR);
-                        ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
-                        quit();
-                    }
-                });
-                Game.loaderScene.notifyComplete();
+                if (loadComplete) {
+                    prepareScene();
+                } else {
+                    ModMenu.getInstance().setMod(Replay.oldMod);
+                    ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
+                    ModMenu.getInstance().setForceAR(Replay.oldForceAR);
+                    ModMenu.getInstance().setEnableForceAR(Replay.oldEnableForceAR);
+                    ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
+                    quit();
+                }
             }
         });
         ResourceManager.getInstance().getSound("failsound").stop();
@@ -758,7 +753,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     super.onUpdate(pSecondsElapsed);
                     float ms = pSecondsElapsed * 1000;
 
-                    UI.mainOverlay.updateEngineFPS(getFPS(), ms);
+                    UI.mainOverlay.updatePerformanceText(getFPS(), ms);
 
                     urText.setText(String.format(Locale.ENGLISH, "%.2f UR    ", stat.getUnstableRate()));
                     urText.setPosition(Config.getRES_WIDTH() - urText.getWidth(), Config.getRES_HEIGHT() - urText.getHeight());
@@ -1243,7 +1238,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         replayText.setAlpha(0.7f);
         fgScene.attachChild(replayText, 0);
         if (stat.getMod().contains(GameMod.MOD_AUTO) || replaying) {
-            playname = replaying ? GlobalManager.getInstance().getScoring().replayStats.getPlayerName() : "osu!";
+            playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStats().getPlayerName() : "osu!";
             replayText.setText("Watching " + playname + " play " + artist + " - " + title + " [" + version + "]");
             replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(40,
                     Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
@@ -1835,7 +1830,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (shouldBePunished || (objects.isEmpty() && activeObjects.isEmpty() && leadOut > 2)) {
-            scene = new Scene();
+            scene = Scenes.player.New();
             SkinManager.setSkinEnabled(false);
             GameObjectPool.getInstance().purge();
             SpritePool.getInstance().purge();
@@ -1869,7 +1864,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
 
                 if (replaying)
-                    summaryScene.load(lastTrack, summaryScene.replayStats, replayFile, true);
+                    summaryScene.load(summaryScene.getReplayStats(), lastTrack, replayFile, true);
                 else {
                     if (stat.getMod().contains(GameMod.MOD_AUTO)) {
                         stat.setPlayerName("osu!");
@@ -1882,7 +1877,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         storyboardOverlayProxy.setDrawProxy(null);
                     }
 
-                    summaryScene.load(lastTrack, stat, replayFile, false);
+                    summaryScene.load(stat, lastTrack, replayFile, false);
                 }
                 GlobalManager.getInstance().getSongService().setVolume(0.2f);
                 engine.setScene(summaryScene);
@@ -2011,7 +2006,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 camera.setCenterDirect(Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT() / 2);
             }
         }
-        scene = new Scene();
+        scene = Scenes.player.New();
         engine.setScene(oldScene);
     }
 
@@ -2646,7 +2641,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         stat.addHitOffset(acc);
 
         if (replaying) {
-            summaryScene.replayStats.addHitOffset(acc);
+            summaryScene.getReplayStats().addHitOffset(acc);
         }
     }
 

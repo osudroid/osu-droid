@@ -1,8 +1,8 @@
 package com.reco1l.data.mods;
 // Created by Reco1l on 21/12/2022, 09:45
 
-import com.reco1l.Game;
-import com.reco1l.management.ModProperty;
+import com.reco1l.global.Game;
+import com.reco1l.interfaces.fields.ModProperty;
 import com.reco1l.preference.GameCheckBoxPreference;
 import com.reco1l.preference.GameSekBarPreference;
 
@@ -16,7 +16,7 @@ public class CustomSpeedMod extends ModWrapper {
     //--------------------------------------------------------------------------------------------//
 
     public CustomSpeedMod() {
-        super();
+        super(new Properties());
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -27,8 +27,8 @@ public class CustomSpeedMod extends ModWrapper {
     }
 
     @Override
-    public String getIcon() {
-        return null;
+    public String getAcronym() {
+        return "cs";
     }
 
     @Override
@@ -37,11 +37,6 @@ public class CustomSpeedMod extends ModWrapper {
     }
 
     //--------------------------------------------------------------------------------------------//
-
-    @Override
-    public ModWrapper.Properties createProperties() {
-        return new Properties();
-    }
 
     @Override
     public void onSelect(boolean isEnabled) {

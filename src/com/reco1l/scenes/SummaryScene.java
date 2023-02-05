@@ -1,18 +1,21 @@
 package com.reco1l.scenes;
 // Created by Reco1l on 19/11/2022, 23:39
 
-import com.reco1l.Game;
-import com.reco1l.UI;
-import com.reco1l.enums.Screens;
-import com.reco1l.view.IconButton;
-import com.reco1l.utils.execution.AsyncTask;
+import android.view.View;
+import android.widget.LinearLayout;
 
+import com.reco1l.global.Game;
+import com.reco1l.global.UI;
+import com.reco1l.global.Scenes;
+import com.reco1l.view.IconButton;
+
+import org.anddev.andengine.entity.scene.Scene;
+
+import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -20,101 +23,99 @@ public class SummaryScene extends BaseScene {
 
     public static final SummaryScene instance = new SummaryScene();
 
-    public StatisticV2 replayStats;
+    private final IconButton
+            mRetryButton,
+            mReplayButton;
 
     public int replayID = -1;
 
+    private StatisticV2 mLastStats;
+    private TrackInfo mLastTrack;
+    private String mLastReplay;
+
+    private BassSoundProvider mApplauseSound;
+
     //--------------------------------------------------------------------------------------------//
 
-    @Override
-    public Screens getIdentifier() {
-        return Screens.Summary;
+    public SummaryScene() {
+        super();
+
+        mRetryButton = new IconButton(getContext());
+        mReplayButton = new IconButton(getContext());
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    protected void onCreate() {
-        setContinuousPlay(false);
-        createTopBarButtons();
-    }
+    public void onButtonContainerChange(LinearLayout layout) {
+        mRetryButton.setIcon(drw(R.drawable.v18_retry));
+        mRetryButton.setTouchListener(() ->
+                Scenes.player.startGame(null, null)
+        );
 
-    private void createTopBarButtons() {
-        IconButton retry = new IconButton(Game.activity);
+        mReplayButton.setIcon(drw(R.drawable.v18_replay));
+        mReplayButton.setTouchListener(() -> {
+            Scenes.player.startGame(mLastTrack, mLastReplay);
 
-        retry.setIcon(drw(R.drawable.v18_tune));
-        retry.runOnTouch(() -> {
-            Game.resourcesManager.getSound("applause").stop();
-            Game.gameScene.startGame(null, null);
+            ModMenu.getInstance().setMod(mLastStats.getMod());
+            ModMenu.getInstance().setChangeSpeed(mLastStats.getChangeSpeed());
+            ModMenu.getInstance().setForceAR(mLastStats.getForceAR());
+            ModMenu.getInstance().setEnableForceAR(mLastStats.isEnableForceAR());
+            ModMenu.getInstance().setFLfollowDelay(mLastStats.getFLFollowDelay());
         });
 
-        IconButton watchReplay = new IconButton(Game.activity);
+        layout.addView(mRetryButton);
+        layout.addView(mReplayButton);
+    }
 
-        watchReplay.setIcon(drw(R.drawable.v18_search));
+    @Override
+    public boolean onBackPress() {
+        Scenes.selector.show();
+        return true;
+    }
 
-        UI.topBar.bindButton(getIdentifier(), retry);
-        UI.topBar.bindButton(getIdentifier(), watchReplay);
+    @Override
+    public void onSceneChange(Scene oldScene, Scene newScene) {
+        super.onSceneChange(oldScene, newScene);
+
+        if (newScene != this && mApplauseSound != null) {
+            mApplauseSound.stop();
+        }
+    }
+
+    public StatisticV2 getReplayStats() {
+        return mLastStats;
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void loadFromBoard(TrackInfo track, int id, boolean isOnline, final String player) {
+    public void load(StatisticV2 stats, TrackInfo track, String replay, boolean isReplaying) {
+        mLastTrack = track;
+        mLastStats = stats;
+        mLastReplay = replay;
 
-        if (!isOnline) {
-            StatisticV2 stats = Game.scoreLibrary.getScore(id);
-            load(track, stats, stats.getReplayName(), true);
-            return;
-        }
-
-        Game.loaderScene.show();
-
-        new AsyncTask() {
-            StatisticV2 stats;
-            String replay;
-
-            public void run() {
-                try {
-                    String pack = Game.onlineManager.getScorePack(id);
-                    String[] params = pack.split("\\s+");
-
-                    if (params.length >= 11) {
-                        stats = new StatisticV2(params);
-                        stats.setPlayerName(player);
-
-                        replay = OnlineManager.getReplayURL(id);
-                    }
-                } catch (OnlineManagerException ignored) {}
+        Game.activity.runOnUiThread(() -> {
+            if (replay == null) {
+                mReplayButton.setVisibility(View.GONE);
+            } else {
+                mReplayButton.setVisibility(View.VISIBLE);
             }
+        });
 
-            public void onComplete() {
-                Game.loaderScene.runOnComplete(() -> {
-                    if (replay != null && stats != null) {
-                        load(track, stats, replay, true);
-                    } else {
-                        Game.selectorScene.show();
-                    }
-                });
-                Game.loaderScene.notifyComplete();
-            }
-        }.execute();
-    }
-
-
-    public void load(TrackInfo track, StatisticV2 stats, String replayPath, boolean isReplaying) {
         UI.gameSummary.setData(track, stats);
         show();
 
-        if (replayPath != null && isReplaying) {
-            replayStats = stats;
-        }
-
         if (!isReplaying) {
-            Game.resourcesManager.getSound("applause").play();
-            Game.scoreLibrary.addScore(track.getFilename(), stats, replayPath);
+            if (mApplauseSound == null) {
+                mApplauseSound = Game.resourcesManager.getSound("applause");
+            }
+            mApplauseSound.play();
+
+            Game.scoreLibrary.addScore(track.getFilename(), stats, replay);
 
             if (Game.onlineManager.isStayOnline() && Game.onlineManager.isReadyToSend()) {
                 UI.gameSummary.retrieveOnlineData();
-                upload(stats, replayPath);
+                upload(stats, replay);
             }
         }
     }
@@ -137,16 +138,5 @@ public class SummaryScene extends BaseScene {
             return;
         }
         Game.scoreLibrary.sendScoreOnline(stats, replayPath);
-    }
-
-    @Override
-    protected void onSceneUpdate(float secondsElapsed) {
-
-    }
-
-    @Override
-    public boolean onBackPress() {
-        Game.selectorScene.show();
-        return true;
     }
 }

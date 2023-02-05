@@ -1,5 +1,7 @@
 package com.reco1l.ui.custom;
 
+import static com.reco1l.data.adapters.ContextMenuAdapter.*;
+
 import android.graphics.PointF;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -9,7 +11,7 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.factor.bouncy.BouncyRecyclerView;
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
@@ -23,11 +25,11 @@ public class ContextMenu extends BaseFragment {
 
     private final ContextMenuBuilder mBuilder;
 
-    private PointF mPosition;
+    private final PointF mPosition;
 
-    private CardView card;
-    private ContextMenuAdapter adapter;
-    private BouncyRecyclerView recyclerView;
+    private CardView mBody;
+    private ContextMenuAdapter mAdapter;
+    private BouncyRecyclerView mRecyclerView;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -53,20 +55,24 @@ public class ContextMenu extends BaseFragment {
     @Override
     protected View getRootView() {
         RelativeLayout layout = new RelativeLayout(getContext());
-        layout.setElevation(Res.dimen(R.dimen.top_layer));
+        layout.setElevation(dimen(R.dimen.top_layer));
         layout.setLayoutParams(Views.match_parent);
-        layout.setId(R.id.background);
 
-        card = new CardView(Game.activity);
+        View view = new View(getContext());
+        view.setLayoutParams(Views.match_parent);
+        view.setId(R.id.background);
+        layout.addView(view);
 
-        card.setCardBackgroundColor(Res.color(R.color.backgroundSecondary));
-        card.setRadius(Res.dimen(R.dimen.app_corners));
-        card.setAlpha(0);
-        layout.addView(card);
+        mBody = new CardView(Game.activity);
 
-        recyclerView = new BouncyRecyclerView(Game.activity, null);
-        recyclerView.setLayoutManager(new LinearLayoutManager(Game.activity));
-        card.addView(recyclerView);
+        mBody.setCardBackgroundColor(Res.color(R.color.backgroundSecondary));
+        mBody.setRadius(Res.dimen(R.dimen.app_corners));
+        mBody.setAlpha(0);
+        layout.addView(mBody);
+
+        mRecyclerView = new BouncyRecyclerView(Game.activity, null);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(Game.activity));
+        mBody.addView(mRecyclerView);
 
         return layout;
     }
@@ -76,15 +82,15 @@ public class ContextMenu extends BaseFragment {
     @Override
     protected void onLoad() {
         fixLocation();
-        if (adapter == null) {
-            adapter = new ContextMenuAdapter(mBuilder.items);
+        if (mAdapter == null) {
+            mAdapter = new ContextMenuAdapter(mBuilder.items);
         }
-        recyclerView.setAdapter(adapter);
+        mRecyclerView.setAdapter(mAdapter);
 
-        card.post(() -> {
-            final int height = card.getHeight();
+        mBody.post(() -> {
+            final int height = mBody.getHeight();
 
-            Animation.of(card)
+            Animation.of(mBody)
                     .fromHeight(0)
                     .toHeight(height)
                     .toAlpha(1)
@@ -92,19 +98,50 @@ public class ContextMenu extends BaseFragment {
 
             fixLocation();
         });
+
+        mRecyclerView.post(this::fixWidth);
+    }
+
+    private void fixWidth() {
+        if (mBuilder.fixedWidth != -1) {
+            mAdapter.forEachHolder(h ->
+                    Views.width(h.getView(), mBuilder.fixedWidth)
+            );
+            return;
+        }
+
+        int w = 0;
+        for (ItemHolder h : mAdapter.getHolders()) {
+            if (h.getWidth() > w) {
+                w = h.getWidth();
+            }
+        }
+
+        if (w > 0) {
+            mBuilder.fixedWidth = w;
+            fixWidth();
+        }
     }
 
     private void fixLocation() {
-        card.setX(mPosition.x);
-        card.setY(mPosition.y);
+        mBody.setX(mPosition.x);
+        mBody.setY(mPosition.y);
 
-        if (card.getX() + card.getWidth() > getWidth()) {
-            card.setX(getWidth() - card.getWidth());
+        if (mBody.getX() + mBody.getWidth() > getWidth()) {
+            mBody.setX(getWidth() - mBody.getWidth());
         }
 
-        if (card.getY() + card.getHeight() > getHeight()) {
-            card.setY(getHeight() - card.getHeight());
+        if (mBody.getY() + mBody.getHeight() > getHeight()) {
+            mBody.setY(getHeight() - mBody.getHeight());
         }
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
+    public void close() {
+        unbindTouchHandlers();
+        super.close();
     }
 
     //--------------------------------------------------------------------------------------------//

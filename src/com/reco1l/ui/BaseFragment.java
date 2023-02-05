@@ -12,9 +12,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.reco1l.Game;
-import com.reco1l.enums.Screens;
+import com.reco1l.global.Game;
+import com.reco1l.scenes.BaseScene;
 import com.reco1l.tables.ResourceTable;
+import com.reco1l.utils.Logging;
 import com.reco1l.utils.TouchListener;
 import com.reco1l.utils.TouchHandler;
 
@@ -27,7 +28,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public abstract class BaseFragment extends Fragment implements ResourceTable {
 
-    final Screens[] parents;
+    final BaseScene[] parents;
 
     protected View rootView;
 
@@ -44,38 +45,42 @@ public abstract class BaseFragment extends Fragment implements ResourceTable {
 
     //--------------------------------------------------------------------------------------------//
 
-    // Use this constructor if the fragment has no parents screens
     public BaseFragment() {
-        this((Screens[]) null);
+        this((BaseScene[]) null);
     }
 
-    // This constructor defines the parent screens where the fragment should be added automatically
-    public BaseFragment(Screens... pParents) {
-        parents = pParents;
-        mRegisteredViews = new HashMap<>();
+    public BaseFragment(BaseScene... parents) {
+        Logging.initOf(getClass());
+        this.parents = parents;
 
+        mRegisteredViews = new HashMap<>();
         Game.platform.onFragmentCreated(this);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    // Override this to set the layout resource to be inflated and set it as root view
+    // Override this to set the layout resource to be inflated and set it as root view.
     protected @LayoutRes int getLayout() {
         return 0;
     }
 
-    // Set the prefix which the resources identifiers start of, this is helpful to a proper usage
-    // of find() method
-    protected String getPrefix() {
-        return null;
-    }
-
-    // Override this to set the root view directly instead of inflate a layout resource
+    // Override this to set the root view directly instead of inflate a layout resource, keep in mind
+    // that if getLayout() was previously override Fragment will be inflated from layout resource ignoring this.
     protected View getRootView() {
         return null;
     }
 
+    // Set the prefix which the resources identifiers start of, this is helpful to the usage of find() method,
+    // this is only useful if you set a layout resource.
+    protected String getPrefix() {
+        return null;
+    }
+
     protected abstract void onLoad();
+
+    // This is called post draw and measure of root view besides onLoad() that's called before, mostly useful for animations.
+    protected void onPost() {
+    }
 
     //--------------------------------------------------------------------------------------------//
 
@@ -109,7 +114,7 @@ public abstract class BaseFragment extends Fragment implements ResourceTable {
 
     //--------------------------------------------------------------------------------------------//
 
-    protected void onUpdate(float pSecElapsed) {
+    protected void onEngineUpdate(float pSecElapsed) {
     }
 
     protected void onShowAttempt() {
@@ -118,7 +123,16 @@ public abstract class BaseFragment extends Fragment implements ResourceTable {
     protected void onCloseAttempt() {
     }
 
-    protected void onScreenChange(Screens pLastScreen, Screens pNewScreen) {
+    protected void onSceneChange(BaseScene oldScene, BaseScene newScene) {
+    }
+
+    // Return true to consume the back press event, false to continue the propagation.
+    public boolean onBackPress() {
+        if (isExtra()) {
+            close();
+            return true;
+        }
+        return false;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -147,29 +161,27 @@ public abstract class BaseFragment extends Fragment implements ResourceTable {
     public final View onCreateView(@NonNull LayoutInflater pInflater, ViewGroup pContainer, Bundle pBundle) {
         rootView = getRootView();
 
-        if (rootView != null && getLayout() != 0) {
-            throw new RuntimeException("You can't override getRootView() and getLayout() at the same time!");
-        } else if (rootView == null && getLayout() == 0) {
-            throw new RuntimeException("You've to override getRootView() or getLayout() to create the fragment view!");
-        }
-
-        if (getLayout() != 0) {
+        if (rootView == null && getLayout() != 0) {
             rootView = pInflater.inflate(getLayout(), pContainer, false);
         }
+
+        if (rootView == null) {
+            throw new RuntimeException("Root view cannot be null!");
+        }
+
         rootBackground = rootView.findViewById(R.id.background);
 
         onLoad();
         mIsLoaded = true;
 
-        if (rootView != null) {
-            if (rootBackground != null) {
-                handleBackground();
-            }
-
-            if (getCloseTime() > 0) {
-                rootView.postDelayed(mCloseTask, getCloseTime());
-            }
+        if (rootBackground != null) {
+            handleBackground();
         }
+        if (getCloseTime() > 0) {
+            rootView.postDelayed(mCloseTask, getCloseTime());
+        }
+
+        rootView.post(this::onPost);
 
         return rootView;
     }
@@ -178,8 +190,6 @@ public abstract class BaseFragment extends Fragment implements ResourceTable {
         if (!mCloseOnBackgroundClick || rootBackground.hasOnClickListeners()) {
             return;
         }
-        rootBackground.setClickable(true);
-
         bindTouch(rootBackground, new TouchListener() {
 
             public boolean useTouchEffect() {
@@ -218,30 +228,32 @@ public abstract class BaseFragment extends Fragment implements ResourceTable {
     }
 
     public boolean show() {
-        if (isExtra()) {
-            Game.platform.closeExtras();
-        }
-
         if (isAdded() || !getConditionToShow()) {
             onShowAttempt();
             return false;
+        }
+
+        if (isExtra()) {
+            Game.platform.closeExtras();
         }
         return Game.platform.addFragment(this);
     }
 
     // If added it calls show(), otherwise calls close()
-    public final void altShow() {
+    // Returns true if it'll added or false if it'll not.
+    public final boolean alternate() {
         if (isAdded()) {
             close();
+            return false;
         } else {
-            show();
+            return show();
         }
     }
 
     //--------------------------------------------------------------------------------------------//
 
     // Find a view by its string format identifier, if you previously defined the prefix you don't
-    // have to write the fragment prefix here
+    // need to write the fragment.
     @SuppressWarnings("unchecked")
     protected <T extends View> T find(String pId) {
         if (rootView == null || pId == null) {
@@ -272,46 +284,48 @@ public abstract class BaseFragment extends Fragment implements ResourceTable {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void onTouchEventNotified(int pAction) {
+    public void notifyTouchEvent(int action) {
         if (getCloseTime() > 0) {
-            if (pAction == MotionEvent.ACTION_DOWN) {
+            if (action == MotionEvent.ACTION_DOWN) {
                 rootView.removeCallbacks(mCloseTask);
             }
-            if (pAction == MotionEvent.ACTION_UP) {
+            if (action == MotionEvent.ACTION_UP) {
                 rootView.postDelayed(mCloseTask, getCloseTime());
             }
         }
     }
 
     // Bind a touch listener to the view and link it to the fragment
-    public final void bindTouch(View pView, TouchListener pListener) {
-        TouchHandler handler = mRegisteredViews.get(pView);
+    public final void bindTouch(View view, TouchListener listener) {
+        TouchHandler handler = mRegisteredViews.get(view);
         if (handler == null) {
-            handler = new TouchHandler(pListener);
-            mRegisteredViews.put(pView, handler);
+            handler = new TouchHandler(listener);
+            mRegisteredViews.put(view, handler);
         } else {
-            handler.listener = pListener;
+            handler.mListener = listener;
         }
         handler.linkToFragment(this);
-        handler.apply(pView);
+        handler.apply(view);
     }
 
-    public final void bindTouch(View pView, Runnable pOnActionUp) {
-        bindTouch(pView, new TouchListener() {
+    public final void bindTouch(View view, Runnable onUp) {
+        bindTouch(view, new TouchListener() {
             public void onPressUp() {
-                if (pOnActionUp != null) {
-                    pOnActionUp.run();
+                if (onUp != null) {
+                    onUp.run();
                 }
             }
         });
     }
 
-    protected final void unbindTouch(View pView) {
-        mRegisteredViews.remove(pView);
+    protected final void unbindTouch(View view) {
+        view.setForeground(null);
+        view.setOnTouchListener(null);
     }
 
     protected final void unbindTouchHandlers() {
         for (View view : mRegisteredViews.keySet()) {
+            view.setForeground(null);
             view.setOnTouchListener(null);
         }
     }

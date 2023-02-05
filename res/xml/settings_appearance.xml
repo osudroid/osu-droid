@@ -3,48 +3,36 @@
 <!-- Created by Reco1l on 19/7/22 00:18 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:key="pref_appearance">
 
     <PreferenceCategory
-        android:title="Appearance"
         android:layout="@layout/custom_preference_category_big"
-        app:iconSpaceReserved="false"/>
+        android:title="Appearance" />
 
-    <PreferenceCategory
-        android:title="Skin"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="Skin">
 
         <com.edlplan.ui.SkinPathPreference
             android:entries="@array/placeholder_array"
             android:entryValues="@array/placeholder_array"
             android:key="skinPath"
-            android:title="@string/opt_skinpath_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_skinpath_title" />
 
         <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"
             android:key="skin"
-            android:title="@string/opt_skin_title"
-            />
+            android:title="@string/opt_skin_title" />
 
         <ListPreference
             android:defaultValue="1"
             android:entries="@array/spinner_style_names"
             android:entryValues="@array/spinner_style_values"
             android:key="spinnerstyle"
-            android:title="@string/opt_spinner_style_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_spinner_style_title" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="UI"
-        app:iconSpaceReserved="false">
-
-        <com.reco1l.preference.GameCheckBoxPreference
-            android:defaultValue="true"
-            android:key="ui_advancedEffects"
-            android:title="@string/opt_triangles_animation_title" />
+    <PreferenceCategory android:title="UI">
 
         <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="true"
@@ -55,8 +43,7 @@
 
     <PreferenceCategory
         android:key="color"
-        android:title="Combo colors"
-        app:iconSpaceReserved="false">
+        android:title="Combo colors">
 
         <com.reco1l.preference.GameCheckBoxPreference
             android:defaultValue="false"
@@ -66,26 +53,22 @@
         <net.margaritov.preference.colorpicker.ColorPickerPreference
             android:defaultValue="@integer/COLOR_GREEN"
             android:key="combo1"
-            android:title="First color"
-            app:iconSpaceReserved="false" />
+            android:title="First color" />
 
         <net.margaritov.preference.colorpicker.ColorPickerPreference
             android:defaultValue="@integer/COLOR_BLUE"
             android:key="combo2"
-            android:title="Second color"
-            app:iconSpaceReserved="false" />
+            android:title="Second color" />
 
         <net.margaritov.preference.colorpicker.ColorPickerPreference
             android:defaultValue="@integer/COLOR_RED"
             android:key="combo3"
-            android:title="Third color"
-            app:iconSpaceReserved="false" />
+            android:title="Third color" />
 
         <net.margaritov.preference.colorpicker.ColorPickerPreference
             android:defaultValue="@integer/COLOR_YELLOW"
             android:key="combo4"
-            android:title="Fourth color"
-            app:iconSpaceReserved="false" />
+            android:title="Fourth color" />
 
     </PreferenceCategory>
 

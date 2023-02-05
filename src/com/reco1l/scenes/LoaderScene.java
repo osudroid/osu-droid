@@ -2,15 +2,11 @@ package com.reco1l.scenes;
 
 // Created by Reco1l on 26/11/2022, 04:58
 
-import android.view.View;
-import android.widget.TextView;
-
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.reco1l.Game;
-import com.reco1l.UI;
-import com.reco1l.enums.Screens;
+import com.reco1l.interfaces.ITask;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.execution.AsyncTask;
 
 import java.util.ArrayList;
 
@@ -21,80 +17,91 @@ public class LoaderScene extends BaseScene {
 
     public static final LoaderScene instance = new LoaderScene();
 
-    private LoaderFragment fragment;
-    private Runnable runOnComplete;
+    private final LoaderFragment mFragment;
 
-    private boolean
-            isImmersive = false,
-            isTaskCompleted = false,
-            isAnimInProgress = false;
+    private ITask mTask;
 
-    //--------------------------------------------------------------------------------------------//
+    private boolean mIsTaskCompleted = false;
 
-    @Override
-    public Screens getIdentifier() {
-        return Screens.Loader;
-    }
+    private int mProgress = -1;
 
     //--------------------------------------------------------------------------------------------//
 
-    public void runOnComplete(Runnable task) {
-        runOnComplete = task;
-    }
+    public LoaderScene() {
+        super();
 
-    public void notifyComplete() {
-        isTaskCompleted = true;
-    }
-
-    public boolean isImmersive() {
-        return isImmersive;
+        mFragment = new LoaderFragment(this);
+        mFragment.setMax(100);
     }
 
     //--------------------------------------------------------------------------------------------//
 
+    public void async(ITask task) {
+        if (task == null) {
+            throw new RuntimeException("You can't pass a null task here!");
+        }
+
+        show();
+        mTask = task;
+
+        new AsyncTask() {
+            public void run() {
+                mTask.run();
+            }
+
+            public void onComplete() {
+                mIsTaskCompleted = true;
+            }
+        }.execute();
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+
     @Override
-    protected void onCreate() {
-        fragment = new LoaderFragment();
+    public void onShow() {
+        ToastLogger.setPercentage(-1);
+        mProgress = (int) ToastLogger.getPercentage();
     }
 
     @Override
-    protected void onSceneUpdate(float secondsElapsed) {
-        if (!fragment.isAdded()) {
+    protected void onSceneUpdate(float sec) {
+        if (mFragment == null || !mFragment.isAdded()) {
             return;
         }
 
-        if (!isAnimInProgress && isTaskCompleted) {
-            isTaskCompleted = false;
-            fragment.onFinish(runOnComplete);
-            runOnComplete = null;
-        }
-    }
+        mFragment.setProgress(mProgress);
 
-    //--------------------------------------------------------------------------------------------//
+        if (!mFragment.isConcurrentAnimation() && mIsTaskCompleted) {
+            mIsTaskCompleted = false;
 
-    public void show(boolean immersive) {
-        isImmersive = immersive;
-        if (immersive) {
-            UI.topBar.close();
+            if (mTask != null) {
+                mFragment.close(mTask::onComplete);
+            } else {
+                mFragment.close();
+            }
+            mTask = null;
         }
-        super.show();
     }
 
     @Override
-    public void show() {
-        show(false);
+    public boolean onBackPress() {
+        return true;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public static class LoaderFragment extends BaseFragment {
 
-        private final ArrayList<String> log;
+        private CircularProgressIndicator mIndicator;
 
-        private CircularProgressIndicator indicator;
-        private TextView text;
+        private boolean mAnimInProgress = false;
 
-        private float percentage;
+        //----------------------------------------------------------------------------------------//
+
+        public LoaderFragment(BaseScene scene) {
+            super(scene);
+        }
 
         //----------------------------------------------------------------------------------------//
 
@@ -110,88 +117,63 @@ public class LoaderScene extends BaseScene {
 
         //----------------------------------------------------------------------------------------//
 
-        public LoaderFragment() {
-            super(Screens.Loader);
-            log = ToastLogger.getLog();
-        }
-
-        //----------------------------------------------------------------------------------------//
-
         @Override
         protected void onLoad() {
-            indicator = find("progress");
-            text = find("text");
+            mIndicator = find("progress");
 
-            if (log != null) {
-                log.clear();
-            }
-
-            ToastLogger.setPercentage(-1);
-            percentage = -1;
-
-            Game.loaderScene.isAnimInProgress = true;
-
-            Animation.of(indicator)
+            mAnimInProgress = true;
+            Animation.of(mIndicator)
                     .fromAlpha(0)
                     .toAlpha(1)
-                    .runOnEnd(() -> Game.loaderScene.isAnimInProgress = false)
+                    .runOnEnd(() -> mAnimInProgress = false)
                     .fromScale(0.8f)
                     .toScale(1)
                     .play(200);
         }
 
-        @Override
-        public void onUpdate(float pSecElapsed) {
-            if (!isLoaded() || ToastLogger.getPercentage() == percentage) {
+        public void close(Runnable task) {
+            if (!isAdded()) {
                 return;
             }
-            percentage = ToastLogger.getPercentage();
+            mAnimInProgress = true;
 
-            if (indicator != null) {
-                indicator.setMax(100);
-                indicator.setIndeterminate(false);
-                indicator.setProgress((int) percentage);
-            }
+            Animation.of(mIndicator)
+                    .toAlpha(0)
+                    .toScale(0.8f)
+                    .runOnEnd(() -> {
+                        mAnimInProgress = false;
+                        super.close();
 
-            if (text != null) {
-                text.setText((int) percentage + " %");
+                        if (task != null) {
+                            task.run();
+                        }
+                    })
+                    .play(200);
+        }
 
-                if (text.getVisibility() == View.GONE) {
-                    text.setVisibility(View.VISIBLE);
+        @Override
+        public void close() {
+            close(null);
+        }
 
-                    Animation.of(text)
-                            .fromY(50)
-                            .toY(0)
-                            .fromAlpha(0)
-                            .toAlpha(1)
-                            .play(180);
-                }
+        //----------------------------------------------------------------------------------------//
+
+        public boolean isConcurrentAnimation() {
+            return mAnimInProgress;
+        }
+
+        //----------------------------------------------------------------------------------------//
+
+        public void setProgress(int progress) {
+            if (mIndicator != null) {
+                mIndicator.setIndeterminate(progress < 0);
+                mIndicator.setProgress(progress);
             }
         }
 
-        public void onFinish(final Runnable onEnd) {
-            if (isAdded()) {
-                Game.activity.runOnUiThread(() -> {
-
-                    if (text.getVisibility() == View.VISIBLE) {
-                        Animation.of(text)
-                                .toY(-50)
-                                .toAlpha(0)
-                                .play(180);
-                    }
-
-                    Animation.of(indicator)
-                            .toAlpha(0)
-                            .toScale(0.8f)
-                            .runOnEnd(() -> {
-                                super.close();
-
-                                if (onEnd != null) {
-                                    onEnd.run();
-                                }
-                            })
-                            .play(200);
-                });
+        public void setMax(int max) {
+            if (mIndicator != null) {
+                mIndicator.setMax(max);
             }
         }
     }

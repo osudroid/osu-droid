@@ -2,11 +2,13 @@ package com.reco1l.tables;
 
 // Created by Reco1l on 30/6/22 19:20
 
+import static android.content.Intent.*;
+
 import android.content.Intent;
 import android.net.Uri;
 
-import com.reco1l.Game;
-import com.reco1l.data.GameNotification;
+import com.reco1l.global.Game;
+import com.reco1l.data.Notification;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
 
@@ -18,14 +20,13 @@ public class NotificationTable {
     //--------------------------------------------------------------------------------------------//
 
     public static void debug(String text) {
-        GameNotification.of("Debug")
+        Notification.of("Debug")
                 .setMessage(text)
                 .commit();
     }
 
-
     public static void exception(Exception e) {
-        GameNotification.of(e.getClass().getSimpleName())
+        Notification.of(e.getClass().getSimpleName())
                 .setMessage(e.getMessage())
                 .runOnClick(() -> {
                     DialogBuilder builder = DialogTable.stacktrace(e);
@@ -36,8 +37,20 @@ public class NotificationTable {
 
     //--------------------------------------------------------------------------------------------//
 
+    public static void welcome() {
+        Notification.of("rimu!")
+                .setMessage("Welcome to rimu! the next osu!droid\n" +
+                        "Keep in mind that it still in alpha stage\n" +
+                        "Click here to report an issue!")
+                .runOnClick(() -> {
+                    Intent intent = new Intent(ACTION_VIEW, Uri.parse("https://github.com/reco1I/rimu/issues"));
+                    Game.activity.startActivity(intent);
+                })
+                .commit();
+    }
+
     public static void accountLogIn(String state, int i) {
-        GameNotification n = GameNotification.of("Online");
+        Notification n = Notification.of("Online");
 
         if (state == null) {
             n.setMessage("Logging in...");
@@ -68,12 +81,10 @@ public class NotificationTable {
     //--------------------------------------------------------------------------------------------//
 
     public static void update(String url) {
-        GameNotification.of("Update")
+        Notification.of("Update")
                 .setMessage(Res.str(R.string.update_dialog_message) + "\nClick to update!")
                 .runOnClick(() -> {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                            .setPackage("com.edlplan.ui");
-
+                    Intent intent = new Intent(ACTION_VIEW, Uri.parse(url));
                     Game.activity.startActivity(intent);
                 })
                 .commit();

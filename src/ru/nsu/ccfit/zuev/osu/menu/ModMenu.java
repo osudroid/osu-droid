@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import static ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*;
 
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 
 import org.anddev.andengine.entity.text.ChangeableText;
 

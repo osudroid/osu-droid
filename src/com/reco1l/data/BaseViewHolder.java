@@ -35,10 +35,6 @@ public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder implemen
         onBind(item, position);
     }
 
-    protected final void rebind() {
-        onBind(item, getBindingAdapterPosition());
-    }
-
     protected abstract void onBind(T item, int position);
 
     //--------------------------------------------------------------------------------------------//
@@ -82,4 +78,18 @@ public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder implemen
     public void onDeselect() {}
 
     protected void onAttachmentChange(boolean isAttached) {}
+
+    //--------------------------------------------------------------------------------------------//
+
+    public View getView() {
+        return root;
+    }
+
+    public int getHeight() {
+        return root.getHeight();
+    }
+
+    public int getWidth() {
+        return root.getWidth();
+    }
 }

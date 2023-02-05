@@ -11,13 +11,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.factor.bouncy.BouncyRecyclerView;
 
-import com.reco1l.Game;
-import com.reco1l.UI;
+import com.reco1l.global.Game;
+import com.reco1l.global.Scenes;
+import com.reco1l.global.UI;
 import com.reco1l.data.adapters.ModCustomizationAdapter;
 import com.reco1l.interfaces.IGameMod;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.Views;
+import com.reco1l.view.BadgeTextView;
 import com.reco1l.view.IconButton;
 
 import com.reco1l.data.mods.CustomDifficultyMod;
@@ -26,6 +29,7 @@ import com.reco1l.data.mods.FlashlightMod;
 import com.reco1l.data.mods.LegacyModWrapper;
 import com.reco1l.data.mods.ModWrapper;
 import com.reco1l.data.adapters.ModSectionAdapter;
+import com.reco1l.view.custom.ModBadge;
 
 import java.util.ArrayList;
 
@@ -36,10 +40,11 @@ import static androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL;
 
 public final class ModMenu extends BaseFragment implements IGameMod {
 
-    public static ModMenu instance;
+    public static final ModMenu instance = new ModMenu();
 
-    public IconButton button;
+    private final IconButton button = Scenes.selector.modsButton;
 
+    @SuppressWarnings("FieldCanBeLocal")
     private Section
             mIncrease,
             mReduction,
@@ -54,7 +59,7 @@ public final class ModMenu extends BaseFragment implements IGameMod {
 
     @Override
     protected int getLayout() {
-        return R.layout.extra_mod_menu;
+        return R.layout.selector_mod_menu;
     }
 
     @Override
@@ -110,14 +115,13 @@ public final class ModMenu extends BaseFragment implements IGameMod {
 
     @Override
     protected void onLoad() {
-        button.setActivated(true);
-
         if (mSectionAdapter == null) {
             loadMods();
         }
 
-        RecyclerView recyclerView = find("sectionContainer");
-        recyclerView.setAdapter(mSectionAdapter);
+        RecyclerView sectionList = find("sectionContainer");
+        sectionList.setLayoutManager(new LinearLayoutManager(getContext(), HORIZONTAL, false));
+        sectionList.setAdapter(mSectionAdapter);
 
         mCustomization = find("customRv");
         mCustomization.setLayoutManager(new LinearLayoutManager(getContext(), HORIZONTAL, false));
@@ -191,20 +195,13 @@ public final class ModMenu extends BaseFragment implements IGameMod {
                 .play(100);
 
         for (ModWrapper wrapper : Game.modManager.getList()) {
-            if (wrapper.getIcon() == null) {
-                continue;
-            }
 
-            ImageView icon = new ImageView(getContext());
-            icon.setImageBitmap(Game.bitmapManager.get(wrapper.getIcon()));
-
+            ModBadge icon = new ModBadge(getContext());
+            icon.setText(wrapper.getAcronym());
+            icon.setSize(BadgeTextView.M);
             widget.addView(icon);
 
-            Animation.of(icon)
-                    .fromWidth(0)
-                    .toWidth(Res.sdp(16))
-                    .toLeftMargin(Res.sdp(4))
-                    .play(100);
+            Views.margins(icon).left(sdp(4));
         }
     }
 
@@ -214,7 +211,6 @@ public final class ModMenu extends BaseFragment implements IGameMod {
     public void close() {
         super.close();
         UI.beatmapPanel.updateAttributes();
-        button.setActivated(false);
     }
 
     //--------------------------------------------------------------------------------------------//

@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu.online;
 
 import android.os.AsyncTask;
 
-import com.reco1l.UI;
+import com.reco1l.global.UI;
 import com.reco1l.tables.NotificationTable;
 import com.reco1l.utils.helpers.OnlineHelper;
 

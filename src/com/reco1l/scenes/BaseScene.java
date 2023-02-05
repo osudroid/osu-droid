@@ -3,102 +3,114 @@ package com.reco1l.scenes;
 // Created by Reco1l on 26/9/22 13:38
 
 import android.content.Context;
+import android.widget.LinearLayout;
 
-import com.reco1l.Game;
-import com.reco1l.UI;
-import com.reco1l.enums.Screens;
-import com.reco1l.interfaces.SceneHandler;
-import com.reco1l.interfaces.MusicObserver;
+import com.reco1l.global.Game;
+import com.reco1l.global.UI;
+import com.reco1l.interfaces.ISceneHandler;
+import com.reco1l.interfaces.IMusicObserver;
 import com.reco1l.tables.ResourceTable;
+import com.reco1l.utils.Logging;
 
+import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
-public abstract class BaseScene extends Scene implements SceneHandler, MusicObserver, ResourceTable {
+public abstract class BaseScene extends Scene implements ISceneHandler, IMusicObserver, ResourceTable {
 
-    protected final Context context;
-
-    private boolean
-            isBackgroundAutoChange = true,
-            isFirstTimeShowing = true,
-            isContinuousPlay = true;
+    private boolean mIsFirstTimeShowing = true;
 
     //--------------------------------------------------------------------------------------------//
 
     public BaseScene() {
-        context = Game.activity;
+        Logging.initOf(getClass());
+        registerUpdateHandler(new IUpdateHandler() {
 
-        Game.engine.registerSceneHandler(this);
-        Game.musicManager.bindMusicObserver(this);
-        onCreate();
-        registerUpdateHandler(this::onSceneUpdate);
+            public void onUpdate(float pSecondsElapsed) {
+                onSceneUpdate(pSecondsElapsed);
+            }
+
+            public void reset() {}
+        });
+
+        Game.engine.registerSceneHandler(this, this);
+
+        Game.musicManager.bindMusicObserver(new IMusicObserver() {
+            public void onMusicChange(TrackInfo newTrack, boolean isSameAudio) {
+                if (isShowing()) {
+                    BaseScene.this.onMusicChange(newTrack, isSameAudio);
+                }
+            }
+
+            public void onMusicPause() {
+                if (isShowing()) {
+                    BaseScene.this.onMusicPause();
+                }
+            }
+
+            public void onMusicPlay() {
+                if (isShowing()) {
+                    BaseScene.this.onMusicPlay();
+                }
+            }
+
+            public void onMusicStop() {
+                if (isShowing()) {
+                    BaseScene.this.onMusicStop();
+                }
+            }
+
+            public void onMusicEnd() {
+                if (isShowing()) {
+                    BaseScene.this.onMusicEnd();
+                }
+            }
+        });
     }
 
     //--------------------------------------------------------------------------------------------//
-
-    protected abstract void onCreate();
-
-    protected abstract void onSceneUpdate(float secondsElapsed);
 
     protected void onFirstShow() {}
 
-    //--------------------------------------------------------------------------------------------//
+    public void onShow() {}
 
-    protected final void setContinuousPlay(boolean bool) {
-        this.isContinuousPlay = bool;
-    }
+    protected void onSceneUpdate(float sec) {}
 
-    protected final void setBackgroundAutoChange(boolean bool) {
-        this.isBackgroundAutoChange = bool;
-    }
+    public void onButtonContainerChange(LinearLayout layout) {}
 
     //--------------------------------------------------------------------------------------------//
 
-    protected boolean isShowing() {
+    protected final boolean isShowing() {
         return Game.engine.getScene() == this;
     }
 
+    protected final Context getContext() {
+        return Game.activity;
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public Screens getAttachedScreen() {
-        return getIdentifier();
-    }
-
-    @Override
     public void onMusicChange(TrackInfo newTrack, boolean isSameAudio) {
-        if (!isShowing()) {
-            return;
-        }
-
-        if (isBackgroundAutoChange) {
-            if (newTrack != null) {
-                UI.background.changeFrom(newTrack.getBackground());
-            }
-        }
-    }
-
-    @Override
-    public void onMusicEnd() {
-        if (!isShowing()) {
-            return;
-        }
-
-        if (isContinuousPlay) {
-            Game.musicManager.next();
+        if (newTrack != null) {
+            UI.background.changeFrom(newTrack.getBackground());
         }
     }
 
     @Override
     public boolean onBackPress() {
-        return Game.engine.backToLastScene();
+        return false;
     }
 
     @Override
     public void onSceneChange(Scene oldScene, Scene newScene) {
-        if (newScene == this && isFirstTimeShowing) {
-            isFirstTimeShowing = false;
+        if (newScene != this) {
+            return;
+        }
+
+        if (mIsFirstTimeShowing) {
+            mIsFirstTimeShowing = false;
             onFirstShow();
         }
     }
@@ -108,4 +120,6 @@ public abstract class BaseScene extends Scene implements SceneHandler, MusicObse
     public void show() {
         Game.engine.setScene(this);
     }
+
+    public void init() {}
 }

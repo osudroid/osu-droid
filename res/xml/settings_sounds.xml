@@ -3,23 +3,20 @@
 <!-- Created by Reco1l on 18/7/22 23:35 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:key="pref_sounds">
 
     <PreferenceCategory
-        android:title="Sounds"
         android:layout="@layout/custom_preference_category_big"
-        app:iconSpaceReserved="false"/>
+        android:title="Sounds" />
 
-    <PreferenceCategory
-        android:title="Volume"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="Volume">
 
         <SeekBarPreference
             android:defaultValue="100"
             android:key="bgmvolume"
             android:summary="@string/opt_bgm_volume_summary"
             android:title="@string/opt_bgm_volume_title"
-            app:iconSpaceReserved="false"
             app:showSeekBarValue="true" />
 
         <SeekBarPreference
@@ -27,57 +24,34 @@
             android:key="soundvolume"
             android:summary="@string/opt_sound_volume_summary"
             android:title="@string/opt_sound_volume_title"
-            app:iconSpaceReserved="false"
             app:showSeekBarValue="true" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="Offset"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="Offset">
 
         <SeekBarPreference
             android:defaultValue="0"
             android:key="offset"
-            android:summary="@string/opt_offset_summary"
             android:title="@string/opt_offset_title"
-            app:iconSpaceReserved="false"
             app:min="-100"
             app:showSeekBarValue="true" />
+
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="In-game"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="In-game">
 
         <ListPreference
             android:defaultValue="1"
             android:entries="@array/metronome_switch_names"
             android:entryValues="@array/metronome_switch_values"
             android:key="metronomeswitch"
-            android:summary="@string/opt_metronome_switch_summary"
-            android:title="@string/opt_metronome_switch_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_metronome_switch_title" />
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="beatmapSounds"
-            android:summary="@string/opt_sound_summary"
-            android:title="@string/opt_sound_title"
-            app:iconSpaceReserved="false" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="UI"
-        app:iconSpaceReserved="false">
-
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="musicpreview"
-            android:summary="@string/opt_musicpreview_summary"
-            android:title="@string/opt_musicpreview_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_sound_title" />
 
     </PreferenceCategory>
 

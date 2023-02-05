@@ -8,7 +8,8 @@ import androidx.cardview.widget.CardView;
 import com.edlplan.framework.easing.Easing;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.reco1l.Game;
+import com.reco1l.global.Game;
+import com.reco1l.interfaces.fields.Endpoint;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
@@ -18,7 +19,6 @@ import com.reco1l.utils.helpers.OnlineHelper;
 import java.text.DecimalFormat;
 
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -26,9 +26,8 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public final class UserProfile extends BaseFragment {
 
-    public static final String PROFILE_URL = "https://" + OnlineManager.hostname + "/game/profile.php?uid=";
+    public static final UserProfile instance = new UserProfile();
 
-    public static UserProfile instance;
     public static String message;
 
     private View body;
@@ -112,7 +111,7 @@ public final class UserProfile extends BaseFragment {
         message.setVisibility(View.GONE);
 
         bindTouch(goProfile, () -> {
-            new WebViewPanel().show(PROFILE_URL + Game.onlineManager.getUserId());
+            new WebViewPanel().show(Endpoint.PROFILE_URL + Game.onlineManager.getUserId());
             close();
         });
 

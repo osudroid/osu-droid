@@ -1,6 +1,6 @@
 package com.reco1l.data;
 
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 import com.reco1l.interfaces.IGameMod;
 
 import java.util.EnumSet;

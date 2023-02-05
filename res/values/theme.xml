@@ -27,8 +27,6 @@
         <item name="preferenceStyle">@style/preference</item>
         <item name="dialogPreferenceStyle">@style/preference</item>
 
-        <!--Custom views styles-->
-        <item name="badgeTextStyle">@style/badgeText</item>
     </style>
 
     <style name="AppTheme" parent="MainTheme" />

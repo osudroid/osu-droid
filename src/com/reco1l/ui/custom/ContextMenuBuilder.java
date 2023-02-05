@@ -10,6 +10,8 @@ public class ContextMenuBuilder {
     final PointF position;
     final ArrayList<ContextMenu.Item> items;
 
+    int fixedWidth = -1;
+
     //--------------------------------------------------------------------------------------------//
 
     public ContextMenuBuilder(PointF pPosition) {
@@ -36,6 +38,15 @@ public class ContextMenuBuilder {
                 onClick.run();
             }
         });
+        return this;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public ContextMenuBuilder setFixedWidth(int width) {
+        if (width > 0) {
+            fixedWidth = width;
+        }
         return this;
     }
 }

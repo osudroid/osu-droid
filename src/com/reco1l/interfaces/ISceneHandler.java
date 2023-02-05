@@ -2,13 +2,12 @@ package com.reco1l.interfaces;
 
 // Created by Reco1l on 18/9/22 20:50
 
-import com.reco1l.enums.Screens;
+import com.reco1l.annotation.Legacy;
 
 import org.anddev.andengine.entity.scene.Scene;
 
-public interface SceneHandler {
-
-    Screens getIdentifier();
+@Legacy // This can be removed if we make GameScene extend BaseScene
+public interface ISceneHandler {
 
     default void onPause() {}
 

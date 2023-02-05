@@ -4,11 +4,9 @@ package com.reco1l.interfaces;
 
 import androidx.annotation.Nullable;
 
-import com.reco1l.enums.Screens;
-
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
-public interface MusicObserver {
+public interface IMusicObserver {
 
     default void onMusicChange(@Nullable TrackInfo newTrack, boolean isSameAudio) {}
 
@@ -19,8 +17,4 @@ public interface MusicObserver {
     default void onMusicStop() {}
 
     default void onMusicEnd() {}
-
-    default Screens getAttachedScreen() {
-        return null;
-    }
 }

@@ -3,7 +3,7 @@ package com.reco1l.management;
 import android.database.Cursor;
 import android.util.Log;
 
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 import com.reco1l.data.ScoreInfo;
 import com.reco1l.utils.execution.AsyncTask;
 
@@ -21,7 +21,7 @@ public final class BoardManager {
     public static final BoardManager instance = new BoardManager();
 
     private final ArrayList<ScoreInfo> mScores;
-    private final ArrayList<Listener> mListeners;
+    private final ArrayList<Observer> mObservers;
 
     private Cursor mCursor;
     private String mErrorMessage;
@@ -34,17 +34,17 @@ public final class BoardManager {
 
     public BoardManager() {
         mScores = new ArrayList<>();
-        mListeners = new ArrayList<>();
+        mObservers = new ArrayList<>();
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void bindListener(Listener pListener) {
-        mListeners.add(pListener);
+    public void bindBoardObserver(Observer observer) {
+        mObservers.add(observer);
     }
 
-    public void unbindListener(Listener pListener) {
-        mListeners.remove(pListener);
+    public void unbindBoardObserver(Observer pListener) {
+        mObservers.remove(pListener);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -60,6 +60,8 @@ public final class BoardManager {
     public ScoreInfo[] getListAsArray() {
         return mScores.toArray(new ScoreInfo[0]);
     }
+
+    //--------------------------------------------------------------------------------------------//
 
     public boolean isEmpty() {
         return mScores.isEmpty();
@@ -95,7 +97,7 @@ public final class BoardManager {
     //--------------------------------------------------------------------------------------------//
 
     private void notifyChange() {
-        mListeners.forEach(l -> l.onBoardChange(mScores));
+        mObservers.forEach(l -> l.onBoardChange(mScores));
     }
 
     private void clear() {
@@ -110,7 +112,6 @@ public final class BoardManager {
             mCursor.close();
         }
         mCursor = null;
-
         mScores.clear();
     }
 
@@ -119,11 +120,6 @@ public final class BoardManager {
     private boolean isValidCursor() {
         if (mCursor == null) {
             mErrorMessage = "Failed to get data from local database!";
-            return false;
-        }
-        else if (mCursor.getCount() == 0) {
-            mCursor.close();
-            mCursor = null;
             return false;
         }
         return true;
@@ -174,9 +170,10 @@ public final class BoardManager {
                 }
                 mCursor.moveToFirst();
                 mLastScore = 0;
+                int count = mCursor.getCount();
 
-                for (int i = mCursor.getCount() - 1; i >= 0; i--) {
-                    if (mCursor.isClosed()) {
+                for (int i = count - 1; i >= 0; i--) {
+                    if (mCursor == null || mCursor.isClosed()) {
                         break;
                     }
 
@@ -272,11 +269,10 @@ public final class BoardManager {
         };
         mLoadingTask.execute();
     }
-
     //----------------------------------------------------------------------------------------//
 
     @FunctionalInterface
-    public interface Listener {
+    public interface Observer {
         void onBoardChange(ArrayList<ScoreInfo> pList);
     }
 }

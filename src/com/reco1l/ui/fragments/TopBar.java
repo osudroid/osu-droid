@@ -5,23 +5,17 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-
 import com.edlplan.ui.TriangleEffectView;
-import com.reco1l.Game;
-import com.reco1l.UI;
-import com.reco1l.enums.Screens;
+import com.reco1l.global.Game;
+import com.reco1l.global.UI;
+import com.reco1l.global.Scenes;
+import com.reco1l.scenes.BaseScene;
 import com.reco1l.tables.AnimationTable;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.view.IconButton;
 
 import com.reco1l.utils.helpers.OnlineHelper;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -33,8 +27,6 @@ public final class TopBar extends BaseFragment {
     public static final TopBar instance = new TopBar();
 
     public UserBox userBox;
-
-    private final Map<Screens, ArrayList<IconButton>> mButtons;
 
     private View
             mBody,
@@ -49,12 +41,7 @@ public final class TopBar extends BaseFragment {
     //--------------------------------------------------------------------------------------------//
 
     public TopBar() {
-        super(Screens.Selector, Screens.Summary, Screens.Loader);
-        mButtons = new HashMap<>();
-
-        for (Screens screen : Screens.values()) {
-            mButtons.put(screen, new ArrayList<>());
-        }
+        super(Scenes.selector, Scenes.summary, Scenes.loader);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -103,15 +90,15 @@ public final class TopBar extends BaseFragment {
 
 
         bindTouch(mBackButton, Game.inputManager::performBack);
-        bindTouch(find("settings"), UI.settingsPanel::altShow);
-        bindTouch(find("inbox"), UI.notificationCenter::altShow);
+        bindTouch(find("settings"), UI.settingsPanel::alternate);
+        bindTouch(find("inbox"), UI.notificationCenter::alternate);
 
         userBox.loadUserData(false);
-        handleButtons(Game.engine.getScreen());
+        handleButtonContainer(Game.engine.getCurrent());
     }
 
     @Override
-    protected void onScreenChange(Screens pLastScreen, Screens pNewScreen) {
+    protected void onSceneChange(BaseScene oldScene, BaseScene newScene) {
         if (isAdded()) {
 
             Animation.of(mLeftAnchorLayout)
@@ -119,7 +106,7 @@ public final class TopBar extends BaseFragment {
                     .toAlpha(0)
                     .runOnEnd(() -> {
                         if (!mIsClosing) {
-                            handleButtons(pNewScreen);
+                            handleButtonContainer(newScene);
 
                             Animation.of(mLeftAnchorLayout)
                                     .toX(0)
@@ -131,20 +118,16 @@ public final class TopBar extends BaseFragment {
         }
     }
 
-    private void handleButtons(@NonNull Screens pCurrent) {
+    private void handleButtonContainer(BaseScene scene) {
         mButtonsContainer.removeAllViews();
 
-        if (pCurrent == Screens.Main || pCurrent == Screens.Loader) {
+        if (scene == Scenes.main || scene == Scenes.loader) {
             mBackButton.setVisibility(View.GONE);
         } else {
             mBackButton.setVisibility(View.VISIBLE);
         }
 
-        //noinspection ConstantConditions
-        for (IconButton button : mButtons.get(pCurrent)) {
-            mButtonsContainer.addView(button);
-            bindTouch(button, button.getTouchListener());
-        }
+        scene.onButtonContainerChange(mButtonsContainer);
     }
 
     @Override
@@ -168,24 +151,9 @@ public final class TopBar extends BaseFragment {
 
     @Override
     public boolean show() {
-        if (Game.engine.getScreen() == Screens.Loader) {
-            if (Game.loaderScene.isImmersive()) {
-                return false;
-            }
-        }
         mIsClosing = false;
         return super.show();
     }
-    //--------------------------------------------------------------------------------------------//
-
-    // Bind a button to be displayed on the desired screen
-    public void bindButton(Screens pScreen, IconButton pButton) {
-        if (pButton != null) {
-            //noinspection ConstantConditions
-            mButtons.get(pScreen).add(pButton);
-        }
-    }
-
     //--------------------------------------------------------------------------------------------//
 
     // TODO [TopBar] Replace this with a custom view
@@ -209,7 +177,7 @@ public final class TopBar extends BaseFragment {
             TriangleEffectView triangles = parent.find("userBoxTriangles");
             triangles.setTriangleColor(0xFFFFFFFF);
 
-            parent.bindTouch(body, UI.userProfile::altShow);
+            parent.bindTouch(body, UI.userProfile::alternate);
         }
 
         //----------------------------------------------------------------------------------------//

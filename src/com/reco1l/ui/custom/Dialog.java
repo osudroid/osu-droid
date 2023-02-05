@@ -11,7 +11,7 @@ import android.widget.TextView;
 import androidx.cardview.widget.CardView;
 
 import com.edlplan.framework.easing.Easing;
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
@@ -67,8 +67,8 @@ public class Dialog extends BaseFragment {
     protected void onLoad() {
         closeOnBackgroundClick(canClose());
 
-        int m = (int) Res.dimen(R.dimen.M);
-        int xs = (int) Res.dimen(R.dimen.XS);
+        int m = Res.dimen(R.dimen.M);
+        int xs = Res.dimen(R.dimen.XS);
 
         mButtonsContainer = find("buttonsContainer");
         mScrollBody = find("bodyParent");
@@ -101,7 +101,7 @@ public class Dialog extends BaseFragment {
                 .play(300);
 
         if (mBuilder.customFragment != null) {
-            Game.platform.manager.beginTransaction()
+            Game.platform.transaction()
                     .add(find("fragmentContainer").getId(), mBuilder.customFragment)
                     .runOnCommit(
                             () -> Animation.of(mBuilder.customFragment.getView())
@@ -174,6 +174,15 @@ public class Dialog extends BaseFragment {
         } else {
             message.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    public boolean onBackPress() {
+        if (canClose()) {
+            close();
+            return true;
+        }
+        return false;
     }
 
     //--------------------------------------------------------------------------------------------//

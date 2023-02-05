@@ -8,7 +8,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 import com.reco1l.notification.NotificationPlayer;
 
 import java.io.File;

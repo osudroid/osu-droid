@@ -4,8 +4,8 @@ package com.reco1l.management;
 
 import android.util.Log;
 
-import com.reco1l.Game;
-import com.reco1l.interfaces.MusicObserver;
+import com.reco1l.global.Game;
+import com.reco1l.interfaces.IMusicObserver;
 import com.reco1l.tables.NotificationTable;
 
 import java.io.File;
@@ -23,7 +23,7 @@ public final class MusicManager {
 
     public static final MusicManager instance = new MusicManager();
 
-    private final ArrayList<MusicObserver> mObservers;
+    private final ArrayList<IMusicObserver> mObservers;
 
     private TrackInfo mTrack;
 
@@ -84,36 +84,22 @@ public final class MusicManager {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void bindMusicObserver(MusicObserver observer) {
+    public void bindMusicObserver(IMusicObserver observer) {
         mObservers.add(observer);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public void onMusicEnd() {
-        notify(MusicObserver::onMusicEnd);
+        notify(IMusicObserver::onMusicEnd);
     }
 
     private void onMusicChange(TrackInfo track, boolean sameAudio) {
         notify(o -> o.onMusicChange(track, sameAudio));
     }
 
-    private void notify(Consumer<MusicObserver> consumer) {
-        mObservers.forEach(observer -> {
-            if (isValidObserver(observer)) {
-                consumer.accept(observer);
-            }
-        });
-    }
-
-    private boolean isValidObserver(MusicObserver observer) {
-        if (observer != null) {
-            if (observer.getAttachedScreen() != null) {
-                return observer.getAttachedScreen() == Game.engine.getScreen();
-            }
-            return true;
-        }
-        return false;
+    private void notify(Consumer<IMusicObserver> consumer) {
+        mObservers.forEach(consumer);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -168,7 +154,7 @@ public final class MusicManager {
 
     public boolean change(BeatmapInfo beatmap) {
         if (beatmap != null) {
-            return change(beatmap.getTrack(0));
+            return change(beatmap.getPreviewTrack());
         }
         stop();
         onMusicChange(null, false);
@@ -228,7 +214,7 @@ public final class MusicManager {
         Game.songService.play();
         Game.songService.setVolume(Config.getBgmVolume());
 
-        notify(MusicObserver::onMusicPlay);
+        notify(IMusicObserver::onMusicPlay);
     }
 
     public void pause() {
@@ -238,7 +224,7 @@ public final class MusicManager {
         assert Game.songService != null;
 
         Game.songService.pause();
-        notify(MusicObserver::onMusicPause);
+        notify(IMusicObserver::onMusicPause);
     }
 
     public void stop() {
@@ -248,22 +234,20 @@ public final class MusicManager {
         assert Game.songService != null;
 
         Game.songService.stop();
-        notify(MusicObserver::onMusicStop);
+        notify(IMusicObserver::onMusicStop);
     }
 
     public void previous() {
         if (isInvalidRequest()) {
             return;
         }
-        TrackInfo prev = Game.libraryManager.getPrevBeatmap().getTrack(0);
-        change(prev);
+        change(Game.libraryManager.getPrevBeatmap());
     }
 
     public void next() {
         if (isInvalidRequest()) {
             return;
         }
-        TrackInfo next = Game.libraryManager.getNextBeatmap().getTrack(0);
-        change(next);
+        change(Game.libraryManager.getNextBeatmap());
     }
 }

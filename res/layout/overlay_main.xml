@@ -3,11 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.edlplan.ui.InvalidateView
-        android:id="@+id/mo_invalidate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
     <TextView
         android:id="@+id/mo_author"
         style="@style/propertyBadge"
@@ -18,41 +13,16 @@
         android:paddingHorizontal="@dimen/S"
         android:text="version number" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <TextView
+        android:id="@+id/mo_fps"
+        style="@style/propertyBadge"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:layout_margin="@dimen/XS"
-        android:orientation="vertical"
-        android:gravity="right">
+        android:backgroundTint="@color/backgroundDimmed"
+        android:paddingHorizontal="@dimen/S"
+        android:text="999fps - 99ms" />
 
-        <TextView
-            android:id="@+id/mo_memory"
-            style="@style/propertyBadge"
-            android:layout_centerHorizontal="true"
-            android:backgroundTint="@color/backgroundDimmed"
-            android:paddingHorizontal="@dimen/S"
-            android:layout_marginBottom="@dimen/XXS"
-            android:text="Memory: 100/100MB" />
-
-        <TextView
-            android:id="@+id/mo_engineFPS"
-            style="@style/propertyBadge"
-            android:layout_centerHorizontal="true"
-            android:backgroundTint="@color/backgroundDimmed"
-            android:paddingHorizontal="@dimen/S"
-            android:layout_marginBottom="@dimen/XXS"
-            android:text="Engine: 120 FPS" />
-
-        <TextView
-            android:id="@+id/mo_drawFPS"
-            style="@style/propertyBadge"
-            android:layout_centerHorizontal="true"
-            android:backgroundTint="@color/backgroundDimmed"
-            android:paddingHorizontal="@dimen/S"
-            android:text="Draw: 120 FPS" />
-
-    </LinearLayout>
 
 </RelativeLayout>

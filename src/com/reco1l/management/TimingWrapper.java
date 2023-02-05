@@ -4,8 +4,8 @@ package com.reco1l.management;
 
 import android.util.Log;
 
-import com.reco1l.Game;
-import com.reco1l.interfaces.MusicObserver;
+import com.reco1l.global.Game;
+import com.reco1l.interfaces.IMusicObserver;
 import com.reco1l.utils.execution.ScheduledTask;
 
 import java.util.LinkedList;
@@ -15,7 +15,7 @@ import ru.nsu.ccfit.zuev.osu.OSUParser;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.game.TimingPoint;
 
-public class TimingWrapper implements MusicObserver {
+public class TimingWrapper implements IMusicObserver {
 
     public static final TimingWrapper instance = new TimingWrapper();
 
@@ -194,7 +194,7 @@ public class TimingWrapper implements MusicObserver {
             lastBeatPassTime = beatPassTime;
             offset = 0;
 
-            ScheduledTask.run(() -> {
+            ScheduledTask.of(() -> {
                 beat++;
 
                 if (beat > 3) {

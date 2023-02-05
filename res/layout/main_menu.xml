@@ -9,40 +9,39 @@
     android:translationZ="@dimen/top_layer">
 
     <View
-        android:id="@+id/mainM_buttonsBackground"
+        android:id="@+id/main_buttonsBackground"
         android:layout_width="match_parent"
         android:layout_height="@dimen/mainMenuButtonHeight"
         android:layout_centerVertical="true"
         android:background="@color/backgroundTertiary" />
 
     <com.reco1l.view.effects.CircularSpectrum
-        android:id="@+id/mainM_spectrum"
+        android:id="@+id/main_spectrum"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:elevation="@dimen/M" />
 
     <com.reco1l.view.effects.ExpandEffect
-        android:id="@+id/mainM_expand"
+        android:id="@+id/main_expand"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:elevation="@dimen/M" />
 
     <com.reco1l.view.LogoView
-        android:id="@+id/mainM_logo"
+        android:id="@+id/main_logo"
         android:layout_width="@dimen/mainMenuSmallLogoSize"
         android:layout_height="@dimen/mainMenuSmallLogoSize"
-        android:layout_centerVertical="true"
-        app:cardElevation="@dimen/L" />
+        android:layout_centerVertical="true" />
 
     <LinearLayout
-        android:id="@+id/mainM_buttonsLayout"
+        android:id="@+id/main_buttonsLayout"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/mainMenuButtonHeight"
         android:layout_centerVertical="true"
-        android:layout_toRightOf="@id/mainM_logo">
+        android:layout_toRightOf="@id/main_logo">
 
         <androidx.cardview.widget.CardView
-            android:id="@+id/mainM_solo"
+            android:id="@+id/main_solo"
             android:layout_width="@dimen/mainMenuButtonWidth"
             android:layout_height="match_parent"
             app:cardBackgroundColor="@color/backgroundSecondary"
@@ -71,7 +70,7 @@
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
-            android:id="@+id/mainM_multi"
+            android:id="@+id/main_multi"
             android:layout_width="@dimen/mainMenuButtonWidth"
             android:layout_height="match_parent"
             app:cardBackgroundColor="@color/backgroundSecondary"
@@ -102,7 +101,7 @@
     </LinearLayout>
 
     <com.reco1l.view.effects.FlashEffect
-        android:id="@+id/mainM_kiai"
+        android:id="@+id/main_kiai"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

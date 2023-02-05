@@ -2,9 +2,9 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.opengl.GLES20;
 
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 import com.reco1l.data.ScoreInfo;
-import com.reco1l.UI;
+import com.reco1l.global.UI;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -101,7 +101,7 @@ public class DuringGameScoreBoard extends GameObject {
         playerRank.setScaleCenter(0, 0);
         playerRank.setScale(1.7f);
         playerRank.setColor(0.6f, 0.6f, 0.6f, 0.9f);
-        playerRank.setText("#" + (!UI.beatmapPanel.isOnlineBoard || posNow < (replayid == -1 ? 20 : 19) ?
+        playerRank.setText("#" + (!Game.boardManager.isOnlineBoard() || posNow < (replayid == -1 ? 20 : 19) ?
                 String.valueOf(posNow + 1) : "?"));
         playerRank.setPosition(100 - playerRank.getWidth(), paddingTop * 2);
         playerSprite.attachChild(playerRank);

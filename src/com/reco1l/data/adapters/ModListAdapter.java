@@ -1,6 +1,7 @@
 package com.reco1l.data.adapters;
 // Created by Reco1l on 20/12/2022, 05:41
 
+import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -8,13 +9,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 
-import com.reco1l.Game;
-import com.reco1l.UI;
+import com.reco1l.global.Game;
+import com.reco1l.global.UI;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
-import com.reco1l.management.ModManager;
 import com.reco1l.utils.Animation;
 import com.reco1l.data.mods.ModWrapper;
+import com.reco1l.view.RoundLayout;
+import com.reco1l.view.custom.ModBadge;
 
 import java.util.ArrayList;
 
@@ -26,6 +28,7 @@ public class ModListAdapter extends BaseAdapter<ModListAdapter.ModViewHolder, Mo
 
     public ModListAdapter(ArrayList<ModWrapper> pList) {
         super(pList);
+        setMarginAtBounds(sdp(12));
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -44,33 +47,40 @@ public class ModListAdapter extends BaseAdapter<ModListAdapter.ModViewHolder, Mo
 
     public static class ModViewHolder extends BaseViewHolder<ModWrapper> {
 
-        private final CardView mBody;
+        private final RoundLayout mBody;
         private final TextView mName;
-        private final ImageView mIcon;
+        private final ModBadge mIcon;
+
+        private final ColorDrawable mBackground;
 
         //----------------------------------------------------------------------------------------//
 
         public ModViewHolder(@NonNull View root) {
             super(root);
-            mBody = (CardView) root;
+            mBody = root.findViewById(R.id.mm_modBody);
             mIcon = root.findViewById(R.id.mm_modIcon);
             mName = root.findViewById(R.id.mm_modName);
+
+            mBackground = new ColorDrawable(0xFF242424);
         }
 
         //----------------------------------------------------------------------------------------//
 
         @Override
-        protected void onBind(ModWrapper pModWrapper, int pPosition) {
-            pModWrapper.holder = this;
+        protected void onBind(ModWrapper wrapper, int pPosition) {
+            wrapper.holder = this;
 
-            mIcon.setImageBitmap(Game.bitmapManager.get(pModWrapper.getIcon()));
-            mName.setText(pModWrapper.getName());
+            mName.setText(wrapper.getName());
+            mIcon.setText(wrapper.getAcronym());
 
-            UI.modMenu.bindTouch(root, () -> UI.modMenu.onModSelect(pModWrapper, false));
+            UI.modMenu.bindTouch(mBody, () -> UI.modMenu.onModSelect(wrapper, false));
 
             if (isEnabled()) {
-                mBody.setCardBackgroundColor(0xFF222F3D);
+                mBackground.setColor(0xFF222F3D);
+            } else {
+                mBackground.setColor(0xFF242424);
             }
+            mBody.setBackground(mBackground);
         }
 
         private boolean isEnabled() {
@@ -79,19 +89,25 @@ public class ModListAdapter extends BaseAdapter<ModListAdapter.ModViewHolder, Mo
 
         @Override
         public void onSelect() {
-            int color = mBody.getCardBackgroundColor().getDefaultColor();
+            int color = mBackground.getColor();
 
             Animation.ofColor(color, 0xFF222F3D)
-                    .runOnUpdate(value -> mBody.setCardBackgroundColor((int) value))
+                    .runOnUpdate(value -> {
+                        mBackground.setColor((int) value);
+                        mBody.invalidate();
+                    })
                     .play(100);
         }
 
         @Override
         public void onDeselect() {
-            int color = mBody.getCardBackgroundColor().getDefaultColor();
+            int color = mBackground.getColor();
 
             Animation.ofColor(color, 0xFF242424)
-                    .runOnUpdate(value -> mBody.setCardBackgroundColor((int) value))
+                    .runOnUpdate(value -> {
+                        mBackground.setColor((int) value);
+                        mBody.invalidate();
+                    })
                     .play(100);
         }
     }

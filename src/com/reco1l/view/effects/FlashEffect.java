@@ -14,8 +14,8 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import com.reco1l.Game;
-import com.reco1l.UI;
+import com.reco1l.global.Game;
+import com.reco1l.global.UI;
 import com.reco1l.utils.Animation;
 import com.reco1l.view.BaseView;
 
@@ -137,8 +137,9 @@ public class FlashEffect extends View implements BaseView {
                     } else {
                         short beat = Game.timingWrapper.getBeat();
 
-                        drawLeft = beat == 0;
-                        drawRight = beat == 0;
+                        // 3 equals 4th beat
+                        drawLeft = beat == 3;
+                        drawRight = beat == 3;
                     }
                 })
                 .play(upTime);

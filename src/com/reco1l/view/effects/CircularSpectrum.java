@@ -13,8 +13,8 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.core.math.MathUtils;
 
-import com.reco1l.Game;
-import com.reco1l.UI;
+import com.reco1l.global.Game;
+import com.reco1l.global.UI;
 import com.reco1l.view.BaseView;
 import com.reco1l.view.LogoView;
 

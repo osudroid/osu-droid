@@ -1,15 +1,23 @@
 package com.reco1l.data;
 // Created by Reco1l on 05/12/2022, 06:23
 
+import static androidx.recyclerview.widget.RecyclerView.*;
+
+import static com.reco1l.utils.Views.*;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 
 import com.reco1l.tables.ResourceTable;
+import com.reco1l.utils.Views;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,12 +28,17 @@ import java.util.function.Consumer;
 public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapter<VH>
         implements ResourceTable {
 
-    private ArrayList<T> mItems;
-    private SelectionListener mListener;
-
-    private int mSelectedPosition = -1;
-
     private final ArrayList<VH> mHolders = new ArrayList<>();
+
+    private ArrayList<T> mItems;
+    private RecyclerView mRecyclerView;
+    private SelectionListener mListener;
+    private LayoutManager mLayoutManager;
+
+    private int
+            mOrientation = -1,
+            mMarginAtBounds = 0,
+            mSelectedPosition = -1;
 
     private T mLastSelected;
 
@@ -59,11 +72,16 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
 
     //--------------------------------------------------------------------------------------------//
 
-    protected int getItemLayout() {
+    // Define layout XML resource to be inflated
+    protected @LayoutRes int getItemLayout() {
         return 0;
     }
 
+    // Return a new instance of your custom view holder class, this can be a replacement for
+    // getItemLayout() if you want to programmatically create a view instead of inflating a layout
     protected abstract VH getViewHolder(View pRootView);
+
+    protected void onHolderCreated(VH pHolder) {}
 
     //--------------------------------------------------------------------------------------------//
 
@@ -118,31 +136,31 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
 
     public final void deselectAll() {
         mSelectedPosition = -1;
-
         mHolders.forEach(BaseViewHolder::handleDeselection);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void setSelectionListener(SelectionListener pListener) {
+    public final void setMarginAtBounds(int margin) {
+        mMarginAtBounds = margin;
+    }
+
+    public final void setSelectionListener(SelectionListener pListener) {
         mListener = pListener;
     }
 
-    public int getSelectedPosition() {
+    public final void forEachHolder(Consumer<VH> action) {
+        mHolders.forEach(action);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public final int getSelectedPosition() {
         return mSelectedPosition;
     }
 
-    public VH getHolderOf(T pItem) {
-        for (VH holder : mHolders) {
-            if (holder.item.equals(pItem)) {
-                return holder;
-            }
-        }
-        return null;
-    }
-
-    public void forEachHolder(Consumer<VH> action) {
-        mHolders.forEach(action);
+    public ArrayList<VH> getHolders() {
+        return mHolders;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -157,34 +175,47 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
     @NonNull
     @Override
     @SuppressWarnings("unchecked")
-    public VH onCreateViewHolder(@NonNull ViewGroup pParent, int pType) {
-        Context context = pParent.getContext();
+    public VH onCreateViewHolder(@NonNull ViewGroup parent, int pType) {
+        Context context = parent.getContext();
 
         View root = null;
         if (getItemLayout() != 0) {
-            root = LayoutInflater.from(context).inflate(getItemLayout(), pParent, false);
+            root = LayoutInflater.from(context).inflate(getItemLayout(), parent, false);
         }
 
         VH holder = getViewHolder(root);
         holder.context = context;
         holder.adapter = (BaseAdapter<BaseViewHolder<T>, T>) this;
-        onHolderCreated(holder);
+
         mHolders.add(holder);
+        onHolderCreated(holder);
+
         return holder;
     }
 
-    protected void onHolderCreated(VH pHolder) {}
 
     @Override
-    public void onBindViewHolder(@NonNull VH pHolder, int i) {
+    public void onBindViewHolder(@NonNull VH holder, int i) {
         T item = mItems.get(i);
 
-        pHolder.bind(item, i);
+        holder.bind(item, i);
 
         if (mSelectedPosition == i) {
-            pHolder.handleSelection();
+            holder.handleSelection();
         } else {
-            pHolder.handleDeselection();
+            holder.handleDeselection();
+        }
+
+        if (mMarginAtBounds > 0 && mOrientation != -1) {
+            MarginUtils m = margins(holder.root);
+
+            if (mOrientation == VERTICAL) {
+                m.top(i == 0 ? mMarginAtBounds : 0);
+                m.bottom(i == getItemCount() - 1 ? mMarginAtBounds : 0);
+            } else {
+                m.left(i == 0 ? mMarginAtBounds : 0);
+                m.right(i == getItemCount() - 1 ? mMarginAtBounds : 0);
+            }
         }
     }
 
@@ -200,5 +231,21 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
     public void onViewDetachedFromWindow(@NonNull VH holder) {
         holder.isAttached = false;
         holder.onAttachmentChange(false);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        mRecyclerView = recyclerView;
+        mLayoutManager = mRecyclerView.getLayoutManager();
+
+        if (mLayoutManager instanceof LinearLayoutManager) {
+            LinearLayoutManager linear = (LinearLayoutManager) mLayoutManager;
+            mOrientation = linear.getOrientation();
+        } else {
+            mOrientation = -1;
+        }
     }
 }

@@ -2,75 +2,47 @@ package com.reco1l.scenes;
 
 // Created by Reco1l on 26/9/22 17:40
 
-import android.util.Log;
+import android.widget.LinearLayout;
 
 import com.edlplan.replay.OdrDatabase;
-import com.reco1l.Game;
-import com.reco1l.UI;
-import com.reco1l.enums.Screens;
+import com.reco1l.global.Game;
+import com.reco1l.global.UI;
+import com.reco1l.global.Scenes;
+import com.reco1l.interfaces.ITask;
+import com.reco1l.tables.NotificationTable;
 import com.reco1l.utils.Animation;
 import com.reco1l.view.IconButton;
 
 import org.anddev.andengine.entity.scene.Scene;
 
+import java.util.Random;
+
+import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
+import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class SelectorScene extends BaseScene {
 
     public static final SelectorScene instance = new SelectorScene();
 
-    public TrackInfo selectedTrack;
+    public final IconButton
+            modsButton,
+            searchButton,
+            randomButton;
 
     //--------------------------------------------------------------------------------------------//
 
-    @Override
-    public Screens getIdentifier() {
-        return Screens.Selector;
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    @Override
-    protected void onCreate() {
-        setContinuousPlay(false);
-
+    public SelectorScene() {
+        super();
         //bindDataBaseChangedListener();
-        setTouchAreaBindingEnabled(true);
-        createTopBarButtons();
-    }
 
-    private void createTopBarButtons() {
-        IconButton mods = UI.modMenu.button = new IconButton(context);
-
-        mods.runOnTouch(UI.modMenu::altShow);
-        mods.setIcon(R.drawable.v18_tune);
-
-        IconButton search = new IconButton(context);
-        search.runOnTouch(UI.filterBar::altShow);
-        search.setIcon(R.drawable.v18_search);
-
-        /*BarButton random = new BarButton(context);
-        random.setIcon(R.drawable.v_random);*/
-
-        UI.topBar.bindButton(getIdentifier(), mods);
-        UI.topBar.bindButton(getIdentifier(), search);
-        /*UI.topBar.addButton(getIdentifier(), random);*/
-    }
-
-
-    @Override
-    public void show() {
-        super.show();
-
-        setTouchAreaBindingEnabled(false);
-        bindDataBaseChangedListener();
-        Game.gameScene.setOldScene(this);
-    }
-
-    @Override
-    protected void onSceneUpdate(float secondsElapsed) {
+        modsButton = new IconButton(getContext());
+        searchButton = new IconButton(getContext());
+        randomButton = new IconButton(getContext());
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -95,12 +67,84 @@ public class SelectorScene extends BaseScene {
                 .play(300);
     }
 
+    @Override
+    public void onButtonContainerChange(LinearLayout layout) {
+        modsButton.setTouchListener(() ->
+                modsButton.setSelected(UI.modMenu.alternate())
+        );
+        modsButton.setIcon(R.drawable.v18_tune);
+
+        searchButton.setTouchListener(() ->
+                modsButton.setSelected(UI.filterBar.alternate())
+        );
+        searchButton.setIcon(R.drawable.v18_search);
+
+        randomButton.setIcon(R.drawable.v18_random);
+        randomButton.setTouchListener(this::random);
+
+        layout.addView(modsButton);
+        layout.addView(searchButton);
+        layout.addView(randomButton);
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     public void loadScore(int id, String player) {
-        boolean isOnline = UI.beatmapPanel.isOnlineBoard;
+        TrackInfo track = Game.musicManager.getTrack();
 
-        Game.summaryScene.loadFromBoard(selectedTrack, id, isOnline, player);
+        Scenes.loader.async(new ITask() {
+
+            private StatisticV2 mStats;
+            private String mReplay;
+
+            public void run() {
+                if (!Game.boardManager.isOnlineBoard()) {
+                    mStats = Game.scoreLibrary.getScore(id);
+                    mReplay = mStats.getReplayName();
+                    return;
+                }
+
+                String pack;
+                try {
+                    pack = Game.onlineManager.getScorePack(id);
+                }
+                catch (OnlineManagerException e) {
+                    NotificationTable.exception(e);
+                    return;
+                }
+
+                String[] params = pack.split("\\s+");
+                if (params.length >= 11) {
+                    mStats = new StatisticV2(params);
+                    mStats.setPlayerName(player);
+                }
+                mReplay = OnlineManager.getReplayURL(id);
+            }
+
+            public void onComplete() {
+                if (mStats == null) {
+                    show();
+                    return;
+                }
+                Scenes.summary.load(mStats, track, mReplay, true);
+            }
+        });
+    }
+
+    public void random() {
+        Random r = new Random();
+
+        int bBound = Game.libraryManager.getSizeOfBeatmaps();
+        int bIndex = r.nextInt(bBound);
+
+        BeatmapInfo beatmap = Game.libraryManager.getBeatmapByIndex(bIndex);
+
+        int tBound = beatmap.getTracks().size();
+        int tIndex = r.nextInt(tBound);
+
+        TrackInfo track = beatmap.getTrack(tIndex);
+
+        onTrackSelect(track);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -124,7 +168,7 @@ public class SelectorScene extends BaseScene {
 
     @Override
     public boolean onBackPress() {
-        Game.engine.setScene(Game.mainScene);
+        Game.engine.setScene(Scenes.main);
         return true;
     }
 
@@ -138,12 +182,42 @@ public class SelectorScene extends BaseScene {
     //--------------------------------------------------------------------------------------------//
 
     public void bindDataBaseChangedListener() {
-        OdrDatabase.get().setOnDatabaseChangedListener(() ->
-                Game.boardManager.load(Game.musicManager.getTrack())
-        );
+        OdrDatabase.get().setOnDatabaseChangedListener(() -> {
+            if (isShowing()) {
+                Game.boardManager.load(Game.musicManager.getTrack());
+            }
+        });
     }
 
     public void unbindDataBaseChangedListener() {
         OdrDatabase.get().setOnDatabaseChangedListener(null);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public void show(boolean reload) {
+        if (!reload) {
+            super.show();
+        }
+
+        Scenes.loader.async(new ITask() {
+
+            public void run() {
+                Game.activity.checkNewBeatmaps();
+                if (!Game.libraryManager.loadLibraryCache(Game.activity, true)) {
+                    Game.libraryManager.scanLibrary(Game.activity);
+                }
+            }
+
+            public void onComplete() {
+                SelectorScene.super.show();
+                Game.musicManager.play();
+            }
+        });
+    }
+
+    @Override
+    public void show() {
+        show(false);
     }
 }

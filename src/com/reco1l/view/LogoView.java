@@ -9,24 +9,20 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
 
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Views;
 import com.reco1l.view.effects.StripsEffect;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class LogoView extends CardView implements BaseView {
+public final class LogoView extends RoundLayout {
 
-    private ImageView lines;
-    private RelativeLayout layout;
-    private StripsEffect effect;
+    private ImageView mLines;
 
     private Animation
             lightOut,
@@ -36,95 +32,79 @@ public class LogoView extends CardView implements BaseView {
     //--------------------------------------------------------------------------------------------//
 
     public LogoView(@NonNull Context context) {
-        this(context, null);
+        super(context);
     }
 
     public LogoView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        onCreate(attrs);
     }
 
     public LogoView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        onCreate(attrs);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public View getView() {
-        return this;
-    }
+    public void onCreate() {
+        setBackground(new ColorDrawable(0xFF1E1E1E));
+        setConstantInvalidation(true);
+        setClampToSquare(true);
+        setMaxRounded(true);
 
-    //--------------------------------------------------------------------------------------------//
+        ViewGroup.LayoutParams params = Views.match_parent;
 
-    @Override
-    public void onCreate(AttributeSet attrs) {
-        layout = new RelativeLayout(getContext());
-        addView(layout);
-
-        setCardBackgroundColor(0xFF1E1E1E);
-        setCardElevation(sdp(20));
-
-        ViewGroup.LayoutParams p = Views.match_parent;
-
-        effect = new StripsEffect(getContext());
+        // Strips effect
+        StripsEffect effect = new StripsEffect(getContext());
         effect.setStripWidth(sdp(20));
-        layout.addView(effect, p);
+        addView(effect, params);
 
+        // Flash effect
         View flash = new View(getContext());
         flash.setBackground(new ColorDrawable(Color.WHITE));
         flash.setAlpha(0);
-        layout.addView(flash, p);
+        addView(flash, params);
 
+        // Border overlay
         ImageView overlay = new ImageView(getContext());
         overlay.setImageResource(R.drawable.logo_overlay);
-        layout.addView(overlay, p);
+        addView(overlay, params);
 
-        lines = new ImageView(getContext());
-        lines.setImageResource(R.drawable.logo_lines);
-        layout.addView(lines, p);
+        // Lines overlay
+        mLines = new ImageView(getContext());
+        mLines.setImageResource(R.drawable.logo_lines);
+        addView(mLines, params);
 
+        // rimu!
         ImageView brand = new ImageView(getContext());
         brand.setImageResource(R.drawable.logo_brand);
-        layout.addView(brand, p);
+        addView(brand, params);
 
         lightIn = Animation.of(flash).toAlpha(0.1f);
         lightOut = Animation.of(flash).toAlpha(0);
 
-        rotate = Animation.of(lines);
+        rotate = Animation.of(mLines);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public void onResize(int w, int h) {
-        int size = Math.max(w, h);
-
-        layout.getLayoutParams().width = size;
-        layout.getLayoutParams().height = size;
-        layout.requestLayout();
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        setRadius(canvas.getHeight() / 2f);
-
-        if (!isInEditMode()) {
-            if (Game.timingWrapper.isNextBeat()) {
-                onNextBeat();
-            }
-            updatePeak();
+    protected void onManagedDraw(Canvas canvas) {
+        if (isInEditMode()) {
+            return;
         }
 
-        super.onDraw(canvas);
-        invalidate();
+        if (Game.timingWrapper.isNextBeat()) {
+            onNextBeat();
+        }
+        updatePeak();
     }
 
     private void updatePeak() {
         if (!Game.musicManager.isPlaying()) {
             return;
         }
+        assert Game.songService != null;
         float level = Game.songService.getLevel();
 
         float peak = Math.max(0.9f, 0.9f + level);
@@ -145,7 +125,7 @@ public class LogoView extends CardView implements BaseView {
             }
         }
 
-        float increment = lines.getRotation();
+        float increment = mLines.getRotation();
         if (Game.timingWrapper.isKiai()) {
             increment += 25;
         } else {
@@ -153,11 +133,5 @@ public class LogoView extends CardView implements BaseView {
         }
 
         rotate.toRotation(increment).play((long) beatLength);
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public StripsEffect getStripsEffect() {
-        return effect;
     }
 }

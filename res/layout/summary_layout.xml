@@ -9,7 +9,7 @@
     android:layout_height="match_parent"
     tools:background="#FFF">
 
-    <ScrollView
+    <com.factor.bouncy.BouncyNestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/backgroundDimmed">
@@ -95,7 +95,7 @@
                 android:layout_marginBottom="@dimen/XS"
                 android:background="@color/badgeBackground"
                 android:orientation="vertical"
-                android:paddingHorizontal="@dimen/XXL"
+                android:paddingHorizontal="@dimen/L"
                 android:paddingVertical="@dimen/XL">
 
                 <RelativeLayout
@@ -124,18 +124,12 @@
                                 android:layout_height="wrap_content"
                                 android:gravity="center">
 
-                                <androidx.cardview.widget.CardView
+                                <com.reco1l.view.RoundedImageView
+                                    android:id="@+id/gr_avatar"
                                     android:layout_width="@dimen/gameResultsAvatarSize"
                                     android:layout_height="@dimen/gameResultsAvatarSize"
-                                    app:cardCornerRadius="@dimen/gameResultsAvatarCornerRadius">
-
-                                    <ImageView
-                                        android:id="@+id/gr_avatar"
-                                        android:layout_width="match_parent"
-                                        android:layout_height="match_parent"
-                                        android:src="@drawable/placeholder_avatar" />
-
-                                </androidx.cardview.widget.CardView>
+                                    android:src="@drawable/placeholder_avatar"
+                                    app:radius="6" />
 
                                 <TextView
                                     android:id="@+id/gr_username"
@@ -159,256 +153,76 @@
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginVertical="@dimen/S"
-                            android:orientation="horizontal">
+                            android:layout_marginTop="@dimen/XL">
 
-                            <!--300s-->
-                            <LinearLayout
-                                android:layout_width="wrap_content"
+                            <!--300-->
+                            <com.reco1l.view.custom.StatisticLayout
+                                android:id="@+id/gr_300"
+                                android:layout_width="@dimen/_70sdp"
                                 android:layout_height="wrap_content"
                                 android:layout_marginRight="@dimen/S"
-                                android:orientation="vertical">
+                                android:text="0000x"
+                                app:badgeText="great"
+                                app:badgeTextColor="#64B6FD" />
 
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="@dimen/S"
-                                    android:background="@drawable/shape_rounded"
-                                    android:backgroundTint="@color/badgeBackground"
-                                    android:gravity="center"
-                                    android:paddingHorizontal="@dimen/M"
-                                    android:paddingVertical="@dimen/XS">
-
-                                    <ImageView
-                                        android:id="@+id/gr_300iv"
-                                        style="@style/hit_badge"
-                                        android:src="@drawable/placeholder_hit_score" />
-
-                                    <TextView
-                                        android:id="@+id/gr_300"
-                                        style="@style/text"
-                                        android:layout_marginLeft="@dimen/S"
-                                        android:text="0000" />
-
-                                </LinearLayout>
-
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/shape_rounded"
-                                    android:backgroundTint="@color/badgeBackground"
-                                    android:gravity="center"
-                                    android:paddingHorizontal="@dimen/M"
-                                    android:paddingVertical="@dimen/XS">
-
-                                    <ImageView
-                                        android:id="@+id/gr_300kiv"
-                                        style="@style/hit_badge"
-                                        android:src="@drawable/placeholder_hit_score" />
-
-                                    <TextView
-                                        android:id="@+id/gr_300k"
-                                        style="@style/text"
-                                        android:layout_marginLeft="@dimen/S"
-                                        android:text="0000" />
-
-                                </LinearLayout>
-
-                            </LinearLayout>
-
-                            <!--100s-->
-                            <LinearLayout
-                                android:layout_width="wrap_content"
+                            <com.reco1l.view.custom.StatisticLayout
+                                android:id="@+id/gr_100"
+                                android:layout_width="@dimen/_70sdp"
                                 android:layout_height="wrap_content"
                                 android:layout_marginRight="@dimen/S"
-                                android:orientation="vertical">
+                                android:text="0000x"
+                                app:badgeText="good"
+                                app:badgeTextColor="#64FD6C" />
 
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="@dimen/S"
-                                    android:background="@drawable/shape_rounded"
-                                    android:backgroundTint="@color/badgeBackground"
-                                    android:gravity="center"
-                                    android:paddingHorizontal="@dimen/M"
-                                    android:paddingVertical="@dimen/XS">
-
-                                    <ImageView
-                                        android:id="@+id/gr_100iv"
-                                        style="@style/hit_badge"
-                                        android:src="@drawable/placeholder_hit_score" />
-
-                                    <TextView
-                                        android:id="@+id/gr_100"
-                                        style="@style/text"
-                                        android:layout_marginLeft="@dimen/S"
-                                        android:text="0000" />
-
-                                </LinearLayout>
-
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/shape_rounded"
-                                    android:backgroundTint="@color/badgeBackground"
-                                    android:gravity="center"
-                                    android:paddingHorizontal="@dimen/M"
-                                    android:paddingVertical="@dimen/XS">
-
-                                    <ImageView
-                                        android:id="@+id/gr_100kiv"
-                                        style="@style/hit_badge"
-                                        android:src="@drawable/placeholder_hit_score" />
-
-                                    <TextView
-                                        android:id="@+id/gr_100k"
-                                        style="@style/text"
-                                        android:layout_marginLeft="@dimen/S"
-                                        android:text="0000" />
-
-                                </LinearLayout>
-
-                            </LinearLayout>
-
-                            <!--50 & 0-->
-                            <LinearLayout
-                                android:layout_width="wrap_content"
+                            <com.reco1l.view.custom.StatisticLayout
+                                android:id="@+id/gr_50"
+                                android:layout_width="@dimen/_70sdp"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical">
+                                android:layout_marginRight="@dimen/S"
+                                android:text="0000x"
+                                app:badgeText="meh"
+                                app:badgeTextColor="#FDE964" />
 
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="@dimen/S"
-                                    android:background="@drawable/shape_rounded"
-                                    android:backgroundTint="@color/badgeBackground"
-                                    android:gravity="center"
-                                    android:paddingHorizontal="@dimen/M"
-                                    android:paddingVertical="@dimen/XS">
-
-                                    <ImageView
-                                        android:id="@+id/gr_50iv"
-                                        style="@style/hit_badge"
-                                        android:src="@drawable/placeholder_hit_score" />
-
-                                    <TextView
-                                        android:id="@+id/gr_50"
-                                        style="@style/text"
-                                        android:layout_marginLeft="@dimen/S"
-                                        android:text="0000" />
-
-                                </LinearLayout>
-
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/shape_rounded"
-                                    android:backgroundTint="@color/badgeBackground"
-                                    android:gravity="center"
-                                    android:paddingHorizontal="@dimen/M"
-                                    android:paddingVertical="@dimen/XS">
-
-                                    <ImageView
-                                        android:id="@+id/gr_0iv"
-                                        style="@style/hit_badge"
-                                        android:src="@drawable/placeholder_hit_score" />
-
-                                    <TextView
-                                        android:id="@+id/gr_0"
-                                        style="@style/text"
-                                        android:layout_marginLeft="@dimen/S"
-                                        android:text="0000" />
-
-                                </LinearLayout>
-
-                            </LinearLayout>
+                            <com.reco1l.view.custom.StatisticLayout
+                                android:id="@+id/gr_0"
+                                android:layout_width="@dimen/_70sdp"
+                                android:layout_height="wrap_content"
+                                android:text="0000x"
+                                app:badgeText="miss"
+                                app:badgeTextColor="#FD6464" />
 
                         </LinearLayout>
 
-                        <!--Accuracy & Max combo-->
+                        <!--Performance-->
                         <LinearLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content">
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/M">
 
-                            <!--Accuracy-->
-                            <LinearLayout
-                                android:layout_width="wrap_content"
+                            <com.reco1l.view.custom.StatisticLayout
+                                android:id="@+id/gr_accuracy"
+                                android:layout_width="@dimen/_90sdp"
                                 android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:paddingHorizontal="@dimen/XL"
-                                android:paddingVertical="@dimen/S">
+                                android:layout_marginRight="@dimen/S"
+                                android:text="100.00%"
+                                app:badgeText="accuracy" />
 
-                                <com.google.android.material.progressindicator.CircularProgressIndicator
-                                    android:id="@+id/gr_accuracyIndicator"
-                                    style="@style/circular_indicator"
-                                    android:indeterminate="false"
-                                    app:indicatorSize="@dimen/circularIndicatorSizeM"
-                                    app:trackThickness="@dimen/progressIndicatorThicknessM" />
-
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginLeft="@dimen/S"
-                                    android:orientation="vertical">
-
-                                    <TextView
-                                        android:id="@+id/gr_accuracy"
-                                        style="@style/text"
-                                        android:layout_marginBottom="@dimen/XXS"
-                                        android:text="100.00%" />
-
-                                    <TextView
-                                        style="@style/text"
-                                        android:drawableStart="@drawable/v8_touch"
-                                        android:drawablePadding="@dimen/XXS"
-                                        android:drawableTint="@color/textSecondary"
-                                        android:text="Accuracy"
-                                        android:textColor="@color/textSecondary"
-                                        android:textSize="@dimen/textXS" />
-
-                                </LinearLayout>
-
-                            </LinearLayout>
-
-                            <!--Accuracy-->
-                            <LinearLayout
-                                android:layout_width="wrap_content"
+                            <com.reco1l.view.custom.StatisticLayout
+                                android:id="@+id/gr_combo"
+                                android:layout_width="@dimen/_90sdp"
                                 android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:paddingHorizontal="@dimen/XL"
-                                android:paddingVertical="@dimen/S">
+                                android:layout_marginRight="@dimen/S"
+                                android:text="0000x"
+                                app:badgeText="max combo" />
 
-                                <com.google.android.material.progressindicator.CircularProgressIndicator
-                                    android:id="@+id/gr_comboIndicator"
-                                    style="@style/circular_indicator"
-                                    android:indeterminate="false"
-                                    app:indicatorSize="@dimen/circularIndicatorSizeM"
-                                    app:trackThickness="@dimen/progressIndicatorThicknessM" />
-
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginLeft="@dimen/S"
-                                    android:orientation="vertical">
-
-                                    <TextView
-                                        android:id="@+id/gr_combo"
-                                        style="@style/text"
-                                        android:layout_marginBottom="@dimen/XXS"
-                                        android:text="1000/1000" />
-
-                                    <TextView
-                                        style="@style/text"
-                                        android:drawableStart="@drawable/v10_combo"
-                                        android:drawablePadding="@dimen/XXS"
-                                        android:drawableTint="@color/textSecondary"
-                                        android:text="Combo"
-                                        android:textColor="@color/textSecondary"
-                                        android:textSize="@dimen/textXS" />
-
-                                </LinearLayout>
-
-                            </LinearLayout>
+                            <!--DPP-->
+                            <com.reco1l.view.custom.StatisticLayout
+                                android:id="@+id/gr_dpp"
+                                android:layout_width="@dimen/_90sdp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginRight="@dimen/S"
+                                android:text="0000.00"
+                                app:badgeText="dpp" />
 
                         </LinearLayout>
 
@@ -488,34 +302,6 @@
                             android:layout_centerInParent="true"
                             android:layout_marginLeft="@dimen/S"
                             android:text="100.00"
-                            android:textSize="@dimen/textXS" />
-
-                    </LinearLayout>
-
-                    <!--PP-->
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_above="@id/gr_score"
-                        android:layout_marginHorizontal="@dimen/S"
-                        android:background="@drawable/shape_rounded"
-                        android:backgroundTint="@color/gameResultsBadgeBackground"
-                        android:paddingHorizontal="@dimen/S"
-                        android:paddingVertical="@dimen/XXS">
-
-                        <TextView
-                            style="@style/text"
-                            android:text="DPP"
-                            android:textColor="@color/textSecondary"
-                            android:textSize="@dimen/textXS"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/gr_pp"
-                            style="@style/text"
-                            android:layout_centerInParent="true"
-                            android:layout_marginLeft="@dimen/S"
-                            android:text="100.00/100.00"
                             android:textSize="@dimen/textXS" />
 
                     </LinearLayout>
@@ -721,6 +507,6 @@
 
         </LinearLayout>
 
-    </ScrollView>
+    </com.factor.bouncy.BouncyNestedScrollView>
 
 </RelativeLayout>

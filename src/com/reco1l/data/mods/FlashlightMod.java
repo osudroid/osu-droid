@@ -1,8 +1,8 @@
 package com.reco1l.data.mods;
 // Created by Reco1l on 21/12/2022, 09:45
 
-import com.reco1l.Game;
-import com.reco1l.management.ModProperty;
+import com.reco1l.global.Game;
+import com.reco1l.interfaces.fields.ModProperty;
 import com.reco1l.preference.GameSekBarPreference;
 
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
@@ -13,12 +13,7 @@ public class FlashlightMod extends LegacyModWrapper {
     //--------------------------------------------------------------------------------------------//
 
     public FlashlightMod() {
-        super(GameMod.MOD_FLASHLIGHT);
-    }
-
-    @Override
-    public ModWrapper.Properties createProperties() {
-        return new Properties();
+        super(new Properties(), GameMod.MOD_FLASHLIGHT);
     }
 
     //--------------------------------------------------------------------------------------------//

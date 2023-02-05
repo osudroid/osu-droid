@@ -3,7 +3,7 @@ package com.reco1l.tables;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 import com.reco1l.ui.SimpleFragment;
 import com.reco1l.ui.custom.DialogBuilder;
 

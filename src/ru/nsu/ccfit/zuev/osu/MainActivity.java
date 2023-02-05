@@ -21,7 +21,6 @@ import androidx.preference.PreferenceManager;
 import androidx.core.content.PermissionChecker;
 
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -33,11 +32,13 @@ import android.widget.Toast;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.GameEngine;
-import com.reco1l.Game;
+import com.reco1l.management.InputManager;
+import com.reco1l.management.MusicManager;
 import com.reco1l.scenes.IntroScene;
+import com.reco1l.tables.NotificationTable;
+import com.reco1l.ui.FragmentPlatform;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.tables.DialogTable;
-import com.reco1l.management.InputManager;
 import com.reco1l.utils.execution.ScheduledTask;
 
 import org.anddev.andengine.engine.Engine;
@@ -61,8 +62,6 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -209,28 +208,7 @@ public class MainActivity extends BaseGameActivity implements
             editor.putString("playername", "Guest");
             editor.commit();
 
-            final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-            alert.setTitle(StringTable.get(R.string.dialog_playername_title));
-            alert.setMessage(StringTable
-                    .get(R.string.dialog_playername_message));
-
-            final EditText input = new EditText(this);
-            input.setText("Guest");
-            alert.setView(input);
-
-            alert.setPositiveButton(StringTable.get(R.string.dialog_ok),
-                    new DialogInterface.OnClickListener() {
-
-                        public void onClick(final DialogInterface dialog,
-                                            final int whichButton) {
-                            final String value = input.getText().toString();
-                            editor.putString("playername", value);
-                            editor.commit();
-                        }
-                    });
-
-            alert.show();
+            NotificationTable.welcome();
         }
 
         if (prefs.getBoolean("qualitySet", false) == false) {
@@ -248,14 +226,9 @@ public class MainActivity extends BaseGameActivity implements
         }
 
         if (prefs.getBoolean("onlineSet", false) == false) {
-
             Editor editor = prefs.edit();
             editor.putBoolean("onlineSet", true);
             editor.commit();
-
-            //TODO removed auto registration at first launch
-            /*OnlineInitializer initializer = new OnlineInitializer(this);
-            initializer.createInitDialog();*/
         }
     }
 
@@ -298,7 +271,6 @@ public class MainActivity extends BaseGameActivity implements
             }
 
             public void onComplete() {
-                Game.engine.onLoadComplete();
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
                 GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene());
                 initPreferences();
@@ -342,7 +314,7 @@ public class MainActivity extends BaseGameActivity implements
         }
         this.mRenderSurfaceView.setRenderer(this.mEngine);
 
-        Game.platform.load(this, mRenderSurfaceView);
+        FragmentPlatform.instance.load(this, mRenderSurfaceView);
     }
 
     public void checkNewBeatmaps() {
@@ -587,7 +559,7 @@ public class MainActivity extends BaseGameActivity implements
             GlobalManager.getInstance().getGameScene().pause();
         }
         if (GlobalManager.getInstance().getMainScene() != null) {
-            if (songService != null && Game.libraryManager.getBeatmap() != null) {
+            if (songService != null && LibraryManager.getInstance().getBeatmap() != null) {
                 songService.showNotification();
 
                 if (wakeLock == null) {
@@ -656,8 +628,7 @@ public class MainActivity extends BaseGameActivity implements
             return super.onKeyDown(keyCode, event);
         }
 
-        Log.i("KeyInputHandler", "Key input detected: " + event.toString());
-        return Game.inputManager.handleKey(keyCode, event.getAction());
+        return InputManager.instance.handleKey(keyCode, event.getAction());
     }
 
     private void initAccessibilityDetector() {
@@ -732,27 +703,27 @@ public class MainActivity extends BaseGameActivity implements
         }
 
         StatisticV2 stat = replay.getStat();
-        TrackInfo track = Game.libraryManager.findTrackByFileNameAndMD5(replay.getMapFile(), replay.getMd5());
+        TrackInfo track = LibraryManager.getInstance().findTrackByFileNameAndMD5(replay.getMapFile(), replay.getMd5());
 
         if (track != null) {
-            Game.musicManager.change(track);
-            Game.summaryScene.load(track, stat, path, true);
+            MusicManager.instance.change(track);
+            GlobalManager.getInstance().getScoring().load(stat, track, path, true);
         }
     }
 
     public void exit() {
-        if(Game.engine.getScene() == Game.gameScene.getScene()) {
-            Game.gameScene.quit();
+        if(GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
+            GlobalManager.getInstance().getGameScene().quit();
         }
-        Game.engine.setScene(Game.mainScene);
+        GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene());
 
         PowerManager.WakeLock wakeLock = getWakeLock();
         if (wakeLock != null && wakeLock.isHeld()) {
             wakeLock.release();
         }
-        Game.mainScene.onExit();
+        GlobalManager.getInstance().getMainScene().onExit();
 
-        ScheduledTask.run(() -> {
+        ScheduledTask.of(() -> {
             if (songService != null) {
                 unbindService(connection);
                 stopService(new Intent(this, SongService.class));

@@ -3,7 +3,7 @@ package com.reco1l.ui;
 import static android.widget.RelativeLayout.LayoutParams.*;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -15,16 +15,16 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.reco1l.Game;
-import com.reco1l.enums.Screens;
-import com.reco1l.ui.custom.Dialog;
+import com.reco1l.global.Game;
+import com.reco1l.interfaces.fields.Identifiers;
+import com.reco1l.scenes.BaseScene;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.Logging;
 import com.reco1l.utils.NativeFrameCounter;
 
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 // Created by Reco1l on 22/6/22 02:25
 
@@ -32,25 +32,27 @@ public final class FragmentPlatform {
 
     public static final FragmentPlatform instance = new FragmentPlatform();
 
-    public RenderSurfaceView renderView;
-    public FragmentManager manager;
-    public Context context;
+    private FragmentManager mManager;
 
-    public FrameLayout screenContainer;
-    public FrameLayout overlayContainer;
+    private RenderSurfaceView mRenderView;
 
-    private final ArrayList<Dialog> dialogs;
-    private final ArrayList<BaseFragment> showing, created;
+    private FrameLayout
+            mOverlayContainer,
+            mScreenContainer;
 
-    private final Object listMutex;
+    private final ArrayList<BaseFragment>
+            mShowing,
+            mCreated;
+
+    private boolean mLockUpdate = false;
 
     //--------------------------------------------------------------------------------------------//
 
     public FragmentPlatform() {
-        dialogs = new ArrayList<>();
-        showing = new ArrayList<>();
-        created = new ArrayList<>();
-        listMutex = new Object();
+        Logging.initOf(getClass());
+
+        mShowing = new ArrayList<>();
+        mCreated = new ArrayList<>();
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -58,24 +60,23 @@ public final class FragmentPlatform {
     @SuppressLint("ResourceType")
     public void load(AppCompatActivity activity, RenderSurfaceView renderView) {
 
-        this.context = activity;
-        this.renderView = renderView;
-        this.manager = activity.getSupportFragmentManager();
+        this.mRenderView = renderView;
+        this.mManager = activity.getSupportFragmentManager();
 
-        ConstraintLayout platform = new ConstraintLayout(context);
-        RelativeLayout renderLayout = new RelativeLayout(context);
+        ConstraintLayout platform = new ConstraintLayout(activity);
+        RelativeLayout renderLayout = new RelativeLayout(activity);
 
-        screenContainer = new FrameLayout(context);
-        overlayContainer = new FrameLayout(context);
+        mScreenContainer = new FrameLayout(activity);
+        mOverlayContainer = new FrameLayout(activity);
 
-        screenContainer.setId(Identifiers.Platform_ScreenFrame);
-        overlayContainer.setId(Identifiers.Platform_OverlayFrame);
+        mScreenContainer.setId(Identifiers.Platform_ScreenFrame);
+        mOverlayContainer.setId(Identifiers.Platform_OverlayFrame);
 
         LayoutParams params = new LayoutParams(MATCH_PARENT, MATCH_PARENT);
 
         platform.addView(renderLayout, params);
-        platform.addView(screenContainer, params);
-        platform.addView(overlayContainer, params);
+        platform.addView(mScreenContainer, params);
+        platform.addView(mOverlayContainer, params);
 
         Game.activity.setContentView(platform, params);
 
@@ -88,65 +89,94 @@ public final class FragmentPlatform {
     //--------------------------------------------------------------------------------------------//
 
     public FragmentTransaction transaction() {
-        return manager.beginTransaction();
+        return mManager.beginTransaction();
     }
 
     public FragmentManager getManager() {
-        return manager;
+        return mManager;
+    }
+
+    public FrameLayout getScreenContainer() {
+        return mScreenContainer;
+    }
+
+    public FrameLayout getOverlayContainer() {
+        return mOverlayContainer;
+    }
+
+    public RenderSurfaceView getRenderView() {
+        return mRenderView;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     void onFragmentCreated(BaseFragment fragment) {
         if (fragment.parents != null) {
-            created.add(fragment);
+            mCreated.add(fragment);
         }
     }
 
     public void onEngineUpdate(float sec) {
-        synchronized (listMutex) {
-            showing.forEach(f -> {
-                if (f.isAdded()) {
-                    Game.activity.runOnUiThread(() -> f.onUpdate(sec));
+        if (mLockUpdate) {
+            return;
+        }
+
+        synchronized (mShowing) {
+            mShowing.forEach(fragment -> {
+                if (fragment.isAdded() && fragment.isLoaded()) {
+                    Game.activity.runOnUiThread(() -> fragment.onEngineUpdate(sec));
                 }
             });
         }
     }
 
-    public void onScreenChange(Screens last, Screens current) {
-        Game.activity.runOnUiThread(() -> {
-            closeExtras();
+    public void onSceneChange(BaseScene lastScene, BaseScene newScene) {
+        mLockUpdate = true;
 
-            synchronized (listMutex) {
-                showing.forEach(f -> {
-                    if (f.parents == null) {
-                        f.close();
-                    }
-                });
+        synchronized (mShowing) {
 
-                created.forEach(f -> {
-                    if (Arrays.asList(f.parents).contains(current)) {
-                        f.show();
-                        return;
-                    }
-                    f.close();
-                });
+            int i = 0;
+            while (i < mShowing.size()) {
+                BaseFragment fragment = mShowing.get(i);
+
+                if (fragment.isExtra() || fragment.parents == null) {
+                    fragment.close();
+                }
+                ++i;
             }
 
-            notifyScreenChange(last, current);
-        });
+            mCreated.forEach(fragment -> {
+                for (BaseScene parent : fragment.parents) {
+                    if (parent == newScene) {
+                        fragment.show();
+                        return;
+                    }
+                }
+                fragment.close();
+            });
+        }
+
+        notifySceneChange(lastScene, newScene);
+        mLockUpdate = false;
+    }
+
+    public boolean onBackPress() {
+        synchronized (mShowing) {
+            for (BaseFragment f : mShowing) {
+                if (f.onBackPress()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public ArrayList<Dialog> getDialogs() {
-        return dialogs;
-    }
-
     public Animation animate(boolean render, boolean screen) {
         View[] views = {
-                (render ? renderView : null),
-                (screen ? screenContainer : null)
+                (render ? mRenderView : null),
+                (screen ? mScreenContainer : null)
         };
 
         return Animation.of(views).cancelCurrentAnimations(false);
@@ -155,71 +185,62 @@ public final class FragmentPlatform {
     //--------------------------------------------------------------------------------------------//
 
     public boolean addFragment(BaseFragment fragment) {
-        synchronized (listMutex) {
-            if (fragment.isAdded() || showing.contains(fragment)) {
+        synchronized (mShowing) {
+            if (fragment.isAdded() || mShowing.contains(fragment)) {
                 return false;
             }
+            mShowing.add(fragment);
 
-            showing.add(fragment);
-            if (fragment instanceof Dialog) {
-                dialogs.add((Dialog) fragment);
-            }
+            FrameLayout container = fragment.isOverlay() ? mOverlayContainer : mScreenContainer;
 
-            FrameLayout container = fragment.isOverlay() ? overlayContainer : screenContainer;
-
-            manager.beginTransaction()
+            FragmentTransaction t = mManager.beginTransaction()
                     .add(container.getId(), fragment)
-                    .runOnCommit(fragment::onTransaction)
-                    .commitAllowingStateLoss();
+                    .runOnCommit(fragment::onTransaction);
 
+            Game.activity.runOnUiThread(t::commitAllowingStateLoss);
             return true;
         }
     }
 
     public void removeFragment(BaseFragment fragment) {
-        synchronized (listMutex) {
+        synchronized (mShowing) {
             if (!fragment.isAdded()) {
                 return;
             }
+            mShowing.remove(fragment);
 
-            showing.remove(fragment);
-            if (fragment instanceof Dialog) {
-                dialogs.remove((Dialog) fragment);
-            }
-
-            manager.beginTransaction()
+            FragmentTransaction t = mManager.beginTransaction()
                     .remove(fragment)
-                    .runOnCommit(fragment::onTransaction)
-                    .commitAllowingStateLoss();
+                    .runOnCommit(fragment::onTransaction);
+
+            Game.activity.runOnUiThread(t::commitAllowingStateLoss);
         }
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public boolean closeExtras() {
-        synchronized (listMutex) {
-            for (BaseFragment f : showing) {
-                if (f.isExtra()) {
-                    f.close();
-                    return true;
+    public void onExit() {
+
+    }
+
+    public void closeExtras() {
+        synchronized (mShowing) {
+            int i = 0;
+            while (i < mShowing.size()) {
+                BaseFragment fragment = mShowing.get(i);
+
+                if (fragment.isExtra()) {
+                    fragment.close();
                 }
+                ++i;
             }
         }
-        return false;
     }
 
-    public void closeAllExcept(BaseFragment fragment) {
-        synchronized (listMutex) {
-            showing.remove(fragment);
-            showing.forEach(BaseFragment::close);
-            showing.add(fragment);
-        }
-    }
-
-    public void notifyScreenChange(Screens lastScreen, Screens newScreen) {
-        synchronized (listMutex) {
-            showing.forEach(fragment ->
-                    fragment.onScreenChange(lastScreen, newScreen)
+    private void notifySceneChange(BaseScene lastScene, BaseScene newScene) {
+        synchronized (mShowing) {
+            mShowing.forEach(fragment ->
+                    fragment.onSceneChange(lastScene, newScene)
             );
         }
     }

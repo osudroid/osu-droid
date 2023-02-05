@@ -4,21 +4,20 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.edlplan.framework.easing.Easing;
-import com.reco1l.Game;
-import com.reco1l.UI;
-import com.reco1l.enums.Screens;
+import com.reco1l.data.Notification;
+import com.reco1l.global.Game;
+import com.reco1l.global.UI;
+import com.reco1l.global.Scenes;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.TouchListener;
 import com.reco1l.utils.Views;
 import com.reco1l.view.LogoView;
 
-import com.reco1l.utils.execution.AsyncTask;
 import com.reco1l.view.effects.ExpandEffect;
 import com.reco1l.view.effects.CircularSpectrum;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
-import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 9/7/22 18:09
@@ -27,27 +26,31 @@ public final class MainMenu extends BaseFragment {
 
     public static final MainMenu instance = new MainMenu();
 
-    private LogoView logo;
-    private LinearLayout buttonsLayout;
-    private View single, multi, buttonsBackground;
+    private LogoView mLogo;
+    private LinearLayout mButtonLayout;
+
+    private View
+            mSoloButton,
+            mMultiButton,
+            mButtonsBackground;
 
     private boolean
-            isMenuShowing = false,
-            isMenuAnimInProgress = false;
+            mIsMenuShowing = false,
+            mIsConcurrentAnimation = false;
 
-    private int showPassTime = 0;
+    private int mShowTime = 0;
 
     //--------------------------------------------------------------------------------------------//
 
     public MainMenu() {
-        super(Screens.Main);
+        super(Scenes.main);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected String getPrefix() {
-        return "mainM";
+        return "main";
     }
 
     @Override
@@ -59,39 +62,39 @@ public final class MainMenu extends BaseFragment {
 
     @Override
     protected void onLoad() {
-        isMenuShowing = false;
-        showPassTime = 0;
+        mIsMenuShowing = false;
+        mShowTime = 0;
 
-        logo = find("logo");
-        single = find("solo");
-        multi = find("multi");
-        buttonsLayout = find("buttonsLayout");
-        buttonsBackground = find("buttonsBackground");
+        mLogo = find("logo");
+        mSoloButton = find("solo");
+        mMultiButton = find("multi");
+        mButtonLayout = find("buttonsLayout");
+        mButtonsBackground = find("buttonsBackground");
 
         CircularSpectrum spectrum = find("spectrum");
-        spectrum.attachToLogo(logo);
+        spectrum.attachToLogo(mLogo);
 
         ExpandEffect expand = find("expand");
-        expand.attachToLogo(logo);
+        expand.attachToLogo(mLogo);
 
-        Views.size(logo, dimen(R.dimen.mainMenuLogoSize));
-        Views.height(buttonsBackground, 0);
-        Views.height(buttonsLayout, 0);
+        Views.size(mLogo, dimen(R.dimen.mainMenuLogoSize));
+        Views.height(mButtonsBackground, 0);
+        Views.height(mButtonLayout, 0);
 
-        Views.margins(buttonsLayout).left(dimen(R.dimen.mainMenuSmallLogoSize) / 3);
+        Views.margins(mButtonLayout).left(dimen(R.dimen.mainMenuSmallLogoSize) / 3);
 
-        logo.post(() ->
-                logo.setX(getWidth() / 2f - logo.getWidth() / 2f)
+        mLogo.post(() ->
+                mLogo.setX(getWidth() / 2f - mLogo.getWidth() / 2f)
         );
 
-        bindTouch(logo, new TouchListener() {
+        bindTouch(mLogo, new TouchListener() {
 
             public BassSoundProvider getPressUpSound() {
                 return Game.resourcesManager.getSound("menuhit");
             }
 
             public void onPressUp() {
-                if (!isMenuShowing) {
+                if (!mIsMenuShowing) {
                     showMenu();
                 } else {
                     hideMenu();
@@ -99,55 +102,55 @@ public final class MainMenu extends BaseFragment {
             }
         });
 
-        bindTouch(single, this::onSingle);
-        bindTouch(multi, this::onMulti);
+        bindTouch(mSoloButton, this::onSingle);
+        bindTouch(mMultiButton, this::onMulti);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     private void showMenu() {
-        if (!isMenuAnimInProgress && !isMenuShowing) {
-            isMenuAnimInProgress = true;
-            showPassTime = 0;
+        if (!mIsConcurrentAnimation && !mIsMenuShowing) {
+            mIsConcurrentAnimation = true;
+            mShowTime = 0;
 
             UI.topBar.show();
 
-            Animation.of(logo)
+            Animation.of(mLogo)
                     .toPosX((float) sdp(48))
                     .toSize(dimen(R.dimen.mainMenuSmallLogoSize))
                     .interpolate(Easing.InOutQuad)
-                    .runOnEnd(() -> isMenuAnimInProgress = false)
+                    .runOnEnd(() -> mIsConcurrentAnimation = false)
                     .play(200);
 
-            Animation.of(buttonsLayout, buttonsBackground)
+            Animation.of(mButtonLayout, mButtonsBackground)
                     .toHeight(dimen(R.dimen.mainMenuButtonHeight))
                     .toAlpha(1)
                     .play(200);
 
-            isMenuShowing = true;
+            mIsMenuShowing = true;
         }
     }
 
     private void hideMenu() {
-        if (!isMenuAnimInProgress && isMenuShowing) {
-            isMenuAnimInProgress = true;
+        if (!mIsConcurrentAnimation && mIsMenuShowing) {
+            mIsConcurrentAnimation = true;
 
             UI.topBar.close();
             int maxSize = dimen(R.dimen.mainMenuLogoSize);
 
-            Animation.of(logo)
+            Animation.of(mLogo)
                     .toPosX((float) getWidth() / 2 - maxSize / 2)
                     .toSize(maxSize)
                     .interpolate(Easing.InOutQuad)
-                    .runOnEnd(() -> isMenuAnimInProgress = false)
+                    .runOnEnd(() -> mIsConcurrentAnimation = false)
                     .play(200);
 
-            Animation.of(buttonsLayout, buttonsBackground)
+            Animation.of(mButtonLayout, mButtonsBackground)
                     .toHeight(0)
                     .toAlpha(0)
                     .play(200);
 
-            isMenuShowing = false;
+            mIsMenuShowing = false;
         }
     }
 
@@ -155,41 +158,23 @@ public final class MainMenu extends BaseFragment {
 
     private void onSingle() {
         Animation.of(rootView)
-                .runOnEnd(() -> {
-                    Game.loaderScene.show();
-                    Game.loaderScene.runOnComplete(() -> {
-                        Game.selectorScene.show();
-                        Game.musicManager.play();
-                    });
-
-                    new AsyncTask() {
-                        public void run() {
-                            Game.activity.checkNewBeatmaps();
-                            if (!Game.libraryManager.loadLibraryCache(Game.activity, true)) {
-                                Game.libraryManager.scanLibrary(Game.activity);
-                            }
-                        }
-
-                        public void onComplete() {
-                            Game.loaderScene.notifyComplete();
-                        }
-                    }.execute();
-                })
+                .runOnEnd(() -> Scenes.selector.show(true))
                 .toY(sdp(40))
                 .toAlpha(0)
                 .play(200);
     }
 
     private void onMulti() {
-        ToastLogger.showText("WIP", false);
-        hideMenu();
+        Notification.of("Multiplayer")
+                .setMessage("Ups! this is currently in WIP, stay tuned :)")
+                .commit();
     }
 
     public void onExit() {
         if (isAdded()) {
-            Animation.of(logo)
+            Animation.of(mLogo)
                     .runOnStart(() -> {
-                        Game.platform.closeAllExcept(this);
+                        Game.platform.onExit();
                         unbindTouchHandlers();
                         hideMenu();
                     })
@@ -202,13 +187,13 @@ public final class MainMenu extends BaseFragment {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    protected void onUpdate(float pSecElapsed) {
-        if (isMenuShowing) {
-            if (showPassTime > 10000f) {
+    protected void onEngineUpdate(float pSecElapsed) {
+        if (mIsMenuShowing) {
+            if (mShowTime > 10000f) {
                 hideMenu();
-                showPassTime = 0;
+                mShowTime = 0;
             } else {
-                showPassTime += pSecElapsed * 1000f;
+                mShowTime += pSecElapsed * 1000f;
             }
         }
     }
@@ -218,7 +203,7 @@ public final class MainMenu extends BaseFragment {
         super.close();
 
         if (isAdded()) {
-            isMenuShowing = false;
+            mIsMenuShowing = false;
         }
     }
 }

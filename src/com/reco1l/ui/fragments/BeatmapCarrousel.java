@@ -4,9 +4,9 @@ import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.reco1l.Game;
-import com.reco1l.UI;
-import com.reco1l.enums.Screens;
+import com.reco1l.global.Game;
+import com.reco1l.global.Scenes;
+import com.reco1l.global.UI;
 import com.reco1l.management.BeatmapCollection;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.view.CarrouselRecyclerView;
@@ -21,7 +21,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public final class BeatmapCarrousel extends BaseFragment implements BeatmapCollection.Listener {
 
-    public static BeatmapCarrousel instance;
+    public static final BeatmapCarrousel instance = new BeatmapCarrousel();
 
     private CarrouselRecyclerView mCarrousel;
     private BeatmapListAdapter mAdapter;
@@ -29,7 +29,7 @@ public final class BeatmapCarrousel extends BaseFragment implements BeatmapColle
     //--------------------------------------------------------------------------------------------//
 
     public BeatmapCarrousel() {
-        super(Screens.Selector);
+        super(Scenes.selector);
         Game.beatmapCollection.addListener(this);
     }
 
@@ -70,8 +70,11 @@ public final class BeatmapCarrousel extends BaseFragment implements BeatmapColle
             mAdapter.setSelectionListener(pos ->
                     mCarrousel.scrollToPosition(pos)
             );
+            mAdapter.setMarginAtBounds(sdp(32));
         }
-        mAdapter.setData(pList);
+        Game.activity.runOnUiThread(() ->
+                mAdapter.setData(pList)
+        );
     }
 
     //--------------------------------------------------------------------------------------------//

@@ -2,7 +2,7 @@
 
 <!-- Created by Reco1l on 1/8/22 06:36 -->
 
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.reco1l.view.RoundLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/bp_banner"
@@ -11,15 +11,14 @@
     android:layout_marginStart="@dimen/_L"
     android:layout_marginTop="@dimen/XS"
     android:orientation="vertical"
-    app:cardBackgroundColor="@color/backgroundSecondary"
-    app:cardCornerRadius="@dimen/app_corners"
-    tools:background="#FFF">
+    app:radius="12">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingStart="@dimen/L">
+        android:paddingStart="@dimen/L"
+        tools:background="#FFF">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -52,21 +51,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <ImageView
-                        android:id="@+id/bp_expand"
-                        style="@style/icon_button"
-                        android:layout_width="@dimen/beatmapPanelExpandButtonSize"
-                        android:layout_height="@dimen/beatmapPanelExpandButtonSize"
-                        android:layout_alignParentTop="true"
-                        android:layout_alignParentEnd="true"
-                        android:background="@drawable/shape_rounded"
-                        android:src="@drawable/v14_arrow" />
-
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_toStartOf="@+id/bp_expand"
                         android:orientation="vertical">
 
                         <TextView
@@ -89,66 +76,74 @@
                     android:id="@+id/bp_properties"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:layout_marginTop="@dimen/S">
 
-                    <com.reco1l.view.BadgeText
+                    <com.reco1l.view.BadgeTextView
                         android:id="@+id/bp_mapper"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Mapper"
-                        app:icon="@drawable/v10_person" />
+                        android:layout_marginBottom="@dimen/XXS"
+                        app:icon="@drawable/v10_person"
+                        android:text="Mapper" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/XXS">
 
-                        <com.reco1l.view.BadgeText
+                        <com.reco1l.view.BadgeTextView
                             android:id="@+id/bp_length"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="00:00"
-                            app:icon="@drawable/v10_time" />
+                            android:layout_marginRight="@dimen/XXS"
+                            app:icon="@drawable/v10_time"
+                            android:text="00:00" />
 
-                        <com.reco1l.view.BadgeText
+                        <com.reco1l.view.BadgeTextView
                             android:id="@+id/bp_bpm"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="000.0-000.0"
-                            app:icon="@drawable/v10_bpm" />
+                            app:icon="@drawable/v10_bpm"
+                            android:text="000.0-000.0" />
 
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/XXS">
 
-                        <com.reco1l.view.BadgeText
+                        <com.reco1l.view.BadgeTextView
                             android:id="@+id/bp_combo"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0000"
-                            app:icon="@drawable/v10_combo" />
+                            android:layout_marginRight="@dimen/XXS"
+                            app:icon="@drawable/v10_combo"
+                            android:text="0000" />
 
-                        <com.reco1l.view.BadgeText
+                        <com.reco1l.view.BadgeTextView
                             android:id="@+id/bp_circles"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0000"
-                            app:icon="@drawable/v10_circle" />
+                            android:layout_marginRight="@dimen/XXS"
+                            app:icon="@drawable/v10_circle"
+                            android:text="0000" />
 
-                        <com.reco1l.view.BadgeText
+                        <com.reco1l.view.BadgeTextView
                             android:id="@+id/bp_sliders"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0000"
-                            app:icon="@drawable/v10_slider" />
+                            android:layout_marginRight="@dimen/XXS"
+                            app:icon="@drawable/v10_slider"
+                            android:text="0000" />
 
-                        <com.reco1l.view.BadgeText
+                        <com.reco1l.view.BadgeTextView
                             android:id="@+id/bp_spinners"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="00"
-                            app:icon="@drawable/v10_spinner" />
+                            app:icon="@drawable/v10_spinner"
+                            android:text="00" />
 
                     </LinearLayout>
 
@@ -156,34 +151,37 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
 
-                        <com.reco1l.view.BadgeText
+                        <com.reco1l.view.BadgeTextView
                             android:id="@+id/bp_ar"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="0dp"
-                            android:text="00.0"
-                            app:icon="@drawable/v10_ar" />
+                            android:layout_marginRight="@dimen/XXS"
+                            app:icon="@drawable/v10_ar"
+                            android:text="00.0" />
 
-                        <com.reco1l.view.BadgeText
+                        <com.reco1l.view.BadgeTextView
                             android:id="@+id/bp_od"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="00.0"
-                            app:icon="@drawable/v10_od" />
+                            android:layout_marginRight="@dimen/XXS"
+                            app:icon="@drawable/v10_od"
+                            android:text="00.0" />
 
-                        <com.reco1l.view.BadgeText
+                        <com.reco1l.view.BadgeTextView
                             android:id="@+id/bp_cs"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="00.0"
-                            app:icon="@drawable/v10_cs" />
+                            android:layout_marginRight="@dimen/XXS"
+                            app:icon="@drawable/v10_cs"
+                            android:text="00.0" />
 
-                        <com.reco1l.view.BadgeText
+                        <com.reco1l.view.BadgeTextView
                             android:id="@+id/bp_hp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="00.0"
-                            app:icon="@drawable/v10_hp" />
+                            app:icon="@drawable/v10_hp"
+                            android:text="00.0" />
 
                     </LinearLayout>
 
@@ -199,12 +197,12 @@
             android:orientation="horizontal"
             android:padding="@dimen/S">
 
-            <com.reco1l.view.BadgeText
+            <com.reco1l.view.BadgeTextView
                 android:id="@+id/bp_stars"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="00.00"
-                app:icon="@drawable/v10_star" />
+                app:icon="@drawable/v10_star"
+                android:text="00.00" />
 
             <TextView
                 android:id="@+id/bp_difficulty"
@@ -221,4 +219,4 @@
     </LinearLayout>
 
 
-</androidx.cardview.widget.CardView>
+</com.reco1l.view.RoundLayout>

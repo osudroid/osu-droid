@@ -11,11 +11,9 @@ import androidx.core.content.FileProvider;
 import com.edlplan.replay.OdrDatabase;
 import com.edlplan.replay.OsuDroidReplay;
 import com.edlplan.replay.OsuDroidReplayPack;
-import com.reco1l.Game;
-import com.reco1l.UI;
-import com.reco1l.data.GameNotification;
+import com.reco1l.global.Game;
+import com.reco1l.data.Notification;
 import com.reco1l.tables.DialogTable;
-import com.reco1l.tables.Res;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
 
@@ -23,7 +21,6 @@ import java.io.File;
 import java.util.List;
 
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public final class ReplayHelper {
 
@@ -37,7 +34,7 @@ public final class ReplayHelper {
     public static void export(int pId) {
         List<OsuDroidReplay> replays = OdrDatabase.get().getReplayById(pId);
 
-        GameNotification notification = GameNotification.of("replay export")
+        Notification notification = Notification.of("replay export")
                 .setMessage("Exporting replay...")
                 .showProgress(true);
 
@@ -86,7 +83,7 @@ public final class ReplayHelper {
                 .setMessage("Are you sure?")
                 .addButton("Yes", d -> {
 
-                    GameNotification notification = GameNotification.of("replay delete")
+                    Notification notification = Notification.of("replay delete")
                             .setMessage("Deleting score " + pId + "...")
                             .showProgress(true);
 

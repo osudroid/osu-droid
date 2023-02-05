@@ -1,4 +1,4 @@
-package com.reco1l.ui;
+package com.reco1l.interfaces.fields;
 
 public interface Identifiers {
 

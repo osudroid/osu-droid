@@ -21,10 +21,10 @@ public class GameEditTextPreference extends Preference {
     private EditText mEditText;
     private OnPreferenceChangeListener mListener;
 
-    private TextWatcher mTextWatcher;
+    private final TextWatcher mTextWatcher;
     private CharSequence mDefaultValue;
 
-    private SharedPreferences mPreferences;
+    private final SharedPreferences mPreferences;
 
     private Runnable mOnFocusLost;
 
@@ -142,7 +142,9 @@ public class GameEditTextPreference extends Preference {
     //--------------------------------------------------------------------------------------------//
 
     public void setText(String text) {
-        mEditText.setText(text);
+        if (mEditText != null) {
+            mEditText.setText(text);
+        }
     }
 
     public String getText() {

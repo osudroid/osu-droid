@@ -15,10 +15,11 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.reco1l.Game;
-import com.reco1l.UI;
+import com.reco1l.global.Game;
+import com.reco1l.global.UI;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
+import com.reco1l.global.Scenes;
 import com.reco1l.tables.DialogTable;
 import com.reco1l.ui.custom.ContextMenu;
 import com.reco1l.ui.custom.ContextMenuBuilder;
@@ -99,14 +100,14 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
 
             mTrackList.setAdapter(mTrackAdapter);
             mTrackList.setYOffset(-UI.topBar.getHeight());
-            mTrackList.setParentWindow(Game.platform.screenContainer);
+            mTrackList.setParentWindow(Game.platform.getScreenContainer());
             mTrackList.setLayoutManager(new LinearLayoutManager(Game.activity));
 
             UI.beatmapCarrousel.bindTouch(body, new TouchListener() {
 
                 public void onPressUp() {
                     if (select()) {
-                        Game.selectorScene.onTrackSelect(item.getPreviewTrack());
+                        Scenes.selector.onTrackSelect(item.getPreviewTrack());
                     }
                 }
 
@@ -162,10 +163,6 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
         @Override
         protected void onBind(BeatmapInfo item, int position) {
             mProperties = Game.propertiesLibrary.getProperties(item.getPath());
-
-            Views.margins(root)
-                    .top(position == 0 ? sdp(32) : 0)
-                    .bottom(position == getItemCount() - 1 ? sdp(32) : 0);
 
             loadBackground(false);
 

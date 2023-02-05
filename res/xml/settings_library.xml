@@ -3,81 +3,44 @@
 <!-- Created by Reco1l on 18/7/22 23:37 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:key="pref_library">
 
     <PreferenceCategory
-        android:title="Library"
         android:layout="@layout/custom_preference_category_big"
-        app:iconSpaceReserved="false"/>
+        android:title="Library" />
 
-    <PreferenceCategory
-        android:title="Location"
-        app:iconSpaceReserved="false">
-
-        <EditTextPreference
-            android:defaultValue="/sdcard/osu!droid/Songs"
-            android:key="directory"
-            android:summary="@string/opt_directory_summary"
-            android:title="@string/opt_directory_title"
-            app:iconSpaceReserved="false" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="Metadata"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="Metadata">
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="forceromanized"
-            android:summary="@string/force_romanized_summary"
-            android:title="@string/force_romanized"
-            app:iconSpaceReserved="false" />
+            android:title="@string/force_romanized" />
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="safebeatmapbg"
-            android:summary="@string/opt_safe_beatmap_bg_summary"
-            android:title="@string/opt_safe_beatmap_bg_title"
-            app:iconSpaceReserved="false" />
+            android:title="Use skin default background" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="Scanning"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="Scanning">
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="scandownload"
-            android:summary="@string/opt_scandownload_summary"
-            android:title="@string/opt_scandownload_title"
-            app:iconSpaceReserved="false" />
-
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="deleteosz"
-            android:summary="@string/opt_deleteosz_summary"
-            android:title="@string/opt_deleteosz_title"
-            app:iconSpaceReserved="false" />
+            android:title="Scan device /download directory" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="Storage"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="Storage">
 
         <com.reco1l.preference.ButtonPreference
             android:key="clear"
-            android:summary="@string/opt_clear_summary"
-            android:title="@string/opt_clear_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_clear_title" />
 
         <com.reco1l.preference.ButtonPreference
             android:key="clear_properties"
-            android:summary="@string/opt_clearprops_summary"
-            android:title="@string/opt_clearprops_title"
-            app:iconSpaceReserved="false" />
+            android:title="@string/opt_clearprops_title" />
 
     </PreferenceCategory>
 

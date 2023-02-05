@@ -1,16 +1,19 @@
 package com.reco1l;
 
-import com.reco1l.interfaces.SceneHandler;
+import android.util.Log;
+
+import com.reco1l.global.Game;
+import com.reco1l.interfaces.ISceneHandler;
 import com.reco1l.scenes.BaseScene;
-import com.reco1l.enums.Screens;
+import com.reco1l.utils.Logging;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.util.FPSCounter;
+import org.anddev.andengine.util.constants.TimeConstants;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 // Created by Reco1l on 22/6/22 02:20
 
@@ -18,152 +21,141 @@ public final class GameEngine extends Engine {
 
     public static GameEngine instance;
 
-    private final List<SceneHandler> handlers;
+    private final Map<Scene, ISceneHandler> mHandlers;
 
-    private Scene lastScene;
-    private Screens currentScreen, lastScreen;
+    private BaseScene
+            mCurrentScene,
+            mLastScene;
 
-    private boolean isGameLoaded = false;
-
-    private float
-            fps,
-            frameTime;
+    private boolean mCanUpdate = false;
 
     //--------------------------------------------------------------------------------------------//
 
     public GameEngine(EngineOptions pEngineOptions) {
         super(pEngineOptions);
+        Logging.initOf(getClass());
+
         instance = this;
-        handlers = new ArrayList<>();
+        mHandlers = new HashMap<>();
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public float getFPS() {
-        return fps;
-    }
-
-    public float getFrameTime() {
-        return frameTime;
-    }
-
-    public Screens getScreen() {
-        return currentScreen;
-    }
-
-    public Screens getLastScreen() {
-        return lastScreen;
-    }
-
-    public Scene getLastScene() {
-        return lastScene;
-    }
-
-    public boolean isGameLoaded() {
-        return isGameLoaded;
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public void onLoadComplete() {
-        isGameLoaded = true;
-
-        registerUpdateHandler(sec -> {
-            Game.platform.onEngineUpdate(sec);
-            Game.timingWrapper.onUpdate(sec);
-        });
-
-        registerUpdateHandler(new FPSCounter() {
-            @Override
-            public void onUpdate(float pSecondsElapsed) {
-                super.onUpdate(pSecondsElapsed);
-                frameTime = pSecondsElapsed * 1000;
-                fps = getFPS();
-            }
-        });
-    }
-
-    public boolean backToLastScene() {
-        if (lastScene != null) {
-            setScene(lastScene);
-            return true;
-        }
-        return false;
+    public void allowUpdate() {
+        mCanUpdate = true;
     }
 
     @Override
-    public void setScene(Scene scene) {
-        if (isGameLoaded) {
-            lastScreen = getScreen();
-            currentScreen = parseScreen(scene);
+    protected void onUpdate(long ns) throws InterruptedException {
+        super.onUpdate(ns);
 
-            Game.platform.onScreenChange(lastScreen, currentScreen);
-        }
-        lastScene = getScene();
-        super.setScene(scene);
+        if (mCanUpdate) {
+            float sec = (float) ns / TimeConstants.NANOSECONDSPERSECOND;
 
-        synchronized (handlers) {
-            handlers.forEach(handler -> handler.onSceneChange(lastScene, scene));
+            Game.platform.onEngineUpdate(sec);
+            Game.timingWrapper.onUpdate(sec);
         }
     }
-
-    private Screens parseScreen(Scene scene) {
-
-        if (scene == Game.gameScene.getScene()) {
-            return Screens.Game;
-        }
-
-        if (scene instanceof BaseScene) {
-            return ((BaseScene) scene).getIdentifier();
-        }
-        return null;
-    }
-
-    //--------------------------------------------------------------------------------------------//
 
     @Override
     public void onResume() {
         super.onResume();
-
-        synchronized (handlers) {
-            handlers.forEach(handler -> {
-                if (currentScreen == handler.getIdentifier()) {
-                    handler.onResume();
-                }
-            });
+        if (!mCanUpdate) {
+            return;
         }
         Game.timingWrapper.sync();
+
+        synchronized (mHandlers) {
+            ISceneHandler h = mHandlers.get(mCurrentScene);
+
+            if (h != null) {
+                h.onResume();
+            }
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        if (!mCanUpdate) {
+            return;
+        }
 
-        synchronized (handlers) {
-            handlers.forEach(handler -> {
-                if (currentScreen == handler.getIdentifier()) {
-                    handler.onPause();
+        synchronized (mHandlers) {
+            ISceneHandler h = mHandlers.get(mCurrentScene);
+
+            if (h != null) {
+                h.onPause();
+            }
+        }
+    }
+
+    public boolean onBackPress() {
+        if (mCurrentScene != null) {
+            BaseScene scene = (BaseScene) mCurrentScene;
+
+            if (scene.onBackPress()) {
+                return true;
+            }
+        }
+
+        return backScene();
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public BaseScene getCurrent() {
+        return mCurrentScene;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public boolean backScene() {
+        if (mLastScene == null) {
+            return false;
+        }
+        setScene(mLastScene);
+        return true;
+    }
+
+    @Override
+    public void setScene(Scene newScene) {
+        if (newScene == null) {
+            throw new RuntimeException("New scene cannot be null!");
+        }
+
+        if (newScene == mCurrentScene) {
+            return;
+        }
+        Log.i("GameEngine", "Changing scene to " + newScene.getClass().getSimpleName());
+
+        if (newScene instanceof BaseScene) {
+            mLastScene = (BaseScene) getScene();
+            mCurrentScene = (BaseScene) newScene;
+
+            if (mCanUpdate) {
+                Game.platform.onSceneChange(mLastScene, mCurrentScene);
+            }
+            super.setScene(newScene);
+            mCurrentScene.onShow();
+
+            synchronized (mHandlers) {
+                ISceneHandler h = mHandlers.get(mCurrentScene);
+
+                if (h != null) {
+                    h.onSceneChange(mLastScene, newScene);
                 }
-            });
+            }
+        } else {
+            throw new RuntimeException("This engine only allow BaseScene types!");
         }
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void registerSceneHandler(SceneHandler sceneHandler) {
-        synchronized (handlers) {
-            this.handlers.add(sceneHandler);
+    public void registerSceneHandler(Scene scene, ISceneHandler sceneHandler) {
+        synchronized (mHandlers) {
+            this.mHandlers.put(scene, sceneHandler);
         }
-    }
-
-    public SceneHandler getCurrentSceneHandler() {
-        synchronized (handlers) {
-            for (SceneHandler handler : handlers) {
-                if (handler.getIdentifier() == currentScreen) {
-                    return handler;
-                }
-            }
-        }
-        return null;
     }
 }

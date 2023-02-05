@@ -17,8 +17,9 @@ import android.widget.RelativeLayout;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 
-import com.reco1l.ui.Identifiers;
+import com.reco1l.interfaces.fields.Identifiers;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.TouchHandler;
 import com.reco1l.utils.Views;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -33,9 +34,7 @@ public class IconButton extends RelativeLayout implements BaseView {
     private boolean
             isActivated = false;
 
-    private Runnable onTouchListener;
-
-    //--------------------------------------------------------------------------------------------//
+     //--------------------------------------------------------------------------------------------//
 
     public enum IndicatorAnchor {
         BOTTOM,
@@ -157,15 +156,11 @@ public class IconButton extends RelativeLayout implements BaseView {
         icon.setImageResource(resource);
     }
 
-    public void runOnTouch(Runnable task) {
-        onTouchListener = task;
+    public void setTouchListener(Runnable task) {
+        new TouchHandler(task).apply(this);
     }
 
     //--------------------------------------------------------------------------------------------//
-
-    public Runnable getTouchListener() {
-        return onTouchListener;
-    }
 
     public boolean isActivated() {
         return isActivated;

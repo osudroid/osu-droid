@@ -1,14 +1,15 @@
 package com.reco1l.data;
 
+import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
 
 import com.reco1l.utils.helpers.BeatmapHelper;
-import com.reco1l.view.BadgeText;
+import com.reco1l.view.BadgeTextView;
+import com.reco1l.view.RoundLayout;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -20,14 +21,14 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public final class TrackCard {
 
-    private final CardView mRootView;
+    private final RoundLayout mRootView;
 
     private final TextView
             mTitle,
             mArtist,
             mDifficulty;
 
-    private final BadgeText
+    private final BadgeTextView
             mBpmText,
             mLengthText,
             mComboText,
@@ -47,7 +48,7 @@ public final class TrackCard {
 
     //--------------------------------------------------------------------------------------------//
 
-    public TrackCard(CardView pRoot) {
+    public TrackCard(RoundLayout pRoot) {
         mRootView = pRoot;
 
         mBpmText = pRoot.findViewById(R.id.bp_bpm);
@@ -116,10 +117,10 @@ public final class TrackCard {
         int textColor = BeatmapHelper.Palette.getTextColor(pStars);
         int color = BeatmapHelper.Palette.getColor(pStars);
 
-        mStarsText.setCardBackgroundColor(color);
+        mStarsText.setBackground(new ColorDrawable(color));
         mStarsText.setTextColor(textColor);
-        mMapper.setCardBackgroundColor(darkerColor);
-        mRootView.setCardBackgroundColor(darkerColor);
+        mMapper.setBackground(new ColorDrawable(darkerColor));
+        mRootView.setBackground(new ColorDrawable(darkerColor));
     }
 
     //--------------------------------------------------------------------------------------------//

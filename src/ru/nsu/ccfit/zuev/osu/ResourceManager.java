@@ -8,6 +8,7 @@ import android.util.Log;
 import androidx.core.content.res.ResourcesCompat;
 
 import com.dgsrz.bancho.security.SecurityUtils;
+import com.reco1l.management.BitmapManager;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.opengl.font.Font;
@@ -102,6 +103,8 @@ public class ResourceManager {
             textures.put("lighting", null);
 //		textures.put("fail-background", null);
 //		textures.put("pause-overlay", null);
+
+        BitmapManager.instance.loadAssets(folder);
     }
 
     public void loadCustomSkin(String folder) {

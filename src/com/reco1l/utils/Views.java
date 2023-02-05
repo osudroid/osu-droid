@@ -141,7 +141,7 @@ public final class Views {
         private final View view;
         private final RelativeLayout.LayoutParams params;
 
-        private ArrayList<Integer> rules;
+        private final ArrayList<Integer> rules;
 
         //----------------------------------------------------------------------------------------//
 

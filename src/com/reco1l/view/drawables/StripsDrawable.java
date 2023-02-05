@@ -3,7 +3,6 @@ package com.reco1l.view.drawables;
 
 import static android.graphics.PorterDuff.*;
 
-import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -13,7 +12,6 @@ import android.graphics.PointF;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -104,6 +102,7 @@ public class StripsDrawable extends Drawable {
     //--------------------------------------------------------------------------------------------//
 
     private int nextAlpha() {
+        // TODO [StripsDrawable] Do maxAlpha & minAlpha customizable
         int max = 120;
         int min = 40;
 
@@ -123,10 +122,6 @@ public class StripsDrawable extends Drawable {
     private Paint getPaint() {
         Paint paint = new Paint();
         paint.setDither(Config.isUseDither());
-
-        if (Build.VERSION.SDK_INT >= 29) {
-            paint.setBlendMode(BlendMode.SCREEN);
-        }
         return paint;
     }
 

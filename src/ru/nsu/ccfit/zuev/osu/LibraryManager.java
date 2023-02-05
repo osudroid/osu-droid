@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.app.Activity;
 
-import com.reco1l.Game;
+import com.reco1l.global.Game;
 
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import org.anddev.andengine.util.Debug;
