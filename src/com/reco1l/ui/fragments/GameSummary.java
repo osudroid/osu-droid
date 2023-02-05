@@ -110,7 +110,7 @@ public final class GameSummary extends BaseFragment {
         mModsContainer = find("mods");
         mDate = find("date");
 
-        mPPText = find("dpp");
+        mPPText = find("pp");
         mURText = find("ur");
         mErrorText = find("error");
 

@@ -44,8 +44,8 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
 
     //--------------------------------------------------------------------------------------------//
 
-    public BaseAdapter(ArrayList<T> pItems) {
-        mItems = pItems;
+    public BaseAdapter(ArrayList<T> items) {
+        mItems = items;
         setHasStableIds(true);
     }
 
@@ -82,6 +82,9 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
     protected abstract VH getViewHolder(View pRootView);
 
     protected void onHolderCreated(VH pHolder) {}
+
+    // Called after the item was assigned to the holder and before of calling onBind()
+    protected void onHolderAssignment(VH holder, int position) {}
 
     //--------------------------------------------------------------------------------------------//
 
@@ -159,7 +162,7 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
         return mSelectedPosition;
     }
 
-    public ArrayList<VH> getHolders() {
+    public final ArrayList<VH> getHolders() {
         return mHolders;
     }
 
@@ -192,7 +195,6 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
 
         return holder;
     }
-
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int i) {

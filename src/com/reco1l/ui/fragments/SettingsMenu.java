@@ -24,6 +24,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.reco1l.global.Game;
 import com.reco1l.global.UI;
 import com.reco1l.global.Scenes;
+import com.reco1l.preference.ButtonPreference;
 import com.reco1l.preference.FieldPreference;
 import com.reco1l.tables.AnimationTable;
 import com.reco1l.tables.DialogTable;
@@ -287,26 +288,11 @@ public final class SettingsMenu extends BaseFragment {
 
         private void loadPreferences() {
             // Appearance
-            SkinPathPreference skinPath = findPreference("skinPath");
+            ButtonPreference skin = findPreference("skinPath");
             CheckBoxPreference comboColor = findPreference("useCustomColors");
 
-            if (skinPath != null) {
-                skinPath.reloadSkinList();
-                skinPath.setOnPreferenceChangeListener((preference, newValue) -> {
-                    if (Game.globalManager.getSkinNow().equals(newValue.toString())) {
-                        return true;
-                    }
-
-                    Game.globalManager.setSkinNow(Config.getSkinPath());
-                    Game.skinManager.clearSkin();
-                    Game.resourcesManager.loadSkin(newValue.toString());
-                    Game.engine.getTextureManager().reloadTextures();
-                    Game.activity.startActivity(new Intent(Game.activity, MainActivity.class));
-
-                    Snackbar.make(Game.activity.findViewById(android.R.id.content),
-                            StringTable.get(R.string.message_loaded_skin), 1500).show();
-                    return true;
-                });
+            if (skin != null) {
+                skin.setOnPreferenceClickListener(p -> new Dialog(DialogTable.skins()).show());
             }
 
             if (comboColor != null) {

@@ -12,11 +12,9 @@
 
     <PreferenceCategory android:title="Skin">
 
-        <com.edlplan.ui.SkinPathPreference
-            android:entries="@array/placeholder_array"
-            android:entryValues="@array/placeholder_array"
+        <com.reco1l.preference.ButtonPreference
             android:key="skinPath"
-            android:title="@string/opt_skinpath_title" />
+            android:title="Select skin" />
 
         <com.reco1l.preference.CheckPreference
             android:defaultValue="false"

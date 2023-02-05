@@ -1,6 +1,11 @@
 package com.reco1l.ui.custom;
 
+import android.view.View;
+
+import androidx.annotation.NonNull;
+
 import com.reco1l.ui.SimpleFragment;
+import com.reco1l.ui.custom.Dialog.Button;
 
 import java.util.ArrayList;
 
@@ -8,8 +13,11 @@ import java.util.ArrayList;
 
 public class DialogBuilder {
 
-    List<Dialog.Button> buttons;
-    SimpleFragment customFragment;
+    protected final ArrayList<Button> buttons;
+
+    protected View view;
+    protected Runnable mOnClose;
+    protected SimpleFragment fragment;
 
     protected String
             title,
@@ -65,6 +73,11 @@ public class DialogBuilder {
 
     public DialogBuilder setCustomFragment(SimpleFragment customFragment) {
         this.fragment = customFragment;
+        return this;
+    }
+
+    public DialogBuilder setCustomView(View customView) {
+        this.view = customView;
         return this;
     }
 

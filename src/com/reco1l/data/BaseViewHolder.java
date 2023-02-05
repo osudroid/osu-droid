@@ -32,6 +32,7 @@ public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder implemen
 
     protected final void bind(T item, int position) {
         this.item = item;
+        adapter.onHolderAssignment(this, position);
         onBind(item, position);
     }
 

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Written by Reco1l -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="@dimen/S"
+    android:paddingBottom="@dimen/S">
+
+    <com.reco1l.view.RoundLayout
+        android:id="@+id/sl_body"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_60sdp"
+        android:gravity="center_vertical"
+        android:background="@color/mm_modItem"
+        app:type="linear"
+        app:radius="12">
+
+        <RelativeLayout
+            android:layout_width="@dimen/_60sdp"
+            android:layout_height="match_parent"
+            android:background="#1A000000"
+            android:padding="@dimen/_8sdp">
+
+            <ImageView
+                android:id="@+id/sl_hitCircle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <ImageView
+                android:id="@+id/sl_hitCircleOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <ImageView
+                android:id="@+id/sl_number"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="center" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/M"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/sl_name"
+                style="@style/text"
+                android:text="Skin name" />
+
+            <TextView
+                android:id="@+id/sl_path"
+                style="@style/text"
+                android:layout_marginTop="@dimen/XXS"
+                android:textColor="@color/textSecondary"
+                android:text="Skin path" />
+
+        </LinearLayout>
+
+    </com.reco1l.view.RoundLayout>
+
+</LinearLayout>

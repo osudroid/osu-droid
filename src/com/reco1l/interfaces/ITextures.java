@@ -9,6 +9,9 @@ public interface ITextures {
     //  skin folder, of course before that you must have to add all used file names to this list.
 
     String[] fileNames = {
+
+            "menu-background",
+
             // Ranking marks
             "ranking-A",
             "ranking-B",
@@ -49,14 +52,12 @@ public interface ITextures {
             "selection-mod-speedup",
             "selection-mod-suddendeath",
 
-            "hit300",
-            "hit300g",
-            "hit100",
-            "hit100k",
-            "hit50",
-            "hit0",
+            // Hit circle
+            "hitcircle",
+            "hitcircleoverlay",
 
-            "menu-background"
+            "default-1",
+            "cursor"
     };
 
 }

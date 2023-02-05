@@ -3,9 +3,15 @@ package com.reco1l.tables;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.factor.bouncy.BouncyRecyclerView;
+import com.reco1l.data.adapters.SkinListAdapter;
 import com.reco1l.global.Game;
 import com.reco1l.ui.SimpleFragment;
 import com.reco1l.ui.custom.DialogBuilder;
+import com.reco1l.utils.Views;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
@@ -141,5 +147,21 @@ public class DialogTable {
         return new DialogBuilder("Exception")
                 .setMessage(str.toString())
                 .addCloseButton();
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public static DialogBuilder skins() {
+        RecyclerView view = new RecyclerView(Game.activity);
+
+        view.setLayoutManager(new LinearLayoutManager(Game.activity));
+        view.setLayoutParams(Views.match_parent);
+        view.setAdapter(new SkinListAdapter());
+        view.setNestedScrollingEnabled(false);
+
+        return new DialogBuilder("Select a skin")
+                .addCloseButton()
+                .setHideHeader(false)
+                .setCustomView(view);
     }
 }

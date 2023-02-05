@@ -215,14 +215,14 @@
                                 android:text="0000x"
                                 app:badgeText="max combo" />
 
-                            <!--DPP-->
+                            <!--PP-->
                             <com.reco1l.view.custom.StatisticLayout
-                                android:id="@+id/gr_dpp"
+                                android:id="@+id/gr_pp"
                                 android:layout_width="@dimen/_90sdp"
                                 android:layout_height="wrap_content"
                                 android:layout_marginRight="@dimen/S"
                                 android:text="0000.00"
-                                app:badgeText="dpp" />
+                                app:badgeText="pp" />
 
                         </LinearLayout>
 
