@@ -5,8 +5,6 @@
 	<string name="game_name">rimu!</string>
 	<string name="team_text">by rimu! team</string>
 
-	<string name="author_names">Made with love by <font color='#FF98ADDF'>Dekyoura</font>, <font color='#FFE39AB3'>Acivev</font> and <font color='#FF98ADDF'>Reco1l</font></string>
-
 	<string name="top_bar_offline">offline</string> <!--Always lowercase-->
 	<string name="top_bar_back">Back</string>
 

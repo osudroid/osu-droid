@@ -1,7 +1,6 @@
 package com.reco1l.view;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -10,8 +9,6 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import com.reco1l.utils.Views;
 
 public class RoundedImageView extends RoundLayout {
 
@@ -38,7 +35,7 @@ public class RoundedImageView extends RoundLayout {
         mImage = new ImageView(getContext(), attrs, defStyleAttr, defStyleRes);
         addView(mImage, getInitialLayoutParams());
 
-        post(() -> matchLayoutParams(mImage));
+        post(() -> matchSize(mImage));
     }
 
     @Override
@@ -55,6 +52,6 @@ public class RoundedImageView extends RoundLayout {
     @Override
     public void setLayoutParams(ViewGroup.LayoutParams params) {
         super.setLayoutParams(params);
-        matchLayoutParams(mImage);
+        matchSize(mImage);
     }
 }

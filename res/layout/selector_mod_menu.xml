@@ -56,14 +56,14 @@
                         android:id="@+id/mm_custom"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:buttonText="Customizations" />
+                        android:text="Customizations" />
 
                     <com.reco1l.view.ButtonView
                         android:id="@+id/mm_clear"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="@dimen/M"
-                        app:buttonText="Clear all mods" />
+                        android:text="Clear all mods" />
 
                 </LinearLayout>
 

@@ -26,7 +26,6 @@ import androidx.annotation.StyleableRes;
 import androidx.core.math.MathUtils;
 
 import com.reco1l.tables.ResourceTable;
-import com.reco1l.utils.Views;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -109,7 +108,7 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
         onCreate();
         handleAttributes();
 
-        post(() -> matchLayoutParams(mInternalLayout));
+        post(() -> onResize(getLayoutParams()));
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -172,6 +171,11 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     protected void onManageAttributes(@Nullable TypedArray t, AttributeSet a) {
         // app:radius
         mRadius = sdp(a.getAttributeIntValue(appNS, "radius", 12));
+    }
+
+    // Called when layout params has been changed
+    protected void onResize(ViewGroup.LayoutParams params) {
+        matchSize(mInternalLayout);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -255,12 +259,12 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     @Override
     public void setLayoutParams(ViewGroup.LayoutParams params) {
         super.setLayoutParams(params);
-        matchLayoutParams(mInternalLayout);
+        onResize(params);
     }
 
     // Match parent layout params useful when you want a child view match width and height from parent,
-    // it's recommended to be used in a post() callback in onCreate() method and at setLayoutParams(method)
-    protected final void matchLayoutParams(View view) {
+    // it's recommended to be used inside onResize() method.
+    protected final void matchSize(View view) {
         if (view == null) {
             return;
         }

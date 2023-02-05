@@ -2,21 +2,21 @@ package com.reco1l.ui.custom;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
+import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
-import androidx.cardview.widget.CardView;
+import androidx.annotation.ColorInt;
 
-import com.edlplan.framework.easing.Easing;
 import com.reco1l.global.Game;
 import com.reco1l.tables.Res;
+import com.reco1l.tables.ResourceTable;
 import com.reco1l.ui.BaseFragment;
-import com.reco1l.utils.Animation;
-import com.reco1l.utils.TouchListener;
+import com.reco1l.ui.SimpleFragment;
 import com.reco1l.utils.Views;
+import com.reco1l.utils.Views.MarginUtils;
 import com.reco1l.view.ButtonView;
 
 import org.jetbrains.annotations.NotNull;
@@ -29,9 +29,11 @@ public class Dialog extends BaseFragment {
 
     private final DialogBuilder mBuilder;
 
-    private CardView mBody;
-    private TextView mTitleText;
-    private ScrollView mScrollBody;
+    //private BouncyNestedScrollView mBody;
+
+    private TextView
+            mTitleText,
+            mMessageText;
 
     private LinearLayout
             mBodyContainer,
@@ -41,7 +43,8 @@ public class Dialog extends BaseFragment {
 
     public Dialog(@NotNull DialogBuilder builder) {
         super();
-        this.mBuilder = builder;
+        mBuilder = builder;
+        closeOnBackgroundClick(mBuilder.canClose);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -65,214 +68,131 @@ public class Dialog extends BaseFragment {
 
     @Override
     protected void onLoad() {
-        closeOnBackgroundClick(canClose());
 
-        int m = Res.dimen(R.dimen.M);
-        int xs = Res.dimen(R.dimen.XS);
 
-        mButtonsContainer = find("buttonsContainer");
-        mScrollBody = find("bodyParent");
-        mBodyContainer = find("container");
+        //mBody = find("body");
         mTitleText = find("title");
-        mBody = find("body");
+        mMessageText = find("message");
+        mBodyContainer = find("container");
+        mButtonsContainer = find("buttons");
 
-        TextView message = find("message");
+        handleCustomBody(mBuilder.fragment, mBuilder.view);
 
-        Animation.of(rootBackground)
-                .fromAlpha(0)
-                .toAlpha(1)
-                .play(500);
-
-        Animation.of(mBody)
-                .fromAlpha(0)
-                .toAlpha(1)
-                .interpolate(Easing.OutExpo)
-                .play(500);
-
-        Animation.of(mScrollBody)
-                .fromY(getHeight() / 0.85f)
-                .toY(0)
-                .interpolate(Easing.OutExpo)
-                .play(500);
-
-        Animation.of(mTitleText)
-                .fromAlpha(0)
-                .toAlpha(1)
-                .play(300);
-
-        if (mBuilder.customFragment != null) {
-            Game.platform.transaction()
-                    .add(find("fragmentContainer").getId(), mBuilder.customFragment)
-                    .runOnCommit(
-                            () -> Animation.of(mBuilder.customFragment.getView())
-                                    .fromAlpha(0)
-                                    .toAlpha(1)
-                                    .play(200)
-                    )
-                    .commit();
+        if (mBuilder.title == null) {
+            mTitleText.setVisibility(View.GONE);
         }
-
-        if (canClose()) {
-            bindTouch(find("scrollBackground"), new TouchListener() {
-                public boolean useTouchEffect() {
-                    return false;
-                }
-
-                public boolean useOnlyOnce() {
-                    return true;
-                }
-
-                public void onPressUp() {
-                    close();
-                }
-            });
-        }
-
-        mScrollBody.setSmoothScrollingEnabled(true);
-
-        if (mBuilder.buttons != null) {
-
-            for (int i = 0; i < mBuilder.buttons.size(); i++) {
-
-                Button button = mBuilder.buttons.get(i);
-                button.build(mButtonsContainer);
-                button.load(this);
-
-
-                Animation.of(button.view)
-                        .fromAlpha(0)
-                        .toAlpha(1)
-                        .delay(200L * i)
-                        .play(200);
-
-                Views.MarginUtils margins = Views.margins(button.view);
-                margins.horizontal(m, m);
-
-                if (mBuilder.buttons.size() > 1) {
-                    if (i == 0) {
-                        margins.vertical(m, xs);
-                    } else if (i == mBuilder.buttons.size() - 1) {
-                        margins.vertical(xs, m);
-                    } else {
-                        margins.vertical(xs, xs);
-                    }
-                } else {
-                    margins.vertical(m, m);
-                }
-            }
-        }
-
         mTitleText.setText(mBuilder.title);
 
-        if (mBuilder.customFragment == null) {
-            if (mBuilder.message != null) {
-                message.setText(mBuilder.message);
-                message.setVisibility(View.VISIBLE);
-            } else {
-                message.setVisibility(View.GONE);
-            }
-        } else {
-            message.setVisibility(View.GONE);
+        if (mBuilder.message == null) {
+            mMessageText.setVisibility(View.GONE);
         }
+        mMessageText.setText(mBuilder.message);
+
+        mBuilder.buttons.forEach(b -> {
+            int i = mBuilder.buttons.indexOf(b);
+            handleButton(b, i);
+        });
     }
 
     @Override
     public boolean onBackPress() {
-        if (canClose()) {
+        if (mBuilder.canClose) {
             close();
             return true;
         }
-        return false;
+        return true;
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public boolean canClose() {
-        return mBuilder.canClose;
+    private void handleButton(Button button, int i) {
+        int m = sdp(12);
+        int xs = sdp(4);
+
+        mButtonsContainer.addView(button.mView, Views.params(-1, sdp(32)));
+
+        bindTouch(button.mView, () ->
+                button.onButtonClick(this)
+        );
+
+        MarginUtils margins = Views.margins(button.mView);
+        margins.horizontal(m, m);
+
+        if (mBuilder.buttons.size() > 1) {
+            if (i == 0) {
+                margins.vertical(m, xs);
+            } else if (i == mBuilder.buttons.size() - 1) {
+                margins.vertical(xs, m);
+            } else {
+                margins.vertical(xs, xs);
+            }
+        } else {
+            margins.vertical(m, m);
+        }
+    }
+
+    private void handleCustomBody(SimpleFragment fragment, View view) {
+        if (fragment == null && view == null) {
+            return;
+        }
+
+        if (mBuilder.hideHeader) {
+            mBodyContainer.removeAllViews();
+        }
+
+        if (fragment != null) {
+            Game.platform.transaction()
+                    .add(mBodyContainer.getId(), fragment)
+                    .commit();
+        } else {
+            mBodyContainer.addView(view);
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     public void close() {
-        if (!isAdded())
+        if (!isAdded()) {
             return;
-
-        Animation.of(rootBackground)
-                .toAlpha(0)
-                .play(500);
-
-        Animation.of(mBody)
-                .toAlpha(0)
-                .interpolate(Easing.InExpo)
-                .play(500);
-
-        Animation.of(mScrollBody)
-                .toY(getHeight() / 0.85f)
-                .interpolate(Easing.InExpo)
-                .runOnEnd(() -> {
-                    super.close();
-                    if (mBuilder.mOnClose != null)
-                        mBuilder.mOnClose.run();
-                })
-                .play(500);
-
-        Animation.of(mTitleText)
-                .toAlpha(0)
-                .play(300);
-
-        Animation.of(mBodyContainer)
-                .toAlpha(0)
-                .play(400);
-
-        if (mBuilder.buttons != null && !mBuilder.buttons.isEmpty()) {
-            Animation.of(mButtonsContainer)
-                    .toAlpha(0)
-                    .play(300);
         }
+        super.close();
 
-    }
-
-
-    public boolean show() {
-        if (!isAdded() && mBuilder.closeExtras) {
-            Game.platform.closeExtras();
+        if (mBuilder.mOnClose != null) {
+            mBuilder.mOnClose.run();
         }
-        return super.show();
     }
-
 
     //--------------------------------------------------------------------------------------------//
 
+    @FunctionalInterface
     public interface OnButtonClick {
         void onButtonClick(Dialog dialog);
     }
 
-    public static class Button {
+    //--------------------------------------------------------------------------------------------//
 
-        protected String text;
-        protected Integer color;
-        protected OnButtonClick onClick;
-        private ButtonView view;
+    public abstract static class Button implements OnButtonClick, ResourceTable {
 
-        public Button(String text, Integer color, OnButtonClick onClick) {
-            this.text = text;
-            this.color = color;
-            this.onClick = onClick;
-        }
+        private final ButtonView mView;
 
-        private void build(LinearLayout container) {
-            view = new ButtonView(Game.activity);
-            container.addView(view, new LayoutParams(MATCH_PARENT, Res.dimen(R.dimen.dialogButtonHeight)));
-        }
+        //--------------------------------------------------------------------------------------- //
 
-        private void load(Dialog dialog) {
-            dialog.bindTouch(view, () -> onClick.onButtonClick(dialog));
+        public Button() {
+            mView = new ButtonView(context());
+            mView.setButtonText(getText());
 
-            if (color != null) {
-                view.setCardBackgroundColor(color);
+            if (getColor() != -1) {
+                mView.setBackground(new ColorDrawable(getColor()));
             }
-            view.setButtonText(text);
+        }
+
+        //--------------------------------------------------------------------------------------- //
+
+        protected abstract String getText();
+
+        protected @ColorInt int getColor() {
+            return -1;
         }
     }
 }

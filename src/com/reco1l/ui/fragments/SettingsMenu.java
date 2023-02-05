@@ -338,7 +338,6 @@ public final class SettingsMenu extends BaseFragment {
 
                         DialogBuilder builder = DialogTable.restart()
                                 .setOnDismiss(() -> dither.setChecked(oldValue))
-                                .setCloseExtras(false)
                                 .addCloseButton();
 
                         new Dialog(builder).show();

@@ -47,13 +47,6 @@
     </declare-styleable>
 
     <!--Views-->
-    <declare-styleable name="TextButton">
-        <attr name="beatSync" />
-        <attr name="buttonText" format="string" />
-        <attr name="buttonColor" format="color" />
-        <attr name="buttonRadius" format="dimension" />
-    </declare-styleable>
-
     <declare-styleable name="StripsEffectView">
         <attr name="beatSync" />
         <attr name="stripWidth" format="dimension" />

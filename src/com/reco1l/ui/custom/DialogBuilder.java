@@ -3,7 +3,6 @@ package com.reco1l.ui.custom;
 import com.reco1l.ui.SimpleFragment;
 
 import java.util.ArrayList;
-import java.util.List;
 
 // Created by Reco1l on 25/7/22 21:46
 
@@ -12,16 +11,23 @@ public class DialogBuilder {
     List<Dialog.Button> buttons;
     SimpleFragment customFragment;
 
-    String title, message;
-    Runnable mOnClose;
+    protected String
+            title,
+            message;
 
-    boolean canClose = true,
-            closeExtras = true;
+    protected boolean
+            canClose = true,
+            hideHeader = true;
 
     //--------------------------------------------------------------------------------------------//
 
-    public DialogBuilder(String pTitle) {
-        title = pTitle;
+    public DialogBuilder() {
+        this(null);
+    }
+
+    public DialogBuilder(String title) {
+        buttons = new ArrayList<>();
+        this.title = title;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -32,18 +38,21 @@ public class DialogBuilder {
         return this;
     }
 
-    public DialogBuilder addButton(String text, Dialog.OnButtonClick onClick) {
-        if (buttons == null)
-            buttons = new ArrayList<>();
+    public DialogBuilder addButton(@NonNull String text, @NonNull Dialog.OnButtonClick listener) {
+        return addButton(new Button() {
 
-        return addButton(text, onClick, null);
+            protected String getText() {
+                return text;
+            }
+
+            public void onButtonClick(Dialog dialog) {
+                listener.onButtonClick(dialog);
+            }
+        });
     }
 
-    public DialogBuilder addButton(String text, Dialog.OnButtonClick onClick, Integer color) {
-        if (onClick == null) {
-            return this;
-        }
-        buttons.add(new Dialog.Button(text, color, onClick));
+    public DialogBuilder addButton(Button button) {
+        buttons.add(button);
         return this;
     }
 
@@ -55,7 +64,7 @@ public class DialogBuilder {
     }
 
     public DialogBuilder setCustomFragment(SimpleFragment customFragment) {
-        this.customFragment = customFragment;
+        this.fragment = customFragment;
         return this;
     }
 
@@ -70,8 +79,9 @@ public class DialogBuilder {
         return this;
     }
 
-    public DialogBuilder setCloseExtras(boolean bool) {
-        closeExtras = bool;
+    // Hide title and message text views when a custom fragment or a custom view is defined.
+    public DialogBuilder setHideHeader(boolean hide) {
+        hideHeader = hide;
         return this;
     }
 }
