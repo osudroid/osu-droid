@@ -6,7 +6,6 @@ import android.content.res.TypedArray;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.EditText;
 
 import androidx.annotation.Nullable;
@@ -16,7 +15,7 @@ import androidx.preference.PreferenceViewHolder;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class GameEditTextPreference extends Preference {
+public class FieldPreference extends Preference {
 
     private EditText mEditText;
     private OnPreferenceChangeListener mListener;
@@ -30,19 +29,19 @@ public class GameEditTextPreference extends Preference {
 
     //--------------------------------------------------------------------------------------------//
 
-    public GameEditTextPreference(Context context) {
+    public FieldPreference(Context context) {
         this(context, null);
     }
 
-    public GameEditTextPreference(Context context, AttributeSet attrs) {
+    public FieldPreference(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public GameEditTextPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+    public FieldPreference(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public GameEditTextPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public FieldPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         setLayoutResource(R.layout.custom_preference_edittext);
 
@@ -70,7 +69,7 @@ public class GameEditTextPreference extends Preference {
                 }
 
                 if (mListener != null) {
-                    mListener.onPreferenceChange(GameEditTextPreference.this, s.toString());
+                    mListener.onPreferenceChange(FieldPreference.this, s.toString());
                 }
             }
         };

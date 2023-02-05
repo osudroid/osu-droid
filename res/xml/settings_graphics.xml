@@ -29,17 +29,17 @@
         android:title="Effects"
         app:iconSpaceReserved="false">
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="true"
             android:key="bursts"
             android:title="@string/opt_bursts_title" />
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="true"
             android:key="hitlighting"
             android:title="@string/opt_hitlighting_title" />
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="true"
             android:key="dither"
             android:title="@string/opt_dither_title" />

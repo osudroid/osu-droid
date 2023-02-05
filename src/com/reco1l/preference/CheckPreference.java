@@ -12,7 +12,7 @@ import com.reco1l.utils.Animation;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class GameCheckBoxPreference extends CheckBoxPreference {
+public class CheckPreference extends CheckBoxPreference {
 
     private LinearLayout resetButton;
 
@@ -22,19 +22,19 @@ public class GameCheckBoxPreference extends CheckBoxPreference {
 
     //--------------------------------------------------------------------------------------------//
 
-    public GameCheckBoxPreference(Context context) {
+    public CheckPreference(Context context) {
         this(context, null);
     }
 
-    public GameCheckBoxPreference(Context context, AttributeSet attrs) {
+    public CheckPreference(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public GameCheckBoxPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+    public CheckPreference(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public GameCheckBoxPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public CheckPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         setLayoutResource(R.layout.custom_preference_checkbox);

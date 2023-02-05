@@ -3,7 +3,7 @@ package com.reco1l.data.mods;
 
 import com.reco1l.global.Game;
 import com.reco1l.interfaces.fields.ModProperty;
-import com.reco1l.preference.GameSekBarPreference;
+import com.reco1l.preference.SliderPreference;
 
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -33,7 +33,7 @@ public class FlashlightMod extends LegacyModWrapper {
         protected void onLoad() {
             super.onLoad();
 
-            GameSekBarPreference delay = find("mod_flashlight_delay");
+            SliderPreference delay = find("mod_flashlight_delay");
 
             delay.setValueFormatter(v -> 120 * v + "ms");
             delay.setDefaultValue(1);

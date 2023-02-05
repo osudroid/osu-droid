@@ -4,7 +4,7 @@ package com.reco1l.data.mods;
 
 import com.reco1l.global.Game;
 import com.reco1l.interfaces.fields.ModProperty;
-import com.reco1l.preference.GameSekBarPreference;
+import com.reco1l.preference.SliderPreference;
 
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -53,7 +53,7 @@ public class CustomDifficultyMod extends ModWrapper {
         @Override
         protected void onLoad() {
             super.onLoad();
-            GameSekBarPreference AR = find("mod_custom_ar");
+            SliderPreference AR = find("mod_custom_ar");
 
             TrackInfo track = Game.musicManager.getTrack();
 

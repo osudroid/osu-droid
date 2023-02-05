@@ -12,7 +12,7 @@
         android:title="Location"
         app:iconSpaceReserved="false">
 
-        <com.reco1l.preference.GameEditTextPreference
+        <com.reco1l.preference.FieldPreference
             android:key="corePath"
             android:title="@string/opt_corepath_title" />
 
@@ -22,17 +22,17 @@
         android:title="Synchronization"
         app:iconSpaceReserved="false">
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="true"
             android:key="lowDelay"
             android:title="Reduce input delay" />
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="true"
             android:key="fixFrameOffset"
             android:title="Fix random offset" />
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="true"
             android:key="syncMusic"
             android:title="@string/opt_syncmusic_title" />
@@ -43,12 +43,12 @@
         android:title="Experimental"
         app:iconSpaceReserved="false">
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="false"
             android:key="removeSliderLock"
             android:title="Remove slider lock" />
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="false"
             android:key="calculateSliderPathInGameStart"
             android:title="@string/opt_calculate_slider_path_in_game_start_title" />
@@ -59,7 +59,7 @@
         android:title="Debug"
         app:iconSpaceReserved="false">
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="true"
             android:key="fps"
             android:title="Show FPS" />

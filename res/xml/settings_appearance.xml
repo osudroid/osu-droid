@@ -18,7 +18,7 @@
             android:key="skinPath"
             android:title="@string/opt_skinpath_title" />
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="false"
             android:key="skin"
             android:title="@string/opt_skin_title" />
@@ -34,7 +34,7 @@
 
     <PreferenceCategory android:title="UI">
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="true"
             android:key="ui_showItemBackground"
             android:title="Disable backgrounds in list items" />
@@ -45,7 +45,7 @@
         android:key="color"
         android:title="Combo colors">
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="false"
             android:key="useCustomColors"
             android:title="@string/opt_combo_colors_title" />

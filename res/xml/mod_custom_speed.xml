@@ -6,11 +6,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--This is in float, 100 means 1.0f-->
-    <com.reco1l.preference.GameSekBarPreference
+    <com.reco1l.preference.SliderPreference
         android:key="mod_speed"
         android:title="Speed modify" />
 
-    <com.reco1l.preference.GameCheckBoxPreference
+    <com.reco1l.preference.CheckPreference
         android:key="mod_speed_pitch"
         android:title="Enable pitch shift" />
 

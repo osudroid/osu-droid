@@ -24,7 +24,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.reco1l.global.Game;
 import com.reco1l.global.UI;
 import com.reco1l.global.Scenes;
-import com.reco1l.preference.GameEditTextPreference;
+import com.reco1l.preference.FieldPreference;
 import com.reco1l.tables.AnimationTable;
 import com.reco1l.tables.DialogTable;
 import com.reco1l.tables.Res;
@@ -382,7 +382,7 @@ public final class SettingsMenu extends BaseFragment {
             }
 
             // Advanced
-            GameEditTextPreference path = findPreference("corePath");
+            FieldPreference path = findPreference("corePath");
 
             if (path != null) {
                 path.setDefaultValue(Config.getDefaultCorePath());

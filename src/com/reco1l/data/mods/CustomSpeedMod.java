@@ -3,8 +3,8 @@ package com.reco1l.data.mods;
 
 import com.reco1l.global.Game;
 import com.reco1l.interfaces.fields.ModProperty;
-import com.reco1l.preference.GameCheckBoxPreference;
-import com.reco1l.preference.GameSekBarPreference;
+import com.reco1l.preference.CheckPreference;
+import com.reco1l.preference.SliderPreference;
 
 import java.util.EnumSet;
 
@@ -60,7 +60,7 @@ public class CustomSpeedMod extends ModWrapper {
         protected void onLoad() {
             super.onLoad();
 
-            GameCheckBoxPreference pitch = find("mod_speed_pitch");
+            CheckPreference pitch = find("mod_speed_pitch");
 
             pitch.setDefaultValue(false);
             pitch.setChecked((boolean) getProperty(ModProperty.CustomSpeed_ShiftPitch, false));
@@ -73,7 +73,7 @@ public class CustomSpeedMod extends ModWrapper {
                 return true;
             });
 
-            GameSekBarPreference speed = find("mod_speed");
+            SliderPreference speed = find("mod_speed");
 
             speed.setDefaultValue(100);
             speed.setMax(200);

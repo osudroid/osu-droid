@@ -4,7 +4,7 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <com.reco1l.preference.GameSekBarPreference
+    <com.reco1l.preference.SliderPreference
         android:key="mod_custom_ar"
         android:title="Approach Rate" />
 

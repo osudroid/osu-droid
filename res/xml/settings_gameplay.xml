@@ -31,7 +31,7 @@
             android:key="playfieldsize"
             android:title="@string/opt_setplayfield_title" />
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="false"
             android:key="shrinkPlayfieldDownwards"
             android:title="@string/opt_shrink_playfield_downwards_title" />
@@ -40,7 +40,7 @@
 
     <PreferenceCategory android:title="Cursor">
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="true"
             android:key="showcursor"
             android:title="@string/opt_showcursor_title" />
@@ -53,7 +53,7 @@
             app:min="25"
             app:showSeekBarValue="true" />
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="true"
             android:key="particles"
             android:title="Show cursor trail" />
@@ -62,12 +62,12 @@
 
     <PreferenceCategory android:title="HUD">
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="false"
             android:key="hideInGameUI"
             android:title="@string/opt_hide_ingame_ui_title" />
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="false"
             android:key="hideReplayMarquee"
             android:title="@string/opt_hide_replay_marquee_title" />
@@ -83,12 +83,12 @@
 
     <PreferenceCategory android:title="Objects">
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="false"
             android:key="images"
             android:title="@string/opt_largeimages_title" />
 
-        <com.reco1l.preference.GameCheckBoxPreference
+        <com.reco1l.preference.CheckPreference
             android:defaultValue="false"
             android:key="showfirstapproachcircle"
             android:title="@string/opt_show_first_approach_circle_title" />
