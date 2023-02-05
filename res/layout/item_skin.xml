@@ -12,14 +12,14 @@
     <com.reco1l.view.RoundLayout
         android:id="@+id/sl_body"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_60sdp"
+        android:layout_height="@dimen/_56sdp"
         android:gravity="center_vertical"
         android:background="@color/mm_modItem"
         app:type="linear"
         app:radius="12">
 
         <RelativeLayout
-            android:layout_width="@dimen/_60sdp"
+            android:layout_width="@dimen/_56sdp"
             android:layout_height="match_parent"
             android:background="#1A000000"
             android:padding="@dimen/_8sdp">
@@ -58,7 +58,8 @@
                 style="@style/text"
                 android:layout_marginTop="@dimen/XXS"
                 android:textColor="@color/textSecondary"
-                android:text="Skin path" />
+                android:text="Skin path"
+                android:textSize="@dimen/textXS"/>
 
         </LinearLayout>
 

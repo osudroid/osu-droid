@@ -12,13 +12,13 @@
 
     <!--Vectors-->
     <color name="vectorPrimary">#819DD4</color>
-    <color name="vectorSecondary">#CC819DD4</color>
+    <color name="vectorSecondary">#BF819DD4</color>
 
     <color name="transparent">#00FFFFFF</color>
 
     <!--Text-->
     <color name="textPrimary">#FF819DD4</color>
-    <color name="textSecondary">#CC819DD4</color>
+    <color name="textSecondary">#BF819DD4</color>
     <color name="textTertiary">#42819DD4</color>
 
     <color name="badgeTextBackground">#50000000</color>
