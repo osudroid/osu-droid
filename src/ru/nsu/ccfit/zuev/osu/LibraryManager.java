@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Objects;
 // import java.util.HashSet;
 // import java.util.Set;
 
@@ -501,6 +502,22 @@ public class LibraryManager {
                     }
                 }
             }
+        }
+        return null;
+    }
+
+    public BeatmapInfo findBeatmapByPath(String path) {
+        if (library == null) {
+            return null;
+        }
+
+        int i = 0;
+        while (i < library.size()) {
+            BeatmapInfo beatmap = library.get(i);
+            if (Objects.equals(beatmap.getPath(), path)) {
+                return beatmap;
+            }
+            ++i;
         }
         return null;
     }
