@@ -132,6 +132,16 @@ public final class Views {
 
     //--------------------------------------------------------------------------------------------//
 
+    public static void rule(View view, int rule) {
+        ((RelativeLayout.LayoutParams) view.getLayoutParams()).addRule(rule);
+        view.requestLayout();
+    }
+
+    public static void rule(View view, int rule, int subject) {
+        ((RelativeLayout.LayoutParams) view.getLayoutParams()).addRule(rule, subject);
+        view.requestLayout();
+    }
+
     public static RuleUtils rule(View view) {
         return new RuleUtils(view);
     }
