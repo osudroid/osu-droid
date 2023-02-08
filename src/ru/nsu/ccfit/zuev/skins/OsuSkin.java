@@ -26,6 +26,7 @@ public class OsuSkin {
     protected final BooleanSkinData disableKiai = new BooleanSkinData("disableKiai", true);
     protected final BooleanSkinData sliderHintEnable = new BooleanSkinData("sliderHintEnable", true);
     protected final BooleanSkinData sliderFollowComboColor = new BooleanSkinData("sliderFollowComboColor", true);
+    protected final BooleanSkinData sliderBorderFollowComboColor = new BooleanSkinData("sliderBorderFollowComboColor", false);
     protected final BooleanSkinData useNewLayout = new BooleanSkinData("useNewLayout");
     protected final BooleanSkinData forceOverrideComboColor = new BooleanSkinData("forceOverride", true);
     protected final BooleanSkinData rotateCursor = new BooleanSkinData("rotateCursor", false);
@@ -128,6 +129,10 @@ public class OsuSkin {
 
     public boolean isSliderFollowComboColor() {
         return sliderFollowComboColor.getCurrentValue();
+    }
+
+    public boolean isSliderBorderFollowComboColor() {
+        return sliderBorderFollowComboColor.getCurrentValue();
     }
 
     public RGBColor getSliderBodyColor() {

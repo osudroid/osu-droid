@@ -108,7 +108,7 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
         onCreate();
         handleAttributes();
 
-        post(() -> onResize(getLayoutParams()));
+        post(() -> onLayoutChange(getLayoutParams()));
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -174,7 +174,7 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     }
 
     // Called when layout params has been changed
-    protected void onResize(ViewGroup.LayoutParams params) {
+    protected void onLayoutChange(ViewGroup.LayoutParams params) {
         matchSize(mInternalLayout);
     }
 
@@ -259,7 +259,7 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     @Override
     public void setLayoutParams(ViewGroup.LayoutParams params) {
         super.setLayoutParams(params);
-        onResize(params);
+        onLayoutChange(params);
     }
 
     // Match parent layout params useful when you want a child view match width and height from parent,
@@ -288,6 +288,40 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     }
 
     @Override
+    public void setForeground(Drawable foreground) {
+        if (mInternalLayout != null) {
+            mInternalLayout.setForeground(foreground);
+        }
+    }
+
+    @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+
+        if (mInternalLayout != null) {
+            mInternalLayout.setVisibility(visibility);
+        }
+    }
+
+    @Override
+    public void setGravity(int gravity) {
+        super.setGravity(gravity);
+
+        if (mInternalLayout != null) {
+            switch (mLayoutType) {
+                case LINEAR:
+                    ((LinearLayout) mInternalLayout).setGravity(gravity);
+                    break;
+                case RELATIVE:
+                    ((RelativeLayout) mInternalLayout).setGravity(gravity);
+                    break;
+            }
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
     public Drawable getBackground() {
         return mInternalLayout.getBackground();
     }
@@ -295,13 +329,6 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     @Override
     public Drawable getForeground() {
         return mInternalLayout.getForeground();
-    }
-
-    @Override
-    public void setForeground(Drawable foreground) {
-        if (mInternalLayout != null) {
-            mInternalLayout.setForeground(foreground);
-        }
     }
 
     //--------------------------------------------------------------------------------------------//

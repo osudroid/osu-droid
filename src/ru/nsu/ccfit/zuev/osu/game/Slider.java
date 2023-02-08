@@ -84,7 +84,7 @@ public class Slider extends GameObject {
     private boolean kiai;
     private boolean isHiddenFadeOutActive = false;
     private RGBColor color = new RGBColor();
-    private RGBColor circleColor = color;
+    private RGBColor borderColor = color;
 
     //for replay
     private int firstHitAccuracy;
@@ -188,8 +188,10 @@ public class Slider extends GameObject {
         kiai = GameHelper.isKiai();
         preStageFinish = false;
         color.set(r, g, b);
+        if (OsuSkin.get().isSliderBorderFollowComboColor()) {
+            borderColor = new RGBColor(r, g, b);
+        }
         if (!OsuSkin.get().isSliderFollowComboColor()) {
-            circleColor = color;
             color = new RGBColor(OsuSkin.get().getSliderBodyColor());
         }
 
@@ -348,6 +350,7 @@ public class Slider extends GameObject {
             abstractSliderBody.setBorderWidth(Utils.toRes(OsuSkin.get().getSliderBodyWidth()) * scale);
             abstractSliderBody.setSliderBodyBaseAlpha(OsuSkin.get().getSliderBodyBaseAlpha());
 
+
             if (OsuSkin.get().isSliderHintEnable()) {
                 if (length > OsuSkin.get().getSliderHintShowMinLength()) {
                     abstractSliderBody.setEnableHint(true);
@@ -364,8 +367,13 @@ public class Slider extends GameObject {
 
             abstractSliderBody.applyToScene(scene, Config.isComplexAnimations());
             abstractSliderBody.setBodyColor(color.r(), color.g(), color.b());
-            RGBColor scolor = GameHelper.getSliderColor();
-            abstractSliderBody.setBorderColor(scolor.r(), scolor.g(), scolor.b());
+
+            if (OsuSkin.get().isSliderBorderFollowComboColor()) {
+                abstractSliderBody.setBorderColor(borderColor.r(), borderColor.g(), borderColor.g());
+            } else {
+                RGBColor scolor = GameHelper.getSliderColor();
+                abstractSliderBody.setBorderColor(scolor.r(), scolor.g(), scolor.b());
+            }
 
         } else {
             initLowPolyTrack();
