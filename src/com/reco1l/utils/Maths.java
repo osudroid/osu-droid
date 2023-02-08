@@ -1,11 +1,11 @@
 package com.reco1l.utils;
 
 // Reco1l math xd
-public final class RMath {
+public final class Maths {
 
     //--------------------------------------------------------------------------------------------//
 
-    private RMath() {}
+    private Maths() {}
 
     //--------------------------------------------------------------------------------------------//
     // Percentage of a value
