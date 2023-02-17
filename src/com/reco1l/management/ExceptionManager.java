@@ -16,7 +16,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.reco1l.tables.NotificationTable;
-import com.reco1l.utils.Logging;
 import com.reco1l.utils.execution.ScheduledTask;
 
 import java.io.File;
@@ -89,7 +88,7 @@ public final class ExceptionManager extends Exception implements UncaughtExcepti
         return
                 "An unexpected error occurred." +
                         "\n\n" +
-                        "Date: " + DateFormat.format("yyyy/mm/dd hh:mm:ss", new Date()) + "\n" +
+                        "Date: " + DateFormat.format("yyyy/MM/dd hh:mm:ss", new Date()) + "\n" +
                         "Build: " + getPackageInformation() + "\n" +
                         "Android: " + Build.VERSION.RELEASE + " (" + Build.VERSION.SDK_INT + ")" +
                         "\n\n" +
@@ -139,7 +138,7 @@ public final class ExceptionManager extends Exception implements UncaughtExcepti
 
     public String buildLogFile(String log) {
 
-        String name = "error_" + DateFormat.format("yyyy-mm-dd_hh-mm-ss", new Date()) + ".txt";
+        String name = "error_" + DateFormat.format("yyyy-MM-dd_hh-mm-ss", new Date()) + ".txt";
         String path = Config.getCorePath() + File.separator + "Log/";
 
         File dir = new File(path);
