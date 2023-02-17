@@ -8,6 +8,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Looper;
 import android.os.Process;
 import android.text.format.DateFormat;
@@ -16,6 +17,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.reco1l.tables.NotificationTable;
+import com.reco1l.utils.Logging;
 import com.reco1l.utils.execution.ScheduledTask;
 
 import java.io.File;
@@ -25,7 +27,6 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.Field;
 import java.util.Date;
 
-import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 
 public final class ExceptionManager extends Exception implements UncaughtExceptionHandler {
@@ -93,7 +94,7 @@ public final class ExceptionManager extends Exception implements UncaughtExcepti
                         "Android: " + Build.VERSION.RELEASE + " (" + Build.VERSION.SDK_INT + ")" +
                         "\n\n" +
                         "System Information: " + "\n" + getSystemInformation() +
-
+                        "\n" +
                         "Exception in thread \"" + thread.getName() + "\": " + e.getClass().getSimpleName() +
                         "\n\n" +
                         Log.getStackTraceString(e);
@@ -138,10 +139,11 @@ public final class ExceptionManager extends Exception implements UncaughtExcepti
 
     public String buildLogFile(String log) {
 
-        String name = "error_" + DateFormat.format("yyyy-MM-dd_hh-mm-ss", new Date()) + ".txt";
-        String path = Config.getCorePath() + File.separator + "Log/";
+        String name = "crash_" + DateFormat.format("yyyy-MM-dd_hh-mm-ss", new Date()) + ".txt";
 
-        File dir = new File(path);
+        File storage = Environment.getExternalStorageDirectory();
+        File dir = new File(storage, Logging.DIRECTORY);
+
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
                 return "Unable to create log directory, please check app permissions.";

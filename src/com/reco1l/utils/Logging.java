@@ -1,15 +1,14 @@
 package com.reco1l.utils;
 
-import android.content.Context;
 import android.os.Environment;
-import android.text.format.DateFormat;
 import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 
 public final class Logging {
+
+    public static final String DIRECTORY = "rimu-logs";
 
     //--------------------------------------------------------------------------------------------//
 
@@ -39,13 +38,13 @@ public final class Logging {
     public static void logcat() {
 
         File storage = Environment.getExternalStorageDirectory();
-        File dir = new File(storage, "osu!droid/Log");
+        File dir = new File(storage, DIRECTORY);
+
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
 
         try {
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
             File log = new File(dir, "logcat.txt");
             if (log.exists()) {
                 log.delete();
