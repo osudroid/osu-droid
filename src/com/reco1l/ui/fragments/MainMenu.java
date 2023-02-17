@@ -33,7 +33,7 @@ public final class MainMenu extends BaseFragment {
 
     private View
             mSoloButton,
-            mMultiButton,
+            mExploreButton,
             mButtonsBackground;
 
     private boolean
@@ -108,7 +108,7 @@ public final class MainMenu extends BaseFragment {
         });
 
         bindTouch(mSoloButton, this::onSingle);
-        bindTouch(mMultiButton, this::onMulti);
+        bindTouch(mExploreButton, this::onExplore);
     }
 
     //--------------------------------------------------------------------------------------------//

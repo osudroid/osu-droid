@@ -14,6 +14,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 26/6/22 21:20
 
+@Deprecated
 public class OnlineHelper {
 
     public static final Drawable defaultAvatar =

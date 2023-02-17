@@ -154,6 +154,7 @@ public final class TopBar extends BaseFragment {
         mIsClosing = false;
         return super.show();
     }
+
     //--------------------------------------------------------------------------------------------//
 
     // TODO [TopBar] Replace this with a custom view

@@ -38,7 +38,7 @@ public final class Notification implements ResourceTable {
 
     //--------------------------------------------------------------------------------------------//
 
-    private Notification(String pHeader) {
+    public Notification(String pHeader) {
         mHeader = pHeader;
         mDrawable = drw(R.drawable.v18_notifications);
     }

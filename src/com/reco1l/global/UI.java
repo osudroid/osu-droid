@@ -1,5 +1,6 @@
 package com.reco1l.global;
 
+import com.reco1l.ui.custom.BeatmapListing;
 import com.reco1l.ui.fragments.*;
 import com.reco1l.utils.Logging;
 
@@ -38,5 +39,7 @@ public final class UI {
     //--------------------------------------------------------------------------------------------//
 
     // Calling this method will load class and its static fields
-    public static void initialize() {}
+    public static void initialize() {
+        BeatmapListing.instance.init();
+    }
 }

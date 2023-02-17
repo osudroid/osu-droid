@@ -180,4 +180,5 @@ dependencies {
     implementation 'com.intuit.sdp:sdp-android:1.1.0'
     implementation 'com.intuit.ssp:ssp-android:1.1.0'
     implementation 'com.github.valkriaine:Bouncy:2.3'
+    implementation 'com.github.delight-im:Android-AdvancedWebView:v3.2.1'
 }

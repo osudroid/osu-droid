@@ -111,7 +111,7 @@ public final class UserProfile extends BaseFragment {
         message.setVisibility(View.GONE);
 
         bindTouch(goProfile, () -> {
-            new WebViewPanel().show(Endpoint.PROFILE_URL + Game.onlineManager.getUserId());
+            new WebViewFragment(Endpoint.PROFILE_URL + Game.onlineManager.getUserId()).show();
             close();
         });
 

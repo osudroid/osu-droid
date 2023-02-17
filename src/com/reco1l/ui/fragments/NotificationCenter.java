@@ -276,6 +276,11 @@ public final class NotificationCenter extends BaseFragment {
             return Game.engine.getScene() != Scenes.player;
         }
 
+        @Override
+        protected boolean isOverlay() {
+            return true;
+        }
+
         //----------------------------------------------------------------------------------------//
 
         @Override

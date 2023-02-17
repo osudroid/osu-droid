@@ -33,6 +33,10 @@ public class ButtonPreference extends Preference {
 
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
+        if (!(holder.itemView.findViewById(R.id.pref_button) instanceof ButtonView)) {
+            return;
+        }
+
         ButtonView view = holder.itemView.findViewById(R.id.pref_button);
 
         if (view != null) {
