@@ -4,7 +4,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.edlplan.framework.easing.Easing;
-import com.reco1l.data.Notification;
 import com.reco1l.global.Game;
 import com.reco1l.global.UI;
 import com.reco1l.global.Scenes;
@@ -12,12 +11,14 @@ import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.TouchListener;
 import com.reco1l.utils.Views;
-import com.reco1l.view.LogoView;
+import com.reco1l.view.BadgeTextView;
+import com.reco1l.view.custom.LogoView;
 
 import com.reco1l.view.effects.ExpandEffect;
 import com.reco1l.view.effects.CircularSpectrum;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
+import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 9/7/22 18:09
@@ -28,6 +29,7 @@ public final class MainMenu extends BaseFragment {
 
     private LogoView mLogo;
     private LinearLayout mButtonLayout;
+    private BadgeTextView mVersionText;
 
     private View
             mSoloButton,
@@ -67,15 +69,18 @@ public final class MainMenu extends BaseFragment {
 
         mLogo = find("logo");
         mSoloButton = find("solo");
-        mMultiButton = find("multi");
+        mVersionText = find("author");
+        mExploreButton = find("explore");
         mButtonLayout = find("buttonsLayout");
         mButtonsBackground = find("buttonsBackground");
 
+        mVersionText.setText(str(R.string.app_name) + " - " + BuildConfig.VERSION_NAME);
+
         CircularSpectrum spectrum = find("spectrum");
-        spectrum.attachToLogo(mLogo);
+        spectrum.attachTo(mLogo);
 
         ExpandEffect expand = find("expand");
-        expand.attachToLogo(mLogo);
+        expand.attachTo(mLogo);
 
         Views.size(mLogo, dimen(R.dimen.mainMenuLogoSize));
         Views.height(mButtonsBackground, 0);
@@ -158,16 +163,18 @@ public final class MainMenu extends BaseFragment {
 
     private void onSingle() {
         Animation.of(rootView)
-                .runOnEnd(() -> Scenes.selector.show(true))
+                .runOnEnd(Scenes.selector::show)
                 .toY(sdp(40))
                 .toAlpha(0)
                 .play(200);
     }
 
-    private void onMulti() {
-        Notification.of("Multiplayer")
-                .setMessage("Ups! this is currently in WIP, stay tuned :)")
-                .commit();
+    private void onExplore() {
+        Animation.of(rootView)
+                .runOnEnd(Scenes.listing::show)
+                .toY(sdp(40))
+                .toAlpha(0)
+                .play(200);
     }
 
     public void onExit() {

@@ -1,6 +1,7 @@
 package com.reco1l.utils;
 
-// Reco1l math xd
+import androidx.annotation.FloatRange;
+
 public final class Maths {
 
     //--------------------------------------------------------------------------------------------//
@@ -10,11 +11,11 @@ public final class Maths {
     //--------------------------------------------------------------------------------------------//
     // Percentage of a value
 
-    public static int pct(int value, float percent) {
+    public static int pct(int value, @FloatRange(from = 0, to = 100) float percent) {
         return (int) (value * (percent / 100f));
     }
 
-    public static float pct(float value, float percent) {
+    public static float pct(float value, @FloatRange(from = 0, to = 100) float percent) {
         return value * (percent / 100f);
     }
 

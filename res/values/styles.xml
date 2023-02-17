@@ -183,11 +183,4 @@
         <item name="trackColor">#0000</item>
     </style>
 
-    <!--Custom-->
-    <style name="hit_score_badge">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:backgroundTint">#51000000</item>
-        <item name="size">l</item>
-    </style>
-
 </resources>

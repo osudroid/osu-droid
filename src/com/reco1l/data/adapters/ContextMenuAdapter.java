@@ -31,7 +31,7 @@ public class ContextMenuAdapter extends BaseAdapter<ItemHolder, ContextMenu.Item
     }
 
     @Override
-    protected ItemHolder getViewHolder(View pRootView) {
+    protected ItemHolder getViewHolder(View rootView) {
         TextView textView = new TextView(new ContextThemeWrapper(Game.activity, R.style.text));
 
         Drawable drawable = new ColorDrawable(color(R.color.accent));

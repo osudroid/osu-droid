@@ -40,8 +40,8 @@ public class SummaryScene extends BaseScene {
     public SummaryScene() {
         super();
 
-        mRetryButton = new IconButton(getContext());
-        mReplayButton = new IconButton(getContext());
+        mRetryButton = new IconButton(context());
+        mReplayButton = new IconButton(context());
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -70,16 +70,18 @@ public class SummaryScene extends BaseScene {
 
     @Override
     public boolean onBackPress() {
-        Scenes.selector.show();
+        Game.engine.setScene(Scenes.selector);
         return true;
     }
 
     @Override
-    public void onSceneChange(Scene oldScene, Scene newScene) {
-        super.onSceneChange(oldScene, newScene);
+    public void onSceneChange(Scene lastScene, Scene newScene) {
+        super.onSceneChange(lastScene, newScene);
 
-        if (newScene != this && mApplauseSound != null) {
-            mApplauseSound.stop();
+        if (lastScene == this) {
+            if (mApplauseSound != null) {
+                mApplauseSound.stop();
+            }
         }
     }
 

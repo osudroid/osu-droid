@@ -8,7 +8,7 @@ public interface Identifiers {
     int IconButton_Icon = 0x020;
     int IconButton_Widget = 0x021;
 
-    int PanelLayout_Title = 0x030;
-
     int ModMenu_CustomizationFrames = 0x100;
+
+    int SettingMenu_SectionFrame = 0x200;
 }

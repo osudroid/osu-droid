@@ -1,8 +1,6 @@
 package com.reco1l.data.adapters;
 // Created by Reco1l on 05/12/2022, 06:27
 
-import static com.reco1l.data.Notification.*;
-
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -32,42 +30,37 @@ public class NotificationListAdapter extends BaseAdapter<NotificationListAdapter
     }
 
     @Override
-    protected ViewHolder getViewHolder(View pRootView) {
-        return new ViewHolder(pRootView);
+    protected ViewHolder getViewHolder(View rootView) {
+        return new ViewHolder(rootView);
     }
 
     //--------------------------------------------------------------------------------------------/
 
     public static class ViewHolder extends BaseViewHolder<Notification> {
 
-        private Holder mHolder;
+        private final View
+                mBody,
+                mCloseButton;
 
         //----------------------------------------------------------------------------------------//
 
         public ViewHolder(@NonNull View root) {
             super(root);
+
+            mBody = root.findViewById(R.id.n_body);
+            mCloseButton = root.findViewById(R.id.n_close);
         }
 
         //----------------------------------------------------------------------------------------//
 
         @Override
         protected void onBind(Notification n, int position) {
-            mHolder = n.build(root);
+            UI.notificationCenter.bindTouch(mCloseButton, item::remove);
+            UI.notificationCenter.bindTouch(mBody, n::onClick);
 
-            UI.notificationCenter.bindTouch(mHolder.closeButton, item::remove);
-            UI.notificationCenter.bindTouch(mHolder.body, n::onClick);
+            mCloseButton.setVisibility(n.hasPriority() ? View.GONE : View.VISIBLE);
 
-            if (n.hasPriority()) {
-                mHolder.closeButton.setVisibility(View.GONE);
-            } else {
-                mHolder.closeButton.setVisibility(View.VISIBLE);
-            }
-        }
-
-        //----------------------------------------------------------------------------------------//
-
-        public void notifyUpdate() {
-            mHolder.handleUpdate();
+            n.bind(root);
         }
     }
 }

@@ -41,7 +41,7 @@ public final class TopBar extends BaseFragment {
     //--------------------------------------------------------------------------------------------//
 
     public TopBar() {
-        super(Scenes.selector, Scenes.summary, Scenes.loader);
+        super(Scenes.selector, Scenes.summary, Scenes.loader, Scenes.listing);
     }
 
     //--------------------------------------------------------------------------------------------//

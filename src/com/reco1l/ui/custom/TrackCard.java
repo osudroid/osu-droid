@@ -1,15 +1,17 @@
-package com.reco1l.data;
+package com.reco1l.ui.custom;
 
 import android.graphics.drawable.ColorDrawable;
 import android.view.View;
-import android.widget.ImageView;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import com.reco1l.data.TrackAttribute;
+import com.reco1l.data.TrackAttributeSet;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.view.BadgeTextView;
-import com.reco1l.view.RoundLayout;
+import com.reco1l.view.FadeImageView;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -21,7 +23,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public final class TrackCard {
 
-    private final RoundLayout mRootView;
+    private final ViewGroup mRootView;
 
     private final TextView
             mTitle,
@@ -42,13 +44,13 @@ public final class TrackCard {
             mStarsText,
             mMapper;
 
-    private final ImageView mBackground;
+    private final FadeImageView mBackground;
 
     private TrackAttributeSet mAttrs;
 
     //--------------------------------------------------------------------------------------------//
 
-    public TrackCard(RoundLayout pRoot) {
+    public TrackCard(ViewGroup pRoot) {
         mRootView = pRoot;
 
         mBpmText = pRoot.findViewById(R.id.bp_bpm);
@@ -68,6 +70,8 @@ public final class TrackCard {
         mMapper = pRoot.findViewById(R.id.bp_mapper);
         mBackground = pRoot.findViewById(R.id.bp_songBackground);
         mDifficulty = pRoot.findViewById(R.id.bp_difficulty);
+
+        mBackground.setAnimationDuration(500);
     }
 
     //--------------------------------------------------------------------------------------------//

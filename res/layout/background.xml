@@ -6,19 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/b_image0"
+    <com.reco1l.view.FadeImageView
+        android:id="@+id/b_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:elevation="1dp"
         android:scaleType="centerCrop" />
-
-    <ImageView
-        android:id="@+id/b_image1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:elevation="0dp"
-        android:scaleType="centerCrop"
-        android:visibility="gone" />
 
 </RelativeLayout>

@@ -2,12 +2,10 @@ package com.reco1l.scenes;
 
 // Created by Reco1l on 26/9/22 13:38
 
-import android.content.Context;
 import android.widget.LinearLayout;
 
 import com.reco1l.global.Game;
 import com.reco1l.global.UI;
-import com.reco1l.interfaces.ISceneHandler;
 import com.reco1l.interfaces.IMusicObserver;
 import com.reco1l.tables.ResourceTable;
 import com.reco1l.utils.Logging;
@@ -17,7 +15,7 @@ import org.anddev.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
-public abstract class BaseScene extends Scene implements ISceneHandler, IMusicObserver, ResourceTable {
+public abstract class BaseScene extends Scene implements IMusicObserver, ResourceTable {
 
     private boolean mIsFirstTimeShowing = true;
 
@@ -25,16 +23,18 @@ public abstract class BaseScene extends Scene implements ISceneHandler, IMusicOb
 
     public BaseScene() {
         Logging.initOf(getClass());
+        Game.engine.onSceneCreated(this);
+
         registerUpdateHandler(new IUpdateHandler() {
 
             public void onUpdate(float pSecondsElapsed) {
-                onSceneUpdate(pSecondsElapsed);
+                if (isShowing()) {
+                    onSceneUpdate(pSecondsElapsed);
+                }
             }
 
             public void reset() {}
         });
-
-        Game.engine.registerSceneHandler(this, this);
 
         Game.musicManager.bindMusicObserver(new IMusicObserver() {
             public void onMusicChange(TrackInfo newTrack, boolean isSameAudio) {
@@ -73,8 +73,6 @@ public abstract class BaseScene extends Scene implements ISceneHandler, IMusicOb
 
     protected void onFirstShow() {}
 
-    public void onShow() {}
-
     protected void onSceneUpdate(float sec) {}
 
     public void onButtonContainerChange(LinearLayout layout) {}
@@ -83,10 +81,6 @@ public abstract class BaseScene extends Scene implements ISceneHandler, IMusicOb
 
     protected final boolean isShowing() {
         return Game.engine.getScene() == this;
-    }
-
-    protected final Context getContext() {
-        return Game.activity;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -98,13 +92,13 @@ public abstract class BaseScene extends Scene implements ISceneHandler, IMusicOb
         }
     }
 
-    @Override
+    //--------------------------------------------------------------------------------------------//
+
     public boolean onBackPress() {
         return false;
     }
 
-    @Override
-    public void onSceneChange(Scene oldScene, Scene newScene) {
+    public void onSceneChange(Scene lastScene, Scene newScene) {
         if (newScene != this) {
             return;
         }
@@ -114,6 +108,10 @@ public abstract class BaseScene extends Scene implements ISceneHandler, IMusicOb
             onFirstShow();
         }
     }
+
+    public void onPause() {}
+
+    public void onResume() {}
 
     //--------------------------------------------------------------------------------------------//
 

@@ -1,28 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:background="#FFF"
+    android:elevation="3dp">
 
-    <TextView
-        android:id="@+id/mo_author"
-        style="@style/propertyBadge"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="@dimen/XS"
-        android:backgroundTint="@color/badgeTextBackground"
-        android:paddingHorizontal="@dimen/S"
-        android:text="version number" />
-
-    <TextView
+    <com.reco1l.view.custom.FPSBadge
         android:id="@+id/mo_fps"
-        style="@style/propertyBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="@dimen/XS"
-        android:backgroundTint="@color/backgroundDimmed"
-        android:paddingHorizontal="@dimen/S"
-        android:text="999fps - 99ms" />
-
+        android:layout_margin="@dimen/XS" />
 
 </RelativeLayout>

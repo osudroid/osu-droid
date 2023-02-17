@@ -20,12 +20,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:layout_marginLeft="@dimen/XXL"
+            android:layout_marginLeft="@dimen/L"
             tools:listitem="@layout/item_beatmap" />
 
     </RelativeLayout>
 
-    <com.reco1l.view.LogoView
+    <com.reco1l.view.custom.LogoView
         android:id="@+id/bl_logo"
         android:layout_width="@dimen/beatmapListLogoSize"
         android:layout_height="@dimen/beatmapListLogoSize"

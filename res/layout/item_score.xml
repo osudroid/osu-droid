@@ -2,150 +2,133 @@
 
 <!-- Created by Reco1l on 9/8/22 20:20 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="@dimen/scoreboardItemHeight"
     android:layout_marginBottom="@dimen/XXS"
     android:paddingHorizontal="@dimen/XS"
-    android:paddingVertical="@dimen/XXS">
+    android:paddingVertical="@dimen/XXS"
+    android:background="@color/backgroundPrimary">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/sb_body"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/sb_rank"
+        style="@style/text"
+        android:layout_width="@dimen/scoreboardItemRankLayoutWidth"
         android:layout_height="match_parent"
-        android:outlineAmbientShadowColor="#0000"
-        android:outlineSpotShadowColor="#0000"
-        app:cardBackgroundColor="#40000000"
-        app:cardCornerRadius="@dimen/app_corners">
+        android:alpha="0.8"
+        android:gravity="center"
+        android:text="50"
+        android:textStyle="bold" />
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/sb_avatar"
+        android:layout_width="@dimen/scoreboardItemAvatarSize"
+        android:layout_height="@dimen/scoreboardItemAvatarSize"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/sb_rank"
+        android:scaleType="centerCrop"
+        android:src="@drawable/placeholder_avatar"
+        app:shapeAppearanceOverlay="@style/avatar_shape" />
+
+    <ImageView
+        android:id="@+id/sb_mark"
+        android:layout_width="@dimen/scoreboardItemMarkSize"
+        android:layout_height="@dimen/scoreboardItemMarkSize"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="@dimen/_S"
+        android:layout_marginBottom="@dimen/XXS"
+        android:layout_toEndOf="@id/sb_avatar" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/S"
+        android:layout_toEndOf="@id/sb_avatar"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/sb_rank"
+                android:id="@+id/sb_name"
                 style="@style/text"
-                android:layout_width="@dimen/scoreboardItemRankLayoutWidth"
-                android:layout_height="match_parent"
-                android:alpha="0.8"
-                android:gravity="center"
-                android:text="50"
-                android:textStyle="bold" />
-
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/sb_avatar"
-                android:layout_width="@dimen/scoreboardItemAvatarSize"
-                android:layout_height="@dimen/scoreboardItemAvatarSize"
-                android:layout_centerVertical="true"
-                android:layout_toRightOf="@id/sb_rank"
-                android:scaleType="centerCrop"
-                android:src="@drawable/placeholder_avatar"
-                app:shapeAppearanceOverlay="@style/avatar_shape" />
-
-            <ImageView
-                android:id="@+id/sb_mark"
-                android:layout_width="@dimen/scoreboardItemMarkSize"
-                android:layout_height="@dimen/scoreboardItemMarkSize"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="@dimen/_S"
+                android:layout_marginLeft="@dimen/_1sdp"
                 android:layout_marginBottom="@dimen/XXS"
-                android:layout_toEndOf="@id/sb_avatar" />
+                android:text="Acivev"
+                android:textSize="@dimen/textS" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="@dimen/S"
-                android:layout_toEndOf="@id/sb_avatar"
-                android:gravity="center_vertical">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/sb_name"
-                        style="@style/text"
-                        android:layout_marginLeft="@dimen/_1sdp"
-                        android:layout_marginBottom="@dimen/XXS"
-                        android:text="Acivev"
-                        android:textSize="@dimen/textS" />
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
-
-                        <TextView
-                            android:id="@+id/sb_accuracy"
-                            style="@style/smallPropertyBadge"
-                            android:layout_marginLeft="0dp"
-                            android:backgroundTint="@color/scoreboardItemBadgeBackground"
-                            android:drawableStart="@drawable/v8_touch"
-                            android:text="100.00%" />
-
-                        <TextView
-                            android:id="@+id/sb_combo"
-                            style="@style/smallPropertyBadge"
-                            android:layout_marginLeft="@dimen/XXS"
-                            android:backgroundTint="@color/scoreboardItemBadgeBackground"
-                            android:drawableStart="@drawable/v8_combo"
-                            android:text="1000x" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="@dimen/S"
-                android:gravity="right"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/XXS"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:id="@+id/sb_mods"
-                        android:layout_width="wrap_content"
-                        android:layout_height="@dimen/scoreboardItemModSize"
-                        android:orientation="horizontal" />
-
-                    <TextView
-                        android:id="@+id/sb_difference"
-                        style="@style/smallPropertyBadge"
-                        android:layout_marginLeft="@dimen/XXS"
-                        android:backgroundTint="@color/scoreboardItemBadgeBackground"
-                        android:drawableStart="@drawable/v8_upgrade"
-                        android:text="0" />
-
-                </LinearLayout>
+                android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/sb_score"
-                    style="@style/text"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentBottom="true"
-                    android:textStyle="bold"
-                    android:text="000,000,000"
-                    android:layout_marginRight="@dimen/_1sdp"/>
+                    android:id="@+id/sb_accuracy"
+                    style="@style/smallPropertyBadge"
+                    android:layout_marginLeft="0dp"
+                    android:backgroundTint="@color/scoreboardItemBadgeBackground"
+                    android:drawableStart="@drawable/v8_touch"
+                    android:text="100.00%" />
+
+                <TextView
+                    android:id="@+id/sb_combo"
+                    style="@style/smallPropertyBadge"
+                    android:layout_marginLeft="@dimen/XXS"
+                    android:backgroundTint="@color/scoreboardItemBadgeBackground"
+                    android:drawableStart="@drawable/v8_combo"
+                    android:text="1000x" />
 
             </LinearLayout>
 
+        </LinearLayout>
 
-        </RelativeLayout>
+    </LinearLayout>
 
-    </androidx.cardview.widget.CardView>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="@dimen/S"
+        android:gravity="right"
+        android:orientation="vertical">
 
-</LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/XXS"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/sb_mods"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/scoreboardItemModSize"
+                android:orientation="horizontal" />
+
+            <TextView
+                android:id="@+id/sb_difference"
+                style="@style/smallPropertyBadge"
+                android:layout_marginLeft="@dimen/XXS"
+                android:backgroundTint="@color/scoreboardItemBadgeBackground"
+                android:drawableStart="@drawable/v8_upgrade"
+                android:text="0" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/sb_score"
+            style="@style/text"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="@dimen/_1sdp"
+            android:text="000,000,000"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+</RelativeLayout>

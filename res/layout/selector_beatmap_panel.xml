@@ -15,14 +15,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <RelativeLayout
+    <com.reco1l.view.custom.TiltedLayout
         android:id="@+id/bp_body"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="#1E000000">
 
         <com.factor.bouncy.BouncyNestedScrollView
             android:id="@+id/bp_panel"
-            android:layout_width="@dimen/beatmapPanelBannerWidth"
+            android:layout_width="@dimen/beatmapPanelContentWidth"
             android:layout_height="match_parent">
 
             <LinearLayout
@@ -35,8 +36,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:layout_marginRight="@dimen/L">
+                    android:gravity="center_horizontal">
 
                     <RelativeLayout
                         android:layout_width="wrap_content"
@@ -83,7 +83,6 @@
                     android:id="@+id/bp_pageContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/L"
                     android:orientation="vertical">
 
                     <LinearLayout
@@ -125,6 +124,6 @@
 
         </com.factor.bouncy.BouncyNestedScrollView>
 
-    </RelativeLayout>
+    </com.reco1l.view.custom.TiltedLayout>
 
 </RelativeLayout>

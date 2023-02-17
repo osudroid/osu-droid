@@ -2,14 +2,18 @@ package com.reco1l.scenes;
 // Created by Reco1l on 26/11/2022, 06:20
 
 import android.view.View;
-import android.widget.TextView;
 
 import com.reco1l.global.Game;
 import com.reco1l.ui.BaseFragment;
+import com.reco1l.ui.custom.Dialog;
+import com.reco1l.ui.custom.DialogBuilder;
 import com.reco1l.utils.Animation;
 import com.reco1l.tables.Res;
+import com.reco1l.utils.execution.Async;
+import com.reco1l.view.BadgeTextView;
 import com.reco1l.view.effects.StripsEffect;
 
+import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class IntroScene extends BaseScene {
@@ -31,11 +35,15 @@ public class IntroScene extends BaseScene {
     public static class IntroFragment extends BaseFragment {
 
         private View
-                logoBrand,
-                logoLines;
+                mLogoBrand,
+                mLogoLines;
 
-        private TextView loading;
-        private StripsEffect effect;
+        private BadgeTextView mText;
+        private StripsEffect mEffect;
+
+        private BassSoundProvider mWelcomeSound;
+
+        private boolean mIsTextShowing = false;
 
         //----------------------------------------------------------------------------------------//
 
@@ -58,12 +66,14 @@ public class IntroScene extends BaseScene {
 
         @Override
         protected void onLoad() {
-            Game.resourcesManager.loadSound("welcome_piano", "sfx/welcome_piano.ogg", false);
+            mWelcomeSound = Game.resourcesManager.loadSound("welcome", "sfx/welcome.ogg", false);
 
-            logoBrand = find("logoBrand");
-            logoLines = find("logoLines");
-            loading = find("loading");
-            effect = find("effect");
+            mLogoBrand = find("logoBrand");
+            mLogoLines = find("logoLines");
+            mEffect = find("effect");
+            mText = find("loading");
+
+            mText.setAlpha(0);
 
             Animation.of(rootView)
                     .fromAlpha(0)
@@ -71,7 +81,7 @@ public class IntroScene extends BaseScene {
                     .play(1000);
         }
 
-        //--------------------------------------------------------------------------------------------//
+        //----------------------------------------------------------------------------------------//
 
         @Override
         public void close() {
@@ -80,67 +90,79 @@ public class IntroScene extends BaseScene {
             }
             Game.libraryManager.shuffleLibrary();
 
-            if (loading.getVisibility() == View.VISIBLE) {
-                Animation.of(loading)
+            if (mIsTextShowing) {
+                Animation.of(mText)
                         .toY(20)
                         .toAlpha(0)
                         .play(300);
             }
 
-            Animation.of(logoLines)
+            Animation.of(mLogoLines)
                     .fromScale(2)
                     .toScale(2.15f)
                     .fromRotation(-50)
                     .toRotation(-70)
                     .toAlpha(0.5f)
-                    .runOnStart(() -> Game.resourcesManager.getSound("welcome_piano").play())
+                    .runOnStart(mWelcomeSound::play)
                     .runOnEnd(() -> {
 
                         int size = Res.sdp(250);
 
-                        Animation.of(logoLines)
+                        Animation.of(mLogoLines)
                                 .toScale(1)
                                 .toSize(size)
                                 .toRotation(0)
                                 .toAlpha(1)
                                 .play(300);
 
-                        Animation.of(effect)
+                        Animation.of(mEffect)
                                 .toAlpha(0)
                                 .play(300);
 
-                        Animation.of(logoBrand)
+                        Animation.of(mLogoBrand)
                                 .toSize(size)
-                                .runOnEnd(super::close)
+                                .runOnEnd(() -> {
+                                    super.close();
+
+                                    DialogBuilder b = new DialogBuilder("Warning");
+
+                                    b.setMessage("This is an unstable development build it can be full of bugs or errors!\nKeep in mind " +
+                                            "rimu! is not osu!droid so please don't report issues at official osu!droid links.\n\n" +
+                                            "As alternative you can report a bug or leave your feedback at: \n\n" +
+                                            "rimu-beta Discord forum:\n" +
+                                            "https://discord.gg/rnbHbsbeFr\n\n" +
+                                            "rimu! repository:\n" +
+                                            "https://github.com/reco1I/rimu/issues"
+                                    );
+
+                                    b.addButton("I understand!", Dialog::close);
+                                    new Dialog(b).show();
+                                })
                                 .play(300);
 
                         Game.musicManager.play();
                     })
-                    .delay(loading.getVisibility() == View.VISIBLE ? 300 : 0)
+                    .delay(mIsTextShowing ? 300 : 0)
                     .play(2000);
         }
 
         //--------------------------------------------------------------------------------------------//
 
         @Override
-        public void onEngineUpdate(float pSecElapsed) {
-            if (!isLoaded()) {
+        public void onEngineUpdate(float elapsed) {
+            String text = Game.globalManager.getInfo();
+            mText.setText(text);
+
+            if (mIsTextShowing) {
                 return;
             }
-            int progress = Game.globalManager.getLoadingProgress();
-            String info = Game.globalManager.getInfo();
+            mIsTextShowing = true;
 
-            if (info != null && loading.getVisibility() != View.VISIBLE) {
-                loading.setVisibility(View.VISIBLE);
-
-                Animation.of(loading)
-                        .fromY(20)
-                        .toY(0)
-                        .fromAlpha(0)
-                        .toAlpha(1)
-                        .play(300);
-            }
-            loading.setText(info + "\n(" + progress + "%)");
+            Animation.of(mText)
+                    .fromY(20)
+                    .toY(0)
+                    .toAlpha(1)
+                    .play(300);
         }
     }
 }

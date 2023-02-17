@@ -59,8 +59,8 @@ public class SkinListAdapter extends BaseAdapter<SkinListAdapter.ViewHolder, Str
     }
 
     @Override
-    protected ViewHolder getViewHolder(View pRootView) {
-        return new ViewHolder(pRootView);
+    protected ViewHolder getViewHolder(View rootView) {
+        return new ViewHolder(rootView);
     }
 
     @Override

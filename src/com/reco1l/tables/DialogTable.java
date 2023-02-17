@@ -6,7 +6,6 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.factor.bouncy.BouncyRecyclerView;
 import com.reco1l.data.adapters.SkinListAdapter;
 import com.reco1l.global.Game;
 import com.reco1l.ui.SimpleFragment;
@@ -21,27 +20,6 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 // Created by Reco1l on 25/7/22 22:30
 
 public class DialogTable {
-
-    //--------------------------------------------------------------------------------------------//
-
-    // Builder for Author dialog
-    public static DialogBuilder author() {
-        return new DialogBuilder("Information")
-                .setCustomFragment(new AuthorFragment())
-                .addCloseButton();
-    }
-
-    public static class AuthorFragment extends SimpleFragment {
-
-        public AuthorFragment() {
-            super(R.layout.layout_author);
-        }
-
-        protected void onLoad() {
-            TextView versionTv = find(R.id.d_author_version);
-            versionTv.setText(String.format("%s", BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")"));
-        }
-    }
 
     //--------------------------------------------------------------------------------------------//
 
@@ -134,7 +112,7 @@ public class DialogTable {
     //--------------------------------------------------------------------------------------------//
 
     // Simple builder for print trace
-    public static DialogBuilder stacktrace(Exception e) {
+    public static DialogBuilder stacktrace(Throwable e) {
 
         StackTraceElement[] ste = e.getStackTrace();
         StringBuilder str = new StringBuilder();

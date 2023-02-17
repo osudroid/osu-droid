@@ -6,6 +6,8 @@ import com.reco1l.interfaces.ITask;
 import com.reco1l.ui.custom.LoaderFragment;
 import com.reco1l.utils.execution.AsyncTask;
 
+import org.anddev.andengine.entity.scene.Scene;
+
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 
 public class LoaderScene extends BaseScene {
@@ -52,11 +54,12 @@ public class LoaderScene extends BaseScene {
 
     //--------------------------------------------------------------------------------------------//
 
-
     @Override
-    public void onShow() {
-        ToastLogger.setPercentage(-1);
-        mProgress = (int) ToastLogger.getPercentage();
+    public void onSceneChange(Scene lastScene, Scene newScene) {
+        if (newScene == this) {
+            ToastLogger.setPercentage(-1);
+            mProgress = (int) ToastLogger.getPercentage();
+        }
     }
 
     @Override

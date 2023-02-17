@@ -20,8 +20,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-
 public class StripsDrawable extends Drawable {
 
     public int
@@ -110,19 +108,11 @@ public class StripsDrawable extends Drawable {
     }
 
     private PointF nextPosition() {
-        return new PointF(width, random.nextInt(width + height + height / 3) - width);
+        return new PointF(width, random.nextInt(Math.max(1,width + height + height / 3)) - width);
     }
 
     private float nextLength() {
-        return random.nextInt((int) (width - stripWidth)) + stripWidth;
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    private Paint getPaint() {
-        Paint paint = new Paint();
-        paint.setDither(Config.isUseDither());
-        return paint;
+        return random.nextInt(Math.max(1, (int) (width - stripWidth))) + stripWidth;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -172,11 +162,11 @@ public class StripsDrawable extends Drawable {
 
             rectF = new RectF();
 
-            paint = getPaint();
+            paint = new Paint();
             paint.setColor(color);
             paint.setAlpha(nextAlpha());
 
-            backPaint = getPaint();
+            backPaint = new Paint();
             backPaint.setColor(Color.TRANSPARENT);
             backPaint.setXfermode(new PorterDuffXfermode(Mode.CLEAR));
 

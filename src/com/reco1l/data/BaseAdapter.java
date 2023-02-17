@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 
 import com.reco1l.tables.ResourceTable;
-import com.reco1l.utils.Views;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +36,7 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
 
     private int
             mOrientation = -1,
-            mMarginAtBounds = 0,
+            mMarginAtBounds = -1,
             mSelectedPosition = -1;
 
     private T mLastSelected;
@@ -79,9 +78,9 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
 
     // Return a new instance of your custom view holder class, this can be a replacement for
     // getItemLayout() if you want to programmatically create a view instead of inflating a layout
-    protected abstract VH getViewHolder(View pRootView);
+    protected abstract VH getViewHolder(View rootView);
 
-    protected void onHolderCreated(VH pHolder) {}
+    protected void onHolderCreated(VH holder, int count) {}
 
     // Called after the item was assigned to the holder and before of calling onBind()
     protected void onHolderAssignment(VH holder, int position) {}
@@ -117,6 +116,9 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
     //--------------------------------------------------------------------------------------------//
 
     public final void select(T pItem) {
+        if (mLastSelected == pItem) {
+            return;
+        }
         mLastSelected = pItem;
         select(mItems.indexOf(pItem));
     }
@@ -125,7 +127,7 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
         if (pPosition < 0 || pPosition == mSelectedPosition) {
             return false;
         }
-        mLastSelected = mItems.get(pPosition);
+        mLastSelected = mItems != null ? mItems.get(pPosition) : null;
 
         notifyItemChanged(mSelectedPosition);
         mSelectedPosition = pPosition;
@@ -158,12 +160,28 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
 
     //--------------------------------------------------------------------------------------------//
 
+    public final T getSelected() {
+        if (mSelectedPosition == -1) {
+            return null;
+        }
+        return mItems.get(mSelectedPosition);
+    }
+
     public final int getSelectedPosition() {
         return mSelectedPosition;
     }
 
     public final ArrayList<VH> getHolders() {
         return mHolders;
+    }
+
+    public final VH getHolderOf(T item) {
+        for (VH holder : mHolders) {
+            if (Objects.equals(holder.item, item)) {
+                return holder;
+            }
+        }
+        return null;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -191,7 +209,7 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
         holder.adapter = (BaseAdapter<BaseViewHolder<T>, T>) this;
 
         mHolders.add(holder);
-        onHolderCreated(holder);
+        onHolderCreated(holder, mHolders.indexOf(holder));
 
         return holder;
     }
@@ -208,7 +226,7 @@ public abstract class BaseAdapter<VH extends BaseViewHolder<T>, T> extends Adapt
             holder.handleDeselection();
         }
 
-        if (mMarginAtBounds > 0 && mOrientation != -1) {
+        if (mMarginAtBounds != -1 && mOrientation != -1) {
             MarginUtils m = margins(holder.root);
 
             if (mOrientation == VERTICAL) {

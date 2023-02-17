@@ -4,10 +4,12 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.reco1l.annotation.Size;
 import com.reco1l.view.BadgeTextView;
 
 public final class ModBadge extends BadgeTextView {
@@ -32,9 +34,13 @@ public final class ModBadge extends BadgeTextView {
     protected void onCreate() {
         super.onCreate();
 
-        setSize(XL);
+        setSize(Size.XL);
         setBackground(new ColorDrawable(0xFF7CB1E5));
-        getTextView().setTextColor(Color.BLACK);
-        getTextView().setAlpha(0.75f);
+
+        TextView text = getTextView();
+
+        text.setTextColor(Color.BLACK);
+        text.setAllCaps(true);
+        text.setAlpha(0.75f);
     }
 }

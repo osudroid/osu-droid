@@ -5,7 +5,8 @@ import android.app.Application;
 import android.os.Bundle;
 import android.util.Log;
 
-import ru.nsu.ccfit.zuev.osu.AppException;
+import com.reco1l.management.ExceptionManager;
+
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 
 public class SaveServiceObject extends Application {
@@ -42,7 +43,7 @@ public class SaveServiceObject extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Thread.setDefaultUncaughtExceptionHandler(AppException.getAppExceptionHandler());
+        Thread.setDefaultUncaughtExceptionHandler(ExceptionManager.instance);
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(Activity activity, Bundle savedInstanceState) {

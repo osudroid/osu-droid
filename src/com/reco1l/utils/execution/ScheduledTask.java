@@ -31,10 +31,12 @@ public abstract class ScheduledTask {
             run();
             return;
         }
+
         if (mTimer == null) {
             mTimer = new Timer();
         }
         mTimer.purge();
+
         if (mCurrentTask != null) {
             mCurrentTask.cancel();
         }
@@ -45,6 +47,7 @@ public abstract class ScheduledTask {
                 cancel();
             }
         };
+
         mTimer.schedule(mCurrentTask, delay);
     }
 

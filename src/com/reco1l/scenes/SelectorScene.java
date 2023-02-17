@@ -11,6 +11,7 @@ import com.reco1l.global.Scenes;
 import com.reco1l.interfaces.ITask;
 import com.reco1l.tables.NotificationTable;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.execution.AsyncTask;
 import com.reco1l.view.IconButton;
 
 import org.anddev.andengine.entity.scene.Scene;
@@ -38,11 +39,10 @@ public class SelectorScene extends BaseScene {
 
     public SelectorScene() {
         super();
-        //bindDataBaseChangedListener();
 
-        modsButton = new IconButton(getContext());
-        searchButton = new IconButton(getContext());
-        randomButton = new IconButton(getContext());
+        modsButton = new IconButton(context());
+        searchButton = new IconButton(context());
+        randomButton = new IconButton(context());
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -173,37 +173,20 @@ public class SelectorScene extends BaseScene {
     }
 
     @Override
-    public void onSceneChange(Scene oldScene, Scene newScene) {
+    public void onSceneChange(Scene lastScene, Scene newScene) {
         if (newScene == this) {
-            UI.background.setBlur(true);
+            Game.musicManager.play();
         }
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void bindDataBaseChangedListener() {
-        OdrDatabase.get().setOnDatabaseChangedListener(() -> {
-            if (isShowing()) {
-                Game.boardManager.load(Game.musicManager.getTrack());
-            }
-        });
-    }
-
-    public void unbindDataBaseChangedListener() {
-        OdrDatabase.get().setOnDatabaseChangedListener(null);
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public void show(boolean reload) {
-        if (!reload) {
-            super.show();
-        }
-
-        Scenes.loader.async(new ITask() {
-
+    @Override
+    public void show() {
+        new AsyncTask() {
             public void run() {
                 Game.activity.checkNewBeatmaps();
+
                 if (!Game.libraryManager.loadLibraryCache(Game.activity, true)) {
                     Game.libraryManager.scanLibrary(Game.activity);
                 }
@@ -211,13 +194,7 @@ public class SelectorScene extends BaseScene {
 
             public void onComplete() {
                 SelectorScene.super.show();
-                Game.musicManager.play();
             }
-        });
-    }
-
-    @Override
-    public void show() {
-        show(false);
+        }.execute();
     }
 }

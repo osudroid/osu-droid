@@ -6,19 +6,18 @@ import static android.graphics.Bitmap.Config.ARGB_8888;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.view.View;
-import android.widget.ImageView;
-
-import androidx.palette.graphics.Palette;
 
 import com.reco1l.global.Game;
 import com.reco1l.global.Scenes;
-import com.reco1l.tables.AnimationTable;
+import com.reco1l.scenes.BaseScene;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.BlurRender;
 import com.reco1l.utils.execution.AsyncTask;
-import com.reco1l.utils.helpers.BitmapHelper;
+import com.reco1l.view.FadeImageView;
+
+import java.util.LinkedList;
+import java.util.Objects;
+import java.util.Queue;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -27,24 +26,22 @@ public final class Background extends BaseFragment {
 
     public static final Background instance = new Background();
 
-    private ImageView
-            mImage0,
-            mImage1;
-
+    private Bitmap mBitmap;
+    private String mImagePath;
+    private FadeImageView mImage;
     private AsyncTask mBitmapTask;
 
-    private String mImagePath;
-    private Bitmap mBitmap;
+    private final Queue<Runnable> mCallbackQueue;
 
     private boolean
-            mIsDark = false,
             mIsReload = false,
             mIsBlurEnabled = false;
 
     //--------------------------------------------------------------------------------------------//
 
     public Background() {
-        super(Scenes.main, Scenes.selector, Scenes.loader, Scenes.summary);
+        super(Scenes.main, Scenes.selector, Scenes.loader, Scenes.summary, Scenes.listing);
+        mCallbackQueue = new LinkedList<>();
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -63,13 +60,17 @@ public final class Background extends BaseFragment {
 
     @Override
     protected void onLoad() {
-        mImage0 = find("image0");
-        mImage1 = find("image1");
+        mImage = find("image");
 
         if (mBitmap == null) {
             mBitmap = Game.bitmapManager.get("menu-background").copy(ARGB_8888, true);
         }
-        mImage0.setImageBitmap(mBitmap);
+        mImage.setImageBitmap(mBitmap);
+    }
+
+    @Override
+    protected void onSceneChange(BaseScene oldScene, BaseScene newScene) {
+        setBlur(newScene != Scenes.main);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -83,96 +84,64 @@ public final class Background extends BaseFragment {
         changeFrom(mImagePath);
     }
 
-    // Returns if the current background predominant color is dark
-    public boolean isDark() {
-        return mIsDark;
+    public void postChange(Runnable task) {
+        mCallbackQueue.add(task);
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public synchronized void changeFrom(String pPath) {
-        if (!mIsReload) {
-            if (pPath != null && pPath.equals(mImagePath)) {
-                return;
-            }
+    public Bitmap getBitmap() {
+        return mBitmap;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public synchronized void changeFrom(String path) {
+        if (Config.isSafeBeatmapBg()) {
+            path = null;
         }
+
+        if (!mIsReload && Objects.equals(path, mImagePath)) {
+            return;
+        }
+        mImagePath = path;
         mIsReload = false;
-        mImagePath = pPath;
 
         if (mBitmapTask != null) {
             mBitmapTask.cancel(true);
         }
 
         mBitmapTask = new AsyncTask() {
-            Bitmap newBitmap;
+
+            private Bitmap mNewBitmap;
 
             public void run() {
-                int quality = Math.max(Config.getBackgroundQuality(), 1);
+                Game.resourcesManager.loadBackground(mImagePath);
 
                 if (mImagePath == null) {
-                    newBitmap = Game.bitmapManager.get("menu-background").copy(ARGB_8888, true);
+                    mNewBitmap = Game.bitmapManager.get("menu-background").copy(ARGB_8888, true);
                 } else {
-                    newBitmap = BitmapFactory.decodeFile(mImagePath).copy(ARGB_8888, true);
+                    mNewBitmap = BitmapFactory.decodeFile(mImagePath).copy(ARGB_8888, true);
                 }
-                newBitmap = BitmapHelper.compress(newBitmap, 100 / quality);
-                parseColor(newBitmap);
 
                 if (mIsBlurEnabled) {
-                    newBitmap = BlurRender.applyTo(newBitmap, 25);
+                    mNewBitmap = BlurRender.applyTo(mNewBitmap, 25);
                 }
             }
 
             public void onComplete() {
-                handleChange(newBitmap);
-                Game.resourcesManager.loadBackground(pPath);
+                mBitmap = mNewBitmap;
+                Game.activity.runOnUiThread(() -> mImage.setImageBitmap(mBitmap));
+
+                while (!mCallbackQueue.isEmpty()) {
+                    Runnable callback = mCallbackQueue.poll();
+
+                    if (callback != null) {
+                        callback.run();
+                    }
+                }
             }
         };
         mBitmapTask.execute();
-    }
-
-    private void parseColor(Bitmap pBitmap) {
-        Palette palette = Palette.from(pBitmap).generate();
-
-        int color = palette.getDominantColor(Color.BLACK);
-        mIsDark = Color.luminance(color) < 0.5;
-    }
-
-    private void handleChange(Bitmap pNewBitmap) {
-        if (!isLoaded()) {
-            return;
-        }
-
-        boolean cursor = mImage0.getVisibility() == View.VISIBLE;
-
-        ImageView front = cursor ? mImage0 : mImage1;
-        ImageView back = cursor ? mImage1 : mImage0;
-
-        Game.activity.runOnUiThread(() -> {
-            back.setImageBitmap(pNewBitmap);
-            back.setVisibility(View.VISIBLE);
-            back.setAlpha(1f);
-        });
-
-        AnimationTable.fadeOut(front)
-                .runOnEnd(() -> {
-                    front.setImageBitmap(null);
-                    front.setVisibility(View.GONE);
-                    front.setElevation(0f);
-
-                    back.setElevation(1f);
-
-                    if (mBitmap != null) {
-                        mBitmap.recycle();
-                    }
-                    mBitmap = pNewBitmap;
-                })
-                .play(500);
-    }
-
-    public void reload() {
-        if (isAdded() && mImagePath != null) {
-            mIsReload = true;
-            changeFrom(mImagePath);
-        }
     }
 }

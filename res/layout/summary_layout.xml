@@ -4,15 +4,13 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:background="#FFF">
+    android:background="@color/backgroundDimmed">
 
     <com.factor.bouncy.BouncyNestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/backgroundDimmed">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -24,7 +22,6 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/shape_gradient"
                 android:padding="@dimen/M">
 
                 <LinearLayout
@@ -39,52 +36,52 @@
                         android:id="@+id/gr_title"
                         style="@style/largeText"
                         android:singleLine="true"
-                        android:text="title title title" />
+                        android:text="title title title"
+                        android:textColor="#FFF" />
 
                     <TextView
                         android:id="@+id/gr_artist"
                         style="@style/text"
                         android:layout_marginTop="@dimen/XXS"
                         android:singleLine="true"
-                        android:text="by artist artist artist" />
+                        android:text="by artist artist artist"
+                        android:textColor="#FFF" />
 
                     <!--Map difficulty-->
-                    <RelativeLayout
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/S"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
 
-                        <TextView
+                        <com.reco1l.view.BadgeTextView
                             android:id="@+id/gr_stars"
-                            style="@style/propertyBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:layout_marginStart="0dp"
-                            android:backgroundTint="@color/gameResultsBadgeBackground"
-                            android:drawableStart="@drawable/v10_star"
-                            android:text="00.00" />
+                            android:text="00.00"
+                            app:icon="@drawable/v10_star" />
 
                         <TextView
                             android:id="@+id/gr_difficulty"
                             style="@style/text"
-                            android:layout_centerVertical="true"
                             android:layout_marginLeft="@dimen/S"
-                            android:layout_toEndOf="@+id/gr_stars"
                             android:text="difficulty"
-                            android:textColor="@color/textSecondary"
+                            android:textColor="#FFF"
                             android:textSize="@dimen/textXS" />
 
-                    </RelativeLayout>
+                    </LinearLayout>
 
                 </LinearLayout>
 
-                <TextView
+                <com.reco1l.view.BadgeTextView
                     android:id="@+id/gr_mapper"
-                    style="@style/propertyBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:layout_marginStart="0dp"
-                    android:backgroundTint="@color/gameResultsBadgeBackground"
-                    android:drawableStart="@drawable/v10_person"
-                    android:text="mapper" />
+                    android:text="mapper"
+                    app:icon="@drawable/v10_person" />
 
             </RelativeLayout>
 
@@ -135,7 +132,8 @@
                                     android:id="@+id/gr_username"
                                     style="@style/text"
                                     android:layout_marginLeft="@dimen/S"
-                                    android:text="Username" />
+                                    android:text="Username"
+                                    android:textColor="#FFF" />
 
                             </LinearLayout>
 
@@ -144,7 +142,7 @@
                                 style="@style/text"
                                 android:layout_marginTop="@dimen/XS"
                                 android:text="Played on 2022/20/11 at 20:22"
-                                android:textColor="@color/textSecondary"
+                                android:textColor="#FFF"
                                 android:textSize="@dimen/textXS" />
 
                         </LinearLayout>
@@ -264,6 +262,7 @@
                             android:layout_width="wrap_content"
                             android:layout_marginRight="@dimen/M"
                             android:text="9,999,999,999"
+                            android:textColor="#FFF"
                             android:textSize="@dimen/XXL" />
 
                     </LinearLayout>
@@ -280,59 +279,19 @@
                     android:orientation="horizontal">
 
                     <!--UR-->
-                    <LinearLayout
-                        android:id="@+id/gr_urLayout"
+                    <com.reco1l.view.BadgeTextView
+                        android:id="@+id/gr_ur"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/shape_rounded"
-                        android:backgroundTint="@color/gameResultsBadgeBackground"
-                        android:paddingHorizontal="@dimen/S"
-                        android:paddingVertical="@dimen/XXS">
-
-                        <TextView
-                            style="@style/text"
-                            android:text="UR"
-                            android:textColor="@color/textSecondary"
-                            android:textSize="@dimen/textXS"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/gr_ur"
-                            style="@style/text"
-                            android:layout_centerInParent="true"
-                            android:layout_marginLeft="@dimen/S"
-                            android:text="100.00"
-                            android:textSize="@dimen/textXS" />
-
-                    </LinearLayout>
+                        android:text="UR: 000.00"
+                        android:layout_marginRight="@dimen/XS"/>
 
                     <!--Error-->
-                    <LinearLayout
-                        android:id="@+id/gr_errorLayout"
+                    <com.reco1l.view.BadgeTextView
+                        android:id="@+id/gr_error"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_above="@id/gr_score"
-                        android:background="@drawable/shape_rounded"
-                        android:backgroundTint="@color/gameResultsBadgeBackground"
-                        android:paddingHorizontal="@dimen/S"
-                        android:paddingVertical="@dimen/XXS">
-
-                        <TextView
-                            style="@style/text"
-                            android:text="Error"
-                            android:textColor="@color/textSecondary"
-                            android:textSize="@dimen/textXS"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/gr_error"
-                            style="@style/text"
-                            android:layout_centerInParent="true"
-                            android:layout_marginLeft="@dimen/S"
-                            android:text="-99,99ms / 99,67ms"
-                            android:textSize="@dimen/textXS" />
-
-                    </LinearLayout>
+                        android:text="Error: -99,99ms / 99,67ms" />
 
                 </LinearLayout>
 

@@ -48,7 +48,8 @@
                         android:id="@+id/d_message"
                         style="@style/text"
                         android:layout_margin="@dimen/S"
-                        android:text="message" />
+                        android:text="message"
+                        android:autoLink="all"/>
 
                 </LinearLayout>
 

@@ -16,9 +16,13 @@
             android:defaultValue="25"
             android:key="bgbrightness"
             android:title="@string/opt_bgbrightness_title"
-
             app:min="1"
             app:showSeekBarValue="true" />
+
+        <com.reco1l.preference.CheckPreference
+            android:defaultValue="false"
+            android:key="enableStoryboard"
+            android:title="Enable storyboard" />
 
     </PreferenceCategory>
 

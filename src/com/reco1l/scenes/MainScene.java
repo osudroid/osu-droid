@@ -6,16 +6,13 @@ import android.widget.LinearLayout;
 
 import com.reco1l.global.Game;
 import com.reco1l.global.UI;
-import com.reco1l.data.Notification;
+import com.reco1l.ui.custom.DialogBuilder;
+import com.reco1l.utils.execution.Async;
 import com.reco1l.view.IconButton;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.tables.DialogTable;
-import com.reco1l.utils.helpers.BeatmapHelper;
-
-import org.anddev.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Updater;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -72,14 +69,5 @@ public class MainScene extends BaseScene {
         Game.musicManager.stop();
         Game.resourcesManager.getSound("seeya").play();
         UI.mainMenu.onExit();
-    }
-
-    @Override
-    public void onSceneChange(Scene oldScene, Scene newScene) {
-        super.onSceneChange(oldScene, newScene);
-
-        if (newScene == this) {
-            UI.background.setBlur(false);
-        }
     }
 }

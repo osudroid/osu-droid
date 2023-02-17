@@ -4,12 +4,12 @@ package com.reco1l.data.adapters;
 
 import static com.reco1l.data.adapters.TrackListAdapter.*;
 
+import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 
 import com.reco1l.global.Game;
 import com.reco1l.global.UI;
@@ -17,7 +17,10 @@ import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
 import com.reco1l.global.Scenes;
 import com.reco1l.utils.Animation;
+import com.reco1l.utils.Views;
 import com.reco1l.utils.helpers.BeatmapHelper;
+import com.reco1l.view.BadgeTextView;
+import com.reco1l.view.RoundLayout;
 import com.reco1l.view.effects.StripsEffect;
 
 import java.util.ArrayList;
@@ -42,34 +45,35 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
     }
 
     @Override
-    protected TrackViewHolder getViewHolder(View pRootView) {
-        return new TrackViewHolder(pRootView);
+    protected TrackViewHolder getViewHolder(View rootView) {
+        return new TrackViewHolder(rootView);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public static class TrackViewHolder extends BaseViewHolder<TrackInfo> {
 
-        private final CardView body;
-        private final ImageView mark;
-        private final TextView stars, difficulty;
+        private final RoundLayout mBody;
 
-        private final StripsEffect stripsEffect;
+        private final ImageView mMarkImage;
+        private final TextView mDifficultyText;
+        private final BadgeTextView mStarsText;
+
+        private final StripsEffect mEffects;
 
         //----------------------------------------------------------------------------------------//
 
         public TrackViewHolder(@NonNull View root) {
             super(root);
 
-            stripsEffect = new StripsEffect(root.getContext());
+            mEffects = new StripsEffect(context());
+            mBody = root.findViewById(R.id.bl_itemChildBody);
 
+            mMarkImage = root.findViewById(R.id.bl_mark);
+            mStarsText = root.findViewById(R.id.bl_stars);
+            mDifficultyText = root.findViewById(R.id.bl_difficulty);
 
-            mark = root.findViewById(R.id.bl_mark);
-            stars = root.findViewById(R.id.bl_stars);
-            body = root.findViewById(R.id.bl_childBody);
-            difficulty = root.findViewById(R.id.bl_difficulty);
-
-            UI.beatmapCarrousel.bindTouch(body, () -> {
+            UI.beatmapCarrousel.bindTouch(mBody, () -> {
                 if(!select()) {
                     Game.musicManager.stop();
                     Game.resourcesManager.getSound("menuhit").play();
@@ -84,8 +88,8 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
 
         @Override
         protected void onBind(TrackInfo item, int position) {
-            difficulty.setText(item.getMode());
-            stars.setText("" + GameHelper.Round(item.getDifficulty(), 2));
+            mDifficultyText.setText(item.getMode());
+            mStarsText.setText("" + GameHelper.Round(item.getDifficulty(), 2));
 
             float sr = item.getDifficulty();
 
@@ -95,35 +99,33 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
             String markTex = Game.scoreLibrary.getBestMark(item.getFilename());
 
             if (markTex != null) {
-                mark.setImageBitmap(Game.bitmapManager.get("ranking-" + markTex));
-                mark.setVisibility(View.VISIBLE);
+                mMarkImage.setImageBitmap(Game.bitmapManager.get("ranking-" + markTex));
+                mMarkImage.setVisibility(View.VISIBLE);
             }
 
-            stars.setTextColor(textColor);
-            stars.getCompoundDrawablesRelative()[0].setTint(textColor);
-            stars.getBackground().setTint(color);
-
-            stripsEffect.setStripColor(color);
+            mStarsText.setTextColor(textColor);
+            mStarsText.setBackground(new ColorDrawable(color));
+            mEffects.setStripColor(color);
         }
 
         //----------------------------------------------------------------------------------------//
 
         @Override
         public void onSelect() {
-            Animation.of(body)
-                    .toAlpha(1)
-                    .play(200);
+            Animation.of(mBody)
+                    .toLeftMargin(0)
+                    .play(300);
 
-            body.addView(stripsEffect, 0);
+            mBody.addView(mEffects, 0, Views.match_parent);
         }
 
         @Override
         public void onDeselect() {
-            Animation.of(body)
-                    .toAlpha(0.8f)
-                    .play(200);
+            Animation.of(mBody)
+                    .toLeftMargin(sdp(18))
+                    .play(300);
 
-            body.removeView(stripsEffect);
+            mBody.removeView(mEffects);
         }
     }
 }

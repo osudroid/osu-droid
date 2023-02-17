@@ -47,11 +47,6 @@
     <dimen name="app_buttonHeight">@dimen/_32sdp</dimen>
     <dimen name="app_corners">@dimen/_12sdp</dimen>
 
-
-
-
-
-
     <!--Buttons-->
     <dimen name="buttonCornerRadius">@dimen/_8sdp</dimen>
     <dimen name="buttonCardElevation">@dimen/_6sdp</dimen>
@@ -78,9 +73,7 @@
 
     <!--Seek bar-->
     <dimen name="seekBarProgressCornerRadius">@dimen/_8sdp</dimen>
-    <dimen name="seekBarThumbCornerRadius">@dimen/_10sdp</dimen>
-    <dimen name="seekBarThumbSize">@dimen/_10sdp</dimen>
-    <dimen name="seekBarHeight">@dimen/_6sdp</dimen>
+    <dimen name="seekBarHeight">@dimen/_8sdp</dimen>
 
     <!--Scrollbar-->
     <dimen name="scrollbarIndicatorWidth">@dimen/_4sdp</dimen>
@@ -108,7 +101,6 @@
 
     <!--Notifications-->
     <dimen name="notificationCenterWidth">@dimen/_250sdp</dimen>
-    <dimen name="popupNotificationWidth">@dimen/_240sdp</dimen>
 
     <dimen name="notificationIconWidth">@dimen/_40sdp</dimen>
     <dimen name="notificationCloseWidth">@dimen/_32sdp</dimen>
@@ -130,7 +122,7 @@
     <dimen name="userPanelTextLayoutHeight">@dimen/_24sdp</dimen>
 
     <!--Settings panel-->
-    <dimen name="settingsPanelWidth">@dimen/_260sdp</dimen>
+    <dimen name="settingsPanelWidth">@dimen/_320sdp</dimen>
     <dimen name="settingsPanelNavBarWidth">@dimen/_60sdp</dimen>
     <dimen name="settingsPanelButtonHeight">@dimen/_50sdp</dimen>
 
@@ -142,8 +134,7 @@
     <dimen name="dialogButtonElevation">@dimen/_4sdp</dimen>
     
     <!--Beatmap Panel-->
-    <dimen name="beatmapPanelContentWidth">@dimen/_220sdp</dimen>
-    <dimen name="beatmapPanelBannerWidth">@dimen/_240sdp</dimen>
+    <dimen name="beatmapPanelContentWidth">@dimen/_230sdp</dimen>
     <dimen name="beatmapPanelPropertiesLayoutHeight">@dimen/_80sdp</dimen>
     <dimen name="beatmapPanelExpandButtonSize">@dimen/_26sdp</dimen>
     <dimen name="beatmapPanelTabButtonWidth">@dimen/_100sdp</dimen>

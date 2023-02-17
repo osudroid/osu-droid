@@ -19,38 +19,40 @@ public class TimingWrapper implements IMusicObserver {
 
     public static final TimingWrapper instance = new TimingWrapper();
 
-    public TimingPoint
-            currentPoint,
-            lastPoint,
-            firstPoint;
+    private TimingPoint
+            mLastPoint,
+            mFirstPoint,
+            mCurrentPoint;
 
-    private LinkedList<TimingPoint> timingPoints;
+    private LinkedList<TimingPoint> mPoints;
 
-    private short beat;
+    private short mBeat;
 
     private float
-            beatLength, lastBeatLength,
-            beatPassTime, lastBeatPassTime,
-            offset;
+            mOffset,
+            mBeatLength,
+            mElapsedTime,
+            mLastBeatLength,
+            mLastElapsedTime;
 
     private boolean
-            isNextBeat = false,
-            isKiaiSection = false;
+            mIsNextBeat = false,
+            mIsKiaiSection = false;
 
     //--------------------------------------------------------------------------------------------//
 
     public TimingWrapper() {
-        beatLength = 1000;
-        this.timingPoints = new LinkedList<>();
+        mBeatLength = 1000;
+        mPoints = new LinkedList<>();
         Game.musicManager.bindMusicObserver(this);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     private void clear() {
-        timingPoints = new LinkedList<>();
-        currentPoint = null;
-        isKiaiSection = false;
+        mPoints = new LinkedList<>();
+        mCurrentPoint = null;
+        mIsKiaiSection = false;
     }
 
     private void loadPointsFrom(TrackInfo track) {
@@ -69,75 +71,75 @@ public class TimingWrapper implements IMusicObserver {
         }
 
         for (String string : data.getData("TimingPoints")) {
-            TimingPoint point = new TimingPoint(string.split("[,]"), currentPoint);
-            timingPoints.add(point);
+            TimingPoint point = new TimingPoint(string.split("[,]"), mCurrentPoint);
+            mPoints.add(point);
 
-            if (!point.wasInderited() || currentPoint == null) {
-                currentPoint = point;
+            if (!point.wasInderited() || mCurrentPoint == null) {
+                mCurrentPoint = point;
             }
         }
-        Log.i("TimingWrapper", "Timing points found: " + timingPoints.size());
-        firstPoint = timingPoints.removeFirst();
-        currentPoint = firstPoint;
-        lastPoint = currentPoint;
-        beatLength = firstPoint.getBeatLength() * 1000f;
+        Log.i("TimingWrapper", "Timing points found: " + mPoints.size());
+        mFirstPoint = mPoints.removeFirst();
+        mCurrentPoint = mFirstPoint;
+        mLastPoint = mCurrentPoint;
+        mBeatLength = mFirstPoint.getBeatLength() * 1000f;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public void setBeatLength(float length) {
-        lastBeatLength = beatLength;
-        beatLength = length;
+        mLastBeatLength = mBeatLength;
+        mBeatLength = length;
     }
 
     public void restoreBPMLength() {
-        beatLength = lastBeatLength;
+        mBeatLength = mLastBeatLength;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     private void computeCurrentBpmLength() {
-        if (currentPoint != null) {
-            beatLength = currentPoint.getBeatLength() * 1000;
+        if (mCurrentPoint != null) {
+            mBeatLength = mCurrentPoint.getBeatLength() * 1000f;
         }
     }
 
     private boolean computeFirstBpmLength() {
-        if (firstPoint != null) {
-            beatLength = firstPoint.getBeatLength() * 1000;
+        if (mFirstPoint != null) {
+            mBeatLength = mFirstPoint.getBeatLength() * 1000f;
             return true;
         }
         return false;
     }
 
     private void computeOffset() {
-        if (lastPoint != null) {
-            offset = lastPoint.getTime() * 1000f % beatLength;
+        if (mLastPoint != null) {
+            mOffset = mLastPoint.getTime() * 1000f % mBeatLength;
         }
     }
 
     private void computeOffsetAtPosition(int position) {
-        if (lastPoint != null) {
-            offset = (position - lastPoint.getTime() * 1000f) % beatLength;
+        if (mLastPoint != null) {
+            mOffset = (position - mLastPoint.getTime() * 1000f) % mBeatLength;
         }
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public boolean isKiai() {
-        return isKiaiSection;
+        return mIsKiaiSection;
     }
 
     public boolean isNextBeat() {
-        return isNextBeat;
+        return mIsNextBeat;
     }
 
     public short getBeat() {
-        return beat;
+        return mBeat;
     }
 
     public float getBeatLength() {
-        return beatLength;
+        return mBeatLength;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -188,35 +190,33 @@ public class TimingWrapper implements IMusicObserver {
     }
 
     private void update(float elapsed, int position) {
-        beatPassTime += elapsed * 1000f;
+        mElapsedTime += elapsed * 1000f;
 
-        if (beatPassTime - lastBeatPassTime >= beatLength - offset) {
-            lastBeatPassTime = beatPassTime;
-            offset = 0;
+        if (mElapsedTime - mLastElapsedTime >= mBeatLength - mOffset) {
+            mLastElapsedTime = mElapsedTime;
+            mOffset = 0;
 
-            ScheduledTask.of(() -> {
-                beat++;
+            mBeat++;
+            if (mBeat > 3) {
+                mBeat = 0;
+            }
 
-                if (beat > 3) {
-                    beat = 0;
-                }
-            }, Math.max(1, (long) beatLength));
-            isNextBeat = true;
+            mIsNextBeat = true;
         } else {
-            isNextBeat = false;
+            mIsNextBeat = false;
         }
 
-        if (currentPoint != null && position > currentPoint.getTime() * 1000) {
-            isKiaiSection = currentPoint.isKiai();
+        if (mCurrentPoint != null && position > mCurrentPoint.getTime() * 1000) {
+            mIsKiaiSection = mCurrentPoint.isKiai();
 
-            if (timingPoints.size() == 0) {
-                currentPoint = null;
+            if (mPoints.size() == 0) {
+                mCurrentPoint = null;
                 return;
             }
-            currentPoint = timingPoints.remove(0);
+            mCurrentPoint = mPoints.remove(0);
 
-            if (!currentPoint.wasInderited()) {
-                lastPoint = currentPoint;
+            if (!mCurrentPoint.wasInderited()) {
+                mLastPoint = mCurrentPoint;
                 computeCurrentBpmLength();
                 computeOffset();
             }

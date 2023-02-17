@@ -1,24 +1,23 @@
 package com.reco1l.ui.fragments;
 
 import static android.widget.RelativeLayout.ALIGN_PARENT_END;
+import static com.reco1l.data.adapters.NotificationListAdapter.ViewHolder;
 
 import android.view.View;
-import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.edlplan.framework.easing.Easing;
 import com.factor.bouncy.BouncyRecyclerView;
-import com.reco1l.global.Game;
-import com.reco1l.global.UI;
 import com.reco1l.data.Notification;
+import com.reco1l.data.adapters.NotificationListAdapter;
+import com.reco1l.global.Game;
 import com.reco1l.global.Scenes;
+import com.reco1l.global.UI;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Views;
-
-import com.reco1l.data.adapters.NotificationListAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +31,7 @@ public final class NotificationCenter extends BaseFragment {
 
     public static final NotificationCenter instance = new NotificationCenter();
 
-    private final PopupFragment pPopupFragment;
+    private final PopupFragment mPopupFragment;
     private final NotificationListAdapter mAdapter;
 
     private final ArrayList<Notification> mNotifications;
@@ -54,7 +53,7 @@ public final class NotificationCenter extends BaseFragment {
         super();
         mNotifications = new ArrayList<>();
         mNotificationMap = new HashMap<>();
-        pPopupFragment = new PopupFragment();
+        mPopupFragment = new PopupFragment();
         mAdapter = new NotificationListAdapter(mNotifications);
 
         closeOnBackgroundClick(true);
@@ -134,6 +133,28 @@ public final class NotificationCenter extends BaseFragment {
 
     //--------------------------------------------------------------------------------------------//
 
+    public void onNotificationChange(Notification n) {
+        if (!mNotifications.contains(n)) {
+            return;
+        }
+
+        if (mPopupFragment != null) {
+            if (mPopupFragment.mNotification == n) {
+                Game.activity.runOnUiThread(() ->
+                        mPopupFragment.bind(false)
+                );
+            }
+        }
+
+        if (mAdapter != null) {
+            ViewHolder holder = mAdapter.getHolderOf(n);
+
+            if (holder != null) {
+                Game.activity.runOnUiThread(holder::rebind);
+            }
+        }
+    }
+
     public void clear() {
         for (int i = 0; i < mNotifications.size(); ++i) {
             Notification n = mNotifications.get(i);
@@ -157,7 +178,7 @@ public final class NotificationCenter extends BaseFragment {
         mNotificationMap.put(n.getKey(), n);
 
         if (!n.isSilent() && !isAdded()) {
-            pPopupFragment.load(n);
+            mPopupFragment.show(n);
         }
 
         Game.activity.runOnUiThread(mAdapter::notifyDataSetChanged);
@@ -170,8 +191,8 @@ public final class NotificationCenter extends BaseFragment {
         }
         mNotificationMap.remove(n.getKey());
 
-        if (pPopupFragment.mNotification == n) {
-            pPopupFragment.close();
+        if (mPopupFragment.mNotification == n) {
+            mPopupFragment.close();
         }
         Game.activity.runOnUiThread(mAdapter::notifyDataSetChanged);
         n.onDismiss();
@@ -194,7 +215,7 @@ public final class NotificationCenter extends BaseFragment {
 
     @Override
     public boolean show() {
-        pPopupFragment.close();
+        mPopupFragment.close();
         return super.show();
     }
 
@@ -203,29 +224,28 @@ public final class NotificationCenter extends BaseFragment {
         if (!isAdded()) {
             return;
         }
+        unbindTouchHandlers();
 
-        Game.activity.runOnUiThread(() -> {
-            Game.platform.animate(true, true)
-                    .toX(0)
-                    .play(400);
+        Game.platform.animate(true, true)
+                .toX(0)
+                .play(400);
 
-            Animation.of(mBody)
-                    .toX(dimen(R.dimen.notificationCenterWidth))
-                    .interpolate(Easing.InExpo)
-                    .runOnStart(() ->
-                            Animation.of(rootBackground)
-                                    .toAlpha(0)
-                                    .play(300)
-                    )
-                    .play(350);
+        Animation.of(mBody)
+                .toX(dimen(R.dimen.notificationCenterWidth))
+                .interpolate(Easing.InExpo)
+                .runOnStart(() ->
+                        Animation.of(rootBackground)
+                                .toAlpha(0)
+                                .play(300)
+                )
+                .play(350);
 
-            Animation.of(mLayer)
-                    .toX(dimen(R.dimen.notificationCenterWidth))
-                    .runOnEnd(super::close)
-                    .interpolate(Easing.InExpo)
-                    .delay(50)
-                    .play(400);
-        });
+        Animation.of(mLayer)
+                .toX(dimen(R.dimen.notificationCenterWidth))
+                .runOnEnd(super::close)
+                .interpolate(Easing.InExpo)
+                .delay(50)
+                .play(400);
     }
 
     //--------------------------------------------------------------------------------------------/
@@ -233,7 +253,6 @@ public final class NotificationCenter extends BaseFragment {
     public static class PopupFragment extends BaseFragment {
 
         private Notification mNotification;
-        private Notification.Holder mHolder;
 
         //----------------------------------------------------------------------------------------//
 
@@ -259,58 +278,49 @@ public final class NotificationCenter extends BaseFragment {
 
         //----------------------------------------------------------------------------------------//
 
-        private void load(Notification n) {
-            mNotification = n;
-
-            if (isAdded()) {
-                resetCloseTimer();
-
-                Animation.of(rootView)
-                        .runOnEnd(this::bind)
-                        .toY(-50)
-                        .toAlpha(0)
-                        .play(150);
-                return;
-            }
-            show();
-        }
-
-        //----------------------------------------------------------------------------------------//
-
         @Override
         protected void onLoad() {
-            int xs = dimen(R.dimen.XS);
+            View body = find("body");
+            View close = find("close");
 
-            rootView.setPadding(xs, xs, xs, xs);
-            rootView.setElevation(dimen(R.dimen.XXL));
-            bind();
+            Views.width(body, sdp(240));
+            Views.rule(body, ALIGN_PARENT_END);
+            Views.padding(rootView).all(sdp(4));
+            Views.margins(rootView).top(UI.topBar.getHeight());
+
+            bindTouch(close, this::close);
+            bindTouch(body, UI.notificationCenter::show);
+            bind(true);
         }
 
-        private void bind() {
-            mHolder = mNotification.build(this.rootView);
+        private void bind(boolean animated) {
+            mNotification.bind(rootView);
 
-            LayoutParams params = (LayoutParams) mHolder.body.getLayoutParams();
-
-            params.width = dimen(R.dimen.popupNotificationWidth);
-            params.addRule(ALIGN_PARENT_END);
-            mHolder.body.requestLayout();
-
-            if (mHolder != null) {
-                unbindTouchHandlers();
-
-                bindTouch(mHolder.closeButton, this::close);
-                bindTouch(mHolder.body, UI.notificationCenter::show);
-
+            if (animated) {
                 Animation.of(rootView)
-                        .fromY(-50)
                         .toY(0)
-                        .fromAlpha(0)
                         .toAlpha(1)
                         .play(150);
             }
         }
 
         //----------------------------------------------------------------------------------------//
+
+        public boolean show(Notification notification) {
+            mNotification = notification;
+            return super.show();
+        }
+
+        @Override
+        protected void onShowAttempt() {
+            resetCloseTimer();
+
+            Animation.of(rootView)
+                    .runOnEnd(() -> bind(true))
+                    .toY(-50)
+                    .toAlpha(0)
+                    .play(150);
+        }
 
         @Override
         public void close() {

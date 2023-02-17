@@ -39,8 +39,8 @@ public class ModListAdapter extends BaseAdapter<ModListAdapter.ModViewHolder, Mo
     }
 
     @Override
-    protected ModViewHolder getViewHolder(View pRootView) {
-        return new ModViewHolder(pRootView);
+    protected ModViewHolder getViewHolder(View rootView) {
+        return new ModViewHolder(rootView);
     }
 
     //--------------------------------------------------------------------------------------------//

@@ -29,8 +29,6 @@ public class Dialog extends BaseFragment {
 
     private final DialogBuilder mBuilder;
 
-    //private BouncyNestedScrollView mBody;
-
     private TextView
             mTitleText,
             mMessageText;

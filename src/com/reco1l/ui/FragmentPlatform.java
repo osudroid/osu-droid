@@ -3,7 +3,6 @@ package com.reco1l.ui;
 import static android.widget.RelativeLayout.LayoutParams.*;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -16,11 +15,12 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.reco1l.global.Game;
+import com.reco1l.global.Scenes;
 import com.reco1l.interfaces.fields.Identifiers;
 import com.reco1l.scenes.BaseScene;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Logging;
-import com.reco1l.utils.NativeFrameCounter;
+import com.reco1l.utils.FrameCounter;
 
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 
@@ -83,7 +83,7 @@ public final class FragmentPlatform {
         renderLayout.setGravity(Gravity.CENTER);
         renderLayout.addView(renderView, params);
 
-        NativeFrameCounter.startCounter();
+        FrameCounter.start();
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -132,6 +132,7 @@ public final class FragmentPlatform {
 
     public void onSceneChange(BaseScene lastScene, BaseScene newScene) {
         mLockUpdate = true;
+        FrameCounter.countFromEngine(newScene == Scenes.player);
 
         synchronized (mShowing) {
 

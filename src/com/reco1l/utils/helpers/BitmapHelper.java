@@ -7,15 +7,24 @@ import android.graphics.Matrix;
 
 import androidx.core.math.MathUtils;
 
+import com.edlplan.framework.math.FMath;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 public class BitmapHelper {
 
     public static Bitmap cropInCenter(Bitmap raw, int width, int height) {
+        if (width < 0 || height < 0) {
+            return raw;
+        }
 
         int x = raw.getWidth() / 2 - width / 2;
         int y = raw.getHeight() / 2 - height / 2;
+
+        if (x < 0 || y < 0) {
+            return raw;
+        }
 
         Bitmap cropped = Bitmap.createBitmap(raw, x, y, width, height);
         raw.recycle();

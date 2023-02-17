@@ -2,148 +2,124 @@ package com.reco1l.view.effects;
 
 // Created by Reco1l on 15/11/2022, 19:28
 
+import static android.graphics.Color.*;
 import static android.graphics.Shader.TileMode.*;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.view.View;
+import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.reco1l.global.Game;
-import com.reco1l.global.UI;
 import com.reco1l.utils.Animation;
-import com.reco1l.view.BaseView;
+import com.reco1l.utils.Animation.UpdateListener;
+import com.reco1l.view.RoundLayout;
 
-import ru.nsu.ccfit.zuev.osu.Config;
+public class FlashEffect extends RoundLayout {
 
-public class FlashEffect extends View implements BaseView {
+    private Paint
+            mLeftPaint,
+            mRightPaint;
 
-    private Paint paint;
-    private Animation fadeUp, fadeDown;
+    private Paint mCursor;
 
-    private boolean
-            drawLeft = true,
-            drawRight = true;
-
-    private int
-            color,
-            cursor;
-
-    private float rectWidth;
+    private float mRectWidth;
 
     //--------------------------------------------------------------------------------------------//
 
-    public FlashEffect(Context context) {
-        this(context, null);
+    public FlashEffect(@NonNull Context context) {
+        super(context);
     }
 
-    public FlashEffect(Context context, @Nullable AttributeSet attrs) {
+    public FlashEffect(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        onCreate(attrs);
+    }
+
+    public FlashEffect(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public void onCreate(AttributeSet attrs) {
-        color = Color.WHITE;
+    public void onCreate() {
+        setConstantInvalidation(true);
+        setRadius(0);
 
-        paint = new Paint();
-        paint.setDither(Config.isUseDither());
+        mLeftPaint = new Paint();
+        mLeftPaint.setAlpha(0);
 
-        Animation.UpdateListener listener = value -> paint.setAlpha((int) value);
-
-        fadeUp = Animation.ofInt(0, 255).runOnUpdate(listener);
-        fadeDown = Animation.ofInt(255, 0).runOnUpdate(listener);
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    private void handleColor(boolean dark) {
-        if (dark && color == Color.WHITE || !dark && color == Color.BLACK) {
-            return;
-        }
-        color = dark ? Color.WHITE : Color.BLACK;
-        createShader();
-    }
-
-    private void createShader() {
-        LinearGradient shader = new LinearGradient(0, 0, rectWidth, 0, color, Color.TRANSPARENT, CLAMP);
-        paint.setShader(shader);
-    }
-
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        rectWidth = w / 5f;
-        createShader();
+        mRightPaint = new Paint();
+        mRightPaint.setAlpha(0);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onLayoutChange(ViewGroup.LayoutParams params) {
+        mRectWidth = getWidth() / 4f;
+
+        LinearGradient left = new LinearGradient(0, 0, mRectWidth, 0, WHITE, TRANSPARENT, CLAMP);
+        mLeftPaint.setShader(left);
+
+        LinearGradient right = new LinearGradient(getWidth() - mRectWidth, 0, getWidth(), 0, TRANSPARENT, WHITE, CLAMP);
+        mRightPaint.setShader(right);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
+    protected void onManagedDraw(Canvas canvas) {
         if (isInEditMode()) {
             return;
         }
 
         if (Game.timingWrapper.isNextBeat()) {
-            onBeatUpdate();
+            onNextBeat(Game.timingWrapper.getBeatLength());
         }
-        handleColor(UI.background.isDark());
 
         int h = canvas.getHeight();
         int w = canvas.getWidth();
 
-        if (drawLeft) {
-            canvas.drawRect(0, 0, rectWidth, h, paint);
-        }
-        if (drawRight) {
-            canvas.save();
-            canvas.rotate(180, w / 2f, h / 2f);
-            canvas.drawRect(0, 0, rectWidth, h, paint);
-            canvas.restore();
-        }
-
-        super.onDraw(canvas);
-        invalidate();
-
-        if (Game.songService != null) {
-            setAlpha(Game.songService.getLevel());
-        }
+        canvas.drawRect(0, 0, mRectWidth, h, mLeftPaint);
+        canvas.drawRect(w - mRectWidth, 0, w, h, mRightPaint);
     }
 
-    public void onBeatUpdate() {
-        float beatLength = Game.timingWrapper.getBeatLength();
-
-        long upTime = (long) (beatLength * 0.07f);
-        long downTime = (long) (beatLength * 0.9f);
-
+    private void onNextBeat(float length) {
         boolean isKiai = Game.timingWrapper.isKiai();
+
+        long in = (long) (length * 0.07);
+        long out = (long) (length * 0.9);
+
         if (!isKiai) {
-            downTime *= 1.4f;
+            short beat = Game.timingWrapper.getBeat();
+
+            if (beat == 3) {
+                playAnimation(mLeftPaint, in, out);
+                playAnimation(mRightPaint, in, out);
+            }
+            return;
         }
 
-        fadeUp.runOnStart(() -> {
-                    if (isKiai) {
-                        cursor = cursor == 0 ? 1 : 0;
+        mCursor = mCursor == mLeftPaint ? mRightPaint : mLeftPaint;
+        playAnimation(mCursor, in, out);
+    }
 
-                        drawLeft = cursor == 0;
-                        drawRight = cursor == 1;
-                    } else {
-                        short beat = Game.timingWrapper.getBeat();
+    private void playAnimation(Paint paint, long in, long out) {
+        UpdateListener listener = value -> paint.setAlpha((int) value);
 
-                        // 3 equals 4th beat
-                        drawLeft = beat == 3;
-                        drawRight = beat == 3;
-                    }
-                })
-                .play(upTime);
+        Animation.ofInt(0, 70)
+                .runOnUpdate(listener)
+                .play(in);
 
-        fadeDown.delay(upTime).play(downTime);
+        Animation.ofInt(70, 0)
+                .runOnUpdate(listener)
+                .delay(in)
+                .play(out);
     }
 }

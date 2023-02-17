@@ -92,11 +92,12 @@ import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
 
-import com.reco1l.global.UI;
 import com.reco1l.global.Scenes;
 import com.reco1l.interfaces.ITask;
 import com.reco1l.scenes.PlayerScene;
 import com.reco1l.scenes.SummaryScene;
+import com.reco1l.utils.FrameCounter;
+
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -181,7 +182,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Sprite[] ScoreBoardSprite;
     private int failcount = 0;
     private float lastObjectHitTime = 0;
-    private SliderPath[] sliderPaths = null;
+    private GameHelper.SliderPath[] sliderPaths = null;
     private int sliderIndex = 0;
 
     private StoryboardSprite storyboardSprite;
@@ -753,7 +754,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     super.onUpdate(pSecondsElapsed);
                     float ms = pSecondsElapsed * 1000;
 
-                    UI.mainOverlay.updatePerformanceText(getFPS(), ms);
+                    FrameCounter.setFPS(getFPS());
+                    FrameCounter.setFrameTime(ms);
 
                     urText.setText(String.format(Locale.ENGLISH, "%.2f UR    ", stat.getUnstableRate()));
                     urText.setPosition(Config.getRES_WIDTH() - urText.getWidth(), Config.getRES_HEIGHT() - urText.getHeight());

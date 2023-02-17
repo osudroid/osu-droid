@@ -42,6 +42,8 @@ public abstract class AsyncTask implements ITask {
     public final void execute() {
         mExecutor.execute(() -> {
             mIsCompleted = false;
+            Thread t = Thread.currentThread();
+            t.setName("async::" + t.getName());
             run();
             mHandler.post(this.mOnComplete);
         });

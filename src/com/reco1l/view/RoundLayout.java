@@ -47,13 +47,13 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
             defStyleRes;
 
     protected final AttributeSet attrs;
-    // End
+
+    protected Path mPath;
 
     private final ViewGroup mInternalLayout;
     private final int mLayoutType;
 
-    private Path mPath;
-    private float mRadius;
+    private int mRadius = 12;
 
     private int
             mInitialWidth,
@@ -108,7 +108,7 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
         onCreate();
         handleAttributes();
 
-        post(() -> onLayoutChange(getLayoutParams()));
+        super.post(() -> onLayoutChange(getLayoutParams()));
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -170,12 +170,17 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     // TypedArray parameter will be null.
     protected void onManageAttributes(@Nullable TypedArray t, AttributeSet a) {
         // app:radius
-        mRadius = sdp(a.getAttributeIntValue(appNS, "radius", 12));
+        mRadius = sdp(a.getAttributeIntValue(appNS, "radius", mRadius));
     }
 
     // Called when layout params has been changed
     protected void onLayoutChange(ViewGroup.LayoutParams params) {
         matchSize(mInternalLayout);
+    }
+
+    // Override only to make special paths
+    protected void onPathCreated(Path path, float radius, int width, int height) {
+        path.addRoundRect(new RectF(0, 0, width, height), radius, radius, Direction.CW);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -213,7 +218,7 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
         invalidate();
     }
 
-    public final void setRadius(float radius) {
+    public final void setRadius(int radius) {
         mRadius = radius;
         invalidate();
     }
@@ -239,7 +244,7 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
         }
 
         mPath = new Path();
-        mPath.addRoundRect(new RectF(0, 0, width, height), radius, radius, Direction.CW);
+        onPathCreated(mPath, radius, width, height);
     }
 
     @Override
@@ -281,6 +286,13 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     }
 
     @Override
+    public void removeView(View view) {
+        mInternalLayout.removeView(view);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    @Override
     public void setBackground(Drawable background) {
         if (mInternalLayout != null) {
             mInternalLayout.setBackground(background);
@@ -317,6 +329,21 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
                     break;
             }
         }
+    }
+
+    @Override
+    public void setPadding(int left, int top, int right, int bottom) {
+        if (mInternalLayout != null) {
+            mInternalLayout.setPadding(left, top, right, bottom);
+        }
+    }
+
+    @Override
+    public boolean post(Runnable action) {
+        if (mInternalLayout != null) {
+            return mInternalLayout.post(action);
+        }
+        return super.post(action);
     }
 
     //--------------------------------------------------------------------------------------------//

@@ -3,7 +3,6 @@ package com.reco1l;
 import android.util.Log;
 
 import com.reco1l.global.Game;
-import com.reco1l.interfaces.ISceneHandler;
 import com.reco1l.scenes.BaseScene;
 import com.reco1l.utils.Logging;
 
@@ -12,8 +11,7 @@ import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.constants.TimeConstants;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 // Created by Reco1l on 22/6/22 02:20
 
@@ -21,7 +19,7 @@ public final class GameEngine extends Engine {
 
     public static GameEngine instance;
 
-    private final Map<Scene, ISceneHandler> mHandlers;
+    private final ArrayList<BaseScene> mScenes;
 
     private BaseScene
             mCurrentScene,
@@ -36,7 +34,7 @@ public final class GameEngine extends Engine {
         Logging.initOf(getClass());
 
         instance = this;
-        mHandlers = new HashMap<>();
+        mScenes = new ArrayList<>();
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -65,12 +63,8 @@ public final class GameEngine extends Engine {
         }
         Game.timingWrapper.sync();
 
-        synchronized (mHandlers) {
-            ISceneHandler h = mHandlers.get(mCurrentScene);
-
-            if (h != null) {
-                h.onResume();
-            }
+        synchronized (mScenes) {
+            mScenes.forEach(BaseScene::onResume);
         }
     }
 
@@ -81,12 +75,8 @@ public final class GameEngine extends Engine {
             return;
         }
 
-        synchronized (mHandlers) {
-            ISceneHandler h = mHandlers.get(mCurrentScene);
-
-            if (h != null) {
-                h.onPause();
-            }
+        synchronized (mScenes) {
+            mScenes.forEach(BaseScene::onPause);
         }
     }
 
@@ -121,7 +111,7 @@ public final class GameEngine extends Engine {
     @Override
     public void setScene(Scene newScene) {
         if (newScene == null) {
-            throw new RuntimeException("New scene cannot be null!");
+            throw new NullPointerException("New scene cannot be null!");
         }
 
         if (newScene == mCurrentScene) {
@@ -137,14 +127,11 @@ public final class GameEngine extends Engine {
                 Game.platform.onSceneChange(mLastScene, mCurrentScene);
             }
             super.setScene(newScene);
-            mCurrentScene.onShow();
 
-            synchronized (mHandlers) {
-                ISceneHandler h = mHandlers.get(mCurrentScene);
-
-                if (h != null) {
-                    h.onSceneChange(mLastScene, newScene);
-                }
+            synchronized (mScenes) {
+                mScenes.forEach(scene ->
+                        scene.onSceneChange(mLastScene, mCurrentScene)
+                );
             }
         } else {
             throw new RuntimeException("This engine only allow BaseScene types!");
@@ -153,9 +140,8 @@ public final class GameEngine extends Engine {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void registerSceneHandler(Scene scene, ISceneHandler sceneHandler) {
-        synchronized (mHandlers) {
-            this.mHandlers.put(scene, sceneHandler);
-        }
+    public void onSceneCreated(BaseScene scene) {
+        mScenes.add(scene);
     }
+
 }

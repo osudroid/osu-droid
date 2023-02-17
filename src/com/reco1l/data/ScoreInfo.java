@@ -4,10 +4,8 @@ import com.reco1l.utils.helpers.ScoringHelper;
 
 import java.text.NumberFormat;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Locale;
 
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
 public class ScoreInfo {

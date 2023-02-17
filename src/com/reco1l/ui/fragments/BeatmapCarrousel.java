@@ -2,11 +2,13 @@ package com.reco1l.ui.fragments;
 
 import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
 
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.reco1l.global.Game;
 import com.reco1l.global.Scenes;
 import com.reco1l.global.UI;
+import com.reco1l.interfaces.IMusicObserver;
 import com.reco1l.management.BeatmapCollection;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.view.CarrouselRecyclerView;
@@ -15,11 +17,12 @@ import com.reco1l.data.adapters.BeatmapListAdapter;
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
+import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 22/8/22 00:31
 
-public final class BeatmapCarrousel extends BaseFragment implements BeatmapCollection.Listener {
+public final class BeatmapCarrousel extends BaseFragment implements BeatmapCollection.Listener, IMusicObserver {
 
     public static final BeatmapCarrousel instance = new BeatmapCarrousel();
 
@@ -31,6 +34,7 @@ public final class BeatmapCarrousel extends BaseFragment implements BeatmapColle
     public BeatmapCarrousel() {
         super(Scenes.selector);
         Game.beatmapCollection.addListener(this);
+        Game.musicManager.bindMusicObserver(this);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -67,14 +71,25 @@ public final class BeatmapCarrousel extends BaseFragment implements BeatmapColle
     public void onLibraryChange(ArrayList<BeatmapInfo> pList) {
         if (mAdapter == null) {
             mAdapter = new BeatmapListAdapter(pList);
-            mAdapter.setSelectionListener(pos ->
-                    mCarrousel.scrollToPosition(pos)
-            );
+            mAdapter.setSelectionListener(pos -> {
+                if (mCarrousel != null) {
+                    mCarrousel.scrollToPosition(pos);
+                }
+            });
             mAdapter.setMarginAtBounds(sdp(32));
         }
-        Game.activity.runOnUiThread(() ->
-                mAdapter.setData(pList)
-        );
+        Game.activity.runOnUiThread(() -> mAdapter.setData(pList));
+    }
+
+    @Override
+    public void onMusicChange(@Nullable TrackInfo newTrack, boolean isSameAudio) {
+        if (!isLoaded()) {
+            return;
+        }
+
+        if (mAdapter != null) {
+            mAdapter.select(Game.musicManager.getBeatmap());
+        }
     }
 
     //--------------------------------------------------------------------------------------------//

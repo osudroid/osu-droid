@@ -21,31 +21,30 @@
         android:layout_alignParentEnd="true"
         android:background="@color/backgroundTertiary" />
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/sm_navbar"
-        android:layout_width="@dimen/settingsPanelNavBarWidth"
+    <RelativeLayout
+        android:id="@+id/sm_body"
+        android:layout_width="@dimen/settingsPanelWidth"
         android:layout_height="match_parent"
-        android:layout_alignParentEnd="true"
-        android:translationZ="1dp"
-        app:cardBackgroundColor="@color/backgroundPrimary"
-        app:cardElevation="@dimen/XL">
+        android:layout_alignParentEnd="true">
 
-        <com.factor.bouncy.BouncyNestedScrollView
+        <com.factor.bouncy.BouncyRecyclerView
+            android:id="@+id/sm_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_alignParentBottom="true"
+            android:layout_marginRight="@dimen/settingsPanelNavBarWidth"
+            android:background="@color/backgroundSecondary" />
+
+        <com.factor.bouncy.BouncyNestedScrollView
+            android:layout_width="@dimen/settingsPanelNavBarWidth"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:background="@color/backgroundPrimary"
             android:scrollbars="none">
 
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <View
-                    android:id="@+id/sm_tabIndicator"
-                    android:layout_width="@dimen/tabIndicatorSize"
-                    android:layout_height="@dimen/settingsPanelButtonHeight"
-                    android:background="@drawable/shape_rounded"
-                    android:backgroundTint="@color/vectorPrimary" />
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
                 <ImageView
                     android:id="@+id/sm_general"
@@ -55,71 +54,38 @@
                 <ImageView
                     android:id="@+id/sm_gameplay"
                     style="@style/settings_panel_tab_button"
-                    android:layout_below="@id/sm_general"
                     android:src="@drawable/v18_gameplay" />
 
                 <ImageView
                     android:id="@+id/sm_appearance"
                     style="@style/settings_panel_tab_button"
-                    android:layout_below="@id/sm_gameplay"
                     android:src="@drawable/v18_appearance" />
 
                 <ImageView
                     android:id="@+id/sm_graphics"
                     style="@style/settings_panel_tab_button"
-                    android:layout_below="@id/sm_appearance"
                     android:src="@drawable/v18_graphics" />
 
                 <ImageView
                     android:id="@+id/sm_sounds"
                     style="@style/settings_panel_tab_button"
-                    android:layout_below="@id/sm_graphics"
                     android:src="@drawable/v18_sounds" />
 
                 <ImageView
                     android:id="@+id/sm_library"
                     style="@style/settings_panel_tab_button"
-                    android:layout_below="@id/sm_sounds"
                     android:src="@drawable/v18_library" />
 
                 <ImageView
                     android:id="@+id/sm_advanced"
                     style="@style/settings_panel_tab_button"
-                    android:layout_below="@id/sm_library"
                     android:src="@drawable/v18_advanced" />
 
-            </RelativeLayout>
+            </LinearLayout>
 
         </com.factor.bouncy.BouncyNestedScrollView>
 
-    </androidx.cardview.widget.CardView>
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/sm_body"
-        android:layout_width="@dimen/settingsPanelWidth"
-        android:layout_height="match_parent"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="@dimen/settingsPanelNavBarWidth"
-        app:cardBackgroundColor="@color/backgroundSecondary"
-        app:cardElevation="@dimen/L">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <com.google.android.material.progressindicator.CircularProgressIndicator
-                android:id="@+id/sm_loading"
-                style="@style/loading_indicator"
-                android:layout_centerInParent="true" />
-
-            <FrameLayout
-                android:id="@+id/sm_container"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:alpha="0" />
-
-        </RelativeLayout>
-
-    </androidx.cardview.widget.CardView>
+    </RelativeLayout>
 
 </RelativeLayout>

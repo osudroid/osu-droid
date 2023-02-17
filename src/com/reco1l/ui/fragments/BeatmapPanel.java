@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.reco1l.data.adapters.ScoreboardAdapter;
 import com.reco1l.global.Game;
-import com.reco1l.data.TrackCard;
+import com.reco1l.ui.custom.TrackCard;
 import com.reco1l.data.ScoreInfo;
 import com.reco1l.global.Scenes;
 import com.reco1l.management.BoardManager;
@@ -22,7 +22,6 @@ import com.reco1l.interfaces.IMusicObserver;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
-import com.reco1l.view.drawables.SelectorBackground;
 
 import java.util.ArrayList;
 
@@ -79,7 +78,6 @@ public final class BeatmapPanel extends BaseFragment implements
     @Override
     protected void onLoad() {
         rootBackground.setLayerType(LAYER_TYPE_HARDWARE, null);
-        rootBackground.setBackground(new SelectorBackground());
 
         mScoresList = find("scoreboard");
         mScoresList.setLayoutManager(new LinearLayoutManager(getContext(), VERTICAL, true));

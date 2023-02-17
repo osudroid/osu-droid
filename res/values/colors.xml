@@ -6,7 +6,7 @@
 
     <!--Theme-->
     <color name="primary">#FFFFFF</color>
-    <color name="accent">#7CB1E5</color>
+    <color name="accent">#819DD4</color>
     <color name="windowBackground">#000000</color>
     <color name="shadowColor">#000000</color>
 
@@ -35,9 +35,6 @@
 
     <color name="loadingIndicatorBackground">#34000000</color>
 
-    <!--Seek bar-->
-    <color name="seekBarThumbColor">#FFFFFF</color>
-
     <!--Check box-->
     <color name="checkBoxOffColor">#20000000</color>
 
@@ -50,7 +47,6 @@
     <color name="panelSeparator">#33000000</color>
 
     <!--Notifications-->
-    <color name="notificationBackground">#353535</color>
     <color name="notificationDrawableBackground">#1F000000</color>
 
     <!--Buttons-->

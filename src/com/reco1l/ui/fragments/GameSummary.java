@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.reco1l.annotation.Legacy;
 import com.reco1l.global.Game;
 import com.reco1l.global.Scenes;
 import com.reco1l.tables.AnimationTable;
@@ -14,6 +15,7 @@ import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
 
 import com.reco1l.utils.helpers.BeatmapHelper;
+import com.reco1l.view.BadgeTextView;
 import com.reco1l.view.RoundedImageView;
 import com.reco1l.view.custom.StatisticLayout;
 
@@ -34,26 +36,25 @@ public final class GameSummary extends BaseFragment {
     private StatisticLayout
             m0Text,
             m50Text,
+            mPPText,
             m100Text,
             m300Text,
-
             mComboText,
-            mAccuracyText,
-            mPPText;
+            mAccuracyText;
+
+    private BadgeTextView
+            mURText,
+            mErrorText,
+            mStarsText,
+            mMapperText;
 
     private TextView
             mDate,
             mUsername,
-
+            mScoreText,
             mTitleText,
-            mStarsText,
             mArtistText,
-            mMapperText,
-            mDifficultyText,
-
-            mURText,
-            mErrorText,
-            mScoreText;
+            mDifficultyText;
 
     private ImageView mMarkImage;
     private RoundedImageView mAvatarImage;
@@ -183,8 +184,8 @@ public final class GameSummary extends BaseFragment {
         mPPText.setText(String.format("%.2f", mCalculator.getTotalPP()));
 
         if (stats.getUnstableRate() <= 0) {
-            find("urLayout").setVisibility(View.GONE);
-            find("errorLayout").setVisibility(View.GONE);
+            mURText.setVisibility(View.GONE);
+            mErrorText.setVisibility(View.GONE);
             return;
         }
 
@@ -255,6 +256,7 @@ public final class GameSummary extends BaseFragment {
 
         //----------------------------------------------------------------------------------------//
 
+        @Legacy
         public void retrieveOnlineData() {
             score = Game.onlineManager.getScore();
             accuracy = GameHelper.Round(Game.onlineManager.getAccuracy() * 100f, 2);
@@ -266,6 +268,7 @@ public final class GameSummary extends BaseFragment {
             }
         }
 
+        @Legacy
         public void updateOnlineData(boolean success) {
             if (!success) {
                 find("rankingStats").setAlpha(0f);

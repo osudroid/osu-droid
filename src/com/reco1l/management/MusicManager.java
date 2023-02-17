@@ -2,6 +2,8 @@ package com.reco1l.management;
 
 // Created by Reco1l on 18/9/22 20:15
 
+import static ru.nsu.ccfit.zuev.audio.Status.*;
+
 import android.util.Log;
 
 import com.reco1l.global.Game;
@@ -40,25 +42,25 @@ public final class MusicManager {
 
     //--------------------------------------------------------------------------------------------//
 
-    public boolean isInvalidRequest(Status... toCheck) {
+    private boolean isInvalidRequest(String action, Status... validStates) {
         if (Game.songService == null) {
-            Log.e("MusicManager", "InvalidRequest: SongService is not initialized!");
+            Log.e("MusicManager", "SongService is not initialized!");
             return true;
         }
-        if (toCheck.length > 0) {
-            for (Status status : toCheck) {
-                if (getState() == status) {
+        if (validStates.length > 0) {
+            for (Status state : validStates) {
+                if (getState() == state) {
                     return false;
                 }
             }
-            Log.e("MusicManager", "InvalidRequest: cannot call this action while state is " + getState().name());
+            Log.e("MusicManager", "Cannot call " + action.toUpperCase() + " while state is " + getState().name());
             return true;
         }
         return false;
     }
 
     public boolean isPlaying() {
-        return Game.songService != null && Game.songService.getStatus() == Status.PLAYING;
+        return Game.songService != null && Game.songService.getStatus() == PLAYING;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -128,9 +130,7 @@ public final class MusicManager {
 
         int lastPosition = Game.songService.getPosition();
 
-        Game.songService.stop();
-        Game.songService.preLoad(mTrack.getMusic(), speed, pitch);
-        Game.songService.play();
+        reset();
         Game.songService.setPosition(lastPosition);
     }
 
@@ -162,7 +162,7 @@ public final class MusicManager {
     }
 
     public boolean change(TrackInfo track) {
-        if (isInvalidRequest() || track == null) {
+        if (isInvalidRequest("change") || track == null) {
             stop();
             mTrack = null;
             mTrackIndex = 0;
@@ -183,7 +183,7 @@ public final class MusicManager {
 
         Game.libraryManager.findBeatmap(mTrack.getBeatmap());
 
-        if (getState() == Status.STOPPED) {
+        if (getState() == STOPPED) {
             Game.songService.play();
             Game.songService.setVolume(Config.getBgmVolume());
         }
@@ -192,12 +192,14 @@ public final class MusicManager {
     }
 
     public void reset() {
-        Game.musicManager.stop();
-        Game.musicManager.play();
+        if (getState() != STOPPED) {
+            stop();
+        }
+        play();
     }
 
     public void play() {
-        if (isInvalidRequest(Status.PAUSED, Status.STOPPED)) {
+        if (isInvalidRequest("play", PAUSED, STOPPED)) {
             return;
         }
         assert Game.songService != null;
@@ -207,8 +209,7 @@ public final class MusicManager {
             return;
         }
 
-        if (getState() == Status.STOPPED) {
-            Game.songService.preLoad(mTrack.getMusic());
+        if (getState() == STOPPED) {
             Game.songService.preLoad(mTrack.getMusic(), mSpeed, mPitch);
         }
         Game.songService.play();
@@ -218,7 +219,7 @@ public final class MusicManager {
     }
 
     public void pause() {
-        if (isInvalidRequest(Status.PLAYING)) {
+        if (isInvalidRequest("pause", PLAYING)) {
             return;
         }
         assert Game.songService != null;
@@ -228,7 +229,7 @@ public final class MusicManager {
     }
 
     public void stop() {
-        if (isInvalidRequest(Status.PLAYING, Status.PAUSED)) {
+        if (isInvalidRequest("stop", PLAYING, PAUSED)) {
             return;
         }
         assert Game.songService != null;
@@ -238,14 +239,14 @@ public final class MusicManager {
     }
 
     public void previous() {
-        if (isInvalidRequest()) {
+        if (isInvalidRequest("previous")) {
             return;
         }
         change(Game.libraryManager.getPrevBeatmap());
     }
 
     public void next() {
-        if (isInvalidRequest()) {
+        if (isInvalidRequest("next")) {
             return;
         }
         change(Game.libraryManager.getNextBeatmap());

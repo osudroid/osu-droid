@@ -1,49 +1,23 @@
 package com.reco1l.ui.fragments;
 
-import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.FrameLayout;
+import static com.reco1l.data.Settings.*;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.preference.CheckBoxPreference;
-import androidx.preference.ListPreference;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.SeekBarPreference;
+import android.view.View;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.edlplan.framework.easing.Easing;
-import com.edlplan.ui.SkinPathPreference;
-import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.google.android.material.snackbar.Snackbar;
+import com.factor.bouncy.BouncyRecyclerView;
+import com.reco1l.data.adapters.SettingsAdapter;
 import com.reco1l.global.Game;
-import com.reco1l.global.UI;
-import com.reco1l.global.Scenes;
-import com.reco1l.preference.ButtonPreference;
-import com.reco1l.preference.FieldPreference;
-import com.reco1l.tables.AnimationTable;
-import com.reco1l.tables.DialogTable;
-import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
-import com.reco1l.ui.custom.Dialog;
-import com.reco1l.ui.custom.DialogBuilder;
 import com.reco1l.utils.Animation;
 
-import com.reco1l.utils.execution.AsyncTask;
 import com.reco1l.utils.helpers.OnlineHelper;
 
-import net.margaritov.preference.colorpicker.ColorPickerPreference;
-
-import java.io.File;
+import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.MainActivity;
-import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -53,29 +27,34 @@ public final class SettingsMenu extends BaseFragment {
 
     public static final SettingsMenu instance = new SettingsMenu();
 
-    private Tabs currentTab;
+    private final SettingsAdapter mAdapter;
 
-    private FrameLayout container;
-    private SettingsFragment fragment;
+    private Sections mCurrent;
+    private BouncyRecyclerView mRecyclerView;
 
-    private View tabIndicator, layer;
-    private CardView body, navigationBar;
-    private CircularProgressIndicator loading;
-
-    private int panelWidth, navBarWidth;
-    private boolean reloadBackground = false;
+    private View
+            mBody,
+            mLayer;
 
     //--------------------------------------------------------------------------------------------//
 
-    private enum Tabs {
-        general,
-        appearance,
-        gameplay,
-        graphics,
-        sounds,
-        library,
-        advanced,
+    private enum Sections {
+        general(new General()),
+        appearance(new Appearance()),
+        gameplay(new Gameplay()),
+        graphics(new Graphics()),
+        sounds(new Sounds()),
+        library(new Library()),
+        advanced(new Advanced());
+
+        private final Wrapper mWrapper;
+
+        Sections(Wrapper wrapper) {
+            mWrapper = wrapper;
+        }
     }
+
+    //--------------------------------------------------------------------------------------------//
 
     @Override
     protected boolean isOverlay() {
@@ -97,118 +76,84 @@ public final class SettingsMenu extends BaseFragment {
         return R.layout.extra_settings_panel;
     }
 
+    @Override
+    public int getWidth() {
+        return dimen(R.dimen.settingsPanelWidth);
+    }
+
     //--------------------------------------------------------------------------------------------//
 
-    private final AsyncTask loadSettings = new AsyncTask() {
-        @Override
-        public void run() {
-            Game.activity.runOnUiThread(() -> {
-                FragmentTransaction transaction = Game.platform.transaction();
+    public SettingsMenu() {
+        super();
 
-                transaction.replace(container.getId(), fragment);
-                transaction.commit();
-            });
+        ArrayList<Wrapper> mFragments = new ArrayList<>();
+
+        for (Sections section : Sections.values()) {
+            mFragments.add(section.mWrapper);
         }
+        mAdapter = new SettingsAdapter(mFragments);
 
-        @Override
-        public void onComplete() {
+        closeOnBackgroundClick(true);
+    }
 
-            Animation.of(loading)
-                    .toAlpha(0)
-                    .toScale(0.8f)
-                    .play(200);
-
-            Animation.of(container)
-                    .toAlpha(1)
-                    .delay(200)
-                    .play(200);
-        }
-    };
+    //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onLoad() {
-        closeOnBackgroundClick(true);
+        mCurrent = Sections.general;
 
-        if (fragment == null) {
-            fragment = new SettingsFragment();
-        }
-        currentTab = Tabs.general;
+        mRecyclerView = find("container");
+        mLayer = find("layer");
+        mBody = find("body");
 
-        panelWidth = Res.dimen(R.dimen.settingsPanelWidth);
-        navBarWidth = Res.dimen(R.dimen.settingsPanelNavBarWidth);
-
-        tabIndicator = find("tabIndicator");
-        navigationBar = find("navbar");
-        container = find("container");
-        loading = find("loading");
-        layer = find("layer");
-        body = find("body");
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         Game.platform.animate(true, true)
-                .toX(-navBarWidth)
-                .duration(400);
+                .toX(-50)
+                .play(400);
 
-        AnimationTable.fadeIn(rootBackground).play();
+        Animation.of(rootBackground)
+                .fromAlpha(0)
+                .toAlpha(1)
+                .play(300);
 
-        Animation.of(navigationBar)
-                .fromX(navBarWidth)
-                .toX(0f)
+        Animation.of(mLayer)
+                .fromX(getWidth())
+                .toX(0)
                 .interpolate(Easing.OutExpo)
                 .play(350);
 
-        Animation.of(layer)
-                .fromX(panelWidth + navBarWidth)
-                .toX(0f)
-                .interpolate(Easing.OutExpo)
-                .play(350);
-
-        Animation.of(body)
-                .fromX(panelWidth + navBarWidth)
-                .toX(0f)
+        Animation.of(mBody)
+                .fromX(getWidth())
+                .toX(0)
                 .interpolate(Easing.OutExpo)
                 .delay(50)
                 .play(400);
 
-        Animation.of(loading)
-                .fromAlpha(0)
-                .toAlpha(1)
-                .fromScale(0.8f)
-                .toScale(1)
-                .runOnEnd(loadSettings::execute)
-                .delay(300)
-                .play(200);
-
-        for (Tabs tab : Tabs.values()) {
+        for (Sections tab : Sections.values()) {
             bindTouch(find(tab.name()), () -> navigateTo(tab));
         }
     }
 
-    private void navigateTo(Tabs tab) {
-        if (currentTab == tab) {
+    @Override
+    protected void onPost() {
+        mRecyclerView.post(() -> mRecyclerView.setAdapter(mAdapter));
+    }
+
+    private void navigateTo(Sections tab) {
+        if (mCurrent == tab) {
             return;
         }
-        currentTab = tab;
-
-        float y = find(tab.name()).getY();
-
-        Animation.of(tabIndicator)
-                .toY(y)
-                .play(200);
-
-        fragment.navigate(tab);
+        mCurrent = tab;
+        mRecyclerView.scrollToPosition(tab.ordinal());
     }
 
     //--------------------------------------------------------------------------------------------//
 
     private void applySettings() {
-        Config.loadConfig(Game.activity);
+        Config.loadConfig(getContext());
         OnlineHelper.update();
         OnlineScoring.getInstance().login();
-
-        if (reloadBackground && Game.engine.getScene() == Scenes.main) {
-            UI.background.reload();
-            reloadBackground = false;
-        }
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -218,177 +163,30 @@ public final class SettingsMenu extends BaseFragment {
         if (!isAdded()) {
             return;
         }
-        currentTab = null;
+        unbindTouchHandlers();
 
         Game.platform.animate(true, true)
                 .toX(0)
                 .play(400);
 
-        AnimationTable.fadeOut(container)
-                .runOnEnd(() -> {
-                    FragmentTransaction transaction = Game.platform.transaction();
-
-                    transaction.remove(fragment);
-                    transaction.commit();
-                })
-                .play(300);
-
-        AnimationTable.fadeOut(rootBackground)
-                .play();
-
-        Animation.of(body)
-                .toX(panelWidth + navBarWidth)
-                .interpolate(Easing.OutExpo)
+        Animation.of(mBody)
+                .toX(getWidth())
+                .interpolate(Easing.InExpo)
+                .runOnStart(() ->
+                        Animation.of(rootBackground)
+                                .toAlpha(0)
+                                .play(300)
+                )
                 .play(350);
 
-        Animation.of(layer)
-                .toX(panelWidth + navBarWidth)
-                .interpolate(Easing.OutExpo)
-                .delay(50)
-                .play(400);
-
-        Animation.of(navigationBar)
-                .toX(navBarWidth)
-                .interpolate(Easing.OutExpo)
-                .delay(400)
+        Animation.of(mLayer)
+                .toX(getWidth())
                 .runOnEnd(() -> {
                     super.close();
                     applySettings();
                 })
-                .play(200);
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public static class SettingsFragment extends PreferenceFragmentCompat {
-
-        @Override
-        public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-            super.onViewCreated(view, savedInstanceState);
-
-            setDivider(new ColorDrawable(Color.TRANSPARENT));
-            setDividerHeight(0);
-        }
-
-        @Override
-        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            addPreferencesFromResource(R.xml.settings_general);
-            addPreferencesFromResource(R.xml.settings_appearance);
-            addPreferencesFromResource(R.xml.settings_gameplay);
-            addPreferencesFromResource(R.xml.settings_graphics);
-            addPreferencesFromResource(R.xml.settings_sounds);
-            addPreferencesFromResource(R.xml.settings_library);
-            addPreferencesFromResource(R.xml.settings_advanced);
-            loadPreferences();
-        }
-
-        public void navigate(Tabs tab) {
-            scrollToPreference("pref_" + tab.name().toLowerCase());
-        }
-
-        private void loadPreferences() {
-            // Appearance
-            ButtonPreference skin = findPreference("skinPath");
-            CheckBoxPreference comboColor = findPreference("useCustomColors");
-
-            if (skin != null) {
-                skin.setOnPreferenceClickListener(p -> new Dialog(DialogTable.skins()).show());
-            }
-
-            if (comboColor != null) {
-                for (int i = 1; i <= 4; i++) {
-                    ColorPickerPreference color = findPreference("combo" + i);
-                    if (color != null)
-                        color.setEnabled(comboColor.isChecked());
-                }
-
-                comboColor.setOnPreferenceChangeListener((p, val) -> {
-                    for (int i = 1; i <= 4; i++) {
-                        ColorPickerPreference color = findPreference("combo" + i);
-                        if (color != null)
-                            color.setEnabled(Boolean.parseBoolean(val.toString()));
-                    }
-                    return true;
-                });
-            }
-
-            // Graphics
-            CheckBoxPreference dither = findPreference("dither");
-            ListPreference background = findPreference("background");
-
-            final boolean oldValue = Config.isUseDither();
-
-            if (dither != null)
-                dither.setOnPreferenceChangeListener((p, val) -> {
-                    if (Config.isUseDither() != (boolean) val) {
-
-                        DialogBuilder builder = DialogTable.restart()
-                                .setOnDismiss(() -> dither.setChecked(oldValue))
-                                .addCloseButton();
-
-                        new Dialog(builder).show();
-                    }
-                    return true;
-                });
-
-            if (background != null)
-                background.setOnPreferenceChangeListener((p, val) -> {
-                    if (Config.getBackgroundQuality() != Integer.parseInt(val.toString()))
-                        UI.settingsPanel.reloadBackground = true;
-                    return true;
-                });
-
-            // Sounds
-            SeekBarPreference bgmVolume = findPreference("bgmvolume");
-
-            if (bgmVolume != null) {
-                bgmVolume.setOnPreferenceChangeListener((p, val) -> {
-                    Game.musicManager.setVolume((int) val / 100f);
-                    return true;
-                });
-            }
-
-            // Library
-            Preference clearProperties = findPreference("clear_properties");
-            Preference clearCache = findPreference("clear");
-
-            if (clearProperties != null) {
-                clearProperties.setOnPreferenceClickListener(p -> {
-                    Game.libraryManager.clearCache();
-                    return true;
-                });
-            }
-
-            if (clearCache != null) {
-                clearCache.setOnPreferenceClickListener(p -> {
-                    Game.propertiesLibrary.clear(Game.activity);
-                    return true;
-                });
-            }
-
-            // Advanced
-            FieldPreference path = findPreference("corePath");
-
-            if (path != null) {
-                path.setDefaultValue(Config.getDefaultCorePath());
-                path.setText(Config.getCorePath());
-
-                path.setOnFocusLostListener(() -> {
-                    if (path.getText().trim().length() == 0) {
-                        path.setText(Config.getCorePath());
-                    }
-
-                    File file = new File(path.getText());
-                    if (!file.exists() && !file.mkdirs()) {
-                        path.setText(Config.getCorePath());
-                    }
-                });
-
-                path.setOnPreferenceChangeListener((p, newValue) -> {
-                    Config.loadPaths();
-                    return false;
-                });
-            }
-        }
+                .interpolate(Easing.InExpo)
+                .delay(50)
+                .play(400);
     }
 }

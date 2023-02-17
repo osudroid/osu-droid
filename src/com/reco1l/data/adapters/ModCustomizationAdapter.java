@@ -33,17 +33,16 @@ public class ModCustomizationAdapter extends BaseAdapter<ModCustomizationAdapter
     }
 
     @Override
-    protected VH getViewHolder(View pRootView) {
-        return new VH(pRootView);
-    }
-
-    @Override
-    protected void onHolderCreated(VH pHolder) {
+    protected VH getViewHolder(View rootView) {
         holderCount++;
 
-        pHolder.frame = new FrameLayout(Game.activity);
-        pHolder.frame.setId(Identifiers.ModMenu_CustomizationFrames + holderCount);
-        pHolder.body.addView(pHolder.frame);
+        VH holder = new VH(rootView);
+
+        holder.frame = new FrameLayout(context());
+        holder.frame.setId(Identifiers.ModMenu_CustomizationFrames + holderCount);
+        holder.body.addView(holder.frame);
+
+        return holder;
     }
 
     //----------------------------------------------------------------------------------------//

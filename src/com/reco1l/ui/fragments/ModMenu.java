@@ -3,7 +3,6 @@ package com.reco1l.ui.fragments;
 // Created by Reco1l on 20/12/2022, 05:40
 
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,12 +14,12 @@ import com.reco1l.global.Game;
 import com.reco1l.global.Scenes;
 import com.reco1l.global.UI;
 import com.reco1l.data.adapters.ModCustomizationAdapter;
+import com.reco1l.annotation.Size;
 import com.reco1l.interfaces.IGameMod;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Views;
-import com.reco1l.view.BadgeTextView;
 import com.reco1l.view.IconButton;
 
 import com.reco1l.data.mods.CustomDifficultyMod;
@@ -198,7 +197,7 @@ public final class ModMenu extends BaseFragment implements IGameMod {
 
             ModBadge icon = new ModBadge(getContext());
             icon.setText(wrapper.getAcronym());
-            icon.setSize(BadgeTextView.M);
+            icon.setSize(Size.M);
             widget.addView(icon);
 
             Views.margins(icon).left(sdp(4));

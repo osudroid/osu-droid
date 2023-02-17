@@ -12,20 +12,6 @@
         app:iconSpaceReserved="false"/>
 
     <PreferenceCategory
-        android:title="Background"
-        app:iconSpaceReserved="false">
-
-        <ListPreference
-            android:defaultValue="1"
-            android:entries="@array/bg_quality_names"
-            android:entryValues="@array/bg_quality_values"
-            android:key="background"
-            android:title="@string/opt_bg_title"
-            app:iconSpaceReserved="false" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
         android:title="Effects"
         app:iconSpaceReserved="false">
 
@@ -38,11 +24,6 @@
             android:defaultValue="true"
             android:key="hitlighting"
             android:title="@string/opt_hitlighting_title" />
-
-        <com.reco1l.preference.CheckPreference
-            android:defaultValue="true"
-            android:key="dither"
-            android:title="@string/opt_dither_title" />
 
     </PreferenceCategory>
 

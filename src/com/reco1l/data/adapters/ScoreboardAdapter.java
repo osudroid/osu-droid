@@ -51,15 +51,13 @@ public class ScoreboardAdapter extends BaseAdapter<ScoreHolder, ScoreInfo> {
     }
 
     @Override
-    protected ScoreHolder getViewHolder(View pRootView) {
-        return new ScoreHolder(pRootView);
+    protected ScoreHolder getViewHolder(View rootView) {
+        return new ScoreHolder(rootView);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public static class ScoreHolder extends BaseViewHolder<ScoreInfo> {
-
-        public View body;
 
         private final LinearLayout modsLayout;
         private final TextView rank, name, score, combo, accuracy, difference;
@@ -70,18 +68,18 @@ public class ScoreboardAdapter extends BaseAdapter<ScoreHolder, ScoreInfo> {
 
         //--------------------------------------------------------------------------------------------//
 
-        public ScoreHolder(@NonNull View item) {
-            super(item);
-            body = item.findViewById(R.id.sb_body);
-            rank = item.findViewById(R.id.sb_rank);
-            avatar = item.findViewById(R.id.sb_avatar);
-            mark = item.findViewById(R.id.sb_mark);
-            name = item.findViewById(R.id.sb_name);
-            score = item.findViewById(R.id.sb_score);
-            combo = item.findViewById(R.id.sb_combo);
-            modsLayout = item.findViewById(R.id.sb_mods);
-            accuracy = item.findViewById(R.id.sb_accuracy);
-            difference = item.findViewById(R.id.sb_difference);
+        public ScoreHolder(@NonNull View root) {
+            super(root);
+
+            rank = root.findViewById(R.id.sb_rank);
+            avatar = root.findViewById(R.id.sb_avatar);
+            mark = root.findViewById(R.id.sb_mark);
+            name = root.findViewById(R.id.sb_name);
+            score = root.findViewById(R.id.sb_score);
+            combo = root.findViewById(R.id.sb_combo);
+            modsLayout = root.findViewById(R.id.sb_mods);
+            accuracy = root.findViewById(R.id.sb_accuracy);
+            difference = root.findViewById(R.id.sb_difference);
         }
 
         @Override
@@ -101,11 +99,11 @@ public class ScoreboardAdapter extends BaseAdapter<ScoreHolder, ScoreInfo> {
 
                     new ContextMenu(builder).show();
                 }
-            }).apply(body);
+            }).apply(root);
 
 
             for (GameMod mod : item.getMods()) {
-                ImageView image = new ImageView(body.getContext());
+                ImageView image = new ImageView(context);
                 image.setImageBitmap(Game.bitmapManager.get("selection-mod-" + mod.texture));
 
                 modsLayout.addView(image);

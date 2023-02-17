@@ -7,19 +7,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/XS"
     android:orientation="vertical"
     tools:background="#FFF">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/bl_childBody"
+    <com.reco1l.view.RoundLayout
+        android:id="@+id/bl_itemChildBody"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="@dimen/XXS"
+        android:layout_marginLeft="@dimen/XL"
         android:layout_marginRight="@dimen/_M"
-        android:alpha="0.85"
-        app:cardBackgroundColor="@color/backgroundDimmed"
-        app:cardCornerRadius="@dimen/app_corners"
-        app:cardElevation="0dp">
+        android:background="@color/backgroundPrimary">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -31,12 +29,13 @@
                 android:gravity="center|left"
                 android:orientation="horizontal">
 
-                <TextView
+                <com.reco1l.view.BadgeTextView
                     android:id="@+id/bl_stars"
-                    style="@style/propertyBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/M"
-                    android:drawableStart="@drawable/v10_star"
-                    android:text="00.00" />
+                    android:text="00.00"
+                    app:icon="@drawable/v10_star" />
 
                 <ImageView
                     android:id="@+id/bl_mark"
@@ -60,6 +59,6 @@
 
         </RelativeLayout>
 
-    </androidx.cardview.widget.CardView>
+    </com.reco1l.view.RoundLayout>
 
 </LinearLayout>

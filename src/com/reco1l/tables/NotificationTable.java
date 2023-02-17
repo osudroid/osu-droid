@@ -25,7 +25,7 @@ public class NotificationTable {
                 .commit();
     }
 
-    public static void exception(Exception e) {
+    public static void exception(Throwable e) {
         Notification.of(e.getClass().getSimpleName())
                 .setMessage(e.getMessage())
                 .runOnClick(() -> {

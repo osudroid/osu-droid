@@ -1,4 +1,4 @@
-package com.reco1l.view;
+package com.reco1l.view.custom;
 // Created by Reco1l on 07/12/2022, 13:13
 
 import android.content.Context;
@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import com.reco1l.global.Game;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Views;
+import com.reco1l.view.RoundLayout;
 import com.reco1l.view.effects.StripsEffect;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -23,11 +24,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public final class LogoView extends RoundLayout {
 
     private ImageView mLines;
-
-    private Animation
-            lightOut,
-            lightIn,
-            rotate;
+    private View mFlash;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -60,10 +57,10 @@ public final class LogoView extends RoundLayout {
         addView(effect, params);
 
         // Flash effect
-        View flash = new View(getContext());
-        flash.setBackground(new ColorDrawable(Color.WHITE));
-        flash.setAlpha(0);
-        addView(flash, params);
+        mFlash = new View(getContext());
+        mFlash.setBackground(new ColorDrawable(Color.WHITE));
+        mFlash.setAlpha(0);
+        addView(mFlash, params);
 
         // Border overlay
         ImageView overlay = new ImageView(getContext());
@@ -79,11 +76,6 @@ public final class LogoView extends RoundLayout {
         ImageView brand = new ImageView(getContext());
         brand.setImageResource(R.drawable.logo_brand);
         addView(brand, params);
-
-        lightIn = Animation.of(flash).toAlpha(0.1f);
-        lightOut = Animation.of(flash).toAlpha(0);
-
-        rotate = Animation.of(mLines);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -95,7 +87,7 @@ public final class LogoView extends RoundLayout {
         }
 
         if (Game.timingWrapper.isNextBeat()) {
-            onNextBeat();
+            onNextBeat(Game.timingWrapper.getBeatLength());
         }
         updatePeak();
     }
@@ -112,26 +104,28 @@ public final class LogoView extends RoundLayout {
         setScaleY(peak);
     }
 
-    private void onNextBeat() {
-        float beatLength = Game.timingWrapper.getBeatLength();
+    private void onNextBeat(float length) {
+        boolean isKiai = Game.timingWrapper.isKiai();
 
-        long in = (long) (beatLength * 0.07f);
-        long out = (long) (beatLength * 0.9f);
+        long in = (long) (length * 0.07);
+        long out = (long) (length * 0.9);
 
-        if (Game.musicManager.isPlaying()) {
-            if (Game.timingWrapper.isKiai()) {
-                lightOut.duration(out);
-                lightIn.runOnEnd(lightOut::play).play(in);
-            }
+
+        if (isKiai) {
+            Animation.of(mFlash)
+                    .toAlpha(0.05f)
+                    .runOnEnd(() ->
+                            Animation.of(mFlash)
+                                    .toAlpha(0)
+                                    .play(out)
+                    ).play(in);
         }
 
-        float increment = mLines.getRotation();
-        if (Game.timingWrapper.isKiai()) {
-            increment += 25;
-        } else {
-            increment += 10;
-        }
+        float delta = mLines.getRotation();
+        delta += isKiai ? 25 : 10;
 
-        rotate.toRotation(increment).play((long) beatLength);
+        Animation.of(mLines)
+                .toRotation(delta)
+                .play((long) length);
     }
 }

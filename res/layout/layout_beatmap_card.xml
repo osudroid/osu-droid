@@ -2,29 +2,25 @@
 
 <!-- Created by Reco1l on 1/8/22 06:36 -->
 
-<com.reco1l.view.RoundLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/bp_banner"
-    android:layout_width="@dimen/beatmapPanelBannerWidth"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="@dimen/_L"
-    android:layout_marginTop="@dimen/XS"
-    android:orientation="vertical"
-    app:radius="12">
+    android:layout_marginTop="@dimen/XS">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingStart="@dimen/L"
         tools:background="#FFF">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <ImageView
+            <com.reco1l.view.FadeImageView
                 android:id="@+id/bp_songBackground"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -59,11 +55,13 @@
                         <TextView
                             android:id="@+id/bp_title"
                             style="@style/largeText"
+                            android:textColor="#FFF"
                             android:text="[title]" />
 
                         <TextView
                             android:id="@+id/bp_artist"
                             style="@style/text"
+                            android:textColor="#FFF"
                             android:layout_below="@+id/bp_title"
                             android:layout_marginTop="@dimen/XXS"
                             android:text="[artist]" />
@@ -211,12 +209,11 @@
                 android:layout_marginLeft="@dimen/S"
                 android:layout_toEndOf="@+id/bp_stars"
                 android:text="[Difficulty name]"
-                android:textColor="@color/textSecondary"
+                android:textColor="#BFFFFFFF"
                 android:textSize="@dimen/textXS" />
 
         </RelativeLayout>
 
     </LinearLayout>
 
-
-</com.reco1l.view.RoundLayout>
+</LinearLayout>

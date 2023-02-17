@@ -13,9 +13,9 @@ import com.edlplan.framework.math.FMath;
 
 public class CarrouselRecyclerView extends RecyclerView {
 
-    private View window;
+    private View mWindow;
 
-    private int yOffset = 0;
+    private int mYOffset = 0;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -35,8 +35,8 @@ public class CarrouselRecyclerView extends RecyclerView {
 
     @Override
     public void onDraw(Canvas c) {
-        updateTranslations();
         super.onDraw(c);
+        updateTranslations();
         invalidate();
     }
 
@@ -53,31 +53,31 @@ public class CarrouselRecyclerView extends RecyclerView {
     }
 
     public float computeTranslationX(View view) {
-        int[] location = new int[2];
-        view.getLocationInWindow(location);
+        int w =  view.getWidth();
+        int h = view.getHeight();
 
-        location[1] += yOffset;
+        int[] pos = new int[2];
+        view.getLocationInWindow(pos);
+        pos[1] += mYOffset;
 
-        int oy = (int) ((getWindowHeight() - view.getHeight()) * 1f / 2);
+        float diff = getWindowHeight() - h;
+        float dx = 1 - Math.abs(pos[1] - diff) / Math.abs(diff + h / 0.01f);
 
-        float dx = 1 - Math.abs(location[1] - oy) / Math.abs(oy + view.getHeight() / 0.025f);
-        float val = view.getWidth() - view.getWidth() * FMath.clamp(dx, 0f, 1f);
-
-        return FMath.clamp(val, 0, view.getWidth());
+        return w - w * FMath.clamp(dx, 0f, 1f);
     }
 
     private int getWindowHeight() {
-        if (window != null) {
-            return window.getHeight();
+        if (mWindow != null) {
+            return mWindow.getHeight();
         }
         return getHeight();
     }
 
     public void setParentWindow(View window) {
-        this.window = window;
+        this.mWindow = window;
     }
 
     public void setYOffset(int yOffset) {
-        this.yOffset = yOffset;
+        this.mYOffset = yOffset;
     }
 }

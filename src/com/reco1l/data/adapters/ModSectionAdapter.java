@@ -31,8 +31,8 @@ public class ModSectionAdapter extends BaseAdapter<ModSectionAdapter.SectionHold
     }
 
     @Override
-    protected SectionHolder getViewHolder(View pRootView) {
-        return new SectionHolder(pRootView);
+    protected SectionHolder getViewHolder(View rootView) {
+        return new SectionHolder(rootView);
     }
 
     //--------------------------------------------------------------------------------------------//

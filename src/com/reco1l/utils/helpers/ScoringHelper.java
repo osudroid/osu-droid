@@ -1,8 +1,6 @@
 package com.reco1l.utils.helpers;
 
 
-import static ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*;
-
 import com.reco1l.interfaces.IGameMod;
 
 import java.util.EnumSet;

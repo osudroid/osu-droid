@@ -19,8 +19,8 @@ import java.util.ArrayList;
 public final class Animation {
 
     // Animation data
-    private long duration = 300;
-    private long delay = 0;
+    private long mDuration = 300;
+    private long mDelay = 0;
 
     private Float
             fromPosX,
@@ -86,6 +86,7 @@ public final class Animation {
 
     // Listeners
     private Runnable
+            runOnCancel,
             runOnStart,
             runOnEnd;
 
@@ -150,7 +151,6 @@ public final class Animation {
             View view = views.get(i);
 
             if (view != null) {
-                view.animate().setListener(null);
                 view.animate().cancel();
             }
             i++;
@@ -163,9 +163,7 @@ public final class Animation {
             ValueAnimator valueAnimator = valueAnimators.get(i);
 
             if (valueAnimator != null) {
-                valueAnimator.removeAllListeners();
-                valueAnimator.removeAllUpdateListeners();
-                valueAnimator.cancel();
+                valueAnimator.end();
             }
             i++;
         }
@@ -185,15 +183,11 @@ public final class Animation {
     //--------------------------------------------------------------------------------------------//
 
     public void play() {
-        play(duration);
+        play(mDuration);
     }
 
     public void play(long duration) {
-        this.duration = duration;
-
-        if (this.duration < 100) {
-            this.duration = 100;
-        }
+        mDuration = Math.max(duration, 0);
 
         if (cancelCurrentAnimations) {
             cancel();
@@ -232,9 +226,14 @@ public final class Animation {
                             if (runOnEnd != null) {
                                 runOnEnd.run();
                             }
+                        }
 
-                            valueAnimator.removeAllListeners();
-                            valueAnimator.removeAllUpdateListeners();
+                        public void onAnimationCancel(Animator animation) {
+                            animation.removeAllListeners();
+
+                            if (runOnCancel != null) {
+                                runOnCancel.run();
+                            }
                         }
                     });
 
@@ -249,8 +248,8 @@ public final class Animation {
                     valueAnimator.setInterpolator(EasingHelper.asInterpolator(interpolator));
                 }
 
-                valueAnimator.setStartDelay(delay);
-                valueAnimator.setDuration(duration);
+                valueAnimator.setStartDelay(mDelay);
+                valueAnimator.setDuration(mDuration);
                 valueAnimator.start();
                 i++;
             }
@@ -281,6 +280,14 @@ public final class Animation {
                                 runOnEnd.run();
                             }
                         }
+
+                        public void onAnimationCancel(Animator animation) {
+                            animation.removeAllListeners();
+
+                            if (runOnCancel != null) {
+                                runOnCancel.run();
+                            }
+                        }
                     });
                 }
 
@@ -293,8 +300,8 @@ public final class Animation {
 
                 applyFinalProperties(viewAnimator);
 
-                viewAnimator.setStartDelay(Math.max(delay, 0));
-                viewAnimator.setDuration(duration);
+                viewAnimator.setStartDelay(Math.max(mDelay, 0));
+                viewAnimator.setDuration(mDuration);
                 viewAnimator.start();
                 i++;
             }
@@ -305,8 +312,8 @@ public final class Animation {
     private void handleFirstProperties(View view) {
         createParameterAnimations(view);
 
-        if (fromPropertiesWithDelay && delay - 1 >= 0) {
-            view.postDelayed(() -> applyInitialProperties(view), delay - 1);
+        if (fromPropertiesWithDelay && mDelay - 1 >= 0) {
+            view.postDelayed(() -> applyInitialProperties(view), mDelay - 1);
         } else {
             applyInitialProperties(view);
         }
@@ -550,12 +557,12 @@ public final class Animation {
     //--------------------------------------------------------------------------------------------//
 
     public Animation duration(long duration) {
-        this.duration = duration;
+        this.mDuration = duration;
         return this;
     }
 
     public Animation delay(long delay) {
-        this.delay = delay;
+        this.mDelay = delay;
         return this;
     }
 
@@ -858,6 +865,11 @@ public final class Animation {
 
     public Animation runOnEnd(Runnable runOnEnd) {
         this.runOnEnd = runOnEnd;
+        return this;
+    }
+
+    public Animation runOnCancel(Runnable runOnCancel) {
+        this.runOnCancel = runOnCancel;
         return this;
     }
 

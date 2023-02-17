@@ -17,8 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import net.margaritov.preference.colorpicker.ColorPickerPreference;
-
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.util.Debug;
 
@@ -53,10 +51,8 @@ public class Config {
         syncMusic,
         burstEffects,
         hitLighting,
-        useDither,
         useTrail,
         useLongTrail,
-        useCustomComboColors,
         forceRomanized,
         fixFrameOffset,
         removeSliderLock,
@@ -72,7 +68,6 @@ public class Config {
         RES_HEIGHT,
         errorMeter,
         spinnerStyle,
-        backgroundQuality,
         textureQuality,
         metronomeSwitch;
     
@@ -86,17 +81,13 @@ public class Config {
 
     private static Map<String, String> skins;
 
-    private static RGBColor[] comboColors;
     private static Context context;
 
     public static void loadConfig(final Context context) {
         Config.context = context;
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(context);
-        String s;
         // graphics
-        s = prefs.getString("background", "2");
-        backgroundQuality = Integer.parseInt(s);
         useCustomSkins = prefs.getBoolean("skin", false);
         useCustomSounds = prefs.getBoolean("beatmapSounds", true);
         corovans = prefs.getBoolean("images", false);
@@ -148,14 +139,8 @@ public class Config {
         cachePath = context.getCacheDir().getPath();
         burstEffects = prefs.getBoolean("bursts", true);
         hitLighting = prefs.getBoolean("hitlighting", true);
-        useDither = prefs.getBoolean("dither", true);
         useTrail = prefs.getBoolean("particles", true);
         //useLongTrail = prefs.getBoolean("longTrail", useLongTrail);
-        useCustomComboColors = prefs.getBoolean("useCustomColors", useCustomComboColors);
-        comboColors = new RGBColor[4];
-        for (int i = 1; i <= 4; i++) {
-            comboColors[i - 1] = RGBColor.hex2Rgb(ColorPickerPreference.convertToRGB(prefs.getInt("combo" + i, 0xff000000)));
-        }
 
         // beatmaps
         SCAN_DOWNLOAD = prefs.getBoolean("scandownload", true);
@@ -210,6 +195,9 @@ public class Config {
         beatmapPath = corePath + "Songs/";
 
         skinPath = prefs.getString("skinPath", skinTopPath);
+        if (!skinPath.contains(skinTopPath)) {
+            skinPath = skinTopPath;
+        }
         if (skinPath.length() == 0) {
             skinPath = corePath + "Skin/";
         }
@@ -325,11 +313,7 @@ public class Config {
     }
 
     public static int getBackgroundQuality() {
-        return backgroundQuality;
-    }
-
-    public static void setBackgroundQuality(final int backgroundQuality) {
-        Config.backgroundQuality = backgroundQuality;
+        return 1;
     }
 
     public static String getCorePath() {
@@ -513,11 +497,7 @@ public class Config {
     }
 
     public static boolean isUseDither() {
-        return useDither;
-    }
-
-    public static void setUseDither(boolean useDither) {
-        Config.useDither = useDither;
+        return true;
     }
 
     public static boolean isUseCursorTrail() {
@@ -566,15 +546,16 @@ public class Config {
     }
 
     public static boolean isUseCustomComboColors() {
-        return useCustomComboColors;
-    }
-
-    public static void setUseCustomComboColors(boolean useCustomComboColors) {
-        Config.useCustomComboColors = useCustomComboColors;
+        return false;
     }
 
     public static RGBColor[] getComboColors() {
-        return comboColors;
+        return new RGBColor[] {
+                new RGBColor(0, 255, 0), // Green
+                new RGBColor(0, 0, 255), // Blue
+                new RGBColor(255, 0, 0), // Red
+                new RGBColor(255, 255, 0) // Yellow
+        };
     }
 
     public static int getErrorMeter() {

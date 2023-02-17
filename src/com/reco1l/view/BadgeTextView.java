@@ -4,6 +4,7 @@ import static android.util.TypedValue.*;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -13,16 +14,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 
+import com.reco1l.annotation.Size;
 import com.reco1l.utils.Views;
 import com.reco1l.utils.Views.MarginUtils;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -31,11 +29,6 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 // As the name says, especial type of layout with a TextView inside, this is NOT a TextView subclass
 // but you can pass TextView attributes through.
 public class BadgeTextView extends RoundLayout {
-
-    public final static int S = 0;
-    public final static int M = 1;
-    public final static int L = 2;
-    public final static int XL = 3;
 
     private LinearLayout mLayout;
     private ImageView mIconView;
@@ -57,12 +50,6 @@ public class BadgeTextView extends RoundLayout {
 
     //--------------------------------------------------------------------------------------------//
 
-    @IntDef(value = {S, M, L, XL})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface BadgeSize {}
-
-    //--------------------------------------------------------------------------------------------//
-
     @Override
     protected int getLayoutType() {
         return LINEAR;
@@ -81,14 +68,14 @@ public class BadgeTextView extends RoundLayout {
 
         // Text
         mTextView = new TextView(getContext(), attrs);
-        mTextView.setAllCaps(true);
+        mTextView.setTextColor(Color.WHITE);
         if (!isInEditMode()) {
             mTextView.setTypeface(ResourcesCompat.getFont(getContext(), R.font.varela_regular), Typeface.BOLD);
         }
         addView(mTextView);
 
         // Defaults
-        setSize(M);
+        setSize(Size.M);
         setBackground(new ColorDrawable(0x66000000));
         handleIconVisibility();
     }
@@ -96,7 +83,12 @@ public class BadgeTextView extends RoundLayout {
     @Override
     protected void onManageAttributes(@Nullable TypedArray t, AttributeSet a) {
         mIconView.setImageResource(a.getAttributeResourceValue(appNS, "icon", 0));
-        setSize(a.getAttributeIntValue(appNS, "size", M));
+        setSize(a.getAttributeIntValue(appNS, "size", Size.M));
+
+        int color = a.getAttributeIntValue(androidNS, "textColor", Color.WHITE);
+        if (mIconView.getDrawable() != null) {
+            mIconView.getDrawable().setTint(color);
+        }
 
         handleIconVisibility();
     }
@@ -124,17 +116,17 @@ public class BadgeTextView extends RoundLayout {
                 .horizontal(sdp(horizontal));
     }
 
-    public void setSize(@BadgeSize int size) {
+    public void setSize(@Size int size) {
         switch (size) {
-            case S:
+            case Size.S:
                 break;
-            case M:
+            case Size.M:
                 handleSize(8, 5, 2, 6);
                 break;
-            case L:
+            case Size.L:
                 handleSize(9, 6, 3, 7);
                 break;
-            case XL:
+            case Size.XL:
                 handleSize(18, 8, 3, 7);
                 break;
         }
@@ -152,7 +144,10 @@ public class BadgeTextView extends RoundLayout {
 
     public void setTextColor(int color) {
         mTextView.setTextColor(color);
-        mIconView.setColorFilter(color);
+
+        if (mIconView.getDrawable() != null) {
+            mIconView.getDrawable().setTint(color);
+        }
     }
 
     public TextView getTextView() {

@@ -9,7 +9,6 @@ import com.reco1l.global.Game;
 import com.reco1l.utils.helpers.BeatmapHelper;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,14 +20,12 @@ public class BeatmapCollection {
 
     public static final BeatmapCollection instance = new BeatmapCollection();
 
-    private final ArrayList<Listener> listeners;
+    private final ArrayList<Listener> mListeners;
 
-    private ArrayList<BeatmapInfo> beatmaps;
-    private Comparator<BeatmapInfo> comparator;
+    private ArrayList<BeatmapInfo> mList;
 
-    private SortOrder order;
-
-    private String filter;
+    private SortOrder mOrder;
+    private String mFilter;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -39,28 +36,28 @@ public class BeatmapCollection {
     //--------------------------------------------------------------------------------------------//
 
     public BeatmapCollection() {
-        beatmaps = new ArrayList<>();
-        listeners = new ArrayList<>();
+        mList = new ArrayList<>();
+        mListeners = new ArrayList<>();
 
         SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(Game.activity);
 
-        order = SortOrder.values()[p.getInt("sortorder", 0)];
+        mOrder = SortOrder.values()[p.getInt("sortOrder", 0)];
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public void setFilter(String filter) {
-        if (Objects.equals(filter, this.filter)) {
+        if (Objects.equals(filter, this.mFilter)) {
             return;
         }
-        this.filter = filter;
+        this.mFilter = filter;
 
         handleFiltering();
         notifyChange();
     }
 
     private void handleFiltering() {
-        if (filter == null) {
+        if (mFilter == null) {
             return;
         }
 
@@ -68,7 +65,7 @@ public class BeatmapCollection {
 
         for (BeatmapInfo beatmap : Game.libraryManager.getLibrary()) {
 
-            String[] sequence = filter.split(" ");
+            String[] sequence = mFilter.split(" ");
             String data = BeatmapHelper.getDataConcat(beatmap);
 
             boolean canAdd = false;
@@ -92,11 +89,8 @@ public class BeatmapCollection {
             }
         }
 
-        if (comparator != null) {
-            newList.sort(comparator);
-        }
-        beatmaps = newList;
-        notifyChange();
+        mList = newList;
+        sort(mOrder, true);
     }
 
     private boolean containsAttrs(BeatmapInfo beatmap, Matcher matcher) {
@@ -155,17 +149,21 @@ public class BeatmapCollection {
     //--------------------------------------------------------------------------------------------//
 
     public void sort(SortOrder order) {
-        if (this.order == order) {
+        sort(order, false);
+    }
+
+    public void sort(SortOrder order, boolean force) {
+        if (this.mOrder == order && !force) {
             return;
         }
-        this.order = order;
+        this.mOrder = order;
 
         PreferenceManager.getDefaultSharedPreferences(Game.activity)
                 .edit()
-                .putInt("sortorder", order.ordinal())
+                .putInt("sortOrder", order.ordinal())
                 .commit();
 
-        comparator = (a, b) -> {
+        mList.sort((a, b) -> {
             String s1;
             String s2;
 
@@ -206,47 +204,40 @@ public class BeatmapCollection {
             }
 
             return s1.compareToIgnoreCase(s2);
-        };
+        });
 
-        beatmaps.sort(comparator);
         notifyChange();
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public ArrayList<BeatmapInfo> getList() {
-        return beatmaps;
+        return mList;
     }
 
     public SortOrder getOrder() {
-        return order;
+        return mOrder;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public void addListener(Listener listener) {
-        listeners.add(listener);
+        mListeners.add(listener);
     }
 
     public void notifyLibraryChange() {
-        beatmaps.clear();
-        beatmaps.addAll(Game.libraryManager.getLibrary());
-        if (comparator != null) {
-            beatmaps.sort(comparator);
-        } else {
-            sort(order);
-        }
-        filter = null;
-        notifyChange();
+        mList.clear();
+        mList.addAll(Game.libraryManager.getLibrary());
+        sort(mOrder, true);
+        mFilter = null;
         Log.i("BeatmapCollection", "Library has been updated");
     }
 
     public void notifyChange() {
-        listeners.forEach(listener -> listener.onLibraryChange(beatmaps));
+        mListeners.forEach(listener -> listener.onLibraryChange(mList));
     }
 
     //--------------------------------------------------------------------------------------------//
-
 
     @FunctionalInterface
     public interface Listener {

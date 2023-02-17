@@ -3,7 +3,6 @@
 <!-- Created by Reco1l on 19/7/22 00:18 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:key="pref_appearance">
 
     <PreferenceCategory
@@ -36,37 +35,6 @@
             android:defaultValue="true"
             android:key="ui_showItemBackground"
             android:title="Disable backgrounds in list items" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="color"
-        android:title="Combo colors">
-
-        <com.reco1l.preference.CheckPreference
-            android:defaultValue="false"
-            android:key="useCustomColors"
-            android:title="@string/opt_combo_colors_title" />
-
-        <net.margaritov.preference.colorpicker.ColorPickerPreference
-            android:defaultValue="@integer/COLOR_GREEN"
-            android:key="combo1"
-            android:title="First color" />
-
-        <net.margaritov.preference.colorpicker.ColorPickerPreference
-            android:defaultValue="@integer/COLOR_BLUE"
-            android:key="combo2"
-            android:title="Second color" />
-
-        <net.margaritov.preference.colorpicker.ColorPickerPreference
-            android:defaultValue="@integer/COLOR_RED"
-            android:key="combo3"
-            android:title="Third color" />
-
-        <net.margaritov.preference.colorpicker.ColorPickerPreference
-            android:defaultValue="@integer/COLOR_YELLOW"
-            android:key="combo4"
-            android:title="Fourth color" />
 
     </PreferenceCategory>
 

@@ -14,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.reco1l.annotation.Size;
 import com.reco1l.utils.Views;
 import com.reco1l.view.BadgeTextView;
 import com.reco1l.view.RoundLayout;
@@ -53,11 +54,13 @@ public final class StatisticLayout extends RoundLayout {
 
         // Badge
         mBadge = new BadgeTextView(getContext());
-        mBadge.setSize(BadgeTextView.L);
         mBadge.getBackground().setTint(0x80000000);
+        mBadge.setSize(Size.L);
+        mBadge.getTextView().setAllCaps(true);
         addView(mBadge, new LayoutParams(getInitialWidth(), WRAP_CONTENT));
 
         mText = new TextView(getContext(), attrs);
+        mText.setTextColor(Color.WHITE);
         addView(mText);
 
         Views.margins(mText).top(sdp(4));

@@ -10,63 +10,58 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.reco1l.global.Game;
-import com.reco1l.global.UI;
 import com.reco1l.utils.Animation;
-import com.reco1l.view.BaseView;
-import com.reco1l.view.LogoView;
+import com.reco1l.view.RoundLayout;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class ExpandEffect extends View implements BaseView {
+public class ExpandEffect extends RoundLayout {
 
-    private LogoView logo;
+    private View mAttachedView;
 
     private float
-            minRadius,
-            strokeWidth;
+            mMinRadius,
+            mStrokeWidth;
 
-    private int
-            color,
-            alpha;
+    private int mAlpha;
 
-    private ArrayList<Circle> circles;
+    private ArrayList<Circle> mCircles;
 
     //--------------------------------------------------------------------------------------------//
 
-    public ExpandEffect(Context context) {
-        this(context, null);
+    public ExpandEffect(@NonNull Context context) {
+        super(context);
     }
 
-    public ExpandEffect(Context context, @Nullable AttributeSet attrs) {
+    public ExpandEffect(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        onCreate(attrs);
+    }
+
+    public ExpandEffect(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public View getView() {
-        return this;
+    protected void onCreate() {
+        setConstantInvalidation(true);
+
+        mCircles = new ArrayList<>();
+
+        mStrokeWidth = sdp(3);
+        mAlpha = 100;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public void onCreate(AttributeSet attrs) {
-        circles = new ArrayList<>();
-
-        strokeWidth = sdp(2);
-        alpha = 80;
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onManagedDraw(Canvas canvas) {
         if (isInEditMode()) {
             return;
         }
@@ -74,24 +69,18 @@ public class ExpandEffect extends View implements BaseView {
         int centerX = canvas.getWidth() / 2;
         int centerY = canvas.getHeight() / 2;
 
-        if (logo != null) {
-            minRadius = logo.getHeight() / 2f;
+        if (mAttachedView != null) {
+            mMinRadius = mAttachedView.getHeight() / 2f;
 
-            centerX = (int) (logo.getX() + logo.getWidth() / 2);
-            centerY = (int) (logo.getY() + logo.getHeight() / 2);
-        }
-
-        if (UI.background.isDark()) {
-            setPaintColor(Color.WHITE);
-        } else {
-            setPaintColor(Color.BLACK);
+            centerX = (int) (mAttachedView.getX() + mAttachedView.getWidth() / 2);
+            centerY = (int) (mAttachedView.getY() + mAttachedView.getHeight() / 2);
         }
 
         if (Game.timingWrapper.isNextBeat()) {
-            circles.add(new Circle());
+            mCircles.add(new Circle());
         }
 
-        Iterator<Circle> iterator = circles.iterator();
+        Iterator<Circle> iterator = mCircles.iterator();
         while (iterator.hasNext()) {
             Circle circle = iterator.next();
 
@@ -101,35 +90,19 @@ public class ExpandEffect extends View implements BaseView {
                 iterator.remove();
             }
         }
-
-        super.onDraw(canvas);
-        invalidate();
     }
 
     //--------------------------------------------------------------------------------------------//
 
-    public void attachToLogo(LogoView logo) {
-        this.logo = logo;
-    }
-
-    private void setPaintColor(int color) {
-        if (this.color == color) {
-            return;
-        }
-        this.color = color;
-
-        int i = 0;
-        while (i < circles.size()) {
-            circles.get(i).paint.setColor(color);
-            ++i;
-        }
+    public void attachTo(View logo) {
+        this.mAttachedView = logo;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     private float getMaxRadius() {
-        if (logo != null) {
-            return logo.getHeight() * 0.75f;
+        if (mAttachedView != null) {
+            return mAttachedView.getHeight() * 0.75f;
         }
 
         if (getHeight() <= getWidth()) {
@@ -141,10 +114,10 @@ public class ExpandEffect extends View implements BaseView {
     private Paint createPaint() {
         Paint paint = new Paint();
 
-        paint.setAlpha(alpha);
-        paint.setColor(color);
+        paint.setAlpha(mAlpha);
+        paint.setColor(Color.WHITE);
         paint.setStyle(Style.STROKE);
-        paint.setStrokeWidth(strokeWidth);
+        paint.setStrokeWidth(mStrokeWidth);
         paint.setAntiAlias(true);
 
         return paint;
@@ -162,7 +135,7 @@ public class ExpandEffect extends View implements BaseView {
 
         private Circle() {
             paint = createPaint();
-            radius = minRadius;
+            radius = mMinRadius;
 
             long time = (long) Game.timingWrapper.getBeatLength();
 
@@ -170,7 +143,7 @@ public class ExpandEffect extends View implements BaseView {
                     .runOnUpdate(value -> radius = (float) value)
                     .play(time * 3);
 
-            Animation.ofInt(alpha, 0)
+            Animation.ofInt(mAlpha, 0)
                     .runOnUpdate(value -> paint.setAlpha((int) value))
                     .play(time * 3);
         }

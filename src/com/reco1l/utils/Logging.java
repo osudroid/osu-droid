@@ -21,4 +21,8 @@ public final class Logging {
         }
         Log.i("JVM", "Class static loaded: " + c.getSimpleName() + "@" + c.hashCode());
     }
+
+    public static void e(Class<?> c, String msg, Throwable e) {
+        Log.e(c.getSimpleName(), msg, e);
+    }
 }
