@@ -39,6 +39,7 @@ import com.reco1l.tables.NotificationTable;
 import com.reco1l.ui.FragmentPlatform;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.tables.DialogTable;
+import com.reco1l.utils.Logging;
 import com.reco1l.utils.execution.ScheduledTask;
 
 import org.anddev.andengine.engine.Engine;
@@ -473,15 +474,7 @@ public class MainActivity extends BaseGameActivity implements
         }
 
         if (BuildConfig.DEBUG) {
-            //Toast.makeText(this,"this is debug version",Toast.LENGTH_LONG).show();
-            try {
-                File d = new File(Environment.getExternalStorageDirectory(), "osu!droid/Log");
-                if (!d.exists()) d.mkdirs();
-                File f = new File(d, "rawlog.txt");
-                if (!f.exists()) f.createNewFile();
-                Runtime.getRuntime().exec("logcat -f " + (f.getAbsolutePath()));
-            } catch (IOException e) {
-            }
+            Logging.logcat();
         }
         onBeginBindService();
     }
