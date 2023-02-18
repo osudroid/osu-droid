@@ -6,6 +6,7 @@ import androidx.preference.SeekBarPreference;
 
 import com.reco1l.global.Game;
 import com.reco1l.preference.ButtonPreference;
+import com.reco1l.preference.CheckPreference;
 import com.reco1l.preference.FieldPreference;
 import com.reco1l.tables.DialogTable;
 import com.reco1l.ui.BasePreferenceFragment;
@@ -24,7 +25,8 @@ public final class Settings {
 
         public abstract @XmlRes int getPreferenceXML();
 
-        public void onLoad(BasePreferenceFragment parent) {}
+        public void onLoad(BasePreferenceFragment parent) {
+        }
 
     }
 
@@ -133,28 +135,37 @@ public final class Settings {
 
         @Override
         public void onLoad(BasePreferenceFragment f) {
+            CheckPreference external = f.find("external");
             FieldPreference path = f.find("corePath");
 
-            if (path != null) {
-                path.setDefaultValue(Config.getDefaultCorePath());
-                path.setText(Config.getCorePath());
-
-                path.setOnFocusLostListener(() -> {
-                    if (path.getText().trim().length() == 0) {
-                        path.setText(Config.getCorePath());
-                    }
-
-                    File file = new File(path.getText());
-                    if (!file.exists() && !file.mkdirs()) {
-                        path.setText(Config.getCorePath());
-                    }
-                });
-
-                path.setOnPreferenceChangeListener((p, newValue) -> {
-                    Config.loadPaths();
-                    return false;
-                });
+            if (external == null || path == null) {
+                return;
             }
+
+            File[] volumes = Game.activity.getExternalFilesDirs(null);
+            boolean hasExternal = volumes.length > 1 && volumes[1] != null;
+
+            external.setEnabled(hasExternal);
+            if (!hasExternal) {
+                external.setChecked(false);
+            }
+
+            external.setOnPreferenceChangeListener((p, value) -> {
+                Config.loadPaths();
+
+                path.setEnabled(!(boolean) value);
+                path.setText(Config.getCorePath());
+                return true;
+            });
+
+            path.setDefaultValue(Config.getDefaultCorePath());
+            path.setEnabled(!external.isChecked());
+            path.setText(Config.getCorePath());
+
+            path.setOnFocusLostListener(() -> {
+                Config.loadPaths();
+                path.setValue(Config.getCorePath());
+            });
         }
     }
 }

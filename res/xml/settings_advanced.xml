@@ -12,6 +12,11 @@
         android:title="Location"
         app:iconSpaceReserved="false">
 
+        <com.reco1l.preference.CheckPreference
+            android:defaultValue="false"
+            android:key="external"
+            android:title="Use external storage"/>
+
         <com.reco1l.preference.FieldPreference
             android:key="corePath"
             android:title="@string/opt_corepath_title" />

@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Environment;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
@@ -184,6 +185,17 @@ public class Config {
 
         defaultCorePath = Environment.getExternalStorageDirectory() + "/osu!droid/";
         corePath = prefs.getString("corePath", defaultCorePath);
+
+        File[] volumes = context.getExternalFilesDirs(null);
+
+        boolean useExternal = prefs.getBoolean("external", false);
+        boolean hasExternal = volumes.length > 1 && volumes[1] != null;
+
+        if (useExternal && hasExternal) {
+            corePath = volumes[1].getAbsolutePath();
+            Log.i("Settings", "Using external storage as core path.");
+        }
+
         if (corePath.length() == 0) {
             corePath = defaultCorePath;
         }
