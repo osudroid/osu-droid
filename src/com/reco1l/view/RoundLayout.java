@@ -104,6 +104,7 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
         if (super.getBackground() != null) {
             super.setBackground(null);
         }
+        super.setPadding(0, 0, 0, 0);
 
         onCreate();
         handleAttributes();
