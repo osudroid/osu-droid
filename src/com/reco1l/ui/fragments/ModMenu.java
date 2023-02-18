@@ -28,7 +28,7 @@ import com.reco1l.data.mods.FlashlightMod;
 import com.reco1l.data.mods.LegacyModWrapper;
 import com.reco1l.data.mods.ModWrapper;
 import com.reco1l.data.adapters.ModSectionAdapter;
-import com.reco1l.view.custom.ModBadge;
+import com.reco1l.view.custom.ModBadgeView;
 
 import java.util.ArrayList;
 
@@ -195,7 +195,7 @@ public final class ModMenu extends BaseFragment implements IGameMod {
 
         for (ModWrapper wrapper : Game.modManager.getList()) {
 
-            ModBadge icon = new ModBadge(getContext());
+            ModBadgeView icon = new ModBadgeView(context());
             icon.setText(wrapper.getAcronym());
             icon.setSize(Size.M);
             widget.addView(icon);

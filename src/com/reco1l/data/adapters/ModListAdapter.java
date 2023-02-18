@@ -3,11 +3,9 @@ package com.reco1l.data.adapters;
 
 import android.graphics.drawable.ColorDrawable;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 
 import com.reco1l.global.Game;
 import com.reco1l.global.UI;
@@ -16,7 +14,7 @@ import com.reco1l.data.BaseViewHolder;
 import com.reco1l.utils.Animation;
 import com.reco1l.data.mods.ModWrapper;
 import com.reco1l.view.RoundLayout;
-import com.reco1l.view.custom.ModBadge;
+import com.reco1l.view.custom.ModBadgeView;
 
 import java.util.ArrayList;
 
@@ -49,7 +47,7 @@ public class ModListAdapter extends BaseAdapter<ModListAdapter.ModViewHolder, Mo
 
         private final RoundLayout mBody;
         private final TextView mName;
-        private final ModBadge mIcon;
+        private final ModBadgeView mIcon;
 
         private final ColorDrawable mBackground;
 

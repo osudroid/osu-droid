@@ -14,21 +14,21 @@ import com.reco1l.view.BadgeTextView;
 
 import java.text.DecimalFormat;
 
-public final class FPSBadge extends BadgeTextView {
+public final class FPSBadgeView extends BadgeTextView {
 
     private final DecimalFormat mDF = new DecimalFormat("##");
 
     //--------------------------------------------------------------------------------------------//
 
-    public FPSBadge(@NonNull Context context) {
+    public FPSBadgeView(@NonNull Context context) {
         super(context);
     }
 
-    public FPSBadge(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public FPSBadgeView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public FPSBadge(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public FPSBadgeView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 

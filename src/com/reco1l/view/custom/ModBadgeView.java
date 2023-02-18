@@ -12,19 +12,19 @@ import androidx.annotation.Nullable;
 import com.reco1l.annotation.Size;
 import com.reco1l.view.BadgeTextView;
 
-public final class ModBadge extends BadgeTextView {
+public final class ModBadgeView extends BadgeTextView {
 
     //--------------------------------------------------------------------------------------------//
 
-    public ModBadge(@NonNull Context context) {
+    public ModBadgeView(@NonNull Context context) {
         super(context);
     }
 
-    public ModBadge(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public ModBadgeView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public ModBadge(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public ModBadgeView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
