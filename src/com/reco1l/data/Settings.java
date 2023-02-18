@@ -5,14 +5,17 @@ import androidx.preference.Preference;
 import androidx.preference.SeekBarPreference;
 
 import com.reco1l.global.Game;
-import com.reco1l.preference.ButtonPreference;
 import com.reco1l.preference.CheckPreference;
 import com.reco1l.preference.FieldPreference;
-import com.reco1l.tables.DialogTable;
+import com.reco1l.preference.MenuPreference;
 import com.reco1l.ui.BasePreferenceFragment;
-import com.reco1l.ui.custom.Dialog;
+import com.reco1l.ui.custom.LoaderFragment;
+import com.reco1l.utils.execution.Async;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -50,8 +53,35 @@ public final class Settings {
 
         @Override
         public void onLoad(BasePreferenceFragment f) {
-            ButtonPreference skin = f.find("skinPath");
-            skin.setOnPreferenceClickListener(p -> new Dialog(DialogTable.skins()).show());
+            MenuPreference selector = f.find("skinPath");
+
+            Map<String, String> skins = new HashMap<>();
+
+            skins.put("Default", Config.getSkinTopPath());
+            skins.putAll(Config.getSkins());
+
+            selector.setEntries(skins);
+
+            skins.forEach((k, e) -> {
+                if (Objects.equals(Config.getSkinPath(), e)) {
+                    selector.setText(e);
+                }
+            });
+
+            selector.setOnPreferenceChangeListener((p, v) -> {
+
+                Async.run(() -> {
+                    LoaderFragment fragment = new LoaderFragment();
+                    fragment.show(true);
+
+                    Game.skinManager.clearSkin();
+                    Game.resourcesManager.loadSkin((String) v);
+                    Game.engine.getTextureManager().reloadTextures();
+
+                    fragment.close();
+                });
+                return true;
+            });
         }
     }
 

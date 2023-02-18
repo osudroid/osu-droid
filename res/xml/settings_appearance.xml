@@ -11,7 +11,7 @@
 
     <PreferenceCategory android:title="Skin">
 
-        <com.reco1l.preference.ButtonPreference
+        <com.reco1l.preference.MenuPreference
             android:key="skinPath"
             android:title="Select skin" />
 
