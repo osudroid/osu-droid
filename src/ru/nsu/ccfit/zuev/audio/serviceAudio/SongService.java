@@ -144,12 +144,6 @@ public class SongService extends Service {
         return 0;
     }
 
-    public void setPosition(int pos){
-        if(audioFunc != null){
-            audioFunc.setPosition(pos);
-        }
-    }
-
     public int getLength() {
         if (audioFunc != null) {
             return audioFunc.getLength();

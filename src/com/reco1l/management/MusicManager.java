@@ -131,7 +131,7 @@ public final class MusicManager {
         int lastPosition = Game.songService.getPosition();
 
         reset();
-        Game.songService.setPosition(lastPosition);
+        Game.songService.seekTo(lastPosition);
     }
 
     private boolean sameAudio(TrackInfo track) {

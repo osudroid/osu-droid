@@ -155,7 +155,7 @@ public final class MusicPlayer extends BaseFragment implements IMusicObserver {
 
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mIsTrackingTouch = false;
-                Game.songService.setPosition(newPosition);
+                Game.musicManager.setPosition(newPosition);
                 notifyTouchEvent(MotionEvent.ACTION_UP);
             }
         });
