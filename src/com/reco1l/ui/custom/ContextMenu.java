@@ -47,15 +47,15 @@ public class ContextMenu extends BaseFragment {
         return true;
     }
 
-    @Override
+    /*@Override
     protected boolean isExtra() {
         return true;
-    }
+    }*/
 
     @Override
     protected View getRootView() {
         RelativeLayout layout = new RelativeLayout(getContext());
-        layout.setElevation(dimen(R.dimen.top_layer));
+        layout.setElevation(sdp(3));
         layout.setLayoutParams(Views.match_parent);
 
         View view = new View(getContext());
@@ -65,7 +65,7 @@ public class ContextMenu extends BaseFragment {
 
         mBody = new CardView(Game.activity);
 
-        mBody.setCardBackgroundColor(Res.color(R.color.backgroundSecondary));
+        mBody.setCardBackgroundColor(Res.color(R.color.backgroundPrimary));
         mBody.setRadius(Res.dimen(R.dimen.app_corners));
         mBody.setAlpha(0);
         layout.addView(mBody);
