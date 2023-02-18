@@ -4,14 +4,13 @@ package com.reco1l.scenes;
 
 import android.widget.LinearLayout;
 
-import com.edlplan.replay.OdrDatabase;
 import com.reco1l.global.Game;
 import com.reco1l.global.UI;
 import com.reco1l.global.Scenes;
 import com.reco1l.interfaces.ITask;
 import com.reco1l.tables.NotificationTable;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.execution.AsyncTask;
+import com.reco1l.utils.execution.Async;
 import com.reco1l.view.IconButton;
 
 import org.anddev.andengine.entity.scene.Scene;
@@ -183,18 +182,13 @@ public class SelectorScene extends BaseScene {
 
     @Override
     public void show() {
-        new AsyncTask() {
-            public void run() {
-                Game.activity.checkNewBeatmaps();
+        Async.run(() -> {
+            Game.activity.checkNewBeatmaps();
 
-                if (!Game.libraryManager.loadLibraryCache(Game.activity, true)) {
-                    Game.libraryManager.scanLibrary(Game.activity);
-                }
+            if (!Game.libraryManager.loadLibraryCache(Game.activity, true)) {
+                Game.libraryManager.scanLibrary(Game.activity);
             }
-
-            public void onComplete() {
-                SelectorScene.super.show();
-            }
-        }.execute();
+        });
+        super.show();
     }
 }
