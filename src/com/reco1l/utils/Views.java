@@ -2,14 +2,23 @@ package com.reco1l.utils;
 
 // Created by Reco1l on 6/9/22 13:31
 
+import static android.util.TypedValue.COMPLEX_UNIT_PX;
 import static android.view.ViewGroup.*;
 import static android.view.ViewGroup.LayoutParams.*;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import android.content.Context;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import androidx.core.content.res.ResourcesCompat;
+
+import com.reco1l.tables.ResourceTable;
 
 import java.util.ArrayList;
+
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 public final class Views {
 
@@ -289,4 +298,15 @@ public final class Views {
     }
 
     //--------------------------------------------------------------------------------------------//
+
+    // Apply basic app text style
+    public static void styleText(TextView text, ResourceTable res) {
+        Context context = text.getContext();
+
+        if (!text.isInEditMode()) {
+            text.setTypeface(ResourcesCompat.getFont(context, R.font.varela_regular));
+        }
+        text.setTextColor(0xFF819DD4);
+        text.setTextSize(COMPLEX_UNIT_PX, res.sdp(10));
+    }
 }
