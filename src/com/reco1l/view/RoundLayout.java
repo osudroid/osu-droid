@@ -23,6 +23,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleableRes;
+import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.core.math.MathUtils;
 
 import com.reco1l.tables.ResourceTable;
@@ -329,6 +330,12 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
                     ((RelativeLayout) mInternalLayout).setGravity(gravity);
                     break;
             }
+        }
+    }
+
+    public void setOrientation(@LinearLayoutCompat.OrientationMode int orientation) {
+        if (mInternalLayout instanceof LinearLayout) {
+            ((LinearLayout) mInternalLayout).setOrientation(orientation);
         }
     }
 

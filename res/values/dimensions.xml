@@ -106,11 +106,6 @@
     <dimen name="notificationCloseWidth">@dimen/_32sdp</dimen>
 
     <!--Main menu-->
-    <dimen name="mainMenuButtonHeight">@dimen/_90sdp</dimen>
-    <dimen name="mainMenuButtonWidth">@dimen/_120sdp</dimen>
-    <dimen name="mainMenuButtonShapeRadius">@dimen/_65sdp</dimen>
-    <dimen name="mainMenuButtonMargin">@dimen/_80sdp</dimen>
-
     <dimen name="mainMenuSmallLogoSize">@dimen/_150sdp</dimen>
     <dimen name="mainMenuLogoSize">@dimen/_250sdp</dimen>
 

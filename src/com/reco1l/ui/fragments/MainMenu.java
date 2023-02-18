@@ -32,7 +32,7 @@ public final class MainMenu extends BaseFragment {
     private BadgeTextView mVersionText;
 
     private View
-            mSoloButton,
+            mPlayButton,
             mExploreButton,
             mButtonsBackground;
 
@@ -68,7 +68,7 @@ public final class MainMenu extends BaseFragment {
         mShowTime = 0;
 
         mLogo = find("logo");
-        mSoloButton = find("solo");
+        mPlayButton = find("play");
         mVersionText = find("author");
         mExploreButton = find("explore");
         mButtonLayout = find("buttonsLayout");
@@ -84,9 +84,6 @@ public final class MainMenu extends BaseFragment {
 
         Views.size(mLogo, dimen(R.dimen.mainMenuLogoSize));
         Views.height(mButtonsBackground, 0);
-        Views.height(mButtonLayout, 0);
-
-        Views.margins(mButtonLayout).left(dimen(R.dimen.mainMenuSmallLogoSize) / 3);
 
         mLogo.post(() ->
                 mLogo.setX(getWidth() / 2f - mLogo.getWidth() / 2f)
@@ -107,7 +104,7 @@ public final class MainMenu extends BaseFragment {
             }
         });
 
-        bindTouch(mSoloButton, this::onSingle);
+        bindTouch(mPlayButton, this::onSingle);
         bindTouch(mExploreButton, this::onExplore);
     }
 
@@ -127,8 +124,8 @@ public final class MainMenu extends BaseFragment {
                     .runOnEnd(() -> mIsConcurrentAnimation = false)
                     .play(200);
 
-            Animation.of(mButtonLayout, mButtonsBackground)
-                    .toHeight(dimen(R.dimen.mainMenuButtonHeight))
+            Animation.of(mButtonsBackground)
+                    .toHeight(sdp(90))
                     .toAlpha(1)
                     .play(200);
 
@@ -150,7 +147,7 @@ public final class MainMenu extends BaseFragment {
                     .runOnEnd(() -> mIsConcurrentAnimation = false)
                     .play(200);
 
-            Animation.of(mButtonLayout, mButtonsBackground)
+            Animation.of(mButtonsBackground)
                     .toHeight(0)
                     .toAlpha(0)
                     .play(200);
@@ -203,6 +200,8 @@ public final class MainMenu extends BaseFragment {
                 mShowTime += pSecElapsed * 1000f;
             }
         }
+
+        mButtonLayout.setX(mLogo.getX() + mLogo.getWidth() + sdp(8));
     }
 
     @Override
