@@ -1,6 +1,7 @@
 package com.reco1l.ui.custom;
 
 import android.graphics.PointF;
+import android.view.View;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -17,6 +18,15 @@ public class ContextMenuBuilder {
     public ContextMenuBuilder(PointF pPosition) {
         items = new ArrayList<>();
         position = pPosition;
+    }
+
+    public ContextMenuBuilder(View view) {
+        items = new ArrayList<>();
+
+        int[] location = new int[2];
+        view.getLocationInWindow(location);
+
+        position = new PointF(location[0], location[1]);
     }
 
     //--------------------------------------------------------------------------------------------//
