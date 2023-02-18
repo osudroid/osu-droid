@@ -142,7 +142,15 @@ public class FieldPreference extends Preference {
 
     public void setText(String text) {
         if (mEditText != null) {
+            mEditText.removeTextChangedListener(mTextWatcher);
             mEditText.setText(text);
+            mEditText.addTextChangedListener(mTextWatcher);
+        }
+    }
+
+    public void setValue(String value) {
+        if (mEditText != null) {
+            mEditText.setText(value);
         }
     }
 
