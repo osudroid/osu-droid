@@ -13,6 +13,7 @@ import com.un4seen.bass.BASS_FX;
 
 import java.nio.ByteBuffer;
 
+import ru.nsu.ccfit.zuev.audio.BassAudioProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 
 public class BassAudioFunc {
@@ -28,16 +29,43 @@ public class BassAudioFunc {
     private BroadcastReceiver receiver;
     private LocalBroadcastManager broadcastManager;
 
-    BassAudioFunc() {
-        BASS.BASS_Init(-1, 44100, BASS.BASS_DEVICE_LATENCY);
+    public BassAudioFunc() {
+        onGameResume();
+    }
+
+    public void onGameResume() {
+        BassAudioProvider.configureBASS();
+        BassAudioProvider.logBASSConfig();
+    }
+
+    public void onGamePause() {
+        // Reset BASS configurations to their default values.
+        // https://www.un4seen.com/doc/#bass/BASS_CONFIG_UPDATEPERIOD.html
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_UPDATEPERIOD, 100);
+
+        // https://www.un4seen.com/doc/#bass/BASS_CONFIG_DEV_PERIOD.html
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_PERIOD, 10);
+
+        // https://www.un4seen.com/doc/#bass/BASS_CONFIG_BUFFER.html
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_BUFFER, 500);
+
+        // https://www.un4seen.com/doc/#bass/BASS_CONFIG_DEV_NONSTOP.html
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_NONSTOP, 0);
+
+        // This is needed for `NotifyPlayer` so that the music does not get choppy.
+        // Unsure why it is needed.
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_BUFFER, 0);
+
+        // Reinitialize BASS under the current configuration.
+        BASS.BASS_Init(BASS.BASS_GetDevice(), BassAudioProvider.DEFAULT_FREQUENCY, BASS.BASS_DEVICE_REINIT);
+        BassAudioProvider.logBASSConfig();
     }
 
     public boolean pause() {
         return BASS.BASS_ChannelPause(channel);
     }
 
-    private boolean resume() {
+    public boolean resume() {
         return BASS.BASS_ChannelPlay(channel, false);
     }
 

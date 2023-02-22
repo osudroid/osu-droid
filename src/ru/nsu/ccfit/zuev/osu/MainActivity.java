@@ -284,9 +284,6 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
         ResourceManager.getInstance().loadFont("smallFont", null, 21, Color.WHITE);
         ResourceManager.getInstance().loadStrokeFont("strokeFont", null, 36, Color.BLACK, Color.WHITE);
-
-        BassAudioPlayer.initDevice();
-
     }
 
     @Override
@@ -298,6 +295,7 @@ public class MainActivity extends BaseGameActivity implements
     public void onLoadComplete() {
         new AsyncTaskLoader().execute(new OsuAsyncCallback() {
             public void run() {
+                BassAudioPlayer.initDevice();
                 GlobalManager.getInstance().init();
                 analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
                 GlobalManager.getInstance().setLoadingProgress(50);

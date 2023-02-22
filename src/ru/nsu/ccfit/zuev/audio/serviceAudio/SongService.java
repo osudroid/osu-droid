@@ -11,6 +11,7 @@ import android.util.Log;
 import java.io.File;
 
 import ru.nsu.ccfit.zuev.audio.Status;
+import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 
@@ -185,12 +186,28 @@ public class SongService extends Service {
             Log.w("SongService", "NOT SHOW THE NOTIFY CUZ IS GAMING");
             return;
         }
+
+        if (audioFunc != null) {
+            audioFunc.onGamePause();
+            reloadCurrentAudio();
+        }
+
         notify.show();
         notify.updateSong(GlobalManager.getInstance().getMainScene().getBeatmapInfo());
         notify.updateState();
     }
 
     public boolean hideNotification() {
+        // Checking if the notification is shown is pretty hacky, but for now it is the case
+        // only if the player leaves the game from the main menu, which is when we want to
+        // reload BASS after being altered in `showNotification` and reload the audio.
+        if (notify.isShowing) {
+            if (audioFunc != null) {
+                audioFunc.onGameResume();
+            }
+            reloadCurrentAudio();
+        }
+
         return notify.hide();
     }
 
@@ -210,6 +227,23 @@ public class SongService extends Service {
 
     public boolean isRunningForeground() {
         return MainActivity.isActivityVisible();
+    }
+
+    private void reloadCurrentAudio() {
+        // Do not attempt to reload if there is no audio playing.
+        if (getStatus() == Status.STOPPED) {
+            return;
+        }
+
+        pause();
+
+        // Reload audio, otherwise it will be choppy or offset for whatever reason.
+        int position = getPosition();
+        preLoad(GlobalManager.getInstance().getMainScene().getBeatmapInfo().getMusic());
+        setVolume(Config.getBgmVolume());
+        seekTo(position);
+
+        audioFunc.resume();
     }
 
     public class ReturnBindObject extends Binder {
