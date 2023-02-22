@@ -734,7 +734,9 @@ public class MainScene implements IUpdateHandler {
                         }
                     }
                     if (GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED) {
-                        bpmLength = lastBpmLength;
+                        if (lastBpmLength > 0) {
+                            bpmLength = lastBpmLength;
+                        }
                         if (lastTimingPoint != null) {
                             int position = GlobalManager.getInstance().getSongService().getPosition();
                             offset = (position - lastTimingPoint.getTime() * 1000f) % bpmLength;
