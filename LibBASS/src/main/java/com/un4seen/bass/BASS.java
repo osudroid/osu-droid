@@ -1,12 +1,13 @@
 /*
 	BASS 2.4 Java class
-	Copyright (c) 1999-2021 Un4seen Developments Ltd.
+	Copyright (c) 1999-2022 Un4seen Developments Ltd.
 
 	See the BASS.CHM file for more detailed documentation
 */
 
 package com.un4seen.bass;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import android.content.res.AssetManager;
 import android.os.ParcelFileDescriptor;
@@ -42,7 +43,7 @@ public class BASS
 	public static final int BASS_ERROR_FREQ = 25;	// illegal sample rate
 	public static final int BASS_ERROR_NOTFILE = 27;	// the stream is not a file stream
 	public static final int BASS_ERROR_NOHW = 29;	// no hardware voices available
-	public static final int BASS_ERROR_EMPTY = 31;	// the MOD music has no sequence data
+	public static final int BASS_ERROR_EMPTY = 31;	// the file has no sample data
 	public static final int BASS_ERROR_NONET = 32;	// no internet connection could be opened
 	public static final int BASS_ERROR_CREATE = 33;	// couldn't create the file
 	public static final int BASS_ERROR_NOFX = 34;	// effects are not available
@@ -58,6 +59,7 @@ public class BASS
 	public static final int BASS_ERROR_BUSY = 46;	// the device is busy
 	public static final int BASS_ERROR_UNSTREAMABLE = 47; // unstreamable file
 	public static final int BASS_ERROR_PROTOCOL = 48;	// unsupported protocol
+	public static final int BASS_ERROR_DENIED = 49;		// access denied
 	public static final int BASS_ERROR_UNKNOWN = -1;	// some other mystery problem
 
 	public static final int BASS_ERROR_JAVA_CLASS = 500;	// object class problem
@@ -104,11 +106,14 @@ public class BASS
 	public static final int BASS_CONFIG_DEV_TIMEOUT = 70;
 	public static final int BASS_CONFIG_NET_META = 71;
 	public static final int BASS_CONFIG_NET_RESTRATE = 72;
+	public static final int BASS_CONFIG_REC_DEFAULT = 73;
+	public static final int BASS_CONFIG_NORAMP = 74;
 
 	// BASS_SetConfigPtr options
 	public static final int BASS_CONFIG_NET_AGENT = 16;
 	public static final int BASS_CONFIG_NET_PROXY = 17;
 	public static final int BASS_CONFIG_LIBSSL = 64;
+	public static final int BASS_CONFIG_FILENAME = 75;
 
 	public static final int BASS_CONFIG_THREAD = 0x40000000; // flag: thread-specific setting
 
@@ -232,20 +237,23 @@ public class BASS
 	
 	// Speaker assignment flags
 	public static final int BASS_SPEAKER_FRONT = 0x1000000;	// front speakers
-	public static final int BASS_SPEAKER_REAR = 0x2000000;	// rear/side speakers
+	public static final int BASS_SPEAKER_REAR = 0x2000000;	// rear speakers
 	public static final int BASS_SPEAKER_CENLFE = 0x3000000;	// center & LFE speakers (5.1)
-	public static final int BASS_SPEAKER_REAR2 = 0x4000000;	// rear center speakers (7.1)
+	public static final int BASS_SPEAKER_SIDE = 0x4000000;	// side speakers (7.1)
 	public static int BASS_SPEAKER_N(int n) { return n<<24; }	// n'th pair of speakers (max 15)
 	public static final int BASS_SPEAKER_LEFT = 0x10000000;	// modifier: left
 	public static final int BASS_SPEAKER_RIGHT = 0x20000000;	// modifier: right
-	public static final int BASS_SPEAKER_FRONTLEFT = BASS_SPEAKER_FRONT|BASS_SPEAKER_LEFT;
-	public static final int BASS_SPEAKER_FRONTRIGHT = BASS_SPEAKER_FRONT|BASS_SPEAKER_RIGHT;
-	public static final int BASS_SPEAKER_REARLEFT = BASS_SPEAKER_REAR|BASS_SPEAKER_LEFT;
-	public static final int BASS_SPEAKER_REARRIGHT = BASS_SPEAKER_REAR|BASS_SPEAKER_RIGHT;
-	public static final int BASS_SPEAKER_CENTER = BASS_SPEAKER_CENLFE|BASS_SPEAKER_LEFT;
-	public static final int BASS_SPEAKER_LFE = BASS_SPEAKER_CENLFE|BASS_SPEAKER_RIGHT;
-	public static final int BASS_SPEAKER_REAR2LEFT = BASS_SPEAKER_REAR2|BASS_SPEAKER_LEFT;
-	public static final int BASS_SPEAKER_REAR2RIGHT = BASS_SPEAKER_REAR2|BASS_SPEAKER_RIGHT;
+	public static final int BASS_SPEAKER_FRONTLEFT = BASS_SPEAKER_FRONT | BASS_SPEAKER_LEFT;
+	public static final int BASS_SPEAKER_FRONTRIGHT = BASS_SPEAKER_FRONT | BASS_SPEAKER_RIGHT;
+	public static final int BASS_SPEAKER_REARLEFT = BASS_SPEAKER_REAR | BASS_SPEAKER_LEFT;
+	public static final int BASS_SPEAKER_REARRIGHT = BASS_SPEAKER_REAR | BASS_SPEAKER_RIGHT;
+	public static final int BASS_SPEAKER_CENTER = BASS_SPEAKER_CENLFE | BASS_SPEAKER_LEFT;
+	public static final int BASS_SPEAKER_LFE = BASS_SPEAKER_CENLFE | BASS_SPEAKER_RIGHT;
+	public static final int BASS_SPEAKER_SIDELEFT = BASS_SPEAKER_SIDE | BASS_SPEAKER_LEFT;
+	public static final int BASS_SPEAKER_SIDERIGHT = BASS_SPEAKER_SIDE | BASS_SPEAKER_RIGHT;
+	public static final int BASS_SPEAKER_REAR2 = BASS_SPEAKER_SIDE;
+	public static final int BASS_SPEAKER_REAR2LEFT = BASS_SPEAKER_SIDELEFT;
+	public static final int BASS_SPEAKER_REAR2RIGHT = BASS_SPEAKER_SIDERIGHT;
 
 	public static final int BASS_ASYNCFILE = 0x40000000;	// read file asynchronously
 
@@ -356,7 +364,7 @@ public class BASS
 	{
 		// User file stream callback functions
 		void FILECLOSEPROC(Object user);
-		long FILELENPROC(Object user);
+		long FILELENPROC(Object user) throws IOException;
 		int FILEREADPROC(ByteBuffer buffer, int length, Object user);
 		boolean FILESEEKPROC(long offset, Object user);
 	}
@@ -463,6 +471,9 @@ public class BASS
 	public static final int BASS_ATTRIB_USER = 15;
 	public static final int BASS_ATTRIB_TAIL = 16;
 	public static final int BASS_ATTRIB_PUSH_LIMIT = 17;
+	public static final int BASS_ATTRIB_DOWNLOADPROC = 18;
+	public static final int BASS_ATTRIB_VOLDSP = 19;
+	public static final int BASS_ATTRIB_VOLDSP_PRIORITY = 20;
 	public static final int BASS_ATTRIB_MUSIC_AMPLIFY = 0x100;
 	public static final int BASS_ATTRIB_MUSIC_PANSEP = 0x101;
 	public static final int BASS_ATTRIB_MUSIC_PSCALER = 0x102;
@@ -478,7 +489,7 @@ public class BASS
 	// BASS_ChannelGetData flags
 	public static final int BASS_DATA_AVAILABLE = 0;			// query how much data is buffered
 	public static final int BASS_DATA_NOREMOVE = 0x10000000;	// flag: don't remove data from recording buffer
-	public static final int BASS_DATA_FIXED = 0x20000000;	// flag: return 8.24 fixed-point data
+	public static final int BASS_DATA_FIXED = 0x20000000;	// unused
 	public static final int BASS_DATA_FLOAT = 0x40000000;	// flag: return floating-point sample data
 	public static final int BASS_DATA_FFT256 = 0x80000000;	// 256 sample FFT
 	public static final int BASS_DATA_FFT512 = 0x80000001;	// 512 FFT
@@ -740,6 +751,7 @@ public class BASS
 	public static native boolean BASS_ChannelLock(int handle, boolean lock);
 	public static native boolean BASS_ChannelFree(int handle);
 	public static native boolean BASS_ChannelPlay(int handle, boolean restart);
+	public static native boolean BASS_ChannelStart(int handle);
 	public static native boolean BASS_ChannelStop(int handle);
 	public static native boolean BASS_ChannelPause(int handle);
 	public static native boolean BASS_ChannelUpdate(int handle, int length);
@@ -748,6 +760,7 @@ public class BASS
 	public static native boolean BASS_ChannelSlideAttribute(int handle, int attrib, float value, int time);
 	public static native boolean BASS_ChannelIsSliding(int handle, int attrib);
 	public static native boolean BASS_ChannelSetAttributeEx(int handle, int attrib, ByteBuffer value, int size);
+	public static native boolean BASS_ChannelSetAttributeDOWNLOADPROC(int handle, DOWNLOADPROC proc, Object user);
 	public static native int BASS_ChannelGetAttributeEx(int handle, int attrib, ByteBuffer value, int size);
 	public static native boolean BASS_ChannelSet3DAttributes(int handle, int mode, float min, float max, int iangle, int oangle, float outvol);
 	public static native boolean BASS_ChannelGet3DAttributes(int handle, Integer mode, FloatValue min, FloatValue max, Integer iangle, Integer oangle, FloatValue outvol);
