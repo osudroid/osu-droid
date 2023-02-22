@@ -13,6 +13,7 @@ import java.io.File;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
+import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 
 
@@ -230,20 +231,21 @@ public class SongService extends Service {
     }
 
     private void reloadCurrentAudio() {
-        // Do not attempt to reload if there is no audio playing.
-        if (getStatus() == Status.STOPPED) {
-            return;
-        }
+        Status pastStatus = getStatus();
 
         pause();
+        setVolume(Config.getBgmVolume());
 
         // Reload audio, otherwise it will be choppy or offset for whatever reason.
-        int position = getPosition();
-        preLoad(GlobalManager.getInstance().getMainScene().getBeatmapInfo().getMusic());
-        setVolume(Config.getBgmVolume());
-        seekTo(position);
+        if (LibraryManager.getInstance().getBeatmap() != null) {
+            int position = getPosition();
+            preLoad(LibraryManager.getInstance().getBeatmap().getMusic());
+            seekTo(position);
+        }
 
-        audioFunc.resume();
+        if (audioFunc != null && pastStatus != Status.STOPPED && pastStatus != Status.PAUSED) {
+            audioFunc.resume();
+        }
     }
 
     public class ReturnBindObject extends Binder {
