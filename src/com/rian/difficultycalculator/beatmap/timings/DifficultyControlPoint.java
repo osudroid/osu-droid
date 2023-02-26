@@ -28,12 +28,10 @@ public class DifficultyControlPoint extends ControlPoint {
         this.generateTicks = generateTicks;
     }
 
-    /**
-     * Determines whether this control point results in a meaningful change when placed alongside another.
-     *
-     * @param existing An existing control point to compare with.
-     */
-    public boolean isRedundant(DifficultyControlPoint existing) {
-        return speedMultiplier == existing.speedMultiplier && generateTicks == existing.generateTicks;
+    @Override
+    public boolean isRedundant(ControlPoint existing) {
+        return existing instanceof DifficultyControlPoint &&
+                speedMultiplier == ((DifficultyControlPoint) existing).speedMultiplier &&
+                generateTicks == ((DifficultyControlPoint) existing).generateTicks;
     }
 }

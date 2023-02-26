@@ -220,10 +220,11 @@ public class SliderPath {
 
         while (l <= r) {
             int pivot = l + ((r - l) >> 1);
+            double length = cumulativeLength.get(pivot);
 
-            if (cumulativeLength.get(pivot) < d) {
+            if (length < d) {
                 l = pivot + 1;
-            } else if (cumulativeLength.get(pivot) > d) {
+            } else if (length > d) {
                 r = pivot - 1;
             } else {
                 return pivot;

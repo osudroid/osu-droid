@@ -15,4 +15,11 @@ public abstract class ControlPoint {
     public ControlPoint(int time) {
         this.time = time;
     }
+
+    /**
+     * Determines whether this control point results in a meaningful change when placed alongside another.
+     *
+     * @param existing An existing control point to compare with.
+     */
+    public abstract boolean isRedundant(ControlPoint existing);
 }

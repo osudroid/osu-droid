@@ -10,6 +10,7 @@ import com.rian.difficultycalculator.beatmap.timings.TimingControlPoint;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Represents a slider.
@@ -179,8 +180,8 @@ public class Slider extends HitObjectWithDuration {
     /**
      * Gets the nested hit objects of this slider.
      */
-    public ArrayList<SliderHitObject> getNestedHitObjects() {
-        return nestedHitObjects;
+    public List<SliderHitObject> getNestedHitObjects() {
+        return Collections.unmodifiableList(nestedHitObjects);
     }
 
     /**

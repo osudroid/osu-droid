@@ -25,4 +25,10 @@ public class TimingControlPoint extends ControlPoint {
     public double getBPM() {
         return 60000 / msPerBeat;
     }
+
+    @Override
+    public boolean isRedundant(ControlPoint existing) {
+        // Timing points are never redundant as they can change the time signature.
+        return false;
+    }
 }
