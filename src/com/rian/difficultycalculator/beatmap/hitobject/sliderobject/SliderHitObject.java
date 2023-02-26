@@ -1,9 +1,9 @@
-package com.rian.difficultycalculator.hitobject.sliderobject;
+package com.rian.difficultycalculator.beatmap.hitobject.sliderobject;
 
-import com.rian.difficultycalculator.hitobject.HitObject;
+import com.rian.difficultycalculator.beatmap.hitobject.HitObject;
 import com.rian.difficultycalculator.math.Vector2;
-import com.rian.difficultycalculator.timings.DifficultyControlPoint;
-import com.rian.difficultycalculator.timings.TimingControlPoint;
+import com.rian.difficultycalculator.beatmap.timings.DifficultyControlPoint;
+import com.rian.difficultycalculator.beatmap.timings.TimingControlPoint;
 
 /**
  * Represents a hit object that can be nested into a slider.

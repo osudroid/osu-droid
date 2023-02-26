@@ -1,6 +1,6 @@
-package com.rian.difficultycalculator.hitobject;
+package com.rian.difficultycalculator.beatmap.hitobject;
 
-import com.rian.difficultycalculator.math.PathApproximator;
+import com.rian.difficultycalculator.utils.PathApproximator;
 import com.rian.difficultycalculator.math.Precision;
 import com.rian.difficultycalculator.math.Vector2;
 

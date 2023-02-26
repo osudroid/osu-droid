@@ -1,4 +1,4 @@
-package com.rian.difficultycalculator.timings;
+package com.rian.difficultycalculator.beatmap.timings;
 
 /**
  * Represents a control point that changes speed multiplier.

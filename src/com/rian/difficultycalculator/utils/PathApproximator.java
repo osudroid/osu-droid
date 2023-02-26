@@ -1,4 +1,7 @@
-package com.rian.difficultycalculator.math;
+package com.rian.difficultycalculator.utils;
+
+import com.rian.difficultycalculator.math.Precision;
+import com.rian.difficultycalculator.math.Vector2;
 
 import java.util.ArrayList;
 import java.util.Stack;

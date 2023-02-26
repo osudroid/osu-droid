@@ -1,11 +1,11 @@
-package com.rian.difficultycalculator.hitobject;
+package com.rian.difficultycalculator.beatmap.hitobject;
 
-import com.rian.difficultycalculator.hitobject.sliderobject.SliderHead;
-import com.rian.difficultycalculator.hitobject.sliderobject.SliderTail;
-import com.rian.difficultycalculator.hitobject.sliderobject.SliderTick;
+import com.rian.difficultycalculator.beatmap.hitobject.sliderobject.SliderHead;
+import com.rian.difficultycalculator.beatmap.hitobject.sliderobject.SliderTail;
+import com.rian.difficultycalculator.beatmap.hitobject.sliderobject.SliderTick;
 import com.rian.difficultycalculator.math.Vector2;
-import com.rian.difficultycalculator.timings.DifficultyControlPoint;
-import com.rian.difficultycalculator.timings.TimingControlPoint;
+import com.rian.difficultycalculator.beatmap.timings.DifficultyControlPoint;
+import com.rian.difficultycalculator.beatmap.timings.TimingControlPoint;
 
 import java.util.ArrayList;
 import java.util.Collections;
