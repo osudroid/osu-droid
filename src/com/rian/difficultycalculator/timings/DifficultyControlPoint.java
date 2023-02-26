@@ -11,7 +11,7 @@ public class DifficultyControlPoint extends ControlPoint {
 
     /**
      * Whether or not slider ticks should be generated at this control point.
-     *
+     * <br>
      * This exists for backwards compatibility with maps that abuse NaN slider velocity behavior on osu!stable (e.g. /b/2628991).
      */
     public final boolean generateTicks;

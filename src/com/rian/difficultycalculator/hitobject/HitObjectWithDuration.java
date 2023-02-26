@@ -11,7 +11,7 @@ public abstract class HitObjectWithDuration extends HitObject {
     /**
      * The time at which this hit object ends, in milliseconds.
      */
-    public final int endTime;
+    protected final int endTime;
 
     /**
      * @param startTime              The time at which this hit object starts, in milliseconds.
@@ -38,6 +38,13 @@ public abstract class HitObjectWithDuration extends HitObject {
     public HitObjectWithDuration(int startTime, int endTime, int x, int y,
                                  TimingControlPoint timingControlPoint, DifficultyControlPoint difficultyControlPoint) {
         this(startTime, endTime, new Vector2(x, y), timingControlPoint, difficultyControlPoint);
+    }
+
+    /**
+     * Gets the end time of this hit object.
+     */
+    public int getEndTime() {
+        return endTime;
     }
 
     /**

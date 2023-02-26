@@ -11,7 +11,7 @@ public class Slider extends HitObjectWithDuration {
     /**
      * The repetition amount of this slider. Note that 1 repetition means no repeats (1 loop).
      */
-    public final int repeatCount;
+    private final int repeatCount;
 
     /**
      * @param startTime              The time at which this slider starts, in milliseconds.
@@ -41,5 +41,14 @@ public class Slider extends HitObjectWithDuration {
         super(startTime, startTime, position, timingControlPoint, difficultyControlPoint);
 
         this.repeatCount = repeatCount;
+    }
+
+    /**
+     * Gets the repetition amount of this slider.
+     * <br>
+     * Note that 1 repetition means no repeats (1 loop).
+     */
+    public int getRepeatCount() {
+        return repeatCount;
     }
 }

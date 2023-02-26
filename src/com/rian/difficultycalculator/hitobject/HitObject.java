@@ -16,32 +16,32 @@ public abstract class HitObject {
     /**
      * The time at which this hit object starts, in milliseconds.
      */
-    public final int startTime;
+    protected final int startTime;
 
     /**
      * The position of this hit object.
      */
-    public final Vector2 position;
+    protected final Vector2 position;
 
     /**
      * The stack height of this hit object.
      */
-    public int stackHeight;
+    protected int stackHeight;
 
     /**
      * The scale of this hit object with respect to osu!standard scale metric.
      */
-    public float scale;
+    protected float scale;
 
     /**
      * The timing control point this hit object is under effect on.
      */
-    public final TimingControlPoint timingControlPoint;
+    protected final TimingControlPoint timingControlPoint;
 
     /**
      * The difficulty control point this hit object is under effect on.
      */
-    public final DifficultyControlPoint difficultyControlPoint;
+    protected final DifficultyControlPoint difficultyControlPoint;
 
     /**
      * @param startTime              The time at which this hit object starts, in milliseconds.
@@ -67,6 +67,66 @@ public abstract class HitObject {
     public HitObject(int startTime, int x, int y,
                      TimingControlPoint timingControlPoint, DifficultyControlPoint difficultyControlPoint) {
         this(startTime, new Vector2(x, y), timingControlPoint, difficultyControlPoint);
+    }
+
+    /**
+     * Gets the scale of this hit object.
+     */
+    public float getScale() {
+        return scale;
+    }
+
+    /**
+     * Sets the scale of this hit object.
+     *
+     * @param scale The new scale.
+     */
+    public void setScale(float scale) {
+        this.scale = scale;
+    }
+
+    /**
+     * Gets the time at which this hit object starts, in milliseconds.
+     */
+    public int getStartTime() {
+        return startTime;
+    }
+
+    /**
+     * Gets the stack height of this hit object.
+     */
+    public int getStackHeight() {
+        return stackHeight;
+    }
+
+    /**
+     * Sets the stack height of this hit object.
+     *
+     * @param stackHeight The new stack height.
+     */
+    public void setStackHeight(int stackHeight) {
+        this.stackHeight = stackHeight;
+    }
+
+    /**
+     * Gets the timing control point this hit object is under effect on.
+     */
+    public TimingControlPoint getTimingControlPoint() {
+        return timingControlPoint;
+    }
+
+    /**
+     * Gets the difficulty control point this hit object is under effect on.
+     */
+    public DifficultyControlPoint getDifficultyControlPoint() {
+        return difficultyControlPoint;
+    }
+
+    /**
+     * Gets the position of this hit object.
+     */
+    public Vector2 getPosition() {
+        return position;
     }
 
     /**
