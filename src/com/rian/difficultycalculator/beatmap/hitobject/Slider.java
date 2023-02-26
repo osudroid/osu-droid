@@ -1,6 +1,7 @@
 package com.rian.difficultycalculator.beatmap.hitobject;
 
 import com.rian.difficultycalculator.beatmap.hitobject.sliderobject.SliderHead;
+import com.rian.difficultycalculator.beatmap.hitobject.sliderobject.SliderHitObject;
 import com.rian.difficultycalculator.beatmap.hitobject.sliderobject.SliderTail;
 import com.rian.difficultycalculator.beatmap.hitobject.sliderobject.SliderTick;
 import com.rian.difficultycalculator.math.Vector2;
@@ -34,7 +35,7 @@ public class Slider extends HitObjectWithDuration {
      * <br><br>
      * Consists of head circle (slider head), slider ticks, repeat points, and tail circle (slider end).
      */
-    private final ArrayList<HitObject> nestedHitObjects = new ArrayList<>();
+    private final ArrayList<SliderHitObject> nestedHitObjects = new ArrayList<>();
 
     /**
      * The velocity of this slider.
@@ -166,10 +167,19 @@ public class Slider extends HitObjectWithDuration {
         return path;
     }
 
+    @Override
+    public void setScale(float scale) {
+        super.setScale(scale);
+
+        for (SliderHitObject object : nestedHitObjects) {
+            object.setScale(scale);
+        }
+    }
+
     /**
      * Gets the nested hit objects of this slider.
      */
-    public ArrayList<HitObject> getNestedHitObjects() {
+    public ArrayList<SliderHitObject> getNestedHitObjects() {
         return nestedHitObjects;
     }
 
