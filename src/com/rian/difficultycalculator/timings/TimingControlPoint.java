@@ -18,4 +18,11 @@ public class TimingControlPoint extends ControlPoint {
 
         this.msPerBeat = msPerBeat;
     }
+
+    /**
+     * Gets the BPM of this control point.
+     */
+    public double getBPM() {
+        return 60000 / msPerBeat;
+    }
 }

@@ -11,7 +11,7 @@ public abstract class HitObjectWithDuration extends HitObject {
     /**
      * The time at which this hit object ends, in milliseconds.
      */
-    protected final int endTime;
+    protected double endTime;
 
     /**
      * @param startTime              The time at which this hit object starts, in milliseconds.
@@ -20,7 +20,7 @@ public abstract class HitObjectWithDuration extends HitObject {
      * @param timingControlPoint     The timing control point this hit object is under effect on.
      * @param difficultyControlPoint The difficulty control point this hit object is under effect on.
      */
-    public HitObjectWithDuration(int startTime, int endTime, Vector2 position,
+    public HitObjectWithDuration(double startTime, double endTime, Vector2 position,
                                  TimingControlPoint timingControlPoint, DifficultyControlPoint difficultyControlPoint) {
         super(startTime, position, timingControlPoint, difficultyControlPoint);
 
@@ -35,7 +35,7 @@ public abstract class HitObjectWithDuration extends HitObject {
      * @param timingControlPoint     The timing control point this hit object is under effect on.
      * @param difficultyControlPoint The difficulty control point this hit object is under effect on.
      */
-    public HitObjectWithDuration(int startTime, int endTime, int x, int y,
+    public HitObjectWithDuration(double startTime, int endTime, double x, double y,
                                  TimingControlPoint timingControlPoint, DifficultyControlPoint difficultyControlPoint) {
         this(startTime, endTime, new Vector2(x, y), timingControlPoint, difficultyControlPoint);
     }
@@ -43,14 +43,14 @@ public abstract class HitObjectWithDuration extends HitObject {
     /**
      * Gets the end time of this hit object.
      */
-    public int getEndTime() {
+    public double getEndTime() {
         return endTime;
     }
 
     /**
      * Gets the duration of this hit object.
      */
-    public int getDuration() {
+    public double getDuration() {
         return endTime - startTime;
     }
 }

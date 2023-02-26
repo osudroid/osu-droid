@@ -16,7 +16,7 @@ public abstract class HitObject {
     /**
      * The time at which this hit object starts, in milliseconds.
      */
-    protected final int startTime;
+    protected final double startTime;
 
     /**
      * The position of this hit object.
@@ -49,7 +49,7 @@ public abstract class HitObject {
      * @param timingControlPoint     The timing control point this hit object is under effect on.
      * @param difficultyControlPoint The difficulty control point this hit object is under effect on.
      */
-    public HitObject(int startTime, Vector2 position,
+    public HitObject(double startTime, Vector2 position,
                      TimingControlPoint timingControlPoint, DifficultyControlPoint difficultyControlPoint) {
         this.startTime = startTime;
         this.position = position;
@@ -64,7 +64,7 @@ public abstract class HitObject {
      * @param timingControlPoint     The timing control point this hit object is under effect on.
      * @param difficultyControlPoint The difficulty control point this hit object is under effect on.
      */
-    public HitObject(int startTime, int x, int y,
+    public HitObject(double startTime, double x, double y,
                      TimingControlPoint timingControlPoint, DifficultyControlPoint difficultyControlPoint) {
         this(startTime, new Vector2(x, y), timingControlPoint, difficultyControlPoint);
     }
@@ -88,7 +88,7 @@ public abstract class HitObject {
     /**
      * Gets the time at which this hit object starts, in milliseconds.
      */
-    public int getStartTime() {
+    public double getStartTime() {
         return startTime;
     }
 

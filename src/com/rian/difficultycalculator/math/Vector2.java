@@ -5,9 +5,20 @@ import android.graphics.PointF;
 /**
  * Represents a two-dimensional vector.
  */
-public class Vector2 extends PointF {
-    public Vector2(float x, float y) {
-        super(x, y);
+public class Vector2 {
+    /**
+     * The X position of the vector.
+     */
+    public double x;
+
+    /**
+     * The Y position of the vector.
+     */
+    public double y;
+
+    public Vector2(double x, double y) {
+        this.x = x;
+        this.y = y;
     }
 
     /**
@@ -79,7 +90,7 @@ public class Vector2 extends PointF {
      * @param scaleFactor The factor to scale the vector by.
      * @return The scaled vector.
      */
-    public Vector2 scale(float scaleFactor) {
+    public Vector2 scale(double scaleFactor) {
         return new Vector2(x * scaleFactor, y * scaleFactor);
     }
 
@@ -101,5 +112,15 @@ public class Vector2 extends PointF {
 
         x /= length;
         y /= length;
+    }
+
+    /**
+     * Checks whether this vector is equal to another vector.
+     *
+     * @param other The other vector.
+     * @return Whether this vector is equal to the other vector.
+     */
+    public boolean equals(Vector2 other) {
+        return x == other.x && y == other.y;
     }
 }

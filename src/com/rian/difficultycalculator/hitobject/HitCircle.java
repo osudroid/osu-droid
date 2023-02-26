@@ -14,7 +14,7 @@ public class HitCircle extends HitObject {
      * @param timingControlPoint     The timing control point this hit circle is under effect on.
      * @param difficultyControlPoint The difficulty control point this hit circle is under effect on.
      */
-    public HitCircle(int startTime, Vector2 position,
+    public HitCircle(double startTime, Vector2 position,
                      TimingControlPoint timingControlPoint, DifficultyControlPoint difficultyControlPoint) {
         super(startTime, position, timingControlPoint, difficultyControlPoint);
     }
@@ -26,7 +26,7 @@ public class HitCircle extends HitObject {
      * @param timingControlPoint     The timing control point this hit circle is under effect on.
      * @param difficultyControlPoint The difficulty control point this hit circle is under effect on.
      */
-    public HitCircle(int startTime, int x, int y,
+    public HitCircle(double startTime, double x, double y,
                      TimingControlPoint timingControlPoint, DifficultyControlPoint difficultyControlPoint) {
         super(startTime, new Vector2(x, y), timingControlPoint, difficultyControlPoint);
     }
