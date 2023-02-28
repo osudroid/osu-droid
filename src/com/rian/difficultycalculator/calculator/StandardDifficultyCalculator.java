@@ -16,7 +16,7 @@ import java.util.EnumSet;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
 /**
- * A difficulty calculator for rimu!.
+ * A difficulty calculator for osu!standard.
  */
 public class StandardDifficultyCalculator extends DifficultyCalculator {
     private static final double difficultyMultiplier = 0.0675;
