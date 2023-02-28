@@ -34,7 +34,7 @@ public final class RimuHitWindowConverter {
     }
 
     /**
-     * Calculates the overall difficulty value of a good hit window without the Precise mod.
+     * Calculates the overall difficulty value of an ok hit window without the Precise mod.
      *
      * @param value The value of the hit window, in milliseconds.
      * @return The overall difficulty value.
@@ -44,7 +44,7 @@ public final class RimuHitWindowConverter {
     }
 
     /**
-     * Calculates the overall difficulty value of a good hit window.
+     * Calculates the overall difficulty value of an ok hit window.
      *
      * @param value The value of the hit window, in milliseconds.
      * @param isPrecise Whether to calculate for Precise mod.
@@ -110,7 +110,7 @@ public final class RimuHitWindowConverter {
     }
 
     /**
-     * Calculates the hit window for 100 (good) hit result of an overall difficulty value
+     * Calculates the hit window for 100 (ok) hit result of an overall difficulty value
      * without the Precise mod.
      *
      * @param od The overall difficulty value.
@@ -121,7 +121,7 @@ public final class RimuHitWindowConverter {
     }
 
     /**
-     * Calculates the hit window for 100 (good) hit result of an overall difficulty value.
+     * Calculates the hit window for 100 (ok) hit result of an overall difficulty value.
      *
      * @param od The overall difficulty value.
      * @param isPrecise Whether to calculate for Precise mod.

@@ -66,15 +66,15 @@ public abstract class DifficultyAttributes {
     /**
      * The number of hit circles in the beatmap.
      */
-    public double hitCircleCount;
+    public int hitCircleCount;
 
     /**
      * The number of sliders in the beatmap.
      */
-    public double sliderCount;
+    public int sliderCount;
 
     /**
      * The number of spinners in the beatmap.
      */
-    public double spinnerCount;
+    public int spinnerCount;
 }

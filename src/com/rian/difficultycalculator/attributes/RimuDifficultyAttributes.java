@@ -18,4 +18,9 @@ public class RimuDifficultyAttributes extends DifficultyAttributes {
      * The difficulty corresponding to the visual skill.
      */
     public double visualDifficulty;
+
+    /**
+     * The clock rate that was considered.
+     */
+    public double clockRate;
 }

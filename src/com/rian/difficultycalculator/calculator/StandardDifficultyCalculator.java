@@ -1,6 +1,7 @@
 package com.rian.difficultycalculator.calculator;
 
 import com.rian.difficultycalculator.attributes.StandardDifficultyAttributes;
+import com.rian.difficultycalculator.attributes.StandardPerformanceAttributes;
 import com.rian.difficultycalculator.beatmap.BeatmapDifficultyManager;
 import com.rian.difficultycalculator.beatmap.DifficultyBeatmap;
 import com.rian.difficultycalculator.skills.Skill;
@@ -63,7 +64,7 @@ public class StandardDifficultyCalculator extends DifficultyCalculator {
         // Document for formula derivation:
         // https://docs.google.com/document/d/10DZGYYSsT_yjz2Mtp6yIJld0Rqx4E-vVHupCqiM4TNI/edit
         attributes.starRating = basePerformance > 1e-5
-                ? 1.14 * 0.027 * (Math.cbrt(100000 / Math.pow(2, 1 / 1.1) * basePerformance) + 4)
+                ? StandardPerformanceCalculator.finalMultiplier * 0.027 * (Math.cbrt(100000 / Math.pow(2, 1 / 1.1) * basePerformance) + 4)
                 : 0;
 
         double ar = beatmap.getDifficultyManager().getAR();

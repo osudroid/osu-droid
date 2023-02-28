@@ -20,7 +20,7 @@ public final class StandardHitWindowConverter {
 
 
     /**
-     * Calculates the overall difficulty value of a good hit window.
+     * Calculates the overall difficulty value of an ok hit window.
      *
      * @param value The value of the hit window, in milliseconds.
      * @return The overall difficulty value.
@@ -50,7 +50,7 @@ public final class StandardHitWindowConverter {
     }
 
     /**
-     * Calculates the hit window for 100 (good) hit result of an overall difficulty value.
+     * Calculates the hit window for 100 (ok) hit result of an overall difficulty value.
      *
      * @param od The overall difficulty value.
      * @return The hit window in milliseconds.

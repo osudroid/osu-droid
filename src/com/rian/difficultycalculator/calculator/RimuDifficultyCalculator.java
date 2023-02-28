@@ -96,6 +96,7 @@ public class RimuDifficultyCalculator extends DifficultyCalculator {
         attributes.hitCircleCount = beatmap.getHitObjectsManager().getCircleCount();
         attributes.sliderCount = beatmap.getHitObjectsManager().getSliderCount();
         attributes.spinnerCount = beatmap.getHitObjectsManager().getSpinnerCount();
+        attributes.clockRate = parameters.getTotalSpeedMultiplier();
 
         return attributes;
     }
