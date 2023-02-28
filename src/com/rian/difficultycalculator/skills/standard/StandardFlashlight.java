@@ -12,7 +12,6 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
  */
 public class StandardFlashlight extends StandardSkill {
     private double currentStrain;
-
     private final boolean hasHidden;
 
     /**

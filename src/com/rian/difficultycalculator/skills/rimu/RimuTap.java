@@ -18,8 +18,8 @@ public class RimuTap extends RimuSkill {
     private final ArrayList<Double> objectStrains = new ArrayList<>();
     private final double greatWindow;
 
-    /**
-     * @param mods The mods that this skill processes.
+    /**s
+     * @param mods The mods that this kill processes.
      * @param greatWindow The 300 hit window.
      */
     public RimuTap(EnumSet<GameMod> mods, double greatWindow) {

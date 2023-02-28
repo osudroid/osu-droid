@@ -12,7 +12,6 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
  */
 public class RimuFlashlight extends RimuSkill {
     private double currentStrain;
-
     private final boolean hasHidden;
     private final boolean withSliders;
 
