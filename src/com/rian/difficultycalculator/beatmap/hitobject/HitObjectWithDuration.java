@@ -14,30 +14,24 @@ public abstract class HitObjectWithDuration extends HitObject {
     protected double endTime;
 
     /**
-     * @param startTime              The time at which this hit object starts, in milliseconds.
-     * @param endTime                The time at which this hit object ends, in milliseconds.
-     * @param position               The position of the hit object relative to the play field.
-     * @param timingControlPoint     The timing control point this hit object is under effect on.
-     * @param difficultyControlPoint The difficulty control point this hit object is under effect on.
+     * @param startTime The time at which this hit object starts, in milliseconds.
+     * @param endTime   The time at which this hit object ends, in milliseconds.
+     * @param position  The position of the hit object relative to the play field.
      */
-    public HitObjectWithDuration(double startTime, double endTime, Vector2 position,
-                                 TimingControlPoint timingControlPoint, DifficultyControlPoint difficultyControlPoint) {
-        super(startTime, position, timingControlPoint, difficultyControlPoint);
+    public HitObjectWithDuration(double startTime, double endTime, Vector2 position) {
+        super(startTime, position);
 
         this.endTime = endTime;
     }
 
     /**
-     * @param startTime              The time at which this hit object starts, in milliseconds.
-     * @param endTime                The time at which this hit object ends, in milliseconds.
-     * @param x                      The X position of the hit object relative to the play field.
-     * @param y                      The Y position of the hit object relative to the play field.
-     * @param timingControlPoint     The timing control point this hit object is under effect on.
-     * @param difficultyControlPoint The difficulty control point this hit object is under effect on.
+     * @param startTime The time at which this hit object starts, in milliseconds.
+     * @param endTime   The time at which this hit object ends, in milliseconds.
+     * @param x         The X position of the hit object relative to the play field.
+     * @param y         The Y position of the hit object relative to the play field.
      */
-    public HitObjectWithDuration(double startTime, int endTime, double x, double y,
-                                 TimingControlPoint timingControlPoint, DifficultyControlPoint difficultyControlPoint) {
-        this(startTime, endTime, new Vector2(x, y), timingControlPoint, difficultyControlPoint);
+    public HitObjectWithDuration(double startTime, double endTime, double x, double y) {
+        this(startTime, endTime, new Vector2(x, y));
     }
 
     /**

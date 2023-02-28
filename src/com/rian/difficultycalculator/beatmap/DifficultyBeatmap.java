@@ -13,14 +13,41 @@ public class DifficultyBeatmap {
     private int formatVersion = 14;
 
     /**
-     * The hit objects of this beatmap.
+     * The manager for difficulty settings of this beatmap.
      */
-    public final BeatmapHitObjects hitObjects = new BeatmapHitObjects();
+    private BeatmapDifficultyManager difficultyManager = new BeatmapDifficultyManager();
 
     /**
-     * The control points of this beatmap.
+     * The manager for hit objects of this beatmap.
      */
-    public final BeatmapControlPoints controlPoints = new BeatmapControlPoints();
+    private BeatmapHitObjectsManager hitObjectsManager = new BeatmapHitObjectsManager();
+
+    public DifficultyBeatmap() {}
+
+    /**
+     * Copy constructor.
+     *
+     * @param source The source to copy from.
+     */
+    private DifficultyBeatmap(DifficultyBeatmap source) {
+        formatVersion = source.formatVersion;
+        difficultyManager = source.difficultyManager.deepClone();
+        hitObjectsManager = source.hitObjectsManager.deepClone();
+    }
+
+    /**
+     * Gets the difficulty manager of this beatmap.
+     */
+    public BeatmapDifficultyManager getDifficultyManager() {
+        return difficultyManager;
+    }
+
+    /**
+     * Gets the hit object manager of this beatmap.
+     */
+    public BeatmapHitObjectsManager getHitObjectsManager() {
+        return hitObjectsManager;
+    }
 
     /**
      * Gets the format version of this beatmap.
@@ -55,7 +82,7 @@ public class DifficultyBeatmap {
     public int getMaxCombo() {
         int combo = 0;
 
-        for (HitObject object : hitObjects.getObjects()) {
+        for (HitObject object : hitObjectsManager.getObjects()) {
             ++combo;
 
             if (object instanceof Slider) {
@@ -64,5 +91,14 @@ public class DifficultyBeatmap {
         }
 
         return combo;
+    }
+
+    /**
+     * Deep clones this beatmap.
+     *
+     * @return The deep cloned instance of this beatmap.
+     */
+    public DifficultyBeatmap deepClone() {
+        return new DifficultyBeatmap(this);
     }
 }

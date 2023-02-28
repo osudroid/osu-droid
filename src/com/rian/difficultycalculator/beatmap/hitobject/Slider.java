@@ -2,46 +2,81 @@ package com.rian.difficultycalculator.beatmap.hitobject;
 
 import com.rian.difficultycalculator.beatmap.hitobject.sliderobject.SliderHead;
 import com.rian.difficultycalculator.beatmap.hitobject.sliderobject.SliderHitObject;
+import com.rian.difficultycalculator.beatmap.hitobject.sliderobject.SliderRepeat;
 import com.rian.difficultycalculator.beatmap.hitobject.sliderobject.SliderTail;
 import com.rian.difficultycalculator.beatmap.hitobject.sliderobject.SliderTick;
+import com.rian.difficultycalculator.math.MathUtils;
 import com.rian.difficultycalculator.math.Vector2;
 import com.rian.difficultycalculator.beatmap.timings.DifficultyControlPoint;
 import com.rian.difficultycalculator.beatmap.timings.TimingControlPoint;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * Represents a slider.
  */
 public class Slider extends HitObjectWithDuration {
-    /**
-     * The repetition amount of this slider. Note that 1 repetition means no repeats (1 loop).
-     */
-    private final int repeatCount;
+    public static final int legacyLastTickOffset = 36;
 
     /**
-     * The end position of this slider.
+     * The repetition amount of this slider.
+     * <br><br>
+     * Note that 1 repetition means no repeats (1 loop).
      */
-    private final Vector2 endPosition;
+    protected final int repeatCount;
 
     /**
      * The path of this slider.
      */
-    private final SliderPath path;
+    protected final SliderPath path;
 
     /**
      * The nested hit objects of the slider.
      * <br><br>
      * Consists of head circle (slider head), slider ticks, repeat points, and tail circle (slider end).
      */
-    private final ArrayList<SliderHitObject> nestedHitObjects = new ArrayList<>();
+    protected final ArrayList<SliderHitObject> nestedHitObjects = new ArrayList<>();
 
     /**
      * The velocity of this slider.
      */
-    private final double velocity;
+    protected final double velocity;
+
+    /**
+     * The head of the slider.
+     */
+    protected final SliderHead head;
+
+    /**
+     * The tail of the slider.
+     */
+    protected final SliderTail tail;
+
+    /**
+     * The position of the cursor at the point of completion of this slider if it was hit
+     * with as few movements as possible. This is set and used by difficulty calculation.
+     */
+    protected Vector2 lazyEndPosition;
+
+    /**
+     * The distance travelled by the cursor upon completion of this slider if it was hit
+     * with as few movements as possible. This is set and used by difficulty calculation.
+     */
+    protected double lazyTravelDistance;
+
+    /**
+     * The time taken by the cursor upon completion of this slider if it was hit with
+     * as few movements as possible. This is set and used by difficulty calculation.
+     */
+    protected double lazyTravelTime;
+
+    /**
+     * The duration of one span of this slider.
+     */
+    protected double spanDuration;
 
     /**
      * @param startTime              The time at which this slider starts, in milliseconds.
@@ -64,8 +99,8 @@ public class Slider extends HitObjectWithDuration {
     /**
      * @param startTime              The time at which this slider starts, in milliseconds.
      * @param position               The position of the slider relative to the play field.
-     * @param timingControlPoint     The timing control point this hit object is under effect on.
-     * @param difficultyControlPoint The difficulty control point this hit object is under effect on.
+     * @param timingControlPoint     The timing control point this slider is under effect on.
+     * @param difficultyControlPoint The difficulty control point this slider is under effect on.
      * @param repeatCount            The repetition amount of this slider. Note that 1 repetition means no repeats (1 loop).
      * @param path                   The path of this slider.
      * @param sliderVelocity         The slider velocity of the beatmap containing this slider.
@@ -77,7 +112,7 @@ public class Slider extends HitObjectWithDuration {
                   int repeatCount, SliderPath path, double sliderVelocity, int tickRate,
                   double tickDistanceMultiplier) {
         // Temporarily set end time to start time. It will be evaluated later.
-        super(startTime, startTime, position, timingControlPoint, difficultyControlPoint);
+        super(startTime, startTime, position);
 
         this.repeatCount = repeatCount;
         this.path = path;
@@ -88,15 +123,16 @@ public class Slider extends HitObjectWithDuration {
         endTime = startTime + repeatCount * path.expectedDistance / velocity;
         endPosition = position.add(path.positionAt(repeatCount % 2));
 
-        double spanDuration = getDuration() / repeatCount;
+        spanDuration = getDuration() / repeatCount;
 
-        nestedHitObjects.add(new SliderHead(startTime, position, timingControlPoint, difficultyControlPoint));
+        head = new SliderHead(startTime, position);
+        nestedHitObjects.add(head);
 
         // A very lenient maximum length of a slider for ticks to be generated.
         // This exists for edge cases such as /b/1573664 where the beatmap has been edited by the user, and should never be reached in normal usage.
         int maxLength = 100000;
         double length = Math.min(maxLength, path.expectedDistance);
-        double tickDistance = Math.min(Math.max(scoringDistance * tickRate / tickDistanceMultiplier, 0), length);
+        double tickDistance = MathUtils.clamp(scoringDistance * tickRate / tickDistanceMultiplier, 0, length);
 
         if (tickDistance != 0) {
             double minDistanceFromEnd = velocity * 10;
@@ -119,16 +155,7 @@ public class Slider extends HitObjectWithDuration {
 
                     Vector2 tickPosition = position.add(path.positionAt(distanceProgress));
 
-                    sliderTicks.add(
-                            new SliderTick(
-                                    spanStartTime + timeProgress * spanDuration,
-                                    tickPosition,
-                                    timingControlPoint,
-                                    difficultyControlPoint,
-                                    span,
-                                    spanStartTime
-                            )
-                    );
+                    sliderTicks.add(new SliderTick(spanStartTime + timeProgress * spanDuration, tickPosition, span, spanStartTime));
                 }
 
                 // For repeat spans, ticks are returned in reverse-StartTime order.
@@ -137,24 +164,70 @@ public class Slider extends HitObjectWithDuration {
                 }
 
                 nestedHitObjects.addAll(sliderTicks);
+
+                if (span < repeatCount - 1) {
+                    Vector2 repeatPosition = position.add(path.positionAt((span + 1) % 2));
+                    nestedHitObjects.add(new SliderRepeat(spanStartTime + spanDuration, repeatPosition, span, spanStartTime));
+                }
             }
         }
 
-        nestedHitObjects.add(
-                new SliderTail(
-                        endTime,
-                        endPosition,
-                        timingControlPoint,
-                        difficultyControlPoint,
-                        repeatCount - 1,
-                        startTime + (repeatCount - 1) * spanDuration
-                )
+        // Okay, I'll level with you. I made a mistake. It was 2007.
+        // Times were simpler. osu! was but in its infancy and sliders were a new concept.
+        // A hack was made, which has unfortunately lived through until this day.
+        //
+        // This legacy tick is used for some calculations and judgements where audio output is not required.
+        // Generally we are keeping this around just for difficulty compatibility.
+        // Optimistically we do not want to ever use this for anything user-facing going forwards.
+        int finalSpanIndex = repeatCount - 1;
+        double finalSpanStartTime = startTime + finalSpanIndex * spanDuration;
+        double finalSpanEndTime = Math.max(
+                startTime + getDuration() / 2,
+                finalSpanStartTime + spanDuration - Slider.legacyLastTickOffset
         );
+
+        tail = new SliderTail(finalSpanEndTime, endPosition, finalSpanIndex, finalSpanStartTime);
+        nestedHitObjects.add(tail);
+        nestedHitObjects.sort(Comparator.comparingDouble(a -> a.startTime));
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param source The source to copy from.
+     */
+    private Slider(Slider source) {
+        super(source.startTime, source.endTime, source.position.x, source.position.y);
+
+        repeatCount = source.repeatCount;
+        endPosition = new Vector2(source.endPosition.x, source.endPosition.y);
+        path = source.path;
+        velocity = source.velocity;
+        head = source.head.deepClone();
+        tail = source.tail.deepClone();
+        lazyEndPosition = source.lazyEndPosition != null ? new Vector2(source.lazyEndPosition.x, source.lazyEndPosition.y) : null;
+        lazyTravelDistance = source.lazyTravelDistance;
+        lazyTravelTime = source.lazyTravelTime;
+        spanDuration = source.spanDuration;
+
+        nestedHitObjects.add(head);
+
+        for (SliderHitObject object : source.nestedHitObjects.subList(1, source.nestedHitObjects.size() - 1)) {
+            nestedHitObjects.add((SliderHitObject) object.deepClone());
+        }
+
+        nestedHitObjects.add(tail);
+        nestedHitObjects.sort(Comparator.comparingDouble(a -> a.startTime));
+    }
+
+    @Override
+    public Slider deepClone() {
+        return new Slider(this);
     }
 
     /**
      * Gets the repetition amount of this slider.
-     * <br>
+     * <br><br>
      * Note that 1 repetition means no repeats (1 loop).
      */
     public int getRepeatCount() {
@@ -169,11 +242,20 @@ public class Slider extends HitObjectWithDuration {
     }
 
     @Override
-    public void setScale(float scale) {
-        super.setScale(scale);
+    public void setRimuScale(float rimuScale) {
+        super.setRimuScale(rimuScale);
 
         for (SliderHitObject object : nestedHitObjects) {
-            object.setScale(scale);
+            object.setRimuScale(rimuScale);
+        }
+    }
+
+    @Override
+    public void setStandardScale(float standardScale) {
+        super.setStandardScale(standardScale);
+
+        for (SliderHitObject object : nestedHitObjects) {
+            object.setStandardScale(standardScale);
         }
     }
 
@@ -185,10 +267,27 @@ public class Slider extends HitObjectWithDuration {
     }
 
     /**
-     * Gets the end position of this slider.
+     * Gets the position of the cursor at the point of completion of this slider if it was hit
+     * with as few movements as possible. This is set and used by difficulty calculation.
      */
-    public Vector2 getEndPosition() {
-        return endPosition;
+    public Vector2 getLazyEndPosition() {
+        return lazyEndPosition;
+    }
+
+    /**
+     * Gets the distance travelled by the cursor upon completion of this slider if it was hit
+     * with as few movements as possible. This is set and used by difficulty calculation.
+     */
+    public double getLazyTravelDistance() {
+        return lazyTravelDistance;
+    }
+
+    /**
+     * Gets the time taken by the cursor upon completion of this slider if it was hit with
+     * as few movements as possible. This is set and used by difficulty calculation.
+     */
+    public double getLazyTravelTime() {
+        return lazyTravelTime;
     }
 
     /**
@@ -199,9 +298,9 @@ public class Slider extends HitObjectWithDuration {
     }
 
     /**
-     * Gets the stacked end position of this slider.
+     * Gets the duration of one span of this slider.
      */
-    public Vector2 getStackedEndPosition() {
-        return evaluateStackedPosition(endPosition);
+    public double getSpanDuration() {
+        return spanDuration;
     }
 }

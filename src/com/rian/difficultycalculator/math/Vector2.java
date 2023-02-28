@@ -1,7 +1,5 @@
 package com.rian.difficultycalculator.math;
 
-import android.graphics.PointF;
-
 /**
  * Represents a two-dimensional vector.
  */
@@ -15,6 +13,10 @@ public class Vector2 {
      * The Y position of the vector.
      */
     public double y;
+
+    public Vector2(double value) {
+        this(value, value);
+    }
 
     public Vector2(double x, double y) {
         this.x = x;
@@ -41,7 +43,7 @@ public class Vector2 {
      */
     public Vector2 divide(float divideFactor) {
         if (divideFactor == 0) {
-            throw new Error("Division by 0");
+            throw new ArithmeticException("Division by 0");
         }
 
         return new Vector2(x / divideFactor, y / divideFactor);

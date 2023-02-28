@@ -18,6 +18,10 @@ public final class PathApproximator {
     private static final float bezierTolerance = 0.25f;
     private static final float circularArcTolerance = 0.1f;
 
+    private PathApproximator() {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Approximates a bezier slider's path.
      * <br><br>
@@ -189,7 +193,7 @@ public final class PathApproximator {
 
         // We select the amount of points for the approximation by requiring the discrete curvature
         // to be smaller than the provided tolerance. The exact angle required to meet the tolerance
-        // is: 2 * Math.Acos(1 - TOLERANCE / r)
+        // is: 2 * Math.acos(1 - TOLERANCE / r)
         // The special case is required for extremely short sliders where the radius is smaller than
         // the tolerance. This is a pathological rather than a realistic case.
         int amountPoints =
@@ -206,8 +210,8 @@ public final class PathApproximator {
         ArrayList<Vector2> output = new ArrayList<>();
 
         for (int i = 0; i < amountPoints; ++i) {
-            double fract = (double) i / (amountPoints - 1);
-            double theta = thetaStart + dir * fract * thetaRange;
+            double fraction = (double) i / (amountPoints - 1);
+            double theta = thetaStart + dir * fraction * thetaRange;
             Vector2 o = new Vector2(Math.cos(theta), Math.sin(theta)).scale(r);
             output.add(center.add(o));
         }

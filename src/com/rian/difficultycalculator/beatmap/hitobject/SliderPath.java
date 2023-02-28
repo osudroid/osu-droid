@@ -1,10 +1,12 @@
 package com.rian.difficultycalculator.beatmap.hitobject;
 
+import com.rian.difficultycalculator.math.MathUtils;
 import com.rian.difficultycalculator.utils.PathApproximator;
 import com.rian.difficultycalculator.math.Precision;
 import com.rian.difficultycalculator.math.Vector2;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Represents the path of a slider.
@@ -13,7 +15,7 @@ public class SliderPath {
     /**
      * The path type of this slider.
      */
-    public final PathType pathType;
+    public final SliderPathType pathType;
 
     /**
      * The control points (anchor points) of this slider path.
@@ -40,7 +42,7 @@ public class SliderPath {
      * @param controlPoints The control points (anchor points) of this slider path.
      * @param expectedDistance The distance that is expected when calculating slider path.
      */
-    public SliderPath(PathType type, ArrayList<Vector2> controlPoints, double expectedDistance) {
+    public SliderPath(SliderPathType type, ArrayList<Vector2> controlPoints, double expectedDistance) {
         this.pathType = type;
         this.controlPoints = controlPoints;
         this.expectedDistance = expectedDistance;
@@ -166,7 +168,7 @@ public class SliderPath {
      * Returns the progress of reaching expected distance.
      */
     private double progressToDistance(double progress) {
-        return Math.min(Math.max(progress, 0), 1) * expectedDistance;
+        return MathUtils.clamp(progress, 0, 1) * expectedDistance;
     }
 
     /**
@@ -174,7 +176,7 @@ public class SliderPath {
      */
     private Vector2 interpolateVertices(int i, double d) {
         if (calculatedPath.size() == 0) {
-            return new Vector2(0, 0);
+            return new Vector2(0);
         }
 
         if (i <= 0) {
@@ -232,15 +234,5 @@ public class SliderPath {
         }
 
         return l;
-    }
-
-    /**
-     * Types of slider paths.
-     */
-    public enum PathType {
-        Catmull,
-        Bezier,
-        Linear,
-        PerfectCurve
     }
 }

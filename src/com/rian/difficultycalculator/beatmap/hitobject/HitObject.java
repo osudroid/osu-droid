@@ -1,8 +1,7 @@
 package com.rian.difficultycalculator.beatmap.hitobject;
 
 import com.rian.difficultycalculator.math.Vector2;
-import com.rian.difficultycalculator.beatmap.timings.DifficultyControlPoint;
-import com.rian.difficultycalculator.beatmap.timings.TimingControlPoint;
+import com.rian.difficultycalculator.utils.GameMode;
 
 /**
  * Represents a hit object.
@@ -16,12 +15,17 @@ public abstract class HitObject {
     /**
      * The time at which this hit object starts, in milliseconds.
      */
-    protected final double startTime;
+    protected double startTime;
 
     /**
      * The position of this hit object.
      */
-    protected final Vector2 position;
+    protected Vector2 position;
+
+    /**
+     * The end position of this hit object.
+     */
+    protected Vector2 endPosition;
 
     /**
      * The stack height of this hit object.
@@ -29,60 +33,64 @@ public abstract class HitObject {
     protected int stackHeight;
 
     /**
-     * The scale of this hit object with respect to osu!standard scale metric.
+     * The rimu! scale of this hit object with respect to osu!standard scale metric.
      */
-    protected float scale;
+    private float rimuScale;
 
     /**
-     * The timing control point this hit object is under effect on.
+     * The osu!standard scale of this hit object.
      */
-    protected final TimingControlPoint timingControlPoint;
+    private float standardScale;
 
     /**
-     * The difficulty control point this hit object is under effect on.
+     * @param startTime The time at which this hit object starts, in milliseconds.
+     * @param position  The position of the hit object relative to the play field.
      */
-    protected final DifficultyControlPoint difficultyControlPoint;
-
-    /**
-     * @param startTime              The time at which this hit object starts, in milliseconds.
-     * @param position               The position of the hit object relative to the play field.
-     * @param timingControlPoint     The timing control point this hit object is under effect on.
-     * @param difficultyControlPoint The difficulty control point this hit object is under effect on.
-     */
-    public HitObject(double startTime, Vector2 position,
-                     TimingControlPoint timingControlPoint, DifficultyControlPoint difficultyControlPoint) {
+    public HitObject(double startTime, Vector2 position) {
         this.startTime = startTime;
         this.position = position;
-        this.timingControlPoint = timingControlPoint;
-        this.difficultyControlPoint = difficultyControlPoint;
+        endPosition = position;
     }
 
     /**
-     * @param startTime              The time at which this hit object starts, in milliseconds.
-     * @param x                      The X position of the hit object relative to the play field.
-     * @param y                      The Y position of the hit object relative to the play field.
-     * @param timingControlPoint     The timing control point this hit object is under effect on.
-     * @param difficultyControlPoint The difficulty control point this hit object is under effect on.
+     * @param startTime The time at which this hit object starts, in milliseconds.
+     * @param x         The X position of the hit object relative to the play field.
+     * @param y         The Y position of the hit object relative to the play field.
      */
-    public HitObject(double startTime, double x, double y,
-                     TimingControlPoint timingControlPoint, DifficultyControlPoint difficultyControlPoint) {
-        this(startTime, new Vector2(x, y), timingControlPoint, difficultyControlPoint);
+    public HitObject(double startTime, double x, double y) {
+        this(startTime, new Vector2(x, y));
     }
 
     /**
-     * Gets the scale of this hit object.
+     * Gets the rimu! scale of this hit object with respect to osu!standard scale metric.
      */
-    public float getScale() {
-        return scale;
+    public float getRimuScale() {
+        return rimuScale;
     }
 
     /**
-     * Sets the scale of this hit object.
+     * Sets the rimu! scale of this hit object.
      *
-     * @param scale The new scale.
+     * @param rimuScale The new rimu! scale.
      */
-    public void setScale(float scale) {
-        this.scale = scale;
+    public void setRimuScale(float rimuScale) {
+        this.rimuScale = rimuScale;
+    }
+
+    /**
+     * Gets the osu!standard scale of this hit object.
+     */
+    public float getStandardScale() {
+        return standardScale;
+    }
+
+    /**
+     * Sets the osu!standard scale of this hit object.
+     *
+     * @param standardScale The new osu!standard scale.
+     */
+    public void setStandardScale(float standardScale) {
+        this.standardScale = standardScale;
     }
 
     /**
@@ -109,20 +117,6 @@ public abstract class HitObject {
     }
 
     /**
-     * Gets the timing control point this hit object is under effect on.
-     */
-    public TimingControlPoint getTimingControlPoint() {
-        return timingControlPoint;
-    }
-
-    /**
-     * Gets the difficulty control point this hit object is under effect on.
-     */
-    public DifficultyControlPoint getDifficultyControlPoint() {
-        return difficultyControlPoint;
-    }
-
-    /**
      * Gets the position of this hit object.
      */
     public Vector2 getPosition() {
@@ -130,36 +124,87 @@ public abstract class HitObject {
     }
 
     /**
-     * Gets the radius of this hit object.
+     * Gets the end position of this hit object.
      */
-    public double getRadius() {
-        return 64 * OBJECT_RADIUS;
+    public Vector2 getEndPosition() {
+        return endPosition;
+    }
+
+    /**
+     * Gets the radius of this hit object.
+     *
+     * @param mode The game mode to calculate for.
+     */
+    public double getRadius(GameMode mode) {
+        double radius = OBJECT_RADIUS;
+
+
+        switch (mode) {
+            case rimu:
+                radius *= rimuScale;
+            case standard:
+                radius *= standardScale;
+        }
+
+        return radius;
     }
 
     /**
      * Gets the stack offset vector of this hit object.
+     *
+     * @param mode The game mode to calculate for.
      */
-    public Vector2 getStackOffset() {
-        return new Vector2(
-            stackHeight * scale * -6.4f,
-            stackHeight * scale * -6.4f
-        );
+    public Vector2 getStackOffset(GameMode mode) {
+        double coordinate = stackHeight;
+
+        switch (mode) {
+            case rimu:
+                coordinate *= rimuScale * -4;
+                break;
+            case standard:
+                coordinate *= standardScale * -6.4;
+        }
+
+        return new Vector2(coordinate);
     }
 
     /**
      * Gets the stacked position of this hit object.
+     *
+     * @param mode The game mode to calculate for.
      */
-    public Vector2 getStackedPosition() {
-        return evaluateStackedPosition(position);
+    public Vector2 getStackedPosition(GameMode mode) {
+        return evaluateStackedPosition(position, mode);
+    }
+
+    /**
+     * Gets the stacked end position of this slider.
+     *
+     * @param mode The game mode to calculate for.
+     */
+    public Vector2 getStackedEndPosition(GameMode mode) {
+        return evaluateStackedPosition(endPosition, mode);
     }
 
     /**
      * Evaluates a stacked position relative to this hit object.
      *
      * @param position The position to evaluate.
+     * @param mode The game mode to calculate for.
      * @return The evaluated stacked position.
      */
-    protected Vector2 evaluateStackedPosition(Vector2 position) {
-        return position.add(getStackOffset());
+    protected Vector2 evaluateStackedPosition(Vector2 position, GameMode mode) {
+        return position.add(getStackOffset(mode));
+    }
+
+    /**
+     * Deep clones this hit object.
+     *
+     * This method only deep clones fields that may be changed during difficulty calculation.
+     *
+     * @return The deep cloned hit object.
+     */
+    public HitObject deepClone() {
+        return null;
     }
 }

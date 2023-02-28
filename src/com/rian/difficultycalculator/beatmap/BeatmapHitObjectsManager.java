@@ -9,9 +9,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A class containing information about hit objects of a beatmap.
+ * A manager for hit objects of a beatmap.
  */
-public class BeatmapHitObjects {
+public class BeatmapHitObjectsManager {
     /**
      * All objects in this beatmap.
      */
@@ -31,6 +31,23 @@ public class BeatmapHitObjects {
      * The amount of spinners in this beatmap.
      */
     private int spinnerCount;
+
+    public BeatmapHitObjectsManager() {}
+
+    /**
+     * Copy constructor.
+     *
+     * @param source The source to copy from.
+     */
+    private BeatmapHitObjectsManager(BeatmapHitObjectsManager source) {
+        circleCount = source.circleCount;
+        sliderCount = source.sliderCount;
+        spinnerCount = source.spinnerCount;
+
+        for (HitObject object : source.objects) {
+            objects.add(object.deepClone());
+        }
+    }
 
     /**
      * Adds hit objects to this beatmap.
@@ -113,6 +130,16 @@ public class BeatmapHitObjects {
     public List<HitObject> getObjects() {
         return Collections.unmodifiableList(objects);
     }
+
+    /**
+     * Deep clones this hit object manager.
+     *
+     * @return The deep cloned instance of this manager.
+     */
+    public BeatmapHitObjectsManager deepClone() {
+        return new BeatmapHitObjectsManager(this);
+    }
+
 
     /**
      * Gets the amount of circles in this beatmap.
