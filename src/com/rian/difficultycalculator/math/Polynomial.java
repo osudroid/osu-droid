@@ -10,7 +10,7 @@ public final class Polynomial {
 
     /**
      * Evaluates a polynomial at point z.
-     *
+     * <br><br>
      * Coefficients are ordered ascending by power with power k at index k.
      * For example, coefficients <code>[3, -1, 2]</code> represent <code>y = 2x^2 - x + 3</code>.
      *
