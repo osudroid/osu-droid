@@ -60,23 +60,14 @@ public final class PathApproximator {
                 // an extension to De Casteljau's algorithm to obtain a piecewise-linear approximation
                 // of the bezier curve represented by our control points, consisting of the same amount
                 // of points as there are control points.
-                bezierApproximate(
-                        parent,
-                        output,
-                        subdivisionBuffer1,
-                        subdivisionBuffer2,
-                        count + 1
-                );
+                bezierApproximate(parent, output, subdivisionBuffer1, subdivisionBuffer2, count + 1);
                 freeBuffers.push(parent);
                 continue;
             }
 
             // If we do not yet have a sufficiently "flat" (in other words, detailed) approximation we keep
             // subdividing the curve we are currently operating on.
-            Vector2[] rightChild =
-            freeBuffers.size() > 0
-                    ? freeBuffers.pop()
-                    : new Vector2[count + 1];
+            Vector2[] rightChild = freeBuffers.size() > 0 ? freeBuffers.pop() : new Vector2[count + 1];
 
             bezierSubdivide(parent, subdivisionBuffer2, rightChild, subdivisionBuffer1, count + 1);
 
@@ -107,31 +98,11 @@ public final class PathApproximator {
             Vector2 v1 = i > 0 ? controlPoints.get(i - 1) : controlPoints.get(i);
             Vector2 v2 = controlPoints.get(i);
             Vector2 v3 = controlPoints.get(i + 1);
-            Vector2 v4 =
-                    i < controlPoints.size() - 2
-                            ? controlPoints.get(i + 2)
-                            : v3.add(v3).subtract(v2);
+            Vector2 v4 = i < controlPoints.size() - 2 ? controlPoints.get(i + 2) : v3.add(v3).subtract(v2);
 
             for (int c = 0; c < catmullDetail; ++c) {
-                result.add(
-                        catmullFindPoint(
-                                v1,
-                                v2,
-                                v3,
-                                v4,
-                                (float) c / catmullDetail
-                        )
-                );
-
-                result.add(
-                        catmullFindPoint(
-                                v1,
-                                v2,
-                                v3,
-                                v4,
-                                (float) (c + 1) / catmullDetail
-                        )
-                );
+                result.add(catmullFindPoint(v1, v2, v3, v4, (float) c / catmullDetail));
+                result.add(catmullFindPoint(v1, v2, v3, v4, (float) (c + 1) / catmullDetail));
             }
         }
 
@@ -196,16 +167,9 @@ public final class PathApproximator {
         // is: 2 * Math.acos(1 - TOLERANCE / r)
         // The special case is required for extremely short sliders where the radius is smaller than
         // the tolerance. This is a pathological rather than a realistic case.
-        int amountPoints =
-                2 * r <= circularArcTolerance
-                        ? 2
-                        : (int) Math.max(
-                        2,
-                        Math.ceil(
-                                thetaRange /
-                                        (2 * Math.acos(1 - circularArcTolerance / r))
-                        )
-                );
+        int amountPoints = 2 * r <= circularArcTolerance
+                ? 2
+                : (int) Math.max(2, Math.ceil(thetaRange / (2 * Math.acos(1 - circularArcTolerance / r))));
 
         ArrayList<Vector2> output = new ArrayList<>();
 

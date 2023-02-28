@@ -6,7 +6,6 @@ import com.rian.difficultycalculator.math.Precision;
 import com.rian.difficultycalculator.math.Vector2;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * Represents the path of a slider.
@@ -92,10 +91,8 @@ public class SliderPath {
 
         if (calculatedLength != expectedDistance) {
             // In osu-stable, if the last two control points of a slider are equal, extension is not performed.
-            if (
-                    controlPoints.size() >= 2 &&
-                    controlPoints.get(controlPoints.size() - 1)
-                            .equals(controlPoints.get(controlPoints.size() - 2)) &&
+            if (controlPoints.size() >= 2 &&
+                    controlPoints.get(controlPoints.size() - 1).equals(controlPoints.get(controlPoints.size() - 2)) &&
                     expectedDistance > calculatedLength) {
                 return;
             }
@@ -124,11 +121,9 @@ public class SliderPath {
 
             calculatedPath.set(
                     pathEndIndex,
-                    calculatedPath.get(pathEndIndex - 1).add(
-                            dir.scale(
-                                    expectedDistance - cumulativeLength.get(cumulativeLength.size() - 1)
-                            )
-                    )
+                    calculatedPath
+                            .get(pathEndIndex - 1)
+                            .add(dir.scale(expectedDistance - cumulativeLength.get(cumulativeLength.size() - 1)))
             );
 
             cumulativeLength.add(expectedDistance);
@@ -172,7 +167,7 @@ public class SliderPath {
     }
 
     /**
-     * Interpolates verticles of the slider.
+     * Interpolates vertices of the slider.
      */
     private Vector2 interpolateVertices(int i, double d) {
         if (calculatedPath.size() == 0) {
