@@ -19,9 +19,9 @@ public class DifficultyCalculationParameters {
     public double customSpeedMultiplier = 1;
 
     /**
-     * The forced AR setting to calculate for. Set to <code>Float.NaN</code> to disable.
+     * The forced AR setting to calculate for. Set to <code>Double.NaN</code> to disable.
      */
-    public double forcedAR = Float.NaN;
+    public double forcedAR = Double.NaN;
 
     /**
      * Retrieves the overall speed multiplier to calculate for.
