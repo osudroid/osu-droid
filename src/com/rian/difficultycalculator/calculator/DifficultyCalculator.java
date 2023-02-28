@@ -22,10 +22,17 @@ public abstract class DifficultyCalculator {
     public final DifficultyBeatmap beatmap;
 
     /**
-     * @param beatmap The beatmap to calculate.
+     * The game mode that is being calculated.
      */
-    public DifficultyCalculator(final DifficultyBeatmap beatmap) {
+    public final GameMode mode;
+
+    /**
+     * @param beatmap The beatmap to calculate.
+     * @param mode The game mode to calculate for.
+     */
+    public DifficultyCalculator(final DifficultyBeatmap beatmap, final GameMode mode) {
         this.beatmap = beatmap;
+        this.mode = mode;
     }
 
     /**
@@ -110,10 +117,10 @@ public abstract class DifficultyCalculator {
                     rawObjects.get(i),
                     beatmap.getHitObjectsManager().getObjects(),
                     objects,
-                    GameMode.rimu,
+                    mode,
                     parameters.getTotalSpeedMultiplier(),
                     timePreempt,
-                    !Double.isNaN(parameters.forcedAR)
+                    parameters.isForceAR()
             ));
         }
 

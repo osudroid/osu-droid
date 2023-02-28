@@ -1,7 +1,8 @@
-package com.rian.difficultycalculator.skills.rimu;
+package com.rian.difficultycalculator.skills.standard;
 
 import com.rian.difficultycalculator.beatmap.hitobject.DifficultyHitObject;
-import com.rian.difficultycalculator.evaluators.rimu.RimuTapEvaluator;
+import com.rian.difficultycalculator.evaluators.standard.StandardRhythmEvaluator;
+import com.rian.difficultycalculator.evaluators.standard.StandardSpeedEvaluator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,11 +11,11 @@ import java.util.EnumSet;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
 /**
- * Represents the skill required to tap with regards to keeping up with the speed at which objects need to be hit.
+ * Represents the skill required to press keys or tap with regards to keeping up with the speed at which objects need to be hit.
  */
-public class RimuTap extends RimuSkill {
+public class StandardSpeed extends StandardSkill {
     private double currentStrain;
-    private double currentOriginalStrain;
+    private double currentRhythm;
     private final ArrayList<Double> objectStrains = new ArrayList<>();
     private final double greatWindow;
 
@@ -22,7 +23,7 @@ public class RimuTap extends RimuSkill {
      * @param mods The mods that this skill processes.
      * @param greatWindow The 300 hit window.
      */
-    public RimuTap(EnumSet<GameMod> mods, double greatWindow) {
+    public StandardSpeed(EnumSet<GameMod> mods, double greatWindow) {
         super(mods);
 
         this.greatWindow = greatWindow;
@@ -51,36 +52,37 @@ public class RimuTap extends RimuSkill {
 
     @Override
     protected double strainValueAt(DifficultyHitObject current) {
-        double decay = strainDecay(current.deltaTime);
+        currentStrain *= strainDecay(current.deltaTime);
         double skillMultiplier = 1375;
+        currentStrain += StandardSpeedEvaluator.evaluateDifficultyOf(current, greatWindow) * skillMultiplier;
+        currentRhythm = StandardRhythmEvaluator.evaluateDifficultyOf(current, greatWindow);
 
-        currentStrain *= decay;
-        currentStrain += RimuTapEvaluator.evaluateDifficultyOf(current, greatWindow, true) * skillMultiplier;
-        currentStrain *= current.rhythmMultiplier;
+        double totalStrain = currentStrain * currentRhythm;
 
-        currentOriginalStrain *= decay;
-        currentOriginalStrain += RimuTapEvaluator.evaluateDifficultyOf(current, greatWindow, false) * skillMultiplier;
-        currentOriginalStrain *= current.rhythmMultiplier;
+        objectStrains.add(totalStrain);
 
-        objectStrains.add(currentStrain);
-
-        return currentStrain;
+        return totalStrain;
     }
 
     @Override
     protected double calculateInitialStrain(double time, DifficultyHitObject current) {
-        return currentStrain * strainDecay(time - current.previous(0).startTime);
+        return currentStrain * currentRhythm * strainDecay(time - current.previous(0).startTime);
     }
 
     @Override
     protected void saveToHitObject(DifficultyHitObject current) {
         current.tapStrain = currentStrain;
-        current.originalTapStrain = currentOriginalStrain;
+        current.rhythmMultiplier = currentRhythm;
     }
 
     @Override
-    protected double getStarsPerDouble() {
-        return 1.1;
+    protected double getDifficultyMultiplier() {
+        return 1.04;
+    }
+
+    @Override
+    protected int getReducedSectionCount() {
+        return 5;
     }
 
     private double strainDecay(double ms) {

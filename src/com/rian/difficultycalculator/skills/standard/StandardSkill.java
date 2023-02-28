@@ -1,4 +1,4 @@
-package com.rian.difficultycalculator.skills.rimu;
+package com.rian.difficultycalculator.skills.standard;
 
 import com.rian.difficultycalculator.math.Interpolation;
 import com.rian.difficultycalculator.math.MathUtils;
@@ -9,48 +9,65 @@ import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
+
 /**
  * Used to processes strain values of difficulty hit objects, keep track of strain levels caused by the processed objects
  * and to calculate a final difficulty value representing the difficulty of hitting all the processed objects.
  */
-public abstract class RimuSkill extends StrainSkill {
+public abstract class StandardSkill extends StrainSkill {
     /**
      * @param mods The mods that this skill processes.
      */
-    public RimuSkill(EnumSet<GameMod> mods) {
+    public StandardSkill(EnumSet<GameMod> mods) {
         super(mods);
     }
 
     @Override
     public double difficultyValue() {
         List<Double> strains = strainPeaks.subList(0, strainPeaks.size() - 1);
+        strains.sort((d1, d2) -> Double.compare(d2, d1));
 
         if (getReducedSectionCount() > 0) {
-            strains.sort((d1, d2) -> Double.compare(d2, d1));
-
             // We are reducing the highest strains first to account for extreme difficulty spikes.
             for (int i = 0; i < Math.min(strains.size(), getReducedSectionCount()); ++i) {
                 double scale = Math.log10(Interpolation.linear(1, 10, MathUtils.clamp((double) i / getReducedSectionCount(), 0, 1)));
 
                 strains.set(i, strains.get(i) * Interpolation.linear(getReducedSectionBaseline(), 1, scale));
             }
+
+            strains.sort((d1, d2) -> Double.compare(d2, d1));
         }
 
-        // Math here preserves the property that two notes of equal difficulty x, we have their summed difficulty = x * starsPerDouble.
-        // This also applies to two sets of notes with equal difficulty.
+        // Difficulty is the weighted sum of the highest strains from every section.
+        // We're sorting from highest to lowest strain.
         double difficulty = 0;
+        double weight = 1;
 
         for (double strain : strains) {
-            difficulty += Math.pow(strain, 1 / Math.log(getStarsPerDouble()) / Math.log(2));
+            double addition = strain * weight;
+
+            if (difficulty + addition == difficulty) {
+                break;
+            }
+
+            difficulty += addition;
+            weight *= getDecayWeight();
         }
 
-        return Math.pow(difficulty, Math.log(getStarsPerDouble()) / Math.log(2));
+        return difficulty * getDifficultyMultiplier();
     }
 
     /**
-     * Gets the bonus multiplier that is given for a sequence of notes of equal difficulty.
+     * Gets the final multiplier to be applied to the final difficulty value after all other calculations.
      */
-    protected double getStarsPerDouble() {
-        return 1.05;
+    protected double getDifficultyMultiplier() {
+        return 1.06;
+    }
+
+    /**
+     * Gets the weight by which each strain value decays.
+     */
+    protected double getDecayWeight() {
+        return 0.9;
     }
 }

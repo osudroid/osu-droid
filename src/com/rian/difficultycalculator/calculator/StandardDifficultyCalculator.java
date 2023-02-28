@@ -1,81 +1,69 @@
 package com.rian.difficultycalculator.calculator;
 
-import com.rian.difficultycalculator.attributes.RimuDifficultyAttributes;
+import com.rian.difficultycalculator.attributes.StandardDifficultyAttributes;
 import com.rian.difficultycalculator.beatmap.BeatmapDifficultyManager;
 import com.rian.difficultycalculator.beatmap.DifficultyBeatmap;
 import com.rian.difficultycalculator.skills.Skill;
-import com.rian.difficultycalculator.skills.rimu.RimuAim;
-import com.rian.difficultycalculator.skills.rimu.RimuFlashlight;
-import com.rian.difficultycalculator.skills.rimu.RimuRhythm;
-import com.rian.difficultycalculator.skills.rimu.RimuTap;
-import com.rian.difficultycalculator.skills.rimu.RimuVisual;
+import com.rian.difficultycalculator.skills.standard.StandardAim;
+import com.rian.difficultycalculator.skills.standard.StandardFlashlight;
+import com.rian.difficultycalculator.skills.standard.StandardSpeed;
 import com.rian.difficultycalculator.utils.GameMode;
-import com.rian.difficultycalculator.utils.RimuHitWindowConverter;
 import com.rian.difficultycalculator.utils.StandardHitWindowConverter;
 
 import java.util.EnumSet;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.game.GameObjectSize;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
 /**
  * A difficulty calculator for rimu!.
  */
-public class RimuDifficultyCalculator extends DifficultyCalculator {
-    private static final double difficultyMultiplier = 0.18;
+public class StandardDifficultyCalculator extends DifficultyCalculator {
+    private static final double difficultyMultiplier = 0.0675;
 
     /**
-     * @param beatmap The beatmap to calculate. Must have at least 1 hit object.
+     * @param beatmap The beatmap to calculate.
      */
-    public RimuDifficultyCalculator(DifficultyBeatmap beatmap) {
-        super(beatmap, GameMode.rimu);
+    public StandardDifficultyCalculator(DifficultyBeatmap beatmap) {
+        super(beatmap, GameMode.standard);
     }
 
     @Override
-    protected RimuDifficultyAttributes createDifficultyAttributes(DifficultyBeatmap beatmap, Skill[] skills,
-                                                                  DifficultyCalculationParameters parameters) {
-        RimuDifficultyAttributes attributes = new RimuDifficultyAttributes();
+    protected StandardDifficultyAttributes createDifficultyAttributes(DifficultyBeatmap beatmap, Skill[] skills, DifficultyCalculationParameters parameters) {
+        StandardDifficultyAttributes attributes = new StandardDifficultyAttributes();
 
         attributes.aimDifficulty = calculateRating(skills[0]);
-        attributes.rhythmDifficulty = calculateRating(skills[2]);
-        attributes.tapDifficulty = calculateRating(skills[3]);
-        attributes.speedNoteCount = ((RimuTap) skills[3]).relevantNoteCount();
-        attributes.flashlightDifficulty = calculateRating(skills[4]);
-        attributes.visualDifficulty = calculateRating(skills[5]);
+        attributes.speedDifficulty = calculateRating(skills[2]);
+        attributes.speedNoteCount = ((StandardSpeed) skills[2]).relevantNoteCount();
+        attributes.flashlightDifficulty = calculateRating(skills[3]);
 
         double aimRatingNoSliders = calculateRating(skills[1]);
         attributes.sliderFactor = attributes.aimDifficulty > 0 ? aimRatingNoSliders / attributes.aimDifficulty : 1;
 
         if (parameters.mods.contains(GameMod.MOD_RELAX)) {
             attributes.aimDifficulty *= 0.9;
-            attributes.tapDifficulty = 0;
-            attributes.rhythmDifficulty = 0;
+            attributes.speedDifficulty = 0;
             attributes.flashlightDifficulty *= 0.7;
-            attributes.visualDifficulty = 0;
         }
 
         double baseAimPerformance = Math.pow(5 * Math.max(1, Math.pow(attributes.aimDifficulty, 0.8) / 0.0675) - 4, 3) / 100000;
-        double baseTapPerformance = Math.pow(5 * Math.max(1, attributes.tapDifficulty / 0.0675) - 4, 3) / 100000;
+        double baseSpeedPerformance = Math.pow(5 * Math.max(1, attributes.speedDifficulty / 0.0675) - 4, 3) / 100000;
         double baseFlashlightPerformance = 0;
-        double baseVisualPerformance = Math.pow(attributes.visualDifficulty, 1.6) * 22.5;
 
         if (parameters.mods.contains(GameMod.MOD_FLASHLIGHT)) {
-            baseFlashlightPerformance = Math.pow(attributes.flashlightDifficulty, 1.6) * 25.0;
+            baseFlashlightPerformance = Math.pow(attributes.flashlightDifficulty, 2) * 25.0;
         }
 
         double basePerformance = Math.pow(
                 Math.pow(baseAimPerformance, 1.1) +
-                Math.pow(baseTapPerformance, 1.1) +
-                Math.pow(baseFlashlightPerformance, 1.1) +
-                Math.pow(baseVisualPerformance, 1.1),
+                        Math.pow(baseSpeedPerformance, 1.1) +
+                        Math.pow(baseFlashlightPerformance, 1.1),
                 1.0 / 1.1
         );
 
         // Document for formula derivation:
         // https://docs.google.com/document/d/10DZGYYSsT_yjz2Mtp6yIJld0Rqx4E-vVHupCqiM4TNI/edit
         attributes.starRating = basePerformance > 1e-5
-                ? 0.027 * (Math.cbrt(100000 / Math.pow(2, 1 / 1.1) * basePerformance) + 4)
+                ? 1.14 * 0.027 * (Math.cbrt(100000 / Math.pow(2, 1 / 1.1) * basePerformance) + 4)
                 : 0;
 
         double ar = beatmap.getDifficultyManager().getAR();
@@ -121,13 +109,10 @@ public class RimuDifficultyCalculator extends DifficultyCalculator {
         }
 
         return new Skill[] {
-                new RimuAim(mods, true),
-                new RimuAim(mods, false),
-                // Tap skill depends on rhythm skill, so we put it first
-                new RimuRhythm(mods, greatWindow),
-                new RimuTap(mods, greatWindow),
-                new RimuFlashlight(mods, true),
-                new RimuVisual(mods, true)
+                new StandardAim(mods, true),
+                new StandardAim(mods, false),
+                new StandardSpeed(mods, greatWindow),
+                new StandardFlashlight(mods),
         };
     }
 
@@ -136,26 +121,23 @@ public class RimuDifficultyCalculator extends DifficultyCalculator {
     }
 
     private void processCS(BeatmapDifficultyManager manager, DifficultyCalculationParameters parameters) {
-        double scale = (Config.getRES_HEIGHT() / 480d) *
-                (54.42 - manager.getCS() * 4.48) *
-                2 / GameObjectSize.BASE_OBJECT_SIZE +
-                0.5 * Config.getScaleMultiplier();
+        double cs = manager.getCS();
 
         if (parameters.mods.contains(GameMod.MOD_HARDROCK)) {
-            scale -= 0.125;
+            ++cs;
         }
         if (parameters.mods.contains(GameMod.MOD_EASY)) {
-            scale += 0.125;
+            --cs;
         }
         if (parameters.mods.contains(GameMod.MOD_REALLYEASY)) {
-            scale += 0.125;
+            --cs;
         }
         if (parameters.mods.contains(GameMod.MOD_SMALLCIRCLE)) {
-            scale -= Config.getRES_HEIGHT() / 480d * 4 * 4.48 * 2 / GameObjectSize.BASE_OBJECT_SIZE;
+            cs += 4;
         }
 
-        double radius = 64 * Math.max(1e-3, scale) / (Config.getRES_HEIGHT() * 0.85 / 384);
-        manager.setCS(5 + (1 - radius / 32) * 5 / 0.7);
+        // 12.14 is the point at which the object radius approaches 0. Use the _very_ minimum value.
+        manager.setCS(Math.min(cs, 12.13));
     }
 
     private void processAR(BeatmapDifficultyManager manager, DifficultyCalculationParameters parameters) {
@@ -186,6 +168,7 @@ public class RimuDifficultyCalculator extends DifficultyCalculator {
 
     private void processOD(BeatmapDifficultyManager manager, DifficultyCalculationParameters parameters) {
         double od = manager.getOD();
+
         if (parameters.mods.contains(GameMod.MOD_HARDROCK)) {
             od *= 1.4;
         }
@@ -196,15 +179,7 @@ public class RimuDifficultyCalculator extends DifficultyCalculator {
             od /= 2;
         }
 
-        od = Math.min(od, 10);
-
-        // Convert standard OD to rimu! hit window to take rimu! hit window and the Precise mod in mind.
-        double odMS = RimuHitWindowConverter.odToHitWindow300(od, parameters.mods.contains(GameMod.MOD_PRECISE));
-
-        // Convert rimu! hit window back to standard OD.
-        od = StandardHitWindowConverter.hitWindow300ToOD(odMS);
-
-        manager.setOD(od);
+        manager.setOD(Math.min(od, 10));
     }
 
     private void processHP(BeatmapDifficultyManager manager, DifficultyCalculationParameters parameters) {
