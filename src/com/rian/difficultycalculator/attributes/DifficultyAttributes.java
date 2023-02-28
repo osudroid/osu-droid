@@ -35,30 +35,30 @@ public abstract class DifficultyAttributes {
 
     /**
      * The number of clickable objects weighted by difficulty.
-     *
+     * <br><br>
      * Related to speed/tap difficulty.
      */
     public double speedNoteCount;
 
     /**
      * Describes how much of aim difficulty is contributed to by hit circles or sliders.
-     *
+     * <br><br>
      * A value closer to 1 indicates most of aim difficulty is contributed by hit circles.
-     *
+     * <br><br>
      * A value closer to 0 indicates most of aim difficulty is contributed by sliders.
      */
     public double sliderFactor;
 
     /**
      * The perceived approach rate inclusive of rate-adjusting mods (DT/HT/etc).
-     *
+     * <br><br>
      * Rate-adjusting mods don't directly affect the approach rate difficulty value, but have a perceived effect as a result of adjusting audio timing.
      */
     public double approachRate;
 
     /**
      * The perceived overall difficulty inclusive of rate-adjusting mods (DT/HT/etc), based on osu!standard judgement.
-     *
+     * <br><br>
      * Rate-adjusting mods don't directly affect the overall difficulty value, but have a perceived effect as a result of adjusting audio timing.
      */
     public double overallDifficulty;

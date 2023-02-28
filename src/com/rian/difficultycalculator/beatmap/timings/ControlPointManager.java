@@ -35,9 +35,9 @@ public abstract class ControlPointManager<T extends ControlPoint> {
 
     /**
      * Adds a new control point.
-     *
+     * <br><br>
      * Note that the provided control point may not be added if the correct state is already present at the control point's time.
-     *
+     * <br><br>
      * Additionally, any control point that exists in the same time will be removed.
      *
      * @param controlPoint The control point to add.
