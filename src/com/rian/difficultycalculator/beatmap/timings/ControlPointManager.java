@@ -1,7 +1,5 @@
 package com.rian.difficultycalculator.beatmap.timings;
 
-import com.rian.difficultycalculator.beatmap.hitobject.HitObject;
-
 import java.util.ArrayList;
 
 /**
@@ -66,7 +64,7 @@ public abstract class ControlPointManager<T extends ControlPoint> {
 
     /**
      * Removes a control point.
-     *
+     * <br><br>
      * This method will remove the earliest control point in the array that is equal to the given control point.
      *
      * @param controlPoint The control point to remove.
