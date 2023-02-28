@@ -9,7 +9,7 @@ public final class MathUtils {
     }
 
     /**
-     * Limits the specified number on range `[min, max]`.
+     * Limits the specified number on range <code>[min, max]</code>.
      *
      * @param num The number to limit.
      * @param min The minimum range.
