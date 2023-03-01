@@ -22,16 +22,14 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 public class StandardDifficultyCalculator extends DifficultyCalculator {
     private static final double difficultyMultiplier = 0.0675;
 
-    /**
-     * @param beatmap The beatmap to calculate.
-     */
-    public StandardDifficultyCalculator(DifficultyBeatmap beatmap) {
-        super(beatmap, GameMode.standard);
+    public StandardDifficultyCalculator() {
+        super(GameMode.standard);
     }
 
     @Override
-    protected StandardDifficultyAttributes createDifficultyAttributes(DifficultyBeatmap beatmap, Skill[] skills,
-                                                                      List<DifficultyHitObject> objects, DifficultyCalculationParameters parameters) {
+    protected StandardDifficultyAttributes createDifficultyAttributes(final DifficultyBeatmap beatmap, final Skill[] skills,
+                                                                      final List<DifficultyHitObject> objects,
+                                                                      final DifficultyCalculationParameters parameters) {
         StandardDifficultyAttributes attributes = new StandardDifficultyAttributes();
 
         attributes.aimDifficulty = calculateRating(skills[0]);

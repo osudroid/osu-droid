@@ -13,6 +13,7 @@ import com.rian.difficultycalculator.skills.rimu.RimuFlashlight;
 import com.rian.difficultycalculator.skills.rimu.RimuRhythm;
 import com.rian.difficultycalculator.skills.rimu.RimuTap;
 import com.rian.difficultycalculator.skills.rimu.RimuVisual;
+import com.rian.difficultycalculator.utils.CircleSizeCalculator;
 import com.rian.difficultycalculator.utils.GameMode;
 import com.rian.difficultycalculator.utils.RimuHitWindowConverter;
 import com.rian.difficultycalculator.utils.StandardHitWindowConverter;
@@ -23,8 +24,6 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.game.GameObjectSize;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
 /**
@@ -39,16 +38,14 @@ public class RimuDifficultyCalculator extends DifficultyCalculator {
     private static final double threeFingerStrainThreshold = 175;
     private static final double difficultyMultiplier = 0.18;
 
-    /**
-     * @param beatmap The beatmap to calculate. Must have at least 1 hit object.
-     */
-    public RimuDifficultyCalculator(DifficultyBeatmap beatmap) {
-        super(beatmap, GameMode.rimu);
+    public RimuDifficultyCalculator() {
+        super(GameMode.rimu);
     }
 
     @Override
-    protected ExtendedRimuDifficultyAttributes createDifficultyAttributes(DifficultyBeatmap beatmap, Skill[] skills,
-                                                                          List<DifficultyHitObject> objects, DifficultyCalculationParameters parameters) {
+    protected ExtendedRimuDifficultyAttributes createDifficultyAttributes(final DifficultyBeatmap beatmap, final Skill[] skills,
+                                                                          final List<DifficultyHitObject> objects,
+                                                                          final DifficultyCalculationParameters parameters) {
         ExtendedRimuDifficultyAttributes attributes = new ExtendedRimuDifficultyAttributes();
 
         attributes.aimDifficulty = calculateRating(skills[0]);
@@ -279,26 +276,9 @@ public class RimuDifficultyCalculator extends DifficultyCalculator {
     }
 
     private void processCS(BeatmapDifficultyManager manager, DifficultyCalculationParameters parameters) {
-        double scale = (Config.getRES_HEIGHT() / 480d) *
-                (54.42 - manager.getCS() * 4.48) *
-                2 / GameObjectSize.BASE_OBJECT_SIZE +
-                0.5 * Config.getScaleMultiplier();
-
-        if (parameters.mods.contains(GameMod.MOD_HARDROCK)) {
-            scale -= 0.125;
-        }
-        if (parameters.mods.contains(GameMod.MOD_EASY)) {
-            scale += 0.125;
-        }
-        if (parameters.mods.contains(GameMod.MOD_REALLYEASY)) {
-            scale += 0.125;
-        }
-        if (parameters.mods.contains(GameMod.MOD_SMALLCIRCLE)) {
-            scale -= Config.getRES_HEIGHT() / 480d * 4 * 4.48 * 2 / GameObjectSize.BASE_OBJECT_SIZE;
-        }
-
-        double radius = 64 * Math.max(1e-3, scale) / (Config.getRES_HEIGHT() * 0.85 / 384);
-        manager.setCS(5 + (1 - radius / 32) * 5 / 0.7);
+        double scale = CircleSizeCalculator.rimuCSToRimuScale(manager.getCS(), parameters.mods);
+        double radius = CircleSizeCalculator.rimuScaleToStandardRadius(scale);
+        manager.setCS(CircleSizeCalculator.standardRadiusToStandardCS(radius));
     }
 
     private void processAR(BeatmapDifficultyManager manager, DifficultyCalculationParameters parameters) {

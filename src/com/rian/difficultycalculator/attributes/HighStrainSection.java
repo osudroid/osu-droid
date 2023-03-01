@@ -3,7 +3,7 @@ package com.rian.difficultycalculator.attributes;
 /**
  * Represents a beatmap section at which the strains of objects are considerably high.
  */
-public final class HighStrainSection {
+public class HighStrainSection {
     /**
      * The index of the first object in this section with respect to the full beatmap.
      */

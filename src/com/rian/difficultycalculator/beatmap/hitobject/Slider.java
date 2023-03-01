@@ -242,7 +242,7 @@ public class Slider extends HitObjectWithDuration {
     }
 
     @Override
-    public void setRimuScale(float rimuScale) {
+    public void setRimuScale(double rimuScale) {
         super.setRimuScale(rimuScale);
 
         for (SliderHitObject object : nestedHitObjects) {
@@ -251,7 +251,7 @@ public class Slider extends HitObjectWithDuration {
     }
 
     @Override
-    public void setStandardScale(float standardScale) {
+    public void setStandardScale(double standardScale) {
         super.setStandardScale(standardScale);
 
         for (SliderHitObject object : nestedHitObjects) {
