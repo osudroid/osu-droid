@@ -1,6 +1,6 @@
 ![osudroid](https://cdn.discordapp.com/attachments/259754869626241024/844308468327514152/BannerGithub.png)
 
-#  osu-droid
+#  osudroid-rx
 [![Official International Discord](https://discordapp.com/api/guilds/316545691545501706/widget.png?style=shield)](https://discord.gg/nyD92cE)
 [![Android CI](https://github.com/osudroid/osu-droid/workflows/Android%20CI/badge.svg?branch=master)](https://github.com/osudroid/osu-droid/actions?query=workflow%3A"Android+CI")
 [![CodeFactor](https://www.codefactor.io/repository/github/osudroid/osu-droid/badge)](https://www.codefactor.io/repository/github/osudroid/osu-droid)
@@ -8,16 +8,18 @@
 
 osu!droid is a free-to-play circle clicking rhythm game for Android devices. It was a game hatched many years ago by the [osu!](https://osu.ppy.sh/home) community. This project is now being developed by a small group of fans and also with the help of foreign friends.
 
+osu!droid relax is an experimental and unofficial beta of osu!droid, which allows you to submit scores using relax on a new server.
+
 ## Status
 
-osu!droid is still work-in-progress. Some features are going to be implemented in the future but it's still playable and fun!
+osu!droid relax is still work-in-progress. Some features are going to be implemented in the future but it's still playable and fun!
 
 ### Downloading the source code
 
 Clone the repository:
 
 ```sh
-git clone https://github.com/osudroid/osu-droid.git
+git clone https://github.com/PaYtOsue/osudroid-rx
 ```
 Open the folder in Android Studio.
 
@@ -42,4 +44,4 @@ We welcome any sort of contributions, as long as they're helpful. Those who aren
 
 ## License
 
-osu-droid is licensed under the [Apache License 2.0](https://opensource.org/licenses/Apache-2.0). Please see the licence file for more information.
+osudroid-rx is licensed under the [Apache License 2.0](https://opensource.org/licenses/Apache-2.0). Please see the licence file for more information.
