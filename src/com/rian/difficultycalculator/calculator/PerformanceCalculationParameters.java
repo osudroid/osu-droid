@@ -1,9 +1,5 @@
 package com.rian.difficultycalculator.calculator;
 
-import java.util.EnumSet;
-
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-
 /**
  * A class for specifying parameters for performance calculation.
  */
@@ -32,4 +28,12 @@ public class PerformanceCalculationParameters {
      * The amount of misses achieved.
      */
     public int countMiss;
+
+    /**
+     * The tap penalty to apply. This value can be properly obtained by passing the replay
+     * relating to this score to the three finger checker.
+     * <br><br>
+     * This is only used in rimu! and must be greater than or equal to 1.
+     */
+    public int tapPenalty = 1;
 }
