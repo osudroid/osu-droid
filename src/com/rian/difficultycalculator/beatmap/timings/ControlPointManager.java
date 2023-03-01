@@ -138,9 +138,9 @@ public abstract class ControlPointManager<T extends ControlPoint> {
     }
 
     /**
-     * Finds the insertion index of a hit object in a given time.
+     * Finds the insertion index of a control point in a given time.
      *
-     * @param time The start time of the hit object.
+     * @param time The start time of the control point.
      */
     private int findInsertionIndex(int time) {
         if (controlPoints.size() == 0 || time < controlPoints.get(0).time) {
