@@ -10,7 +10,7 @@ public enum GameMod {
     MOD_EASY("es", 0.5f),
     MOD_HARDROCK("hr", 1.06f),
     MOD_HIDDEN("hd", 1.06f),
-    MOD_RELAX("relax", 0.001f, true),
+    MOD_RELAX("relax", 1f),
     MOD_AUTOPILOT("ap", 0.001f, true),
     MOD_DOUBLETIME("dt", 1.12f),
     MOD_NIGHTCORE("nc", 1.12f),
