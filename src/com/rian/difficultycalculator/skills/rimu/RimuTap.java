@@ -1,13 +1,11 @@
 package com.rian.difficultycalculator.skills.rimu;
 
-import com.rian.difficultycalculator.attributes.HighStrainSection;
 import com.rian.difficultycalculator.beatmap.hitobject.DifficultyHitObject;
 import com.rian.difficultycalculator.evaluators.rimu.RimuTapEvaluator;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
