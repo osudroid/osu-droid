@@ -10,8 +10,6 @@ import com.rian.difficultycalculator.utils.GameMode;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-
 /**
  * A difficulty calculator for calculating star rating.
  */
@@ -61,13 +59,15 @@ public abstract class DifficultyCalculator {
 
         Skill[] skills = createSkills(beatmap, parameters);
 
-        for (DifficultyHitObject object : createDifficultyHitObjects(beatmap, parameters)) {
+        List<DifficultyHitObject> objects = createDifficultyHitObjects(beatmap, parameters);
+
+        for (DifficultyHitObject object : objects) {
             for (Skill skill : skills) {
                 skill.process(object);
             }
         }
 
-        return createDifficultyAttributes(beatmap, skills, parameters);
+        return createDifficultyAttributes(beatmap, skills, objects, parameters);
     }
 
     /**
@@ -92,10 +92,11 @@ public abstract class DifficultyCalculator {
      *
      * @param beatmap The beatmap whose difficulty was calculated.
      * @param skills The skills which processed the beatmap.
+     * @param objects The difficulty objects that were processed.
      * @param parameters The difficulty calculation parameters used.
      * @return Difficulty attributes describing the beatmap's difficulty.
      */
-    protected abstract DifficultyAttributes createDifficultyAttributes(DifficultyBeatmap beatmap, Skill[] skills, DifficultyCalculationParameters parameters);
+    protected abstract DifficultyAttributes createDifficultyAttributes(DifficultyBeatmap beatmap, Skill[] skills, List<DifficultyHitObject> objects, DifficultyCalculationParameters parameters);
 
     /**
      * Retrieves the difficulty hit objects to calculate against.
@@ -104,7 +105,7 @@ public abstract class DifficultyCalculator {
      * @param parameters The difficulty calculation parameter being used.
      * @return The generated difficulty hit objects.
      */
-    private ArrayList<DifficultyHitObject> createDifficultyHitObjects(
+    private List<DifficultyHitObject> createDifficultyHitObjects(
             DifficultyBeatmap beatmap, DifficultyCalculationParameters parameters) {
         ArrayList<DifficultyHitObject> objects = new ArrayList<>();
         List<HitObject> rawObjects = beatmap.getHitObjectsManager().getObjects();

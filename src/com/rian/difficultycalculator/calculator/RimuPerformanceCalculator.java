@@ -95,7 +95,7 @@ public class RimuPerformanceCalculator extends PerformanceCalculator {
         if (estimateDifficultSliders > 0)
         {
             double estimateSliderEndsDropped = MathUtils.clamp(Math.min(countOk + countMeh + countMiss, difficultyAttributes.maxCombo - scoreMaxCombo), 0, estimateDifficultSliders);
-            double sliderNerfFactor = (1 - difficultyAttributes.sliderFactor) * Math.pow(1 - estimateSliderEndsDropped / estimateDifficultSliders, 3) + difficultyAttributes.sliderFactor;
+            double sliderNerfFactor = (1 - difficultyAttributes.aimSliderFactor) * Math.pow(1 - estimateSliderEndsDropped / estimateDifficultSliders, 3) + difficultyAttributes.aimSliderFactor;
             aimValue *= sliderNerfFactor;
         }
 

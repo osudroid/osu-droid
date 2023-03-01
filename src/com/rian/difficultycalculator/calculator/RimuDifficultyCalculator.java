@@ -1,8 +1,12 @@
 package com.rian.difficultycalculator.calculator;
 
-import com.rian.difficultycalculator.attributes.RimuDifficultyAttributes;
+import com.rian.difficultycalculator.attributes.DifficultSlider;
+import com.rian.difficultycalculator.attributes.ExtendedRimuDifficultyAttributes;
+import com.rian.difficultycalculator.attributes.HighStrainSection;
 import com.rian.difficultycalculator.beatmap.BeatmapDifficultyManager;
 import com.rian.difficultycalculator.beatmap.DifficultyBeatmap;
+import com.rian.difficultycalculator.beatmap.hitobject.DifficultyHitObject;
+import com.rian.difficultycalculator.beatmap.hitobject.HitObjectWithDuration;
 import com.rian.difficultycalculator.skills.Skill;
 import com.rian.difficultycalculator.skills.rimu.RimuAim;
 import com.rian.difficultycalculator.skills.rimu.RimuFlashlight;
@@ -13,7 +17,11 @@ import com.rian.difficultycalculator.utils.GameMode;
 import com.rian.difficultycalculator.utils.RimuHitWindowConverter;
 import com.rian.difficultycalculator.utils.StandardHitWindowConverter;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.GameObjectSize;
@@ -23,6 +31,12 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
  * A difficulty calculator for rimu!.
  */
 public class RimuDifficultyCalculator extends DifficultyCalculator {
+    /**
+     * The strain threshold to start detecting for possible three-fingered section.
+     * <br><br>
+     * Increasing this number will result in less sections being flagged.
+     */
+    private static final double threeFingerStrainThreshold = 175;
     private static final double difficultyMultiplier = 0.18;
 
     /**
@@ -33,9 +47,9 @@ public class RimuDifficultyCalculator extends DifficultyCalculator {
     }
 
     @Override
-    protected RimuDifficultyAttributes createDifficultyAttributes(DifficultyBeatmap beatmap, Skill[] skills,
-                                                                  DifficultyCalculationParameters parameters) {
-        RimuDifficultyAttributes attributes = new RimuDifficultyAttributes();
+    protected ExtendedRimuDifficultyAttributes createDifficultyAttributes(DifficultyBeatmap beatmap, Skill[] skills,
+                                                                          List<DifficultyHitObject> objects, DifficultyCalculationParameters parameters) {
+        ExtendedRimuDifficultyAttributes attributes = new ExtendedRimuDifficultyAttributes();
 
         attributes.aimDifficulty = calculateRating(skills[0]);
         attributes.rhythmDifficulty = calculateRating(skills[2]);
@@ -45,7 +59,7 @@ public class RimuDifficultyCalculator extends DifficultyCalculator {
         attributes.visualDifficulty = calculateRating(skills[5]);
 
         double aimRatingNoSliders = calculateRating(skills[1]);
-        attributes.sliderFactor = attributes.aimDifficulty > 0 ? aimRatingNoSliders / attributes.aimDifficulty : 1;
+        attributes.aimSliderFactor = attributes.aimDifficulty > 0 ? aimRatingNoSliders / attributes.aimDifficulty : 1;
 
         if (parameters.mods.contains(GameMod.MOD_RELAX)) {
             attributes.aimDifficulty *= 0.9;
@@ -53,6 +67,8 @@ public class RimuDifficultyCalculator extends DifficultyCalculator {
             attributes.rhythmDifficulty = 0;
             attributes.flashlightDifficulty *= 0.7;
             attributes.visualDifficulty = 0;
+        } else {
+            attributes.possibleThreeFingeredSections = calculateTapHighStrainSections(objects);
         }
 
         double baseAimPerformance = Math.pow(5 * Math.max(1, Math.pow(attributes.aimDifficulty, 0.8) / 0.0675) - 4, 3) / 100000;
@@ -97,6 +113,7 @@ public class RimuDifficultyCalculator extends DifficultyCalculator {
         attributes.sliderCount = beatmap.getHitObjectsManager().getSliderCount();
         attributes.spinnerCount = beatmap.getHitObjectsManager().getSpinnerCount();
         attributes.clockRate = parameters.getTotalSpeedMultiplier();
+        attributes.difficultSliders = calculateDifficultSliders(objects, attributes.sliderCount);
 
         return attributes;
     }
@@ -134,6 +151,131 @@ public class RimuDifficultyCalculator extends DifficultyCalculator {
 
     private double calculateRating(Skill skill) {
         return Math.sqrt(skill.difficultyValue()) * difficultyMultiplier;
+    }
+
+    /**
+     * Calculates sections where a player will most likely use more than three fingers on.
+     *
+     * @param objects The objects that were processed.
+     * @return The sections.
+     */
+    private List<HighStrainSection> calculateTapHighStrainSections(List<DifficultyHitObject> objects) {
+        ArrayList<HighStrainSection> tempSections = new ArrayList<>();
+
+        final int maxSectionDeltaTime = 2000;
+        final int minSectionObjectCount = 5;
+        int firstObjectIndex = 0;
+
+        for (int i = 0; i < objects.size() - 1; ++i) {
+            DifficultyHitObject current = objects.get(i);
+            DifficultyHitObject next = objects.get(i + 1);
+
+            double realDeltaTime = next.object.getStartTime();
+
+            if (current.object instanceof HitObjectWithDuration) {
+                realDeltaTime -= ((HitObjectWithDuration) current.object).getEndTime();
+            } else {
+                realDeltaTime -= current.object.getStartTime();
+            }
+
+            if (realDeltaTime >= maxSectionDeltaTime) {
+                // Ignore sections that don't meet object count requirement.
+                if (i - firstObjectIndex < minSectionObjectCount) {
+                    firstObjectIndex = i + 1;
+                    continue;
+                }
+
+                tempSections.add(new HighStrainSection(firstObjectIndex, i, 0));
+                firstObjectIndex = i + 1;
+            }
+        }
+
+        // Don't forget to manually add the last beatmap section, which would otherwise be ignored.
+        if (objects.size() - firstObjectIndex > minSectionObjectCount) {
+            tempSections.add(new HighStrainSection(firstObjectIndex, objects.size() - 1, 0));
+        }
+
+        // Re-filter with tap strain in mind.
+        ArrayList<HighStrainSection> finalSections = new ArrayList<>();
+        for (HighStrainSection section : tempSections) {
+            boolean inSpeedSection = false;
+            int newFirstObjectIndex = section.firstObjectIndex;
+
+            for (int i = section.firstObjectIndex; i <= section.lastObjectIndex; ++i) {
+                DifficultyHitObject current = objects.get(i);
+
+                if (!inSpeedSection && current.originalTapStrain >= threeFingerStrainThreshold) {
+                    inSpeedSection = true;
+                    newFirstObjectIndex = i;
+                    continue;
+                }
+
+                if (inSpeedSection && current.originalTapStrain < threeFingerStrainThreshold) {
+                    inSpeedSection = false;
+                    finalSections.add(new HighStrainSection(newFirstObjectIndex, i, calculateThreeFingerSummedStrain(objects, newFirstObjectIndex, i)));
+                }
+            }
+
+            // Don't forget to manually add the last beatmap section, which would otherwise be ignored.
+            if (inSpeedSection) {
+                finalSections.add(new HighStrainSection(newFirstObjectIndex, section.lastObjectIndex, calculateThreeFingerSummedStrain(objects, newFirstObjectIndex, section.lastObjectIndex)));
+            }
+        }
+
+        return Collections.unmodifiableList(finalSections);
+    }
+
+    /**
+     * Calculates the sum of strains for possible three-fingered sections.
+     *
+     * @param objects The objects that were processed.
+     * @param firstObjectIndex The index of the first object in the section.
+     * @param lastObjectIndex The index of the last object in the section.
+     * @return The summed strain of the section.
+     */
+    private double calculateThreeFingerSummedStrain(List<DifficultyHitObject> objects, int firstObjectIndex, int lastObjectIndex) {
+        double strainSum = 0;
+
+        for (DifficultyHitObject object : objects.subList(firstObjectIndex, lastObjectIndex)) {
+            strainSum += object.originalTapStrain / threeFingerStrainThreshold;
+        }
+
+        return Math.pow(strainSum, 0.75);
+    }
+
+    /**
+     * Calculates sliders that are considered difficult to hit.
+     *
+     * @param objects The objects that were processed.
+     * @param sliderCount The amount of sliders in the beatmap.
+     * @return A list containing information about sliders that are considered difficult to hit.
+     */
+    private List<DifficultSlider> calculateDifficultSliders(List<DifficultyHitObject> objects, int sliderCount) {
+        // Take the top 15% most difficult sliders based on velocity.
+        ArrayList<DifficultSlider> difficultSliders = new ArrayList<>();
+        double velocitySum = 0;
+
+        for (int i = 0; i < objects.size(); ++i) {
+            DifficultyHitObject object = objects.get(i);
+            double velocity = object.travelDistance / object.travelTime;
+
+            if (velocity > 0) {
+                // Use velocity as difficulty rating temporarily.
+                difficultSliders.add(new DifficultSlider(i, velocity));
+                velocitySum += velocity;
+
+                difficultSliders.sort(Comparator.comparingDouble(a -> ((DifficultSlider) a).difficultyRating).reversed());
+                while (difficultSliders.size() > Math.ceil(0.15 * sliderCount)) {
+                    difficultSliders.remove(difficultSliders.size() - 1);
+                }
+            }
+        }
+
+        for (DifficultSlider slider : difficultSliders) {
+            slider.difficultyRating /= velocitySum;
+        }
+
+        return difficultSliders;
     }
 
     private void processCS(BeatmapDifficultyManager manager, DifficultyCalculationParameters parameters) {

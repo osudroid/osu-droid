@@ -47,7 +47,7 @@ public abstract class DifficultyAttributes {
      * <br><br>
      * A value closer to 0 indicates most of aim difficulty is contributed by sliders.
      */
-    public double sliderFactor;
+    public double aimSliderFactor;
 
     /**
      * The perceived approach rate inclusive of rate-adjusting mods (DT/HT/etc).
