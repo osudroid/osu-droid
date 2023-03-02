@@ -1,7 +1,6 @@
 package com.rian.difficultycalculator.calculator;
 
 import com.rian.difficultycalculator.checkers.SliderCheeseInformation;
-import com.rian.difficultycalculator.math.MathUtils;
 
 /**
  * A class for specifying parameters for performance calculation.
