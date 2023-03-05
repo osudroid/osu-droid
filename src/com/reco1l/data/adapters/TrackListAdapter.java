@@ -11,11 +11,12 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.reco1l.global.Game;
-import com.reco1l.global.UI;
+import com.caverock.androidsvg.SVGImageView;
+import com.reco1l.Game;
+import com.reco1l.ui.UI;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
-import com.reco1l.global.Scenes;
+import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Views;
 import com.reco1l.utils.helpers.BeatmapHelper;

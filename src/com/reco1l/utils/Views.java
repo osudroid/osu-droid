@@ -8,17 +8,17 @@ import static android.view.ViewGroup.LayoutParams.*;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.content.Context;
+import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import androidx.core.content.res.ResourcesCompat;
+import androidx.annotation.LayoutRes;
 
 import com.reco1l.tables.ResourceTable;
 
 import java.util.ArrayList;
-
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public final class Views {
 

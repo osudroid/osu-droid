@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
 import com.reco1l.tables.Res;
-import com.reco1l.ui.fragments.ModMenu;
+import com.reco1l.ui.scenes.selector.fragments.ModMenu;
 import com.reco1l.utils.Views;
 
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -55,7 +55,7 @@ public class ModSectionAdapter extends BaseAdapter<ModSectionAdapter.SectionHold
         @Override
         protected void onBind(ModMenu.Section section, int position) {
             if (position == 0) {
-                Views.margins(root).left(Res.sdp(12));
+                Views.margins(root).left(sdp(12));
             }
             header.setText(section.title);
             recyclerView.setAdapter(new ModListAdapter(section.mods));

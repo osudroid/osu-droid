@@ -5,6 +5,7 @@ import android.widget.TextView;
 
 import com.reco1l.utils.Animation;
 
+@Deprecated
 public class AnimationTable {
 
     public static void textChange(TextView view, String newText) {
@@ -35,13 +36,5 @@ public class AnimationTable {
                 .toAlpha(0)
                 .toScale(0.8f)
                 .play(200);
-    }
-
-    public static Animation fadeIn(View... views) {
-        return Animation.of(views).toAlpha(1);
-    }
-
-    public static Animation fadeOut(View... views) {
-        return Animation.of(views).toAlpha(0);
     }
 }

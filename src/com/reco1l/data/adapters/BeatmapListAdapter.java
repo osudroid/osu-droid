@@ -2,7 +2,7 @@ package com.reco1l.data.adapters;
 
 // Created by Reco1l on 18/9/22 00:01
 
-import static com.reco1l.data.BitmapPool.*;
+import static com.reco1l.utils.BitmapPool.*;
 import static com.reco1l.data.adapters.BeatmapListAdapter.*;
 
 import android.graphics.Bitmap;
@@ -15,21 +15,21 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.reco1l.data.BitmapPool;
-import com.reco1l.global.Game;
-import com.reco1l.global.UI;
+import com.reco1l.utils.BitmapPool;
+import com.reco1l.Game;
+import com.reco1l.ui.UI;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
-import com.reco1l.global.Scenes;
+import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.tables.DialogTable;
 import com.reco1l.ui.custom.ContextMenu;
 import com.reco1l.ui.custom.ContextMenuBuilder;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
 import com.reco1l.utils.Animation;
-import com.reco1l.utils.Dimension;
+import com.reco1l.utils.drawing.Dimension;
 import com.reco1l.utils.TouchListener;
-import com.reco1l.view.CarrouselRecyclerView;
+import com.reco1l.ui.scenes.selector.views.CarrouselRecyclerView;
 import com.reco1l.utils.helpers.BeatmapHelper;
 
 import java.util.ArrayList;

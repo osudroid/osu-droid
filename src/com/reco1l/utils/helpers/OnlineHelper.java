@@ -2,8 +2,8 @@ package com.reco1l.utils.helpers;
 
 import android.graphics.drawable.Drawable;
 
-import com.reco1l.global.Game;
-import com.reco1l.global.UI;
+import com.reco1l.Game;
+import com.reco1l.ui.UI;
 
 import java.io.File;
 

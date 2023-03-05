@@ -7,14 +7,14 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.reco1l.global.Game;
-import com.reco1l.global.UI;
+import com.reco1l.Game;
+import com.reco1l.ui.UI;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
 import com.reco1l.utils.Animation;
-import com.reco1l.data.mods.ModWrapper;
+import com.reco1l.management.modding.mods.ModWrapper;
 import com.reco1l.view.RoundLayout;
-import com.reco1l.view.custom.ModBadgeView;
+import com.reco1l.ui.elements.ModBadgeView;
 
 import java.util.ArrayList;
 

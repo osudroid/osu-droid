@@ -1,20 +1,16 @@
 package com.reco1l.ui.custom;
 
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-
 import android.graphics.drawable.ColorDrawable;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
 
-import com.reco1l.global.Game;
-import com.reco1l.tables.Res;
-import com.reco1l.tables.ResourceTable;
-import com.reco1l.ui.BaseFragment;
-import com.reco1l.ui.SimpleFragment;
+import com.reco1l.Game;
+import com.reco1l.management.resources.ResourceTable;
+import com.reco1l.ui.base.BaseFragment;
+import com.reco1l.ui.base.SimpleFragment;
 import com.reco1l.utils.Views;
 import com.reco1l.utils.Views.MarginUtils;
 import com.reco1l.view.ButtonView;

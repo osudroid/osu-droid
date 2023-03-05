@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.reco1l.global.Game;
+import com.reco1l.Game;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Animation.UpdateListener;
 import com.reco1l.view.RoundLayout;

@@ -7,14 +7,15 @@ import static android.content.Intent.*;
 import android.content.Intent;
 import android.net.Uri;
 
-import com.reco1l.global.Game;
-import com.reco1l.data.Notification;
+import com.reco1l.Game;
+import com.reco1l.ui.custom.Notification;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
 
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
+@Deprecated
 public class NotificationTable {
 
     //--------------------------------------------------------------------------------------------//

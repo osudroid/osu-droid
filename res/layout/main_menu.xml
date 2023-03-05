@@ -20,14 +20,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-            <com.reco1l.view.custom.MenuButtonLayout
+            <com.reco1l.ui.elements.MenuButtonVIew
                 android:id="@+id/main_play"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/v32_play"
                 android:text="@string/main_menu_play" />
 
-            <com.reco1l.view.custom.MenuButtonLayout
+            <com.reco1l.ui.elements.MenuButtonVIew
                 android:id="@+id/main_explore"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -49,7 +49,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.reco1l.view.custom.LogoView
+    <com.reco1l.ui.elements.LogoView
         android:id="@+id/main_logo"
         android:layout_width="@dimen/mainMenuSmallLogoSize"
         android:layout_height="@dimen/mainMenuSmallLogoSize"

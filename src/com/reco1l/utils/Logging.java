@@ -56,4 +56,19 @@ public final class Logging {
             e.printStackTrace();
         }
     }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public static void e(Object o, String m, Exception e) {
+        e(o, m);
+        e.printStackTrace();
+    }
+
+    public static void e(Object o, String m) {
+        Log.e(o.getClass().getSimpleName(), m);
+    }
+
+    public static void i(Object o, String m) {
+        Log.i(o.getClass().getSimpleName(), m);
+    }
 }

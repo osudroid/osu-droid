@@ -10,12 +10,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.edlplan.framework.easing.Easing;
 import com.factor.bouncy.BouncyRecyclerView;
-import com.reco1l.data.Notification;
+import com.reco1l.ui.custom.Notification;
 import com.reco1l.data.adapters.NotificationListAdapter;
-import com.reco1l.global.Game;
-import com.reco1l.global.Scenes;
-import com.reco1l.global.UI;
-import com.reco1l.ui.BaseFragment;
+import com.reco1l.Game;
+import com.reco1l.ui.UI;
+import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Views;
 

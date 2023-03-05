@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.reco1l.view.RoundLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="@dimen/_100sdp"
+    android:layout_height="@dimen/_26sdp"
+    android:layout_marginBottom="@dimen/XXS"
+    android:background="@color/backgroundSecondary"
+    app:radius="8"
+    app:type="linear">
+
+    <TextView
+        android:id="@+id/id_rank"
+        style="@style/text"
+        android:layout_width="@dimen/_18sdp"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="#50"
+        android:textSize="@dimen/textXXS"
+        android:textStyle="bold" />
+
+    <com.reco1l.view.RoundLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#28000000"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/S"
+        app:radius="8"
+        app:type="linear">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/id_name"
+                style="@style/text"
+                android:gravity="center"
+                android:text="Reco1l"
+                android:textSize="@dimen/textXXS"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/id_max_combo"
+                style="@style/text"
+                android:layout_alignParentEnd="true"
+                android:gravity="center"
+                android:text="x0000"
+                android:textSize="@dimen/textXXS" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/id_score"
+            style="@style/text"
+            android:gravity="center"
+            android:text="000,000,000"
+            android:textSize="@dimen/textXXS" />
+
+    </com.reco1l.view.RoundLayout>
+
+</com.reco1l.view.RoundLayout>

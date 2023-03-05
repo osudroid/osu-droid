@@ -17,16 +17,13 @@ public final class FrameCounter {
 
     private static Choreographer mChoreographer;
 
-    private static boolean mCountFromEngine = false;
-
     //--------------------------------------------------------------------------------------------//
 
     static {
         Logging.initOf(FrameCounter.class);
     }
 
-    private FrameCounter() {
-    }
+    private FrameCounter() {}
 
     //--------------------------------------------------------------------------------------------//
 
@@ -44,10 +41,9 @@ public final class FrameCounter {
         mElapsedTime += span;
         mLastTime = time;
 
-        if (!mCountFromEngine) {
-            mFPS = mFrameCount / (mElapsedTime / 1000f);
-            mFrameTime = span;
-        }
+        mFPS = mFrameCount / (mElapsedTime / 1000f);
+        mFrameTime = span;
+
         mChoreographer.postFrameCallback(ns -> handleNextFrame());
 
         if (mElapsedTime > 1000) {
@@ -67,16 +63,4 @@ public final class FrameCounter {
     }
 
     //--------------------------------------------------------------------------------------------//
-
-    public synchronized static void countFromEngine(boolean countFromEngine) {
-        mCountFromEngine = countFromEngine;
-    }
-
-    public synchronized static void setFPS(float fps) {
-        mFPS = fps;
-    }
-
-    public synchronized static void setFrameTime(float ft) {
-        mFrameTime = ft;
-    }
 }

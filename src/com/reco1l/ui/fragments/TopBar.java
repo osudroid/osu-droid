@@ -5,14 +5,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.edlplan.ui.TriangleEffectView;
-import com.reco1l.global.Game;
-import com.reco1l.global.UI;
-import com.reco1l.global.Scenes;
-import com.reco1l.scenes.BaseScene;
+import com.reco1l.Game;
+import com.reco1l.ui.UI;
+import com.reco1l.ui.scenes.Scenes;
+import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.tables.AnimationTable;
 import com.reco1l.tables.Res;
-import com.reco1l.ui.BaseFragment;
+import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.utils.Animation;
 
 import com.reco1l.utils.helpers.OnlineHelper;

@@ -10,8 +10,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
-import com.reco1l.global.Game;
-import com.reco1l.ui.BaseFragment;
+import com.reco1l.Game;
+import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.tables.Res;
 
 import org.jetbrains.annotations.NotNull;

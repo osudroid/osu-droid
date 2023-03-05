@@ -7,9 +7,9 @@ import androidx.annotation.NonNull;
 
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
-import com.reco1l.data.Settings;
-import com.reco1l.interfaces.fields.Identifiers;
-import com.reco1l.ui.BasePreferenceFragment;
+import com.reco1l.management.Settings;
+import com.reco1l.ui.base.Identifiers;
+import com.reco1l.ui.base.BasePreferenceFragment;
 import com.reco1l.ui.fragments.SettingsMenu;
 import com.reco1l.utils.Views;
 

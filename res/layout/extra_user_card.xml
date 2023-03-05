@@ -178,13 +178,9 @@
                                 android:layout_centerVertical="true"
                                 android:src="@drawable/v14_open" />
 
-                            <TextView
-                                style="@style/text"
-                                android:layout_centerInParent="true"
-                                android:text="@string/user_profile_visit" />
-
-                        </RelativeLayout>
-                    </androidx.cardview.widget.CardView>
+            <com.reco1l.view.ProgressIndicatorView
+                android:layout_width="@dimen/_32sdp"
+                android:layout_height="@dimen/_32sdp" />
 
                 </LinearLayout>
 

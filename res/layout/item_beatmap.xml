@@ -80,7 +80,7 @@
 
     </com.reco1l.view.RoundLayout>
 
-    <com.reco1l.view.CarrouselRecyclerView
+    <com.reco1l.ui.scenes.selector.views.CarrouselRecyclerView
         android:id="@+id/bl_trackList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

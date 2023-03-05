@@ -4,7 +4,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
 import com.edlplan.framework.math.FMath;
-import com.reco1l.global.Game;
+import com.reco1l.Game;
 
 import java.io.IOException;
 import java.io.InputStream;

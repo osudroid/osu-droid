@@ -2,8 +2,7 @@ package com.reco1l;
 
 import android.util.Log;
 
-import com.reco1l.global.Game;
-import com.reco1l.scenes.BaseScene;
+import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.utils.Logging;
 
 import org.anddev.andengine.engine.Engine;

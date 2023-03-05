@@ -124,6 +124,6 @@
 
         </com.factor.bouncy.BouncyNestedScrollView>
 
-    </com.reco1l.view.custom.TiltedLayout>
+    </LinearLayout>
 
 </RelativeLayout>

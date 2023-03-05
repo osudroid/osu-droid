@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 
-import com.reco1l.tables.ResourceTable;
+import com.reco1l.management.resources.ResourceTable;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -5,8 +5,6 @@ package com.reco1l.utils.execution;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.reco1l.interfaces.ITask;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 

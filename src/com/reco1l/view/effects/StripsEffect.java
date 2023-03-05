@@ -5,67 +5,59 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
-import android.view.View;
+import android.view.ViewGroup;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.reco1l.global.Game;
+import com.reco1l.Game;
 import com.reco1l.utils.Animation;
-import com.reco1l.view.BaseView;
+import com.reco1l.view.RoundLayout;
 import com.reco1l.view.drawables.StripsDrawable;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+public class StripsEffect extends RoundLayout {
 
-public class StripsEffect extends View implements BaseView {
-
-    private StripsDrawable drawable;
+    private StripsDrawable mDrawable;
 
     private Animation
-            speedIn,
-            speedOut;
+            mSpeedIn,
+            mSpeedOut;
 
-    private boolean syncToBeat = true;
+    private boolean mSyncToBeat = true;
 
     //--------------------------------------------------------------------------------------------//
 
-    public StripsEffect(Context context) {
-        this(context, null);
+    public StripsEffect(@NonNull Context context) {
+        super(context);
     }
 
-    public StripsEffect(Context context, @Nullable AttributeSet attrs) {
+    public StripsEffect(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        onCreate(attrs);
     }
 
-    public StripsEffect(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public StripsEffect(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        onCreate(attrs);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    public View getView() {
-        return this;
+    public void onCreate() {
+        mDrawable = new StripsDrawable();
+
+        ViewGroup internal = getInternalLayout();
+        internal.setLayerType(LAYER_TYPE_HARDWARE, null);
+        internal.setBackground(mDrawable);
+
+        setConstantInvalidation(true);
     }
 
     @Override
-    public int[] getStyleable() {
-        return R.styleable.StripsEffectView;
-    }
+    protected void onManageAttributes(@Nullable TypedArray t, AttributeSet a) {
+        mSyncToBeat = a.getAttributeBooleanValue(appNS, "syncToBeat", true);
 
-    //--------------------------------------------------------------------------------------------//
-
-    @Override
-    public void onCreate(AttributeSet attrs) {
-        drawable = new StripsDrawable();
-
-        setLayerType(LAYER_TYPE_HARDWARE, null);
-        setBackground(drawable);
-
-        handleAttributes(attrs);
-
-        if (syncToBeat) {
+        if (mSyncToBeat) {
             Animation.UpdateListener onUpdate = value -> {
                 float speed = (float) value;
 
@@ -75,33 +67,21 @@ public class StripsEffect extends View implements BaseView {
                 setStripSpeed(speed);
             };
 
-            speedIn = Animation.ofFloat(1f, 12f).runOnUpdate(onUpdate);
-            speedOut = Animation.ofFloat(12f, 1f).runOnUpdate(onUpdate);
+            mSpeedIn = Animation.ofFloat(1f, 12f).runOnUpdate(onUpdate);
+            mSpeedOut = Animation.ofFloat(12f, 1f).runOnUpdate(onUpdate);
         }
-    }
-
-    @Override
-    public void onManageAttributes(TypedArray a) {
-        syncToBeat = a.getBoolean(R.styleable.StripsEffectView_beatSync, true);
-
-        drawable.stripWidth = a.getDimension(R.styleable.StripsEffectView_stripWidth, 80);
-        drawable.speed = a.getFloat(R.styleable.StripsEffectView_stripSpeed, 2f);
-        drawable.spawnTime = a.getInt(R.styleable.StripsEffectView_spawnTime, 200);
-        drawable.limit = a.getInt(R.styleable.StripsEffectView_spawnLimit, 60);
     }
 
     //--------------------------------------------------------------------------------------------//
 
+
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onManagedDraw(Canvas canvas) {
         if (!isInEditMode()) {
-            if (syncToBeat && Game.timingWrapper.isNextBeat()) {
+            if (mSyncToBeat && Game.timingWrapper.isNextBeat()) {
                 onNextBeat();
             }
         }
-
-        super.onDraw(canvas);
-        invalidate();
     }
 
     private void onNextBeat() {
@@ -112,41 +92,41 @@ public class StripsEffect extends View implements BaseView {
         long in = (long) (beatLength * 0.07f);
         long out = (long) (beatLength * 0.9f);
 
-        if (speedOut != null && speedIn != null) {
-            speedOut.delay(in).play(out);
-            speedIn.play(in);
+        if (mSpeedOut != null && mSpeedIn != null) {
+            mSpeedOut.delay(in).play(out);
+            mSpeedIn.play(in);
         }
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public void reset() {
-        drawable.reset();
+        mDrawable.reset();
     }
 
-    public void setStripColor(int color) {
-        drawable.color = color;
+    public void setStripColor(@ColorInt int color) {
+        mDrawable.setStripColor(color);
         reset();
     }
 
     public void setStripWidth(float width) {
-        drawable.stripWidth = width;
+        mDrawable.setStripWidth(width);
         reset();
     }
 
     public void setStripSpeed(float speed) {
-        drawable.speed = speed;
+        mDrawable.setStripSpeed(speed);
     }
 
     public void setSpawnTime(int spawnTime) {
-        drawable.spawnTime = spawnTime;
+        mDrawable.setSpawnTime(spawnTime);
     }
 
-    public void setStripLimit(int limit) {
-        drawable.limit = limit;
+    public void setSpawnLimit(int spawnLimit) {
+        mDrawable.setSpawnLimit(spawnLimit);
     }
 
-    public void setBeatSyncing(boolean bool) {
-        syncToBeat = bool;
+    public void setSyncToBeat(boolean bool) {
+        mSyncToBeat = bool;
     }
 }

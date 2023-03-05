@@ -13,7 +13,6 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 
-import com.reco1l.utils.Maths;
 import com.reco1l.utils.Views;
 import com.reco1l.view.effects.StripsEffect;
 

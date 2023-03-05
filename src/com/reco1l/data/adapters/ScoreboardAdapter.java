@@ -9,13 +9,13 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.caverock.androidsvg.SVGImageView;
 import com.google.android.material.imageview.ShapeableImageView;
-import com.reco1l.global.Game;
+import com.reco1l.Game;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
-import com.reco1l.data.ScoreInfo;
-import com.reco1l.global.Scenes;
-import com.reco1l.interfaces.fields.Endpoint;
+import com.reco1l.management.scoreboard.ScoreInfo;
+import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.ui.custom.ContextMenu;
 import com.reco1l.ui.custom.ContextMenuBuilder;
 import com.reco1l.utils.TouchHandler;

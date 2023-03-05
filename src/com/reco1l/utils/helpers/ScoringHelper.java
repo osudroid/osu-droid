@@ -1,7 +1,7 @@
 package com.reco1l.utils.helpers;
 
 
-import com.reco1l.interfaces.IGameMod;
+import com.reco1l.management.modding.ModAcronyms;
 
 import java.util.EnumSet;
 
@@ -9,7 +9,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
 // Created by Reco1l on 8/8/22 21:35
 
-public class ScoringHelper implements IGameMod {
+public class ScoringHelper implements ModAcronyms {
 
     public static String getCustomMods(String data) {
         String[] mods = data.split("\\|", 2);

@@ -11,9 +11,9 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.factor.bouncy.BouncyRecyclerView;
-import com.reco1l.global.Game;
+import com.reco1l.Game;
 import com.reco1l.tables.Res;
-import com.reco1l.ui.BaseFragment;
+import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Views;
 

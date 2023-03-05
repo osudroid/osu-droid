@@ -1,6 +1,6 @@
 package com.reco1l.ui.fragments;
 
-import static com.reco1l.data.Settings.*;
+import static com.reco1l.management.Settings.*;
 
 import android.view.View;
 
@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.edlplan.framework.easing.Easing;
 import com.factor.bouncy.BouncyRecyclerView;
 import com.reco1l.data.adapters.SettingsAdapter;
-import com.reco1l.global.Game;
-import com.reco1l.ui.BaseFragment;
+import com.reco1l.Game;
+import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.utils.Animation;
 
 import com.reco1l.utils.helpers.OnlineHelper;

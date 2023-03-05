@@ -11,8 +11,9 @@ import androidx.annotation.DimenRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
 
-import com.reco1l.global.Game;
+import com.reco1l.Game;
 
+@Deprecated // Implement ResourceTable instead
 public final class Res {
 
     private static final Resources R = Game.activity.getResources();

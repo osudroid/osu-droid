@@ -2,16 +2,14 @@ package com.reco1l.ui.fragments;
 
 // Created by Reco1l on 13/11/2022, 21:13
 
-import static android.graphics.Bitmap.Config.ARGB_8888;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import com.reco1l.global.Game;
-import com.reco1l.global.Scenes;
-import com.reco1l.scenes.BaseScene;
-import com.reco1l.ui.BaseFragment;
-import com.reco1l.utils.BlurRender;
+import com.reco1l.Game;
+import com.reco1l.ui.scenes.Scenes;
+import com.reco1l.ui.scenes.BaseScene;
+import com.reco1l.ui.base.BaseFragment;
+import com.reco1l.utils.drawing.BlurRender;
 import com.reco1l.utils.execution.AsyncTask;
 import com.reco1l.view.FadeImageView;
 
@@ -26,8 +24,12 @@ public final class Background extends BaseFragment {
 
     public static final Background instance = new Background();
 
-    private Bitmap mBitmap;
+    private Bitmap
+            mBitmap,
+            mDefaultBitmap;
+
     private String mImagePath;
+
     private FadeImageView mImage;
     private AsyncTask mBitmapTask;
 
@@ -62,8 +64,10 @@ public final class Background extends BaseFragment {
     protected void onLoad() {
         mImage = find("image");
 
+        mDefaultBitmap = Game.bitmapManager.get("menu-background");
+
         if (mBitmap == null) {
-            mBitmap = Game.bitmapManager.get("menu-background").copy(ARGB_8888, true);
+            mBitmap = mDefaultBitmap;
         }
         mImage.setImageBitmap(mBitmap);
     }
@@ -119,9 +123,9 @@ public final class Background extends BaseFragment {
                 Game.resourcesManager.loadBackground(mImagePath);
 
                 if (mImagePath == null) {
-                    mNewBitmap = Game.bitmapManager.get("menu-background").copy(ARGB_8888, true);
+                    mNewBitmap = mDefaultBitmap;
                 } else {
-                    mNewBitmap = BitmapFactory.decodeFile(mImagePath).copy(ARGB_8888, true);
+                    mNewBitmap = BitmapFactory.decodeFile(mImagePath);
                 }
 
                 if (mIsBlurEnabled) {

@@ -6,12 +6,12 @@ import android.widget.TextView;
 import androidx.cardview.widget.CardView;
 
 import com.edlplan.framework.easing.Easing;
-import com.google.android.material.imageview.ShapeableImageView;
-import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.reco1l.global.Game;
-import com.reco1l.interfaces.fields.Endpoint;
-import com.reco1l.tables.Res;
-import com.reco1l.ui.BaseFragment;
+import com.reco1l.Game;
+import com.reco1l.management.online.Endpoint;
+import com.reco1l.management.online.IOnlineObserver;
+import com.reco1l.management.online.UserInfo;
+import com.reco1l.ui.base.BaseFragment;
+
 import com.reco1l.utils.Animation;
 
 import com.reco1l.utils.helpers.OnlineHelper;

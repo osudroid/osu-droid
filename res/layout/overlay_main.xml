@@ -6,7 +6,7 @@
     tools:background="#FFF"
     android:elevation="3dp">
 
-    <com.reco1l.view.custom.FPSBadgeView
+    <com.reco1l.ui.elements.FPSBadgeView
         android:id="@+id/mo_fps"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

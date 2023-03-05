@@ -1,15 +1,13 @@
 package com.reco1l.ui.fragments;
 
-import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.reco1l.scenes.BaseScene;
-import com.reco1l.ui.BaseFragment;
+import com.reco1l.ui.scenes.BaseScene;
+import com.reco1l.ui.base.BaseFragment;
 
 import im.delight.android.webview.AdvancedWebView;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -89,9 +87,8 @@ public class WebViewFragment extends BaseFragment implements AdvancedWebView.Lis
 
     //--------------------------------------------------------------------------------------------//
 
-    public WebViewFragment setLockToHostname(boolean bool) {
+    public void setLockToHostname(boolean bool) {
         mLockHostname = bool;
-        return this;
     }
 
     //--------------------------------------------------------------------------------------------//

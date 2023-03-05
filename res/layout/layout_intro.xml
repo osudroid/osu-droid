@@ -19,8 +19,7 @@
         android:id="@+id/il_effect"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0.5"
-        app:beatSync="false" />
+        android:alpha="0.5" />
 
     <ImageView
         android:id="@+id/il_logoBrand"

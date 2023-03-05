@@ -20,12 +20,11 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
 
-            <com.reco1l.view.IconButton
+            <com.reco1l.view.IconButtonView
                 android:id="@+id/fm_sort"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:iconSrc="@drawable/v18_sort"
-                app:indicatorPosition="top" />
+                android:src="@drawable/v18_sort" />
 
             <EditText
                 android:id="@+id/fm_search"

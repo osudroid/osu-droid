@@ -4,55 +4,48 @@
 
 <resources>
 
+    <attr name="syncToBeat" format="boolean" />
+
+    <attr name="size" format="enum">
+        <enum name="xxs" value="-2" />
+        <enum name="xs" value="-1" />
+        <enum name="s" value="0" />
+        <enum name="m" value="1" />
+        <enum name="l" value="2" />
+        <enum name="xl" value="3" />
+        <enum name="xxl" value="4" />
+    </attr>
+
     <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
     <declare-styleable name="RoundLayout">
         <attr name="radius" format="integer" />
 
-        <attr name="type" format="enum" >
-            <enum name="linear" value="0"/>
-            <enum name="relative" value="1"/>
+        <attr name="type" format="enum">
+            <enum name="linear" value="0" />
+            <enum name="relative" value="1" />
         </attr>
     </declare-styleable>
 
     <declare-styleable name="BadgeText">
         <attr name="icon" format="reference" />
-
-        <attr name="size" format="enum">
-            <enum name="s" value="0" />
-            <enum name="m" value="1" />
-            <enum name="l" value="2" />
-        </attr>
-
+        <attr name="size" />
     </declare-styleable>
 
-    <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+    <declare-styleable name="ScoreNumberView">
+        <attr name="text" format="string"/>
+        <attr name="numberScale" format="float" />
+    </declare-styleable>
 
-    <declare-styleable name="ScoreBadge">
+    <declare-styleable name="StatisticLayout">
         <attr name="badgeText" format="string" />
-        <attr name="badgeTextColor" format="color"/>
+        <attr name="badgeTextColor" format="color" />
     </declare-styleable>
 
     <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
-    <attr name="beatSync" format="boolean" />
-
-    <declare-styleable name="IconButton">
-        <attr name="iconSrc" format="reference" />
-        <attr name="indicatorPosition" format="enum">
-            <enum name="bottom" value="0" />
-            <enum name="top" value="1" />
-        </attr>
-        <attr name="activated" format="boolean" />
-    </declare-styleable>
-
-    <!--Views-->
     <declare-styleable name="StripsEffectView">
-        <attr name="beatSync" />
-        <attr name="stripWidth" format="dimension" />
-        <attr name="stripSpeed" format="float" />
-        <attr name="spawnTime" format="integer" />
-        <attr name="spawnLimit" format="integer" />
+        <attr name="syncToBeat" />
     </declare-styleable>
 
     <declare-styleable name="PanelLayout">

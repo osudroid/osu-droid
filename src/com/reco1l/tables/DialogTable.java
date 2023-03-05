@@ -3,8 +3,8 @@ package com.reco1l.tables;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.reco1l.global.Game;
-import com.reco1l.ui.SimpleFragment;
+import com.reco1l.Game;
+import com.reco1l.ui.base.SimpleFragment;
 import com.reco1l.ui.custom.DialogBuilder;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
@@ -13,6 +13,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 // Created by Reco1l on 25/7/22 22:30
 
+@Deprecated
 public class DialogTable {
 
     //--------------------------------------------------------------------------------------------//

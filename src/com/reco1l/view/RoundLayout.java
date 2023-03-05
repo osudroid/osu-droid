@@ -26,7 +26,7 @@ import androidx.annotation.StyleableRes;
 import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.core.math.MathUtils;
 
-import com.reco1l.tables.ResourceTable;
+import com.reco1l.management.resources.ResourceTable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -106,6 +106,7 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
             super.setBackground(null);
         }
         super.setPadding(0, 0, 0, 0);
+        resetLayout(mInternalLayout);
 
         onCreate();
         handleAttributes();
@@ -114,6 +115,16 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     }
 
     //--------------------------------------------------------------------------------------------//
+
+    private void resetLayout(ViewGroup layout) {
+        layout.setScaleX(1);
+        layout.setScaleY(1);
+        layout.setAlpha(1);
+        layout.setTranslationY(0);
+        layout.setTranslationX(0);
+        layout.setTranslationX(0);
+        layout.setVisibility(VISIBLE);
+    }
 
     @SuppressLint("ResourceType")
     private void handleNativeAttributes(AttributeSet attrs) {
@@ -138,8 +149,8 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
         return mInitialHeight;
     }
 
-    protected final LayoutParams getInitialLayoutParams() {
-        return new LayoutParams(mInitialWidth, mInitialHeight);
+    protected final ViewGroup.LayoutParams getInitialLayoutParams() {
+        return new ViewGroup.LayoutParams(mInitialWidth, mInitialHeight);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -269,14 +280,18 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
         onLayoutChange(params);
     }
 
+    protected final void matchSize(View view) {
+        matchSize(view, getLayoutParams());
+    }
+
     // Match parent layout params useful when you want a child view match width and height from parent,
     // it's recommended to be used inside onResize() method.
-    protected final void matchSize(View view) {
-        if (view == null) {
+    protected final void matchSize(View view, ViewGroup.LayoutParams params) {
+        if (view == null || params == null) {
             return;
         }
-        view.getLayoutParams().width = getLayoutParams().width;
-        view.getLayoutParams().height = getLayoutParams().height;
+        view.getLayoutParams().width = params.width;
+        view.getLayoutParams().height = params.height;
         view.requestLayout();
     }
 
@@ -305,15 +320,6 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     public void setForeground(Drawable foreground) {
         if (mInternalLayout != null) {
             mInternalLayout.setForeground(foreground);
-        }
-    }
-
-    @Override
-    public void setVisibility(int visibility) {
-        super.setVisibility(visibility);
-
-        if (mInternalLayout != null) {
-            mInternalLayout.setVisibility(visibility);
         }
     }
 

@@ -5,7 +5,7 @@ import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
-import com.reco1l.global.Game;
+import com.reco1l.Game;
 import com.reco1l.utils.helpers.BeatmapHelper;
 
 import java.util.ArrayList;
