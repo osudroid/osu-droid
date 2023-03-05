@@ -46,6 +46,11 @@ public final class UI {
     public static final FilterBar filterBar = FilterBar.instance;
     public static final ModMenu modMenu = ModMenu.instance;
 
+    // Player scene
+    public static final PauseMenu pauseMenu = PauseMenu.instance;
+    public static final GameOverlay gameOverlay = GameOverlay.instance;
+    public static final BreakOverlay breakOverlay = BreakOverlay.instance;
+
     //--------------------------------------------------------------------------------------------//
 
     // Calling this method will load class and its static fields

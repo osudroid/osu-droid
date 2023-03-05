@@ -104,7 +104,7 @@ public class ScoreboardAdapter extends BaseAdapter<ScoreHolder, ScoreInfo> {
 
             for (GameMod mod : item.getMods()) {
                 ImageView image = new ImageView(context);
-                image.setImageBitmap(Game.bitmapManager.get("selection-mod-" + mod.texture));
+                //image.setImageBitmap(Game.bitmapManager.get("selection-mod-" + mod.texture));
 
                 modsLayout.addView(image);
                 Views.size(image, dimen(R.dimen.scoreboardItemModSize));

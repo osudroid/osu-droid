@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 import androidx.annotation.LayoutRes;
 
-import com.reco1l.tables.ResourceTable;
+import com.reco1l.management.resources.ResourceTable;
 
 import java.util.ArrayList;
 
@@ -299,14 +299,20 @@ public final class Views {
 
     //--------------------------------------------------------------------------------------------//
 
-    // Apply basic app text style
-    public static void styleText(TextView text, ResourceTable res) {
-        Context context = text.getContext();
+    public static TextView styledText(ResourceTable table, AttributeSet attrs) {
+        TextView text = new TextView(table.context(), attrs);
 
-        if (!text.isInEditMode()) {
-            text.setTypeface(ResourcesCompat.getFont(context, R.font.varela_regular));
-        }
         text.setTextColor(0xFF819DD4);
-        text.setTextSize(COMPLEX_UNIT_PX, res.sdp(10));
+        text.setTextSize(COMPLEX_UNIT_PX, table.sdp(10));
+        text.setTypeface(table.font("varela_regular"));
+        return text;
+    }
+
+    public View inflate(Context context, @LayoutRes int layout) {
+        if (context == null) {
+            return null;
+        }
+        LayoutInflater inflater = context.getSystemService(LayoutInflater.class);
+        return inflater.inflate(layout, null);
     }
 }

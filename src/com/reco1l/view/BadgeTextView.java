@@ -109,7 +109,7 @@ public class BadgeTextView extends RoundLayout {
 
     private void handleSize(int text, int radius, int vertical, int horizontal) {
         mTextView.setTextSize(COMPLEX_UNIT_PX, sdp(text));
-        setRadius(sdp(radius));
+        setRadius(radius);
 
         Views.padding(mLayout)
                 .vertical(sdp(vertical))

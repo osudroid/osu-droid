@@ -16,6 +16,8 @@ import com.reco1l.tables.Res;
 
 import org.jetbrains.annotations.NotNull;
 
+import main.audio.BassSoundProvider;
+
 // Created by Reco1l on 23/6/22 20:44
 
 public final class TouchHandler {
@@ -25,8 +27,8 @@ public final class TouchHandler {
     public TouchListener mListener;
 
     private final Handler mHandler;
-    private final Runnable mLongPressCallback;
     private final Vibrator mVibrator;
+    private final Runnable mLongPressCallback;
 
     private BaseFragment mLinkedFragment;
 
@@ -58,29 +60,33 @@ public final class TouchHandler {
 
     //--------------------------------------------------------------------------------------------//
 
+    private void playSound(String sfx) {
+        if (sfx == null) {
+            return;
+        }
+
+        BassSoundProvider sound = Game.resourcesManager.getSound(sfx);
+        if (sound != null) {
+            sound.play();
+        }
+    }
+
     private void handleEffects(View view, MotionEvent event) {
 
         switch (event.getAction()) {
             case ACTION_DOWN:
                 view.setPressed(true);
-
-                if (mListener.getPressDownSound() != null) {
-                    mListener.getPressDownSound().play();
-                }
+                playSound(mListener.getPressDownSound());
                 break;
 
             case ACTION_UP:
                 view.setPressed(false);
 
                 if (mIsLongPressActioned) {
-                    if (mListener.getLongPressSound() != null) {
-                        mListener.getLongPressSound().play();
-                    }
+                    playSound(mListener.getLongPressSound());
                     break;
                 }
-                if (mListener.getPressUpSound() != null) {
-                    mListener.getPressUpSound().play();
-                }
+                playSound(mListener.getPressUpSound());
                 break;
 
             case ACTION_MOVE:

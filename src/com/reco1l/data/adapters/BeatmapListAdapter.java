@@ -34,9 +34,10 @@ import com.reco1l.utils.helpers.BeatmapHelper;
 
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.BeatmapInfo;
+import main.osu.BeatmapProperties;
+import main.osu.Config;
+import com.rimu.R;
 
 public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapInfo> {
 
@@ -133,7 +134,7 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
 
         @Override
         protected void onAttachmentChange(boolean isAttached) {
-            if (mBitmap != null) {
+            if (mBitmap != null || !Config.isItemBackground()) {
                 return;
             }
 

@@ -10,15 +10,15 @@ public class TouchListener {
 
     //--------------------------------------------------------------------------------------------//
 
-    public BassSoundProvider getPressDownSound() {
+    public String getPressDownSound() {
         return null;
     }
 
-    public BassSoundProvider getPressUpSound() {
-        return Game.resourcesManager.getSound("menuclick");
+    public String getPressUpSound() {
+        return "menuclick";
     }
 
-    public BassSoundProvider getLongPressSound() {
+    public String getLongPressSound() {
         return null;
     }
 

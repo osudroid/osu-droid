@@ -255,16 +255,16 @@ public abstract class BaseFragment extends Fragment implements ResourceTable {
     // Find a view by its string format identifier, if you previously defined the prefix you don't
     // need to write the fragment.
     @SuppressWarnings("unchecked")
-    protected <T extends View> T find(String pId) {
-        if (rootView == null || pId == null) {
+    protected <T extends View> T find(String viewID) {
+        if (rootView == null || viewID == null) {
             return null;
         }
 
         int resId;
-        if (getPrefix() == null || pId.startsWith(getPrefix() + "_")) {
-            resId = id(pId, "id");
+        if (getPrefix() == null || viewID.startsWith(getPrefix() + "_")) {
+            resId = id(viewID, "id");
         } else {
-            resId = id(getPrefix() + "_" + pId, "id");
+            resId = id(getPrefix() + "_" + viewID, "id");
         }
 
         Object view = rootView.findViewById(resId);

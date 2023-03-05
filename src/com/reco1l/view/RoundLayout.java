@@ -12,6 +12,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -233,6 +234,12 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     }
 
     public final void setRadius(int radius) {
+        mRadius = sdp(radius);
+        invalidate();
+    }
+
+    // This set the radius without rescaling it using sdp()
+    public final void setRadiusAbs(int radius) {
         mRadius = radius;
         invalidate();
     }
@@ -400,5 +407,13 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
             return (int) (sp * resources().getDisplayMetrics().density);
         }
         return ResourceTable.super.ssp(sp);
+    }
+
+    @Override
+    public Typeface font(String name) {
+        if (isInEditMode()) {
+            return Typeface.DEFAULT;
+        }
+        return ResourceTable.super.font(name);
     }
 }

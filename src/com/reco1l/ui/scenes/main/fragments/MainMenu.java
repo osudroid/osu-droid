@@ -1,4 +1,4 @@
-package com.reco1l.ui.fragments;
+package com.reco1l.ui.scenes.main.fragments;
 
 import android.view.View;
 import android.widget.LinearLayout;
@@ -17,9 +17,8 @@ import com.reco1l.ui.elements.LogoView;
 import com.reco1l.view.effects.ExpandEffect;
 import com.reco1l.view.effects.CircularSpectrum;
 
-import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
-import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.BuildConfig;
+import com.rimu.R;
 
 // Created by Reco1l on 9/7/22 18:09
 
@@ -91,8 +90,8 @@ public final class MainMenu extends BaseFragment {
 
         bindTouch(mLogo, new TouchListener() {
 
-            public BassSoundProvider getPressUpSound() {
-                return Game.resourcesManager.getSound("menuhit");
+            public String getPressUpSound() {
+                return "menuhit";
             }
 
             public void onPressUp() {

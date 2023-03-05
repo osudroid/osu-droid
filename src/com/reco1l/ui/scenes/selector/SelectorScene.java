@@ -1,4 +1,4 @@
-package com.reco1l.scenes;
+package com.reco1l.ui.scenes.selector;
 
 // Created by Reco1l on 26/9/22 17:40
 
@@ -52,7 +52,6 @@ public class SelectorScene extends BaseScene {
             return;
         }
         Game.musicManager.change(track);
-        Game.globalManager.setSelectedTrack(track);
     }
 
     public void onAudioChange(TrackInfo track) {
