@@ -62,7 +62,7 @@ public class ScoreboardAdapter extends BaseAdapter<ScoreHolder, ScoreInfo> {
         private final LinearLayout modsLayout;
         private final TextView rank, name, score, combo, accuracy, difference;
         private final ShapeableImageView avatar;
-        private final ImageView mark;
+        private final SVGImageView mark;
 
         private final NumberFormat mFormat = NumberFormat.getNumberInstance(Locale.US);
 
@@ -120,8 +120,7 @@ public class ScoreboardAdapter extends BaseAdapter<ScoreHolder, ScoreInfo> {
             } else {
                 avatar.setImageDrawable(OnlineHelper.getPlayerAvatar());
             }
-
-            mark.setImageBitmap(Game.bitmapManager.get("ranking-" + item.getMark()));
+            mark.setImageAsset("svg/ranking-" + item.getMark() + ".svg");
 
             name.setText(item.getName());
             rank.setText("" + item.getRank());

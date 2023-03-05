@@ -60,7 +60,7 @@ public class CarrouselRecyclerView extends RecyclerView {
         view.getLocationInWindow(pos);
         pos[1] += mYOffset;
 
-        float diff = getWindowHeight() - h;
+        float diff = (getWindowHeight() - h) * 1f / 2;
         float dx = 1 - Math.abs(pos[1] - diff) / Math.abs(diff + h / 0.01f);
 
         return w - w * FMath.clamp(dx, 0f, 1f);

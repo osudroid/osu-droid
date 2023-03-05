@@ -56,7 +56,7 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
 
         private final RoundLayout mBody;
 
-        private final ImageView mMarkImage;
+        private final SVGImageView mMarkImage;
         private final TextView mDifficultyText;
         private final BadgeTextView mStarsText;
 
@@ -97,10 +97,10 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
             int color = BeatmapHelper.Palette.getColor(sr);
             int textColor = BeatmapHelper.Palette.getTextColor(sr);
 
-            String markTex = Game.scoreLibrary.getBestMark(item.getFilename());
+            String mark = Game.scoreLibrary.getBestMark(item.getFilename());
 
-            if (markTex != null) {
-                mMarkImage.setImageBitmap(Game.bitmapManager.get("ranking-" + markTex));
+            if (mark != null) {
+                mMarkImage.setImageAsset("svg/ranking-" + mark + ".svg");
                 mMarkImage.setVisibility(View.VISIBLE);
             }
 

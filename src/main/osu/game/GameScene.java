@@ -897,14 +897,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
         if (!breakPeriods.isEmpty()) {
             if (!UI.breakOverlay.isBreak() && breakPeriods.peek().getStart() <= secPassed) {
                 gameStarted = false;
-                breakAnimator.init(breakPeriods.peek().getLength());
-                if(GameHelper.isFlashLight()){
+                UI.breakOverlay.show(breakPeriods.peek());
+                if (GameHelper.isFlashLight()) {
                     flashlightSprite.onBreak(true);
                 }
                 breakPeriods.poll();
             }
         }
-        if (breakAnimator.isOver()) {
+        if (UI.breakOverlay.isOver()) {
             gameStarted = true;
             if (GameHelper.isFlashLight()) {
                 flashlightSprite.onBreak(false);

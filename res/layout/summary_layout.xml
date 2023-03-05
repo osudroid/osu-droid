@@ -246,12 +246,11 @@
                                 android:gravity="right"
                                 android:orientation="horizontal" />
 
-                            <ImageView
+                            <com.caverock.androidsvg.SVGImageView
                                 android:id="@+id/gr_markIv"
                                 android:layout_width="@dimen/gameResultsMarkSize"
                                 android:layout_height="@dimen/gameResultsMarkSize"
-                                android:layout_margin="@dimen/M"
-                                android:src="@drawable/placeholder_ranking" />
+                                android:layout_margin="@dimen/M" />
 
                         </LinearLayout>
 

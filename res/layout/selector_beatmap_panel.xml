@@ -7,19 +7,13 @@
     xmlns:tool="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:translationZ="@dimen/middle_layer"
-    android:background="@color/beatmapPanelBackground">
+    android:background="@color/beatmapPanelBackground"
+    android:translationZ="@dimen/middle_layer">
 
-    <View
-        android:id="@+id/background"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <com.reco1l.view.custom.TiltedLayout
+    <LinearLayout
         android:id="@+id/bp_body"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:background="#1E000000">
+        android:layout_height="match_parent">
 
         <com.factor.bouncy.BouncyNestedScrollView
             android:id="@+id/bp_panel"
@@ -33,92 +27,35 @@
 
                 <include layout="@layout/layout_beatmap_card" />
 
-                <LinearLayout
+                <com.reco1l.view.RoundLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_horizontal">
+                    android:layout_margin="@dimen/XS"
+                    android:background="@color/backgroundSecondary"
+                    android:orientation="vertical"
+                    app:type="linear">
 
-                    <RelativeLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="@dimen/beatmapPanelTabLayoutHeight"
-                        android:layout_marginVertical="@dimen/S"
-                        android:background="@drawable/shape_rounded"
-                        android:backgroundTint="@color/beatmapPanelTabBackground"
-                        android:gravity="center_horizontal">
+                    <com.reco1l.view.TabSelectorView
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_36sdp"
+                        android:layout_marginHorizontal="@dimen/M"
+                        app:tabs="Local|Global" />
 
-                        <View
-                            android:id="@+id/bp_tabIndicator"
-                            android:layout_width="@dimen/beatmapPanelTabButtonWidth"
-                            android:layout_height="match_parent"
-                            android:alpha="0.2"
-                            android:background="@drawable/shape_rounded"
-                            android:backgroundTint="#FFFFFF" />
-
-                        <TextView
-                            android:id="@+id/bp_localTab"
-                            style="@style/text"
-                            android:layout_width="@dimen/beatmapPanelTabButtonWidth"
-                            android:layout_height="match_parent"
-                            android:background="@drawable/shape_rounded"
-                            android:gravity="center"
-                            android:text="Local"
-                            android:textSize="@dimen/textS" />
-
-                        <TextView
-                            android:id="@+id/bp_globalTab"
-                            style="@style/text"
-                            android:layout_width="@dimen/beatmapPanelTabButtonWidth"
-                            android:layout_height="match_parent"
-                            android:layout_toEndOf="@+id/bp_localTab"
-                            android:background="@drawable/shape_rounded"
-                            android:gravity="center"
-                            android:text="Global"
-                            android:textSize="@dimen/textS" />
-
-                    </RelativeLayout>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/bp_pageContainer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:id="@+id/bp_messageLayout"
+                    <com.reco1l.view.RoundLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:padding="@dimen/XXL"
-                        android:visibility="gone">
+                        android:background="@color/backgroundPrimary">
 
-                        <ImageView
-                            android:layout_width="wrap_content"
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/bp_scoreboard"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_centerHorizontal="true"
-                            android:src="@drawable/v28_info"
-                            app:tint="@color/textSecondary" />
+                            tool:itemCount="1"
+                            tool:listitem="@layout/item_score" />
 
-                        <TextView
-                            android:id="@+id/bp_messageTv"
-                            style="@style/text"
-                            android:layout_marginTop="@dimen/XS"
-                            android:gravity="center"
-                            android:text="@string/beatmap_panel_offline_prompt"
-                            android:textColor="@color/textSecondary" />
+                    </com.reco1l.view.RoundLayout>
 
-                    </LinearLayout>
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/bp_scoreboard"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        tool:itemCount="1"
-                        tool:listitem="@layout/item_score" />
-
-                </LinearLayout>
+                </com.reco1l.view.RoundLayout>
 
             </LinearLayout>
 

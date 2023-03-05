@@ -1,4 +1,4 @@
-package com.reco1l.ui.custom;
+package com.reco1l.ui.scenes.selector.elements;
 
 import android.graphics.drawable.ColorDrawable;
 import android.view.View;
@@ -7,8 +7,8 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
-import com.reco1l.data.TrackAttribute;
-import com.reco1l.data.TrackAttributeSet;
+import com.reco1l.management.game.TrackAttribute;
+import com.reco1l.management.game.TrackAttributeSet;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.view.BadgeTextView;
 import com.reco1l.view.FadeImageView;
@@ -17,9 +17,9 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.TrackInfo;
+import main.osu.game.GameHelper;
+import com.rimu.R;
 
 public final class TrackCard {
 

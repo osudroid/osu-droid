@@ -111,7 +111,7 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
         onCreate();
         handleAttributes();
 
-        super.post(() -> onLayoutChange(getLayoutParams()));
+        super.post(() -> onPostLayout(getLayoutParams()));
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -187,8 +187,9 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     }
 
     // Called when layout params has been changed
-    protected void onLayoutChange(ViewGroup.LayoutParams params) {
-        matchSize(mInternalLayout);
+    @CallSuper
+    protected void onPostLayout(ViewGroup.LayoutParams params) {
+        matchSize(mInternalLayout, params);
     }
 
     // Override only to make special paths
@@ -277,7 +278,7 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     @Override
     public void setLayoutParams(ViewGroup.LayoutParams params) {
         super.setLayoutParams(params);
-        onLayoutChange(params);
+        onPostLayout(params);
     }
 
     protected final void matchSize(View view) {

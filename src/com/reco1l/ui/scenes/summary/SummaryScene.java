@@ -31,7 +31,8 @@ public class SummaryScene extends BaseScene {
             mRetryButton,
             mReplayButton;
 
-    public int replayID = -1;
+    // TODO [SummaryScene] Fix replay ID
+    private int mReplayID = -1;
 
     private StatisticV2 mLastStats;
     private TrackInfo mLastTrack;

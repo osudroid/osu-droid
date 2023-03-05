@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <View
+        android:id="@+id/background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#2E000000" />
+
+    <com.reco1l.ui.scenes.summary.views.PlayerArrowView
+        android:id="@+id/bo_arrow0"
+        android:layout_width="@dimen/_160sdp"
+        android:layout_height="match_parent"
+        android:background="#1AFFFFFF"
+        app:arrowWidth="80" />
+
+    <com.reco1l.ui.scenes.summary.views.PlayerArrowView
+        android:id="@+id/bo_arrow1"
+        android:layout_width="@dimen/_80sdp"
+        android:layout_height="match_parent"
+        android:background="#1AFFFFFF"
+        app:arrowWidth="80" />
+
+    <com.reco1l.ui.scenes.summary.views.PlayerArrowView
+        android:id="@+id/bo_arrow2"
+        android:layout_width="@dimen/_160sdp"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:background="#1AFFFFFF"
+        android:rotationY="180"
+        app:arrowWidth="80" />
+
+    <com.reco1l.ui.scenes.summary.views.PlayerArrowView
+        android:id="@+id/bo_arrow3"
+        android:layout_width="@dimen/_80sdp"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:background="#1AFFFFFF"
+        android:rotationY="180"
+        app:arrowWidth="80" />
+
+    <com.reco1l.ui.scenes.player.views.ScoreNumberView
+        android:id="@+id/bo_leftTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
+
+    <LinearLayout
+        android:id="@+id/bo_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/_40sdp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <com.caverock.androidsvg.SVGImageView
+            android:id="@+id/bo_mark"
+            android:layout_width="@dimen/_16sdp"
+            android:layout_height="@dimen/_16sdp"
+            android:layout_marginBottom="@dimen/XS" />
+
+        <TextView
+            android:id="@+id/bo_accuracy"
+            style="@style/text"
+            android:textColor="#FFF"
+            android:text="100.00%"/>
+
+    </LinearLayout>
+
+    <!--
+        <com.reco1l.view.RoundedImageView
+            android:layout_width="@dimen/_60sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:padding="@dimen/XS"
+            android:background="@color/textPrimary"
+            android:src="@drawable/v18_skip"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="@dimen/_40sdp"/>
+    -->
+
+
+</RelativeLayout>

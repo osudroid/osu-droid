@@ -4,10 +4,10 @@ package com.reco1l.ui.scenes.summary.fragments;
 
 import android.graphics.drawable.Drawable;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.caverock.androidsvg.SVGImageView;
 import com.reco1l.annotation.Legacy;
 import com.reco1l.Game;
 import com.reco1l.ui.scenes.Scenes;
@@ -35,7 +35,7 @@ public final class GameSummary extends BaseFragment {
 
     public static final GameSummary instance = new GameSummary();
 
-    private StatisticLayout
+    private StatisticView
             m0Text,
             m50Text,
             mPPText,
@@ -58,7 +58,7 @@ public final class GameSummary extends BaseFragment {
             mArtistText,
             mDifficultyText;
 
-    private ImageView mMarkImage;
+    private SVGImageView mMarkImage;
     private RoundedImageView mAvatarImage;
     private LinearLayout mModsContainer;
 
@@ -156,7 +156,7 @@ public final class GameSummary extends BaseFragment {
             mComboText.setText(mStats.getMaxCombo() + "x");
             mAccuracyText.setText(String.format("%.2f%%", mStats.getAccuracy() * 100f));
 
-            mMarkImage.setImageBitmap(Game.bitmapManager.get("ranking-" + mStats.getMark()));
+            mMarkImage.setImageAsset("svg/ranking-" + mStats.getMark() + ".svg");
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 

@@ -1,4 +1,4 @@
-package com.reco1l.view.custom;
+package com.reco1l.ui.scenes.summary.views;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -19,7 +19,7 @@ import com.reco1l.utils.Views;
 import com.reco1l.view.BadgeTextView;
 import com.reco1l.view.RoundLayout;
 
-public final class StatisticLayout extends RoundLayout {
+public final class StatisticView extends RoundLayout {
 
     private LinearLayout mLayout;
     private BadgeTextView mBadge;
@@ -27,15 +27,15 @@ public final class StatisticLayout extends RoundLayout {
 
     //--------------------------------------------------------------------------------------------//
 
-    public StatisticLayout(@NonNull Context context) {
+    public StatisticView(@NonNull Context context) {
         super(context);
     }
 
-    public StatisticLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public StatisticView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public StatisticLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public StatisticView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 

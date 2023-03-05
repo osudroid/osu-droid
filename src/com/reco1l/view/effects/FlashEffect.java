@@ -61,7 +61,7 @@ public class FlashEffect extends RoundLayout {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    protected void onLayoutChange(ViewGroup.LayoutParams params) {
+    protected void onPostLayout(ViewGroup.LayoutParams params) {
         mRectWidth = getWidth() / 4f;
 
         LinearGradient left = new LinearGradient(0, 0, mRectWidth, 0, WHITE, TRANSPARENT, CLAMP);

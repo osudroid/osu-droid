@@ -2,218 +2,212 @@
 
 <!-- Created by Reco1l on 1/8/22 06:36 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.reco1l.view.RoundLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/bp_banner"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="@dimen/XS">
+    android:layout_margin="@dimen/XS"
+    android:background="@color/backgroundPrimary"
+    android:orientation="vertical"
+    app:type="linear">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        tools:background="#FFF">
+        android:layout_height="wrap_content">
 
-        <RelativeLayout
+        <com.reco1l.view.FadeImageView
+            android:id="@+id/bp_songBackground"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/bp_content"
+            android:layout_alignBottom="@+id/bp_content"
+            android:scaleType="centerCrop" />
 
-            <com.reco1l.view.FadeImageView
-                android:id="@+id/bp_songBackground"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/bp_content"
-                android:layout_alignBottom="@+id/bp_content"
-                android:scaleType="centerCrop" />
+        <View
+            android:id="@+id/bp_gradient"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/bp_content"
+            android:layout_alignBottom="@+id/bp_content"
+            android:background="@drawable/shape_double_gradient" />
 
-            <View
-                android:id="@+id/bp_gradient"
+        <LinearLayout
+            android:id="@+id/bp_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/S">
+
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/bp_content"
-                android:layout_alignBottom="@+id/bp_content"
-                android:background="@drawable/shape_double_gradient" />
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/bp_title"
+                        style="@style/largeText"
+                        android:text="[title]"
+                        android:textColor="#FFF" />
+
+                    <TextView
+                        android:id="@+id/bp_artist"
+                        style="@style/text"
+                        android:layout_below="@+id/bp_title"
+                        android:layout_marginTop="@dimen/XXS"
+                        android:text="[artist]"
+                        android:textColor="#FFF" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
 
             <LinearLayout
-                android:id="@+id/bp_content"
+                android:id="@+id/bp_properties"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="@dimen/S">
+                android:layout_marginTop="@dimen/S"
+                android:orientation="vertical">
 
-                <RelativeLayout
+                <com.reco1l.view.BadgeTextView
+                    android:id="@+id/bp_mapper"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/XXS"
+                    android:text="Mapper"
+                    app:icon="@drawable/v10_person" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/XXS">
+
+                    <com.reco1l.view.BadgeTextView
+                        android:id="@+id/bp_length"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="@dimen/XXS"
+                        android:text="00:00"
+                        app:icon="@drawable/v10_time" />
+
+                    <com.reco1l.view.BadgeTextView
+                        android:id="@+id/bp_bpm"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="000.0-000.0"
+                        app:icon="@drawable/v10_bpm" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/XXS">
+
+                    <com.reco1l.view.BadgeTextView
+                        android:id="@+id/bp_combo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="@dimen/XXS"
+                        android:text="0000"
+                        app:icon="@drawable/v10_combo" />
+
+                    <com.reco1l.view.BadgeTextView
+                        android:id="@+id/bp_circles"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="@dimen/XXS"
+                        android:text="0000"
+                        app:icon="@drawable/v10_circle" />
+
+                    <com.reco1l.view.BadgeTextView
+                        android:id="@+id/bp_sliders"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="@dimen/XXS"
+                        android:text="0000"
+                        app:icon="@drawable/v10_slider" />
+
+                    <com.reco1l.view.BadgeTextView
+                        android:id="@+id/bp_spinners"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="00"
+                        app:icon="@drawable/v10_spinner" />
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/bp_title"
-                            style="@style/largeText"
-                            android:textColor="#FFF"
-                            android:text="[title]" />
-
-                        <TextView
-                            android:id="@+id/bp_artist"
-                            style="@style/text"
-                            android:textColor="#FFF"
-                            android:layout_below="@+id/bp_title"
-                            android:layout_marginTop="@dimen/XXS"
-                            android:text="[artist]" />
-
-                    </LinearLayout>
-
-                </RelativeLayout>
-
-                <LinearLayout
-                    android:id="@+id/bp_properties"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="@dimen/S">
-
                     <com.reco1l.view.BadgeTextView
-                        android:id="@+id/bp_mapper"
+                        android:id="@+id/bp_ar"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="@dimen/XXS"
-                        app:icon="@drawable/v10_person"
-                        android:text="Mapper" />
+                        android:layout_marginStart="0dp"
+                        android:layout_marginRight="@dimen/XXS"
+                        android:text="00.0"
+                        app:icon="@drawable/v10_ar" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <com.reco1l.view.BadgeTextView
+                        android:id="@+id/bp_od"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="@dimen/XXS">
+                        android:layout_marginRight="@dimen/XXS"
+                        android:text="00.0"
+                        app:icon="@drawable/v10_od" />
 
-                        <com.reco1l.view.BadgeTextView
-                            android:id="@+id/bp_length"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginRight="@dimen/XXS"
-                            app:icon="@drawable/v10_time"
-                            android:text="00:00" />
-
-                        <com.reco1l.view.BadgeTextView
-                            android:id="@+id/bp_bpm"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:icon="@drawable/v10_bpm"
-                            android:text="000.0-000.0" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <com.reco1l.view.BadgeTextView
+                        android:id="@+id/bp_cs"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="@dimen/XXS">
+                        android:layout_marginRight="@dimen/XXS"
+                        android:text="00.0"
+                        app:icon="@drawable/v10_cs" />
 
-                        <com.reco1l.view.BadgeTextView
-                            android:id="@+id/bp_combo"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginRight="@dimen/XXS"
-                            app:icon="@drawable/v10_combo"
-                            android:text="0000" />
-
-                        <com.reco1l.view.BadgeTextView
-                            android:id="@+id/bp_circles"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginRight="@dimen/XXS"
-                            app:icon="@drawable/v10_circle"
-                            android:text="0000" />
-
-                        <com.reco1l.view.BadgeTextView
-                            android:id="@+id/bp_sliders"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginRight="@dimen/XXS"
-                            app:icon="@drawable/v10_slider"
-                            android:text="0000" />
-
-                        <com.reco1l.view.BadgeTextView
-                            android:id="@+id/bp_spinners"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:icon="@drawable/v10_spinner"
-                            android:text="00" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <com.reco1l.view.BadgeTextView
-                            android:id="@+id/bp_ar"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="0dp"
-                            android:layout_marginRight="@dimen/XXS"
-                            app:icon="@drawable/v10_ar"
-                            android:text="00.0" />
-
-                        <com.reco1l.view.BadgeTextView
-                            android:id="@+id/bp_od"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginRight="@dimen/XXS"
-                            app:icon="@drawable/v10_od"
-                            android:text="00.0" />
-
-                        <com.reco1l.view.BadgeTextView
-                            android:id="@+id/bp_cs"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginRight="@dimen/XXS"
-                            app:icon="@drawable/v10_cs"
-                            android:text="00.0" />
-
-                        <com.reco1l.view.BadgeTextView
-                            android:id="@+id/bp_hp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:icon="@drawable/v10_hp"
-                            android:text="00.0" />
-
-                    </LinearLayout>
+                    <com.reco1l.view.BadgeTextView
+                        android:id="@+id/bp_hp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="00.0"
+                        app:icon="@drawable/v10_hp" />
 
                 </LinearLayout>
 
             </LinearLayout>
 
-        </RelativeLayout>
+        </LinearLayout>
 
-        <RelativeLayout
-            android:layout_width="match_parent"
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/S">
+
+        <com.reco1l.view.BadgeTextView
+            android:id="@+id/bp_stars"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="@dimen/S">
+            android:text="00.00"
+            app:icon="@drawable/v10_star" />
 
-            <com.reco1l.view.BadgeTextView
-                android:id="@+id/bp_stars"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:icon="@drawable/v10_star"
-                android:text="00.00" />
+        <TextView
+            android:id="@+id/bp_difficulty"
+            style="@style/text"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/S"
+            android:layout_toEndOf="@+id/bp_stars"
+            android:text="[Difficulty name]"
+            android:textColor="#BFFFFFFF"
+            android:textSize="@dimen/textXS" />
 
-            <TextView
-                android:id="@+id/bp_difficulty"
-                style="@style/text"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="@dimen/S"
-                android:layout_toEndOf="@+id/bp_stars"
-                android:text="[Difficulty name]"
-                android:textColor="#BFFFFFFF"
-                android:textSize="@dimen/textXS" />
+    </RelativeLayout>
 
-        </RelativeLayout>
-
-    </LinearLayout>
-
-</LinearLayout>
+</com.reco1l.view.RoundLayout>

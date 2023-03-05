@@ -1,11 +1,8 @@
 package com.reco1l.ui.scenes.selector.fragments;
 
-import static android.view.View.LAYER_TYPE_HARDWARE;
-
 import static androidx.recyclerview.widget.RecyclerView.*;
 
 import android.view.View;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -39,8 +36,7 @@ public final class BeatmapPanel extends BaseFragment implements
 
     private int bodyWidth;
 
-    private View body, message, pageContainer, tabIndicator;
-    private TextView localTab, globalTab, messageText;
+    private View body;
 
     private RecyclerView mScoresList;
     private ScoreboardAdapter mScoresAdapter;
@@ -77,8 +73,6 @@ public final class BeatmapPanel extends BaseFragment implements
     //--------------------------------------------------------------------------------------------//
     @Override
     protected void onLoad() {
-        rootBackground.setLayerType(LAYER_TYPE_HARDWARE, null);
-
         mScoresList = find("scoreboard");
         mScoresList.setLayoutManager(new LinearLayoutManager(getContext(), VERTICAL, true));
 
@@ -92,23 +86,8 @@ public final class BeatmapPanel extends BaseFragment implements
                 .toAlpha(1)
                 .play(300);
 
-        message = find("messageLayout");
-        messageText = find("messageTv");
-        pageContainer = find("pageContainer");
-
-        localTab = find("localTab");
-        globalTab = find("globalTab");
-        tabIndicator = find("tabIndicator");
-
-        message.setVisibility(View.GONE);
-
-        bindTouch(globalTab, () -> switchTab(globalTab));
-        bindTouch(localTab, () -> switchTab(localTab));
-
         mTrackCard = new TrackCard(find("banner"));
         mTrackCard.onMusicChange(Game.musicManager.getTrack());
-
-        switchTab(localTab);
     }
 
     @Override

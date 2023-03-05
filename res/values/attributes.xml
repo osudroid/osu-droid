@@ -48,12 +48,10 @@
         <attr name="syncToBeat" />
     </declare-styleable>
 
-    <declare-styleable name="PanelLayout">
-        <attr name="beatSync" />
-        <attr name="panelColor" format="color" />
-        <attr name="panelTitle" format="string" />
-        <attr name="panelRadius" format="dimension" />
-        <attr name="panelTitleHeight" format="dimension" />
+    <declare-styleable name="PlayerArrowView">
+        <attr name="arrowWidth" format="integer"/>
     </declare-styleable>
+
+    <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
 </resources>

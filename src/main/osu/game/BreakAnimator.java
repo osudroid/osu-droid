@@ -132,8 +132,7 @@ public class BreakAnimator extends GameObject {
         }
         time += dt;
 
-        if (length > 3 && time > (length - 1) / 2
-                && time - dt < (length - 1) / 2) {
+        if (length > 3 && time > (length - 1) / 2 && time - dt < (length - 1) / 2) {
             passfail.setVisible(true);
             passfail.registerEntityModifier(new SequenceEntityModifier(
                     new DelayModifier(0.25f), new FadeOutModifier(0.025f),
@@ -161,20 +160,16 @@ public class BreakAnimator extends GameObject {
             isbreak = false;
             over = true;
             resumeBgFade();
-            SyncTaskManager.getInstance().run(new Runnable() {
-
-
-                public void run() {
-                    if (mark != null) {
-                        mark.detachSelf();
-                    }
-                    for (final Sprite sp : arrows) {
-                        sp.detachSelf();
-                    }
-                    passfail.detachSelf();
-                    SpritePool.getInstance().putSprite("section-" + ending,
-                            passfail);
+            SyncTaskManager.getInstance().run(() -> {
+                if (mark != null) {
+                    mark.detachSelf();
                 }
+                for (final Sprite sp : arrows) {
+                    sp.detachSelf();
+                }
+                passfail.detachSelf();
+                SpritePool.getInstance().putSprite("section-" + ending,
+                        passfail);
             });
         }
     }

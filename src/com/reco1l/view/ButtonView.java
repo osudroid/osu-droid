@@ -65,8 +65,8 @@ public class ButtonView extends RoundLayout {
     }
 
     @Override
-    public void onLayoutChange(ViewGroup.LayoutParams params) {
-        super.onLayoutChange(params);
+    public void onPostLayout(ViewGroup.LayoutParams params) {
+        super.onPostLayout(params);
         Views.size(mEffect, getWidth(), getHeight());
     }
 

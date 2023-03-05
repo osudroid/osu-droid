@@ -1,24 +1,23 @@
-package com.reco1l.management;
+package com.reco1l.management.scoreboard;
 
 import android.database.Cursor;
 import android.util.Log;
 
-import com.reco1l.global.Game;
-import com.reco1l.data.ScoreInfo;
+import com.reco1l.Game;
 import com.reco1l.utils.execution.AsyncTask;
 
 import java.io.File;
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
+import main.osu.TrackInfo;
+import main.osu.helper.FileUtils;
+import main.osu.online.OnlineManager.OnlineManagerException;
 
 // Created by Reco1l on 18/9/22 12:40
 
-public final class BoardManager {
+public final class ScoreboardManager {
 
-    public static final BoardManager instance = new BoardManager();
+    public static final ScoreboardManager instance = new ScoreboardManager();
 
     private final ArrayList<ScoreInfo> mScores;
     private final ArrayList<Observer> mObservers;
@@ -32,7 +31,7 @@ public final class BoardManager {
 
     //--------------------------------------------------------------------------------------------//
 
-    public BoardManager() {
+    public ScoreboardManager() {
         mScores = new ArrayList<>();
         mObservers = new ArrayList<>();
     }

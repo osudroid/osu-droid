@@ -13,21 +13,21 @@ import androidx.annotation.Nullable;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.utils.Maths;
 
-public class ProgressIndicator extends RoundLayout {
+public class ProgressIndicatorView extends RoundLayout {
 
     private CircularProgressIndicator mIndicator;
 
     //--------------------------------------------------------------------------------------------//
 
-    public ProgressIndicator(@NonNull Context context) {
+    public ProgressIndicatorView(@NonNull Context context) {
         super(context);
     }
 
-    public ProgressIndicator(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public ProgressIndicatorView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public ProgressIndicator(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public ProgressIndicatorView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
@@ -49,14 +49,14 @@ public class ProgressIndicator extends RoundLayout {
     }
 
     @Override
-    protected void onLayoutChange(ViewGroup.LayoutParams params) {
-        super.onLayoutChange(params);
+    protected void onPostLayout(ViewGroup.LayoutParams params) {
+        super.onPostLayout(params);
         matchSize(mIndicator);
 
         mIndicator.post(() -> {
             int size = Maths.pct(Math.min(mIndicator.getWidth(), mIndicator.getHeight()), 80);
 
-            setRadius(Maths.pct(size, 15));
+            setRadiusAbs(Maths.pct(size, 15));
             mIndicator.setIndicatorSize(size);
 
             int thick = Maths.pct(size, 12);

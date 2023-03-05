@@ -20,7 +20,7 @@ import main.osu.MainActivity;
 
 // Created by Reco1l on 26/9/22 19:10
 
-public final class Game implements IReferences {
+public final class Game implements References {
 
     static {
         Logging.loadOf(Game.class);

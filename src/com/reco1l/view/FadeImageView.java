@@ -57,8 +57,8 @@ public final class FadeImageView extends RoundLayout {
     }
 
     @Override
-    protected void onLayoutChange(ViewGroup.LayoutParams params) {
-        super.onLayoutChange(params);
+    protected void onPostLayout(ViewGroup.LayoutParams params) {
+        super.onPostLayout(params);
         matchSize(mLayers[0]);
         matchSize(mLayers[1]);
     }

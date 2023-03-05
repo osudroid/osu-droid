@@ -1,4 +1,4 @@
-package com.reco1l.data;
+package com.reco1l.management.scoreboard;
 
 import com.reco1l.utils.helpers.ScoringHelper;
 
@@ -6,23 +6,23 @@ import java.text.NumberFormat;
 import java.util.EnumSet;
 import java.util.Locale;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import main.osu.game.mods.GameMod;
 
 public class ScoreInfo {
 
+    public int scoreId;
+    public long playScore;
+
+    public String userName;
+
     private int
-            id,
             rank,
             combo;
 
-    private long
-            score,
-            difference;
-
+    private long difference;
     private float accuracy;
 
     private String
-            name,
             mark,
             avatar;
 
@@ -32,15 +32,15 @@ public class ScoreInfo {
 
     @Deprecated
     public String get() {
-        return name + "\n"
-                + NumberFormat.getNumberInstance(Locale.US).format(score) + "\n"
+        return userName + "\n"
+                + NumberFormat.getNumberInstance(Locale.US).format(playScore) + "\n"
                 + NumberFormat.getNumberInstance(Locale.US).format(combo) + "x";
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public ScoreInfo setId(int id) {
-        this.id = id;
+        this.scoreId = id;
         return this;
     }
 
@@ -55,7 +55,7 @@ public class ScoreInfo {
     }
 
     public ScoreInfo setScore(long score) {
-        this.score = score;
+        this.playScore = score;
         return this;
     }
 
@@ -70,7 +70,7 @@ public class ScoreInfo {
     }
 
     public ScoreInfo setName(String name) {
-        this.name = name;
+        this.userName = name;
         return this;
     }
 
@@ -93,7 +93,7 @@ public class ScoreInfo {
 
 
     public int getId() {
-        return id;
+        return scoreId;
     }
 
     public int getRank() {
@@ -105,7 +105,7 @@ public class ScoreInfo {
     }
 
     public long getScore() {
-        return score;
+        return playScore;
     }
 
     public long getDifference() {
@@ -117,7 +117,7 @@ public class ScoreInfo {
     }
 
     public String getName() {
-        return name;
+        return userName;
     }
 
     public String getMark() {

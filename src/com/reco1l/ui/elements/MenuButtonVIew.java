@@ -1,4 +1,4 @@
-package com.reco1l.view.custom;
+package com.reco1l.ui.elements;
 
 import static androidx.appcompat.widget.LinearLayoutCompat.VERTICAL;
 
@@ -16,19 +16,19 @@ import androidx.annotation.Nullable;
 import com.reco1l.utils.Views;
 import com.reco1l.view.RoundLayout;
 
-public class MenuButtonLayout extends RoundLayout {
+public class MenuButtonVIew extends RoundLayout {
 
     //--------------------------------------------------------------------------------------------//
 
-    public MenuButtonLayout(@NonNull Context context) {
+    public MenuButtonVIew(@NonNull Context context) {
         super(context);
     }
 
-    public MenuButtonLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public MenuButtonVIew(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public MenuButtonLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public MenuButtonVIew(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
@@ -52,13 +52,12 @@ public class MenuButtonLayout extends RoundLayout {
 
         Views.margins(image).bottom(sdp(6));
 
-        TextView text = new TextView(getContext(), attrs);
-        Views.styleText(text, this);
+        TextView text = Views.styledText(this, attrs);
         addView(text);
     }
 
     @Override
-    protected void onLayoutChange(ViewGroup.LayoutParams params) {
+    protected void onPostLayout(ViewGroup.LayoutParams params) {
         Views.size(getInternalLayout(), sdp(120), sdp(90));
     }
 }
