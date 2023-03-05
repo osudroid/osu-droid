@@ -7,10 +7,10 @@ import com.reco1l.utils.execution.Async;
 import java.util.EnumSet;
 import java.util.function.Consumer;
 
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
+import main.osu.TrackInfo;
+import main.osu.game.GameHelper;
+import main.osu.game.mods.GameMod;
+import main.osu.helper.DifficultyReCalculator;
 
 public class TrackAttributeSet implements ModAcronyms {
 

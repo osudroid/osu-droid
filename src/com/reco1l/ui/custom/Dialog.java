@@ -17,7 +17,7 @@ import com.reco1l.view.ButtonView;
 
 import org.jetbrains.annotations.NotNull;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 // Created by Reco1l on 23/7/22 20:43
 

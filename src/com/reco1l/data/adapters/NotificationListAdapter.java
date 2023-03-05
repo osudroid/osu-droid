@@ -12,7 +12,7 @@ import com.reco1l.ui.custom.Notification;
 
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public class NotificationListAdapter extends BaseAdapter<NotificationListAdapter.ViewHolder, Notification> {
 

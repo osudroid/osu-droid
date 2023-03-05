@@ -18,13 +18,13 @@ import org.anddev.andengine.entity.scene.Scene;
 
 import java.util.Random;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.BeatmapInfo;
+import main.osu.Config;
+import main.osu.TrackInfo;
+import main.osu.online.OnlineManager;
+import main.osu.online.OnlineManager.OnlineManagerException;
+import main.osu.scoring.StatisticV2;
+import com.rimu.R;
 
 public class SelectorScene extends BaseScene {
 

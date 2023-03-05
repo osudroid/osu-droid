@@ -13,13 +13,15 @@ import com.reco1l.view.IconButtonView;
 
 import org.anddev.andengine.entity.scene.Scene;
 
-import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.audio.BassSoundProvider;
+import main.osu.Config;
+import main.osu.TrackInfo;
+import main.osu.game.mods.GameMod;
+import main.osu.scoring.StatisticV2;
+
+import com.rimu.R;
+
+import java.io.File;
 
 public class SummaryScene extends BaseScene {
 

@@ -10,7 +10,7 @@ import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.ui.base.BaseFragment;
 
 import im.delight.android.webview.AdvancedWebView;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public class WebViewFragment extends BaseFragment implements AdvancedWebView.Listener {
 

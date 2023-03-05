@@ -5,7 +5,7 @@ import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.utils.Animation;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public class LoaderFragment extends BaseFragment {
 

@@ -7,10 +7,10 @@ import com.reco1l.ui.UI;
 
 import java.io.File;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
-import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.Config;
+import main.osu.helper.MD5Calcuator;
+import main.osu.online.OnlineFileOperator;
+import com.rimu.R;
 
 // Created by Reco1l on 26/6/22 21:20
 

@@ -26,9 +26,9 @@ import com.reco1l.view.effects.StripsEffect;
 
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.TrackInfo;
+import main.osu.game.GameHelper;
+import com.rimu.R;
 
 public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
 

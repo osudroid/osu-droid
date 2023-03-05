@@ -5,8 +5,8 @@ package com.reco1l.management.modding.mods;
 import com.reco1l.Game;
 import com.reco1l.preference.SliderPreference;
 
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.TrackInfo;
+import com.rimu.R;
 
 public class CustomDifficultyMod extends ModWrapper {
 

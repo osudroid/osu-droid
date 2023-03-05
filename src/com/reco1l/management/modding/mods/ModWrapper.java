@@ -10,7 +10,7 @@ import com.reco1l.ui.base.BasePreferenceFragment;
 
 import java.util.EnumSet;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import main.osu.game.mods.GameMod;
 
 public abstract class ModWrapper implements ModAcronyms {
 

@@ -25,11 +25,11 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.TrackInfo;
+import main.osu.game.GameHelper;
+import main.osu.helper.DifficultyReCalculator;
+import main.osu.scoring.StatisticV2;
+import com.rimu.R;
 
 public final class GameSummary extends BaseFragment {
 

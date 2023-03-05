@@ -13,7 +13,7 @@ import com.reco1l.utils.Logging;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.scene.Scene;
 
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import main.osu.TrackInfo;
 
 public abstract class BaseScene extends Scene implements IMusicObserver, ResourceTable {
 

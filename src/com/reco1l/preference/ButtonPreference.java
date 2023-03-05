@@ -10,7 +10,7 @@ import androidx.preference.PreferenceViewHolder;
 import com.reco1l.tables.Res;
 import com.reco1l.view.ButtonView;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public class ButtonPreference extends Preference {
 

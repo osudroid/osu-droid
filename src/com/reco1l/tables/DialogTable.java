@@ -7,9 +7,9 @@ import com.reco1l.Game;
 import com.reco1l.ui.base.SimpleFragment;
 import com.reco1l.ui.custom.DialogBuilder;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.BeatmapInfo;
+import main.osu.BeatmapProperties;
+import com.rimu.R;
 
 // Created by Reco1l on 25/7/22 22:30
 

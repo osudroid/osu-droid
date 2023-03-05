@@ -5,7 +5,7 @@ import com.reco1l.management.modding.ModAcronyms;
 
 import java.util.EnumSet;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import main.osu.game.mods.GameMod;
 
 // Created by Reco1l on 8/8/22 21:35
 

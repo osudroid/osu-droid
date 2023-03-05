@@ -18,7 +18,7 @@ import com.reco1l.ui.elements.ModBadgeView;
 
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public class ModListAdapter extends BaseAdapter<ModListAdapter.ModViewHolder, ModWrapper> {
 

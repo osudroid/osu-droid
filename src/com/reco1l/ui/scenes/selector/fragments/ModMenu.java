@@ -32,8 +32,8 @@ import com.reco1l.ui.elements.ModBadgeView;
 
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.game.mods.GameMod;
+import com.rimu.R;
 
 import static androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL;
 

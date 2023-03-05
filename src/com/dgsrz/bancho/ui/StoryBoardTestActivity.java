@@ -17,10 +17,10 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.storyboard.OsbParser;
-import ru.nsu.ccfit.zuev.osu.storyboard.OsuSprite;
+import main.audio.BassAudioPlayer;
+import main.osu.ResourceManager;
+import main.osu.storyboard.OsbParser;
+import main.osu.storyboard.OsuSprite;
 
 /**
  * Based on native touch event

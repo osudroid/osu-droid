@@ -23,13 +23,13 @@ import androidx.core.app.NotificationManagerCompat;
 
 import com.reco1l.Game;
 
-import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.LibraryManager;
-import ru.nsu.ccfit.zuev.osu.MainActivity;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.audio.Status;
+import main.audio.serviceAudio.SongService;
+import main.osu.BeatmapInfo;
+import main.osu.GlobalManager;
+import main.osu.LibraryManager;
+import main.osu.MainActivity;
+import com.rimu.R;
 
 // Created by Reco1l on 11/6/22 20:43
 

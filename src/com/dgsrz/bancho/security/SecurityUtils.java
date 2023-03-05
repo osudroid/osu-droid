@@ -13,7 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import ru.nsu.ccfit.zuev.osu.BuildType;
+import main.osu.BuildType;
 
 /**
  * 加解密工具类

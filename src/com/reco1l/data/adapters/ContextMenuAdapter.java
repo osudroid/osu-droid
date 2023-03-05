@@ -22,7 +22,7 @@ import com.reco1l.utils.TouchHandler;
 
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public class ContextMenuAdapter extends BaseAdapter<ItemHolder, ContextMenu.Item> {
 

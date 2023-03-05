@@ -13,7 +13,7 @@ import com.reco1l.tables.Res;
 import com.reco1l.ui.scenes.selector.fragments.ModMenu;
 import com.reco1l.utils.Views;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public class ModSectionAdapter extends BaseAdapter<ModSectionAdapter.SectionHolder, ModMenu.Section> {
 

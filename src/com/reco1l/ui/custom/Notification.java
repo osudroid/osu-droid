@@ -10,8 +10,8 @@ import com.reco1l.management.resources.ResourceTable;
 import com.reco1l.ui.fragments.NotificationCenter;
 import com.reco1l.view.ProgressIndicatorView;
 
-import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.audio.BassSoundProvider;
+import com.rimu.R;
 
 // Created by Reco1l on 1/7/22 00:04
 

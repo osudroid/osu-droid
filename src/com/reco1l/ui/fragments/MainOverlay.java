@@ -7,7 +7,7 @@ import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.ui.elements.FPSBadgeView;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public final class MainOverlay extends BaseFragment {
 

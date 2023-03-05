@@ -27,7 +27,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.Field;
 import java.util.Date;
 
-import ru.nsu.ccfit.zuev.osu.MainActivity;
+import main.osu.MainActivity;
 
 public final class ExceptionManager extends Exception implements UncaughtExceptionHandler {
 

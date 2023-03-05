@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 // Created by Reco1l on 27/6/22 17:17
 

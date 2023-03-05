@@ -9,10 +9,10 @@ import com.reco1l.Game;
 import java.io.IOException;
 import java.io.InputStream;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
+import main.osu.BeatmapInfo;
+import main.osu.Config;
+import main.osu.TrackInfo;
+import main.osu.game.GameHelper;
 
 // Created by Reco1l on 1/8/22 05:27
 

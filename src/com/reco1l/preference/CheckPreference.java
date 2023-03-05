@@ -10,7 +10,7 @@ import androidx.preference.PreferenceViewHolder;
 
 import com.reco1l.utils.Animation;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public class CheckPreference extends CheckBoxPreference {
 

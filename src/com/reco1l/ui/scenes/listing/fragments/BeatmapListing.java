@@ -22,8 +22,8 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.ZipException;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
+import main.osu.Config;
+import main.osu.helper.FileUtils;
 
 public class BeatmapListing extends WebViewFragment {
 

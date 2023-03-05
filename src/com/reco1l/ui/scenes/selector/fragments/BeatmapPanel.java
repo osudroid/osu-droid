@@ -25,8 +25,8 @@ import com.reco1l.utils.Animation;
 
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.TrackInfo;
+import com.rimu.R;
 
 // Created by Reco1l on 13/9/22 01:22
 

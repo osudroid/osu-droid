@@ -1,8 +1,6 @@
 package com.edlplan.replay;
 
-import android.os.Environment;
-
-import ru.nsu.ccfit.zuev.osu.Config;
+import main.osu.Config;
 
 import java.io.File;
 

@@ -12,8 +12,8 @@ import com.reco1l.ui.custom.Notification;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
 
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.online.OnlineManager;
+import com.rimu.R;
 
 @Deprecated
 public class NotificationTable {

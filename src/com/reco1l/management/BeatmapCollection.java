@@ -13,8 +13,8 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import main.osu.BeatmapInfo;
+import main.osu.TrackInfo;
 
 public class BeatmapCollection {
 

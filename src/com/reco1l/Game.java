@@ -15,8 +15,8 @@ import com.reco1l.ui.base.FragmentPlatform;
 import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.utils.Logging;
 
-import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
-import ru.nsu.ccfit.zuev.osu.MainActivity;
+import main.audio.serviceAudio.SongService;
+import main.osu.MainActivity;
 
 // Created by Reco1l on 26/9/22 19:10
 

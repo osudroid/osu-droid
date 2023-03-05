@@ -29,9 +29,9 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.game.GameHelper;
+import main.osu.game.mods.GameMod;
+import com.rimu.R;
 
 // Created by Reco1l on 18/6/22 01:20
 

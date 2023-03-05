@@ -13,8 +13,8 @@ import com.reco1l.tables.Res;
 import com.reco1l.view.BadgeTextView;
 import com.reco1l.view.effects.StripsEffect;
 
-import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.audio.BassSoundProvider;
+import com.rimu.R;
 
 public class IntroScene extends BaseScene {
 

@@ -7,8 +7,8 @@ import com.reco1l.preference.SliderPreference;
 
 import java.util.EnumSet;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.game.mods.GameMod;
+import com.rimu.R;
 
 public class CustomSpeedMod extends ModWrapper {
 

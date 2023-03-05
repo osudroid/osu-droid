@@ -17,8 +17,8 @@ import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Queue;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.Config;
+import com.rimu.R;
 
 public final class Background extends BaseFragment {
 

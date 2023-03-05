@@ -18,7 +18,7 @@ import com.reco1l.utils.TouchListener;
 import com.reco1l.utils.execution.ScheduledTask;
 import com.reco1l.view.IconButtonView;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public final class FilterBar extends BaseFragment {
 

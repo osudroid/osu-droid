@@ -17,9 +17,8 @@ import com.reco1l.utils.helpers.OnlineHelper;
 
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.Config;
+import com.rimu.R;
 
 // Created by Reco1l on 18/7/22 22:13
 

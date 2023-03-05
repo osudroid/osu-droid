@@ -19,7 +19,7 @@ import com.reco1l.view.RoundLayout;
 
 import java.util.Map;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public class MenuPreference extends Preference {
 

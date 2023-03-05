@@ -2,7 +2,7 @@ package com.reco1l.management.music;
 
 // Created by Reco1l on 18/9/22 20:15
 
-import static ru.nsu.ccfit.zuev.audio.Status.*;
+import static main.audio.Status.*;
 
 import android.util.Log;
 
@@ -15,10 +15,10 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import main.audio.Status;
+import main.osu.BeatmapInfo;
+import main.osu.Config;
+import main.osu.TrackInfo;
 
 public final class MusicManager {
 

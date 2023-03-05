@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.Config;
+import com.rimu.R;
 
 public final class Settings {
 

@@ -20,7 +20,7 @@ import com.reco1l.ui.custom.DialogBuilder;
 import java.io.File;
 import java.util.List;
 
-import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
+import com.rimu.BuildConfig;
 
 public final class ReplayHelper {
 

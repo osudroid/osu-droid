@@ -5,7 +5,7 @@ import com.edlplan.framework.math.line.LinePath;
 
 import org.anddev.andengine.entity.scene.Scene;
 
-import ru.nsu.ccfit.zuev.osu.RGBColor;
+import main.osu.RGBColor;
 
 public class SliderBody3D extends AbstractSliderBody {
 

@@ -22,7 +22,7 @@ import com.reco1l.utils.TouchHandler;
 import java.util.HashMap;
 import java.util.Map;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 // Created by Reco1l on 22/6/22 02:26
 

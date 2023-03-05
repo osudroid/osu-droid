@@ -9,7 +9,7 @@ import com.reco1l.utils.helpers.ScoringHelper;
 
 import java.util.EnumSet;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import main.osu.game.mods.GameMod;
 
 @Legacy // Handles mod entries from GameMod class
 public class LegacyModWrapper extends ModWrapper implements ModAcronyms {

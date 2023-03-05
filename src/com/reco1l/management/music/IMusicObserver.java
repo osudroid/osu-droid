@@ -4,7 +4,7 @@ package com.reco1l.management.music;
 
 import androidx.annotation.Nullable;
 
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import main.osu.TrackInfo;
 
 public interface IMusicObserver {
 

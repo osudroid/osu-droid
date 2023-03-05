@@ -8,10 +8,10 @@ import com.reco1l.Game;
 
 import java.util.LinkedList;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapData;
-import ru.nsu.ccfit.zuev.osu.OSUParser;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.game.TimingPoint;
+import main.osu.BeatmapData;
+import main.osu.OSUParser;
+import main.osu.TrackInfo;
+import main.osu.game.TimingPoint;
 
 public class TimingWrapper implements IMusicObserver {
 

@@ -2,7 +2,7 @@ package com.reco1l.management.online;
 
 import com.reco1l.annotation.Legacy;
 
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
+import main.osu.online.OnlineManager;
 
 // New backend support in client should replace this
 @Legacy

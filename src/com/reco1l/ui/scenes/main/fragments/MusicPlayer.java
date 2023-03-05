@@ -34,9 +34,9 @@ import com.reco1l.utils.helpers.BeatmapHelper;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.BeatmapInfo;
+import main.osu.TrackInfo;
+import com.rimu.R;
 
 // Created by Reco1l on 1/7/22 22:45
 

@@ -15,7 +15,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import ru.nsu.ccfit.zuev.osu.Config;
+import main.osu.Config;
 
 public class FavoriteLibrary {
 

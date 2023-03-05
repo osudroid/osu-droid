@@ -19,7 +19,7 @@ import com.reco1l.utils.Views;
 import com.reco1l.view.RoundLayout;
 import com.reco1l.view.effects.StripsEffect;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public final class LogoView extends RoundLayout {
 

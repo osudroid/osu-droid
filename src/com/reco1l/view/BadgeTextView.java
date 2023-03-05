@@ -22,7 +22,7 @@ import com.reco1l.annotation.Size;
 import com.reco1l.utils.Views;
 import com.reco1l.utils.Views.MarginUtils;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 // Written by Reco1l
 

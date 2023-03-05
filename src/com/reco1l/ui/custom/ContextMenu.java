@@ -19,7 +19,7 @@ import com.reco1l.utils.Views;
 
 import com.reco1l.data.adapters.ContextMenuAdapter;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public class ContextMenu extends BaseFragment {
 

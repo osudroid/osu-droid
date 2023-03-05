@@ -9,7 +9,7 @@ import com.reco1l.utils.execution.AsyncTask;
 
 import org.anddev.andengine.entity.scene.Scene;
 
-import ru.nsu.ccfit.zuev.osu.ToastLogger;
+import main.osu.ToastLogger;
 
 public class LoaderScene extends BaseScene {
 
