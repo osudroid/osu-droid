@@ -42,6 +42,8 @@ import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.options.EngineOptions;
+import org.anddev.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
+import org.anddev.andengine.engine.options.resolutionpolicy.FixedResolutionPolicy;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.extension.input.touch.controller.MultiTouch;
@@ -69,8 +71,6 @@ import main.osu.game.SpritePool;
 import main.audio.BassAudioPlayer;
 import main.audio.serviceAudio.SaveServiceObject;
 import main.audio.serviceAudio.SongService;
-import main.osu.async.AsyncTaskLoader;
-import main.osu.async.OsuAsyncCallback;
 import main.osu.async.SyncTaskManager;
 import main.osu.helper.FileUtils;
 import main.osu.helper.StringTable;
@@ -120,8 +120,6 @@ public class MainActivity extends BaseGameActivity implements
 
         final DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
-/*        final double screenSize = Math.sqrt(Utils.sqr(dm.widthPixels / dm.xdpi)
-                + Utils.sqr(dm.heightPixels / dm.ydpi));*/
         double screenInches = Math.sqrt(Math.pow(dm.heightPixels, 2) + Math.pow(dm.widthPixels, 2)) / (dm.density * 160.0f);
         Debug.i("screen inches: " + screenInches);
         Config.setScaleMultiplier((float) ((11 - 5.2450170716245195) / 5));
@@ -195,25 +193,6 @@ public class MainActivity extends BaseGameActivity implements
         }
     }
 
-    private void initPreferences() {
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(this);
-
-        if (prefs.getString("playername", "").equals("")) {
-            final SharedPreferences.Editor editor = prefs.edit();
-            editor.putString("playername", "Guest");
-            editor.commit();
-
-            NotificationTable.welcome();
-        }
-
-        if (prefs.getBoolean("onlineSet", false) == false) {
-            Editor editor = prefs.edit();
-            editor.putBoolean("onlineSet", true);
-            editor.commit();
-        }
-    }
-
     @Override
     public void onLoadResources() {
         ResourceManager.getInstance().Init(mEngine, this);
@@ -242,7 +221,6 @@ public class MainActivity extends BaseGameActivity implements
 
             public void onComplete() {
                 GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene());
-                initPreferences();
                 availableInternalMemory();
                 initAccessibilityDetector();
                 if (willReplay) {
@@ -283,7 +261,7 @@ public class MainActivity extends BaseGameActivity implements
         }
         this.mRenderSurfaceView.setRenderer(this.mEngine);
 
-        FragmentPlatform.instance.load(this, mRenderSurfaceView);
+        FragmentPlatform.instance.onSetContentView(this, mRenderSurfaceView);
     }
 
     public void checkNewBeatmaps() {

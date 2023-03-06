@@ -4,6 +4,7 @@ import static com.reco1l.management.Settings.*;
 
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.edlplan.framework.easing.Easing;
@@ -11,6 +12,7 @@ import com.factor.bouncy.BouncyRecyclerView;
 import com.reco1l.data.adapters.SettingsAdapter;
 import com.reco1l.Game;
 import com.reco1l.ui.base.BaseFragment;
+import com.reco1l.ui.base.Layers;
 import com.reco1l.utils.Animation;
 
 import com.reco1l.utils.helpers.OnlineHelper;
@@ -55,9 +57,10 @@ public final class SettingsMenu extends BaseFragment {
 
     //--------------------------------------------------------------------------------------------//
 
+    @NonNull
     @Override
-    protected boolean isOverlay() {
-        return true;
+    protected Layers getLayer() {
+        return Layers.Overlay;
     }
 
     @Override

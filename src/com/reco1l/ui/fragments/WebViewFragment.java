@@ -6,6 +6,9 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import androidx.annotation.NonNull;
+
+import com.reco1l.ui.base.Layers;
 import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.ui.base.BaseFragment;
 
@@ -47,9 +50,10 @@ public class WebViewFragment extends BaseFragment implements AdvancedWebView.Lis
         return true;
     }
 
+    @NonNull
     @Override
-    protected boolean isOverlay() {
-        return true;
+    protected Layers getLayer() {
+        return Layers.Overlay;
     }
 
     //--------------------------------------------------------------------------------------------//

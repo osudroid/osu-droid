@@ -6,10 +6,12 @@ import static com.reco1l.data.adapters.NotificationListAdapter.ViewHolder;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.edlplan.framework.easing.Easing;
 import com.factor.bouncy.BouncyRecyclerView;
+import com.reco1l.ui.base.Layers;
 import com.reco1l.ui.custom.Notification;
 import com.reco1l.data.adapters.NotificationListAdapter;
 import com.reco1l.Game;
@@ -70,9 +72,10 @@ public final class NotificationCenter extends BaseFragment {
         return R.layout.extra_notification_center;
     }
 
+    @NonNull
     @Override
-    protected boolean isOverlay() {
-        return true;
+    protected Layers getLayer() {
+        return Layers.Overlay;
     }
 
     @Override
@@ -270,9 +273,10 @@ public final class NotificationCenter extends BaseFragment {
             return 8000;
         }
 
+        @NonNull
         @Override
-        protected boolean isOverlay() {
-            return true;
+        protected Layers getLayer() {
+            return Layers.Overlay;
         }
 
         //----------------------------------------------------------------------------------------//

@@ -85,8 +85,9 @@ public abstract class BaseFragment extends Fragment implements ResourceTable {
     //--------------------------------------------------------------------------------------------//
 
     // If the fragment is an overlay it'll be added to the overlay container
-    protected boolean isOverlay() {
-        return false;
+    @NonNull
+    protected Layers getLayer() {
+        return Layers.Screen;
     }
 
     // If the fragment is an extra means that is not attached to a screen and can be closed by other

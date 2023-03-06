@@ -1,6 +1,9 @@
 package com.reco1l.ui.scenes.loader.fragments;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.reco1l.ui.base.Layers;
 import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.utils.Animation;
@@ -37,9 +40,10 @@ public class LoaderFragment extends BaseFragment {
         return R.layout.layout_loader;
     }
 
+    @NonNull
     @Override
-    protected boolean isOverlay() {
-        return mShowAsOverlay;
+    protected Layers getLayer() {
+        return mShowAsOverlay ? Layers.Overlay : Layers.Screen;
     }
 
     //----------------------------------------------------------------------------------------//

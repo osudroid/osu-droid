@@ -3,7 +3,10 @@ package com.reco1l.ui.scenes.intro;
 
 import android.view.View;
 
+import androidx.annotation.NonNull;
+
 import com.reco1l.Game;
+import com.reco1l.ui.base.Layers;
 import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.ui.custom.Dialog;
@@ -57,9 +60,10 @@ public class IntroScene extends BaseScene {
             return "il";
         }
 
+        @NonNull
         @Override
-        protected boolean isOverlay() {
-            return true;
+        protected Layers getLayer() {
+            return Layers.Overlay;
         }
 
         //----------------------------------------------------------------------------------------//
@@ -121,23 +125,7 @@ public class IntroScene extends BaseScene {
 
                         Animation.of(mLogoBrand)
                                 .toSize(size)
-                                .runOnEnd(() -> {
-                                    super.close();
-
-                                    DialogBuilder b = new DialogBuilder("Warning");
-
-                                    b.setMessage("This is an unstable development build it can be full of bugs or errors!\nKeep in mind " +
-                                            "rimu! is not osu!droid so please don't report issues at official osu!droid links.\n\n" +
-                                            "As alternative you can report a bug or leave your feedback at: \n\n" +
-                                            "rimu-beta Discord forum:\n" +
-                                            "https://discord.gg/rnbHbsbeFr\n\n" +
-                                            "rimu! repository:\n" +
-                                            "https://github.com/reco1I/rimu/issues"
-                                    );
-
-                                    b.addButton("I understand!", Dialog::close);
-                                    new Dialog(b).show();
-                                })
+                                .runOnEnd(super::close)
                                 .play(300);
 
                         Game.musicManager.play();

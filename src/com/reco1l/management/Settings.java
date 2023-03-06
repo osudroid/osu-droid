@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import main.osu.Config;
+import main.osu.MainActivity;
+
 import com.rimu.R;
 
 public final class Settings {
@@ -31,11 +33,13 @@ public final class Settings {
     //--------------------------------------------------------------------------------------------//
 
     static {
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(Game.activity);
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.instance);
     }
 
     //--------------------------------------------------------------------------------------------//
 
+    // If you storing the return value in a primitive then it's strongly recommended to use
+    // get(String key, Object defValue) instead to avoid ClassCastException.
     public static <T> T get(String key) {
         return get(key, null);
     }

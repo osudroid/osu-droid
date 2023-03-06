@@ -1,11 +1,15 @@
 package com.reco1l;
 
 import android.util.Log;
+import android.view.View;
 
+import com.reco1l.management.Settings;
 import com.reco1l.ui.scenes.BaseScene;
+import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.utils.Logging;
 
 import org.anddev.andengine.engine.Engine;
+import org.anddev.andengine.engine.LimitedFPSEngine;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.constants.TimeConstants;
@@ -14,7 +18,7 @@ import java.util.ArrayList;
 
 // Created by Reco1l on 22/6/22 02:20
 
-public final class GameEngine extends Engine {
+public final class GameEngine extends LimitedFPSEngine {
 
     public static GameEngine instance;
 
@@ -29,10 +33,15 @@ public final class GameEngine extends Engine {
     //--------------------------------------------------------------------------------------------//
 
     public GameEngine(EngineOptions pEngineOptions) {
-        super(pEngineOptions);
-        Logging.initOf(getClass());
+        // TODO [GameEngine] Variable frame rate
+        this(pEngineOptions, 1000);
+    }
 
+    public GameEngine(EngineOptions pEngineOptions, int pFramesPerSecond) {
+        super(pEngineOptions, pFramesPerSecond);
         instance = this;
+
+        Logging.initOf(getClass());
         mScenes = new ArrayList<>();
     }
 
@@ -43,7 +52,7 @@ public final class GameEngine extends Engine {
     }
 
     @Override
-    protected void onUpdate(long ns) throws InterruptedException {
+    public void onUpdate(long ns) throws InterruptedException {
         super.onUpdate(ns);
 
         if (mCanUpdate) {
@@ -126,6 +135,8 @@ public final class GameEngine extends Engine {
                 Game.platform.onSceneChange(mLastScene, mCurrentScene);
             }
             super.setScene(newScene);
+
+
 
             synchronized (mScenes) {
                 mScenes.forEach(scene ->

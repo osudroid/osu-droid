@@ -67,6 +67,8 @@ public abstract class BaseScene extends Scene implements IMusicObserver, Resourc
                 }
             }
         });
+
+        setBackgroundEnabled(false);
     }
 
     //--------------------------------------------------------------------------------------------//

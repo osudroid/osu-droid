@@ -12,6 +12,7 @@ import com.reco1l.management.online.IOnlineObserver;
 import com.reco1l.management.online.UserInfo;
 import com.reco1l.ui.base.BaseFragment;
 
+import com.reco1l.ui.base.Layers;
 import com.reco1l.utils.Animation;
 
 import com.reco1l.utils.helpers.OnlineHelper;
@@ -44,7 +45,13 @@ public final class UserProfile extends BaseFragment {
 
     @Override
     protected String getPrefix() {
-        return "UC";
+        return "up";
+    }
+
+    @NonNull
+    @Override
+    protected Layers getLayer() {
+        return Layers.Overlay;
     }
 
     //--------------------------------------------------------------------------------------------//

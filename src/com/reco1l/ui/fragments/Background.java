@@ -5,7 +5,10 @@ package com.reco1l.ui.fragments;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import androidx.annotation.NonNull;
+
 import com.reco1l.Game;
+import com.reco1l.ui.base.Layers;
 import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.ui.base.BaseFragment;
@@ -56,6 +59,12 @@ public final class Background extends BaseFragment {
     @Override
     protected int getLayout() {
         return R.layout.background;
+    }
+
+    @NonNull
+    @Override
+    protected Layers getLayer() {
+        return Layers.Background;
     }
 
     //--------------------------------------------------------------------------------------------//

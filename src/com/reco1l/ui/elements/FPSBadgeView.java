@@ -72,12 +72,12 @@ public final class FPSBadgeView extends BadgeTextView {
 
     @Override
     protected void onManagedDraw(Canvas canvas) {
-        if (isInEditMode()) {
+        if (isInEditMode() || mProvider == null) {
             return;
         }
 
-        float fps = FrameCounter.getFPS();
-        float ft = FrameCounter.getFrameTime();
+        float fps = mProvider.getFPS();
+        float ft = mProvider.getFrameTime();
 
         setTextColor(getFpsColorJudgment(fps));
         setText(mDF.format(fps) + "fps - " + mDF.format(ft) + "ms");

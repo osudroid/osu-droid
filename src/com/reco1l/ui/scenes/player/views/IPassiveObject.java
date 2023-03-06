@@ -5,6 +5,8 @@ import android.widget.FrameLayout;
 import com.reco1l.Game;
 import com.reco1l.management.game.GameWrapper;
 
+import main.osu.Config;
+
 public interface IPassiveObject {
 
     default void setGameWrapper(GameWrapper wrapper) {}

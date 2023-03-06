@@ -226,10 +226,7 @@ public class Config {
         ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(dm);
 
         int width = Math.max(dm.widthPixels, dm.heightPixels), height = Math.min(dm.widthPixels, dm.heightPixels);
-        //int width = dm.widthPixels, height =  dm.heightPixels;
         setSize(width, height);
-        //ToastLogger.showText("width=" + dm.widthPixels + " height=" + dm.heightPixels, true);
-        Debug.i("width=" + dm.widthPixels + " height=" + dm.heightPixels);
     }
 
     public static void setSize(int width, int height) {

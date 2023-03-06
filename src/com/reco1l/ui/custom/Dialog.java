@@ -6,10 +6,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 
 import com.reco1l.Game;
 import com.reco1l.management.resources.ResourceTable;
 import com.reco1l.ui.base.BaseFragment;
+import com.reco1l.ui.base.Layers;
 import com.reco1l.ui.base.SimpleFragment;
 import com.reco1l.utils.Views;
 import com.reco1l.utils.Views.MarginUtils;
@@ -53,9 +55,10 @@ public class Dialog extends BaseFragment {
         return R.layout.overlay_dialog;
     }
 
+    @NonNull
     @Override
-    protected boolean isOverlay() {
-        return true;
+    protected Layers getLayer() {
+        return Layers.Overlay;
     }
 
     //--------------------------------------------------------------------------------------------//

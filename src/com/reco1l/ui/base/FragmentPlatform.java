@@ -1,16 +1,15 @@
 package com.reco1l.ui.base;
 
-import static android.widget.RelativeLayout.LayoutParams.*;
-
-import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.res.Resources;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.RelativeLayout.LayoutParams;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -19,6 +18,7 @@ import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Logging;
 import com.reco1l.utils.FrameCounter;
+import com.reco1l.utils.Views;
 
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 
 // Created by Reco1l on 22/6/22 02:25
 
-public final class FragmentPlatform {
+public final class FragmentPlatform implements Identifiers {
 
     public static final FragmentPlatform instance = new FragmentPlatform();
 
@@ -35,6 +35,7 @@ public final class FragmentPlatform {
     private RenderSurfaceView mRenderView;
 
     private FrameLayout
+            mBackgroundContainer,
             mOverlayContainer,
             mScreenContainer;
 
@@ -55,32 +56,55 @@ public final class FragmentPlatform {
 
     //--------------------------------------------------------------------------------------------//
 
-    @SuppressLint("ResourceType")
-    public void load(AppCompatActivity activity, RenderSurfaceView renderView) {
+    public static int getNavigationBarHeight(Context context) {
+        Resources resources = context.getResources();
+        int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            return resources.getDimensionPixelSize(resourceId);
+        }
+        return 0;
+    }
 
-        this.mRenderView = renderView;
-        this.mManager = activity.getSupportFragmentManager();
+    private RelativeLayout createPlatform(Context context, RenderSurfaceView render) {
+        RelativeLayout frame = new RelativeLayout(context);
 
-        ConstraintLayout platform = new ConstraintLayout(activity);
-        RelativeLayout renderLayout = new RelativeLayout(activity);
+        mBackgroundContainer = new FrameLayout(context);
+        mBackgroundContainer.setId(Platform_Background);
+        frame.addView(mBackgroundContainer, Views.match_parent);
 
-        mScreenContainer = new FrameLayout(activity);
-        mOverlayContainer = new FrameLayout(activity);
+        // Centering the SurfaceView
+        LinearLayout layout = new LinearLayout(context);
+        layout.setGravity(Gravity.CENTER);
+        layout.addView(render);
+        frame.addView(layout, Views.match_parent);
 
-        mScreenContainer.setId(Identifiers.Platform_ScreenFrame);
-        mOverlayContainer.setId(Identifiers.Platform_OverlayFrame);
+        mScreenContainer = new FrameLayout(context);
+        mScreenContainer.setId(Platform_Screen);
+        frame.addView(mScreenContainer, Views.match_parent);
 
-        LayoutParams params = new LayoutParams(MATCH_PARENT, MATCH_PARENT);
+        mOverlayContainer = new FrameLayout(context);
+        mOverlayContainer.setId(Platform_Overlay);
+        frame.addView(mOverlayContainer, Views.match_parent);
 
-        platform.addView(renderLayout, params);
-        platform.addView(mScreenContainer, params);
-        platform.addView(mOverlayContainer, params);
+        // For some reason drawing views below the SurfaceView causes black boxes glitches
+        // this should fix it
+        View view = new View(context);
+        frame.addView(view, Views.match_parent);
+        return frame;
+    }
 
-        Game.activity.setContentView(platform, params);
+    public void onSetContentView(AppCompatActivity activity, RenderSurfaceView renderView) {
 
-        renderLayout.setGravity(Gravity.CENTER);
-        renderLayout.addView(renderView, params);
+        mManager = activity.getSupportFragmentManager();
+        mRenderView = renderView;
 
+        RelativeLayout platform = createPlatform(activity, renderView);
+
+        // TODO [FragmentPlatform] Fix rendering dimensions in wider devices this issue came from
+        //  GLSurfaceView which seems to have the navigation bar margin always enabled
+        //renderView.post(() -> Views.size(platform, renderView.getWidth(), renderView.getHeight()));
+
+        Game.activity.setContentView(platform);
         FrameCounter.start();
     }
 
@@ -92,6 +116,10 @@ public final class FragmentPlatform {
 
     public FragmentManager getManager() {
         return mManager;
+    }
+
+    public FrameLayout getBackgroundContainer() {
+        return mBackgroundContainer;
     }
 
     public FrameLayout getScreenContainer() {
@@ -140,7 +168,7 @@ public final class FragmentPlatform {
                 if (fragment.isExtra() || fragment.parents == null) {
                     fragment.close();
                 }
-                ++i;
+                ++ i;
             }
 
             mCreated.forEach(fragment -> {
@@ -177,7 +205,7 @@ public final class FragmentPlatform {
                 (screen ? mScreenContainer : null)
         };
 
-        return Animation.of(views).cancelCurrentAnimations(false);
+        return Animation.of(mScreenContainer).cancelCurrentAnimations(false);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -189,11 +217,11 @@ public final class FragmentPlatform {
             }
             mShowing.add(fragment);
 
-            FrameLayout container = fragment.isOverlay() ? mOverlayContainer : mScreenContainer;
+            int container = fragment.getLayer().getContainerID();
 
             FragmentTransaction t = mManager.beginTransaction()
-                    .add(container.getId(), fragment)
-                    .runOnCommit(fragment::onTransaction);
+                                            .add(container, fragment)
+                                            .runOnCommit(fragment::onTransaction);
 
             Game.activity.runOnUiThread(t::commitAllowingStateLoss);
             return true;
@@ -202,14 +230,14 @@ public final class FragmentPlatform {
 
     public void removeFragment(BaseFragment fragment) {
         synchronized (mShowing) {
-            if (!fragment.isAdded()) {
+            if (! fragment.isAdded()) {
                 return;
             }
             mShowing.remove(fragment);
 
             FragmentTransaction t = mManager.beginTransaction()
-                    .remove(fragment)
-                    .runOnCommit(fragment::onTransaction);
+                                            .remove(fragment)
+                                            .runOnCommit(fragment::onTransaction);
 
             Game.activity.runOnUiThread(t::commitAllowingStateLoss);
         }
@@ -230,7 +258,7 @@ public final class FragmentPlatform {
                 if (fragment.isExtra()) {
                     fragment.close();
                 }
-                ++i;
+                ++ i;
             }
         }
     }

@@ -3,6 +3,9 @@ package com.reco1l.ui.scenes.player.fragments;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
+
+import com.reco1l.ui.base.Layers;
 import com.reco1l.ui.custom.Notification;
 import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.ui.base.BaseFragment;
@@ -53,9 +56,10 @@ public class PauseMenu extends BaseFragment {
         return "pm";
     }
 
+    @NonNull
     @Override
-    protected boolean isOverlay() {
-        return true;
+    protected Layers getLayer() {
+        return Layers.Overlay;
     }
 
     //--------------------------------------------------------------------------------------------//

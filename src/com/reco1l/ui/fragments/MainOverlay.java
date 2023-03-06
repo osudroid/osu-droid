@@ -2,6 +2,9 @@ package com.reco1l.ui.fragments;
 
 import android.view.View;
 
+import androidx.annotation.NonNull;
+
+import com.reco1l.ui.base.Layers;
 import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.ui.base.BaseFragment;
@@ -33,9 +36,10 @@ public final class MainOverlay extends BaseFragment {
         return "mo";
     }
 
+    @NonNull
     @Override
-    protected boolean isOverlay() {
-        return true;
+    protected Layers getLayer() {
+        return Layers.Overlay;
     }
 
     //--------------------------------------------------------------------------------------------//

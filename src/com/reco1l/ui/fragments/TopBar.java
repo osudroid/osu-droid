@@ -5,8 +5,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.reco1l.Game;
 import com.reco1l.ui.UI;
+import com.reco1l.ui.base.Layers;
 import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.tables.AnimationTable;
@@ -55,9 +58,10 @@ public final class TopBar extends BaseFragment {
         return R.layout.overlay_top_bar;
     }
 
+    @NonNull
     @Override
-    protected boolean isOverlay() {
-        return true;
+    protected Layers getLayer() {
+        return Layers.Overlay;
     }
 
     @Override

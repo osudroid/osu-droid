@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -14,6 +15,7 @@ import com.factor.bouncy.BouncyRecyclerView;
 import com.reco1l.Game;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.base.BaseFragment;
+import com.reco1l.ui.base.Layers;
 import com.reco1l.utils.Animation;
 import com.reco1l.utils.Views;
 
@@ -42,9 +44,10 @@ public class ContextMenu extends BaseFragment {
 
     //--------------------------------------------------------------------------------------------//
 
+    @NonNull
     @Override
-    protected boolean isOverlay() {
-        return true;
+    protected Layers getLayer() {
+        return Layers.Overlay;
     }
 
     /*@Override

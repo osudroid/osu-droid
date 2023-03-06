@@ -2,6 +2,7 @@ package com.reco1l.ui.scenes.listing.fragments;
 
 import android.os.Environment;
 
+import com.reco1l.ui.base.Layers;
 import com.reco1l.ui.custom.Notification;
 import com.reco1l.Game;
 import com.reco1l.ui.scenes.Scenes;
@@ -45,11 +46,6 @@ public class BeatmapListing extends WebViewFragment {
 
     @Override
     protected boolean isExtra() {
-        return false;
-    }
-
-    @Override
-    protected boolean isOverlay() {
         return false;
     }
 

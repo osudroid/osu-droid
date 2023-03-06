@@ -43,6 +43,7 @@ public final class PlayerScene extends BaseScene implements FPSProvider, IPassiv
             }
         };
         registerUpdateHandler(mCounter);
+        setBackgroundEnabled(true);
     }
 
     //--------------------------------------------------------------------------------------------//
