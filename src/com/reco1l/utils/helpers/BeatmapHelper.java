@@ -142,23 +142,20 @@ public class BeatmapHelper {
 
     public static String getDataConcat(BeatmapInfo beatmap) {
 
-        String builder = beatmap.getTitle() +
-                ' ' +
-                beatmap.getArtist() +
-                ' ' +
-                beatmap.getCreator() +
-                ' ' +
-                beatmap.getTags() +
-                ' ' +
-                beatmap.getSource() +
-                ' ' +
-                beatmap.getTracks().get(0).getBeatmapSetID();
+        StringBuilder builder = new StringBuilder();
 
-       /* for (TrackInfo track : beatmap.getTracks()) {
-            builder.append(' ')
-                    .append(track.getMode());
-        }*/
+        builder.append(BeatmapHelper.getTitle(beatmap));
+        builder.append(BeatmapHelper.getArtist(beatmap));
 
-        return builder.toLowerCase();
+        builder.append(beatmap.getCreator());
+        builder.append(beatmap.getTags());
+        builder.append(beatmap.getSource());
+        builder.append(beatmap.getPreviewTrack().getBeatmapSetID());
+
+       for (TrackInfo track : beatmap.getTracks()) {
+            builder.append(track.getMode());
+        }
+
+        return builder.toString().toLowerCase();
     }
 }
