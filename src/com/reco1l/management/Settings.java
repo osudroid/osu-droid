@@ -13,8 +13,8 @@ import com.reco1l.preference.CheckPreference;
 import com.reco1l.preference.FieldPreference;
 import com.reco1l.preference.MenuPreference;
 import com.reco1l.ui.base.BasePreferenceFragment;
-import com.reco1l.ui.scenes.loader.fragments.LoaderFragment;
-import com.reco1l.utils.execution.Async;
+import com.reco1l.ui.fragments.LoadingFragment;
+import com.reco1l.framework.execution.Async;
 
 import java.io.File;
 import java.util.HashMap;

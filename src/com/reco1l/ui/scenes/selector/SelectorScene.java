@@ -7,11 +7,9 @@ import android.widget.LinearLayout;
 import com.reco1l.Game;
 import com.reco1l.ui.UI;
 import com.reco1l.ui.scenes.Scenes;
-import com.reco1l.utils.execution.ITask;
 import com.reco1l.ui.scenes.BaseScene;
-import com.reco1l.tables.NotificationTable;
-import com.reco1l.utils.Animation;
-import com.reco1l.utils.execution.Async;
+import com.reco1l.framework.Animation;
+import com.reco1l.framework.execution.Async;
 import com.reco1l.view.IconButtonView;
 
 import org.anddev.andengine.entity.scene.Scene;
@@ -21,9 +19,7 @@ import java.util.Random;
 import main.osu.BeatmapInfo;
 import main.osu.Config;
 import main.osu.TrackInfo;
-import main.osu.online.OnlineManager;
-import main.osu.online.OnlineManager.OnlineManagerException;
-import main.osu.scoring.StatisticV2;
+
 import com.rimu.R;
 
 public class SelectorScene extends BaseScene {

@@ -6,7 +6,6 @@ import static com.reco1l.data.adapters.TrackListAdapter.*;
 
 import android.graphics.drawable.ColorDrawable;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,8 +16,8 @@ import com.reco1l.ui.UI;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
 import com.reco1l.ui.scenes.Scenes;
-import com.reco1l.utils.Animation;
-import com.reco1l.utils.Views;
+import com.reco1l.framework.Animation;
+import com.reco1l.framework.Views;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.view.BadgeTextView;
 import com.reco1l.view.RoundLayout;

@@ -9,9 +9,9 @@ import com.reco1l.ui.base.Layers;
 import com.reco1l.ui.custom.Notification;
 import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.ui.base.BaseFragment;
-import com.reco1l.utils.Animation;
-import com.reco1l.utils.Logging;
-import com.reco1l.utils.TouchListener;
+import com.reco1l.framework.Animation;
+import com.reco1l.framework.Logging;
+import com.reco1l.framework.input.TouchListener;
 import com.reco1l.view.ButtonView;
 import com.reco1l.ui.elements.MenuButtonVIew;
 

@@ -6,7 +6,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.ui.base.Layers;
 import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.ui.base.BaseFragment;
-import com.reco1l.utils.Animation;
+import com.reco1l.framework.Animation;
 
 import com.rimu.R;
 

@@ -1,4 +1,4 @@
-package com.reco1l.utils.drawing;
+package com.reco1l.framework.drawing;
 
 public class Dimension {
 

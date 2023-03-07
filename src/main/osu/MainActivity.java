@@ -8,9 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.os.*;
 
@@ -31,7 +28,6 @@ import com.reco1l.GameEngine;
 import com.reco1l.management.InputManager;
 import com.reco1l.management.music.MusicManager;
 import com.reco1l.ui.scenes.intro.IntroScene;
-import com.reco1l.tables.NotificationTable;
 import com.reco1l.ui.base.FragmentPlatform;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.tables.DialogTable;
@@ -42,8 +38,6 @@ import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.options.EngineOptions;
-import org.anddev.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
-import org.anddev.andengine.engine.options.resolutionpolicy.FixedResolutionPolicy;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.extension.input.touch.controller.MultiTouch;
@@ -67,7 +61,6 @@ import java.util.concurrent.TimeUnit;
 
 import net.lingala.zip4j.ZipFile;
 
-import main.osu.game.SpritePool;
 import main.audio.BassAudioPlayer;
 import main.audio.serviceAudio.SaveServiceObject;
 import main.audio.serviceAudio.SongService;

@@ -1,17 +1,16 @@
-package com.reco1l.utils;
+package com.reco1l.framework.bitmaps;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 
-import com.reco1l.utils.drawing.Dimension;
-import com.reco1l.utils.execution.Async;
-import com.reco1l.utils.helpers.BitmapHelper;
+import com.reco1l.framework.drawing.Dimension;
+import com.reco1l.framework.execution.Async;
 
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class BitmapPool {
+public class BitmapQueue {
 
     private final Queue<QueueItem> mQueue;
 
@@ -19,7 +18,7 @@ public class BitmapPool {
 
     //--------------------------------------------------------------------------------------------//
 
-    public BitmapPool() {
+    public BitmapQueue() {
         mQueue = new LinkedList<>();
     }
 
@@ -78,9 +77,9 @@ public class BitmapPool {
 
     public static class QueueItem {
 
-        private BitmapCallback callback;
-        private Dimension dimension;
-        private String path;
+        private final BitmapCallback callback;
+        private final Dimension dimension;
+        private final String path;
 
         public QueueItem(BitmapCallback callback, Dimension dimension, String path) {
             this.dimension = dimension;

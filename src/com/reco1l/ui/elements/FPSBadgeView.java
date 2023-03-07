@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.reco1l.Game;
-import com.reco1l.utils.FrameCounter;
+import com.reco1l.framework.FrameCounter;
 import com.reco1l.view.BadgeTextView;
 
 import java.text.DecimalFormat;

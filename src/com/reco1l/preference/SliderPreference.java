@@ -11,7 +11,7 @@ import android.widget.TextView;
 import androidx.preference.PreferenceViewHolder;
 import androidx.preference.SeekBarPreference;
 
-import com.reco1l.utils.Animation;
+import com.reco1l.framework.Animation;
 
 import com.rimu.R;
 

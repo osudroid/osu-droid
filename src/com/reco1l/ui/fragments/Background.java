@@ -12,8 +12,9 @@ import com.reco1l.ui.base.Layers;
 import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.ui.base.BaseFragment;
-import com.reco1l.utils.drawing.BlurRender;
-import com.reco1l.utils.execution.AsyncTask;
+import com.reco1l.framework.Animation;
+import com.reco1l.framework.drawing.BlurRender;
+import com.reco1l.framework.execution.Async;
 import com.reco1l.view.FadeImageView;
 
 import java.util.LinkedList;

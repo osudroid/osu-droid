@@ -1,14 +1,10 @@
 package com.reco1l;
 
 import android.util.Log;
-import android.view.View;
 
-import com.reco1l.management.Settings;
 import com.reco1l.ui.scenes.BaseScene;
-import com.reco1l.ui.scenes.Scenes;
-import com.reco1l.utils.Logging;
+import com.reco1l.framework.Logging;
 
-import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.LimitedFPSEngine;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.entity.scene.Scene;

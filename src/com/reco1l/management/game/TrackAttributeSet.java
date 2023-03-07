@@ -2,7 +2,7 @@ package com.reco1l.management.game;
 
 import com.reco1l.Game;
 import com.reco1l.management.modding.ModAcronyms;
-import com.reco1l.utils.execution.Async;
+import com.reco1l.framework.execution.Async;
 
 import java.util.EnumSet;
 import java.util.function.Consumer;

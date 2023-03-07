@@ -18,11 +18,11 @@ import com.reco1l.management.scoreboard.ScoreInfo;
 import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.ui.custom.ContextMenu;
 import com.reco1l.ui.custom.ContextMenuBuilder;
-import com.reco1l.utils.TouchHandler;
-import com.reco1l.utils.TouchListener;
-import com.reco1l.utils.Views;
+import com.reco1l.framework.input.TouchHandler;
+import com.reco1l.framework.input.TouchListener;
+import com.reco1l.framework.Views;
 
-import com.reco1l.utils.helpers.OnlineHelper;
+import com.reco1l.framework.execution.Async;
 import com.reco1l.utils.helpers.ReplayHelper;
 
 import java.text.NumberFormat;

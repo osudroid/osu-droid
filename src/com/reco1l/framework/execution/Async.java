@@ -1,4 +1,4 @@
-package com.reco1l.utils.execution;
+package com.reco1l.framework.execution;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

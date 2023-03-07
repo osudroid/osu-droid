@@ -9,13 +9,11 @@ import com.caverock.androidsvg.SVGImageView;
 import com.edlplan.framework.easing.Easing;
 import com.reco1l.annotation.Legacy;
 import com.reco1l.management.game.GameWrapper;
-import com.reco1l.ui.UI;
 import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.ui.scenes.player.views.IPassiveObject;
 import com.reco1l.ui.scenes.player.views.ScoreNumberView;
 import com.reco1l.ui.scenes.summary.views.PlayerArrowView;
-import com.reco1l.utils.Animation;
-import com.reco1l.utils.Logging;
+import com.reco1l.framework.Animation;
 import com.rimu.R;
 
 import main.osu.game.BreakPeriod;

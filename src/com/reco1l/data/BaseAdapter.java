@@ -3,7 +3,7 @@ package com.reco1l.data;
 
 import static androidx.recyclerview.widget.RecyclerView.*;
 
-import static com.reco1l.utils.Views.*;
+import static com.reco1l.framework.Views.*;
 
 import android.content.Context;
 import android.view.LayoutInflater;

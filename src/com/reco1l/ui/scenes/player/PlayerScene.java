@@ -8,6 +8,7 @@ import com.reco1l.ui.UI;
 import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.ui.elements.FPSBadgeView.FPSProvider;
 import com.reco1l.ui.scenes.player.views.IPassiveObject;
+import com.reco1l.framework.Animation;
 
 import org.anddev.andengine.entity.util.FPSCounter;
 

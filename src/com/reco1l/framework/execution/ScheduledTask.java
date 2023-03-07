@@ -1,4 +1,4 @@
-package com.reco1l.utils.execution;
+package com.reco1l.framework.execution;
 
 // Created by Reco1l on 16/11/2022, 22:57
 

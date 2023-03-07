@@ -15,7 +15,7 @@ import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.tables.AnimationTable;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.base.BaseFragment;
-import com.reco1l.utils.Animation;
+import com.reco1l.framework.Animation;
 
 import com.reco1l.utils.helpers.OnlineHelper;
 

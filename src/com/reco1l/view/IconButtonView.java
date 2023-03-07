@@ -12,8 +12,8 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.reco1l.utils.TouchHandler;
-import com.reco1l.utils.Views;
+import com.reco1l.framework.input.TouchHandler;
+import com.reco1l.framework.Views;
 
 public class IconButtonView extends RoundLayout {
 

@@ -1,4 +1,4 @@
-package com.reco1l.utils;
+package com.reco1l.framework;
 
 // Created by Reco1l on 6/9/22 13:31
 

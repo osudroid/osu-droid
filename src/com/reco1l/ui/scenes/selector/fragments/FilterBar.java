@@ -14,8 +14,8 @@ import com.reco1l.management.BeatmapCollection.SortOrder;
 import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.ui.custom.ContextMenu;
 import com.reco1l.ui.custom.ContextMenuBuilder;
-import com.reco1l.utils.TouchListener;
-import com.reco1l.utils.execution.ScheduledTask;
+import com.reco1l.framework.input.TouchListener;
+import com.reco1l.framework.execution.ScheduledTask;
 import com.reco1l.view.IconButtonView;
 
 import com.rimu.R;

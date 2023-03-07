@@ -17,8 +17,8 @@ import com.reco1l.data.adapters.NotificationListAdapter;
 import com.reco1l.Game;
 import com.reco1l.ui.UI;
 import com.reco1l.ui.base.BaseFragment;
-import com.reco1l.utils.Animation;
-import com.reco1l.utils.Views;
+import com.reco1l.framework.Animation;
+import com.reco1l.framework.Views;
 
 import java.util.ArrayList;
 import java.util.HashMap;

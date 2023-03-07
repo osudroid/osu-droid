@@ -13,7 +13,7 @@ import com.reco1l.data.adapters.SettingsAdapter;
 import com.reco1l.Game;
 import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.ui.base.Layers;
-import com.reco1l.utils.Animation;
+import com.reco1l.framework.Animation;
 
 import com.reco1l.utils.helpers.OnlineHelper;
 

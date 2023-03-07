@@ -9,6 +9,8 @@ import android.util.AttributeSet;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.reco1l.annotation.Direction;
+import com.reco1l.framework.drawing.PathDrawer;
 import com.reco1l.view.RoundLayout;
 
 public class PlayerArrowView extends RoundLayout {

@@ -17,8 +17,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.reco1l.tables.NotificationTable;
-import com.reco1l.utils.Logging;
-import com.reco1l.utils.execution.ScheduledTask;
+import com.reco1l.framework.Logging;
+import com.reco1l.framework.execution.ScheduledTask;
 
 import java.io.File;
 import java.io.FileWriter;

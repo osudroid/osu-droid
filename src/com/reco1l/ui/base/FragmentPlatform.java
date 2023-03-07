@@ -5,9 +5,7 @@ import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
@@ -15,10 +13,10 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.reco1l.Game;
 import com.reco1l.ui.scenes.BaseScene;
-import com.reco1l.utils.Animation;
-import com.reco1l.utils.Logging;
-import com.reco1l.utils.FrameCounter;
-import com.reco1l.utils.Views;
+import com.reco1l.framework.Animation;
+import com.reco1l.framework.Logging;
+import com.reco1l.framework.FrameCounter;
+import com.reco1l.framework.Views;
 
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 

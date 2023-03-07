@@ -17,8 +17,8 @@ import com.reco1l.Game;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
 import com.reco1l.ui.custom.ContextMenu;
-import com.reco1l.utils.Animation;
-import com.reco1l.utils.TouchHandler;
+import com.reco1l.framework.Animation;
+import com.reco1l.framework.input.TouchHandler;
 
 import java.util.ArrayList;
 

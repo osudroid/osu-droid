@@ -3,7 +3,7 @@ package com.reco1l.tables;
 import android.view.View;
 import android.widget.TextView;
 
-import com.reco1l.utils.Animation;
+import com.reco1l.framework.Animation;
 
 @Deprecated
 public class AnimationTable {

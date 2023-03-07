@@ -4,7 +4,7 @@ import android.database.Cursor;
 import android.util.Log;
 
 import com.reco1l.Game;
-import com.reco1l.utils.execution.AsyncTask;
+import com.reco1l.framework.execution.AsyncTask;
 
 import java.io.File;
 import java.util.ArrayList;

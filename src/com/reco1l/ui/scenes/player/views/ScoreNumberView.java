@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.reco1l.Game;
-import com.reco1l.utils.Views;
+import com.reco1l.framework.Views;
 import com.reco1l.view.RoundLayout;
 
 import java.util.Objects;

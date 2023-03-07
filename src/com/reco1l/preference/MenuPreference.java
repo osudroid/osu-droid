@@ -13,8 +13,8 @@ import androidx.preference.PreferenceViewHolder;
 
 import com.reco1l.ui.custom.ContextMenu;
 import com.reco1l.ui.custom.ContextMenuBuilder;
-import com.reco1l.utils.TouchHandler;
-import com.reco1l.utils.TouchListener;
+import com.reco1l.framework.input.TouchHandler;
+import com.reco1l.framework.input.TouchListener;
 import com.reco1l.view.RoundLayout;
 
 import java.util.Map;

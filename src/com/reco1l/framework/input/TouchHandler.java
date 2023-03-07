@@ -1,4 +1,4 @@
-package com.reco1l.utils;
+package com.reco1l.framework.input;
 
 import static android.view.MotionEvent.*;
 

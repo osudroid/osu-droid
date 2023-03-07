@@ -1,4 +1,4 @@
-package com.reco1l.utils.helpers;
+package com.reco1l.framework.bitmaps;
 // Created by Reco1l on 02/12/2022, 01:28
 
 import android.graphics.Bitmap;

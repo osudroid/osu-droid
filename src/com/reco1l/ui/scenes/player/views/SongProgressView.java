@@ -11,7 +11,7 @@ import androidx.annotation.Nullable;
 
 import com.reco1l.management.game.GameWrapper;
 import com.reco1l.view.RoundLayout;
-import com.reco1l.utils.drawing.CompoundRect;
+import com.reco1l.framework.drawing.CompoundRect;
 
 public class SongProgressView extends RoundLayout implements IPassiveObject {
 

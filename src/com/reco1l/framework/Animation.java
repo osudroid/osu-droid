@@ -1,4 +1,4 @@
-package com.reco1l.utils;
+package com.reco1l.framework;
 
 // Created by Reco1l on 14/11/2022, 23:08
 
@@ -13,6 +13,7 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 import com.reco1l.Game;
+import com.reco1l.framework.execution.ScheduledTask;
 
 import java.util.ArrayList;
 
@@ -38,12 +39,12 @@ public final class Animation {
             fromWidth,
             fromHeight,
 
-            fromTopMargin,
+    fromTopMargin,
             fromLeftMargin,
             fromRightMargin,
             fromBottomMargin,
 
-            fromTopPadding,
+    fromTopPadding,
             fromLeftPadding,
             fromRightPadding,
             fromBottomPadding;
@@ -64,12 +65,12 @@ public final class Animation {
             toWidth,
             toHeight,
 
-            toTopMargin,
+    toTopMargin,
             toLeftMargin,
             toRightMargin,
             toBottomMargin,
 
-            toTopPadding,
+    toTopPadding,
             toLeftPadding,
             toRightPadding,
             toBottomPadding;
@@ -79,7 +80,6 @@ public final class Animation {
     private Easing interpolator;
 
     private boolean
-            fromPropertiesWithDelay = false,
             cancelCurrentAnimations = true,
             playWithLayer = false;
     // End
@@ -192,9 +192,10 @@ public final class Animation {
         if (cancelCurrentAnimations) {
             cancel();
         }
+
+
         if (views != null && !views.isEmpty()) {
             handleViewAnimations();
-            return;
         }
         if (valueAnimators != null && !valueAnimators.isEmpty()) {
             handleValueAnimations();
@@ -248,7 +249,7 @@ public final class Animation {
                     valueAnimator.setInterpolator(EasingHelper.asInterpolator(interpolator));
                 }
 
-                valueAnimator.setStartDelay(mDelay);
+                valueAnimator.setStartDelay(Math.max(mDelay, 0));
                 valueAnimator.setDuration(mDuration);
                 valueAnimator.start();
                 i++;
@@ -257,17 +258,21 @@ public final class Animation {
     }
 
     private void handleViewAnimations() {
-        Game.activity.runOnUiThread(() -> {
-            int i = 0;
-            while (i < views.size()) {
 
-                View view = views.get(i);
+        int i = 0;
+        while (i < views.size()) {
+
+            View view = views.get(i);
+            boolean isFirst = i == 0;
+
+            ScheduledTask.of(() -> {
+
                 ViewPropertyAnimator viewAnimator = view.animate();
 
-                handleFirstProperties(view);
+                applyInitialProperties(view);
 
                 // Setting this to first view, otherwise will duplicate listeners
-                if (i == 0) {
+                if (isFirst) {
                     viewAnimator.setListener(new BaseAnimationListener() {
                         public void onAnimationStart(Animator animation) {
                             if (runOnStart != null) {
@@ -298,25 +303,18 @@ public final class Animation {
                     viewAnimator.withLayer();
                 }
 
-                applyFinalProperties(viewAnimator);
+                Game.activity.runOnUiThread(() -> applyFinalProperties(viewAnimator));
 
-                viewAnimator.setStartDelay(Math.max(mDelay, 0));
                 viewAnimator.setDuration(mDuration);
-                viewAnimator.start();
-                i++;
-            }
-            handleValueAnimations();
-        });
-    }
+                Game.activity.runOnUiThread(viewAnimator::start);
 
-    private void handleFirstProperties(View view) {
-        createParameterAnimations(view);
+            }, Math.max(mDelay, 0));
 
-        if (fromPropertiesWithDelay && mDelay - 1 >= 0) {
-            view.postDelayed(() -> applyInitialProperties(view), mDelay - 1);
-        } else {
-            applyInitialProperties(view);
+            createParameterAnimations(view);
+            i++;
         }
+
+        handleValueAnimations();
     }
 
     private void createParameterAnimations(View view) {
@@ -479,79 +477,82 @@ public final class Animation {
             return;
         }
 
-        if (fromPosX != null) {
-            view.setX(fromPosX);
-        }
-        if (fromPosY != null) {
-            view.setY(fromPosY);
-        }
+        Game.activity.runOnUiThread(() -> {
 
-        if (fromX != null) {
-            view.setTranslationX(fromX);
-        }
-        if (fromY != null) {
-            view.setTranslationY(fromY);
-        }
-        if (fromAlpha != null) {
-            view.setAlpha(fromAlpha);
-        }
-        if (fromRotation != null) {
-            view.setRotation(fromRotation);
-        }
+            if (fromPosX != null) {
+                view.setX(fromPosX);
+            }
+            if (fromPosY != null) {
+                view.setY(fromPosY);
+            }
 
-        if (fromScale != null) {
-            fromScaleX = fromScale;
-            fromScaleY = fromScale;
-        }
+            if (fromX != null) {
+                view.setTranslationX(fromX);
+            }
+            if (fromY != null) {
+                view.setTranslationY(fromY);
+            }
+            if (fromAlpha != null) {
+                view.setAlpha(fromAlpha);
+            }
+            if (fromRotation != null) {
+                view.setRotation(fromRotation);
+            }
 
-        if (fromScaleX != null) {
-            view.setScaleX(fromScaleX);
-        }
-        if (fromScaleY != null) {
-            view.setScaleY(fromScaleY);
-        }
+            if (fromScale != null) {
+                fromScaleX = fromScale;
+                fromScaleY = fromScale;
+            }
 
-        if (fromSize != null) {
-            fromWidth = fromSize;
-            fromHeight = fromSize;
-        }
+            if (fromScaleX != null) {
+                view.setScaleX(fromScaleX);
+            }
+            if (fromScaleY != null) {
+                view.setScaleY(fromScaleY);
+            }
 
-        if (fromWidth != null) {
-            Views.width(view, fromWidth);
-        }
-        if (fromHeight != null) {
-            Views.height(view, fromHeight);
-        }
+            if (fromSize != null) {
+                fromWidth = fromSize;
+                fromHeight = fromSize;
+            }
 
-        Views.MarginUtils margin = Views.margins(view);
+            if (fromWidth != null) {
+                Views.width(view, fromWidth);
+            }
+            if (fromHeight != null) {
+                Views.height(view, fromHeight);
+            }
 
-        if (fromTopMargin != null) {
-            margin.top(fromTopMargin);
-        }
-        if (fromLeftMargin != null) {
-            margin.left(fromLeftMargin);
-        }
-        if (fromRightMargin != null) {
-            margin.right(fromRightMargin);
-        }
-        if (fromBottomMargin != null) {
-            margin.bottom(fromBottomMargin);
-        }
+            Views.MarginUtils margin = Views.margins(view);
 
-        Views.PaddingUtils padding = Views.padding(view);
+            if (fromTopMargin != null) {
+                margin.top(fromTopMargin);
+            }
+            if (fromLeftMargin != null) {
+                margin.left(fromLeftMargin);
+            }
+            if (fromRightMargin != null) {
+                margin.right(fromRightMargin);
+            }
+            if (fromBottomMargin != null) {
+                margin.bottom(fromBottomMargin);
+            }
 
-        if (fromTopPadding != null) {
-            padding.top(fromTopPadding);
-        }
-        if (fromBottomPadding != null) {
-            padding.bottom(fromBottomPadding);
-        }
-        if (fromLeftPadding != null) {
-            padding.left(fromLeftPadding);
-        }
-        if (fromRightPadding != null) {
-            padding.right(fromRightPadding);
-        }
+            Views.PaddingUtils padding = Views.padding(view);
+
+            if (fromTopPadding != null) {
+                padding.top(fromTopPadding);
+            }
+            if (fromBottomPadding != null) {
+                padding.bottom(fromBottomPadding);
+            }
+            if (fromLeftPadding != null) {
+                padding.left(fromLeftPadding);
+            }
+            if (fromRightPadding != null) {
+                padding.right(fromRightPadding);
+            }
+        });
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -840,11 +841,6 @@ public final class Animation {
 
     public Animation interpolate(Easing interpolator) {
         this.interpolator = interpolator;
-        return this;
-    }
-
-    public Animation fromPropertiesWithDelay(boolean fromPropertiesWithDelay) {
-        this.fromPropertiesWithDelay = fromPropertiesWithDelay;
         return this;
     }
 

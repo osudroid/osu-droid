@@ -11,8 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.reco1l.utils.TouchHandler;
-import com.reco1l.utils.TouchListener;
+import com.reco1l.framework.input.TouchHandler;
+import com.reco1l.framework.input.TouchListener;
 
 // Created by Reco1l on 22/6/22 02:26
 

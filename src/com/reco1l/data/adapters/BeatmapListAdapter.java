@@ -2,7 +2,7 @@ package com.reco1l.data.adapters;
 
 // Created by Reco1l on 18/9/22 00:01
 
-import static com.reco1l.utils.BitmapPool.*;
+import static com.reco1l.framework.bitmaps.BitmapQueue.*;
 import static com.reco1l.data.adapters.BeatmapListAdapter.*;
 
 import android.graphics.Bitmap;
@@ -15,7 +15,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.reco1l.utils.BitmapPool;
+import com.reco1l.management.Settings;
+import com.reco1l.framework.bitmaps.BitmapQueue;
 import com.reco1l.Game;
 import com.reco1l.ui.UI;
 import com.reco1l.data.BaseAdapter;
@@ -26,9 +27,9 @@ import com.reco1l.ui.custom.ContextMenu;
 import com.reco1l.ui.custom.ContextMenuBuilder;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
-import com.reco1l.utils.Animation;
-import com.reco1l.utils.drawing.Dimension;
-import com.reco1l.utils.TouchListener;
+import com.reco1l.framework.Animation;
+import com.reco1l.framework.drawing.Dimension;
+import com.reco1l.framework.input.TouchListener;
 import com.reco1l.ui.scenes.selector.views.CarrouselRecyclerView;
 import com.reco1l.utils.helpers.BeatmapHelper;
 

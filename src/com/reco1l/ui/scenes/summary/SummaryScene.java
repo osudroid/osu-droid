@@ -8,7 +8,7 @@ import com.reco1l.Game;
 import com.reco1l.ui.UI;
 import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.ui.scenes.BaseScene;
-import com.reco1l.utils.execution.Async;
+import com.reco1l.framework.execution.Async;
 import com.reco1l.view.IconButtonView;
 
 import org.anddev.andengine.entity.scene.Scene;

@@ -1,4 +1,4 @@
-package com.reco1l.utils.drawing;
+package com.reco1l.framework.drawing;
 
 // Created by Reco1l on 16/11/2022, 04:54
 
@@ -15,7 +15,7 @@ import com.reco1l.Game;
 //  but if you want to migrate it go ahead.
 public final class BlurRender {
 
-    public static Bitmap applyTo(Bitmap bitmap, int radius) {
+    public static Bitmap applyTo(Bitmap bitmap, float radius) {
         if (bitmap == null) {
             return null;
         }

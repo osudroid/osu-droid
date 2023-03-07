@@ -8,7 +8,7 @@ import com.reco1l.Game;
 import com.reco1l.ui.UI;
 import com.reco1l.management.music.IMusicObserver;
 import com.reco1l.management.resources.ResourceTable;
-import com.reco1l.utils.Logging;
+import com.reco1l.framework.Logging;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.scene.Scene;

@@ -2,13 +2,12 @@ package com.reco1l.ui.scenes.listing.fragments;
 
 import android.os.Environment;
 
-import com.reco1l.ui.base.Layers;
 import com.reco1l.ui.custom.Notification;
 import com.reco1l.Game;
 import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.tables.NotificationTable;
 import com.reco1l.ui.fragments.WebViewFragment;
-import com.reco1l.utils.execution.AsyncTask;
+import com.reco1l.framework.execution.AsyncTask;
 
 import net.lingala.zip4j.ZipFile;
 

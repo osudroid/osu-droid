@@ -2,8 +2,6 @@ package com.reco1l.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -12,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 
-import com.reco1l.utils.Animation;
+import com.reco1l.framework.Animation;
 
 public final class FadeImageView extends RoundLayout {
 

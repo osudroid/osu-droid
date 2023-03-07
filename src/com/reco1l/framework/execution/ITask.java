@@ -1,4 +1,4 @@
-package com.reco1l.utils.execution;
+package com.reco1l.framework.execution;
 
 public interface ITask {
 

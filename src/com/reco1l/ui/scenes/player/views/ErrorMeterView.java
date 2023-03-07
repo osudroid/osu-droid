@@ -13,9 +13,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.reco1l.management.game.GameWrapper;
-import com.reco1l.utils.Animation;
+import com.reco1l.framework.Animation;
 import com.reco1l.view.RoundLayout;
-import com.reco1l.utils.drawing.CompoundRect;
+import com.reco1l.framework.drawing.CompoundRect;
 
 import java.util.Iterator;
 import java.util.LinkedList;

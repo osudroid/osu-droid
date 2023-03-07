@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
-import com.reco1l.utils.Views;
+import com.reco1l.framework.Views;
 import com.reco1l.view.effects.StripsEffect;
 
 public class ButtonView extends RoundLayout {

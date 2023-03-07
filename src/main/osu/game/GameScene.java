@@ -74,7 +74,7 @@ import com.reco1l.management.game.GameWrapper;
 import com.reco1l.Game;
 import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.ui.UI;
-import com.reco1l.utils.execution.ITask;
+import com.reco1l.framework.execution.Async;
 import com.reco1l.ui.scenes.player.PlayerScene;
 import com.reco1l.ui.scenes.summary.SummaryScene;
 

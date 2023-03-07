@@ -18,7 +18,7 @@ import com.reco1l.management.modding.ModAcronyms;
 import com.reco1l.management.music.IMusicObserver;
 import com.reco1l.tables.Res;
 import com.reco1l.ui.base.BaseFragment;
-import com.reco1l.utils.Animation;
+import com.reco1l.framework.Animation;
 
 import java.util.ArrayList;
 

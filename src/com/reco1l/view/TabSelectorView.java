@@ -16,7 +16,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.reco1l.utils.Views;
+import com.reco1l.framework.Views;
 
 public class TabSelectorView extends RoundLayout {
 

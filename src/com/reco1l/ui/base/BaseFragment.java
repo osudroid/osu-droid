@@ -15,9 +15,9 @@ import androidx.fragment.app.Fragment;
 import com.reco1l.Game;
 import com.reco1l.management.resources.ResourceTable;
 import com.reco1l.ui.scenes.BaseScene;
-import com.reco1l.utils.Logging;
-import com.reco1l.utils.TouchListener;
-import com.reco1l.utils.TouchHandler;
+import com.reco1l.framework.Logging;
+import com.reco1l.framework.input.TouchListener;
+import com.reco1l.framework.input.TouchHandler;
 
 import java.util.HashMap;
 import java.util.Map;
