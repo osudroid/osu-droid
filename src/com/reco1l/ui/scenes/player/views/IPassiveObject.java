@@ -1,11 +1,9 @@
 package com.reco1l.ui.scenes.player.views;
 
-import android.widget.FrameLayout;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 import com.reco1l.Game;
 import com.reco1l.management.game.GameWrapper;
-
-import main.osu.Config;
 
 public interface IPassiveObject {
 
@@ -22,7 +20,7 @@ public interface IPassiveObject {
     }
 
     default float getEngineScale() {
-        FrameLayout screen = Game.platform.getScreenContainer();
+        CoordinatorLayout screen = Game.platform.getScreenContainer();
 
         float w = screen.getWidth();
         float h = screen.getHeight();

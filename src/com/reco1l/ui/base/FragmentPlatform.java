@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -32,7 +33,7 @@ public final class FragmentPlatform implements Identifiers {
 
     private RenderSurfaceView mRenderView;
 
-    private FrameLayout
+    private CoordinatorLayout
             mBackgroundContainer,
             mOverlayContainer,
             mScreenContainer;
@@ -63,8 +64,8 @@ public final class FragmentPlatform implements Identifiers {
         return 0;
     }
 
-    private RelativeLayout createPlatform(Context context, RenderSurfaceView render) {
-        RelativeLayout frame = new RelativeLayout(context);
+    private CoordinatorLayout createPlatform(Context context, RenderSurfaceView render) {
+        CoordinatorLayout frame = new CoordinatorLayout(context);
 
         mBackgroundContainer = new FrameLayout(context);
         mBackgroundContainer.setId(Platform_Background);
@@ -80,7 +81,7 @@ public final class FragmentPlatform implements Identifiers {
         mScreenContainer.setId(Platform_Screen);
         frame.addView(mScreenContainer, Views.match_parent);
 
-        mOverlayContainer = new FrameLayout(context);
+        mOverlayContainer = new CoordinatorLayout(context);
         mOverlayContainer.setId(Platform_Overlay);
         frame.addView(mOverlayContainer, Views.match_parent);
 
@@ -96,7 +97,7 @@ public final class FragmentPlatform implements Identifiers {
         mManager = activity.getSupportFragmentManager();
         mRenderView = renderView;
 
-        RelativeLayout platform = createPlatform(activity, renderView);
+        CoordinatorLayout platform = createPlatform(activity, renderView);
 
         // TODO [FragmentPlatform] Fix rendering dimensions in wider devices this issue came from
         //  GLSurfaceView which seems to have the navigation bar margin always enabled
@@ -120,11 +121,11 @@ public final class FragmentPlatform implements Identifiers {
         return mBackgroundContainer;
     }
 
-    public FrameLayout getScreenContainer() {
+    public CoordinatorLayout getScreenContainer() {
         return mScreenContainer;
     }
 
-    public FrameLayout getOverlayContainer() {
+    public CoordinatorLayout getOverlayContainer() {
         return mOverlayContainer;
     }
 
