@@ -9,57 +9,60 @@
     android:layout_height="match_parent"
     android:translationZ="@dimen/middle_layer">
 
-    <LinearLayout
+    <com.factor.bouncy.BouncyNestedScrollView
         android:id="@+id/bp_body"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/beatmapPanelContentWidth"
         android:layout_height="match_parent">
 
-        <com.factor.bouncy.BouncyNestedScrollView
-            android:id="@+id/bp_panel"
-            android:layout_width="@dimen/beatmapPanelContentWidth"
-            android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <LinearLayout
+            <include layout="@layout/layout_beatmap_card" />
+
+            <com.reco1l.view.RoundLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/XS"
+                android:background="@color/backgroundSecondary"
+                android:orientation="vertical"
+                app:type="linear">
 
-                <include layout="@layout/layout_beatmap_card" />
+                <com.reco1l.view.TabSelectorView
+                    android:id="@+id/bp_tabs"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_36sdp"
+                    android:layout_marginHorizontal="@dimen/M"
+                    app:tabs="Local|Global" />
 
                 <com.reco1l.view.RoundLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/XS"
-                    android:background="@color/backgroundSecondary"
-                    android:orientation="vertical"
-                    app:type="linear">
+                    android:background="@color/backgroundPrimary">
 
-                    <com.reco1l.view.TabSelectorView
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/_36sdp"
-                        android:layout_marginHorizontal="@dimen/M"
-                        app:tabs="Local|Global" />
-
-                    <com.reco1l.view.RoundLayout
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/bp_scoreboard"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@color/backgroundPrimary">
+                        tool:itemCount="1"
+                        tool:listitem="@layout/item_score" />
 
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/bp_scoreboard"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            tool:itemCount="1"
-                            tool:listitem="@layout/item_score" />
-
-                    </com.reco1l.view.RoundLayout>
+                    <com.reco1l.view.AlertBoxView
+                        android:id="@+id/bp_alert"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:alpha="0"
+                        android:paddingVertical="@dimen/M"
+                        android:src="@drawable/v28_info"
+                        android:text="No scores found!" />
 
                 </com.reco1l.view.RoundLayout>
 
-            </LinearLayout>
+            </com.reco1l.view.RoundLayout>
 
-        </com.factor.bouncy.BouncyNestedScrollView>
+        </LinearLayout>
 
-    </LinearLayout>
+    </com.factor.bouncy.BouncyNestedScrollView>
 
 </RelativeLayout>
