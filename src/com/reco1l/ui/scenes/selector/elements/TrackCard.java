@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.reco1l.management.game.TrackAttribute;
 import com.reco1l.management.game.TrackAttributeSet;
+import com.reco1l.ui.UI;
 import com.reco1l.utils.helpers.BeatmapHelper;
 import com.reco1l.view.BadgeTextView;
 import com.reco1l.view.FadeImageView;
@@ -76,18 +77,22 @@ public final class TrackCard {
 
     //--------------------------------------------------------------------------------------------//
 
-    private void changeLabels(TrackInfo pTrack) {
+    private void changeLabels(TrackInfo track) {
 
-        mTitle.setText(BeatmapHelper.getTitle(pTrack));
-        mArtist.setText("by " + BeatmapHelper.getArtist(pTrack));
-        mMapper.setText(pTrack.getCreator());
-        mDifficulty.setText(pTrack.getMode());
+        mTitle.setText(BeatmapHelper.getTitle(track));
+        mArtist.setText("by " + BeatmapHelper.getArtist(track));
+        mMapper.setText(track.getCreator());
+        mDifficulty.setText(track.getMode());
 
-        if (pTrack.getBackground() != null) {
+        if (track.getBackground() != null) {
             mBackground.setVisibility(View.VISIBLE);
-            mBackground.setImageDrawable(BeatmapHelper.getBackground(pTrack));
+
+            UI.background.postChange(() ->
+                    mBackground.setImageBitmap(UI.background.getRawBitmap())
+            );
         } else {
             mBackground.setVisibility(View.INVISIBLE);
+            mBackground.setImageBitmap(null);
         }
     }
 

@@ -3,7 +3,6 @@ package com.reco1l.ui.scenes;
 // Created by Reco1l on 26/9/22 22:21
 
 import com.reco1l.ui.scenes.listing.ListingScene;
-import com.reco1l.ui.scenes.loader.LoaderScene;
 import com.reco1l.ui.scenes.main.MainScene;
 import com.reco1l.ui.scenes.player.PlayerScene;
 import com.reco1l.ui.scenes.selector.SelectorScene;
@@ -20,7 +19,6 @@ public final class Scenes {
 
     public static final MainScene main = MainScene.instance;
     public static final PlayerScene player = PlayerScene.instance;
-    public static final LoaderScene loader = LoaderScene.instance;
     public static final SummaryScene summary = SummaryScene.instance;
     public static final ListingScene listing = ListingScene.instance;
     public static final SelectorScene selector = SelectorScene.instance;
@@ -35,7 +33,6 @@ public final class Scenes {
         return new BaseScene[] {
                 main,
                 player,
-                loader,
                 summary,
                 listing,
                 selector

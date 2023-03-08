@@ -13,6 +13,7 @@ public class GameWrapper {
 
     public float
             time,
+            skipTime,
             startTime,
             overallDifficulty;
 

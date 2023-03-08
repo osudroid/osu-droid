@@ -34,7 +34,7 @@ public final class TopBar extends BaseFragment {
     //--------------------------------------------------------------------------------------------//
 
     public TopBar() {
-        super(Scenes.selector, Scenes.summary, Scenes.loader, Scenes.listing);
+        super(Scenes.selector, Scenes.summary, Scenes.listing);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -113,7 +113,7 @@ public final class TopBar extends BaseFragment {
     private void handleButtonContainer(BaseScene scene) {
         mButtonsContainer.removeAllViews();
 
-        if (scene == Scenes.main || scene == Scenes.loader) {
+        if (scene == Scenes.main) {
             mBackButton.setVisibility(View.GONE);
         } else {
             mBackButton.setVisibility(View.VISIBLE);

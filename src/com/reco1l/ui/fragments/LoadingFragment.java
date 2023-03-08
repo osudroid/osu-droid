@@ -1,32 +1,21 @@
-package com.reco1l.ui.scenes.loader.fragments;
+package com.reco1l.ui.fragments;
 
 import androidx.annotation.NonNull;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.ui.base.Layers;
-import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.framework.Animation;
 
 import com.rimu.R;
 
-public class LoaderFragment extends BaseFragment {
+public class LoadingFragment extends BaseFragment {
 
     private CircularProgressIndicator mIndicator;
 
     private boolean
             mShowAsOverlay = false,
             mAnimInProgress = false;
-
-    //----------------------------------------------------------------------------------------//
-
-    public LoaderFragment() {
-        super();
-    }
-
-    public LoaderFragment(BaseScene... parents) {
-        super(parents);
-    }
 
     //----------------------------------------------------------------------------------------//
 

@@ -263,6 +263,10 @@ public class RoundLayout extends CoordinatorLayout implements ResourceTable {
             requestLayout();
         }
 
+        if (mRadius == 0 && !mIsMaxRounded) {
+            return;
+        }
+
         float radius = MathUtils.clamp(mRadius, 0, size / 2f);
         if (mIsMaxRounded) {
             radius = size / 2f;

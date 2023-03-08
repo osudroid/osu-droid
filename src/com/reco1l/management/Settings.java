@@ -64,9 +64,7 @@ public final class Settings {
 
         public abstract @XmlRes int getPreferenceXML();
 
-        public void onLoad(BasePreferenceFragment parent) {
-        }
-
+        public void onLoad(BasePreferenceFragment parent) {}
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -107,7 +105,7 @@ public final class Settings {
             selector.setOnPreferenceChangeListener((p, v) -> {
 
                 Async.run(() -> {
-                    LoaderFragment fragment = new LoaderFragment();
+                    LoadingFragment fragment = new LoadingFragment();
                     fragment.show(true);
 
                     Game.skinManager.clearSkin();

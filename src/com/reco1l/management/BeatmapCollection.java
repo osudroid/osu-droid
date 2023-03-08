@@ -211,6 +211,10 @@ public class BeatmapCollection {
 
     //--------------------------------------------------------------------------------------------//
 
+    public int indexOf(BeatmapInfo beatmap) {
+        return mList.indexOf(beatmap);
+    }
+
     public ArrayList<BeatmapInfo> getList() {
         return mList;
     }

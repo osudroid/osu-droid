@@ -7,6 +7,4 @@ public interface Identifiers {
     int Platform_Background = 0x003;
 
     int ModMenu_CustomizationFrames = 0x100;
-
-    int SettingMenu_SectionFrame = 0x200;
 }

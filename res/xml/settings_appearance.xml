@@ -2,10 +2,10 @@
 
 <!-- Created by Reco1l on 19/7/22 00:18 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    android:key="pref_appearance">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
+        android:key="pref_appearance"
         android:layout="@layout/custom_preference_category_big"
         android:title="Appearance" />
 
@@ -20,21 +20,10 @@
             android:key="skin"
             android:title="@string/opt_skin_title" />
 
-        <ListPreference
-            android:defaultValue="1"
-            android:entries="@array/spinner_style_names"
-            android:entryValues="@array/spinner_style_values"
-            android:key="spinnerstyle"
-            android:title="@string/opt_spinner_style_title" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory android:title="UI">
-
         <com.reco1l.preference.CheckPreference
             android:defaultValue="true"
-            android:key="ui_showItemBackground"
-            android:title="Disable backgrounds in list items" />
+            android:key="spinner"
+            android:title="Use modern spinner" />
 
     </PreferenceCategory>
 

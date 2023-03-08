@@ -67,8 +67,8 @@ public final class GameEngine extends LimitedFPSEngine {
         }
         Game.timingWrapper.sync();
 
-        synchronized (mScenes) {
-            mScenes.forEach(BaseScene::onResume);
+        if (mCurrentScene != null) {
+            mCurrentScene.onResume();
         }
     }
 
@@ -79,20 +79,27 @@ public final class GameEngine extends LimitedFPSEngine {
             return;
         }
 
-        synchronized (mScenes) {
-            mScenes.forEach(BaseScene::onPause);
+        if (mCurrentScene != null) {
+            mCurrentScene.onPause();
+        }
+    }
+
+    public void onWindowFocusChange(boolean isFocus) {
+        if (!mCanUpdate) {
+            return;
+        }
+
+        if (mCurrentScene != null) {
+            mCurrentScene.onWindowFocusChange(isFocus);
         }
     }
 
     public boolean onBackPress() {
         if (mCurrentScene != null) {
-            BaseScene scene = (BaseScene) mCurrentScene;
-
-            if (scene.onBackPress()) {
+            if (mCurrentScene.onBackPress()) {
                 return true;
             }
         }
-
         return backScene();
     }
 
@@ -118,21 +125,18 @@ public final class GameEngine extends LimitedFPSEngine {
             throw new NullPointerException("New scene cannot be null!");
         }
 
-        if (newScene == mCurrentScene) {
-            return;
-        }
         Log.i("GameEngine", "Changing scene to " + newScene.getClass().getSimpleName());
 
         if (newScene instanceof BaseScene) {
-            mLastScene = (BaseScene) getScene();
-            mCurrentScene = (BaseScene) newScene;
+            if (mCurrentScene != newScene) {
+                mLastScene = (BaseScene) getScene();
+                mCurrentScene = (BaseScene) newScene;
+            }
 
             if (mCanUpdate) {
                 Game.platform.onSceneChange(mLastScene, mCurrentScene);
             }
             super.setScene(newScene);
-
-
 
             synchronized (mScenes) {
                 mScenes.forEach(scene ->

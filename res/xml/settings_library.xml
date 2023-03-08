@@ -2,10 +2,10 @@
 
 <!-- Created by Reco1l on 18/7/22 23:37 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    android:key="pref_library">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
+        android:key="pref_library"
         android:layout="@layout/custom_preference_category_big"
         android:title="Library" />
 

@@ -7,7 +7,6 @@
     xmlns:tool="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/beatmapPanelBackground"
     android:translationZ="@dimen/middle_layer">
 
     <LinearLayout

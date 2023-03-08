@@ -100,8 +100,10 @@ public final class LogoView extends RoundLayout {
             return;
         }
 
-        if (Game.timingWrapper.isNextBeat()) {
-            onNextBeat(Game.timingWrapper.getBeatLength());
+        if (Settings.<Boolean>get("menusEffects", true)) {
+            if (Game.timingWrapper.isNextBeat()) {
+                onNextBeat(Game.timingWrapper.getBeatLength());
+            }
         }
         updatePeak();
     }

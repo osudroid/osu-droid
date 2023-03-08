@@ -115,6 +115,8 @@ public abstract class BaseScene extends Scene implements IMusicObserver, Resourc
 
     public void onResume() {}
 
+    public void onWindowFocusChange(boolean isFocus) {}
+
     //--------------------------------------------------------------------------------------------//
 
     public void show() {

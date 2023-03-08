@@ -73,7 +73,7 @@ public final class FadeImageView extends RoundLayout {
 
     //--------------------------------------------------------------------------------------------//
 
-    private void handleChange(Drawable drawable) {
+    private void handleChange(Bitmap bitmap) {
         if (mAnimation != null) {
             mAnimation.cancel();
         }
@@ -81,13 +81,13 @@ public final class FadeImageView extends RoundLayout {
         final ImageView front = getFrontImage();
         final ImageView back = getBackImage();
 
-        back.setImageDrawable(drawable);
+        back.setImageBitmap(bitmap);
         back.setAlpha(1f);
 
         Runnable callback = () -> {
             mCursor = mCursor == 0 ? 1 : 0;
 
-            front.setImageDrawable(null);
+            front.setImageBitmap(null);
             front.setElevation(0f);
 
             back.setElevation(1f);
@@ -96,6 +96,7 @@ public final class FadeImageView extends RoundLayout {
         mAnimation = Animation.of(front)
                 .toAlpha(0)
                 .runOnCancel(callback)
+                .cancelCurrentAnimations(false)
                 .runOnEnd(callback);
 
         mAnimation.play(mAnimationDuration);
@@ -104,11 +105,7 @@ public final class FadeImageView extends RoundLayout {
     //--------------------------------------------------------------------------------------------//
 
     public void setImageBitmap(Bitmap bitmap) {
-        handleChange(new BitmapDrawable(resources(), bitmap));
-    }
-
-    public void setImageDrawable(Drawable drawable) {
-        handleChange(drawable);
+        handleChange(bitmap);
     }
 
     public void setAnimationDuration(long duration) {

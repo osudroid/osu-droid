@@ -55,12 +55,14 @@ public class TimingWrapper implements IMusicObserver {
     }
 
     private void loadPointsFrom(TrackInfo track) {
-        OSUParser parser = new OSUParser(track.getFilename());
+        Async.run(() -> {
+            OSUParser parser = new OSUParser(track.getFilename());
 
-        if (parser.openFile()) {
-            Log.i("TimingWrapper", "Parsed points from: " + track.getPublicName());
-            parsePoints(parser.readData());
-        }
+            if (parser.openFile()) {
+                Log.i("TimingWrapper", "Parsed points from: " + track.getPublicName());
+                parsePoints(parser.readData());
+            }
+        });
     }
 
     public void parsePoints(BeatmapData data) {
@@ -82,6 +84,10 @@ public class TimingWrapper implements IMusicObserver {
         mCurrentPoint = mFirstPoint;
         mLastPoint = mCurrentPoint;
         mBeatLength = mFirstPoint.getBeatLength() * 1000f;
+
+        if (computeFirstBpmLength()) {
+            computeOffset();
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -149,10 +155,6 @@ public class TimingWrapper implements IMusicObserver {
 
         if (newTrack != null) {
             loadPointsFrom(newTrack);
-
-            if (computeFirstBpmLength()) {
-                computeOffset();
-            }
         }
     }
 

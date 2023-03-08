@@ -7,6 +7,7 @@ import androidx.annotation.UiThread;
 
 import com.caverock.androidsvg.SVGImageView;
 import com.edlplan.framework.easing.Easing;
+import com.reco1l.annotation.Direction;
 import com.reco1l.annotation.Legacy;
 import com.reco1l.management.game.GameWrapper;
 import com.reco1l.ui.base.BaseFragment;
@@ -67,6 +68,30 @@ public class BreakOverlay extends BaseFragment implements IPassiveObject {
         mTimeText = find("leftTime");
         mAccuracyText = find("accuracy");
 
+        mTimeText.setAlpha(0);
+        mInfoLayout.setAlpha(0);
+
+        for (PlayerArrowView arrow : mArrows) {
+            arrow.setAlpha(0);
+        }
+    }
+
+    @Override
+    protected void onPost() {
+        if (mWrapper != null) {
+            setGameWrapper(mWrapper);
+        }
+    }
+
+    public void display(BreakPeriod period) {
+        if (!isLoaded()) {
+            return;
+        }
+
+        mIsOver = false;
+        mIsBreak = true;
+        mCurrentPeriod = period;
+
         Animation.of(mTimeText)
                  .fromScale(0.5f)
                  .toScale(1)
@@ -83,36 +108,61 @@ public class BreakOverlay extends BaseFragment implements IPassiveObject {
                  .play(400);
 
         for (PlayerArrowView arrow : mArrows) {
+            Animation anim = Animation.of(arrow);
 
-            arrow.setAlpha(0);
-            arrow.post(() -> {
-                Animation anim = Animation.of(arrow);
+            if (arrow.getDirection() == Direction.LEFT_TO_RIGHT) {
+                anim.fromX(-arrow.getWidth());
+            }
+            else {
+                anim.fromX(arrow.getWidth());
+            }
+            anim.interpolate(Easing.OutExpo);
+            anim.toX(0);
+            anim.toAlpha(1);
 
-                if (arrow.getRotationY() == 0) {
-                    anim.fromX(- arrow.getWidth());
-                }
-                else {
-                    anim.fromX(arrow.getWidth());
-                }
-                anim.interpolate(Easing.OutExpo);
-                anim.toX(0);
-                anim.toAlpha(1);
-
-                if (arrow.getWidth() > sdp(80)) { // Means larger arrows
-                    anim.play(350);
-                }
-                else {
-                    anim.delay(50);
-                    anim.play(400);
-                }
-            });
+            if (arrow.getWidth() > sdp(80)) { // Means larger arrows
+                anim.play(350);
+            }
+            else {
+                anim.play(400);
+            }
         }
     }
 
-    @Override
-    protected void onPost() {
-        if (mWrapper != null) {
-            setGameWrapper(mWrapper);
+    public void hide() {
+        if (!isLoaded()) {
+            return;
+        }
+
+        Animation.of(mTimeText)
+                 .toScale(0.5f)
+                 .toAlpha(0)
+                 .interpolate(Easing.InExpo)
+                 .play(400);
+
+        Animation.of(mInfoLayout)
+                 .toY(50)
+                 .toAlpha(0)
+                 .play(400);
+
+        for (PlayerArrowView arrow : mArrows) {
+            Animation anim = Animation.of(arrow);
+
+            if (arrow.getDirection() == Direction.LEFT_TO_RIGHT) {
+                anim.toX(-arrow.getWidth());
+            }
+            else {
+                anim.toX(arrow.getWidth());
+            }
+            anim.interpolate(Easing.InExpo);
+            anim.toAlpha(0);
+
+            if (arrow.getWidth() > sdp(80)) {
+                anim.play(400);
+            }
+            else {
+                anim.play(350);
+            }
         }
     }
 
@@ -138,13 +188,14 @@ public class BreakOverlay extends BaseFragment implements IPassiveObject {
         if (mCurrentPeriod == null) {
             return;
         }
+
         int left = (int) (mCurrentPeriod.getEndTime() - sec);
 
         if (left <= 0) {
             mCurrentPeriod = null;
             mIsBreak = false;
             mIsOver = true;
-            close();
+            hide();
             return;
         }
 
@@ -166,65 +217,5 @@ public class BreakOverlay extends BaseFragment implements IPassiveObject {
     @Legacy
     public boolean isBreak() {
         return mIsBreak;
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    public boolean show(BreakPeriod period) {
-        if (isAdded()) {
-            return false;
-        }
-        mIsOver = false;
-        mIsBreak = true;
-        mCurrentPeriod = period;
-        return super.show();
-    }
-
-    @Override
-    public boolean show() {
-        Logging.e(this, "Call show(BreakPeriod) instead!");
-        return false;
-    }
-
-    @Override
-    public void close() {
-        if (!isAdded()) {
-            return;
-        }
-
-        Animation.of(mTimeText)
-                 .toScale(0.5f)
-                 .toAlpha(0)
-                 .interpolate(Easing.InExpo)
-                 .play(400);
-
-        Animation.of(mInfoLayout)
-                 .toY(50)
-                 .toAlpha(0)
-                 .play(400);
-
-        for (PlayerArrowView arrow : mArrows) {
-            Animation anim = Animation.of(arrow);
-
-            if (arrow.getRotationY() == 0) {
-                anim.toX(- arrow.getWidth());
-            }
-            else {
-                anim.toX(arrow.getWidth());
-            }
-            anim.interpolate(Easing.InExpo);
-            anim.toAlpha(0);
-
-            if (arrow.getWidth() > sdp(80)) {
-                anim.play(400);
-                anim.delay(50);
-            }
-            else {
-                if (arrow == mArrows[mArrows.length - 1]) {
-                    anim.runOnEnd(super::close);
-                }
-                anim.play(400);
-            }
-        }
     }
 }

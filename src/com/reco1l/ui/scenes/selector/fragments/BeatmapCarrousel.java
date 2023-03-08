@@ -88,7 +88,7 @@ public final class BeatmapCarrousel extends BaseFragment implements BeatmapColle
         }
 
         if (mAdapter != null) {
-            mAdapter.select(Game.musicManager.getBeatmap());
+            mAdapter.select(Game.musicManager.getBeatmapIndex());
         }
     }
 
@@ -97,7 +97,7 @@ public final class BeatmapCarrousel extends BaseFragment implements BeatmapColle
     private void restoreSelection() {
         mCarrousel.post(() -> {
             if (mAdapter != null) {
-                mAdapter.select(Game.musicManager.getBeatmap());
+                mAdapter.select(Game.musicManager.getBeatmapIndex());
             }
         });
     }

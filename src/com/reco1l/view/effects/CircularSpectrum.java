@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.reco1l.Game;
+import com.reco1l.management.Settings;
 import com.reco1l.view.RoundLayout;
 
 public class CircularSpectrum extends RoundLayout {
@@ -78,7 +79,7 @@ public class CircularSpectrum extends RoundLayout {
 
     @Override
     protected void onManagedDraw(Canvas canvas) {
-        if (isInEditMode()) {
+        if (isInEditMode() || !Settings.<Boolean>get("menusEffects", true)) {
             return;
         }
 
@@ -92,15 +93,9 @@ public class CircularSpectrum extends RoundLayout {
             setY(mAttachedView.getY() - canvas.getHeight() / 2f + mAttachedView.getHeight() / 2f);
         }
 
-        if (Game.songService == null) {
-            return;
-        }
-        float[] fft = getFft();
-
-        if (fft != null) {
+        if (Game.songService != null) {
+            float[] fft = getFft();
             update(canvas, fft);
-        } else {
-            update(canvas, new float[mLines]);
         }
     }
 
@@ -109,7 +104,7 @@ public class CircularSpectrum extends RoundLayout {
 
         float[] raw = Game.songService.getSpectrum();
         if (raw == null) {
-            return null;
+            return new float[mLines];
         }
 
         float[] fft = new float[mLines];

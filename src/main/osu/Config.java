@@ -42,6 +42,7 @@ public class Config {
         useCustomSkins,
         useCustomSounds,
         corovans,
+        complexAnimations,
         showCursor,
         accurateSlider,
         shrinkPlayfieldDownwards,
@@ -49,24 +50,19 @@ public class Config {
         syncMusic,
         burstEffects,
         hitLighting,
+        useDither,
         useTrail,
-        useLongTrail,
         forceRomanized,
         fixFrameOffset,
         removeSliderLock,
         calculateSliderPathInGameStart,
-        hideReplayMarquee,
-        hideInGameUI,
         receiveAnnouncements,
         enableStoryboard,
         safeBeatmapBg,
-        showItemBackground;
+        modernSpinner;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
-        errorMeter,
-        spinnerStyle,
-        textureQuality,
         metronomeSwitch;
     
     private static float soundVolume,
@@ -90,21 +86,16 @@ public class Config {
         useCustomSounds = prefs.getBoolean("beatmapSounds", true);
         comboburst = prefs.getBoolean("comboburst", false);
         corovans = prefs.getBoolean("images", false);
-        textureQuality = prefs.getBoolean("lowtextures", false) ? 2 : 1;
-        errorMeter = Integer.parseInt(prefs.getString("errormeter", "0"));
-        spinnerStyle = Integer.parseInt(prefs.getString("spinnerstyle", "0"));
+        modernSpinner = prefs.getBoolean("spinner", true);
         showFirstApproachCircle = prefs.getBoolean("showfirstapproachcircle", false);
         metronomeSwitch = Integer.parseInt(prefs.getString("metronomeswitch", "1"));
         enableStoryboard = prefs.getBoolean("enableStoryboard", false);
 
-        // UI
-        showItemBackground = prefs.getBoolean("ui_showItemBackground", true);
-
         setSize();
 
-        setPlayfieldSize(Integer.parseInt(prefs.getString(
-            "playfieldsize", "100")) / 100f);
+        setPlayfieldSize(Integer.parseInt(prefs.getString("playfieldsize", "100")) / 100f);
         shrinkPlayfieldDownwards = prefs.getBoolean("shrinkPlayfieldDownwards", true);
+        complexAnimations = prefs.getBoolean("complexanimations", true);
         accurateSlider = true;
 
         try {
@@ -135,6 +126,7 @@ public class Config {
         cachePath = context.getCacheDir().getPath();
         burstEffects = prefs.getBoolean("bursts", true);
         hitLighting = prefs.getBoolean("hitlighting", true);
+        useDither = prefs.getBoolean("dither", useDither);
         useTrail = prefs.getBoolean("particles", true);
 
         // beatmaps
@@ -146,8 +138,6 @@ public class Config {
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
         calculateSliderPathInGameStart = prefs.getBoolean("calculateSliderPathInGameStart", false);
-        hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
-        hideInGameUI = prefs.getBoolean("hideInGameUI", false);
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
 
@@ -238,14 +228,6 @@ public class Config {
         return backgroundBrightness > 0.02 && enableStoryboard;
     }
 
-    public static void setEnableStoryboard(boolean enableStoryboard) {
-        Config.enableStoryboard = enableStoryboard;
-    }
-
-    public static boolean isUseSuperSlider() {
-        return true;
-    }
-
     public static boolean isFixFrameOffset() {
         return fixFrameOffset;
     }
@@ -262,24 +244,12 @@ public class Config {
         return corovans;
     }
 
-    public static void setCorovans(final boolean corovans) {
-        Config.corovans = corovans;
-    }
-
     public static float getSoundVolume() {
         return soundVolume;
     }
 
-    public static void setSoundVolume(final float volume) {
-        Config.soundVolume = volume;
-    }
-
     public static float getBgmVolume() {
         return bgmVolume;
-    }
-
-    public static void setBgmVolume(float bgmVolume) {
-        Config.bgmVolume = bgmVolume;
     }
 
     public static float getOffset() {
@@ -327,23 +297,15 @@ public class Config {
     }
 
     public static int getTextureQuality() {
-        return textureQuality;
+        return 1;
     }
 
     public static float getBackgroundBrightness() {
         return backgroundBrightness;
     }
 
-    public static void setBackgroundBrightness(final float backgroundBrightness) {
-        Config.backgroundBrightness = backgroundBrightness;
-    }
-
-    public static boolean isSliderBorders() {
-        return true;
-    }
-
     public static boolean isComplexAnimations() {
-        return true;
+        return complexAnimations;
     }
 
     public static String getLocalUsername() {
@@ -354,16 +316,8 @@ public class Config {
         return showCursor;
     }
 
-    public static void setShowCursor(final boolean showCursor) {
-        Config.showCursor = showCursor;
-    }
-
     public static boolean isAccurateSlider() {
         return accurateSlider;
-    }
-
-    public static void setAccurateSlider(final boolean accurateSlider) {
-        Config.accurateSlider = accurateSlider;
     }
 
     public static float getScaleMultiplier() {
@@ -378,24 +332,12 @@ public class Config {
         return onlineUsername;
     }
 
-    public static void setOnlineUsername(String onlineUsername) {
-        Config.onlineUsername = onlineUsername;
-    }
-
     public static String getOnlinePassword() {
         return onlinePassword;
     }
 
-    public static void setOnlinePassword(String onlinePassword) {
-        Config.onlinePassword = onlinePassword;
-    }
-
     public static boolean isStayOnline() {
         return stayOnline && BuildType.hasOnlineAccess();
-    }
-
-    public static void setStayOnline(boolean stayOnline) {
-        Config.stayOnline = stayOnline;
     }
 
     public static String getOnlineDeviceID() {
@@ -406,80 +348,36 @@ public class Config {
         return syncMusic;
     }
 
-    public static void setSyncMusic(boolean syncMusic) {
-        Config.syncMusic = syncMusic;
-    }
-
     public static String getCachePath() {
         return cachePath;
-    }
-
-    public static void setCachePath(String cachePath) {
-        Config.cachePath = cachePath;
     }
 
     public static boolean isBurstEffects() {
         return burstEffects;
     }
 
-    public static void setBurstEffects(boolean burstEffects) {
-        Config.burstEffects = burstEffects;
-    }
-
     public static boolean isHitLighting() {
         return hitLighting;
     }
 
-    public static void setHitLighting(boolean hitLighting) {
-        Config.hitLighting = hitLighting;
-    }
-
     public static boolean isUseDither() {
-        return true;
+        return useDither;
     }
 
     public static boolean isUseCursorTrail() {
         return useTrail;
     }
 
-    public static boolean isUseLongTrail() {
-        return useLongTrail;
-    }
-
-    public static void setUseLongTrail(boolean useLongTrail) {
-        Config.useLongTrail = useLongTrail;
-    }
-
     public static String getSkinPath() {
         return skinPath;
-    }
-
-    public static void setSkinPath(String skinPath) {
-        Config.skinPath = skinPath;
     }
 
     public static String getSkinTopPath() {
         return skinTopPath;
     }
 
-    public static void setSkinTopPath(String skinTopPath) {
-        Config.skinTopPath = skinTopPath;
-    }
-
-    public static boolean isHideNaviBar() {
-        return true;
-    }
-
-    public static boolean isEnablePP() {
-        return true;
-    }
-
     public static String getScorePath() {
         return scorePath;
-    }
-
-    public static void setScorePath(String scorePath) {
-        Config.scorePath = scorePath;
     }
 
     public static boolean isUseCustomComboColors() {
@@ -495,56 +393,28 @@ public class Config {
         };
     }
 
-    public static int getErrorMeter() {
-        return errorMeter;
-    }
-
-    public static void setErrorMeter(int errorMeter) {
-        Config.errorMeter = errorMeter;
-    }
-
-    public static int getSpinnerStyle() {
-        return spinnerStyle;
-    }
-
-    public static void setSpinnerStyle(int spinnerStyle) {
-        Config.spinnerStyle = spinnerStyle;
+    public static boolean isUseModernStyle() {
+        return modernSpinner;
     }
 
     public static boolean isShowFirstApproachCircle() {
         return showFirstApproachCircle;
     }
 
-    public static void setShowFirstApproachCircle(boolean showFirstApproachCircle) {
-        Config.showFirstApproachCircle = showFirstApproachCircle;
-    }
-
     public static int getMetronomeSwitch() {
         return metronomeSwitch;
     }
 
-    public static void setMetronomeSwitch(int metronomeSwitch) {
-        Config.metronomeSwitch = metronomeSwitch;
-    }
-
     public static boolean isComboburst() {
-        return true;
+        return comboburst;
     }
 
     public static boolean isForceRomanized() {
         return forceRomanized;
     }
 
-    public static void setForceRomanized(boolean forceRomanized) {
-        Config.forceRomanized = forceRomanized;
-    }
-
     public static float getCursorSize() {
         return cursorSize;
-    }
-
-    public static void setCursorSize() {
-        Config.cursorSize = cursorSize;
     }
 
     public static float getPlayfieldSize() {
@@ -559,40 +429,12 @@ public class Config {
         return shrinkPlayfieldDownwards;
     }
 
-    public static void setShrinkPlayfieldDownwards(boolean shrinkPlayfieldDownwards) {
-        Config.shrinkPlayfieldDownwards = shrinkPlayfieldDownwards;
-    }
-
-    public static boolean isHideReplayMarquee() {
-        return hideReplayMarquee;
-    }
-
-    public static void setHideReplayMarquee(boolean hideReplayMarquee) {
-        Config.hideReplayMarquee = hideReplayMarquee;
-    }
-
-    public static boolean isHideInGameUI() {
-        return hideInGameUI;
-    }
-
-    public static void setHideInGameUI(boolean hideInGameUI) {
-        Config.hideInGameUI = hideInGameUI;
-    }
-
     public static boolean isReceiveAnnouncements() {
         return receiveAnnouncements;
     }
 
-    public static void setReceiveAnnouncements(boolean receiveAnnouncements) {
-        Config.receiveAnnouncements = receiveAnnouncements;
-    }
-
     public static boolean isSafeBeatmapBg() {
         return safeBeatmapBg;
-    }
-
-    public static void setSafeBeatmapBg(boolean safeBeatmapBg) {
-        Config.safeBeatmapBg = safeBeatmapBg;
     }
 
     public static String getDefaultCorePath() {
@@ -615,9 +457,5 @@ public class Config {
     public static void addSkin(String name, String path) {
         if(skins == null) skins = new HashMap<String, String>();
         skins.put(name, path);
-    }
-
-    public static boolean isItemBackground() {
-        return showItemBackground;
     }
 }

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Created by Reco1l on 6/7/22 21:13 -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true">
+
+    <LinearLayout
+        android:id="@+id/pl_body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <com.reco1l.ui.elements.LogoView
+            android:layout_width="@dimen/_50sdp"
+            android:layout_height="@dimen/_50sdp" />
+
+        <TextView
+            android:id="@+id/pl_title"
+            style="@style/text"
+            android:layout_marginTop="@dimen/S"
+            android:text="Welcome to rimu!"
+            android:textColor="#FFF"
+            android:textSize="@dimen/textXL" />
+
+        <TextView
+            android:id="@+id/pl_artist"
+            style="@style/text"
+            android:layout_marginBottom="@dimen/XS"
+            android:text="by Acivev"
+            android:textColor="#BFFFFFFF" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/XS">
+
+            <com.reco1l.view.BadgeTextView
+                android:id="@+id/pl_stars"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="00.00"
+                app:icon="@drawable/v10_star" />
+
+            <com.reco1l.view.BadgeTextView
+                android:id="@+id/pl_mapper"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/XS"
+                android:text="Acivev"
+                app:icon="@drawable/v10_person" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/pl_difficulty"
+            style="@style/text"
+            android:layout_marginTop="@dimen/XS"
+            android:text="difficulty name"
+            android:textColor="#BFFFFFFF"
+            android:textSize="@dimen/textXS" />
+
+        <com.reco1l.view.RoundLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/XXL"
+            android:background="#1F000000"
+            android:padding="@dimen/XS"
+            app:radius="6">
+
+            <com.reco1l.view.ProgressIndicatorView
+                android:layout_width="@dimen/_20sdp"
+                android:layout_height="@dimen/_20sdp"
+                app:color="#FFF" />
+
+        </com.reco1l.view.RoundLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

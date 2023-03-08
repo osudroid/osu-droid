@@ -31,7 +31,9 @@ public final class MusicManager {
     private float mSpeed = 1f;
     private boolean mPitch = false;
 
-    private int mTrackIndex = 0;
+    private int
+            mTrackIndex = 0,
+            mBeatmapIndex = 0;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -62,15 +64,21 @@ public final class MusicManager {
         return Game.songService != null && Game.songService.getStatus() == PLAYING;
     }
 
-    //--------------------------------------------------------------------------------------------//
-
     private Status getState() {
         return Game.songService.getStatus();
     }
 
+    //--------------------------------------------------------------------------------------------//
+
     public int getTrackIndex() {
         return mTrackIndex;
     }
+
+    public int getBeatmapIndex() {
+        return mBeatmapIndex;
+    }
+
+    //--------------------------------------------------------------------------------------------//
 
     public TrackInfo getTrack() {
         return mTrack;
@@ -143,7 +151,8 @@ public final class MusicManager {
 
         try {
             return Objects.equals(last.getCanonicalPath(), New.getCanonicalPath());
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             NotificationTable.exception(e);
             return false;
         }
@@ -165,6 +174,7 @@ public final class MusicManager {
             stop();
             mTrack = null;
             mTrackIndex = 0;
+            mBeatmapIndex = 0;
 
             onMusicChange(null, false);
             return false;
@@ -172,8 +182,10 @@ public final class MusicManager {
         assert Game.songService != null;
 
         boolean same = sameAudio(track);
+
         mTrack = track;
         mTrackIndex = mTrack.getBeatmap().getTracks().indexOf(mTrack);
+        mBeatmapIndex = Game.beatmapCollection.indexOf(mTrack.getBeatmap());
 
         if (!same) {
             Game.songService.stop();

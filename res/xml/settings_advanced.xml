@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:key="pref_advanced">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory
+        android:key="pref_advanced"
         android:layout="@layout/custom_preference_category_big"
         android:title="Advanced" />
 
@@ -57,17 +57,6 @@
             android:defaultValue="false"
             android:key="calculateSliderPathInGameStart"
             android:title="@string/opt_calculate_slider_path_in_game_start_title" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="Debug"
-        app:iconSpaceReserved="false">
-
-        <com.reco1l.preference.CheckPreference
-            android:defaultValue="true"
-            android:key="fps"
-            android:title="Show FPS" />
 
     </PreferenceCategory>
 

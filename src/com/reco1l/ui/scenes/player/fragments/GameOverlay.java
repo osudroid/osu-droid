@@ -1,5 +1,7 @@
 package com.reco1l.ui.scenes.player.fragments;
 
+import android.widget.RelativeLayout;
+
 import androidx.annotation.UiThread;
 
 import com.reco1l.management.game.GameWrapper;
@@ -20,6 +22,7 @@ import java.util.Locale;
 
 import main.osu.scoring.StatisticV2;
 
+import com.reco1l.view.RoundedImageView;
 import com.rimu.R;
 
 public final class GameOverlay extends BaseFragment implements IPassiveObject {
@@ -27,6 +30,7 @@ public final class GameOverlay extends BaseFragment implements IPassiveObject {
     public static final GameOverlay instance = new GameOverlay();
 
     private LeaderboardView mLeaderboard;
+    private RoundedImageView mSkipButton;
     private BadgeTextView mInfoText;
 
     private ScoreNumberView
@@ -39,13 +43,13 @@ public final class GameOverlay extends BaseFragment implements IPassiveObject {
     private HealthBarView mHealth;
     private BadgeTextView mURText;
 
+    private RelativeLayout mMainBody;
+
     private GameWrapper mWrapper;
 
-    //--------------------------------------------------------------------------------------------//
-
-    public GameOverlay() {
-        super(Scenes.player);
-    }
+    private boolean
+            mSkipActioned,
+            mShowingSkipButton;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -56,17 +60,20 @@ public final class GameOverlay extends BaseFragment implements IPassiveObject {
 
     @Override
     protected String getPrefix() {
-        return "go";
+        return "hud";
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onLoad() {
+
         mLeaderboard = find("leaderboard");
         mInfoText = find("infoText");
         mProgress = find("progress");
         mAccuracy = find("accuracy");
+        mSkipButton = find("skip");
+        mMainBody = find("main");
         mHealth = find("health");
         mCombo = find("combo");
         mScore = find("score");
@@ -76,8 +83,29 @@ public final class GameOverlay extends BaseFragment implements IPassiveObject {
         FPSBadgeView counter = find("fps");
         counter.setProvider(Scenes.player);
 
-        // Allowing only to show 5 scores
         Views.height(mLeaderboard, sdp(28) * 5);
+
+        mShowingSkipButton = false;
+        mSkipButton.setAlpha(0);
+
+        mMainBody.setAlpha(0);
+        mMainBody.setScaleX(1.2f);
+        mMainBody.setScaleY(1.2f);
+
+        bindTouch(mSkipButton, () -> {
+            unbindTouch(mSkipButton);
+            mSkipActioned = true;
+
+            Animation.of(mSkipButton)
+                     .toY(50)
+                     .toAlpha(0)
+                     .play(200);
+
+            Animation.of(mMainBody)
+                    .toScale(1)
+                    .toAlpha(1)
+                    .play(200);
+        });
     }
 
     @Override
@@ -94,6 +122,23 @@ public final class GameOverlay extends BaseFragment implements IPassiveObject {
             }
             else {
                 mInfoText.setAlpha(0);
+            }
+
+            mShowingSkipButton = mWrapper.skipTime > 1;
+
+            if (mShowingSkipButton) {
+                Animation.of(mSkipButton)
+                        .fromY(50)
+                        .toY(0)
+                        .toAlpha(1)
+                        .play(200);
+            } else {
+                unbindTouch(mSkipButton);
+
+                Animation.of(mMainBody)
+                         .toScale(1)
+                         .toAlpha(1)
+                         .play(200);
             }
         }
     }
@@ -123,6 +168,16 @@ public final class GameOverlay extends BaseFragment implements IPassiveObject {
         }
     }
 
+    //--------------------------------------------------------------------------------------------//
+
+    public boolean wasSkipButtonActioned() {
+        boolean actioned = mSkipActioned;
+        if (actioned) {
+            mSkipActioned = false;
+        }
+        return mShowingSkipButton && actioned;
+    }
+
     public void onAccuracyChange(float accuracy) {
         mMeter.putErrorAt(accuracy);
     }
@@ -142,6 +197,21 @@ public final class GameOverlay extends BaseFragment implements IPassiveObject {
             mScore.setText("" + s.getAutoTotalScore());
             mAccuracy.setText(String.format("%.2f%%", s.getAccuracy() * 100f));
             mURText.setText(String.format(Locale.ENGLISH, "%.2f UR", s.getUnstableRate()));
+        }
+
+        if (sec > mWrapper.skipTime && mShowingSkipButton) {
+            mShowingSkipButton = false;
+            unbindTouch(mSkipButton);
+
+            Animation.of(mSkipButton)
+                    .toY(50)
+                    .toAlpha(0)
+                    .play(200);
+
+            Animation.of(mMainBody)
+                     .toScale(1)
+                     .toAlpha(1)
+                     .play(200);
         }
 
         mHealth.onObjectUpdate(dt, sec);

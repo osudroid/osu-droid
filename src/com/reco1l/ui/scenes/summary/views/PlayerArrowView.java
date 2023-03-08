@@ -15,7 +15,9 @@ import com.reco1l.view.RoundLayout;
 
 public class PlayerArrowView extends RoundLayout {
 
-    private int mArrowWidth;
+    private int mArrowSize;
+
+    private @Direction int mDirection;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -35,31 +37,64 @@ public class PlayerArrowView extends RoundLayout {
 
     @Override
     protected void onManageAttributes(@Nullable TypedArray t, AttributeSet a) {
-        mArrowWidth = sdp(a.getAttributeIntValue(appNS, "arrowWidth", 60));
+        mArrowSize = sdp(a.getAttributeIntValue(appNS, "arrowSize", 60));
+        mDirection = a.getAttributeIntValue(appNS, "direction", 2);
     }
 
     @Override
-    protected void onPathCreated(Path path, float radius, int width, int height) {
+    protected void onPathCreated(Path path, float radius, int w, int h) {
 
+        int halfW = w / 2;
+        int halfH = h / 2;
 
-        /*
-        * A        B
-        *
-        *               C
-        *
-        * E        D
-        */
+        PathDrawer drawer = new PathDrawer(path);
 
-        Point B = new Point(width - mArrowWidth, 0);
-        Point C = new Point(width, height / 2);
-        Point D = new Point(width - mArrowWidth, height);
-        Point E = new Point(0, height);
+        Point arrowPeak;
 
-        path.lineTo(B.x, B.y);
-        path.lineTo(C.x, C.y);
-        path.lineTo(D.x, D.y);
-        path.lineTo(E.x, E.y);
-        path.lineTo(0, 0);
+        Point topL = new Point(0, 0);
+        Point topR = new Point(w, 0);
+
+        Point bottomR = new Point(w, h);
+        Point bottomL = new Point(0, h);
+
+        switch (mDirection) {
+            case Direction.BOTTOM_TO_TOP:
+                arrowPeak = new Point(halfW, 0);
+
+                topL.y += mArrowSize;
+                topR.y += mArrowSize;
+
+                drawer.line(topL, arrowPeak, topR, bottomR, bottomL);
+                break;
+            case Direction.TOP_TO_BOTTOM:
+                arrowPeak = new Point(halfW, h);
+
+                bottomL.y -= mArrowSize;
+                bottomR.y -= mArrowSize;
+
+                drawer.line(topL, topR, bottomR, arrowPeak, bottomL);
+                break;
+            case Direction.LEFT_TO_RIGHT:
+                arrowPeak = new Point(w, halfH);
+
+                topR.x -= mArrowSize;
+                bottomR.x -= mArrowSize;
+
+                drawer.line(topL, topR, arrowPeak, bottomR, bottomL);
+                break;
+            case Direction.RIGHT_TO_LEFT:
+                arrowPeak = new Point(0, halfH);
+
+                topL.x += mArrowSize;
+                bottomL.x += mArrowSize;
+
+                drawer.line(topL, topR, bottomR, bottomL, arrowPeak);
+                break;
+        }
         path.close();
+    }
+
+    public @Direction int getDirection() {
+        return mDirection;
     }
 }

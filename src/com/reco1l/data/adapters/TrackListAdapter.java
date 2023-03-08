@@ -75,7 +75,6 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
 
             UI.beatmapCarrousel.bindTouch(mBody, () -> {
                 if(!select()) {
-                    Game.musicManager.stop();
                     Game.resourcesManager.getSound("menuhit").play();
                     Scenes.player.startGame(item, null);
                 } else {

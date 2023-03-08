@@ -1,6 +1,7 @@
 package main.osu;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.dgsrz.bancho.security.SecurityUtils;
@@ -29,7 +30,6 @@ import main.audio.BassSoundProvider;
 import main.osu.helper.FileUtils;
 import main.osu.helper.QualityAssetBitmapSource;
 import main.osu.helper.QualityFileBitmapSource;
-import main.osu.helper.ScaledBitmapSource;
 import main.skins.OsuSkin;
 import main.skins.SkinJsonReader;
 import main.skins.SkinManager;
@@ -312,27 +312,20 @@ public class ResourceManager {
         return loadTexture(resname, file, external, TextureOptions.BILINEAR, this.engine);
     }
 
-    public TextureRegion loadTexture(final String resname, final String file,
-                                     final boolean external, Engine engine) {
-        return loadTexture(resname, file, external, TextureOptions.BILINEAR, engine);
-    }
+    public TextureRegion loadBackground(Bitmap bitmap) {
+        Engine engine = GlobalManager.getInstance().getEngine();
 
-    public TextureRegion loadBackground(final String file) {
-        return loadBackground(file, this.engine);
-    }
-
-    public TextureRegion loadBackground(final String file, Engine engine) {
         if (textures.containsKey("::background")) {
             engine.getTextureManager().unloadTexture(
                     textures.get("::background").getTexture());
         }
-        if (file == null) {
+        if (bitmap == null) {
             textures.put("::background", textures.get("menu-background"));
             return textures.get("::background");
         }
         int tw = 16, th = 16;
         TextureRegion region;
-        final ScaledBitmapSource source = new ScaledBitmapSource(new File(file));
+        BitmapSourceAtlas source = new BitmapSourceAtlas(bitmap);
         if (source.getWidth() == 0 || source.getHeight() == 0) {
             return null;
         }
@@ -342,14 +335,13 @@ public class ResourceManager {
         while (th < source.getHeight()) {
             th *= 2;
         }
-        if (source.preload() == false) {
+        if (!source.isLoaded()) {
             textures.put("::background", textures.get("menu-background"));
             return textures.get("::background");
         }
-        final BitmapTextureAtlas tex = new BitmapTextureAtlas(tw, th,
-                TextureOptions.BILINEAR);
-        region = TextureRegionFactory
-                .createFromSource(tex, source, 0, 0, false);
+        final BitmapTextureAtlas tex = new BitmapTextureAtlas(tw, th, TextureOptions.BILINEAR);
+
+        region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false);
         engine.getTextureManager().loadTexture(tex);
         textures.put("::background", region);
         return region;

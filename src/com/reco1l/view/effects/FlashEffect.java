@@ -76,7 +76,7 @@ public class FlashEffect extends RoundLayout {
 
     @Override
     protected void onManagedDraw(Canvas canvas) {
-        if (isInEditMode()) {
+        if (isInEditMode() || !Settings.<Boolean>get("menusEffects", true)) {
             return;
         }
 

@@ -3,27 +3,34 @@
 <!-- Created by Reco1l on 18/7/22 23:26 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:key="pref_graphics">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory
-        android:title="Graphics"
+        android:key="pref_graphics"
         android:layout="@layout/custom_preference_category_big"
-        app:iconSpaceReserved="false"/>
+        android:title="Graphics"
+        app:iconSpaceReserved="false" />
 
-    <PreferenceCategory
-        android:title="Effects"
-        app:iconSpaceReserved="false">
-
-        <com.reco1l.preference.CheckPreference
-            android:defaultValue="true"
-            android:key="bursts"
-            android:title="@string/opt_bursts_title" />
+    <PreferenceCategory android:title="Engine">
 
         <com.reco1l.preference.CheckPreference
             android:defaultValue="true"
-            android:key="hitlighting"
-            android:title="@string/opt_hitlighting_title" />
+            android:key="dither"
+            android:title="@string/opt_dither_title" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="User interface">
+
+        <com.reco1l.preference.CheckPreference
+            android:defaultValue="true"
+            android:key="itemBackground"
+            android:title="Show songs background in the selector" />
+
+        <com.reco1l.preference.CheckPreference
+            android:defaultValue="true"
+            android:key="menusEffects"
+            android:title="Show menus complex effects" />
 
     </PreferenceCategory>
 

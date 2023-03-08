@@ -1,10 +1,7 @@
 package main.osu;
 
-import android.util.DisplayMetrics;
-
 import com.reco1l.Game;
 import com.reco1l.ui.scenes.Scenes;
-import com.reco1l.ui.scenes.loader.LoaderScene;
 import com.reco1l.ui.scenes.selector.SelectorScene;
 import com.reco1l.ui.scenes.main.MainScene;
 
@@ -29,7 +26,6 @@ public class GlobalManager {
     private MainScene mainScene;
     private SummaryScene scoring;
     private SelectorScene selectorScene;
-    private LoaderScene loaderScene;
 
     private MainActivity mainActivity;
     private int loadingProgress;
@@ -59,7 +55,6 @@ public class GlobalManager {
         setGameScene(Scenes.player.getLegacyClass());
         setSongMenu(Scenes.selector);
         setScoring(Scenes.summary);
-        setLoadingScene(Scenes.loader);
         getGameScene().setScoringScene(getScoring());
         getGameScene().setOldScene(getSongMenu());
         if (songService != null) {
@@ -164,17 +159,4 @@ public class GlobalManager {
         this.saveServiceObject = saveServiceObject;
     }
 
-    public DisplayMetrics getDisplayMetrics() {
-        final DisplayMetrics dm = new DisplayMetrics();
-        mainActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
-        return dm;
-    }
-
-    public LoaderScene getLoadingScene() {
-        return loaderScene;
-    }
-
-    public void setLoadingScene(LoaderScene loaderScene) {
-        this.loaderScene = loaderScene;
-    }
 }

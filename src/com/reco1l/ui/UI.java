@@ -2,6 +2,7 @@ package com.reco1l.ui;
 
 import com.reco1l.ui.scenes.listing.fragments.BeatmapListing;
 import com.reco1l.ui.fragments.*;
+import com.reco1l.ui.scenes.player.fragments.PlayerLoader;
 import com.reco1l.ui.scenes.main.fragments.MainMenu;
 import com.reco1l.ui.scenes.main.fragments.MusicPlayer;
 import com.reco1l.ui.scenes.player.fragments.BreakOverlay;
@@ -49,6 +50,7 @@ public final class UI {
     // Player scene
     public static final PauseMenu pauseMenu = PauseMenu.instance;
     public static final GameOverlay gameOverlay = GameOverlay.instance;
+    public static final PlayerLoader playerLoader = PlayerLoader.instance;
     public static final BreakOverlay breakOverlay = BreakOverlay.instance;
 
     //--------------------------------------------------------------------------------------------//

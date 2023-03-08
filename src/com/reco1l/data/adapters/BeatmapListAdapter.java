@@ -37,18 +37,17 @@ import java.util.ArrayList;
 
 import main.osu.BeatmapInfo;
 import main.osu.BeatmapProperties;
-import main.osu.Config;
 import com.rimu.R;
 
 public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapInfo> {
 
-    private final BitmapPool mBackgroundPool;
+    private final BitmapQueue mBackgroundPool;
 
     //--------------------------------------------------------------------------------------------//
 
     public BeatmapListAdapter(ArrayList<BeatmapInfo> list) {
         super(list);
-        mBackgroundPool = new BitmapPool();
+        mBackgroundPool = new BitmapQueue();
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -68,7 +67,7 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
     public static class BeatmapViewHolder extends BaseViewHolder<BeatmapInfo> implements BitmapCallback {
 
 
-        private final BitmapPool mBackgroundPool;
+        private final BitmapQueue mBackgroundPool;
         private final TrackListAdapter mTrackAdapter;
 
         private final View mBody;
@@ -86,7 +85,7 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
 
         //----------------------------------------------------------------------------------------//
 
-        private BeatmapViewHolder(@NonNull View root, BitmapPool backgroundPool) {
+        private BeatmapViewHolder(@NonNull View root, BitmapQueue backgroundPool) {
             super(root);
             mBackgroundPool = backgroundPool;
 
@@ -135,7 +134,7 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
 
         @Override
         protected void onAttachmentChange(boolean isAttached) {
-            if (mBitmap != null || !Config.isItemBackground()) {
+            if (mBitmap != null || !Settings.<Boolean>get("itemBackground", true)) {
                 return;
             }
 

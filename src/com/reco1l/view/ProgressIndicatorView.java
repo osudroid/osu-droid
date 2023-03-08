@@ -3,6 +3,7 @@ package com.reco1l.view;
 import static com.google.android.material.progressindicator.CircularProgressIndicator.*;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.Gravity;
 
@@ -41,11 +42,16 @@ public class ProgressIndicatorView extends RoundLayout {
 
         mIndicator.setIndicatorInset(0);
         mIndicator.setIndeterminate(true);
-        mIndicator.setIndicatorColor(0xFF819DD4);
         mIndicator.setIndicatorDirection(INDICATOR_DIRECTION_COUNTERCLOCKWISE);
 
         setGravity(Gravity.CENTER);
         setClampToSquare(true);
+        setRadius(0);
+    }
+
+    @Override
+    protected void onManageAttributes(@Nullable TypedArray t, AttributeSet a) {
+        mIndicator.setIndicatorColor(a.getAttributeIntValue(appNS, "color", 0xFF819DD4));
     }
 
     @Override
@@ -56,7 +62,6 @@ public class ProgressIndicatorView extends RoundLayout {
         mIndicator.post(() -> {
             int size = Maths.pct(Math.min(getWidth(), getHeight()), 80);
 
-            setRadiusAbs(Maths.pct(size, 15));
             mIndicator.setIndicatorSize(size);
 
             int thick = Maths.pct(size, 12);

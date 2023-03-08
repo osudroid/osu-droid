@@ -87,7 +87,8 @@ public class SelectorScene extends BaseScene {
     public void loadScore(int id, String player) {
         TrackInfo track = Game.musicManager.getTrack();
 
-        Scenes.loader.async(new ITask() {
+        // TODO [SelectorScene] load score
+      /*  Scenes.loader.async(new ITask() {
 
             private StatisticV2 mStats;
             private String mReplay;
@@ -123,7 +124,7 @@ public class SelectorScene extends BaseScene {
                 }
                 Scenes.summary.load(mStats, track, mReplay, true);
             }
-        });
+        });*/
     }
 
     public void random() {

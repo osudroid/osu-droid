@@ -51,12 +51,13 @@ public class StripsEffect extends RoundLayout {
         internal.setLayerType(LAYER_TYPE_HARDWARE, null);
         internal.setBackground(mDrawable);
 
+        setRadius(0);
         setConstantInvalidation(true);
     }
 
     @Override
     protected void onManageAttributes(@Nullable TypedArray t, AttributeSet a) {
-        mSyncToBeat = a.getAttributeBooleanValue(appNS, "syncToBeat", true);
+        mSyncToBeat = a.getAttributeBooleanValue(appNS, "beatSync", true);
 
         if (mSyncToBeat) {
             Animation.UpdateListener onUpdate = value -> {
@@ -78,10 +79,12 @@ public class StripsEffect extends RoundLayout {
 
     @Override
     protected void onManagedDraw(Canvas canvas) {
-        if (!isInEditMode()) {
-            if (mSyncToBeat && Game.timingWrapper.isNextBeat()) {
-                onNextBeat();
-            }
+        if (isInEditMode() || !Settings.<Boolean>get("menusEffects", true)) {
+            return;
+        }
+
+        if (mSyncToBeat && Game.timingWrapper.isNextBeat()) {
+            onNextBeat();
         }
     }
 

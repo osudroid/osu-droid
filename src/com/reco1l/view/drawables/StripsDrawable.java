@@ -18,6 +18,8 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.reco1l.management.Settings;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
@@ -99,6 +101,10 @@ public class StripsDrawable extends Drawable {
 
     @Override
     public void draw(@NonNull Canvas canvas) {
+        if (!Settings.<Boolean>get("menusEffects", true)) {
+            return;
+        }
+
         mWidth = getBounds().width();
         mHeight = getBounds().height();
 

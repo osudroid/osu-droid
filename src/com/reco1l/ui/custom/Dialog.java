@@ -137,7 +137,7 @@ public class Dialog extends BaseFragment {
         }
 
         if (fragment != null) {
-            Game.platform.transaction()
+            getChildFragmentManager().beginTransaction()
                     .add(mBodyContainer.getId(), fragment)
                     .commit();
         } else {

@@ -15,14 +15,14 @@
         android:layout_width="@dimen/_160sdp"
         android:layout_height="match_parent"
         android:background="#1AFFFFFF"
-        app:arrowWidth="80" />
+        app:arrowSize="80" />
 
     <com.reco1l.ui.scenes.summary.views.PlayerArrowView
         android:id="@+id/bo_arrow1"
         android:layout_width="@dimen/_80sdp"
         android:layout_height="match_parent"
         android:background="#1AFFFFFF"
-        app:arrowWidth="80" />
+        app:arrowSize="80" />
 
     <com.reco1l.ui.scenes.summary.views.PlayerArrowView
         android:id="@+id/bo_arrow2"
@@ -30,8 +30,8 @@
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:background="#1AFFFFFF"
-        android:rotationY="180"
-        app:arrowWidth="80" />
+        app:direction="right_to_left"
+        app:arrowSize="80" />
 
     <com.reco1l.ui.scenes.summary.views.PlayerArrowView
         android:id="@+id/bo_arrow3"
@@ -39,8 +39,8 @@
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:background="#1AFFFFFF"
-        android:rotationY="180"
-        app:arrowWidth="80" />
+        app:direction="right_to_left"
+        app:arrowSize="80" />
 
     <com.reco1l.ui.scenes.player.views.ScoreNumberView
         android:id="@+id/bo_leftTime"

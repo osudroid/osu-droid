@@ -32,6 +32,7 @@ public final class FragmentPlatform implements Identifiers {
     private FragmentManager mManager;
 
     private RenderSurfaceView mRenderView;
+    private LinearLayout mRenderContainer;
 
     private CoordinatorLayout
             mBackgroundContainer,
@@ -67,17 +68,17 @@ public final class FragmentPlatform implements Identifiers {
     private CoordinatorLayout createPlatform(Context context, RenderSurfaceView render) {
         CoordinatorLayout frame = new CoordinatorLayout(context);
 
-        mBackgroundContainer = new FrameLayout(context);
+        // Centering the SurfaceView
+        mRenderContainer = new LinearLayout(context);
+        mRenderContainer.setGravity(Gravity.CENTER);
+        mRenderContainer.addView(render);
+        frame.addView(mRenderContainer, Views.match_parent);
+
+        mBackgroundContainer = new CoordinatorLayout(context);
         mBackgroundContainer.setId(Platform_Background);
         frame.addView(mBackgroundContainer, Views.match_parent);
 
-        // Centering the SurfaceView
-        LinearLayout layout = new LinearLayout(context);
-        layout.setGravity(Gravity.CENTER);
-        layout.addView(render);
-        frame.addView(layout, Views.match_parent);
-
-        mScreenContainer = new FrameLayout(context);
+        mScreenContainer = new CoordinatorLayout(context);
         mScreenContainer.setId(Platform_Screen);
         frame.addView(mScreenContainer, Views.match_parent);
 
@@ -85,10 +86,6 @@ public final class FragmentPlatform implements Identifiers {
         mOverlayContainer.setId(Platform_Overlay);
         frame.addView(mOverlayContainer, Views.match_parent);
 
-        // For some reason drawing views below the SurfaceView causes black boxes glitches
-        // this should fix it
-        View view = new View(context);
-        frame.addView(view, Views.match_parent);
         return frame;
     }
 
@@ -109,15 +106,34 @@ public final class FragmentPlatform implements Identifiers {
 
     //--------------------------------------------------------------------------------------------//
 
-    public FragmentTransaction transaction() {
-        return mManager.beginTransaction();
+    public RenderSurfaceView getRenderView() {
+        return mRenderView;
     }
 
     public FragmentManager getManager() {
         return mManager;
     }
 
-    public FrameLayout getBackgroundContainer() {
+    //--------------------------------------------------------------------------------------------//
+
+
+    public DisplayMetrics getMetrics() {
+        DisplayMetrics metrics = new DisplayMetrics();
+        Game.activity.getDisplay().getMetrics(metrics);
+        return metrics;
+    }
+
+    public int getScreenWidth() {
+        return getMetrics().widthPixels;
+    }
+
+    public int getScreenHeight() {
+        return getMetrics().heightPixels;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public CoordinatorLayout getBackgroundContainer() {
         return mBackgroundContainer;
     }
 
@@ -129,8 +145,8 @@ public final class FragmentPlatform implements Identifiers {
         return mOverlayContainer;
     }
 
-    public RenderSurfaceView getRenderView() {
-        return mRenderView;
+    public LinearLayout getRenderContainer() {
+        return mRenderContainer;
     }
 
     //--------------------------------------------------------------------------------------------//
