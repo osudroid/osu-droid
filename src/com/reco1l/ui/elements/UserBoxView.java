@@ -139,7 +139,7 @@ public class UserBoxView extends RoundLayout implements IOnlineObserver {
     public void onClear() {
 
         Game.activity.runOnUiThread(() -> {
-            mAvatar.setImageBitmap(null);
+            mAvatar.setImageResource(R.drawable.placeholder_avatar);
             mUsername.setText("Guest");
             mRank.setText("offline");
         });
