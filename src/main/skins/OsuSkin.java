@@ -34,7 +34,7 @@ public class OsuSkin {
     protected final String DEFAULT_COLOR_HEX = "#3d3d57ff";
     protected final ArrayList<RGBColor> comboColor = new ArrayList<>();
 
-    protected final ColorSkinData sliderBorderColor = new ColorSkinData("sliderBorderColor", "#333333");
+    protected final ColorSkinData sliderBorderColor = new ColorSkinData("sliderBorderColor", "#ffffff");
     protected final ColorSkinData sliderBodyColor = new ColorSkinData("sliderBodyColor", "#3d3d57ff");
     protected final ColorSkinData sliderHintColor = new ColorSkinData("sliderHintColor", "#00000050");
 
@@ -113,8 +113,8 @@ public class OsuSkin {
 
     public ArrayList<RGBColor> getComboColor() {
         if (comboColor.isEmpty()) {
-            comboColor.add(RGBColor.hex2Rgb("#9c4b74ff"));
-            comboColor.add(RGBColor.hex2Rgb("#5e5e89ff"));
+            comboColor.add(RGBColor.hex2Rgb("#504BD7"));
+            comboColor.add(RGBColor.hex2Rgb("#7786ff"));
         }
         return comboColor;
     }
