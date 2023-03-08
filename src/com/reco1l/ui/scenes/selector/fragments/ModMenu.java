@@ -16,7 +16,6 @@ import com.reco1l.ui.UI;
 import com.reco1l.data.adapters.ModCustomizationAdapter;
 import com.reco1l.annotation.Size;
 import com.reco1l.management.modding.ModAcronyms;
-import com.reco1l.tables.Res;
 import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.framework.Animation;
 import com.reco1l.framework.Views;
@@ -190,7 +189,7 @@ public final class ModMenu extends BaseFragment implements ModAcronyms {
         widget.removeAllViews();
 
         Animation.of(widget)
-                .toRightPadding(Res.sdp(12))
+                .toRightPadding(sdp(12))
                 .play(100);
 
         for (ModWrapper wrapper : Game.modManager.getList()) {

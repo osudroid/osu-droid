@@ -12,7 +12,6 @@ import com.reco1l.annotation.Legacy;
 import com.reco1l.Game;
 import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.tables.AnimationTable;
-import com.reco1l.tables.Res;
 import com.reco1l.ui.base.BaseFragment;
 
 import com.reco1l.framework.execution.Async;
@@ -253,7 +252,7 @@ public final class GameSummary extends BaseFragment {
         //----------------------------------------------------------------------------------------//
 
         private void applyColoring(TextView text, Difference difference) {
-            Drawable background = Res.drw(R.drawable.shape_rounded).mutate();
+            Drawable background = drw(R.drawable.shape_rounded).mutate();
             background.setTint(difference.backgroundColor);
 
             text.setTextColor(difference.textColor);

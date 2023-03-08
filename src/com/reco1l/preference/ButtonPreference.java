@@ -7,12 +7,12 @@ import android.util.TypedValue;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
-import com.reco1l.tables.Res;
+import com.reco1l.management.resources.ResourceTable;
 import com.reco1l.view.ButtonView;
 
 import com.rimu.R;
 
-public class ButtonPreference extends Preference {
+public class ButtonPreference extends Preference implements ResourceTable {
 
     public ButtonPreference(Context context) {
         this(context, null);
@@ -42,8 +42,8 @@ public class ButtonPreference extends Preference {
         if (view != null) {
             view.getTextView().setId(android.R.id.title);
 
-            TypedValue out = Res.attr(android.R.attr.selectableItemBackground, true);
-            view.setForeground(Res.drw(out.resourceId));
+            TypedValue out = attr(android.R.attr.selectableItemBackground, true);
+            view.setForeground(drw(out.resourceId));
         }
         super.onBindViewHolder(holder);
     }

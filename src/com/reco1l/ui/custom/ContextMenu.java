@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.factor.bouncy.BouncyRecyclerView;
 import com.reco1l.Game;
-import com.reco1l.tables.Res;
 import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.ui.base.Layers;
 import com.reco1l.framework.Animation;
@@ -68,8 +67,8 @@ public class ContextMenu extends BaseFragment {
 
         mBody = new CardView(Game.activity);
 
-        mBody.setCardBackgroundColor(Res.color(R.color.backgroundPrimary));
-        mBody.setRadius(Res.dimen(R.dimen.app_corners));
+        mBody.setCardBackgroundColor(color(R.color.backgroundPrimary));
+        mBody.setRadius(dimen(R.dimen.app_corners));
         mBody.setAlpha(0);
         layout.addView(mBody);
 

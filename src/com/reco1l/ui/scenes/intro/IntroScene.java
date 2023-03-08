@@ -10,7 +10,6 @@ import com.reco1l.ui.base.Layers;
 import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.framework.Animation;
-import com.reco1l.tables.Res;
 import com.reco1l.view.BadgeTextView;
 import com.reco1l.view.effects.StripsEffect;
 
@@ -108,7 +107,7 @@ public class IntroScene extends BaseScene {
                     .runOnStart(mWelcomeSound::play)
                     .runOnEnd(() -> {
 
-                        int size = Res.sdp(250);
+                        int size = sdp(250);
 
                         Animation.of(mLogoLines)
                                 .toScale(1)

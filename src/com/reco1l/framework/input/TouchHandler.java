@@ -11,8 +11,8 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.reco1l.Game;
+import com.reco1l.management.resources.ResourceTable;
 import com.reco1l.ui.base.BaseFragment;
-import com.reco1l.tables.Res;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -20,7 +20,7 @@ import main.audio.BassSoundProvider;
 
 // Created by Reco1l on 23/6/22 20:44
 
-public final class TouchHandler {
+public final class TouchHandler implements ResourceTable {
 
     private static final long LONG_PRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
 
@@ -169,14 +169,14 @@ public final class TouchHandler {
         if (view.getForeground() != null) {
             return;
         }
-        TypedValue outValue = new TypedValue();
 
         int id = android.R.attr.selectableItemBackground;
         if (mListener.useBorderlessEffect()) {
             id = android.R.attr.selectableItemBackgroundBorderless;
         }
 
-        Game.activity.getTheme().resolveAttribute(id, outValue, true);
-        view.setForeground(Res.drw(outValue.resourceId));
+        TypedValue outValue = attr(id, true);
+
+        view.setForeground(drw(outValue.resourceId));
     }
 }

@@ -16,7 +16,6 @@ import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.management.scoreboard.ScoreboardManager;
 import com.reco1l.management.modding.ModAcronyms;
 import com.reco1l.management.music.IMusicObserver;
-import com.reco1l.tables.Res;
 import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.framework.Animation;
 
@@ -76,7 +75,7 @@ public final class BeatmapPanel extends BaseFragment implements
         mScoresList = find("scoreboard");
         mScoresList.setLayoutManager(new LinearLayoutManager(getContext(), VERTICAL, true));
 
-        bodyWidth = Res.dimen(R.dimen.beatmapPanelContentWidth);
+        bodyWidth = dimen(R.dimen.beatmapPanelContentWidth);
         body = find("body");
 
         Animation.of(body)
@@ -134,7 +133,7 @@ public final class BeatmapPanel extends BaseFragment implements
 
         Animation.of(body)
                 .toX(-bodyWidth)
-                .toTopMargin(Res.dimen(R.dimen.topBarHeight))
+                .toTopMargin(dimen(R.dimen.topBarHeight))
                 .toAlpha(0)
                 .runOnEnd(super::close)
                 .play(300);

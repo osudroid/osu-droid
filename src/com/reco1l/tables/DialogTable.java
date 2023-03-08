@@ -99,7 +99,7 @@ public class DialogTable {
     // Builder for auto-clicker dialog
     public static DialogBuilder auto_clicker() {
         return new DialogBuilder("Warning")
-                .setMessage(Res.str(R.string.message_autoclicker_detected))
+                .setMessage("Please disable your accessibility service(s) with Perform Gestures permission before playing the game!")
                 .addButton("Exit", dialog -> Game.activity.exit())
                 .setDismiss(false);
     }
