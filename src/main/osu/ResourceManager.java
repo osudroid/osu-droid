@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.dgsrz.bancho.security.SecurityUtils;
 import com.reco1l.management.resources.BitmapManager;
+import com.reco1l.framework.support.BitmapSourceAtlas;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.opengl.texture.TextureOptions;
