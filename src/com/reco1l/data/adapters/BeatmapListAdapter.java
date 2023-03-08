@@ -216,7 +216,11 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
 
                         DialogBuilder dialog = new DialogBuilder("Delete Beatmap")
                                 .setMessage("Are you sure you want to delete this beatmap?")
-                                .addButton("Yes", d -> Game.libraryManager.deleteMap(item))
+                                .addButton("Yes", d -> {
+                                    Game.libraryManager.deleteMap(item);
+                                    Scenes.selector.random();
+                                    d.close();
+                                })
                                 .addCloseButton();
 
                         new Dialog(dialog).show();

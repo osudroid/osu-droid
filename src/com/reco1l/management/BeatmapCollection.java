@@ -237,7 +237,7 @@ public class BeatmapCollection {
         Log.i("BeatmapCollection", "Library has been updated");
     }
 
-    public void notifyChange() {
+    private void notifyChange() {
         mListeners.forEach(listener -> listener.onLibraryChange(mList));
     }
 

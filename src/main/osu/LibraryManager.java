@@ -297,6 +297,7 @@ public class LibraryManager {
         if (library != null) {
             library.remove(info);
         }
+        Game.beatmapCollection.notifyLibraryChange();
     }
 
     public void savetoCache(final Activity activity) {        
