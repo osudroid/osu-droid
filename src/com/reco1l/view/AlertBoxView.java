@@ -52,6 +52,7 @@ public class AlertBoxView extends RoundLayout {
         addView(mIcon, Views.wrap_content);
 
         mText = Views.styledText(this, attrs);
+        mText.setGravity(Gravity.CENTER);
         addView(mText, Views.wrap_content);
 
         Views.resetAll(mText);
