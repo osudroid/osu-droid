@@ -56,7 +56,6 @@ public class UserBoxView extends RoundLayout implements IOnlineObserver {
 
         mRank = Views.styledText(this, null);
         mRank.setTextSize(TypedValue.COMPLEX_UNIT_PX, sdp(18));
-        mRank.setText("offline");
         mRank.setAlpha(0.25f);
         addView(mRank);
 
@@ -74,19 +73,19 @@ public class UserBoxView extends RoundLayout implements IOnlineObserver {
 
         mUsername = Views.styledText(this, null);
         mUsername.setTextSize(TypedValue.COMPLEX_UNIT_PX, sdp(12));
-        mUsername.setText("Guest");
         mLayout.addView(mUsername);
 
         Views.padding(mUsername)
              .right(sdp(14));
 
         mAvatar = new RoundedImageView(getContext());
-        mAvatar.setImageResource(R.drawable.placeholder_avatar);
         mAvatar.setRadius(8);
         mLayout.addView(mAvatar);
 
         int size = sdp(24);
         mAvatarDimen = new Dimension(size, size);
+
+        onClear();
     }
 
     @Override
