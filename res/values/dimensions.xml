@@ -26,12 +26,12 @@
     <dimen name="_XXL">@dimen/_minus20sdp</dimen>
 
     <!--Text-->
-    <dimen name="textXXS">@dimen/_6ssp</dimen>
-    <dimen name="textXS">@dimen/_8ssp</dimen>
-    <dimen name="textS">@dimen/_10ssp</dimen>
-    <dimen name="textM">@dimen/_12ssp</dimen>
-    <dimen name="textL">@dimen/_14ssp</dimen>
-    <dimen name="textXL">@dimen/_18ssp</dimen>
+    <dimen name="textXXS">@dimen/_6sdp</dimen>
+    <dimen name="textXS">@dimen/_8sdp</dimen>
+    <dimen name="textS">@dimen/_10sdp</dimen>
+    <dimen name="textM">@dimen/_12sdp</dimen>
+    <dimen name="textL">@dimen/_14sdp</dimen>
+    <dimen name="textXL">@dimen/_18sdp</dimen>
 
     <!--Vectors-->
     <dimen name="vector32">@dimen/_32sdp</dimen>
@@ -88,7 +88,6 @@
     
     <!--Top Bar-->
     <dimen name="topBarHeight">@dimen/_40sdp</dimen>
-    <dimen name="topBarMusicButtonHeight">@dimen/_28sdp</dimen>
     <dimen name="topBarAvatarSize">@dimen/_24sdp</dimen>
     <dimen name="topBarAvatarCorners">@dimen/_8sdp</dimen>
 
