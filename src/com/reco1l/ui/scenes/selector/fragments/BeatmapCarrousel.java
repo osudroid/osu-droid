@@ -18,6 +18,7 @@ import java.util.ArrayList;
 
 import main.osu.BeatmapInfo;
 import main.osu.TrackInfo;
+
 import com.rimu.R;
 
 // Created by Reco1l on 22/8/22 00:31
@@ -87,9 +88,7 @@ public final class BeatmapCarrousel extends BaseFragment implements BeatmapColle
             return;
         }
 
-        if (mAdapter != null) {
-            mAdapter.select(Game.musicManager.getBeatmapIndex());
-        }
+        restoreSelection();
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -97,7 +96,9 @@ public final class BeatmapCarrousel extends BaseFragment implements BeatmapColle
     private void restoreSelection() {
         mCarrousel.post(() -> {
             if (mAdapter != null) {
-                mAdapter.select(Game.musicManager.getBeatmapIndex());
+                if (mAdapter.getSelectedPosition() != Game.musicManager.getBeatmapIndex()) {
+                    mAdapter.select(Game.musicManager.getBeatmapIndex());
+                }
             }
         });
     }
