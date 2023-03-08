@@ -69,7 +69,7 @@ public class MenuPreference extends Preference {
         mButton = (RoundLayout) holder.findViewById(R.id.pref_menu_button);
         mSelectedText = (TextView) holder.findViewById(R.id.pref_selected);
 
-        new TouchHandler(new TouchListener() {
+        TouchHandler.of(mButton, new TouchListener() {
 
             public void onPressUp() {
                 if (mEntries == null || mEntries.isEmpty()) {
@@ -97,7 +97,7 @@ public class MenuPreference extends Preference {
 
                 menu.show();
             }
-        }).apply(mButton);
+        });
     }
 
     //--------------------------------------------------------------------------------------------//

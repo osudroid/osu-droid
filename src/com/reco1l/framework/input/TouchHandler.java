@@ -1,8 +1,8 @@
 package com.reco1l.framework.input;
 
+import static android.content.Context.VIBRATOR_SERVICE;
 import static android.view.MotionEvent.*;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.util.TypedValue;
@@ -14,20 +14,28 @@ import com.reco1l.Game;
 import com.reco1l.management.resources.ResourceTable;
 import com.reco1l.ui.base.BaseFragment;
 
-import org.jetbrains.annotations.NotNull;
-
 import main.audio.BassSoundProvider;
+import main.osu.MainActivity;
 
 // Created by Reco1l on 23/6/22 20:44
 
 public final class TouchHandler implements ResourceTable {
 
-    private static final long LONG_PRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
+    private static final long LONG_PRESS_TIMEOUT;
+    private static final Vibrator mVibrator;
+
+    static {
+        LONG_PRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
+
+        mVibrator = (Vibrator) MainActivity.instance.getSystemService(VIBRATOR_SERVICE);
+    }
+
+    //--------------------------------------------------------------------------------------------//
 
     public TouchListener mListener;
 
+    private final View mView;
     private final Handler mHandler;
-    private final Vibrator mVibrator;
     private final Runnable mLongPressCallback;
 
     private BaseFragment mLinkedFragment;
@@ -36,25 +44,37 @@ public final class TouchHandler implements ResourceTable {
 
     //--------------------------------------------------------------------------------------------//
 
-    public TouchHandler(TouchListener listener) {
+    private TouchHandler(View view, TouchListener listener) {
+        mView = view;
         mListener = listener;
-        mVibrator = (Vibrator) Game.activity.getSystemService(Context.VIBRATOR_SERVICE);
         mHandler = new Handler();
 
         mLongPressCallback = () -> {
             mIsLongPressActioned = true;
             listener.onLongPress();
+
             if (mVibrator != null) {
                 mVibrator.vibrate(50);
             }
         };
+
+        bind();
     }
 
-    public TouchHandler(@NotNull Runnable onUp) {
-        this(new TouchListener() {
+    public static TouchHandler of(View view, TouchListener listener) {
+        return new TouchHandler(view, listener);
+    }
+
+    public static TouchHandler of(View view, Runnable onPressUp) {
+
+        return new TouchHandler(view, new TouchListener() {
+
             public void onPressUp() {
-                onUp.run();
+                if (onPressUp != null) {
+                    onPressUp.run();
+                }
             }
+
         });
     }
 
@@ -104,20 +124,20 @@ public final class TouchHandler implements ResourceTable {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void apply(View view) {
+    public void bind() {
         if (mListener == null) {
             return;
         }
 
         if (mListener.useTouchEffect()) {
-            handleRippleEffect(view);
+            handleRippleEffect(mView);
         }
 
-        view.setOnTouchListener((v, event) -> {
+        mView.setOnTouchListener((v, event) -> {
             int action = event.getAction();
 
             notifyTouchEvent(event);
-            handleEffects(view, event);
+            handleEffects(mView, event);
 
             mListener.setPosition(event.getRawX(), event.getRawY());
 
@@ -135,10 +155,6 @@ public final class TouchHandler implements ResourceTable {
                     return false;
                 }
                 removeCallbacks();
-
-                if (mListener.useOnlyOnce()) {
-                    view.setOnTouchListener(null);
-                }
                 mListener.onPressUp();
                 return true;
             }
@@ -169,13 +185,7 @@ public final class TouchHandler implements ResourceTable {
         if (view.getForeground() != null) {
             return;
         }
-
-        int id = android.R.attr.selectableItemBackground;
-        if (mListener.useBorderlessEffect()) {
-            id = android.R.attr.selectableItemBackgroundBorderless;
-        }
-
-        TypedValue outValue = attr(id, true);
+        TypedValue outValue = attr(android.R.attr.selectableItemBackground, true);
 
         view.setForeground(drw(outValue.resourceId));
     }

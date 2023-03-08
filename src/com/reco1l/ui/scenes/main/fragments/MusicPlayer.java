@@ -161,7 +161,6 @@ public final class MusicPlayer extends BaseFragment implements IMusicObserver {
         });
 
         bindTouch(find("list"), new TouchListener() {
-            public boolean useBorderlessEffect() { return true; }
 
             public void onPressUp() {
                 switchListVisibility();
@@ -169,10 +168,6 @@ public final class MusicPlayer extends BaseFragment implements IMusicObserver {
         });
 
         bindTouch(mPlayButton, new TouchListener() {
-            public boolean useTouchEffect() {
-                return false;
-            }
-
             public void onPressUp() {
                 if (Game.musicManager.isPlaying()) {
                     Game.musicManager.pause();
@@ -183,16 +178,12 @@ public final class MusicPlayer extends BaseFragment implements IMusicObserver {
         });
 
         bindTouch(find("prev"), new TouchListener() {
-            public boolean useBorderlessEffect() { return true; }
-
             public void onPressUp() {
                 Game.musicManager.previous();
             }
         });
 
         bindTouch(find("next"), new TouchListener() {
-            public boolean useBorderlessEffect() { return true; }
-
             public void onPressUp() {
                 Game.musicManager.next();
             }

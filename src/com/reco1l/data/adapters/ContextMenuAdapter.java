@@ -58,9 +58,10 @@ public class ContextMenuAdapter extends BaseAdapter<ItemHolder, ContextMenu.Item
         protected void onBind(ContextMenu.Item item, int position) {
             ((TextView) root).setText(item.getText());
 
-            new TouchHandler(() ->
-                    item.onClick((TextView) root)
-            ).apply(root);
+            TouchHandler.of(root, () -> {
+
+                item.onClick((TextView) root);
+            });
         }
 
         @Override

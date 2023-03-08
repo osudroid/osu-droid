@@ -85,6 +85,6 @@ public class SimpleFragment extends Fragment {
     }
 
     public final void bindTouch(View view, TouchListener listener) {
-        new TouchHandler(listener).apply(view);
+        TouchHandler.of(view, listener);
     }
 }

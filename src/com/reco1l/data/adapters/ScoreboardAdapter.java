@@ -85,13 +85,13 @@ public class ScoreboardAdapter extends BaseAdapter<ScoreHolder, ScoreInfo> {
         @Override
         protected void onBind(ScoreInfo item, int position) {
 
-            new TouchHandler(new TouchListener() {
+
+            TouchHandler.of(root, new TouchListener() {
 
                 public void onPressUp() {
                     Scenes.selector.loadScore(item.getId(), item.getName());
                 }
 
-                @Override
                 public void onLongPress() {
                     ContextMenuBuilder builder = new ContextMenuBuilder(getTouchPosition())
                             .addItem("Export", () -> ReplayHelper.export(item.getId()))
@@ -99,7 +99,8 @@ public class ScoreboardAdapter extends BaseAdapter<ScoreHolder, ScoreInfo> {
 
                     new ContextMenu(builder).show();
                 }
-            }).apply(root);
+
+            });
 
 
             for (GameMod mod : item.getMods()) {

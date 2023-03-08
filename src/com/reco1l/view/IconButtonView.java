@@ -71,7 +71,7 @@ public class IconButtonView extends RoundLayout {
     }
 
     public void setTouchListener(Runnable task) {
-        new TouchHandler(task).apply(this);
+        TouchHandler.of(this, task);
     }
 
     //--------------------------------------------------------------------------------------------//

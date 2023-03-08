@@ -22,16 +22,8 @@ public class TouchListener {
         return null;
     }
 
-    public boolean useOnlyOnce() {
-        return false;
-    }
-
     public boolean useTouchEffect() {
         return true;
-    }
-
-    public boolean useBorderlessEffect() {
-        return false;
     }
 
     //--------------------------------------------------------------------------------------------//

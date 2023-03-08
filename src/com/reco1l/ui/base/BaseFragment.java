@@ -299,23 +299,25 @@ public abstract class BaseFragment extends Fragment implements ResourceTable {
     // Bind a touch listener to the view and link it to the fragment
     public final void bindTouch(View view, TouchListener listener) {
         TouchHandler handler = mRegisteredViews.get(view);
+
         if (handler == null) {
-            handler = new TouchHandler(listener);
+            handler = TouchHandler.of(view, listener);
             mRegisteredViews.put(view, handler);
         } else {
             handler.mListener = listener;
         }
         handler.linkToFragment(this);
-        handler.apply(view);
     }
 
-    public final void bindTouch(View view, Runnable onUp) {
+    public final void bindTouch(View view, Runnable onPressUp) {
         bindTouch(view, new TouchListener() {
+
             public void onPressUp() {
-                if (onUp != null) {
-                    onUp.run();
+                if (onPressUp != null) {
+                    onPressUp.run();
                 }
             }
+
         });
     }
 
