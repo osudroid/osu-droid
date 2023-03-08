@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import com.reco1l.framework.drawing.Dimension;
 import com.reco1l.management.game.GameWrapper;
 import com.reco1l.framework.Animation;
+import com.reco1l.tools.Views;
 import com.reco1l.view.RoundLayout;
 import com.reco1l.framework.drawing.CompoundRect;
 
@@ -100,6 +101,12 @@ public class ErrorMeterView extends RoundLayout implements IPassiveObject {
     }
 
     @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        Views.size(this, toEngineScale(300), toEngineScale(15));
+    }
+
+    @Override
     protected void onDimensionChange(Dimension dimens) {
         super.onDimensionChange(dimens);
 
@@ -108,7 +115,7 @@ public class ErrorMeterView extends RoundLayout implements IPassiveObject {
 
         m50Compound.rect.right = w;
 
-        int centerWidth = sdp(3);
+        int centerWidth = toEngineScale(6);
         mCenter.rect.bottom = h;
         mCenter.rect.left = w / 2 - centerWidth / 2;
         mCenter.rect.right = w / 2 + centerWidth / 2;
@@ -214,8 +221,11 @@ public class ErrorMeterView extends RoundLayout implements IPassiveObject {
 
         private Line(int x) {
             Rect rect = new Rect();
-            rect.left = x - sdp(1);
-            rect.right = x + sdp(1);
+
+            int size = toEngineScale(3);
+
+            rect.left = x - size / 2;
+            rect.right = x + size / 2;
             rect.bottom = getWidth();
 
             mCompound = new CompoundRect(rect);
