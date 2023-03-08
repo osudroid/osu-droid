@@ -102,10 +102,18 @@ public final class Views {
             horizontal(size, size);
         }
 
+        public MarginUtils vertical(int size) {
+            return vertical(size, size);
+        }
+
         public MarginUtils vertical(int top, int bottom) {
             top(top);
             bottom(bottom);
             return this;
+        }
+
+        public MarginUtils horizontal(int size) {
+            return horizontal(size, size);
         }
 
         public MarginUtils horizontal(int left, int right) {
