@@ -20,11 +20,21 @@
             android:key="skin"
             android:title="@string/opt_skin_title" />
 
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Elements">
+
         <com.reco1l.preference.CheckPreference
             android:defaultValue="true"
             android:key="spinner"
             android:title="Use modern spinner" />
 
+        <com.reco1l.preference.CheckPreference
+            android:defaultValue="true"
+            android:key="comboburst"
+            android:title="Use combo burst" />
+
     </PreferenceCategory>
+
 
 </PreferenceScreen>
