@@ -74,7 +74,7 @@ public class HealthBarView extends RoundLayout implements IPassiveObject {
             mColour.setImageBitmap(colour);
             mBackground.setImageBitmap(back);
 
-            mColour.setY(toEngineScale(16));
+            mColour.setY(toEngineScale(15));
 
             Views.size(mBackground,
                     toEngineScale(back.getWidth()),

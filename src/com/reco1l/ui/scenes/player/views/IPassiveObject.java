@@ -1,9 +1,14 @@
 package com.reco1l.ui.scenes.player.views;
 
+import android.util.DisplayMetrics;
+
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 import com.reco1l.Game;
 import com.reco1l.management.game.GameWrapper;
+import com.reco1l.tools.Logging;
+
+import main.osu.Config;
 
 public interface IPassiveObject {
 
@@ -15,16 +20,17 @@ public interface IPassiveObject {
 
     //--------------------------------------------------------------------------------------------//
 
-    default int toEngineScale(float width) {
-        return (int) (width * getEngineScale());
+    default int toEngineScale(float size) {
+        return (int) (size * getEngineScale());
     }
 
     default float getEngineScale() {
-        CoordinatorLayout screen = Game.platform.getScreenContainer();
+        CoordinatorLayout frame = Game.platform.getScreenContainer();
 
-        float w = screen.getWidth();
-        float h = screen.getHeight();
 
-        return 1f + (h / w);
+        float factor = (float) frame.getHeight() / Config.getRES_HEIGHT();
+
+        Logging.i(this, "Scale factor: " + factor);
+        return factor;
     }
 }
