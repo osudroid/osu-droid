@@ -17,7 +17,6 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
@@ -26,6 +25,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleableRes;
 import androidx.appcompat.widget.LinearLayoutCompat;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.math.MathUtils;
 
 import com.reco1l.framework.drawing.Dimension;
@@ -36,7 +36,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 // CardView takes more time to render due to implementation so this is a good alternative i made
-public class RoundLayout extends FrameLayout implements ResourceTable {
+public class RoundLayout extends CoordinatorLayout implements ResourceTable {
 
     public static final int LINEAR = 0;
     public static final int RELATIVE = 1;
@@ -102,7 +102,7 @@ public class RoundLayout extends FrameLayout implements ResourceTable {
             super.setBackground(null);
         }
         super.setPadding(0, 0, 0, 0);
-        Views.reset(mInternalLayout);
+        Views.resetParameters(mInternalLayout);
 
         onCreate();
         handleAttributes();
