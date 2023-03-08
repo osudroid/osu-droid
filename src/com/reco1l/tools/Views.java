@@ -326,7 +326,13 @@ public final class Views {
 
     //--------------------------------------------------------------------------------------------//
 
-    public static void reset(View view) {
+    public static void resetAll(View view) {
+        resetParameters(view);
+        resetPadding(view);
+        resetMargin(view);
+    }
+
+    public static void resetParameters(View view) {
         if (view == null) {
             return;
         }
@@ -336,7 +342,7 @@ public final class Views {
         view.setAlpha(1);
         view.setTranslationY(0);
         view.setTranslationX(0);
-        view.setTranslationX(0);
+        view.setTranslationZ(0);
         view.setVisibility(VISIBLE);
     }
 
