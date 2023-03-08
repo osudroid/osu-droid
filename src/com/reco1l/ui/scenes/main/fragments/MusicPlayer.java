@@ -33,6 +33,7 @@ import com.reco1l.tools.helpers.BeatmapHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.TimeZone;
 
 import main.osu.BeatmapInfo;
 import main.osu.TrackInfo;
@@ -66,7 +67,7 @@ public final class MusicPlayer extends BaseFragment implements IMusicObserver {
             mIsTrackingTouch = false,
             mWasPlaying = false;
 
-    private final SimpleDateFormat mTimeFormat;
+    private final SimpleDateFormat mSDF;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -74,7 +75,8 @@ public final class MusicPlayer extends BaseFragment implements IMusicObserver {
         super();
         Game.musicManager.bindMusicObserver(this);
 
-        mTimeFormat = new SimpleDateFormat("mm:ss");
+        mSDF = new SimpleDateFormat("mm:ss");
+        mSDF.setTimeZone(TimeZone.getTimeZone("GMT+0"));
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -149,7 +151,7 @@ public final class MusicPlayer extends BaseFragment implements IMusicObserver {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromTouch) {
                 if (fromTouch) {
                     newPosition = progress;
-                    mTime.setText(mTimeFormat.format(progress));
+                    mTime.setText(mSDF.format(progress));
                 }
             }
 
@@ -207,7 +209,7 @@ public final class MusicPlayer extends BaseFragment implements IMusicObserver {
         if (!mIsTrackingTouch) {
             mSeekBar.setMax(length);
             mSeekBar.setProgress(position);
-            mTime.setText(mTimeFormat.format(position));
+            mTime.setText(mSDF.format(position));
         }
 
         if (Game.musicManager.isPlaying() && !mWasPlaying) {
@@ -247,7 +249,7 @@ public final class MusicPlayer extends BaseFragment implements IMusicObserver {
     private void loadMetadata(BeatmapInfo pBeatmap) {
         mTitle.setText(BeatmapHelper.getTitle(pBeatmap));
         mArtist.setText(BeatmapHelper.getArtist(pBeatmap));
-        mLength.setText(mTimeFormat.format(Game.songService.getLength()));
+        mLength.setText(mSDF.format(Game.songService.getLength()));
     }
 
     private void switchListVisibility() {
