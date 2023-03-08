@@ -55,11 +55,7 @@ public interface ResourceTable {
     // Return SP dimension in scalable type (Use only in texts)
     @Deprecated
     default int ssp(int sp) {
-        if (sp <= 0) {
-            // Invert the positive value instead.
-            return 0;
-        }
-        return (int) resources().getDimension(id("_" + sp + "ssp", "dimen"));
+        return sdp(sp);
     }
 
     //--------------------------------------------------------------------------------------------//
