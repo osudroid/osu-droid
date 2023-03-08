@@ -323,4 +323,28 @@ public final class Views {
         LayoutInflater inflater = context.getSystemService(LayoutInflater.class);
         return inflater.inflate(layout, null);
     }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public static void reset(View view) {
+        if (view == null) {
+            return;
+        }
+
+        view.setScaleX(1);
+        view.setScaleY(1);
+        view.setAlpha(1);
+        view.setTranslationY(0);
+        view.setTranslationX(0);
+        view.setTranslationX(0);
+        view.setVisibility(VISIBLE);
+    }
+
+    public static void resetPadding(View view) {
+        padding(view).all(0);
+    }
+
+    public static void resetMargin(View view) {
+        margins(view).all(0);
+    }
 }
