@@ -75,13 +75,18 @@
     <PreferenceCategory android:title="HUD">
 
         <com.reco1l.preference.CheckPreference
-            android:defaultValue="false"
-            android:key="hideHUD"
-            android:title="@string/opt_hide_ingame_ui_title" />
+            android:defaultValue="true"
+            android:key="showHUD"
+            android:title="Show in-game HUD" />
 
         <com.reco1l.preference.CheckPreference
             android:defaultValue="true"
-            android:key="hideMeter"
+            android:key="showLeaderboard"
+            android:title="Show in-game leaderboard" />
+
+        <com.reco1l.preference.CheckPreference
+            android:defaultValue="true"
+            android:key="showMeter"
             android:title="Show error meter" />
 
     </PreferenceCategory>
@@ -97,21 +102,6 @@
             android:defaultValue="false"
             android:key="showfirstapproachcircle"
             android:title="@string/opt_show_first_approach_circle_title" />
-
-        <com.reco1l.preference.CheckPreference
-            android:defaultValue="true"
-            android:key="bursts"
-            android:title="@string/opt_bursts_title" />
-
-        <com.reco1l.preference.CheckPreference
-            android:defaultValue="true"
-            android:key="complexanimations"
-            android:title="@string/opt_complexanimations_title" />
-
-        <com.reco1l.preference.CheckPreference
-            android:defaultValue="true"
-            android:key="hitlighting"
-            android:title="@string/opt_hitlighting_title" />
 
     </PreferenceCategory>
 

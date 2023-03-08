@@ -20,7 +20,22 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="User interface">
+    <PreferenceCategory android:title="Effects">
+
+        <com.reco1l.preference.CheckPreference
+            android:defaultValue="true"
+            android:key="bursts"
+            android:title="Show hit burst effect" />
+
+        <com.reco1l.preference.CheckPreference
+            android:defaultValue="true"
+            android:key="hitlighting"
+            android:title="Show hit lightning effect" />
+
+        <com.reco1l.preference.CheckPreference
+            android:defaultValue="true"
+            android:key="complexanimations"
+            android:title="Show game complex effects" />
 
         <com.reco1l.preference.CheckPreference
             android:defaultValue="true"
