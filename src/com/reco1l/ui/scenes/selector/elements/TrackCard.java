@@ -17,6 +17,7 @@ import com.reco1l.view.FadeImageView;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import main.osu.TrackInfo;
 import main.osu.game.GameHelper;
@@ -115,6 +116,7 @@ public final class TrackCard {
                     } else {
                         sdf = new SimpleDateFormat("mm:ss");
                     }
+                    sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
                     return sdf.format(a.getValue());
                 });
             }
