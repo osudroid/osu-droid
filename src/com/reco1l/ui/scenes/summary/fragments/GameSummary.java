@@ -10,8 +10,8 @@ import android.widget.TextView;
 import com.caverock.androidsvg.SVGImageView;
 import com.reco1l.annotation.Legacy;
 import com.reco1l.Game;
+import com.reco1l.framework.Animation;
 import com.reco1l.ui.scenes.Scenes;
-import com.reco1l.tables.AnimationTable;
 import com.reco1l.ui.base.BaseFragment;
 
 import com.reco1l.framework.execution.Async;
@@ -326,7 +326,11 @@ public final class GameSummary extends BaseFragment {
             }
             scoreText.setText(df.format(newScore) + string);
 
-            AnimationTable.fadeOutScaleOut(find("rankingLoading"));
+            Animation.of(find("rankingLoading"))
+                     .toAlpha(0)
+                     .toScale(0.8f)
+                     .play(200);
+
             find("rankingStats").setAlpha(1f);
         }
     }
