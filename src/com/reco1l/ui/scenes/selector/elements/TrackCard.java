@@ -1,5 +1,7 @@
 package com.reco1l.ui.scenes.selector.elements;
 
+import static java.util.Locale.US;
+
 import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +23,7 @@ import java.util.TimeZone;
 
 import main.osu.TrackInfo;
 import main.osu.game.GameHelper;
+
 import com.rimu.R;
 
 public final class TrackCard {
@@ -91,7 +94,8 @@ public final class TrackCard {
             UI.background.postChange(() ->
                     mBackground.setImageBitmap(UI.background.getRawBitmap())
             );
-        } else {
+        }
+        else {
             mBackground.setVisibility(View.INVISIBLE);
             mBackground.setImageBitmap(null);
         }
@@ -100,27 +104,25 @@ public final class TrackCard {
     private void createAttributes(TrackInfo pTrack) {
         mAttrs = new TrackAttributeSet(pTrack);
 
-        mAttrs.forEach(a -> {
+        mAttrs.forEach(a -> a.setFormatter(v -> {
+
             if (a.getValue() instanceof Float) {
-                a.setFormatter(v -> "" + GameHelper.Round((Float) v, 2));
+                return "" + GameHelper.Round((Float) v, 2);
             }
             if (a.getValue() instanceof Integer) {
-                a.setFormatter(v -> "" + NumberFormat.getNumberInstance(Locale.US).format(v));
+                return "" + NumberFormat.getNumberInstance(US).format(v);
             }
             if (a.getValue() instanceof Long) {
-                a.setFormatter(v -> {
-                    SimpleDateFormat sdf;
+                boolean isHour = (long) a.getValue() > 3600 * 1000;
 
-                    if ((long) a.getValue() > 3600 * 1000) {
-                        sdf = new SimpleDateFormat("HH:mm:ss");
-                    } else {
-                        sdf = new SimpleDateFormat("mm:ss");
-                    }
-                    sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
-                    return sdf.format(a.getValue());
-                });
+                SimpleDateFormat SDF = new SimpleDateFormat(isHour ? "HH:mm:ss" : "mm:ss");
+                SDF.setTimeZone(TimeZone.getTimeZone("GMT+0"));
+
+                return SDF.format(a.getValue());
             }
-        });
+
+            return null;
+        }));
     }
 
     private void handleColoring(float pStars) {
@@ -157,8 +159,8 @@ public final class TrackCard {
         mAttrs.get(TrackAttribute.HP).setView(mHPText.getTextView());
 
         mAttrs.get(TrackAttribute.STARS)
-                .setView(mStarsText.getTextView())
-                .setOnChange(v -> handleColoring((Float) v));
+              .setView(mStarsText.getTextView())
+              .setOnChange(v -> handleColoring((Float) v));
 
         handleModifications();
     }
