@@ -5,7 +5,9 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.util.TypedValue;
 
+import androidx.annotation.AttrRes;
 import androidx.annotation.ColorRes;
 import androidx.annotation.DimenRes;
 import androidx.annotation.DrawableRes;
@@ -14,12 +16,12 @@ import androidx.core.content.res.ResourcesCompat;
 
 import com.reco1l.Game;
 
+import main.osu.MainActivity;
+
 public interface ResourceTable {
 
-    //--------------------------------------------------------------------------------------------//
-
     default Context context() {
-        return Game.activity;
+        return MainActivity.instance;
     }
 
     default Resources resources() {
@@ -80,5 +82,12 @@ public interface ResourceTable {
 
     default Typeface font(String name) {
         return ResourcesCompat.getFont(context(), id(name, "font"));
+    }
+
+    default TypedValue attr(@AttrRes int id, boolean resolveRefs) {
+        TypedValue outValue = new TypedValue();
+
+        theme().resolveAttribute(id, outValue, resolveRefs);
+        return outValue;
     }
 }
