@@ -2,6 +2,7 @@ package com.reco1l.data.adapters;
 
 import static com.reco1l.data.adapters.ScoreboardAdapter.*;
 
+import android.graphics.Bitmap;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -102,7 +103,6 @@ public class ScoreboardAdapter extends BaseAdapter<ScoreHolder, ScoreInfo> {
 
             });
 
-
             for (GameMod mod : item.getMods()) {
                 ImageView image = new ImageView(context);
                 //image.setImageBitmap(Game.bitmapManager.get("selection-mod-" + mod.texture));
@@ -115,11 +115,19 @@ public class ScoreboardAdapter extends BaseAdapter<ScoreHolder, ScoreInfo> {
                 }
             }
 
-            if (Game.onlineManager.isStayOnline()) {
-                String url = Endpoint.Avatar_URL + item.getAvatar();
-                avatar.setImageDrawable(OnlineHelper.getAvatarFromURL(url, item.getName()));
+            if (!Game.onlineManager2.isOfflineMode()) {
+                Async.run(() -> {
+                    try {
+                        Bitmap bm = Game.onlineManager2.loadAvatarOf(item.getId(), avatar.getWidth());
+                        Game.activity.runOnUiThread(() ->
+                                avatar.setImageBitmap(bm)
+                        );
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
             } else {
-                avatar.setImageDrawable(OnlineHelper.getPlayerAvatar());
+                avatar.setImageResource(R.drawable.placeholder_avatar);
             }
             mark.setImageAsset("svg/ranking-" + item.getMark() + ".svg");
 

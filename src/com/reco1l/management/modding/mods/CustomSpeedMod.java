@@ -40,13 +40,24 @@ public class CustomSpeedMod extends ModWrapper {
     @Override
     public void onSelect(boolean isEnabled) {
         super.onSelect(isEnabled);
+
+        if (!isEnabled) {
+            Game.modManager.setCustomSpeed(1);
+            Game.modManager.setPitchShift(false);
+            updatePlayback();
+        }
+    }
+
+    private static void updatePlayback() {
+        Game.musicManager.setPlayback(
+                Game.modManager.getCustomSpeed(),
+                Game.modManager.isPitchShift()
+        );
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public static class Properties extends ModWrapper.Properties {
-
-        //----------------------------------------------------------------------------------------//
 
         @Override
         protected int getPreferenceXML() {
@@ -62,12 +73,10 @@ public class CustomSpeedMod extends ModWrapper {
             CheckPreference pitch = find("mod_speed_pitch");
 
             pitch.setDefaultValue(false);
-            pitch.setChecked((boolean) getProperty(ModProperty.CustomSpeed_ShiftPitch, false));
+            pitch.setChecked(Game.modManager.isPitchShift());
 
             pitch.setOnPreferenceChangeListener((p, v) -> {
-                setProperty(ModProperty.CustomSpeed_ShiftPitch, v);
-                Game.modMenu.setEnableNCWhenSpeedChange((boolean) v);
-
+                Game.modManager.setPitchShift((boolean) v);
                 updatePlayback();
                 return true;
             });
@@ -78,22 +87,14 @@ public class CustomSpeedMod extends ModWrapper {
             speed.setMax(200);
             speed.setMin(50);
 
-            speed.setValue((int) ((float) getProperty(ModProperty.CustomSpeed_Value, 1.0f) * 100));
+            speed.setValue((int) Game.modManager.getCustomSpeed() * 100);
             speed.setValueFormatter(value -> (float) value / 100 + "x");
 
             speed.setOnPreferenceChangeListener((p, v) -> {
-                setProperty(ModProperty.CustomSpeed_Value, ((int) v) / (float) 100);
-
-                Game.modMenu.setChangeSpeed(((int) v) / (float) 100);
+                Game.modManager.setCustomSpeed(((int) v) / (float) 100);
                 updatePlayback();
                 return true;
             });
-        }
-
-        private void updatePlayback() {
-            Game.musicManager.setPlayback(
-                    (float) getProperty(ModProperty.CustomSpeed_Value, 1.0f),
-                    (boolean) getProperty(ModProperty.CustomSpeed_ShiftPitch, false));
         }
     }
 }

@@ -17,9 +17,18 @@ public class FlashlightMod extends LegacyModWrapper {
 
     //--------------------------------------------------------------------------------------------//
 
-    public static class Properties extends ModWrapper.Properties {
+    @Override
+    public void onSelect(boolean isEnabled) {
+        super.onSelect(isEnabled);
 
-        //----------------------------------------------------------------------------------------//
+        if (!isEnabled) {
+            Game.modManager.setCustomFLDelay(0.12f);
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public static class Properties extends ModWrapper.Properties {
 
         @Override
         protected int getPreferenceXML() {
@@ -39,14 +48,12 @@ public class FlashlightMod extends LegacyModWrapper {
             delay.setMax(10);
             delay.setMin(1);
 
-            float currentValue = (float) getProperty(ModProperty.Flashlight_Delay, 0.12f);
+            float currentValue = Game.modManager.getCustomFLDelay();
             delay.setValue((int) (currentValue * 1000 / 120));
 
             delay.setOnPreferenceChangeListener((p, v) -> {
                 float value = 120 * ((int) v) / 1000f;
-
-                setProperty(ModProperty.Flashlight_Delay, value);
-                Game.modMenu.setFLfollowDelay(value);
+                Game.modManager.setCustomFLDelay(value);
                 return true;
             });
         }

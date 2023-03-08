@@ -42,12 +42,6 @@ public class MainScene extends BaseScene {
         layout.addView(musicButton);
     }
 
-    @Override
-    protected void onFirstShow() {
-        Game.onlineScoring.login();
-        Updater.getInstance().checkForUpdates();
-    }
-
     //--------------------------------------------------------------------------------------------//
 
     @Override

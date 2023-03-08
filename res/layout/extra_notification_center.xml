@@ -44,11 +44,6 @@
                 android:background="@color/panelTopBar"
                 android:gravity="center_vertical">
 
-                <com.edlplan.ui.TriangleEffectView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:alpha="0.15" />
-
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

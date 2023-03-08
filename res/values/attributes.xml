@@ -49,6 +49,15 @@
         <attr name="badgeTextColor" format="color" />
     </declare-styleable>
 
+    <declare-styleable name="UserStatisticLayout">
+        <attr name="valueText" format="string" />
+    </declare-styleable>
+
+    <declare-styleable name="TabSelectorView">
+        <!--Separate them with | -->
+        <attr name="tabs" format="string" />
+    </declare-styleable>
+
     <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
     <declare-styleable name="StripsEffectView">

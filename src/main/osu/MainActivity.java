@@ -206,7 +206,7 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public void onLoadComplete() {
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
+        new AsyncTask() {
             public void run() {
                 GlobalManager.getInstance().init();
                 analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
@@ -228,7 +228,7 @@ public class MainActivity extends BaseGameActivity implements
                     willReplay = false;
                 }
             }
-        });
+        }.execute();
     }
 
     /*

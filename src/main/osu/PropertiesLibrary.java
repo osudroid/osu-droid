@@ -104,23 +104,6 @@ public class PropertiesLibrary {
         save(context);
     }
 
-    public void saveAsync() {
-        if (context == null) {
-            return;
-        }
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
-
-            public void run() {
-                save(context);
-            }
-
-
-            public void onComplete() {
-            }
-        });
-    }
-
     public BeatmapProperties getProperties(final String path) {
         if (props.containsKey(path)) {
             return props.get(path);

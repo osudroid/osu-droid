@@ -33,14 +33,15 @@ public class CustomDifficultyMod extends ModWrapper {
     @Override
     public void onSelect(boolean isEnabled) {
         super.onSelect(isEnabled);
-        Game.modMenu.setEnableForceAR(isEnabled);
+
+        if (!isEnabled) {
+            Game.modManager.setCustomAR(-1);
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
 
     public static class Properties extends ModWrapper.Properties {
-
-        //----------------------------------------------------------------------------------------//
 
         @Override
         protected int getPreferenceXML() {
@@ -61,12 +62,13 @@ public class CustomDifficultyMod extends ModWrapper {
             AR.setMax(125);
             AR.setMin(1);
 
-            float currentValue = (float) getProperty(ModProperty.CustomDiff_AR, track.getApproachRate());
+            float customAR = Game.modManager.getCustomAR();
+            float currentValue = customAR == -1 ? track.getApproachRate() : customAR;
+
             AR.setValue((int) (currentValue * 10));
 
             AR.setOnPreferenceChangeListener((p, v) -> {
-                setProperty(ModProperty.CustomDiff_AR, ((int) v) / (float) 10);
-                Game.modMenu.setForceAR(((int) v) / (float) 10);
+                Game.modManager.setCustomAR(((int) v) / (float) 10);
                 return true;
             });
         }

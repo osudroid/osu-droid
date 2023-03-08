@@ -327,18 +327,17 @@ public abstract class BaseFragment extends Fragment implements ResourceTable {
     }
 
     protected final void unbindTouchHandlers() {
-        for (View view : mRegisteredViews.keySet()) {
-            view.setForeground(null);
-            view.setOnTouchListener(null);
-        }
+        mRegisteredViews.forEach((k, e) -> unbindTouch(k));
     }
 
     protected final void rebindTouchHandlers() {
-        for (View view : mRegisteredViews.keySet()) {
-            TouchHandler handler = mRegisteredViews.get(view);
-            if (handler != null) {
-                handler.apply(view);
-            }
+        mRegisteredViews.forEach((k, e) -> rebindTouch(k));
+    }
+
+    protected final void rebindTouch(View view) {
+        TouchHandler handler = mRegisteredViews.get(view);
+        if (handler != null) {
+            handler.bind();
         }
     }
 

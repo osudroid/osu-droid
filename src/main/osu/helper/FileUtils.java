@@ -115,8 +115,10 @@ public class FileUtils {
             }
         }catch(IOException e) {
             Debug.e("getFileChecksum " + e.getMessage(), e);
+            return null;
         }catch(NoSuchAlgorithmException e) {
             Debug.e(e.getMessage(), e);
+            return null;
         }
         return sb.toString();
     }

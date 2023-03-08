@@ -6,205 +6,178 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/background"
+    xmlns:tools="http://schemas.android.com/tools"
     android:translationZ="@dimen/top_layer">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/UC_body"
-        style="@style/panel"
+    <View
+        android:id="@+id/background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <com.reco1l.view.RoundLayout
+        android:id="@+id/up_body"
         android:layout_width="@dimen/app_panelWidth"
-        android:layout_height="@dimen/userPanelSmallHeight"
-        android:layout_alignParentEnd="true">
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="@dimen/M"
+        android:background="@color/backgroundSecondary">
 
         <LinearLayout
-            android:id="@+id/UC_innerBody"
+            android:id="@+id/up_logged"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!--User avatar & name-->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <com.edlplan.ui.TriangleEffectView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@+id/UC_userBox"
-                    android:layout_alignParentTop="true"
-                    android:alpha="0.15" />
-
-                <LinearLayout
-                    android:id="@+id/UC_userBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/panelTopBar"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="@dimen/panelMargins">
-
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/UC_avatar"
-                        android:layout_width="@dimen/userPanelAvatarSize"
-                        android:layout_height="@dimen/userPanelAvatarSize"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/placeholder_avatar"
-                        app:shapeAppearanceOverlay="@style/avatar_shape" />
-
-                    <TextView
-                        android:id="@+id/UC_name"
-                        style="@style/text"
-                        android:layout_marginLeft="@dimen/M"
-                        android:maxLength="32"
-                        android:text="[Player name]"
-                        android:textSize="@dimen/textM"
-                        android:textStyle="bold" />
-
-                </LinearLayout>
-
-                <View
-                    style="@style/panelSeparatorView"
-                    android:layout_below="@+id/UC_userBox" />
-
-            </RelativeLayout>
-
-            <!--User stats-->
-            <ScrollView
-                android:id="@+id/UC_info"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/XXS"
-                android:paddingEnd="@dimen/XS"
-                android:scrollbarSize="@dimen/scrollbarIndicatorWidth"
-                android:scrollbarThumbVertical="@drawable/layers_scrollbar_thumb">
+                android:gravity="center_vertical"
+                android:padding="@dimen/XL">
 
-                <LinearLayout
-                    android:id="@+id/UC_infoBody"
+                <com.reco1l.view.RoundedImageView
+                    android:id="@+id/up_avatar"
+                    android:layout_width="@dimen/_32sdp"
+                    android:layout_height="@dimen/_32sdp"
+                    android:src="@drawable/placeholder_avatar"
+                    app:radius="4" />
+
+                <TextView
+                    android:id="@+id/up_name"
+                    style="@style/text"
+                    android:layout_marginLeft="@dimen/M"
+                    android:text="User"
+                    android:textSize="@dimen/textL"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <com.reco1l.view.RoundLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/backgroundPrimary"
+                android:orientation="vertical"
+                android:padding="@dimen/S"
+                app:type="linear">
+
+                <com.reco1l.view.RowTextView
+                    android:id="@+id/up_rank"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:clipToPadding="false"
-                    android:orientation="vertical"
-                    android:paddingLeft="@dimen/panelMargins"
-                    android:paddingRight="@dimen/M">
+                    android:text="Rank"
+                    app:valueText="#1" />
 
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginVertical="@dimen/XS"
-                        android:gravity="center_vertical">
+                <com.reco1l.view.RowTextView
+                    android:id="@+id/up_acc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/XS"
+                    android:text="Accuracy"
+                    app:valueText="100.00%" />
 
-                        <TextView
-                            style="@style/text"
-                            android:layout_below="@id/UC_accLayout"
-                            android:layout_centerHorizontal="true"
-                            android:layout_marginTop="@dimen/XS"
-                            android:text="@string/user_profile_accuracy"
-                            android:textColor="@color/textSecondary" />
+                <com.reco1l.view.RowTextView
+                    android:id="@+id/up_plays"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/XS"
+                    android:text="Play count"
+                    app:valueText="1000" />
 
-                        <RelativeLayout
-                            android:id="@+id/UC_accLayout"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerHorizontal="true">
+                <com.reco1l.view.ButtonView
+                    android:id="@+id/up_profile"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/M"
+                    android:layout_marginBottom="@dimen/S"
+                    android:text="Visit profile" />
 
-                            <com.google.android.material.progressindicator.CircularProgressIndicator
-                                android:id="@+id/UC_accProgress"
-                                style="@style/big_circular_indicator"
-                                android:indeterminate="false"
-                                android:progress="60" />
+                <com.reco1l.view.ButtonView
+                    android:id="@+id/up_logout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/XS"
+                    android:text="Log out"
+                    android:background="#FF6B6B"/>
 
-                            <TextView
-                                android:id="@+id/UC_acc"
-                                style="@style/text"
-                                android:layout_centerInParent="true"
-                                android:text="100.00%" />
+            </com.reco1l.view.RoundLayout>
 
-                        </RelativeLayout>
+        </LinearLayout>
 
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/userPanelTextLayoutHeight"
-                        android:gravity="center_vertical">
-
-                        <TextView
-                            style="@style/text"
-                            android:text="@string/user_profile_rank"
-                            android:textColor="@color/textSecondary" />
-
-                        <TextView
-                            android:id="@+id/UC_rank"
-                            style="@style/text"
-                            android:layout_alignParentEnd="true"
-                            android:text="#0000000" />
-
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:id="@+id/uc_score_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/userPanelTextLayoutHeight"
-                        android:layout_marginTop="@dimen/XS"
-                        android:gravity="center_vertical">
-
-                        <TextView
-                            style="@style/text"
-                            android:text="@string/user_profile_score"
-                            android:textColor="@color/textSecondary" />
-
-                        <TextView
-                            android:id="@+id/UC_score"
-                            style="@style/text"
-                            android:layout_alignParentEnd="true"
-                            android:text="000,000,000" />
-
-                    </RelativeLayout>
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/UC_profile"
-                        style="@style/button"
-                        android:layout_marginTop="@dimen/S"
-                        android:layout_marginBottom="@dimen/L">
-
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:layout_centerVertical="true"
-                                android:src="@drawable/v14_open" />
+        <LinearLayout
+            android:id="@+id/up_loading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/up_login"
+            android:layout_alignParentTop="true"
+            android:gravity="center">
 
             <com.reco1l.view.ProgressIndicatorView
                 android:layout_width="@dimen/_32sdp"
                 android:layout_height="@dimen/_32sdp" />
 
-                </LinearLayout>
+        </LinearLayout>
 
-            </ScrollView>
+        <LinearLayout
+            android:id="@+id/up_login"
+            tools:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-            <!--Error message-->
             <LinearLayout
-                android:id="@+id/UC_messageLayout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center">
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="@dimen/XL">
 
                 <TextView
-                    android:id="@+id/UC_message"
+                    style="@style/text"
+                    android:text="Login"
+                    android:textSize="@dimen/textL"
+                    android:textStyle="bold" />
+
+                <TextView
                     style="@style/text"
                     android:gravity="center"
-                    android:paddingHorizontal="@dimen/panelMargins"
-                    android:text="@string/user_profile_debug_message"
-                    android:textColor="@color/textSecondary" />
+                    android:text="Please type your credentials" />
 
             </LinearLayout>
 
+            <com.reco1l.view.RoundLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/backgroundPrimary"
+                android:orientation="vertical"
+                android:padding="@dimen/S"
+                app:type="linear">
+
+                <EditText
+                    android:id="@+id/up_user"
+                    style="@style/edit_text"
+                    android:layout_height="@dimen/_26sdp"
+                    android:layout_marginTop="@dimen/S"
+                    android:hint="Username" />
+
+                <EditText
+                    android:id="@+id/up_pass"
+                    style="@style/edit_text"
+                    android:layout_height="@dimen/_26sdp"
+                    android:layout_marginTop="@dimen/S"
+                    android:hint="Password"
+                    android:inputType="textPassword" />
+
+                <com.reco1l.view.ButtonView
+                    android:id="@+id/up_accept"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/M"
+                    android:layout_marginBottom="@dimen/XS"
+                    android:text="Accept" />
+
+            </com.reco1l.view.RoundLayout>
+
         </LinearLayout>
 
-    </androidx.cardview.widget.CardView>
+    </com.reco1l.view.RoundLayout>
 
 </RelativeLayout>

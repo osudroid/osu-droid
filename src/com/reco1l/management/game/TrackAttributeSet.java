@@ -62,7 +62,7 @@ public class TrackAttributeSet implements ModAcronyms {
     public void handleValues() {
         forEach(TrackAttribute::reset);
 
-        EnumSet<GameMod> mods = Game.modManager.getSet();
+        EnumSet<GameMod> mods = Game.modManager.getMods();
 
         if (mods.contains(EZ)) {
             get(TrackAttribute.AR).opt(v -> ((float) v) * 0.5f);
@@ -87,9 +87,9 @@ public class TrackAttributeSet implements ModAcronyms {
 
             get(TrackAttribute.AR).opt(v -> ((float) v) - 0.5f);
 
-            if (Game.modMenu.getChangeSpeed() != 1) {
+            if (Game.modManager.isCustomSpeed()) {
                 get(TrackAttribute.AR).opt(v ->
-                        (float) v - Game.modMenu.getSpeed() - 1.0f
+                        (float) v - Game.modManager.getSpeed() - 1.0f
                 );
             }
             else if (mods.contains(DT) || mods.contains(NC)) {
@@ -105,8 +105,8 @@ public class TrackAttributeSet implements ModAcronyms {
             get(TrackAttribute.CS).opt(v -> (float) v + 4f);
         }
 
-        if (Game.modMenu.getChangeSpeed() != 1) {
-            float speed = Game.modMenu.getSpeed();
+        if (Game.modManager.isCustomSpeed()) {
+            float speed = Game.modManager.getSpeed();
 
             get(TrackAttribute.BPM_MAX).opt(v -> (float) v * speed);
             get(TrackAttribute.LENGTH).opt(v -> (long) ((long) v / speed));
@@ -143,16 +143,16 @@ public class TrackAttributeSet implements ModAcronyms {
             );
         }
 
-        if (Game.modMenu.isEnableForceAR()) {
-            get(TrackAttribute.AR).opt(v -> Game.modMenu.getForceAR());
+        if (Game.modManager.isCustomAR()) {
+            get(TrackAttribute.AR).opt(v -> Game.modManager.getCustomAR());
         }
 
-        new Thread(() -> {
+        Async.run(() -> {
             DifficultyReCalculator drc = new DifficultyReCalculator();
 
             get(TrackAttribute.STARS).opt(v ->
-                    drc.recalculateStar(mTrack, getValue(TrackAttribute.CS), Game.modMenu.getSpeed())
+                    drc.recalculateStar(mTrack, getValue(TrackAttribute.CS), Game.modManager.getSpeed())
             );
-        }).start();
+        });
     }
 }

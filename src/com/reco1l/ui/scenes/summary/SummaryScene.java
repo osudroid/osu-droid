@@ -1,4 +1,4 @@
-package com.reco1l.scenes;
+package com.reco1l.ui.scenes.summary;
 // Created by Reco1l on 19/11/2022, 23:39
 
 import android.view.View;
@@ -61,12 +61,7 @@ public class SummaryScene extends BaseScene {
         mReplayButton.setIcon(drw(R.drawable.v18_replay));
         mReplayButton.setTouchListener(() -> {
             Scenes.player.startGame(mLastTrack, mLastReplay);
-
-            ModMenu.getInstance().setMod(mLastStats.getMod());
-            ModMenu.getInstance().setChangeSpeed(mLastStats.getChangeSpeed());
-            ModMenu.getInstance().setForceAR(mLastStats.getForceAR());
-            ModMenu.getInstance().setEnableForceAR(mLastStats.isEnableForceAR());
-            ModMenu.getInstance().setFLfollowDelay(mLastStats.getFLFollowDelay());
+            Game.modManager.setFromStats(mLastStats);
         });
 
         layout.addView(mRetryButton);
@@ -90,7 +85,7 @@ public class SummaryScene extends BaseScene {
         }
     }
 
-    public StatisticV2 getReplayStats() {
+    public StatisticV2 getReplayStat() {
         return mLastStats;
     }
 
@@ -119,16 +114,13 @@ public class SummaryScene extends BaseScene {
             mApplauseSound.play();
 
             Game.scoreLibrary.addScore(track.getFilename(), stats, replay);
-
-            if (Game.onlineManager.isStayOnline() && Game.onlineManager.isReadyToSend()) {
-                UI.gameSummary.retrieveOnlineData();
-                upload(stats, replay);
-            }
+            //UI.gameSummary.retrieveOnlineData();
+            upload(stats, replay);
         }
     }
 
     private boolean isUnranked(StatisticV2 stats) {
-        if (Config.isRemoveSliderLock() || ModMenu.getInstance().isChangeSpeed() || ModMenu.getInstance().isEnableForceAR()) {
+        if (Config.isRemoveSliderLock() || Game.modManager.isCustomSpeed() || Game.modManager.isCustomAR()) {
             return true;
         }
 
@@ -144,6 +136,24 @@ public class SummaryScene extends BaseScene {
         if (stats.getModifiedTotalScore() <= 0 || isUnranked(stats)) {
             return;
         }
-        Game.scoreLibrary.sendScoreOnline(stats, replayPath);
+        File replay = new File(replayPath);
+
+        Async.run(() -> {
+            try {
+                Game.onlineManager2.submitReplay(0, stats, replay);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public int getReplayID() {
+        return mReplayID;
+    }
+
+    public void setReplayID(int replayID) {
+        mReplayID = replayID;
     }
 }

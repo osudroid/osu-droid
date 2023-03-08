@@ -16,7 +16,6 @@ import com.reco1l.ui.base.BasePreferenceFragment;
 import com.reco1l.ui.base.Layers;
 import com.reco1l.framework.Animation;
 
-import com.reco1l.utils.helpers.OnlineHelper;
 
 import main.osu.Config;
 
@@ -149,8 +148,6 @@ public final class SettingsMenu extends BaseFragment {
 
     private void applySettings() {
         Config.loadConfig(getContext());
-        OnlineHelper.update();
-        OnlineScoring.getInstance().login();
     }
 
     //--------------------------------------------------------------------------------------------//

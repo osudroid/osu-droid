@@ -134,7 +134,9 @@ public final class GameEngine extends LimitedFPSEngine {
             }
 
             if (mCanUpdate) {
-                Game.platform.onSceneChange(mLastScene, mCurrentScene);
+                Game.activity.runOnUiThread(() ->
+                        Game.platform.onSceneChange(mLastScene, mCurrentScene)
+                );
             }
             super.setScene(newScene);
 

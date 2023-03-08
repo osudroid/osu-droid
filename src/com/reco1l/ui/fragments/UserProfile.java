@@ -1,9 +1,13 @@
 package com.reco1l.ui.fragments;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.cardview.widget.CardView;
+import androidx.annotation.NonNull;
 
 import com.edlplan.framework.easing.Easing;
 import com.reco1l.Game;
@@ -21,24 +25,49 @@ import com.reco1l.view.RoundLayout;
 import com.reco1l.view.RoundedImageView;
 import com.reco1l.view.RowTextView;
 
-import java.text.DecimalFormat;
-
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 // Created by Reco1l on 13/9/22 01:22
 
-public final class UserProfile extends BaseFragment {
+public final class UserProfile extends BaseFragment implements IOnlineObserver {
 
     public static final UserProfile instance = new UserProfile();
 
-    public static String message;
+    private EditText
+            mUsername,
+            mPassword;
 
-    private View body;
-    private TextView errorText;
-    private final Runnable closeTask = this::close;
+    private TextView mName;
+    private RoundLayout mBody;
+    private RoundedImageView mAvatar;
 
+    private ButtonView
+            mAccept,
+            mLogOut,
+            mProfile;
+
+    private RowTextView
+            mRank,
+            mAccuracy,
+            mPlayCount;
+
+    private LinearLayout
+            mLoginLayout,
+            mLoadLayout,
+            mUserLayout;
+
+    private int
+            mLoginLayoutHeight,
+            mUserLayoutHeight;
+
+    //--------------------------------------------------------------------------------------------//
+
+    public UserProfile() {
+        super();
+
+        Game.onlineManager2.bindOnlineObserver(this);
+        closeOnBackgroundClick(true);
+    }
 
     //--------------------------------------------------------------------------------------------//
 
@@ -62,127 +91,183 @@ public final class UserProfile extends BaseFragment {
 
     @Override
     protected void onLoad() {
-        closeOnBackgroundClick(true);
+        mLoginLayout = find("login");
+        mUserLayout = find("logged");
+        mLoadLayout = find("loading");
 
-        body = find("body");
-        body.postDelayed(closeTask, 8000);
+        mName = find("name");
+        mBody = find("body");
+        mAvatar = find("avatar");
+        mUsername = find("user");
+        mPassword = find("pass");
+        mAccept = find("accept");
 
-        Animation.of(body)
-                .fromHeight(Res.sdp(30))
-                .toHeight(Res.dimen(Game.onlineManager.isStayOnline() ?
-                        R.dimen.userPanelHeight : R.dimen.userPanelSmallHeight))
-                .interpolate(Easing.OutExpo)
-                .fromY(-30)
-                .toY(0)
-                .fromAlpha(0)
-                .toAlpha(1)
-                .play(240);
+        mRank = find("rank");
+        mAccuracy = find("acc");
+        mPlayCount = find("plays");
 
-        Animation.of(find("userBox"))
-                .fromAlpha(0)
-                .toAlpha(1)
+        mProfile = find("profile");
+        mLogOut = find("logout");
+
+        mUserLayout.setAlpha(0);
+        mLoadLayout.setAlpha(0);
+        mLoginLayout.setAlpha(0);
+
+        bindTouch(mAccept, () -> {
+            unbindTouch(mAccept);
+
+            mLoadLayout.setVisibility(View.VISIBLE);
+            Views.scale(mUserLayout, 0.9f);
+
+            Animation.of(mLoginLayout)
+                    .toAlpha(0)
+                    .toScale(0.9f)
+                    .play(100);
+
+            Animation.of(mLoadLayout)
+                    .toAlpha(1)
+                    .fromScale(0.9f)
+                    .toScale(1)
+                    .delay(100)
+                    .play(100);
+
+            Async.run(() -> {
+                String user = mUsername.getText().toString();
+                String pass = mPassword.getText().toString();
+
+                try {
+                    Game.onlineManager2.login(user, pass);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        });
+
+        bindTouch(mProfile, () -> {
+            String url = Endpoint.PROFILE + Game.onlineManager2.getCurrentUser().getID();
+
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setData(Uri.parse(url));
+            startActivity(i);
+        });
+
+        bindTouch(mLogOut, Game.onlineManager2::logOut);
+    }
+
+    @Override
+    protected void onPost() {
+        mUserLayoutHeight = mUserLayout.getHeight();
+        mLoginLayoutHeight = mLoginLayout.getHeight();
+
+        if (Game.onlineManager2.isLogged()) {
+            mLoginLayout.setVisibility(View.GONE);
+            mLoadLayout.setVisibility(View.GONE);
+            onLogin(Game.onlineManager2.getCurrentUser());
+        } else {
+            onClear();
+        }
+
+        Animation.of(mBody)
+                .fromScale(0.95f)
+                .toScale(1)
+                .cancelCurrentAnimations(false)
+                .interpolate(Easing.InOutBounce)
                 .play(200);
 
-        View message = find("messageLayout");
-        View infoContainer = find("info");
-        TextView name = find("name");
-        errorText = find("message");
+        Animation.of(rootView)
+                .fromAlpha(1)
+                .toAlpha(1)
+                .play(200);
+    }
 
-        if (!Game.onlineManager.isStayOnline()) {
-            infoContainer.setVisibility(View.GONE);
-            message.setVisibility(View.VISIBLE);
-
-            name.setText(Config.getLocalUsername());
-
-            Animation.of(message)
-                    .fromAlpha(0)
-                    .toAlpha(1)
-                    .play(200);
-
-            updateMessage(null);
+    @Override
+    public void onLogin(UserInfo user) {
+        if (!isLoaded()) {
             return;
         }
 
-        CircularProgressIndicator accuracyBar = find("accProgress");
-        ShapeableImageView avatar = find("avatar");
-        CardView goProfile = find("profile");
+        Game.activity.runOnUiThread(() -> {
+            mUserLayout.setVisibility(View.VISIBLE);
 
-        TextView rank = find("rank"),
-                score = find("score"),
-                accuracy = find("acc");
+            Animation.of(mBody)
+                    .toHeight(mUserLayoutHeight)
+                    .runOnEnd(() -> mLoginLayout.setVisibility(View.GONE))
+                    .play(200);
 
-        Animation.of(find("infoBody"))
-                .fromAlpha(0)
-                .toAlpha(1)
-                .play(200);
+            Animation.of(mLoadLayout)
+                    .toAlpha(0)
+                    .toScale(0.9f)
+                    .runOnEnd(() -> mLoadLayout.setVisibility(View.GONE))
+                    .play(100);
 
-        avatar.setImageDrawable(OnlineHelper.getPlayerAvatar());
+            Animation.of(mUserLayout)
+                    .toAlpha(1)
+                    .toScale(1)
+                    .delay(100)
+                    .play(100);
 
-        infoContainer.setVisibility(View.VISIBLE);
-        message.setVisibility(View.GONE);
+            mAvatar.setImageBitmap(user.getAvatar());
 
-        bindTouch(goProfile, () -> {
-            new WebViewFragment(Endpoint.PROFILE_URL + Game.onlineManager.getUserId()).show();
-            close();
+            mName.setText(user.getUsername());
+            mRank.setValueText("#" + user.getRank());
+            mPlayCount.setValueText("" + user.getPlayCount());
+            mAccuracy.setValueText(String.format("%.2f%%", user.getAccuracyFP()));
         });
-
-        name.setText(Game.onlineManager.getUsername());
-        rank.setText(String.format("#%d", Game.onlineManager.getRank()));
-
-
-
-        Animation.ofFloat(0, Game.onlineManager.getAccuracy() * 100f)
-                .runOnUpdate(val -> accuracy.setText(String.format("%.2f%%", (float) val)))
-                .interpolate(Easing.OutExpo)
-                .delay(200)
-                .play(1000);
-
-        Animation.ofInt(0, (int) Game.onlineManager.getAccuracy() * 100)
-                .runOnUpdate(v -> accuracyBar.setProgress((int) v))
-                .interpolate(Easing.OutExpo)
-                .delay(200)
-                .play(1000);
-
-        DecimalFormat df = new DecimalFormat("###,###,###,###");
-        score.setText(df.format(Game.onlineManager.getScore()));
     }
 
-    //--------------------------------------------------------------------------------------------//
-
-    public void updateMessage(String text) {
-        message = text != null ? text : Res.str(R.string.user_profile_offline_message);
-        if (BuildConfig.DEBUG)
-            message = text != null ? text : Res.str(R.string.user_profile_debug_message);
-        if (!isAdded())
+    @Override
+    public void onClear() {
+        if (!isLoaded()) {
             return;
-        Game.activity.runOnUiThread(() -> errorText.setText(message));
+        }
+
+        Game.activity.runOnUiThread(() -> {
+            rebindTouch(mAccept);
+
+            mLoginLayout.setVisibility(View.VISIBLE);
+
+            Animation.of(mBody)
+                    .toHeight(mLoginLayoutHeight)
+                    .play(200);
+
+            Animation.of(mUserLayout)
+                    .toAlpha(0)
+                    .toScale(0.8f)
+                    .runOnEnd(() -> mUserLayout.setVisibility(View.GONE))
+                    .play(100);
+
+            Animation.of(mLoadLayout)
+                    .toAlpha(0)
+                    .toScale(0.8f)
+                    .runOnEnd(() -> mLoadLayout.setVisibility(View.GONE))
+                    .play(100);
+
+            Animation.of(mLoginLayout)
+                    .toAlpha(1)
+                    .fromScale(0.9f)
+                    .toScale(1)
+                    .delay(100)
+                    .play(100);
+        });
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     public void close() {
-        if (!isAdded())
+        if (!isAdded()) {
             return;
+        }
 
-        body.removeCallbacks(closeTask);
+        unbindTouchHandlers();
 
-        Animation.of(find("innerBody"))
+        Animation.of(mBody)
+                .toScale(0.95f)
+                .play(200);
+
+        Animation.of(rootView)
                 .toAlpha(0)
-                .play(100);
-
-        Animation.of(errorText)
-                .toAlpha(0)
-                .play(100);
-
-        Animation.of(body)
-                .toHeight(Res.sdp(30))
-                .toY(-30)
-                .toAlpha(0)
-                .interpolate(Easing.OutExpo)
                 .runOnEnd(super::close)
-                .play(240);
+                .play(200);
     }
-
-
 }

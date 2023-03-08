@@ -55,8 +55,10 @@ public class ButtonView extends RoundLayout {
 
         Views.rule(mText, RelativeLayout.CENTER_IN_PARENT);
 
-        setBackground(new ColorDrawable(0xFF819DD4));
-        setRadius(sdp(8));
+        if (getBackground() == null) {
+            setBackground(new ColorDrawable(0xFF819DD4));
+        }
+        setRadius(5);
     }
 
     @Override

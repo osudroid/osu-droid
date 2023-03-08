@@ -3,6 +3,8 @@ package main.osu.scoring;
 import com.dgsrz.bancho.security.SecurityUtils;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Random;
@@ -230,6 +232,11 @@ public class StatisticV2 implements Serializable {
             return 0;
         }
         return realScore / (float) possibleScore;
+    }
+
+    public long getAccuracyL() {
+        // getAccuracy() returns values like 0.9794 so for new backend we have to multiply it
+        return (long) (getAccuracy() * 10000);
     }
 
     public void setAccuracy(float accuracy) {

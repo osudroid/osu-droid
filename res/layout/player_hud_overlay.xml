@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:translationZ="@dimen/middle_layer">
+
+    <RelativeLayout
+        android:id="@+id/hud_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.reco1l.ui.scenes.player.views.HealthBarView
+            android:id="@+id/hud_health"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:gravity="right"
+            android:orientation="vertical">
+
+            <com.reco1l.ui.scenes.player.views.ScoreNumberView
+                android:id="@+id/hud_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:numberScale="0.9" />
+
+            <com.reco1l.ui.scenes.player.views.ScoreNumberView
+                android:id="@+id/hud_accuracy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:numberScale="0.6" />
+
+        </LinearLayout>
+
+        <com.reco1l.view.BadgeTextView
+            android:id="@+id/hud_infoText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/M"
+            android:text="text" />
+
+        <com.reco1l.ui.scenes.player.views.LeaderboardView
+            android:id="@+id/hud_leaderboard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true" />
+
+        <com.reco1l.ui.scenes.player.views.ScoreNumberView
+            android:id="@+id/hud_combo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            app:numberScale="1.5" />
+
+        <com.reco1l.ui.scenes.player.views.ErrorMeterView
+            android:id="@+id/hud_meter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/XS" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/XS"
+        android:gravity="right"
+        android:orientation="vertical">
+
+        <com.reco1l.view.BadgeTextView
+            android:id="@+id/hud_ur"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/XS"
+            android:text="100.00 UR" />
+
+        <com.reco1l.ui.elements.FPSBadgeView
+            android:id="@+id/hud_fps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <com.reco1l.view.RoundedImageView
+        android:id="@+id/hud_skip"
+        android:layout_width="@dimen/_60sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/_40sdp"
+        android:background="@color/textPrimary"
+        android:padding="@dimen/XS"
+        android:src="@drawable/v18_skip" />
+
+    <com.reco1l.ui.scenes.player.views.SongProgressView
+        android:id="@+id/hud_progress"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_2sdp"
+        android:layout_alignParentBottom="true" />
+
+</RelativeLayout>
