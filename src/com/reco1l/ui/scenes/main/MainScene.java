@@ -9,7 +9,7 @@ import com.reco1l.ui.UI;
 import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.view.IconButtonView;
 import com.reco1l.ui.custom.Dialog;
-import com.reco1l.tables.DialogTable;
+import com.reco1l.data.DialogTable;
 
 import main.osu.Config;
 import com.rimu.R;

@@ -1,4 +1,4 @@
-package com.reco1l.tables;
+package com.reco1l.data;
 
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -13,7 +13,8 @@ import com.rimu.R;
 
 // Created by Reco1l on 25/7/22 22:30
 
-@Deprecated
+@Deprecated // For now we use this but since DialogBuilder is abstract would be better to just
+// use abstraction instead of a static class.
 public class DialogTable {
 
     //--------------------------------------------------------------------------------------------//

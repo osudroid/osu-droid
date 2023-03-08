@@ -13,7 +13,7 @@ import com.edlplan.replay.OsuDroidReplay;
 import com.edlplan.replay.OsuDroidReplayPack;
 import com.reco1l.Game;
 import com.reco1l.ui.custom.Notification;
-import com.reco1l.tables.DialogTable;
+import com.reco1l.data.DialogTable;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
 

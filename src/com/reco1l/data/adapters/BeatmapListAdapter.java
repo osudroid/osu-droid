@@ -22,7 +22,7 @@ import com.reco1l.ui.UI;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
 import com.reco1l.ui.scenes.Scenes;
-import com.reco1l.tables.DialogTable;
+import com.reco1l.data.DialogTable;
 import com.reco1l.ui.custom.ContextMenu;
 import com.reco1l.ui.custom.ContextMenuBuilder;
 import com.reco1l.ui.custom.Dialog;

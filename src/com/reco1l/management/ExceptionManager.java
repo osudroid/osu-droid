@@ -16,7 +16,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.reco1l.tables.DialogTable;
+import com.reco1l.data.DialogTable;
 import com.reco1l.framework.Logging;
 import com.reco1l.framework.execution.ScheduledTask;
 import com.reco1l.ui.custom.Dialog;
