@@ -101,7 +101,7 @@ public class PlayerLoader extends BaseFragment {
                      super.close();
                      onEnd.run();
                  })
-                 .delay(3000)
+                 .delay(2000)
                  .play(500);
     }
 }

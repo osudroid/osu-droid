@@ -1,5 +1,7 @@
 package com.reco1l.ui.scenes.player;
 
+import static main.osu.game.mods.GameMod.MOD_AUTO;
+
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 import com.reco1l.Game;
@@ -61,7 +63,11 @@ public final class PlayerScene extends BaseScene implements FPSProvider, IPassiv
             return false;
         }
 
-        if (Game.modManager.contains(GameMod.MOD_AUTO) || isReplaying()) {
+        if (UI.playerLoader.isAdded()) {
+            return true;
+        }
+
+        if (Game.modManager.contains(MOD_AUTO) || isReplaying()) {
             mGame.quit();
             return true;
         }
@@ -104,7 +110,7 @@ public final class PlayerScene extends BaseScene implements FPSProvider, IPassiv
             return;
         }
 
-        if (!Game.modManager.contains(GameMod.MOD_AUTO) && !isReplaying()) {
+        if (!Game.modManager.contains(MOD_AUTO) && !isReplaying()) {
             mGame.pause();
         }
     }
