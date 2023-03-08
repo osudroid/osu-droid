@@ -19,8 +19,8 @@ import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 
 import com.reco1l.annotation.Size;
-import com.reco1l.framework.Views;
-import com.reco1l.framework.Views.MarginUtils;
+import com.reco1l.tools.Views;
+import com.reco1l.tools.Views.MarginUtils;
 
 import com.rimu.R;
 

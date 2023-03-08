@@ -2,6 +2,8 @@ package com.reco1l.framework;
 
 import android.view.Choreographer;
 
+import com.reco1l.tools.Logging;
+
 // Counts FPS from native UI using choreographer callback
 public final class FrameCounter {
 

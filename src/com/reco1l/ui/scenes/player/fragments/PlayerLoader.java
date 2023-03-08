@@ -10,7 +10,7 @@ import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.ui.base.Layers;
 import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.framework.Animation;
-import com.reco1l.utils.helpers.BeatmapHelper;
+import com.reco1l.tools.helpers.BeatmapHelper;
 import com.reco1l.view.BadgeTextView;
 import com.rimu.R;
 

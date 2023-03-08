@@ -14,6 +14,7 @@ import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 import com.reco1l.Game;
 import com.reco1l.framework.execution.ScheduledTask;
+import com.reco1l.tools.Views;
 
 import java.util.ArrayList;
 

@@ -18,7 +18,7 @@ import com.reco1l.annotation.Size;
 import com.reco1l.management.modding.ModAcronyms;
 import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.framework.Animation;
-import com.reco1l.framework.Views;
+import com.reco1l.tools.Views;
 import com.reco1l.view.IconButtonView;
 
 import com.reco1l.management.modding.mods.CustomDifficultyMod;

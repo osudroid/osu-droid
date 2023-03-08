@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.reco1l.framework.Maths;
+import com.reco1l.tools.Maths;
 import com.reco1l.framework.drawing.Dimension;
 
 public class ProgressIndicatorView extends RoundLayout {

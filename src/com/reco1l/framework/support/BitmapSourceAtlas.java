@@ -2,7 +2,7 @@ package com.reco1l.framework.support;
 
 import android.graphics.Bitmap;
 
-import com.reco1l.framework.Logging;
+import com.reco1l.tools.Logging;
 
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
 import org.anddev.andengine.opengl.texture.source.BaseTextureAtlasSource;

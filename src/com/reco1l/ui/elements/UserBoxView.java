@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.reco1l.Game;
-import com.reco1l.framework.Views;
+import com.reco1l.tools.Views;
 import com.reco1l.framework.drawing.Dimension;
 import com.reco1l.management.online.IOnlineObserver;
 import com.reco1l.management.online.UserInfo;

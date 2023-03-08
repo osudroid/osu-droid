@@ -10,7 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.reco1l.framework.Views;
+import com.reco1l.tools.Views;
 
 public class RowTextView extends RoundLayout {
 

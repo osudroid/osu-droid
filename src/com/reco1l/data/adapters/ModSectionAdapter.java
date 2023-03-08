@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
 import com.reco1l.ui.scenes.selector.fragments.ModMenu;
-import com.reco1l.framework.Views;
+import com.reco1l.tools.Views;
 
 import com.rimu.R;
 

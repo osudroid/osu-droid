@@ -32,7 +32,7 @@ import com.reco1l.ui.scenes.intro.IntroScene;
 import com.reco1l.ui.base.FragmentPlatform;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.data.DialogTable;
-import com.reco1l.framework.Logging;
+import com.reco1l.tools.Logging;
 import com.reco1l.framework.execution.AsyncTask;
 import com.reco1l.framework.execution.ScheduledTask;
 

@@ -1,13 +1,8 @@
-package com.reco1l.utils.helpers;
+package com.reco1l.tools.helpers;
 
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 
 import com.edlplan.framework.math.FMath;
-import com.reco1l.Game;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 import main.osu.BeatmapInfo;
 import main.osu.Config;

@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import com.reco1l.management.Settings;
-import com.reco1l.framework.Logging;
+import com.reco1l.tools.Logging;
 
 import org.grove.Grove;
 import org.grove.cmt.ExistOrFoundInfo;

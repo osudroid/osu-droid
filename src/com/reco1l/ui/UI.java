@@ -13,7 +13,7 @@ import com.reco1l.ui.scenes.selector.fragments.BeatmapPanel;
 import com.reco1l.ui.scenes.selector.fragments.FilterBar;
 import com.reco1l.ui.scenes.selector.fragments.ModMenu;
 import com.reco1l.ui.scenes.summary.fragments.GameSummary;
-import com.reco1l.framework.Logging;
+import com.reco1l.tools.Logging;
 
 // Created by Reco1l on 29/6/22 22:38
 

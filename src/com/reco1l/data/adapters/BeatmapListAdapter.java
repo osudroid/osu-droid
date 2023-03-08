@@ -31,7 +31,7 @@ import com.reco1l.framework.Animation;
 import com.reco1l.framework.drawing.Dimension;
 import com.reco1l.framework.input.TouchListener;
 import com.reco1l.ui.scenes.selector.views.CarrouselRecyclerView;
-import com.reco1l.utils.helpers.BeatmapHelper;
+import com.reco1l.tools.helpers.BeatmapHelper;
 
 import java.util.ArrayList;
 

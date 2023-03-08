@@ -1,6 +1,6 @@
 package com.reco1l.management.scoreboard;
 
-import com.reco1l.utils.helpers.ScoringHelper;
+import com.reco1l.tools.helpers.ScoringHelper;
 
 import java.text.NumberFormat;
 import java.util.EnumSet;

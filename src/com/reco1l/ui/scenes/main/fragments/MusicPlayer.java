@@ -26,10 +26,10 @@ import com.reco1l.management.resources.ResourceTable;
 import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.framework.Animation;
 import com.reco1l.framework.input.TouchListener;
-import com.reco1l.framework.Views;
+import com.reco1l.tools.Views;
 import com.reco1l.view.IconButtonView;
 import com.reco1l.ui.scenes.main.fragments.MusicPlayer.PlaylistAdapter.ViewHolder;
-import com.reco1l.utils.helpers.BeatmapHelper;
+import com.reco1l.tools.helpers.BeatmapHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package main.osu.game;
 
-import com.reco1l.utils.helpers.ScoringHelper;
+import com.reco1l.tools.helpers.ScoringHelper;
 
 import java.util.HashMap;
 import java.util.LinkedList;

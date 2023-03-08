@@ -20,10 +20,10 @@ import com.reco1l.ui.custom.ContextMenu;
 import com.reco1l.ui.custom.ContextMenuBuilder;
 import com.reco1l.framework.input.TouchHandler;
 import com.reco1l.framework.input.TouchListener;
-import com.reco1l.framework.Views;
+import com.reco1l.tools.Views;
 
 import com.reco1l.framework.execution.Async;
-import com.reco1l.utils.helpers.ReplayHelper;
+import com.reco1l.tools.helpers.ReplayHelper;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;

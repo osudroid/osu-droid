@@ -1,4 +1,4 @@
-package com.reco1l.framework;
+package com.reco1l.tools;
 
 import androidx.annotation.FloatRange;
 

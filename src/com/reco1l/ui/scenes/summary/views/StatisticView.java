@@ -15,7 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.reco1l.annotation.Size;
-import com.reco1l.framework.Views;
+import com.reco1l.tools.Views;
 import com.reco1l.view.BadgeTextView;
 import com.reco1l.view.RoundLayout;
 

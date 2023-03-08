@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import com.reco1l.management.game.TrackAttribute;
 import com.reco1l.management.game.TrackAttributeSet;
 import com.reco1l.ui.UI;
-import com.reco1l.utils.helpers.BeatmapHelper;
+import com.reco1l.tools.helpers.BeatmapHelper;
 import com.reco1l.view.BadgeTextView;
 import com.reco1l.view.FadeImageView;
 

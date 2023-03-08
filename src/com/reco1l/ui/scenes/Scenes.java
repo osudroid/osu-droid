@@ -7,7 +7,7 @@ import com.reco1l.ui.scenes.main.MainScene;
 import com.reco1l.ui.scenes.player.PlayerScene;
 import com.reco1l.ui.scenes.selector.SelectorScene;
 import com.reco1l.ui.scenes.summary.SummaryScene;
-import com.reco1l.framework.Logging;
+import com.reco1l.tools.Logging;
 
 public final class Scenes {
 

@@ -15,7 +15,7 @@ import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.ui.base.BaseFragment;
 
 import com.reco1l.framework.execution.Async;
-import com.reco1l.utils.helpers.BeatmapHelper;
+import com.reco1l.tools.helpers.BeatmapHelper;
 import com.reco1l.view.BadgeTextView;
 import com.reco1l.view.RoundedImageView;
 import com.reco1l.ui.scenes.summary.views.StatisticView;

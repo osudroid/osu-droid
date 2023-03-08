@@ -5,7 +5,7 @@ package com.reco1l.management.modding.mods;
 import com.reco1l.annotation.Legacy;
 import com.reco1l.Game;
 import com.reco1l.management.modding.ModAcronyms;
-import com.reco1l.utils.helpers.ScoringHelper;
+import com.reco1l.tools.helpers.ScoringHelper;
 
 import java.util.EnumSet;
 

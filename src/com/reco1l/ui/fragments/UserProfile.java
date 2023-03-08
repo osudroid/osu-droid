@@ -14,7 +14,7 @@ import com.reco1l.ui.base.BaseFragment;
 
 import com.reco1l.ui.base.Layers;
 import com.reco1l.framework.Animation;
-import com.reco1l.framework.Views;
+import com.reco1l.tools.Views;
 import com.reco1l.framework.execution.Async;
 import com.reco1l.view.ButtonView;
 import com.reco1l.view.RoundLayout;

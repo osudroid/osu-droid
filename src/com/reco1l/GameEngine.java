@@ -3,7 +3,7 @@ package com.reco1l;
 import android.util.Log;
 
 import com.reco1l.ui.scenes.BaseScene;
-import com.reco1l.framework.Logging;
+import com.reco1l.tools.Logging;
 
 import org.anddev.andengine.engine.LimitedFPSEngine;
 import org.anddev.andengine.engine.options.EngineOptions;

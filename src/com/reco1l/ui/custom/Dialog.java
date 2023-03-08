@@ -12,8 +12,8 @@ import com.reco1l.management.resources.ResourceTable;
 import com.reco1l.ui.base.BaseFragment;
 import com.reco1l.ui.base.Layers;
 import com.reco1l.ui.base.SimpleFragment;
-import com.reco1l.framework.Views;
-import com.reco1l.framework.Views.MarginUtils;
+import com.reco1l.tools.Views;
+import com.reco1l.tools.Views.MarginUtils;
 import com.reco1l.view.ButtonView;
 
 import org.jetbrains.annotations.NotNull;

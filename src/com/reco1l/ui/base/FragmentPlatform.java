@@ -15,9 +15,9 @@ import androidx.fragment.app.FragmentTransaction;
 import com.reco1l.Game;
 import com.reco1l.ui.scenes.BaseScene;
 import com.reco1l.framework.Animation;
-import com.reco1l.framework.Logging;
+import com.reco1l.tools.Logging;
 import com.reco1l.framework.FrameCounter;
-import com.reco1l.framework.Views;
+import com.reco1l.tools.Views;
 
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 

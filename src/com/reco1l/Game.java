@@ -13,7 +13,7 @@ import com.reco1l.management.music.TimingWrapper;
 import com.reco1l.ui.UI;
 import com.reco1l.ui.base.FragmentPlatform;
 import com.reco1l.ui.scenes.Scenes;
-import com.reco1l.framework.Logging;
+import com.reco1l.tools.Logging;
 
 import main.audio.serviceAudio.SongService;
 import main.osu.MainActivity;
