@@ -321,4 +321,8 @@ public final class OnlineManager {
     public void bindOnlineObserver(IOnlineObserver observer) {
         mObservers.add(observer);
     }
+
+    public void unbindOnlineObserver(IOnlineObserver observer) {
+        mObservers.remove(observer);
+    }
 }
