@@ -59,7 +59,7 @@ public class ModListAdapter extends BaseAdapter<ModListAdapter.ModViewHolder, Mo
             mIcon = root.findViewById(R.id.mm_modIcon);
             mName = root.findViewById(R.id.mm_modName);
 
-            mBackground = new ColorDrawable(0xFF242424);
+            mBackground = new ColorDrawable();
         }
 
         //----------------------------------------------------------------------------------------//
@@ -74,9 +74,9 @@ public class ModListAdapter extends BaseAdapter<ModListAdapter.ModViewHolder, Mo
             UI.modMenu.bindTouch(mBody, () -> UI.modMenu.onModSelect(wrapper, false));
 
             if (isEnabled()) {
-                mBackground.setColor(0xFF222F3D);
+                mBackground.setColor(0xff3c536b);
             } else {
-                mBackground.setColor(0xFF242424);
+                mBackground.setColor(0xFF172332);
             }
             mBody.setBackground(mBackground);
         }
@@ -89,7 +89,7 @@ public class ModListAdapter extends BaseAdapter<ModListAdapter.ModViewHolder, Mo
         public void onSelect() {
             int color = mBackground.getColor();
 
-            Animation.ofColor(color, 0xFF222F3D)
+            Animation.ofColor(color, 0xff3c536b)
                     .runOnUpdate(value -> {
                         mBackground.setColor((int) value);
                         mBody.invalidate();
@@ -101,7 +101,7 @@ public class ModListAdapter extends BaseAdapter<ModListAdapter.ModViewHolder, Mo
         public void onDeselect() {
             int color = mBackground.getColor();
 
-            Animation.ofColor(color, 0xFF242424)
+            Animation.ofColor(color, 0xFF172332)
                     .runOnUpdate(value -> {
                         mBackground.setColor((int) value);
                         mBody.invalidate();
