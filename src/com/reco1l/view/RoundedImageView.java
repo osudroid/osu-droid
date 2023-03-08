@@ -50,6 +50,14 @@ public class RoundedImageView extends RoundLayout {
         mImage.setImageDrawable(drw);
     }
 
+    public void setImageBitmap(Bitmap bm) {
+        mImage.setImageBitmap(bm);
+    }
+
+    public void setImageResource(int resource) {
+        mImage.setImageResource(resource);
+    }
+
     @Override
     public void setLayoutParams(ViewGroup.LayoutParams params) {
         super.setLayoutParams(params);
