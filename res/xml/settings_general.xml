@@ -16,9 +16,10 @@
         app:iconSpaceReserved="false">
 
         <com.reco1l.preference.CheckPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="general_offline_mode"
-            android:title="Offline mode" />
+            android:title="Offline mode"
+            android:enabled="false" />
 
         <CheckBoxPreference
             android:defaultValue="true"
