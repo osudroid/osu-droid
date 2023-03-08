@@ -56,8 +56,8 @@ public class TabSelectorView extends RoundLayout {
     }
 
     @Override
-    protected void onSizeChange(Dimension dimens) {
-        super.onSizeChange(dimens);
+    protected void onDimensionChange(Dimension dimens) {
+        super.onDimensionChange(dimens);
         matchSize(mLayout);
 
         mLayout.post(() -> {

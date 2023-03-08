@@ -54,8 +54,8 @@ public class SongProgressView extends RoundLayout implements IPassiveObject {
     }
 
     @Override
-    protected void onSizeChange(Dimension dimens) {
-        super.onSizeChange(dimens);
+    protected void onDimensionChange(Dimension dimens) {
+        super.onDimensionChange(dimens);
 
         mBackground.rect.right = getWidth();
         mBackground.rect.bottom = getHeight();

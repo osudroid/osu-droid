@@ -28,7 +28,6 @@ import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.math.MathUtils;
 
-import com.reco1l.framework.Views;
 import com.reco1l.framework.drawing.Dimension;
 import com.reco1l.management.resources.ResourceTable;
 
@@ -112,7 +111,7 @@ public class RoundLayout extends CoordinatorLayout implements ResourceTable {
         super.post(() -> {
             mDimensions.width = getLayoutParams().width;
             mDimensions.height = getLayoutParams().height;
-            onSizeChange(mDimensions);
+            onDimensionChange(mDimensions);
         });
     }
 
@@ -190,7 +189,7 @@ public class RoundLayout extends CoordinatorLayout implements ResourceTable {
 
     // Called when layout params has been changed
     @CallSuper
-    protected void onSizeChange(Dimension dimens) {
+    protected void onDimensionChange(Dimension dimens) {
         matchSize(mInternalLayout, dimens);
     }
 
@@ -279,7 +278,7 @@ public class RoundLayout extends CoordinatorLayout implements ResourceTable {
     @Override
     protected void dispatchDraw(Canvas canvas) {
         onManagedDraw(canvas);
-        onSizeChange(mDimensions);
+        onDimensionChange(mDimensions);
 
         if (mPath != null) {
             canvas.clipPath(mPath);

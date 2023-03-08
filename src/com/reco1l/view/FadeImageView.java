@@ -55,8 +55,8 @@ public final class FadeImageView extends RoundLayout {
     }
 
     @Override
-    protected void onSizeChange(Dimension dimens) {
-        super.onSizeChange(dimens);
+    protected void onDimensionChange(Dimension dimens) {
+        super.onDimensionChange(dimens);
         matchSize(mLayers[0]);
         matchSize(mLayers[1]);
     }

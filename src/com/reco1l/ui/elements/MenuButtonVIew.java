@@ -57,10 +57,10 @@ public class MenuButtonVIew extends RoundLayout {
     }
 
     @Override
-    protected void onSizeChange(Dimension dimens) {
+    protected void onDimensionChange(Dimension dimens) {
         dimens.width = sdp(120);
         dimens.height = sdp(90);
 
-        super.onSizeChange(dimens);
+        super.onDimensionChange(dimens);
     }
 }

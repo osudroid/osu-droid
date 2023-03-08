@@ -100,8 +100,8 @@ public class ErrorMeterView extends RoundLayout implements IPassiveObject {
     }
 
     @Override
-    protected void onSizeChange(Dimension dimens) {
-        super.onSizeChange(dimens);
+    protected void onDimensionChange(Dimension dimens) {
+        super.onDimensionChange(dimens);
 
         int w = getWidth();
         int h = getHeight();

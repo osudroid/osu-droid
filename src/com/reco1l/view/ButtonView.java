@@ -60,8 +60,8 @@ public class ButtonView extends RoundLayout {
     }
 
     @Override
-    public void onSizeChange(Dimension dimens) {
-        super.onSizeChange(dimens);
+    public void onDimensionChange(Dimension dimens) {
+        super.onDimensionChange(dimens);
         Views.size(mEffect, getWidth(), getHeight());
     }
 
