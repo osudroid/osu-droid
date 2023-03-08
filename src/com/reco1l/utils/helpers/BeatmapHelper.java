@@ -114,30 +114,6 @@ public class BeatmapHelper {
         }
     }
 
-    // Background
-    //--------------------------------------------------------------------------------------------//
-
-    public static Drawable getBackground(TrackInfo track) {
-        if (track == null)
-            return null;
-
-        if (track.getBackground() != null) {
-            return Drawable.createFromPath(track.getBackground());
-        }
-        InputStream is;
-
-        try {
-            is = Game.activity.getAssets().open("gfx/menu-background.png");
-        } catch (IOException e) {
-            return null;
-        }
-        if (is != null) {
-            return Drawable.createFromStream(is, null);
-        }
-        return null;
-    }
-
-    // Filtering
     //--------------------------------------------------------------------------------------------//
 
     public static String getDataConcat(BeatmapInfo beatmap) {
