@@ -640,8 +640,9 @@ public class SVGAndroidRenderer
 
    private static void  debug(String format, Object... args)
    {
-      if (BuildConfig.DEBUG)
-         Log.d(TAG, String.format(format, args));
+      if (BuildConfig.DEBUG) {
+         //Log.d(TAG, String.format(format, args));
+      }
    }
 
 

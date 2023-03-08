@@ -1227,7 +1227,7 @@ class SVGParserImpl implements SVGParser
    {
       if (!BuildConfig.DEBUG)
          return;
-      Log.d(TAG, indent+elem);
+      //Log.d(TAG, indent+elem);
       if (elem instanceof SVGBase.SvgConditionalContainer) {
          indent = indent+"  ";
          for (SVGBase.SvgObject child: ((SVGBase.SvgConditionalContainer) elem).children) {
@@ -1239,8 +1239,9 @@ class SVGParserImpl implements SVGParser
 
    private void  debug(String format, Object... args)
    {
-      if (BuildConfig.DEBUG)
-         Log.d(TAG, String.format(format, args));
+      if (BuildConfig.DEBUG) {
+         //Log.d(TAG, String.format(format, args));
+      }
    }
 
 
