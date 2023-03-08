@@ -16,9 +16,12 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.reco1l.tables.NotificationTable;
+import com.reco1l.tables.DialogTable;
 import com.reco1l.framework.Logging;
 import com.reco1l.framework.execution.ScheduledTask;
+import com.reco1l.ui.custom.Dialog;
+import com.reco1l.ui.custom.DialogBuilder;
+import com.reco1l.ui.custom.Notification;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -42,6 +45,8 @@ public final class ExceptionManager extends Exception implements UncaughtExcepti
         mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
     }
 
+    //--------------------------------------------------------------------------------------------//
+
     @Override
     public void uncaughtException(@NonNull Thread t, @NonNull Throwable e) {
         Context context = MainActivity.instance;
@@ -54,7 +59,7 @@ public final class ExceptionManager extends Exception implements UncaughtExcepti
         }
 
         if (t.getName().startsWith("async::")) {
-            NotificationTable.exception(e);
+            notify(e);
             return;
         }
 
@@ -168,5 +173,17 @@ public final class ExceptionManager extends Exception implements UncaughtExcepti
         }
 
         return "For more information read the log files.";
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public static void notify(Throwable e) {
+        Notification.of(e.getClass().getSimpleName())
+                    .setMessage(e.getMessage())
+                    .runOnClick(() -> {
+                        DialogBuilder builder = DialogTable.stacktrace(e);
+                        new Dialog(builder).show();
+                    })
+                    .commit();
     }
 }

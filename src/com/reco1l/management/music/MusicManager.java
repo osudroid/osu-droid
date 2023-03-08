@@ -7,7 +7,7 @@ import static main.audio.Status.*;
 import android.util.Log;
 
 import com.reco1l.Game;
-import com.reco1l.tables.NotificationTable;
+import com.reco1l.management.ExceptionManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -153,7 +153,7 @@ public final class MusicManager {
             return Objects.equals(last.getCanonicalPath(), New.getCanonicalPath());
         }
         catch (IOException e) {
-            NotificationTable.exception(e);
+            ExceptionManager.notify(e);
             return false;
         }
     }

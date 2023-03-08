@@ -2,10 +2,10 @@ package com.reco1l.ui.scenes.listing.fragments;
 
 import android.os.Environment;
 
+import com.reco1l.management.ExceptionManager;
 import com.reco1l.ui.custom.Notification;
 import com.reco1l.Game;
 import com.reco1l.ui.scenes.Scenes;
-import com.reco1l.tables.NotificationTable;
 import com.reco1l.ui.fragments.WebViewFragment;
 import com.reco1l.framework.execution.AsyncTask;
 
@@ -137,7 +137,7 @@ public class BeatmapListing extends WebViewFragment {
 
                 mNotification.setMessage("Failed to download " + mName);
                 if (mException != null) {
-                    NotificationTable.exception(mException);
+                    ExceptionManager.notify(mException);
                 }
             }
         }.execute();
