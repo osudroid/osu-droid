@@ -39,8 +39,6 @@ public final class MainMenu extends BaseFragment {
             mIsMenuShowing = false,
             mIsConcurrentAnimation = false;
 
-    private int mShowTime = 0;
-
     //--------------------------------------------------------------------------------------------//
 
     public MainMenu() {
@@ -64,7 +62,6 @@ public final class MainMenu extends BaseFragment {
     @Override
     protected void onLoad() {
         mIsMenuShowing = false;
-        mShowTime = 0;
 
         mLogo = find("logo");
         mPlayButton = find("play");
@@ -112,7 +109,6 @@ public final class MainMenu extends BaseFragment {
     private void showMenu() {
         if (!mIsConcurrentAnimation && !mIsMenuShowing) {
             mIsConcurrentAnimation = true;
-            mShowTime = 0;
 
             UI.topBar.show();
 
@@ -191,15 +187,6 @@ public final class MainMenu extends BaseFragment {
 
     @Override
     protected void onEngineUpdate(float pSecElapsed) {
-        if (mIsMenuShowing) {
-            if (mShowTime > 10000f) {
-                hideMenu();
-                mShowTime = 0;
-            } else {
-                mShowTime += pSecElapsed * 1000f;
-            }
-        }
-
         mButtonLayout.setX(mLogo.getX() + mLogo.getWidth() + sdp(8));
     }
 
