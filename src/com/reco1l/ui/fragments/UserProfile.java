@@ -111,7 +111,7 @@ public final class UserProfile extends BaseFragment implements IOnlineObserver {
 
         mUserLayout.setAlpha(0);
         mLoadLayout.setAlpha(0);
-        mLoginLayout.setAlpha(0);
+        //mLoginLayout.setAlpha(0);
 
         bindTouch(mAccept, () -> {
             unbindTouch(mAccept);
@@ -159,13 +159,14 @@ public final class UserProfile extends BaseFragment implements IOnlineObserver {
         mUserLayoutHeight = mUserLayout.getHeight();
         mLoginLayoutHeight = mLoginLayout.getHeight();
 
-        if (Game.onlineManager2.isLogged()) {
+        // TODO [UserProfile] Online behavior
+        /*if (Game.onlineManager2.isLogged()) {
             mLoginLayout.setVisibility(View.GONE);
             mLoadLayout.setVisibility(View.GONE);
             onLogin(Game.onlineManager2.getCurrentUser());
         } else {
             onClear();
-        }
+        }*/
 
         Animation.of(mBody)
                 .fromScale(0.95f)

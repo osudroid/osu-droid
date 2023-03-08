@@ -6,13 +6,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:translationZ="@dimen/top_layer">
 
     <View
         android:id="@+id/background"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
     <com.reco1l.view.RoundLayout
         android:id="@+id/up_body"
@@ -26,7 +25,8 @@
             android:id="@+id/up_logged"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -95,8 +95,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/XS"
-                    android:text="Log out"
-                    android:background="#FF6B6B"/>
+                    android:background="#FF6B6B"
+                    android:text="Log out" />
 
             </com.reco1l.view.RoundLayout>
 
@@ -118,7 +118,6 @@
 
         <LinearLayout
             android:id="@+id/up_login"
-            tools:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -143,7 +142,17 @@
 
             </LinearLayout>
 
+            <com.reco1l.view.AlertBoxView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/backgroundPrimary"
+                android:orientation="vertical"
+                android:padding="@dimen/M"
+                android:src="@drawable/v28_info"
+                android:text="Online features are not available in this build" />
+
             <com.reco1l.view.RoundLayout
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/backgroundPrimary"
