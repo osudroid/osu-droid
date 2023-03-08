@@ -193,6 +193,10 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
             ContextMenuBuilder builder = new ContextMenuBuilder(pPosition)
                     .addItem(new ContextMenu.Item() {
 
+                        public boolean closeOnClick() {
+                            return false;
+                        }
+
                         public String getText() {
                             if (mProperties.isFavorite()) {
                                 return "Remove from favorites";

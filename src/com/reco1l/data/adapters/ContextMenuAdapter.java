@@ -22,13 +22,21 @@ import com.reco1l.framework.input.TouchHandler;
 
 import java.util.ArrayList;
 
+import com.reco1l.ui.custom.ContextMenu.Item;
 import com.rimu.R;
 
-public class ContextMenuAdapter extends BaseAdapter<ItemHolder, ContextMenu.Item> {
+public class ContextMenuAdapter extends BaseAdapter<ItemHolder, Item> {
 
-    public ContextMenuAdapter(ArrayList<ContextMenu.Item> items) {
+    private ContextMenu mParent;
+
+    //--------------------------------------------------------------------------------------------//
+
+    public ContextMenuAdapter(ArrayList<Item> items, ContextMenu parent) {
         super(items);
+        mParent = parent;
     }
+
+    //--------------------------------------------------------------------------------------------//
 
     @Override
     protected ItemHolder getViewHolder(View rootView) {
@@ -45,23 +53,34 @@ public class ContextMenuAdapter extends BaseAdapter<ItemHolder, ContextMenu.Item
         int s = dimen(R.dimen.S);
         textView.setPadding(m, s, m, s);
 
-        return new ItemHolder(textView);
+        return new ItemHolder(textView, mParent);
     }
 
-    public static class ItemHolder extends BaseViewHolder<ContextMenu.Item> {
+    //--------------------------------------------------------------------------------------------//
 
-        public ItemHolder(@NonNull View root) {
+    public static class ItemHolder extends BaseViewHolder<Item> {
+
+        private final TextView mText;
+
+        //----------------------------------------------------------------------------------------//
+
+        public ItemHolder(@NonNull View root, ContextMenu menu) {
             super(root);
+            mText = (TextView) root;
+
+            TouchHandler.of(mText, () -> {
+                if (item.closeOnClick()) {
+                    menu.close();
+                }
+                item.onClick(mText);
+            });
         }
 
+        //----------------------------------------------------------------------------------------//
+
         @Override
-        protected void onBind(ContextMenu.Item item, int position) {
-            ((TextView) root).setText(item.getText());
-
-            TouchHandler.of(root, () -> {
-
-                item.onClick((TextView) root);
-            });
+        protected void onBind(Item item, int position) {
+            mText.setText(item.getText());
         }
 
         @Override

@@ -85,7 +85,7 @@ public class ContextMenu extends BaseFragment {
     protected void onLoad() {
         fixLocation();
         if (mAdapter == null) {
-            mAdapter = new ContextMenuAdapter(mBuilder.items);
+            mAdapter = new ContextMenuAdapter(mBuilder.items, this);
         }
         mRecyclerView.setAdapter(mAdapter);
 
@@ -154,8 +154,14 @@ public class ContextMenu extends BaseFragment {
 
         public abstract void onClick(TextView view);
 
+        //----------------------------------------------------------------------------------------//
+
         public boolean isSelectable() {
             return false;
+        }
+
+        public boolean closeOnClick() {
+            return true;
         }
     }
 

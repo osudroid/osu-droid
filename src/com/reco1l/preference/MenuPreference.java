@@ -88,13 +88,11 @@ public class MenuPreference extends Preference {
 
                         public void onClick(TextView view) {
                             setValue(key);
-                            menu.close();
                         }
                     });
                 }
 
                 builder.setFixedWidth(mButton.getWidth());
-
                 menu.show();
             }
         });

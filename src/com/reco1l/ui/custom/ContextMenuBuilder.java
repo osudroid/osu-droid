@@ -4,12 +4,14 @@ import android.graphics.PointF;
 import android.view.View;
 import android.widget.TextView;
 
+import com.reco1l.ui.custom.ContextMenu.Item;
+
 import java.util.ArrayList;
 
 public class ContextMenuBuilder {
 
     final PointF position;
-    final ArrayList<ContextMenu.Item> items;
+    final ArrayList<Item> items;
 
     int fixedWidth = -1;
 
@@ -31,22 +33,22 @@ public class ContextMenuBuilder {
 
     //--------------------------------------------------------------------------------------------//
 
-    public ContextMenuBuilder addItem(ContextMenu.Item item) {
+    public ContextMenuBuilder addItem(Item item) {
         items.add(item);
         return this;
     }
 
     public ContextMenuBuilder addItem(String text, Runnable onClick) {
-        items.add(new ContextMenu.Item() {
-            @Override
+        items.add(new Item() {
+
             public String getText() {
                 return text;
             }
 
-            @Override
             public void onClick(TextView view) {
                 onClick.run();
             }
+
         });
         return this;
     }
