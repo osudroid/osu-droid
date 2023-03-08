@@ -3,8 +3,10 @@ package com.reco1l.ui.scenes.player.views;
 import android.util.DisplayMetrics;
 
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.math.MathUtils;
 
 import com.reco1l.Game;
+import com.reco1l.management.Settings;
 import com.reco1l.management.game.GameWrapper;
 import com.reco1l.tools.Logging;
 
@@ -27,10 +29,8 @@ public interface IPassiveObject {
     default float getEngineScale() {
         CoordinatorLayout frame = Game.platform.getScreenContainer();
 
+        float factor = MathUtils.clamp(Settings.get("hudScale", 100), 50, 200) / 100f;
 
-        float factor = (float) frame.getHeight() / Config.getRES_HEIGHT();
-
-        Logging.i(this, "Scale factor: " + factor);
-        return factor;
+        return (float) frame.getHeight() / Config.getRES_HEIGHT() * factor;
     }
 }

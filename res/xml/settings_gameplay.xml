@@ -22,9 +22,9 @@
         <SeekBarPreference
             android:defaultValue="25"
             android:key="bgBlur"
+            android:max="100"
             android:title="Background blur"
             app:min="0"
-            android:max="100"
             app:showSeekBarValue="true" />
 
         <com.reco1l.preference.CheckPreference
@@ -73,6 +73,13 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="HUD">
+
+        <com.reco1l.preference.SliderPreference
+            android:defaultValue="100"
+            android:key="hudScale"
+            android:max="200"
+            android:min="50"
+            android:title="HUD scaling" />
 
         <com.reco1l.preference.CheckPreference
             android:defaultValue="true"

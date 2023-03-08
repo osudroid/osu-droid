@@ -12,6 +12,7 @@ import com.reco1l.Game;
 import com.reco1l.preference.CheckPreference;
 import com.reco1l.preference.FieldPreference;
 import com.reco1l.preference.MenuPreference;
+import com.reco1l.preference.SliderPreference;
 import com.reco1l.ui.base.BasePreferenceFragment;
 import com.reco1l.ui.fragments.LoadingFragment;
 import com.reco1l.framework.execution.Async;
@@ -127,6 +128,18 @@ public final class Settings {
             return R.xml.settings_gameplay;
         }
 
+        public void onLoad(BasePreferenceFragment parent) {
+
+            SliderPreference scale = parent.find("hudScale");
+
+            if (scale != null) {
+                scale.setDefaultValue(100);
+                scale.setMin(50);
+                scale.setMax(200);
+                scale.setValue(Settings.<Integer>get("hudScale", 100));
+                scale.setValueFormatter(v -> (v / 100f) + "x");
+            }
+        }
     }
 
     //--------------------------------------------------------------------------------------------//
