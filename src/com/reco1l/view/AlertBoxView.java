@@ -49,21 +49,24 @@ public class AlertBoxView extends RoundLayout {
         setOrientation(VERTICAL);
 
         mIcon = new ImageView(getContext(), attrs);
-        addView(mIcon);
+        addView(mIcon, Views.wrap_content);
 
         mText = Views.styledText(this, attrs);
-        addView(mText);
+        addView(mText, Views.wrap_content);
+
+        Views.resetAll(mText);
+        Views.resetAll(mIcon);
 
         int dp6 = sdp(6);
-        int dp3 = sdp(3);
+        int dp4 = sdp(4);
 
         Views.margins(mIcon)
              .top(dp6)
-             .bottom(dp3)
+             .bottom(dp4)
              .horizontal(dp6);
 
         Views.margins(mText)
-             .top(dp3)
+             .top(dp4)
              .bottom(dp6)
              .horizontal(dp6);
     }
