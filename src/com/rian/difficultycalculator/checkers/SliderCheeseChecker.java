@@ -76,7 +76,7 @@ public final class SliderCheeseChecker {
         boolean isPrecise = difficultyAttributes.mods.contains(GameMod.MOD_PRECISE);
         double rimuOD = RimuHitWindowConverter.hitWindow300ToOD(realODMS, isPrecise);
 
-        mehWindow = RimuHitWindowConverter.hitWindow50ToOD(rimuOD, isPrecise);
+        mehWindow = RimuHitWindowConverter.odToHitWindow50(rimuOD, isPrecise);
         trueObjectScale = CircleSizeCalculator.rimuCSToRimuScale(beatmap.getDifficultyManager().getCS(), difficultyAttributes.mods);
     }
 
