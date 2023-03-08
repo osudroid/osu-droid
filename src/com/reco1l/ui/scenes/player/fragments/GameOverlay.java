@@ -1,9 +1,11 @@
 package com.reco1l.ui.scenes.player.fragments;
 
+import android.view.View;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.UiThread;
 
+import com.reco1l.management.Settings;
 import com.reco1l.management.game.GameWrapper;
 import com.reco1l.ui.scenes.Scenes;
 import com.reco1l.ui.scenes.player.views.IPassiveObject;
@@ -106,6 +108,25 @@ public final class GameOverlay extends BaseFragment implements IPassiveObject {
                     .toAlpha(1)
                     .play(200);
         });
+
+
+        if (Settings.<Boolean>get("showHUD", true)) {
+            mMainBody.setVisibility(View.VISIBLE);
+        } else {
+            mMainBody.setVisibility(View.GONE);
+        }
+
+        if (Settings.<Boolean>get("showLeaderboard", true)) {
+            mLeaderboard.setVisibility(View.VISIBLE);
+        } else {
+            mLeaderboard.setVisibility(View.GONE);
+        }
+
+        if (Settings.<Boolean>get("showMeter", true)) {
+            mMeter.setVisibility(View.VISIBLE);
+        } else {
+            mMeter.setVisibility(View.GONE);
+        }
     }
 
     @Override

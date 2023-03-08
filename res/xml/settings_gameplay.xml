@@ -80,7 +80,7 @@
             android:title="Show in-game HUD" />
 
         <com.reco1l.preference.CheckPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:key="showLeaderboard"
             android:title="Show in-game leaderboard" />
 
