@@ -32,7 +32,7 @@ public class RoundedImageView extends RoundLayout {
 
     @Override
     protected void onCreate() {
-        mImage = new ImageView(getContext(), attrs, defStyleAttr, defStyleRes);
+        mImage = new ImageView(getContext(), attrs, defStyleAttr);
         mImage.setPadding(0, 0, 0, 0);
         addView(mImage, getInitialLayoutParams());
 

@@ -63,7 +63,7 @@ public class HealthBarView extends RoundLayout implements IPassiveObject {
     }
 
     @Override
-    protected void onAttachedToWindow() {
+    public void onAttachedToWindow() {
         super.onAttachedToWindow();
 
         if (!isInEditMode()) {

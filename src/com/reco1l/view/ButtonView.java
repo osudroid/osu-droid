@@ -6,12 +6,13 @@ import static android.util.TypedValue.COMPLEX_UNIT_PX;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
-import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
 import com.reco1l.framework.Views;
+import com.reco1l.framework.drawing.Dimension;
 import com.reco1l.view.effects.StripsEffect;
 
 public class ButtonView extends RoundLayout {
@@ -52,15 +53,15 @@ public class ButtonView extends RoundLayout {
                 .vertical(sdp(6))
                 .horizontal(sdp(12));
 
-        Views.rule(mText, CENTER_IN_PARENT);
+        Views.rule(mText, RelativeLayout.CENTER_IN_PARENT);
 
         setBackground(new ColorDrawable(0xFF819DD4));
         setRadius(sdp(8));
     }
 
     @Override
-    public void onPostLayout(ViewGroup.LayoutParams params) {
-        super.onPostLayout(params);
+    public void onSizeChange(Dimension dimens) {
+        super.onSizeChange(dimens);
         Views.size(mEffect, getWidth(), getHeight());
     }
 

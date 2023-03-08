@@ -3,7 +3,6 @@ package com.reco1l.view;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -11,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 
 import com.reco1l.framework.Animation;
+import com.reco1l.framework.drawing.Dimension;
 
 public final class FadeImageView extends RoundLayout {
 
@@ -55,8 +55,8 @@ public final class FadeImageView extends RoundLayout {
     }
 
     @Override
-    protected void onPostLayout(ViewGroup.LayoutParams params) {
-        super.onPostLayout(params);
+    protected void onSizeChange(Dimension dimens) {
+        super.onSizeChange(dimens);
         matchSize(mLayers[0]);
         matchSize(mLayers[1]);
     }

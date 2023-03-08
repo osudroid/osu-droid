@@ -6,7 +6,6 @@ import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -14,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.reco1l.framework.Views;
+import com.reco1l.framework.drawing.Dimension;
 import com.reco1l.view.RoundLayout;
 
 public class MenuButtonVIew extends RoundLayout {
@@ -57,7 +57,10 @@ public class MenuButtonVIew extends RoundLayout {
     }
 
     @Override
-    protected void onPostLayout(ViewGroup.LayoutParams params) {
-        Views.size(getInternalLayout(), sdp(120), sdp(90));
+    protected void onSizeChange(Dimension dimens) {
+        dimens.width = sdp(120);
+        dimens.height = sdp(90);
+
+        super.onSizeChange(dimens);
     }
 }

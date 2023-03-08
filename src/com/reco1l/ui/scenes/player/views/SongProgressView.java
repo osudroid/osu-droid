@@ -4,11 +4,11 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.util.AttributeSet;
-import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.reco1l.framework.drawing.Dimension;
 import com.reco1l.management.game.GameWrapper;
 import com.reco1l.view.RoundLayout;
 import com.reco1l.framework.drawing.CompoundRect;
@@ -54,8 +54,8 @@ public class SongProgressView extends RoundLayout implements IPassiveObject {
     }
 
     @Override
-    protected void onPostLayout(ViewGroup.LayoutParams params) {
-        super.onPostLayout(params);
+    protected void onSizeChange(Dimension dimens) {
+        super.onSizeChange(dimens);
 
         mBackground.rect.right = getWidth();
         mBackground.rect.bottom = getHeight();

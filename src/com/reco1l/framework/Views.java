@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import androidx.annotation.LayoutRes;
 
+import com.reco1l.framework.drawing.Dimension;
 import com.reco1l.management.resources.ResourceTable;
 
 import java.util.ArrayList;

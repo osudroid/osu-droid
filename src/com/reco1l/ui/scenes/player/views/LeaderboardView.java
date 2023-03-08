@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -60,7 +61,7 @@ public class LeaderboardView extends RoundLayout implements IPassiveObject {
 
     @Override
     protected void onCreate() {
-        setGravity(CENTER_VERTICAL);
+        setGravity(RelativeLayout.CENTER_VERTICAL);
         setRadius(0);
 
         mRecycler = new RecyclerView(getContext());

@@ -5,13 +5,13 @@ import static com.google.android.material.progressindicator.CircularProgressIndi
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.Gravity;
-import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.reco1l.framework.Maths;
+import com.reco1l.framework.drawing.Dimension;
 
 public class ProgressIndicatorView extends RoundLayout {
 
@@ -49,12 +49,12 @@ public class ProgressIndicatorView extends RoundLayout {
     }
 
     @Override
-    protected void onPostLayout(ViewGroup.LayoutParams params) {
-        super.onPostLayout(params);
+    protected void onSizeChange(Dimension dimens) {
+        super.onSizeChange(dimens);
         matchSize(mIndicator);
 
         mIndicator.post(() -> {
-            int size = Maths.pct(Math.min(mIndicator.getWidth(), mIndicator.getHeight()), 80);
+            int size = Maths.pct(Math.min(getWidth(), getHeight()), 80);
 
             setRadiusAbs(Maths.pct(size, 15));
             mIndicator.setIndicatorSize(size);

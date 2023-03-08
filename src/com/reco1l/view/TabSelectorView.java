@@ -9,7 +9,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -17,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.reco1l.framework.Views;
+import com.reco1l.framework.drawing.Dimension;
 
 public class TabSelectorView extends RoundLayout {
 
@@ -56,8 +56,8 @@ public class TabSelectorView extends RoundLayout {
     }
 
     @Override
-    protected void onPostLayout(ViewGroup.LayoutParams params) {
-        super.onPostLayout(params);
+    protected void onSizeChange(Dimension dimens) {
+        super.onSizeChange(dimens);
         matchSize(mLayout);
 
         mLayout.post(() -> {
@@ -65,7 +65,7 @@ public class TabSelectorView extends RoundLayout {
                 int w = getWidth() / mTabs.length;
 
                 for (TextView tab : mTabs) {
-                    tab.post(() -> Views.size(tab, w, params.height));
+                    tab.post(() -> Views.size(tab, w, dimens.height));
                 }
 
                 mIndicator.setY(getHeight() - mIndicator.getHeight());

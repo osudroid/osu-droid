@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -44,7 +45,7 @@ public class RowTextView extends RoundLayout {
         mValueText = Views.styledText(this, null);
         addView(mValueText);
 
-        Views.rule(mValueText, ALIGN_PARENT_RIGHT);
+        Views.rule(mValueText, RelativeLayout.ALIGN_PARENT_RIGHT);
 
         Views.padding(getInternalLayout())
                 .vertical(sdp(6))

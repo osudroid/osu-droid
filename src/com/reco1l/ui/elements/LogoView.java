@@ -7,13 +7,13 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.reco1l.Game;
+import com.reco1l.framework.drawing.Dimension;
 import com.reco1l.management.Settings;
 import com.reco1l.framework.Animation;
 import com.reco1l.framework.Views;
@@ -24,7 +24,12 @@ import com.rimu.R;
 
 public final class LogoView extends RoundLayout {
 
-    private ImageView mLines;
+    private ImageView
+            mLines,
+            mBrand,
+            mOverlay;
+
+    private StripsEffect mEffect;
     private View mFlash;
 
     //--------------------------------------------------------------------------------------------//
@@ -45,41 +50,50 @@ public final class LogoView extends RoundLayout {
 
     @Override
     public void onCreate() {
-        setBackground(new ColorDrawable(0xFF1E1E1E));
+        setBackground(new ColorDrawable(0xFF21293B));
         setConstantInvalidation(true);
         setClampToSquare(true);
         setMaxRounded(true);
 
-        ViewGroup.LayoutParams params = Views.match_parent;
-
         // Strips effect
-        StripsEffect effect = new StripsEffect(getContext());
-        effect.setStripWidth(sdp(20));
-        addView(effect, params);
+        mEffect = new StripsEffect(getContext());
+        mEffect.setStripWidth(sdp(20));
+        addView(mEffect, getInitialLayoutParams());
 
         // Flash effect
         mFlash = new View(getContext());
         mFlash.setBackground(new ColorDrawable(Color.WHITE));
         mFlash.setAlpha(0);
-        addView(mFlash, params);
+        addView(mFlash, getInitialLayoutParams());
 
         // Border overlay
-        ImageView overlay = new ImageView(getContext());
-        overlay.setImageResource(R.drawable.logo_overlay);
-        addView(overlay, params);
+        mOverlay = new ImageView(getContext());
+        mOverlay.setImageResource(R.drawable.logo_overlay);
+        addView(mOverlay, getInitialLayoutParams());
 
         // Lines overlay
         mLines = new ImageView(getContext());
         mLines.setImageResource(R.drawable.logo_lines);
-        addView(mLines, params);
+        addView(mLines, getInitialLayoutParams());
 
         // rimu!
-        ImageView brand = new ImageView(getContext());
-        brand.setImageResource(R.drawable.logo_brand);
-        addView(brand, params);
+        mBrand = new ImageView(getContext());
+        mBrand.setImageResource(R.drawable.logo_brand);
+        addView(mBrand, getInitialLayoutParams());
     }
 
     //--------------------------------------------------------------------------------------------//
+
+    @Override
+    protected void onSizeChange(Dimension dimens) {
+        super.onSizeChange(dimens);
+
+        matchSize(mEffect);
+        matchSize(mFlash);
+        matchSize(mBrand);
+        matchSize(mLines);
+        matchSize(mOverlay);
+    }
 
     @Override
     protected void onManagedDraw(Canvas canvas) {
@@ -92,6 +106,13 @@ public final class LogoView extends RoundLayout {
         }
         updatePeak();
     }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+    }
+
+    //--------------------------------------------------------------------------------------------//
 
     private void updatePeak() {
         if (!Game.musicManager.isPlaying()) {
@@ -114,19 +135,19 @@ public final class LogoView extends RoundLayout {
 
         if (isKiai) {
             Animation.of(mFlash)
-                    .toAlpha(0.05f)
-                    .runOnEnd(() ->
-                            Animation.of(mFlash)
-                                    .toAlpha(0)
-                                    .play(out)
-                    ).play(in);
+                     .toAlpha(0.05f)
+                     .runOnEnd(() ->
+                             Animation.of(mFlash)
+                                      .toAlpha(0)
+                                      .play(out)
+                     ).play(in);
         }
 
         float delta = mLines.getRotation();
         delta += isKiai ? 25 : 10;
 
         Animation.of(mLines)
-                .toRotation(delta)
-                .play((long) length);
+                 .toRotation(delta)
+                 .play((long) length);
     }
 }

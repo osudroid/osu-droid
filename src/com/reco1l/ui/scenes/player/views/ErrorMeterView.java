@@ -7,11 +7,11 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.reco1l.framework.drawing.Dimension;
 import com.reco1l.management.game.GameWrapper;
 import com.reco1l.framework.Animation;
 import com.reco1l.view.RoundLayout;
@@ -100,8 +100,8 @@ public class ErrorMeterView extends RoundLayout implements IPassiveObject {
     }
 
     @Override
-    protected void onPostLayout(ViewGroup.LayoutParams params) {
-        super.onPostLayout(params);
+    protected void onSizeChange(Dimension dimens) {
+        super.onSizeChange(dimens);
 
         int w = getWidth();
         int h = getHeight();
