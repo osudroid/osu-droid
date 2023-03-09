@@ -37,6 +37,8 @@ import java.util.ArrayList;
 
 import main.osu.BeatmapInfo;
 import main.osu.BeatmapProperties;
+
+import com.reco1l.view.BadgeTextView;
 import com.rimu.R;
 
 public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapInfo> {
@@ -72,12 +74,12 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
 
         private final View mBody;
         private final ImageView mBackground;
+        private final BadgeTextView mMapper;
         private final CarrouselRecyclerView mTrackList;
 
         private final TextView
                 mTitle,
-                mArtist,
-                mMapper;
+                mArtist;
 
         private Bitmap mBitmap;
         private QueueItem mQueueItem;
