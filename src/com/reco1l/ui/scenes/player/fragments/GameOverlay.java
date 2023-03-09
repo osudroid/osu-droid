@@ -51,7 +51,8 @@ public final class GameOverlay extends BaseFragment implements IPassiveObject {
 
     private boolean
             mSkipActioned,
-            mShowingSkipButton;
+            mShowingSkipButton,
+            mShowingLeaderboard;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -104,27 +105,31 @@ public final class GameOverlay extends BaseFragment implements IPassiveObject {
                      .play(200);
 
             Animation.of(mMainBody)
-                    .toScale(1)
-                    .toAlpha(1)
-                    .play(200);
+                     .toScale(1)
+                     .toAlpha(1)
+                     .play(200);
         });
 
 
         if (Settings.<Boolean>get("showHUD", true)) {
             mMainBody.setVisibility(View.VISIBLE);
-        } else {
+        }
+        else {
             mMainBody.setVisibility(View.GONE);
         }
 
-        if (Settings.<Boolean>get("showLeaderboard", true)) {
+        mShowingLeaderboard = Settings.<Boolean>get("showLeaderboard", true);
+        if (mShowingLeaderboard) {
             mLeaderboard.setVisibility(View.VISIBLE);
-        } else {
+        }
+        else {
             mLeaderboard.setVisibility(View.GONE);
         }
 
         if (Settings.<Boolean>get("showMeter", true)) {
             mMeter.setVisibility(View.VISIBLE);
-        } else {
+        }
+        else {
             mMeter.setVisibility(View.GONE);
         }
     }
@@ -149,11 +154,12 @@ public final class GameOverlay extends BaseFragment implements IPassiveObject {
 
             if (mShowingSkipButton) {
                 Animation.of(mSkipButton)
-                        .fromY(50)
-                        .toY(0)
-                        .toAlpha(1)
-                        .play(200);
-            } else {
+                         .fromY(50)
+                         .toY(0)
+                         .toAlpha(1)
+                         .play(200);
+            }
+            else {
                 unbindTouch(mSkipButton);
 
                 Animation.of(mMainBody)
@@ -205,7 +211,8 @@ public final class GameOverlay extends BaseFragment implements IPassiveObject {
 
     //--------------------------------------------------------------------------------------------//
 
-    @Override @UiThread
+    @Override
+    @UiThread
     public void onObjectUpdate(float dt, float sec) {
         if (!isLoaded() || mWrapper == null) {
             return;
@@ -225,9 +232,9 @@ public final class GameOverlay extends BaseFragment implements IPassiveObject {
             unbindTouch(mSkipButton);
 
             Animation.of(mSkipButton)
-                    .toY(50)
-                    .toAlpha(0)
-                    .play(200);
+                     .toY(50)
+                     .toAlpha(0)
+                     .play(200);
 
             Animation.of(mMainBody)
                      .toScale(1)
@@ -237,6 +244,10 @@ public final class GameOverlay extends BaseFragment implements IPassiveObject {
 
         mHealth.onObjectUpdate(dt, sec);
         mProgress.onObjectUpdate(dt, sec);
-        mLeaderboard.onObjectUpdate(dt, sec);
+
+        // TODO [GameOverlay] Swapping an array constantly can be expensive
+        if (mShowingLeaderboard) {
+            mLeaderboard.onObjectUpdate(dt, sec);
+        }
     }
 }
