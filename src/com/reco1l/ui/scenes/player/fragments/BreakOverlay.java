@@ -7,6 +7,7 @@ import androidx.annotation.UiThread;
 
 import com.caverock.androidsvg.SVGImageView;
 import com.edlplan.framework.easing.Easing;
+import com.reco1l.Game;
 import com.reco1l.annotation.Direction;
 import com.reco1l.annotation.Legacy;
 import com.reco1l.management.game.GameWrapper;
@@ -76,10 +77,16 @@ public class BreakOverlay extends BaseFragment implements IPassiveObject {
         }
     }
 
-    @Override
-    protected void onPost() {
-        if (mWrapper != null) {
-            setGameWrapper(mWrapper);
+    private void loadStatistics() {
+        if (mWrapper == null) {
+            return;
+        }
+
+        StatisticV2 s = mWrapper.statistics;
+
+        if (s != null) {
+            mMarkIcon.setImageAsset("svg/ranking-" + s.getMark() + ".svg");
+            mAccuracyText.setText(String.format("%.2f%%", s.getAccuracy() * 100f));
         }
     }
 
@@ -91,6 +98,8 @@ public class BreakOverlay extends BaseFragment implements IPassiveObject {
         mIsOver = false;
         mIsBreak = true;
         mCurrentPeriod = period;
+
+        Game.activity.runOnUiThread(this::loadStatistics);
 
         Animation.of(mTimeText)
                  .fromScale(0.5f)
@@ -171,15 +180,6 @@ public class BreakOverlay extends BaseFragment implements IPassiveObject {
     @Override
     public void setGameWrapper(GameWrapper wrapper) {
         mWrapper = wrapper;
-
-        if (isLoaded()) {
-            StatisticV2 s = mWrapper.statistics;
-
-            if (s != null) {
-                mMarkIcon.setImageAsset("svg/ranking-" + s.getMark() + ".svg");
-                mAccuracyText.setText(String.format("%.2f%%", s.getAccuracy() * 100f));
-            }
-        }
     }
 
     @Override
