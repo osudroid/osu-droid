@@ -14,6 +14,8 @@ import com.rian.difficultycalculator.utils.RimuHitWindowConverter;
 import com.rian.difficultycalculator.utils.StandardHitWindowConverter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
@@ -95,14 +97,19 @@ public final class SliderCheeseChecker {
     }
 
     private ArrayList<Double> obtainCheesedSlidersDifficultyRating() {
-        // Current loop indexes are stored for efficiency.
-        int[] cursorLoopIndexes = new int[cursorMoves.size()];
+        // Current loop indices are stored for efficiency.
+        int[] cursorLoopIndices = new int[cursorMoves.size()];
+        Arrays.fill(cursorLoopIndices, 1);
 
         ArrayList<Double> cheesedDifficultyRatings = new ArrayList<>();
         double objectRadius = HitObject.OBJECT_RADIUS * trueObjectScale;
         double sliderBallRadius = objectRadius * 2;
 
-        for (DifficultSlider difficultSlider : difficultyAttributes.difficultSliders) {
+        List<DifficultSlider> difficultSliders = difficultyAttributes.difficultSliders.subList(0, difficultyAttributes.difficultSliders.size() - 1);
+        // Sort difficult sliders by index so that cursor loop indices work properly.
+        difficultSliders.sort(Comparator.comparingInt(a -> a.index));
+
+        for (DifficultSlider difficultSlider : difficultSliders) {
             if (difficultSlider.index >= objectData.length) {
                 continue;
             }
@@ -121,79 +128,165 @@ public final class SliderCheeseChecker {
             }
 
             Vector2 objectStartPosition = object.getStackedPosition(GameMode.rimu);
-            boolean isCheesed = false;
 
-            for (int i = 0; i < cursorMoves.size() && !isCheesed; ++i) {
+            // These time boundaries should consider the delta time between the previous and next
+            // object as well as their hit accuracy. However, they are somewhat complicated to
+            // compute and the accuracy gain is small. As such, let's settle with 50 hit window.
+            double minTimeLimit = object.getStartTime() - mehWindow;
+            double maxTimeLimit = object.getStartTime() + mehWindow;
+
+            // Get the closest tap distance across all cursors.
+            double[] closestDistances = new double[cursorMoves.size()];
+            int[] closestIndices = new int[cursorMoves.size()];
+
+            for (int i = 0; i < cursorMoves.size(); ++i) {
                 Replay.MoveArray cursorMove = cursorMoves.get(i);
-                boolean isPressingSlider = false;
+                double closestDistance = Double.POSITIVE_INFINITY;
+                int closestIndex = cursorMove.size;
 
-                for (int j = cursorLoopIndexes[i]; j < cursorMove.size; j = ++cursorLoopIndexes[i]) {
+                for (int j = cursorLoopIndices[i]; j < cursorMove.size; j = ++cursorLoopIndices[i]) {
                     Replay.ReplayMovement movement = cursorMove.movements[j];
+                    Replay.ReplayMovement prevMovement = cursorMove.movements[j - 1];
 
-                    if (movement.getTime() < object.getStartTime() - mehWindow) {
+                    if (prevMovement.getTime() < minTimeLimit) {
                         continue;
                     }
 
-                    if (movement.getTime() > object.getStartTime() + mehWindow) {
+                    if (prevMovement.getTime() > maxTimeLimit) {
                         break;
                     }
 
-                    if (movement.getTouchType() == TouchType.DOWN) {
-                        Vector2 movementPosition = new Vector2(movement.getPoint());
-                        isPressingSlider = movementPosition.getDistance(objectStartPosition) < objectRadius;
+                    if (prevMovement.getTouchType() == TouchType.DOWN && prevMovement.getTime() >= minTimeLimit) {
+                        double distance = new Vector2(prevMovement.getPoint()).getDistance(objectStartPosition);
+
+                        if (closestDistance > distance) {
+                            closestDistance = distance;
+                            closestIndex = j;
+                        }
+
+                        if (closestDistance <= objectRadius) {
+                            break;
+                        }
                     }
 
-                    if (!isPressingSlider) {
-                        continue;
-                    }
-
-                    // Track cursor movement to see if it lands on every tick.
-                    int movementIndex = j + 1;
-                    boolean isSliderFulfilled = true;
-
-                    for (int k = 1; k < object.getNestedHitObjects().size() && isSliderFulfilled; ++k) {
-                        if (!objectData[difficultSlider.index].tickSet.get(k - 1)) {
+                    // Check if there are cursor presses within the cursor's active time.
+                    for (int k = 0; k < cursorMoves.size(); ++k) {
+                        // Skip the current cursor index.
+                        if (k == i) {
                             continue;
                         }
 
-                        SliderHitObject nestedObject = object.getNestedHitObjects().get(k);
-                        Vector2 nestedPosition = nestedObject.getStackedPosition(GameMode.rimu);
-
-                        while (movementIndex < cursorMove.size && cursorMove.movements[movementIndex].getTime() < nestedObject.getStartTime()) {
-                            if (cursorMove.movements[movementIndex].getTouchType() == TouchType.UP) {
-                                isSliderFulfilled = false;
+                        for (Replay.ReplayMovement press : cursorMoves.get(k).movements) {
+                            if (press.getTouchType() != TouchType.DOWN) {
+                                continue;
+                            }
+                            if (press.getTime() < minTimeLimit) {
+                                continue;
+                            }
+                            if (press.getTime() > maxTimeLimit) {
                                 break;
                             }
 
-                            ++movementIndex;
-                        }
+                            double distance = Double.POSITIVE_INFINITY;
 
-                        if (movementIndex == cursorMove.size) {
-                            break;
-                        }
+                            // We will not consider presses here as it has already been processed above.
+                            switch (movement.getTouchType()) {
+                                case MOVE:
+                                    double t = (double) (press.getTime() - prevMovement.getTime()) / (movement.getTime() - prevMovement.getTime());
+                                    Vector2 cursorPosition = new Vector2(
+                                            Interpolation.linear(prevMovement.getPoint().x, movement.getPoint().x, t),
+                                            Interpolation.linear(prevMovement.getPoint().y, movement.getPoint().y, t)
+                                    );
 
-                        Replay.ReplayMovement currentMovement = cursorMove.movements[movementIndex];
-                        Replay.ReplayMovement prevMovement = cursorMove.movements[movementIndex - 1];
+                                    distance = cursorPosition.getDistance(objectStartPosition);
+                                    break;
+                                case UP:
+                                    distance = new Vector2(prevMovement.getPoint()).getDistance(objectStartPosition);
+                                    break;
+                            }
 
-                        switch (currentMovement.getTouchType()) {
-                            case MOVE:
-                                // Interpolate cursor position during nested object time.
-                                double t = (nestedObject.getStartTime() - prevMovement.getTime()) / (movement.getTime() - prevMovement.getTime());
-                                Vector2 cursorPosition = new Vector2(
-                                        Interpolation.linear(prevMovement.getPoint().x, movement.getPoint().x, t),
-                                        Interpolation.linear(prevMovement.getPoint().y, movement.getPoint().y, t)
-                                );
+                            if (closestDistance > distance) {
+                                closestDistance = distance;
+                                closestIndex = j;
+                            }
 
-                                double distance = cursorPosition.getDistance(nestedPosition);
-                                isSliderFulfilled = distance <= sliderBallRadius;
+                            if (closestDistance <= objectRadius) {
                                 break;
-                            case UP:
-                                isSliderFulfilled = new Vector2(prevMovement.getPoint()).getDistance(nestedPosition) <= sliderBallRadius;
-                                break;
+                            }
                         }
                     }
+                }
 
-                    isCheesed = !isSliderFulfilled;
+                closestDistances[i] = closestDistance;
+                closestIndices[i] = closestIndex;
+
+                if (cursorLoopIndices[i] > 0) {
+                    // Decrement the index. The previous group may also have a role on the next slider.
+                    --cursorLoopIndices[i];
+                }
+            }
+
+            int index = 0;
+            int movementIndex = closestIndices[index];
+            double closestDistance = closestDistances[index];
+
+            for (int i = 1; i < closestIndices.length; ++i) {
+                if (closestDistances[i] <= closestDistance) {
+                    closestDistance = closestDistances[i];
+                    movementIndex = closestIndices[i];
+                    index = i;
+                }
+            }
+
+            if (closestDistance > objectRadius) {
+                // Closest press is not in slider head. Abort.
+                cheesedDifficultyRatings.add(difficultSlider.difficultyRating);
+                continue;
+            }
+
+            boolean isCheesed = false;
+            // Track cursor movement to see if it lands on every tick.
+            Replay.MoveArray cursorMove = cursorMoves.get(index);
+
+            for (int k = 1; k < object.getNestedHitObjects().size() && !isCheesed; ++k) {
+                if (!objectData[difficultSlider.index].tickSet.get(k - 1)) {
+                    continue;
+                }
+
+                SliderHitObject nestedObject = object.getNestedHitObjects().get(k);
+                Vector2 nestedPosition = nestedObject.getStackedPosition(GameMode.rimu);
+
+                while (movementIndex < cursorMove.size && cursorMove.movements[movementIndex].getTime() < nestedObject.getStartTime()) {
+                    if (cursorMove.movements[movementIndex].getTouchType() == TouchType.UP) {
+                        isCheesed = true;
+                        break;
+                    }
+
+                    ++movementIndex;
+                }
+
+                if (movementIndex == cursorMove.size) {
+                    break;
+                }
+
+                Replay.ReplayMovement currentMovement = cursorMove.movements[movementIndex];
+                Replay.ReplayMovement prevMovement = cursorMove.movements[movementIndex - 1];
+
+                switch (currentMovement.getTouchType()) {
+                    case MOVE:
+                        // Interpolate cursor position during nested object time.
+                        double t = (nestedObject.getStartTime() - prevMovement.getTime()) / (currentMovement.getTime() - prevMovement.getTime());
+                        Vector2 cursorPosition = new Vector2(
+                                Interpolation.linear(prevMovement.getPoint().x, currentMovement.getPoint().x, t),
+                                Interpolation.linear(prevMovement.getPoint().y, currentMovement.getPoint().y, t)
+                        );
+
+                        double distance = cursorPosition.getDistance(nestedPosition);
+                        isCheesed = distance > sliderBallRadius;
+                        break;
+                    case UP:
+                        isCheesed = new Vector2(prevMovement.getPoint()).getDistance(nestedPosition) > sliderBallRadius;
+                        break;
                 }
             }
 
