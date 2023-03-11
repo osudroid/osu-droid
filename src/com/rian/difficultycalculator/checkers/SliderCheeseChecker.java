@@ -305,9 +305,18 @@ public final class SliderCheeseChecker {
         }
 
         return new SliderCheeseInformation(
-                1 - summedDifficultyRating * difficultyAttributes.aimSliderFactor,
-                1 - summedDifficultyRating * difficultyAttributes.flashlightSliderFactor,
-                1 - summedDifficultyRating * difficultyAttributes.visualSliderFactor
+                Math.max(
+                        difficultyAttributes.aimSliderFactor,
+                        Math.pow(1 - summedDifficultyRating * difficultyAttributes.aimSliderFactor, 2)
+                ),
+                Math.max(
+                        difficultyAttributes.flashlightSliderFactor,
+                        Math.pow(1 - summedDifficultyRating * difficultyAttributes.flashlightSliderFactor, 2)
+                ),
+                Math.max(
+                        difficultyAttributes.visualSliderFactor,
+                        Math.pow(1 - summedDifficultyRating * difficultyAttributes.visualSliderFactor, 2)
+                )
         );
     }
 }
