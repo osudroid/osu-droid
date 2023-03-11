@@ -131,6 +131,12 @@ public class RimuPerformanceCalculator extends PerformanceCalculator {
                 // The following function is to give higher reward for deviations lower than 25 (250 UR).
                 (15 / (deviation + 15) + 0.65);
 
+        // Bonus for many hit circles - it's harder to keep good accuracy up for longer.
+        accuracyValue *= Math.min(
+                1.15,
+                Math.sqrt(Math.log(1 + ((Math.E - 1) * difficultyAttributes.hitCircleCount) / 1000))
+        );
+
         // Scale the accuracy value with rhythm complexity.
         accuracyValue *= 1.5 / (1 + Math.exp(-(((RimuDifficultyAttributes) difficultyAttributes).rhythmDifficulty - 1) / 2));
 
