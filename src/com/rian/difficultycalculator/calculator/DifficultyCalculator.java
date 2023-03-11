@@ -62,7 +62,7 @@ public abstract class DifficultyCalculator {
             }
         }
 
-        return createDifficultyAttributes(beatmap, skills, objects, parameters);
+        return createDifficultyAttributes(beatmapToCalculate, skills, objects, parameters);
     }
 
     /**

@@ -127,7 +127,7 @@ public final class ThreeFingerChecker {
 
         greatWindow = RimuHitWindowConverter.odToHitWindow300(rimuOD, isPrecise);
         okWindow = RimuHitWindowConverter.odToHitWindow100(rimuOD, isPrecise);
-        mehWindow = RimuHitWindowConverter.hitWindow50ToOD(rimuOD, isPrecise);
+        mehWindow = RimuHitWindowConverter.odToHitWindow50(rimuOD, isPrecise);
 
         trueObjectScale = CircleSizeCalculator.rimuCSToRimuScale(beatmap.getDifficultyManager().getCS(), difficultyAttributes.mods);
     }

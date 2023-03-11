@@ -2,7 +2,7 @@ package com.rian.difficultycalculator.calculator;
 
 import java.util.EnumSet;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import main.osu.game.mods.GameMod;
 
 /**
  * A class for specifying parameters for difficulty calculation.

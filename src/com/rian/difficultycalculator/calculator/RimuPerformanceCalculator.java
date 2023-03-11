@@ -7,7 +7,7 @@ import com.rian.difficultycalculator.math.MathUtils;
 import com.rian.difficultycalculator.utils.RimuHitWindowConverter;
 import com.rian.difficultycalculator.utils.StandardHitWindowConverter;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import main.osu.game.mods.GameMod;
 
 public class RimuPerformanceCalculator extends PerformanceCalculator {
     public static final double finalMultiplier = 1.24;
@@ -151,6 +151,12 @@ public class RimuPerformanceCalculator extends PerformanceCalculator {
         double accuracyValue = 650 * Math.exp(-0.125 * deviation) *
                 // The following function is to give higher reward for deviations lower than 25 (250 UR).
                 (15 / (deviation + 15) + 0.65);
+
+        // Bonus for many hit circles - it's harder to keep good accuracy up for longer.
+        accuracyValue *= Math.min(
+                1.15,
+                Math.sqrt(Math.log(1 + ((Math.E - 1) * difficultyAttributes.hitCircleCount) / 1000))
+        );
 
         // Scale the accuracy value with rhythm complexity.
         accuracyValue *= 1.5 / (1 + Math.exp(-(((RimuDifficultyAttributes) difficultyAttributes).rhythmDifficulty - 1) / 2));
