@@ -88,7 +88,10 @@ public final class SliderCheeseChecker {
      * @return A structure containing information about the check.
      */
     public SliderCheeseInformation check() {
-        if (difficultyAttributes.difficultSliders.isEmpty()) {
+        if (difficultyAttributes.difficultSliders.isEmpty() ||
+            (difficultyAttributes.aimSliderFactor == 1 &&
+                difficultyAttributes.flashlightSliderFactor == 1 &&
+                difficultyAttributes.visualSliderFactor == 1)) {
             return new SliderCheeseInformation(1, 1, 1);
         }
 
