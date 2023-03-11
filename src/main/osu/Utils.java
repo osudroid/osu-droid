@@ -250,4 +250,24 @@ public class Utils {
         }
         return false;
     }
+
+    public static float tryParseFloat(String str, float defaultVal) {
+        float val;
+        try {
+            val = Float.parseFloat(str);
+        } catch (NumberFormatException ignored) {
+            val = defaultVal;
+        }
+        return val;
+    }
+
+    public static int tryParseInt(String str, int defaultVal) {
+        int val;
+        try {
+            val = Integer.parseInt(str);
+        } catch (NumberFormatException ignored) {
+            val = defaultVal;
+        }
+        return val;
+    }
 }
