@@ -8,9 +8,9 @@ import android.widget.LinearLayout;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.PreferenceViewHolder;
 
-import com.reco1l.utils.Animation;
+import com.reco1l.framework.Animation;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public class CheckPreference extends CheckBoxPreference {
 

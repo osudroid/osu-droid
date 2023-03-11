@@ -1,7 +1,4 @@
 buildscript {
-    /*ext {
-        kotlin_version = '1.5.21'
-    }*/
     repositories {
         google()
         mavenCentral()
@@ -11,7 +8,6 @@ buildscript {
         classpath 'com.android.tools.build:gradle:7.0.2'
         classpath 'com.google.gms:google-services:4.3.10'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.7.1'
-        //classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
@@ -45,9 +41,6 @@ if (localPropertiesFile.exists()) {
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
-
-//apply plugin: 'kotlin-android'
-//apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 31
@@ -99,8 +92,6 @@ android {
         release {
             resValue "string", "app_name", "rimu!"
             zipAlignEnabled true
-//            minifyEnabled true
-//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
             signingConfig signingConfigs.release
             firebaseCrashlytics {
                 mappingFileUploadEnabled false
@@ -111,9 +102,6 @@ android {
             matchingFallbacks = ['release']
             resValue "string", "app_name", "rimu!"
             zipAlignEnabled true
-//            minifyEnabled true
-//            debuggable true
-//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
             signingConfig signingConfigs.release
             firebaseCrashlytics {
                 mappingFileUploadEnabled false
@@ -133,8 +121,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     useLibrary 'org.apache.http.legacy'
@@ -142,7 +130,7 @@ android {
     lintOptions {
         abortOnError true
         ignoreWarnings true
-        disable 'MissingTranslation', 'ExpiredTargetSdkVersion', 'ProtectedPermissions', 'AppLinkUrlError'
+        disable 'MissingTranslation', 'ProtectedPermissions', 'AppLinkUrlError'
     }
 
     android.applicationVariants.all { variant ->
@@ -156,26 +144,24 @@ android {
 dependencies {
     implementation project(':AndEngine')
     implementation project(':andnext_markdown')
+    implementation project(path: ':LibBASS')
+    implementation project(':androidsvg')
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.preference:preference:1.1.1'
-    implementation 'androidx.palette:palette:1.0.0'
-
+    implementation 'com.google.android.material:material:1.6.1'
     implementation 'com.google.firebase:firebase-crashlytics:18.2.1'
     implementation 'com.google.firebase:firebase-analytics:19.0.1'
     implementation 'com.google.firebase:firebase-messaging:22.0.0'
-    implementation 'com.google.android.material:material:1.6.1'
-    implementation 'com.google.code.gson:gson:2.8.8'
 
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'pub.devrel:easypermissions:3.0.0'
     implementation 'net.lingala.zip4j:zip4j:2.9.0'
 
     implementation 'com.github.EdrowsLuo:osudroidstrings:bd9507b289'
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlJavaExt:d91c53fcff'
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:d91c53fcff'
-    implementation project(path: ':LibBASS')
-    //implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     implementation 'com.intuit.sdp:sdp-android:1.1.0'
     implementation 'com.intuit.ssp:ssp-android:1.1.0'

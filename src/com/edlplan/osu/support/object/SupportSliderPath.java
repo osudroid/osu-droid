@@ -8,8 +8,8 @@ import com.edlplan.framework.utils.advance.StringSplitter;
 
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
+import main.osu.Utils;
+import main.osu.game.GameHelper;
 
 public class SupportSliderPath {
 

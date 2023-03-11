@@ -42,65 +42,11 @@
                 android:layout_toStartOf="@id/tb_userBox"
                 android:src="@drawable/v18_notifications" />
 
-            <!--User box-->
-            <RelativeLayout
+            <com.reco1l.ui.elements.UserBoxView
                 android:id="@+id/tb_userBox"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_toStartOf="@+id/tb_settings"
-                android:background="@color/topBarButtonsBackground">
-
-                <com.edlplan.ui.TriangleEffectView
-                    android:id="@+id/tb_userBoxTriangles"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_alignEnd="@id/tb_userBoxBody"
-                    android:alpha="0.05" />
-
-                <TextView
-                    android:id="@+id/tb_playerRank"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginLeft="@dimen/XS"
-                    android:text="@string/top_bar_offline"
-                    android:textColor="@color/textTertiary"
-                    android:textSize="@dimen/textXL" />
-
-                <LinearLayout
-                    android:id="@+id/tb_userBoxBody"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:paddingHorizontal="@dimen/XL">
-
-                    <TextView
-                        android:id="@+id/tb_playerName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="@dimen/L"
-                        android:maxLength="32"
-                        android:text="Guest"
-                        android:textColor="@color/textPrimary"
-                        android:textSize="@dimen/textM" />
-
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="@dimen/topBarAvatarSize"
-                        android:layout_height="@dimen/topBarAvatarSize"
-                        app:cardCornerRadius="@dimen/topBarAvatarCorners">
-
-                        <ImageView
-                            android:id="@+id/tb_avatar"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/placeholder_avatar" />
-
-                    </androidx.cardview.widget.CardView>
-
-                </LinearLayout>
-
-            </RelativeLayout>
+                android:layout_toStartOf="@+id/tb_settings" />
 
             <LinearLayout
                 android:id="@+id/tb_container"

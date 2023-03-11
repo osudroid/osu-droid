@@ -44,7 +44,7 @@
                         android:src="@drawable/v18_notifications"
                         android:visibility="gone" />
 
-                    <com.reco1l.view.ProgressIndicator
+                    <com.reco1l.view.ProgressIndicatorView
                         android:id="@+id/n_progress"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"

@@ -27,7 +27,7 @@
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true">
 
-        <com.factor.bouncy.BouncyRecyclerView
+        <FrameLayout
             android:id="@+id/sm_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -84,7 +84,6 @@
             </LinearLayout>
 
         </com.factor.bouncy.BouncyNestedScrollView>
-
 
     </RelativeLayout>
 

@@ -1,27 +1,24 @@
 package com.reco1l.ui.custom;
 
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-
 import android.graphics.drawable.ColorDrawable;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 
-import com.reco1l.global.Game;
-import com.reco1l.tables.Res;
-import com.reco1l.tables.ResourceTable;
-import com.reco1l.ui.BaseFragment;
-import com.reco1l.ui.SimpleFragment;
-import com.reco1l.utils.Views;
-import com.reco1l.utils.Views.MarginUtils;
+import com.reco1l.management.resources.ResourceTable;
+import com.reco1l.ui.base.BaseFragment;
+import com.reco1l.ui.base.Layers;
+import com.reco1l.ui.base.SimpleFragment;
+import com.reco1l.tools.Views;
+import com.reco1l.tools.Views.MarginUtils;
 import com.reco1l.view.ButtonView;
 
 import org.jetbrains.annotations.NotNull;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 // Created by Reco1l on 23/7/22 20:43
 
@@ -57,9 +54,10 @@ public class Dialog extends BaseFragment {
         return R.layout.overlay_dialog;
     }
 
+    @NonNull
     @Override
-    protected boolean isOverlay() {
-        return true;
+    protected Layers getLayer() {
+        return Layers.Overlay;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -139,7 +137,7 @@ public class Dialog extends BaseFragment {
         }
 
         if (fragment != null) {
-            Game.platform.transaction()
+            getChildFragmentManager().beginTransaction()
                     .add(mBodyContainer.getId(), fragment)
                     .commit();
         } else {

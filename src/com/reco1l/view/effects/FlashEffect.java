@@ -10,14 +10,15 @@ import android.graphics.Canvas;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.reco1l.global.Game;
-import com.reco1l.utils.Animation;
-import com.reco1l.utils.Animation.UpdateListener;
+import com.reco1l.Game;
+import com.reco1l.framework.drawing.Dimension;
+import com.reco1l.management.Settings;
+import com.reco1l.framework.Animation;
+import com.reco1l.framework.Animation.UpdateListener;
 import com.reco1l.view.RoundLayout;
 
 public class FlashEffect extends RoundLayout {
@@ -61,7 +62,7 @@ public class FlashEffect extends RoundLayout {
     //--------------------------------------------------------------------------------------------//
 
     @Override
-    protected void onLayoutChange(ViewGroup.LayoutParams params) {
+    protected void onDimensionChange(Dimension dimens) {
         mRectWidth = getWidth() / 4f;
 
         LinearGradient left = new LinearGradient(0, 0, mRectWidth, 0, WHITE, TRANSPARENT, CLAMP);
@@ -75,7 +76,7 @@ public class FlashEffect extends RoundLayout {
 
     @Override
     protected void onManagedDraw(Canvas canvas) {
-        if (isInEditMode()) {
+        if (isInEditMode() || !Settings.<Boolean>get("menusEffects", true)) {
             return;
         }
 

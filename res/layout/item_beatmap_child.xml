@@ -37,12 +37,11 @@
                     android:text="00.00"
                     app:icon="@drawable/v10_star" />
 
-                <ImageView
+                <com.caverock.androidsvg.SVGImageView
                     android:id="@+id/bl_mark"
                     android:layout_width="@dimen/beatmapListTrackMarkSize"
                     android:layout_height="@dimen/beatmapListTrackMarkSize"
                     android:layout_marginLeft="@dimen/S"
-                    android:src="@drawable/placeholder_ranking_small"
                     android:visibility="gone" />
 
                 <TextView

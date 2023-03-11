@@ -1,32 +1,25 @@
 package com.reco1l.ui.fragments;
 
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import com.edlplan.ui.TriangleEffectView;
-import com.reco1l.global.Game;
-import com.reco1l.global.UI;
-import com.reco1l.global.Scenes;
-import com.reco1l.scenes.BaseScene;
-import com.reco1l.tables.AnimationTable;
-import com.reco1l.tables.Res;
-import com.reco1l.ui.BaseFragment;
-import com.reco1l.utils.Animation;
+import androidx.annotation.NonNull;
 
-import com.reco1l.utils.helpers.OnlineHelper;
+import com.reco1l.Game;
+import com.reco1l.ui.UI;
+import com.reco1l.ui.base.Layers;
+import com.reco1l.ui.scenes.Scenes;
+import com.reco1l.ui.scenes.BaseScene;
+import com.reco1l.ui.base.BaseFragment;
+import com.reco1l.framework.Animation;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 // Created by Reco1l on 26/6/22 21:20
 
 public final class TopBar extends BaseFragment {
 
     public static final TopBar instance = new TopBar();
-
-    public UserBox userBox;
 
     private View
             mBody,
@@ -41,7 +34,7 @@ public final class TopBar extends BaseFragment {
     //--------------------------------------------------------------------------------------------//
 
     public TopBar() {
-        super(Scenes.selector, Scenes.summary, Scenes.loader, Scenes.listing);
+        super(Scenes.selector, Scenes.summary, Scenes.listing);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -56,21 +49,21 @@ public final class TopBar extends BaseFragment {
         return R.layout.overlay_top_bar;
     }
 
+    @NonNull
     @Override
-    protected boolean isOverlay() {
-        return true;
+    protected Layers getLayer() {
+        return Layers.Overlay;
     }
 
     @Override
     public int getHeight() {
-        return Res.dimen(R.dimen.topBarHeight);
+        return dimen(R.dimen.topBarHeight);
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onLoad() {
-        userBox = new UserBox(this);
 
         mBody = find("body");
         mBackButton = find("back");
@@ -88,12 +81,11 @@ public final class TopBar extends BaseFragment {
                     .play(200);
         });
 
-
         bindTouch(mBackButton, Game.inputManager::performBack);
+        bindTouch(find("userBox"), UI.userProfile::alternate);
         bindTouch(find("settings"), UI.settingsPanel::alternate);
         bindTouch(find("inbox"), UI.notificationCenter::alternate);
 
-        userBox.loadUserData(false);
         handleButtonContainer(Game.engine.getCurrent());
     }
 
@@ -121,7 +113,7 @@ public final class TopBar extends BaseFragment {
     private void handleButtonContainer(BaseScene scene) {
         mButtonsContainer.removeAllViews();
 
-        if (scene == Scenes.main || scene == Scenes.loader) {
+        if (scene == Scenes.main) {
             mBackButton.setVisibility(View.GONE);
         } else {
             mBackButton.setVisibility(View.VISIBLE);
@@ -153,55 +145,5 @@ public final class TopBar extends BaseFragment {
     public boolean show() {
         mIsClosing = false;
         return super.show();
-    }
-
-    //--------------------------------------------------------------------------------------------//
-
-    // TODO [TopBar] Replace this with a custom view
-    @Deprecated
-    public static class UserBox {
-
-        private final TopBar parent;
-        private final ImageView avatar;
-        private final TextView rank, name;
-
-        //----------------------------------------------------------------------------------------//
-
-        public UserBox(TopBar parent) {
-            this.parent = parent;
-
-            View body = parent.find("userBox");
-            rank = parent.find("playerRank");
-            name = parent.find("playerName");
-            avatar = parent.find("avatar");
-
-            TriangleEffectView triangles = parent.find("userBoxTriangles");
-            triangles.setTriangleColor(0xFFFFFFFF);
-
-            parent.bindTouch(body, UI.userProfile::alternate);
-        }
-
-        //----------------------------------------------------------------------------------------//
-
-        public void loadUserData(boolean clear) {
-            if (!parent.isAdded())
-                return;
-
-            AnimationTable.fadeOutIn(avatar, () -> avatar.setImageResource(R.drawable.placeholder_avatar));
-
-            AnimationTable.textChange(rank, Res.str(R.string.top_bar_offline));
-            AnimationTable.textChange(name, Config.getLocalUsername());
-
-            if (Game.onlineManager.isStayOnline() && !clear) {
-                AnimationTable.textChange(name, Game.onlineManager.getUsername());
-                AnimationTable.textChange(rank, "#" + Game.onlineManager.getRank());
-
-                AnimationTable.fadeOutIn(avatar, () -> {
-                    if (OnlineHelper.getPlayerAvatar() != null) {
-                        avatar.setImageDrawable(OnlineHelper.getPlayerAvatar());
-                    }
-                });
-            }
-        }
     }
 }

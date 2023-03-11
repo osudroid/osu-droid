@@ -2,11 +2,10 @@ package com.reco1l;
 
 import android.util.Log;
 
-import com.reco1l.global.Game;
-import com.reco1l.scenes.BaseScene;
-import com.reco1l.utils.Logging;
+import com.reco1l.ui.scenes.BaseScene;
+import com.reco1l.tools.Logging;
 
-import org.anddev.andengine.engine.Engine;
+import org.anddev.andengine.engine.LimitedFPSEngine;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.constants.TimeConstants;
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 
 // Created by Reco1l on 22/6/22 02:20
 
-public final class GameEngine extends Engine {
+public final class GameEngine extends LimitedFPSEngine {
 
     public static GameEngine instance;
 
@@ -30,10 +29,15 @@ public final class GameEngine extends Engine {
     //--------------------------------------------------------------------------------------------//
 
     public GameEngine(EngineOptions pEngineOptions) {
-        super(pEngineOptions);
-        Logging.initOf(getClass());
+        // TODO [GameEngine] Variable frame rate
+        this(pEngineOptions, 1000);
+    }
 
+    public GameEngine(EngineOptions pEngineOptions, int pFramesPerSecond) {
+        super(pEngineOptions, pFramesPerSecond);
         instance = this;
+
+        Logging.initOf(getClass());
         mScenes = new ArrayList<>();
     }
 
@@ -44,7 +48,7 @@ public final class GameEngine extends Engine {
     }
 
     @Override
-    protected void onUpdate(long ns) throws InterruptedException {
+    public void onUpdate(long ns) throws InterruptedException {
         super.onUpdate(ns);
 
         if (mCanUpdate) {
@@ -63,8 +67,8 @@ public final class GameEngine extends Engine {
         }
         Game.timingWrapper.sync();
 
-        synchronized (mScenes) {
-            mScenes.forEach(BaseScene::onResume);
+        if (mCurrentScene != null) {
+            mCurrentScene.onResume();
         }
     }
 
@@ -75,20 +79,27 @@ public final class GameEngine extends Engine {
             return;
         }
 
-        synchronized (mScenes) {
-            mScenes.forEach(BaseScene::onPause);
+        if (mCurrentScene != null) {
+            mCurrentScene.onPause();
+        }
+    }
+
+    public void onWindowFocusChange(boolean isFocus) {
+        if (!mCanUpdate) {
+            return;
+        }
+
+        if (mCurrentScene != null) {
+            mCurrentScene.onWindowFocusChange(isFocus);
         }
     }
 
     public boolean onBackPress() {
         if (mCurrentScene != null) {
-            BaseScene scene = (BaseScene) mCurrentScene;
-
-            if (scene.onBackPress()) {
+            if (mCurrentScene.onBackPress()) {
                 return true;
             }
         }
-
         return backScene();
     }
 
@@ -114,17 +125,18 @@ public final class GameEngine extends Engine {
             throw new NullPointerException("New scene cannot be null!");
         }
 
-        if (newScene == mCurrentScene) {
-            return;
-        }
         Log.i("GameEngine", "Changing scene to " + newScene.getClass().getSimpleName());
 
         if (newScene instanceof BaseScene) {
-            mLastScene = (BaseScene) getScene();
-            mCurrentScene = (BaseScene) newScene;
+            if (mCurrentScene != newScene) {
+                mLastScene = (BaseScene) getScene();
+                mCurrentScene = (BaseScene) newScene;
+            }
 
             if (mCanUpdate) {
-                Game.platform.onSceneChange(mLastScene, mCurrentScene);
+                Game.activity.runOnUiThread(() ->
+                        Game.platform.onSceneChange(mLastScene, mCurrentScene)
+                );
             }
             super.setScene(newScene);
 

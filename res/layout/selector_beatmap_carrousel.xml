@@ -15,7 +15,7 @@
         android:layout_alignParentRight="true"
         android:layout_marginLeft="@dimen/beatmapPanelContentWidth">
 
-        <com.reco1l.view.CarrouselRecyclerView
+        <com.reco1l.ui.scenes.selector.views.CarrouselRecyclerView
             android:id="@+id/bl_recycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -25,7 +25,7 @@
 
     </RelativeLayout>
 
-    <com.reco1l.view.custom.LogoView
+    <com.reco1l.ui.elements.LogoView
         android:id="@+id/bl_logo"
         android:layout_width="@dimen/beatmapListLogoSize"
         android:layout_height="@dimen/beatmapListLogoSize"

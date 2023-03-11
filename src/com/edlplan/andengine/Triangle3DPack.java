@@ -9,7 +9,7 @@ import org.anddev.andengine.opengl.vertex.VertexBuffer;
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
 
-import ru.nsu.ccfit.zuev.osu.polygon.PolygonVertexBuffer;
+import main.osu.polygon.PolygonVertexBuffer;
 
 public class Triangle3DPack extends Shape {
 
