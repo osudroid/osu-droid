@@ -1,37 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- <string-array name="bg_brightness_names">
-        <item>100%</item>
-        <item>75%</item>
-        <item>50%</item>
-        <item>25%</item>
-        <item>0%</item>
-    </string-array>
-    <string-array name="bg_brightness_values">
-        <item>100</item>
-        <item>75</item>
-        <item>50</item>
-        <item>25</item>
-        <item>0</item>
-    </string-array> -->
-    <string-array name="error_meter_display_names">
-        <item>Always</item>
-        <item>Replay Only</item>
-        <item>Disable</item>
-    </string-array>
-    <string-array name="error_meter_display_values">
-        <item>1</item>
-        <item>2</item>
-        <item>0</item>
-    </string-array>
-    <string-array name="spinner_style_names">
-        <item>Modern</item>
-        <item>Classical</item>
-    </string-array>
-    <string-array name="spinner_style_values">
-        <item>1</item>
-        <item>0</item>
-    </string-array>
     <string-array name="metronome_switch_names">
         <item>Off</item>
         <item>NightCore Mode Only</item>

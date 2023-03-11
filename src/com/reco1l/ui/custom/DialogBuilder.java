@@ -4,7 +4,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
-import com.reco1l.ui.SimpleFragment;
+import com.reco1l.ui.base.SimpleFragment;
 import com.reco1l.ui.custom.Dialog.Button;
 
 import java.util.ArrayList;

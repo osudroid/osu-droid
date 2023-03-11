@@ -2,7 +2,7 @@ package com.reco1l.data.adapters;
 
 // Created by Reco1l on 18/9/22 00:01
 
-import static com.reco1l.data.BitmapPool.*;
+import static com.reco1l.framework.bitmaps.BitmapQueue.*;
 import static com.reco1l.data.adapters.BeatmapListAdapter.*;
 
 import android.graphics.Bitmap;
@@ -15,38 +15,41 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.reco1l.data.BitmapPool;
-import com.reco1l.global.Game;
-import com.reco1l.global.UI;
+import com.reco1l.management.Settings;
+import com.reco1l.framework.bitmaps.BitmapQueue;
+import com.reco1l.Game;
+import com.reco1l.ui.UI;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
-import com.reco1l.global.Scenes;
-import com.reco1l.tables.DialogTable;
+import com.reco1l.ui.scenes.Scenes;
+import com.reco1l.data.DialogTable;
 import com.reco1l.ui.custom.ContextMenu;
 import com.reco1l.ui.custom.ContextMenuBuilder;
 import com.reco1l.ui.custom.Dialog;
 import com.reco1l.ui.custom.DialogBuilder;
-import com.reco1l.utils.Animation;
-import com.reco1l.utils.Dimension;
-import com.reco1l.utils.TouchListener;
-import com.reco1l.view.CarrouselRecyclerView;
-import com.reco1l.utils.helpers.BeatmapHelper;
+import com.reco1l.framework.Animation;
+import com.reco1l.framework.drawing.Dimension;
+import com.reco1l.framework.input.TouchListener;
+import com.reco1l.ui.scenes.selector.views.CarrouselRecyclerView;
+import com.reco1l.tools.helpers.BeatmapHelper;
 
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.BeatmapInfo;
+import main.osu.BeatmapProperties;
+
+import com.reco1l.view.BadgeTextView;
+import com.rimu.R;
 
 public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapInfo> {
 
-    private final BitmapPool mBackgroundPool;
+    private final BitmapQueue mBackgroundPool;
 
     //--------------------------------------------------------------------------------------------//
 
     public BeatmapListAdapter(ArrayList<BeatmapInfo> list) {
         super(list);
-        mBackgroundPool = new BitmapPool();
+        mBackgroundPool = new BitmapQueue();
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -66,17 +69,17 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
     public static class BeatmapViewHolder extends BaseViewHolder<BeatmapInfo> implements BitmapCallback {
 
 
-        private final BitmapPool mBackgroundPool;
+        private final BitmapQueue mBackgroundPool;
         private final TrackListAdapter mTrackAdapter;
 
         private final View mBody;
         private final ImageView mBackground;
+        private final BadgeTextView mMapper;
         private final CarrouselRecyclerView mTrackList;
 
         private final TextView
                 mTitle,
-                mArtist,
-                mMapper;
+                mArtist;
 
         private Bitmap mBitmap;
         private QueueItem mQueueItem;
@@ -84,7 +87,7 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
 
         //----------------------------------------------------------------------------------------//
 
-        private BeatmapViewHolder(@NonNull View root, BitmapPool backgroundPool) {
+        private BeatmapViewHolder(@NonNull View root, BitmapQueue backgroundPool) {
             super(root);
             mBackgroundPool = backgroundPool;
 
@@ -133,7 +136,7 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
 
         @Override
         protected void onAttachmentChange(boolean isAttached) {
-            if (mBitmap != null) {
+            if (mBitmap != null || !Settings.<Boolean>get("itemBackground", true)) {
                 return;
             }
 
@@ -192,6 +195,10 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
             ContextMenuBuilder builder = new ContextMenuBuilder(pPosition)
                     .addItem(new ContextMenu.Item() {
 
+                        public boolean closeOnClick() {
+                            return false;
+                        }
+
                         public String getText() {
                             if (mProperties.isFavorite()) {
                                 return "Remove from favorites";
@@ -215,7 +222,11 @@ public class BeatmapListAdapter extends BaseAdapter<BeatmapViewHolder, BeatmapIn
 
                         DialogBuilder dialog = new DialogBuilder("Delete Beatmap")
                                 .setMessage("Are you sure you want to delete this beatmap?")
-                                .addButton("Yes", d -> Game.libraryManager.deleteMap(item))
+                                .addButton("Yes", d -> {
+                                    Game.libraryManager.deleteMap(item);
+                                    Scenes.selector.random();
+                                    d.close();
+                                })
                                 .addCloseButton();
 
                         new Dialog(dialog).show();

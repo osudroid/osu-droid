@@ -1,18 +1,19 @@
 package com.reco1l.ui.fragments;
 
-import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.reco1l.scenes.BaseScene;
-import com.reco1l.ui.BaseFragment;
+import androidx.annotation.NonNull;
+
+import com.reco1l.ui.base.Layers;
+import com.reco1l.ui.scenes.BaseScene;
+import com.reco1l.ui.base.BaseFragment;
 
 import im.delight.android.webview.AdvancedWebView;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public class WebViewFragment extends BaseFragment implements AdvancedWebView.Listener {
 
@@ -49,9 +50,10 @@ public class WebViewFragment extends BaseFragment implements AdvancedWebView.Lis
         return true;
     }
 
+    @NonNull
     @Override
-    protected boolean isOverlay() {
-        return true;
+    protected Layers getLayer() {
+        return Layers.Overlay;
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -89,9 +91,8 @@ public class WebViewFragment extends BaseFragment implements AdvancedWebView.Lis
 
     //--------------------------------------------------------------------------------------------//
 
-    public WebViewFragment setLockToHostname(boolean bool) {
+    public void setLockToHostname(boolean bool) {
         mLockHostname = bool;
-        return this;
     }
 
     //--------------------------------------------------------------------------------------------//

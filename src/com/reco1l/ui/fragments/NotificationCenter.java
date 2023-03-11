@@ -6,24 +6,25 @@ import static com.reco1l.data.adapters.NotificationListAdapter.ViewHolder;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.edlplan.framework.easing.Easing;
 import com.factor.bouncy.BouncyRecyclerView;
-import com.reco1l.data.Notification;
+import com.reco1l.ui.base.Layers;
+import com.reco1l.ui.custom.Notification;
 import com.reco1l.data.adapters.NotificationListAdapter;
-import com.reco1l.global.Game;
-import com.reco1l.global.Scenes;
-import com.reco1l.global.UI;
-import com.reco1l.ui.BaseFragment;
-import com.reco1l.utils.Animation;
-import com.reco1l.utils.Views;
+import com.reco1l.Game;
+import com.reco1l.ui.UI;
+import com.reco1l.ui.base.BaseFragment;
+import com.reco1l.framework.Animation;
+import com.reco1l.tools.Views;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 // Created by Reco1l on 27/6/22 17:17
 
@@ -71,9 +72,10 @@ public final class NotificationCenter extends BaseFragment {
         return R.layout.extra_notification_center;
     }
 
+    @NonNull
     @Override
-    protected boolean isOverlay() {
-        return true;
+    protected Layers getLayer() {
+        return Layers.Overlay;
     }
 
     @Override
@@ -271,14 +273,10 @@ public final class NotificationCenter extends BaseFragment {
             return 8000;
         }
 
+        @NonNull
         @Override
-        protected boolean getConditionToShow() {
-            return Game.engine.getScene() != Scenes.player;
-        }
-
-        @Override
-        protected boolean isOverlay() {
-            return true;
+        protected Layers getLayer() {
+            return Layers.Overlay;
         }
 
         //----------------------------------------------------------------------------------------//

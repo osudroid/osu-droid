@@ -14,8 +14,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.helper.QualityFileBitmapSource;
+import main.osu.GlobalManager;
+import main.osu.helper.QualityFileBitmapSource;
 
 public class TextureHelper {
 

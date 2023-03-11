@@ -5,8 +5,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/backgroundDimmed">
+    android:layout_height="match_parent">
 
     <com.factor.bouncy.BouncyNestedScrollView
         android:layout_width="match_parent"
@@ -154,7 +153,7 @@
                             android:layout_marginTop="@dimen/XL">
 
                             <!--300-->
-                            <com.reco1l.view.custom.StatisticLayout
+                            <com.reco1l.ui.scenes.summary.views.StatisticView
                                 android:id="@+id/gr_300"
                                 android:layout_width="@dimen/_70sdp"
                                 android:layout_height="wrap_content"
@@ -163,7 +162,7 @@
                                 app:badgeText="great"
                                 app:badgeTextColor="#64B6FD" />
 
-                            <com.reco1l.view.custom.StatisticLayout
+                            <com.reco1l.ui.scenes.summary.views.StatisticView
                                 android:id="@+id/gr_100"
                                 android:layout_width="@dimen/_70sdp"
                                 android:layout_height="wrap_content"
@@ -172,7 +171,7 @@
                                 app:badgeText="good"
                                 app:badgeTextColor="#64FD6C" />
 
-                            <com.reco1l.view.custom.StatisticLayout
+                            <com.reco1l.ui.scenes.summary.views.StatisticView
                                 android:id="@+id/gr_50"
                                 android:layout_width="@dimen/_70sdp"
                                 android:layout_height="wrap_content"
@@ -181,7 +180,7 @@
                                 app:badgeText="meh"
                                 app:badgeTextColor="#FDE964" />
 
-                            <com.reco1l.view.custom.StatisticLayout
+                            <com.reco1l.ui.scenes.summary.views.StatisticView
                                 android:id="@+id/gr_0"
                                 android:layout_width="@dimen/_70sdp"
                                 android:layout_height="wrap_content"
@@ -197,7 +196,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/M">
 
-                            <com.reco1l.view.custom.StatisticLayout
+                            <com.reco1l.ui.scenes.summary.views.StatisticView
                                 android:id="@+id/gr_accuracy"
                                 android:layout_width="@dimen/_90sdp"
                                 android:layout_height="wrap_content"
@@ -205,7 +204,7 @@
                                 android:text="100.00%"
                                 app:badgeText="accuracy" />
 
-                            <com.reco1l.view.custom.StatisticLayout
+                            <com.reco1l.ui.scenes.summary.views.StatisticView
                                 android:id="@+id/gr_combo"
                                 android:layout_width="@dimen/_90sdp"
                                 android:layout_height="wrap_content"
@@ -214,7 +213,7 @@
                                 app:badgeText="max combo" />
 
                             <!--PP-->
-                            <com.reco1l.view.custom.StatisticLayout
+                            <com.reco1l.ui.scenes.summary.views.StatisticView
                                 android:id="@+id/gr_pp"
                                 android:layout_width="@dimen/_90sdp"
                                 android:layout_height="wrap_content"
@@ -246,12 +245,11 @@
                                 android:gravity="right"
                                 android:orientation="horizontal" />
 
-                            <ImageView
+                            <com.caverock.androidsvg.SVGImageView
                                 android:id="@+id/gr_markIv"
                                 android:layout_width="@dimen/gameResultsMarkSize"
                                 android:layout_height="@dimen/gameResultsMarkSize"
-                                android:layout_margin="@dimen/M"
-                                android:src="@drawable/placeholder_ranking" />
+                                android:layout_margin="@dimen/M" />
 
                         </LinearLayout>
 

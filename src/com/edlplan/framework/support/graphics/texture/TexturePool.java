@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.helper.QualityFileBitmapSource;
+import main.osu.GlobalManager;
+import main.osu.helper.QualityFileBitmapSource;
 
 public class TexturePool {
 

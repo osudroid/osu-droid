@@ -6,6 +6,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     tools:background="#FFF">
 
@@ -65,11 +66,12 @@
                         android:text="by artist"
                         android:textColor="@color/textSecondary" />
 
-                    <TextView
+                    <com.reco1l.view.BadgeTextView
                         android:id="@+id/bl_mapper"
-                        style="@style/propertyBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
-                        android:drawableStart="@drawable/v10_person"
+                        app:icon="@drawable/v10_person"
                         android:text="mapper" />
 
                 </RelativeLayout>
@@ -80,7 +82,7 @@
 
     </com.reco1l.view.RoundLayout>
 
-    <com.reco1l.view.CarrouselRecyclerView
+    <com.reco1l.ui.scenes.selector.views.CarrouselRecyclerView
         android:id="@+id/bl_trackList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

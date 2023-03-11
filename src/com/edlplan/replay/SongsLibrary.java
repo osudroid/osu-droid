@@ -3,7 +3,7 @@ package com.edlplan.replay;
 import java.io.File;
 import java.util.HashMap;
 
-import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
+import main.osu.helper.FileUtils;
 
 public class SongsLibrary {
 

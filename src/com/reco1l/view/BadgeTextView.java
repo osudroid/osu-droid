@@ -19,10 +19,10 @@ import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 
 import com.reco1l.annotation.Size;
-import com.reco1l.utils.Views;
-import com.reco1l.utils.Views.MarginUtils;
+import com.reco1l.tools.Views;
+import com.reco1l.tools.Views.MarginUtils;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 // Written by Reco1l
 
@@ -109,7 +109,7 @@ public class BadgeTextView extends RoundLayout {
 
     private void handleSize(int text, int radius, int vertical, int horizontal) {
         mTextView.setTextSize(COMPLEX_UNIT_PX, sdp(text));
-        setRadius(sdp(radius));
+        setRadius(radius);
 
         Views.padding(mLayout)
                 .vertical(sdp(vertical))

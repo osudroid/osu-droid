@@ -1,2 +1,3 @@
 include ':AndEngine', ':LibBASS'
 include ':andnext_markdown'
+include ':androidsvg'

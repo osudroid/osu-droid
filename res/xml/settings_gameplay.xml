@@ -3,10 +3,10 @@
 <!-- Created by Reco1l on 18/7/22 23:13 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:key="pref_gameplay">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory
+        android:key="pref_gameplay"
         android:layout="@layout/custom_preference_category_big"
         android:title="Gameplay" />
 
@@ -17,6 +17,14 @@
             android:key="bgbrightness"
             android:title="@string/opt_bgbrightness_title"
             app:min="1"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:defaultValue="25"
+            android:key="bgBlur"
+            android:max="100"
+            android:title="Background blur"
+            app:min="0"
             app:showSeekBarValue="true" />
 
         <com.reco1l.preference.CheckPreference
@@ -66,22 +74,27 @@
 
     <PreferenceCategory android:title="HUD">
 
+        <com.reco1l.preference.SliderPreference
+            android:defaultValue="100"
+            android:key="hudScale"
+            android:max="200"
+            android:min="50"
+            android:title="HUD scaling" />
+
         <com.reco1l.preference.CheckPreference
-            android:defaultValue="false"
-            android:key="hideInGameUI"
-            android:title="@string/opt_hide_ingame_ui_title" />
+            android:defaultValue="true"
+            android:key="showHUD"
+            android:title="Show in-game HUD" />
 
         <com.reco1l.preference.CheckPreference
             android:defaultValue="false"
-            android:key="hideReplayMarquee"
-            android:title="@string/opt_hide_replay_marquee_title" />
+            android:key="showLeaderboard"
+            android:title="Show in-game leaderboard" />
 
-        <ListPreference
-            android:defaultValue="0"
-            android:entries="@array/error_meter_display_names"
-            android:entryValues="@array/error_meter_display_values"
-            android:key="errormeter"
-            android:title="@string/opt_error_meter_display_title" />
+        <com.reco1l.preference.CheckPreference
+            android:defaultValue="true"
+            android:key="showMeter"
+            android:title="Show error meter" />
 
     </PreferenceCategory>
 
