@@ -5,7 +5,7 @@ import com.rian.difficultycalculator.evaluators.rimu.RimuRhythmEvaluator;
 
 import java.util.EnumSet;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import main.osu.game.mods.GameMod;
 
 /**
  * Represents the skill required to properly follow a beatmap's rhythm.

@@ -7,7 +7,7 @@ import com.rian.difficultycalculator.math.MathUtils;
 import com.rian.difficultycalculator.utils.RimuHitWindowConverter;
 import com.rian.difficultycalculator.utils.StandardHitWindowConverter;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import main.osu.game.mods.GameMod;
 
 public class RimuPerformanceCalculator extends PerformanceCalculator {
     public static final double finalMultiplier = 1.24;

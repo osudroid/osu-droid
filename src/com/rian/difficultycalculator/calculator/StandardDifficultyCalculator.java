@@ -13,7 +13,7 @@ import com.rian.difficultycalculator.utils.StandardHitWindowConverter;
 
 import java.util.EnumSet;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import main.osu.game.mods.GameMod;
 
 /**
  * A difficulty calculator for osu!standard.

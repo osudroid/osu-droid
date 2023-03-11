@@ -4,7 +4,7 @@ import com.rian.difficultycalculator.beatmap.hitobject.DifficultyHitObject;
 
 import java.util.EnumSet;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import main.osu.game.mods.GameMod;
 
 /**
  * A bare minimal abstract skill for fully custom skill implementations.

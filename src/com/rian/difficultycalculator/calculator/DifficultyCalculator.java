@@ -10,8 +10,6 @@ import com.rian.difficultycalculator.utils.GameMode;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-
 /**
  * A difficulty calculator for calculating star rating.
  */

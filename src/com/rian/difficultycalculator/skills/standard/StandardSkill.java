@@ -7,7 +7,7 @@ import com.rian.difficultycalculator.skills.StrainSkill;
 import java.util.EnumSet;
 import java.util.List;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import main.osu.game.mods.GameMod;
 
 
 /**

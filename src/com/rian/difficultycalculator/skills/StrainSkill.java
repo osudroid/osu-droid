@@ -5,7 +5,7 @@ import com.rian.difficultycalculator.beatmap.hitobject.DifficultyHitObject;
 import java.util.ArrayList;
 import java.util.EnumSet;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import main.osu.game.mods.GameMod;
 
 /**
  * Used to processes strain values of difficulty hit objects, keep track of strain levels caused by
