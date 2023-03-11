@@ -5,16 +5,16 @@ import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
-import com.reco1l.global.Game;
-import com.reco1l.utils.helpers.BeatmapHelper;
+import com.reco1l.Game;
+import com.reco1l.tools.helpers.BeatmapHelper;
 
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import main.osu.BeatmapInfo;
+import main.osu.TrackInfo;
 
 public class BeatmapCollection {
 
@@ -211,6 +211,10 @@ public class BeatmapCollection {
 
     //--------------------------------------------------------------------------------------------//
 
+    public int indexOf(BeatmapInfo beatmap) {
+        return mList.indexOf(beatmap);
+    }
+
     public ArrayList<BeatmapInfo> getList() {
         return mList;
     }
@@ -233,7 +237,7 @@ public class BeatmapCollection {
         Log.i("BeatmapCollection", "Library has been updated");
     }
 
-    public void notifyChange() {
+    private void notifyChange() {
         mListeners.forEach(listener -> listener.onLibraryChange(mList));
     }
 

@@ -13,7 +13,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public class FieldPreference extends Preference {
 
@@ -142,7 +142,15 @@ public class FieldPreference extends Preference {
 
     public void setText(String text) {
         if (mEditText != null) {
+            mEditText.removeTextChangedListener(mTextWatcher);
             mEditText.setText(text);
+            mEditText.addTextChangedListener(mTextWatcher);
+        }
+    }
+
+    public void setValue(String value) {
+        if (mEditText != null) {
+            mEditText.setText(value);
         }
     }
 

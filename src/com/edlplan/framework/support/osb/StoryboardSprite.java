@@ -26,7 +26,7 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import java.io.File;
 import java.util.HashMap;
 
-import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
+import main.osu.helper.FileUtils;
 
 public class StoryboardSprite extends SupportSprite {
 

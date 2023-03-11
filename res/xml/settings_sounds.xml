@@ -3,10 +3,10 @@
 <!-- Created by Reco1l on 18/7/22 23:35 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:key="pref_sounds">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory
+        android:key="pref_sounds"
         android:layout="@layout/custom_preference_category_big"
         android:title="Sounds" />
 

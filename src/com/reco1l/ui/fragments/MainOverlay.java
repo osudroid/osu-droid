@@ -1,13 +1,22 @@
 package com.reco1l.ui.fragments;
 
-import com.reco1l.global.Scenes;
-import com.reco1l.ui.BaseFragment;
+import android.view.View;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import androidx.annotation.NonNull;
+
+import com.reco1l.ui.base.Layers;
+import com.reco1l.ui.scenes.Scenes;
+import com.reco1l.ui.scenes.BaseScene;
+import com.reco1l.ui.base.BaseFragment;
+import com.reco1l.ui.elements.FPSBadgeView;
+
+import com.rimu.R;
 
 public final class MainOverlay extends BaseFragment {
 
     public static final MainOverlay instance = new MainOverlay();
+
+    private FPSBadgeView mFPSText;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -27,15 +36,29 @@ public final class MainOverlay extends BaseFragment {
         return "mo";
     }
 
+    @NonNull
     @Override
-    protected boolean isOverlay() {
-        return true;
+    protected Layers getLayer() {
+        return Layers.Overlay;
     }
 
     //--------------------------------------------------------------------------------------------//
 
     @Override
     protected void onLoad() {
+        mFPSText = find("fps");
+    }
 
+    @Override
+    protected void onSceneChange(BaseScene oldScene, BaseScene newScene) {
+        if (!isLoaded()) {
+            return;
+        }
+
+        if (newScene == Scenes.player) {
+            mFPSText.setVisibility(View.GONE);
+        } else {
+            mFPSText.setVisibility(View.VISIBLE);
+        }
     }
 }

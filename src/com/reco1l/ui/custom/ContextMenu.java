@@ -7,19 +7,20 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.factor.bouncy.BouncyRecyclerView;
-import com.reco1l.global.Game;
-import com.reco1l.tables.Res;
-import com.reco1l.ui.BaseFragment;
-import com.reco1l.utils.Animation;
-import com.reco1l.utils.Views;
+import com.reco1l.Game;
+import com.reco1l.ui.base.BaseFragment;
+import com.reco1l.ui.base.Layers;
+import com.reco1l.framework.Animation;
+import com.reco1l.tools.Views;
 
 import com.reco1l.data.adapters.ContextMenuAdapter;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public class ContextMenu extends BaseFragment {
 
@@ -42,20 +43,21 @@ public class ContextMenu extends BaseFragment {
 
     //--------------------------------------------------------------------------------------------//
 
+    @NonNull
     @Override
-    protected boolean isOverlay() {
-        return true;
+    protected Layers getLayer() {
+        return Layers.Overlay;
     }
 
-    @Override
+    /*@Override
     protected boolean isExtra() {
         return true;
-    }
+    }*/
 
     @Override
     protected View getRootView() {
         RelativeLayout layout = new RelativeLayout(getContext());
-        layout.setElevation(dimen(R.dimen.top_layer));
+        layout.setElevation(sdp(3));
         layout.setLayoutParams(Views.match_parent);
 
         View view = new View(getContext());
@@ -65,8 +67,8 @@ public class ContextMenu extends BaseFragment {
 
         mBody = new CardView(Game.activity);
 
-        mBody.setCardBackgroundColor(Res.color(R.color.backgroundSecondary));
-        mBody.setRadius(Res.dimen(R.dimen.app_corners));
+        mBody.setCardBackgroundColor(color(R.color.backgroundPrimary));
+        mBody.setRadius(dimen(R.dimen.app_corners));
         mBody.setAlpha(0);
         layout.addView(mBody);
 
@@ -83,7 +85,7 @@ public class ContextMenu extends BaseFragment {
     protected void onLoad() {
         fixLocation();
         if (mAdapter == null) {
-            mAdapter = new ContextMenuAdapter(mBuilder.items);
+            mAdapter = new ContextMenuAdapter(mBuilder.items, this);
         }
         mRecyclerView.setAdapter(mAdapter);
 
@@ -152,8 +154,14 @@ public class ContextMenu extends BaseFragment {
 
         public abstract void onClick(TextView view);
 
+        //----------------------------------------------------------------------------------------//
+
         public boolean isSelectable() {
             return false;
+        }
+
+        public boolean closeOnClick() {
+            return true;
         }
     }
 

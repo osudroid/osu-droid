@@ -7,109 +7,39 @@
     xmlns:tool="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:translationZ="@dimen/middle_layer"
-    android:background="@color/beatmapPanelBackground">
+    android:translationZ="@dimen/middle_layer">
 
-    <View
-        android:id="@+id/background"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <com.reco1l.view.custom.TiltedLayout
+    <com.factor.bouncy.BouncyNestedScrollView
         android:id="@+id/bp_body"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:background="#1E000000">
+        android:layout_width="@dimen/beatmapPanelContentWidth"
+        android:layout_height="match_parent">
 
-        <com.factor.bouncy.BouncyNestedScrollView
-            android:id="@+id/bp_panel"
-            android:layout_width="@dimen/beatmapPanelContentWidth"
-            android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <LinearLayout
+            <include layout="@layout/layout_beatmap_card" />
+
+            <com.reco1l.view.RoundLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/XS"
+                android:background="@color/backgroundSecondary"
+                android:orientation="vertical"
+                app:type="linear">
 
-                <include layout="@layout/layout_beatmap_card" />
+                <com.reco1l.view.TabSelectorView
+                    android:id="@+id/bp_tabs"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_36sdp"
+                    android:layout_marginHorizontal="@dimen/M"
+                    app:tabs="Local|Global" />
 
-                <LinearLayout
+                <com.reco1l.view.RoundLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_horizontal">
-
-                    <RelativeLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="@dimen/beatmapPanelTabLayoutHeight"
-                        android:layout_marginVertical="@dimen/S"
-                        android:background="@drawable/shape_rounded"
-                        android:backgroundTint="@color/beatmapPanelTabBackground"
-                        android:gravity="center_horizontal">
-
-                        <View
-                            android:id="@+id/bp_tabIndicator"
-                            android:layout_width="@dimen/beatmapPanelTabButtonWidth"
-                            android:layout_height="match_parent"
-                            android:alpha="0.2"
-                            android:background="@drawable/shape_rounded"
-                            android:backgroundTint="#FFFFFF" />
-
-                        <TextView
-                            android:id="@+id/bp_localTab"
-                            style="@style/text"
-                            android:layout_width="@dimen/beatmapPanelTabButtonWidth"
-                            android:layout_height="match_parent"
-                            android:background="@drawable/shape_rounded"
-                            android:gravity="center"
-                            android:text="Local"
-                            android:textSize="@dimen/textS" />
-
-                        <TextView
-                            android:id="@+id/bp_globalTab"
-                            style="@style/text"
-                            android:layout_width="@dimen/beatmapPanelTabButtonWidth"
-                            android:layout_height="match_parent"
-                            android:layout_toEndOf="@+id/bp_localTab"
-                            android:background="@drawable/shape_rounded"
-                            android:gravity="center"
-                            android:text="Global"
-                            android:textSize="@dimen/textS" />
-
-                    </RelativeLayout>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/bp_pageContainer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:id="@+id/bp_messageLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:padding="@dimen/XXL"
-                        android:visibility="gone">
-
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerHorizontal="true"
-                            android:src="@drawable/v28_info"
-                            app:tint="@color/textSecondary" />
-
-                        <TextView
-                            android:id="@+id/bp_messageTv"
-                            style="@style/text"
-                            android:layout_marginTop="@dimen/XS"
-                            android:gravity="center"
-                            android:text="@string/beatmap_panel_offline_prompt"
-                            android:textColor="@color/textSecondary" />
-
-                    </LinearLayout>
+                    android:background="@color/backgroundPrimary">
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/bp_scoreboard"
@@ -118,12 +48,21 @@
                         tool:itemCount="1"
                         tool:listitem="@layout/item_score" />
 
-                </LinearLayout>
+                    <com.reco1l.view.AlertBoxView
+                        android:id="@+id/bp_alert"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:alpha="0"
+                        android:paddingVertical="@dimen/M"
+                        android:src="@drawable/v28_info"
+                        android:text="No scores found!" />
 
-            </LinearLayout>
+                </com.reco1l.view.RoundLayout>
 
-        </com.factor.bouncy.BouncyNestedScrollView>
+            </com.reco1l.view.RoundLayout>
 
-    </com.reco1l.view.custom.TiltedLayout>
+        </LinearLayout>
+
+    </com.factor.bouncy.BouncyNestedScrollView>
 
 </RelativeLayout>

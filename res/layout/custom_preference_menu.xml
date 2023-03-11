@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="@dimen/M"
+    android:paddingRight="@dimen/M"
+    tools:background="@color/backgroundSecondary">
+
+    <LinearLayout
+        android:id="@+id/pref_reset"
+        android:layout_width="@dimen/M"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/pref_main_layout"
+        android:layout_alignBottom="@id/pref_main_layout"
+        android:alpha="0"
+        android:gravity="center"
+        android:paddingHorizontal="@dimen/XS"
+        android:paddingVertical="@dimen/XXS">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:cardBackgroundColor="@color/textTertiary"
+            app:cardCornerRadius="@dimen/app_corners" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/pref_main_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/M"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@android:id/title"
+            style="@style/text"
+            android:layout_width="match_parent"
+            tools:text="title" />
+
+        <com.reco1l.view.RoundLayout
+            android:id="@+id/pref_menu_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/M"
+            android:background="#1F000000"
+            android:paddingVertical="@dimen/S"
+            android:paddingHorizontal="@dimen/M"
+            app:radius="10">
+
+            <TextView
+                android:id="@+id/pref_selected"
+                style="@style/text"
+                android:text="selected option" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:src="@drawable/v14_arrow" />
+
+        </com.reco1l.view.RoundLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

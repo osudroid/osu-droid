@@ -7,9 +7,9 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/scoreboardItemHeight"
     android:layout_marginBottom="@dimen/XXS"
-    android:paddingHorizontal="@dimen/XS"
+    android:paddingRight="@dimen/XS"
     android:paddingVertical="@dimen/XXS"
-    android:background="@color/backgroundPrimary">
+    android:background="#14000000">
 
     <TextView
         android:id="@+id/sb_rank"
@@ -31,7 +31,7 @@
         android:src="@drawable/placeholder_avatar"
         app:shapeAppearanceOverlay="@style/avatar_shape" />
 
-    <ImageView
+    <com.caverock.androidsvg.SVGImageView
         android:id="@+id/sb_mark"
         android:layout_width="@dimen/scoreboardItemMarkSize"
         android:layout_height="@dimen/scoreboardItemMarkSize"

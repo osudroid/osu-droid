@@ -5,14 +5,14 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
-import com.reco1l.global.UI;
+import com.reco1l.ui.UI;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
-import com.reco1l.data.Notification;
+import com.reco1l.ui.custom.Notification;
 
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
+import com.rimu.R;
 
 public class NotificationListAdapter extends BaseAdapter<NotificationListAdapter.ViewHolder, Notification> {
 

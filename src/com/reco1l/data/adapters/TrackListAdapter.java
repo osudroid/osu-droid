@@ -6,28 +6,28 @@ import static com.reco1l.data.adapters.TrackListAdapter.*;
 
 import android.graphics.drawable.ColorDrawable;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.reco1l.global.Game;
-import com.reco1l.global.UI;
+import com.caverock.androidsvg.SVGImageView;
+import com.reco1l.Game;
+import com.reco1l.ui.UI;
 import com.reco1l.data.BaseAdapter;
 import com.reco1l.data.BaseViewHolder;
-import com.reco1l.global.Scenes;
-import com.reco1l.utils.Animation;
-import com.reco1l.utils.Views;
-import com.reco1l.utils.helpers.BeatmapHelper;
+import com.reco1l.ui.scenes.Scenes;
+import com.reco1l.framework.Animation;
+import com.reco1l.tools.Views;
+import com.reco1l.tools.helpers.BeatmapHelper;
 import com.reco1l.view.BadgeTextView;
 import com.reco1l.view.RoundLayout;
 import com.reco1l.view.effects.StripsEffect;
 
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import main.osu.TrackInfo;
+import main.osu.game.GameHelper;
+import com.rimu.R;
 
 public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
 
@@ -55,7 +55,7 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
 
         private final RoundLayout mBody;
 
-        private final ImageView mMarkImage;
+        private final SVGImageView mMarkImage;
         private final TextView mDifficultyText;
         private final BadgeTextView mStarsText;
 
@@ -75,7 +75,6 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
 
             UI.beatmapCarrousel.bindTouch(mBody, () -> {
                 if(!select()) {
-                    Game.musicManager.stop();
                     Game.resourcesManager.getSound("menuhit").play();
                     Scenes.player.startGame(item, null);
                 } else {
@@ -96,10 +95,10 @@ public class TrackListAdapter extends BaseAdapter<TrackViewHolder, TrackInfo> {
             int color = BeatmapHelper.Palette.getColor(sr);
             int textColor = BeatmapHelper.Palette.getTextColor(sr);
 
-            String markTex = Game.scoreLibrary.getBestMark(item.getFilename());
+            String mark = Game.scoreLibrary.getBestMark(item.getFilename());
 
-            if (markTex != null) {
-                mMarkImage.setImageBitmap(Game.bitmapManager.get("ranking-" + markTex));
+            if (mark != null) {
+                mMarkImage.setImageAsset("svg/ranking-" + mark + ".svg");
                 mMarkImage.setVisibility(View.VISIBLE);
             }
 

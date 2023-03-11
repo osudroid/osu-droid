@@ -10,9 +10,7 @@ import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
-import javax.microedition.khronos.opengles.GL10;
-
-import ru.nsu.ccfit.zuev.osu.RGBColor;
+import main.osu.RGBColor;
 
 public class SliderBody2D extends AbstractSliderBody {
 

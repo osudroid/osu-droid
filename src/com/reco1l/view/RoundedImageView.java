@@ -1,6 +1,7 @@
 package com.reco1l.view;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -32,7 +33,8 @@ public class RoundedImageView extends RoundLayout {
 
     @Override
     protected void onCreate() {
-        mImage = new ImageView(getContext(), attrs, defStyleAttr, defStyleRes);
+        mImage = new ImageView(getContext(), attrs, defStyleAttr);
+        mImage.setPadding(0, 0, 0, 0);
         addView(mImage, getInitialLayoutParams());
 
         post(() -> matchSize(mImage));
@@ -47,6 +49,14 @@ public class RoundedImageView extends RoundLayout {
 
     public void setImageDrawable(Drawable drw) {
         mImage.setImageDrawable(drw);
+    }
+
+    public void setImageBitmap(Bitmap bm) {
+        mImage.setImageBitmap(bm);
+    }
+
+    public void setImageResource(int resource) {
+        mImage.setImageResource(resource);
     }
 
     @Override

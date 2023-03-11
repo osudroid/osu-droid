@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="ru.nsu.ccfit.zuev.osuplus"
-      android:installLocation="auto">
+    package="com.rimu"
+    android:installLocation="auto">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
     <uses-permission android:name="android.permission.READ_LOGS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
     <application
+        android:name="main.audio.serviceAudio.SaveServiceObject"
+        android:allowAudioPlaybackCapture="true"
         android:icon="@mipmap/ic_launcher"
+        android:isGame="true"
         android:label="@string/app_name"
         android:largeHeap="true"
-        android:isGame="true"
-        android:allowAudioPlaybackCapture="true"
         android:requestLegacyExternalStorage="true"
         android:resizeableActivity="false"
-        android:name="ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject"
         tools:ignore="UnusedAttribute">
-        <service android:name="ru.nsu.ccfit.zuev.audio.serviceAudio.SongService"/>
+        <service android:name="main.audio.serviceAudio.SongService" />
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/v_app_icon"/>
+            android:resource="@drawable/v_app_icon" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/accent"/>
+            android:resource="@color/accent" />
 
         <service
-            android:name="ru.nsu.ccfit.zuev.push.PushNotificationService"
+            android:name="main.push.PushNotificationService"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 
@@ -50,7 +50,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
 
         <activity
@@ -59,12 +59,11 @@
 
             <!-- firefox and file explorer -->
             <intent-filter>
-                <action
-                    android:name="android.intent.action.VIEW" />
-                <category
-                    android:name="android.intent.category.DEFAULT" />
-                <category
-                    android:name="android.intent.category.BROWSABLE" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
                     android:mimeType="application/zip"
                     android:scheme="file" />
@@ -80,30 +79,31 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.EDIT" />
+
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="file"/>
-                <data
-                    android:pathPattern=".*\.edr" />
+
+                <data android:scheme="file" />
+                <data android:pathPattern=".*\.edr" />
             </intent-filter>
 
         </activity>
 
         <activity
-            android:name="ru.nsu.ccfit.zuev.osu.PermissionActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:name="main.osu.PermissionActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:label="@string/app_name"
             android:launchMode="singleInstance"
             android:screenOrientation="sensorLandscape"
-            android:label="@string/app_name"
-            tools:ignore="LockedOrientationActivity"/>
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
 
         <activity
-            android:name="ru.nsu.ccfit.zuev.osu.MainActivity"
-            android:theme="@style/AppTheme"
+            android:name="main.osu.MainActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:label="@string/app_name"
             android:launchMode="singleInstance"
             android:screenOrientation="sensorLandscape"
-            android:label="@string/app_name"
+            android:theme="@style/AppTheme"
             tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -112,22 +112,32 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.EDIT" />
+
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="file" android:host="*"
-                      android:mimeType="application/octet-stream" android:pathPattern=".*\\.osz"/>
-                <data android:scheme="file" android:host="*"
-                      android:mimeType="application/octet-stream" android:pathPattern=".*\\.zip"/>
-                <data android:scheme="file" android:host="*"
-                      android:mimeType="application/octet-stream" android:pathPattern=".*\\.odr"/>
+
+                <data
+                    android:host="*"
+                    android:mimeType="application/octet-stream"
+                    android:pathPattern=".*\\.osz"
+                    android:scheme="file" />
+                <data
+                    android:host="*"
+                    android:mimeType="application/octet-stream"
+                    android:pathPattern=".*\\.zip"
+                    android:scheme="file" />
+                <data
+                    android:host="*"
+                    android:mimeType="application/octet-stream"
+                    android:pathPattern=".*\\.odr"
+                    android:scheme="file" />
             </intent-filter>
             <!-- firefox and file explorer -->
             <intent-filter>
-                <action
-                    android:name="android.intent.action.VIEW" />
-                <category
-                    android:name="android.intent.category.DEFAULT" />
-                <category
-                    android:name="android.intent.category.BROWSABLE" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
                     android:mimeType="application/zip"
                     android:scheme="file" />
@@ -143,10 +153,11 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.EDIT" />
+
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="file"/>
-                <data
-                    android:pathPattern=".*\.osz" />
+
+                <data android:scheme="file" />
+                <data android:pathPattern=".*\.osz" />
             </intent-filter>
         </activity>
 

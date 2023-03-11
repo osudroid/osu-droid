@@ -3,7 +3,7 @@ package com.reco1l.management;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
-import com.reco1l.global.Game;
+import com.reco1l.Game;
 
 // This only have support for Back button.
 public class InputManager {

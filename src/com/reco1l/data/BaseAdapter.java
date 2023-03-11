@@ -3,7 +3,7 @@ package com.reco1l.data;
 
 import static androidx.recyclerview.widget.RecyclerView.*;
 
-import static com.reco1l.utils.Views.*;
+import static com.reco1l.tools.Views.*;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 
-import com.reco1l.tables.ResourceTable;
+import com.reco1l.management.resources.ResourceTable;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -17,6 +17,12 @@
         <item name="android:elevation">1dp</item>
     </style>
 
+    <style name="largeText" parent="text">
+        <item name="android:textSize">@dimen/textM</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:maxLines">2</item>
+    </style>
+
     <style name="edit_text" parent="text">
         <item name="android:layout_width">match_parent</item>
         <item name="android:background">@drawable/shape_rounded</item>
@@ -28,26 +34,10 @@
     </style>
 
     <!--TODO remove this-->
-    <style name="largeText" parent="text">
-        <item name="android:textSize">@dimen/textM</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:maxLines">2</item>
-    </style>
-
     <!--Buttons-->
     <style name="icon_button">
         <item name="android:scaleType">center</item>
         <item name="android:clickable">true</item>
-    </style>
-
-    <style name="button">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">@dimen/app_buttonHeight</item>
-        <item name="cardElevation">@dimen/buttonCardElevation</item>
-        <item name="cardBackgroundColor">@color/buttonBackground</item>
-        <item name="cardCornerRadius">@dimen/buttonCornerRadius</item>
-        <item name="contentPaddingLeft">@dimen/M</item>
-        <item name="contentPaddingRight">@dimen/M</item>
     </style>
 
     <style name="settings_panel_tab_button" parent="icon_button">

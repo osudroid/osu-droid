@@ -12,6 +12,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -19,19 +20,24 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import androidx.annotation.CallSuper;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleableRes;
+import androidx.appcompat.widget.LinearLayoutCompat;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.math.MathUtils;
 
-import com.reco1l.tables.ResourceTable;
+import com.reco1l.framework.drawing.Dimension;
+import com.reco1l.management.resources.ResourceTable;
+import com.reco1l.tools.Views;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 // CardView takes more time to render due to implementation so this is a good alternative i made
-public class RoundLayout extends RelativeLayout implements ResourceTable {
+public class RoundLayout extends CoordinatorLayout implements ResourceTable {
 
     public static final int LINEAR = 0;
     public static final int RELATIVE = 1;
@@ -42,16 +48,14 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
             androidNS = "http://schemas.android.com/apk/res/android";
 
     // Initial values defined at creation of view, useful if you want to pass attrs to a child view
-    protected final int
-            defStyleAttr,
-            defStyleRes;
+    protected final int defStyleAttr;
 
     protected final AttributeSet attrs;
 
     protected Path mPath;
 
     private final ViewGroup mInternalLayout;
-    private final int mLayoutType;
+    private final Dimension mDimensions;
 
     private int mRadius = 12;
 
@@ -63,6 +67,7 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
             mIsMaxRounded = false,
             mClampToSquare = false,
             mConstantInvalidate = false;
+
 
     //--------------------------------------------------------------------------------------------//
 
@@ -81,34 +86,35 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     }
 
     public RoundLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
-    }
-
-    public RoundLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
+        super(context, attrs, defStyleAttr);
         handleNativeAttributes(attrs);
 
         this.attrs = attrs;
-        this.defStyleRes = defStyleRes;
         this.defStyleAttr = defStyleAttr;
 
-        mLayoutType = getLayoutType();
-
-        if (mLayoutType == LINEAR) {
-            mInternalLayout = new LinearLayout(context, attrs, defStyleAttr, defStyleRes);
+        if (getLayoutType() == LINEAR) {
+            mInternalLayout = new LinearLayout(context, attrs, defStyleAttr);
         } else {
-            mInternalLayout = new RelativeLayout(context, attrs, defStyleAttr, defStyleRes);
+            mInternalLayout = new RelativeLayout(context, attrs, defStyleAttr);
         }
         super.addView(mInternalLayout, 0, getInitialLayoutParams());
 
         if (super.getBackground() != null) {
             super.setBackground(null);
         }
+        super.setPadding(0, 0, 0, 0);
+        Views.resetParameters(mInternalLayout);
 
         onCreate();
         handleAttributes();
 
-        super.post(() -> onLayoutChange(getLayoutParams()));
+        mDimensions = new Dimension(getInitialWidth(), getInitialHeight());
+
+        super.post(() -> {
+            mDimensions.width = getLayoutParams().width;
+            mDimensions.height = getLayoutParams().height;
+            onDimensionChange(mDimensions);
+        });
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -136,8 +142,8 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
         return mInitialHeight;
     }
 
-    protected final LayoutParams getInitialLayoutParams() {
-        return new LayoutParams(mInitialWidth, mInitialHeight);
+    protected final ViewGroup.LayoutParams getInitialLayoutParams() {
+        return new ViewGroup.LayoutParams(mInitialWidth, mInitialHeight);
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -174,8 +180,9 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     }
 
     // Called when layout params has been changed
-    protected void onLayoutChange(ViewGroup.LayoutParams params) {
-        matchSize(mInternalLayout);
+    @CallSuper
+    protected void onDimensionChange(Dimension dimens) {
+        matchSize(mInternalLayout, dimens);
     }
 
     // Override only to make special paths
@@ -194,7 +201,7 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
             onManageAttributes(null, attrs);
             return;
         }
-        TypedArray t = getContext().obtainStyledAttributes(attrs, getStyleable(), defStyleAttr, defStyleRes);
+        TypedArray t = getContext().obtainStyledAttributes(attrs, getStyleable(), defStyleAttr, 0);
         onManageAttributes(t, attrs);
         t.recycle();
     }
@@ -219,6 +226,12 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     }
 
     public final void setRadius(int radius) {
+        mRadius = sdp(radius);
+        invalidate();
+    }
+
+    // This set the radius without rescaling it using sdp()
+    public final void setRadiusAbs(int radius) {
         mRadius = radius;
         invalidate();
     }
@@ -227,6 +240,9 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
 
     @Override
     protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
+        mDimensions.width = getLayoutParams().width;
+        mDimensions.height = getLayoutParams().height;
+
         int size = Math.min(width, height);
 
         if (mClampToSquare) {
@@ -236,6 +252,10 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
             getLayoutParams().width = size;
             getLayoutParams().height = size;
             requestLayout();
+        }
+
+        if (mRadius == 0 && !mIsMaxRounded) {
+            return;
         }
 
         float radius = MathUtils.clamp(mRadius, 0, size / 2f);
@@ -250,6 +270,7 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     @Override
     protected void dispatchDraw(Canvas canvas) {
         onManagedDraw(canvas);
+        onDimensionChange(mDimensions);
 
         if (mPath != null) {
             canvas.clipPath(mPath);
@@ -257,24 +278,25 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
         super.dispatchDraw(canvas);
 
         if (mConstantInvalidate) {
+            if (mInternalLayout != null) {
+                mInternalLayout.invalidate();
+            }
             invalidate();
         }
     }
 
-    @Override
-    public void setLayoutParams(ViewGroup.LayoutParams params) {
-        super.setLayoutParams(params);
-        onLayoutChange(params);
+    protected final void matchSize(View view) {
+        matchSize(view, mDimensions);
     }
 
     // Match parent layout params useful when you want a child view match width and height from parent,
     // it's recommended to be used inside onResize() method.
-    protected final void matchSize(View view) {
-        if (view == null) {
+    protected final void matchSize(View view, Dimension dimen) {
+        if (view == null || view.getLayoutParams() == null || dimen == null) {
             return;
         }
-        view.getLayoutParams().width = getLayoutParams().width;
-        view.getLayoutParams().height = getLayoutParams().height;
+        view.getLayoutParams().width = dimen.width;
+        view.getLayoutParams().height = dimen.height;
         view.requestLayout();
     }
 
@@ -306,21 +328,9 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
         }
     }
 
-    @Override
-    public void setVisibility(int visibility) {
-        super.setVisibility(visibility);
-
-        if (mInternalLayout != null) {
-            mInternalLayout.setVisibility(visibility);
-        }
-    }
-
-    @Override
     public void setGravity(int gravity) {
-        super.setGravity(gravity);
-
         if (mInternalLayout != null) {
-            switch (mLayoutType) {
+            switch (getLayoutType()) {
                 case LINEAR:
                     ((LinearLayout) mInternalLayout).setGravity(gravity);
                     break;
@@ -328,6 +338,12 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
                     ((RelativeLayout) mInternalLayout).setGravity(gravity);
                     break;
             }
+        }
+    }
+
+    public void setOrientation(@LinearLayoutCompat.OrientationMode int orientation) {
+        if (mInternalLayout instanceof LinearLayout) {
+            ((LinearLayout) mInternalLayout).setOrientation(orientation);
         }
     }
 
@@ -364,6 +380,10 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
         return mInternalLayout;
     }
 
+    public final Dimension getDimensions() {
+        return mDimensions;
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     @Override
@@ -381,9 +401,14 @@ public class RoundLayout extends RelativeLayout implements ResourceTable {
     }
 
     public final int ssp(int sp) {
+        return sdp(sp);
+    }
+
+    @Override
+    public Typeface font(String name) {
         if (isInEditMode()) {
-            return (int) (sp * resources().getDisplayMetrics().density);
+            return Typeface.DEFAULT;
         }
-        return ResourceTable.super.ssp(sp);
+        return ResourceTable.super.font(name);
     }
 }
