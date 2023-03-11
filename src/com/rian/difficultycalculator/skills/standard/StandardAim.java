@@ -5,7 +5,7 @@ import com.rian.difficultycalculator.evaluators.standard.StandardAimEvaluator;
 
 import java.util.EnumSet;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import main.osu.game.mods.GameMod;
 
 /**
  * Represents the skill required to correctly aim at every object in the map with a uniform circle size and normalized distances.

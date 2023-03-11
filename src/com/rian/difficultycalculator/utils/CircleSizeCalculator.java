@@ -2,9 +2,9 @@ package com.rian.difficultycalculator.utils;
 
 import java.util.EnumSet;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.game.GameObjectSize;
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import main.osu.Config;
+import main.osu.game.GameObjectSize;
+import main.osu.game.mods.GameMod;
 
 /**
  * A utility for calculating circle sizes across all modes (rimu! and osu!standard).

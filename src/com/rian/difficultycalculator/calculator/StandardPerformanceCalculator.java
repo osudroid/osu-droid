@@ -4,7 +4,7 @@ import com.rian.difficultycalculator.attributes.StandardDifficultyAttributes;
 import com.rian.difficultycalculator.attributes.StandardPerformanceAttributes;
 import com.rian.difficultycalculator.math.MathUtils;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import main.osu.game.mods.GameMod;
 
 /**
  * A performance calculator for calculating osu!standard performance points.

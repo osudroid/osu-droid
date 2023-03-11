@@ -24,7 +24,9 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import main.osu.Config;
+import main.osu.game.GameObjectSize;
+import main.osu.game.mods.GameMod;
 
 /**
  * A difficulty calculator for rimu!.
@@ -64,8 +66,6 @@ public class RimuDifficultyCalculator extends DifficultyCalculator {
             attributes.rhythmDifficulty = 0;
             attributes.flashlightDifficulty *= 0.7;
             attributes.visualDifficulty = 0;
-        } else {
-            attributes.possibleThreeFingeredSections = calculateTapHighStrainSections(objects);
         }
 
         double baseAimPerformance = Math.pow(5 * Math.max(1, Math.pow(attributes.aimDifficulty, 0.8) / 0.0675) - 4, 3) / 100000;
@@ -110,7 +110,6 @@ public class RimuDifficultyCalculator extends DifficultyCalculator {
         attributes.sliderCount = beatmap.getHitObjectsManager().getSliderCount();
         attributes.spinnerCount = beatmap.getHitObjectsManager().getSpinnerCount();
         attributes.clockRate = parameters.getTotalSpeedMultiplier();
-        attributes.difficultSliders = calculateDifficultSliders(objects, attributes.sliderCount);
 
         return attributes;
     }

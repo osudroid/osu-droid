@@ -5,7 +5,7 @@ import com.rian.difficultycalculator.evaluators.rimu.RimuVisualEvaluator;
 
 import java.util.EnumSet;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import main.osu.game.mods.GameMod;
 
 /**
  * Represents the skill required to read every object in a beatmap.
