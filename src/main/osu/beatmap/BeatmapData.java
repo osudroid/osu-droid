@@ -1,5 +1,7 @@
 package main.osu.beatmap;
 
+import com.rian.difficultycalculator.beatmap.BeatmapControlPointsManager;
+
 import java.util.ArrayList;
 
 import main.osu.beatmap.sections.BeatmapDifficulty;
@@ -32,9 +34,9 @@ public class BeatmapData {
     public final BeatmapEvents events = new BeatmapEvents();
 
     /**
-     * Raw data of timing points in this beatmap.
+     * The manager of timing points in this beatmap.
      */
-    public final ArrayList<String> timingPoints = new ArrayList<>();
+    public final BeatmapControlPointsManager timingPoints = new BeatmapControlPointsManager();
 
     /**
      * Raw data of hit objects in this beatmap.
@@ -81,5 +83,27 @@ public class BeatmapData {
      */
     public void setFormatVersion(int formatVersion) {
         this.formatVersion = formatVersion;
+    }
+
+    /**
+     * Returns a time combined with beatmap-wide time offset.
+     *
+     * Beatmap version 4 and lower had an incorrect offset. Stable has this set as 24ms off.
+     *
+     * @param time The time.
+     */
+    public double getOffsetTime(double time) {
+        return time + (formatVersion < 5 ? 24 : 0);
+    }
+
+    /**
+     * Returns a time combined with beatmap-wide time offset.
+     *
+     * Beatmap version 4 and lower had an incorrect offset. Stable has this set as 24ms off.
+     *
+     * @param time The time.
+     */
+    public int getOffsetTime(int time) {
+        return time + (formatVersion < 5 ? 24 : 0);
     }
 }

@@ -1,9 +1,10 @@
 package main.osu.beatmap.parser.sections;
 
+import com.rian.difficultycalculator.beatmap.constants.SampleBank;
+
 import main.osu.Utils;
 import main.osu.beatmap.BeatmapData;
 import main.osu.beatmap.constants.BeatmapCountdown;
-import main.osu.beatmap.constants.SampleBank;
 
 /**
  * A parser for parsing a beatmap's general section.

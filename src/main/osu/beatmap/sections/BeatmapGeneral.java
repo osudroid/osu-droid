@@ -1,7 +1,8 @@
 package main.osu.beatmap.sections;
 
+import com.rian.difficultycalculator.beatmap.constants.SampleBank;
+
 import main.osu.beatmap.constants.BeatmapCountdown;
-import main.osu.beatmap.constants.SampleBank;
 
 /**
  * Contains general information about a beatmap.

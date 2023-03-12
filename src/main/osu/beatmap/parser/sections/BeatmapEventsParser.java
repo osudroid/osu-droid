@@ -19,8 +19,8 @@ public class BeatmapEventsParser extends BeatmapSectionParser {
 
             if (line.startsWith("2") || line.startsWith("Break")) {
                 data.events.breaks.add(new BreakPeriod(
-                        Utils.tryParseInt(pars[1], 0),
-                        Utils.tryParseInt(pars[2], 0)
+                        data.getOffsetTime(Utils.tryParseInt(pars[1], 0)),
+                        data.getOffsetTime(Utils.tryParseInt(pars[2], 0))
                 ));
             }
         }
