@@ -5,6 +5,7 @@ import com.rian.difficultycalculator.beatmap.BeatmapHitObjectsManager;
 
 import java.util.ArrayList;
 
+import main.osu.beatmap.sections.BeatmapColor;
 import main.osu.beatmap.sections.BeatmapDifficulty;
 import main.osu.beatmap.sections.BeatmapEvents;
 import main.osu.beatmap.sections.BeatmapGeneral;
@@ -30,9 +31,14 @@ public class BeatmapData {
     public final BeatmapDifficulty difficulty = new BeatmapDifficulty();
 
     /**
-     * Events of the beatmap.
+     * Events of this beatmap.
      */
     public final BeatmapEvents events = new BeatmapEvents();
+
+    /**
+     * Combo and skin colors of this beatmap.
+     */
+    public final BeatmapColor colors = new BeatmapColor();
 
     /**
      * The manager of timing points in this beatmap.
@@ -60,14 +66,14 @@ public class BeatmapData {
     private int formatVersion = 14;
 
     /**
-     * Gets the path of parent folder of this beatmap.
+     * Gets the path of the parent folder of this beatmap.
      */
     public String getFolder() {
         return folder;
     }
 
     /**
-     * Sets the path of parent folder of this beatmap.
+     * Sets the path of the parent folder of this beatmap.
      *
      * @param path The path of the parent folder.
      */
