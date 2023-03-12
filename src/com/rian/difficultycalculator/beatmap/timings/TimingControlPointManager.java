@@ -10,6 +10,6 @@ public class TimingControlPointManager extends ControlPointManager<TimingControl
 
     @Override
     public TimingControlPoint controlPointAt(int time) {
-        return binarySearchWithFallback(time);
+        return binarySearchWithFallback(time, controlPoints.size() > 0 ? controlPoints.get(0) : defaultControlPoint);
     }
 }
