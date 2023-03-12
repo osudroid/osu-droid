@@ -11,7 +11,7 @@ import main.osu.beatmap.constants.BeatmapCountdown;
  */
 public class BeatmapGeneralParser extends BeatmapKeyValueSectionParser {
     @Override
-    public void parse(BeatmapData data, String line) {
+    public boolean parse(BeatmapData data, String line) {
         String[] p = splitProperty(line);
 
         switch (p[0]) {
@@ -34,5 +34,7 @@ public class BeatmapGeneralParser extends BeatmapKeyValueSectionParser {
                 data.general.stackLeniency = Utils.tryParseFloat(p[1], data.general.stackLeniency);
                 break;
         }
+
+        return true;
     }
 }

@@ -11,6 +11,7 @@ public abstract class BeatmapSectionParser {
      *
      * @param data The beatmap data to fill.
      * @param line The line to parse.
+     * @return Whether the line was successfully parsed.
      */
-    public abstract void parse(final BeatmapData data, final String line);
+    public abstract boolean parse(final BeatmapData data, final String line);
 }

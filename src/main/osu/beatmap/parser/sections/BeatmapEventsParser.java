@@ -9,7 +9,7 @@ import main.osu.game.BreakPeriod;
  */
 public class BeatmapEventsParser extends BeatmapSectionParser {
     @Override
-    public void parse(BeatmapData data, String line) {
+    public boolean parse(BeatmapData data, String line) {
         final String[] pars = line.split("\\s*,\\s*");
 
         if (pars.length >= 3) {
@@ -24,5 +24,7 @@ public class BeatmapEventsParser extends BeatmapSectionParser {
                 ));
             }
         }
+
+        return true;
     }
 }

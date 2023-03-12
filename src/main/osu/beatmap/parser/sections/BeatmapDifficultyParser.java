@@ -8,7 +8,7 @@ import main.osu.beatmap.BeatmapData;
  */
 public class BeatmapDifficultyParser extends BeatmapKeyValueSectionParser {
     @Override
-    public void parse(BeatmapData data, String line) {
+    public boolean parse(BeatmapData data, String line) {
         String[] p = splitProperty(line);
 
         switch (p[0]) {
@@ -33,5 +33,7 @@ public class BeatmapDifficultyParser extends BeatmapKeyValueSectionParser {
             case "SliderTickRate":
                 data.difficulty.sliderTickRate = Utils.tryParseInt(p[1], data.difficulty.sliderTickRate);
         }
+
+        return true;
     }
 }

@@ -7,7 +7,7 @@ import main.osu.beatmap.BeatmapData;
  */
 public class BeatmapMetadataParser extends BeatmapKeyValueSectionParser {
     @Override
-    public void parse(BeatmapData data, String line) {
+    public boolean parse(BeatmapData data, String line) {
         String[] p = splitProperty(line);
 
         switch (p[0]) {
@@ -36,5 +36,7 @@ public class BeatmapMetadataParser extends BeatmapKeyValueSectionParser {
                 data.metadata.tags = p[1];
                 break;
         }
+
+        return true;
     }
 }
