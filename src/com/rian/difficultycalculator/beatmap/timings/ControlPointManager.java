@@ -1,6 +1,8 @@
 package com.rian.difficultycalculator.beatmap.timings;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A manager for a type of control point.
@@ -86,6 +88,13 @@ public abstract class ControlPointManager<T extends ControlPoint> {
         }
 
         return controlPoints.remove(index);
+    }
+
+    /**
+     * Gets an immutable list of control points in this manager.
+     */
+    public List<T> getControlPoints() {
+        return Collections.unmodifiableList(controlPoints);
     }
 
     /**
