@@ -1,5 +1,6 @@
 package main.osu.beatmap.parser.sections;
 
+import main.osu.Utils;
 import main.osu.beatmap.BeatmapData;
 
 /**
@@ -34,6 +35,12 @@ public class BeatmapMetadataParser extends BeatmapKeyValueSectionParser {
                 break;
             case "Tags":
                 data.metadata.tags = p[1];
+                break;
+            case "BeatmapID":
+                data.metadata.beatmapID = Utils.tryParseInt(p[1], data.metadata.beatmapID);
+                break;
+            case "BeatmapSetID":
+                data.metadata.beatmapSetID = Utils.tryParseInt(p[1], data.metadata.beatmapSetID);
                 break;
         }
 
