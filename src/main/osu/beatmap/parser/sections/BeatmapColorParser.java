@@ -1,6 +1,7 @@
 package main.osu.beatmap.parser.sections;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 import main.osu.RGBColor;
 import main.osu.Utils;
@@ -25,11 +26,12 @@ public class BeatmapColorParser extends BeatmapKeyValueSectionParser {
         if (p[0].startsWith("Combo")) {
             int index = Utils.tryParseInt(p[0].substring(5), data.colors.comboColors.size() + 1);
             data.colors.comboColors.add(new ComboColor(index, color));
+            data.colors.comboColors.sort(Comparator.comparingInt(a -> a.index));
 
             return true;
         }
 
-        if (p[0].equals("SliderBorder")) {
+        if (p[0].startsWith("SliderBorder")) {
             data.colors.sliderBorderColor = color;
         }
 
