@@ -2,6 +2,8 @@ package main.osu.beatmap;
 
 import com.rian.difficultycalculator.beatmap.BeatmapControlPointsManager;
 import com.rian.difficultycalculator.beatmap.BeatmapHitObjectsManager;
+import com.rian.difficultycalculator.beatmap.hitobject.HitObject;
+import com.rian.difficultycalculator.beatmap.hitobject.Slider;
 
 import java.util.ArrayList;
 
@@ -79,6 +81,23 @@ public class BeatmapData {
      */
     public void setFolder(String path) {
         folder = path;
+    }
+
+    /**
+     * Gets the max combo of this beatmap.
+     */
+    public int getMaxCombo() {
+        int combo = 0;
+
+        for (HitObject object : hitObjects.getObjects()) {
+            ++combo;
+
+            if (object instanceof Slider) {
+                combo += ((Slider) object).getNestedHitObjects().size() - 1;
+            }
+        }
+
+        return combo;
     }
 
     /**
