@@ -1,6 +1,7 @@
 package main.osu.beatmap;
 
 import com.rian.difficultycalculator.beatmap.BeatmapControlPointsManager;
+import com.rian.difficultycalculator.beatmap.BeatmapHitObjectsManager;
 
 import java.util.ArrayList;
 
@@ -41,7 +42,12 @@ public class BeatmapData {
     /**
      * Raw data of hit objects in this beatmap.
      */
-    public final ArrayList<String> hitObjects = new ArrayList<>();
+    public final ArrayList<String> rawHitObjects = new ArrayList<>();
+
+    /**
+     * The manager of hit objects in this beatmap.
+     */
+    public final BeatmapHitObjectsManager hitObjects = new BeatmapHitObjectsManager();
 
     /**
      * The path of parent folder of this beatmap.

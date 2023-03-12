@@ -270,4 +270,14 @@ public class Utils {
         }
         return val;
     }
+
+    public static double tryParseDouble(String str, double defaultVal) {
+        double val;
+        try {
+            val = Double.parseDouble(str);
+        } catch (NumberFormatException ignored) {
+            val = defaultVal;
+        }
+        return val;
+    }
 }

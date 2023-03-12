@@ -30,6 +30,9 @@ public class BeatmapGeneralParser extends BeatmapKeyValueSectionParser {
             case "SampleSet":
                 data.general.sampleBank = SampleBank.parse(p[1]);
                 break;
+            case "SampleVolume":
+                data.general.sampleVolume = Utils.tryParseInt(p[1], data.general.sampleVolume);
+                break;
             case "StackLeniency":
                 data.general.stackLeniency = Utils.tryParseFloat(p[1], data.general.stackLeniency);
                 break;

@@ -36,6 +36,11 @@ public class BeatmapGeneral {
     public SampleBank sampleBank = SampleBank.normal;
 
     /**
+     * The sample volume that will be used if timing points do not override it.
+     */
+    public int sampleVolume = 100;
+
+    /**
      * The multiplier for the threshold in time where hit objects
      * placed close together stack, ranging from 0 to 1.
      */
