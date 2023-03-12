@@ -98,6 +98,13 @@ public abstract class ControlPointManager<T extends ControlPoint> {
     }
 
     /**
+     * Clears all control points in this manager.
+     */
+    public void clear() {
+        controlPoints.clear();
+    }
+
+    /**
      * Binary searches one of the control point lists to find the active control point at the given time.
      * <br><br>
      * Includes logic for returning the default control point when no matching point is found.
@@ -112,7 +119,7 @@ public abstract class ControlPointManager<T extends ControlPoint> {
     /**
      * Binary searches one of the control point lists to find the active control point at the given time.
      * <br><br>
-     * Includes logic for returning the default control point when no matching point is found.
+     * Includes logic for returning a fallback control point when no matching point is found.
      *
      * @param time The time to find the control point at.
      * @param fallback The control point to fallback to when no control points were found.
