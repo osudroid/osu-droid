@@ -14,7 +14,7 @@ public abstract class ControlPointManager<T extends ControlPoint> {
     /**
      * The control points in this manager.
      */
-    private final ArrayList<T> controlPoints = new ArrayList<>();
+    protected final ArrayList<T> controlPoints = new ArrayList<>();
 
     /**
      * @param defaultControlPoint The default control point for this type.
@@ -97,9 +97,22 @@ public abstract class ControlPointManager<T extends ControlPoint> {
      * @return The active control point at the given time, or the default control point if none found.
      */
     protected T binarySearchWithFallback(int time) {
+        return binarySearchWithFallback(time, defaultControlPoint);
+    }
+
+    /**
+     * Binary searches one of the control point lists to find the active control point at the given time.
+     * <br><br>
+     * Includes logic for returning the default control point when no matching point is found.
+     *
+     * @param time The time to find the control point at.
+     * @param fallback The control point to fallback to when no control points were found.
+     * @return The active control point at the given time, or the fallback control point if none found.
+     */
+    protected T binarySearchWithFallback(int time, T fallback) {
         T controlPoint = binarySearch(time);
 
-        return controlPoint != null ? controlPoint : defaultControlPoint;
+        return controlPoint != null ? controlPoint : fallback;
     }
 
     /**
