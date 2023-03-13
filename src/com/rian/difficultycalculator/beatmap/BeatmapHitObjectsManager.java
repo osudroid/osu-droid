@@ -140,7 +140,6 @@ public class BeatmapHitObjectsManager {
         return new BeatmapHitObjectsManager(this);
     }
 
-
     /**
      * Gets the amount of circles in this beatmap.
      */
