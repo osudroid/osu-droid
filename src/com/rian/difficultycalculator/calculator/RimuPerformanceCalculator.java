@@ -16,6 +16,9 @@ public class RimuPerformanceCalculator extends PerformanceCalculator {
     private double deviation;
     private double tapDeviation;
     private double tapPenalty;
+    private double aimSliderCheesePenalty;
+    private double flashlightSliderCheesePenalty;
+    private double visualSliderCheesePenalty;
 
     public RimuPerformanceCalculator(RimuDifficultyAttributes attributes) {
         super(attributes);
@@ -71,6 +74,9 @@ public class RimuPerformanceCalculator extends PerformanceCalculator {
 
         if (parameters != null) {
             tapPenalty = parameters.tapPenalty;
+            aimSliderCheesePenalty = parameters.aimSliderCheesePenalty;
+            flashlightSliderCheesePenalty = parameters.flashlightSliderCheesePenalty;
+            visualSliderCheesePenalty = parameters.visualSliderCheesePenalty;
         }
     }
 
@@ -82,6 +88,9 @@ public class RimuPerformanceCalculator extends PerformanceCalculator {
         deviation = 0;
         tapDeviation = 0;
         tapPenalty = 1;
+        aimSliderCheesePenalty = 1;
+        flashlightSliderCheesePenalty = 1;
+        visualSliderCheesePenalty = 1;
     }
 
     private double calculateAimValue() {
@@ -104,6 +113,9 @@ public class RimuPerformanceCalculator extends PerformanceCalculator {
             double sliderNerfFactor = (1 - difficultyAttributes.aimSliderFactor) * Math.pow(1 - estimateSliderEndsDropped / estimateDifficultSliders, 3) + difficultyAttributes.aimSliderFactor;
             aimValue *= sliderNerfFactor;
         }
+
+        // Scale the aim value with slider cheese penalty.
+        aimValue *= aimSliderCheesePenalty;
 
         // Scale the aim value with deviation.
         aimValue *= 1.05 * Math.pow(ErrorFunction.erf(32.0625 / (Math.sqrt(2) * deviation)), 1.5);
@@ -174,6 +186,9 @@ public class RimuPerformanceCalculator extends PerformanceCalculator {
         flashlightValue *= 0.7 +  0.1 * Math.min(1, getTotalHits() / 200) +
                         (getTotalHits() > 200 ? 0.2 * Math.min(1, (getTotalHits() - 200) / 200) : 0);
 
+        // Scale the flashlight value with slider cheese penalty.
+        flashlightValue *= flashlightSliderCheesePenalty;
+
         // Scale the flashlight value with deviation.
         flashlightValue *= ErrorFunction.erf(50 / (Math.sqrt(2) * deviation));
 
@@ -196,6 +211,9 @@ public class RimuPerformanceCalculator extends PerformanceCalculator {
 
         // Scale the visual value with object count to penalize short maps.
         visualValue *= Math.min(1, 1.650668 + (0.4845796 - 1.650668) / (1 + Math.pow(getTotalHits() / 817.9306, 1.147469)));
+
+        // Scale the visual value with slider cheese penalty.
+        visualValue *= visualSliderCheesePenalty;
 
         // Scale the visual value with deviation.
         visualValue *= 1.065 * Math.pow(ErrorFunction.erf(30 / (Math.sqrt(2) * deviation)), 1.75);
