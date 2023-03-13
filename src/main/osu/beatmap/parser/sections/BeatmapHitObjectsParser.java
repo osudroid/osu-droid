@@ -23,7 +23,22 @@ import main.osu.game.GameHelper;
  * A parser for parsing a beatmap's hit objects section.
  */
 public class BeatmapHitObjectsParser extends BeatmapSectionParser {
+    private final boolean parseHitObjects;
     private final int stackDistance = 3;
+
+    /**
+     * @param parseHitObjects Whether to also parse information of hit objects (such as circles,
+     *                        slider paths, and spinners).
+     *                        <br>
+     *                        Parsed hit objects will be added to the
+     *                        <code>BeatmapHitObjectsManager</code> of a <code>BeatmapData</code>.
+     *
+     */
+    public BeatmapHitObjectsParser(boolean parseHitObjects) {
+        super();
+
+        this.parseHitObjects = parseHitObjects;
+    }
 
     @Override
     public boolean parse(BeatmapData data, String line) {
@@ -32,6 +47,12 @@ public class BeatmapHitObjectsParser extends BeatmapSectionParser {
         if (pars.length < 4) {
             // Malformed hit object
             return false;
+        }
+
+        data.rawHitObjects.add(line);
+
+        if (!parseHitObjects) {
+            return true;
         }
 
         int time = Utils.tryParseInt(pars[2], -1);
@@ -65,7 +86,6 @@ public class BeatmapHitObjectsParser extends BeatmapSectionParser {
         }
 
         data.hitObjects.add(object);
-        data.rawHitObjects.add(line);
 
         return true;
     }
@@ -298,7 +318,7 @@ public class BeatmapHitObjectsParser extends BeatmapSectionParser {
         SliderPathType sliderType = SliderPathType.parse(curvePointsData[0].charAt(0));
         ArrayList<Vector2> curvePoints = new ArrayList<>();
         for (int i = 1; i < curvePointsData.length; i++) {
-            String[] curvePointData = curvePointsData[i].split("[:]");
+            String[] curvePointData = curvePointsData[i].split(":");
             Vector2 curvePointPosition = new Vector2(
                     Utils.tryParseFloat(curvePointData[0], Float.NaN),
                     Utils.tryParseFloat(curvePointData[1], Float.NaN)

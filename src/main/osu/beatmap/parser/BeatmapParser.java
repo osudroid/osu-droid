@@ -96,10 +96,11 @@ public class BeatmapParser {
     /**
      * Parses the <code>.osu</code> file.
      *
+     * @param withHitObjects Whether to also parse hit objects.
      * @return A <code>BeatmapData</code> containing relevant information of the beatmap file,
      * <code>null</code> if the beatmap file cannot be opened or a line could not be parsed.
      */
-    public BeatmapData parse() {
+    public BeatmapData parse(boolean withHitObjects) {
         if (source == null && !openFile()) {
             return null;
         }
@@ -114,7 +115,7 @@ public class BeatmapParser {
         BeatmapEventsParser eventsParser = new BeatmapEventsParser();
         BeatmapControlPointsParser controlPointsParser = new BeatmapControlPointsParser();
         BeatmapColorParser colorParser = new BeatmapColorParser();
-        BeatmapHitObjectsParser hitObjectsParser = new BeatmapHitObjectsParser();
+        BeatmapHitObjectsParser hitObjectsParser = new BeatmapHitObjectsParser(withHitObjects);
 
         String s;
 
