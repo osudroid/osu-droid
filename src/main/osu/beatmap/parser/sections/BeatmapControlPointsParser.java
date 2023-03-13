@@ -77,7 +77,7 @@ public class BeatmapControlPointsParser extends BeatmapSectionParser {
                 return false;
             }
 
-            manager.timing.add(new TimingControlPoint(time, msPerBeat));
+            manager.timing.add(new TimingControlPoint(time, msPerBeat, timeSignature));
         }
 
         manager.difficulty.add(new DifficultyControlPoint(

@@ -5,7 +5,7 @@ package com.rian.difficultycalculator.beatmap.timings;
  */
 public class TimingControlPointManager extends ControlPointManager<TimingControlPoint> {
     public TimingControlPointManager() {
-        super(new TimingControlPoint(0, 1000));
+        super(new TimingControlPoint(0, 1000, 4));
     }
 
     @Override
