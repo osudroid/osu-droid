@@ -19,9 +19,9 @@ import com.rian.difficultycalculator.utils.StandardHitWindowConverter;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.scoring.Replay;
-import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
+import main.osu.game.mods.GameMod;
+import main.osu.scoring.Replay;
+import main.osu.scoring.TouchType;
 
 /**
  * Utility to check whether or not a beatmap is three-fingered.

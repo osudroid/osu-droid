@@ -18,9 +18,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.scoring.Replay;
-import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
+import main.osu.game.mods.GameMod;
+import main.osu.scoring.Replay;
+import main.osu.scoring.TouchType;
 
 /**
  * Utility to check whether relevant sliders in a beatmap are cheesed.
