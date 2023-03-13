@@ -233,6 +233,17 @@ public class BeatmapParser {
         }
 
         // Hit objects
+        if (data.hitObjects.getObjects().isEmpty() && !data.rawHitObjects.isEmpty()) {
+            BeatmapHitObjectsParser parser = new BeatmapHitObjectsParser(true);
+
+            for (String s : data.rawHitObjects) {
+                parser.parse(data, s);
+
+                // Remove the last object in raw hit object to undo the process done by the parser.
+                data.rawHitObjects.remove(data.rawHitObjects.size() - 1);
+            }
+        }
+
         info.setTotalHitObjectCount(data.hitObjects.getObjects().size());
         info.setHitCircleCount(data.hitObjects.getCircleCount());
         info.setSliderCount(data.hitObjects.getSliderCount());
