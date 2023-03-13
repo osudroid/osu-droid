@@ -7,5 +7,18 @@ public enum SliderPathType {
     Catmull,
     Bezier,
     Linear,
-    PerfectCurve
+    PerfectCurve;
+
+    public static SliderPathType parse(char value) {
+        switch (value) {
+            case 'C':
+                return Catmull;
+            case 'L':
+                return Linear;
+            case 'P':
+                return PerfectCurve;
+            default:
+                return Bezier;
+        }
+    }
 }

@@ -10,13 +10,20 @@ public class TimingControlPoint extends ControlPoint {
     public final double msPerBeat;
 
     /**
-     * @param time      The time at which this control point takes effect, in milliseconds.
-     * @param msPerBeat The amount of milliseconds passed for each beat.
+     * The time signature at this control point.
      */
-    public TimingControlPoint(int time, double msPerBeat) {
+    public final int timeSignature;
+
+    /**
+     * @param time          The time at which this control point takes effect, in milliseconds.
+     * @param msPerBeat     The amount of milliseconds passed for each beat.
+     * @param timeSignature The time signature at this control point.
+     */
+    public TimingControlPoint(int time, double msPerBeat, int timeSignature) {
         super(time);
 
         this.msPerBeat = msPerBeat;
+        this.timeSignature = timeSignature;
     }
 
     /**
