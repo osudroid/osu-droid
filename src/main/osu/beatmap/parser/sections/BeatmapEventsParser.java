@@ -1,5 +1,6 @@
 package main.osu.beatmap.parser.sections;
 
+import main.osu.RGBColor;
 import main.osu.Utils;
 import main.osu.beatmap.BeatmapData;
 import main.osu.game.BreakPeriod;
@@ -23,6 +24,14 @@ public class BeatmapEventsParser extends BeatmapSectionParser {
                         data.getOffsetTime(Utils.tryParseInt(pars[2], 0))
                 ));
             }
+        }
+
+        if (pars.length >= 5 && line.startsWith("3")) {
+            data.events.backgroundColor = new RGBColor(
+                    Utils.tryParseInt(pars[2], 0),
+                    Utils.tryParseInt(pars[3], 0),
+                    Utils.tryParseInt(pars[4], 0)
+            );
         }
 
         return true;

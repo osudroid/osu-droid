@@ -2,6 +2,7 @@ package main.osu.beatmap.sections;
 
 import java.util.ArrayList;
 
+import main.osu.RGBColor;
 import main.osu.game.BreakPeriod;
 
 /**
@@ -17,4 +18,9 @@ public class BeatmapEvents {
      * The breaks this beatmap has.
      */
     public ArrayList<BreakPeriod> breaks = new ArrayList<>();
+
+    /**
+     * The background color of this beatmap.
+     */
+    public RGBColor backgroundColor;
 }
