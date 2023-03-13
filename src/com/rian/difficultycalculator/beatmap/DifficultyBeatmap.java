@@ -2,6 +2,9 @@ package com.rian.difficultycalculator.beatmap;
 
 import com.rian.difficultycalculator.beatmap.hitobject.HitObject;
 import com.rian.difficultycalculator.beatmap.hitobject.Slider;
+import com.rian.difficultycalculator.beatmap.timings.BreakPeriod;
+
+import java.util.ArrayList;
 
 /**
  * A beatmap structure containing necessary information for difficulty and performance calculation.
@@ -21,6 +24,11 @@ public class DifficultyBeatmap {
      * The manager for hit objects of this beatmap.
      */
     private BeatmapHitObjectsManager hitObjectsManager = new BeatmapHitObjectsManager();
+
+    /**
+     * The break periods of this beatmap.
+     */
+    public final ArrayList<BreakPeriod> breakPeriods = new ArrayList<>();
 
     public DifficultyBeatmap() {}
 

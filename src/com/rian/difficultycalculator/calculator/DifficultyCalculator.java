@@ -15,57 +15,54 @@ import java.util.List;
  */
 public abstract class DifficultyCalculator {
     /**
-     * The beatmap that is being calculated.
-     */
-    public final DifficultyBeatmap beatmap;
-
-    /**
      * The game mode that is being calculated.
      */
     public final GameMode mode;
 
     /**
-     * @param beatmap The beatmap to calculate.
      * @param mode The game mode to calculate for.
      */
-    public DifficultyCalculator(final DifficultyBeatmap beatmap, final GameMode mode) {
-        this.beatmap = beatmap;
+    protected DifficultyCalculator(final GameMode mode) {
         this.mode = mode;
     }
 
     /**
-     * Calculates the difficulty of the beatmap without specific parameters.
+     * Calculates the difficulty of a beatmap without specific parameters.
      *
+     * @param beatmap The beatmap whose difficulty is to be calculated.
      * @return A structure describing the difficulty of the beatmap.
      */
-    public DifficultyAttributes calculate() {
-        return calculate(null);
+    public DifficultyAttributes calculate(final DifficultyBeatmap beatmap) {
+        return calculate(beatmap, null);
     }
 
     /**
      * Calculates the difficulty of the beatmap with specific parameters.
      *
+     * @param beatmap The beatmap whose difficulty is to be calculated.
      * @param parameters The calculation parameters that should be applied to the beatmap.
      * @return A structure describing the difficulty of the beatmap.
      */
-    public DifficultyAttributes calculate(DifficultyCalculationParameters parameters) {
-        DifficultyBeatmap beatmap = this.beatmap;
+    public DifficultyAttributes calculate(final DifficultyBeatmap beatmap, final DifficultyCalculationParameters parameters) {
+        DifficultyBeatmap beatmapToCalculate = beatmap;
 
         if (parameters != null) {
             // Always operate on a clone of the original beatmap, to not modify it game-wide
-            beatmap = beatmap.deepClone();
-            applyParameters(beatmap, parameters);
+            beatmapToCalculate = beatmap.deepClone();
+            applyParameters(beatmapToCalculate, parameters);
         }
 
-        Skill[] skills = createSkills(beatmap, parameters);
+        Skill[] skills = createSkills(beatmapToCalculate, parameters);
 
-        for (DifficultyHitObject object : createDifficultyHitObjects(beatmap, parameters)) {
+        List<DifficultyHitObject> objects = createDifficultyHitObjects(beatmapToCalculate, parameters);
+
+        for (DifficultyHitObject object : objects) {
             for (Skill skill : skills) {
                 skill.process(object);
             }
         }
 
-        return createDifficultyAttributes(beatmap, skills, parameters);
+        return createDifficultyAttributes(beatmapToCalculate, skills, objects, parameters);
     }
 
     /**
@@ -74,7 +71,7 @@ public abstract class DifficultyCalculator {
      * @param beatmap The beatmap.
      * @param parameters The difficulty calculation parameters.
      */
-    protected abstract void applyParameters(DifficultyBeatmap beatmap, DifficultyCalculationParameters parameters);
+    protected abstract void applyParameters(final DifficultyBeatmap beatmap, final DifficultyCalculationParameters parameters);
 
     /**
      * Creates the skills to calculate the difficulty of a beatmap.
@@ -83,17 +80,18 @@ public abstract class DifficultyCalculator {
      * @param parameters The difficulty calculation parameter being used.
      * @return The skills.
      */
-    protected abstract Skill[] createSkills(DifficultyBeatmap beatmap, DifficultyCalculationParameters parameters);
+    protected abstract Skill[] createSkills(final DifficultyBeatmap beatmap, final DifficultyCalculationParameters parameters);
 
     /**
      * Creates difficulty attributes to describe a beatmap's difficulty.
      *
      * @param beatmap The beatmap whose difficulty was calculated.
      * @param skills The skills which processed the beatmap.
+     * @param objects The difficulty objects that were processed.
      * @param parameters The difficulty calculation parameters used.
      * @return Difficulty attributes describing the beatmap's difficulty.
      */
-    protected abstract DifficultyAttributes createDifficultyAttributes(DifficultyBeatmap beatmap, Skill[] skills, DifficultyCalculationParameters parameters);
+    protected abstract DifficultyAttributes createDifficultyAttributes(final DifficultyBeatmap beatmap, final Skill[] skills, final List<DifficultyHitObject> objects, final DifficultyCalculationParameters parameters);
 
     /**
      * Retrieves the difficulty hit objects to calculate against.
@@ -102,8 +100,8 @@ public abstract class DifficultyCalculator {
      * @param parameters The difficulty calculation parameter being used.
      * @return The generated difficulty hit objects.
      */
-    private ArrayList<DifficultyHitObject> createDifficultyHitObjects(
-            DifficultyBeatmap beatmap, DifficultyCalculationParameters parameters) {
+    private List<DifficultyHitObject> createDifficultyHitObjects(
+            final DifficultyBeatmap beatmap, final DifficultyCalculationParameters parameters) {
         ArrayList<DifficultyHitObject> objects = new ArrayList<>();
         List<HitObject> rawObjects = beatmap.getHitObjectsManager().getObjects();
 

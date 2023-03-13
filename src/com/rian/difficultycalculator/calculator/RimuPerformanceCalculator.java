@@ -15,6 +15,7 @@ public class RimuPerformanceCalculator extends PerformanceCalculator {
     private double effectiveMissCount;
     private double deviation;
     private double tapDeviation;
+    private double tapPenalty;
 
     public RimuPerformanceCalculator(RimuDifficultyAttributes attributes) {
         super(attributes);
@@ -67,6 +68,10 @@ public class RimuPerformanceCalculator extends PerformanceCalculator {
         effectiveMissCount = calculateEffectiveMissCount();
         deviation = calculateDeviation();
         tapDeviation = calculateTapDeviation();
+
+        if (parameters != null) {
+            tapPenalty = parameters.tapPenalty;
+        }
     }
 
     @Override
@@ -76,6 +81,7 @@ public class RimuPerformanceCalculator extends PerformanceCalculator {
         effectiveMissCount = 0;
         deviation = 0;
         tapDeviation = 0;
+        tapPenalty = 1;
     }
 
     private double calculateAimValue() {
@@ -95,7 +101,7 @@ public class RimuPerformanceCalculator extends PerformanceCalculator {
         if (estimateDifficultSliders > 0)
         {
             double estimateSliderEndsDropped = MathUtils.clamp(Math.min(countOk + countMeh + countMiss, difficultyAttributes.maxCombo - scoreMaxCombo), 0, estimateDifficultSliders);
-            double sliderNerfFactor = (1 - difficultyAttributes.sliderFactor) * Math.pow(1 - estimateSliderEndsDropped / estimateDifficultSliders, 3) + difficultyAttributes.sliderFactor;
+            double sliderNerfFactor = (1 - difficultyAttributes.aimSliderFactor) * Math.pow(1 - estimateSliderEndsDropped / estimateDifficultSliders, 3) + difficultyAttributes.aimSliderFactor;
             aimValue *= sliderNerfFactor;
         }
 
@@ -118,6 +124,9 @@ public class RimuPerformanceCalculator extends PerformanceCalculator {
 
         // Scale the tap value with tap deviation.
         tapValue *= 1.1 * Math.pow(ErrorFunction.erf(25 / (Math.sqrt(2) * tapDeviation)), 1.25);
+
+        // Scale the tap value with three-finger penalty.
+        tapValue /= tapPenalty;
 
         return tapValue;
     }

@@ -1,9 +1,9 @@
 package com.rian.difficultycalculator.calculator;
 
 import com.rian.difficultycalculator.attributes.StandardDifficultyAttributes;
-import com.rian.difficultycalculator.attributes.StandardPerformanceAttributes;
 import com.rian.difficultycalculator.beatmap.BeatmapDifficultyManager;
 import com.rian.difficultycalculator.beatmap.DifficultyBeatmap;
+import com.rian.difficultycalculator.beatmap.hitobject.DifficultyHitObject;
 import com.rian.difficultycalculator.skills.Skill;
 import com.rian.difficultycalculator.skills.standard.StandardAim;
 import com.rian.difficultycalculator.skills.standard.StandardFlashlight;
@@ -12,6 +12,7 @@ import com.rian.difficultycalculator.utils.GameMode;
 import com.rian.difficultycalculator.utils.StandardHitWindowConverter;
 
 import java.util.EnumSet;
+import java.util.List;
 
 import main.osu.game.mods.GameMod;
 
@@ -21,15 +22,14 @@ import main.osu.game.mods.GameMod;
 public class StandardDifficultyCalculator extends DifficultyCalculator {
     private static final double difficultyMultiplier = 0.0675;
 
-    /**
-     * @param beatmap The beatmap to calculate.
-     */
-    public StandardDifficultyCalculator(DifficultyBeatmap beatmap) {
-        super(beatmap, GameMode.standard);
+    public StandardDifficultyCalculator() {
+        super(GameMode.standard);
     }
 
     @Override
-    protected StandardDifficultyAttributes createDifficultyAttributes(DifficultyBeatmap beatmap, Skill[] skills, DifficultyCalculationParameters parameters) {
+    protected StandardDifficultyAttributes createDifficultyAttributes(final DifficultyBeatmap beatmap, final Skill[] skills,
+                                                                      final List<DifficultyHitObject> objects,
+                                                                      final DifficultyCalculationParameters parameters) {
         StandardDifficultyAttributes attributes = new StandardDifficultyAttributes();
 
         attributes.aimDifficulty = calculateRating(skills[0]);
@@ -38,7 +38,7 @@ public class StandardDifficultyCalculator extends DifficultyCalculator {
         attributes.flashlightDifficulty = calculateRating(skills[3]);
 
         double aimRatingNoSliders = calculateRating(skills[1]);
-        attributes.sliderFactor = attributes.aimDifficulty > 0 ? aimRatingNoSliders / attributes.aimDifficulty : 1;
+        attributes.aimSliderFactor = attributes.aimDifficulty > 0 ? aimRatingNoSliders / attributes.aimDifficulty : 1;
 
         if (parameters.mods.contains(GameMod.MOD_RELAX)) {
             attributes.aimDifficulty *= 0.9;

@@ -1,5 +1,7 @@
 package com.rian.difficultycalculator.math;
 
+import android.graphics.PointF;
+
 /**
  * Represents a two-dimensional vector.
  */
@@ -16,6 +18,10 @@ public class Vector2 {
 
     public Vector2(double value) {
         this(value, value);
+    }
+
+    public Vector2(PointF pointF) {
+        this(pointF.x, pointF.y);
     }
 
     public Vector2(double x, double y) {

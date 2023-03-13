@@ -35,12 +35,12 @@ public abstract class HitObject {
     /**
      * The rimu! scale of this hit object with respect to osu!standard scale metric.
      */
-    private float rimuScale;
+    private double rimuScale;
 
     /**
      * The osu!standard scale of this hit object.
      */
-    private float standardScale;
+    private double standardScale;
 
     /**
      * @param startTime The time at which this hit object starts, in milliseconds.
@@ -64,7 +64,7 @@ public abstract class HitObject {
     /**
      * Gets the rimu! scale of this hit object with respect to osu!standard scale metric.
      */
-    public float getRimuScale() {
+    public double getRimuScale() {
         return rimuScale;
     }
 
@@ -73,14 +73,14 @@ public abstract class HitObject {
      *
      * @param rimuScale The new rimu! scale.
      */
-    public void setRimuScale(float rimuScale) {
+    public void setRimuScale(double rimuScale) {
         this.rimuScale = rimuScale;
     }
 
     /**
      * Gets the osu!standard scale of this hit object.
      */
-    public float getStandardScale() {
+    public double getStandardScale() {
         return standardScale;
     }
 
@@ -89,7 +89,7 @@ public abstract class HitObject {
      *
      * @param standardScale The new osu!standard scale.
      */
-    public void setStandardScale(float standardScale) {
+    public void setStandardScale(double standardScale) {
         this.standardScale = standardScale;
     }
 
