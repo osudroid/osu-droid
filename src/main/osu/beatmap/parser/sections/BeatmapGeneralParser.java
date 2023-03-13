@@ -36,6 +36,8 @@ public class BeatmapGeneralParser extends BeatmapKeyValueSectionParser {
             case "StackLeniency":
                 data.general.stackLeniency = Utils.tryParseFloat(p[1], data.general.stackLeniency);
                 break;
+            case "Mode":
+                return p[1].equals("0");
         }
 
         return true;
