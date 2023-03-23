@@ -561,10 +561,29 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final TimingPoint tp = new TimingPoint(s.split("[,]"),
                     currentTimingPoint);
             timingPoints.add(tp);
-            if (tp.wasInderited() == false || currentTimingPoint == null) {
+            if (!tp.wasInderited()) {
                 currentTimingPoint = tp;
             }
         }
+
+        if (currentTimingPoint == null) {
+            // No uninherited timing points, use default uninherited timing point.
+            currentTimingPoint = new TimingPoint(
+                    // https://osu.ppy.sh/wiki/en/Client/File_formats/Osu_%28file_format%29#timing-points
+                    new String[] {"0", "1000", "4", "0", "0", "100", "1", "0"},
+                    null
+            );
+
+            for (final String s : beatmapData.getData("TimingPoints")) {
+                final TimingPoint tp = new TimingPoint(s.split("[,]"),
+                        currentTimingPoint);
+                timingPoints.add(tp);
+                if (!tp.wasInderited()) {
+                    currentTimingPoint = tp;
+                }
+            }
+        }
+
         GameHelper.controlPoints = new ControlPoints();
         GameHelper.controlPoints.load(TimingPoints.parse(beatmapData.getData("TimingPoints")));
         currentTimingPoint = timingPoints.peek();

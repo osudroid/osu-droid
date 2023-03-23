@@ -38,10 +38,18 @@ public class ControlPoints {
                 break;
             }
         }
+
+        TimingPoint tmp;
+
         if (tmpIndex == -1) {
-            throw new IllegalArgumentException("No uninherited timing point found");
+            tmp = new TimingPoint();
+            tmp.setTime(0);
+            tmp.setBeatLength(1000);
+            tmp.setMeter(4);
+        } else {
+            tmp = res.get(tmpIndex);
         }
-        TimingPoint tmp = res.get(tmpIndex);
+
         preTp = new TimingControlPoint();
         preTp.setTime(tmp.getTime());
         preTp.setBeatLength(tmp.getBeatLength());
@@ -66,7 +74,7 @@ public class ControlPoints {
 
         for (int i = 0; i < res.size(); i++) {
             tmp = res.get(i);
-            if (!tmp.isInherited() && i != tmpIndex) {
+            if (!tmp.isInherited()) {
                 preTp = new TimingControlPoint();
                 preTp.setTime(tmp.getTime());
                 preTp.setBeatLength(tmp.getBeatLength());
