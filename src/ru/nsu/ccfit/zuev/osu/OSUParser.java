@@ -464,10 +464,7 @@ public class OSUParser {
                 return false;
             }
 
-            int time = tryParseInt(rawData[2], -1);
-            if (time <= -1) {
-                return false;
-            }
+            int time = tryParseInt(rawData[2], 0);
             while (tpIndex < timingPoints.size() - 1 && timingPoints.get(tpIndex + 1).getOffset() <= time) {
                 tpIndex++;
             }
@@ -492,10 +489,7 @@ public class OSUParser {
                 track.setHitCircleCount(track.getHitCircleCount() + 1);
             } else if (hitObjectType == HitObjectType.Spinner) {
                 // Spinner
-                int endTime = tryParseInt(rawData[5], -1);
-                if (endTime <= -1) {
-                    return false;
-                }
+                int endTime = tryParseInt(rawData[5], 0);
                 object = new Spinner(time, endTime, pos, currentTimingPoint);
                 track.setSpinnerCount(track.getSpinnerCount() + 1);
             } else if (hitObjectType == HitObjectType.Slider || hitObjectType == HitObjectType.SliderNewCombo) {
