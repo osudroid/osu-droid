@@ -384,9 +384,7 @@ public class OSUParser {
         }
 
         if (currentTimingPoint == null) {
-            ToastLogger.showText(StringTable.format(R.string.osu_parser_timing_error,
-                    file.getName().substring(0, file.getName().length() - 4)), true);
-            return false;
+            currentTimingPoint = new TimingPoint(1000f, 0f, 1f);
         }
 
         for (final String tempString : data.getData("TimingPoints")) {
