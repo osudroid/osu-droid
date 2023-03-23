@@ -89,7 +89,7 @@ public class DifficultyReCalculator {
         }
 
         if (currentTimingPoint == null) {
-            return false;
+            currentTimingPoint = new TimingPoint(1000f, 0f, 1f);
         }
 
         for (final String tempString : data.getData("TimingPoints")) {
@@ -155,10 +155,7 @@ public class DifficultyReCalculator {
                 return false;
             }
 
-            int time = parser.tryParseInt(rawData[2], -1);
-            if (time <= -1) {
-                return false;
-            }
+            int time = parser.tryParseInt(rawData[2], 0);
             while (tpIndex < timingPoints.size() - 1 && timingPoints.get(tpIndex + 1).getOffset() <= time) {
                 tpIndex++;
             }
@@ -182,10 +179,7 @@ public class DifficultyReCalculator {
                 object = new HitCircle(time, pos, currentTimingPoint);
             } else if (hitObjectType == HitObjectType.Spinner) {
                 // Spinner
-                int endTime = parser.tryParseInt(rawData[5], -1);
-                if (endTime <= -1) {
-                    return false;
-                }
+                int endTime = parser.tryParseInt(rawData[5], 0);
                 object = new Spinner(time, endTime, pos, currentTimingPoint);
             } else if (hitObjectType == HitObjectType.Slider || hitObjectType == HitObjectType.SliderNewCombo) {
                 // Slider
