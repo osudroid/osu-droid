@@ -399,7 +399,7 @@ public class LibraryManager {
             track.setCreator("unknown");
 
             final BeatmapData data = parser.parse(true);
-            if (!parser.populateMetadata(data, info, track)) {
+            if (data == null || !data.populateMetadata(info, track)) {
                 continue;
             }
             if (track.getBackground() != null) {

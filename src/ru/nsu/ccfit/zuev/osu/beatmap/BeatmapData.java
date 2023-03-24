@@ -1,17 +1,30 @@
 package ru.nsu.ccfit.zuev.osu.beatmap;
 
+import com.rian.difficultycalculator.attributes.DifficultyAttributes;
 import com.rian.difficultycalculator.beatmap.BeatmapControlPointsManager;
 import com.rian.difficultycalculator.beatmap.BeatmapHitObjectsManager;
 import com.rian.difficultycalculator.beatmap.hitobject.HitObject;
+import com.rian.difficultycalculator.beatmap.hitobject.HitObjectWithDuration;
 import com.rian.difficultycalculator.beatmap.hitobject.Slider;
+import com.rian.difficultycalculator.beatmap.timings.TimingControlPoint;
 
+import java.io.File;
 import java.util.ArrayList;
 
+import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
+import ru.nsu.ccfit.zuev.osu.ToastLogger;
+import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
+import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapHitObjectsParser;
 import ru.nsu.ccfit.zuev.osu.beatmap.sections.BeatmapColor;
 import ru.nsu.ccfit.zuev.osu.beatmap.sections.BeatmapDifficulty;
 import ru.nsu.ccfit.zuev.osu.beatmap.sections.BeatmapEvents;
 import ru.nsu.ccfit.zuev.osu.beatmap.sections.BeatmapGeneral;
 import ru.nsu.ccfit.zuev.osu.beatmap.sections.BeatmapMetadata;
+import ru.nsu.ccfit.zuev.osu.game.GameHelper;
+import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
+import ru.nsu.ccfit.zuev.osu.helper.StringTable;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 /**
  * A structure containing information about a beatmap.
@@ -181,5 +194,115 @@ public class BeatmapData {
      */
     public int getOffsetTime(int time) {
         return time + (formatVersion < 5 ? 24 : 0);
+    }
+
+    /**
+     * Given a <code>BeatmapInfo</code> and <code>TrackInfo</code>, populate its metadata
+     * with this <code>BeatmapData</code>.
+     *
+     * @param info The <code>BeatmapInfo</code> to populate.
+     * @param track The <code>TrackInfo</code> to populate.
+     * @return Whether the given <code>BeatmapInfo</code> and <code>TrackInfo</code> was successfully populated.
+     */
+    public boolean populateMetadata(final BeatmapInfo info, final TrackInfo track) {
+        // General
+        if (info.getMusic() == null) {
+            final File musicFile = new File(info.getPath(), general.audioFilename);
+            if (!musicFile.exists()) {
+                ToastLogger.showText(StringTable.format(R.string.osu_parser_music_not_found,
+                        track.getFilename().substring(0, track.getFilename().length() - 4)), true);
+                return false;
+            }
+            info.setMusic(musicFile.getPath());
+            info.setPreviewTime(general.previewTime);
+        }
+
+        // Metadata
+        if (info.getTitle() == null) {
+            info.setTitle(metadata.title);
+        }
+        if (info.getTitleUnicode() == null) {
+            String titleUnicode = metadata.titleUnicode;
+            if (!titleUnicode.isEmpty()) {
+                info.setTitleUnicode(titleUnicode);
+            }
+        }
+        if (info.getArtist() == null) {
+            info.setArtist(metadata.artist);
+        }
+        if (info.getArtistUnicode() == null) {
+            String artistUnicode = metadata.artist;
+            if (!artistUnicode.isEmpty()) {
+                info.setArtistUnicode(artistUnicode);
+            }
+        }
+        if (info.getSource() == null) {
+            info.setSource(metadata.source);
+        }
+        if (info.getTags() == null) {
+            info.setTags(metadata.tags);
+        }
+
+        track.setCreator(metadata.creator);
+        track.setMode(metadata.version);
+        track.setPublicName(metadata.artist + " - " + metadata.title);
+        track.setBeatmapID(metadata.beatmapID);
+        track.setBeatmapSetID(metadata.beatmapSetID);
+
+        // Difficulty
+        track.setOverallDifficulty(difficulty.od);
+        track.setApproachRate(difficulty.ar);
+        track.setHpDrain(difficulty.hp);
+        track.setCircleSize(difficulty.cs);
+
+        // Events
+        track.setBackground(events.backgroundFilename);
+
+        // Timing points
+        for (TimingControlPoint point : timingPoints.timing.getControlPoints()) {
+            float bpm = (float) point.getBPM();
+
+            track.setBpmMin(track.getBpmMin() != Float.MAX_VALUE ? Math.min(track.getBpmMin(), bpm) : bpm);
+            track.setBpmMax(track.getBpmMax() != 0 ? Math.max(track.getBpmMax(), bpm) : bpm);
+        }
+
+        // Hit objects
+        if (hitObjects.getObjects().isEmpty() && !rawHitObjects.isEmpty()) {
+            BeatmapHitObjectsParser parser = new BeatmapHitObjectsParser(true);
+
+            for (String s : rawHitObjects) {
+                parser.parse(this, s);
+
+                // Remove the last object in raw hit object to undo the process done by the parser.
+                rawHitObjects.remove(rawHitObjects.size() - 1);
+            }
+
+            BeatmapParser.populateObjectData(this);
+        }
+
+        if (hitObjects.getObjects().isEmpty()) {
+            return false;
+        }
+
+        track.setTotalHitObjectCount(hitObjects.getObjects().size());
+        track.setHitCircleCount(hitObjects.getCircleCount());
+        track.setSliderCount(hitObjects.getSliderCount());
+        track.setSpinnerCount(hitObjects.getSpinnerCount());
+
+        HitObject lastObject = hitObjects.getObjects().get(hitObjects.getObjects().size() - 1);
+
+        track.setMusicLength((int) lastObject.getStartTime());
+        if (lastObject instanceof HitObjectWithDuration) {
+            track.setMusicLength((int) ((HitObjectWithDuration) lastObject).getEndTime());
+        }
+        track.setMaxCombo(getMaxCombo());
+
+        DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
+                BeatmapDifficultyCalculator.constructDifficultyBeatmap(this)
+        );
+
+        track.setDifficulty(GameHelper.Round(attributes.starRating, 2));
+
+        return true;
     }
 }
