@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.beatmap.parser.sections;
 
+import android.text.TextUtils;
+
 import java.util.Arrays;
 
 /**
@@ -20,7 +22,7 @@ public abstract class BeatmapKeyValueSectionParser extends BeatmapSectionParser 
 
         return new String[] {
                 s[0].trim(),
-                s.length > 1 ? String.join(":", Arrays.copyOfRange(s, 1, s.length)).trim() : ""
+                s.length > 1 ? TextUtils.join(":", Arrays.copyOfRange(s, 1, s.length)).trim() : ""
         };
     }
 }
