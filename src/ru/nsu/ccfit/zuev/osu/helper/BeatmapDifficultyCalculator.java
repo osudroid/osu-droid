@@ -11,8 +11,6 @@ import com.rian.difficultycalculator.calculator.DifficultyCalculator;
 import com.rian.difficultycalculator.calculator.PerformanceCalculationParameters;
 import com.rian.difficultycalculator.calculator.PerformanceCalculator;
 
-import java.util.EnumSet;
-
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapHitObjectsParser;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
