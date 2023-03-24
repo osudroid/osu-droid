@@ -11,6 +11,8 @@ import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.replay.OdrDatabase;
 import com.edlplan.ui.fragment.PropsMenuFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
+import com.rian.difficultycalculator.attributes.DifficultyAttributes;
+import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -43,18 +45,19 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
 import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
+import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
+import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
+import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
@@ -64,6 +67,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinLayout;
 
 public class SongMenu implements IUpdateHandler, MenuItemListener,
@@ -968,16 +972,27 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         changeDimensionInfo(track);
         (new Thread() {
             public void run() {
-                DifficultyReCalculator diffReCalculator = new DifficultyReCalculator();
-                float newstar = diffReCalculator.recalculateStar(
-                    selectedTrack,
-                    diffReCalculator.getCS(selectedTrack),
-                    ModMenu.getInstance().getSpeed()
+                BeatmapData beatmapData = new BeatmapParser(selectedTrack.getFilename()).parse(true);
+
+                if (beatmapData == null) {
+                    setStarsDisplay(0);
+                    return;
+                }
+
+                DifficultyCalculationParameters parameters = new DifficultyCalculationParameters();
+                parameters.mods = ModMenu.getInstance().getMod();
+                parameters.customSpeedMultiplier = ModMenu.getInstance().getChangeSpeed();
+
+                if (ModMenu.getInstance().isEnableForceAR()) {
+                    parameters.forcedAR = ModMenu.getInstance().getForceAR();
+                }
+
+                DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
+                        BeatmapDifficultyCalculator.constructDifficultyBeatmap(beatmapData),
+                        parameters
                 );
 
-                if (newstar != 0f) {
-                    setStarsDisplay(newstar);
-                }
+                setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
             }
         }).start();
     }

@@ -55,16 +55,18 @@ import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.effect.Metronome;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.PlayMode;
-import ru.nsu.ccfit.zuev.osu.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.OSUParser;
 import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.RGBAColor;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
+import ru.nsu.ccfit.zuev.osu.beatmap.constants.BeatmapCountdown;
+import ru.nsu.ccfit.zuev.osu.beatmap.constants.SampleBank;
+import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
@@ -208,51 +210,34 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private void setBackground() {
         boolean bgset = false;
-        bgSprite = null;
+        Sprite bgSprite;
         if (storyboardSprite != null) {
             if (storyboardSprite.isStoryboardAvailable()) {
                 storyboardSprite.setBrightness(Config.getBackgroundBrightness());
                 return;
             }
         }
-        for (final String s : beatmapData.getData("Events")) {
-            final String[] pars = s.split("\\s*,\\s*");
-            if (pars.length >= 3 && pars[0].equals("0") && pars[1].equals("0")) {
-                // String filename = pars[2].substring(1, pars[2].length() - 1);
 
-                if (Config.getBackgroundQuality() == 0) {
-                    scene.setBackground(new ColorBackground(0, 0, 0));
-                    continue;
-                }
-
-                bgset = true;
-                final TextureRegion tex = Config.isSafeBeatmapBg() ?
-                    ResourceManager.getInstance().getTexture("menu-background") :
-                    ResourceManager.getInstance().getTextureIfLoaded("::background");
-                if (tex == null) {
-                    continue;
-                }
+        if (beatmapData.events.backgroundFilename != null) {
+            bgset = true;
+            final TextureRegion tex = Config.isSafeBeatmapBg() ? ResourceManager.getInstance().getTexture("menu-background") : ResourceManager.getInstance().getTextureIfLoaded("::background");
+            if (tex != null) {
                 float brightness = Config.getBackgroundBrightness();
-                float height = tex.getHeight() * Config.getBackgroundQuality();
-                height *= Config.getRES_WIDTH()
-                        / (float) (tex.getWidth() * Config
-                        .getBackgroundQuality());
-                bgSprite = new Sprite(0,
-                        (Config.getRES_HEIGHT() - height) / 2,
-                        Config.getRES_WIDTH(), height, tex);
+                float height = tex.getHeight();
+                height *= Config.getRES_WIDTH() / (float) tex.getWidth();
+                bgSprite = new Sprite(0, (Config.getRES_HEIGHT() - height) / 2, Config.getRES_WIDTH(), height, tex);
                 bgSprite.setColor(brightness, brightness, brightness);
                 scene.setBackground(new SpriteBackground(bgSprite));
-            } else if (pars.length >= 3 && pars[0].equals("2")) {
-
-            } else if (bgset == false && pars.length == 5
-                    && pars[0].equals("3") && pars[1].equals("100")) {
-                bgset = true;
-                final float bright = Config.getBackgroundBrightness();
-                scene.setBackground(new ColorBackground(
-                        Integer.parseInt(pars[2]) * bright / 255f,
-                        Integer.parseInt(pars[3]) * bright / 255f,
-                        Integer.parseInt(pars[4]) * bright / 255f));
             }
+        }
+
+        if (!bgset && beatmapData.events.backgroundColor != null) {
+            final float bright = Config.getBackgroundBrightness();
+            scene.setBackground(new ColorBackground(
+                    beatmapData.events.backgroundColor.r() * bright / 255f,
+                    beatmapData.events.backgroundColor.g() * bright / 255f,
+                    beatmapData.events.backgroundColor.b() * bright / 255f
+            ));
         }
     }
 
@@ -269,9 +254,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         } else
             this.replayFile = rFile;
 
-        OSUParser parser = new OSUParser(track.getFilename());
+        BeatmapParser parser = new BeatmapParser(track.getFilename());
         if (parser.openFile()) {
-            beatmapData = parser.readData();
+            beatmapData = parser.parse(false);
         } else {
             Debug.e("startGame: cannot open file");
             ToastLogger.showText(
@@ -279,6 +264,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                             track.getFilename()), true);
             return false;
         }
+
+        if (beatmapData == null) {
+            return false;
+        }
+
         parser = null;
 
 //        try {
@@ -295,25 +285,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         // TODO skin manager
         SkinManager.getInstance().loadBeatmapSkin(beatmapData.getFolder());
 
-        if (beatmapData.getData("General", "Mode").equals("0") == false) {
-            if (beatmapData.getData("General", "Mode").equals("") == false) {
-                ToastLogger.showText(StringTable.format(
-                        R.string.message_error_mapmode,
-                        beatmapData.getData("General", "Mode")), true);
-                return false;
-            }
-        }
-
-        breakPeriods = new LinkedList<BreakPeriod>();
-        for (final String s : beatmapData.getData("Events")) {
-            final String[] pars = s.split("\\s*,\\s*");
-            if ((pars.length >= 3) && pars[0].equals("0") && pars[1].equals("0")) {
-
-            } else if (pars.length >= 3 && pars[0].equals("2")) {
-                breakPeriods.add(new BreakPeriod(
-                        Float.parseFloat(pars[1]) / 1000f, Float
-                        .parseFloat(pars[2]) / 1000f));
-            }
+        breakPeriods = new LinkedList<>();
+        for (final BreakPeriod period : beatmapData.events.breaks) {
+            breakPeriods.add(new BreakPeriod(period.getStart() / 1000f, (period.getStart() + period.getLength()) / 1000f));
         }
 
         totalOffset = Config.getOffset();
@@ -327,9 +301,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         try {
             final File musicFile = new File(beatmapData.getFolder(),
-                    beatmapData.getData("General", "AudioFilename"));
+                    beatmapData.general.audioFilename);
 
-            if (musicFile.exists() == false) {
+            if (!musicFile.exists()) {
                 throw new FileNotFoundException(musicFile.getPath());
             }
 
@@ -347,9 +321,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return false;
         }
 
-        title = beatmapData.getData("Metadata", "Title");
-        artist = beatmapData.getData("Metadata", "Artist");
-        version = beatmapData.getData("Metadata", "Version");
+        title = beatmapData.metadata.title;
+        artist = beatmapData.metadata.artist;
+        version = beatmapData.metadata.version;
 
         // r = 54.42 - 4.48 * cs
         // Reading beatmap settings
@@ -357,7 +331,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         //TextureRegion appcircleTex = ResourceManager.getInstance().getTexture("approachcircle");
 
         scale = (float) ((Config.getRES_HEIGHT() / 480.0f)
-                * (54.42 - Float.parseFloat(beatmapData.getData("Difficulty", "CircleSize")) * 4.48)
+                * (54.42 - beatmapData.difficulty.cs * 4.48)
                 * 2 / GameObjectSize.BASE_OBJECT_SIZE)
                 + 0.5f * Config.getScaleMultiplier();
 
@@ -368,19 +342,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 + 0.125f
                 * Config.getScaleMultiplier();*/
 
-        String rawRate = beatmapData.getData("Difficulty", "ApproachRate");
-        if (rawRate.equals("")) {
-            rawRate = beatmapData.getData("Difficulty", "OverallDifficulty");
-        }
-        float rawApproachRate = Float.parseFloat(rawRate);
+        float rawApproachRate = beatmapData.difficulty.ar;
         approachRate = (float) GameHelper.ar2ms(rawApproachRate) / 1000f;
-        final String rawSliderSpeed = beatmapData.getData("Difficulty",
-                "SliderMultiplier");
 
-        overallDifficulty = Float.parseFloat(beatmapData.getData("Difficulty",
-                "OverallDifficulty"));
-        drain = Float.parseFloat(beatmapData.getData("Difficulty",
-                "HPDrainRate"));
+        overallDifficulty = beatmapData.difficulty.od;
+        drain = beatmapData.difficulty.hp;
         rawDifficulty = overallDifficulty;
         rawDrain = drain;
 
@@ -478,19 +444,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setAutopilotMod(ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTOPILOT));
         GameHelper.setAuto(ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO));
 
-        final String stackLatiency = beatmapData.getData("General",
-                "StackLeniency");
-        if (stackLatiency.equals("") == false) {
-            GameHelper.setStackLatient(Float.parseFloat(stackLatiency));
-        } else {
-            GameHelper.setStackLatient(0);
-        }
+        GameHelper.setStackLeniency(beatmapData.general.stackLeniency);
         if (scale < 0.001f){
             scale = 0.001f;
         }
-        GameHelper.setSpeed(Float.parseFloat(rawSliderSpeed) * 100);
-        GameHelper.setTickRate(Float.parseFloat(beatmapData.getData(
-                "Difficulty", "SliderTickRate")));
+        GameHelper.setSpeed((float) beatmapData.difficulty.sliderMultiplier * 100);
+        GameHelper.setTickRate((float) beatmapData.difficulty.sliderTickRate);
         GameHelper.setScale(scale);
         GameHelper.setDifficulty(overallDifficulty);
         GameHelper.setDrain(drain);
@@ -498,7 +457,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         // Parsing hit objects
         objects = new LinkedList<GameObjectData>();
-        for (final String s : beatmapData.getData("HitObjects")) {
+        for (final String s : beatmapData.rawHitObjects) {
             objects.add(new GameObjectData(s));
         }
 
@@ -507,36 +466,24 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return false;
         }
 
-        activeObjects = new LinkedList<GameObject>();
-        passiveObjects = new LinkedList<GameObject>();
+        activeObjects = new LinkedList<>();
+        passiveObjects = new LinkedList<>();
         lastObjectId = -1;
 
         GameHelper.setSliderColor(SkinManager.getInstance().getSliderColor());
-        final String slidercolor = beatmapData.getData("Colours",
-                "SliderBorder");
-        if (slidercolor.equals("") == false) {
-            final String[] sliderColors = slidercolor.split("[,]");
-            GameHelper.setSliderColor(new RGBColor(Integer
-                    .parseInt(sliderColors[0]) / 255.0f, Integer
-                    .parseInt(sliderColors[1]) / 255.0f, Integer
-                    .parseInt(sliderColors[2]) / 255.0f));
+        if (beatmapData.colors.sliderBorderColor != null) {
+            GameHelper.setSliderColor(beatmapData.colors.sliderBorderColor);
         }
 
         if (OsuSkin.get().isForceOverrideSliderBorderColor()) {
             GameHelper.setSliderColor(new RGBColor(OsuSkin.get().getSliderBorderColor()));
         }
 
-        combos = new ArrayList<RGBColor>();
-        comboNum = 2;
-        String ccolor = beatmapData.getData("Colours", "Combo1");
-        while (ccolor.equals("") == false) {
-            final String[] colors = ccolor.replace(" ", "").split("[,]");
-            combos.add(new RGBColor(Integer.parseInt(colors[0]) / 255.0f,
-                    Integer.parseInt(colors[1]) / 255.0f, Integer
-                    .parseInt(colors[2]) / 255.0f));
-
-            ccolor = beatmapData.getData("Colours", "Combo" + comboNum++);
+        combos = new ArrayList<>();
+        for (RGBColor color : beatmapData.colors.comboColors) {
+            combos.add(new RGBColor(color.r() / 255, color.g() / 255, color.b() / 255));
         }
+
         if (combos.isEmpty() || Config.isUseCustomComboColors()) {
             combos.clear();
             combos.addAll(Arrays.asList(Config.getComboColors()));
@@ -548,16 +495,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         comboNum = -1;
         currentComboNum = 0;
         lastObjectHitTime = 0;
-        final String defSound = beatmapData.getData("General", "SampleSet");
-        if (defSound.equals("Soft")) {
+        final SampleBank defSound = beatmapData.general.sampleBank;
+        if (defSound == SampleBank.soft) {
             TimingPoint.setDefaultSound("soft");
         } else {
             TimingPoint.setDefaultSound("normal");
         }
-        timingPoints = new LinkedList<TimingPoint>();
-        activeTimingPoints = new LinkedList<TimingPoint>();
+        timingPoints = new LinkedList<>();
+        activeTimingPoints = new LinkedList<>();
         currentTimingPoint = null;
-        for (final String s : beatmapData.getData("TimingPoints")) {
+        for (final String s : beatmapData.rawTimingPoints) {
             final TimingPoint tp = new TimingPoint(s.split("[,]"),
                     currentTimingPoint);
             timingPoints.add(tp);
@@ -574,7 +521,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     null
             );
 
-            for (final String s : beatmapData.getData("TimingPoints")) {
+            for (final String s : beatmapData.rawTimingPoints) {
                 final TimingPoint tp = new TimingPoint(s.split("[,]"),
                         currentTimingPoint);
                 timingPoints.add(tp);
@@ -585,7 +532,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         GameHelper.controlPoints = new ControlPoints();
-        GameHelper.controlPoints.load(TimingPoints.parse(beatmapData.getData("TimingPoints")));
+        GameHelper.controlPoints.load(TimingPoints.parse(beatmapData.rawTimingPoints));
         currentTimingPoint = timingPoints.peek();
         firstTimingPoint = currentTimingPoint;
         soundTimingPoint = currentTimingPoint;
@@ -808,8 +755,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         stat = new StatisticV2();
         stat.setMod(ModMenu.getInstance().getMod());
         float multiplier = 1 + rawDifficulty / 10f + rawDrain / 10f;
-        multiplier += (Float.parseFloat(beatmapData.getData("Difficulty",
-                "CircleSize")) - 3) / 4f;
+        multiplier += (beatmapData.difficulty.cs - 3) / 4f;
 
         stat.setDiffModifier(multiplier);
         stat.setMaxObjectsCount(lastTrack.getTotalHitObjectCount());
@@ -848,13 +794,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         comboWas100 = false;
         comboWasMissed = false;
 
-        final String leadin = beatmapData.getData("General", "AudioLeadIn");
-        secPassed = -Integer.parseInt(leadin.equals("") ? "0" : leadin) / 1000f;
+        final int leadIn = beatmapData.general.audioLeadIn;
+        secPassed = -leadIn / 1000f;
         if (secPassed > -1) {
             secPassed = -1;
         }
 
-        if (objects.isEmpty() == false) {
+        if (!objects.isEmpty()) {
             skipTime = objects.peek().getTime() - approachRate - 1f;
         } else {
             skipTime = 0;
@@ -889,31 +835,21 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             autoCursor.attachToScene(fgScene);
         }
 
-        final String countdownPar = beatmapData.getData("General", "Countdown");
-        if (Config.isCorovans() && countdownPar.equals("") == false) {
-            float cdSpeed = 0;
-            if (countdownPar.equals("1")) {
-                cdSpeed = 1;
-            } else if (countdownPar.equals("2")) {
-                cdSpeed = 2;
-            } else if (countdownPar.equals("3")) {
-                cdSpeed = 0.5f;
-            }
+        final BeatmapCountdown countdown = beatmapData.general.countdown;
+        if (Config.isCorovans() && countdown != null) {
+            float cdSpeed = countdown.speed;
             skipTime -= cdSpeed * Countdown.COUNTDOWN_LENGTH;
-            if (cdSpeed != 0
-                    && objects.peek().getTime() - secPassed >= cdSpeed
-                    * Countdown.COUNTDOWN_LENGTH) {
-                addPassiveObject(new Countdown(this, bgScene, cdSpeed, 0,
-                        objects.peek().getTime() - secPassed));
+            if (cdSpeed != 0 && objects.peek().getTime() - secPassed >= cdSpeed * Countdown.COUNTDOWN_LENGTH) {
+                addPassiveObject(new Countdown(this, bgScene, cdSpeed, 0, objects.peek().getTime() - secPassed));
             }
         }
 
-        float lastObjectTme = 0;
-        if (objects.isEmpty() == false)
-            lastObjectTme = objects.getLast().getTime();
+        float lastObjectTime = 0;
+        if (!objects.isEmpty())
+            lastObjectTime = objects.getLast().getTime();
 
         if(!Config.isHideInGameUI()) { 
-            progressBar = new SongProgressBar(this, bgScene, lastObjectTme, objects
+            progressBar = new SongProgressBar(this, bgScene, lastObjectTime, objects
                     .getFirst().getTime(), new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
             progressBar.setProgressRectColor(new RGBAColor(153f / 255f, 204f / 255f, 51f / 255f, 0.4f));
         }
@@ -968,8 +904,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setGlobalTime(0);
 
         float effectOffset = 155 - 25;
-        breakAnimator = new BreakAnimator(this, fgScene, stat, beatmapData
-                    .getData("General", "LetterboxInBreaks").equals("1"), bgSprite);
+        breakAnimator = new BreakAnimator(this, fgScene, stat, beatmapData.general.letterboxInBreaks, bgSprite);
         if(!Config.isHideInGameUI()){
             scorebar = new ScoreBar(this, fgScene, stat);
             addPassiveObject(scorebar);
@@ -1682,7 +1617,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             // If Config.isCalculateSliderPathInGameStart(), do this in stackNotes()
             if (Config.isCalculateSliderPathInGameStart() == false &&
                 objects.isEmpty() == false && (objDefine & 1) > 0) {
-                if (objects.peek().getTime() - data.getTime() < 2f * GameHelper.getStackLatient()
+                if (objects.peek().getTime() - data.getTime() < 2f * GameHelper.getStackLeniency()
                         && Utils.squaredDistance(pos, objects.peek().getPos()) < scale) {
                     objects.peek().setPosOffset(
                             data.getPosOffset() + Utils.toRes(4) * scale);
@@ -2762,7 +2697,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final String[] params = data.getData();
             final int objDefine = Integer.parseInt(params[3]);
             if (objects.isEmpty() == false && (objDefine & 1) > 0 && i + 1 < objects.size()) {
-                if (objects.get(i + 1).getTime() - data.getTime() < 2f * GameHelper.getStackLatient()
+                if (objects.get(i + 1).getTime() - data.getTime() < 2f * GameHelper.getStackLeniency()
                         && Utils.squaredDistance(pos, objects.get(i + 1).getPos()) < scale) {
                     objects.get(i + 1).setPosOffset(
                             data.getPosOffset() + Utils.toRes(4) * scale);

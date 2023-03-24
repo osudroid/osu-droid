@@ -1,4 +1,4 @@
-package com.rian.difficultycalculator.beatmap.constants;
+package ru.nsu.ccfit.zuev.osu.beatmap.constants;
 
 /**
  * Created by Fuuko on 2015/5/29.

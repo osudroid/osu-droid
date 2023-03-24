@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.app.Activity;
 
+import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
+import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import org.anddev.andengine.util.Debug;
 
@@ -387,7 +389,7 @@ public class LibraryManager {
             return;
         }
         for (final File file : filelist) {
-            final OSUParser parser = new OSUParser(file);
+            final BeatmapParser parser = new BeatmapParser(file);
             if (!parser.openFile()) {
                 continue;
             }
@@ -395,7 +397,9 @@ public class LibraryManager {
             final TrackInfo track = new TrackInfo(info);
             track.setFilename(file.getPath());
             track.setCreator("unknown");
-            if (!parser.readMetaData(track, info)) {
+
+            final BeatmapData data = parser.parse(true);
+            if (!parser.populateMetadata(data, info, track)) {
                 continue;
             }
             if (track.getBackground() != null) {

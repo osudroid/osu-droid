@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu.scoring;
 
 import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.edlplan.framework.utils.functionality.SmartIterator;
+import com.rian.difficultycalculator.attributes.DifficultyAttributes;
+import com.rian.difficultycalculator.attributes.PerformanceAttributes;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
@@ -24,10 +26,12 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
+import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
+import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
@@ -448,19 +452,24 @@ public class ScoringScene {
         //calculatePP
         if (Config.isDisplayScoreStatistics()){
             StringBuilder ppinfo = new StringBuilder();
-            DifficultyReCalculator diffRecalculator = new DifficultyReCalculator();
-            float newstar = diffRecalculator.recalculateStar(
-                trackInfo,
-                diffRecalculator.getCS(stat, trackInfo),
-                stat.getSpeed()
-            );
-            diffRecalculator.calculatePP(stat, trackInfo);
-            double pp = diffRecalculator.getTotalPP();
-            diffRecalculator.calculateMaxPP(stat, trackInfo);
-            double max_pp = diffRecalculator.getTotalPP();
-            ppinfo.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fpp", newstar, pp, max_pp));
+            BeatmapData beatmapData = new BeatmapParser(track.getFilename()).parse(true);
+
+            if (beatmapData != null) {
+                DifficultyAttributes difficultyAttributes = BeatmapDifficultyCalculator.calculateDifficulty(
+                        BeatmapDifficultyCalculator.constructDifficultyBeatmap(beatmapData), stat
+                );
+                PerformanceAttributes performanceAttributes = BeatmapDifficultyCalculator.calculatePerformance(
+                        difficultyAttributes, stat
+                );
+                PerformanceAttributes maxPerformanceAttributes = BeatmapDifficultyCalculator.calculatePerformance(
+                        difficultyAttributes
+                );
+                ppinfo.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fpp", difficultyAttributes.starRating, performanceAttributes.total, maxPerformanceAttributes.total));
+            }
             if (stat.getUnstableRate() > 0) {
-                ppinfo.append("\n\n");
+                if (beatmapData != null) {
+                    ppinfo.append("\n");
+                }
                 ppinfo.append(String.format(Locale.ENGLISH, "Error: %.2fms - %.2fms avg", stat.getNegativeHitError(), stat.getPositiveHitError()));
                 ppinfo.append("\n");
                 ppinfo.append(String.format(Locale.ENGLISH, "Unstable Rate: %.2f", stat.getUnstableRate()));

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PointF;
 import android.net.Uri;
-import android.os.Build;
 import android.os.PowerManager;
 import android.util.Log;
 
@@ -61,6 +60,8 @@ import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
 import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
+import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
+import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.SongProgressBar;
 import ru.nsu.ccfit.zuev.osu.game.TimingPoint;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierFactory;
@@ -1080,13 +1081,13 @@ public class MainScene implements IUpdateHandler {
             Arrays.fill(peakDownRate, 1f);
             Arrays.fill(peakAlpha, 0f);
 
-            OSUParser parser = new OSUParser(selectedTrack.getFilename());
+            BeatmapParser parser = new BeatmapParser(selectedTrack.getFilename());
             if (parser.openFile()) {
-                beatmapData = parser.readData();
+                beatmapData = parser.parse(false);
 
-                timingPoints = new LinkedList<TimingPoint>();
+                timingPoints = new LinkedList<>();
                 currentTimingPoint = null;
-                for (final String s : beatmapData.getData("TimingPoints")) {
+                for (final String s : beatmapData.rawTimingPoints) {
                     final TimingPoint tp = new TimingPoint(s.split("[,]"), currentTimingPoint);
                     timingPoints.add(tp);
                     if (tp.wasInderited() == false || currentTimingPoint == null) {

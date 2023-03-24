@@ -29,7 +29,7 @@ public class GameHelper {
     private static float difficulty = 1;
     private static float approachRate = 1;
     private static float drain = 0;
-    private static float stackLatient = 0;
+    private static float stackLeniency = 0;
     private static float timeMultiplier = 0;
     private static RGBColor sliderColor = new RGBColor();
     private static boolean hidden = false;
@@ -338,12 +338,12 @@ public class GameHelper {
         return pointPool.poll();
     }
 
-    public static float getStackLatient() {
-        return stackLatient;
+    public static float getStackLeniency() {
+        return stackLeniency;
     }
 
-    public static void setStackLatient(final float stackLatient) {
-        GameHelper.stackLatient = stackLatient;
+    public static void setStackLeniency(final float stackLeniency) {
+        GameHelper.stackLeniency = stackLeniency;
     }
 
     public static RGBColor getSliderColor() {

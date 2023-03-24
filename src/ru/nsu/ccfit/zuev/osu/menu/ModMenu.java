@@ -1,6 +1,8 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
 import com.edlplan.ui.fragment.InGameSettingMenu;
+import com.rian.difficultycalculator.attributes.DifficultyAttributes;
+import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
@@ -17,10 +19,13 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
+import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
+import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.game.mods.IModSwitcher;
 import ru.nsu.ccfit.zuev.osu.game.mods.ModButton;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
+import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.TextButton;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -179,14 +184,32 @@ public class ModMenu implements IModSwitcher {
                     (new Thread() {
                         public void run() {
                             if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != null){
-                                DifficultyReCalculator rec = new DifficultyReCalculator();
-                                float newstar = rec.recalculateStar(
-                                        GlobalManager.getInstance().getSongMenu().getSelectedTrack(),
-                                        rec.getCS(GlobalManager.getInstance().getSongMenu().getSelectedTrack()),
-                                        getSpeed());
-                                if (newstar != 0f) {
-                                    GlobalManager.getInstance().getSongMenu().setStarsDisplay(newstar);
+                                BeatmapData beatmapData = new BeatmapParser(
+                                        GlobalManager.getInstance().getSongMenu().getSelectedTrack().getFilename()
+                                ).parse(true);
+
+                                if (beatmapData == null) {
+                                    GlobalManager.getInstance().getSongMenu().setStarsDisplay(0);
+                                    return;
                                 }
+
+                                DifficultyCalculationParameters parameters = new DifficultyCalculationParameters();
+                                parameters.mods = getMod();
+                                parameters.customSpeedMultiplier = changeSpeed;
+
+                                if (enableForceAR) {
+                                    parameters.forcedAR = forceAR;
+                                }
+
+                                DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
+                                        BeatmapDifficultyCalculator.constructDifficultyBeatmap(beatmapData),
+                                        parameters
+                                );
+
+
+                                GlobalManager.getInstance().getSongMenu().setStarsDisplay(
+                                        GameHelper.Round(attributes.starRating, 2)
+                                );
                             }
                         }
                     }).start();
