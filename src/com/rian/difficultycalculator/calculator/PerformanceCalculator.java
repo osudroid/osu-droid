@@ -56,7 +56,7 @@ public class PerformanceCalculator {
      *
      * @return The performance attributes for the beatmap relating to the parameters.
      */
-    protected PerformanceAttributes createPerformanceAttributes() {
+    private PerformanceAttributes createPerformanceAttributes() {
         double multiplier = finalMultiplier;
 
         if (difficultyAttributes.mods.contains(GameMod.MOD_NOFAIL)) {
@@ -93,7 +93,7 @@ public class PerformanceCalculator {
         return attributes;
     }
 
-    protected void processParameters(PerformanceCalculationParameters parameters) {
+    private void processParameters(PerformanceCalculationParameters parameters) {
         if (parameters == null) {
             resetDefaults();
             return;
@@ -110,28 +110,28 @@ public class PerformanceCalculator {
     /**
      * Calculates the accuracy of the parameters.
      */
-    protected double getAccuracy() {
+    private double getAccuracy() {
         return (double) (countGreat * 6 + countOk * 2 + countMeh) / (getTotalHits() * 6);
     }
 
     /**
      * Gets the total hits that can be done in the beatmap.
      */
-    protected int getTotalHits() {
+    private int getTotalHits() {
         return difficultyAttributes.hitCircleCount + difficultyAttributes.sliderCount + difficultyAttributes.spinnerCount;
     }
 
     /**
      * Gets the amount of hits that were successfully done.
      */
-    protected int getTotalSuccessfulHits() {
+    private int getTotalSuccessfulHits() {
         return countGreat + countOk + countMeh;
     }
 
     /**
      * Resets this calculator to its original state.
      */
-    protected void resetDefaults() {
+    private void resetDefaults() {
         scoreMaxCombo = difficultyAttributes.maxCombo;
         countGreat = getTotalHits();
         countOk = 0;
@@ -144,7 +144,7 @@ public class PerformanceCalculator {
         double aimValue = Math.pow(5 * Math.max(1, difficultyAttributes.aimDifficulty / 0.0675) - 4, 3) / 100000;
 
         // Longer maps are worth more
-        double lengthBonus = 0.95 + 0.4 * Math.min(1, getTotalHits() / 2000);
+        double lengthBonus = 0.95 + 0.4 * Math.min(1, getTotalHits() / 2000d);
         if (getTotalHits() > 2000) {
             lengthBonus += Math.log10(getTotalHits() / 2000d) * 0.5;
         }
@@ -156,12 +156,14 @@ public class PerformanceCalculator {
             aimValue *= 0.97 * Math.pow(1 - Math.pow(effectiveMissCount / getTotalHits(), 0.775), effectiveMissCount);
         }
 
+        aimValue *= getComboScalingFactor();
+
         if (!difficultyAttributes.mods.contains(GameMod.MOD_RELAX)) {
             // AR scaling
             double approachRateFactor = 0;
             if (difficultyAttributes.approachRate > 10.33) {
                 approachRateFactor += 0.3 * (difficultyAttributes.approachRate - 10.33);
-            } else if (difficultyAttributes.approachRate< 8) {
+            } else if (difficultyAttributes.approachRate < 8) {
                 approachRateFactor += 0.05 * (8 - difficultyAttributes.approachRate);
             }
 
@@ -177,8 +179,7 @@ public class PerformanceCalculator {
         // We assume 15% of sliders in a map are difficult since there's no way to tell from the performance calculator.
         double estimateDifficultSliders = difficultyAttributes.sliderCount * 0.15;
 
-        if (estimateDifficultSliders > 0)
-        {
+        if (estimateDifficultSliders > 0) {
             double estimateSliderEndsDropped = MathUtils.clamp(Math.min(countOk + countMeh + countMiss, difficultyAttributes.maxCombo - scoreMaxCombo), 0, estimateDifficultSliders);
             double sliderNerfFactor = (1 - difficultyAttributes.aimSliderFactor) * Math.pow(1 - estimateSliderEndsDropped / estimateDifficultSliders, 3) + difficultyAttributes.aimSliderFactor;
             aimValue *= sliderNerfFactor;
@@ -188,7 +189,7 @@ public class PerformanceCalculator {
         aimValue *= getAccuracy();
 
         // It is also important to consider accuracy difficulty when doing that.
-        aimValue *= 0.98 * Math.pow(difficultyAttributes.overallDifficulty, 2) / 2500;
+        aimValue *= 0.98 + Math.pow(difficultyAttributes.overallDifficulty, 2) / 2500;
 
         return aimValue;
     }
@@ -201,7 +202,7 @@ public class PerformanceCalculator {
         double speedValue = Math.pow(5 * Math.max(1, difficultyAttributes.speedDifficulty / 0.0675) - 4, 3) / 100000;
 
         // Longer maps are worth more
-        double lengthBonus = 0.95 + 0.4 * Math.min(1, getTotalHits() / 2000);
+        double lengthBonus = 0.95 + 0.4 * Math.min(1, getTotalHits() / 2000d);
         if (getTotalHits() > 2000) {
             lengthBonus += Math.log10(getTotalSuccessfulHits() / 2000d) * 0.5;
         }
@@ -226,7 +227,7 @@ public class PerformanceCalculator {
         }
 
         // Calculate accuracy assuming the worst case scenario.
-        double relevantTotalDiff = getTotalHits() - this.difficultyAttributes.speedNoteCount;
+        double relevantTotalDiff = getTotalHits() - difficultyAttributes.speedNoteCount;
         double relevantCountGreat = Math.max(0, countGreat - relevantTotalDiff);
         double relevantCountOk = Math.max(0, countOk - Math.max(0, relevantTotalDiff - countGreat));
         double relevantCountMeh = Math.max(0, countMeh - Math.max(0, relevantTotalDiff - countGreat - countOk));
@@ -236,7 +237,7 @@ public class PerformanceCalculator {
         speedValue *= (0.95 + Math.pow(difficultyAttributes.overallDifficulty, 2) / 750) * Math.pow((getAccuracy() + relevantAccuracy) / 2, (14.5 - Math.max(difficultyAttributes.overallDifficulty, 8)) / 2);
 
         // Scale the speed value with # of 50s to punish double-tapping.
-        speedValue *= Math.pow(0.99, Math.max(0, countMeh - getTotalHits() / 500));
+        speedValue *= Math.pow(0.99, Math.max(0, countMeh - getTotalHits() / 500d));
 
         return speedValue;
     }
@@ -278,12 +279,12 @@ public class PerformanceCalculator {
 
         double flashlightValue = Math.pow(difficultyAttributes.flashlightDifficulty, 2) * 25;
 
-        flashlightValue *= getComboScalingFactor();
-
         if (effectiveMissCount > 0) {
             // Penalize misses by assessing # of misses relative to the total # of objects. Default a 3% reduction for any # of misses.
             flashlightValue *= 0.97 * Math.pow(1 - Math.pow(effectiveMissCount / getTotalHits(), 0.775), Math.pow(effectiveMissCount, 0.875));
         }
+
+        flashlightValue *= getComboScalingFactor();
 
         // Account for shorter maps having a higher ratio of 0 combo/100 combo flashlight radius.
         flashlightValue *= 0.7 + 0.1 * Math.min(1, getTotalHits() / 200) +

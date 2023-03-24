@@ -71,9 +71,13 @@ public class DifficultyCalculator {
      * @param parameters The difficulty calculation parameters used.
      * @return Difficulty attributes describing the beatmap's difficulty.
      */
-    protected DifficultyAttributes createDifficultyAttributes(final DifficultyBeatmap beatmap, final Skill[] skills,
+    private DifficultyAttributes createDifficultyAttributes(final DifficultyBeatmap beatmap, final Skill[] skills,
                                                               final DifficultyCalculationParameters parameters) {
         DifficultyAttributes attributes = new DifficultyAttributes();
+
+        if (parameters != null) {
+            attributes.mods = parameters.mods.clone();
+        }
 
         attributes.aimDifficulty = calculateRating(skills[0]);
         attributes.speedDifficulty = calculateRating(skills[2]);
@@ -138,7 +142,7 @@ public class DifficultyCalculator {
      * @param beatmap The beatmap.
      * @param parameters The difficulty calculation parameters.
      */
-    protected void applyParameters(DifficultyBeatmap beatmap, DifficultyCalculationParameters parameters) {
+    private void applyParameters(DifficultyBeatmap beatmap, DifficultyCalculationParameters parameters) {
         final BeatmapDifficultyManager manager = beatmap.getDifficultyManager();
 
         processCS(manager, parameters);
@@ -161,7 +165,7 @@ public class DifficultyCalculator {
      * @param parameters The difficulty calculation parameter being used.
      * @return The skills.
      */
-    protected Skill[] createSkills(DifficultyBeatmap beatmap, DifficultyCalculationParameters parameters) {
+    private Skill[] createSkills(DifficultyBeatmap beatmap, DifficultyCalculationParameters parameters) {
         EnumSet<GameMod> mods = EnumSet.noneOf(GameMod.class);
         float od = beatmap.getDifficultyManager().getOD();
         double greatWindow = HitWindowConverter.odToHitWindow300(od);
@@ -286,7 +290,7 @@ public class DifficultyCalculator {
 
         float ar = beatmap.getDifficultyManager().getAR();
         float timePreempt = (ar <= 5) ? (1800 - 120 * ar) : (1950 - 150 * ar);
-        float objectScale = (1 - (0.7f * (beatmap.getDifficultyManager().getCS() - 5)) / 5) / 2;
+        float objectScale = (1 - 0.7f * (beatmap.getDifficultyManager().getCS() - 5) / 5) / 2;
 
         for (int i = 1; i < rawObjects.size(); ++i) {
             rawObjects.get(i).setScale(objectScale);

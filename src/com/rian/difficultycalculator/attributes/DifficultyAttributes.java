@@ -11,7 +11,7 @@ public class DifficultyAttributes {
     /**
      * The mods which were applied to the beatmap.
      */
-    public EnumSet<GameMod> mods;
+    public EnumSet<GameMod> mods = EnumSet.noneOf(GameMod.class);
 
     /**
      * The combined star rating of all skills.
