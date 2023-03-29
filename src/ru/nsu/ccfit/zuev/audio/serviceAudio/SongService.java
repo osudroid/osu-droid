@@ -48,6 +48,21 @@ public class SongService extends Service {
     }
 
     @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        forceHideNotification();
+    }
+
+    @Override
+    public void onLowMemory() {
+        forceHideNotification();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_NOT_STICKY;
+    }
+
+    @Override
     public void onRebind(Intent intent) {
         super.onRebind(intent);
         System.out.println("onReBind");
@@ -210,6 +225,12 @@ public class SongService extends Service {
         }
 
         return notify.hide();
+    }
+
+    public void forceHideNotification() {
+        if (notify != null) {
+            notify.forceHide();
+        }
     }
 
     public void setReceiverStuff(BroadcastReceiver receiver, IntentFilter filter) {
