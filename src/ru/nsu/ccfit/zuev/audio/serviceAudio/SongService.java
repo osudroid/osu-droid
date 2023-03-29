@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.audio.serviceAudio;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
@@ -89,8 +90,11 @@ public class SongService extends Service {
 
     public boolean preLoad(String filePath, float speed, boolean enableNC) {
         if (checkFileExist(filePath)) {
-            if (audioFunc == null) return false;
-                audioFunc.setLoop(false);
+            if (audioFunc == null) {
+                return false;
+            }
+
+            audioFunc.setLoop(false);
             return audioFunc.preLoad(filePath, speed, enableNC);
         }
         return false;
