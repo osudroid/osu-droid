@@ -75,7 +75,8 @@ public class Config {
         useSuperSlider,
         enableStoryboard,
         safeBeatmapBg,
-        trianglesAnimation;
+        trianglesAnimation,
+        displayRealTimePPCounter;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -222,6 +223,7 @@ public class Config {
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
+        displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
 
         if(receiveAnnouncements) {
             FirebaseMessaging.getInstance().subscribeToTopic("announcements");
@@ -297,6 +299,10 @@ public class Config {
 
     public static boolean isDisplayScoreStatistics() {
         return displayScoreStatistics;
+    }
+
+    public static boolean isDisplayRealTimePPCounter() {
+        return displayRealTimePPCounter;
     }
 
     public static boolean isEnableExtension() {
