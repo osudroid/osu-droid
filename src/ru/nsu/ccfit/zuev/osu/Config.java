@@ -223,7 +223,7 @@ public class Config {
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
-        displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
+        displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", true);
 
         if(receiveAnnouncements) {
             FirebaseMessaging.getInstance().subscribeToTopic("announcements");
