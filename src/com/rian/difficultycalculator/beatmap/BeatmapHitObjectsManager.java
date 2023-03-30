@@ -125,6 +125,15 @@ public class BeatmapHitObjectsManager {
     }
 
     /**
+     * Resets the stacking of hit objects.
+     */
+    public void resetStacking() {
+        for (HitObject object : objects) {
+            object.setStackHeight(0);
+        }
+    }
+
+    /**
      * Gets the list of hit objects in this beatmap.
      */
     public List<HitObject> getObjects() {

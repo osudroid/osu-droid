@@ -161,7 +161,7 @@ public class DifficultyHitObject {
      */
     public DifficultyHitObject(HitObject object, HitObject lastObject, HitObject lastLastObject,
                                double clockRate, ArrayList<DifficultyHitObject> difficultyHitObjects,
-                               int index, float timePreempt, boolean isForceAR) {
+                               int index, double timePreempt, boolean isForceAR) {
         this.object = object;
         this.lastObject = lastObject;
         this.lastLastObject = lastLastObject;

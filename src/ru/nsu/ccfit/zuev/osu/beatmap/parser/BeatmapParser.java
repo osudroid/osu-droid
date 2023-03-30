@@ -197,9 +197,12 @@ public class BeatmapParser {
 
         for (HitObject object : data.hitObjects.getObjects()) {
             object.setScale(scale);
+
+            // Reset stack height as we will be re-applying it.
+            object.setStackHeight(0);
         }
 
-        HitObjectStackEvaluator.applyStandardStacking(data.getFormatVersion(), data.hitObjects.getObjects(), data.difficulty.ar, data.general.stackLeniency);
+        HitObjectStackEvaluator.applyStacking(data.getFormatVersion(), data.hitObjects.getObjects(), data.difficulty.ar, data.general.stackLeniency);
     }
 
     private void closeSource() {

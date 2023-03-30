@@ -144,18 +144,23 @@ public class DifficultyCalculator {
      */
     private void applyParameters(DifficultyBeatmap beatmap, DifficultyCalculationParameters parameters) {
         final BeatmapDifficultyManager manager = beatmap.getDifficultyManager();
+        float initialAR = manager.getAR();
 
         processCS(manager, parameters);
         processAR(manager, parameters);
         processOD(manager, parameters);
         processHP(manager, parameters);
 
-        HitObjectStackEvaluator.applyStandardStacking(
-                beatmap.getFormatVersion(),
-                beatmap.getHitObjectsManager().getObjects(),
-                manager.getAR(),
-                beatmap.getStackLeniency()
-        );
+        if (initialAR != manager.getAR()) {
+            beatmap.getHitObjectsManager().resetStacking();
+
+            HitObjectStackEvaluator.applyStacking(
+                    beatmap.getFormatVersion(),
+                    beatmap.getHitObjectsManager().getObjects(),
+                    manager.getAR(),
+                    beatmap.getStackLeniency()
+            );
+        }
     }
 
     /**
@@ -213,7 +218,7 @@ public class DifficultyCalculator {
         float ar = manager.getAR();
 
         if (parameters == null) {
-            manager.setAR(Math.min(ar, 10));
+            manager.setAR(Math.min(ar, 10f));
             return;
         }
 
@@ -289,7 +294,7 @@ public class DifficultyCalculator {
         List<HitObject> rawObjects = beatmap.getHitObjectsManager().getObjects();
 
         float ar = beatmap.getDifficultyManager().getAR();
-        float timePreempt = (ar <= 5) ? (1800 - 120 * ar) : (1950 - 150 * ar);
+        double timePreempt = (ar <= 5) ? (1800 - 120 * ar) : (1950 - 150 * ar);
         float objectScale = (1 - 0.7f * (beatmap.getDifficultyManager().getCS() - 5) / 5) / 2;
 
         for (int i = 1; i < rawObjects.size(); ++i) {

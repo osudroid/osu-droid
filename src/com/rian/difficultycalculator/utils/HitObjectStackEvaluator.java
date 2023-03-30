@@ -14,9 +14,18 @@ import java.util.List;
 public final class HitObjectStackEvaluator {
     private static final int stackDistance = 3;
 
-    public static void applyStandardStacking(int formatVersion, List<HitObject> objects, double ar,
-                                             float stackLeniency) {
-        applyStandardStacking(formatVersion, objects, ar, stackLeniency, 0, objects.size() - 1);
+    /**
+     * Applies osu!standard note stacking to hit objects.
+     *
+     * @param formatVersion The format version of the beatmap containing the hit objects.
+     * @param objects       The hit objects to apply stacking to.
+     * @param ar            The calculated approach rate of the beatmap.
+     * @param stackLeniency The multiplier for the threshold in time where hit objects
+     *                      placed close together stack, ranging from 0 to 1.
+     */
+    public static void applyStacking(int formatVersion, List<HitObject> objects, float ar,
+                                     float stackLeniency) {
+        applyStacking(formatVersion, objects, ar, stackLeniency, 0, objects.size() - 1);
     }
 
     /**
@@ -30,15 +39,15 @@ public final class HitObjectStackEvaluator {
      * @param startIndex    The minimum index bound of the hit object to apply stacking to.
      * @param endIndex      The maximum index bound of the hit object to apply stacking to.
      */
-    public static void applyStandardStacking(int formatVersion, List<HitObject> objects, double ar,
-                                             float stackLeniency, int startIndex, int endIndex) {
+    public static void applyStacking(int formatVersion, List<HitObject> objects, float ar,
+                                     float stackLeniency, int startIndex, int endIndex) {
         if (objects.isEmpty()) {
             return;
         }
 
         if (formatVersion < 6) {
             // Use the old version of stacking algorithm for beatmap version 5 or lower.
-            applyStandardStackingOld(objects, ar, stackLeniency);
+            applyStackingOld(objects, ar, stackLeniency);
             return;
         }
 
@@ -196,7 +205,7 @@ public final class HitObjectStackEvaluator {
      * @param stackLeniency The multiplier for the threshold in time where hit objects
      *                      placed close together stack, ranging from 0 to 1.
      */
-    private static void applyStandardStackingOld(List<HitObject> objects, double ar, float stackLeniency) {
+    private static void applyStackingOld(List<HitObject> objects, double ar, float stackLeniency) {
         double timePreempt = (ar <= 5) ? (1800 - 120 * ar) : (1950 - 150 * ar);
         double stackThreshold = timePreempt * stackLeniency;
 
