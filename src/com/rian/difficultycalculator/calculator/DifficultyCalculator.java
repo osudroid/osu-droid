@@ -1,6 +1,7 @@
 package com.rian.difficultycalculator.calculator;
 
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
+import com.rian.difficultycalculator.attributes.TimedDifficultyAttributes;
 import com.rian.difficultycalculator.beatmap.BeatmapDifficultyManager;
 import com.rian.difficultycalculator.beatmap.DifficultyBeatmap;
 import com.rian.difficultycalculator.beatmap.hitobject.DifficultyHitObject;
@@ -61,6 +62,54 @@ public class DifficultyCalculator {
         }
 
         return createDifficultyAttributes(beatmapToCalculate, skills, parameters);
+    }
+
+    /**
+     * Calculates the difficulty of a beatmap without specific parameters and returns a set of
+     * <code>TimedDifficultyAttributes</code> representing the difficulty at every relevant time
+     * value in the beatmap.
+     *
+     * @param beatmap The beatmap whose difficulty is to be calculated.
+     * @return The set of <code>TimedDifficultyAttributes</code>.
+     */
+    public List<TimedDifficultyAttributes> calculateTimed(final DifficultyBeatmap beatmap) {
+        return calculateTimed(beatmap, null);
+    }
+
+    /**
+     * Calculates the difficulty of a beatmap without specific parameters and returns a set of
+     * <code>TimedDifficultyAttributes</code> representing the difficulty at every relevant time
+     * value in the beatmap.
+     *
+     * @param beatmap The beatmap whose difficulty is to be calculated.
+     * @param parameters The calculation parameters that should be applied to the beatmap.
+     * @return The set of <code>TimedDifficultyAttributes</code>.
+     */
+    public List<TimedDifficultyAttributes> calculateTimed(final DifficultyBeatmap beatmap,
+                                                          final DifficultyCalculationParameters parameters) {
+        DifficultyBeatmap beatmapToCalculate = beatmap;
+
+        if (parameters != null) {
+            // Always operate on a clone of the original beatmap, to not modify it game-wide
+            beatmapToCalculate = beatmap.deepClone();
+            applyParameters(beatmapToCalculate, parameters);
+        }
+
+        Skill[] skills = createSkills(beatmapToCalculate, parameters);
+        ArrayList<TimedDifficultyAttributes> attributes = new ArrayList<>();
+        DifficultyBeatmap progressiveBeatmap = new DifficultyBeatmap(beatmapToCalculate.getDifficultyManager());
+
+        for (DifficultyHitObject object : createDifficultyHitObjects(beatmapToCalculate, parameters)) {
+            progressiveBeatmap.getHitObjectsManager().add(object.object);
+
+            for (Skill skill : skills) {
+                skill.process(object);
+            }
+
+            attributes.add(new TimedDifficultyAttributes(object.endTime * (parameters != null ? parameters.getTotalSpeedMultiplier() : 1), createDifficultyAttributes(progressiveBeatmap, skills, parameters)));
+        }
+
+        return attributes;
     }
 
     /**

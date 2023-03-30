@@ -29,6 +29,19 @@ public class DifficultyBeatmap {
 
     /**
      * Constructs a new instance of <code>DifficultyBeatmap</code> using an existing
+     * difficulty manager.
+     * <br><br>
+     * The manager will be deep-cloned.
+     *
+     * @param difficultyManager The difficulty manager.
+     */
+    public DifficultyBeatmap(BeatmapDifficultyManager difficultyManager) {
+        this.difficultyManager = difficultyManager.deepClone();
+        this.hitObjectsManager = new BeatmapHitObjectsManager();
+    }
+
+    /**
+     * Constructs a new instance of <code>DifficultyBeatmap</code> using an existing
      * difficulty manager and hit objects manager.
      * <br><br>
      * Both managers will be deep-cloned.
