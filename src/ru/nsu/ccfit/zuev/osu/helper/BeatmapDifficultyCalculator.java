@@ -49,7 +49,11 @@ public final class BeatmapDifficultyCalculator {
         difficultyManager.setSliderMultiplier(data.difficulty.sliderMultiplier);
         difficultyManager.setSliderTickRate(data.difficulty.sliderTickRate);
 
-        return new DifficultyBeatmap(difficultyManager, data.hitObjects);
+        DifficultyBeatmap beatmap = new DifficultyBeatmap(difficultyManager, data.hitObjects);
+        beatmap.setFormatVersion(data.getFormatVersion());
+        beatmap.setStackLeniency(data.general.stackLeniency);
+
+        return beatmap;
     }
 
     /**
