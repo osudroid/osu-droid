@@ -4,12 +4,15 @@ import static ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser.populateObjectD
 
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
 import com.rian.difficultycalculator.attributes.PerformanceAttributes;
+import com.rian.difficultycalculator.attributes.TimedDifficultyAttributes;
 import com.rian.difficultycalculator.beatmap.BeatmapDifficultyManager;
 import com.rian.difficultycalculator.beatmap.DifficultyBeatmap;
 import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 import com.rian.difficultycalculator.calculator.DifficultyCalculator;
 import com.rian.difficultycalculator.calculator.PerformanceCalculationParameters;
 import com.rian.difficultycalculator.calculator.PerformanceCalculator;
+
+import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapHitObjectsParser;
@@ -137,6 +140,50 @@ public final class BeatmapDifficultyCalculator {
     public static DifficultyAttributes calculateDifficulty(
             final DifficultyBeatmap beatmap, final DifficultyCalculationParameters parameters) {
         return difficultyCalculator.calculate(beatmap, parameters);
+    }
+
+    /**
+     * Calculates the difficulty of a <code>DifficultyBeatmap</code>, returning a set of
+     * <code>TimedDifficultyAttributes</code> representing the difficulty of the beatmap
+     * at any relevant time.
+     *
+     * @param beatmap The <code>DifficultyBeatmap</code> to calculate.
+     * @return A set of <code>TimedDifficultyAttributes</code> describing the difficulty of
+     * the <code>DifficultyBeatmap</code> at any relevant time.
+     */
+    public static List<TimedDifficultyAttributes> calculateTimedDifficulty(
+            final DifficultyBeatmap beatmap) {
+        return calculateTimedDifficulty(beatmap, (DifficultyCalculationParameters) null);
+    }
+
+    /**
+     * Calculates the difficulty of a <code>DifficultyBeatmap</code>, returning a set of
+     * <code>TimedDifficultyAttributes</code> representing the difficulty of the beatmap
+     * at any relevant time.
+     *
+     * @param beatmap The <code>DifficultyBeatmap</code> to calculate.
+     * @param stat The <code>StatisticV2</code> to calculate.
+     * @return A set of <code>TimedDifficultyAttributes</code> describing the difficulty of
+     * the <code>DifficultyBeatmap</code> at any relevant time relating to the <code>StatisticV2</code>.
+     */
+    public static List<TimedDifficultyAttributes> calculateTimedDifficulty(
+            final DifficultyBeatmap beatmap, final StatisticV2 stat) {
+        return calculateTimedDifficulty(beatmap, constructDifficultyParameters(stat));
+    }
+
+    /**
+     * Calculates the difficulty of a <code>DifficultyBeatmap</code> given a <code>StatisticV2</code>,
+     * returning a set of <code>TimedDifficultyAttributes</code> representing the difficulty of the
+     * beatmap at any relevant time.
+     *
+     * @param beatmap The <code>DifficultyBeatmap</code> to calculate.
+     * @param parameters The parameters of the calculation. Can be <code>null</code>.
+     * @return A set of <code>TimedDifficultyAttributes</code> describing the difficulty of
+     * the <code>DifficultyBeatmap</code> at any relevant time relating to the calculation parameters.
+     */
+    public static List<TimedDifficultyAttributes> calculateTimedDifficulty(
+            final DifficultyBeatmap beatmap, final DifficultyCalculationParameters parameters) {
+        return difficultyCalculator.calculateTimed(beatmap, parameters);
     }
 
     /**
