@@ -97,7 +97,15 @@ public class DifficultyCalculator {
 
         Skill[] skills = createSkills(beatmapToCalculate, parameters);
         ArrayList<TimedDifficultyAttributes> attributes = new ArrayList<>();
+
+        if (beatmapToCalculate.getHitObjectsManager().getObjects().isEmpty()) {
+            return attributes;
+        }
+
         DifficultyBeatmap progressiveBeatmap = new DifficultyBeatmap(beatmapToCalculate.getDifficultyManager());
+
+        // Add the first object in the beatmap, otherwise it will be ignored.
+        progressiveBeatmap.getHitObjectsManager().add(beatmapToCalculate.getHitObjectsManager().getObjects().get(0));
 
         for (DifficultyHitObject object : createDifficultyHitObjects(beatmapToCalculate, parameters)) {
             progressiveBeatmap.getHitObjectsManager().add(object.object);
