@@ -66,6 +66,7 @@ public class BassAudioFunc {
     }
 
     public boolean resume() {
+        setEndSync();
         return BASS.BASS_ChannelPlay(channel, false);
     }
 
@@ -153,16 +154,7 @@ public class BassAudioFunc {
                     }
                 },0);
             }*/
-            BASS.BASS_ChannelSetSync(channel, BASS.BASS_SYNC_END, 0, new BASS.SYNCPROC() {
-                @Override
-                public void SYNCPROC(int handle, int channel, int data, Object user) {
-                    if (!isGaming) {
-                        broadcastManager.sendBroadcast(new Intent("Notify_next"));
-                    } else {
-                        stop();
-                    }
-                }
-            }, 0);
+            setEndSync();
             return BASS.BASS_ChannelPlay(channel, true);
         }
         return false;
@@ -288,4 +280,13 @@ public class BassAudioFunc {
         BASS.BASS_Free();
     }
 
+    private void setEndSync() {
+        BASS.BASS_ChannelSetSync(channel, BASS.BASS_SYNC_END, 0, (handle, channel, data, user) -> {
+            if (!isGaming) {
+                broadcastManager.sendBroadcast(new Intent("Notify_next"));
+            } else {
+                stop();
+            }
+        }, 0);
+    }
 }
