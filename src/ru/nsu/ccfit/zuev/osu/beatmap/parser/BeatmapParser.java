@@ -2,10 +2,7 @@ package ru.nsu.ccfit.zuev.osu.beatmap.parser;
 
 import android.util.Log;
 
-import com.rian.difficultycalculator.attributes.DifficultyAttributes;
 import com.rian.difficultycalculator.beatmap.hitobject.HitObject;
-import com.rian.difficultycalculator.beatmap.hitobject.HitObjectWithDuration;
-import com.rian.difficultycalculator.beatmap.timings.TimingControlPoint;
 import com.rian.difficultycalculator.utils.HitObjectStackEvaluator;
 
 import java.io.File;
@@ -13,15 +10,11 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import okio.BufferedSource;
+import okio.Okio;
+import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.constants.BeatmapSection;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
-import ru.nsu.ccfit.zuev.osuplus.R;
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.ToastLogger;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapColorParser;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapControlPointsParser;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapDifficultyParser;
@@ -29,9 +22,6 @@ import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapEventsParser;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapGeneralParser;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapHitObjectsParser;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapMetadataParser;
-import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import okio.BufferedSource;
-import okio.Okio;
 
 /**
  * A parser for parsing <code>.osu</code> files.
