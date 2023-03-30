@@ -12,11 +12,15 @@ import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
 import com.edlplan.ui.fragment.InGameSettingMenu;
+import com.rian.difficultycalculator.attributes.TimedDifficultyAttributes;
+import com.rian.difficultycalculator.beatmap.hitobject.HitObject;
+import com.rian.difficultycalculator.beatmap.hitobject.HitObjectWithDuration;
+import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 
 import org.anddev.andengine.engine.Engine;
+import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.entity.modifier.DelayModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
@@ -43,11 +47,11 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
-import java.util.Iterator;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -63,17 +67,15 @@ import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.RGBAColor;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
-import ru.nsu.ccfit.zuev.osu.beatmap.constants.BeatmapCountdown;
-import ru.nsu.ccfit.zuev.osu.beatmap.constants.SampleBank;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
-import ru.nsu.ccfit.zuev.skins.OsuSkin;
-import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
 import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
+import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
+import ru.nsu.ccfit.zuev.osu.beatmap.constants.BeatmapCountdown;
+import ru.nsu.ccfit.zuev.osu.beatmap.constants.SampleBank;
+import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.AutoCursor;
@@ -81,6 +83,7 @@ import ru.nsu.ccfit.zuev.osu.game.cursor.main.Cursor;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
+import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
@@ -93,12 +96,14 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
-import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
+import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
-import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
+import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
+import ru.nsu.ccfit.zuev.skins.SkinManager;
 
 public class GameScene implements IUpdateHandler, GameObjectListener,
         IOnSceneTouchListener {
@@ -187,6 +192,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
+    private List<TimedDifficultyAttributes> timedDifficultyAttributes = new ArrayList<>();
+    private ChangeableText ppText;
+
     private long previousFrameTime;
 
     public GameScene(final Engine engine) {
@@ -254,22 +262,26 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         } else
             this.replayFile = rFile;
 
-        BeatmapParser parser = new BeatmapParser(track.getFilename());
-        if (parser.openFile()) {
-            beatmapData = parser.parse(false);
-        } else {
-            Debug.e("startGame: cannot open file");
-            ToastLogger.showText(
-                    StringTable.format(R.string.message_error_open,
-                            track.getFilename()), true);
-            return false;
+        // Only parse beatmap if the track changed or real-time PP counter is active and there are
+        // no timed difficulty attributes.
+        if (track != lastTrack || (Config.isDisplayRealTimePPCounter() && timedDifficultyAttributes.isEmpty())) {
+            BeatmapParser parser = new BeatmapParser(track.getFilename());
+            if (parser.openFile()) {
+                // We want to calculate timed difficulty attributes for live pp counter.
+                // In that case, we need to parse hit objects.
+                beatmapData = parser.parse(Config.isDisplayRealTimePPCounter());
+            } else {
+                Debug.e("startGame: cannot open file");
+                ToastLogger.showText(
+                        StringTable.format(R.string.message_error_open,
+                                track.getFilename()), true);
+                return false;
+            }
         }
 
         if (beatmapData == null) {
             return false;
         }
-
-        parser = null;
 
 //        try {
 //            float height = 720;
@@ -456,7 +468,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setApproachRate(approachRate);
 
         // Parsing hit objects
-        objects = new LinkedList<GameObjectData>();
+        objects = new LinkedList<>();
         for (final String s : beatmapData.rawHitObjects) {
             objects.add(new GameObjectData(s));
         }
@@ -605,6 +617,26 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         } catch (final Exception e) {
         }*/
 
+        ppText = null;
+        if (Config.isDisplayRealTimePPCounter() && track != lastTrack) {
+            // Calculate timed difficulty attributes
+            DifficultyCalculationParameters parameters = new DifficultyCalculationParameters();
+
+            parameters.mods = ModMenu.getInstance().getMod().clone();
+            parameters.customSpeedMultiplier = ModMenu.getInstance().getChangeSpeed();
+
+            if (ModMenu.getInstance().isEnableForceAR()) {
+                parameters.forcedAR = ModMenu.getInstance().getForceAR();
+            }
+
+            timedDifficultyAttributes = BeatmapDifficultyCalculator.calculateTimedDifficulty(
+                    BeatmapDifficultyCalculator.constructDifficultyBeatmap(beatmapData),
+                    parameters
+            );
+        } else if (!Config.isDisplayRealTimePPCounter()) {
+            timedDifficultyAttributes.clear();
+        }
+
         lastTrack = track;
         if (Config.isCalculateSliderPathInGameStart()){
             stackNotes();
@@ -679,7 +711,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             public void onComplete() {
-                if (loadComplete == true) {
+                if (loadComplete) {
                     prepareScene();
                 } else {
                     ModMenu.getInstance().setMod(Replay.oldMod);
@@ -706,7 +738,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         setBackground();
 
-        if (Config.isShowFPS()) {
+        if (Config.isShowFPS() || Config.isDisplayRealTimePPCounter()) {
             final Font font = ResourceManager.getInstance().getFont(
                     "smallFont");
             final ChangeableText fpsText = new ChangeableText(Utils.toRes(790),
@@ -721,6 +753,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             fgScene.attachChild(fpsText);
             // fgScene.attachChild(accText);
             fgScene.attachChild(urText);
+
+            if (Config.isDisplayRealTimePPCounter()) {
+                ppText = new ChangeableText(Utils.toRes(720), Utils.toRes(440), font, "0.00pp  ");
+                fgScene.attachChild(ppText);
+            }
 
             ChangeableText memText = null;
             if (BuildConfig.DEBUG) {
@@ -739,13 +776,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                     fpsText.setPosition(Config.getRES_WIDTH() - fpsText.getWidth() - 5, Config.getRES_HEIGHT() - fpsText.getHeight() - 10);
                     urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, fpsText.getY() - urText.getHeight());
+                    if (ppText != null) {
+                        ppText.setPosition(Config.getRES_WIDTH() - ppText.getWidth() - 5, urText.getY() - ppText.getHeight());
+                    }
 
                     if (fmemText != null) {
                         Runtime runtime = Runtime.getRuntime();
                         fmemText.setText(
-                            ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB"
-                            + "/" + (Runtime.getRuntime().totalMemory() / 1024 / 1024) + " MB    ");
-                        fmemText.setPosition(Config.getRES_WIDTH() - fmemText.getWidth() - 5, urText.getY() - fmemText.getHeight());
+                            ((runtime.totalMemory() - runtime.freeMemory()) / 1024 / 1024) + " MB"
+                            + "/" + (runtime.totalMemory() / 1024 / 1024) + " MB    ");
+                        fmemText.setPosition(
+                                Config.getRES_WIDTH() - fmemText.getWidth() - 5,
+                                (ppText != null ? ppText : urText).getY() - fmemText.getHeight()
+                        );
                     }
 
                 }
@@ -1260,9 +1303,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         engine.setScene(scene);
         scene.registerUpdateHandler(this);
     }
-
-
-
 
     public RGBColor getComboColor(int num) {
         return combos.get(num % combos.size());
@@ -2010,6 +2050,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 restartGame();
             }
             if(GameHelper.isSuddenDeath())stat.changeHp(-1.0f);
+            if (objectId != -1) {
+                updatePPCounter(objectId);
+            }
             return "hit0";
         }
 
@@ -2056,6 +2099,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (endCombo) {
             comboWas100 = false;
             comboWasMissed = false;
+        }
+
+        if (objectId != -1) {
+            updatePPCounter(objectId);
         }
 
         return scoreName;
@@ -2107,8 +2154,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         createBurstEffect(pos, color);
         createHitEffect(pos, scoreName, color);
-
-
     }
 
     public void onSliderReverse(PointF pos, float ang, RGBColor color) {
@@ -2788,5 +2833,65 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             ToastLogger.showText(StringTable.get(R.string.message_save_replay_failed), true);
             return false;
         }
+    }
+
+    private void updatePPCounter(int objectId) {
+        if (ppText == null) {
+            return;
+        }
+
+        HitObject object = beatmapData.hitObjects.getObjects().get(objectId);
+        double time = object.getStartTime();
+
+        if (object instanceof HitObjectWithDuration) {
+            time = ((HitObjectWithDuration) object).getEndTime();
+        }
+
+        ppText.setText(String.format(Locale.ENGLISH, "%.2fpp  ", getPPAtTime(time)));
+    }
+
+    private double getPPAtTime(double time) {
+        TimedDifficultyAttributes timedAttributes = getAttributeAtTime(time);
+
+        if (timedAttributes == null) {
+            return 0;
+        }
+
+        return BeatmapDifficultyCalculator.calculatePerformance(
+                timedAttributes.attributes,
+                stat
+        ).total;
+    }
+
+    private TimedDifficultyAttributes getAttributeAtTime(double time) {
+        if (timedDifficultyAttributes.isEmpty()) {
+            return null;
+        }
+
+        if (time < timedDifficultyAttributes.get(0).time) {
+            return null;
+        }
+
+        if (time >= timedDifficultyAttributes.get(timedDifficultyAttributes.size() - 1).time) {
+            return timedDifficultyAttributes.get(timedDifficultyAttributes.size() - 1);
+        }
+
+        int l = 0;
+        int r = timedDifficultyAttributes.size() - 2;
+
+        while (l <= r) {
+            int pivot = l + ((r - l) >> 1);
+            TimedDifficultyAttributes attributes = timedDifficultyAttributes.get(pivot);
+
+            if (attributes.time < time) {
+                l = pivot + 1;
+            } else if (attributes.time > time) {
+                r = pivot - 1;
+            } else {
+                return attributes;
+            }
+        }
+
+        return timedDifficultyAttributes.get(l);
     }
 }
