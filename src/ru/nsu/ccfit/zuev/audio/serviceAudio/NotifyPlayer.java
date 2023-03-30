@@ -172,6 +172,12 @@ public class NotifyPlayer {
         return true;
     }
 
+    public void forceHide() {
+        if (manager != null) {
+            manager.cancel(1);
+        }
+    }
+
     public void create() {
         String channelId = "ru.nsu.ccfit.zuev.audio";
 
