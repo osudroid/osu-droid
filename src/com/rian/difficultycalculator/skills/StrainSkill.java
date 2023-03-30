@@ -47,22 +47,17 @@ public abstract class StrainSkill extends Skill {
 
         currentSectionPeak = Math.max(strainValueAt(current), currentSectionPeak);
         saveToHitObject(current);
-
-        if (current.next(0) == null) {
-            // Don't forget to save the last section peak, which would otherwise be ignored.
-            saveCurrentPeak();
-        }
     }
 
     @Override
     public double difficultyValue() {
-        ArrayList<Double> strains = new ArrayList<>(strainPeaks);
+        ArrayList<Double> strains = getCurrentStrainPeaks();
         Collections.sort(strains, (d1, d2) -> Double.compare(d2, d1));
 
         if (getReducedSectionCount() > 0) {
             // We are reducing the highest strains first to account for extreme difficulty spikes.
             for (int i = 0; i < Math.min(strains.size(), getReducedSectionCount()); ++i) {
-                double scale = Math.log10(Interpolation.linear(1, 10, MathUtils.clamp((float) i / getReducedSectionCount(), 0, 1)));
+                double scale = Math.log10(Interpolation.linear(1d, 10, MathUtils.clamp((float) i / getReducedSectionCount(), 0, 1)));
 
                 strains.set(i, strains.get(i) * Interpolation.linear(getReducedSectionBaseline(), 1, scale));
             }
@@ -81,6 +76,17 @@ public abstract class StrainSkill extends Skill {
         }
 
         return difficulty * getDifficultyMultiplier();
+    }
+
+    /**
+     * Returns a list of the peak strains for each <code>sectionLength</code> section of the beatmap,
+     * including the peak of the current section.
+     */
+    public ArrayList<Double> getCurrentStrainPeaks() {
+        ArrayList<Double> strains = new ArrayList<>(strainPeaks);
+        strains.add(currentSectionPeak);
+
+        return strains;
     }
 
     /**
