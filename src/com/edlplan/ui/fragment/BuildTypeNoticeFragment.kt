@@ -3,6 +3,8 @@ package com.edlplan.ui.fragment
 import android.animation.Animator
 import android.os.Build
 import android.view.View
+import android.widget.Button
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import com.edlplan.framework.easing.Easing
 import com.edlplan.framework.utils.Lazy
@@ -10,6 +12,8 @@ import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.TriangleEffectView
 import org.anddev.andengine.util.StreamUtils
+import ru.nsu.ccfit.zuev.osu.BuildType
+import ru.nsu.ccfit.zuev.osuplus.BuildConfig
 import ru.nsu.ccfit.zuev.osuplus.R
 import java.io.IOException
 
@@ -17,10 +21,13 @@ class BuildTypeNoticeFragment : BaseFragment() {
     override val layoutID: Int
         get() = R.layout.fragment_build_type_notice
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     override fun onLoadView() {
+
         findViewById<TriangleEffectView>(R.id.bg_triangles)!!.setXDistribution { (2f / (1 + Math.exp((Math.random() * 2 - 1) * 10)) - 1).toFloat() }
-        findViewById<View>(R.id.button_view_changelist)!!.setOnClickListener {
+
+        val button: Button = findViewById(R.id.button_view_changelist)!!
+
+        button.setOnClickListener {
             var markdown: String?
             try {
                 val `in` = requireContext().assets.open("app/changelog.md")
@@ -35,6 +42,19 @@ class BuildTypeNoticeFragment : BaseFragment() {
                     .setMarkdown(markdown)
                     .show()
         }
+
+        val text: TextView = findViewById(R.id.build_text)!!
+        val header: TextView = findViewById(R.id.build_text_header)!!
+
+        if (BuildConfig.BUILD_TYPE == "release") {
+            header.text = "Notify!"
+            text.text = "This update will most likely be the last update of osu!droid as most efforts will be put into developing rimu!\n\n" +
+                    "Website: https://osudroid.moe\n" +
+                    "Discord Development: https://discord.gg/Jumudbq7pz\n" +
+                    "Discord International: https://discord.gg/nyD92cE"
+            button.visibility = View.GONE
+        }
+
         playOnLoadAnim()
     }
 
