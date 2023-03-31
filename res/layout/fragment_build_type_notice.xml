@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
+                xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/frg_background"
     android:background="#FAFFFFFF">
@@ -11,47 +11,50 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-
     <LinearLayout
-        android:gravity="center"
-        android:orientation="vertical"
-        android:id="@+id/frg_body"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true">
+            android:gravity="center"
+            android:orientation="vertical"
+            android:id="@+id/frg_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+    android:layout_marginHorizontal="60dp">
 
         <ImageView
-            android:id="@+id/warning_icon"
-            android:scaleX="0.7"
-            android:scaleY="0.7"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/icons8_brake_warning_96" />
+                android:id="@+id/warning_icon"
+                android:scaleX="0.7"
+                android:scaleY="0.7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/icons8_brake_warning_96"
+                android:tint="#E91E63" tools:ignore="UseAppTint"/>
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/pre_release_notice"
-            android:textColor="#E91E63"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_margin="10dp"/>
+                android:id="@+id/build_text_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pre_release_notice"
+                android:textColor="#E91E63"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_margin="10dp"/>
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:gravity="center_horizontal"
-            android:textColor="#000000"
-            android:text="@string/pre_release_message"
-            android:autoLink="web"
-            android:textSize="16sp" />
+                android:id="@+id/build_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:gravity="center_horizontal"
+                android:textColor="#000000"
+                android:text="@string/pre_release_message"
+                android:autoLink="web"
+                android:textSize="16sp"/>
 
         <Button
-            android:id="@+id/button_view_changelist"
-            android:textColor="#FF5722"
-            android:text="@string/click_to_see_change_list"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+                android:id="@+id/button_view_changelist"
+                android:textColor="#FF5722"
+                android:text="@string/click_to_see_change_list"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
     </LinearLayout>
 </RelativeLayout>

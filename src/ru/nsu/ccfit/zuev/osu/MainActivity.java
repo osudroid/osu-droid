@@ -382,9 +382,7 @@ public class MainActivity extends BaseGameActivity implements
 
         ActivityOverlay.initial(this, frameLayout.getId());
 
-        if ("pre_release".equals(BuildConfig.BUILD_TYPE) || BuildConfig.DEBUG) {
-            BuildTypeNoticeFragment.single.get().show();
-        }
+        BuildTypeNoticeFragment.single.get().show();
     }
 
     public void checkNewBeatmaps() {
