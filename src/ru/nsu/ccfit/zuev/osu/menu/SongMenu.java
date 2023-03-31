@@ -972,7 +972,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         changeDimensionInfo(track);
         (new Thread() {
             public void run() {
-                BeatmapData beatmapData = new BeatmapParser(selectedTrack.getFilename()).parse(true);
+                BeatmapData beatmapData = new BeatmapParser(selectedTrack.getFilename()).parse();
 
                 if (beatmapData == null) {
                     setStarsDisplay(0);

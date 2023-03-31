@@ -57,7 +57,6 @@ import javax.microedition.khronos.opengles.GL10;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
 import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
@@ -1082,15 +1081,14 @@ public class MainScene implements IUpdateHandler {
             Arrays.fill(peakAlpha, 0f);
 
             BeatmapParser parser = new BeatmapParser(selectedTrack.getFilename());
-            if (parser.openFile()) {
-                beatmapData = parser.parse(false);
-
+            beatmapData = parser.parse();
+            if (beatmapData != null) {
                 timingPoints = new LinkedList<>();
                 currentTimingPoint = null;
                 for (final String s : beatmapData.rawTimingPoints) {
                     final TimingPoint tp = new TimingPoint(s.split("[,]"), currentTimingPoint);
                     timingPoints.add(tp);
-                    if (tp.wasInderited() == false || currentTimingPoint == null) {
+                    if (!tp.wasInderited() || currentTimingPoint == null) {
                         currentTimingPoint = tp;
                     }
                 }

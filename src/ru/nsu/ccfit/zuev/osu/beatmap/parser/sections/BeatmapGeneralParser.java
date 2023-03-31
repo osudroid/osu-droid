@@ -1,6 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.beatmap.parser.sections;
 
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.constants.BeatmapCountdown;
 import ru.nsu.ccfit.zuev.osu.beatmap.constants.SampleBank;
@@ -10,7 +9,7 @@ import ru.nsu.ccfit.zuev.osu.beatmap.constants.SampleBank;
  */
 public class BeatmapGeneralParser extends BeatmapKeyValueSectionParser {
     @Override
-    public boolean parse(BeatmapData data, String line) {
+    public void parse(BeatmapData data, String line) {
         String[] p = splitProperty(line);
 
         switch (p[0]) {
@@ -18,10 +17,10 @@ public class BeatmapGeneralParser extends BeatmapKeyValueSectionParser {
                 data.general.audioFilename = p[1];
                 break;
             case "AudioLeadIn":
-                data.general.audioLeadIn = Utils.tryParseInt(p[1], data.general.audioLeadIn);
+                data.general.audioLeadIn = parseInt(p[1]);
                 break;
             case "PreviewTime":
-                data.general.previewTime = data.getOffsetTime(Utils.tryParseInt(p[1], data.general.previewTime));
+                data.general.previewTime = data.getOffsetTime(parseInt(p[1]));
                 break;
             case "Countdown":
                 data.general.countdown = BeatmapCountdown.parse(p[1]);
@@ -30,17 +29,17 @@ public class BeatmapGeneralParser extends BeatmapKeyValueSectionParser {
                 data.general.sampleBank = SampleBank.parse(p[1]);
                 break;
             case "SampleVolume":
-                data.general.sampleVolume = Utils.tryParseInt(p[1], data.general.sampleVolume);
+                data.general.sampleVolume = parseInt(p[1]);
                 break;
             case "StackLeniency":
-                data.general.stackLeniency = Utils.tryParseFloat(p[1], data.general.stackLeniency);
+                data.general.stackLeniency = parseFloat(p[1]);
                 break;
             case "LetterboxInBreaks":
                 data.general.letterboxInBreaks = p[1].equals("1");
+                break;
             case "Mode":
-                return p[1].equals("0");
+                data.general.mode = parseInt(p[1]);
+                break;
         }
-
-        return true;
     }
 }

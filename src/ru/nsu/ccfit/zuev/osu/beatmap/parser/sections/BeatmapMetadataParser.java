@@ -1,6 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.beatmap.parser.sections;
 
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 
 /**
@@ -8,7 +7,7 @@ import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
  */
 public class BeatmapMetadataParser extends BeatmapKeyValueSectionParser {
     @Override
-    public boolean parse(BeatmapData data, String line) {
+    public void parse(BeatmapData data, String line) {
         String[] p = splitProperty(line);
 
         switch (p[0]) {
@@ -37,13 +36,11 @@ public class BeatmapMetadataParser extends BeatmapKeyValueSectionParser {
                 data.metadata.tags = p[1];
                 break;
             case "BeatmapID":
-                data.metadata.beatmapID = Utils.tryParseInt(p[1], data.metadata.beatmapID);
+                data.metadata.beatmapID = parseInt(p[1]);
                 break;
             case "BeatmapSetID":
-                data.metadata.beatmapSetID = Utils.tryParseInt(p[1], data.metadata.beatmapSetID);
+                data.metadata.beatmapSetID = parseInt(p[1]);
                 break;
         }
-
-        return true;
     }
 }

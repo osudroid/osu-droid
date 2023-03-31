@@ -186,7 +186,7 @@ public class ModMenu implements IModSwitcher {
                             if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != null){
                                 BeatmapData beatmapData = new BeatmapParser(
                                         GlobalManager.getInstance().getSongMenu().getSelectedTrack().getFilename()
-                                ).parse(true);
+                                ).parse();
 
                                 if (beatmapData == null) {
                                     GlobalManager.getInstance().getSongMenu().setStarsDisplay(0);

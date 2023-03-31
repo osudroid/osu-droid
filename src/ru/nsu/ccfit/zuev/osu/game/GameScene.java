@@ -269,7 +269,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (parser.openFile()) {
                 // We want to calculate timed difficulty attributes for live pp counter.
                 // In that case, we need to parse hit objects.
-                beatmapData = parser.parse(Config.isDisplayRealTimePPCounter());
+                beatmapData = parser.parse();
             } else {
                 Debug.e("startGame: cannot open file");
                 ToastLogger.showText(

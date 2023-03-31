@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapHitObjectsParser;
 import ru.nsu.ccfit.zuev.osu.beatmap.sections.BeatmapColor;
 import ru.nsu.ccfit.zuev.osu.beatmap.sections.BeatmapDifficulty;
 import ru.nsu.ccfit.zuev.osu.beatmap.sections.BeatmapEvents;
@@ -267,19 +265,6 @@ public class BeatmapData {
         }
 
         // Hit objects
-        if (hitObjects.getObjects().isEmpty() && !rawHitObjects.isEmpty()) {
-            BeatmapHitObjectsParser parser = new BeatmapHitObjectsParser(true);
-
-            for (String s : rawHitObjects) {
-                parser.parse(this, s);
-
-                // Remove the last object in raw hit object to undo the process done by the parser.
-                rawHitObjects.remove(rawHitObjects.size() - 1);
-            }
-
-            BeatmapParser.populateObjectData(this);
-        }
-
         if (hitObjects.getObjects().isEmpty()) {
             return false;
         }

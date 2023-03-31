@@ -96,11 +96,10 @@ public class BeatmapParser {
     /**
      * Parses the <code>.osu</code> file.
      *
-     * @param withHitObjects Whether to also parse hit objects.
      * @return A <code>BeatmapData</code> containing relevant information of the beatmap file,
      * <code>null</code> if the beatmap file cannot be opened or a line could not be parsed.
      */
-    public BeatmapData parse(boolean withHitObjects) {
+    public BeatmapData parse() {
         if (source == null && !openFile()) {
             return null;
         }
@@ -116,12 +115,18 @@ public class BeatmapParser {
         BeatmapEventsParser eventsParser = new BeatmapEventsParser();
         BeatmapControlPointsParser controlPointsParser = new BeatmapControlPointsParser();
         BeatmapColorParser colorParser = new BeatmapColorParser();
-        BeatmapHitObjectsParser hitObjectsParser = new BeatmapHitObjectsParser(withHitObjects);
+        BeatmapHitObjectsParser hitObjectsParser = new BeatmapHitObjectsParser();
 
         String s;
 
         try {
             while ((s = source.readUtf8Line()) != null) {
+                // Check if beatmap is not an osu!standard beatmap
+                if (data.general.mode != 0) {
+                    // Silently ignore (do not log anything to the user)
+                    return null;
+                }
+
                 // Handle space comments
                 if (s.startsWith(" ") || s.startsWith("_")) {
                     continue;
@@ -145,33 +150,32 @@ public class BeatmapParser {
                     continue;
                 }
 
-                boolean successfulParse = true;
-                switch (currentSection) {
-                    case general:
-                        successfulParse = generalParser.parse(data, s);
-                        break;
-                    case metadata:
-                        successfulParse = metadataParser.parse(data, s);
-                        break;
-                    case difficulty:
-                        successfulParse = difficultyParser.parse(data, s);
-                        break;
-                    case events:
-                        successfulParse = eventsParser.parse(data, s);
-                        break;
-                    case timingPoints:
-                        successfulParse = controlPointsParser.parse(data, s);
-                        break;
-                    case colors:
-                        successfulParse = colorParser.parse(data, s);
-                        break;
-                    case hitObjects:
-                        successfulParse = hitObjectsParser.parse(data, s);
-                        break;
-                }
-
-                if (!successfulParse) {
-                    Log.e("BeatmapParser.parse", "Unable to parse line " + s);
+                try {
+                    switch (currentSection) {
+                        case general:
+                            generalParser.parse(data, s);
+                            break;
+                        case metadata:
+                            metadataParser.parse(data, s);
+                            break;
+                        case difficulty:
+                            difficultyParser.parse(data, s);
+                            break;
+                        case events:
+                            eventsParser.parse(data, s);
+                            break;
+                        case timingPoints:
+                            controlPointsParser.parse(data, s);
+                            break;
+                        case colors:
+                            colorParser.parse(data, s);
+                            break;
+                        case hitObjects:
+                            hitObjectsParser.parse(data, s);
+                            break;
+                    }
+                } catch (Exception e) {
+                    Log.e("BeatmapParser.parse", "Unable to parse line " + s, e);
                     closeSource();
                     return null;
                 }

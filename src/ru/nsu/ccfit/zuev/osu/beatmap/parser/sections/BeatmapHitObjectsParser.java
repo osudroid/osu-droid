@@ -13,58 +13,28 @@ import com.rian.difficultycalculator.math.Vector2;
 
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.constants.HitObjectType;
-
 
 /**
  * A parser for parsing a beatmap's hit objects section.
  */
 public class BeatmapHitObjectsParser extends BeatmapSectionParser {
-    private final boolean parseHitObjects;
-
-    /**
-     * @param parseHitObjects Whether to also parse information of hit objects (such as circles,
-     *                        slider paths, and spinners).
-     *                        <br>
-     *                        Parsed hit objects will be added to the
-     *                        <code>BeatmapHitObjectsManager</code> of a <code>BeatmapData</code>.
-     *
-     */
-    public BeatmapHitObjectsParser(boolean parseHitObjects) {
-        super();
-
-        this.parseHitObjects = parseHitObjects;
-    }
-
     @Override
-    public boolean parse(BeatmapData data, String line) {
+    public void parse(BeatmapData data, String line) {
         final String[] pars = line.split(",");
 
         if (pars.length < 4) {
-            // Malformed hit object
-            return false;
+            throw new UnsupportedOperationException("Malformed hit object");
         }
 
-        data.rawHitObjects.add(line);
+        double time = data.getOffsetTime(parseDouble(pars[2]));
 
-        if (!parseHitObjects) {
-            return true;
-        }
-
-        int time = data.getOffsetTime(Utils.tryParseInt(pars[2], 0));
-
-        HitObjectType type = HitObjectType.valueOf(Utils.tryParseInt(pars[3], -1) % 16);
+        HitObjectType type = HitObjectType.valueOf(parseInt(pars[3]) % 16);
         Vector2 position = new Vector2(
-            Utils.tryParseFloat(pars[0], Float.NaN),
-            Utils.tryParseFloat(pars[1], Float.NaN)
+            (int) parseFloat(pars[0], maxCoordinateValue),
+            (int) parseFloat(pars[1], maxCoordinateValue)
         );
-
-        if (Float.isNaN(position.x) || Float.isNaN(position.y)) {
-            return false;
-        }
-        position = new Vector2((int) position.x, (int) position.y);
 
         HitObject object = null;
 
@@ -76,23 +46,25 @@ public class BeatmapHitObjectsParser extends BeatmapSectionParser {
             object = createSpinner(data, time, pars);
         }
 
-        if (object == null) {
-            return false;
-        }
-
+        data.rawHitObjects.add(line);
         data.hitObjects.add(object);
-
-        return true;
     }
 
-    private HitCircle createCircle(int time, Vector2 position) {
+    private HitCircle createCircle(double time, Vector2 position) {
         return new HitCircle(time, position);
     }
 
-    private Slider createSlider(BeatmapData data, int time, Vector2 position, String[] pars) {
-        // Handle malformed slider
+    private Slider createSlider(BeatmapData data, double time, Vector2 position, String[] pars)
+            throws UnsupportedOperationException {
         if (pars.length < 8) {
-            return null;
+            throw new UnsupportedOperationException("Malformed slider");
+        }
+
+        int repeat = parseInt(pars[6]);
+        double rawLength = Math.max(0, parseDouble(pars[7], maxCoordinateValue));
+
+        if (repeat > 9000) {
+            throw new UnsupportedOperationException("Repeat count is way too high");
         }
 
         String[] curvePointsData = pars[5].split("[|]");
@@ -102,13 +74,9 @@ public class BeatmapHitObjectsParser extends BeatmapSectionParser {
         for (int i = 1; i < curvePointsData.length; i++) {
             String[] curvePointData = curvePointsData[i].split(":");
             Vector2 curvePointPosition = new Vector2(
-                    Utils.tryParseFloat(curvePointData[0], Float.NaN),
-                    Utils.tryParseFloat(curvePointData[1], Float.NaN)
+                    (int) parseFloat(curvePointData[0], maxCoordinateValue),
+                    (int) parseFloat(curvePointData[1], maxCoordinateValue)
             );
-
-            if (Double.isNaN(curvePointPosition.x) || Double.isNaN(curvePointPosition.y)) {
-                return null;
-            }
 
             curvePoints.add(curvePointPosition.subtract(position));
         }
@@ -135,12 +103,6 @@ public class BeatmapHitObjectsParser extends BeatmapSectionParser {
             }
         }
 
-        int repeat = Utils.tryParseInt(pars[6], -1);
-        double rawLength = Utils.tryParseDouble(pars[7], Double.NaN);
-        if (repeat < 0 || Double.isNaN(rawLength)) {
-            return null;
-        }
-
         SliderPath path = new SliderPath(sliderType, curvePoints, rawLength);
         TimingControlPoint timingControlPoint = data.timingPoints.timing.controlPointAt(time);
         DifficultyControlPoint difficultyControlPoint = data.timingPoints.difficulty.controlPointAt(time);
@@ -161,13 +123,8 @@ public class BeatmapHitObjectsParser extends BeatmapSectionParser {
         );
     }
 
-    private Spinner createSpinner(BeatmapData data, int time, String[] pars) {
-        int endTime = Utils.tryParseInt(pars[5], -1);
-        if (endTime < 0) {
-            return null;
-        }
-        endTime = data.getOffsetTime(endTime);
-
+    private Spinner createSpinner(BeatmapData data, double time, String[] pars) {
+        double endTime = data.getOffsetTime(parseInt(pars[5]));
         return new Spinner(time, endTime);
     }
 }

@@ -50,6 +50,11 @@ public class BeatmapGeneral {
      */
     public boolean letterboxInBreaks;
 
+    /**
+     * The game mode this beatmap represents.
+     */
+    public int mode;
+
     public BeatmapGeneral() {}
 
     /**
@@ -66,6 +71,7 @@ public class BeatmapGeneral {
         sampleVolume = source.sampleVolume;
         stackLeniency = source.stackLeniency;
         letterboxInBreaks = source.letterboxInBreaks;
+        mode = source.mode;
     }
 
     /**

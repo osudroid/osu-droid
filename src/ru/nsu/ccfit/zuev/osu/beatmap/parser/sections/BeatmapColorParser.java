@@ -12,18 +12,18 @@ import ru.nsu.ccfit.zuev.osu.beatmap.ComboColor;
  */
 public class BeatmapColorParser extends BeatmapKeyValueSectionParser {
     @Override
-    public boolean parse(BeatmapData data, String line) {
+    public void parse(BeatmapData data, String line) {
         String[] p = splitProperty(line);
         String[] s = p[1].split(",");
 
         if (s.length != 3 && s.length != 4) {
-            return false;
+            throw new UnsupportedOperationException("Color specified in incorrect format (should be R,G,B or R,G,B,A)");
         }
 
         RGBColor color = new RGBColor(
-                Utils.tryParseInt(s[0], 0),
-                Utils.tryParseInt(s[1], 0),
-                Utils.tryParseInt(s[2], 0)
+                parseInt(s[0]),
+                parseInt(s[1]),
+                parseInt(s[2])
         );
 
         if (p[0].startsWith("Combo")) {
@@ -35,7 +35,5 @@ public class BeatmapColorParser extends BeatmapKeyValueSectionParser {
         if (p[0].startsWith("SliderBorder")) {
             data.colors.sliderBorderColor = color;
         }
-
-        return true;
     }
 }

@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.helper;
 
-import static ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser.populateObjectData;
-
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
 import com.rian.difficultycalculator.attributes.PerformanceAttributes;
 import com.rian.difficultycalculator.attributes.TimedDifficultyAttributes;
@@ -15,7 +13,6 @@ import com.rian.difficultycalculator.calculator.PerformanceCalculator;
 import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapHitObjectsParser;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 /**
@@ -31,19 +28,6 @@ public final class BeatmapDifficultyCalculator {
      * @return The constructed <code>DifficultyBeatmap</code>.
      */
     public static DifficultyBeatmap constructDifficultyBeatmap(final BeatmapData data) {
-        if (data.hitObjects.getObjects().isEmpty() && !data.rawHitObjects.isEmpty()) {
-            BeatmapHitObjectsParser parser = new BeatmapHitObjectsParser(true);
-
-            for (String s : data.rawHitObjects) {
-                parser.parse(data, s);
-
-                // Remove the last object in raw hit object to undo the process done by the parser.
-                data.rawHitObjects.remove(data.rawHitObjects.size() - 1);
-            }
-
-            populateObjectData(data);
-        }
-
         BeatmapDifficultyManager difficultyManager = new BeatmapDifficultyManager();
         difficultyManager.setCS(data.difficulty.cs);
         difficultyManager.setAR(data.difficulty.ar);
