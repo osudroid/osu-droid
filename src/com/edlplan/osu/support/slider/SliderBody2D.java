@@ -93,6 +93,10 @@ public class SliderBody2D extends AbstractSliderBody {
 
     @Override
     public void onUpdate() {
+        if (body == null || border == null) {
+            return;
+        }
+
         BuildCache cache = localCache.get();
         LinePath sub = path.cutPath(startLength, endLength).fitToLinePath(cache.path);
         float alpha = endLength / path.getMeasurer().maxLength();
