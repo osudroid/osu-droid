@@ -1081,10 +1081,9 @@ public class MainScene implements IUpdateHandler {
             Arrays.fill(peakAlpha, 0f);
 
             BeatmapParser parser = new BeatmapParser(selectedTrack.getFilename());
-            beatmapData = parser.parse();
+            beatmapData = parser.parse(false);
             if (beatmapData != null) {
                 timingPoints = new LinkedList<>();
-                currentTimingPoint = null;
                 for (final String s : beatmapData.rawTimingPoints) {
                     final TimingPoint tp = new TimingPoint(s.split("[,]"), currentTimingPoint);
                     timingPoints.add(tp);

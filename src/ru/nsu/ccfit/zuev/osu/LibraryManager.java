@@ -395,7 +395,7 @@ public class LibraryManager {
             track.setFilename(file.getPath());
             track.setCreator("unknown");
 
-            final BeatmapData data = parser.parse();
+            final BeatmapData data = parser.parse(true);
             if (data == null || !data.populateMetadata(info, track)) {
                 continue;
             }
