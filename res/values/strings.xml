@@ -142,9 +142,6 @@
 	<!-- Crash -->
 	<string name="crash">Sorry, abnormal program will now exit.</string>
 	<string name="app_run_code_error">Fatal error encountered</string>
-	<string name="osu_parser_error">The difficulty parsing error</string>
-	<string name="osu_parser_music_not_found" formatted="false">Failed loading %s: Could not find audio file</string>
-	<string name="osu_parser_timing_error" formatted="false">Failed loading %s: No uninherited timing point found</string>
 	<string name="require_storage_permission">Game wont run without storage permission, please enable it manually</string>
 
 	<string name="update_dialog_message">There is a new update available</string>
@@ -191,4 +188,9 @@
 	<string name="message_save_replay_failed">Save replay failed</string>
 
     <string name="message_autoclicker_detected">Please disable your accessibility service(s) with the Perform Gestures permission before playing the game.</string>
+
+	<!-- Beatmap parser errors -->
+	<string name="beatmap_parser_cannot_open_file" formatted="false">Failed loading %s: Could not open beatmap file</string>
+	<string name="beatmap_parser_music_not_found" formatted="false">Failed loading %s: Could not find audio file</string>
+	<string name="beatmap_parser_cannot_parse_line" formatted="false">Failed loading %s: Unable to parse a line in the %s section</string>
 </resources>

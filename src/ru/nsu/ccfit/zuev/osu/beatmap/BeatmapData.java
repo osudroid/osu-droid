@@ -207,7 +207,7 @@ public class BeatmapData {
         if (info.getMusic() == null) {
             final File musicFile = new File(info.getPath(), general.audioFilename);
             if (!musicFile.exists()) {
-                ToastLogger.showText(StringTable.format(R.string.osu_parser_music_not_found,
+                ToastLogger.showText(StringTable.format(R.string.beatmap_parser_music_not_found,
                         track.getFilename().substring(0, track.getFilename().length() - 4)), true);
                 return false;
             }

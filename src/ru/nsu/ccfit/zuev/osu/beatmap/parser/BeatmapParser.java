@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import okio.BufferedSource;
 import okio.Okio;
+import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.constants.BeatmapSection;
@@ -22,6 +23,8 @@ import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapEventsParser;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapGeneralParser;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapHitObjectsParser;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapMetadataParser;
+import ru.nsu.ccfit.zuev.osu.helper.StringTable;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 /**
  * A parser for parsing <code>.osu</code> files.
@@ -101,7 +104,13 @@ public class BeatmapParser {
      * <code>null</code> if the beatmap file cannot be opened or a line could not be parsed.
      */
     public BeatmapData parse(boolean withHitObjects) {
+        String fileName = file.getName().substring(0, file.getName().length() - 4);
+
         if (source == null && !openFile()) {
+            ToastLogger.showText(
+                    StringTable.format(R.string.beatmap_parser_cannot_open_file, fileName),
+                    true
+            );
             return null;
         }
 
@@ -179,6 +188,15 @@ public class BeatmapParser {
                     }
                 } catch (Exception e) {
                     Log.e("BeatmapParser.parse", "Unable to parse line " + s, e);
+                    String sectionName = currentSection.name();
+                    ToastLogger.showText(
+                            StringTable.format(
+                                    R.string.beatmap_parser_cannot_parse_line,
+                                    fileName,
+                                    sectionName.substring(0, 1).toUpperCase() + sectionName.substring(1)
+                            ),
+                            true
+                    );
                     closeSource();
                     return null;
                 }
