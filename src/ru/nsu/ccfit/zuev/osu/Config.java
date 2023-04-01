@@ -76,7 +76,8 @@ public class Config {
         enableStoryboard,
         safeBeatmapBg,
         trianglesAnimation,
-        displayRealTimePPCounter;
+        displayRealTimePPCounter,
+        displayReleaseNotify;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -224,6 +225,7 @@ public class Config {
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", true);
+        displayReleaseNotify = prefs.getBoolean("displayReleaseNotify", true); //This needs to be removed later its just for now...
 
         if(receiveAnnouncements) {
             FirebaseMessaging.getInstance().subscribeToTopic("announcements");
@@ -303,6 +305,10 @@ public class Config {
 
     public static boolean isDisplayRealTimePPCounter() {
         return displayRealTimePPCounter;
+    }
+
+    public static boolean isDisplayReleaseNotify() {
+        return displayReleaseNotify;
     }
 
     public static boolean isEnableExtension() {

@@ -338,4 +338,7 @@
 
     <string name="opt_display_realtime_pp_counter_title">Display real-time PP counter</string>
     <string name="opt_display_realtime_pp_counter_summary">Displays a real-time PP counter during gameplay. May increase loading time significantly, especially in long beatmaps</string>
+
+    <string name="opt_displayReleaseNotify_title">Show Release Notify</string>
+    <string name="opt_displayReleaseNotify_summary">Toggle to receive notifications at start</string>
 </resources>
