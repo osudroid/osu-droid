@@ -671,9 +671,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 storyboardSprite = new StoryboardSprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
                 storyboardOverlayProxy = new ProxySprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
                 storyboardSprite.setOverlayDrawProxy(storyboardOverlayProxy);
-                scene.attachChild(storyboardSprite);
+            } else {
+                storyboardSprite.detachSelf();
             }
-            storyboardSprite.detachSelf();
+
             scene.attachChild(storyboardSprite);
         }
         bgScene = new Scene();
