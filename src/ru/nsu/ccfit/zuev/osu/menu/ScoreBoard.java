@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
-import android.os.AsyncTask;
 
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
@@ -29,8 +28,7 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
+import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
@@ -57,8 +55,8 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     private boolean isCanceled = false;
     private boolean isScroll = false;
 
-    private AsyncTask<OsuAsyncCallback, Integer, Boolean> onlineTask;
-    private final LinkedList<AsyncTask<OsuAsyncCallback, Integer, Boolean>> avatarTasks;
+    private AsyncTask onlineTask;
+    private final LinkedList<AsyncTask> avatarTasks;
     private final Context context;
 
     private final SurfaceScrollDetector mScrollDetector;
@@ -266,9 +264,8 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     private void initFromOnline(final TrackInfo track) {
         final long currentNumber = viewNumber;
         loadingText.setText("Loading scores...");
-        onlineTask = new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
-
+        onlineTask = new AsyncTask() {
+            @Override
             public void run() {
                 File trackFile = new File(track.getFilename());
                 String hash = FileUtils.getMD5Checksum(trackFile);
@@ -349,14 +346,14 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 }
             }
 
-
+            @Override
             public void onComplete() {
                 isCanceled = false;
                 if (Utils.isWifi(context) || Config.getLoadAvatar())
                     loadAvatar();
             }
-
-        });
+        };
+        onlineTask.execute();
     }
 
     public void init(final TrackInfo track) {
@@ -527,17 +524,16 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
             }
             for (int i = 0; i < avatars.length; i++) {
                 if (isCanceled) {
-                    isCanceled = false;
                     break;
                 }
                 if (sprites[i] == null) {
                     continue;
                 }
                 final int finalI = i;
-                AsyncTask<OsuAsyncCallback, Integer, Boolean> avatarTask = new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
+                AsyncTask avatarTask = new AsyncTask() {
                     private final TextureRegion[] avatarTexRegion = new TextureRegion[avatars.length];
 
+                    @Override
                     public void run() {
 
                         Avatar ava = avatars[finalI];
@@ -549,6 +545,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                         }
                     }
 
+                    @Override
                     public void onComplete() {
                         try {
                             if (avatarTexRegion[finalI] != null && showOnlineScores) {
@@ -559,8 +556,8 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
 
                         isCanceled = false;
                     }
-                });
-
+                };
+                avatarTask.execute();
                 avatarTasks.add(avatarTask);
             }
             isCanceled = false;
@@ -571,21 +568,19 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     }
 
     public void cancelLoadOnlineScores() {
-        if (onlineTask != null && onlineTask.getStatus() != AsyncTask.Status.FINISHED) {
+        if (onlineTask != null) {
             onlineTask.cancel(true);
         }
     }
 
     public void cancelLoadAvatar() {
         if (avatarTasks != null) {
-            for (AsyncTask<OsuAsyncCallback, Integer, Boolean> avatarTask : avatarTasks) {
-                if (avatarTask.getStatus() != AsyncTask.Status.FINISHED) {
-                    isCanceled = true;
-                    avatarTask.cancel(true);
-                    /* if (OnlineManager.get != null) {
-                        OnlineManager.get.abort();
-                    } */
-                }
+            isCanceled = true;
+            for (AsyncTask avatarTask : avatarTasks) {
+                avatarTask.cancel(true);
+                /* if (OnlineManager.get != null) {
+                    OnlineManager.get.abort();
+                } */
             }
         }
     }

@@ -4,20 +4,16 @@ import android.os.Build;
 
 import com.edlplan.ui.fragment.LoadingFragment;
 import com.edlplan.ui.fragment.UpdateDialogFragment;
-
 import com.google.android.material.snackbar.Snackbar;
-
 import com.google.gson.Gson;
-
-import java.io.IOException;
-
-import okhttp3.ResponseBody;
-import okhttp3.Request;
 
 import org.anddev.andengine.util.Debug;
 
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
+import java.io.IOException;
+
+import okhttp3.Request;
+import okhttp3.ResponseBody;
+import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.model.vo.UpdateVO;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
@@ -52,55 +48,56 @@ public class Updater {
     }
 
     public void checkForUpdates() {
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-             public void run() {
-                 try {
-                     mActivity.runOnUiThread(() -> {
-                         Snackbar.make(mActivity.findViewById(android.R.id.content),
-                             StringTable.get(R.string.update_info_checking), 1500).show();
-                         if(loadingFragment == null) {
+        new AsyncTask() {
+            @Override
+            public void run() {
+                try {
+                    mActivity.runOnUiThread(() -> {
+                        Snackbar.make(mActivity.findViewById(android.R.id.content),
+                                StringTable.get(R.string.update_info_checking), 1500).show();
+                        if (loadingFragment == null) {
                             loadingFragment = new LoadingFragment();
                             loadingFragment.show();
                         }
                     });
 
                     String lang;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) { 
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         lang = mActivity.getResources().getConfiguration().getLocales().get(0).getLanguage();
-                    }else {
+                    } else {
                         lang = mActivity.getResources().getConfiguration().locale.getLanguage();
                     }
                     ResponseBody response = httpGet(OnlineManager.endpoint + "update.php?lang=" + lang);
                     UpdateVO updateInfo = new Gson().fromJson(response.string(), UpdateVO.class);
-                    if(!newUpdate && updateInfo.getVersionCode() > mActivity.getVersionCode()) {
+                    if (!newUpdate && updateInfo.getVersionCode() > mActivity.getVersionCode()) {
                         changelogMsg = updateInfo.getChangelog();
                         downloadUrl = updateInfo.getLink();
                         newUpdate = true;
                     }
-                }catch(IOException e) {
-                    Debug.e("Updater onRun: " + e.getMessage(), e); 
+                } catch (IOException e) {
+                    Debug.e("Updater onRun: " + e.getMessage(), e);
                 }
             }
 
+            @Override
             public void onComplete() {
                 mActivity.runOnUiThread(() -> {
-                    if(loadingFragment != null) {
+                    if (loadingFragment != null) {
                         loadingFragment.dismiss();
                         loadingFragment = null;
                     }
 
-                    if(newUpdate) {
+                    if (newUpdate) {
                         new UpdateDialogFragment()
-                            .setChangelogMessage(changelogMsg)
-                            .setDownloadUrl(downloadUrl)
-                            .show();
-                    }else {
+                                .setChangelogMessage(changelogMsg)
+                                .setDownloadUrl(downloadUrl)
+                                .show();
+                    } else {
                         Snackbar.make(mActivity.findViewById(android.R.id.content),
-                            StringTable.get(R.string.update_info_latest), 1500).show();
+                                StringTable.get(R.string.update_info_latest), 1500).show();
                     }
                 });
             }
-        });
+        }.execute();
     }
-
 }

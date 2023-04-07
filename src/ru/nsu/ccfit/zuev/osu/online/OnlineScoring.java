@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
-import android.os.AsyncTask;
-
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
@@ -9,8 +7,7 @@ import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
+import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
@@ -72,9 +69,8 @@ public class OnlineScoring {
         if (OnlineManager.getInstance().isStayOnline() == false)
             return;
         avatarLoaded = false;
-        new AsyncTaskLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new OsuAsyncCallback() {
-
-
+        new AsyncTask() {
+            @Override
             public void run() {
                 synchronized (onlineMutex) {
                     boolean success = false;
@@ -107,21 +103,14 @@ public class OnlineScoring {
                     }
                 }
             }
-
-
-            public void onComplete() {
-                // TODO Auto-generated method stub
-
-            }
-        });
+        }.execute();
     }
 
     public void startPlay(final TrackInfo track, final String hash) {
         if (OnlineManager.getInstance().isStayOnline() == false)
             return;
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
-
+        new AsyncTask() {
+            @Override
             public void run() {
                 synchronized (onlineMutex) {
 
@@ -140,13 +129,7 @@ public class OnlineScoring {
                     }
                 }
             }
-
-
-            public void onComplete() {
-                // TODO Auto-generated method stub
-
-            }
-        });
+        }.execute();
     }
 
     public void sendRecord(final StatisticV2 record, final SendingPanel panel, final String replay) {
@@ -159,9 +142,8 @@ public class OnlineScoring {
 
         final String recordData = record.compile();
 
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
-
+        new AsyncTask() {
+            @Override
             public void run() {
                 boolean success = false;
                 synchronized (onlineMutex) {
@@ -203,13 +185,7 @@ public class OnlineScoring {
 
                 }
             }
-
-
-            public void onComplete() {
-                // TODO Auto-generated method stub
-
-            }
-        });
+        }.execute();
     }
 
     public ArrayList<String> getTop(final File trackFile, final String hash) {
@@ -229,9 +205,8 @@ public class OnlineScoring {
         if (avatarUrl == null || avatarUrl.length() == 0)
             return;
 
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
-
+        new AsyncTask() {
+            @Override
             public void run() {
                 synchronized (onlineMutex) {
                     if (OnlineManager.getInstance().loadAvatarToTextureManager()) {
@@ -244,13 +219,7 @@ public class OnlineScoring {
                         secondPanel.setAvatar(avatarLoaded ? "userAvatar" : null);
                 }
             }
-
-
-            public void onComplete() {
-                // TODO Auto-generated method stub
-
-            }
-        });
+        }.execute();
     }
 
     public boolean isAvatarLoaded() {

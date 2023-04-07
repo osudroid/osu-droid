@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Process;
 
 import com.edlplan.ext.EdExtensionHelper;
@@ -48,8 +47,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
+import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
@@ -105,7 +103,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private ChangeableText trackInfo, mapper, beatmapInfo, beatmapInfo2, dimensionInfo;
     private boolean isSelectComplete = true;
     private AnimSprite scoringSwitcher = null;
-    private AsyncTask<OsuAsyncCallback, Integer, Boolean> boardTask;
+    private AsyncTask boardTask;
     private GroupType groupType = GroupType.MapSet;
 
     public SongMenu() {
@@ -1028,21 +1026,17 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         GlobalManager.getInstance().setSelectedTrack(track);
         updateInfo(track);
         board.cancelLoadAvatar();
-        if (boardTask != null && boardTask.getStatus() != AsyncTask.Status.FINISHED) {
+        if (boardTask != null) {
             boardTask.cancel(true);
             board.cancelLoadOnlineScores();
         }
-        boardTask = new AsyncTaskLoader().execute(new OsuAsyncCallback() {
+        boardTask = new AsyncTask() {
             @Override
             public void run() {
                 board.init(track);
             }
-
-            @Override
-            public void onComplete() {
-                // Do something cleanup
-            }
-        });
+        };
+        boardTask.execute();
 
         final int quality = Config.getBackgroundQuality();
         synchronized (backgroundMutex) {
@@ -1059,15 +1053,14 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 Config.setBackgroundQuality(4);
             }
         }
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
-
+        new AsyncTask() {
+            @Override
             public void run() {
                 // Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 synchronized (backgroundMutex) {
                     final TextureRegion tex = Config.isSafeBeatmapBg() || track.getBackground() == null?
-                        ResourceManager.getInstance().getTexture("menu-background") :
-                        ResourceManager.getInstance().loadBackground(bgName);
+                            ResourceManager.getInstance().getTexture("menu-background") :
+                            ResourceManager.getInstance().loadBackground(bgName);
                     if (tex != null) {
                         float height = tex.getHeight();
                         height *= Config.getRES_WIDTH()
@@ -1104,11 +1097,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
             }
 
-
+            @Override
             public void onComplete() {
                 isSelectComplete = true;
             }// onComplete
-        });
+        }.execute();
     }
 
     public void stopScroll(final float y) {
@@ -1128,9 +1121,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (showOnline) {
             engine.setScene(new LoadingScreen().getScene());
             ToastLogger.showTextId(R.string.online_loadrecord, false);
-            new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
-
+            new AsyncTask() {
+                @Override
                 public void run() {
                     try {
                         String scorePack = OnlineManager.getInstance().getScorePack(id);
@@ -1148,11 +1140,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     }
 
                 }
-
-                public void onComplete() {
-                    // TODO Auto-generated method stub
-                }
-            });
+            }.execute();
             return;
         }
 
@@ -1201,9 +1189,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (!Config.isPlayMusicPreview()) {
             return;
         }
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
-
+        new AsyncTask() {
+            @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 synchronized (musicMutex) {
@@ -1227,13 +1214,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                 }
             }
-
-
-            public void onComplete() {
-                // TODO Auto-generated method stub
-
-            }
-        });
+        }.execute();
     }
 
     public boolean isSelectAllowed() {
@@ -1262,21 +1243,17 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public void reloadScoreBroad() {
         board.cancelLoadAvatar();
-        if (boardTask != null && boardTask.getStatus() != AsyncTask.Status.FINISHED) {
+        if (boardTask != null) {
             boardTask.cancel(true);
             board.cancelLoadOnlineScores();
         }
-        boardTask = new AsyncTaskLoader().execute(new OsuAsyncCallback() {
+        boardTask = new AsyncTask() {
             @Override
             public void run() {
                 board.init(selectedTrack);
             }
-
-            @Override
-            public void onComplete() {
-                // Do something cleanup
-            }
-        });
+        };
+        boardTask.execute();
     }
 
     public Entity getFrontLayer() {

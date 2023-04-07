@@ -14,8 +14,7 @@ import androidx.preference.PreferenceManager;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
+import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -80,10 +79,11 @@ public class OnlineInitializer implements View.OnClickListener {
                 StringTable.get(R.string.online_registration),
                 StringTable.get(R.string.online_registration_process));
 
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
+        new AsyncTask() {
             private boolean success = false;
             private String resultMessage = "";
 
+            @Override
             public void run() {
 
                 try {
@@ -99,14 +99,13 @@ public class OnlineInitializer implements View.OnClickListener {
                 resultMessage = OnlineManager.getInstance().getFailMessage();
             }
 
+            @Override
             public void onComplete() {
-                activity.runOnUiThread(new Runnable() {
-                    public void run() {
-                        pdialog.dismiss();
-                        if (success)
-                            registerDialog.dismiss();
-                        errorText.setText(resultMessage);
-                    }
+                activity.runOnUiThread(() -> {
+                    pdialog.dismiss();
+                    if (success)
+                        registerDialog.dismiss();
+                    errorText.setText(resultMessage);
                 });
                 final SharedPreferences prefs = PreferenceManager
                         .getDefaultSharedPreferences(activity);
@@ -124,6 +123,6 @@ public class OnlineInitializer implements View.OnClickListener {
                     ToastLogger.showTextId(R.string.online_regcomplete, true);
                 }
             }
-        });
+        }.execute();
     }
 }

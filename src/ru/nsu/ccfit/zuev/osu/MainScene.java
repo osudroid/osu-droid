@@ -57,8 +57,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
+import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.SongProgressBar;
@@ -209,7 +208,8 @@ public class MainScene implements IUpdateHandler {
 //                    final Intent intent = new Intent(
 //                            MainManager.getInstance().getMainActivity(), OsuActivity.class);
 //                    MainManager.getInstance().getMainActivity().startActivity(intent);
-                    new AsyncTaskLoader().execute(new OsuAsyncCallback() {
+                    new AsyncTask() {
+                        @Override
                         public void run() {
                             GlobalManager.getInstance().getEngine().setScene(new LoadingScreen().getScene());
                             GlobalManager.getInstance().getMainActivity().checkNewSkins();
@@ -226,13 +226,13 @@ public class MainScene implements IUpdateHandler {
                             } */
                         }
 
+                        @Override
                         public void onComplete() {
-
                             musicControl(MusicOption.PLAY);
                             GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getSongMenu().getScene());
                             GlobalManager.getInstance().getSongMenu().select();
                         }
-                    });
+                    }.execute();
                     return true;
                 }
                 return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX,

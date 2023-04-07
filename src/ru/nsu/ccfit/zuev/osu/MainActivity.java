@@ -17,11 +17,14 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.os.*;
-
-import androidx.preference.PreferenceManager;
-import androidx.core.content.PermissionChecker;
-
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.PowerManager;
+import android.os.StatFs;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -32,14 +35,18 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
-
 import android.widget.Toast;
-import com.edlplan.ui.ActivityOverlay;
-import com.edlplan.ui.fragment.ConfirmDialogFragment;
-import com.edlplan.ui.fragment.BuildTypeNoticeFragment;
 
+import androidx.core.content.PermissionChecker;
+import androidx.preference.PreferenceManager;
+
+import com.edlplan.ui.ActivityOverlay;
+import com.edlplan.ui.fragment.BuildTypeNoticeFragment;
+import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+
+import net.lingala.zip4j.ZipFile;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
@@ -67,13 +74,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import net.lingala.zip4j.ZipFile;
-
 import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
+import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.SpritePool;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
@@ -293,7 +297,8 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public void onLoadComplete() {
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
+        new AsyncTask() {
+            @Override
             public void run() {
                 BassAudioPlayer.initDevice();
                 GlobalManager.getInstance().init();
@@ -308,7 +313,8 @@ public class MainActivity extends BaseGameActivity implements
                 }
             }
 
-            public void onComplete() {  
+            @Override
+            public void onComplete() {
                 GlobalManager.getInstance().setInfo("");
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
@@ -322,7 +328,7 @@ public class MainActivity extends BaseGameActivity implements
                     willReplay = false;
                 }
             }
-        });
+        }.execute();
     }
     /*
     Accuracy isn't the best, but it's sufficient enough

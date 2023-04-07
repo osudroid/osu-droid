@@ -70,8 +70,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
+import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.constants.BeatmapCountdown;
 import ru.nsu.ccfit.zuev.osu.beatmap.constants.SampleBank;
@@ -702,12 +701,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         Replay.oldEnableForceAR = ModMenu.getInstance().isEnableForceAR();
         Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
 
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
+        new AsyncTask() {
+            @Override
             public void run() {
                 loadComplete = loadGame(track != null ? track : lastTrack, rfile);
             }
 
+            @Override
             public void onComplete() {
                 if (loadComplete) {
                     prepareScene();
@@ -720,7 +720,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     quit();
                 }
             }
-        });
+        }.execute();
+
         ResourceManager.getInstance().getSound("failsound").stop();
     }
 
