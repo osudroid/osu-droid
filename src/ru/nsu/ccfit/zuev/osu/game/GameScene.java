@@ -262,14 +262,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         } else
             this.replayFile = rFile;
 
-        // Only parse beatmap if the track changed or real-time PP counter is active and there are
-        // no timed difficulty attributes.
-        if (track != lastTrack || (Config.isDisplayRealTimePPCounter() && timedDifficultyAttributes.isEmpty())) {
+        // Avoid parsing beatmap if the track didn't change.
+        if (track != lastTrack) {
             BeatmapParser parser = new BeatmapParser(track.getFilename());
             if (parser.openFile()) {
-                // We want to calculate timed difficulty attributes for live pp counter.
-                // In that case, we need to parse hit objects.
-                beatmapData = parser.parse(Config.isDisplayRealTimePPCounter());
+                beatmapData = parser.parse(true);
             } else {
                 Debug.e("startGame: cannot open file");
                 ToastLogger.showText(
