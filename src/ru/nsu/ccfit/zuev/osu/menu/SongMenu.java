@@ -602,7 +602,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
                                              float pTouchAreaLocalX, float pTouchAreaLocalY) {
                     if (!pSceneTouchEvent.isActionDown()) return false;
-                    board.cancleLoadAvatar();
+                    board.cancelLoadAvatar();
                     toggleScoringSwitcher();
                     return true;
                 }
@@ -1027,10 +1027,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         EdExtensionHelper.onSelectTrack(selectedTrack);
         GlobalManager.getInstance().setSelectedTrack(track);
         updateInfo(track);
-        board.cancleLoadAvatar();
+        board.cancelLoadAvatar();
         if (boardTask != null && boardTask.getStatus() != AsyncTask.Status.FINISHED) {
             boardTask.cancel(true);
-            board.cancleLoadOnlineScores();
+            board.cancelLoadOnlineScores();
         }
         boardTask = new AsyncTaskLoader().execute(new OsuAsyncCallback() {
             @Override
@@ -1261,10 +1261,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void reloadScoreBroad() {
-        board.cancleLoadAvatar();
+        board.cancelLoadAvatar();
         if (boardTask != null && boardTask.getStatus() != AsyncTask.Status.FINISHED) {
             boardTask.cancel(true);
-            board.cancleLoadOnlineScores();
+            board.cancelLoadOnlineScores();
         }
         boardTask = new AsyncTaskLoader().execute(new OsuAsyncCallback() {
             @Override
