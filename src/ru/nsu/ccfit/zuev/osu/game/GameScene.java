@@ -1979,6 +1979,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         passiveObjects.clear();
         breakPeriods.clear();
         cursorSprites = null;
+        scoreBoard = null;
 
         if (GlobalManager.getInstance().getSongService() != null) {
             GlobalManager.getInstance().getSongService().stop();
