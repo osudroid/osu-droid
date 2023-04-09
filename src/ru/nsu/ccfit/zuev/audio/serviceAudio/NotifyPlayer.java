@@ -206,7 +206,6 @@ public class NotifyPlayer {
                 .setContentText("artist")
                 .setOnlyAlertOnce(true)
                 .setSound(null)
-                .setOngoing(true)
                 .setShowWhen(false)
                 .setContentIntent(openApp)
                 .addAction(R.drawable.v_prev, actionPrev, prev)
