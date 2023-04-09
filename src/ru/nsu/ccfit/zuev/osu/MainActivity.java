@@ -37,6 +37,7 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.PermissionChecker;
 import androidx.preference.PreferenceManager;
 
@@ -885,5 +886,11 @@ public class MainActivity extends BaseGameActivity implements
             finish();
             return false;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
+        super.onDestroy();
     }
 }
