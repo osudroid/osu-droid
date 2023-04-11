@@ -614,7 +614,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }*/
 
         ppText = null;
-        if (Config.isDisplayRealTimePPCounter() && track != lastTrack) {
+        if (Config.isDisplayRealTimePPCounter()) {
             // Calculate timed difficulty attributes
             DifficultyCalculationParameters parameters = new DifficultyCalculationParameters();
 
@@ -629,7 +629,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     BeatmapDifficultyCalculator.constructDifficultyBeatmap(beatmapData),
                     parameters
             );
-        } else if (!Config.isDisplayRealTimePPCounter()) {
+        } else {
             timedDifficultyAttributes.clear();
         }
 
