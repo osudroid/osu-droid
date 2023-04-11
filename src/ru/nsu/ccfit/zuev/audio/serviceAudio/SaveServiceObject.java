@@ -62,13 +62,7 @@ public class SaveServiceObject extends Application {
 
             @Override
             public void onActivityDestroyed(Activity activity) {
-                // Some weird cycle is going on the app, sometimes the service is killed/unbind before this method calll
-                // so in the else block we're forcing to remove the notification
-                if (songService != null) {
-                    songService.forceHideNotification();
-                } else {
-                    NotificationManagerCompat.from(getApplicationContext()).cancel(1);
-                }
+                NotificationManagerCompat.from(getApplicationContext()).cancelAll();
             }
         });
     }

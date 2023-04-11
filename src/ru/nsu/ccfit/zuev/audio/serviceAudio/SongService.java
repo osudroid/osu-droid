@@ -11,6 +11,7 @@ import android.util.Log;
 
 import java.io.File;
 
+import androidx.core.app.NotificationManagerCompat;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -44,18 +45,24 @@ public class SongService extends Service {
     public boolean onUnbind(Intent intent) {
         System.out.println("Service unbind");
         hideNotification();
+        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
         exit();
         return super.onUnbind(intent);
     }
 
     @Override
+    public void onDestroy() {
+        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
+    }
+
+    @Override
     public void onTaskRemoved(Intent rootIntent) {
-        forceHideNotification();
+        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
     }
 
     @Override
     public void onLowMemory() {
-        forceHideNotification();
+        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
     }
 
     @Override
@@ -120,6 +127,14 @@ public class SongService extends Service {
         if (audioFunc == null) return false;
         notify.updateState();
         return audioFunc.stop();
+    }
+
+    public void stopWithoutNotify()
+    {
+        if (audioFunc != null)
+        {
+            audioFunc.stop();
+        }
     }
 
     public boolean exit() {
@@ -229,12 +244,6 @@ public class SongService extends Service {
         }
 
         return notify.hide();
-    }
-
-    public void forceHideNotification() {
-        if (notify != null) {
-            notify.forceHide();
-        }
     }
 
     public void setReceiverStuff(BroadcastReceiver receiver, IntentFilter filter) {
