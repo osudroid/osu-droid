@@ -406,14 +406,7 @@ public class MainActivity extends BaseGameActivity implements
                         StringTable.get(R.string.message_lib_importing),
                         false);
 
-                if(FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath())) {
-                    String folderName = beatmapToAdd.substring(0, beatmapToAdd.length() - 4);
-                    // We have imported the beatmap!
-                    ToastLogger.showText(
-                            StringTable.format(R.string.message_lib_imported, folderName),
-                            true);
-                }
-
+                FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath());
                 // LibraryManager.getInstance().sort();
                 LibraryManager.getInstance().savetoCache(MainActivity.this);
             } else if (file.getName().endsWith(".odr")) {
@@ -421,7 +414,7 @@ public class MainActivity extends BaseGameActivity implements
             }
         } else if (mainDir.exists() && mainDir.isDirectory()) {
             File[] filelist = FileUtils.listFiles(mainDir, ".osz");
-            final ArrayList<String> beatmaps = new ArrayList<String>();
+            final ArrayList<String> beatmaps = new ArrayList<>();
             for (final File file : filelist) {
                 ZipFile zip = new ZipFile(file);
                 if(zip.isValidZipFile()) {
@@ -461,13 +454,7 @@ public class MainActivity extends BaseGameActivity implements
                         R.string.message_lib_importing_several,
                         beatmaps.size()), false);
                 for (final String beatmap : beatmaps) {
-                    if(FileUtils.extractZip(beatmap, Config.getBeatmapPath())) {
-                        String folderName = beatmap.substring(0, beatmap.length() - 4);
-                        // We have imported the beatmap!
-                        ToastLogger.showText(
-                                StringTable.format(R.string.message_lib_imported, folderName),
-                                true);
-                    }
+                    FileUtils.extractZip(beatmap, Config.getBeatmapPath());
                 }
                 // Config.setDELETE_OSZ(deleteOsz);
 

@@ -44,7 +44,7 @@ public class LibraryManager {
 
     @SuppressWarnings("unchecked")
     public boolean loadLibraryCache(final Activity activity, boolean forceUpdate) {
-        library = new ArrayList<BeatmapInfo>();
+        library = new ArrayList<>();
         ToastLogger.addToLog("Loading library...");
         if (!FileUtils.canUseSD()) {
             ToastLogger.addToLog("Can't use SD card!");
@@ -406,8 +406,8 @@ public class LibraryManager {
             info.addTrack(track);
         }
 
-        if (info.getCount() == 0) {
-            deleteDir(dir);
+        if (info.getCount() > 0) {
+            ToastLogger.showText(StringTable.format(R.string.message_lib_imported, dir.getName()), true);
         }
 
         Collections.sort(info.getTracks(), (object1, object2) -> Float.compare(object1.getDifficulty(), object2.getDifficulty()));
