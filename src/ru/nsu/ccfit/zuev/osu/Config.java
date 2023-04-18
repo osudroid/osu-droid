@@ -39,6 +39,7 @@ public class Config {
 
     private static boolean DELETE_OSZ,
         SCAN_DOWNLOAD,
+        deleteUnimportedBeatmaps,
         showFirstApproachCircle,
         comboburst,
         useCustomSkins,
@@ -201,6 +202,7 @@ public class Config {
         // beatmaps
         DELETE_OSZ = prefs.getBoolean("deleteosz", true);
         SCAN_DOWNLOAD = prefs.getBoolean("scandownload", false);
+        deleteUnimportedBeatmaps = prefs.getBoolean("deleteUnimportedBeatmaps", false);
         forceRomanized = prefs.getBoolean("forceromanized", false);
         beatmapPath = prefs.getString("directory", corePath + "Songs/");
         if (beatmapPath.length() == 0) {
@@ -421,6 +423,14 @@ public class Config {
 
     public static void setSCAN_DOWNLOAD(final boolean sCAN_DOWNLOAD) {
         SCAN_DOWNLOAD = sCAN_DOWNLOAD;
+    }
+
+    public static boolean isDeleteUnimportedBeatmaps() {
+        return deleteUnimportedBeatmaps;
+    }
+
+    public static void setDeleteUnimportedBeatmaps(boolean deleteUnimportedBeatmaps) {
+        Config.deleteUnimportedBeatmaps = deleteUnimportedBeatmaps;
     }
 
     public static boolean isUseCustomSkins() {

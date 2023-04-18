@@ -388,6 +388,9 @@ public class LibraryManager {
         for (final File file : filelist) {
             final BeatmapParser parser = new BeatmapParser(file);
             if (!parser.openFile()) {
+                if (Config.isDeleteUnimportedBeatmaps()) {
+                    file.delete();
+                }
                 continue;
             }
 
@@ -397,6 +400,9 @@ public class LibraryManager {
 
             final BeatmapData data = parser.parse(true);
             if (data == null || !data.populateMetadata(info, track)) {
+                if (Config.isDeleteUnimportedBeatmaps()) {
+                    file.delete();
+                }
                 continue;
             }
             if (track.getBackground() != null) {
@@ -408,6 +414,8 @@ public class LibraryManager {
 
         if (info.getCount() > 0) {
             ToastLogger.showText(StringTable.format(R.string.message_lib_imported, dir.getName()), true);
+        } else if (Config.isDeleteUnimportedBeatmaps()) {
+            deleteDir(dir);
         }
 
         Collections.sort(info.getTracks(), (object1, object2) -> Float.compare(object1.getDifficulty(), object2.getDifficulty()));

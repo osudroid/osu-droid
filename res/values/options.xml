@@ -299,6 +299,9 @@
     <string name="opt_scandownload_summary">Scan /Download directory for new beatmaps and skins (might not work with SD card)</string>
     <string name="opt_scandownload_title">Scan Download</string>
 
+    <string name="opt_deleteUnimportedBeatmaps_summary">Delete beatmaps that cannot be imported. Will apply in future beatmap import operations.</string>
+    <string name="opt_deleteUnimportedBeatmaps_title">Delete Unimported Beatmaps</string>
+
     <string name="opt_superSlider_title">Super Slider</string>
     <string name="opt_superSlider_summary">Perfect shape slider!</string>
 	

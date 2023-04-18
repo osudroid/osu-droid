@@ -144,6 +144,8 @@
             android:defaultValue="/sdcard/osu!droid/Songs"/>
         <CheckBoxPreference android:key="scandownload" android:summary="@string/opt_scandownload_summary"
             android:title="@string/opt_scandownload_title" android:defaultValue="false"/>
+        <CheckBoxPreference android:key="deleteUnimportedBeatmaps" android:title="@string/opt_deleteUnimportedBeatmaps_title"
+            android:summary="@string/opt_deleteUnimportedBeatmaps_summary" android:defaultValue="false"/>
         <Preference android:key="clear" android:title="@string/opt_clear_title"
             android:summary="@string/opt_clear_summary"/>
         <Preference android:key="clear_properties" android:title="@string/opt_clearprops_title"
