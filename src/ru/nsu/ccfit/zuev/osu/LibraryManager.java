@@ -406,11 +406,11 @@ public class LibraryManager {
             info.addTrack(track);
         }
 
-        Collections.sort(info.getTracks(), new Comparator<TrackInfo>() {
-            public int compare(final TrackInfo object1, final TrackInfo object2) {
-                return Float.valueOf(object1.getDifficulty()).compareTo(object2.getDifficulty());
-            }
-        });
+        if (info.getCount() == 0) {
+            deleteDir(dir);
+        }
+
+        Collections.sort(info.getTracks(), (object1, object2) -> Float.compare(object1.getDifficulty(), object2.getDifficulty()));
     }
 
     public ArrayList<BeatmapInfo> getLibrary() {
