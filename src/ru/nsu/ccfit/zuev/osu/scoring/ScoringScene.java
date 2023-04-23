@@ -497,7 +497,9 @@ public class ScoringScene {
                 if (hasUnrankedMod
                     || Config.isRemoveSliderLock()
                     || ModMenu.getInstance().isChangeSpeed()
-                    || ModMenu.getInstance().isEnableForceAR()) {
+                    || ModMenu.getInstance().isEnableForceAR()
+                    || !ModMenu.getInstance().isDefaultFLFollowDelay()
+                    ) {
                     return;
                 }
 

@@ -357,6 +357,10 @@ public class ModMenu implements IModSwitcher {
         return enableForceAR;
     }
 
+    public boolean isDefaultFLFollowDelay() {
+        return FLfollowDelay == 0.12f;
+    }
+
     public void setEnableForceAR(boolean t){
         enableForceAR = t;
     }
