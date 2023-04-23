@@ -5,15 +5,16 @@ Changelog for 1.6.8
 - Delete local replay
 - Custom playfield size ranging from 80%-100%
     - Now you can keep your fingers away from system status bar!
-- Sudden Death (SD) mod (unranked)
+- Sudden Death (SD) mod
     - Automatically fails gameplay after a miss. Slider breaks will not trigger fail.
 - Small Circle (SC) mod (unranked)
     - Adds the beatmap's circle size (CS) by 4, if you want to challenge yourself with way smaller circles.
 - Perfect (PF) mod
-    - SS or fail (unranked).
+    - SS or fail.
 - Flashlight (FL) mod
-    - Behaves similarly to osu! PC's FL mod, however the lightened area might be different (unranked).
+    - Behaves similarly to osu! PC's FL mod, however the lightened area might be different.
     - The delay at which the lightened area follows your cursor can be adjusted to anywhere from 120ms to 1200ms.
+    - Setting the delay to other value than 120ms will make the mod unranked.
 - Really Easy (RE(z)) mod (unranked)
     - Easier EZ, only decreases AR slightly instead of cutting it in half.
 - ScoreV2 mod (unranked)
@@ -59,7 +60,17 @@ Changelog for 1.6.8
 - Option to scan download directory for `.osk` (skin) files
 - Display unstable rate (UR) in gameplay and result screen
     - Like average offset, this is only visible in gameplay if show FPS is enabled in Graphics settings.
-    - When replaying a score, the result may differ from the original value due to the way replay is saved.
+    - When replaying a score, the result may differ from the original value due to the way replays are saved.
+- Live pp counter
+    - Only visible if show FPS in enabled in Graphics settings.
+    - Can be toggled via Advanced settings.
+- Option to rotate cursor in `skin.json`
+    - Format in `skin.json` (set to `true` to enable, `false` to disable):
+      ```json
+      "Cursor": {
+          "rotateCursor": true
+      }
+      ```
 
 ## Changes:
 
@@ -68,13 +79,13 @@ Changelog for 1.6.8
 - PR (Precise) mod is ranked
 - EZ (Easy) mod has 3 lives
 - RX (Relax) mod and AP (AutoPilot) mod replays will be saved with 0.01x score multiplier
-- Updated star rating system
+- Updated star rating and performance points system
     - Improves calculation accuracy to be closer to osu! PC star rating.
 - 10 simultaneous cursor input support
-- Improved framerate for storyboard
+- Improved frame rate for storyboard
 - Custom skins are sorted alphabetically
-- A cursor will appear when using Auto or AP (AutoPilot) mod
-- Rewritten beatmap parser, now able to load some beatmaps that were not possible to load
+- Automated cursor movement in Auto or AP (AutoPilot) mod
+- New beatmap parser, now able to load some beatmaps that were not possible to load
 - Sliders will gradually fade out if HD (Hidden) mod is active
 - Slightly reworked the display of options list
 - Changing volume-related options no longer requires a game restart
@@ -83,6 +94,8 @@ Changelog for 1.6.8
 - Moved skin selection option to Graphics category
 - Changed the game's domain to https://osudroid.moe/
 - Changed leaderboard avatar to point to game domain instead of Gravatar
+- New music player notification style
+    - The notification may persist even when the game is closed, however the notifcation should be swipeable.
 
 ## Bug fixes:
 
@@ -116,61 +129,9 @@ Changelog for 1.6.8
 - Fixed a bug where some beatmaps would fail to load properly due to abnormal timing point placement
 - Fixed a bug where hardware dither option is not working as intended
 - Fixed a bug where retrying a beatmap with a storyboard causes the game to crash
+- Fixed an issue where the game can potentially lock up for a while when playing a beatmap with online leaderboard
 
 ## Removals:
 
 - Removed split-screen support as the game restarts if used in split screen mode
 - Removed average offset counter during gameplay
-
-## Additions [+], changes [=], bug fixes [*], and removals [-] since the previous pre-release:
-
-- [+] Added slider dim for FL (Flashlight) mod
-- [+] Added break dim for FL (Flashlight) mod
-- [+] Added a slight delay to FL (Flashlight) mod lightened area movement towards the cursor
-    - Defaults at 120ms, but can be adjusted to anywhere from 120ms to 1200ms.
-- [+] Added the ability to save failed replays
-- [+] Added support for push notifications
-- [+] Added a separate loading screen for any game-related operations that takes some time to process
-- [+] Added the option to disable triangles animation
-    - Users with issues while triangles animation is active are encouraged to try this option.
-- [+] Added the option to replace all beatmaps' backgrounds with the current skin's `menu-background` image
-    - Only affects in-game display. The actual beatmap background file will not be replaced.
-- [+] Added the option to hide in-game UI
-    - If enabled, this will hide combo bursts, health bar, combo counter, accuracy counter, and score counter during gameplay.
-- [+] Added the option to scan download directory for `.osk` (skin) files
-- [+] Added unstable rate (UR) in gameplay and result screen
-    - Like average offset, this is only visible in gameplay if show FPS is enabled in Graphics settings.
-    - When replaying a score, the result may differ from the original value due to the way replay is saved.
-- [+] Added the option to rotate cursor into `skin.json`
-    - Format in `skin.json` (set to `true` to enable, `false` to disable):
-        ```json
-        "Cursor": {
-            "rotateCursor": true
-        }
-        ```
-- [=] Updated audio engine
-    - Should improve performance and optimize latency.
-- [=] Sliders will gradually fade out if HD (Hidden) mod is active
-- [=] Changing volume-related options no longer requires a game restart
-- [=] Improved file-related operations' performance
-- [=] Use `HTTPS` protocol for all web-related operations
-- [=] FL (Flashlight) mod dim area now starts at the center of the screen
-- [=] Moved PP information in score result scene
-- [=] FL (Flashlight) mod dim area now disappears during break time
-- [=] A cursor will appear when using Auto or AP (AutoPilot) mod
-- [=] Slightly reworked the display of options list
-- [=] Moved skin selection option to Graphics category
-- [=] Changed the game's domain to https://osudroid.moe/
-- [=] Changed leaderboard avatar to point to game domain instead of Gravatar
-- [=] Renamed "display PP in score" option to "display score statistics in score" to incorporate unstable rate and hit error to the option
-- [*] Fixed a bug where offline replays do not get saved
-- [*] Fixed a bug where FL (Flashlight) mod dim area flickers if the player taps during break
-- [*] Fixed a bug where beatmaps that haven't finished downloading gets imported
-- [*] Fixed a bug where star rating calculation does not take speed multiplier into account
-- [*] Fixed a bug where some animated hit results (100k, 300k, and 300g) are not displayed properly
-- [*] Fixed a bug where some beatmaps would fail to load properly due to abnormal timing point placement
-- [*] Fixed a bug where FL (Flashlight) mod dim area would go out of screen if a note is placed outside of playfield
-- [*] Fixed a bug where hardware dither option is not working as intended
-- [*] Fixed a bug where retrying a beatmap with a storyboard causes the game to crash
-- [-] Removed split-screen support as the game restarts if used in split screen mode
-- [-] Removed average offset counter during gameplay
