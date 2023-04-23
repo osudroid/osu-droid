@@ -58,6 +58,7 @@ import javax.microedition.khronos.opengles.GL10;
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
+import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.SongProgressBar;
@@ -700,8 +701,11 @@ public class MainScene implements IUpdateHandler {
     }
 
     public void reloadOnlinePanel() {
-        scene.detachChild(OnlineScoring.getInstance().getPanel());
-        createOnlinePanel(scene);
+        // IndexOutOfBoundsException 141 fix
+        SyncTaskManager.getInstance().run(() -> {
+            scene.detachChild(OnlineScoring.getInstance().getPanel());
+            createOnlinePanel(scene);
+        });
     }
 
     public void musicControl(MusicOption option) {
