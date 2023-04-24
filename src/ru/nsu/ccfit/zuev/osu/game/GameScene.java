@@ -2828,6 +2828,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             replay.save(replayFile);
             ScoreLibrary.getInstance().addScore(lastTrack.getFilename(), stat, replayFile);
             ToastLogger.showText(StringTable.get(R.string.message_save_replay_successful), true);
+            replayFile = null;
             return true;
         }
         else{
