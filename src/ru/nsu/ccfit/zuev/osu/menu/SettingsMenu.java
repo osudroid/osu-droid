@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import android.animation.Animator;
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
@@ -39,10 +40,13 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Updater;
 // import ru.nsu.ccfit.zuev.osu.game.SpritePool;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osu.online.OnlineInitializer;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
+import static android.content.Intent.ACTION_VIEW;
+
 public class SettingsMenu extends SettingsFragment {
+
+    public static final String REGISTER_URL = "https://osudroid.moe/user/?action=register";
 
     private PreferenceScreen mParentScreen, parentScreen;
     private boolean isOnNestedScreen = false;
@@ -149,8 +153,8 @@ public class SettingsMenu extends SettingsFragment {
         });
         final Preference register = findPreference("registerAcc");
         register.setOnPreferenceClickListener(preference -> {
-            OnlineInitializer initializer = new OnlineInitializer(getActivity());
-            initializer.createInitDialog();
+            Intent intent = new Intent(ACTION_VIEW, Uri.parse(REGISTER_URL));
+            startActivity(intent);
             return true;
         });
 
