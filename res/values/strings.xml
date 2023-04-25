@@ -35,7 +35,6 @@
 	<string name="dialog_cancel">Cancel</string>
 	<string name="dialog_search_title">Search</string>
 	<string name="dialog_search_message">Enter search query</string>
-	<string name="dialog_register">Register</string>
 
 	<string name="dialog_delete_pp_title">Reset your pp?</string>
 	<string name="dialog_delete_pp_make_sure">Really?</string>
@@ -102,22 +101,11 @@
 
 	<string name="hint_login">Login</string>
 	<string name="hint_password">Password</string>
-	<string name="hint_confirm">Confirm password</string>
-	<string name="hint_email">E-mail</string>
 
 	<string name="replay_invalid">Cannot load replay</string>
 	<string name="replay_cantdownload">Cannot download replay</string>
 	<string name="replay_wrongmap">Replay doesn\'t match the map</string>
 	<string name="replay_corrupted">Replay file is corrupted</string>
-
-	<string name="online_registration">Registration</string>
-	<string name="online_registration_process">Registering...</string>
-	<string name="online_loadrecord">Loading record details...</string>
-	<string name="online_invlogin">Invalid login</string>
-	<string name="online_invpassword">Password should be 4-32 characters</string>
-	<string name="online_invconfirm">Passwords don\'t match</string>
-	<string name="online_invemail">Invaild e-mail</string>
-	<string name="online_regcomplete">Registration complete. Restart app to login</string>
 
 	<string name="userpanel_not_online">You are not online. Please log in or check your internet connection.</string>
 	<string name="userpanel_logging_in">Logging in, please wait.</string>
