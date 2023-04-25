@@ -35,6 +35,7 @@ import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Updater;
@@ -46,7 +47,7 @@ import static android.content.Intent.ACTION_VIEW;
 
 public class SettingsMenu extends SettingsFragment {
 
-    public static final String REGISTER_URL = "https://osudroid.moe/user/?action=register";
+    public static final String REGISTER_URL = "https://" + OnlineManager.hostname + "/user/?action=register";
 
     private PreferenceScreen mParentScreen, parentScreen;
     private boolean isOnNestedScreen = false;
@@ -204,7 +205,7 @@ public class SettingsMenu extends SettingsFragment {
     }
 
     private void setTitle(String title) {
-       ((TextView) findViewById(R.id.title)).setText(title); 
+       ((TextView) findViewById(R.id.title)).setText(title);
     }
 
     @Override
