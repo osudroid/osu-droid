@@ -69,7 +69,6 @@ public class SliderPath {
             if (i == controlPoints.size() - 1 || controlPoints.get(i).equals(controlPoints.get(i + 1))) {
                 int spanEnd = i + 1;
                 List<Vector2> cpSpan = controlPoints.subList(spanStart, spanEnd);
-                List<Vector2> subPath = calculateSubPath(cpSpan);
 
                 for (Vector2 t : calculateSubPath(cpSpan)) {
                     if (calculatedPath.isEmpty() || !calculatedPath.get(calculatedPath.size() - 1).equals(t)) {
