@@ -180,7 +180,7 @@ public abstract class ControlPointManager<T extends ControlPoint> {
      *
      * @param time The start time of the control point, in milliseconds.
      */
-    private int findInsertionIndex(int time) {
+    private int findInsertionIndex(double time) {
         if (controlPoints.size() == 0 || time < controlPoints.get(0).time) {
             return 0;
         }

@@ -18,11 +18,11 @@ public class BeatmapControlPointsParser extends BeatmapSectionParser {
             throw new UnsupportedOperationException("Malformed timing point");
         }
 
-        int time = data.getOffsetTime(parseInt(pars[0]));
+        double time = data.getOffsetTime(parseDouble(pars[0].trim()));
 
         // msPerBeat is allowed to be NaN to handle an edge case in which some
         // beatmaps use NaN slider velocity to disable slider tick generation.
-        double msPerBeat = parseDouble(pars[1], true);
+        double msPerBeat = parseDouble(pars[1].trim(), true);
 
         int timeSignature = 4;
         if (pars.length >= 3) {

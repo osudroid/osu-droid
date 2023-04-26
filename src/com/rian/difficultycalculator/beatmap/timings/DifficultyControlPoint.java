@@ -21,7 +21,7 @@ public class DifficultyControlPoint extends ControlPoint {
      * @param speedMultiplier The slider speed multiplier of this control point.
      * @param generateTicks   Whether or not slider ticks should be generated at this control point.<br>This exists for backwards compatibility with maps that abuse NaN slider velocity behavior on osu!stable (e.g. /b/2628991).
      */
-    public DifficultyControlPoint(int time, double speedMultiplier, boolean generateTicks) {
+    public DifficultyControlPoint(double time, double speedMultiplier, boolean generateTicks) {
         super(time);
 
         this.speedMultiplier = speedMultiplier;

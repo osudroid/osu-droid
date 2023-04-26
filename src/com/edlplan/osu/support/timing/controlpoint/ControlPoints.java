@@ -8,17 +8,13 @@ import java.util.Collections;
 import java.util.List;
 
 public class ControlPoints {
-    private ArrayList<TimingControlPoint> timingPoints = new ArrayList<>();
+    private final ArrayList<TimingControlPoint> timingPoints = new ArrayList<>();
 
-    private ArrayList<DifficultyControlPoint> difficultyPoints = new ArrayList<>();
+    private final ArrayList<DifficultyControlPoint> difficultyPoints = new ArrayList<>();
 
-    private ArrayList<EffectControlPoint> effectPoints = new ArrayList<>();
+    private final ArrayList<EffectControlPoint> effectPoints = new ArrayList<>();
 
-    private ArrayList<SampleControlPoint> samplePoints = new ArrayList<>();
-
-    public ControlPoints() {
-
-    }
+    private final ArrayList<SampleControlPoint> samplePoints = new ArrayList<>();
 
     public void load(TimingPoints points) {
         ArrayList<TimingPoint> res = points.getTimingPointList();
@@ -115,9 +111,9 @@ public class ControlPoints {
                 effectPoints.add(preEcp);
             }
         }
-        Collections.sort(timingPoints, (a, b) -> Integer.compare(a.getTime(), b.getTime()));
-        Collections.sort(difficultyPoints, (a, b) -> Integer.compare(a.getTime(), b.getTime()));
-        Collections.sort(effectPoints, (a, b) -> Integer.compare(a.getTime(), b.getTime()));
+        Collections.sort(timingPoints, (a, b) -> Double.compare(a.getTime(), b.getTime()));
+        Collections.sort(difficultyPoints, (a, b) -> Double.compare(a.getTime(), b.getTime()));
+        Collections.sort(effectPoints, (a, b) -> Double.compare(a.getTime(), b.getTime()));
 
         /*Log.v("ControlPoints", "t: " + timingPoints.size());
         Log.v("ControlPoints", "d: " + difficultyPoints.size());

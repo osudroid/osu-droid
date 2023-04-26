@@ -7,12 +7,12 @@ public abstract class ControlPoint {
     /**
      * The time at which this control point takes effect, in milliseconds.
      */
-    public final int time;
+    public final double time;
 
     /**
      * @param time The time at which this control point takes effect, in milliseconds.
      */
-    public ControlPoint(int time) {
+    public ControlPoint(double time) {
         this.time = time;
     }
 

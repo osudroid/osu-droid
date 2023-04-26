@@ -19,7 +19,7 @@ public class TimingControlPoint extends ControlPoint {
      * @param msPerBeat     The amount of milliseconds passed for each beat.
      * @param timeSignature The time signature at this control point.
      */
-    public TimingControlPoint(int time, double msPerBeat, int timeSignature) {
+    public TimingControlPoint(double time, double msPerBeat, int timeSignature) {
         super(time);
 
         this.msPerBeat = msPerBeat;
