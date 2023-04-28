@@ -120,7 +120,7 @@
             android:summary="@string/opt_sound_volume_summary" android:key="soundvolume"
             android:defaultValue="100"/> -->
         <SeekBarPreference android:summary="@string/opt_offset_summary" android:title="@string/opt_offset_title"
-            android:key="offset" app:min="-100" app:showSeekBarValue="true" android:defaultValue="0"/>
+            android:key="offset" app:min="-250" android:max="250" app:showSeekBarValue="true" android:defaultValue="0"/>
         <!-- <EditTextPreference android:title="@string/opt_offset_title" android:summary="@string/opt_offset_summary"
             android:key="offset" android:defaultValue="0"/> -->
         <ListPreference android:entries="@array/metronome_switch_names" android:title="@string/opt_metronome_switch_title"

@@ -10,6 +10,7 @@ import android.util.DisplayMetrics;
 import androidx.preference.PreferenceManager;
 
 import com.edlplan.favorite.FavoriteLibrary;
+import com.edlplan.framework.math.FMath;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.File;
@@ -135,8 +136,7 @@ public class Config {
         useSuperSlider = prefs.getBoolean("superSlider", false);
 
         try {
-            int off = prefs.getInt("offset", 0);
-            offset = (int) (Math.signum(off) * Math.min(250, Math.abs(off)));
+            offset = (int) FMath.clamp(prefs.getInt("offset", 0), -250, 250);
             backgroundBrightness = prefs.getInt("bgbrightness", 25) / 100f;
             soundVolume = prefs.getInt("soundvolume", 100) / 100f;
             bgmVolume = prefs.getInt("bgmvolume", 100) / 100f;
