@@ -73,11 +73,25 @@ public class ScoreBar extends GameObject {
             hp = speed * dt * Math.signum(hp - lasthp) + lasthp;
         }
 
-        TextureRegion texture = colour.getTextureRegion();
         float translationX = width - (width * Math.abs(hp));
 
         colour.setPosition(mColourX - translationX, colour.getY());
-        texture.setTexturePosition((int) -translationX, 0);
+
+        if (colour.getClass() == Sprite.class)
+        {
+            colour.getTextureRegion().setTexturePosition((int) -translationX, 0);
+        }
+        else if (colour.getClass() == AnimSprite.class)
+        {
+            AnimSprite sprite = (AnimSprite) colour;
+
+            int i = sprite.getTextureRegionCount() - 1;
+            while (i >= 0)
+            {
+                sprite.getTextureRegionAt(i).setTexturePosition((int) -translationX, 0);
+                --i;
+            }
+        }
 
         ki.setPosition(Utils.toRes(5) + colour.getWidth() - ki.getWidth() / 2,
                 Utils.toRes(16) + colour.getHeight() / 2 - ki.getHeight() / 2);
