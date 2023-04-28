@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
+import android.util.Log;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 
@@ -7,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -20,6 +22,8 @@ public class ScoreBar extends GameObject {
     private final float width;
     private float lasthp = 0;
 
+    private float mColourX;
+
     public ScoreBar(final GameObjectListener listener, final Scene scene,
                     final StatisticV2 stat) {
         this.stat = stat;
@@ -27,16 +31,19 @@ public class ScoreBar extends GameObject {
                 "scorebar-bg"));
         bg.setScaleCenter(0, 0);
 
+        mColourX = Utils.toRes(5);
+
         if (ResourceManager.getInstance().isTextureLoaded("scorebar-colour-0")) {
             List<String> loadedScoreBarTextures = new ArrayList<>();
             for (int i = 0; i < 60; i++) {
                 if (ResourceManager.getInstance().isTextureLoaded("scorebar-colour-" + i))
                     loadedScoreBarTextures.add("scorebar-colour-" + i);
             }
-            colour = new AnimSprite(Utils.toRes(5), Utils.toRes(16), loadedScoreBarTextures.size(),
+
+            colour = new AnimSprite(mColourX, Utils.toRes(16), loadedScoreBarTextures.size(),
                     loadedScoreBarTextures.toArray(new String[loadedScoreBarTextures.size()]));
         } else {
-            colour = new Sprite(Utils.toRes(5), Utils.toRes(16),
+            colour = new Sprite(mColourX, Utils.toRes(16),
                     ResourceManager.getInstance().getTexture("scorebar-colour"));
         }
         width = colour.getWidth();
@@ -65,7 +72,11 @@ public class ScoreBar extends GameObject {
             hp = speed * dt * Math.signum(hp - lasthp) + lasthp;
         }
 
-        colour.setWidth(width * hp);
+        var texture = colour.getTextureRegion();
+        var translationX = width - (width * Math.abs(hp));
+
+        colour.setPosition(mColourX - translationX, colour.getY());
+        texture.setTexturePosition((int) -translationX, 0);
 
         ki.setPosition(Utils.toRes(5) + colour.getWidth() - ki.getWidth() / 2,
                 Utils.toRes(16) + colour.getHeight() / 2 - ki.getHeight() / 2);
