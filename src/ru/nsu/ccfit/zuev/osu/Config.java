@@ -136,8 +136,7 @@ public class Config {
         useSuperSlider = prefs.getBoolean("superSlider", false);
 
         try {
-            int off = prefs.getInt("offset", 0);
-            offset = (int) (Math.signum(off) * FMath.clamp(Math.abs(off), -250, 250));
+            offset = (int) FMath.clamp(prefs.getInt("offset", 0), -250, 250);
             backgroundBrightness = prefs.getInt("bgbrightness", 25) / 100f;
             soundVolume = prefs.getInt("soundvolume", 100) / 100f;
             bgmVolume = prefs.getInt("bgmvolume", 100) / 100f;
