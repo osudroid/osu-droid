@@ -7,6 +7,7 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -72,8 +73,8 @@ public class ScoreBar extends GameObject {
             hp = speed * dt * Math.signum(hp - lasthp) + lasthp;
         }
 
-        var texture = colour.getTextureRegion();
-        var translationX = width - (width * Math.abs(hp));
+        TextureRegion texture = colour.getTextureRegion();
+        float translationX = width - (width * Math.abs(hp));
 
         colour.setPosition(mColourX - translationX, colour.getY());
         texture.setTexturePosition((int) -translationX, 0);
