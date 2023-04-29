@@ -67,7 +67,7 @@ public class ScoreBar extends GameObject {
             hp = speed * dt * Math.signum(hp - lasthp) + lasthp;
         }
 
-        float translationX = width - (width * Math.abs(hp));
+        float translationX = width * (1 - Math.abs(hp));
 
         colour.setPosition(mColourX - translationX, colour.getY());
 
