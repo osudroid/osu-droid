@@ -1,15 +1,12 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
-import android.util.Log;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
