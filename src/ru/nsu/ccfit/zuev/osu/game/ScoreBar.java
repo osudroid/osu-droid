@@ -19,8 +19,7 @@ public class ScoreBar extends GameObject {
     private final AnimSprite ki;
     private final float width;
     private float lasthp = 0;
-
-    private float mColourX;
+    private final float mColourX = Utils.toRes(5);
 
     public ScoreBar(final GameObjectListener listener, final Scene scene,
                     final StatisticV2 stat) {
@@ -28,8 +27,6 @@ public class ScoreBar extends GameObject {
         bg = new Sprite(0, 0, ResourceManager.getInstance().getTexture(
                 "scorebar-bg"));
         bg.setScaleCenter(0, 0);
-
-        mColourX = Utils.toRes(5);
 
         if (ResourceManager.getInstance().isTextureLoaded("scorebar-colour-0")) {
             List<String> loadedScoreBarTextures = new ArrayList<>();
