@@ -188,17 +188,6 @@ public class BeatmapParser {
                     }
                 } catch (Exception e) {
                     Log.e("BeatmapParser.parse", "Unable to parse line " + s, e);
-                    String sectionName = currentSection.name();
-                    ToastLogger.showText(
-                            StringTable.format(
-                                    R.string.beatmap_parser_cannot_parse_line,
-                                    fileName,
-                                    sectionName.substring(0, 1).toUpperCase() + sectionName.substring(1)
-                            ),
-                            true
-                    );
-                    closeSource();
-                    return null;
                 }
             }
 

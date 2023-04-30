@@ -180,5 +180,4 @@
 	<!-- Beatmap parser errors -->
 	<string name="beatmap_parser_cannot_open_file" formatted="false">Failed loading %s: Could not open beatmap file</string>
 	<string name="beatmap_parser_music_not_found" formatted="false">Failed loading %s: Could not find audio file</string>
-	<string name="beatmap_parser_cannot_parse_line" formatted="false">Failed loading %s: Unable to parse a line in the %s section</string>
 </resources>
