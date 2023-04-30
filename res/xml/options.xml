@@ -160,10 +160,6 @@
         <EditTextPreference android:key="skinTopPath"
             android:title="@string/opt_skin_top_path_title"
             android:summary="@string/opt_skin_top_path_summary"/>
-        <CheckBoxPreference android:key="displayReleaseNotify"
-            android:title="@string/opt_displayReleaseNotify_title"
-            android:summary="@string/opt_displayReleaseNotify_summary"
-            android:defaultValue="true" />
         <CheckBoxPreference android:key="syncMusic" android:defaultValue="true"
             android:summary="@string/opt_syncmusic_summary"
             android:title="@string/opt_syncmusic_title"/>
