@@ -33,8 +33,6 @@ public class BeatmapControlPointsParser extends BeatmapSectionParser {
             throw new UnsupportedOperationException("The numerator of a time signature must be positive");
         }
 
-        data.rawTimingPoints.add(line);
-
         boolean timingChange = true;
         if (pars.length >= 7) {
             timingChange = pars[6].equals("1");
@@ -56,5 +54,7 @@ public class BeatmapControlPointsParser extends BeatmapSectionParser {
                 msPerBeat < 0 ? 100 / -msPerBeat : 1,
                 !Double.isNaN(msPerBeat)
         ));
+
+        data.rawTimingPoints.add(line);
     }
 }
