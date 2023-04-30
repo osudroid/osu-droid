@@ -62,7 +62,8 @@ public class FileUtils {
 
         ToastLogger.addToLog("Importing " + sourcePath);
 
-        final String folderName = file.getName().substring(0, file.getName().length() - 4);
+        String sourceFileName = file.getName();
+        final String folderName = sourceFileName.substring(0, sourceFileName.length() - 4);
 
         final File folderFile = new File(targetPath + "/" + folderName);
         if(!folderFile.exists()) {
@@ -76,18 +77,26 @@ public class FileUtils {
                         StringTable.format(R.string.message_error, "Invalid file"),
                         false);
                 Debug.e("FileUtils.extractZip: " + file.getName() + " is invalid");
-                file.renameTo(new File(file.getParentFile(), file.getName() + ".badzip"));
+                file.renameTo(new File(file.getParentFile(), sourceFileName + ".badzip"));
                 LibraryManager.getInstance().deleteDir(folderFile);
                 return false;
             }
 
             zip.extractAll(folderFile.getAbsolutePath());
-            if((Config.isDELETE_OSZ() && file.getName().toLowerCase().endsWith(".osz"))
-                || file.getName().toLowerCase().endsWith(".osk")) {
+            if((Config.isDELETE_OSZ() && sourceFileName.toLowerCase().endsWith(".osz"))
+                || sourceFileName.toLowerCase().endsWith(".osk")) {
                 file.delete();
             }
         } catch (final ZipException e) {
             Debug.e("FileUtils.extractZip: " + e.getMessage(), e);
+
+            int extensionIndex = sourceFileName.lastIndexOf('.');
+            file.renameTo(new File(
+                    file.getParentFile(),
+                    sourceFileName.substring(0, extensionIndex) + ".bad" +
+                            sourceFileName.substring(extensionIndex + 1)
+            ));
+
             return false;
         }
 
