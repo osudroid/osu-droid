@@ -53,9 +53,12 @@ public class DuringGameScoreBoard extends GameObject {
         }
 
         // Reinitialize scoreboard if data changes.
+        // This should only be done if the scoreboard data comes from an online source.
         final ScoreBoard.ScoreBoardItems[] items = GlobalManager.getInstance().getSongMenu().getBoard();
-        if (scoreBoardData.length != items.length) {
+        int replayID = GlobalManager.getInstance().getScoring().getReplayID();
+        if (replayID == -1 && scoreBoardData.length != items.length) {
             initScoreboard();
+            return;
         }
 
         float passedAfterChange = (System.currentTimeMillis() - lastRankChange) * 0.001f;
