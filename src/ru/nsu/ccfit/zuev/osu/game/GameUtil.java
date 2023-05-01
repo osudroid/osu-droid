@@ -8,9 +8,22 @@ import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 public class GameUtil
 {
 
-    public static IEntityModifier newFadeModifier(float time, boolean isHidden)
+    public static IEntityModifier newFadeModifier(float time)
     {
-        if (isHidden)
+        if (GameHelper.isHidden())
+        {
+            return new SequenceEntityModifier(
+                    new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
+                    new FadeOutModifier(time / 4 * GameHelper.getTimeMultiplier())
+            );
+        }
+
+        return new FadeInModifier(time / 2 * GameHelper.getTimeMultiplier());
+    }
+
+    public static IEntityModifier newFadeModifier(float time, float maxAlpha)
+    {
+        if (GameHelper.isHidden())
         {
             return new SequenceEntityModifier(
                     new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
