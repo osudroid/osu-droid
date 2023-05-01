@@ -16,6 +16,9 @@ public class TimingPoints {
             TimingPoint t = new TimingPoint();
             t.setTime(Double.parseDouble(l[0].trim()));
             t.setBeatLength(Double.parseDouble(l[1].trim()));
+            if (Double.isNaN(t.getBeatLength())) {
+                continue;
+            }
             t.setMeter(l.length > 2 ? Integer.parseInt(l[2]) : 4);
             t.setSampleType(l.length > 3 ? Integer.parseInt(l[3]) : 1);
             t.setSampleSet(l.length > 4 ? SampleSet.parse(l[4]) : SampleSet.None);
