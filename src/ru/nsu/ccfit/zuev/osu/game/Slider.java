@@ -378,7 +378,6 @@ public class Slider extends GameObject {
             }
             sprite.setScale(scale);
             sprite.setColor(color.r(), color.g(), color.b());
-            sprite.setAlpha(0.7f);
             scene.attachChild(sprite, 0);
             trackBoundaries.add(sprite);
         }
@@ -862,7 +861,6 @@ public class Slider extends GameObject {
                 }
 
                 if (Config.isComplexAnimations()) {
-                    //final float offset = startCircle.getWidth() / 2;
                     if (Config.isUseSuperSlider()) {
                         if (superPath != null && abstractSliderBody != null) {
                             float l = superPath.getMeasurer().maxLength() * percentage;
@@ -872,7 +870,6 @@ public class Slider extends GameObject {
                         }
                     } else {
                         tmpPoint = getPercentPosition(percentage, null);
-//					if (Config.isLowpolySliders()) {
                         for (int i = 0; i < path.boundIndexes.size(); i++) {
                             final float ppos = path.boundIndexes.get(i)
                                     / (float) path.points.size();
