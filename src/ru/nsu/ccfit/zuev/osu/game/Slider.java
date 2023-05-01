@@ -52,7 +52,6 @@ public class Slider extends GameObject {
     private float tickTime;
     private float maxTime;
     private float scale;
-    private float length;
     private int repeatCount;
     private boolean reverse;
     private int[] soundId = new int[3];
@@ -87,7 +86,6 @@ public class Slider extends GameObject {
 
     private TrianglePack body = null, border = null;
     private LinePath superPath = null;
-    private float sliderLength;
     private boolean preStageFinish = false;
 
     private SliderBody2D abstractSliderBody = null;
@@ -121,16 +119,12 @@ public class Slider extends GameObject {
         this.timing = timing;
         this.scale = scale;
         this.pos = pos;
-        this.length = length;
         passedTime = -time;
         preTime = time;
         if (sliderPath != null){
             path = sliderPath;
         } else{
-            //if (Config.isUseSuperSlider()) {
-            //	path = SupportSliderPath.parseDroidLinePath(pos, data, length);
-            //} else {
-                //fixed negative length silder bug
+                //fixed negative length slider bug
                 if (length < 0){
                     path = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
                     data.split("[|]"), 0, offset);
@@ -155,18 +149,12 @@ public class Slider extends GameObject {
         double scoringDistance = GameHelper.getSpeed() * speedMultiplier;
         double velocity = scoringDistance / timingPoint.getBeatLength();
         double spanDuration = length / velocity;
-        //fixed negative length silder bug
+        //fixed negative length slider bug
         if(spanDuration <= 0){
             spanDuration = 0;
         }
-		/*System.out.println("vel  " + velocity);
-		System.out.println("span " + spanDuration);
-		System.out.println("sm   " + speedMultiplier);
-		System.out.println("l    " + length);
-		System.out.println("sd   " + scoringDistance);
-		System.out.println("bpm  " + 60 * 1000 / timingPoint.getBeatLength());*/
 
-        maxTime = (float) (spanDuration / 1000);//length * timing.getBeatLength() / GameHelper.getSpeed();
+        maxTime = (float) (spanDuration / 1000);
         ball = null;
         followcircle = null;
         repeatCount = repeats;
@@ -219,26 +207,16 @@ public class Slider extends GameObject {
         }
         soundIdIndex = 1;
 
-        // Calculating position of top/left corner for sprites and hit radius
-		/*final PointF startPos = new PointF(pos.x - tex.getWidth() / 2, pos.y
-				- tex.getHeight() / 2);*/
-
-        /* Initializing sprites */
-
-        // Start circle
-        //startCircle.setPosition(startPos.x, startPos.y);
         startCircle.setScale(scale);
         startCircle.setColor(r, g, b);
         startCircle.setAlpha(0);
         startPosition = pos;
         Utils.putSpriteAnchorCenter(pos, startCircle);
 
-        //startOverlay.setPosition(startPos.x, startPos.y);
         startOverlay.setScale(scale);
         startOverlay.setAlpha(0);
         Utils.putSpriteAnchorCenter(pos, startOverlay);
 
-        //approachCircle.setPosition(startPos.x, startPos.y);
         approachCircle.setColor(r, g, b);
         approachCircle.setScale(scale * 2);
         approachCircle.setAlpha(0);
@@ -252,11 +230,6 @@ public class Slider extends GameObject {
         if (!path.points.isEmpty()) {
             endPos = path.points.get(path.points.size() - 1);
         }
-		/*new PointF(path.points.get(lastIndex).x
-				- tex.getWidth() / 2, path.points.get(lastIndex).y
-				- tex.getHeight() / 2);*/
-
-        //endCircle.setPosition(endPos.x, endPos.y);
         endCircle.setScale(scale);
         endCircle.setColor(r, g, b);
         endCircle.setAlpha(0);
@@ -264,7 +237,6 @@ public class Slider extends GameObject {
         Utils.putSpriteAnchorCenter(endPos, endCircle);
 
 
-        //endOverlay.setPosition(endPos.x, endPos.y);
         endOverlay.setScale(scale);
         endOverlay.setAlpha(0);
         Utils.putSpriteAnchorCenter(endPos, endOverlay);
@@ -336,7 +308,7 @@ public class Slider extends GameObject {
                     superPath.add(new Vec2(p.x, p.y));
                 }
                 superPath.measure();
-                superPath.bufferLength(sliderLength = path.length.get(path.length.size() - 1));
+                superPath.bufferLength(path.length.get(path.length.size() - 1));
                 superPath = superPath.fitToLinePath();
                 superPath.measure();
 
@@ -391,7 +363,6 @@ public class Slider extends GameObject {
         }
         trackPoly = new Polygon(0, 0, verts);
         trackPoly.setColor(color.r(), color.g(), color.b());
-//		trackPoly.setAlpha(0.5f);
         scene.attachChild(trackPoly, 0);
 
         trackBoundaries.clear();
@@ -428,25 +399,7 @@ public class Slider extends GameObject {
             }
             borderPoly = new Polygon(0, 0, verts);
             borderPoly.setColor(scolor.r(), scolor.g(), scolor.b());
-//			borderPoly.setAlpha(0.1f);
             scene.attachChild(borderPoly, 0);
-
-//			trackBorders.clear();
-//			for (final Integer i : path.boundIndexes) {
-//				final Sprite sprite = SpritePool.getInstance().getSprite(
-//						"::trackborder");
-//				if (Config.isComplexAnimations() == false) {
-//					sprite.setPosition(path.points.get(i).x - sprite.getWidth()
-//							/ 2, path.points.get(i).y - sprite.getHeight() / 2);
-//				} else {
-//					sprite.setPosition(startPos.x, startPos.y);
-//				}
-//				sprite.setScale(scale);
-//				sprite.setColor(scolor.r(), scolor.g(), scolor.b());
-//				sprite.setAlpha(0.1f);
-//				scene.attachChild(sprite, 0);
-//				trackBorders.add(sprite);
-//			}
         }
     }
 
@@ -929,39 +882,15 @@ public class Slider extends GameObject {
                                         .get(i));
                             }
                             Utils.putSpriteAnchorCenter(tpoint, trackBoundaries.get(i));
-							/*trackBoundaries.get(i).setPosition(
-									tpoint.x - offset, tpoint.y - offset);*/
                             if (!trackBorders.isEmpty()) {
                                 Utils.putSpriteAnchorCenter(tpoint, trackBorders.get(i));
-								/*trackBorders.get(i).setPosition(
-										trackBoundaries.get(i));*/
                             }
                         }
-//					} else {
-//						for (int i = 0; i < trackSprites.size(); i++) {
-//							tmpPoint = getPercentPosition(percentage * i
-//									/ path.points.size(), null);
-//							trackSprites.get(i).setPosition(
-//									tmpPoint.x - offset, tmpPoint.y - offset);
-//							if (trackBorders.isEmpty() == false) {
-//								trackBorders.get(i).setPosition(
-//										trackSprites.get(i));
-//							}
-//						}
-//					}
-                        //endOverlay.setPosition(endCircle);
-                        //endArrow.setPosition(endCircle);
                         if (trackPolyVerts != null) {
                             final float[] verts = trackPoly.getVertices();
                             for (int i = 0; i < verts.length; i++) {
                                 verts[i] = getPercentPositionOnTrack(
-                                        trackPolyVerts, percentage, i);// trackPolyVerts[i
-                                // % 2] +
-                                // (trackPolyVerts[i]
-                                // -
-                                // trackPolyVerts[i
-                                // % 2]) *
-                                // percentage;
+                                        trackPolyVerts, percentage, i);
                             }
                             trackPoly.updateShape();
                         }
@@ -970,9 +899,6 @@ public class Slider extends GameObject {
                             for (int i = 0; i < verts.length; i++) {
                                 verts[i] = getPercentPositionOnTrack(
                                         borderPolyVerts, percentage, i);
-                                // verts[i] = borderPolyVerts[i % 2] +
-                                // (trackPolyVerts[i] - borderPolyVerts[i % 2]) *
-                                // percentage;
                             }
                             borderPoly.updateShape();
                         }
@@ -1030,8 +956,7 @@ public class Slider extends GameObject {
 
                     tmpPoint = endPosition;
 
-                    if (/*Config.isLowpolySliders()
-							&& */!trackBoundaries.isEmpty()) {
+                    if (!trackBoundaries.isEmpty()) {
                         endCircle.setPosition(trackBoundaries
                                 .get(trackBoundaries.size() - 1));
                     } else {
@@ -1045,7 +970,7 @@ public class Slider extends GameObject {
             return;
         }
 
-        if (ball == null) // if ball still don't exists
+        if (ball == null) // if ball still don't exist
         {
             number.detach(true);
             approachCircle.setAlpha(0);
