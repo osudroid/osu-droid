@@ -6,11 +6,10 @@ import com.edlplan.andengine.TrianglePack;
 import com.edlplan.framework.math.Color4;
 import com.edlplan.framework.math.line.LinePath;
 
-import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
+import ru.nsu.ccfit.zuev.osu.game.GameUtil;
 
 public class SliderBody2D extends AbstractSliderBody {
 
@@ -69,28 +68,6 @@ public class SliderBody2D extends AbstractSliderBody {
         this.hintWidth = hintWidth;
     }
 
-    /**
-     * Gradually fades the slider's body, border, and hint (if any) out over the specified duration.
-     * <P>
-     * Used if Hidden mod is active.
-     * </P>
-     *
-     * @param duration The duration of the fade-out animation.
-     */
-    public void fadeOut(float duration) {
-        final EaseQuadOut easing = EaseQuadOut.getInstance();
-
-        if (body.getAlpha() > 0) {
-            body.registerEntityModifier(new AlphaModifier(duration, body.getAlpha(), 0, easing));
-        }
-        if (border.getAlpha() > 0) {
-            border.registerEntityModifier(new AlphaModifier(duration, border.getAlpha(), 0, easing));
-        }
-        if (hint != null && hint.getAlpha() > 0) {
-            hint.registerEntityModifier(new AlphaModifier(duration, hint.getAlpha(), 0, easing));
-        }
-    }
-
     @Override
     public void onUpdate() {
         if (body == null || border == null) {
@@ -99,12 +76,8 @@ public class SliderBody2D extends AbstractSliderBody {
 
         BuildCache cache = localCache.get();
         LinePath sub = path.cutPath(startLength, endLength).fitToLinePath(cache.path);
-        float alpha = endLength / path.getMeasurer().maxLength();
-        body.setAlpha(alpha * sliderBodyBaseAlpha);
-        border.setAlpha(alpha);
 
         if (hint != null) {
-            hint.setAlpha(alpha * hintAlpha);
             cache.drawLinePath
                     .reset(sub, hintWidth)
                     .getTriangles(cache.triangleBuilder)
@@ -157,6 +130,17 @@ public class SliderBody2D extends AbstractSliderBody {
         endLength = length;
     }
 
+    public void applyModifiers(float time)
+    {
+        body.registerEntityModifier(GameUtil.newFadeModifier(time, sliderBodyBaseAlpha));
+        border.registerEntityModifier(GameUtil.newFadeModifier(time));
+
+        if (hint != null)
+        {
+            hint.registerEntityModifier(GameUtil.newFadeModifier(time, hintAlpha));
+        }
+    }
+
     @Override
     public void applyToScene(Scene scene, boolean emptyOnStart) {
         BuildCache cache = localCache.get();
@@ -166,33 +150,30 @@ public class SliderBody2D extends AbstractSliderBody {
 
         if (enableHint) {
             hint = SpriteCache.trianglePackCache.get();
+            hint.setAlpha(0);
             hint.setDepthTest(true);
             hint.setClearDepthOnStart(true);
             hint.setColor(hintColor.r(), hintColor.g(), hintColor.b());
         }
 
+        body.setAlpha(0);
         body.setDepthTest(true);
         body.setClearDepthOnStart(!enableHint);
         body.setColor(bodyColor.r(), bodyColor.g(), bodyColor.b());
 
+        border.setAlpha(0);
         border.setDepthTest(true);
         border.setClearDepthOnStart(false);
         border.setColor(borderColor.r(), borderColor.g(), borderColor.b());
 
         if (emptyOnStart) {
-            body.setAlpha(0);
-            border.setAlpha(0);
             if (hint != null) {
-                hint.setAlpha(0);
                 hint.getVertices().length = 0;
             }
             body.getVertices().length = 0;
             border.getVertices().length = 0;
         } else {
-            body.setAlpha(sliderBodyBaseAlpha);
-            border.setAlpha(1);
             if (hint != null) {
-                hint.setAlpha(hintAlpha);
                 cache.drawLinePath
                         .reset(path, hintWidth)
                         .getTriangles(cache.triangleBuilder)

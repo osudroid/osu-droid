@@ -9,15 +9,11 @@ import com.edlplan.osu.support.slider.SliderBody2D;
 import com.edlplan.osu.support.timing.controlpoint.TimingControlPoint;
 
 import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.entity.modifier.FadeInModifier;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.sprite.batch.SpriteGroup;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
-import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +24,6 @@ import java.util.ListIterator;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -285,14 +280,13 @@ public class Slider extends GameObject {
             Utils.putSpriteAnchorCenter(pos, startArrow);
             scene.attachChild(startArrow, 0);
         }
-        if (GameHelper.isHidden()) {
-            number.init(scene, pos, scale,
-                    new SequenceEntityModifier(new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
-                            new FadeOutModifier(time / 4 * GameHelper.getTimeMultiplier())));
-        } else {
-            number.init(scene, pos, scale, new FadeInModifier(
-                    time / 2 * GameHelper.getTimeMultiplier()));
-        }
+        number.init(scene, pos, scale, GameUtil.newFadeModifier(time));
+
+        startCircle.registerEntityModifier(GameUtil.newFadeModifier(time));
+        startOverlay.registerEntityModifier(GameUtil.newFadeModifier(time));
+        endCircle.registerEntityModifier(GameUtil.newFadeModifier(time));
+        endOverlay.registerEntityModifier(GameUtil.newFadeModifier(time));
+
         scene.attachChild(startCircle, 0);
         scene.attachChild(approachCircle);
         scene.attachChild(endOverlay, 0);
@@ -366,21 +360,17 @@ public class Slider extends GameObject {
                         }
                     }
                 }
-
                 abstractSliderBody.applyToScene(scene, Config.isComplexAnimations());
+                abstractSliderBody.applyModifiers(time);
                 abstractSliderBody.setBodyColor(color.r(), color.g(), color.b());
                 RGBColor scolor = GameHelper.getSliderColor();
                 abstractSliderBody.setBorderColor(scolor.r(), scolor.g(), scolor.b());
 
             } else {
                 initLowPolyTrack();
+                applyLowPolyTrackModifiers(time);
             }
         }
-//		if (Config.isLowpolySliders()) {
-//			initLowPolyTrack();
-//		} else {
-//			initTrack();
-//		}
     }
 
     private void initLowPolyTrack() {
@@ -909,11 +899,6 @@ public class Slider extends GameObject {
                     approachCircle.setAlpha(percentage);
                 }
 
-
-                startCircle.setAlpha(percentage);
-                startOverlay.setAlpha(percentage);
-                endCircle.setAlpha(percentage);
-                endOverlay.setAlpha(percentage);
                 for (int i = 0; i < ticks.size(); i++) {
                     if (percentage > (float) (i + 1) / ticks.size()) {
                         ticks.get(i).setAlpha(1);
@@ -1002,10 +987,6 @@ public class Slider extends GameObject {
             } else if (percentage - dt / preTime <= 0.5f) {
                 // Setting up positions of slider parts
                 approachCircle.setAlpha(1);
-                startCircle.setAlpha(1);
-                startOverlay.setAlpha(1);
-                endCircle.setAlpha(1);
-                endOverlay.setAlpha(1);
                 for (final Sprite sp : ticks) {
                     sp.setAlpha(1);
                 }
@@ -1062,11 +1043,6 @@ public class Slider extends GameObject {
 
             }
             return;
-        } else {
-            if (Config.isUseSuperSlider()) {
-                startCircle.setAlpha(0);
-                startOverlay.setAlpha(0);
-            }
         }
 
         if (ball == null) // if ball still don't exists
@@ -1087,11 +1063,6 @@ public class Slider extends GameObject {
 
             scene.attachChild(ball);
             scene.attachChild(followcircle);
-
-            // Slider body, border, and hint gradually fade in Hidden mod
-            if (GameHelper.isHidden()) {
-                hiddenFadeOut();
-            }
         }
         // Ball positiong
         final float percentage = passedTime / maxTime;
@@ -1159,55 +1130,33 @@ public class Slider extends GameObject {
         }
     }
 
-    private void hiddenFadeOut() {
-        final float realDuration = maxTime * repeatCount * GameHelper.getTimeMultiplier();
-        final EaseQuadOut easing = EaseQuadOut.getInstance();
+    private void applyLowPolyTrackModifiers(float duration) {
         if (group != null) {
-            group.registerEntityModifier(new AlphaModifier(realDuration,
-                group.getAlpha(), 0, easing));
+            group.registerEntityModifier(GameUtil.newFadeModifier(duration));
         }
         if (trackPoly != null) {
-            trackPoly.registerEntityModifier(new AlphaModifier(realDuration,
-                trackPoly.getAlpha(), 0, easing));
+            trackPoly.registerEntityModifier(GameUtil.newFadeModifier(duration));
         }
         if (borderPoly != null) {
-            borderPoly.registerEntityModifier(new AlphaModifier(realDuration,
-                borderPoly.getAlpha(), 0, easing));
+            borderPoly.registerEntityModifier(GameUtil.newFadeModifier(duration));
         }
         if (borderGroup != null) {
-            borderGroup.registerEntityModifier(new AlphaModifier(realDuration,
-                borderGroup.getAlpha(), 0, easing));
+            borderGroup.registerEntityModifier(GameUtil.newFadeModifier(duration));
         }
         if (body != null) {
-            body.registerEntityModifier(new AlphaModifier(realDuration,
-                body.getAlpha(), 0, easing));
+            body.registerEntityModifier(GameUtil.newFadeModifier(duration));
         }
         if (border != null) {
-            border.registerEntityModifier(new AlphaModifier(realDuration,
-                border.getAlpha(), 0, easing));
+            border.registerEntityModifier(GameUtil.newFadeModifier(duration));
         }
-        startCircle.registerEntityModifier(new AlphaModifier(realDuration,
-            startCircle.getAlpha(), 0, easing));
-        startOverlay.registerEntityModifier(new AlphaModifier(realDuration,
-            startOverlay.getAlpha(), 0, easing));
-        endCircle.registerEntityModifier(new AlphaModifier(realDuration,
-            endCircle.getAlpha(), 0, easing));
-        endOverlay.registerEntityModifier(new AlphaModifier(realDuration,
-            endOverlay.getAlpha(), 0, easing));
         for (final Sprite sp : trackSprites) {
-            sp.registerEntityModifier(new AlphaModifier(realDuration,
-                sp.getAlpha(), 0, easing));
+            sp.registerEntityModifier(GameUtil.newFadeModifier(duration));
         }
         for (final Sprite sp : trackBorders) {
-            sp.registerEntityModifier(new AlphaModifier(realDuration,
-                sp.getAlpha(), 0, easing));
+            sp.registerEntityModifier(GameUtil.newFadeModifier(duration));
         }
         for (final Sprite sp : trackBoundaries) {
-            sp.registerEntityModifier(new AlphaModifier(realDuration,
-                sp.getAlpha(), 0, easing));
-        }
-        if (abstractSliderBody != null) {
-            abstractSliderBody.fadeOut(realDuration);
+            sp.registerEntityModifier(GameUtil.newFadeModifier(duration));
         }
     }
 
