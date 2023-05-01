@@ -225,7 +225,6 @@ public class Slider extends GameObject {
         soundIdIndex = 1;
 
         // Calculating position of top/left corner for sprites and hit radius
-        final TextureRegion tex = startCircle.getTextureRegion();
 		/*final PointF startPos = new PointF(pos.x - tex.getWidth() / 2, pos.y
 				- tex.getHeight() / 2);*/
 
