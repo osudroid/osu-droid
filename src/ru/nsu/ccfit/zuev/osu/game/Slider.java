@@ -383,66 +383,6 @@ public class Slider extends GameObject {
 //		}
     }
 
-    private void initTrack() {
-        final TextureRegion tex = startCircle.getTextureRegion();
-        final PointF startPos = new PointF(startPosition.x
-                - tex.getWidth() / 2f, startPosition.y - tex.getHeight()
-                / 2f);
-        trackSprites.clear();
-        group = new SpriteGroup(ResourceManager.getInstance()
-                .getTexture("::track").getTexture(), path.points.size());
-        group.setColor(color.r(), color.g(), color.b());
-        for (int i = 0; i < path.points.size(); i++) {
-            final PointF p = path.points.get(i);
-            final Sprite sprite = SpritePool.getInstance().getSprite("::track");
-            if (!Config.isComplexAnimations()) {
-                sprite.setPosition(p.x - sprite.getWidth() / 2,
-                        p.y - sprite.getHeight() / 2);
-            } else {
-                sprite.setPosition(startPos.x, startPos.y);
-            }
-            sprite.setScale(scale);
-            sprite.setColor(color.r(), color.g(), color.b());
-            sprite.setAlpha(1);
-            if (i < path.points.size() - 1) {
-                sprite.setRotation(MathUtils.radToDeg(Utils.direction(p,
-                        path.points.get(i + 1))));
-            } else if (i > 0) {
-                sprite.setRotation(MathUtils.radToDeg(Utils.direction(
-                        path.points.get(i - 1), p)));
-            }
-            trackSprites.add(sprite);
-            group.attachChild(sprite);
-            // scene.attachChild(sprite, 0);
-        }
-        scene.attachChild(group, 0);
-
-        // Slider track border
-        if (Config.isSliderBorders()) {
-            trackBorders.clear();
-            borderGroup = new SpriteGroup(ResourceManager.getInstance()
-                    .getTexture("::trackborder").getTexture(),
-                    path.points.size());
-            for (final PointF p : path.points) {
-                final Sprite sprite = SpritePool.getInstance().getSprite(
-                        "::trackborder");
-                if (!Config.isComplexAnimations()) {
-                    sprite.setPosition(p.x - sprite.getWidth() / 2, p.y
-                            - sprite.getHeight() / 2);
-                } else {
-                    sprite.setPosition(startPos.x, startPos.y);
-                }
-                sprite.setScale(scale);
-                sprite.setAlpha(1);
-                trackBorders.add(sprite);
-                borderGroup.attachChild(sprite);
-            }
-            final RGBColor scolor = GameHelper.getSliderColor();
-            borderGroup.setColor(scolor.r(), scolor.g(), scolor.b());
-            scene.attachChild(borderGroup, 0);
-        }
-    }
-
     private void initLowPolyTrack() {
         final TextureRegion tex = startCircle.getTextureRegion();
         final PointF startPos = new PointF(startPosition.x
