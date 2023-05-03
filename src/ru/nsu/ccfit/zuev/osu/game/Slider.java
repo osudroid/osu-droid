@@ -1048,7 +1048,7 @@ public class Slider extends GameObject {
                 scale * 1.1f);
 
         float realDuration = maxTime * repeatCount * GameHelper.getTimeMultiplier();
-        float animDuration = Math.min(realDuration / 2, 0.2f);
+        float animDuration = Math.min(realDuration / 2, 0.15f);
 
         if (inRadius && !mWasInRadius)
         {
