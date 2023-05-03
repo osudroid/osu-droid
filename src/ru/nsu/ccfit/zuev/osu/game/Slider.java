@@ -3,15 +3,13 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.edlplan.andengine.TrianglePack;
+import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody2D;
 import com.edlplan.osu.support.timing.controlpoint.TimingControlPoint;
 
-import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.entity.modifier.FadeInModifier;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
+import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.sprite.batch.SpriteGroup;
@@ -28,7 +26,6 @@ import java.util.ListIterator;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -70,7 +67,7 @@ public class Slider extends GameObject {
     private double tickInterval;
 
     private AnimSprite ball;
-    private Sprite followcircle;
+    private Sprite followCircle;
 
     private PointF tmpPoint = new PointF();
     private Float ballAngle = 0f;
@@ -94,6 +91,10 @@ public class Slider extends GameObject {
     private boolean preStageFinish = false;
 
     private SliderBody2D abstractSliderBody = null;
+
+    private boolean
+            mWasInRadius,
+            mIsEnding;
 
     public Slider() {
         startCircle = SpritePool.getInstance().getSprite("sliderstartcircle");
@@ -157,10 +158,12 @@ public class Slider extends GameObject {
             spanDuration = 0;
         }
 
+        mWasInRadius = false;
+        mIsEnding = false;
 
         maxTime = (float) (spanDuration / 1000);
         ball = null;
-        followcircle = null;
+        followCircle = null;
         repeatCount = repeats;
         reverse = false;
         startHit = false;
@@ -628,9 +631,9 @@ public class Slider extends GameObject {
         startArrow.detachSelf();
         endArrow.detachSelf();
         ball.detachSelf();
-        followcircle.detachSelf();
+        followCircle.detachSelf();
         SpritePool.getInstance().putAnimSprite("sliderb", ball);
-        SpritePool.getInstance().putSprite("sliderfollowcircle", followcircle);
+        SpritePool.getInstance().putSprite("sliderfollowcircle", followCircle);
         for (final Sprite sp : trackSprites) {
             sp.detachSelf();
             SpritePool.getInstance().putSprite("::track", sp);
@@ -659,7 +662,7 @@ public class Slider extends GameObject {
     private void over() {
         repeatCount--;
         // If alpha > 0 means cursor in slider ball bounds
-        if (followcircle.getAlpha() > 0 && replayObjectData == null ||
+        if (followCircle.getAlpha() > 0 && replayObjectData == null ||
                 replayObjectData != null && replayObjectData.tickSet.get(tickIndex)) {
             if (soundIdIndex < soundId.length)
                 Utils.playHitSound(listener, soundId[soundIdIndex],
@@ -975,8 +978,7 @@ public class Slider extends GameObject {
 
                     tmpPoint = endPosition;
 
-                    if (/*Config.isLowpolySliders()
-							&& */!trackBoundaries.isEmpty()) {
+                    if (!trackBoundaries.isEmpty()) {
                         endCircle.setPosition(trackBoundaries
                                 .get(trackBoundaries.size() - 1));
                     } else {
@@ -988,9 +990,14 @@ public class Slider extends GameObject {
 
             }
             return;
+        } else {
+            if (Config.isUseSuperSlider()) {
+                startCircle.setAlpha(0);
+                startOverlay.setAlpha(0);
+            }
         }
 
-        if (ball == null) // if ball still don't exists
+        if (ball == null) // if ball still don't exist
         {
             number.detach(true);
             approachCircle.setAlpha(0);
@@ -1002,12 +1009,10 @@ public class Slider extends GameObject {
             ball.setScale(scale);
             ball.setFlippedHorizontal(false);
 
-            followcircle = SpritePool.getInstance().getSprite(
-                    "sliderfollowcircle");
-            followcircle.setScale(scale);
+            followCircle = SpritePool.getInstance().getSprite("sliderfollowcircle");
 
             scene.attachChild(ball);
-            scene.attachChild(followcircle);
+            scene.attachChild(followCircle);
 
             // Slider body, border, and hint gradually fade in Hidden mod
             if (GameHelper.isHidden()) {
@@ -1032,20 +1037,58 @@ public class Slider extends GameObject {
             if (GameHelper.isAutopilotMod() && listener.isMouseDown(i))
                 inRadius = true;
         }
-        followcircle.setAlpha(inRadius ? 1 : 0);
+
         listener.onTrackingSliders(inRadius);
 
         tickTime += dt;
-        //try fixed big followcircle bug
-        float fcscale = scale * (1.1f - 0.1f * tickTime * GameHelper.getTickRate() / timing.getBeatLength());
-        if (fcscale <= scale * 1.1f && fcscale >= scale * -1.1f){
-            followcircle.setScale(fcscale);
+
+        float fcScale = FMath.clamp(
+                scale * (1.1f - 0.1f * tickTime * GameHelper.getTickRate() / timing.getBeatLength()),
+                scale * -1.1f,
+                scale * 1.1f);
+
+        float realDuration = maxTime * repeatCount * GameHelper.getTimeMultiplier();
+        float animDuration = Math.min(realDuration / 2, 0.2f);
+
+        if (inRadius && !mWasInRadius)
+        {
+            mWasInRadius = true;
+
+            float initialScale = followCircle.getAlpha() == 0 ? 0 : followCircle.getScaleX();
+
+            followCircle.clearEntityModifiers();
+            followCircle.registerEntityModifier(new ParallelEntityModifier(
+                    new ScaleModifier(animDuration, initialScale, fcScale),
+                    new FadeInModifier(animDuration)
+            ));
         }
+        else if (inRadius && passedTime > realDuration - animDuration / 2 && !mIsEnding) // Slider near to end
+        {
+            mIsEnding = true;
+
+            followCircle.clearEntityModifiers();
+            followCircle.registerEntityModifier(new ParallelEntityModifier(
+                    new ScaleModifier(animDuration, followCircle.getScaleX(), 0),
+                    new FadeOutModifier(animDuration)
+            ));
+        }
+        else if (!inRadius && mWasInRadius)
+        {
+            mWasInRadius = false;
+
+            followCircle.clearEntityModifiers();
+            followCircle.registerEntityModifier(new ParallelEntityModifier(
+                    new ScaleModifier(animDuration, followCircle.getScaleX(), fcScale * 1.5f),
+                    new FadeOutModifier(animDuration)
+            ));
+        }
+
+
         // Some magic with slider ticks. If it'll crash it's not my fault ^_^"
         while (ticks.size() > 0 && percentage < 1 - 0.02f / maxTime
                 && tickTime * GameHelper.getTickRate() > tickInterval) {
             tickTime -= tickInterval / GameHelper.getTickRate();
-            if (followcircle.getAlpha() > 0 && replayObjectData == null ||
+            if (followCircle.getAlpha() > 0 && replayObjectData == null ||
                     replayObjectData != null && replayObjectData.tickSet.get(tickIndex)) {
                 Utils.playHitSound(listener, 16);
                 listener.onSliderHit(id, 10, null, ballpos, false, color, GameObjectListener.SLIDER_TICK);
@@ -1064,8 +1107,8 @@ public class Slider extends GameObject {
             ticksTotal++;
         }
         // Setting position of ball and follow circle
-        followcircle.setPosition(ballpos.x - followcircle.getWidth() / 2,
-                ballpos.y - followcircle.getHeight() / 2);
+        followCircle.setPosition(ballpos.x - followCircle.getWidth() / 2,
+                                 ballpos.y - followCircle.getHeight() / 2);
         ball.setPosition(ballpos.x - ball.getWidth() / 2,
                 ballpos.y - ball.getHeight() / 2);
         ball.setRotation(ballAngle);
