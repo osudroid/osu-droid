@@ -287,12 +287,38 @@ public class Slider extends GameObject {
             scene.attachChild(startArrow, 0);
         }
         if (GameHelper.isHidden()) {
-            number.init(scene, pos, scale,
-                    new SequenceEntityModifier(new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
-                            new FadeOutModifier(time / 4 * GameHelper.getTimeMultiplier())));
+            number.init(scene, pos, scale, new SequenceEntityModifier(
+                    new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
+                    new FadeOutModifier(time * 0.35f * GameHelper.getTimeMultiplier())
+            ));
+
+            startCircle.registerEntityModifier(new SequenceEntityModifier(
+                    new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
+                    new FadeOutModifier(time * 0.35f * GameHelper.getTimeMultiplier())
+            ));
+
+            startOverlay.registerEntityModifier(new SequenceEntityModifier(
+                    new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
+                    new FadeOutModifier(time * 0.35f * GameHelper.getTimeMultiplier())
+            ));
+
+            endCircle.registerEntityModifier(new SequenceEntityModifier(
+                    new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
+                    new FadeOutModifier(time * 0.35f * GameHelper.getTimeMultiplier())
+            ));
+
+            endOverlay.registerEntityModifier(new SequenceEntityModifier(
+                    new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
+                    new FadeOutModifier(time * 0.35f * GameHelper.getTimeMultiplier())
+            ));
+
         } else {
-            number.init(scene, pos, scale, new FadeInModifier(
-                    time / 2 * GameHelper.getTimeMultiplier()));
+            number.init(scene, pos, scale, new FadeInModifier(time / 2 * GameHelper.getTimeMultiplier()));
+
+            startCircle.registerEntityModifier(new FadeInModifier(time / 2 * GameHelper.getTimeMultiplier()));
+            startOverlay.registerEntityModifier(new FadeInModifier(time / 2 * GameHelper.getTimeMultiplier()));
+            endCircle.registerEntityModifier(new FadeInModifier(time / 2 * GameHelper.getTimeMultiplier()));
+            endOverlay.registerEntityModifier(new FadeInModifier(time / 2 * GameHelper.getTimeMultiplier()));
         }
         scene.attachChild(startCircle, 0);
         scene.attachChild(approachCircle);
@@ -970,11 +996,6 @@ public class Slider extends GameObject {
                     approachCircle.setAlpha(percentage);
                 }
 
-
-                startCircle.setAlpha(percentage);
-                startOverlay.setAlpha(percentage);
-                endCircle.setAlpha(percentage);
-                endOverlay.setAlpha(percentage);
                 for (int i = 0; i < ticks.size(); i++) {
                     if (percentage > (float) (i + 1) / ticks.size()) {
                         ticks.get(i).setAlpha(1);
@@ -1063,10 +1084,6 @@ public class Slider extends GameObject {
             } else if (percentage - dt / preTime <= 0.5f) {
                 // Setting up positions of slider parts
                 approachCircle.setAlpha(1);
-                startCircle.setAlpha(1);
-                startOverlay.setAlpha(1);
-                endCircle.setAlpha(1);
-                endOverlay.setAlpha(1);
                 for (final Sprite sp : ticks) {
                     sp.setAlpha(1);
                 }
@@ -1123,11 +1140,6 @@ public class Slider extends GameObject {
 
             }
             return;
-        } else {
-            if (Config.isUseSuperSlider()) {
-                startCircle.setAlpha(0);
-                startOverlay.setAlpha(0);
-            }
         }
 
         if (ball == null) // if ball still don't exists
