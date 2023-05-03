@@ -1047,42 +1047,49 @@ public class Slider extends GameObject {
                 scale * -1.1f,
                 scale * 1.1f);
 
-        float realDuration = maxTime * repeatCount * GameHelper.getTimeMultiplier();
-        float animDuration = Math.min(realDuration / 2, 0.15f);
-
-        if (inRadius && !mWasInRadius)
+        if (Config.isComplexAnimations())
         {
-            mWasInRadius = true;
+            float realDuration = maxTime * repeatCount * GameHelper.getTimeMultiplier();
+            float animDuration = Math.min(realDuration / 2, 0.15f);
 
-            float initialScale = followCircle.getAlpha() == 0 ? 0 : followCircle.getScaleX();
+            if (inRadius && !mWasInRadius)
+            {
+                mWasInRadius = true;
 
-            followCircle.clearEntityModifiers();
-            followCircle.registerEntityModifier(new ParallelEntityModifier(
-                    new ScaleModifier(animDuration, initialScale, fcScale),
-                    new FadeInModifier(animDuration)
-            ));
+                float initialScale = followCircle.getAlpha() == 0 ? 0 : followCircle.getScaleX();
+
+                followCircle.clearEntityModifiers();
+                followCircle.registerEntityModifier(new ParallelEntityModifier(
+                        new ScaleModifier(animDuration, initialScale, fcScale),
+                        new FadeInModifier(animDuration)
+                ));
+            }
+            else if (inRadius && passedTime > realDuration - animDuration / 2 && !mIsEnding) // Slider near to end
+            {
+                mIsEnding = true;
+
+                followCircle.clearEntityModifiers();
+                followCircle.registerEntityModifier(new ParallelEntityModifier(
+                        new ScaleModifier(animDuration, followCircle.getScaleX(), 0),
+                        new FadeOutModifier(animDuration)
+                ));
+            }
+            else if (!inRadius && mWasInRadius)
+            {
+                mWasInRadius = false;
+
+                followCircle.clearEntityModifiers();
+                followCircle.registerEntityModifier(new ParallelEntityModifier(
+                        new ScaleModifier(animDuration, followCircle.getScaleX(), fcScale * 1.5f),
+                        new FadeOutModifier(animDuration)
+                ));
+            }
         }
-        else if (inRadius && passedTime > realDuration - animDuration / 2 && !mIsEnding) // Slider near to end
+        else
         {
-            mIsEnding = true;
-
-            followCircle.clearEntityModifiers();
-            followCircle.registerEntityModifier(new ParallelEntityModifier(
-                    new ScaleModifier(animDuration, followCircle.getScaleX(), 0),
-                    new FadeOutModifier(animDuration)
-            ));
+            followCircle.setAlpha(inRadius ? 1 : 0);
+            followCircle.setScale(fcScale);
         }
-        else if (!inRadius && mWasInRadius)
-        {
-            mWasInRadius = false;
-
-            followCircle.clearEntityModifiers();
-            followCircle.registerEntityModifier(new ParallelEntityModifier(
-                    new ScaleModifier(animDuration, followCircle.getScaleX(), fcScale * 1.5f),
-                    new FadeOutModifier(animDuration)
-            ));
-        }
-
 
         // Some magic with slider ticks. If it'll crash it's not my fault ^_^"
         while (ticks.size() > 0 && percentage < 1 - 0.02f / maxTime
