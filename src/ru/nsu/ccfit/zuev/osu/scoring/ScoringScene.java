@@ -496,7 +496,6 @@ public class ScoringScene {
                     .applyFilter(m -> m.unranked).hasNext();
                 if (hasUnrankedMod
                     || Config.isRemoveSliderLock()
-                    || ModMenu.getInstance().isChangeSpeed()
                     || ModMenu.getInstance().isEnableForceAR()
                     || !ModMenu.getInstance().isDefaultFLFollowDelay()
                     ) {
