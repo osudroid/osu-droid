@@ -258,39 +258,49 @@ public class Slider extends GameObject {
             Utils.putSpriteAnchorCenter(pos, startArrow);
             scene.attachChild(startArrow, 0);
         }
+
         if (GameHelper.isHidden()) {
+            float fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
+            float fadeOutDuration = time * 0.3f * GameHelper.getTimeMultiplier();
+
             number.init(scene, pos, scale, new SequenceEntityModifier(
-                    new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
-                    new FadeOutModifier(time * 0.35f * GameHelper.getTimeMultiplier())
+                    new FadeInModifier(fadeInDuration),
+                    new FadeOutModifier(fadeOutDuration)
             ));
 
             startCircle.registerEntityModifier(new SequenceEntityModifier(
-                    new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
-                    new FadeOutModifier(time * 0.35f * GameHelper.getTimeMultiplier())
+                    new FadeInModifier(fadeInDuration),
+                    new FadeOutModifier(fadeOutDuration)
             ));
 
             startOverlay.registerEntityModifier(new SequenceEntityModifier(
-                    new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
-                    new FadeOutModifier(time * 0.35f * GameHelper.getTimeMultiplier())
+                    new FadeInModifier(fadeInDuration),
+                    new FadeOutModifier(fadeOutDuration)
             ));
 
             endCircle.registerEntityModifier(new SequenceEntityModifier(
-                    new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
-                    new FadeOutModifier(time * 0.35f * GameHelper.getTimeMultiplier())
+                    new FadeInModifier(fadeInDuration),
+                    new FadeOutModifier(fadeInDuration)
             ));
 
             endOverlay.registerEntityModifier(new SequenceEntityModifier(
-                    new FadeInModifier(time / 4 * GameHelper.getTimeMultiplier()),
-                    new FadeOutModifier(time * 0.35f * GameHelper.getTimeMultiplier())
+                    new FadeInModifier(fadeInDuration),
+                    new FadeOutModifier(fadeOutDuration)
             ));
 
         } else {
-            number.init(scene, pos, scale, new FadeInModifier(time / 2 * GameHelper.getTimeMultiplier()));
+            // Preempt time can go below 450ms. Normally, this is achieved via the DT mod which uniformly speeds up all animations game wide regardless of AR.
+            // This uniform speedup is hard to match 1:1, however we can at least make AR>10 (via mods) feel good by extending the upper linear function above.
+            // Note that this doesn't exactly match the AR>10 visuals as they're classically known, but it feels good.
+            // This adjustment is necessary for AR>10, otherwise TimePreempt can become smaller leading to hitcircles not fully fading in.
+            float fadeInDuration = 0.4f * Math.min(1, time / ((float) GameHelper.ar2ms(10) / 1000)) * GameHelper.getTimeMultiplier();
 
-            startCircle.registerEntityModifier(new FadeInModifier(time / 2 * GameHelper.getTimeMultiplier()));
-            startOverlay.registerEntityModifier(new FadeInModifier(time / 2 * GameHelper.getTimeMultiplier()));
-            endCircle.registerEntityModifier(new FadeInModifier(time / 2 * GameHelper.getTimeMultiplier()));
-            endOverlay.registerEntityModifier(new FadeInModifier(time / 2 * GameHelper.getTimeMultiplier()));
+            number.init(scene, pos, scale, new FadeInModifier(fadeInDuration));
+
+            startCircle.registerEntityModifier(new FadeInModifier(fadeInDuration));
+            startOverlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
+            endCircle.registerEntityModifier(new FadeInModifier(fadeInDuration));
+            endOverlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
         }
         scene.attachChild(startCircle, 0);
         scene.attachChild(approachCircle);
@@ -371,6 +381,11 @@ public class Slider extends GameObject {
             } else {
                 initLowPolyTrack();
             }
+        }
+
+        // Slider body, border, and hint gradually fade in Hidden mod
+        if (GameHelper.isHidden()) {
+            hiddenFadeOut();
         }
     }
 
@@ -1013,11 +1028,6 @@ public class Slider extends GameObject {
 
             scene.attachChild(ball);
             scene.attachChild(followCircle);
-
-            // Slider body, border, and hint gradually fade in Hidden mod
-            if (GameHelper.isHidden()) {
-                hiddenFadeOut();
-            }
         }
         // Ball positiong
         final float percentage = passedTime / maxTime;
