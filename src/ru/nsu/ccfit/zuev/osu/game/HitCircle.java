@@ -2,13 +2,16 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
+import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
+import org.anddev.andengine.util.modifier.IModifier;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
@@ -283,22 +286,13 @@ public class HitCircle extends GameObject {
             // calculating size of approach circle
             approachCircle.setScale(scale * (1 + 2f * (1 - percentage)));
             // and if we just begun
-            if (GameHelper.isHidden() == false || (isFirstNote && Config.isShowFirstApproachCircle())) {
+            if (!GameHelper.isHidden() || (isFirstNote && Config.isShowFirstApproachCircle())) {
                 if (passedTime < time / 2) {
                     // calculating alpha of all sprites
                     percentage = passedTime * 2 / time;
                     overlay.setAlpha(percentage);
                     circle.setAlpha(percentage);
                     approachCircle.setAlpha(percentage);
-//			} else if (GameHelper.isHidden()) {
-//				if (passedTime < time * 0.9f) {
-////					percentage = 1 - passedTime / (time * 0.85f);
-////					overlay.setAlpha(percentage);
-////					circle.setAlpha(percentage);
-////				} else {
-//					overlay.setAlpha(0);
-//					circle.setAlpha(0);
-//				}
                 } else if (!GameHelper.isHidden())// if circle already has to be shown, set all alphas to 1
                 {
                     overlay.setAlpha(1);
@@ -306,15 +300,43 @@ public class HitCircle extends GameObject {
                     approachCircle.setAlpha(1);
                 }
             }
-        } else if (autoPlay == false)// if player didn't click circle in time
+        } else if (!autoPlay)// if player didn't click circle in time
         {
-            approachCircle.setAlpha(0);
+            if (approachCircle.getAlpha() == 1)
+            {
+                approachCircle.registerEntityModifier(new FadeOutModifier(0.05f));
+            }
+
             // If passed too many time, counting it as miss
             if (passedTime > time + GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) {
                 passedTime = -1;
                 final byte forcedScore = (replayObjectData == null) ? 0 : replayObjectData.result;
                 SyncTaskManager.getInstance().run(() -> {
-                    removeFromScene();
+
+                    if (GameHelper.isHidden())
+                    {
+                        removeFromScene();
+                    }
+                    else
+                    {
+                        circle.registerEntityModifier(new FadeOutModifier(0.1f));
+                        overlay.registerEntityModifier(new FadeOutModifier(0.1f));
+                        number.registerEntityModifier(new FadeOutModifier(0.1f, new IEntityModifier.IEntityModifierListener()
+                        {
+                            @Override
+                            public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem)
+                            {
+
+                            }
+
+                            @Override
+                            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
+                            {
+                                SyncTaskManager.getInstance().run(HitCircle.this::removeFromScene);
+                            }
+                        }));
+                    }
+
                     HitCircle.this.listener.onCircleHit(id, 10, pos, false, forcedScore, color);
                 });
             }

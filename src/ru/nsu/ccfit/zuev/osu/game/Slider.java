@@ -638,8 +638,25 @@ public class Slider extends GameObject {
             border.detachSelf();
         }
         if (abstractSliderBody != null) {
-            abstractSliderBody.removeFromScene(scene);
+            if (!GameHelper.isHidden())
+            {
+                abstractSliderBody.removeFromSceneAnimated(scene);
+            }
+            else
+            {
+                abstractSliderBody.removeFromScene(scene);
+            }
         }
+
+        ball.registerEntityModifier(new FadeOutModifier(0.1f, new IEntityModifier.IEntityModifierListener()
+        {
+            @Override public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
+
+            @Override public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
+            {
+                SyncTaskManager.getInstance().run(pItem::detachSelf);
+            }
+        }));
 
         if (!Config.isComplexAnimations())
         {
@@ -652,7 +669,6 @@ public class Slider extends GameObject {
         approachCircle.detachSelf();
         startArrow.detachSelf();
         endArrow.detachSelf();
-        ball.detachSelf();
         SpritePool.getInstance().putAnimSprite("sliderb", ball);
         SpritePool.getInstance().putSprite("sliderfollowcircle", followCircle);
         for (final Sprite sp : trackSprites) {
@@ -909,10 +925,10 @@ public class Slider extends GameObject {
         {
             float percentage = 1 + passedTime / preTime;
             // calculating size of approach circle
-            approachCircle.setScale(scale
-                    * (1 + 2f * (1 - percentage)));
-            if (startHit) {
-                approachCircle.setAlpha(0);
+            approachCircle.setScale(scale * (1 + 2f * (1 - percentage)));
+            if (startHit && approachCircle.getAlpha() == 1)
+            {
+                approachCircle.registerEntityModifier(new FadeOutModifier(0.05f));
             }
             if (percentage <= 0.5f) {
                 // Following core doing a very cute show animation ^_^"
@@ -1054,6 +1070,8 @@ public class Slider extends GameObject {
                     / timing.getBeatLength());
             ball.setScale(scale);
             ball.setFlippedHorizontal(false);
+
+            ball.registerEntityModifier(new FadeInModifier(0.1f));
 
             followCircle = SpritePool.getInstance().getSprite("sliderfollowcircle");
             followCircle.setAlpha(0);
@@ -1271,8 +1289,9 @@ public class Slider extends GameObject {
             }
             if (passedTime < 0) // we at approach time
             {
-                if (startHit) {
-                    approachCircle.setAlpha(0);
+                if (startHit && approachCircle.getAlpha() == 1)
+                {
+                    approachCircle.registerEntityModifier(new FadeOutModifier(0.05f));
                 }
             }
         }

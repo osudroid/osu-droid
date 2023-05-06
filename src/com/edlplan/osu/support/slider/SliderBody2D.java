@@ -6,14 +6,14 @@ import com.edlplan.andengine.TrianglePack;
 import com.edlplan.framework.math.Color4;
 import com.edlplan.framework.math.line.LinePath;
 
-import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.entity.modifier.FadeInModifier;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
+import org.anddev.andengine.entity.IEntity;
+import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.scene.Scene;
+import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
+import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 
 public class SliderBody2D extends AbstractSliderBody {
 
@@ -230,6 +230,30 @@ public class SliderBody2D extends AbstractSliderBody {
         scene.attachChild(body, 0);
         if (hint != null) {
             scene.attachChild(hint, 0);
+        }
+    }
+
+    public void removeFromSceneAnimated(Scene scene)
+    {
+        if (hint != null)
+        {
+            hint.registerEntityModifier(new AlphaModifier(0.24f, hintAlpha, 0));
+        }
+        if (body != null)
+        {
+            body.registerEntityModifier(new AlphaModifier(0.24f, sliderBodyBaseAlpha, 0));
+        }
+        if (border != null)
+        {
+            border.registerEntityModifier(new FadeOutModifier(0.24f, new IEntityModifier.IEntityModifierListener()
+            {
+                @Override public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
+
+                @Override public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
+                {
+                    SyncTaskManager.getInstance().run(() -> removeFromScene(scene));
+                }
+            }));
         }
     }
 
