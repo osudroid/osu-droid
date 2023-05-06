@@ -9,12 +9,15 @@ import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody2D;
 import com.edlplan.osu.support.timing.controlpoint.TimingControlPoint;
 
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.sprite.batch.SpriteGroup;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
+import org.anddev.andengine.util.modifier.IModifier;
+import org.anddev.andengine.util.modifier.ease.EaseQuadIn;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
 import java.util.ArrayList;
@@ -93,8 +96,7 @@ public class Slider extends GameObject {
     private SliderBody2D abstractSliderBody = null;
 
     private boolean
-            mWasInRadius,
-            mIsEnding;
+            mWasInRadius;
 
     public Slider() {
         startCircle = SpritePool.getInstance().getSprite("sliderstartcircle");
@@ -159,7 +161,6 @@ public class Slider extends GameObject {
         }
 
         mWasInRadius = false;
-        mIsEnding = false;
 
         maxTime = (float) (spanDuration / 1000);
         ball = null;
@@ -631,7 +632,6 @@ public class Slider extends GameObject {
         startArrow.detachSelf();
         endArrow.detachSelf();
         ball.detachSelf();
-        followCircle.detachSelf();
         SpritePool.getInstance().putAnimSprite("sliderb", ball);
         SpritePool.getInstance().putSprite("sliderfollowcircle", followCircle);
         for (final Sprite sp : trackSprites) {
@@ -716,6 +716,7 @@ public class Slider extends GameObject {
             }
             return;
         }
+
         // Calculating score
         int score = 0;
         if (ticksGot > 0) {
@@ -740,6 +741,29 @@ public class Slider extends GameObject {
         }
         listener.onSliderEnd(id, firstHitAccuracy, tickSet);
         // Remove slider from scene
+
+        if (mWasInRadius)
+        {
+            followCircle.clearEntityModifiers();
+            followCircle.registerEntityModifier(new ParallelEntityModifier(
+                    new ScaleModifier(0.2f, followCircle.getScaleX(), followCircle.getScaleX() * 0.8f, EaseQuadOut.getInstance()),
+                    new AlphaModifier(0.2f, followCircle.getAlpha(), 0f, new IEntityModifier.IEntityModifierListener()
+                    {
+                        @Override
+                        public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem)
+                        {
+
+                        }
+
+                        @Override
+                        public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
+                        {
+                            SyncTaskManager.getInstance().run(pItem::detachSelf);
+                        }
+                    }, EaseQuadIn.getInstance())
+            ));
+        }
+
         SyncTaskManager.getInstance().run(this::removeFromScene);
     }
 
@@ -1010,6 +1034,7 @@ public class Slider extends GameObject {
             ball.setFlippedHorizontal(false);
 
             followCircle = SpritePool.getInstance().getSprite("sliderfollowcircle");
+            followCircle.setAlpha(0);
 
             scene.attachChild(ball);
             scene.attachChild(followCircle);
@@ -1037,9 +1062,7 @@ public class Slider extends GameObject {
             if (GameHelper.isAutopilotMod() && listener.isMouseDown(i))
                 inRadius = true;
         }
-
         listener.onTrackingSliders(inRadius);
-
         tickTime += dt;
 
         float fcScale = FMath.clamp(
@@ -1049,29 +1072,19 @@ public class Slider extends GameObject {
 
         if (Config.isComplexAnimations())
         {
-            float realDuration = maxTime * repeatCount * GameHelper.getTimeMultiplier();
-            float animDuration = Math.min(realDuration / 2, 0.15f);
+            float remainTime = (maxTime * GameHelper.getTimeMultiplier() * repeatCount) - passedTime;
 
             if (inRadius && !mWasInRadius)
             {
                 mWasInRadius = true;
 
-                float initialScale = followCircle.getAlpha() == 0 ? 0 : followCircle.getScaleX();
+                // If alpha doesn't equal 0 means that it has been into an animation before
+                float initialScale = followCircle.getAlpha() == 0 ? fcScale * 0.5f : followCircle.getScaleX();
 
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(new ParallelEntityModifier(
-                        new ScaleModifier(animDuration, initialScale, fcScale),
-                        new FadeInModifier(animDuration)
-                ));
-            }
-            else if (inRadius && passedTime > realDuration - animDuration / 2 && !mIsEnding) // Slider near to end
-            {
-                mIsEnding = true;
-
-                followCircle.clearEntityModifiers();
-                followCircle.registerEntityModifier(new ParallelEntityModifier(
-                        new ScaleModifier(animDuration, followCircle.getScaleX(), 0),
-                        new FadeOutModifier(animDuration)
+                        new ScaleModifier(Math.min(remainTime, 0.18f), initialScale, fcScale, EaseQuadOut.getInstance()),
+                        new AlphaModifier(Math.min(remainTime, 0.6f), followCircle.getAlpha(), 1f)
                 ));
             }
             else if (!inRadius && mWasInRadius)
@@ -1080,8 +1093,21 @@ public class Slider extends GameObject {
 
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(new ParallelEntityModifier(
-                        new ScaleModifier(animDuration, followCircle.getScaleX(), fcScale * 1.5f),
-                        new FadeOutModifier(animDuration)
+                        new ScaleModifier(0.1f, followCircle.getScaleX(), fcScale * 2f),
+                        new AlphaModifier(0.1f, followCircle.getAlpha(), 0f, new IEntityModifier.IEntityModifierListener()
+                        {
+                            @Override
+                            public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem)
+                            {
+
+                            }
+
+                            @Override
+                            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
+                            {
+                                SyncTaskManager.getInstance().run(pItem::detachSelf);
+                            }
+                        })
                 ));
             }
         }
