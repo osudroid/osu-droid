@@ -637,6 +637,11 @@ public class Slider extends GameObject {
         if (abstractSliderBody != null) {
             abstractSliderBody.removeFromScene(scene);
         }
+
+        if (!Config.isComplexAnimations())
+        {
+            followCircle.detachSelf();
+        }
         startCircle.detachSelf();
         endCircle.detachSelf();
         startOverlay.detachSelf();
@@ -755,7 +760,7 @@ public class Slider extends GameObject {
         listener.onSliderEnd(id, firstHitAccuracy, tickSet);
         // Remove slider from scene
 
-        if (mWasInRadius)
+        if (Config.isComplexAnimations() && mWasInRadius)
         {
             followCircle.clearEntityModifiers();
             followCircle.registerEntityModifier(new ParallelEntityModifier(
