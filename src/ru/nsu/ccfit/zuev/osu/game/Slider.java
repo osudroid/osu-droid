@@ -95,7 +95,9 @@ public class Slider extends GameObject {
 
     private SliderBody2D abstractSliderBody = null;
 
-    private boolean mWasInRadius;
+    private boolean
+            mIsOver,
+            mWasInRadius;
 
     public Slider() {
         startCircle = SpritePool.getInstance().getSprite("sliderstartcircle");
@@ -734,6 +736,7 @@ public class Slider extends GameObject {
             }
             return;
         }
+        mIsOver = true;
 
         // Calculating score
         int score = 0;
@@ -1118,7 +1121,10 @@ public class Slider extends GameObject {
                             @Override
                             public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
                             {
-                                SyncTaskManager.getInstance().run(pItem::detachSelf);
+                                if (mIsOver)
+                                {
+                                    SyncTaskManager.getInstance().run(pItem::detachSelf);
+                                }
                             }
                         })
                 ));
