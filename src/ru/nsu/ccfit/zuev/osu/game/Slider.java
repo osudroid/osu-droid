@@ -638,17 +638,17 @@ public class Slider extends GameObject {
             border.detachSelf();
         }
         if (abstractSliderBody != null) {
-            if (!GameHelper.isHidden())
-            {
-                abstractSliderBody.removeFromSceneAnimated(scene);
-            }
-            else
+            if (GameHelper.isHidden())
             {
                 abstractSliderBody.removeFromScene(scene);
             }
+            else
+            {
+                abstractSliderBody.removeFromScene(scene, 0.24f * GameHelper.getTimeMultiplier());
+            }
         }
 
-        ball.registerEntityModifier(new FadeOutModifier(0.1f, new IEntityModifier.IEntityModifierListener()
+        ball.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier(), new IEntityModifier.IEntityModifierListener()
         {
             @Override public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
 
@@ -783,8 +783,8 @@ public class Slider extends GameObject {
         {
             followCircle.clearEntityModifiers();
             followCircle.registerEntityModifier(new ParallelEntityModifier(
-                    new ScaleModifier(0.2f, followCircle.getScaleX(), followCircle.getScaleX() * 0.8f, EaseQuadOut.getInstance()),
-                    new AlphaModifier(0.2f, followCircle.getAlpha(), 0f, new IEntityModifier.IEntityModifierListener()
+                    new ScaleModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), followCircle.getScaleX() * 0.8f, EaseQuadOut.getInstance()),
+                    new AlphaModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new IEntityModifier.IEntityModifierListener()
                     {
                         @Override
                         public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem)
@@ -1070,7 +1070,7 @@ public class Slider extends GameObject {
             ball.setScale(scale);
             ball.setFlippedHorizontal(false);
 
-            ball.registerEntityModifier(new FadeInModifier(0.1f));
+            ball.registerEntityModifier(new FadeInModifier(0.1f * GameHelper.getTimeMultiplier()));
 
             followCircle = SpritePool.getInstance().getSprite("sliderfollowcircle");
             followCircle.setAlpha(0);
@@ -1117,8 +1117,8 @@ public class Slider extends GameObject {
 
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(new ParallelEntityModifier(
-                        new ScaleModifier(Math.min(remainTime, 0.18f), initialScale, fcScale, EaseQuadOut.getInstance()),
-                        new AlphaModifier(Math.min(remainTime, 0.06f), followCircle.getAlpha(), 1f)
+                        new ScaleModifier(Math.min(remainTime, 0.18f * GameHelper.getTimeMultiplier()), initialScale, fcScale, EaseQuadOut.getInstance()),
+                        new AlphaModifier(Math.min(remainTime, 0.06f * GameHelper.getTimeMultiplier()), followCircle.getAlpha(), 1f)
                 ));
             }
             else if (!inRadius && mWasInRadius)
@@ -1127,8 +1127,8 @@ public class Slider extends GameObject {
 
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(new ParallelEntityModifier(
-                        new ScaleModifier(0.1f, followCircle.getScaleX(), fcScale * 2f),
-                        new AlphaModifier(0.1f, followCircle.getAlpha(), 0f, new IEntityModifier.IEntityModifierListener()
+                        new ScaleModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), fcScale * 2f),
+                        new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new IEntityModifier.IEntityModifierListener()
                         {
                             @Override
                             public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem)

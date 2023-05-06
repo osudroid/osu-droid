@@ -310,27 +310,24 @@ public class HitCircle extends GameObject {
                     if (GameHelper.isHidden())
                     {
                         removeFromScene();
+                        return;
                     }
-                    else
+                    circle.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier()));
+                    overlay.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier()));
+                    number.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier(), new IEntityModifier.IEntityModifierListener()
                     {
-                        circle.registerEntityModifier(new FadeOutModifier(0.1f));
-                        overlay.registerEntityModifier(new FadeOutModifier(0.1f));
-                        number.registerEntityModifier(new FadeOutModifier(0.1f, new IEntityModifier.IEntityModifierListener()
+                        @Override
+                        public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem)
                         {
-                            @Override
-                            public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem)
-                            {
 
-                            }
+                        }
 
-                            @Override
-                            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
-                            {
-                                SyncTaskManager.getInstance().run(HitCircle.this::removeFromScene);
-                            }
-                        }));
-                    }
-
+                        @Override
+                        public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
+                        {
+                            SyncTaskManager.getInstance().run(HitCircle.this::removeFromScene);
+                        }
+                    }));
                     HitCircle.this.listener.onCircleHit(id, 10, pos, false, forcedScore, color);
                 });
             }

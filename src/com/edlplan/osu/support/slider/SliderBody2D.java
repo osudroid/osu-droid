@@ -233,19 +233,19 @@ public class SliderBody2D extends AbstractSliderBody {
         }
     }
 
-    public void removeFromSceneAnimated(Scene scene)
+    public void removeFromScene(Scene scene, float duration)
     {
         if (hint != null)
         {
-            hint.registerEntityModifier(new AlphaModifier(0.24f, hintAlpha, 0));
+            hint.registerEntityModifier(new AlphaModifier(duration, hintAlpha, 0));
         }
         if (body != null)
         {
-            body.registerEntityModifier(new AlphaModifier(0.24f, sliderBodyBaseAlpha, 0));
+            body.registerEntityModifier(new AlphaModifier(duration, sliderBodyBaseAlpha, 0));
         }
         if (border != null)
         {
-            border.registerEntityModifier(new FadeOutModifier(0.24f, new IEntityModifier.IEntityModifierListener()
+            border.registerEntityModifier(new FadeOutModifier(duration, new IEntityModifier.IEntityModifierListener()
             {
                 @Override public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
 
