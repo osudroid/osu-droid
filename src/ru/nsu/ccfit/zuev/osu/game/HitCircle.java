@@ -135,6 +135,8 @@ public class HitCircle extends GameObject {
             float fadeInDuration = 0.4f * Math.min(1, time / ((float) GameHelper.ar2ms(10) / 1000)) * GameHelper.getTimeMultiplier();
 
             number.init(scene, pos, GameHelper.getScale(), new FadeInModifier(fadeInDuration));
+            circle.registerEntityModifier(new FadeInModifier(fadeInDuration));
+            overlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
         }
         scene.attachChild(circle, 0);
         scene.attachChild(approachCircle);
@@ -276,13 +278,9 @@ public class HitCircle extends GameObject {
                 if (passedTime < time / 2) {
                     // calculating alpha of all sprites
                     percentage = passedTime * 2 / time;
-                    overlay.setAlpha(percentage);
-                    circle.setAlpha(percentage);
                     approachCircle.setAlpha(percentage);
                 } else if (!GameHelper.isHidden())// if circle already has to be shown, set all alphas to 1
                 {
-                    overlay.setAlpha(1);
-                    circle.setAlpha(1);
                     approachCircle.setAlpha(1);
                 }
             }
