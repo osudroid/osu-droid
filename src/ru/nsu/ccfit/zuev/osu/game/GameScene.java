@@ -196,6 +196,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private long previousFrameTime;
 
+    private boolean mIsAuto;
+
     public GameScene(final Engine engine) {
         this.engine = engine;
         scene = new Scene();
@@ -797,6 +799,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         stat = new StatisticV2();
         stat.setMod(ModMenu.getInstance().getMod());
+        mIsAuto = stat.getMod() != null && stat.getMod().contains(GameMod.MOD_AUTO);
+
         float multiplier = 1 + rawDifficulty / 10f + rawDrain / 10f;
         multiplier += (beatmapData.difficulty.cs - 3) / 4f;
 
@@ -2358,7 +2362,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
 
     public boolean isMousePressed(final GameObject object, final int index) {
-        if (stat.getMod().contains(GameMod.MOD_AUTO)) {
+        // EnumSet.contains() internally uses an iterator, and it can be expensive to use everytime we want to use this method.
+        if (mIsAuto) {
             return false;
         }
         if (Config.isRemoveSliderLock()){
@@ -2376,10 +2381,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private GameObject getLastTobeclickObject(){
-        Iterator iterator = activeObjects.iterator();
-        while(iterator.hasNext()){
-            GameObject note = (GameObject)iterator.next();
-            if(note.isStartHit() == false)return note;
+        for (GameObject note : activeObjects)
+        {
+            if (!note.isStartHit())
+            {
+                return note;
+            }
         }
         return null;
     }
