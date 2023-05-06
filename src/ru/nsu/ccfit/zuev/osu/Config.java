@@ -48,6 +48,7 @@ public class Config {
         showFPS,
         sliderBorders,
         complexAnimations,
+        snakingInSliders,
         playMusicPreview,
         showCursor,
         accurateSlider,
@@ -130,6 +131,7 @@ public class Config {
         shrinkPlayfieldDownwards = prefs.getBoolean("shrinkPlayfieldDownwards", true);
         sliderBorders = prefs.getBoolean("sliderborders", true);
         complexAnimations = prefs.getBoolean("complexanimations", true);
+        snakingInSliders = prefs.getBoolean("snakingInSliders", true);
         accurateSlider = true;
 
         useSuperSlider = prefs.getBoolean("superSlider", false);
@@ -475,6 +477,11 @@ public class Config {
 
     public static boolean isComplexAnimations() {
         return complexAnimations;
+    }
+
+    public static boolean isSnakingInSliders()
+    {
+        return snakingInSliders;
     }
 
     public static void setComplexAnimations(final boolean complexAnimations) {

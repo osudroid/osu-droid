@@ -378,7 +378,7 @@ public class Slider extends GameObject {
                     }
                 }
 
-                abstractSliderBody.applyToScene(scene, Config.isComplexAnimations());
+                abstractSliderBody.applyToScene(scene, Config.isSnakingInSliders());
                 abstractSliderBody.setBodyColor(color.r(), color.g(), color.b());
                 RGBColor scolor = GameHelper.getSliderColor();
                 abstractSliderBody.setBorderColor(scolor.r(), scolor.g(), scolor.b());
@@ -398,7 +398,7 @@ public class Slider extends GameObject {
                 / 2f);
         trackPolyVerts = createPolygon(Utils.toRes(54) * scale);
         float[] verts;
-        if (Config.isComplexAnimations()) {
+        if (Config.isSnakingInSliders()) {
             verts = new float[trackPolyVerts.length];
             for (int i = 0; i < verts.length; i++) {
                 verts[i] = trackPolyVerts[(i % 2)];
@@ -415,7 +415,7 @@ public class Slider extends GameObject {
         for (final Integer i : path.boundIndexes) {
             final Sprite sprite = SpritePool.getInstance()
                     .getSprite("::track2");
-            if (!Config.isComplexAnimations()) {
+            if (!Config.isSnakingInSliders()) {
                 sprite.setPosition(
                         path.points.get(i).x - sprite.getWidth() / 2,
                         path.points.get(i).y - sprite.getHeight() / 2);
@@ -434,7 +434,7 @@ public class Slider extends GameObject {
 
             borderPolyVerts = createPolygon(Utils.toRes(57)
                     * scale);
-            if (Config.isComplexAnimations()) {
+            if (Config.isSnakingInSliders()) {
                 verts = new float[borderPolyVerts.length];
                 for (int i = 0; i < verts.length; i++) {
                     verts[i] = borderPolyVerts[(i % 2)];
@@ -945,7 +945,7 @@ public class Slider extends GameObject {
                     endArrow.setAlpha(percentage);
                 }
 
-                if (Config.isComplexAnimations()) {
+                if (Config.isSnakingInSliders()) {
                     //final float offset = startCircle.getWidth() / 2;
                     if (Config.isUseSuperSlider()) {
                         if (superPath != null && abstractSliderBody != null) {
@@ -1002,7 +1002,7 @@ public class Slider extends GameObject {
                 if (repeatCount > 1) {
                     endArrow.setAlpha(1);
                 }
-                if (Config.isComplexAnimations()) {
+                if (Config.isSnakingInSliders()) {
                     final float offset = startCircle.getWidth() / 2;
                     if (Config.isUseSuperSlider()) {
                         if (!preStageFinish && superPath != null && abstractSliderBody != null) {
