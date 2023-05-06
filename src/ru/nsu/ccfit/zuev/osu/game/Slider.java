@@ -650,9 +650,11 @@ public class Slider extends GameObject {
 
         ball.registerEntityModifier(new FadeOutModifier(0.1f, new IEntityModifier.IEntityModifierListener()
         {
-            @Override public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
+            @Override
+            public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
 
-            @Override public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
+            @Override
+            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
             {
                 SyncTaskManager.getInstance().run(pItem::detachSelf);
             }
@@ -1134,7 +1136,6 @@ public class Slider extends GameObject {
                             @Override
                             public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem)
                             {
-
                             }
 
                             @Override
