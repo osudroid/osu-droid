@@ -1097,7 +1097,7 @@ public class Slider extends GameObject {
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(new ParallelEntityModifier(
                         new ScaleModifier(Math.min(remainTime, 0.18f), initialScale, fcScale, EaseQuadOut.getInstance()),
-                        new AlphaModifier(Math.min(remainTime, 0.6f), followCircle.getAlpha(), 1f)
+                        new AlphaModifier(Math.min(remainTime, 0.06f), followCircle.getAlpha(), 1f)
                 ));
             }
             else if (!inRadius && mWasInRadius)
