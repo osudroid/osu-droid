@@ -95,8 +95,7 @@ public class Slider extends GameObject {
 
     private SliderBody2D abstractSliderBody = null;
 
-    private boolean
-            mWasInRadius;
+    private boolean mWasInRadius;
 
     public Slider() {
         startCircle = SpritePool.getInstance().getSprite("sliderstartcircle");
