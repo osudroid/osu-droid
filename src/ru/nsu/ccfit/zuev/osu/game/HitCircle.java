@@ -212,13 +212,9 @@ public class HitCircle extends GameObject {
                 listener.registerAccuracy(replayObjectData.accuracy / 1000f);
                 passedTime = -1;
                 // Remove circle and register hit in update thread
-                SyncTaskManager.getInstance().run(new Runnable() {
-                    public void run() {
-                        HitCircle.this.listener
-                                .onCircleHit(id, replayObjectData.accuracy / 1000f, pos,
-                                        endsCombo, replayObjectData.result, color);
-                        removeFromScene();
-                    }
+                SyncTaskManager.getInstance().run(() -> {
+                    HitCircle.this.listener.onCircleHit(id, replayObjectData.accuracy / 1000f, pos,endsCombo, replayObjectData.result, color);
+                    removeFromScene();
                 });
                 return;
             }
@@ -246,19 +242,13 @@ public class HitCircle extends GameObject {
         }
 
         if (GameHelper.isKiai()) {
-            final float kiaiModifier = Math
-                    .max(0,
-                            1 - GameHelper.getGlobalTime()
-                                    / GameHelper.getKiaiTickLength()) * 0.50f;
-            final float r = Math.min(1, color.r() + (1 - color.r())
-                    * kiaiModifier);
-            final float g = Math.min(1, color.g() + (1 - color.g())
-                    * kiaiModifier);
-            final float b = Math.min(1, color.b() + (1 - color.b())
-                    * kiaiModifier);
+            final float kiaiModifier = Math.max(0, 1 - GameHelper.getGlobalTime() / GameHelper.getKiaiTickLength()) * 0.50f;
+            final float r = Math.min(1, color.r() + (1 - color.r()) * kiaiModifier);
+            final float g = Math.min(1, color.g() + (1 - color.g()) * kiaiModifier);
+            final float b = Math.min(1, color.b() + (1 - color.b()) * kiaiModifier);
             kiai = true;
             circle.setColor(r, g, b);
-        } else if (kiai == true) {
+        } else if (kiai) {
             circle.setColor(color.r(), color.g(), color.b());
             kiai = false;
         }
@@ -273,7 +263,6 @@ public class HitCircle extends GameObject {
             });
             return;
         }
-
 
         passedTime += dt;
 
