@@ -299,10 +299,7 @@ public class HitCircle extends GameObject {
             }
         } else if (!autoPlay)// if player didn't click circle in time
         {
-            if (approachCircle.getAlpha() == 1)
-            {
-                approachCircle.registerEntityModifier(new FadeOutModifier(0.05f));
-            }
+            approachCircle.setAlpha(0);
 
             // If passed too many time, counting it as miss
             if (passedTime > time + GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) {

@@ -926,9 +926,9 @@ public class Slider extends GameObject {
             float percentage = 1 + passedTime / preTime;
             // calculating size of approach circle
             approachCircle.setScale(scale * (1 + 2f * (1 - percentage)));
-            if (startHit && approachCircle.getAlpha() == 1)
+            if (startHit)
             {
-                approachCircle.registerEntityModifier(new FadeOutModifier(0.05f));
+                approachCircle.setAlpha(0);
             }
             if (percentage <= 0.5f) {
                 // Following core doing a very cute show animation ^_^"
@@ -1289,9 +1289,9 @@ public class Slider extends GameObject {
             }
             if (passedTime < 0) // we at approach time
             {
-                if (startHit && approachCircle.getAlpha() == 1)
+                if (startHit)
                 {
-                    approachCircle.registerEntityModifier(new FadeOutModifier(0.05f));
+                    approachCircle.setAlpha(0);
                 }
             }
         }
