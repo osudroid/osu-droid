@@ -698,8 +698,7 @@ public class Slider extends GameObject {
 
     private void over() {
         repeatCount--;
-        // If alpha > 0 means cursor in slider ball bounds
-        if (followCircle.getAlpha() > 0 && replayObjectData == null ||
+        if (mWasInRadius && replayObjectData == null ||
                 replayObjectData != null && replayObjectData.tickSet.get(tickIndex)) {
             if (soundIdIndex < soundId.length)
                 Utils.playHitSound(listener, soundId[soundIdIndex],
@@ -1151,6 +1150,7 @@ public class Slider extends GameObject {
         }
         else
         {
+            mWasInRadius = inRadius;
             followCircle.setAlpha(inRadius ? 1 : 0);
             followCircle.setScale(fcScale);
         }
