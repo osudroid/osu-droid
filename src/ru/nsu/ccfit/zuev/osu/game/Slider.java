@@ -259,8 +259,10 @@ public class Slider extends GameObject {
             scene.attachChild(startArrow, 0);
         }
 
+        float fadeInDuration;
+
         if (GameHelper.isHidden()) {
-            float fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
+            fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
             float fadeOutDuration = time * 0.3f * GameHelper.getTimeMultiplier();
 
             number.init(scene, pos, scale, new SequenceEntityModifier(
@@ -293,7 +295,7 @@ public class Slider extends GameObject {
             // This uniform speedup is hard to match 1:1, however we can at least make AR>10 (via mods) feel good by extending the upper linear function above.
             // Note that this doesn't exactly match the AR>10 visuals as they're classically known, but it feels good.
             // This adjustment is necessary for AR>10, otherwise TimePreempt can become smaller leading to hitcircles not fully fading in.
-            float fadeInDuration = 0.4f * Math.min(1, time / ((float) GameHelper.ar2ms(10) / 1000)) * GameHelper.getTimeMultiplier();
+            fadeInDuration = 0.4f * Math.min(1, time / ((float) GameHelper.ar2ms(10) / 1000)) * GameHelper.getTimeMultiplier();
 
             number.init(scene, pos, scale, new FadeInModifier(fadeInDuration));
 
@@ -383,10 +385,7 @@ public class Slider extends GameObject {
             }
         }
 
-        // Slider body, border, and hint gradually fade in Hidden mod
-        if (GameHelper.isHidden()) {
-            hiddenFadeOut();
-        }
+        applyBodyFadeAdjustments(fadeInDuration);
     }
 
     private void initLowPolyTrack() {
@@ -1140,55 +1139,82 @@ public class Slider extends GameObject {
         }
     }
 
-    private void hiddenFadeOut() {
-        final float realDuration = maxTime * repeatCount * GameHelper.getTimeMultiplier();
+    private void applyBodyFadeAdjustments(float fadeInDuration) {
         final EaseQuadOut easing = EaseQuadOut.getInstance();
-        if (group != null) {
-            group.registerEntityModifier(new AlphaModifier(realDuration,
-                group.getAlpha(), 0, easing));
-        }
-        if (trackPoly != null) {
-            trackPoly.registerEntityModifier(new AlphaModifier(realDuration,
-                trackPoly.getAlpha(), 0, easing));
-        }
-        if (borderPoly != null) {
-            borderPoly.registerEntityModifier(new AlphaModifier(realDuration,
-                borderPoly.getAlpha(), 0, easing));
-        }
-        if (borderGroup != null) {
-            borderGroup.registerEntityModifier(new AlphaModifier(realDuration,
-                borderGroup.getAlpha(), 0, easing));
-        }
-        if (body != null) {
-            body.registerEntityModifier(new AlphaModifier(realDuration,
-                body.getAlpha(), 0, easing));
-        }
-        if (border != null) {
-            border.registerEntityModifier(new AlphaModifier(realDuration,
-                border.getAlpha(), 0, easing));
-        }
-        startCircle.registerEntityModifier(new AlphaModifier(realDuration,
-            startCircle.getAlpha(), 0, easing));
-        startOverlay.registerEntityModifier(new AlphaModifier(realDuration,
-            startOverlay.getAlpha(), 0, easing));
-        endCircle.registerEntityModifier(new AlphaModifier(realDuration,
-            endCircle.getAlpha(), 0, easing));
-        endOverlay.registerEntityModifier(new AlphaModifier(realDuration,
-            endOverlay.getAlpha(), 0, easing));
-        for (final Sprite sp : trackSprites) {
-            sp.registerEntityModifier(new AlphaModifier(realDuration,
-                sp.getAlpha(), 0, easing));
-        }
-        for (final Sprite sp : trackBorders) {
-            sp.registerEntityModifier(new AlphaModifier(realDuration,
-                sp.getAlpha(), 0, easing));
-        }
-        for (final Sprite sp : trackBoundaries) {
-            sp.registerEntityModifier(new AlphaModifier(realDuration,
-                sp.getAlpha(), 0, easing));
-        }
-        if (abstractSliderBody != null) {
-            abstractSliderBody.fadeOut(realDuration);
+
+        if (GameHelper.isHidden()) {
+            // New duration from completed fade in to end (before fading out)
+            float realFadeInDuration = fadeInDuration / GameHelper.getTimeMultiplier();
+            float fadeOutDuration = (maxTime * repeatCount + preTime - realFadeInDuration) * GameHelper.getTimeMultiplier();
+
+            SequenceEntityModifier modifier = new SequenceEntityModifier(
+                    new FadeInModifier(fadeInDuration),
+                    new FadeOutModifier(fadeOutDuration, easing)
+            );
+
+            if (group != null) {
+                group.registerEntityModifier(modifier);
+            }
+            if (trackPoly != null) {
+                trackPoly.registerEntityModifier(modifier);
+            }
+            if (borderPoly != null) {
+                borderPoly.registerEntityModifier(modifier);
+            }
+            if (borderGroup != null) {
+                borderGroup.registerEntityModifier(modifier);
+            }
+            if (body != null) {
+                body.registerEntityModifier(modifier);
+            }
+            if (border != null) {
+                border.registerEntityModifier(modifier);
+            }
+            for (final Sprite sp : trackSprites) {
+                sp.registerEntityModifier(modifier);
+            }
+            for (final Sprite sp : trackBorders) {
+                sp.registerEntityModifier(modifier);
+            }
+            for (final Sprite sp : trackBoundaries) {
+                sp.registerEntityModifier(modifier);
+            }
+            if (abstractSliderBody != null) {
+                abstractSliderBody.applyFadeAdjustments(fadeInDuration, fadeOutDuration);
+            }
+        } else {
+            FadeInModifier modifier = new FadeInModifier(fadeInDuration);
+
+            if (group != null) {
+                group.registerEntityModifier(modifier);
+            }
+            if (trackPoly != null) {
+                trackPoly.registerEntityModifier(modifier);
+            }
+            if (borderPoly != null) {
+                borderPoly.registerEntityModifier(modifier);
+            }
+            if (borderGroup != null) {
+                borderGroup.registerEntityModifier(modifier);
+            }
+            if (body != null) {
+                body.registerEntityModifier(modifier);
+            }
+            if (border != null) {
+                border.registerEntityModifier(modifier);
+            }
+            for (final Sprite sp : trackSprites) {
+                sp.registerEntityModifier(modifier);
+            }
+            for (final Sprite sp : trackBorders) {
+                sp.registerEntityModifier(modifier);
+            }
+            for (final Sprite sp : trackBoundaries) {
+                sp.registerEntityModifier(modifier);
+            }
+            if (abstractSliderBody != null) {
+                abstractSliderBody.applyFadeAdjustments(fadeInDuration);
+            }
         }
     }
 
