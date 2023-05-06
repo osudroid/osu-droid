@@ -78,9 +78,6 @@ public class HitCircle extends GameObject {
         }
 
         // Calculating position of top/left corner for sprites and hit radius
-        final TextureRegion tex = circle.getTextureRegion();
-		/*final PointF rpos = new PointF(pos.x - tex.getWidth() / 2, pos.y
-				- tex.getHeight() / 2);*/
         radius = Utils.toRes(128) * scale / 2;
         radius *= radius;
 
