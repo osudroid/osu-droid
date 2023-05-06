@@ -512,4 +512,16 @@ public class LibraryManager {
         }
         return null;
     }
+
+    public void updateLibrary(boolean force)
+    {
+        Activity context = GlobalManager.getInstance().getMainActivity();
+
+        savetoCache(context);
+
+        if (!loadLibraryCache(context, force))
+        {
+            scanLibrary(context);
+        }
+    }
 }
