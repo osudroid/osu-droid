@@ -29,6 +29,7 @@ import java.util.ListIterator;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
+import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -757,14 +758,28 @@ public class Slider extends GameObject {
         mIsOver = true;
 
         // Calculating score
+        int firstHitScore = 0;
+        if (GameHelper.isScoreV2()) {
+            // If ScoreV2 is active, the accuracy of hitting the slider head is additionally accounted for when judging the entire slider:
+            // Getting a 300 for a slider requires getting a 300 judgement for the slider head.
+            // Getting a 100 for a slider requires getting a 100 judgement or better for the slider head.
+            DifficultyHelper diffHelper = GameHelper.getDifficultyHelper();
+            float od = GameHelper.getDifficulty();
+
+            if (Math.abs(firstHitAccuracy) <= diffHelper.hitWindowFor300(od) * 1000) {
+                firstHitScore = 300;
+            } else if (Math.abs(firstHitAccuracy) <= diffHelper.hitWindowFor100(od) * 1000) {
+                firstHitScore = 100;
+            }
+        }
         int score = 0;
         if (ticksGot > 0) {
             score = 50;
         }
-        if (ticksGot >= ticksTotal / 2) {
+        if (ticksGot >= ticksTotal / 2 && (!GameHelper.isScoreV2() || firstHitScore >= 100)) {
             score = 100;
         }
-        if (ticksGot >= ticksTotal) {
+        if (ticksGot >= ticksTotal && (!GameHelper.isScoreV2() || firstHitScore == 300)) {
             score = 300;
         }
         // If slider was in reverse mode, we should swap start and end points

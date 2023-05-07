@@ -43,6 +43,7 @@ public class GameHelper {
     private static boolean autopilotMod = false;
     private static boolean suddenDeath = false;
     private static boolean perfect = false;
+    private static boolean scoreV2;
     private static boolean useReplay;
     private static boolean isKiai = false;
     private static boolean auto = false;
@@ -418,6 +419,14 @@ public class GameHelper {
 
     public static void setPerfect(final boolean perfect) {
         GameHelper.perfect = perfect;
+    }
+
+    public static boolean isScoreV2() {
+        return scoreV2;
+    }
+
+    public static void setScoreV2(boolean scoreV2) {
+        GameHelper.scoreV2 = scoreV2;
     }
 
     public static boolean isUseReplay() {
