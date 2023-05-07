@@ -302,7 +302,7 @@ public class Slider extends GameObject {
                         path.points.get(lastIndex), path.points.get(lastIndex - 1))));
             }
             Utils.putSpriteAnchorCenter(endPos, endArrow);
-            scene.attachChild(endArrow, 0);
+            scene.attachChild(endArrow);
         }
 
         tickInterval = timing.getBeatLength() * speedMultiplier;
