@@ -30,7 +30,6 @@ public class HitCircle extends GameObject {
     private int soundId;
     private int sampleSet;
     private int addition;
-    private String externalSound;
     //private PointF pos;
     private float radius;
     private float passedTime;
@@ -59,7 +58,6 @@ public class HitCircle extends GameObject {
         this.sampleSet = 0;
         this.addition = 0;
         // TODO: 外部音效文件支持
-        this.externalSound = "";
         this.time = time;
         this.isFirstNote = isFirstNote;
         passedTime = 0;
@@ -71,9 +69,6 @@ public class HitCircle extends GameObject {
             final String[] group = tempSound.split(":");
             this.sampleSet = Integer.parseInt(group[0]);
             this.addition = Integer.parseInt(group[1]);
-            if (group.length > 4) {
-                this.externalSound = group[4];
-            }
         }
 
         // Calculating position of top/left corner for sprites and hit radius
