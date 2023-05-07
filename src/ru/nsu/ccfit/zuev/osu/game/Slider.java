@@ -12,7 +12,6 @@ import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
 import org.anddev.andengine.entity.modifier.ScaleModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
@@ -34,6 +33,7 @@ import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
+import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 
@@ -439,11 +439,8 @@ public class Slider extends GameObject {
             }
         }
 
-        ball.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier(), new IEntityModifier.IEntityModifierListener()
+        ball.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier(), new ModifierListener()
         {
-            @Override
-            public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
-
             @Override
             public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
             {
@@ -578,14 +575,8 @@ public class Slider extends GameObject {
             followCircle.clearEntityModifiers();
             followCircle.registerEntityModifier(new ParallelEntityModifier(
                     new ScaleModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), followCircle.getScaleX() * 0.8f, EaseQuadOut.getInstance()),
-                    new AlphaModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new IEntityModifier.IEntityModifierListener()
+                    new AlphaModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener()
                     {
-                        @Override
-                        public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem)
-                        {
-
-                        }
-
                         @Override
                         public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
                         {
@@ -813,13 +804,8 @@ public class Slider extends GameObject {
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(new ParallelEntityModifier(
                         new ScaleModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), fcScale * 2f),
-                        new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new IEntityModifier.IEntityModifierListener()
+                        new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener()
                         {
-                            @Override
-                            public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem)
-                            {
-                            }
-
                             @Override
                             public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
                             {

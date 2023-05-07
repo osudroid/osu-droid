@@ -5,7 +5,6 @@ import android.graphics.PointF;
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -15,6 +14,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
+import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -300,15 +300,8 @@ public class HitCircle extends GameObject {
                         return;
                     }
                     circle.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier()));
-                    overlay.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier()));
-                    number.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier(), new IEntityModifier.IEntityModifierListener()
+                    overlay.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier(), new ModifierListener()
                     {
-                        @Override
-                        public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem)
-                        {
-
-                        }
-
                         @Override
                         public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
                         {
