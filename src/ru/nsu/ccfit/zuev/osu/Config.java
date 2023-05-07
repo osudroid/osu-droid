@@ -52,7 +52,6 @@ public class Config {
         snakingInSliders,
         playMusicPreview,
         showCursor,
-        accurateSlider,
         shrinkPlayfieldDownwards,
         hideNaviBar,
         showScoreboard,
@@ -75,7 +74,6 @@ public class Config {
         hideReplayMarquee,
         hideInGameUI,
         receiveAnnouncements,
-        useSuperSlider,
         enableStoryboard,
         safeBeatmapBg,
         trianglesAnimation,
@@ -132,9 +130,6 @@ public class Config {
         sliderBorders = prefs.getBoolean("sliderborders", true);
         complexAnimations = prefs.getBoolean("complexanimations", true);
         snakingInSliders = prefs.getBoolean("snakingInSliders", true);
-        accurateSlider = true;
-
-        useSuperSlider = prefs.getBoolean("superSlider", false);
 
         try {
             offset = (int) FMath.clamp(prefs.getInt("offset", 0), -250, 250);
@@ -283,10 +278,6 @@ public class Config {
 
     public static void setEnableStoryboard(boolean enableStoryboard) {
         Config.enableStoryboard = enableStoryboard;
-    }
-
-    public static boolean isUseSuperSlider() {
-        return useSuperSlider;
     }
 
     public static boolean isFixFrameOffset() {
@@ -504,14 +495,6 @@ public class Config {
 
     public static void setShowCursor(final boolean showCursor) {
         Config.showCursor = showCursor;
-    }
-
-    public static boolean isAccurateSlider() {
-        return accurateSlider;
-    }
-
-    public static void setAccurateSlider(final boolean accurateSlider) {
-        Config.accurateSlider = accurateSlider;
     }
 
     public static float getScaleMultiplier() {

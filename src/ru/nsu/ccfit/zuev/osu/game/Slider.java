@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.edlplan.andengine.TrianglePack;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
@@ -10,11 +9,15 @@ import com.edlplan.osu.support.slider.SliderBody2D;
 import com.edlplan.osu.support.timing.controlpoint.TimingControlPoint;
 
 import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.*;
+import org.anddev.andengine.entity.modifier.AlphaModifier;
+import org.anddev.andengine.entity.modifier.FadeInModifier;
+import org.anddev.andengine.entity.modifier.FadeOutModifier;
+import org.anddev.andengine.entity.modifier.IEntityModifier;
+import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
+import org.anddev.andengine.entity.modifier.ScaleModifier;
+import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.sprite.batch.SpriteGroup;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
 import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseQuadIn;
@@ -23,30 +26,23 @@ import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.LinkedList;
-import java.util.ListIterator;
 
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
-import ru.nsu.ccfit.zuev.skins.OsuSkin;
-import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
-import ru.nsu.ccfit.zuev.osu.polygon.Polygon;
+import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
+import ru.nsu.ccfit.zuev.skins.SkinManager;
 
 public class Slider extends GameObject {
     private final Sprite startCircle, endCircle;
     private final Sprite startOverlay, endOverlay;
     private final Sprite approachCircle;
     private final Sprite startArrow, endArrow;
-    private final ArrayList<Sprite> trackSprites = new ArrayList<>();
-    private final ArrayList<Sprite> trackBorders = new ArrayList<>();
     private final ArrayList<Sprite> ticks = new ArrayList<>();
-    private final ArrayList<Sprite> trackBoundaries = new ArrayList<>();
     private PointF startPosition, endPosition;
     private Scene scene;
     private GameObjectListener listener;
@@ -73,14 +69,8 @@ public class Slider extends GameObject {
     private AnimSprite ball;
     private Sprite followCircle;
 
-    private PointF tmpPoint = new PointF();
-    private Float ballAngle = 0f;
-    private SpriteGroup group = null;
-    private SpriteGroup borderGroup = null;
-    private Polygon trackPoly = null;
-    private Polygon borderPoly = null;
-    private float[] trackPolyVerts = null;
-    private float[] borderPolyVerts = null;
+    private final PointF tmpPoint = new PointF();
+    private float ballAngle;
 
     private boolean kiai;
     private RGBColor color = new RGBColor();
@@ -90,7 +80,6 @@ public class Slider extends GameObject {
     private final BitSet tickSet = new BitSet();
     private int tickIndex;
 
-    private TrianglePack body = null, border = null;
     private LinePath superPath = null;
     private boolean preStageFinish = false;
 
@@ -348,185 +337,43 @@ public class Slider extends GameObject {
 
         // Slider track
         if (!path.points.isEmpty()) {
-            if (Config.isUseSuperSlider()) {
-                superPath = new LinePath();
-                for (PointF p : path.points) {
-                    superPath.add(new Vec2(p.x, p.y));
-                }
-                superPath.measure();
-                superPath.bufferLength(path.length.get(path.length.size() - 1));
-                superPath = superPath.fitToLinePath();
-                superPath.measure();
+            superPath = new LinePath();
+            for (PointF p : path.points) {
+                superPath.add(new Vec2(p.x, p.y));
+            }
+            superPath.measure();
+            superPath.bufferLength(path.length.get(path.length.size() - 1));
+            superPath = superPath.fitToLinePath();
+            superPath.measure();
 
-                abstractSliderBody = new SliderBody2D(superPath);
-                abstractSliderBody.setBodyWidth(
-                        Utils.toRes(OsuSkin.get().getSliderBodyWidth() - OsuSkin.get().getSliderBorderWidth())
-                                * scale);
-                abstractSliderBody.setBorderWidth(Utils.toRes(OsuSkin.get().getSliderBodyWidth()) * scale);
-                abstractSliderBody.setSliderBodyBaseAlpha(OsuSkin.get().getSliderBodyBaseAlpha());
+            abstractSliderBody = new SliderBody2D(superPath);
+            abstractSliderBody.setBodyWidth(
+                    Utils.toRes(OsuSkin.get().getSliderBodyWidth() - OsuSkin.get().getSliderBorderWidth())
+                            * scale);
+            abstractSliderBody.setBorderWidth(Utils.toRes(OsuSkin.get().getSliderBodyWidth()) * scale);
+            abstractSliderBody.setSliderBodyBaseAlpha(OsuSkin.get().getSliderBodyBaseAlpha());
 
-                if (OsuSkin.get().isSliderHintEnable()) {
-                    if (length > OsuSkin.get().getSliderHintShowMinLength()) {
-                        abstractSliderBody.setEnableHint(true);
-                        abstractSliderBody.setHintAlpha(OsuSkin.get().getSliderHintAlpha());
-                        abstractSliderBody.setHintWidth(Utils.toRes(OsuSkin.get().getSliderHintWidth()));
-                        RGBColor hintColor = OsuSkin.get().getSliderHintColor();
-                        if (hintColor != null) {
-                            abstractSliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b());
-                        } else {
-                            abstractSliderBody.setHintColor(color.r(), color.g(), color.b());
-                        }
+            if (OsuSkin.get().isSliderHintEnable()) {
+                if (length > OsuSkin.get().getSliderHintShowMinLength()) {
+                    abstractSliderBody.setEnableHint(true);
+                    abstractSliderBody.setHintAlpha(OsuSkin.get().getSliderHintAlpha());
+                    abstractSliderBody.setHintWidth(Utils.toRes(OsuSkin.get().getSliderHintWidth()));
+                    RGBColor hintColor = OsuSkin.get().getSliderHintColor();
+                    if (hintColor != null) {
+                        abstractSliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b());
+                    } else {
+                        abstractSliderBody.setHintColor(color.r(), color.g(), color.b());
                     }
                 }
-
-                abstractSliderBody.applyToScene(scene, Config.isSnakingInSliders());
-                abstractSliderBody.setBodyColor(color.r(), color.g(), color.b());
-                RGBColor scolor = GameHelper.getSliderColor();
-                abstractSliderBody.setBorderColor(scolor.r(), scolor.g(), scolor.b());
-
-            } else {
-                initLowPolyTrack();
             }
+
+            abstractSliderBody.applyToScene(scene, Config.isSnakingInSliders());
+            abstractSliderBody.setBodyColor(color.r(), color.g(), color.b());
+            RGBColor scolor = GameHelper.getSliderColor();
+            abstractSliderBody.setBorderColor(scolor.r(), scolor.g(), scolor.b());
         }
 
         applyBodyFadeAdjustments(fadeInDuration);
-    }
-
-    private void initLowPolyTrack() {
-        final TextureRegion tex = startCircle.getTextureRegion();
-        final PointF startPos = new PointF(startPosition.x
-                - tex.getWidth() / 2f, startPosition.y - tex.getHeight()
-                / 2f);
-        trackPolyVerts = createPolygon(Utils.toRes(54) * scale);
-        float[] verts;
-        if (Config.isSnakingInSliders()) {
-            verts = new float[trackPolyVerts.length];
-            for (int i = 0; i < verts.length; i++) {
-                verts[i] = trackPolyVerts[(i % 2)];
-            }
-        } else {
-            verts = trackPolyVerts;
-            trackPolyVerts = null;
-        }
-        trackPoly = new Polygon(0, 0, verts);
-        trackPoly.setColor(color.r(), color.g(), color.b());
-        scene.attachChild(trackPoly, 0);
-
-        trackBoundaries.clear();
-        for (final Integer i : path.boundIndexes) {
-            final Sprite sprite = SpritePool.getInstance()
-                    .getSprite("::track2");
-            if (!Config.isSnakingInSliders()) {
-                sprite.setPosition(
-                        path.points.get(i).x - sprite.getWidth() / 2,
-                        path.points.get(i).y - sprite.getHeight() / 2);
-            } else {
-                sprite.setPosition(startPos.x, startPos.y);
-            }
-            sprite.setScale(scale);
-            sprite.setColor(color.r(), color.g(), color.b());
-            sprite.setAlpha(0.7f);
-            scene.attachChild(sprite, 0);
-            trackBoundaries.add(sprite);
-        }
-
-        if (Config.isSliderBorders()) {
-            final RGBColor scolor = GameHelper.getSliderColor();
-
-            borderPolyVerts = createPolygon(Utils.toRes(57)
-                    * scale);
-            if (Config.isSnakingInSliders()) {
-                verts = new float[borderPolyVerts.length];
-                for (int i = 0; i < verts.length; i++) {
-                    verts[i] = borderPolyVerts[(i % 2)];
-                }
-            } else {
-                verts = borderPolyVerts;
-                borderPolyVerts = null;
-            }
-            borderPoly = new Polygon(0, 0, verts);
-            borderPoly.setColor(scolor.r(), scolor.g(), scolor.b());
-            scene.attachChild(borderPoly, 0);
-        }
-    }
-
-    private float[] createPolygon(final float size) {
-        int vi = 0;
-
-        final LinkedList<PointF> points = new LinkedList<>();
-        for (int i = 0; i < path.points.size(); i++) {
-            points.add(getPointPos(i, -1, size));
-            points.add(getPointPos(i, 1, size));
-        }
-
-        final ArrayList<PointF> addPoints = new ArrayList<>();
-        final ListIterator<PointF> iterator = points.listIterator();
-        final float sqrDist = Utils
-                .sqr(((scale * Constants.HIGH_SLIDER_STEP)) - 1);
-        for (int i = 0; i < points.size(); i++) {
-            if (i + 2 >= points.size()) {
-                break;
-            }
-            if (!iterator.hasNext()) {
-                break;
-            }
-            final PointF p1 = iterator.next();
-            if (!iterator.hasNext()) {
-                break;
-            }
-            iterator.next();
-            if (!iterator.hasNext()) {
-                break;
-            }
-            final PointF p2 = iterator.next();
-            iterator.previous();
-            iterator.previous();
-
-            if (!addPoints.isEmpty()) {
-                for (int j = 0; j < addPoints.size(); j++) {
-                    iterator.add(addPoints.get(j));
-                    iterator.add(Utils.inter(p1, p2, (j + 1)
-                            / (float) (addPoints.size() + 1)));
-                }
-                addPoints.clear();
-            }
-
-            int numPoints = (int) (Utils.squaredDistance(p1, p2) / sqrDist);
-            if (numPoints < 1) {
-                continue;
-            }
-            numPoints = (int) Math.sqrt(numPoints);
-
-            for (int j = 0; j < numPoints; j++) {
-                final float t = (j + 1) / (float) (numPoints + 1);
-                final PointF p = Utils.inter(p1, p2, t);
-                final int idx = i / 2;
-                final float dx = path.points.get(idx).x * (1 - t)
-                        + path.points.get(idx + 1).x * t;
-                final float dy = path.points.get(idx).y * (1 - t)
-                        + path.points.get(idx + 1).y * t;
-                p.x -= dx;
-                p.y -= dy;
-                float len = Utils.length(p);
-                len = size / len;
-                if (Math.abs(len - 1) < 0.025f) {
-                    continue;
-                }
-                p.x *= len;
-                p.y *= len;
-                p.x += dx;
-                p.y += dy;
-
-                addPoints.add(p);
-            }
-        }
-
-        final float[] verts = new float[points.size() * 2];
-        for (final PointF p : points) {
-            verts[vi++] = p.x;
-            verts[vi++] = p.y;
-        }
-        return verts;
     }
 
     private PointF getPercentPosition(final float percentage, final Float angle) {
@@ -585,59 +432,11 @@ public class Slider extends GameObject {
         return p;
     }
 
-    private PointF getPointPos(final int i, final int sign, final float size) {
-        if (path.points.isEmpty()) {
-            return startPosition;
-        }
-
-        int j = i;
-        if (j + 1 >= path.points.size()) {
-            j = path.points.size() - 2;
-        }
-        float nx = -path.points.get(j + 1).y + path.points.get(j).y;
-        float ny = path.points.get(j + 1).x - path.points.get(j).x;
-        if (sign < 0) {
-            nx *= -1;
-            ny *= -1;
-        }
-        final PointF p = new PointF();
-        p.x = path.points.get(i).x;
-        p.y = path.points.get(i).y;
-        final float nlen = (float) Math.sqrt(nx * nx + ny * ny);
-        if (nlen > 0) {
-            nx /= nlen;
-            ny /= nlen;
-            nx *= size;
-            ny *= size;
-            p.x += nx;
-            p.y += ny;
-        }
-        return p;
-    }
-
     private void removeFromScene() {
         if (scene == null) {
             return;
         }
         // Detach all objects
-        if (group != null) {
-            group.detachSelf();
-        }
-        if (trackPoly != null) {
-            trackPoly.detachSelf();
-        }
-        if (borderPoly != null) {
-            borderPoly.detachSelf();
-        }
-        if (borderGroup != null) {
-            borderGroup.detachSelf();
-        }
-        if (body != null) {
-            body.detachSelf();
-        }
-        if (border != null) {
-            border.detachSelf();
-        }
         if (abstractSliderBody != null) {
             if (GameHelper.isHidden())
             {
@@ -674,19 +473,6 @@ public class Slider extends GameObject {
         endArrow.detachSelf();
         SpritePool.getInstance().putAnimSprite("sliderb", ball);
         SpritePool.getInstance().putSprite("sliderfollowcircle", followCircle);
-        for (final Sprite sp : trackSprites) {
-            sp.detachSelf();
-            SpritePool.getInstance().putSprite("::track", sp);
-        }
-        for (final Sprite sp : trackBoundaries) {
-            sp.detachSelf();
-            SpritePool.getInstance().putSprite("::track2", sp);
-        }
-        trackBoundaries.clear();
-        for (final Sprite sp : trackBorders) {
-            sp.detachSelf();
-            SpritePool.getInstance().putSprite("::trackborder", sp);
-        }
         for (final Sprite sp : ticks) {
             sp.detachSelf();
             SpritePool.getInstance().putSprite("sliderscorepoint", sp);
@@ -821,24 +607,6 @@ public class Slider extends GameObject {
         SyncTaskManager.getInstance().run(this::removeFromScene);
     }
 
-    private float getPercentPositionOnTrack(final float[] verts,
-                                            final float percent, final int i) {
-        if (i <= 3) {
-            return verts[i];
-        }
-        if (percent >= 1) {
-            return verts[i];
-        }
-        if (percent <= 0) {
-            return verts[i % 4];
-        }
-        float t = percent * (i / 4f);
-        int index = (int) (t);
-        t -= index;
-        index = index * 4 + i % 4;
-        return verts[index] + (verts[index + 4] - verts[index]) * t;
-    }
-
     private boolean isHit() {
         float radius = Utils.sqr(Utils.toRes(64) * scale);
         for (int i = 0; i < listener.getCursorsCount(); i++) {
@@ -910,31 +678,10 @@ public class Slider extends GameObject {
             kiai = true;
             startCircle.setColor(r, g, b);
             endCircle.setColor(r, g, b);
-            if (group != null) {
-                group.setColor(r, g, b);
-            }
-            if (trackPoly != null) {
-                trackPoly.setColor(r, g, b);
-            }
-            if (body != null) {
-                body.setColor(r, g, b);
-            }
-            for (final Sprite sp : trackBoundaries) {
-                sp.setColor(r, g, b);
-            }
         } else if (kiai) {
             startCircle.setColor(color.r(), color.g(), color.b());
             endCircle.setColor(color.r(), color.g(), color.b());
-            if (group != null) {
-                group.setColor(color.r(), color.g(), color.b());
-            }
-            if (trackPoly != null) {
-                trackPoly.setColor(color.r(), color.g(), color.b());
-            }
             kiai = false;
-            for (final Sprite sp : trackBoundaries) {
-                sp.setColor(color.r(), color.g(), color.b());
-            }
         }
 
         if (passedTime < 0) // we at approach time
@@ -962,53 +709,11 @@ public class Slider extends GameObject {
                     endArrow.setAlpha(percentage);
                 }
 
-                if (Config.isSnakingInSliders()) {
-                    //final float offset = startCircle.getWidth() / 2;
-                    if (Config.isUseSuperSlider()) {
-                        if (superPath != null && abstractSliderBody != null) {
-                            float l = superPath.getMeasurer().maxLength() * percentage;
+                if (Config.isSnakingInSliders() && superPath != null && abstractSliderBody != null) {
+                    float l = superPath.getMeasurer().maxLength() * percentage;
 
-                            abstractSliderBody.setEndLength(l);
-                            abstractSliderBody.onUpdate();
-                        }
-                    } else {
-                        tmpPoint = getPercentPosition(percentage, null);
-                        for (int i = 0; i < path.boundIndexes.size(); i++) {
-                            final float ppos = path.boundIndexes.get(i)
-                                    / (float) path.points.size();
-                            PointF tpoint = tmpPoint;
-                            if (percentage >= ppos) {
-                                tpoint = path.points.get(path.boundIndexes
-                                        .get(i));
-                            }
-                            Utils.putSpriteAnchorCenter(tpoint, trackBoundaries.get(i));
-                            if (!trackBorders.isEmpty()) {
-                                Utils.putSpriteAnchorCenter(tpoint, trackBorders.get(i));
-                            }
-                        }
-                        if (trackPolyVerts != null) {
-                            final float[] verts = trackPoly.getVertices();
-                            for (int i = 0; i < verts.length; i++) {
-                                verts[i] = getPercentPositionOnTrack(
-                                        trackPolyVerts, percentage, i);
-                            }
-                            trackPoly.updateShape();
-                        }
-                        if (borderPolyVerts != null) {
-                            final float[] verts = borderPoly.getVertices();
-                            for (int i = 0; i < verts.length; i++) {
-                                verts[i] = getPercentPositionOnTrack(
-                                        borderPolyVerts, percentage, i);
-                            }
-                            borderPoly.updateShape();
-                        }
-                    }
-
-                    tmpPoint = getPercentPosition(percentage, null);
-
-                    Utils.putSpriteAnchorCenter(tmpPoint, endCircle);
-                    Utils.putSpriteAnchorCenter(tmpPoint, endOverlay);
-                    Utils.putSpriteAnchorCenter(tmpPoint, endArrow);
+                    abstractSliderBody.setEndLength(l);
+                    abstractSliderBody.onUpdate();
                 }
             } else if (percentage - dt / preTime <= 0.5f) {
                 // Setting up positions of slider parts
@@ -1019,60 +724,16 @@ public class Slider extends GameObject {
                 if (repeatCount > 1) {
                     endArrow.setAlpha(1);
                 }
-                if (Config.isSnakingInSliders()) {
-                    final float offset = startCircle.getWidth() / 2;
-                    if (Config.isUseSuperSlider()) {
-                        if (!preStageFinish && superPath != null && abstractSliderBody != null) {
-                            abstractSliderBody.setEndLength(superPath.getMeasurer().maxLength());
-                            abstractSliderBody.onUpdate();
-                            preStageFinish = true;
-                        }
-
-                    } else {
-
-                        for (int i = 0; i < path.boundIndexes.size(); i++) {
-                            tmpPoint = path.points
-                                    .get(path.boundIndexes.get(i));
-                            trackBoundaries.get(i).setPosition(
-                                    tmpPoint.x - offset, tmpPoint.y - offset);
-                            if (!trackBorders.isEmpty()) {
-                                trackBorders.get(i).setPosition(
-                                        trackBoundaries.get(i));
-                            }
-                        }
-                        if (trackPolyVerts != null) {
-                            final float[] verts = trackPoly.getVertices();
-                            System.arraycopy(trackPolyVerts, 0, verts, 0, verts.length);
-                            trackPoly.updateShape();
-                            trackPolyVerts = null;
-                        }
-                        if (borderPolyVerts != null) {
-                            final float[] verts = borderPoly.getVertices();
-                            System.arraycopy(borderPolyVerts, 0, verts, 0, verts.length);
-                            borderPoly.updateShape();
-                            borderPolyVerts = null;
-                        }
-                    }
-
-                    tmpPoint = endPosition;
-
-                    if (!trackBoundaries.isEmpty()) {
-                        endCircle.setPosition(trackBoundaries
-                                .get(trackBoundaries.size() - 1));
-                    } else {
-                        Utils.putSpriteAnchorCenter(tmpPoint, endCircle);
-                    }
-                    Utils.putSpriteAnchorCenter(tmpPoint, endOverlay);
-                    Utils.putSpriteAnchorCenter(tmpPoint, endArrow);
+                if (Config.isSnakingInSliders() && !preStageFinish && superPath != null && abstractSliderBody != null) {
+                    abstractSliderBody.setEndLength(superPath.getMeasurer().maxLength());
+                    abstractSliderBody.onUpdate();
+                    preStageFinish = true;
                 }
-
             }
             return;
         } else {
-            if (Config.isUseSuperSlider()) {
-                startCircle.setAlpha(0);
-                startOverlay.setAlpha(0);
-            }
+            startCircle.setAlpha(0);
+            startOverlay.setAlpha(0);
         }
 
         if (ball == null) // if ball still don't exist
@@ -1211,81 +872,18 @@ public class Slider extends GameObject {
     }
 
     private void applyBodyFadeAdjustments(float fadeInDuration) {
-        final EaseQuadOut easing = EaseQuadOut.getInstance();
+        if (abstractSliderBody == null) {
+            return;
+        }
 
         if (GameHelper.isHidden()) {
             // New duration from completed fade in to end (before fading out)
             float realFadeInDuration = fadeInDuration / GameHelper.getTimeMultiplier();
             float fadeOutDuration = (maxTime * repeatCount + preTime - realFadeInDuration) * GameHelper.getTimeMultiplier();
 
-            SequenceEntityModifier modifier = new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeOutDuration, easing)
-            );
-
-            if (group != null) {
-                group.registerEntityModifier(modifier);
-            }
-            if (trackPoly != null) {
-                trackPoly.registerEntityModifier(modifier);
-            }
-            if (borderPoly != null) {
-                borderPoly.registerEntityModifier(modifier);
-            }
-            if (borderGroup != null) {
-                borderGroup.registerEntityModifier(modifier);
-            }
-            if (body != null) {
-                body.registerEntityModifier(modifier);
-            }
-            if (border != null) {
-                border.registerEntityModifier(modifier);
-            }
-            for (final Sprite sp : trackSprites) {
-                sp.registerEntityModifier(modifier);
-            }
-            for (final Sprite sp : trackBorders) {
-                sp.registerEntityModifier(modifier);
-            }
-            for (final Sprite sp : trackBoundaries) {
-                sp.registerEntityModifier(modifier);
-            }
-            if (abstractSliderBody != null) {
-                abstractSliderBody.applyFadeAdjustments(fadeInDuration, fadeOutDuration);
-            }
+            abstractSliderBody.applyFadeAdjustments(fadeInDuration, fadeOutDuration);
         } else {
-            FadeInModifier modifier = new FadeInModifier(fadeInDuration);
-
-            if (group != null) {
-                group.registerEntityModifier(modifier);
-            }
-            if (trackPoly != null) {
-                trackPoly.registerEntityModifier(modifier);
-            }
-            if (borderPoly != null) {
-                borderPoly.registerEntityModifier(modifier);
-            }
-            if (borderGroup != null) {
-                borderGroup.registerEntityModifier(modifier);
-            }
-            if (body != null) {
-                body.registerEntityModifier(modifier);
-            }
-            if (border != null) {
-                border.registerEntityModifier(modifier);
-            }
-            for (final Sprite sp : trackSprites) {
-                sp.registerEntityModifier(modifier);
-            }
-            for (final Sprite sp : trackBorders) {
-                sp.registerEntityModifier(modifier);
-            }
-            for (final Sprite sp : trackBoundaries) {
-                sp.registerEntityModifier(modifier);
-            }
-            if (abstractSliderBody != null) {
-                abstractSliderBody.applyFadeAdjustments(fadeInDuration);
-            }
+            abstractSliderBody.applyFadeAdjustments(fadeInDuration);
         }
     }
 
