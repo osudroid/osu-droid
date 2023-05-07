@@ -143,9 +143,6 @@
     <!-- <string name="opt_vbroffset_title">VBR offset</string>
     <string name="opt_vbroffset_summary">Offset for mp3\'s encoded with variable bitrate (built-in player only)</string> -->
 
-    <string name="opt_sliderborders_title">Slider borders</string>
-    <string name="opt_sliderborders_summary">Draw borders along slider tracks. Disable for better performance</string>
-
     <string name="opt_complexanimations_title">Complex effects</string>
     <string name="opt_complexanimations_summary">Enable advanced graphical effects and animations. Disable for better performance</string>
 

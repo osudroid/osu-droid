@@ -47,7 +47,6 @@ public class Config {
         useCustomSounds,
         corovans,
         showFPS,
-        sliderBorders,
         complexAnimations,
         snakingInSliders,
         playMusicPreview,
@@ -127,7 +126,6 @@ public class Config {
         setPlayfieldSize(Integer.parseInt(prefs.getString(
             "playfieldsize", "100")) / 100f);
         shrinkPlayfieldDownwards = prefs.getBoolean("shrinkPlayfieldDownwards", true);
-        sliderBorders = prefs.getBoolean("sliderborders", true);
         complexAnimations = prefs.getBoolean("complexanimations", true);
         snakingInSliders = prefs.getBoolean("snakingInSliders", true);
 
@@ -450,14 +448,6 @@ public class Config {
 
     public static void setBackgroundBrightness(final float backgroundBrightness) {
         Config.backgroundBrightness = backgroundBrightness;
-    }
-
-    public static boolean isSliderBorders() {
-        return sliderBorders;
-    }
-
-    public static void setSliderBorders(final boolean sliderBorders) {
-        Config.sliderBorders = sliderBorders;
     }
 
     public static boolean isComplexAnimations() {
