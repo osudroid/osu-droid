@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+	<string name="chimu_cancel">Cancel</string>
+	<string name="chimu_connecting">Connecting to server...</string>
+	<string name="chimu_downloading">Downloading beatmap %s...</string>
+	<string name="chimu_importing">Importing beatmap %s...</string>
+
 	<string name="message_error">Error: %s</string>
 	<string name="message_error_createdir">Cannot create %s</string>
 	<string name="message_error_multitouch">Multitouch is not supported by your device</string>

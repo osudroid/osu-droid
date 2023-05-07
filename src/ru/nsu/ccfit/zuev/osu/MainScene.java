@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
 
+import com.reco1l.legacy.ui.ChimuWebView;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
@@ -543,6 +544,30 @@ public class MainScene implements IUpdateHandler {
             scene.attachChild(particleSystem[1]);
         }
 
+        TextureRegion chimuTex = ResourceManager.getInstance().getTexture("chimu");
+        Sprite chimu = new Sprite(Config.getRES_WIDTH() - chimuTex.getWidth(), (Config.getRES_HEIGHT() - chimuTex.getHeight()) / 2f, chimuTex)
+        {
+            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY)
+            {
+                if (pSceneTouchEvent.isActionDown())
+                {
+                    setColor(0.7f, 0.7f, 0.7f);
+                    doStop = true;
+                    return true;
+                }
+
+                if (pSceneTouchEvent.isActionUp())
+                {
+                    setColor(1, 1, 1);
+                    musicControl(MusicOption.STOP);
+                    new ChimuWebView().show();
+                    return true;
+                }
+
+                return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX, pTouchAreaLocalY);
+            }
+        };
+
         play.setAlpha(0f);
         options.setAlpha(0f);
         exit.setAlpha(0f);
@@ -577,9 +602,11 @@ public class MainScene implements IUpdateHandler {
         scene.attachChild(music_pause);
         scene.attachChild(music_stop);
         scene.attachChild(music_next);
+        scene.attachChild(chimu);
 
         scene.registerTouchArea(logo);
         scene.registerTouchArea(author);
+        scene.registerTouchArea(chimu);
         scene.registerTouchArea(yasonline);
         scene.registerTouchArea(music_prev);
         scene.registerTouchArea(music_play);
