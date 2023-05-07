@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
@@ -130,7 +131,7 @@ public class Slider extends GameObject {
             num %= 10;
         }
         number = GameObjectPool.getInstance().getNumber(num);
-
+        number.init(pos, scale);
 
         TimingControlPoint timingPoint = GameHelper.controlPoints.getTimingPointAt(realTime);
         double speedMultiplier = GameHelper.controlPoints.getDifficultyPointAt(realTime).getSpeedMultiplier();
@@ -249,7 +250,7 @@ public class Slider extends GameObject {
             fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
             float fadeOutDuration = time * 0.3f * GameHelper.getTimeMultiplier();
 
-            number.init(scene, pos, scale, new SequenceEntityModifier(
+            number.registerEntityModifiers(() -> new SequenceEntityModifier(
                     new FadeInModifier(fadeInDuration),
                     new FadeOutModifier(fadeOutDuration)
             ));
@@ -281,8 +282,7 @@ public class Slider extends GameObject {
             // This adjustment is necessary for AR>10, otherwise TimePreempt can become smaller leading to hitcircles not fully fading in.
             fadeInDuration = 0.4f * Math.min(1, time / ((float) GameHelper.ar2ms(10) / 1000)) * GameHelper.getTimeMultiplier();
 
-            number.init(scene, pos, scale, new FadeInModifier(fadeInDuration));
-
+            number.registerEntityModifiers(() -> new FadeInModifier(fadeInDuration));
             startCircle.registerEntityModifier(new FadeInModifier(fadeInDuration));
             startOverlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
             endCircle.registerEntityModifier(new FadeInModifier(fadeInDuration));

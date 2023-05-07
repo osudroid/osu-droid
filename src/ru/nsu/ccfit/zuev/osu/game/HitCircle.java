@@ -109,12 +109,13 @@ public class HitCircle extends GameObject {
             num %= 10;
         }
         number = GameObjectPool.getInstance().getNumber(num);
+        number.init(pos, GameHelper.getScale());
 
         if (GameHelper.isHidden()) {
             float fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
             float fadeOutDuration = time * 0.3f * GameHelper.getTimeMultiplier();
 
-            number.init(scene, pos, GameHelper.getScale(), new SequenceEntityModifier(
+            number.registerEntityModifiers(() -> new SequenceEntityModifier(
                     new FadeInModifier(fadeInDuration),
                     new FadeOutModifier(fadeOutDuration)
             ));
@@ -133,7 +134,7 @@ public class HitCircle extends GameObject {
             // This adjustment is necessary for AR>10, otherwise TimePreempt can become smaller leading to hitcircles not fully fading in.
             float fadeInDuration = 0.4f * Math.min(1, time / ((float) GameHelper.ar2ms(10) / 1000)) * GameHelper.getTimeMultiplier();
 
-            number.init(scene, pos, GameHelper.getScale(), new FadeInModifier(fadeInDuration));
+            number.registerEntityModifiers(() -> new FadeInModifier(fadeInDuration));
             circle.registerEntityModifier(new FadeInModifier(fadeInDuration));
             overlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
         }
@@ -155,8 +156,8 @@ public class HitCircle extends GameObject {
         // Detach all objects
         overlay.detachSelf();
         circle.detachSelf();
+        number.detachSelf();
         approachCircle.detachSelf();
-        number.detach(false);
         listener.removeObject(this);
         // Put circle and number into pool
         GameObjectPool.getInstance().putCircle(this);
@@ -299,6 +300,7 @@ public class HitCircle extends GameObject {
                         listener.onCircleHit(id, 10, pos, false, forcedScore, color);
                         return;
                     }
+                    number.registerEntityModifiers(() -> new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier()));
                     circle.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier()));
                     overlay.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier(), new ModifierListener()
                     {
