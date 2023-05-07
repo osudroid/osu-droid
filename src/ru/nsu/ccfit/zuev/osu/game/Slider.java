@@ -228,12 +228,10 @@ public class Slider extends GameObject {
         endPosition = endPos;
         Utils.putSpriteAnchorCenter(endPos, endCircle);
 
-
         endOverlay.setScale(scale);
         endOverlay.setAlpha(0);
         Utils.putSpriteAnchorCenter(endPos, endOverlay);
 
-        scene.attachChild(startOverlay, 0);
         // Repeat arrow at start
         if (repeatCount > 2) {
             startArrow.setAlpha(0);
@@ -288,9 +286,12 @@ public class Slider extends GameObject {
             endCircle.registerEntityModifier(new FadeInModifier(fadeInDuration));
             endOverlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
         }
+        scene.attachChild(number, 0);
+        scene.attachChild(startOverlay, 0);
         scene.attachChild(startCircle, 0);
-        scene.attachChild(approachCircle);
         scene.attachChild(endOverlay, 0);
+        scene.attachChild(endCircle, 0);
+        scene.attachChild(approachCircle);
         // Repeat arrow at end
         if (repeatCount > 1) {
             endArrow.setAlpha(0);
@@ -303,7 +304,6 @@ public class Slider extends GameObject {
             Utils.putSpriteAnchorCenter(endPos, endArrow);
             scene.attachChild(endArrow, 0);
         }
-        scene.attachChild(endCircle, 0);
 
         tickInterval = timing.getBeatLength() * speedMultiplier;
         int tickCount = (int) (maxTime * GameHelper.getTickRate() / tickInterval);
@@ -736,7 +736,7 @@ public class Slider extends GameObject {
 
         if (ball == null) // if ball still don't exist
         {
-            number.detach(true);
+            GlobalManager.getInstance().getMainActivity().runOnUpdateThread(number::detachSelf);
             approachCircle.setAlpha(0);
 
             ball = SpritePool.getInstance().getAnimSprite("sliderb",

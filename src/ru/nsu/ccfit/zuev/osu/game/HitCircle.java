@@ -101,8 +101,6 @@ public class HitCircle extends GameObject {
             approachCircle.setVisible(Config.isShowFirstApproachCircle() && this.isFirstNote);
         }
 
-        // Attach sprites to scene
-        scene.attachChild(overlay, 0);
         // and getting new number from sprite pool
         num += 1;
         if (OsuSkin.get().isLimitComboTextLength()) {
@@ -138,6 +136,8 @@ public class HitCircle extends GameObject {
             circle.registerEntityModifier(new FadeInModifier(fadeInDuration));
             overlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
         }
+        scene.attachChild(number, 0);
+        scene.attachChild(overlay, 0);
         scene.attachChild(circle, 0);
         scene.attachChild(approachCircle);
     }
@@ -310,7 +310,7 @@ public class HitCircle extends GameObject {
                             SyncTaskManager.getInstance().run(HitCircle.this::removeFromScene);
                         }
                     }));
-                    HitCircle.this.listener.onCircleHit(id, 10, pos, false, forcedScore, color);
+                    listener.onCircleHit(id, 10, pos, false, forcedScore, color);
                 });
             }
         }
