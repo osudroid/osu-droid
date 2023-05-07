@@ -69,7 +69,7 @@ public class Slider extends GameObject {
     private AnimSprite ball;
     private Sprite followCircle;
 
-    private final PointF tmpPoint = new PointF();
+    private PointF tmpPoint = new PointF();
     private float ballAngle;
 
     private boolean kiai;
@@ -120,19 +120,10 @@ public class Slider extends GameObject {
         this.pos = pos;
         passedTime = -time;
         preTime = time;
-        if (sliderPath != null){
-            path = sliderPath;
-        } else{
-                if (length < 0){
-                    path = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
-                    data.split("[|]"), 0, offset);
-                }
-                else {
-                    path = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
-                    data.split("[|]"), length, offset);
-                }
-            //}
-        }
+        path = sliderPath != null ?
+                sliderPath :
+                GameHelper.calculatePath(Utils.realToTrackCoords(pos),
+                        data.split("[|]"), Math.max(0, length), offset);
 
         num += 1;
         if (OsuSkin.get().isLimitComboTextLength()) {
@@ -709,11 +700,19 @@ public class Slider extends GameObject {
                     endArrow.setAlpha(percentage);
                 }
 
-                if (Config.isSnakingInSliders() && superPath != null && abstractSliderBody != null) {
-                    float l = superPath.getMeasurer().maxLength() * percentage;
+                if (Config.isSnakingInSliders()) {
+                    if (superPath != null && abstractSliderBody != null) {
+                        float l = superPath.getMeasurer().maxLength() * percentage;
 
-                    abstractSliderBody.setEndLength(l);
-                    abstractSliderBody.onUpdate();
+                        abstractSliderBody.setEndLength(l);
+                        abstractSliderBody.onUpdate();
+                    }
+
+                    tmpPoint = getPercentPosition(percentage, null);
+
+                    Utils.putSpriteAnchorCenter(tmpPoint, endCircle);
+                    Utils.putSpriteAnchorCenter(tmpPoint, endOverlay);
+                    Utils.putSpriteAnchorCenter(tmpPoint, endArrow);
                 }
             } else if (percentage - dt / preTime <= 0.5f) {
                 // Setting up positions of slider parts
@@ -724,10 +723,18 @@ public class Slider extends GameObject {
                 if (repeatCount > 1) {
                     endArrow.setAlpha(1);
                 }
-                if (Config.isSnakingInSliders() && !preStageFinish && superPath != null && abstractSliderBody != null) {
-                    abstractSliderBody.setEndLength(superPath.getMeasurer().maxLength());
-                    abstractSliderBody.onUpdate();
-                    preStageFinish = true;
+                if (Config.isSnakingInSliders()) {
+                    if (!preStageFinish && superPath != null && abstractSliderBody != null) {
+                        abstractSliderBody.setEndLength(superPath.getMeasurer().maxLength());
+                        abstractSliderBody.onUpdate();
+                        preStageFinish = true;
+                    }
+
+                    tmpPoint = endPosition;
+
+                    Utils.putSpriteAnchorCenter(tmpPoint, endCircle);
+                    Utils.putSpriteAnchorCenter(tmpPoint, endOverlay);
+                    Utils.putSpriteAnchorCenter(tmpPoint, endArrow);
                 }
             }
             return;

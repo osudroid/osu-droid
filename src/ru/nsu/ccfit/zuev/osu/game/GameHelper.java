@@ -141,15 +141,10 @@ public class GameHelper {
             section = spline.getPoints();
 
             // Debug.i("section size=" + section.size());
-            boolean firstPut = false;
             for (final PointF p : section) {
                 if (pind < 0
                         || Math.abs(p.x - path.points.get(pind).x)
                         + Math.abs(p.y - path.points.get(pind).y) > 1f) {
-                    if (!firstPut) {
-                        firstPut = true;
-                        path.boundIndexes.add(path.points.size());
-                    }
                     if (!path.points.isEmpty()) {
                         vec.set(p.x - path.points.get(path.points.size() - 1).x,
                                 p.y - path.points.get(path.points.size() - 1).y);
@@ -160,13 +155,9 @@ public class GameHelper {
                     pind++;
 
                     if (trackLength >= maxLength) {
-                        path.boundIndexes.add(path.points.size() - 1);
                         break MainCycle;
                     }
                 }
-            }
-            if (!path.points.isEmpty()) {
-                path.boundIndexes.add(path.points.size() - 1);
             }
         }
 
@@ -219,7 +210,6 @@ public class GameHelper {
         pointPool.addAll(path.points);
         path.points.clear();
         path.length.clear();
-        path.boundIndexes.clear();
         pathPool.add(path);
     }
 
@@ -449,6 +439,5 @@ public class GameHelper {
     public static class SliderPath {
         public ArrayList<PointF> points = new ArrayList<>();
         public ArrayList<Float> length = new ArrayList<>();
-        public ArrayList<Integer> boundIndexes = new ArrayList<>();
     }
 }
