@@ -71,8 +71,7 @@ public class CircleNumber extends Entity
     }
 
     // The default registerEntityModifier() doesn't apply the modifiers to the nested Entities, so we've to apply to each one.
-    // Now we use a Supplier because modifiers cannot be shared between multiple Entities, and using deepCopy() can be
-    // expensive, so we use a supplier instead.
+    // Modifiers cannot be shared between multiple Entities, and using deepCopy() can be expensive, so we use a supplier instead.
     public void registerEntityModifiers(Supplier<IEntityModifier> modifier)
     {
         for (int i = 0; i < getChildCount(); i++)
