@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.BitSet;
 
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
@@ -736,7 +735,7 @@ public class Slider extends GameObject {
 
         if (ball == null) // if ball still don't exist
         {
-            GlobalManager.getInstance().getMainActivity().runOnUpdateThread(number::detachSelf);
+            SyncTaskManager.getInstance().run(number::detachSelf);
             approachCircle.setAlpha(0);
 
             ball = SpritePool.getInstance().getAnimSprite("sliderb",
