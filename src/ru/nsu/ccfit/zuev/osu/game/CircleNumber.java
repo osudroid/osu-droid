@@ -66,14 +66,12 @@ public class CircleNumber extends GameObject {
 
                 public void run() {
                     for (final Sprite sp : digits) {
-                        sp.clearEntityModifiers();
                         sp.detachSelf();
                     }
                 }
             });
         } else {
             for (final Sprite sp : digits) {
-                sp.clearEntityModifiers();
                 sp.detachSelf();
             }
         } // if (sync)
@@ -82,5 +80,12 @@ public class CircleNumber extends GameObject {
 
     @Override
     public void update(final float dt) {
+    }
+
+    public void registerEntityModifier(IEntityModifier modifier)
+    {
+        for (final Sprite sp : digits) {
+            sp.registerEntityModifier(modifier);
+        }
     }
 }

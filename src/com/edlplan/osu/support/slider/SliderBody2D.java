@@ -6,11 +6,14 @@ import com.edlplan.andengine.TrianglePack;
 import com.edlplan.framework.math.Color4;
 import com.edlplan.framework.math.line.LinePath;
 
-import org.anddev.andengine.entity.modifier.AlphaModifier;
+import org.anddev.andengine.entity.IEntity;
+import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.scene.Scene;
+import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
+import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 
 public class SliderBody2D extends AbstractSliderBody {
 
@@ -69,25 +72,42 @@ public class SliderBody2D extends AbstractSliderBody {
         this.hintWidth = hintWidth;
     }
 
-    /**
-     * Gradually fades the slider's body, border, and hint (if any) out over the specified duration.
-     * <P>
-     * Used if Hidden mod is active.
-     * </P>
-     *
-     * @param duration The duration of the fade-out animation.
-     */
-    public void fadeOut(float duration) {
+    public void applyFadeAdjustments(float fadeInDuration) {
+        if (body != null) {
+            body.registerEntityModifier(new AlphaModifier(fadeInDuration, 0, sliderBodyBaseAlpha));
+        }
+
+        if (border != null) {
+            border.registerEntityModifier(new FadeInModifier(fadeInDuration));
+        }
+
+        if (hint != null) {
+            hint.registerEntityModifier(new AlphaModifier(fadeInDuration, 0, hintAlpha));
+        }
+    }
+
+    public void applyFadeAdjustments(float fadeInDuration, float fadeOutDuration) {
         final EaseQuadOut easing = EaseQuadOut.getInstance();
 
-        if (body.getAlpha() > 0) {
-            body.registerEntityModifier(new AlphaModifier(duration, body.getAlpha(), 0, easing));
+        if (body != null) {
+            body.registerEntityModifier(new SequenceEntityModifier(
+                    new AlphaModifier(fadeInDuration, 0, sliderBodyBaseAlpha),
+                    new AlphaModifier(fadeOutDuration, sliderBodyBaseAlpha, 0, easing)
+            ));
         }
-        if (border.getAlpha() > 0) {
-            border.registerEntityModifier(new AlphaModifier(duration, border.getAlpha(), 0, easing));
+
+        if (border != null) {
+            border.registerEntityModifier(new SequenceEntityModifier(
+                    new FadeInModifier(fadeInDuration),
+                    new FadeOutModifier(fadeOutDuration, easing)
+            ));
         }
-        if (hint != null && hint.getAlpha() > 0) {
-            hint.registerEntityModifier(new AlphaModifier(duration, hint.getAlpha(), 0, easing));
+
+        if (hint != null) {
+            hint.registerEntityModifier(new SequenceEntityModifier(
+                    new AlphaModifier(fadeInDuration, 0, hintAlpha),
+                    new AlphaModifier(fadeOutDuration, hintAlpha, 0, easing)
+            ));
         }
     }
 
@@ -99,12 +119,8 @@ public class SliderBody2D extends AbstractSliderBody {
 
         BuildCache cache = localCache.get();
         LinePath sub = path.cutPath(startLength, endLength).fitToLinePath(cache.path);
-        float alpha = endLength / path.getMeasurer().maxLength();
-        body.setAlpha(alpha * sliderBodyBaseAlpha);
-        border.setAlpha(alpha);
 
         if (hint != null) {
-            hint.setAlpha(alpha * hintAlpha);
             cache.drawLinePath
                     .reset(sub, hintWidth)
                     .getTriangles(cache.triangleBuilder)
@@ -163,36 +179,32 @@ public class SliderBody2D extends AbstractSliderBody {
         body = SpriteCache.trianglePackCache.get();
         border = SpriteCache.trianglePackCache.get();
 
-
         if (enableHint) {
             hint = SpriteCache.trianglePackCache.get();
+            hint.setAlpha(0);
             hint.setDepthTest(true);
             hint.setClearDepthOnStart(true);
             hint.setColor(hintColor.r(), hintColor.g(), hintColor.b());
         }
 
+        body.setAlpha(0);
         body.setDepthTest(true);
         body.setClearDepthOnStart(!enableHint);
         body.setColor(bodyColor.r(), bodyColor.g(), bodyColor.b());
 
+        border.setAlpha(0);
         border.setDepthTest(true);
         border.setClearDepthOnStart(false);
         border.setColor(borderColor.r(), borderColor.g(), borderColor.b());
 
         if (emptyOnStart) {
-            body.setAlpha(0);
-            border.setAlpha(0);
             if (hint != null) {
-                hint.setAlpha(0);
                 hint.getVertices().length = 0;
             }
             body.getVertices().length = 0;
             border.getVertices().length = 0;
         } else {
-            body.setAlpha(sliderBodyBaseAlpha);
-            border.setAlpha(1);
             if (hint != null) {
-                hint.setAlpha(hintAlpha);
                 cache.drawLinePath
                         .reset(path, hintWidth)
                         .getTriangles(cache.triangleBuilder)
@@ -218,6 +230,30 @@ public class SliderBody2D extends AbstractSliderBody {
         scene.attachChild(body, 0);
         if (hint != null) {
             scene.attachChild(hint, 0);
+        }
+    }
+
+    public void removeFromScene(Scene scene, float duration)
+    {
+        if (hint != null)
+        {
+            hint.registerEntityModifier(new AlphaModifier(duration, hintAlpha, 0));
+        }
+        if (body != null)
+        {
+            body.registerEntityModifier(new AlphaModifier(duration, sliderBodyBaseAlpha, 0));
+        }
+        if (border != null)
+        {
+            border.registerEntityModifier(new FadeOutModifier(duration, new IEntityModifier.IEntityModifierListener()
+            {
+                @Override public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
+
+                @Override public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
+                {
+                    SyncTaskManager.getInstance().run(() -> removeFromScene(scene));
+                }
+            }));
         }
     }
 

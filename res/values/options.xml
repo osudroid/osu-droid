@@ -147,8 +147,10 @@
     <string name="opt_sliderborders_summary">Draw borders along slider tracks. Disable for better performance</string>
 
     <string name="opt_complexanimations_title">Complex effects</string>
-    <string name="opt_complexanimations_summary">Enable advanced graphical effects (eg. snaking sliders). Disable for better performance</string>
+    <string name="opt_complexanimations_summary">Enable advanced graphical effects and animations. Disable for better performance</string>
 
+    <string name="opt_snakingInSliders_title">Use snaking in sliders</string>
+    <string name="opt_snakingInSliders_summary">Enable sliders gradually snaking from start</string>
 
     <string name="opt_other_title">Miscellaneous</string>
     <string name="opt_multitouch_title">Multi-touch</string>

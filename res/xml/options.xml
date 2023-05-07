@@ -65,6 +65,13 @@
         <CheckBoxPreference android:key="complexanimations" android:defaultValue="true"
             android:title="@string/opt_complexanimations_title"
             android:summary="@string/opt_complexanimations_summary"/>
+
+        <CheckBoxPreference
+                android:key="snakingInSliders"
+                android:defaultValue="true"
+                android:title="@string/opt_snakingInSliders_title"
+                android:summary="@string/opt_snakingInSliders_summary"/>
+
         <CheckBoxPreference android:summary="@string/opt_showcursor_summary"
             android:title="@string/opt_showcursor_title" android:key="showcursor"
             android:defaultValue="false"/>
