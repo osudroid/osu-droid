@@ -60,6 +60,16 @@ public class CircleNumber extends Entity
         return num;
     }
 
+    @Override
+    public float getAlpha()
+    {
+        if (getFirstChild() != null)
+        {
+            return getFirstChild().getAlpha();
+        }
+        return super.getAlpha();
+    }
+
     // The default registerEntityModifier() doesn't apply the modifiers to the nested Entities, so we've to apply to each one.
     // Now we use a Supplier because modifiers cannot be shared between multiple Entities, and using deepCopy() can be
     // expensive, so we use a supplier instead.
