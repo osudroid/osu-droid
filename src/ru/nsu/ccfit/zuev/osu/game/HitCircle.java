@@ -211,7 +211,7 @@ public class HitCircle extends GameObject {
                 passedTime = -1;
                 // Remove circle and register hit in update thread
                 SyncTaskManager.getInstance().run(() -> {
-                    HitCircle.this.listener.onCircleHit(id, replayObjectData.accuracy / 1000f, pos,endsCombo, replayObjectData.result, color);
+                    listener.onCircleHit(id, replayObjectData.accuracy / 1000f, pos,endsCombo, replayObjectData.result, color);
                     removeFromScene();
                 });
                 return;
@@ -232,8 +232,7 @@ public class HitCircle extends GameObject {
             float finalSignAcc = signAcc;
             startHit = true;
             SyncTaskManager.getInstance().run(() -> {
-                HitCircle.this.listener
-                        .onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, color);
+                listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, color);
                 removeFromScene();
             });
             return;
@@ -256,7 +255,7 @@ public class HitCircle extends GameObject {
             passedTime = -1;
             // Remove circle and register hit in update thread
             SyncTaskManager.getInstance().run(() -> {
-                HitCircle.this.listener.onCircleHit(id, 0, pos, endsCombo, ResultType.HIT300.getId(), color);
+                listener.onCircleHit(id, 0, pos, endsCombo, ResultType.HIT300.getId(), color);
                 removeFromScene();
             });
             return;
@@ -329,8 +328,7 @@ public class HitCircle extends GameObject {
             // Remove circle and register hit in update thread
             float finalSignAcc = signAcc;
             SyncTaskManager.getInstance().run(() -> {
-                HitCircle.this.listener
-                        .onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, color);
+                listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, color);
                 removeFromScene();
             });
             
