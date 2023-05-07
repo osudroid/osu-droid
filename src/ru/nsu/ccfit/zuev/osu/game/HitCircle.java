@@ -296,6 +296,7 @@ public class HitCircle extends GameObject {
                     if (GameHelper.isHidden())
                     {
                         removeFromScene();
+                        listener.onCircleHit(id, 10, pos, false, forcedScore, color);
                         return;
                     }
                     circle.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier()));
