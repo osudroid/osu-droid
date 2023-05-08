@@ -219,7 +219,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private void setBackground() {
         boolean bgset = false;
-        Sprite bgSprite;
+        bgSprite = null;
         if (storyboardSprite != null) {
             if (storyboardSprite.isStoryboardAvailable()) {
                 storyboardSprite.setBrightness(Config.getBackgroundBrightness());
