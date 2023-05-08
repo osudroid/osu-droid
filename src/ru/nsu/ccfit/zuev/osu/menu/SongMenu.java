@@ -986,7 +986,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
 
                 DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
-                        BeatmapDifficultyCalculator.constructDifficultyBeatmap(beatmapData),
+                        beatmapData,
                         parameters
                 );
 

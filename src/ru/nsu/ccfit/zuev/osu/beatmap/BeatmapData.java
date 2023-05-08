@@ -79,6 +79,11 @@ public class BeatmapData {
     private String folder;
 
     /**
+     * The MD5 hash of this beatmap.
+     */
+    private String md5;
+
+    /**
      * The format version of this beatmap.
      */
     private int formatVersion = 14;
@@ -101,6 +106,7 @@ public class BeatmapData {
     private BeatmapData(BeatmapData source) {
         folder = source.folder;
         formatVersion = source.formatVersion;
+        md5 = source.md5;
 
         general = source.general.deepClone();
         metadata = source.metadata.deepClone();
@@ -137,6 +143,22 @@ public class BeatmapData {
      */
     public void setFolder(String path) {
         folder = path;
+    }
+
+    /**
+     * Gets the MD5 hash of this beatmap.
+     */
+    public String getMD5() {
+        return md5;
+    }
+
+    /**
+     * Sets the MD5 hash of this beatmap.
+     *
+     * @param md5 The MD5 hash of this beatmap.
+     */
+    public void setMD5(String md5) {
+        this.md5 = md5;
     }
 
     /**
@@ -282,9 +304,7 @@ public class BeatmapData {
         }
         track.setMaxCombo(getMaxCombo());
 
-        DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
-                BeatmapDifficultyCalculator.constructDifficultyBeatmap(this)
-        );
+        DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(this);
 
         track.setDifficulty(GameHelper.Round(attributes.starRating, 2));
 

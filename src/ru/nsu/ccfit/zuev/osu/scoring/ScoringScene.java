@@ -456,7 +456,7 @@ public class ScoringScene {
 
             if (beatmapData != null) {
                 DifficultyAttributes difficultyAttributes = BeatmapDifficultyCalculator.calculateDifficulty(
-                        BeatmapDifficultyCalculator.constructDifficultyBeatmap(beatmapData), stat
+                        beatmapData, stat
                 );
                 PerformanceAttributes performanceAttributes = BeatmapDifficultyCalculator.calculatePerformance(
                         difficultyAttributes, stat

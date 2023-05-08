@@ -202,7 +202,7 @@ public class ModMenu implements IModSwitcher {
                                 }
 
                                 DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
-                                        BeatmapDifficultyCalculator.constructDifficultyBeatmap(beatmapData),
+                                        beatmapData,
                                         parameters
                                 );
 

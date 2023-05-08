@@ -46,4 +46,21 @@ public class DifficultyCalculationParameters {
     public boolean isForceAR() {
         return !Float.isNaN(forcedAR);
     }
+
+    /**
+     * Copies this instance to another instance.
+     *
+     * @return The copied instance.
+     */
+    public DifficultyCalculationParameters copy() {
+        var copy = new DifficultyCalculationParameters();
+
+        copy.mods = EnumSet.copyOf(mods);
+        copy.forcedAR = forcedAR;
+        copy.customSpeedMultiplier = customSpeedMultiplier;
+
+        return copy;
+    }
+
+
 }

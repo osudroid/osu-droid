@@ -23,6 +23,7 @@ import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapEventsParser;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapGeneralParser;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapHitObjectsParser;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapMetadataParser;
+import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -116,6 +117,8 @@ public class BeatmapParser {
 
         BeatmapSection currentSection = null;
         BeatmapData data = new BeatmapData();
+
+        data.setMD5(FileUtils.getMD5Checksum(file));
         data.setFolder(file.getParent());
         data.setFormatVersion(beatmapFormatVersion);
 

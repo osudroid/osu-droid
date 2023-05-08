@@ -628,7 +628,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             timedDifficultyAttributes = BeatmapDifficultyCalculator.calculateTimedDifficulty(
-                    BeatmapDifficultyCalculator.constructDifficultyBeatmap(beatmapData),
+                    beatmapData,
                     parameters
             );
         } else {
