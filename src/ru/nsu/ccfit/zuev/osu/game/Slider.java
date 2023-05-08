@@ -225,11 +225,11 @@ public class Slider extends GameObject {
         endCircle.setColor(r, g, b);
         endCircle.setAlpha(0);
         endPosition = endPos;
-        Utils.putSpriteAnchorCenter(endPos, endCircle);
+        Utils.putSpriteAnchorCenter(Config.isSnakingInSliders() ? pos : endPos, endCircle);
 
         endOverlay.setScale(scale);
         endOverlay.setAlpha(0);
-        Utils.putSpriteAnchorCenter(endPos, endOverlay);
+        Utils.putSpriteAnchorCenter(Config.isSnakingInSliders() ? pos : endPos, endOverlay);
 
         // Repeat arrow at start
         if (repeatCount > 2) {
@@ -300,7 +300,7 @@ public class Slider extends GameObject {
                 endArrow.setRotation(MathUtils.radToDeg(Utils.direction(
                         path.points.get(lastIndex), path.points.get(lastIndex - 1))));
             }
-            Utils.putSpriteAnchorCenter(endPos, endArrow);
+            Utils.putSpriteAnchorCenter(Config.isSnakingInSliders() ? pos : endPos, endArrow);
             scene.attachChild(endArrow);
         }
 
