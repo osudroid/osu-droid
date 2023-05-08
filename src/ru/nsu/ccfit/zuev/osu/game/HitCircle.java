@@ -287,26 +287,28 @@ public class HitCircle extends GameObject {
             if (passedTime > time + GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) {
                 passedTime = -1;
                 final byte forcedScore = (replayObjectData == null) ? 0 : replayObjectData.result;
-                SyncTaskManager.getInstance().run(() -> {
 
-                    if (GameHelper.isHidden())
-                    {
+                if (GameHelper.isHidden())
+                {
+                    SyncTaskManager.getInstance().run(() -> {
                         removeFromScene();
                         listener.onCircleHit(id, 10, pos, false, forcedScore, color);
-                        return;
-                    }
-                    number.registerEntityModifiers(() -> new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), number.getAlpha(), 0));
-                    circle.registerEntityModifier(new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), circle.getAlpha(), 0));
-                    overlay.registerEntityModifier(new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), overlay.getAlpha(), 0, new ModifierListener()
+                    });
+                    return;
+                }
+                number.registerEntityModifiers(() -> new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), number.getAlpha(), 0));
+                circle.registerEntityModifier(new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), circle.getAlpha(), 0));
+                overlay.registerEntityModifier(new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), overlay.getAlpha(), 0, new ModifierListener()
+                {
+                    @Override
+                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
                     {
-                        @Override
-                        public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
-                        {
-                            SyncTaskManager.getInstance().run(HitCircle.this::removeFromScene);
-                        }
-                    }));
-                    listener.onCircleHit(id, 10, pos, false, forcedScore, color);
-                });
+                        SyncTaskManager.getInstance().run(() -> {
+                            removeFromScene();
+                            listener.onCircleHit(id, 10, pos, false, forcedScore, color);
+                        });
+                    }
+                }));
             }
         }
     } // update(float dt)
