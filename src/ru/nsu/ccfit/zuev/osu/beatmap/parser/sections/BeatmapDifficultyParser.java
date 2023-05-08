@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.beatmap.parser.sections;
 
+import com.edlplan.framework.math.FMath;
+
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 
 /**
@@ -27,10 +29,10 @@ public class BeatmapDifficultyParser extends BeatmapKeyValueSectionParser {
                 data.difficulty.hp = parseFloat(p[1]);
                 break;
             case "SliderMultiplier":
-                data.difficulty.sliderMultiplier = parseDouble(p[1]);
+                data.difficulty.sliderMultiplier = FMath.clamp(parseDouble(p[1]), 0.4, 3.6);
                 break;
             case "SliderTickRate":
-                data.difficulty.sliderTickRate = parseDouble(p[1]);
+                data.difficulty.sliderTickRate = FMath.clamp(parseDouble(p[1]), 0.5, 8);
                 break;
         }
     }
