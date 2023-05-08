@@ -10,7 +10,6 @@ import com.rian.difficultycalculator.calculator.DifficultyCalculator;
 import com.rian.difficultycalculator.calculator.PerformanceCalculationParameters;
 import com.rian.difficultycalculator.calculator.PerformanceCalculator;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 
@@ -296,11 +295,7 @@ public final class BeatmapDifficultyCalculator {
          * @param attributes The difficulty attributes to cache.
          */
         public void addCache(DifficultyCalculationParameters parameters, DifficultyAttributes attributes) {
-            if (parameters == null) {
-                parameters = new DifficultyCalculationParameters();
-            }
-
-            attributeCache.put(parameters.copy(), attributes);
+            addCache(parameters, attributes, attributeCache);
         }
 
         /**
@@ -310,11 +305,7 @@ public final class BeatmapDifficultyCalculator {
          * @param attributes The timed difficulty attributes to cache.
          */
         public void addCache(DifficultyCalculationParameters parameters, List<TimedDifficultyAttributes> attributes) {
-            if (parameters == null) {
-                parameters = new DifficultyCalculationParameters();
-            }
-
-            timedAttributeCache.put(parameters.copy(), attributes);
+            addCache(parameters, attributes, timedAttributeCache);
         }
 
         /**
@@ -338,6 +329,27 @@ public final class BeatmapDifficultyCalculator {
         }
 
         /**
+         * Adds a difficulty attributes cache to a cache map.
+         *
+         * @param parameters The difficulty calculation parameter to cache.
+         * @param cache The difficulty attributes cache to add.
+         * @param cacheMap The map to add the cache to.
+         * @param <T> The difficulty attributes cache type.
+         */
+        private <T> void addCache(DifficultyCalculationParameters parameters, T cache,
+                                  HashMap<DifficultyCalculationParameters, T> cacheMap) {
+            if (parameters != null) {
+                // Copy the parameter for caching.
+                parameters = parameters.copy();
+                parameters.mods.retainAll(difficultyCalculator.difficultyAdjustmentMods);
+            } else {
+                parameters = new DifficultyCalculationParameters();
+            }
+
+            cacheMap.put(parameters, cache);
+        }
+
+        /**
          * Gets the cache of difficulty attributes of a calculation parameter.
          *
          * @param parameters The difficulty calculation parameter to retrieve.
@@ -347,7 +359,11 @@ public final class BeatmapDifficultyCalculator {
          */
         private <T> T getCache(DifficultyCalculationParameters parameters,
                                HashMap<DifficultyCalculationParameters, T> cacheMap) {
-            if (parameters == null) {
+            if (parameters != null) {
+                // Copy the parameter for caching.
+                parameters = parameters.copy();
+                parameters.mods.retainAll(difficultyCalculator.difficultyAdjustmentMods);
+            } else {
                 parameters = new DifficultyCalculationParameters();
             }
 
@@ -385,7 +401,7 @@ public final class BeatmapDifficultyCalculator {
 
             // Check whether mods are equal.
             return parameter1.mods.size() == parameter2.mods.size() &&
-                    !EnumSet.copyOf(parameter1.mods).retainAll(parameter2.mods);
+                    parameter1.mods.containsAll(parameter2.mods);
         }
     }
 }

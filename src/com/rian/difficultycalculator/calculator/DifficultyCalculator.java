@@ -23,6 +23,16 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
  * A difficulty calculator for calculating star rating.
  */
 public class DifficultyCalculator {
+    /**
+     * Mods that can alter the star rating when they are used in calculation with one or more mods.
+     */
+    public final EnumSet<GameMod> difficultyAdjustmentMods = EnumSet.of(
+            GameMod.MOD_DOUBLETIME, GameMod.MOD_HALFTIME, GameMod.MOD_NIGHTCORE,
+            GameMod.MOD_SMALLCIRCLE, GameMod.MOD_RELAX, GameMod.MOD_EASY,
+            GameMod.MOD_REALLYEASY, GameMod.MOD_HARDROCK, GameMod.MOD_HIDDEN,
+            GameMod.MOD_FLASHLIGHT, GameMod.MOD_SPEEDUP
+    );
+
     private static final double difficultyMultiplier = 0.0675;
 
     public DifficultyCalculator() {}
