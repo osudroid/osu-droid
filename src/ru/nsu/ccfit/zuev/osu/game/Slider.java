@@ -12,7 +12,6 @@ import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
 import org.anddev.andengine.entity.modifier.ScaleModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
@@ -243,16 +242,36 @@ public class Slider extends GameObject {
         }
 
         float fadeInDuration;
-        IEntityModifier animationModifier;
 
         if (GameHelper.isHidden()) {
             fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
             float fadeOutDuration = time * 0.3f * GameHelper.getTimeMultiplier();
 
-            animationModifier = new SequenceEntityModifier(
+            number.registerEntityModifiers(() -> new SequenceEntityModifier(
                     new FadeInModifier(fadeInDuration),
                     new FadeOutModifier(fadeOutDuration)
-            );
+            ));
+
+            startCircle.registerEntityModifier(new SequenceEntityModifier(
+                    new FadeInModifier(fadeInDuration),
+                    new FadeOutModifier(fadeOutDuration)
+            ));
+
+            startOverlay.registerEntityModifier(new SequenceEntityModifier(
+                    new FadeInModifier(fadeInDuration),
+                    new FadeOutModifier(fadeOutDuration)
+            ));
+
+            endCircle.registerEntityModifier(new SequenceEntityModifier(
+                    new FadeInModifier(fadeInDuration),
+                    new FadeOutModifier(fadeInDuration)
+            ));
+
+            endOverlay.registerEntityModifier(new SequenceEntityModifier(
+                    new FadeInModifier(fadeInDuration),
+                    new FadeOutModifier(fadeOutDuration)
+            ));
+
         } else {
             // Preempt time can go below 450ms. Normally, this is achieved via the DT mod which uniformly speeds up all animations game wide regardless of AR.
             // This uniform speedup is hard to match 1:1, however we can at least make AR>10 (via mods) feel good by extending the upper linear function above.
@@ -260,22 +279,18 @@ public class Slider extends GameObject {
             // This adjustment is necessary for AR>10, otherwise TimePreempt can become smaller leading to hitcircles not fully fading in.
             fadeInDuration = 0.4f * Math.min(1, time / ((float) GameHelper.ar2ms(10) / 1000)) * GameHelper.getTimeMultiplier();
 
-            animationModifier = new FadeInModifier(fadeInDuration);
+            number.registerEntityModifiers(() -> new FadeInModifier(fadeInDuration));
+            startCircle.registerEntityModifier(new FadeInModifier(fadeInDuration));
+            startOverlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
+            endCircle.registerEntityModifier(new FadeInModifier(fadeInDuration));
+            endOverlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
         }
-
-        number.registerEntityModifiers(() -> animationModifier);
-        startCircle.registerEntityModifier(animationModifier);
-        startOverlay.registerEntityModifier(animationModifier);
-        endCircle.registerEntityModifier(animationModifier);
-        endOverlay.registerEntityModifier(animationModifier);
-
         scene.attachChild(number, 0);
         scene.attachChild(startOverlay, 0);
         scene.attachChild(startCircle, 0);
         scene.attachChild(endOverlay, 0);
         scene.attachChild(endCircle, 0);
         scene.attachChild(approachCircle);
-
         // Repeat arrow at end
         if (repeatCount > 1) {
             endArrow.setAlpha(0);
