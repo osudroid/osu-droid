@@ -61,6 +61,4 @@ public class DifficultyCalculationParameters {
 
         return copy;
     }
-
-
 }
