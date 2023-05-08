@@ -6,6 +6,7 @@ import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
+import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -58,7 +59,6 @@ public class HitCircle extends GameObject {
         this.soundId = sound;
         this.sampleSet = 0;
         this.addition = 0;
-        // TODO: 外部音效文件支持
         this.time = time;
         this.isFirstNote = isFirstNote;
         passedTime = 0;
@@ -105,22 +105,16 @@ public class HitCircle extends GameObject {
         number = GameObjectPool.getInstance().getNumber(num);
         number.init(pos, GameHelper.getScale());
 
+        IEntityModifier animationModifier;
+
         if (GameHelper.isHidden()) {
             float fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
             float fadeOutDuration = time * 0.3f * GameHelper.getTimeMultiplier();
 
-            number.registerEntityModifiers(() -> new SequenceEntityModifier(
+            animationModifier = new SequenceEntityModifier(
                     new FadeInModifier(fadeInDuration),
                     new FadeOutModifier(fadeOutDuration)
-            ));
-            overlay.registerEntityModifier(new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeOutDuration)
-            ));
-            circle.registerEntityModifier(new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeOutDuration)
-            ));
+            );
         } else {
             // Preempt time can go below 450ms. Normally, this is achieved via the DT mod which uniformly speeds up all animations game wide regardless of AR.
             // This uniform speedup is hard to match 1:1, however we can at least make AR>10 (via mods) feel good by extending the upper linear function above.
@@ -128,10 +122,13 @@ public class HitCircle extends GameObject {
             // This adjustment is necessary for AR>10, otherwise TimePreempt can become smaller leading to hitcircles not fully fading in.
             float fadeInDuration = 0.4f * Math.min(1, time / ((float) GameHelper.ar2ms(10) / 1000)) * GameHelper.getTimeMultiplier();
 
-            number.registerEntityModifiers(() -> new FadeInModifier(fadeInDuration));
-            circle.registerEntityModifier(new FadeInModifier(fadeInDuration));
-            overlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
+            animationModifier = new FadeInModifier(fadeInDuration);
         }
+
+        number.registerEntityModifiers(() -> animationModifier);
+        circle.registerEntityModifier(animationModifier);
+        overlay.registerEntityModifier(animationModifier);
+
         scene.attachChild(number, 0);
         scene.attachChild(overlay, 0);
         scene.attachChild(circle, 0);
