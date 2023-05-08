@@ -3,9 +3,9 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import org.anddev.andengine.entity.IEntity;
+import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -15,6 +15,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
+import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -30,7 +31,6 @@ public class HitCircle extends GameObject {
     private int soundId;
     private int sampleSet;
     private int addition;
-    private String externalSound;
     //private PointF pos;
     private float radius;
     private float passedTime;
@@ -59,7 +59,6 @@ public class HitCircle extends GameObject {
         this.sampleSet = 0;
         this.addition = 0;
         // TODO: 外部音效文件支持
-        this.externalSound = "";
         this.time = time;
         this.isFirstNote = isFirstNote;
         passedTime = 0;
@@ -71,9 +70,6 @@ public class HitCircle extends GameObject {
             final String[] group = tempSound.split(":");
             this.sampleSet = Integer.parseInt(group[0]);
             this.addition = Integer.parseInt(group[1]);
-            if (group.length > 4) {
-                this.externalSound = group[4];
-            }
         }
 
         // Calculating position of top/left corner for sprites and hit radius
@@ -101,20 +97,19 @@ public class HitCircle extends GameObject {
             approachCircle.setVisible(Config.isShowFirstApproachCircle() && this.isFirstNote);
         }
 
-        // Attach sprites to scene
-        scene.attachChild(overlay, 0);
         // and getting new number from sprite pool
         num += 1;
         if (OsuSkin.get().isLimitComboTextLength()) {
             num %= 10;
         }
         number = GameObjectPool.getInstance().getNumber(num);
+        number.init(pos, GameHelper.getScale());
 
         if (GameHelper.isHidden()) {
             float fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
             float fadeOutDuration = time * 0.3f * GameHelper.getTimeMultiplier();
 
-            number.init(scene, pos, GameHelper.getScale(), new SequenceEntityModifier(
+            number.registerEntityModifiers(() -> new SequenceEntityModifier(
                     new FadeInModifier(fadeInDuration),
                     new FadeOutModifier(fadeOutDuration)
             ));
@@ -133,10 +128,12 @@ public class HitCircle extends GameObject {
             // This adjustment is necessary for AR>10, otherwise TimePreempt can become smaller leading to hitcircles not fully fading in.
             float fadeInDuration = 0.4f * Math.min(1, time / ((float) GameHelper.ar2ms(10) / 1000)) * GameHelper.getTimeMultiplier();
 
-            number.init(scene, pos, GameHelper.getScale(), new FadeInModifier(fadeInDuration));
+            number.registerEntityModifiers(() -> new FadeInModifier(fadeInDuration));
             circle.registerEntityModifier(new FadeInModifier(fadeInDuration));
             overlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
         }
+        scene.attachChild(number, 0);
+        scene.attachChild(overlay, 0);
         scene.attachChild(circle, 0);
         scene.attachChild(approachCircle);
     }
@@ -155,8 +152,8 @@ public class HitCircle extends GameObject {
         // Detach all objects
         overlay.detachSelf();
         circle.detachSelf();
+        number.detachSelf();
         approachCircle.detachSelf();
-        number.detach(false);
         listener.removeObject(this);
         // Put circle and number into pool
         GameObjectPool.getInstance().putCircle(this);
@@ -214,7 +211,7 @@ public class HitCircle extends GameObject {
                 passedTime = -1;
                 // Remove circle and register hit in update thread
                 SyncTaskManager.getInstance().run(() -> {
-                    HitCircle.this.listener.onCircleHit(id, replayObjectData.accuracy / 1000f, pos,endsCombo, replayObjectData.result, color);
+                    listener.onCircleHit(id, replayObjectData.accuracy / 1000f, pos,endsCombo, replayObjectData.result, color);
                     removeFromScene();
                 });
                 return;
@@ -235,8 +232,7 @@ public class HitCircle extends GameObject {
             float finalSignAcc = signAcc;
             startHit = true;
             SyncTaskManager.getInstance().run(() -> {
-                HitCircle.this.listener
-                        .onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, color);
+                listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, color);
                 removeFromScene();
             });
             return;
@@ -259,7 +255,7 @@ public class HitCircle extends GameObject {
             passedTime = -1;
             // Remove circle and register hit in update thread
             SyncTaskManager.getInstance().run(() -> {
-                HitCircle.this.listener.onCircleHit(id, 0, pos, endsCombo, ResultType.HIT300.getId(), color);
+                listener.onCircleHit(id, 0, pos, endsCombo, ResultType.HIT300.getId(), color);
                 removeFromScene();
             });
             return;
@@ -291,31 +287,28 @@ public class HitCircle extends GameObject {
             if (passedTime > time + GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) {
                 passedTime = -1;
                 final byte forcedScore = (replayObjectData == null) ? 0 : replayObjectData.result;
-                SyncTaskManager.getInstance().run(() -> {
 
-                    if (GameHelper.isHidden())
-                    {
+                if (GameHelper.isHidden())
+                {
+                    SyncTaskManager.getInstance().run(() -> {
                         removeFromScene();
-                        return;
-                    }
-                    circle.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier()));
-                    overlay.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier()));
-                    number.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier(), new IEntityModifier.IEntityModifierListener()
+                        listener.onCircleHit(id, 10, pos, false, forcedScore, color);
+                    });
+                    return;
+                }
+                number.registerEntityModifiers(() -> new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), number.getAlpha(), 0));
+                circle.registerEntityModifier(new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), circle.getAlpha(), 0));
+                overlay.registerEntityModifier(new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), overlay.getAlpha(), 0, new ModifierListener()
+                {
+                    @Override
+                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
                     {
-                        @Override
-                        public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem)
-                        {
-
-                        }
-
-                        @Override
-                        public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
-                        {
-                            SyncTaskManager.getInstance().run(HitCircle.this::removeFromScene);
-                        }
-                    }));
-                    HitCircle.this.listener.onCircleHit(id, 10, pos, false, forcedScore, color);
-                });
+                        SyncTaskManager.getInstance().run(() -> {
+                            removeFromScene();
+                            listener.onCircleHit(id, 10, pos, false, forcedScore, color);
+                        });
+                    }
+                }));
             }
         }
     } // update(float dt)
@@ -337,8 +330,7 @@ public class HitCircle extends GameObject {
             // Remove circle and register hit in update thread
             float finalSignAcc = signAcc;
             SyncTaskManager.getInstance().run(() -> {
-                HitCircle.this.listener
-                        .onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, color);
+                listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, color);
                 removeFromScene();
             });
             

@@ -12,7 +12,6 @@ import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
 import org.anddev.andengine.entity.modifier.ScaleModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
@@ -34,6 +33,7 @@ import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
+import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 
@@ -130,7 +130,7 @@ public class Slider extends GameObject {
             num %= 10;
         }
         number = GameObjectPool.getInstance().getNumber(num);
-
+        number.init(pos, scale);
 
         TimingControlPoint timingPoint = GameHelper.controlPoints.getTimingPointAt(realTime);
         double speedMultiplier = GameHelper.controlPoints.getDifficultyPointAt(realTime).getSpeedMultiplier();
@@ -227,12 +227,10 @@ public class Slider extends GameObject {
         endPosition = endPos;
         Utils.putSpriteAnchorCenter(endPos, endCircle);
 
-
         endOverlay.setScale(scale);
         endOverlay.setAlpha(0);
         Utils.putSpriteAnchorCenter(endPos, endOverlay);
 
-        scene.attachChild(startOverlay, 0);
         // Repeat arrow at start
         if (repeatCount > 2) {
             startArrow.setAlpha(0);
@@ -249,7 +247,7 @@ public class Slider extends GameObject {
             fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
             float fadeOutDuration = time * 0.3f * GameHelper.getTimeMultiplier();
 
-            number.init(scene, pos, scale, new SequenceEntityModifier(
+            number.registerEntityModifiers(() -> new SequenceEntityModifier(
                     new FadeInModifier(fadeInDuration),
                     new FadeOutModifier(fadeOutDuration)
             ));
@@ -281,16 +279,18 @@ public class Slider extends GameObject {
             // This adjustment is necessary for AR>10, otherwise TimePreempt can become smaller leading to hitcircles not fully fading in.
             fadeInDuration = 0.4f * Math.min(1, time / ((float) GameHelper.ar2ms(10) / 1000)) * GameHelper.getTimeMultiplier();
 
-            number.init(scene, pos, scale, new FadeInModifier(fadeInDuration));
-
+            number.registerEntityModifiers(() -> new FadeInModifier(fadeInDuration));
             startCircle.registerEntityModifier(new FadeInModifier(fadeInDuration));
             startOverlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
             endCircle.registerEntityModifier(new FadeInModifier(fadeInDuration));
             endOverlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
         }
+        scene.attachChild(number, 0);
+        scene.attachChild(startOverlay, 0);
         scene.attachChild(startCircle, 0);
-        scene.attachChild(approachCircle);
         scene.attachChild(endOverlay, 0);
+        scene.attachChild(endCircle, 0);
+        scene.attachChild(approachCircle);
         // Repeat arrow at end
         if (repeatCount > 1) {
             endArrow.setAlpha(0);
@@ -301,9 +301,8 @@ public class Slider extends GameObject {
                         path.points.get(lastIndex), path.points.get(lastIndex - 1))));
             }
             Utils.putSpriteAnchorCenter(endPos, endArrow);
-            scene.attachChild(endArrow, 0);
+            scene.attachChild(endArrow);
         }
-        scene.attachChild(endCircle, 0);
 
         tickInterval = timing.getBeatLength() * speedMultiplier;
         int tickCount = (int) (maxTime * GameHelper.getTickRate() / tickInterval);
@@ -439,11 +438,8 @@ public class Slider extends GameObject {
             }
         }
 
-        ball.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier(), new IEntityModifier.IEntityModifierListener()
+        ball.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier(), new ModifierListener()
         {
-            @Override
-            public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
-
             @Override
             public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
             {
@@ -578,14 +574,8 @@ public class Slider extends GameObject {
             followCircle.clearEntityModifiers();
             followCircle.registerEntityModifier(new ParallelEntityModifier(
                     new ScaleModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), followCircle.getScaleX() * 0.8f, EaseQuadOut.getInstance()),
-                    new AlphaModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new IEntityModifier.IEntityModifierListener()
+                    new AlphaModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener()
                     {
-                        @Override
-                        public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem)
-                        {
-
-                        }
-
                         @Override
                         public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
                         {
@@ -745,7 +735,7 @@ public class Slider extends GameObject {
 
         if (ball == null) // if ball still don't exist
         {
-            number.detach(true);
+            SyncTaskManager.getInstance().run(number::detachSelf);
             approachCircle.setAlpha(0);
 
             ball = SpritePool.getInstance().getAnimSprite("sliderb",
@@ -813,13 +803,8 @@ public class Slider extends GameObject {
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(new ParallelEntityModifier(
                         new ScaleModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), fcScale * 2f),
-                        new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new IEntityModifier.IEntityModifierListener()
+                        new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener()
                         {
-                            @Override
-                            public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem)
-                            {
-                            }
-
                             @Override
                             public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
                             {
