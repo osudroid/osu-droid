@@ -296,6 +296,10 @@ public final class BeatmapDifficultyCalculator {
          * @param attributes The difficulty attributes to cache.
          */
         public void addCache(DifficultyCalculationParameters parameters, DifficultyAttributes attributes) {
+            if (parameters == null) {
+                parameters = new DifficultyCalculationParameters();
+            }
+
             attributeCache.put(parameters.copy(), attributes);
         }
 
@@ -306,6 +310,10 @@ public final class BeatmapDifficultyCalculator {
          * @param attributes The timed difficulty attributes to cache.
          */
         public void addCache(DifficultyCalculationParameters parameters, List<TimedDifficultyAttributes> attributes) {
+            if (parameters == null) {
+                parameters = new DifficultyCalculationParameters();
+            }
+
             timedAttributeCache.put(parameters.copy(), attributes);
         }
 
@@ -339,6 +347,10 @@ public final class BeatmapDifficultyCalculator {
          */
         private <T> T getCache(DifficultyCalculationParameters parameters,
                                HashMap<DifficultyCalculationParameters, T> cacheMap) {
+            if (parameters == null) {
+                parameters = new DifficultyCalculationParameters();
+            }
+
             for (var cache : cacheMap.entrySet()) {
                 if (isParameterEqual(cache.getKey(), parameters)) {
                     return cache.getValue();
