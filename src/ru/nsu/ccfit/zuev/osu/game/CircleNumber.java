@@ -61,6 +61,21 @@ public class CircleNumber extends Entity
     }
 
     @Override
+    public void setAlpha(float pAlpha)
+    {
+        var count = getChildCount();
+
+        if (count > 0)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                getChild(i).setAlpha(pAlpha);
+            }
+        }
+        super.setAlpha(pAlpha);
+    }
+
+    @Override
     public float getAlpha()
     {
         if (getFirstChild() != null)

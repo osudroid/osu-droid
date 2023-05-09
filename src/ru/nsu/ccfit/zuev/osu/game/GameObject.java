@@ -2,9 +2,16 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import android.os.Handler;
+import android.os.Looper;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 
 public abstract class GameObject {
+
+    // All Value Animators needs to run on a thread that has its Looper, since update thread doesn't have one, using a Handler
+    // will allow us to run animations with the main looper. I'm leaving this here to use it in more inheritors if it's needed.
+    protected static final Handler mAnimationHandler = new Handler(Looper.getMainLooper());
+
     protected boolean endsCombo;
     protected boolean autoPlay = false;
     protected float hitTime = 0;
@@ -51,7 +58,7 @@ public abstract class GameObject {
         return startHit;
     }
 
-    public void tryHit(float dt) {return;};
+    public void tryHit(float dt) {}
 
-    public PointF getPos() {return pos;};
+    public PointF getPos() {return pos;}
 }
