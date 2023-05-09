@@ -697,12 +697,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final String rfile = track != null ? replayFile : this.replayFile;
 
-        Replay.oldMod = ModMenu.getInstance().getMod();
-        Replay.oldChangeSpeed = ModMenu.getInstance().getChangeSpeed();
-        Replay.oldForceAR = ModMenu.getInstance().getForceAR();
-        Replay.oldEnableForceAR = ModMenu.getInstance().isEnableForceAR();
-        Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
-
         new AsyncTask() {
             @Override
             public void run() {

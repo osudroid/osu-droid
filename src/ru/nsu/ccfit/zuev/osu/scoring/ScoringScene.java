@@ -273,14 +273,20 @@ public class ScoringScene {
                     SongMenu.stopMusicStatic();
                     engine.setScene(menu.getScene());
 
-//					Replay.mod = stat.getMod();
-                    game.startGame(trackToReplay, replay);
+                    Replay.oldMod = ModMenu.getInstance().getMod();
+                    Replay.oldChangeSpeed = ModMenu.getInstance().getChangeSpeed();
+                    Replay.oldForceAR = ModMenu.getInstance().getForceAR();
+                    Replay.oldEnableForceAR = ModMenu.getInstance().isEnableForceAR();
+                    Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
 
                     ModMenu.getInstance().setMod(stat.getMod());
                     ModMenu.getInstance().setChangeSpeed(stat.getChangeSpeed());
                     ModMenu.getInstance().setForceAR(stat.getForceAR());
                     ModMenu.getInstance().setEnableForceAR(stat.isEnableForceAR());
                     ModMenu.getInstance().setFLfollowDelay(stat.getFLFollowDelay());
+
+                    game.startGame(trackToReplay, replay);
+
                     scene = null;
                     stopMusic();
                     return true;

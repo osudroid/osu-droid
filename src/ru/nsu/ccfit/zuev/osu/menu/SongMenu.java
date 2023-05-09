@@ -61,6 +61,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
+import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -1016,6 +1017,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
             ResourceManager.getInstance().getSound("menuhit").play();
             stopMusic();
+
+            Replay.oldMod = ModMenu.getInstance().getMod();
+            Replay.oldChangeSpeed = ModMenu.getInstance().getChangeSpeed();
+            Replay.oldForceAR = ModMenu.getInstance().getForceAR();
+            Replay.oldEnableForceAR = ModMenu.getInstance().isEnableForceAR();
+            Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
+
             game.startGame(track, null);
             unload();
             return;
