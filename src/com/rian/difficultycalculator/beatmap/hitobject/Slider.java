@@ -91,7 +91,7 @@ public class Slider extends HitObjectWithDuration {
      */
     public Slider(double startTime, float x, float y, TimingControlPoint timingControlPoint,
                   DifficultyControlPoint difficultyControlPoint, int repeatCount, SliderPath path,
-                  double sliderVelocity, int tickRate, double tickDistanceMultiplier, boolean generateTicks) {
+                  double sliderVelocity, double tickRate, double tickDistanceMultiplier, boolean generateTicks) {
         this(startTime, new Vector2(x, y), timingControlPoint, difficultyControlPoint, repeatCount,
                 path, sliderVelocity, tickRate, tickDistanceMultiplier, generateTicks);
     }
@@ -133,7 +133,7 @@ public class Slider extends HitObjectWithDuration {
         // This exists for edge cases such as /b/1573664 where the beatmap has been edited by the user, and should never be reached in normal usage.
         double maxLength = 100000;
         double length = Math.min(maxLength, path.expectedDistance);
-        double tickDistance = MathUtils.clamp(scoringDistance * tickRate / tickDistanceMultiplier, 0, length);
+        double tickDistance = MathUtils.clamp(scoringDistance / tickRate * tickDistanceMultiplier, 0, length);
 
         if (tickDistance != 0 && generateTicks) {
             double minDistanceFromEnd = velocity * 10;
