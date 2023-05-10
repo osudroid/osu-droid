@@ -42,7 +42,6 @@ import androidx.core.content.PermissionChecker;
 import androidx.preference.PreferenceManager;
 
 import com.edlplan.ui.ActivityOverlay;
-import com.edlplan.ui.fragment.BuildTypeNoticeFragment;
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -254,10 +253,6 @@ public class MainActivity extends BaseGameActivity implements
             Editor editor = prefs.edit();
             editor.putBoolean("onlineSet", true);
             editor.commit();
-
-            //TODO removed auto registration at first launch
-            /*OnlineInitializer initializer = new OnlineInitializer(this);
-            initializer.createInitDialog();*/
         }
     }
 
@@ -266,9 +261,16 @@ public class MainActivity extends BaseGameActivity implements
         Config.setTextureQuality(1);
         ResourceManager.getInstance().Init(mEngine, this);
         ResourceManager.getInstance().loadHighQualityAsset("logo", "logo.png");
+        ResourceManager.getInstance().loadHighQualityAsset("welcome", "gfx/welcome.png");
+        ResourceManager.getInstance().loadHighQualityAsset("loading_start", "gfx/loading.png");
+
+        ResourceManager.getInstance().loadSound("welcome", "sfx/welcome.ogg", false);
+        ResourceManager.getInstance().loadSound("welcome_piano", "sfx/welcome_piano.ogg", false);
+
+        // Setting the logo as fast as we can
+        getEngine().setScene(SplashScene.INSTANCE.getScene());
+
         ResourceManager.getInstance().loadHighQualityAsset("play", "play.png");
-        //ResourceManager.getInstance().loadHighQualityAsset("multiplayer", "multiplayer.png");
-        //ResourceManager.getInstance().loadHighQualityAsset("solo", "solo.png");
         ResourceManager.getInstance().loadHighQualityAsset("exit", "exit.png");
         ResourceManager.getInstance().loadHighQualityAsset("chimu", "chimu.png");
         ResourceManager.getInstance().loadHighQualityAsset("options", "options.png");
@@ -294,7 +296,7 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public Scene onLoadScene() {
-        return new SplashScene().getScene();
+        return SplashScene.INSTANCE.getScene();
     }
 
     @Override
@@ -312,6 +314,15 @@ public class MainActivity extends BaseGameActivity implements
                 if (!LibraryManager.getInstance().loadLibraryCache(MainActivity.this, true)) {
                     LibraryManager.getInstance().scanLibrary(MainActivity.this);
                     System.gc();
+                }
+                SplashScene.INSTANCE.playWelcomeAnimation();
+                try
+                {
+                    // Allow the welcome animation to progress before entering onComplete state.
+                    Thread.sleep(2500);
+                }
+                catch (InterruptedException ignored)
+                {
                 }
             }
 
@@ -389,10 +400,6 @@ public class MainActivity extends BaseGameActivity implements
                 }});
 
         ActivityOverlay.initial(this, frameLayout.getId());
-
-        if ("pre_release".equals(BuildConfig.BUILD_TYPE) || BuildConfig.DEBUG) {
-            BuildTypeNoticeFragment.single.get().show();
-        }
     }
 
     public void checkNewBeatmaps() {

@@ -10,6 +10,8 @@
         <item name="preferenceTheme">@style/AppTheme.PreferenceThemeOverlay</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">#000</item>
     </style>
 
     <style name="AppTheme.PreferenceThemeOverlay" parent="@style/PreferenceThemeOverlay">
