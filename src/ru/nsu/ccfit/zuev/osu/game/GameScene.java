@@ -751,7 +751,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             if (Config.isDisplayRealTimePPCounter()) {
                 ppText = new ChangeableText(Utils.toRes(720),
-                        Utils.toRes(440), font, "0.00pp", Integer.MAX_VALUE);
+                        Utils.toRes(440), font, "0.00pp", 100);
                 fgScene.attachChild(ppText);
             }
 
