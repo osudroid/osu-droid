@@ -318,6 +318,7 @@ public class MainActivity extends BaseGameActivity implements
                 SplashScene.INSTANCE.playWelcomeAnimation();
                 try
                 {
+                    // Allow the welcome animation to progress before entering onComplete state.
                     Thread.sleep(2500);
                 }
                 catch (InterruptedException ignored)
