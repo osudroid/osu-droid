@@ -1248,8 +1248,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             .applyFilter(m -> m.unranked).hasNext();
         if (hasUnrankedMod
                 || Config.isRemoveSliderLock()
-                || ModMenu.getInstance().isChangeSpeed()
-                || ModMenu.getInstance().isEnableForceAR()) {
+                || ModMenu.getInstance().isEnableForceAR()
+                || !ModMenu.getInstance().isDefaultFLFollowDelay()) {
             unranked.setVisible(true);
         }
 
