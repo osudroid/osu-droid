@@ -1,31 +1,18 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
-
-import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody2D;
 import com.edlplan.osu.support.timing.controlpoint.TimingControlPoint;
-
 import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.entity.modifier.FadeInModifier;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.ScaleModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
+import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.util.MathUtils;
 import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseQuadIn;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -36,6 +23,10 @@ import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
 
 public class Slider extends GameObject {
     private final Sprite startCircle, endCircle;
@@ -774,10 +765,7 @@ public class Slider extends GameObject {
         listener.onTrackingSliders(inRadius);
         tickTime += dt;
 
-        float fcScale = FMath.clamp(
-                scale * (1.1f - 0.1f * tickTime * GameHelper.getTickRate() / timing.getBeatLength()),
-                scale * -1.1f,
-                scale * 1.1f);
+        float fcScale = scale * 1.1f;
 
         if (Config.isComplexAnimations())
         {
