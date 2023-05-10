@@ -17,17 +17,16 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 public class SplashScene implements IUpdateHandler {
 
     public static final SplashScene INSTANCE = new SplashScene();
-
     private final Scene scene;
-
     private ChangeableText infoText;
+    private ChangeableText progressText;
     private Sprite mLoading;
-
     private boolean mStarting = true;
 
     public SplashScene() {
         scene = new Scene();
         initializeLoading();
+        initializeProgress();
         initializeInfo();
         scene.registerUpdateHandler(this);
     }
@@ -38,6 +37,7 @@ public class SplashScene implements IUpdateHandler {
         mLoading = new Sprite(0, 0, loadTex);
         mLoading.setPosition((Config.getRES_WIDTH() - mLoading.getWidth()) / 2f, (Config.getRES_HEIGHT() - mLoading.getHeight()) / 2f);
         mLoading.setRotationCenter(mLoading.getWidth() / 2f, mLoading.getHeight() / 2f);
+        mLoading.setScale(0.4f);
         mLoading.setAlpha(0);
 
         mLoading.registerEntityModifier(new LoopEntityModifier(new RotationByModifier(2f, 360)));
@@ -48,6 +48,7 @@ public class SplashScene implements IUpdateHandler {
         infoText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", HorizontalAlign.CENTER, 1024);
         infoText.setPosition((Config.getRES_WIDTH() - infoText.getWidth()) / 2, Config.getRES_HEIGHT() - infoText.getHeight() - 20);
         infoText.setAlpha(0);
+        infoText.setScale(0.6f);
         scene.attachChild(infoText);
     }
 
@@ -59,7 +60,11 @@ public class SplashScene implements IUpdateHandler {
 
         // ChangeableText isn't compatible with animations unfortunately
         infoText.detachSelf();
+        progressText.detachSelf();
+
         mLoading.registerEntityModifier(new FadeOutModifier(0.2f));
+        progressText.registerEntityModifier(new FadeOutModifier(0.2f));
+
 
         try
         {
@@ -91,13 +96,25 @@ public class SplashScene implements IUpdateHandler {
         ));
     }
 
+    private void initializeProgress() {
+        progressText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "0 %", HorizontalAlign.CENTER, 10);
+        progressText.setPosition((Config.getRES_WIDTH() - progressText.getWidth()) / 2f, Config.getRES_WIDTH() + Config.getRES_HEIGHT() / 2f - progressText.getHeight() / 2f);
+        progressText.setAlpha(0);
+        progressText.setScale(0.5f);
+        scene.attachChild(progressText);
+    }
+
     @Override
     public void onUpdate(float pSecondsElapsed) {
+        float progress = GlobalManager.getInstance().getLoadingProgress();
 
         if (mStarting)
         {
             mLoading.setAlpha(mLoading.getAlpha() + 0.1f);
         }
+
+        progressText.setText(String.format("%.0f %%", progress));
+        progressText.setPosition((Config.getRES_WIDTH() - progressText.getWidth()) / 2, Config.getRES_WIDTH() / 4.25f + (Config.getRES_HEIGHT() / 4.25f - progressText.getHeight()) / 2);
 
         if (GlobalManager.getInstance().getInfo() != null) {
             infoText.setText(GlobalManager.getInstance().getInfo());
