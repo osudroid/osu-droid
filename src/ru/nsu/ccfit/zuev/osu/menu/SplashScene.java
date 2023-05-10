@@ -5,7 +5,6 @@ import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import org.anddev.andengine.util.HorizontalAlign;
 import ru.nsu.ccfit.zuev.osu.Config;
