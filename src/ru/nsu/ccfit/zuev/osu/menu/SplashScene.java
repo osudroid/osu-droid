@@ -98,23 +98,24 @@ public class SplashScene implements IUpdateHandler {
 
     private void initializeProgress() {
         progressText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "0 %", HorizontalAlign.CENTER, 10);
-        progressText.setPosition((Config.getRES_WIDTH() - progressText.getWidth()) / 2f, Config.getRES_WIDTH() + Config.getRES_HEIGHT() / 2f - progressText.getHeight() / 2f);
+        progressText.setPosition((Config.getRES_WIDTH() - progressText.getWidth()) / 2f, (Config.getRES_HEIGHT() + mLoading.getHeight()) / 2f - mLoading.getHeight() / 4f);
         progressText.setAlpha(0);
         progressText.setScale(0.5f);
         scene.attachChild(progressText);
     }
 
+
+
     @Override
     public void onUpdate(float pSecondsElapsed) {
         float progress = GlobalManager.getInstance().getLoadingProgress();
-
         if (mStarting)
         {
             mLoading.setAlpha(mLoading.getAlpha() + 0.1f);
         }
 
         progressText.setText(String.format("%.0f %%", progress));
-        progressText.setPosition((Config.getRES_WIDTH() - progressText.getWidth()) / 2, Config.getRES_WIDTH() / 4.25f + (Config.getRES_HEIGHT() / 4.25f - progressText.getHeight()) / 2);
+        progressText.setPosition((Config.getRES_WIDTH() - progressText.getWidth()) / 2f, (Config.getRES_HEIGHT() + mLoading.getHeight()) / 2f - mLoading.getHeight() / 4f);
 
         if (GlobalManager.getInstance().getInfo() != null) {
             infoText.setText(GlobalManager.getInstance().getInfo());
