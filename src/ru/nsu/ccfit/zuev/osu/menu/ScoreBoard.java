@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
-
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -15,19 +14,7 @@ import org.anddev.andengine.input.touch.detector.SurfaceScrollDetector;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.MathUtils;
-
-import java.io.File;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
@@ -36,6 +23,13 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osuplus.R;
+
+import java.io.File;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
 
 public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     private final Scene scene;
@@ -517,54 +511,46 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     }
 
     public void loadAvatar() {
+        AsyncTask asyncTask = new AsyncTask() {
+            private final List<TextureRegion> avatarTextureRegions = new ArrayList<>(avatars.length);
+            @Override
+            public void run() {
+                try {
+                    if (avatars == null) {
+                        return;
+                    }
 
-        try {
-            if (avatars == null) {
-                return;
-            }
-            for (int i = 0; i < avatars.length; i++) {
-                if (isCanceled) {
-                    break;
-                }
-                if (sprites[i] == null) {
-                    continue;
-                }
-                final int finalI = i;
-                AsyncTask avatarTask = new AsyncTask() {
-                    private final TextureRegion[] avatarTexRegion = new TextureRegion[avatars.length];
-
-                    @Override
-                    public void run() {
-
-                        Avatar ava = avatars[finalI];
-                        boolean bool = OnlineManager.getInstance().loadAvatarToTextureManager(ava.getAvaUrl(), "ava@" + ava.getUserName());
-                        if (bool) {
-                            avatarTexRegion[finalI] = ResourceManager.getInstance().getTextureIfLoaded("ava@" + ava.getUserName());
+                    for (Avatar avatar : avatars) {
+                        if (isCanceled) {
+                            break;
+                        }
+                        if (avatar == null) {
+                            continue;
+                        }
+                        if (OnlineManager.getInstance().loadAvatarToTextureManager(avatar.getAvaUrl(), "ava@" + avatar.getUserName())) {
+                            avatarTextureRegions.add(ResourceManager.getInstance().getTextureIfLoaded("ava@" + avatar.getUserName()));
                         } else {
-                            avatarTexRegion[finalI] = ResourceManager.getInstance().getTexture("emptyavatar");
+                            avatarTextureRegions.add(ResourceManager.getInstance().getTexture("emptyavatar"));
                         }
                     }
-
-                    @Override
-                    public void onComplete() {
-                        try {
-                            if (avatarTexRegion[finalI] != null && showOnlineScores) {
-                                final Sprite avatar = new Sprite(55, 12, Utils.toRes(90), Utils.toRes(90), avatarTexRegion[finalI]);
-                                sprites[finalI].attachChild(avatar);
-                            }
-                        } catch (Exception ignored) {}
-
-                        isCanceled = false;
-                    }
-                };
-                avatarTask.execute();
-                avatarTasks.add(avatarTask);
+                } catch (Exception e) {
+                    isCanceled = false;
+                }
             }
-            isCanceled = false;
-        } catch (Exception ex) {
-//                        Debug.e(ex.toString());
-            isCanceled = false;
-        }
+
+            @Override
+            public void onComplete() {
+                try {
+                    if (showOnlineScores) {
+                        for (int i = 0; i < avatarTextureRegions.size(); i++) {
+                            sprites[i].attachChild(new Sprite(55, 12, Utils.toRes(90), Utils.toRes(90), avatarTextureRegions.get(i)));
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+        };
+        asyncTask.execute();
+        avatarTasks.add(asyncTask); // Unneeded, but for compatibility reasons as I haven't changed anything else yet
     }
 
     public void cancelLoadOnlineScores() {
