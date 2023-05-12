@@ -10,6 +10,7 @@ import org.anddev.andengine.util.HorizontalAlign;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 
 /**
  * Created by Fuuko on 2015/4/25.
@@ -59,12 +60,10 @@ public class SplashScene implements IUpdateHandler {
         mStarting = false;
 
         // ChangeableText isn't compatible with animations unfortunately
-        infoText.detachSelf();
-        progressText.detachSelf();
-
-        mLoading.registerEntityModifier(new FadeOutModifier(0.2f));
-        progressText.registerEntityModifier(new FadeOutModifier(0.2f));
-
+        SyncTaskManager.getInstance().run(() -> {
+            infoText.detachSelf();
+            progressText.detachSelf();
+        });
 
         try
         {
@@ -103,8 +102,6 @@ public class SplashScene implements IUpdateHandler {
         progressText.setScale(0.5f);
         scene.attachChild(progressText);
     }
-
-
 
     @Override
     public void onUpdate(float pSecondsElapsed) {
