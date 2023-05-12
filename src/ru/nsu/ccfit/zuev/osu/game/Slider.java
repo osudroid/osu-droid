@@ -750,6 +750,10 @@ public class Slider extends GameObject {
 
             followCircle = SpritePool.getInstance().getSprite("sliderfollowcircle");
             followCircle.setAlpha(0);
+            if (!Config.isComplexAnimations())
+            {
+                followCircle.setScale(scale);
+            }
 
             scene.attachChild(ball);
             scene.attachChild(followCircle);
@@ -775,17 +779,14 @@ public class Slider extends GameObject {
         listener.onTrackingSliders(inRadius);
         tickTime += dt;
 
-        float fcScale = scale;
-
         if (!mIsAnimating)
         {
             float newScale = scale * (1.1f - 0.1f * tickTime * GameHelper.getTickRate() / timing.getBeatLength());
 
             if (newScale <= scale * 1.1f && newScale >= scale * -1.1f)
             {
-                fcScale = newScale;
+                followCircle.setScale(newScale);
             }
-            followCircle.setScale(newScale);
         }
 
         if (Config.isComplexAnimations())
@@ -798,7 +799,7 @@ public class Slider extends GameObject {
                 mIsAnimating = true;
 
                 // If alpha doesn't equal 0 means that it has been into an animation before
-                float initialScale = followCircle.getAlpha() == 0 ? fcScale * 0.5f : followCircle.getScaleX();
+                float initialScale = followCircle.getAlpha() == 0 ? scale * 0.5f : followCircle.getScaleX();
 
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(new ParallelEntityModifier(new ModifierListener()
@@ -808,7 +809,7 @@ public class Slider extends GameObject {
                         mIsAnimating = false;
                     }
                 },
-                    new ScaleModifier(Math.min(remainTime, 0.18f * GameHelper.getTimeMultiplier()), initialScale, fcScale, EaseQuadOut.getInstance()),
+                    new ScaleModifier(Math.min(remainTime, 0.18f * GameHelper.getTimeMultiplier()), initialScale, scale, EaseQuadOut.getInstance()),
                     new AlphaModifier(Math.min(remainTime, 0.06f * GameHelper.getTimeMultiplier()), followCircle.getAlpha(), 1f)
                 ));
             }
@@ -825,10 +826,9 @@ public class Slider extends GameObject {
                         mIsAnimating = false;
                     }
                 },
-                    new ScaleModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), fcScale * 2f),
+                    new ScaleModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), scale * 2f),
                     new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener()
                     {
-                        @Override
                         public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
                         {
                             if (mIsOver)
@@ -844,7 +844,6 @@ public class Slider extends GameObject {
         {
             mWasInRadius = inRadius;
             followCircle.setAlpha(inRadius ? 1 : 0);
-            followCircle.setScale(fcScale);
         }
 
         // Some magic with slider ticks. If it'll crash it's not my fault ^_^"
