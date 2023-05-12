@@ -175,14 +175,14 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         return sb.toString();
     }
 
-    private synchronized void initSprite(int i, String title, String acc, String markStr, final  boolean showOnline, final int scoreID, String avaURL, final String username) {
+    private synchronized void initSprite(String title, String acc, String markStr, final  boolean showOnline, final int scoreID, String avaURL, final String username) {
         final TextureRegion tex = ResourceManager.getInstance().getTexture(
                 "menu-button-background").deepCopy();
         tex.setHeight(107);
         tex.setWidth(724);
         camY = -146;
 
-        sprites.add(i, new Sprite(Utils.toRes(-150), Utils.toRes(40), tex) {
+        Sprite sprite = new Sprite(Utils.toRes(-150), Utils.toRes(40), tex) {
             private float dx = 0, dy = 0;
 
             @Override
@@ -213,17 +213,17 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 }
                 return false;
             }
-        });
+        };
+        sprite.setColor(0, 0, 0);
+        sprite.setAlpha(0.5f);
+        sprite.setScale(0.65f);
+        sprite.setWidth(sprite.getWidth() * 1.1f);
 
-        sprites.get(i).setColor(0, 0, 0);
-        sprites.get(i).setAlpha(0.5f);
-        sprites.get(i).setScale(0.65f);
-        sprites.get(i).setWidth(sprites.get(i).getWidth() * 1.1f);
 
         int pos = 0;
         if (showOnlineScores) {
             pos = 90;
-            avatars.set(i, new ScoreBoard.Avatar(username, avaURL));
+            avatars.add(new ScoreBoard.Avatar(username, avaURL));
         }
 
         final Text text = new Text(Utils.toRes(pos + 160), Utils.toRes(20),
@@ -237,14 +237,15 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         text.setScale(1.2f);
         mark.setScale(1.5f);
         mark.setPosition(pos + mark.getWidth() / 2 + 60, mark.getY());
-        sprites.get(i).attachChild(text);
-        sprites.get(i).attachChild(accText);
-        sprites.get(i).attachChild(mark);
+        sprite.attachChild(text);
+        sprite.attachChild(accText);
+        sprite.attachChild(mark);
 
-        scene.attachChild(sprites.get(i));
-        mainScene.registerTouchArea(sprites.get(i));
+        scene.attachChild(sprite);
+        mainScene.registerTouchArea(sprite);
 
-        height = sprites.get(i).getHeight();
+        height = sprite.getHeight();
+        sprites.add(sprite);
     }
 
     private void initFromOnline(final TrackInfo track) {
@@ -307,7 +308,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                                 + (lastTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
                         lastTotalScore = currTotalScore;
 
-                        initSprite(i, titleStr, accStr, data[4], true, scoreID, data[7], data[1]);
+                        initSprite(titleStr, accStr, data[4], true, scoreID, data[7], data[1]);
 
                         ScoreBoard.ScoreBoardItems items = new ScoreBoard.ScoreBoardItems();
                         items.set(data[1], Integer.parseInt(data[3]), Integer.parseInt(data[2]), scoreID);
@@ -330,7 +331,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                                     + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(Integer.parseInt(data[6]) / 1000f, 2)) + "%" + "\n"
                                     + "-";
 
-                            initSprite(scores.size(), titleStr, accStr, data[4], true, scoreID, data[9], data[1]);
+                            initSprite(titleStr, accStr, data[4], true, scoreID, data[9], data[1]);
                         } else {
                             sprites.set(scores.size() - 1, null);
                         }
@@ -346,6 +347,8 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 if (Utils.isWifi(context) || Config.getLoadAvatar()) {
                     loadAvatar();
                 }
+                Collections.reverse(sprites);
+                Collections.reverse(avatars);
             }
         };
         onlineTask.execute();
@@ -402,12 +405,15 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                         + (lastTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
                 lastTotalScore = currTotalScore;
 
-                initSprite(i, titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null);
+                initSprite(titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null);
 
                 scoreItems[i] = new ScoreBoard.ScoreBoardItems();
                 scoreItems[i].set(scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")), scoreID);
             }
         }
+
+        Collections.reverse(sprites);
+        Collections.reverse(avatars);
     }
 
     public void clear() {
