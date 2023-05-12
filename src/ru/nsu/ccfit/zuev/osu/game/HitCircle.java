@@ -123,8 +123,8 @@ public class HitCircle extends GameObject {
             ));
         }
         scene.attachChild(number, 0);
-        scene.attachChild(circle, 0);
         scene.attachChild(overlay, 0);
+        scene.attachChild(circle, 0);
         scene.attachChild(approachCircle);
     }
 
