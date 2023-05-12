@@ -283,7 +283,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                     List<ScoreBoard.ScoreBoardItems> scoreBoardItems = new ArrayList<>();
                     long lastTotalScore = 0;
 
-                    for (int i = scores.size() - 1; i >= 0; i--) {
+                    for (int i = 0; i < scores.size(); i++) {
                         Debug.i(scores.get(i));
 
                         String[] data = scores.get(i).split(",");
@@ -345,8 +345,6 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 if (Utils.isWifi(context) || Config.getLoadAvatar()) {
                     loadAvatar();
                 }
-                Collections.reverse(sprites);
-                Collections.reverse(avatars);
             }
         };
         onlineTask.execute();
@@ -381,11 +379,12 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
             if (scoreSet == null || scoreSet.getCount() == 0) {
                 return;
             }
+
             percentShow = 0;
             scoreSet.moveToFirst();
             long lastTotalScore = 0;
             scoreItems = new ScoreBoard.ScoreBoardItems[scoreSet.getCount()];
-            for (int i = scoreSet.getCount() - 1; i >= 0; i--) {
+            for (int i = 0; i < scoreSet.getCount(); i++) {
                 scoreSet.moveToPosition(i);
                 final int scoreID = scoreSet.getInt(0);
 
@@ -409,9 +408,6 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 scoreItems[i].set(scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")), scoreID);
             }
         }
-
-        Collections.reverse(sprites);
-        Collections.reverse(avatars);
     }
 
     public void clear() {
