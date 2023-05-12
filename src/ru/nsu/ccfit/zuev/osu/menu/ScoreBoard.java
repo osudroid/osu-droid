@@ -73,8 +73,8 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         this.loadingText = new ChangeableText(Utils.toRes(5), Utils.toRes(230), ResourceManager.getInstance().getFont("strokeFont"), "", 50);
         this.scene.attachChild(this.loadingText);
 
-        this.sprites = Collections.synchronizedList(new ArrayList<>());
-        this.avatars = Collections.synchronizedList(new ArrayList<>());
+        this.sprites = Collections.synchronizedList(new ArrayList<>(50));
+        this.avatars = Collections.synchronizedList(new ArrayList<>(50));
 
         this.listener = listener;
         this.mScrollDetector = new SurfaceScrollDetector(this);
@@ -182,7 +182,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         tex.setWidth(724);
         camY = -146;
 
-        sprites.set(i, new Sprite(Utils.toRes(-150), Utils.toRes(40), tex) {
+        sprites.add(i, new Sprite(Utils.toRes(-150), Utils.toRes(40), tex) {
             private float dx = 0, dy = 0;
 
             @Override
