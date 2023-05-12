@@ -59,6 +59,8 @@ public class SplashScene implements IUpdateHandler {
     {
         mStarting = false;
 
+        mLoading.registerEntityModifier(new FadeOutModifier(0.2f));
+
         // ChangeableText isn't compatible with animations unfortunately
         SyncTaskManager.getInstance().run(() -> {
             infoText.detachSelf();
