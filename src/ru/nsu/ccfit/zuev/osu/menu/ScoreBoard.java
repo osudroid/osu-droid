@@ -332,8 +332,6 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                                     + "-";
 
                             initSprite(titleStr, accStr, data[4], true, scoreID, data[9], data[1]);
-                        } else {
-                            sprites.set(scores.size() - 1, null);
                         }
                     }
 
