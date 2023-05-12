@@ -33,7 +33,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     private final MenuItemListener listener;
     private final ChangeableText loadingText;
     private final List<Sprite> sprites;
-    private final List<ScoreBoard.Avatar> avatars;
+    private final List<Avatar> avatars;
     private float percentShow = -1;
     private long viewNumber = 0;
     private boolean showOnlineScores = false;
@@ -59,7 +59,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     private float downTime = -1;
     private int _scoreID = -1;
     private boolean moved = false;
-    private ScoreBoard.ScoreBoardItems[] scoreItems = new ScoreBoard.ScoreBoardItems[0];
+    private ScoreBoardItems[] scoreItems = new ScoreBoardItems[0];
 
     private static final Object mutex = new Object();
 
@@ -222,7 +222,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         int pos = 0;
         if (showOnlineScores) {
             pos = 90;
-            avatars.add(new ScoreBoard.Avatar(username, avaURL));
+            avatars.add(new Avatar(username, avaURL));
         }
 
         final Text text = new Text(Utils.toRes(pos + 160), Utils.toRes(20),
@@ -276,10 +276,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
 
                     loadingText.setText(OnlineManager.getInstance().getFailMessage());
 
-//                    sprites = Collections.synchronizedList(new ArrayList<>());
-//                    avatars = Collections.synchronizedList(new ArrayList<>());
-
-                    List<ScoreBoard.ScoreBoardItems> scoreBoardItems = new ArrayList<>();
+                    List<ScoreBoardItems> scoreBoardItems = new ArrayList<>();
                     long lastTotalScore = 0;
 
                     for (int i = 0; i < scores.size(); i++) {
@@ -309,11 +306,11 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
 
                         initSprite(titleStr, accStr, data[4], true, scoreID, data[7], data[1]);
 
-                        ScoreBoard.ScoreBoardItems items = new ScoreBoard.ScoreBoardItems();
+                        ScoreBoardItems items = new ScoreBoardItems();
                         items.set(data[1], Integer.parseInt(data[3]), Integer.parseInt(data[2]), scoreID);
                         scoreBoardItems.add(items);
                     }
-                    scoreItems = scoreBoardItems.toArray(new ScoreBoard.ScoreBoardItems[0]);
+                    scoreItems = scoreBoardItems.toArray(new ScoreBoardItems[0]);
 
                     if (scores.size() > 0) {
                         String[] data = scores.get(scores.size() - 1).split("\\s+");
@@ -354,7 +351,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
             return;
         }
 
-        scoreItems = new ScoreBoard.ScoreBoardItems[0];
+        scoreItems = new ScoreBoardItems[0];
         lastTrack = track;
         wasOnline = showOnlineScores;
 
@@ -382,7 +379,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
             percentShow = 0;
             scoreSet.moveToFirst();
             long lastTotalScore = 0;
-            scoreItems = new ScoreBoard.ScoreBoardItems[scoreSet.getCount()];
+            scoreItems = new ScoreBoardItems[scoreSet.getCount()];
             for (int i = 0; i < scoreSet.getCount(); i++) {
                 scoreSet.moveToPosition(i);
                 final int scoreID = scoreSet.getInt(0);
@@ -403,7 +400,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
 
                 initSprite(titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null);
 
-                scoreItems[i] = new ScoreBoard.ScoreBoardItems();
+                scoreItems[i] = new ScoreBoardItems();
                 scoreItems[i].set(scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")), scoreID);
             }
         }
@@ -499,7 +496,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
             public void run() {
                 try {
                     synchronized (avatars) {
-                        for (ScoreBoard.Avatar avatar : avatars) {
+                        for (Avatar avatar : avatars) {
                             if (isCanceled) {
                                 break;
                             }
