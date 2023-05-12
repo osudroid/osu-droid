@@ -175,7 +175,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         return sb.toString();
     }
 
-    private synchronized void initSprite(String title, String acc, String markStr, final  boolean showOnline, final int scoreID, String avaURL, final String username) {
+    private synchronized void initSprite(String title, String acc, String markStr, final boolean showOnline, final int scoreID, String avaURL, final String username) {
         final TextureRegion tex = ResourceManager.getInstance().getTexture(
                 "menu-button-background").deepCopy();
         tex.setHeight(107);
@@ -218,7 +218,6 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         sprite.setAlpha(0.5f);
         sprite.setScale(0.65f);
         sprite.setWidth(sprite.getWidth() * 1.1f);
-
 
         int pos = 0;
         if (showOnlineScores) {
@@ -286,9 +285,9 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                     for (int i = 0; i < scores.size(); i++) {
                         Debug.i(scores.get(i));
 
-                        String[] data = scores.get(i).split(",");
+                        String[] data = scores.get(i).split("\\s+");
 
-                        if(data.length < 8 || data.length == 10) {
+                        if (data.length < 8 || data.length == 10) {
                             continue;
                         }
 
