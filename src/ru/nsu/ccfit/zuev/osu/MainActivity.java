@@ -260,16 +260,16 @@ public class MainActivity extends BaseGameActivity implements
     public void onLoadResources() {
         Config.setTextureQuality(1);
         ResourceManager.getInstance().Init(mEngine, this);
-        ResourceManager.getInstance().loadHighQualityAsset("logo", "logo.png");
         ResourceManager.getInstance().loadHighQualityAsset("welcome", "gfx/welcome.png");
         ResourceManager.getInstance().loadHighQualityAsset("loading_start", "gfx/loading.png");
 
         ResourceManager.getInstance().loadSound("welcome", "sfx/welcome.ogg", false);
         ResourceManager.getInstance().loadSound("welcome_piano", "sfx/welcome_piano.ogg", false);
 
-        // Setting the logo as fast as we can
+        // Setting the scene as fast as we can
         getEngine().setScene(SplashScene.INSTANCE.getScene());
 
+        ResourceManager.getInstance().loadHighQualityAsset("logo", "logo.png");
         ResourceManager.getInstance().loadHighQualityAsset("play", "play.png");
         ResourceManager.getInstance().loadHighQualityAsset("exit", "exit.png");
         ResourceManager.getInstance().loadHighQualityAsset("chimu", "chimu.png");
