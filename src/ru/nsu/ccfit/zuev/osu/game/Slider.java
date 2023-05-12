@@ -779,6 +779,7 @@ public class Slider extends GameObject {
         listener.onTrackingSliders(inRadius);
         tickTime += dt;
 
+        /*
         if (!mIsAnimating)
         {
             float newScale = scale * (1.1f - 0.1f * tickTime * GameHelper.getTickRate() / timing.getBeatLength());
@@ -787,7 +788,7 @@ public class Slider extends GameObject {
             {
                 followCircle.setScale(newScale);
             }
-        }
+        }*/
 
         if (Config.isComplexAnimations())
         {
