@@ -412,9 +412,7 @@ public class LibraryManager {
             info.addTrack(track);
         }
 
-        if (info.getCount() > 0) {
-            ToastLogger.showText(StringTable.format(R.string.message_lib_imported, dir.getName()), false);
-        } else if (Config.isDeleteUnimportedBeatmaps()) {
+        if (Config.isDeleteUnimportedBeatmaps() && info.getCount() == 0) {
             deleteDir(dir);
         }
 
