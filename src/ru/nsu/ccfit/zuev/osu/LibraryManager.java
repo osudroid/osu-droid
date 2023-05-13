@@ -87,10 +87,10 @@ public enum LibraryManager {
                     fileCount = (Integer) obj;
 
                     obj = istream.readObject();
-                    if (obj instanceof ArrayList<?>) {
+                    if (obj instanceof Collection<?>) {
 //                        library = (ArrayList<BeatmapInfo>) obj;
                         synchronized (library) {
-                            library.addAll((ArrayList<BeatmapInfo>) obj);
+                            library.addAll((Collection<? extends BeatmapInfo>) obj);
                         }
 
                         ToastLogger.addToLog("Library loaded");
@@ -429,8 +429,6 @@ public enum LibraryManager {
 
     public void updateLibrary(boolean force)
     {
-        Activity context = GlobalManager.getInstance().getMainActivity();
-
         saveToCache();
 
         if (!loadLibraryCache(force))
@@ -454,23 +452,24 @@ public enum LibraryManager {
 
         public void start() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                // Split list into chunks of N elements per sublist, N being number of cores
+                int optimalChunkSize = (int) Math.ceil((double) fileCount / Runtime.getRuntime().availableProcessors());
+                // Split list into chunks of N elements per M sublist, N being number of files and M being number of processors
                 List<List<File>> sub_files = new ArrayList<>(files.stream()
-                        .collect(Collectors.groupingBy(s -> files.indexOf(s) / 100))
+                        .collect(Collectors.groupingBy(s -> files.indexOf(s) / optimalChunkSize))
                         .values());
                 sub_files.parallelStream().forEach(list -> executors.submit(() -> {
                     for (File file : list) {
+                        GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / fileCount);
+                        ToastLogger.setPercentage(fileCached * 100f / fileCount);
+
                         synchronized (this) {
-                            GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / fileCount);
-                            ToastLogger.setPercentage(fileCached * 100f / fileCount);
                             fileCached++;
                         }
 
-                        if (file.isDirectory()) {
+                        if (!file.isDirectory()) {
                             continue;
                         }
 
-                        Debug.i( Thread.currentThread().getName() + ": Library Cache: " + fileCached + "/" + fileCount);
                         GlobalManager.getInstance().setInfo("Loading " + file.getName() + "...");
                         final BeatmapInfo info = new BeatmapInfo();
                         info.setPath(file.getPath());
@@ -489,7 +488,7 @@ public enum LibraryManager {
                             totalMaps += info.getCount();
                         }
 
-                        Debug.i("Library Cache: " + fileCached + "/" + fileCount);
+                        Debug.i("Library Cache: " + fileCached + "/" + list.size());
                         FileUtils.getMD5Checksum(file);
                     }
                 }));
