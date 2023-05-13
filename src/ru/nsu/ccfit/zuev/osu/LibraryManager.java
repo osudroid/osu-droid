@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public enum LibraryManager {
     INSTANCE;
-    private static final String VERSION = "library3.5";
+    private static final String VERSION = "library4.0";
     private static final List<BeatmapInfo> library = Collections.synchronizedList(new ArrayList<>());
     private Integer fileCount = 0;
     private int currentIndex = 0;
@@ -155,6 +155,7 @@ public enum LibraryManager {
         // Here we go!
         this.fileCount = filelist.length;
 
+        Debug.i("LibraryManager: Operating in multithreaded mode");
         LibraryCacheManager manager = new LibraryCacheManager(fileCount, filelist);
         manager.start();
 
@@ -168,7 +169,6 @@ public enum LibraryManager {
             }
         }
         isCaching = true;
-
 
         saveToCache();
         ToastLogger.showText(
@@ -441,45 +441,26 @@ public enum LibraryManager {
         }
 
         public void start() {
+            int optimalChunkSize = (int) Math.ceil((double) fileCount / Runtime.getRuntime().availableProcessors());
+            List<List<File>> sub_files;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                int optimalChunkSize = (int) Math.ceil((double) fileCount / Runtime.getRuntime().availableProcessors());
                 // Split list into chunks of N elements per M sublist, N being number of files and M being number of processors
-                List<List<File>> sub_files = new ArrayList<>(files.stream()
+                sub_files = new ArrayList<>(files.stream()
                         .collect(Collectors.groupingBy(s -> files.indexOf(s) / optimalChunkSize))
                         .values());
-                sub_files.parallelStream().forEach(list -> executors.submit(() -> {
-                    for (File file : list) {
-                        GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / fileCount);
-                        ToastLogger.setPercentage(fileCached * 100f / fileCount);
+                sub_files.parallelStream().forEach(this::submitToExecutor);
+            } else {
+                // Android versions below N don't support streams, so we have to do it the old-fashioned way
+                sub_files = new ArrayList<>();
+                for (int i = 0; i < files.size(); i += optimalChunkSize) {
+                    sub_files.add(files.subList(i, Math.min(i + optimalChunkSize, files.size())));
+                }
 
-                        synchronized (this) {
-                            fileCached++;
-                        }
-
-                        if (!file.isDirectory()) {
-                            continue;
-                        }
-
-                        GlobalManager.getInstance().setInfo("Loading " + file.getName() + "...");
-                        final BeatmapInfo info = new BeatmapInfo();
-                        info.setPath(file.getPath());
-                        scanFolder(info);
-                        if (info.getCount() < 1) {
-                            continue;
-                        }
-
-                        fillEmptyFields(info);
-
-                        synchronized (library) {
-                            library.add(info);
-                        }
-
-                        synchronized (this) {
-                            totalMaps += info.getCount();
-                        }
-                    }
-                }));
+                for (List<File> files : sub_files) {
+                    submitToExecutor(files);
+                }
             }
+
             executors.shutdown();
             try {
                 if (executors.awaitTermination(10, TimeUnit.MINUTES)) {
@@ -495,6 +476,41 @@ public enum LibraryManager {
             } catch (InterruptedException e) {
                 Debug.e(e);
             }
+        }
+
+        private void submitToExecutor(List<File> files) {
+            executors.submit(() -> {
+                for (File file : files) {
+                    GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / fileCount);
+                    ToastLogger.setPercentage(fileCached * 100f / fileCount);
+
+                    synchronized (this) {
+                        fileCached++;
+                    }
+
+                    if (!file.isDirectory()) {
+                        continue;
+                    }
+
+                    GlobalManager.getInstance().setInfo("Loading " + file.getName() + "...");
+                    final BeatmapInfo info = new BeatmapInfo();
+                    info.setPath(file.getPath());
+                    scanFolder(info);
+                    if (info.getCount() < 1) {
+                        continue;
+                    }
+
+                    fillEmptyFields(info);
+
+                    synchronized (library) {
+                        library.add(info);
+                    }
+
+                    synchronized (this) {
+                        totalMaps += info.getCount();
+                    }
+                }
+            });
         }
 
         public synchronized int getTotalMaps() {
