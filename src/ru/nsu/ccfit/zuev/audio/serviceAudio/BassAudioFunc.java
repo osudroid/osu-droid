@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 
 import ru.nsu.ccfit.zuev.audio.BassAudioProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
+import ru.nsu.ccfit.zuev.osu.Config;
 
 public class BassAudioFunc {
 
@@ -67,7 +68,13 @@ public class BassAudioFunc {
 
     public boolean resume() {
         setEndSync();
-        return BASS.BASS_ChannelPlay(channel, false);
+
+        if (BASS.BASS_ChannelPlay(channel, false))
+        {
+            setVolume(Config.getBgmVolume());
+            return true;
+        }
+        return false;
     }
 
     public boolean preLoad(String filePath, PlayMode mode) {
@@ -155,7 +162,11 @@ public class BassAudioFunc {
                 },0);
             }*/
             setEndSync();
-            return BASS.BASS_ChannelPlay(channel, true);
+            if (BASS.BASS_ChannelPlay(channel, true))
+            {
+                setVolume(Config.getBgmVolume());
+                return true;
+            }
         }
         return false;
     }

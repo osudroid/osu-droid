@@ -78,6 +78,7 @@ public class Slider extends GameObject {
 
     private boolean
             mIsOver,
+            mIsAnimating,
             mWasInRadius;
 
     public Slider() {
@@ -134,6 +135,7 @@ public class Slider extends GameObject {
         }
 
         mIsOver = false;
+        mIsAnimating = false;
         mWasInRadius = false;
 
         maxTime = (float) (spanDuration / 1000);
@@ -562,17 +564,25 @@ public class Slider extends GameObject {
 
         if (Config.isComplexAnimations() && mWasInRadius)
         {
+            mIsAnimating = true;
+
             followCircle.clearEntityModifiers();
-            followCircle.registerEntityModifier(new ParallelEntityModifier(
-                    new ScaleModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), followCircle.getScaleX() * 0.8f, EaseQuadOut.getInstance()),
-                    new AlphaModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener()
+            followCircle.registerEntityModifier(new ParallelEntityModifier(new ModifierListener()
+            {
+                public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
+                {
+                    mIsAnimating = false;
+                }
+            },
+                new ScaleModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), followCircle.getScaleX() * 0.8f, EaseQuadOut.getInstance()),
+                new AlphaModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener()
+                {
+                    @Override
+                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
                     {
-                        @Override
-                        public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
-                        {
-                            SyncTaskManager.getInstance().run(pItem::detachSelf);
-                        }
-                    }, EaseQuadIn.getInstance())
+                        SyncTaskManager.getInstance().run(pItem::detachSelf);
+                    }
+                }, EaseQuadIn.getInstance())
             ));
         }
 
@@ -740,6 +750,10 @@ public class Slider extends GameObject {
 
             followCircle = SpritePool.getInstance().getSprite("sliderfollowcircle");
             followCircle.setAlpha(0);
+            if (!Config.isComplexAnimations())
+            {
+                followCircle.setScale(scale);
+            }
 
             scene.attachChild(ball);
             scene.attachChild(followCircle);
@@ -765,7 +779,16 @@ public class Slider extends GameObject {
         listener.onTrackingSliders(inRadius);
         tickTime += dt;
 
-        float fcScale = scale * 1.1f;
+        /*
+        if (!mIsAnimating)
+        {
+            float newScale = scale * (1.1f - 0.1f * tickTime * GameHelper.getTickRate() / timing.getBeatLength());
+
+            if (newScale <= scale * 1.1f && newScale >= scale * -1.1f)
+            {
+                followCircle.setScale(newScale);
+            }
+        }*/
 
         if (Config.isComplexAnimations())
         {
@@ -774,34 +797,47 @@ public class Slider extends GameObject {
             if (inRadius && !mWasInRadius)
             {
                 mWasInRadius = true;
+                mIsAnimating = true;
 
                 // If alpha doesn't equal 0 means that it has been into an animation before
-                float initialScale = followCircle.getAlpha() == 0 ? fcScale * 0.5f : followCircle.getScaleX();
+                float initialScale = followCircle.getAlpha() == 0 ? scale * 0.5f : followCircle.getScaleX();
 
                 followCircle.clearEntityModifiers();
-                followCircle.registerEntityModifier(new ParallelEntityModifier(
-                        new ScaleModifier(Math.min(remainTime, 0.18f * GameHelper.getTimeMultiplier()), initialScale, fcScale, EaseQuadOut.getInstance()),
-                        new AlphaModifier(Math.min(remainTime, 0.06f * GameHelper.getTimeMultiplier()), followCircle.getAlpha(), 1f)
+                followCircle.registerEntityModifier(new ParallelEntityModifier(new ModifierListener()
+                {
+                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
+                    {
+                        mIsAnimating = false;
+                    }
+                },
+                    new ScaleModifier(Math.min(remainTime, 0.18f * GameHelper.getTimeMultiplier()), initialScale, scale, EaseQuadOut.getInstance()),
+                    new AlphaModifier(Math.min(remainTime, 0.06f * GameHelper.getTimeMultiplier()), followCircle.getAlpha(), 1f)
                 ));
             }
             else if (!inRadius && mWasInRadius)
             {
                 mWasInRadius = false;
+                mIsAnimating = true;
 
                 followCircle.clearEntityModifiers();
-                followCircle.registerEntityModifier(new ParallelEntityModifier(
-                        new ScaleModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), fcScale * 2f),
-                        new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener()
+                followCircle.registerEntityModifier(new ParallelEntityModifier(new ModifierListener()
+                {
+                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
+                    {
+                        mIsAnimating = false;
+                    }
+                },
+                    new ScaleModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), scale * 2f),
+                    new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener()
+                    {
+                        public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
                         {
-                            @Override
-                            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
+                            if (mIsOver)
                             {
-                                if (mIsOver)
-                                {
-                                    SyncTaskManager.getInstance().run(pItem::detachSelf);
-                                }
+                                SyncTaskManager.getInstance().run(pItem::detachSelf);
                             }
-                        })
+                        }
+                    })
                 ));
             }
         }
@@ -809,7 +845,6 @@ public class Slider extends GameObject {
         {
             mWasInRadius = inRadius;
             followCircle.setAlpha(inRadius ? 1 : 0);
-            followCircle.setScale(fcScale);
         }
 
         // Some magic with slider ticks. If it'll crash it's not my fault ^_^"
