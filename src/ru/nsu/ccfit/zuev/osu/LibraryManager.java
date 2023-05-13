@@ -208,13 +208,16 @@ public enum LibraryManager {
         }
     }
 
-    public synchronized void deleteMap(final BeatmapInfo info) {
+    public void deleteMap(final BeatmapInfo info) {
         final File dir = new File(info.getPath());
         deleteDir(dir);
-        library.remove(info);
+
+        synchronized (library) {
+            library.remove(info);
+        }
     }
 
-    public synchronized void saveToCache() {
+    public void saveToCache() {
         if (library.isEmpty()) {
             return;
         }
@@ -224,7 +227,10 @@ public enum LibraryManager {
             lib.createNewFile();
             ostream.writeObject(VERSION);
             ostream.writeObject(fileCount);
-            ostream.writeObject(library);
+
+            synchronized (library) {
+                ostream.writeObject(library);
+            }
         } catch (final IOException e) {
             ToastLogger.showText(
                     StringTable.format(R.string.message_error, e.getMessage()),
@@ -245,21 +251,23 @@ public enum LibraryManager {
         currentIndex = 0;
     }
 
-    public synchronized void addBeatmap(final File file, LinkedList<String> cachedFiles) {
+    public void addBeatmap(final File file, LinkedList<String> cachedFiles) {
         if (!file.isDirectory()) {
             return;
         }
         GlobalManager.getInstance().setInfo("Loading " + file.getName() + " ...");
         final BeatmapInfo info = new BeatmapInfo();
         info.setPath(file.getPath());
-        for (final BeatmapInfo i : library) {
-            if (i.getPath().substring(i.getPath().lastIndexOf('/'))
-                    .equals(info.getPath().substring(info.getPath().lastIndexOf('/')))) {
-                //Log.i("ed-d", "found " + i.getPath());
-                if (cachedFiles != null) {
-                    cachedFiles.add(i.getPath());
+        synchronized (library) {
+            for (final BeatmapInfo i : library) {
+                if (i.getPath().substring(i.getPath().lastIndexOf('/'))
+                        .equals(info.getPath().substring(info.getPath().lastIndexOf('/')))) {
+                    //Log.i("ed-d", "found " + i.getPath());
+                    if (cachedFiles != null) {
+                        cachedFiles.add(i.getPath());
+                    }
+                    return;
                 }
-                return;
             }
         }
         //Log.i("ed-d", "not found " + info.getPath());
@@ -274,7 +282,9 @@ public enum LibraryManager {
 
         fillEmptyFields(info);
 
-        library.add(info);
+        synchronized (library) {
+            library.add(info);
+        }
     }
 
     private static void fillEmptyFields(BeatmapInfo info) {
@@ -332,16 +342,22 @@ public enum LibraryManager {
         Collections.sort(info.getTracks(), (object1, object2) -> Float.compare(object1.getDifficulty(), object2.getDifficulty()));
     }
 
-    public synchronized List<BeatmapInfo> getLibrary() {
-        return library;
+    public List<BeatmapInfo> getLibrary() {
+        synchronized (library) {
+            return library;
+        }
     }
 
-    public synchronized void shuffleLibrary() {
-        Collections.shuffle(library);
+    public void shuffleLibrary() {
+        synchronized (library) {
+            Collections.shuffle(library);
+        }
     }
 
-    public synchronized int getSizeOfBeatmaps() {
-        return library.size();
+    public int getSizeOfBeatmaps() {
+        synchronized (library) {
+            return library.size();
+        }
     }
 
     public BeatmapInfo getBeatmap() {
@@ -356,35 +372,41 @@ public enum LibraryManager {
         return getBeatmapByIndex(--currentIndex);
     }
 
-    public synchronized BeatmapInfo getBeatmapByIndex(int index) {
-        Debug.i("Music Changing Info: Require index :" + index + "/" + library.size());
-        if (library.size() == 0) return null;
-        if (index < 0 || index >= library.size()) {
-            shuffleLibrary();
-            currentIndex = 0;
-            return library.get(0);
-        } else {
-            currentIndex = index;
-            return library.get(index);
+    public BeatmapInfo getBeatmapByIndex(int index) {
+        synchronized (library) {
+            Debug.i("Music Changing Info: Require index :" + index + "/" + library.size());
+            if (library.size() == 0) return null;
+            if (index < 0 || index >= library.size()) {
+                shuffleLibrary();
+                currentIndex = 0;
+                return library.get(0);
+            } else {
+                currentIndex = index;
+                return library.get(index);
+            }
         }
     }
 
-    public synchronized int findBeatmap(BeatmapInfo info) {
-        if (library.size() > 0) {
-            for (int i = 0; i < library.size(); i++) {
-                if (library.get(i).equals(info)) {
-                    return currentIndex = i;
+    public int findBeatmap(BeatmapInfo info) {
+        synchronized (library) {
+            if (library.size() > 0) {
+                for (int i = 0; i < library.size(); i++) {
+                    if (library.get(i).equals(info)) {
+                        return currentIndex = i;
+                    }
                 }
             }
         }
         return currentIndex = 0;
     }
 
-    public synchronized int findBeatmapById(int mapSetId) {
-        if (library.size() > 0) {
-            for (int i = 0; i < library.size(); i++) {
-                if (library.get(i).getTrack(0).getBeatmapSetID() == mapSetId) {
-                    return currentIndex = i;
+    public int findBeatmapById(int mapSetId) {
+        synchronized (library) {
+            if (library.size() > 0) {
+                for (int i = 0; i < library.size(); i++) {
+                    if (library.get(i).getTrack(0).getBeatmapSetID() == mapSetId) {
+                        return currentIndex = i;
+                    }
                 }
             }
         }
@@ -399,16 +421,18 @@ public enum LibraryManager {
         this.currentIndex = index;
     }
 
-    public synchronized TrackInfo findTrackByFileNameAndMD5(String fileName, String md5) {
-        if (library.size() > 0) {
-            for (BeatmapInfo info : library) {
-                for (int j = 0; j < info.getCount(); j++) {
-                    TrackInfo track = info.getTrack(j);
-                    File trackFile = new File(track.getFilename());
-                    if (fileName.equals(trackFile.getName())) {
-                        String trackMD5 = FileUtils.getMD5Checksum(trackFile);
-                        if (md5.equals(trackMD5)) {
-                            return track;
+    public TrackInfo findTrackByFileNameAndMD5(String fileName, String md5) {
+        synchronized (library) {
+            if (library.size() > 0) {
+                for (BeatmapInfo info : library) {
+                    for (int j = 0; j < info.getCount(); j++) {
+                        TrackInfo track = info.getTrack(j);
+                        File trackFile = new File(track.getFilename());
+                        if (fileName.equals(trackFile.getName())) {
+                            String trackMD5 = FileUtils.getMD5Checksum(trackFile);
+                            if (md5.equals(trackMD5)) {
+                                return track;
+                            }
                         }
                     }
                 }
