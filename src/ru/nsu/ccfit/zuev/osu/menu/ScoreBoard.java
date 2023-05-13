@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.content.Context;
 import android.database.Cursor;
+import com.reco1l.framework.lang.execution.Async;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -43,7 +44,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     private boolean isScroll = false;
 
     private AsyncTask onlineTask;
-    private AsyncTask avatarTask;
+    private Async avatarTask;
     private final Context context;
     private final SurfaceScrollDetector mScrollDetector;
 
@@ -489,47 +490,50 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     }
 
     public void loadAvatar() {
-        this.avatarTask = new AsyncTask() {
-            private final List<TextureRegion> avatarTextureRegions = new ArrayList<>();
+        avatarTask = Async.run(() -> {
+            try
+            {
+                synchronized (avatars)
+                {
+                    int i = 0;
+                    int size = avatars.size();
 
-            @Override
-            public void run() {
-                try {
-                    synchronized (avatars) {
-                        for (Avatar avatar : avatars) {
-                            if (isCanceled) {
-                                break;
-                            }
+                    while (i < size)
+                    {
+                        if (isCanceled)
+                        {
+                            break;
+                        }
+                        var avatar = avatars.get(i);
 
-                            String avaName;
-                            if (OnlineManager.getInstance().loadAvatarToTextureManager(avatar.getAvaUrl(), avaName = "ava@" + avatar.getUserName())) {
-                                avatarTextureRegions.add(ResourceManager.getInstance().getTextureIfLoaded(avaName));
-                            } else {
-                                avatarTextureRegions.add(ResourceManager.getInstance().getTexture("emptyavatar"));
+                        var avaName = "ava@" + avatar.getUserName();
+                        var texture = ResourceManager.getInstance().getTexture("emptyavatar");
+
+                        if (OnlineManager.getInstance().loadAvatarToTextureManager(avatar.getAvaUrl(), avaName))
+                        {
+                            texture = Objects.requireNonNullElse(ResourceManager.getInstance().getTextureIfLoaded(avaName), texture);
+                        }
+
+                        if (showOnlineScores)
+                        {
+                            synchronized (sprites)
+                            {
+                                var sprite = sprites.get(i);
+                                var child = new Sprite(55, 12, Utils.toRes(90), Utils.toRes(90), texture);
+
+                                SyncTaskManager.getInstance().run(() -> sprite.attachChild(child));
                             }
                         }
+                        i++;
                     }
-                } catch (Exception e) {
-                    isCanceled = false;
                 }
             }
-
-            @Override
-            public void onComplete() {
-                try {
-                    if (showOnlineScores) {
-                        for (int i = 0; i < avatarTextureRegions.size(); i++) {
-                            synchronized (sprites) {
-                                sprites.get(i).attachChild(new Sprite(55, 12, Utils.toRes(90), Utils.toRes(90), avatarTextureRegions.get(i)));
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    Debug.e(e.getMessage());
-                }
+            catch (Exception e)
+            {
+                isCanceled = false;
+                Debug.e(e.getMessage());
             }
-        };
-        this.avatarTask.execute();
+        });
     }
 
     public void cancelLoadOnlineScores() {
@@ -541,7 +545,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     public void cancelLoadAvatar() {
         if (this.avatarTask != null) {
             isCanceled = true;
-            this.avatarTask.cancel(true);
+            avatarTask.getExecutor().shutdownNow();
         }
     }
 
