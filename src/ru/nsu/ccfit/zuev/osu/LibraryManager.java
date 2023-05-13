@@ -481,7 +481,7 @@ public enum LibraryManager {
 
             executors.shutdown();
             try {
-                if (executors.awaitTermination(10, TimeUnit.MINUTES)) {
+                if (executors.awaitTermination(1, TimeUnit.HOURS)) {
                     Debug.i("Library Cache: " + totalMaps + " maps loaded");
                     isCaching = false;
 
