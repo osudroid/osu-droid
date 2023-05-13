@@ -511,7 +511,9 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
 
                         if (OnlineManager.getInstance().loadAvatarToTextureManager(avatar.getAvaUrl(), avaName))
                         {
-                            texture = Objects.requireNonNullElse(ResourceManager.getInstance().getTextureIfLoaded(avaName), texture);
+                            var tex = ResourceManager.getInstance().getTextureIfLoaded(avaName);
+
+                            texture = tex != null ? tex : texture;
                         }
 
                         if (showOnlineScores)
