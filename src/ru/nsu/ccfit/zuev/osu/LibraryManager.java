@@ -477,9 +477,6 @@ public enum LibraryManager {
                         synchronized (this) {
                             totalMaps += info.getCount();
                         }
-
-                        Debug.i("Library Cache: " + fileCached + "/" + list.size());
-                        FileUtils.getMD5Checksum(file);
                     }
                 }));
             }
@@ -487,11 +484,13 @@ public enum LibraryManager {
             try {
                 if (executors.awaitTermination(10, TimeUnit.MINUTES)) {
                     Debug.i("Library Cache: " + totalMaps + " maps loaded");
-                }
-                isCaching = false;
+                    isCaching = false;
 
-                synchronized (LibraryManager.class) {
-                    LibraryManager.class.notify();
+                    synchronized (LibraryManager.class) {
+                        LibraryManager.class.notify();
+                    }
+                } else {
+                    Debug.e("Library Cache: Timeout");
                 }
             } catch (InterruptedException e) {
                 Debug.e(e);
