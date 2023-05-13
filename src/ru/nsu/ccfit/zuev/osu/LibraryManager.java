@@ -389,11 +389,9 @@ public enum LibraryManager {
 
     public int findBeatmap(BeatmapInfo info) {
         synchronized (library) {
-            if (library.size() > 0) {
-                for (int i = 0; i < library.size(); i++) {
-                    if (library.get(i).equals(info)) {
-                        return currentIndex = i;
-                    }
+            for (int i = 0; i < library.size(); i++) {
+                if (library.get(i).equals(info)) {
+                    return currentIndex = i;
                 }
             }
         }
@@ -402,11 +400,9 @@ public enum LibraryManager {
 
     public int findBeatmapById(int mapSetId) {
         synchronized (library) {
-            if (library.size() > 0) {
-                for (int i = 0; i < library.size(); i++) {
-                    if (library.get(i).getTrack(0).getBeatmapSetID() == mapSetId) {
-                        return currentIndex = i;
-                    }
+            for (int i = 0; i < library.size(); i++) {
+                if (library.get(i).getTrack(0).getBeatmapSetID() == mapSetId) {
+                    return currentIndex = i;
                 }
             }
         }
@@ -423,16 +419,14 @@ public enum LibraryManager {
 
     public TrackInfo findTrackByFileNameAndMD5(String fileName, String md5) {
         synchronized (library) {
-            if (library.size() > 0) {
-                for (BeatmapInfo info : library) {
-                    for (int j = 0; j < info.getCount(); j++) {
-                        TrackInfo track = info.getTrack(j);
-                        File trackFile = new File(track.getFilename());
-                        if (fileName.equals(trackFile.getName())) {
-                            String trackMD5 = FileUtils.getMD5Checksum(trackFile);
-                            if (md5.equals(trackMD5)) {
-                                return track;
-                            }
+            for (BeatmapInfo info : library) {
+                for (int j = 0; j < info.getCount(); j++) {
+                    TrackInfo track = info.getTrack(j);
+                    File trackFile = new File(track.getFilename());
+                    if (fileName.equals(trackFile.getName())) {
+                        String trackMD5 = FileUtils.getMD5Checksum(trackFile);
+                        if (md5.equals(trackMD5)) {
+                            return track;
                         }
                     }
                 }
