@@ -408,9 +408,10 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     }
 
     public void clear() {
-        if (sprites == null) {
+        if (sprites.isEmpty()) {
             return;
         }
+
         synchronized (sprites) {
             final Sprite[] spritesArray = sprites.toArray(new Sprite[0]);
             sprites.clear();
