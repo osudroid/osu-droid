@@ -183,7 +183,7 @@
             android:summary="@string/opt_display_score_statistics_summary" android:defaultValue="true"/>
         <CheckBoxPreference android:key="displayRealTimePPCounter"
             android:title="@string/opt_display_realtime_pp_counter_title"
-            android:summary="@string/opt_display_realtime_pp_counter_summary" android:defaultValue="true"/>
+            android:summary="@string/opt_display_realtime_pp_counter_summary" android:defaultValue="false"/>
         <!--CheckBoxPreference android:key="enableExtension" android:title="@string/opt_enable_extension_title"
                             android:defaultValue="false"/>
         <Preference android:key="downloadExtension" android:title="@string/opt_download_extension_title" /-->
