@@ -78,7 +78,7 @@ public class FileUtils {
                         false);
                 Debug.e("FileUtils.extractZip: " + file.getName() + " is invalid");
                 file.renameTo(new File(file.getParentFile(), sourceFileName + ".badzip"));
-                LibraryManager.getInstance().deleteDir(folderFile);
+                LibraryManager.deleteDir(folderFile);
                 return false;
             }
 

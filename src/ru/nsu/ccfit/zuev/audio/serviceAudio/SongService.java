@@ -271,9 +271,9 @@ public class SongService extends Service {
         setVolume(Config.getBgmVolume());
 
         // Reload audio, otherwise it will be choppy or offset for whatever reason.
-        if (LibraryManager.getInstance().getBeatmap() != null) {
+        if (LibraryManager.INSTANCE.getBeatmap() != null) {
             int position = getPosition();
-            preLoad(LibraryManager.getInstance().getBeatmap().getMusic());
+            preLoad(LibraryManager.INSTANCE.getBeatmap().getMusic());
             seekTo(position);
         }
 

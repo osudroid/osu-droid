@@ -216,8 +216,8 @@ public class MainScene implements IUpdateHandler {
                             GlobalManager.getInstance().getEngine().setScene(new LoadingScreen().getScene());
                             GlobalManager.getInstance().getMainActivity().checkNewSkins();
                             GlobalManager.getInstance().getMainActivity().checkNewBeatmaps();
-                            if (!LibraryManager.getInstance().loadLibraryCache(GlobalManager.getInstance().getMainActivity(), true)) {
-                                LibraryManager.getInstance().scanLibrary(GlobalManager.getInstance().getMainActivity());
+                            if (!LibraryManager.INSTANCE.loadLibraryCache(true)) {
+                                LibraryManager.INSTANCE.scanLibrary();
                                 System.gc();
                             }
                             GlobalManager.getInstance().getSongMenu().reload();
@@ -506,7 +506,7 @@ public class MainScene implements IUpdateHandler {
             scene.attachChild(spectrum[i]);
         }
 
-        LibraryManager.getInstance().loadLibraryCache((Activity) context, false);
+        LibraryManager.INSTANCE.loadLibraryCache(false);
 
         TextureRegion starRegion = ResourceManager.getInstance().getTexture("star");
 
@@ -658,7 +658,7 @@ public class MainScene implements IUpdateHandler {
                     GlobalManager.getInstance().getSongService().stop();
                 }
                 firstTimingPoint = null;
-                LibraryManager.getInstance().getPrevBeatmap();
+                LibraryManager.INSTANCE.getPrevBeatmap();
                 loadBeatmapInfo();
                 loadTimeingPoints(true);
                 doChange = false;
@@ -713,7 +713,7 @@ public class MainScene implements IUpdateHandler {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING || GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED) {
                     GlobalManager.getInstance().getSongService().stop();
                 }
-                LibraryManager.getInstance().getNextBeatmap();
+                LibraryManager.INSTANCE.getNextBeatmap();
                 firstTimingPoint = null;
                 loadBeatmapInfo();
                 loadTimeingPoints(true);
@@ -925,14 +925,14 @@ public class MainScene implements IUpdateHandler {
     }
 
     public void loadBeatmap() {
-        LibraryManager.getInstance().shuffleLibrary();
+        LibraryManager.INSTANCE.shuffleLibrary();
         loadBeatmapInfo();
         loadTimeingPoints(true);
     }
 
     public void loadBeatmapInfo() {
-        if (LibraryManager.getInstance().getSizeOfBeatmaps() != 0) {
-            beatmapInfo = LibraryManager.getInstance().getBeatmap();
+        if (LibraryManager.INSTANCE.getSizeOfBeatmaps() != 0) {
+            beatmapInfo = LibraryManager.INSTANCE.getBeatmap();
             Log.w("MainMenuActivity", "Next song: " + beatmapInfo.getMusic() + ", Start at: " + beatmapInfo.getPreviewTime());
 
             if (musicInfoText == null) {
@@ -1133,7 +1133,7 @@ public class MainScene implements IUpdateHandler {
     }
 
     public void setBeatmap(BeatmapInfo info) {
-        int playIndex = LibraryManager.getInstance().findBeatmap(info);
+        int playIndex = LibraryManager.INSTANCE.findBeatmap(info);
         Debug.i("index " + playIndex);
         loadBeatmapInfo();
         loadTimeingPoints(false);
@@ -1147,7 +1147,7 @@ public class MainScene implements IUpdateHandler {
                 //replay
                 ScoringScene scorescene = GlobalManager.getInstance().getScoring();
                 StatisticV2 stat = replay.getStat();
-                TrackInfo track = LibraryManager.getInstance().findTrackByFileNameAndMD5(replay.getMapFile(), replay.getMd5());
+                TrackInfo track = LibraryManager.INSTANCE.findTrackByFileNameAndMD5(replay.getMapFile(), replay.getMd5());
                 if (track != null) {
                     GlobalManager.getInstance().getMainScene().setBeatmap(track.getBeatmap());
                     GlobalManager.getInstance().getSongMenu().select();

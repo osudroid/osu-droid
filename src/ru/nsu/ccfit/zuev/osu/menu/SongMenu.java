@@ -185,7 +185,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         board = new ScoreBoard(scene, backLayer, this, context);
 
         float oy = 10;
-        for (final BeatmapInfo i : LibraryManager.getInstance().getLibrary()) {
+        for (final BeatmapInfo i : LibraryManager.INSTANCE.getLibrary()) {
             final MenuItem item = new MenuItem(this, i);
             items.add(item);
             item.attachToScene(scene, backLayer);
@@ -1330,7 +1330,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             items.clear();
             switch (type) {
                 case MapSet:
-                    for (final BeatmapInfo i : LibraryManager.getInstance().getLibrary()) {
+                    for (final BeatmapInfo i : LibraryManager.INSTANCE.getLibrary()) {
                         final MenuItem item = new MenuItem(this, i);
                         items.add(item);
                         item.attachToScene(scene, backLayer);
@@ -1338,7 +1338,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     }
                     break;
                 case SingleDiff:
-                    for (final BeatmapInfo i : LibraryManager.getInstance().getLibrary()) {
+                    for (final BeatmapInfo i : LibraryManager.INSTANCE.getLibrary()) {
                         for (int j = 0; j < i.getCount(); j++) {
                             final MenuItem item = new MenuItem(this, i, j);
                             items.add(item);
