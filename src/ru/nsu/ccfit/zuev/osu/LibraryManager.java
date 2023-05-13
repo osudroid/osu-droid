@@ -1,29 +1,19 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import android.app.Activity;
-
 import android.os.Build;
+import org.anddev.andengine.util.Debug;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
-import org.anddev.andengine.util.Debug;
+import ru.nsu.ccfit.zuev.osu.helper.StringTable;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-// import java.util.HashSet;
-// import java.util.Set;
-
-import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public enum LibraryManager {
     INSTANCE;
