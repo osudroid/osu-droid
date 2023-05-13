@@ -423,6 +423,10 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 }
             });
         }
+
+        synchronized (avatars) {
+            avatars.clear();
+        }
     }
 
     public void update(final float pSecondsElapsed) {
