@@ -224,6 +224,7 @@ public class Slider extends GameObject {
         endOverlay.setAlpha(0);
         Utils.putSpriteAnchorCenter(Config.isSnakingInSliders() ? pos : endPos, endOverlay);
 
+        scene.attachChild(startOverlay, 0);
         // Repeat arrow at start
         if (repeatCount > 2) {
             startArrow.setAlpha(0);
@@ -279,11 +280,9 @@ public class Slider extends GameObject {
             endOverlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
         }
         scene.attachChild(number, 0);
-        scene.attachChild(startOverlay, 0);
         scene.attachChild(startCircle, 0);
-        scene.attachChild(endOverlay, 0);
-        scene.attachChild(endCircle, 0);
         scene.attachChild(approachCircle);
+        scene.attachChild(endOverlay, 0);
         // Repeat arrow at end
         if (repeatCount > 1) {
             endArrow.setAlpha(0);
@@ -294,8 +293,9 @@ public class Slider extends GameObject {
                         path.points.get(lastIndex), path.points.get(lastIndex - 1))));
             }
             Utils.putSpriteAnchorCenter(Config.isSnakingInSliders() ? pos : endPos, endArrow);
-            scene.attachChild(endArrow);
+            scene.attachChild(endArrow, 0);
         }
+        scene.attachChild(endCircle, 0);
 
         tickInterval = timing.getBeatLength() * speedMultiplier;
         int tickCount = (int) (maxTime * GameHelper.getTickRate() / tickInterval);
