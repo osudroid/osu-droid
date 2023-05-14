@@ -858,11 +858,9 @@ public class Slider extends GameObject {
 
                 if (Config.isComplexAnimations()) {
                     followCircle.clearEntityModifiers();
-                    followCircle.registerEntityModifier(new ParallelEntityModifier(
-                            new ScaleModifier(
-                                    Math.min((float) tickInterval / GameHelper.getTickRate(), 0.2f) * GameHelper.getTimeMultiplier(),
-                                    scale * 1.1f, scale, EaseQuadOut.getInstance()
-                            )
+                    followCircle.registerEntityModifier(new ScaleModifier(
+                            Math.min((float) tickInterval / GameHelper.getTickRate(), 0.2f) * GameHelper.getTimeMultiplier(),
+                            scale * 1.1f, scale, EaseQuadOut.getInstance()
                     ));
                 }
 
