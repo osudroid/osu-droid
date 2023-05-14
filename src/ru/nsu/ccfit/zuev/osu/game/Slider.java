@@ -866,13 +866,6 @@ public class Slider extends GameObject {
                 tickSet.set(tickIndex++, true);
             } else {
                 listener.onSliderHit(id, -1, null, ballpos, false, color, GameObjectListener.SLIDER_TICK);
-
-                if (Config.isComplexAnimations()) {
-                    followCircle.clearEntityModifiers();
-                    followCircle.registerEntityModifier(new ParallelEntityModifier(
-                            new ScaleModifier(0.2f * GameHelper.getTimeMultiplier(), scale * 1.1f, scale, EaseQuadOut.getInstance())));
-                }
-
                 tickSet.set(tickIndex++, false);
             }
             ticks.get(currentTick).setAlpha(0);
