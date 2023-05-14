@@ -107,27 +107,18 @@ public enum LibraryManager {
         ToastLogger.showText(StringTable.get(R.string.message_lib_update), true);
 
         final int fileCount = files.length;
-        int fileCached = 0;
-        LinkedList<String> cachedFiles = new LinkedList<>();
-        for (final File f : files) {
-            GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / fileCount);
-            ToastLogger.setPercentage(fileCached * 100f / fileCount);
-            fileCached++;
-            addBeatmap(f, cachedFiles);
-        }
+        LibraryCacheManager manager = new LibraryCacheManager(fileCount, files);
+        manager.addUncachedBeatmaps();
 
-        final LinkedList<BeatmapInfo> uncached = new LinkedList<>();
-
-        synchronized (library) {
-            for (final BeatmapInfo i : library) {
-                if (!cachedFiles.contains(i.getPath())) {
-                    uncached.add(i);
-                }
-            }
-            for (final BeatmapInfo i : uncached) {
-                library.remove(i);
+        while (isCaching) {
+            try {
+                this.wait();
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                Debug.e("LibraryManager: " + e.getMessage(), e);
             }
         }
+        isCaching = true;
 
         this.fileCount = files.length;
         saveToCache();
@@ -248,42 +239,6 @@ public enum LibraryManager {
                     false);
         }
         currentIndex = 0;
-    }
-
-    public void addBeatmap(final File file, LinkedList<String> cachedFiles) {
-        if (!file.isDirectory()) {
-            return;
-        }
-        GlobalManager.getInstance().setInfo("Loading " + file.getName() + " ...");
-        final BeatmapInfo info = new BeatmapInfo();
-        info.setPath(file.getPath());
-        synchronized (library) {
-            for (final BeatmapInfo i : library) {
-                if (i.getPath().substring(i.getPath().lastIndexOf('/'))
-                        .equals(info.getPath().substring(info.getPath().lastIndexOf('/')))) {
-                    //Log.i("ed-d", "found " + i.getPath());
-                    if (cachedFiles != null) {
-                        cachedFiles.add(i.getPath());
-                    }
-                    return;
-                }
-            }
-        }
-        //Log.i("ed-d", "not found " + info.getPath());
-        if (cachedFiles != null) {
-            cachedFiles.add(info.getPath());
-        }
-
-        scanFolder(info);
-        if (info.getCount() == 0) {
-            return;
-        }
-
-        fillEmptyFields(info);
-
-        synchronized (library) {
-            library.add(info);
-        }
     }
 
     private static void fillEmptyFields(BeatmapInfo info) {
@@ -434,12 +389,10 @@ public enum LibraryManager {
         return null;
     }
 
-    public void updateLibrary(boolean force)
-    {
+    public void updateLibrary(boolean force) {
         saveToCache();
 
-        if (!loadLibraryCache(force))
-        {
+        if (!loadLibraryCache(force)) {
             scanLibrary();
         }
     }
@@ -493,6 +446,84 @@ public enum LibraryManager {
             } catch (InterruptedException e) {
                 Debug.e(e);
             }
+        }
+
+        public void addUncachedBeatmaps() {
+            int optimalChunkSize = (int) Math.ceil((double) fileCount / Runtime.getRuntime().availableProcessors());
+            List<List<File>> sub_files;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                sub_files = new ArrayList<>(files.stream()
+                        .collect(Collectors.groupingBy(s -> files.indexOf(s) / optimalChunkSize))
+                        .values());
+                sub_files.parallelStream().forEach(this::submitToExecutorCheckCached);
+            } else {
+                sub_files = new ArrayList<>();
+                for (int i = 0; i < files.size(); i += optimalChunkSize) {
+                    sub_files.add(files.subList(i, Math.min(i + optimalChunkSize, files.size())));
+                }
+
+                for (List<File> files : sub_files) {
+                    submitToExecutorCheckCached(files);
+                }
+            }
+
+            executors.shutdown();
+            try {
+                if (executors.awaitTermination(1, TimeUnit.HOURS)) {
+                    Debug.i("Library Cache Updated");
+                    isCaching = false;
+
+                    synchronized (LibraryManager.class) {
+                        LibraryManager.class.notify();
+                    }
+                } else {
+                    Debug.e("Library Cache: Timeout");
+                }
+            } catch (InterruptedException e) {
+                Debug.e(e);
+            }
+        }
+
+        private void submitToExecutorCheckCached(List<File> files) {
+            executors.submit(() -> {
+                for (final File file : files) {
+                    GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / fileCount);
+                    ToastLogger.setPercentage(fileCached * 100f / fileCount);
+
+                    synchronized (this) {
+                        fileCached++;
+                    }
+
+                    if (!file.isDirectory()) {
+                        return;
+                    }
+
+                    GlobalManager.getInstance().setInfo("Loading " + file.getName() + " ...");
+                    final BeatmapInfo info = new BeatmapInfo();
+                    info.setPath(file.getPath());
+
+
+                    synchronized (library) {
+                        for (final BeatmapInfo i : library) {
+                            if (i.getPath().substring(i.getPath().lastIndexOf('/'))
+                                    .equals(info.getPath().substring(info.getPath().lastIndexOf('/')))) {
+                                return;
+                            }
+                        }
+                    }
+
+                    scanFolder(info);
+                    if (info.getCount() == 0) {
+                        return;
+                    }
+
+                    fillEmptyFields(info);
+
+                    synchronized (library) {
+                        library.add(info);
+                    }
+                }
+            });
         }
 
         private void submitToExecutor(List<File> files) {
