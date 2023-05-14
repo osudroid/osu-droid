@@ -482,6 +482,21 @@ public enum LibraryManager {
             } catch (InterruptedException e) {
                 Debug.e(e);
             }
+
+            // Remove all beatmaps that are no longer in the library
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                // For some reason forEach() doesn't work here (produces NullPointerException)
+                var testList = library.stream().filter(i -> !files.contains(new File(i.getPath()))).collect(Collectors.toList());
+                library.removeAll(testList);
+            } else {
+                for (BeatmapInfo i : library) {
+                    if (!files.contains(new File(i.getPath()))) {
+                        synchronized (library) {
+                            library.remove(i);
+                        }
+                    }
+                }
+            }
         }
 
         private void submitToExecutorCheckCached(List<File> files) {
@@ -502,12 +517,22 @@ public enum LibraryManager {
                     final BeatmapInfo info = new BeatmapInfo();
                     info.setPath(file.getPath());
 
-
                     synchronized (library) {
-                        for (final BeatmapInfo i : library) {
-                            if (i.getPath().substring(i.getPath().lastIndexOf('/'))
-                                    .equals(info.getPath().substring(info.getPath().lastIndexOf('/')))) {
-                                return;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            if (library.stream().anyMatch(i -> i.getPath().equals(info.getPath()))) {
+                                continue;
+                            }
+                        } else {
+                            boolean found = false;
+                            for (final BeatmapInfo i : library) {
+                                if (i.getPath().equals(info.getPath())) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+
+                            if (found) {
+                                continue;
                             }
                         }
                     }
