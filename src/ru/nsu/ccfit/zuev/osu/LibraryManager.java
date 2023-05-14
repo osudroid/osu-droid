@@ -78,7 +78,6 @@ public enum LibraryManager {
 
                     obj = istream.readObject();
                     if (obj instanceof Collection<?>) {
-//                        library = (ArrayList<BeatmapInfo>) obj;
                         synchronized (library) {
                             library.addAll((Collection<? extends BeatmapInfo>) obj);
                         }
