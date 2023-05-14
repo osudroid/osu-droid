@@ -513,7 +513,6 @@ public enum LibraryManager {
                         return;
                     }
 
-                    GlobalManager.getInstance().setInfo("Loading " + file.getName() + " ...");
                     final BeatmapInfo info = new BeatmapInfo();
                     info.setPath(file.getPath());
 
@@ -536,6 +535,8 @@ public enum LibraryManager {
                             }
                         }
                     }
+
+                    GlobalManager.getInstance().setInfo("Loading " + file.getName() + " ...");
 
                     scanFolder(info);
                     if (info.getCount() == 0) {
