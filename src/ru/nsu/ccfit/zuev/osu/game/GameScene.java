@@ -2272,7 +2272,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 break;
         }
 
-        if (ResourceManager.getInstance().getTexture("lighting") != null) {
+        if (Config.isHitLighting() &&
+                ResourceManager.getInstance().getTexture("lighting") != null) {
             final GameEffect light = GameObjectPool.getInstance().getEffect(
                     "lighting");
             light.init(
