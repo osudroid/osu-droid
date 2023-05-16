@@ -2557,11 +2557,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
 
-        if (Config.isComplexAnimations()
+        if (Config.isHitLighting()
                 && name.equals("sliderpoint10") == false
                 && name.equals("sliderpoint30") == false
-                && ResourceManager.getInstance().getTexture("lighting") != null
-                && Config.isHitLighting()) {
+                && ResourceManager.getInstance().getTexture("lighting") != null) {
             final GameEffect light = GameObjectPool.getInstance().getEffect("lighting");
             light.setColor(color);
             light.init(
