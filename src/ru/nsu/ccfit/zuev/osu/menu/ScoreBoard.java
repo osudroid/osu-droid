@@ -245,7 +245,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         mainScene.registerTouchArea(sprite);
 
         height = sprite.getHeight();
-        sprites.add(sprite);
+        sprites.add(0, sprite);
     }
 
     private void initFromOnline(final TrackInfo track) {
@@ -280,7 +280,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                     List<ScoreBoardItems> scoreBoardItems = new ArrayList<>();
                     long lastTotalScore = 0;
 
-                    for (int i = 0; i < scores.size(); i++) {
+                    for (int i = scores.size() - 1; i >= 0; --i) {
                         Debug.i(scores.get(i));
 
                         String[] data = scores.get(i).split("\\s+");
@@ -378,10 +378,10 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
             }
 
             percentShow = 0;
-            scoreSet.moveToFirst();
+            scoreSet.moveToLast();
             long lastTotalScore = 0;
             scoreItems = new ScoreBoardItems[scoreSet.getCount()];
-            for (int i = 0; i < scoreSet.getCount(); i++) {
+            for (int i = scoreSet.getCount() - 1; i >= 0; --i) {
                 scoreSet.moveToPosition(i);
                 final int scoreID = scoreSet.getInt(0);
 
