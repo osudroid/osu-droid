@@ -223,7 +223,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         int pos = 0;
         if (showOnlineScores) {
             pos = 90;
-            avatars.add(new Avatar(username, avaURL));
+            avatars.add(0, new Avatar(username, avaURL));
         }
 
         final Text text = new Text(Utils.toRes(pos + 160), Utils.toRes(20),
