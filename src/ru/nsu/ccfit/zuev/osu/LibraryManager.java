@@ -412,22 +412,16 @@ public enum LibraryManager {
 
         public void start() {
             int optimalChunkSize = (int) Math.ceil((double) fileCount / Runtime.getRuntime().availableProcessors());
-            List<List<File>> sub_files;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 // Split list into chunks of N elements per M sublist, N being number of files and M being number of processors
-                sub_files = new ArrayList<>(files.stream()
+                List<List<File>> sub_files = new ArrayList<>(files.stream()
                         .collect(Collectors.groupingBy(s -> files.indexOf(s) / optimalChunkSize))
                         .values());
                 sub_files.parallelStream().forEach(this::submitToExecutor);
             } else {
                 // Android versions below N don't support streams, so we have to do it the old-fashioned way
-                sub_files = new ArrayList<>();
                 for (int i = 0; i < files.size(); i += optimalChunkSize) {
-                    sub_files.add(files.subList(i, Math.min(i + optimalChunkSize, files.size())));
-                }
-
-                for (List<File> files : sub_files) {
-                    submitToExecutor(files);
+                    submitToExecutor(files.subList(i, Math.min(i + optimalChunkSize, files.size())));
                 }
             }
 
@@ -450,20 +444,14 @@ public enum LibraryManager {
 
         public void addUncachedBeatmaps() {
             int optimalChunkSize = (int) Math.ceil((double) fileCount / Runtime.getRuntime().availableProcessors());
-            List<List<File>> sub_files;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                sub_files = new ArrayList<>(files.stream()
+                List<List<File>> sub_files = new ArrayList<>(files.stream()
                         .collect(Collectors.groupingBy(s -> files.indexOf(s) / optimalChunkSize))
                         .values());
                 sub_files.parallelStream().forEach(this::submitToExecutorCheckCached);
             } else {
-                sub_files = new ArrayList<>();
                 for (int i = 0; i < files.size(); i += optimalChunkSize) {
-                    sub_files.add(files.subList(i, Math.min(i + optimalChunkSize, files.size())));
-                }
-
-                for (List<File> files : sub_files) {
-                    submitToExecutorCheckCached(files);
+                    submitToExecutorCheckCached(files.subList(i, Math.min(i + optimalChunkSize, files.size())));
                 }
             }
 
