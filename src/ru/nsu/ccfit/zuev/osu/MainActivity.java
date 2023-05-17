@@ -311,8 +311,8 @@ public class MainActivity extends BaseGameActivity implements
                 Config.loadSkins();
                 checkNewSkins();
                 checkNewBeatmaps();
-                if (!LibraryManager.getInstance().loadLibraryCache(MainActivity.this, true)) {
-                    LibraryManager.getInstance().scanLibrary(MainActivity.this);
+                if (!LibraryManager.INSTANCE.loadLibraryCache(true)) {
+                    LibraryManager.INSTANCE.scanLibrary();
                     System.gc();
                 }
                 SplashScene.INSTANCE.playWelcomeAnimation();
@@ -413,8 +413,8 @@ public class MainActivity extends BaseGameActivity implements
                         false);
 
                 FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath());
-                // LibraryManager.getInstance().sort();
-                LibraryManager.getInstance().savetoCache(MainActivity.this);
+                // LibraryManager.INSTANCE.sort();
+                LibraryManager.INSTANCE.saveToCache();
             } else if (file.getName().endsWith(".odr")) {
                 willReplay = true;
             }
@@ -464,8 +464,8 @@ public class MainActivity extends BaseGameActivity implements
                 }
                 // Config.setDELETE_OSZ(deleteOsz);
 
-                // LibraryManager.getInstance().sort();
-                LibraryManager.getInstance().savetoCache(MainActivity.this);
+                // LibraryManager.INSTANCE.sort();
+                LibraryManager.INSTANCE.saveToCache();
             }
         }
     }

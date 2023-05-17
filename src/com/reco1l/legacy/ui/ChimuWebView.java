@@ -182,7 +182,7 @@ public class ChimuWebView extends WebViewFragment implements IDownloaderObserver
                 return;
             }
 
-            LibraryManager.getInstance().updateLibrary(true);
+            LibraryManager.INSTANCE.updateLibrary(true);
         }
         catch (IOException e)
         {

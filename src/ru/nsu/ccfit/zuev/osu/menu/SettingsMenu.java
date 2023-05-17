@@ -143,7 +143,7 @@ public class SettingsMenu extends SettingsFragment {
 
         final Preference pref = findPreference("clear");
         pref.setOnPreferenceClickListener(preference -> {
-            LibraryManager.getInstance().clearCache();
+            LibraryManager.INSTANCE.clearCache();
             return true;
         });
         final Preference clearProps = findPreference("clear_properties");
