@@ -122,7 +122,11 @@ public class OnlineManager {
 
         PostBuilder post = new PostBuilder();
         post.addParam("username", username);
-        post.addParam("password", MD5Calcuator.getStringMD5(password + "taikotaiko"));
+        post.addParam(
+                "password",
+                MD5Calcuator.getStringMD5(
+                        escapeHTMLSpecialCharacters(addSlashes(password.trim())) + "taikotaiko"
+                ));
         post.addParam("version", onlineVersion);
 
         ArrayList<String> response = sendRequest(post, endpoint + "login.php");
@@ -172,7 +176,11 @@ public class OnlineManager {
                             final String deviceID) throws OnlineManagerException {
         PostBuilder post = new PostBuilder();
         post.addParam("username", username);
-        post.addParam("password", MD5Calcuator.getStringMD5(password + "taikotaiko"));
+        post.addParam(
+                "password",
+                MD5Calcuator.getStringMD5(
+                        escapeHTMLSpecialCharacters(addSlashes(password.trim())) + "taikotaiko"
+                ));
         post.addParam("email", email);
         post.addParam("deviceID", deviceID);
 
@@ -428,5 +436,21 @@ public class OnlineManager {
         public OnlineManagerException(final String message) {
             super(message);
         }
+    }
+
+    private String escapeHTMLSpecialCharacters(String str) {
+        return str
+                .replace("&", "&amp;")
+                .replace("\"", "&quot;")
+                .replace("'", "&apos;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
+    }
+
+    private String addSlashes(String str) {
+        return str
+                .replace("'", "\\'")
+                .replace("\"", "\\\"")
+                .replace("\\", "\\\\");
     }
 }
