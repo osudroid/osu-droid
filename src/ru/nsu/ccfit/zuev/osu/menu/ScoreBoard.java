@@ -568,7 +568,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 isScroll = true;
                 break;
             case TouchEvent.ACTION_MOVE:
-                if (pointerId == 1 || pointerId == pTouchEvent.getPointerID()) {
+                if (pointerId == -1 || pointerId == pTouchEvent.getPointerID()) {
                     isScroll = true;
                     if (initialY == -1) {
                         velocityY = 0;
