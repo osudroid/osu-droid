@@ -140,5 +140,4 @@ Changelog for 1.6.8
 ## Removals:
 
 - Removed split-screen support as the game restarts if used in split screen mode
-- Removed average offset counter during gameplay
 - Removed the "Super slider" graphics settings (it is now enabled by default)
