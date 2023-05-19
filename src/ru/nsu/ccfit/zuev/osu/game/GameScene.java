@@ -740,13 +740,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     Utils.toRes(520), font, "00.00 FPS");
             final ChangeableText urText = new ChangeableText(Utils.toRes(720),
                     Utils.toRes(480), font, "00.00 UR    ");
-            /* final ChangeableText accText = new ChangeableText(Utils.toRes(720),
-                    Utils.toRes(440), font, "Avg offset: 0ms     ");  */
+            final ChangeableText accText = new ChangeableText(Utils.toRes(720),
+                    Utils.toRes(440), font, "Avg offset: 0ms     ");
             fpsText.setPosition(Config.getRES_WIDTH() - fpsText.getWidth() - 5, Config.getRES_HEIGHT() - fpsText.getHeight() - 10);
-            // accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
-            urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, fpsText.getY() - urText.getHeight());
+            accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
+            urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, accText.getY() - urText.getHeight());
             fgScene.attachChild(fpsText);
-            // fgScene.attachChild(accText);
+            fgScene.attachChild(accText);
             fgScene.attachChild(urText);
 
             if (Config.isDisplayRealTimePPCounter()) {
@@ -764,14 +764,24 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             final ChangeableText fmemText = memText;
             fgScene.registerUpdateHandler(new FPSCounter() {
+                int elapsedInt = 0;
                 @Override
                 public void onUpdate(final float pSecondsElapsed) {
                     super.onUpdate(pSecondsElapsed);
+                    elapsedInt++;
                     fpsText.setText(Math.round(this.getFPS()) + " FPS");
+                    if (offsetRegs != 0 && elapsedInt > 200) {
+                        float mean = avgOffset / offsetRegs;
+                        accText.setText("Avg offset: "
+                                + (int) (mean * 1000f)
+                                + "ms");
+                        elapsedInt = 0;
+                    }
                     urText.setText(String.format(Locale.ENGLISH, "%.2f UR    ", stat.getUnstableRate()));
 
                     fpsText.setPosition(Config.getRES_WIDTH() - fpsText.getWidth() - 5, Config.getRES_HEIGHT() - fpsText.getHeight() - 10);
-                    urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, fpsText.getY() - urText.getHeight());
+                    accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
+                    urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, accText.getY() - urText.getHeight());
                     if (ppText != null) {
                         ppText.setPosition(Config.getRES_WIDTH() - ppText.getWidth() - 5, urText.getY() - ppText.getHeight());
                     }
