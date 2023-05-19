@@ -87,7 +87,7 @@ public class DifficultyCalculator {
     }
 
     /**
-     * Calculates the difficulty of a beatmap without specific parameters and returns a set of
+     * Calculates the difficulty of a beatmap with specific parameters and returns a set of
      * <code>TimedDifficultyAttributes</code> representing the difficulty at every relevant time
      * value in the beatmap.
      *
