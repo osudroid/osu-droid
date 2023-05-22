@@ -422,10 +422,11 @@ public class MainActivity extends BaseGameActivity implements
             File[] filelist = FileUtils.listFiles(mainDir, ".osz");
             final ArrayList<String> beatmaps = new ArrayList<>();
             for (final File file : filelist) {
-                ZipFile zip = new ZipFile(file);
-                if(zip.isValidZipFile()) {
-                    beatmaps.add(file.getPath());
-                }
+                try (var zip = new ZipFile(file)) {
+                    if (zip.isValidZipFile()) {
+                        beatmaps.add(file.getPath());
+                    }
+                } catch (IOException ignored) {}
             }
 
             File beatmapDir = new File(Config.getBeatmapPath());
@@ -433,10 +434,11 @@ public class MainActivity extends BaseGameActivity implements
                     && beatmapDir.isDirectory()) {
                 filelist = FileUtils.listFiles(beatmapDir, ".osz");
                 for (final File file : filelist) {
-                    ZipFile zip = new ZipFile(file);
-                    if(zip.isValidZipFile()) {
-                        beatmaps.add(file.getPath());
-                    }
+                    try (var zip = new ZipFile(file)) {
+                        if (zip.isValidZipFile()) {
+                            beatmaps.add(file.getPath());
+                        }
+                    } catch (IOException ignored) {}
                 }
             }
 
@@ -446,10 +448,11 @@ public class MainActivity extends BaseGameActivity implements
                     && downloadDir.isDirectory()) {
                 filelist = FileUtils.listFiles(downloadDir, ".osz");
                 for (final File file : filelist) {
-                    ZipFile zip = new ZipFile(file);
-                    if(zip.isValidZipFile()) {
-                        beatmaps.add(file.getPath());
-                    }
+                    try (var zip = new ZipFile(file)) {
+                        if (zip.isValidZipFile()) {
+                            beatmaps.add(file.getPath());
+                        }
+                    } catch (IOException ignored) {}
                 }
             }
 
@@ -482,10 +485,11 @@ public class MainActivity extends BaseGameActivity implements
             final File[] files = FileUtils.listFiles(skinDir, ".osk");
 
             for (final File file : files) {
-                ZipFile zip = new ZipFile(file);
-                if(zip.isValidZipFile()) {
-                    skins.add(file.getPath());
-                }
+                try (var zip = new ZipFile(file)) {
+                    if (zip.isValidZipFile()) {
+                        skins.add(file.getPath());
+                    }
+                } catch (IOException ignored) {}
             }
         }
 
@@ -498,10 +502,11 @@ public class MainActivity extends BaseGameActivity implements
             final File[] files = FileUtils.listFiles(downloadDir, ".osk");
 
             for (final File file : files) {
-                ZipFile zip = new ZipFile(file);
-                if(zip.isValidZipFile()) {
-                    skins.add(file.getPath());
-                }
+                try (var zip = new ZipFile(file)) {
+                    if (zip.isValidZipFile()) {
+                        skins.add(file.getPath());
+                    }
+                } catch (IOException ignored) {}
             }
         }
 
