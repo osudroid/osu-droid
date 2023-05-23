@@ -652,7 +652,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
 
         public Avatar(String userName, String avaUrl) {
             this.userName = userName;
-            this.avaUrl = "https://" + OnlineManager.hostname + "/user/avatar/?s=100&id=" + avaUrl;
+            this.avaUrl = avaUrl;
         }
 
         public String getUserName() {
