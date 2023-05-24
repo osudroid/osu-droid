@@ -125,7 +125,7 @@ public class OnlineManager {
         post.addParam(
                 "password",
                 MD5Calcuator.getStringMD5(
-                        escapeHTMLSpecialCharacters(addSlashes(password.trim())) + "taikotaiko"
+                        escapeHTMLSpecialCharacters(addSlashes(String.valueOf(password).trim())) + "taikotaiko"
                 ));
         post.addParam("version", onlineVersion);
 
@@ -179,7 +179,7 @@ public class OnlineManager {
         post.addParam(
                 "password",
                 MD5Calcuator.getStringMD5(
-                        escapeHTMLSpecialCharacters(addSlashes(password.trim())) + "taikotaiko"
+                        escapeHTMLSpecialCharacters(addSlashes(String.valueOf(password).trim())) + "taikotaiko"
                 ));
         post.addParam("email", email);
         post.addParam("deviceID", deviceID);
