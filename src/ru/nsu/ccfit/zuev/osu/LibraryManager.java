@@ -527,8 +527,8 @@ public enum LibraryManager {
                     GlobalManager.getInstance().setInfo("Loading " + file.getName() + " ...");
 
                     scanFolder(info);
-                    if (info.getCount() == 0) {
-                        return;
+                    if (info.getCount() < 1) {
+                        continue;
                     }
 
                     fillEmptyFields(info);
