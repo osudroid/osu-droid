@@ -474,12 +474,12 @@ public enum LibraryManager {
             // Remove all beatmaps that are no longer in the library
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 // For some reason forEach() doesn't work here (produces NullPointerException)
-                var testList = library.stream().filter(i -> !files.contains(new File(i.getPath()))).collect(Collectors.toList());
-                library.removeAll(testList);
+                var removedMaps = library.stream().filter(i -> !files.contains(new File(i.getPath()))).collect(Collectors.toList());
+                library.removeAll(removedMaps);
             } else {
-                for (BeatmapInfo i : library) {
-                    if (!files.contains(new File(i.getPath()))) {
-                        synchronized (library) {
+                synchronized (library) {
+                    for (BeatmapInfo i : library) {
+                        if (!files.contains(new File(i.getPath()))) {
                             library.remove(i);
                         }
                     }
