@@ -37,8 +37,6 @@ public class OsuSkin {
     protected final ColorSkinData sliderBodyColor = new ColorSkinData("sliderBodyColor", DEFAULT_COLOR_HEX);
     protected final ColorSkinData sliderHintColor = new ColorSkinData("sliderHintColor", DEFAULT_COLOR_HEX);
 
-    protected final SkinSliderType skinSliderType = SkinSliderType.FLAT;
-
     protected final HashMap<String, SkinLayout> layoutData = new HashMap<>();
     protected final HashMap<String, RGBColor> colorData = new HashMap<>();
 
