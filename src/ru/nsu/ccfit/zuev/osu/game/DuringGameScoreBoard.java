@@ -9,6 +9,8 @@ import org.anddev.andengine.entity.text.Text;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Locale;
 
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -124,6 +126,10 @@ public class DuringGameScoreBoard extends GameObject {
                         }
                         scoreBoardData[i - (replayIndex != -1 ? 1 : 0)] = items[i];
                     }
+                }
+                if (GlobalManager.getInstance().getSongMenu().isBoardOnline()) {
+                    // Online scores are sorted in the other way around, so we reverse the order.
+                    Collections.reverse(Arrays.asList(scoreBoardData));
                 }
                 posNow = scoreBoardData.length;
                 currentUsername = isNotMe != null ? isNotMe :
