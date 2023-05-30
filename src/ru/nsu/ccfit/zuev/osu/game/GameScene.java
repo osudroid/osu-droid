@@ -2059,7 +2059,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 gameover();
                 restartGame();
             }
-            if(GameHelper.isSuddenDeath())stat.changeHp(-1.0f);
+            if(GameHelper.isSuddenDeath()) {
+                gameover();
+            }
             if (objectId != -1) {
                 updatePPCounter(objectId);
             }
@@ -2184,7 +2186,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 ResourceManager.getInstance().getCustomSound("combobreak", 1)
                         .play();
             }
-            if(GameHelper.isSuddenDeath()) stat.changeHp(-1.0f);
+            if(GameHelper.isSuddenDeath()) {
+                gameover();
+            }
             stat.registerHit(0, true, false);
             return;
         }
