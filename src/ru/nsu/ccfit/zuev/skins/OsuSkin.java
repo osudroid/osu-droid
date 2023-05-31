@@ -37,6 +37,10 @@ public class OsuSkin {
     protected final ColorSkinData sliderBodyColor = new ColorSkinData("sliderBodyColor", DEFAULT_COLOR_HEX);
     protected final ColorSkinData sliderHintColor = new ColorSkinData("sliderHintColor", DEFAULT_COLOR_HEX);
 
+    protected final StringSkinData hitCirclePrefix = new StringSkinData("hitCirclePrefix", "default");
+    protected final StringSkinData scorePrefix = new StringSkinData("scorePrefix", "score");
+    protected final StringSkinData comboPrefix = new StringSkinData("comboPrefix", "score");
+
     protected final HashMap<String, SkinLayout> layoutData = new HashMap<>();
     protected final HashMap<String, RGBColor> colorData = new HashMap<>();
 
@@ -138,6 +142,21 @@ public class OsuSkin {
     public RGBColor getColor(String name, RGBColor fallback) {
         RGBColor color = colorData.get(name);
         return color == null ? fallback : color;
+    }
+
+    public StringSkinData getHitCirclePrefix()
+    {
+        return hitCirclePrefix;
+    }
+
+    public StringSkinData getScorePrefix()
+    {
+        return scorePrefix;
+    }
+
+    public StringSkinData getComboPrefix()
+    {
+        return comboPrefix;
     }
 
     public void reset() {

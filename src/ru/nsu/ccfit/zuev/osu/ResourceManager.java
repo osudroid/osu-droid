@@ -7,6 +7,8 @@ import android.util.Log;
 
 import com.dgsrz.bancho.security.SecurityUtils;
 
+import com.reco1l.framework.data.IniReader;
+import com.reco1l.legacy.data.SkinIniConverter;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.font.FontFactory;
@@ -36,6 +38,7 @@ import ru.nsu.ccfit.zuev.osu.helper.ScaledBitmapSource;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinJsonReader;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
+import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
 public class ResourceManager {
     private static ResourceManager mgr = new ResourceManager();
@@ -117,13 +120,32 @@ public class ResourceManager {
         }
         if (skinFiles != null) {
             JSONObject skinjson = null;
-            File skinJson = new File(folder, "skin.json");
-            if (skinJson.exists()) {
+            File jsonFile = new File(folder, "skin.json");
+            if (jsonFile.exists()) {
                 try {
-                    skinjson = new JSONObject(OsuSkin.readFull(skinJson));
+                    skinjson = new JSONObject(OsuSkin.readFull(jsonFile));
                 } catch (Exception e) {
                     e.printStackTrace();
                     skinjson = null;
+                }
+            }
+            else
+            {
+                var iniFile = new File(folder, "skin.ini");
+
+                if (iniFile.exists())
+                {
+                    GlobalManager.getInstance().setInfo("Converting skin.ini to skin.json...");
+
+                    try (var ini = new IniReader(iniFile))
+                    {
+                        skinjson = SkinIniConverter.convertToJson(ini);
+                        SkinIniConverter.saveToFile(skinjson, jsonFile);
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
                 }
             }
             if (skinjson == null) skinjson = new JSONObject();
@@ -571,6 +593,23 @@ public class ResourceManager {
                 loadHighQualityFile(file.getPath(), file);
             }
         }
+    }
+
+    public TextureRegion getTextureWithPrefix(StringSkinData string, String name)
+    {
+        var defaultTag = string.getDefaultValue() + "-" + name;
+
+        if (SkinManager.isSkinEnabled() && customTextures.containsKey(defaultTag))
+        {
+            return customTextures.get(defaultTag);
+        }
+
+        var tag = string.getCurrentValue() + "-" + name;
+        if (!textures.containsKey(tag))
+        {
+            return loadTexture(defaultTag, "gfx/" + defaultTag + ".png", false);
+        }
+        return textures.get(tag);
     }
 
     public TextureRegion getTexture(final String resname) {

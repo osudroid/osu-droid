@@ -962,13 +962,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             addPassiveObject(scorebar);
             final TextureRegion scoreDigitTex = ResourceManager.getInstance()
                     .getTexture("score-0");
-            accText = new GameScoreText(Config.getRES_WIDTH()
+            accText = new GameScoreText(OsuSkin.get().getScorePrefix(), Config.getRES_WIDTH()
                     - scoreDigitTex.getWidth() * 4.75f, 50,
                     "000.00%", 0.6f);
-            comboText = new GameScoreText(Utils.toRes(2), Config.getRES_HEIGHT()
+            comboText = new GameScoreText(OsuSkin.get().getComboPrefix(), Utils.toRes(2), Config.getRES_HEIGHT()
                     - Utils.toRes(95), "0000x", 1.5f);
             comboText.changeText(new StringBuilder("0****"));
-            scoreText = new GameScoreText(Config.getRES_WIDTH()
+            scoreText = new GameScoreText(OsuSkin.get().getScorePrefix(), Config.getRES_WIDTH()
                     - scoreDigitTex.getWidth() * 7.25f, 0, "0000000000", 0.9f);
             comboText.attachToScene(fgScene);
             accText.attachToScene(fgScene);
@@ -1576,7 +1576,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
     
             scoreText.setPosition(Config.getRES_WIDTH()
-                    - ResourceManager.getInstance().getTexture("score-0").getWidth() * (9.25f - scoreTextOffset), 0);
+                    - ResourceManager.getInstance().getTextureWithPrefix(OsuSkin.get().getScorePrefix(), "0").getWidth() * (9.25f - scoreTextOffset), 0);
             scoreText.changeText(strBuilder);
         }
 
