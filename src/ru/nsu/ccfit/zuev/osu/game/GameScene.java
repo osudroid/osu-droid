@@ -901,7 +901,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             lastObjectTime = objects.getLast().getTime();
 
         if(!Config.isHideInGameUI()) { 
-            progressBar = new SongProgressBar(this, bgScene, lastObjectTime, objects
+            progressBar = new SongProgressBar(this, fgScene, lastObjectTime, objects
                     .getFirst().getTime(), new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
             progressBar.setProgressRectColor(new RGBAColor(153f / 255f, 204f / 255f, 51f / 255f, 0.4f));
         }
@@ -909,7 +909,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (Config.getErrorMeter() == 1
                 || (Config.getErrorMeter() == 2 && replaying)) {
             hitErrorMeter = new HitErrorMeter(
-                    bgScene,
+                    fgScene,
                     new PointF(Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT() - 20),
                     overallDifficulty,
                     12,
@@ -936,22 +936,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
             skipBtn.setAlpha(0.7f);
             fgScene.attachChild(skipBtn);
-            /*if (SkinManager.getFrames("play-skip") <= 1) {
-                tex = ResourceManager.getInstance().getTexture("play-skip");
-                skipBtn = new Sprite(Config.getRES_WIDTH() - tex.getWidth(),
-                        Config.getRES_HEIGHT() - tex.getHeight(), tex);
-                fgScene.attachChild(skipBtn);
-            } else {
-                if (SkinManager.getFrames("play-skip") == 1) {
-                    final int frames = SkinManager.getFrames("play-skip");
-                    tex = ResourceManager.getInstance().getTexture(
-                            "play-skip-0");
-                    skipBtn = new AnimSprite(Config.getRES_WIDTH()
-                            - tex.getWidth(), Config.getRES_HEIGHT()
-                            - tex.getHeight(), "play-skip-", frames, frames);
-                    fgScene.attachChild(skipBtn);
-                }
-            }*/
         }
         GameHelper.setGlobalTime(0);
 
