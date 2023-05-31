@@ -597,13 +597,21 @@ public class ResourceManager {
 
     public TextureRegion getTextureWithPrefix(StringSkinData prefix, String name)
     {
-        var textureFromPrefix = getTexture(prefix.getCurrentValue() + "-" + name);
-
-        if (textureFromPrefix != null)
-        {
-            return textureFromPrefix;
+        var defaultName = prefix.getDefaultValue() + "-" + name;
+        if (SkinManager.isSkinEnabled() && customTextures.containsKey(defaultName)) {
+            return customTextures.get(defaultName);
         }
-        else return getTexture(prefix.getDefaultValue() + "-" + name);
+
+        var customName = prefix.getCurrentValue() + "-" + name;
+
+        if (!textures.containsKey(customName)) {
+            loadTexture(customName, Config.getSkinPath() + customName.replace("\\", "") + ".png", true);
+        }
+
+        if (textures.get(customName) != null) {
+            return textures.get(customName);
+        }
+        return textures.get(defaultName);
     }
 
     public TextureRegion getTexture(final String resname) {
@@ -613,11 +621,6 @@ public class ResourceManager {
         if (!textures.containsKey(resname)) {
             Debug.i("Loading texture: " + resname);
 
-            var texture = loadTexture(resname, Config.getSkinPath() + resname.replace("\\", "") + ".png", true);
-            if (texture != null)
-            {
-                return texture;
-            }
             return loadTexture(resname, "gfx/" + resname + ".png", false);
         }
         return textures.get(resname);
