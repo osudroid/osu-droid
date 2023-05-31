@@ -45,7 +45,7 @@ fun convertToJson(ini: IniReader) = JsonContent().apply {
         }
     }
 
-    putGroup("Colors").apply {
+    putGroup("Color").apply {
 
         convertToHex(ini["Colours", "SongSelectActiveText"])?.also {
 
