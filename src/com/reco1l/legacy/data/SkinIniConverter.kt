@@ -43,8 +43,8 @@ fun convertToJson(ini: IniReader) = JsonContent().apply {
 
     putGroup("Color").apply {
 
-        put("MenuItemSelectedTextColor", ini["Colours", "SongSelectActiveText"] ?: "#FFFFFF")
-        put("MenuItemDefaultTextColor", ini["Colours", "SongSelectInactiveText"] ?: "#000000")
+        put("MenuItemSelectedTextColor", convertToHex(ini["Colours", "SongSelectActiveText"]) ?: "#FFFFFF")
+        put("MenuItemDefaultTextColor", convertToHex(ini["Colours", "SongSelectInactiveText"]) ?: "#000000")
     }
 
     putGroup("Fonts").apply {
@@ -65,11 +65,10 @@ private fun convertToHex(ints: IntArray?): String?
     }
     val hex = StringBuilder("#")
 
-    hex.append("%02X".format(ints[0]))
-    hex.append("%02X".format(ints[1]))
-    hex.append("%02X".format(ints[2]))
-
-    return hex.toString()
+    append('#')
+    append("%02X".format(ints[0]))
+    append("%02X".format(ints[1]))
+    append("%02X".format(ints[2]))
 }
 
 private fun parseComboColors(ini: IniReader) = mutableListOf<String>().also {
