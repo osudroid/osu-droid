@@ -603,10 +603,7 @@ public class ResourceManager {
         {
             return textureFromPrefix;
         }
-        else
-        {
-            return getTexture(prefix.getDefaultValue() + "-" + name);
-        }
+        else return getTexture(prefix.getDefaultValue() + "-" + name);
     }
 
     public TextureRegion getTexture(final String resname) {
@@ -616,7 +613,7 @@ public class ResourceManager {
         if (!textures.containsKey(resname)) {
             Debug.i("Loading texture: " + resname);
 
-            var texture = loadTexture(resname, Config.getSkinPath() + resname + ".png", true);
+            var texture = loadTexture(resname, Config.getSkinPath() + resname.replace("\\", "") + ".png", true);
             if (texture != null)
             {
                 return texture;
