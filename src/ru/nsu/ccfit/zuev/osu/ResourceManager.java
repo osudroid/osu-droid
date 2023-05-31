@@ -595,16 +595,16 @@ public class ResourceManager {
         }
     }
 
-    public TextureRegion getTextureWithPrefix(StringSkinData string, String name)
+    public TextureRegion getTextureWithPrefix(StringSkinData prefix, String name)
     {
-        var defaultTag = string.getDefaultValue() + "-" + name;
+        var defaultTag = prefix.getDefaultValue() + "-" + name;
 
         if (SkinManager.isSkinEnabled() && customTextures.containsKey(defaultTag))
         {
             return customTextures.get(defaultTag);
         }
 
-        var tag = string.getCurrentValue() + "-" + name;
+        var tag = prefix.getCurrentValue() + "-" + name;
         if (!textures.containsKey(tag))
         {
             return loadTexture(defaultTag, "gfx/" + defaultTag + ".png", false);
