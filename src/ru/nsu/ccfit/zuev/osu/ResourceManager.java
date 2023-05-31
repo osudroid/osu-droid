@@ -9,6 +9,7 @@ import com.dgsrz.bancho.security.SecurityUtils;
 
 import com.reco1l.framework.data.IniReader;
 import com.reco1l.legacy.data.SkinIniConverter;
+import com.reco1l.legacy.engine.BlankTextureRegion;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.font.FontFactory;
@@ -457,8 +458,8 @@ public class ResourceManager {
         TextureRegion region;
         if (external) {
             final File texFile = new File(file);
-            if (texFile.exists() == false) {
-                return textures.values().iterator().next();
+            if (!texFile.exists()) {
+                return new BlankTextureRegion();
             }
             final QualityFileBitmapSource source = new QualityFileBitmapSource(
                     texFile);
@@ -473,7 +474,7 @@ public class ResourceManager {
             }
 
             int errorCount = 0;
-            while (source.preload() == false && errorCount < 3) {
+            while (!source.preload() && errorCount < 3) {
                 errorCount++;
             }
             if (errorCount >= 3) {
@@ -504,7 +505,7 @@ public class ResourceManager {
                 th *= 2;
             }
             int errorCount = 0;
-            while (source.preload() == false && errorCount < 3) {
+            while (!source.preload() && errorCount < 3) {
                 errorCount++;
             }
             if (errorCount >= 3) {
