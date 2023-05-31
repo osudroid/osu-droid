@@ -110,11 +110,11 @@ class IniReader(file: File) : Closeable
 
                 if (map[sectionName] == null)
                 {
-                    currentSection = HashMap()
-                    map[sectionName] = currentSection!!
-
-                    Log.i("IniReader", line)
+                    map[sectionName] = HashMap()
                 }
+                currentSection = map[sectionName]
+
+                Log.i("IniReader", line)
                 return@let
             }
 
