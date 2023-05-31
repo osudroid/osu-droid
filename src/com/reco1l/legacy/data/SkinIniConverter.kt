@@ -57,13 +57,11 @@ fun convertToJson(ini: IniReader) = JsonContent().apply {
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-private fun convertToHex(ints: IntArray?): String?
+private fun convertToHex(ints: IntArray?) = if (ints == null || ints.isEmpty())
 {
-    if (ints == null || ints.isEmpty())
-    {
-        return null
-    }
-    val hex = StringBuilder("#")
+    null
+}
+else buildString {
 
     append('#')
     append("%02X".format(ints[0]))
