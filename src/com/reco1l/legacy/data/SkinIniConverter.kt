@@ -38,24 +38,13 @@ fun convertToJson(ini: IniReader) = JsonContent().apply {
             put("sliderBodyColor", it)
             put("sliderFollowComboColor", false)
         }
-
-        convertToHex(ini["Colours", "SliderBorder"])?.also {
-
-            put("sliderBorderColor", it)
-        }
+        put("sliderBorderColor", convertToHex(ini["Colours", "SliderBorder"]) ?: "#FFFFFF")
     }
 
     putGroup("Color").apply {
 
-        convertToHex(ini["Colours", "SongSelectActiveText"])?.also {
-
-            put("MenuItemSelectedTextColor", it)
-        }
-
-        convertToHex(ini["Colours", "SongSelectInactiveText"])?.also {
-
-            put("MenuItemDefaultTextColor", it)
-        }
+        put("MenuItemSelectedTextColor", ini["Colours", "SongSelectActiveText"] ?: "#FFFFFF")
+        put("MenuItemDefaultTextColor", ini["Colours", "SongSelectInactiveText"] ?: "#000000")
     }
 
     putGroup("Fonts").apply {
