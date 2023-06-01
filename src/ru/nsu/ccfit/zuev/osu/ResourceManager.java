@@ -155,6 +155,8 @@ public class ResourceManager {
                     SkinConverter.ensureTexture(new File(folder, "selection-mods.png"));
                     SkinConverter.ensureTexture(new File(folder, "selection-random.png"));
                     SkinConverter.ensureTexture(new File(folder, "selection-options.png"));
+
+                    skinFiles = FileUtils.listFiles(skinFolder);
                 }
             }
             if (skinjson == null) skinjson = new JSONObject();
