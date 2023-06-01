@@ -45,6 +45,7 @@ fun convertToJson(ini: IniReader) = JsonContent().apply {
 
         put("MenuItemSelectedTextColor", convertToHex(ini["Colours", "SongSelectActiveText"]) ?: "#FFFFFF")
         put("MenuItemDefaultTextColor", convertToHex(ini["Colours", "SongSelectInactiveText"]) ?: "#000000")
+        put("MenuItemDefaultColor", "#EB4999") // Matching osu! stable inactive color.
     }
 
     putGroup("Fonts").apply {
