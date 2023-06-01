@@ -21,7 +21,7 @@ public class CircleNumber extends Entity
         final String snum = String.valueOf(Math.abs(number));
 
         for (int i = 0; i < snum.length(); i++) {
-            var tex = ResourceManager.getInstance().getTexture("default-" + snum.charAt(i));
+            var tex = ResourceManager.getInstance().getTextureWithPrefix(OsuSkin.get().getHitCirclePrefix(), String.valueOf(snum.charAt(i)));
 
             attachChild(new Sprite(0, 0, tex));
         }

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class GameScoreTextShadow extends GameObject {
     private final AnimSprite[] letters;
@@ -19,16 +20,20 @@ public class GameScoreTextShadow extends GameObject {
                                final float scale) {
         letters = new AnimSprite[mask.length()];
         float width = 0;
+
+        // Since GameScoreTextShadow is only used for the combo thing im inferring the prefix to the combo one.
+        var prefix = OsuSkin.get().getComboPrefix();
+
         for (int i = 0; i < mask.length(); i++) {
             if (mask.charAt(i) == '0') {
-                letters[i] = new AnimSprite(x + width, y, "score-", 10, 0);
+                letters[i] = new AnimSprite(x + width, y, prefix, null, 10, 0);
                 digits.add(letters[i]);
             } else if (mask.charAt(i) == '.') {
-                letters[i] = new AnimSprite(x + width, y, 0, "score-comma");
+                letters[i] = new AnimSprite(x + width, y, prefix, "comma", 1, 0);
             } else if (mask.charAt(i) == '%') {
-                letters[i] = new AnimSprite(x + width, y, 0, "score-percent");
+                letters[i] = new AnimSprite(x + width, y, prefix, "percent", 1, 0);
             } else {
-                letters[i] = new AnimSprite(x + width, y, 0, "score-x");
+                letters[i] = new AnimSprite(x + width, y, prefix, "x", 1, 0);
                 hasX = true;
             }
             letters[i].setSize(letters[i].getWidth() * scale,

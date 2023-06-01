@@ -16,6 +16,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class BreakAnimator extends GameObject {
     private final Scene scene;
@@ -97,7 +98,7 @@ public class BreakAnimator extends GameObject {
         }
         if (showMark) {
             final TextureRegion zeroRect = ResourceManager.getInstance()
-                    .getTexture("score-0");
+                    .getTextureWithPrefix(OsuSkin.get().getScorePrefix(), "0");
             mark = new Sprite(Config.getRES_WIDTH() - zeroRect.getWidth() * 11,
                     Utils.toRes(5), ResourceManager.getInstance().getTexture(
                     "ranking-" + stat.getMark() + "-small"));
