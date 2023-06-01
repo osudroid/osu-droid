@@ -15,7 +15,7 @@ import java.io.IOException
 
 fun ensureOptionalTexture(file: File)
 {
-    if (!file.exists()) return
+    if (file.exists()) return
 
     val bitmap = Bitmap.createBitmap(1, 1, Config.ARGB_8888)
     bitmap.setHasAlpha(true)
