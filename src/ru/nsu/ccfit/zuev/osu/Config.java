@@ -144,8 +144,8 @@ public class Config {
                 .putInt("cursorSize", 50)
                 .commit();
             Config.loadConfig(context);
+            return;
         }
-        
 
         //advanced
         defaultCorePath = Environment.getExternalStorageDirectory() + "/osu!droid/";
