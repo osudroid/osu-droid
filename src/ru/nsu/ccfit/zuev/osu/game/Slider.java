@@ -65,6 +65,7 @@ public class Slider extends GameObject {
 
     private boolean kiai;
     private RGBColor color = new RGBColor();
+    private final RGBColor circleColor = new RGBColor();
 
     //for replay
     private int firstHitAccuracy;
@@ -157,6 +158,7 @@ public class Slider extends GameObject {
         if (!OsuSkin.get().isSliderFollowComboColor()) {
             color = new RGBColor(OsuSkin.get().getSliderBodyColor());
         }
+        circleColor.set(r, g, b);
 
         if (soundId.length < repeats + 1) {
             soundId = new int[repeats + 1];
@@ -635,23 +637,16 @@ public class Slider extends GameObject {
         }
 
         if (GameHelper.isKiai()) {
-            final float kiaiModifier = Math
-                    .max(0,
-                            1 - GameHelper.getGlobalTime()
-                                    / GameHelper.getKiaiTickLength()) * 0.50f;
-
-            final float r = Math.min(1, color.r() + (1 - color.r())
-                    * kiaiModifier);
-            final float g = Math.min(1, color.g() + (1 - color.g())
-                    * kiaiModifier);
-            final float b = Math.min(1, color.b() + (1 - color.b())
-                    * kiaiModifier);
+            final float kiaiModifier = Math.max(0, 1 - GameHelper.getGlobalTime() / GameHelper.getKiaiTickLength()) * 0.50f;
+            final float r = Math.min(1, circleColor.r() + (1 - circleColor.r()) * kiaiModifier);
+            final float g = Math.min(1, circleColor.g() + (1 - circleColor.g()) * kiaiModifier);
+            final float b = Math.min(1, circleColor.b() + (1 - circleColor.b()) * kiaiModifier);
             kiai = true;
             startCircle.setColor(r, g, b);
             endCircle.setColor(r, g, b);
         } else if (kiai) {
-            startCircle.setColor(color.r(), color.g(), color.b());
-            endCircle.setColor(color.r(), color.g(), color.b());
+            startCircle.setColor(circleColor.r(), circleColor.g(), circleColor.b());
+            endCircle.setColor(circleColor.r(), circleColor.g(), circleColor.b());
             kiai = false;
         }
 
