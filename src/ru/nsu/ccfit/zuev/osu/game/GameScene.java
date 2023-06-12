@@ -1420,7 +1420,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (mainCursorId < 0){
                     int i = 0;
                     for (final Cursor c : cursors) {
-                        if (c.mousePressed && isFirstObjectsNear(c.mousePos)) {
+                        if (c.mousePressed) {
                             mainCursorId = i;
                             flashlightSprite.onMouseMove(c.mousePos.x, c.mousePos.y);
                             break;
@@ -2158,6 +2158,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public void onSliderHit(int id, final int score, final PointF start,
                             final PointF end, final boolean endCombo, RGBColor color, int type) {
+        if (GameHelper.isFlashLight() && !GameHelper.isAuto() && !GameHelper.isAutopilotMod()) {
+            int nearestCursorId = getNearestCursorId(end.x, end.y);
+            if (nearestCursorId >= 0) {
+                mainCursorId = nearestCursorId;
+                flashlightSprite.onMouseMove(
+                        cursors[mainCursorId].mousePos.x,
+                        cursors[mainCursorId].mousePos.y
+                );
+            }
+        }
+
         if (score == 0) {
             createHitEffect(start, "hit0", color);
             createHitEffect(end, "hit0", color);
@@ -2214,6 +2225,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     createBurstEffect(end, color);
             }
         }
+
         createHitEffect(end, scoreName, color);
     }
 
@@ -2720,19 +2732,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             ++i;
         }
         return id;
-    }
-
-    private boolean isFirstObjectsNear(PointF pos){
-        if (activeObjects.isEmpty()) {
-            return true;
-        }
-        if (activeObjects.peek() instanceof Spinner || activeObjects.peek() instanceof Slider) {
-            return true;
-        }
-        else if (Utils.squaredDistance(pos, activeObjects.peek().getPos()) < 180f * 180f) {
-            return true;
-        }
-        return false;
     }
 
     private void stackNotes(){
