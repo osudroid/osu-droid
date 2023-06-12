@@ -13,8 +13,8 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class DownloadingFragment extends LoadingFragment
 {
 
-    private final Downloader mDownloader;
-    private final Runnable mAwaitCall;
+    private Downloader mDownloader;
+    private Runnable mAwaitCall;
 
     private Button mButton;
     private TextView mText;
@@ -22,7 +22,7 @@ public class DownloadingFragment extends LoadingFragment
 
     //----------------------------------------------------------------------------------------------------------------//
 
-    public DownloadingFragment(Downloader downloader, Runnable await)
+    public void setDownloader(Downloader downloader, Runnable await)
     {
         mAwaitCall = await;
         mDownloader = downloader;
