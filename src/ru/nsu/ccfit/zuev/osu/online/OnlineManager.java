@@ -342,6 +342,10 @@ public class OnlineManager {
     }
 
     private Bitmap loadAvatarToBitmap(File avatarFile) {
+        if (!avatarFile.exists()) {
+            return null;
+        }
+
         try {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
