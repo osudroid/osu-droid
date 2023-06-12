@@ -45,6 +45,7 @@ fun convertToJson(ini: IniReader) = JsonContent().apply {
 
         put("MenuItemSelectedTextColor", convertToHex(ini["Colours", "SongSelectActiveText"]) ?: "#FFFFFF")
         put("MenuItemDefaultTextColor", convertToHex(ini["Colours", "SongSelectInactiveText"]) ?: "#000000")
+        put("MenuItemDefaultColor", "#EB4999") // Matching osu! stable inactive color.
     }
 
     putGroup("Fonts").apply {
@@ -52,6 +53,11 @@ fun convertToJson(ini: IniReader) = JsonContent().apply {
         put("hitCirclePrefix", ini["Fonts", "HitCirclePrefix"] ?: "default")
         put("scorePrefix", ini["Fonts", "ScorePrefix"] ?: "score")
         put("comboPrefix", ini["Fonts", "ComboPrefix"] ?: "score")
+    }
+
+    putGroup("Layout").apply {
+
+        putGroup("BackButton").put("scaleWhenHold", false)
     }
 }
 

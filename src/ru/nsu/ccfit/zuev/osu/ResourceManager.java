@@ -8,6 +8,7 @@ import android.util.Log;
 import com.dgsrz.bancho.security.SecurityUtils;
 
 import com.reco1l.framework.data.IniReader;
+import com.reco1l.legacy.data.SkinConverter;
 import com.reco1l.legacy.data.SkinIniConverter;
 import com.reco1l.legacy.engine.BlankTextureRegion;
 import org.anddev.andengine.engine.Engine;
@@ -149,6 +150,15 @@ public class ResourceManager {
                     {
                         e.printStackTrace();
                     }
+
+                    SkinConverter.ensureOptionalTexture(new File(folder, "sliderendcircle.png"));
+                    SkinConverter.ensureOptionalTexture(new File(folder, "sliderendcircleoverlay.png"));
+
+                    SkinConverter.ensureTexture(new File(folder, "selection-mods.png"));
+                    SkinConverter.ensureTexture(new File(folder, "selection-random.png"));
+                    SkinConverter.ensureTexture(new File(folder, "selection-options.png"));
+
+                    skinFiles = FileUtils.listFiles(skinFolder);
                 }
             }
             if (skinjson == null) skinjson = new JSONObject();

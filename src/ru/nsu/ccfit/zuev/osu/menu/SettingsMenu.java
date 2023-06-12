@@ -22,6 +22,7 @@ import androidx.preference.PreferenceScreen;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.SkinPathPreference;
+import com.edlplan.ui.fragment.LoadingFragment;
 import com.edlplan.ui.fragment.SettingsFragment;
 import com.edlplan.ui.EasingHelper;
 
@@ -29,6 +30,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 
+import com.reco1l.framework.lang.execution.Async;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
@@ -66,14 +68,21 @@ public class SettingsMenu extends SettingsFragment {
         skinPath.reloadSkinList();
         skinPath.setOnPreferenceChangeListener((preference, newValue) -> {
             if(GlobalManager.getInstance().getSkinNow() != newValue.toString()) {
-                // SpritePool.getInstance().purge();
-                GlobalManager.getInstance().setSkinNow(Config.getSkinPath());
-                SkinManager.getInstance().clearSkin();
-                ResourceManager.getInstance().loadSkin(newValue.toString());
-                GlobalManager.getInstance().getEngine().getTextureManager().reloadTextures();
-                mActivity.startActivity(new Intent(mActivity, MainActivity.class));
-                Snackbar.make(mActivity.findViewById(android.R.id.content),
-                    StringTable.get(R.string.message_loaded_skin), 1500).show();
+                var loading = new LoadingFragment();
+                loading.show();
+
+                Async.run(() -> {
+                    GlobalManager.getInstance().setSkinNow(Config.getSkinPath());
+                    SkinManager.getInstance().clearSkin();
+                    ResourceManager.getInstance().loadSkin(newValue.toString());
+                    GlobalManager.getInstance().getEngine().getTextureManager().reloadTextures();
+
+                    mActivity.runOnUiThread(() -> {
+                        loading.dismiss();
+                        mActivity.startActivity(new Intent(mActivity, MainActivity.class));
+                        Snackbar.make(mActivity.findViewById(android.R.id.content), StringTable.get(R.string.message_loaded_skin), 1500).show();
+                    });
+                });
             }
             return true;
         });
