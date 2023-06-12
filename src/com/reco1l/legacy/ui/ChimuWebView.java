@@ -108,7 +108,8 @@ public class ChimuWebView extends WebViewFragment implements IDownloaderObserver
 
                 Downloader downloader = new Downloader(file, url);
 
-                mFragment = new DownloadingFragment(downloader, () -> {
+                mFragment = new DownloadingFragment();
+                mFragment.setDownloader(downloader, () -> {
 
                     mFragment.getText().setVisibility(View.VISIBLE);
                     mFragment.getText().setText(R.string.chimu_connecting);
@@ -120,7 +121,6 @@ public class ChimuWebView extends WebViewFragment implements IDownloaderObserver
 
                     mFragment.getButton().setOnClickListener(v -> downloader.cancel());
                 });
-
                 mFragment.show();
             }
 
