@@ -36,3 +36,4 @@ Changelog for 1.6.8 Hotfix (June 12, 2023)
 - Fixed a bug where game configurations may be loaded twice
 - Fixed a bug where the Flashlight lightened area may not move if the next object to press is a circle
 - Fixed a bug where the color of slider start and end circles follows the slider body's color in kiai mode if the `sliderFollowComboColor` setting in `skin.json` is set to `false`
+- Fixed a bug where the game may crash when opening the Chimu in-game beatmap downloader
