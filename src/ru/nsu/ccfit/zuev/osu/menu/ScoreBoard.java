@@ -496,35 +496,26 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
 
     public void loadAvatar() {
         avatarTask = Async.run(() -> {
-            try
-            {
-                synchronized (avatars)
-                {
+            try {
+                synchronized (avatars) {
                     int i = 0;
                     int size = avatars.size();
 
-                    while (i < size)
-                    {
-                        if (isCanceled)
-                        {
+                    while (i < size) {
+                        if (isCanceled) {
                             break;
                         }
                         var avatar = avatars.get(i);
-
-                        var avaName = "ava@" + avatar.getUserName();
                         var texture = ResourceManager.getInstance().getTexture("emptyavatar");
 
-                        if (OnlineManager.getInstance().loadAvatarToTextureManager(avatar.getAvaUrl(), avaName))
-                        {
-                            var tex = ResourceManager.getInstance().getTextureIfLoaded(avaName);
+                        if (OnlineManager.getInstance().loadAvatarToTextureManager(avatar.getAvaUrl())) {
+                            var tex = ResourceManager.getInstance().getAvatarTextureIfLoaded(avatar.getAvaUrl());
 
                             texture = tex != null ? tex : texture;
                         }
 
-                        if (showOnlineScores)
-                        {
-                            synchronized (sprites)
-                            {
+                        if (showOnlineScores) {
+                            synchronized (sprites) {
                                 var sprite = sprites.get(i);
                                 var child = new Sprite(55, 12, Utils.toRes(90), Utils.toRes(90), texture);
 
@@ -534,9 +525,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                         i++;
                     }
                 }
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 isCanceled = false;
                 Debug.e(e.getMessage());
             }

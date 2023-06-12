@@ -5,6 +5,10 @@ import com.dgsrz.bancho.security.SecurityUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -56,24 +60,40 @@ public class OnlineFileOperator {
     }
 
     public static boolean downloadFile(String urlstr, String filename) {
+        return downloadFile(urlstr, filename, false);
+    }
+
+    public static boolean downloadFile(String urlstr, String filename, boolean checkModificationDate) {
         Debug.i("Starting download " + urlstr);
         File file = new File(filename);
         try {
-            if(file.exists()) {
+            if (!checkModificationDate && file.exists()) {
                 Debug.i(file.getName() + " already exists");
                 return true;
             }
             // Cheching for errors
             Debug.i("Connected to " + urlstr);
 
-            Request request = new Request.Builder()
-                .url(urlstr)
-                .build();
+            var builder = new Request.Builder().url(urlstr);
+
+            if (checkModificationDate && file.exists()) {
+                var lastModifiedDate = new Date(file.lastModified());
+                var df = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss", Locale.ENGLISH);
+                df.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+                builder.addHeader("If-Modified-Since", df.format(lastModifiedDate) + " GMT");
+            }
+
+            Request request = builder.build();
             Response response = OnlineManager.client.newCall(request).execute();
-            BufferedSink sink = Okio.buffer(Okio.sink(file));
-            sink.writeAll(response.body().source());
+
+            if (response.isSuccessful()) {
+                BufferedSink sink = Okio.buffer(Okio.sink(file));
+                sink.writeAll(response.body().source());
+                sink.close();
+            }
+
             response.close();
-            sink.close();
             return true;
         } catch (final IOException e) {
             Debug.e("downloadFile IOException " + e.getMessage(), e);

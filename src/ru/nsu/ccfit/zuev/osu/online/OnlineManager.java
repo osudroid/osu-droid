@@ -1,25 +1,22 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import okhttp3.OkHttpClient;
 
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
@@ -28,6 +25,7 @@ import ru.nsu.ccfit.zuev.osu.online.PostBuilder.RequestException;
 public class OnlineManager {
     public static final String hostname = "osudroid.moe";
     public static final String endpoint = "https://" + hostname + "/api/";
+    public static final String defaultAvatarURL = "https://" + hostname + "/user/avatar/0.png";
     private static final String onlineVersion = "30";
 
     public static final OkHttpClient client = new OkHttpClient();
@@ -172,28 +170,6 @@ public class OnlineManager {
         return true;
     }
 
-    public boolean register(final String username, final String password, final String email,
-                            final String deviceID) throws OnlineManagerException {
-        PostBuilder post = new PostBuilder();
-        post.addParam("username", username);
-        post.addParam(
-                "password",
-                MD5Calcuator.getStringMD5(
-                        escapeHTMLSpecialCharacters(addSlashes(String.valueOf(password).trim())) + "taikotaiko"
-                ));
-        post.addParam("email", email);
-        post.addParam("deviceID", deviceID);
-
-        ArrayList<String> response = sendRequest(post, endpoint + "register.php");
-
-        Bundle params = new Bundle();
-        params.putString(FirebaseAnalytics.Param.METHOD, "ingame");
-        GlobalManager.getInstance().getMainActivity().getAnalytics().logEvent(FirebaseAnalytics.Event.SIGN_UP,
-            params);
-
-        return (response != null);
-    }
-
     public void startPlay(final TrackInfo track, final String hash) throws OnlineManagerException {
         Debug.i("Starting play...");
         playID = null;
@@ -314,46 +290,65 @@ public class OnlineManager {
     }
 
     public boolean loadAvatarToTextureManager() {
-        return loadAvatarToTextureManager(this.avatarURL, "userAvatar");
+        return loadAvatarToTextureManager(avatarURL);
     }
 
-    public boolean loadAvatarToTextureManager(String avatarURL, String userName) {
+    public boolean loadAvatarToTextureManager(String avatarURL) {
         if (avatarURL == null || avatarURL.length() == 0) return false;
 
-        String filename = MD5Calcuator.getStringMD5(avatarURL + userName);
+        String filename = MD5Calcuator.getStringMD5(avatarURL);
         Debug.i("Loading avatar from " + avatarURL);
         Debug.i("filename = " + filename);
         File picfile = new File(Config.getCachePath(), filename);
+        OnlineFileOperator.downloadFile(avatarURL, picfile.getAbsolutePath(), true);
 
-        if(!picfile.exists()) {
-            OnlineFileOperator.downloadFile(avatarURL, picfile.getAbsolutePath());
-        }else if(picfile.exists() && picfile.length() < 1) {
-            picfile.delete();
-            OnlineFileOperator.downloadFile(avatarURL, picfile.getAbsolutePath());
-        }
+        var bitmap = loadAvatarToBitmap(picfile);
         int imageWidth = 0, imageHeight = 0;
-        boolean fileAvailable = true;
 
-        try {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            imageWidth = BitmapFactory.decodeFile(picfile.getPath()).getWidth();
-            imageHeight = BitmapFactory.decodeFile(picfile.getPath()).getHeight();
-            options.inJustDecodeBounds = false;
-            options = null;
-        } catch (NullPointerException e) {
-            fileAvailable = false;
+        if (bitmap != null) {
+            imageWidth = bitmap.getWidth();
+            imageHeight = bitmap.getHeight();
         }
-        if (fileAvailable && (imageWidth * imageHeight) > 0) {
-            //头像已经缓存好在本地
-            ResourceManager.getInstance().loadHighQualityFile(userName, picfile);
-            if (ResourceManager.getInstance().getTextureIfLoaded(userName) != null) {
+
+        if (imageWidth * imageHeight > 0) {
+            // Avatar has been cached locally
+            ResourceManager.getInstance().loadHighQualityFile(filename, picfile);
+            if (ResourceManager.getInstance().getAvatarTextureIfLoaded(avatarURL) != null) {
                 return true;
+            }
+        } else {
+            // Avatar not found, download the default avatar
+            String defaultAvatarFilename = MD5Calcuator.getStringMD5(defaultAvatarURL);
+            File avatarFile = new File(Config.getCachePath(), defaultAvatarFilename);
+            OnlineFileOperator.downloadFile(defaultAvatarURL, avatarFile.getAbsolutePath());
+
+            bitmap = loadAvatarToBitmap(avatarFile);
+            if (bitmap != null) {
+                imageWidth = bitmap.getWidth();
+                imageHeight = bitmap.getHeight();
+            }
+
+            if (imageWidth * imageHeight > 0) {
+                //Avatar has been cached locally
+                ResourceManager.getInstance().loadHighQualityFile(defaultAvatarFilename, avatarFile);
+                if (ResourceManager.getInstance().getAvatarTextureIfLoaded(defaultAvatarURL) != null) {
+                    return true;
+                }
             }
         }
 
         Debug.i("Success!");
         return false;
+    }
+
+    private Bitmap loadAvatarToBitmap(File avatarFile) {
+        try {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            return BitmapFactory.decodeFile(avatarFile.getPath());
+        } catch (NullPointerException e) {
+            return null;
+        }
     }
 
     public void sendReplay(String filename) {

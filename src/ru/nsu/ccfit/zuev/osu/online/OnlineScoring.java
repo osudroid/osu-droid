@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public class OnlineScoring {
@@ -38,7 +37,8 @@ public class OnlineScoring {
             return null;
         secondPanel = new OnlinePanel();
         secondPanel.setInfo();
-        secondPanel.setAvatar(avatarLoaded ? "userAvatar" : null);
+        String avatarURL = OnlineManager.getInstance().getAvatarURL();
+        secondPanel.setAvatar(avatarLoaded && !avatarURL.isEmpty() ? avatarURL : null);
         return secondPanel;
     }
 
@@ -59,7 +59,8 @@ public class OnlineScoring {
     }
 
     public void updatePanelAvatars() {
-        String texname = avatarLoaded ? "userAvatar" : null;
+        final String avatarUrl = OnlineManager.getInstance().getAvatarURL();
+        String texname = avatarLoaded && !avatarUrl.isEmpty() ? avatarUrl : null;
         panel.setAvatar(texname);
         if (secondPanel != null)
             secondPanel.setAvatar(texname);
@@ -81,7 +82,7 @@ public class OnlineScoring {
 
                         try {
                             success = OnlineManager.getInstance().logIn();
-                        } catch (OnlineManagerException e) {
+                        } catch (OnlineManager.OnlineManagerException e) {
                             Debug.e("Login error: " + e.getMessage());
                             setPanelMessage("Login failed", "Retrying in 5 sec");
                             try {
@@ -117,7 +118,7 @@ public class OnlineScoring {
                     for (int i = 0; i < attemptCount; i++) {
                         try {
                             OnlineManager.getInstance().startPlay(track, hash);
-                        } catch (OnlineManagerException e) {
+                        } catch (OnlineManager.OnlineManagerException e) {
                             Debug.e("Login error: " + e.getMessage());
                             continue;
                         }
@@ -155,7 +156,7 @@ public class OnlineScoring {
 
                         try {
                             success = OnlineManager.getInstance().sendRecord(recordData);
-                        } catch (OnlineManagerException e) {
+                        } catch (OnlineManager.OnlineManagerException e) {
                             Debug.e("Login error: " + e.getMessage());
                             success = false;
                         }
@@ -192,7 +193,7 @@ public class OnlineScoring {
         synchronized (onlineMutex) {
             try {
                 return OnlineManager.getInstance().getTop(trackFile, hash);
-            } catch (OnlineManagerException e) {
+            } catch (OnlineManager.OnlineManagerException e) {
                 Debug.e("Cannot load scores " + e.getMessage());
                 return new ArrayList<String>();
             }
@@ -209,14 +210,11 @@ public class OnlineScoring {
             @Override
             public void run() {
                 synchronized (onlineMutex) {
-                    if (OnlineManager.getInstance().loadAvatarToTextureManager()) {
-                        avatarLoaded = true;
-                    } else
-                        avatarLoaded = false;
+                    avatarLoaded = OnlineManager.getInstance().loadAvatarToTextureManager();
                     if (both)
                         updatePanelAvatars();
                     else if (secondPanel != null)
-                        secondPanel.setAvatar(avatarLoaded ? "userAvatar" : null);
+                        secondPanel.setAvatar(avatarLoaded ? avatarUrl : null);
                 }
             }
         }.execute();

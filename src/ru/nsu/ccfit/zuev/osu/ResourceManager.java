@@ -33,9 +33,11 @@ import java.util.regex.Pattern;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
+import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
 import ru.nsu.ccfit.zuev.osu.helper.QualityAssetBitmapSource;
 import ru.nsu.ccfit.zuev.osu.helper.QualityFileBitmapSource;
 import ru.nsu.ccfit.zuev.osu.helper.ScaledBitmapSource;
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinJsonReader;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
@@ -625,6 +627,16 @@ public class ResourceManager {
             return loadTexture(resname, "gfx/" + resname + ".png", false);
         }
         return textures.get(resname);
+    }
+
+    public TextureRegion getAvatarTextureIfLoaded(final String avatarURL) {
+        var region = getTextureIfLoaded(MD5Calcuator.getStringMD5(avatarURL));
+
+        if (region == null) {
+            region = getTextureIfLoaded(MD5Calcuator.getStringMD5(OnlineManager.defaultAvatarURL));
+        }
+
+        return region;
     }
 
     public TextureRegion getTextureIfLoaded(final String resname) {
