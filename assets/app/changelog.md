@@ -7,13 +7,13 @@ Changelog for 1.6.8 Hotfix (June 12, 2023)
 - New options for `skin.json`:
   - `hitCirclePrefix`: Denotes the prefix of texture files used in circle numbers. The default value is `default`. In this case, the game will pick up `default-0`, `default-1`, `default-2`, and so on for circle number textures.
   - `scorePrefix`: Denotes the prefix of texture files used in the score and accuracy counter. The default value is `score`. In this case, the game will pick up `score-0`, `score-1`, `score-2`, and so on for score and accuracy counter number textures.
-  - `comboPrefix`: Denotes the prefix of texture files used in the combo counter. The default value is `combo`. In this case, the game will pick up `combo-0`, `combo-1`, `combo-2`, and so on for combo counter number textures.
+  - `comboPrefix`: Denotes the prefix of texture files used in the combo counter. The default value is `score`. In this case, the game will pick up `score-0`, `score-1`, `score-2`, and so on for combo counter number textures.
   - The JSON format:
   ```json
       "Fonts": {
           "hitCirclePrefix": "default",
           "scorePrefix": "score",
-          "comboPrefix": "combo"
+          "comboPrefix": "score"
       }
   ```
 
