@@ -73,6 +73,8 @@ public class GlobalManager {
             songService.stop();
             songService.hideNotification();
         }
+        Updater.getInstance().checkForUpdates(false, false);
+
     }
 
     public Engine getEngine() {
