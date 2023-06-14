@@ -324,6 +324,7 @@ public class MainActivity extends BaseGameActivity implements
                 catch (InterruptedException ignored)
                 {
                 }
+                Updater.getInstance().checkForUpdates(false, true);
             }
 
             @Override
