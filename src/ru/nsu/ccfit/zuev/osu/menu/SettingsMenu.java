@@ -170,7 +170,7 @@ public class SettingsMenu extends SettingsFragment {
 
         final Preference update = findPreference("update");
         update.setOnPreferenceClickListener(preference -> {
-            Updater.getInstance().checkForUpdates();
+            Updater.getInstance().checkForUpdates(true, true);
             return true;
         });
 
