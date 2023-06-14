@@ -87,7 +87,7 @@ public class Updater {
             @Override
             public void onComplete() {
                 mActivity.runOnUiThread(() -> {
-                    if (loadingFragment != null) {
+                    if (showLoading && loadingFragment != null) {
                         loadingFragment.dismiss();
                         loadingFragment = null;
                     }
