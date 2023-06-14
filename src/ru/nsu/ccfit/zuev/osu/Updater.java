@@ -47,15 +47,20 @@ public class Updater {
         return OnlineManager.client.newCall(request).execute().body();
     }
 
-    public void checkForUpdates() {
+    public void checkForUpdates(boolean showLoading, boolean showSnackbar) {
         new AsyncTask() {
             @Override
             public void run() {
                 try {
                     mActivity.runOnUiThread(() -> {
-                        Snackbar.make(mActivity.findViewById(android.R.id.content),
-                                StringTable.get(R.string.update_info_checking), 1500).show();
-                        if (loadingFragment == null) {
+                      if (showSnackbar) {
+                            Snackbar.make(mActivity.findViewById(android.R.id.content),
+                                    StringTable.get(R.string.update_info_checking), 1500).show();
+                        } else {
+                            GlobalManager.getInstance().setInfo(StringTable.get(R.string.update_info_checking));
+                        }
+
+                        if (showLoading && loadingFragment == null) {
                             loadingFragment = new LoadingFragment();
                             loadingFragment.show();
                         }
@@ -82,7 +87,7 @@ public class Updater {
             @Override
             public void onComplete() {
                 mActivity.runOnUiThread(() -> {
-                    if (loadingFragment != null) {
+                    if (showLoading && loadingFragment != null) {
                         loadingFragment.dismiss();
                         loadingFragment = null;
                     }
@@ -92,9 +97,13 @@ public class Updater {
                                 .setChangelogMessage(changelogMsg)
                                 .setDownloadUrl(downloadUrl)
                                 .show();
-                    } else {
-                        Snackbar.make(mActivity.findViewById(android.R.id.content),
-                                StringTable.get(R.string.update_info_latest), 1500).show();
+                     } else {
+                        if (showSnackbar) {
+                            Snackbar.make(mActivity.findViewById(android.R.id.content),
+                                    StringTable.get(R.string.update_info_latest), 1500).show();
+                        } else {
+                            GlobalManager.getInstance().setInfo(StringTable.get(R.string.update_info_latest));
+                        }
                     }
                 });
             }
