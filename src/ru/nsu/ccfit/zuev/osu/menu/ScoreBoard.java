@@ -277,7 +277,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
 
                     loadingText.setText(OnlineManager.getInstance().getFailMessage());
 
-                    List<ScoreBoardItems> scoreBoardItems = new ArrayList<>();
+                    scoreItems = new ScoreBoardItems[scores.size()];
                     long lastTotalScore = 0;
 
                     for (int i = scores.size() - 1; i >= 0; --i) {
@@ -309,9 +309,8 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
 
                         ScoreBoardItems items = new ScoreBoardItems();
                         items.set(data[1], Integer.parseInt(data[3]), Integer.parseInt(data[2]), scoreID);
-                        scoreBoardItems.add(items);
+                        scoreItems[i] = items;
                     }
-                    scoreItems = scoreBoardItems.toArray(new ScoreBoardItems[0]);
 
                     if (scores.size() > 0) {
                         String[] data = scores.get(scores.size() - 1).split("\\s+");
