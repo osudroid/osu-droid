@@ -2039,11 +2039,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             comboWasMissed = true;
             stat.registerHit(0, false, false);
             if (writeReplay) replay.addObjectScore(objectId, ResultType.MISS);
-            if(GameHelper.isPerfect()){
+            if (GameHelper.isPerfect()) {
                 gameover();
                 restartGame();
             }
-            if(GameHelper.isSuddenDeath()) {
+            if (GameHelper.isSuddenDeath()) {
+                stat.changeHp(-1.0f);
                 gameover();
             }
             if (objectId != -1) {
@@ -2181,7 +2182,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 ResourceManager.getInstance().getCustomSound("combobreak", 1)
                         .play();
             }
-            if(GameHelper.isSuddenDeath()) {
+            if (GameHelper.isSuddenDeath()) {
+                stat.changeHp(-1.0f);
                 gameover();
             }
             stat.registerHit(0, true, false);
@@ -2506,9 +2508,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         scene.getChildScene().back();
         paused = false;
-        if (stat.getHp() <= 0 && stat.getMod().contains(GameMod.MOD_NOFAIL) == false
-                && stat.getMod().contains(GameMod.MOD_RELAX) == false
-                && stat.getMod().contains(GameMod.MOD_AUTOPILOT) == false) {
+        if (stat.getHp() <= 0 && !stat.getMod().contains(GameMod.MOD_NOFAIL)
+                && !stat.getMod().contains(GameMod.MOD_RELAX)
+                && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)) {
             quit();
             return;
         }
