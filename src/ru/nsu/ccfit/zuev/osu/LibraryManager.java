@@ -496,7 +496,7 @@ public enum LibraryManager {
                     }
 
                     if (!file.isDirectory()) {
-                        return;
+                        continue;
                     }
 
                     final BeatmapInfo info = new BeatmapInfo();
