@@ -202,7 +202,7 @@ public class Slider extends HitObjectWithDuration {
 
         repeatCount = source.repeatCount;
         endPosition = new Vector2(source.endPosition.x, source.endPosition.y);
-        path = source.path;
+        path = source.path.deepClone();
         velocity = source.velocity;
         head = source.head.deepClone();
         tail = source.tail.deepClone();
@@ -218,7 +218,7 @@ public class Slider extends HitObjectWithDuration {
         }
 
         nestedHitObjects.add(tail);
-        Collections.sort(nestedHitObjects, (o1, o2) -> (int) (o1.startTime - o2.startTime));
+        Collections.sort(nestedHitObjects, (o1, o2) -> Double.compare(o1.startTime, o2.startTime));
     }
 
     @Override

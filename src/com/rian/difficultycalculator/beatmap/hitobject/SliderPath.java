@@ -52,9 +52,51 @@ public class SliderPath {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param source The source to copy from.
+     */
+    private SliderPath(SliderPath source) {
+        pathType = source.pathType;
+        expectedDistance = source.expectedDistance;
+        controlPoints = new ArrayList<>();
+
+        for (final Vector2 point : source.controlPoints) {
+            controlPoints.add(new Vector2(point.x, point.y));
+        }
+
+        for (final Vector2 point : source.calculatedPath) {
+            calculatedPath.add(new Vector2(point.x, point.y));
+        }
+
+        cumulativeLength.addAll(source.cumulativeLength);
+    }
+
+    /**
+     * Computes the position on the slider at a given progress that ranges from 0
+     * (beginning of the path) to 1 (end of the path).
+     *
+     * @param progress Ranges from 0 (beginning of the path) to 1 (end of the path).
+     */
+    public Vector2 positionAt(double progress) {
+        double d = progressToDistance(progress);
+
+        return interpolateVertices(indexOfDistance(d), d);
+    }
+
+    /**
+     * Deep clones this slider path.
+     *
+     * @return The deep cloned slider path.
+     */
+    public SliderPath deepClone() {
+        return new SliderPath(this);
+    }
+
+    /**
      * Calculates the path of this slider.
      */
-    public void calculatePath() {
+    private void calculatePath() {
         calculatedPath.clear();
 
         if (controlPoints.isEmpty()) {
@@ -84,7 +126,7 @@ public class SliderPath {
     /**
      * Calculates the cumulative length of this slider.
      */
-    public void calculateCumulativeLength() {
+    private void calculateCumulativeLength() {
         cumulativeLength.clear();
         cumulativeLength.add(0d);
 
@@ -135,18 +177,6 @@ public class SliderPath {
 
             cumulativeLength.add(expectedDistance);
         }
-    }
-
-    /**
-     * Computes the position on the slider at a given progress that ranges from 0
-     * (beginning of the path) to 1 (end of the path).
-     *
-     * @param progress Ranges from 0 (beginning of the path) to 1 (end of the path).
-     */
-    public Vector2 positionAt(double progress) {
-        double d = progressToDistance(progress);
-
-        return interpolateVertices(indexOfDistance(d), d);
     }
 
     private List<Vector2> calculateSubPath(List<Vector2> subControlPoints) {
