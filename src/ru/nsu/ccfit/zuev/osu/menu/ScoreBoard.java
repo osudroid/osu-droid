@@ -614,7 +614,9 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     }
 
     public ScoreBoardItems[] getScoreBoardItems() {
-        return scoreItems;
+        synchronized (mutex) {
+            return scoreItems;
+        }
     }
 
     public Scene getScene() {
