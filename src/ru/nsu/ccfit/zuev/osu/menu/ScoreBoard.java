@@ -251,6 +251,9 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     private void initFromOnline(final TrackInfo track) {
         final long currentNumber = viewNumber;
         loadingText.setText("Loading scores...");
+
+        cancelLoadOnlineScores();
+
         this.onlineTask = new AsyncTask() {
             @Override
             public void run() {
@@ -351,11 +354,13 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
             return;
         }
 
-        scoreItems = new ScoreBoardItems[0];
+        cancelLoadOnlineScores();
+
         lastTrack = track;
         wasOnline = showOnlineScores;
 
         synchronized (mutex) {
+            scoreItems = new ScoreBoardItems[0];
             viewNumber++;
         }
 
