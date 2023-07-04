@@ -1,5 +1,6 @@
 package org.anddev.andengine.ui.activity;
 
+import androidx.fragment.app.Fragment;
 import org.anddev.andengine.audio.music.MusicManager;
 import org.anddev.andengine.audio.sound.SoundManager;
 import org.anddev.andengine.engine.Engine;
@@ -53,6 +54,12 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 	protected void onCreate(final Bundle pSavedInstanceState) {
 		super.onCreate(pSavedInstanceState);
 		this.mPaused = true;
+
+		if (pSavedInstanceState != null) {
+			for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+				getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+			}
+		}
 
 		this.mEngine = this.onLoadEngine();
 		if (this.mEngine == null) {
