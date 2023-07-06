@@ -6,6 +6,7 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class ScoreNumber {
     private final Sprite[] letters;
@@ -20,16 +21,16 @@ public class ScoreNumber {
         for (int i = 0; i < text.length(); i++) {
             if (text.charAt(i) <= '9' && text.charAt(i) >= '0') {
                 letters[i] = new Sprite(x + width * scale, y, ResourceManager
-                        .getInstance().getTexture("score-" + text.charAt(i)));
+                        .getInstance().getTextureWithPrefix(OsuSkin.get().getScorePrefix(), String.valueOf(text.charAt(i))));
             } else if (text.charAt(i) == '.' || text.charAt(i) == ',') {
                 letters[i] = new Sprite(x + width * scale, y, ResourceManager
-                        .getInstance().getTexture("score-comma"));
+                        .getInstance().getTextureWithPrefix(OsuSkin.get().getScorePrefix(), "comma"));
             } else if (text.charAt(i) == '%') {
                 letters[i] = new Sprite(x + width * scale, y, ResourceManager
-                        .getInstance().getTexture("score-percent"));
+                        .getInstance().getTextureWithPrefix(OsuSkin.get().getScorePrefix(), "percent"));
             } else {
                 letters[i] = new Sprite(x + width * scale, y, ResourceManager
-                        .getInstance().getTexture("score-x"));
+                        .getInstance().getTextureWithPrefix(OsuSkin.get().getScorePrefix(), "x"));
             }
             letters[i].setSize(letters[i].getWidth() * scale,
                     letters[i].getHeight() * scale);

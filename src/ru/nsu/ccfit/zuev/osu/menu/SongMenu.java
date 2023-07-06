@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Process;
 
 import com.edlplan.ext.EdExtensionHelper;
@@ -11,6 +10,8 @@ import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.replay.OdrDatabase;
 import com.edlplan.ui.fragment.PropsMenuFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
+import com.rian.difficultycalculator.attributes.DifficultyAttributes;
+import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -43,27 +44,29 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
+import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
+import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
+import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
+import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
+import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinLayout;
 
 public class SongMenu implements IUpdateHandler, MenuItemListener,
@@ -101,7 +104,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private ChangeableText trackInfo, mapper, beatmapInfo, beatmapInfo2, dimensionInfo;
     private boolean isSelectComplete = true;
     private AnimSprite scoringSwitcher = null;
-    private AsyncTask<OsuAsyncCallback, Integer, Boolean> boardTask;
+    private AsyncTask boardTask;
     private GroupType groupType = GroupType.MapSet;
 
     public SongMenu() {
@@ -182,7 +185,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         board = new ScoreBoard(scene, backLayer, this, context);
 
         float oy = 10;
-        for (final BeatmapInfo i : LibraryManager.getInstance().getLibrary()) {
+        for (final BeatmapInfo i : LibraryManager.INSTANCE.getLibrary()) {
             final MenuItem item = new MenuItem(this, i);
             items.add(item);
             item.attachToScene(scene, backLayer);
@@ -193,7 +196,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         if (items.size() == 0) {
             final Text text = new Text(0, 0, ResourceManager.getInstance()
-                    .getFont("CaptionFont"), "There are no songs in library",
+                    .getFont("CaptionFont"), "There are no songs in library, try using chimu.moe",
                     HorizontalAlign.CENTER);
             text.setPosition(Config.getRES_WIDTH() / 2f - text.getWidth() / 2,
                     Config.getRES_HEIGHT() / 2f - text.getHeight() / 2);
@@ -598,7 +601,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
                                              float pTouchAreaLocalX, float pTouchAreaLocalY) {
                     if (!pSceneTouchEvent.isActionDown()) return false;
-                    board.cancleLoadAvatar();
+                    board.cancelLoadAvatar();
                     toggleScoringSwitcher();
                     return true;
                 }
@@ -968,16 +971,27 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         changeDimensionInfo(track);
         (new Thread() {
             public void run() {
-                DifficultyReCalculator diffReCalculator = new DifficultyReCalculator();
-                float newstar = diffReCalculator.recalculateStar(
-                    selectedTrack,
-                    diffReCalculator.getCS(selectedTrack),
-                    ModMenu.getInstance().getSpeed()
+                BeatmapData beatmapData = new BeatmapParser(selectedTrack.getFilename()).parse(true);
+
+                if (beatmapData == null) {
+                    setStarsDisplay(0);
+                    return;
+                }
+
+                DifficultyCalculationParameters parameters = new DifficultyCalculationParameters();
+                parameters.mods = ModMenu.getInstance().getMod();
+                parameters.customSpeedMultiplier = ModMenu.getInstance().getChangeSpeed();
+
+                if (ModMenu.getInstance().isEnableForceAR()) {
+                    parameters.forcedAR = ModMenu.getInstance().getForceAR();
+                }
+
+                DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
+                        beatmapData,
+                        parameters
                 );
 
-                if (newstar != 0f) {
-                    setStarsDisplay(newstar);
-                }
+                setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
             }
         }).start();
     }
@@ -1003,6 +1017,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
             ResourceManager.getInstance().getSound("menuhit").play();
             stopMusic();
+
+            Replay.oldMod = ModMenu.getInstance().getMod();
+            Replay.oldChangeSpeed = ModMenu.getInstance().getChangeSpeed();
+            Replay.oldForceAR = ModMenu.getInstance().getForceAR();
+            Replay.oldEnableForceAR = ModMenu.getInstance().isEnableForceAR();
+            Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
+
             game.startGame(track, null);
             unload();
             return;
@@ -1012,22 +1033,18 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         EdExtensionHelper.onSelectTrack(selectedTrack);
         GlobalManager.getInstance().setSelectedTrack(track);
         updateInfo(track);
-        board.cancleLoadAvatar();
-        if (boardTask != null && boardTask.getStatus() != AsyncTask.Status.FINISHED) {
+        board.cancelLoadAvatar();
+        if (boardTask != null) {
             boardTask.cancel(true);
-            board.cancleLoadOnlineScores();
+            board.cancelLoadOnlineScores();
         }
-        boardTask = new AsyncTaskLoader().execute(new OsuAsyncCallback() {
+        boardTask = new AsyncTask() {
             @Override
             public void run() {
                 board.init(track);
             }
-
-            @Override
-            public void onComplete() {
-                // Do something cleanup
-            }
-        });
+        };
+        boardTask.execute();
 
         final int quality = Config.getBackgroundQuality();
         synchronized (backgroundMutex) {
@@ -1044,15 +1061,14 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 Config.setBackgroundQuality(4);
             }
         }
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
-
+        new AsyncTask() {
+            @Override
             public void run() {
                 // Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 synchronized (backgroundMutex) {
                     final TextureRegion tex = Config.isSafeBeatmapBg() || track.getBackground() == null?
-                        ResourceManager.getInstance().getTexture("menu-background") :
-                        ResourceManager.getInstance().loadBackground(bgName);
+                            ResourceManager.getInstance().getTexture("menu-background") :
+                            ResourceManager.getInstance().loadBackground(bgName);
                     if (tex != null) {
                         float height = tex.getHeight();
                         height *= Config.getRES_WIDTH()
@@ -1089,11 +1105,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
             }
 
-
+            @Override
             public void onComplete() {
                 isSelectComplete = true;
             }// onComplete
-        });
+        }.execute();
     }
 
     public void stopScroll(final float y) {
@@ -1113,9 +1129,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (showOnline) {
             engine.setScene(new LoadingScreen().getScene());
             ToastLogger.showTextId(R.string.online_loadrecord, false);
-            new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
-
+            new AsyncTask() {
+                @Override
                 public void run() {
                     try {
                         String scorePack = OnlineManager.getInstance().getScorePack(id);
@@ -1133,11 +1148,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     }
 
                 }
-
-                public void onComplete() {
-                    // TODO Auto-generated method stub
-                }
-            });
+            }.execute();
             return;
         }
 
@@ -1186,9 +1197,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (!Config.isPlayMusicPreview()) {
             return;
         }
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
-
+        new AsyncTask() {
+            @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 synchronized (musicMutex) {
@@ -1212,13 +1222,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                 }
             }
-
-
-            public void onComplete() {
-                // TODO Auto-generated method stub
-
-            }
-        });
+        }.execute();
     }
 
     public boolean isSelectAllowed() {
@@ -1246,22 +1250,18 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void reloadScoreBroad() {
-        board.cancleLoadAvatar();
-        if (boardTask != null && boardTask.getStatus() != AsyncTask.Status.FINISHED) {
+        board.cancelLoadAvatar();
+        if (boardTask != null) {
             boardTask.cancel(true);
-            board.cancleLoadOnlineScores();
+            board.cancelLoadOnlineScores();
         }
-        boardTask = new AsyncTaskLoader().execute(new OsuAsyncCallback() {
+        boardTask = new AsyncTask() {
             @Override
             public void run() {
                 board.init(selectedTrack);
             }
-
-            @Override
-            public void onComplete() {
-                // Do something cleanup
-            }
-        });
+        };
+        boardTask.execute();
     }
 
     public Entity getFrontLayer() {
@@ -1330,7 +1330,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             items.clear();
             switch (type) {
                 case MapSet:
-                    for (final BeatmapInfo i : LibraryManager.getInstance().getLibrary()) {
+                    for (final BeatmapInfo i : LibraryManager.INSTANCE.getLibrary()) {
                         final MenuItem item = new MenuItem(this, i);
                         items.add(item);
                         item.attachToScene(scene, backLayer);
@@ -1338,7 +1338,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     }
                     break;
                 case SingleDiff:
-                    for (final BeatmapInfo i : LibraryManager.getInstance().getLibrary()) {
+                    for (final BeatmapInfo i : LibraryManager.INSTANCE.getLibrary()) {
                         for (int j = 0; j < i.getCount(); j++) {
                             final MenuItem item = new MenuItem(this, i, j);
                             items.add(item);

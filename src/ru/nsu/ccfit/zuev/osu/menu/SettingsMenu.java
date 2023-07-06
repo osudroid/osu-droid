@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import android.animation.Animator;
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
@@ -21,6 +22,7 @@ import androidx.preference.PreferenceScreen;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.SkinPathPreference;
+import com.edlplan.ui.fragment.LoadingFragment;
 import com.edlplan.ui.fragment.SettingsFragment;
 import com.edlplan.ui.EasingHelper;
 
@@ -28,21 +30,26 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 
+import com.reco1l.framework.lang.execution.Async;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Updater;
 // import ru.nsu.ccfit.zuev.osu.game.SpritePool;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osu.online.OnlineInitializer;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
+import static android.content.Intent.ACTION_VIEW;
+
 public class SettingsMenu extends SettingsFragment {
+
+    public static final String REGISTER_URL = "https://" + OnlineManager.hostname + "/user/?action=register";
 
     private PreferenceScreen mParentScreen, parentScreen;
     private boolean isOnNestedScreen = false;
@@ -61,14 +68,21 @@ public class SettingsMenu extends SettingsFragment {
         skinPath.reloadSkinList();
         skinPath.setOnPreferenceChangeListener((preference, newValue) -> {
             if(GlobalManager.getInstance().getSkinNow() != newValue.toString()) {
-                // SpritePool.getInstance().purge();
-                GlobalManager.getInstance().setSkinNow(Config.getSkinPath());
-                SkinManager.getInstance().clearSkin();
-                ResourceManager.getInstance().loadSkin(newValue.toString());
-                GlobalManager.getInstance().getEngine().getTextureManager().reloadTextures();
-                mActivity.startActivity(new Intent(mActivity, MainActivity.class));
-                Snackbar.make(mActivity.findViewById(android.R.id.content),
-                    StringTable.get(R.string.message_loaded_skin), 1500).show();
+                var loading = new LoadingFragment();
+                loading.show();
+
+                Async.run(() -> {
+                    GlobalManager.getInstance().setSkinNow(Config.getSkinPath());
+                    SkinManager.getInstance().clearSkin();
+                    ResourceManager.getInstance().loadSkin(newValue.toString());
+                    GlobalManager.getInstance().getEngine().getTextureManager().reloadTextures();
+
+                    mActivity.runOnUiThread(() -> {
+                        loading.dismiss();
+                        mActivity.startActivity(new Intent(mActivity, MainActivity.class));
+                        Snackbar.make(mActivity.findViewById(android.R.id.content), StringTable.get(R.string.message_loaded_skin), 1500).show();
+                    });
+                });
             }
             return true;
         });
@@ -138,7 +152,7 @@ public class SettingsMenu extends SettingsFragment {
 
         final Preference pref = findPreference("clear");
         pref.setOnPreferenceClickListener(preference -> {
-            LibraryManager.getInstance().clearCache();
+            LibraryManager.INSTANCE.clearCache();
             return true;
         });
         final Preference clearProps = findPreference("clear_properties");
@@ -149,14 +163,14 @@ public class SettingsMenu extends SettingsFragment {
         });
         final Preference register = findPreference("registerAcc");
         register.setOnPreferenceClickListener(preference -> {
-            OnlineInitializer initializer = new OnlineInitializer(getActivity());
-            initializer.createInitDialog();
+            Intent intent = new Intent(ACTION_VIEW, Uri.parse(REGISTER_URL));
+            startActivity(intent);
             return true;
         });
 
         final Preference update = findPreference("update");
         update.setOnPreferenceClickListener(preference -> {
-            Updater.getInstance().checkForUpdates();
+            Updater.getInstance().checkForUpdates(true, true);
             return true;
         });
 
@@ -200,7 +214,7 @@ public class SettingsMenu extends SettingsFragment {
     }
 
     private void setTitle(String title) {
-       ((TextView) findViewById(R.id.title)).setText(title); 
+       ((TextView) findViewById(R.id.title)).setText(title);
     }
 
     @Override

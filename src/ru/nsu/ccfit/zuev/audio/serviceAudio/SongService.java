@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.audio.serviceAudio;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.util.Log;
 
 import java.io.File;
 
+import androidx.core.app.NotificationManagerCompat;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -43,8 +45,29 @@ public class SongService extends Service {
     public boolean onUnbind(Intent intent) {
         System.out.println("Service unbind");
         hideNotification();
+        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
         exit();
         return super.onUnbind(intent);
+    }
+
+    @Override
+    public void onDestroy() {
+        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
+    }
+
+    @Override
+    public void onLowMemory() {
+        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -74,8 +97,11 @@ public class SongService extends Service {
 
     public boolean preLoad(String filePath, float speed, boolean enableNC) {
         if (checkFileExist(filePath)) {
-            if (audioFunc == null) return false;
-                audioFunc.setLoop(false);
+            if (audioFunc == null) {
+                return false;
+            }
+
+            audioFunc.setLoop(false);
             return audioFunc.preLoad(filePath, speed, enableNC);
         }
         return false;
@@ -101,6 +127,14 @@ public class SongService extends Service {
         if (audioFunc == null) return false;
         notify.updateState();
         return audioFunc.stop();
+    }
+
+    public void stopWithoutNotify()
+    {
+        if (audioFunc != null)
+        {
+            audioFunc.stop();
+        }
     }
 
     public boolean exit() {
@@ -237,9 +271,9 @@ public class SongService extends Service {
         setVolume(Config.getBgmVolume());
 
         // Reload audio, otherwise it will be choppy or offset for whatever reason.
-        if (LibraryManager.getInstance().getBeatmap() != null) {
+        if (LibraryManager.INSTANCE.getBeatmap() != null) {
             int position = getPosition();
-            preLoad(LibraryManager.getInstance().getBeatmap().getMusic());
+            preLoad(LibraryManager.INSTANCE.getBeatmap().getMusic());
             seekTo(position);
         }
 

@@ -12,7 +12,7 @@ public class ColorSkinData extends SkinData<RGBColor> {
     private String currentHex;
 
     public ColorSkinData(String tag, String defaultHex) {
-        super(tag, new DefaultRGBColor(new RGBColor(RGBColor.hex2Rgb(defaultHex))));
+        super(tag, new DefaultRGBColor(RGBColor.hex2Rgb(defaultHex)));
         this.defaultHex = defaultHex;
         this.currentHex = defaultHex;
     }
@@ -31,6 +31,6 @@ public class ColorSkinData extends SkinData<RGBColor> {
 
     @Override
     public boolean currentIsDefault() {
-        return currentHex.equals(defaultHex);
+        return currentHex.equalsIgnoreCase(defaultHex);
     }
 }

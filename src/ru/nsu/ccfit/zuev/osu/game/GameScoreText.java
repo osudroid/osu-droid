@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
+import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
 public class GameScoreText {
     private final AnimSprite[] letters;
@@ -16,7 +18,7 @@ public class GameScoreText {
     private float scale = 0;
     private boolean hasX = false;
 
-    public GameScoreText(final float x, final float y, final String mask,
+    public GameScoreText(StringSkinData prefix, final float x, final float y, final String mask,
                          final float scale) {
         AnimSprite scoreComma = null;
         AnimSprite scorePercent = null;
@@ -25,16 +27,16 @@ public class GameScoreText {
         float width = 0;
         for (int i = 0; i < mask.length(); i++) {
             if (mask.charAt(i) == '0') {
-                letters[i] = new AnimSprite(x + width, y, "score-", 10, 0);
+                letters[i] = new AnimSprite(x + width, y, prefix, null, 10, 0);
                 digits.add(letters[i]);
             } else if (mask.charAt(i) == '.') {
-                letters[i] = new AnimSprite(x + width, y, 0, "score-comma");
+                letters[i] = new AnimSprite(x + width, y, prefix, "comma", 1, 0);
                 scoreComma = letters[i];
             } else if (mask.charAt(i) == '%') {
-                letters[i] = new AnimSprite(x + width, y, 0, "score-percent");
+                letters[i] = new AnimSprite(x + width, y, prefix, "percent", 1, 0);
                 scorePercent = letters[i];
             } else {
-                letters[i] = new AnimSprite(x + width, y, 0, "score-x");
+                letters[i] = new AnimSprite(x + width, y, prefix, "x", 1, 0);
                 scoreX = letters[i];
                 hasX = true;
             }

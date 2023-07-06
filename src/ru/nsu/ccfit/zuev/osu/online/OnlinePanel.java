@@ -153,7 +153,7 @@ public class OnlinePanel extends Entity {
             avatar.detachSelf();
         avatar = null;
         if (texname == null) return;
-        TextureRegion tex = ResourceManager.getInstance().getTextureIfLoaded(texname);
+        TextureRegion tex = ResourceManager.getInstance().getAvatarTextureIfLoaded(texname);
         if (tex == null) return;
 
         Debug.i("Avatar is set!");
