@@ -1,6 +1,6 @@
 
 
-#  osudroid!relax
+# osudroid!relax
 
 ![logo](https://media.discordapp.net/attachments/792900587887919114/1127174982754107483/Untitled164_20230708175009.png)
 [![Official International Discord](https://discordapp.com/api/guilds/774138960430759958/widget.png?style=shield)](https://discord.gg/bppaHBZXFB)
@@ -12,6 +12,9 @@ osu!droid is a free-to-play circle clicking rhythm game for Android devices. It 
 # All about this relax server
 
 osu!droid relax is an experimental and unofficial beta of osu!droid, which allows you to submit scores using relax on a new server.
+
+# Note
+please take note that this is not akatsuki on android. you can [click here](https://akatsuki.gg) to visit the website if you want
 
 ## Status
 
