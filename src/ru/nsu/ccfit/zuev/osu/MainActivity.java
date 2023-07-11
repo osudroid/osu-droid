@@ -271,6 +271,9 @@ public class MainActivity extends BaseGameActivity implements
 
         ResourceManager.getInstance().loadHighQualityAsset("logo", "logo.png");
         ResourceManager.getInstance().loadHighQualityAsset("play", "play.png");
+        ResourceManager.getInstance().loadHighQualityAsset("solo", "solo.png");
+        ResourceManager.getInstance().loadHighQualityAsset("multi", "multi.png");
+        ResourceManager.getInstance().loadHighQualityAsset("back", "back.png");
         ResourceManager.getInstance().loadHighQualityAsset("exit", "exit.png");
         ResourceManager.getInstance().loadHighQualityAsset("chimu", "chimu.png");
         ResourceManager.getInstance().loadHighQualityAsset("options", "options.png");
