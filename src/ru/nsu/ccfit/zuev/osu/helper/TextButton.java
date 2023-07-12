@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.helper;
 
 import org.anddev.andengine.entity.sprite.Sprite;
+import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.entity.text.Text;
 import org.anddev.andengine.opengl.font.Font;
 
@@ -11,7 +12,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
  */
 public class TextButton extends Sprite {
 
-    private final Text buttonText;
+    private final ChangeableText buttonText;
 
     public TextButton(Font font, String text) {
         this(font, text, 1.0f);
@@ -20,7 +21,7 @@ public class TextButton extends Sprite {
     public TextButton(Font font, String text, float scale) {
         super(0, 0, ResourceManager.getInstance().getTexture(
                 "button"));
-        buttonText = new Text(0, 0, font, text);
+        buttonText = new ChangeableText(0, 0, font, text);
         buttonText.setScale(scale);
         setColor(201 / 255f, 31 / 255f, 55 / 255f);
         this.setWidth(buttonText.getWidthScaled() + 80);
@@ -53,5 +54,9 @@ public class TextButton extends Sprite {
 
     public void setTextColor(float pRed, float pGreen, float pBlue) {
         buttonText.setColor(pRed, pGreen, pBlue);
+    }
+
+    public void setText(String text) {
+        buttonText.setText(text);
     }
 }
