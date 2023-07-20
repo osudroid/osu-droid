@@ -2,6 +2,9 @@ package ru.nsu.ccfit.zuev.osu.scoring;
 
 import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.edlplan.framework.utils.functionality.SmartIterator;
+import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.ui.multiplayer.RoomScene;
+import com.reco1l.legacy.ui.multiplayer.StatisticSelector;
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
 import com.rian.difficultycalculator.attributes.PerformanceAttributes;
 
@@ -48,6 +51,12 @@ public class ScoringScene {
     private int replayID = -1;
     private TrackInfo track;
 
+    // Multiplayer
+    public StatisticV2 currentStatistic;
+
+    private StatisticV2[] statistics;
+
+
     public ScoringScene(final Engine pEngine, final GameScene pGame,
                         final SongMenu pMenu) {
         engine = pEngine;
@@ -59,8 +68,8 @@ public class ScoringScene {
                      final SongService player, final String replay, final String mapMD5,
                      final TrackInfo trackToReplay) {
         scene = new Scene();
-        //music = player;
-        this.songService = player;
+        songService = player;
+        currentStatistic = stat;
         if (replay != null && track == null) {
             replayStat = stat;
         }
@@ -91,8 +100,6 @@ public class ScoringScene {
         final Sprite panel = new Sprite(x, y, Utils.toRes(panelr.getWidth() * 0.9f),
                 Utils.toRes(panelr.getHeight() * 0.9f), panelr);
         scene.attachChild(panel);
-
-//		final float iconSize = Utils.toRes(64);
 
         final TextureRegion hit300sr = ResourceManager.getInstance().getTexture("hit300");
         final Sprite hit300s = new Sprite(Utils.toRes(10), Utils.toRes(130),
@@ -213,13 +220,7 @@ public class ScoringScene {
                     return true;
                 }
                 if (pSceneTouchEvent.isActionUp()) {
-                    ResourceManager.getInstance().getSound("applause").stop();
-                    GlobalManager.getInstance().getScoring().setReplayID(-1);
-                    menu.updateScore();
-//					stopMusic();
-                    replayMusic();
-                    engine.setScene(menu.getScene());
-                    scene = null;
+                    back();
                     return true;
                 }
                 return false;
@@ -229,72 +230,77 @@ public class ScoringScene {
         backBtn.setPosition(Config.getRES_WIDTH() - backBtn.getWidth() - 10, Config.getRES_HEIGHT() - backBtn.getHeight() - 10);
         scene.attachChild(backBtn);
 
-        final Sprite retryBtn = new Sprite(Utils.toRes(580), Utils.toRes(400), ResourceManager.getInstance().getTexture("ranking-retry")) {
+        Sprite retryBtn = null;
 
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-                    setColor(0.7f, 0.7f, 0.7f);
-                    ResourceManager.getInstance().getSound("menuback").play();
-                    return true;
+        if (!Multiplayer.isMultiplayer)
+        {
+            retryBtn = new Sprite(Utils.toRes(580), Utils.toRes(400), ResourceManager.getInstance().getTexture("ranking-retry")) {
+
+                @Override
+                public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
+                                             final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+                    if (pSceneTouchEvent.isActionDown()) {
+                        setColor(0.7f, 0.7f, 0.7f);
+                        ResourceManager.getInstance().getSound("menuback").play();
+                        return true;
+                    }
+                    if (pSceneTouchEvent.isActionUp()) {
+                        ResourceManager.getInstance().getSound("applause").stop();
+                        engine.setScene(menu.getScene());
+                        game.startGame(null, null);
+                        scene = null;
+                        stopMusic();
+                        return true;
+                    }
+                    return false;
                 }
-                if (pSceneTouchEvent.isActionUp()) {
-                    ResourceManager.getInstance().getSound("applause").stop();
-                    engine.setScene(menu.getScene());
-                    game.startGame(null, null);
-                    scene = null;
-                    stopMusic();
-                    return true;
+
+            };
+        }
+
+        Sprite replayBtn = null;
+
+        if (!Multiplayer.isMultiplayer)
+        {
+            replayBtn = new Sprite(Utils.toRes(580), Utils.toRes(400),
+                                                ResourceManager.getInstance().getTexture("ranking-replay")) {
+
+                @Override
+                public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
+                                             final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+                    if (pSceneTouchEvent.isActionDown()) {
+                        setColor(0.7f, 0.7f, 0.7f);
+                        ResourceManager.getInstance().getSound("menuback").play();
+                        return true;
+                    }
+                    if (pSceneTouchEvent.isActionUp()) {
+                        ResourceManager.getInstance().getSound("applause").stop();
+                        SongMenu.stopMusicStatic();
+                        engine.setScene(menu.getScene());
+
+                        Replay.oldMod = ModMenu.getInstance().getMod();
+                        Replay.oldChangeSpeed = ModMenu.getInstance().getChangeSpeed();
+                        Replay.oldForceAR = ModMenu.getInstance().getForceAR();
+                        Replay.oldEnableForceAR = ModMenu.getInstance().isEnableForceAR();
+                        Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
+
+                        ModMenu.getInstance().setMod(stat.getMod());
+                        ModMenu.getInstance().setChangeSpeed(stat.getChangeSpeed());
+                        ModMenu.getInstance().setForceAR(stat.getForceAR());
+                        ModMenu.getInstance().setEnableForceAR(stat.isEnableForceAR());
+                        ModMenu.getInstance().setFLfollowDelay(stat.getFLFollowDelay());
+
+                        game.startGame(trackToReplay, replay);
+
+                        scene = null;
+                        stopMusic();
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
-            }
 
-        };
-
-        final Sprite replayBtn = new Sprite(Utils.toRes(580), Utils.toRes(400),
-                ResourceManager.getInstance().getTexture("ranking-replay")) {
-
-            /////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////////////////////////////////
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-                    setColor(0.7f, 0.7f, 0.7f);
-                    ResourceManager.getInstance().getSound("menuback").play();
-                    return true;
-                }
-                if (pSceneTouchEvent.isActionUp()) {
-                    ResourceManager.getInstance().getSound("applause").stop();
-                    SongMenu.stopMusicStatic();
-                    engine.setScene(menu.getScene());
-
-                    Replay.oldMod = ModMenu.getInstance().getMod();
-                    Replay.oldChangeSpeed = ModMenu.getInstance().getChangeSpeed();
-                    Replay.oldForceAR = ModMenu.getInstance().getForceAR();
-                    Replay.oldEnableForceAR = ModMenu.getInstance().isEnableForceAR();
-                    Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
-
-                    ModMenu.getInstance().setMod(stat.getMod());
-                    ModMenu.getInstance().setChangeSpeed(stat.getChangeSpeed());
-                    ModMenu.getInstance().setForceAR(stat.getForceAR());
-                    ModMenu.getInstance().setEnableForceAR(stat.isEnableForceAR());
-                    ModMenu.getInstance().setFLfollowDelay(stat.getFLFollowDelay());
-
-                    game.startGame(trackToReplay, replay);
-
-                    scene = null;
-                    stopMusic();
-                    return true;
-                }
-                return false;
-            }
-
-        };
+            };
+        }
 
         if (stat.accuracy == 1 || stat.getMaxCombo() == this.track.getMaxCombo() || stat.isPerfect()) {
             final Sprite perfect = new Sprite(0, 0, ResourceManager
@@ -302,18 +308,18 @@ public class ScoringScene {
             perfect.setPosition(0, accuracy.getY() + accuracy.getHeight() + 10);
             scene.attachChild(perfect);
         }
-        if (track != null) {
+        if (track != null && retryBtn != null) {
             retryBtn.setPosition(Config.getRES_WIDTH() - backBtn.getWidth() - 10, backBtn.getY() - retryBtn.getHeight() - 10);
             scene.attachChild(retryBtn);
-        } else if (replay != null) {
+        } else if (replay != null && replayBtn != null) {
             replayBtn.setPosition(Config.getRES_WIDTH() - backBtn.getWidth() - 10, backBtn.getY() - replayBtn.getHeight() - 10);
             scene.attachChild(replayBtn);
         }
 
         scene.setTouchAreaBindingEnabled(true);
-        if (track != null) {
+        if (track != null && retryBtn != null) {
             scene.registerTouchArea(retryBtn);
-        } else if (replay != null) {
+        } else if (replay != null && replayBtn != null) {
             scene.registerTouchArea(replayBtn);
         }
         scene.registerTouchArea(backBtn);
@@ -492,14 +498,21 @@ public class ScoringScene {
         scene.attachChild(mapperInfo);
         scene.attachChild(playerInfo);
 
+        // In case the scene was reloaded
+        if (statistics != null)
+            setRoomStatistics(statistics);
+
         //save and upload score
         if (track != null && mapMD5 != null) {
             ResourceManager.getInstance().getSound("applause").play();
             ScoreLibrary.getInstance().addScore(track.getFilename(), stat, replay);
             if (stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
                     OnlineManager.getInstance().isReadyToSend()) {
-                boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator())
-                    .applyFilter(m -> m.unranked).hasNext();
+
+                if (GlobalManager.getInstance().getGameScene().hasFailed)
+                    return;
+
+                boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator()).applyFilter(m -> m.unranked).hasNext();
                 if (hasUnrankedMod
                     || Config.isRemoveSliderLock()
                     || ModMenu.getInstance().isEnableForceAR()
@@ -516,6 +529,38 @@ public class ScoringScene {
                 ScoreLibrary.getInstance().sendScoreOnline(stat, replay, sendingPanel);
             }
         }
+    }
+
+    // Called by the server when all players in the room has submitted its score
+    public void setRoomStatistics(StatisticV2[] stats)
+    {
+        statistics = stats;
+
+        if (scene != null)
+        {
+            var playerSelector = new StatisticSelector(statistics);
+            scene.attachChild(playerSelector);
+        }
+    }
+
+    public void back() {
+        ResourceManager.getInstance().getSound("applause").stop();
+        statistics = null;
+        currentStatistic = null;
+
+        if (Multiplayer.isMultiplayer)
+        {
+            // Preventing NPEs when player gets disconnected while playing
+            if (!Multiplayer.isConnected)
+                RoomScene.INSTANCE.back();
+            else
+                RoomScene.INSTANCE.show();
+            return;
+        }
+        replayMusic();
+        GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getSongMenu().getScene());
+        GlobalManager.getInstance().getSongMenu().updateScore();
+        setReplayID(-1);
     }
 
     public Scene getScene() {

@@ -46,6 +46,14 @@ import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
+import com.reco1l.api.ibancho.RoomAPI;
+import com.reco1l.api.ibancho.data.PlayerStatus;
+import com.reco1l.framework.extensions.LangUtil;
+import com.reco1l.framework.lang.Execution;
+import com.reco1l.framework.lang.execution.Async;
+import com.reco1l.legacy.ui.multiplayer.LobbyScene;
+import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import net.lingala.zip4j.ZipFile;
 
 import org.anddev.andengine.engine.Engine;
@@ -279,6 +287,12 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadHighQualityAsset("options", "options.png");
         ResourceManager.getInstance().loadHighQualityAsset("offline-avatar", "offline-avatar.png");
         ResourceManager.getInstance().loadHighQualityAsset("star", "gfx/star.png");
+        ResourceManager.getInstance().loadHighQualityAsset("chat", "chat.png");
+        ResourceManager.getInstance().loadHighQualityAsset("team_vs", "team_vs.png");
+        ResourceManager.getInstance().loadHighQualityAsset("head_head", "head_head.png");
+        ResourceManager.getInstance().loadHighQualityAsset("crown", "crown.png");
+        ResourceManager.getInstance().loadHighQualityAsset("missing", "missing.png");
+        ResourceManager.getInstance().loadHighQualityAsset("lock", "lock.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_play", "music_play.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_pause", "music_pause.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_stop", "music_stop.png");
@@ -304,9 +318,19 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public void onLoadComplete() {
+
+        // Initializing this class because they contain fragments in they constructors that should be initialized in
+        // main thread because of the Looper.
+        LobbyScene.INSTANCE.init();
+        RoomScene.INSTANCE.init();
+
         new AsyncTask() {
             @Override
             public void run() {
+
+                RoomAPI.INSTANCE.setPlayerEventListener(RoomScene.INSTANCE);
+                RoomAPI.INSTANCE.setRoomEventListener(RoomScene.INSTANCE);
+
                 BassAudioPlayer.initDevice();
                 GlobalManager.getInstance().init();
                 analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
@@ -676,14 +700,32 @@ public class MainActivity extends BaseGameActivity implements
         if (this.mEngine == null) {
             return;
         }
-        if (GlobalManager.getInstance().getEngine() != null
-                && GlobalManager.getInstance().getGameScene() != null
-                && !hasFocus
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
-            if (!GlobalManager.getInstance().getGameScene().isPaused()) {
-                GlobalManager.getInstance().getGameScene().pause();
+
+        if (getEngine() != null && !hasFocus) {
+
+            if (getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()
+                    && GlobalManager.getInstance().getGameScene() != null) {
+
+                if (!GlobalManager.getInstance().getGameScene().isPaused() && !Multiplayer.isMultiplayer)
+                    GlobalManager.getInstance().getGameScene().pause();
+            }
+
+            if (Multiplayer.isConnected && getEngine().getScene() == RoomScene.INSTANCE)
+            {
+                RoomScene.awaitStatusChange = true;
+
+                LangUtil.orAsyncCatch(() -> {
+
+                    if (RoomScene.hasLocalTrack)
+                        RoomAPI.setPlayerStatus(PlayerStatus.NOT_READY);
+                    else
+                        RoomAPI.setPlayerStatus(PlayerStatus.READY);
+
+                    return null;
+                }, null);
             }
         }
+
         if (hasFocus && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Config.isHideNaviBar()) {
             getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -740,11 +782,7 @@ public class MainActivity extends BaseGameActivity implements
         }
         if (GlobalManager.getInstance().getScoring() != null && keyCode == KeyEvent.KEYCODE_BACK
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getScoring().getScene()) {
-            GlobalManager.getInstance().getScoring().replayMusic();
-            GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getSongMenu().getScene());
-            GlobalManager.getInstance().getSongMenu().updateScore();
-            ResourceManager.getInstance().getSound("applause").stop();
-            GlobalManager.getInstance().getScoring().setReplayID(-1);
+            GlobalManager.getInstance().getScoring().back();
             return true;
         }
         if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ENTER)
@@ -761,14 +799,6 @@ public class MainActivity extends BaseGameActivity implements
                     FilterMenu.getInstance().hideMenu();
                 }
             }
-
-            /*if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == PropsMenu.getInstance()
-                    .getScene()) {
-                PropsMenu.getInstance().saveChanges();
-                if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                    InputManager.getInstance().toggleKeyboard();
-                }
-            }*/
 
             if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == ModMenu.getInstance().getScene()) {
                 ModMenu.getInstance().hide();
@@ -794,6 +824,24 @@ public class MainActivity extends BaseGameActivity implements
 
                 if (GlobalManager.getInstance().getEngine().getScene() instanceof LoadingScreen.LoadingScene) {
                     return true;
+                }
+
+                if (Multiplayer.isMultiplayer) {
+                    if (GlobalManager.getInstance().getEngine().getScene() == LobbyScene.INSTANCE) {
+                        LobbyScene.INSTANCE.back();
+                        return true;
+                    }
+
+                    if (GlobalManager.getInstance().getEngine().getScene() == RoomScene.INSTANCE) {
+
+                        if (RoomScene.INSTANCE.hasChildScene() && RoomScene.INSTANCE.getChildScene() == ModMenu.getInstance().getScene())
+                        {
+                            ModMenu.getInstance().hide();
+                            return true;
+                        }
+                        runOnUiThread(RoomScene.INSTANCE.getLeaveDialog()::show);
+                        return true;
+                    }
                 }
 
                 GlobalManager.getInstance().getMainScene().showExitDialog();

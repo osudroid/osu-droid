@@ -76,7 +76,8 @@ public class Config {
         enableStoryboard,
         safeBeatmapBg,
         trianglesAnimation,
-        displayRealTimePPCounter;
+        displayRealTimePPCounter,
+        useNightcoreOnMultiplayer;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -221,6 +222,9 @@ public class Config {
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
+
+        // Multiplayer
+        useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
 
         if(receiveAnnouncements) {
             FirebaseMessaging.getInstance().subscribeToTopic("announcements");
@@ -773,4 +777,11 @@ public class Config {
         skins.put(name, path);
     }
 
+    public static boolean isUseNightcoreOnMultiplayer() {
+        return useNightcoreOnMultiplayer;
+    }
+
+    public static void setUseNightcoreOnMultiplayer(boolean value) {
+        useNightcoreOnMultiplayer = value;
+    }
 }

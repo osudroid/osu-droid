@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.online;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -36,7 +37,7 @@ public class OnlineManager {
 
     private boolean stayOnline = true;
     private String ssid = "";
-    private String userId = "";
+    private long userId = -1L;
     private String playID = "";
 
     private String username = "";
@@ -142,7 +143,7 @@ public class OnlineManager {
             failMessage = "Invalid server response";
             return false;
         }
-        userId = params[0];
+        userId = Long.parseLong(params[0]);
         ssid = params[1];
         rank = Integer.parseInt(params[2]);
         score = Long.parseLong(params[3]);
@@ -186,7 +187,7 @@ public class OnlineManager {
             osuID = null;
 
         PostBuilder post = new PostBuilder();
-        post.addParam("userID", userId);
+        post.addParam("userID", String.valueOf(userId));
         post.addParam("ssid", ssid);
         post.addParam("filename", trackfile.getName());
         post.addParam("hash", hash);
@@ -235,7 +236,7 @@ public class OnlineManager {
         Debug.i("Sending record...");
 
         PostBuilder post = new PostBuilder();
-        post.addParam("userID", userId);
+        post.addParam("userID", String.valueOf(userId));
         post.addParam("playID", playID);
         post.addParam("data", data);
 

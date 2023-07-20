@@ -1,11 +1,14 @@
 package com.reco1l.framework.net
 
-// import com.reco1l.framework.extensions.iterator
+import com.reco1l.framework.extensions.className
+import com.reco1l.framework.extensions.iterator
+import com.reco1l.framework.extensions.logI
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import org.json.JSONTokener
 
-class JsonContent : JSONObject()
+class JsonContent() : JSONObject()
 {
 
     /**
@@ -14,14 +17,13 @@ class JsonContent : JSONObject()
     var isConvertedArray = false
         private set
 
-    //----------------------------------------------------------------------------------------------------------------//
 
-    // Disabled for osu!droid.
-/*   /**
+
+    /**
      * This constructor parses objects and arrays into a [JSONObject].
      * In the case of arrays it puts every array entry with the index as it name.
      */
-    constructor(source: String) : super()
+    constructor(source: String) : this()
     {
         val t = JSONTokener(source)
         val o = t.nextValue()
@@ -50,9 +52,9 @@ class JsonContent : JSONObject()
             return
         }
         throw JSONException("Not a JSON:\n$source")
-    }*/
+    }
 
-    //----------------------------------------------------------------------------------------------------------------//
+
 
     /**
      * Puts inside a new [JsonContent] and returns it.
@@ -82,7 +84,7 @@ class JsonContent : JSONObject()
         return get(index.toString())
     }
 
-    //----------------------------------------------------------------------------------------------------------------//
+
 
     /**
      * If this content correspond to an array converted it'll convert it back to [JSONArray].

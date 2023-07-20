@@ -1,6 +1,10 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
 import com.edlplan.ui.fragment.InGameSettingMenu;
+import com.reco1l.api.ibancho.RoomAPI;
+import com.reco1l.framework.lang.execution.Async;
+import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
 import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 
@@ -31,10 +35,11 @@ import ru.nsu.ccfit.zuev.osu.helper.TextButton;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
+import static com.reco1l.legacy.data.MultiplayerConverter.*;
+
 public class ModMenu implements IModSwitcher {
     private static final ModMenu instance = new ModMenu();
-    private Scene scene = null;
-    private SongMenu menu;
+    private Scene scene = null, parent;
     private EnumSet<GameMod> mod;
     private ChangeableText multiplierText;
     private TrackInfo selectedTrack;
@@ -62,35 +67,95 @@ public class ModMenu implements IModSwitcher {
         return instance;
     }
 
-    public void setSongMenu(final SongMenu menu) {
-        this.menu = menu;
-    }
-
     public void reload() {
         mod = EnumSet.noneOf(GameMod.class);
         init();
     }
 
-    public void show(SongMenu songMenu, TrackInfo selectedTrack) {
-        setSongMenu(songMenu);
+    public void show(Scene scene, TrackInfo selectedTrack) {
+        parent = scene;
         setSelectedTrack(selectedTrack);
-        songMenu.scene.setChildScene(getScene(),
-                false, true, true);
-        InGameSettingMenu.getInstance().show();
+        scene.setChildScene(getScene(), false, true, true);
+
+        // TODO Custom mods support for multiplayer.
+        if (!Multiplayer.isMultiplayer)
+            InGameSettingMenu.getInstance().show();
+
+        update();
+    }
+
+    public void update()
+    {
+        // Ensure selected mods are visually selected
+        if (!modButtons.isEmpty()) {
+            for (GameMod key : modButtons.keySet()) {
+                var button = modButtons.get(key);
+
+                if (button != null)
+                    button.setModEnabled(mod.contains(key));
+            }
+        }
+
+        // Updating multiplier text just in case
+        changeMultiplierText();
+    }
+
+    public void setMods(EnumSet<GameMod> mods, boolean isFreeMods)
+    {
+        if (!isFreeMods)
+            mod = mods;
+
+        if (!Multiplayer.isRoomHost)
+        {
+            if (mods.contains(GameMod.MOD_DOUBLETIME) || mods.contains(GameMod.MOD_NIGHTCORE))
+            {
+                mod.remove(Config.isUseNightcoreOnMultiplayer() ? GameMod.MOD_DOUBLETIME : GameMod.MOD_NIGHTCORE);
+                mod.add(Config.isUseNightcoreOnMultiplayer() ? GameMod.MOD_NIGHTCORE : GameMod.MOD_DOUBLETIME);
+            }
+            else {
+                mod.remove(GameMod.MOD_NIGHTCORE);
+                mod.remove(GameMod.MOD_DOUBLETIME);
+            }
+        }
+
+        if (mods.contains(GameMod.MOD_SCOREV2))
+            mod.add(GameMod.MOD_SCOREV2);
+        else
+            mod.remove(GameMod.MOD_SCOREV2);
+
+        if (mods.contains(GameMod.MOD_HALFTIME))
+            mod.add(GameMod.MOD_HALFTIME);
+        else
+            mod.remove(GameMod.MOD_HALFTIME);
+
+        update();
     }
 
     public void hide() {
-        if (menu != null) {
-            menu.getScene().clearChildScene();
-            menu = null;
+        if (parent != null) {
+            parent.clearChildScene();
+            parent = null;
         }
         InGameSettingMenu.getInstance().dismiss();
+
+        if (!Multiplayer.isMultiplayer)
+            return;
+
+        RoomScene.INSTANCE.setAwaitModsChange(true);
+
+        Async.run(() -> {
+
+            if (Multiplayer.isRoomHost)
+                RoomAPI.INSTANCE.setRoomMods(modsToString(mod));
+            else
+                RoomAPI.INSTANCE.setPlayerMods(modsToString(mod));
+        });
     }
 
     public void hideByFrag() {
-        if (menu != null) {
-            menu.getScene().clearChildScene();
-            menu = null;
+        if (parent != null) {
+            parent.clearChildScene();
+            parent = null;
         }
     }
 
@@ -129,26 +194,48 @@ public class ModMenu implements IModSwitcher {
 
         //line 1
         addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-easy", GameMod.MOD_EASY);
-        addButton(offset + offsetGrowth, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-nofail", GameMod.MOD_NOFAIL);
-        addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-halftime", GameMod.MOD_HALFTIME);
-        addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-reallyeasy", GameMod.MOD_REALLYEASY);
+
+        // Used to define the X offset of each button according to its visibility
+        int factor = 1;
+
+        if (!Multiplayer.isMultiplayer)
+            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-nofail", GameMod.MOD_NOFAIL);
+
+        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost)
+            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-halftime", GameMod.MOD_HALFTIME);
+
+        addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-reallyeasy", GameMod.MOD_REALLYEASY);
+
+        factor = 1;
 
         //line 2
         addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hardrock", GameMod.MOD_HARDROCK);
-        addButton(offset + offsetGrowth, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-doubletime", GameMod.MOD_DOUBLETIME);
-        addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-nightcore", GameMod.MOD_NIGHTCORE);
-        addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hidden", GameMod.MOD_HIDDEN);
-        addButton(offset + offsetGrowth * 4, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-flashlight", GameMod.MOD_FLASHLIGHT);
-        addButton(offset + offsetGrowth * 5, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-suddendeath", GameMod.MOD_SUDDENDEATH);
-        addButton(offset + offsetGrowth * 6, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-perfect", GameMod.MOD_PERFECT);
-        //addButton(offset + offsetGrowth * 6, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-speedup", GameMod.MOD_SPEEDUP);
+
+        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost)
+            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-doubletime", GameMod.MOD_DOUBLETIME);
+
+        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost)
+            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-nightcore", GameMod.MOD_NIGHTCORE);
+
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hidden", GameMod.MOD_HIDDEN);
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-flashlight", GameMod.MOD_FLASHLIGHT);
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-suddendeath", GameMod.MOD_SUDDENDEATH);
+        addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-perfect", GameMod.MOD_PERFECT);
+
+        factor = 1;
+
         //line 3
         addButton(offset, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax", GameMod.MOD_RELAX);
-        addButton(offset + offsetGrowth, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax2", GameMod.MOD_AUTOPILOT);
-        addButton(offset + offsetGrowth * 2, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-autoplay", GameMod.MOD_AUTO);
-        addButton(offset + offsetGrowth * 3, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-scorev2", GameMod.MOD_SCOREV2);
-        addButton(offset + offsetGrowth * 4, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-precise", GameMod.MOD_PRECISE);
-        addButton(offset + offsetGrowth * 5, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-smallcircle", GameMod.MOD_SMALLCIRCLE);
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax2", GameMod.MOD_AUTOPILOT);
+
+        if (!Multiplayer.isMultiplayer)
+            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-autoplay", GameMod.MOD_AUTO);
+
+        if (!Multiplayer.isMultiplayer)
+            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-scorev2", GameMod.MOD_SCOREV2);
+
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-precise", GameMod.MOD_PRECISE);
+        addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-smallcircle", GameMod.MOD_SMALLCIRCLE);
 
 
         final TextButton resetText = new TextButton(ResourceManager

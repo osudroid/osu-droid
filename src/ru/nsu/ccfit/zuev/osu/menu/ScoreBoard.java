@@ -2,7 +2,10 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.content.Context;
 import android.database.Cursor;
+import com.reco1l.api.ibancho.data.WinCondition;
 import com.reco1l.framework.lang.execution.Async;
+import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -204,6 +207,10 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 } else if (pSceneTouchEvent.isActionUp() && !moved && !isScroll) {
                     downTime = -1;
                     this.setAlpha(0.5f);
+
+                    if (Multiplayer.isMultiplayer)
+                        return true;
+
                     listener.openScore(scoreID, showOnline, username);
                     GlobalManager.getInstance().getScoring().setReplayID(scoreID);
                     return true;
@@ -491,7 +498,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
 
         if (downTime > 0.5f) {
             moved = true;
-            if (_scoreID != -1 && !showOnlineScores) {
+            if (!Multiplayer.isMultiplayer && _scoreID != -1 && !showOnlineScores) {
                 GlobalManager.getInstance().getSongMenu().showDeleteScoreMenu(_scoreID);
             }
             downTime = -1;
@@ -627,7 +634,10 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         public String userName;
         public int playScore;
         public int scoreId;
-        private int maxCombo;
+        public int maxCombo;
+
+        /**Only shown in multiplayer when room win condition is Accuracy*/
+        public float accuracy = -1;
 
         public void set(String name, int com, int scr, int id) {
             userName = name;
@@ -637,7 +647,16 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         }
 
         public String get() {
-            return userName + "\n" + NumberFormat.getNumberInstance(Locale.US).format(playScore) + "\n" + NumberFormat.getNumberInstance(Locale.US).format(maxCombo) + "x";
+            var text = userName + "\n" + NumberFormat.getNumberInstance(Locale.US).format(playScore) + "\n";
+
+            //noinspection DataFlowIssue
+            if (Multiplayer.isConnected && RoomScene.getRoom().getWinCondition() == WinCondition.ACCURACY)
+            {
+                text += String.format(Locale.ENGLISH, "%2.2f%%", accuracy * 100f);
+            }
+            else text += NumberFormat.getNumberInstance(Locale.US).format(maxCombo) + "x";
+
+            return text;
         }
     }
 

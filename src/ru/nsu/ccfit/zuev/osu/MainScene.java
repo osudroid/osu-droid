@@ -439,7 +439,7 @@ public class MainScene implements IUpdateHandler {
                 {
                     setColor(1, 1, 1);
                     musicControl(MusicOption.STOP);
-                    new ChimuWebView().show();
+                    ChimuWebView.INSTANCE.show();
                     return true;
                 }
 
@@ -654,6 +654,7 @@ public class MainScene implements IUpdateHandler {
         if (doMenuShow == true && isMenuShowed == true) {
             if (showPassTime > 10000f) {
 
+                menu.showFirstMenu();
                 scene.unregisterTouchArea(menu.getFirst());
                 scene.unregisterTouchArea(menu.getSecond());
                 scene.unregisterTouchArea(menu.getThird());
@@ -670,23 +671,7 @@ public class MainScene implements IUpdateHandler {
 
                 logo.registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2,
                         EaseBounceOut.getInstance()));
-                logoOverlay.registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, new IEntityModifier.IEntityModifierListener()
-                {
-                    @Override
-                    public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem)
-                    {
-
-                    }
-
-                    @Override
-                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
-                    {
-                        if (menu.isSecondMenu())
-                        {
-                            menu.showFirstMenu(false);
-                        }
-                    }
-                }, EaseBounceOut.getInstance()));
+                logoOverlay.registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, EaseBounceOut.getInstance()));
 
                 for (int i = 0; i < spectrum.length; i++) {
                     spectrum[i].registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3, Config.getRES_WIDTH() / 2, EaseBounceOut.getInstance()));
@@ -870,6 +855,7 @@ public class MainScene implements IUpdateHandler {
         if (trackInfos != null && trackInfos.size() > 0) {
             int trackIndex = random.nextInt(trackInfos.size());
             selectedTrack = trackInfos.get(trackIndex);
+            GlobalManager.getInstance().setSelectedTrack(selectedTrack);
 
             if (selectedTrack.getBackground() != null) {
                 try {

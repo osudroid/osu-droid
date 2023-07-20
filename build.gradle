@@ -1,6 +1,6 @@
 buildscript {
-    ext {
-        kotlin_version = '1.5.21'
+    ext{
+        kotlin_version = '1.7.0'
     }
     repositories {
         google()
@@ -180,4 +180,11 @@ dependencies {
 
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'com.github.delight-im:Android-AdvancedWebView:v3.2.1'
+
+    // Multiplayer
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.10"
+    implementation ('io.socket:socket.io-client:2.1.0') {
+        exclude group: 'org.json', module: 'json'
+    }
 }

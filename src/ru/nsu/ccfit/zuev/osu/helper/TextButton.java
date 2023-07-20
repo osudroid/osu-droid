@@ -21,7 +21,7 @@ public class TextButton extends Sprite {
     public TextButton(Font font, String text, float scale) {
         super(0, 0, ResourceManager.getInstance().getTexture(
                 "button"));
-        buttonText = new ChangeableText(0, 0, font, text);
+        buttonText = new ChangeableText(0, 0, font, text, 50);
         buttonText.setScale(scale);
         setColor(201 / 255f, 31 / 255f, 55 / 255f);
         this.setWidth(buttonText.getWidthScaled() + 80);
@@ -58,5 +58,8 @@ public class TextButton extends Sprite {
 
     public void setText(String text) {
         buttonText.setText(text);
+        float textX = (this.getWidth() - buttonText.getWidth()) / 2;
+        float textY = (this.getHeight() - buttonText.getHeight()) / 2;
+        buttonText.setPosition(textX, textY);
     }
 }

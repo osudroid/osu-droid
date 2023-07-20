@@ -1,13 +1,18 @@
 package com.reco1l.legacy.ui
 
-import org.anddev.andengine.entity.sprite.Sprite
+import com.reco1l.framework.lang.async
+import com.reco1l.legacy.ui.multiplayer.LobbyScene
+import com.reco1l.legacy.ui.multiplayer.Multiplayer
+import com.reco1l.legacy.ui.multiplayer.RoomScene
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.MainScene
 import ru.nsu.ccfit.zuev.osu.MainScene.MusicOption
-import ru.nsu.ccfit.zuev.osu.async.AsyncTask
+import ru.nsu.ccfit.zuev.osu.ToastLogger
+import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
 import ru.nsu.ccfit.zuev.osu.menu.SettingsMenu
+import java.lang.Exception
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as global
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as resources
 
@@ -16,180 +21,177 @@ class MainMenu(val main: MainScene)
 
     private val sound = resources().loadSound("menuhit", "sfx/menuhit.ogg", false)
 
-    private val play = object : Sprite(0f, 0f, resources().getTexture("play"))
+    /**
+     * This button will switch between `Play` and `Solo`.
+     */
+    val first = object : AnimSprite(0f, 0f, 0f, "play", "solo")
     {
         override fun onAreaTouched(touchEvent: TouchEvent, localX: Float, localY: Float): Boolean
         {
-            if (touchEvent.isActionDown)
+            if (frame == 0)
             {
-                setColor(0.7f, 0.7f, 0.7f)
-                sound?.play()
-                return true
-            }
-
-            if (touchEvent.isActionUp)
-            {
-                setColor(1f, 1f, 1f)
-                showSecondMenu()
-                return true
-            }
-
-            return super.onAreaTouched(touchEvent, localX, localY)
-        }
-    }
-
-    private val settings = object : Sprite(0f, 0f, resources().getTexture("options"))
-    {
-        override fun onAreaTouched(touchEvent: TouchEvent, localX: Float, localY: Float): Boolean
-        {
-
-            if (touchEvent.isActionDown)
-            {
-                setColor(0.7f, 0.7f, 0.7f)
-                sound?.play()
-                return true
-            }
-
-            if (touchEvent.isActionUp)
-            {
-                setColor(1f, 1f, 1f)
-                if (main.isOnExitAnim) return true
-                global().songService.isGaming = true
-                global().mainActivity.runOnUiThread { SettingsMenu().show() }
-                return true
-            }
-
-            return super.onAreaTouched(touchEvent, localX, localY)
-        }
-    }
-
-    private val exit = object : Sprite(0f, 0f, resources().getTexture("exit"))
-    {
-        override fun onAreaTouched(touchEvent: TouchEvent, localX: Float, localY: Float): Boolean
-        {
-            if (touchEvent.isActionDown)
-            {
-                setColor(0.7f, 0.7f, 0.7f)
-                return true
-            }
-
-            if (touchEvent.isActionUp)
-            {
-                setColor(1f, 1f, 1f)
-                main.showExitDialog()
-                return true
-            }
-
-            return super.onAreaTouched(touchEvent, localX, localY)
-        }
-    }
-
-    private val solo = object : Sprite(0f, 0f, resources().getTexture("solo"))
-    {
-        override fun onAreaTouched(touchEvent: TouchEvent, localX: Float, localY: Float): Boolean
-        {
-            if (touchEvent.isActionDown)
-            {
-                setColor(0.7f, 0.7f, 0.7f)
-                sound?.play()
-                return true
-            }
-
-            if (touchEvent.isActionUp)
-            {
-                setColor(1f, 1f, 1f)
-                if (main.isOnExitAnim) return true
-
-                global().songService.isGaming = true
-
-                object : AsyncTask()
+                if (touchEvent.isActionDown)
                 {
-                    override fun run()
-                    {
-                        global().engine.scene = LoadingScreen().scene
+                    setColor(0.7f, 0.7f, 0.7f)
+                    sound?.play()
+                    return true
+                }
+
+                if (touchEvent.isActionUp)
+                {
+                    setColor(1f, 1f, 1f)
+                    showSecondMenu()
+                    return true
+                }
+            }
+            else
+            {
+                if (touchEvent.isActionDown)
+                {
+                    setColor(0.7f, 0.7f, 0.7f)
+                    sound?.play()
+                    return true
+                }
+
+                if (touchEvent.isActionUp)
+                {
+                    setColor(1f, 1f, 1f)
+                    if (main.isOnExitAnim) return true
+
+                    global().songService.isGaming = true
+
+                    async {
+                        LoadingScreen().show()
+
                         global().mainActivity.checkNewSkins()
                         global().mainActivity.checkNewBeatmaps()
-                        if (!LibraryManager.INSTANCE.loadLibraryCache(true))
-                        {
-                            LibraryManager.INSTANCE.scanLibrary()
-                            System.gc()
-                        }
-                        global().songMenu.reload()
-                    }
+                        LibraryManager.INSTANCE.updateLibrary(true)
 
-                    override fun onComplete()
-                    {
                         main.musicControl(MusicOption.PLAY)
-                        global().engine.scene = global().songMenu.getScene()
+
+                        global().songMenu.reload()
+                        global().songMenu.show()
                         global().songMenu.select()
                     }
-                }.execute()
-                return true
+                    return true
+                }
             }
             return super.onAreaTouched(touchEvent, localX, localY)
         }
     }
 
-    private val multi = object : Sprite(0f, 0f, resources().getTexture("multi"))
+    /**
+     * This button will switch between `Settings` and `Multiplayer`
+     */
+    val second = object : AnimSprite(0f, 0f, 0f, "options", "multi")
     {
         override fun onAreaTouched(touchEvent: TouchEvent, localX: Float, localY: Float): Boolean
         {
-            if (touchEvent.isActionDown)
+
+            if (frame == 0)
             {
-                setColor(0.7f, 0.7f, 0.7f)
-                sound?.play()
-                return true
-            }
-
-            if (touchEvent.isActionUp)
-            {
-                setColor(1f, 1f, 1f)
-                if (main.isOnExitAnim) return true
-
-                global().songService.isGaming = true
-
-                object : AsyncTask()
+                if (touchEvent.isActionDown)
                 {
-                    override fun run()
-                    {
-                        global().engine.scene = LoadingScreen().scene
+                    setColor(0.7f, 0.7f, 0.7f)
+                    sound?.play()
+                    return true
+                }
+
+                if (touchEvent.isActionUp)
+                {
+                    setColor(1f, 1f, 1f)
+                    if (main.isOnExitAnim) return true
+                    global().songService.isGaming = true
+                    global().mainActivity.runOnUiThread { SettingsMenu().show() }
+                    return true
+                }
+            }
+            else
+            {
+                if (touchEvent.isActionDown)
+                {
+                    setColor(0.7f, 0.7f, 0.7f)
+                    sound?.play()
+                    return true
+                }
+
+                if (touchEvent.isActionUp)
+                {
+                    setColor(1f, 1f, 1f)
+                    if (main.isOnExitAnim) return true
+
+                    global().songService.isGaming = true
+                    Multiplayer.isMultiplayer = true
+
+                    async {
+                        LoadingScreen().show()
+
                         global().mainActivity.checkNewSkins()
                         global().mainActivity.checkNewBeatmaps()
-                        if (!LibraryManager.INSTANCE.loadLibraryCache(true))
+                        LibraryManager.INSTANCE.updateLibrary(true)
+
+                        LobbyScene.load()
+                        RoomScene.load()
+
+                        try
                         {
-                            LibraryManager.INSTANCE.scanLibrary()
-                            System.gc()
+                            LobbyScene.show()
+                        }
+                        catch (e: Exception)
+                        {
+                            global().songService.isGaming = false
+                            Multiplayer.isMultiplayer = false
+
+                            global().mainScene.show()
+                            ToastLogger.showText("Unable to connect multiplayer services: ${e.message}", true)
+                            e.printStackTrace()
+                            return@async
                         }
                     }
-
-                    override fun onComplete()
-                    {
-                        main.musicControl(MusicOption.PLAY)
-                    }
-                }.execute()
-                return true
+                    return true
+                }
             }
             return super.onAreaTouched(touchEvent, localX, localY)
         }
     }
 
-    private val back = object : Sprite(0f, 0f, resources().getTexture("back"))
+    /**
+     * This button will switch between `Exit` and `Back`
+     */
+    val third = object : AnimSprite(0f, 0f, 0f, "exit", "back")
     {
         override fun onAreaTouched(touchEvent: TouchEvent, localX: Float, localY: Float): Boolean
         {
-            if (touchEvent.isActionDown)
+            if (frame == 0)
             {
-                setColor(0.7f, 0.7f, 0.7f)
-                return true
-            }
+                if (touchEvent.isActionDown)
+                {
+                    setColor(0.7f, 0.7f, 0.7f)
+                    return true
+                }
 
-            if (touchEvent.isActionUp)
+                if (touchEvent.isActionUp)
+                {
+                    setColor(1f, 1f, 1f)
+                    main.showExitDialog()
+                    return true
+                }
+            }
+            else
             {
-                setColor(1f, 1f, 1f)
-                showFirstMenu(true)
-                return true
-            }
+                if (touchEvent.isActionDown)
+                {
+                    setColor(0.7f, 0.7f, 0.7f)
+                    return true
+                }
 
+                if (touchEvent.isActionUp)
+                {
+                    setColor(1f, 1f, 1f)
+                    showFirstMenu()
+                    return true
+                }
+            }
             return super.onAreaTouched(touchEvent, localX, localY)
         }
     }
@@ -197,22 +199,8 @@ class MainMenu(val main: MainScene)
     /**
      * Indicates if the player has tapped on `Play`.
      */
-    var isSecondMenu = false
+    private var isSecondMenu = false
 
-    /**
-     * This button will switch between `Play` and `Solo`.
-     */
-    var first = play
-
-    /**
-     * This button will switch between `Settings` and `Multiplayer`
-     */
-    var second = settings
-
-    /**
-     * This button will switch between `Exit` and `Back`
-     */
-    var third = exit
 
     fun attachButtons()
     {
@@ -221,75 +209,23 @@ class MainMenu(val main: MainScene)
         main.scene.attachChild(third, 1)
     }
 
-    private fun detachButtons()
-    {
-        first.detachSelf()
-        second.detachSelf()
-        third.detachSelf()
-
-        main.scene.unregisterTouchArea(first)
-        main.scene.unregisterTouchArea(second)
-        main.scene.unregisterTouchArea(third)
-    }
-
     private fun showSecondMenu()
     {
         if (isSecondMenu) return
         isSecondMenu = true
 
-        global().engine.runOnUpdateThread {
-
-            detachButtons()
-
-            solo.setPosition(first.x, first.y)
-            multi.setPosition(second.x, second.y)
-            back.setPosition(third.x, third.y)
-
-            solo.setScale(first.scaleX, first.scaleY)
-            multi.setScale(second.scaleX, second.scaleY)
-            back.setScale(third.scaleX, third.scaleY)
-
-            solo.alpha = first.alpha
-            multi.alpha = second.alpha
-            back.alpha = third.alpha
-
-            first = solo
-            second = multi
-            third = back
-
-            attachButtons()
-
-            main.scene.registerTouchArea(first)
-            main.scene.registerTouchArea(second)
-            main.scene.registerTouchArea(third)
-        }
+        first.frame = 1
+        second.frame = 1
+        third.frame = 1
     }
 
-    fun showFirstMenu(withTouch: Boolean)
+    fun showFirstMenu()
     {
         if (!isSecondMenu) return
         isSecondMenu = false
 
-        global().engine.runOnUpdateThread {
-
-            detachButtons()
-
-            play.alpha = first.alpha
-            settings.alpha = second.alpha
-            exit.alpha = third.alpha
-
-            first = play
-            second = settings
-            third = exit
-
-            attachButtons()
-
-            if (withTouch)
-            {
-                main.scene.registerTouchArea(first)
-                main.scene.registerTouchArea(second)
-                main.scene.registerTouchArea(third)
-            }
-        }
+        first.frame = 0
+        second.frame = 0
+        third.frame = 0
     }
 }
