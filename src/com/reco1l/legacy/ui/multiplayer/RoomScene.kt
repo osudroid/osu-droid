@@ -592,11 +592,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomBeatmapChange(beatmap: RoomBeatmap?)
     {
-        if (beatmap == null)
-            chat.onSystemChatMessage("Host is changing beatmap.", "#007BFF")
-        else if (room!!.beatmap != beatmap)
-            chat.onSystemChatMessage("Host changed beatmap.", "#007BFF")
-
         // Setting await lock
         awaitStatusChange = true
 
