@@ -20,7 +20,6 @@ import java.util.Locale;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoard;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -140,9 +139,6 @@ public class DuringGameScoreBoard extends GameObject {
                 items = Multiplayer.getLiveData();
             else
                 items = GlobalManager.getInstance().getSongMenu().getBoard();
-
-            if (items == null || items.length == 0)
-                return null;
 
             int replayID = Multiplayer.isConnected ? -1 : GlobalManager.getInstance().getScoring().getReplayID();
             if (replayID == -1) {

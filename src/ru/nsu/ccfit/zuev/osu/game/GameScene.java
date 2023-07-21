@@ -604,13 +604,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         // Resetting variables before starting the game.
+        Multiplayer.clearLeaderboard();
         hasFailed = false;
         backPressCount = 0;
         lastTimeBackPress = -1f;
         isSkipRequested = false;
         realTimeElapsed = 0;
-        Multiplayer.setFinalData(null);
-        Multiplayer.setLiveData(null);
 
         paused = false;
         gameStarted = false;

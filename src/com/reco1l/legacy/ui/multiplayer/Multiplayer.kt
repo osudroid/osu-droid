@@ -24,11 +24,19 @@ object Multiplayer
 
     /**Array containing live leaderboard*/
     @JvmStatic
-    var liveData: Array<ScoreBoardItems>? = null
+    var liveData: Array<ScoreBoardItems> = emptyArray()
 
     /**Array containing final leaderboard*/
     @JvmStatic
     var finalData: Array<StatisticV2>? = null
+
+
+    @JvmStatic
+    fun clearLeaderboard()
+    {
+        liveData = emptyArray()
+        finalData = null
+    }
 
 
     fun onLiveLeaderboard(array: JSONArray)
