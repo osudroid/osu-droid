@@ -55,7 +55,7 @@ public class DuringGameScoreBoard extends GameObject {
     public void update(float dt) {
 
         // Updating color animation at the update thread
-        if (Multiplayer.isConnected && playerSprite != null)
+        if (playerSprite != null)
         {
             float passedAfterChange = (System.currentTimeMillis() - lastRankChange) * 0.001f;
 
@@ -64,7 +64,7 @@ public class DuringGameScoreBoard extends GameObject {
                                   passedAfterChange < 1 ? 1 - 0.5f * passedAfterChange : 0.5f);
         }
 
-        if (initTask == null || !initTask.isCompleted() || Multiplayer.isConnected) {
+        if (initTask == null || !initTask.isCompleted() || Multiplayer.isMultiplayer) {
             return;
         }
 
@@ -72,44 +72,32 @@ public class DuringGameScoreBoard extends GameObject {
         // This should only be done if the scoreboard data comes from an online source.
         final ScoreBoard.ScoreBoardItems[] items = GlobalManager.getInstance().getSongMenu().getBoard();
         int replayID = GlobalManager.getInstance().getScoring().getReplayID();
-        if (replayID == -1 && scoreBoardData.length != items.length) {
+        if (replayID == -1 && (scoreBoardData == null || scoreBoardData.length != items.length)) {
             initScoreboard();
             return;
         }
-        updateInternal();
-    }
 
-    private void updateInternal() {
+        int score = stat.getAutoTotalScore();
+        playerText.setText(currentUsername + "\n" +
+                                   NumberFormat.getNumberInstance(Locale.US).format(score) + "\n" +
+                                   NumberFormat.getNumberInstance(Locale.US).format(stat.getMaxCombo()) + "x");
+        playerText.setScaleCenter(0, 0);
+        playerText.setScale(0.65f);
 
-        if (!Multiplayer.isConnected)
-        {
-            float passedAfterChange = (System.currentTimeMillis() - lastRankChange) * 0.001f;
-
-            playerSprite.setColor(passedAfterChange < 1 ? 1 - 0.5f * passedAfterChange : 0.5f,
-                                  passedAfterChange < 1 ? 1 - 0.5f * passedAfterChange : 0.5f, 1,
-                                  passedAfterChange < 1 ? 1 - 0.5f * passedAfterChange : 0.5f);
-            int score = stat.getAutoTotalScore();
-            playerText.setText(currentUsername + "\n" +
-                                       NumberFormat.getNumberInstance(Locale.US).format(score) + "\n" +
-                                       NumberFormat.getNumberInstance(Locale.US).format(stat.getMaxCombo()) + "x");
-            playerText.setScaleCenter(0, 0);
-            playerText.setScale(0.65f);
-
-            for (int i = posNow - 1; i >= 0; i--) {
-                if (score > scoreBoardData[i].playScore) {
-                    posNow = i;
-                    ranks[i].setText("#" + (i + 2));
-                    ranks[i].setPosition(100 - ranks[i].getWidth(), paddingTop * 2);
-                    playerRank.setText("#" + (i + 1));
-                    playerRank.setPosition(100 - playerRank.getWidth(), paddingTop * 2);
-                    lastRankChange = System.currentTimeMillis();
-                    if (i > 2) {
-                        boards[i].setVisible(false);
-                        boards[i - 2].setVisible(true);
-                    }
-                    playerSprite.setColor(1, 1, 1);
-                    playerSprite.setAlpha(1);
+        for (int i = posNow - 1; i >= 0; i--) {
+            if (score > scoreBoardData[i].playScore) {
+                posNow = i;
+                ranks[i].setText("#" + (i + 2));
+                ranks[i].setPosition(100 - ranks[i].getWidth(), paddingTop * 2);
+                playerRank.setText("#" + (i + 1));
+                playerRank.setPosition(100 - playerRank.getWidth(), paddingTop * 2);
+                lastRankChange = System.currentTimeMillis();
+                if (i > 2) {
+                    boards[i].setVisible(false);
+                    boards[i - 2].setVisible(true);
                 }
+                playerSprite.setColor(1, 1, 1);
+                playerSprite.setAlpha(1);
             }
         }
         if (boards.length > 4 && posNow > 3) {
@@ -127,18 +115,50 @@ public class DuringGameScoreBoard extends GameObject {
         }
     }
 
+    private void updatePositions()
+    {
+        var initialY = Config.getRES_HEIGHT() / 2f - itemHeight * 3;
+
+        int size = boards.length;
+        int i = 0;
+        while (i < size)
+        {
+            var sprite = boards[i];
+            sprite.setPosition(0, initialY + itemHeight * Math.min(i, 3));
+            sprite.setVisible(i <= (posNow > 3 ? 2 : 3) || i == posNow);
+            i++;
+        }
+    }
+
     public void initScoreboard() {
         if (initTask != null) {
             initTask.cancel(null);
         }
 
         initTask = Execution.async(() -> {
-            ScoreBoard.ScoreBoardItems[] items;
+            final var oldBoard = boards;
+            Execution.glThread(() -> {
+                if (oldBoard != null) {
+                    int i = oldBoard.length - 1;
+                    while (i >= 0)
+                    {
+                        Sprite board = oldBoard[i];
+                        board.detachSelf();
+                        i--;
+                    }
+                }
+                return null;
+            });
 
+            ScoreBoard.ScoreBoardItems[] items;
             if (Multiplayer.isConnected)
+            {
                 items = Multiplayer.getLiveData();
-            else
-                items = GlobalManager.getInstance().getSongMenu().getBoard();
+
+                if (items == null || items.length == 0)
+                    return null;
+            }
+            else items = GlobalManager.getInstance().getSongMenu().getBoard();
 
             int replayID = Multiplayer.isConnected ? -1 : GlobalManager.getInstance().getScoring().getReplayID();
             if (replayID == -1) {
@@ -162,11 +182,10 @@ public class DuringGameScoreBoard extends GameObject {
 
             if (Multiplayer.isConnected)
             {
-                assert RoomScene.getPlayer() != null;
-                assert RoomScene.getRoom() != null;
-
+                //noinspection DataFlowIssue
                 if (RoomScene.getRoom().getTeamMode() == TeamMode.TEAM_VS_TEAM)
                 {
+                    //noinspection DataFlowIssue
                     if (RoomScene.getPlayer().getTeam() == RoomTeam.RED)
                         currentUsername = "Red Team";
                     else
@@ -191,16 +210,6 @@ public class DuringGameScoreBoard extends GameObject {
             TextureRegion tex = ResourceManager.getInstance().getTexture("menu-button-background").deepCopy();
             tex.setHeight(90);
             tex.setWidth(130);
-
-            final var oldBoard = boards;
-            Execution.glThread(() -> {
-                if (oldBoard != null) {
-                    for (Sprite board : oldBoard) {
-                        board.detachSelf();
-                    }
-                }
-                return null;
-            });
             boards = new Sprite[Multiplayer.isConnected ? scoreBoardData.length : scoreBoardData.length + 1];
             ranks = new ChangeableText[scoreBoardData.length];
             for (int i = 0; i < scoreBoardData.length; i++) {
@@ -263,7 +272,7 @@ public class DuringGameScoreBoard extends GameObject {
                 playerText.setText(scoreBoardData[posNow].get());
                 playerText.setScaleCenter(0, 0);
                 playerText.setScale(0.65f);
-                updateInternal();
+                updatePositions();
                 return null;
             }
             lastRankChange = System.currentTimeMillis();

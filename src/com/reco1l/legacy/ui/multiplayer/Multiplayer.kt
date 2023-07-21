@@ -24,7 +24,7 @@ object Multiplayer
 
     /**Array containing live leaderboard*/
     @JvmStatic
-    var liveData: Array<ScoreBoardItems> = emptyArray()
+    var liveData: Array<ScoreBoardItems>? = null
 
     /**Array containing final leaderboard*/
     @JvmStatic
@@ -34,7 +34,7 @@ object Multiplayer
     @JvmStatic
     fun clearLeaderboard()
     {
-        liveData = emptyArray()
+        liveData = null
         finalData = null
     }
 
