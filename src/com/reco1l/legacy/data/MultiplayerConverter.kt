@@ -66,32 +66,6 @@ fun stringToMods(data: String?): EnumSet<GameMod>
     return mod
 }
 
-fun stringToEnforcedMods(data: String?): EnumSet<GameMod>
-{
-    val mod = EnumSet.noneOf(GameMod::class.java)
-
-    if (data.isNullOrEmpty()) return mod
-
-    if ('d' in data) mod += MOD_DOUBLETIME
-    if ('c' in data) mod += MOD_NIGHTCORE
-    if ('t' in data) mod += MOD_HALFTIME
-    if ('v' in data) mod += MOD_SCOREV2
-
-    return mod
-}
-
-fun enforcedModsToString(mod: EnumSet<GameMod>): String
-{
-    val s = StringBuilder()
-
-    if (MOD_DOUBLETIME in mod) s.append('d')
-    if (MOD_NIGHTCORE in mod) s.append('c')
-    if (MOD_HALFTIME in mod) s.append('t')
-    if (MOD_SCOREV2 in mod) s.append('v')
-
-    return s.toString()
-}
-
 fun modsToString(mod: EnumSet<GameMod>): String
 {
     val s = StringBuilder()
