@@ -25,6 +25,7 @@ import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.RGBColor
 import ru.nsu.ccfit.zuev.osuplus.R
 import kotlin.math.abs
+import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
 class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
 {
@@ -119,7 +120,11 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
         field?.clearFocus()
 
         async {
-            try { RoomAPI.sendMessage(message.toString()) } catch (e: Exception)
+            try
+            {
+                RoomAPI.sendMessage(message.toString())
+            }
+            catch (e: Exception)
             {
                 onSystemChatMessage("Error to send message: ${e.message}", "#FF0000")
                 e.printStackTrace()
@@ -248,6 +253,12 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
         if (isExtended)
         {
             toggleVisibility()
+            return
+        }
+
+        if (getGlobal().engine.scene == getGlobal().gameScene.scene)
+        {
+            getGlobal().gameScene.pause()
             return
         }
         uiThread { RoomScene.leaveDialog.show() }
