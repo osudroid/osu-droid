@@ -8,7 +8,6 @@ import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.util.MathUtils
-import ru.nsu.ccfit.zuev.osu.Utils
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import java.text.NumberFormat.getNumberInstance
 import java.util.Locale.ENGLISH
@@ -51,16 +50,13 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList()
         attachChild(item)
         getGlobal().scoring.scene.registerTouchArea(item)
 
-        itemHeight = 90f
+        itemHeight = 100f
     }
 
 
     inner class BoardItem(val index: Int, private val stats: StatisticV2) :
 
-            Sprite(560f, 0f, getResources().getTexture("menu-button-background").deepCopy().apply {
-                this.width = 130
-                this.height = 90
-            })
+            Sprite(570f, 0f, getResources().getTexture("menu-button-background").deepCopy())
     {
         private var moved = false
         private var dx = 0f
@@ -73,7 +69,9 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList()
         init
         {
             this.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
-            this.setColor(0.5f, 0.5f, 0.5f, 0.5f)
+            this.setColor(0.5f, 0.5f, 0.5f)
+            this.width = 140f
+            this.height = 100f
 
             text.setColor(0.85f, 0.85f, 0.9f)
             text.text = "${stats.playerName}\n${getNumberInstance(US).format(stats.modifiedTotalScore)}\n"
