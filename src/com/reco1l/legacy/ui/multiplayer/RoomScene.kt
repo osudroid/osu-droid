@@ -23,6 +23,7 @@ import org.anddev.andengine.entity.scene.background.SpriteBackground
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent
+import org.anddev.andengine.util.MathUtils
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ToastLogger
@@ -274,7 +275,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     options = RoomOptions()
                     options!!.show()
                 }
-
                 return false
             }
         }.also {
@@ -304,26 +304,37 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         {
             var scaleWhenHold = layoutBackButton?.property?.optBoolean("scaleWhenHold", true) ?: false
 
-            override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float) = when
+            var moved = false
+            var dx = 0f
+            var dy = 0f
+
+            override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
-                event.isActionDown ->
+                if (event.isActionDown)
                 {
-                    if (scaleWhenHold) setScale(1.25f)
+                    if (scaleWhenHold) this.setScale(1.25f)
+
+                    moved = false
+                    dx = localX
+                    dy = localY
 
                     getResources().getSound("menuback")?.play()
-                    true
+                    return true
                 }
-
-                event.isActionUp || event.isActionOutside || event.isActionMove ->
+                if (event.isActionUp)
                 {
-                    setScale(1f)
+                    this.setScale(1f)
 
-                    if (event.isActionUp)
+                    if (!moved)
                         uiThread { leaveDialog.show() }
-                    true
+                    return true
                 }
-
-                else -> false
+                if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 50)
+                {
+                    this.setScale(1f)
+                    moved = true
+                }
+                return false
             }
         }.also {
 
@@ -341,6 +352,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Mods button, shown only if free mods or if the player it's the host
         modsButton = object : AnimSprite(0f, 0f, 0f, "selection-mods", "selection-mods-over")
         {
+            var moved = false
+            var dx = 0f
+            var dy = 0f
+
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
                 if (!Multiplayer.isRoomHost && !room!!.isFreeMods || awaitModsChange || player!!.status == READY)
@@ -348,18 +363,24 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
                 if (event.isActionDown)
                 {
+                    moved = false
+                    dx = localX
+                    dy = localY
+
                     frame = 1
                     return true
                 }
                 if (event.isActionUp)
                 {
                     frame = 0
-                    getModMenu().show(this@RoomScene, getGlobal().selectedTrack)
+                    if (!moved)
+                        getModMenu().show(this@RoomScene, getGlobal().selectedTrack)
                     return true
                 }
-                if (event.isActionOutside || event.isActionMove)
+                if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 50)
                 {
                     frame = 0
+                    moved = true
                 }
                 return false
             }
