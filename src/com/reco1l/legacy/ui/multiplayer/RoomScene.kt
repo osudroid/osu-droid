@@ -958,8 +958,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
                     if (Multiplayer.isRoomHost)
                     {
-                        secondaryButton!!.setText("Start")
-                        secondaryButton!!.setColor(0.2f, 0.9f, 0.9f)
+                        secondaryButton!!.setText("Start match!")
+                        secondaryButton!!.setColor(0.2f, 0.9f, 0.2f)
                     }
                 }
 
