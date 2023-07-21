@@ -87,17 +87,19 @@ public class ModMenu implements IModSwitcher {
     public void update()
     {
         // Ensure selected mods are visually selected
-        if (!modButtons.isEmpty()) {
-            for (GameMod key : modButtons.keySet()) {
-                var button = modButtons.get(key);
+        synchronized (modButtons) {
+            if (!modButtons.isEmpty()) {
+                for (GameMod key : modButtons.keySet()) {
+                    var button = modButtons.get(key);
 
-                if (button != null)
-                    button.setModEnabled(mod.contains(key));
+                    if (button != null)
+                        button.setModEnabled(mod.contains(key));
+                }
             }
-        }
 
-        // Updating multiplier text just in case
-        changeMultiplierText();
+            // Updating multiplier text just in case
+            changeMultiplierText();
+        }
     }
 
     public void setMods(EnumSet<GameMod> mods, boolean isFreeMods)
