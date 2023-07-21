@@ -460,7 +460,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Hide any player menu if its shown
         uiThread {
-            playerList!!.menu?.dismiss()
+            playerList?.menu?.dismiss()
             options?.dismiss()
         }
 
