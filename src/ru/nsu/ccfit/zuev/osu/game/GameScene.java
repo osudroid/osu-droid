@@ -1914,8 +1914,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             leadOut += dt;
         }
 
-        // TODO skip button
         if (secPassed > skipTime - 1f && skipBtn != null) {
+            RoomScene.INSTANCE.getChat().dismiss();
             skipBtn.detachSelf();
             skipBtn = null;
         } else if (skipBtn != null) {
