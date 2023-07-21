@@ -8,6 +8,7 @@ import com.reco1l.api.ibancho.data.Room
 import com.reco1l.api.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
+import com.reco1l.framework.extensions.className
 import com.reco1l.framework.extensions.orAsyncCatch
 import com.reco1l.framework.extensions.orCatch
 import com.reco1l.framework.lang.uiThread
@@ -44,7 +45,7 @@ class LobbyRoomList : ScrollableList()
         {
             { RoomAPI.connectToRoom(room.id, getOnline().userId, getOnline().username, null) }.orCatch {
 
-                ToastLogger.showText("Failed to connect room: ${it.message}", true)
+                ToastLogger.showText("Failed to connect room: ${it.className} - ${it.message}", true)
                 it.printStackTrace()
                 LobbyScene.show()
             }
@@ -69,7 +70,7 @@ class LobbyRoomList : ScrollableList()
 
                     { RoomAPI.connectToRoom(room.id, getOnline().userId, getOnline().username, password) }.orAsyncCatch {
 
-                        ToastLogger.showText("Failed to connect room: ${it.message}", true)
+                        ToastLogger.showText("Failed to connect room: ${it.className} - ${it.message}", true)
                         it.printStackTrace()
                         LobbyScene.show()
                     }

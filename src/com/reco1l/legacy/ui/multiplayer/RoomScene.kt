@@ -9,6 +9,7 @@ import com.reco1l.api.ibancho.data.PlayerStatus.*
 import com.reco1l.api.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
+import com.reco1l.framework.extensions.className
 import com.reco1l.framework.extensions.orCatch
 import com.reco1l.framework.lang.glThread
 import com.reco1l.framework.lang.uiThread
@@ -576,7 +577,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     override fun onRoomConnectFail(e: Exception)
     {
         room = null
-        ToastLogger.showText("Failed to connect room: ${e.message}", true)
+        ToastLogger.showText("Failed to connect room: ${e.className} - ${e.message}", true)
         e.printStackTrace()
         back()
     }
