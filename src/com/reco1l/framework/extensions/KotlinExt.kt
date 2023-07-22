@@ -86,7 +86,7 @@ inline fun <reified T> (() -> T).orCatch(onException: (e: Exception) -> T): T
 /**
  * Prettier try-catch on async thread.
  */
-fun (() -> Unit).orAsyncCatch(onException: ((e: Exception) -> Unit)?)
+fun (() -> Any).orAsyncCatch(onException: ((e: Exception) -> Unit)?)
 {
     async { try { this() } catch (e: Exception) { onException?.invoke(e) } }
 }

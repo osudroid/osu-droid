@@ -2,6 +2,7 @@ package com.reco1l.legacy.ui.multiplayer
 
 import android.animation.Animator
 import android.annotation.SuppressLint
+import android.content.Context
 import android.text.SpannableStringBuilder
 import android.text.method.ScrollingMovementMethod
 import android.view.KeyEvent
@@ -9,6 +10,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnKeyListener
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
@@ -19,6 +21,8 @@ import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.fragment.BaseFragment
 import com.reco1l.api.ibancho.RoomAPI
+import com.reco1l.framework.extensions.orAsyncCatch
+import com.reco1l.framework.extensions.orCatch
 import com.reco1l.framework.lang.async
 import com.reco1l.framework.lang.uiThread
 import org.anddev.andengine.input.touch.TouchEvent
@@ -122,16 +126,14 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
         field?.text = null
         field?.clearFocus()
 
-        async {
-            try
-            {
-                RoomAPI.sendMessage(message.toString())
-            }
-            catch (e: Exception)
-            {
-                onSystemChatMessage("Error to send message: ${e.message}", "#FF0000")
-                e.printStackTrace()
-            }
+        val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        imm?.hideSoftInputFromWindow(field?.windowToken, 0);
+
+        { RoomAPI.sendMessage(message.toString()) }.orAsyncCatch {
+
+            onSystemChatMessage("Error to send message: ${it.message}", "#FF0000")
+            it.printStackTrace()
+
         }
     }
 
