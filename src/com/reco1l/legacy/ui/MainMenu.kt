@@ -57,6 +57,13 @@ class MainMenu(val main: MainScene)
                     setColor(1f, 1f, 1f)
                     if (main.isOnExitAnim) return true
 
+                    if (LibraryManager.INSTANCE.library.isEmpty())
+                    {
+                        getGlobal().mainScene.musicControl(MusicOption.STOP)
+                        ChimuWebView.INSTANCE.show()
+                        return true
+                    }
+
                     getGlobal().songService.isGaming = true
 
                     async {
@@ -67,13 +74,6 @@ class MainMenu(val main: MainScene)
                         LibraryManager.INSTANCE.updateLibrary(true)
 
                         main.musicControl(MusicOption.PLAY)
-
-                        if (LibraryManager.INSTANCE.library.isEmpty())
-                        {
-                            getGlobal().mainScene.musicControl(MusicOption.STOP)
-                            ChimuWebView.INSTANCE.show()
-                            return@async
-                        }
 
                         getGlobal().songMenu.reload()
                         getGlobal().songMenu.show()
