@@ -635,7 +635,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         getGlobal().selectedTrack = localTrack
 
         // Preventing from change song when host is in room while other players are in gameplay
-        if (getGlobal().engine.scene == getGlobal().gameScene.scene)
+        if (getGlobal().engine.scene != getGlobal().gameScene.scene)
         {
             getGlobal().songService.preLoad(localTrack.beatmap.music)
             getGlobal().songService.play()
