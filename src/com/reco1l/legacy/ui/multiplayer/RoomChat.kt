@@ -74,7 +74,10 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
 
     fun onRoomChatMessage(username: String, message: String) = uiThread {
 
-        val color = if (username == RoomScene.player!!.name) "#FF4081" else "#FF679B"
+        var color = if (username == RoomScene.player!!.name) "#FF4081" else "#FF679B"
+
+        if (username in DEV_NAMES)
+            color = "#9E00FF"
 
         val html = "<font color=$color>$username:</font> <font color=#000000>$message</font>"
         val spanned = HtmlCompat.fromHtml(html, FROM_HTML_MODE_LEGACY)
@@ -262,5 +265,14 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
             return
         }
         uiThread { RoomScene.leaveDialog.show() }
+    }
+
+    companion object
+    {
+        val DEV_NAMES = arrayOf(
+                "Rian8337",
+                "Reco1l",
+                "Acivev"
+        )
     }
 }
