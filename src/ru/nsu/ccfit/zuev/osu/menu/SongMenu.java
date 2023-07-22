@@ -1205,13 +1205,21 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             RoomScene.INSTANCE.setAwaitBeatmapChange(true);
             RoomScene.INSTANCE.show();
 
-            RoomAPI.INSTANCE.changeBeatmap(
-                    selectedTrack.getMD5(),
-                    selectedTrack.getBeatmap().getTitle(),
-                    selectedTrack.getBeatmap().getArtist(),
-                    selectedTrack.getCreator(),
-                    selectedTrack.getMode()
-            );
+            if (!Multiplayer.isConnected)
+                return;
+
+            if (selectedTrack != null)
+            {
+                RoomAPI.INSTANCE.changeBeatmap(
+                        selectedTrack.getMD5(),
+                        selectedTrack.getBeatmap().getTitle(),
+                        selectedTrack.getBeatmap().getArtist(),
+                        selectedTrack.getCreator(),
+                        selectedTrack.getMode()
+                );
+            }
+            else RoomAPI.INSTANCE.changeBeatmap();
+
             return;
         }
         GlobalManager.getInstance().getMainScene().show();
