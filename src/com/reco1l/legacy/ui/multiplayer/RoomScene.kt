@@ -488,7 +488,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             if (hasLocalTrack)
                 RoomAPI.setPlayerStatus(NOT_READY)
-            else
+            else if (room!!.beatmap != null)
                 RoomAPI.setPlayerStatus(MISSING_BEATMAP)
         }
         else
