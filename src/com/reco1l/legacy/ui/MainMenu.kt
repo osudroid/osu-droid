@@ -12,8 +12,7 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
 import ru.nsu.ccfit.zuev.osu.menu.SettingsMenu
-import java.lang.Exception
-import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as global
+import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as resources
 
 class MainMenu(val main: MainScene)
@@ -58,20 +57,27 @@ class MainMenu(val main: MainScene)
                     setColor(1f, 1f, 1f)
                     if (main.isOnExitAnim) return true
 
-                    global().songService.isGaming = true
+                    getGlobal().songService.isGaming = true
 
                     async {
                         LoadingScreen().show()
 
-                        global().mainActivity.checkNewSkins()
-                        global().mainActivity.checkNewBeatmaps()
+                        getGlobal().mainActivity.checkNewSkins()
+                        getGlobal().mainActivity.checkNewBeatmaps()
                         LibraryManager.INSTANCE.updateLibrary(true)
 
                         main.musicControl(MusicOption.PLAY)
 
-                        global().songMenu.reload()
-                        global().songMenu.show()
-                        global().songMenu.select()
+                        if (LibraryManager.INSTANCE.library.isEmpty())
+                        {
+                            getGlobal().mainScene.musicControl(MusicOption.STOP)
+                            ChimuWebView.INSTANCE.show()
+                            return@async
+                        }
+
+                        getGlobal().songMenu.reload()
+                        getGlobal().songMenu.show()
+                        getGlobal().songMenu.select()
                     }
                     return true
                 }
@@ -101,8 +107,8 @@ class MainMenu(val main: MainScene)
                 {
                     setColor(1f, 1f, 1f)
                     if (main.isOnExitAnim) return true
-                    global().songService.isGaming = true
-                    global().mainActivity.runOnUiThread { SettingsMenu().show() }
+                    getGlobal().songService.isGaming = true
+                    getGlobal().mainActivity.runOnUiThread { SettingsMenu().show() }
                     return true
                 }
             }
@@ -120,14 +126,14 @@ class MainMenu(val main: MainScene)
                     setColor(1f, 1f, 1f)
                     if (main.isOnExitAnim) return true
 
-                    global().songService.isGaming = true
+                    getGlobal().songService.isGaming = true
                     Multiplayer.isMultiplayer = true
 
                     async {
                         LoadingScreen().show()
 
-                        global().mainActivity.checkNewSkins()
-                        global().mainActivity.checkNewBeatmaps()
+                        getGlobal().mainActivity.checkNewSkins()
+                        getGlobal().mainActivity.checkNewBeatmaps()
                         LibraryManager.INSTANCE.updateLibrary(true)
 
                         LobbyScene.load()
@@ -139,10 +145,10 @@ class MainMenu(val main: MainScene)
                         }
                         catch (e: Exception)
                         {
-                            global().songService.isGaming = false
+                            getGlobal().songService.isGaming = false
                             Multiplayer.isMultiplayer = false
 
-                            global().mainScene.show()
+                            getGlobal().mainScene.show()
                             ToastLogger.showText("Unable to connect multiplayer services: ${e.message}", true)
                             e.printStackTrace()
                             return@async

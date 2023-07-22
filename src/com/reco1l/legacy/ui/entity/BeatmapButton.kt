@@ -11,9 +11,7 @@ import com.reco1l.legacy.ui.multiplayer.RoomScene
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent
-import ru.nsu.ccfit.zuev.osu.RGBColor
-import ru.nsu.ccfit.zuev.osu.ToastLogger
-import ru.nsu.ccfit.zuev.osu.TrackInfo
+import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.menu.MenuItemTrack
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
@@ -83,8 +81,15 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
 
         if (Multiplayer.isRoomHost)
         {
+            if (LibraryManager.INSTANCE.library.isEmpty())
+            {
+                getGlobal().songService.pause()
+                ChimuWebView.INSTANCE.show()
+                return true
+            }
+
             getGlobal().songMenu.reload()
-            getGlobal().engine.scene = getGlobal().songMenu.scene
+            getGlobal().songMenu.show()
             getGlobal().songMenu.select()
 
             // We notify all clients that the host is changing beatmap
