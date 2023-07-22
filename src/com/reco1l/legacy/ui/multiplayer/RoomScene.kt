@@ -486,9 +486,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             // Setting player status to NOT_READY
             awaitStatusChange = true
 
-            if (hasLocalTrack)
+            if (hasLocalTrack || room!!.beatmap == null)
                 RoomAPI.setPlayerStatus(NOT_READY)
-            else if (room!!.beatmap != null)
+            else
                 RoomAPI.setPlayerStatus(MISSING_BEATMAP)
         }
         else
@@ -702,7 +702,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Setting player status to NOT_READY
         awaitStatusChange = true
 
-        if (hasLocalTrack)
+        if (hasLocalTrack || room!!.beatmap == null)
             RoomAPI.setPlayerStatus(NOT_READY)
         else
             RoomAPI.setPlayerStatus(MISSING_BEATMAP)
@@ -742,7 +742,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Setting player status to NOT_READY
         awaitStatusChange = true
 
-        if (hasLocalTrack)
+        if (hasLocalTrack || room!!.beatmap == null)
             RoomAPI.setPlayerStatus(NOT_READY)
         else
             RoomAPI.setPlayerStatus(MISSING_BEATMAP)
@@ -761,7 +761,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Setting player status to NOT_READY
         awaitStatusChange = true
 
-        if (hasLocalTrack)
+        if (hasLocalTrack || room!!.beatmap == null)
             RoomAPI.setPlayerStatus(NOT_READY)
         else
             RoomAPI.setPlayerStatus(MISSING_BEATMAP)
@@ -792,7 +792,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Setting player status to NOT_READY
         awaitStatusChange = true
 
-        if (hasLocalTrack)
+        if (hasLocalTrack || room!!.beatmap == null)
             RoomAPI.setPlayerStatus(NOT_READY)
         else
             RoomAPI.setPlayerStatus(MISSING_BEATMAP)
