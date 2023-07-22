@@ -3,6 +3,8 @@ package com.reco1l.legacy.ui.multiplayer
 import android.animation.Animator
 import android.view.View
 import android.widget.EditText
+import android.widget.SeekBar
+import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.BaseAnimationListener
@@ -24,10 +26,6 @@ class LobbyCreateRoom : BaseFragment()
 
     override val layoutID = R.layout.multiplayer_create_room
 
-    private var nameField: EditText? = null
-
-    private var passwordField: EditText? = null
-
     init
     {
         isDismissOnBackgroundClick = true
@@ -35,15 +33,29 @@ class LobbyCreateRoom : BaseFragment()
 
     override fun onLoadView()
     {
-        nameField = findViewById(R.id.room_name)
-        passwordField = findViewById(R.id.room_password)
+        val nameField = findViewById<EditText>(R.id.room_name)
+        val passwordField = findViewById<EditText>(R.id.room_password)
+        val errorText = findViewById<TextView>(R.id.room_error_text)!!
+        val maxText = findViewById<TextView>(R.id.room_max_text)!!
+        val maxBar = findViewById<SeekBar>(R.id.room_max_bar)!!
 
-        val errorText: TextView = findViewById(R.id.room_error_text)!!
+        maxBar.setOnSeekBarChangeListener(
+                object : OnSeekBarChangeListener
+                {
+                    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean)
+                    {
+                        maxText.text = "Max players: $progress"
+                    }
+
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) = Unit
+                }
+        )
         nameField!!.setText("${getOnline().username}'s room")
 
         findViewById<View>(R.id.room_create)!!.setOnClickListener {
 
-            if (nameField!!.text.isNullOrEmpty())
+            if (nameField.text.isNullOrEmpty())
             {
                 errorText.visibility = View.VISIBLE
                 return@setOnClickListener
@@ -58,7 +70,7 @@ class LobbyCreateRoom : BaseFragment()
             async {
                 LoadingScreen().show()
 
-                val name = nameField!!.text!!.toString()
+                val name = nameField.text.toString()
                 val password = passwordField!!.text.toString().takeUnless { it.isEmpty() }
 
                 val beatmap = getGlobal().selectedTrack?.let {
@@ -79,7 +91,8 @@ class LobbyCreateRoom : BaseFragment()
                             beatmap,
                             getOnline().userId,
                             getOnline().username,
-                            password
+                            password,
+                            maxBar.progress
                     )
                     RoomAPI.connectToRoom(roomId, getOnline().userId, getOnline().username, password)
                 }
