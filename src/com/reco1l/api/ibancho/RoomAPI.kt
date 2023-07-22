@@ -290,6 +290,7 @@ object RoomAPI
     /**
      * Change room beatmap.
      */
+    @JvmOverloads
     fun changeBeatmap(md5: String? = null, title: String? = null, artist: String? = null, version: String? = null, creator: String? = null)
     {
         val json = JSONObject().apply {
