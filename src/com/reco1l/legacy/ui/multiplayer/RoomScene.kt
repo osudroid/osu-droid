@@ -462,6 +462,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         uiThread {
             playerList?.menu?.dismiss()
             options?.dismiss()
+            Unit
         }
 
         // Clearing player list
