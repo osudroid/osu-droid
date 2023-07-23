@@ -710,13 +710,16 @@ public class MainActivity extends BaseGameActivity implements
                     GlobalManager.getInstance().getGameScene().pause();
             }
 
-            if (Multiplayer.isConnected && getEngine().getScene() == RoomScene.INSTANCE)
+            if (Multiplayer.isConnected
+                    && (getEngine().getScene() == RoomScene.INSTANCE
+                    || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()))
             {
                 RoomScene.awaitStatusChange = true;
 
                 LangUtil.orAsyncCatch(() -> {
 
-                    if (RoomScene.hasLocalTrack)
+                    //noinspection DataFlowIssue
+                    if (RoomScene.hasLocalTrack || RoomScene.getRoom().getBeatmap() == null)
                         RoomAPI.setPlayerStatus(PlayerStatus.NOT_READY);
                     else
                         RoomAPI.setPlayerStatus(PlayerStatus.READY);
