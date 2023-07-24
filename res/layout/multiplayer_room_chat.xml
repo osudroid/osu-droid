@@ -132,6 +132,7 @@
                     android:maxLines="1"
                     android:padding="14dp"
                     android:textSize="14dp"
+                    android:maxLength="150"
                     android:layout_alignParentBottom="true"
                     android:hint="Tap to write"
                     android:singleLine="true"
