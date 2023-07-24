@@ -811,18 +811,21 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomMatchPlay()
     {
-        getGlobal().songMenu.stopMusic()
+        if (player!!.status == READY)
+        {
+            getGlobal().songMenu.stopMusic()
 
-        Replay.oldMod = getModMenu().mod
-        Replay.oldChangeSpeed = getModMenu().changeSpeed
-        Replay.oldForceAR = getModMenu().forceAR
-        Replay.oldEnableForceAR = getModMenu().isEnableForceAR
-        Replay.oldFLFollowDelay = getModMenu().fLfollowDelay
+            Replay.oldMod = getModMenu().mod
+            Replay.oldChangeSpeed = getModMenu().changeSpeed
+            Replay.oldForceAR = getModMenu().forceAR
+            Replay.oldEnableForceAR = getModMenu().isEnableForceAR
+            Replay.oldFLFollowDelay = getModMenu().fLfollowDelay
 
-        getGlobal().songMenu.game.startGame(getGlobal().selectedTrack, null)
+            getGlobal().songMenu.game.startGame(getGlobal().selectedTrack, null)
 
-        // Hiding any player menu if its shown
-        uiThread { playerList!!.menu?.dismiss() }
+            // Hiding any player menu if its shown
+            uiThread { playerList!!.menu?.dismiss() }
+        }
 
         // Updating player list
         playerList!!.updateItems()
@@ -830,11 +833,23 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomMatchStart()
     {
-        RoomAPI.setPlayerStatus(PLAYING)
-        getGlobal().gameScene.start()
+        if (player!!.status == READY)
+        {
+            RoomAPI.setPlayerStatus(PLAYING)
+            getGlobal().gameScene.start()
+        }
+
+        // Updating player list
+        playerList!!.updateItems()
     }
 
-    override fun onRoomMatchSkip() = getGlobal().gameScene.skip()
+    override fun onRoomMatchSkip()
+    {
+        if (getGlobal().engine.scene != getGlobal().gameScene.scene)
+            return
+
+        getGlobal().gameScene.skip()
+    }
 
 
     // Leaderboard
