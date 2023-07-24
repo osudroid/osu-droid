@@ -108,26 +108,37 @@ object LobbyScene : Scene()
         {
             var scaleWhenHold = layoutBackButton?.property?.optBoolean("scaleWhenHold", true) ?: false
 
-            override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float) = when
+            var moved = false
+            var dx = 0f
+            var dy = 0f
+
+            override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
-                event.isActionDown ->
+                if (event.isActionDown)
                 {
-                    if (scaleWhenHold) setScale(1.25f)
+                    if (scaleWhenHold) this.setScale(1.25f)
 
-                    resources().getSound("menuback")?.play()
-                    true
+                    moved = false
+                    dx = localX
+                    dy = localY
+
+                    ResourceManager.getInstance().getSound("menuback")?.play()
+                    return true
                 }
-
-                event.isActionUp || event.isActionOutside || event.isActionMove ->
+                if (event.isActionUp)
                 {
-                    setScale(1f)
+                    this.setScale(1f)
 
-                    if (event.isActionUp)
+                    if (!moved)
                         back()
-                    true
+                    return true
                 }
-
-                else -> false
+                if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 50)
+                {
+                    this.setScale(1f)
+                    moved = true
+                }
+                return false
             }
         }.also {
 
