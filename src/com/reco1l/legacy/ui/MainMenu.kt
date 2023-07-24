@@ -8,7 +8,6 @@ import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.MainScene
 import ru.nsu.ccfit.zuev.osu.MainScene.MusicOption
-import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
 import ru.nsu.ccfit.zuev.osu.menu.SettingsMenu
@@ -42,47 +41,46 @@ class MainMenu(val main: MainScene)
                     showSecondMenu()
                     return true
                 }
+                return false
             }
-            else
+
+            if (touchEvent.isActionDown)
             {
-                if (touchEvent.isActionDown)
-                {
-                    setColor(0.7f, 0.7f, 0.7f)
-                    sound?.play()
-                    return true
-                }
-
-                if (touchEvent.isActionUp)
-                {
-                    setColor(1f, 1f, 1f)
-                    if (main.isOnExitAnim) return true
-
-                    if (LibraryManager.INSTANCE.library.isEmpty())
-                    {
-                        getGlobal().mainScene.musicControl(MusicOption.STOP)
-                        ChimuWebView.INSTANCE.show()
-                        return true
-                    }
-
-                    getGlobal().songService.isGaming = true
-
-                    async {
-                        LoadingScreen().show()
-
-                        getGlobal().mainActivity.checkNewSkins()
-                        getGlobal().mainActivity.checkNewBeatmaps()
-                        LibraryManager.INSTANCE.updateLibrary(true)
-
-                        main.musicControl(MusicOption.PLAY)
-
-                        getGlobal().songMenu.reload()
-                        getGlobal().songMenu.show()
-                        getGlobal().songMenu.select()
-                    }
-                    return true
-                }
+                setColor(0.7f, 0.7f, 0.7f)
+                sound?.play()
+                return true
             }
-            return super.onAreaTouched(touchEvent, localX, localY)
+
+            if (touchEvent.isActionUp)
+            {
+                setColor(1f, 1f, 1f)
+                if (main.isOnExitAnim) return true
+
+                if (LibraryManager.INSTANCE.library.isEmpty())
+                {
+                    getGlobal().mainScene.musicControl(MusicOption.STOP)
+                    ChimuWebView.INSTANCE.show()
+                    return true
+                }
+
+                getGlobal().songService.isGaming = true
+
+                async {
+                    LoadingScreen().show()
+
+                    getGlobal().mainActivity.checkNewSkins()
+                    getGlobal().mainActivity.checkNewBeatmaps()
+                    LibraryManager.INSTANCE.updateLibrary(true)
+
+                    main.musicControl(MusicOption.PLAY)
+
+                    getGlobal().songMenu.reload()
+                    getGlobal().songMenu.show()
+                    getGlobal().songMenu.select()
+                }
+                return true
+            }
+            return false
         }
     }
 
@@ -111,53 +109,38 @@ class MainMenu(val main: MainScene)
                     getGlobal().mainActivity.runOnUiThread { SettingsMenu().show() }
                     return true
                 }
+                return false
             }
-            else
+
+            if (touchEvent.isActionDown)
             {
-                if (touchEvent.isActionDown)
-                {
-                    setColor(0.7f, 0.7f, 0.7f)
-                    sound?.play()
-                    return true
-                }
-
-                if (touchEvent.isActionUp)
-                {
-                    setColor(1f, 1f, 1f)
-                    if (main.isOnExitAnim) return true
-
-                    getGlobal().songService.isGaming = true
-                    Multiplayer.isMultiplayer = true
-
-                    async {
-                        LoadingScreen().show()
-
-                        getGlobal().mainActivity.checkNewSkins()
-                        getGlobal().mainActivity.checkNewBeatmaps()
-                        LibraryManager.INSTANCE.updateLibrary(true)
-
-                        LobbyScene.load()
-                        RoomScene.load()
-
-                        try
-                        {
-                            LobbyScene.show()
-                        }
-                        catch (e: Exception)
-                        {
-                            getGlobal().songService.isGaming = false
-                            Multiplayer.isMultiplayer = false
-
-                            getGlobal().mainScene.show()
-                            ToastLogger.showText("Unable to connect multiplayer services: ${e.message}", true)
-                            e.printStackTrace()
-                            return@async
-                        }
-                    }
-                    return true
-                }
+                setColor(0.7f, 0.7f, 0.7f)
+                sound?.play()
+                return true
             }
-            return super.onAreaTouched(touchEvent, localX, localY)
+
+            if (touchEvent.isActionUp)
+            {
+                setColor(1f, 1f, 1f)
+                if (main.isOnExitAnim) return true
+
+                getGlobal().songService.isGaming = true
+                Multiplayer.isMultiplayer = true
+
+                async {
+                    LoadingScreen().show()
+
+                    getGlobal().mainActivity.checkNewSkins()
+                    getGlobal().mainActivity.checkNewBeatmaps()
+                    LibraryManager.INSTANCE.updateLibrary(true)
+
+                    RoomScene.load()
+                    LobbyScene.load()
+                    LobbyScene.show()
+                }
+                return true
+            }
+            return false
         }
     }
 
@@ -182,23 +165,22 @@ class MainMenu(val main: MainScene)
                     main.showExitDialog()
                     return true
                 }
+                return false
             }
-            else
-            {
-                if (touchEvent.isActionDown)
-                {
-                    setColor(0.7f, 0.7f, 0.7f)
-                    return true
-                }
 
-                if (touchEvent.isActionUp)
-                {
-                    setColor(1f, 1f, 1f)
-                    showFirstMenu()
-                    return true
-                }
+            if (touchEvent.isActionDown)
+            {
+                setColor(0.7f, 0.7f, 0.7f)
+                return true
             }
-            return super.onAreaTouched(touchEvent, localX, localY)
+
+            if (touchEvent.isActionUp)
+            {
+                setColor(1f, 1f, 1f)
+                showFirstMenu()
+                return true
+            }
+            return false
         }
     }
 
