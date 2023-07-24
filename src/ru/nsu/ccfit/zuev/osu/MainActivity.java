@@ -319,7 +319,7 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     public void onLoadComplete() {
 
-        // Initializing this class because they contain fragments in they constructors that should be initialized in
+        // Initializing this class because they contain fragments in its constructors that should be initialized in
         // main thread because of the Looper.
         LobbyScene.INSTANCE.init();
         RoomScene.INSTANCE.init();
@@ -327,10 +327,6 @@ public class MainActivity extends BaseGameActivity implements
         new AsyncTask() {
             @Override
             public void run() {
-
-                RoomAPI.INSTANCE.setPlayerEventListener(RoomScene.INSTANCE);
-                RoomAPI.INSTANCE.setRoomEventListener(RoomScene.INSTANCE);
-
                 BassAudioPlayer.initDevice();
                 GlobalManager.getInstance().init();
                 analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
@@ -343,14 +339,11 @@ public class MainActivity extends BaseGameActivity implements
                     System.gc();
                 }
                 SplashScene.INSTANCE.playWelcomeAnimation();
-                try
-                {
+                try {
                     // Allow the welcome animation to progress before entering onComplete state.
                     Thread.sleep(2500);
                 }
-                catch (InterruptedException ignored)
-                {
-                }
+                catch (InterruptedException ignored) {}
                 Updater.getInstance().checkForUpdates(false, true);
             }
 

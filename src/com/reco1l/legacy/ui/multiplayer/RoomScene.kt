@@ -134,6 +134,13 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     private val infoText = ChangeableText(0f, 0f, getResources().getFont("smallFont"), "", 100)
 
 
+    init
+    {
+        RoomAPI.playerEventListener = this
+        RoomAPI.roomEventListener = this
+    }
+
+
     fun load()
     {
         detachChildren()
