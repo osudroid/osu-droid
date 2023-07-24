@@ -1903,7 +1903,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 engine.setScene(scoringScene.getScene());
 
                 if (Multiplayer.isConnected)
+                {
+                    RoomScene.INSTANCE.getChat().show();
                     ToastLogger.showText("Loading room statistics...", false);
+                }
 
             } else {
                 engine.setScene(oldScene);
