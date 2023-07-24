@@ -11,7 +11,10 @@ import com.reco1l.legacy.ui.multiplayer.RoomScene
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent
-import ru.nsu.ccfit.zuev.osu.*
+import ru.nsu.ccfit.zuev.osu.LibraryManager
+import ru.nsu.ccfit.zuev.osu.RGBColor
+import ru.nsu.ccfit.zuev.osu.ToastLogger
+import ru.nsu.ccfit.zuev.osu.TrackInfo
 import ru.nsu.ccfit.zuev.osu.menu.MenuItemTrack
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
@@ -129,21 +132,13 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
 
         // Updating button text
         trackTitle.text = "${beatmap!!.version} (${beatmap!!.creator})"
-        creatorInfo.text = "${beatmap!!.title} by ${beatmap!!.artist}\nMissing beatmap."
+        creatorInfo.text = "${beatmap!!.title} by ${beatmap!!.artist}\n${
 
-        // Requesting to Chimu
-        {
-            val json = CheesegullAPI.GET_beatmapRaw(beatmap!!.md5)
-
-            // It was found
-            beatmap!!.parentSetID = json.getString("ParentSetID").toLong()
-            creatorInfo.text = "${beatmap!!.title} by ${beatmap!!.artist}\nTap to download."
-
-        }.orAsyncCatch {
-
-            // It was not found
-            creatorInfo.text = "${beatmap!!.title} by ${beatmap!!.artist}\nBeatmap not found on Chimu."
-        }
+            if (beatmap!!.parentSetID == null)
+                "Beatmap not found on Chimu."
+            else
+                "Tap to download."
+        }"
     }
 
     companion object

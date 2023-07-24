@@ -44,5 +44,9 @@ internal fun parseBeatmap(o: JSONObject?): RoomBeatmap?
             artist = o.optString("artist"),
             creator = o.optString("creator"),
             version = o.optString("version")
-    )
+    ).apply {
+
+        if (!o.isNull("beatmapSetId"))
+            parentSetID = o.getString("beatmapSetId").toLong()
+    }
 }
