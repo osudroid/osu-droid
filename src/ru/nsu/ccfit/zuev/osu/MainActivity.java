@@ -717,7 +717,7 @@ public class MainActivity extends BaseGameActivity implements
                     if (RoomScene.hasLocalTrack || RoomScene.getRoom().getBeatmap() == null)
                         RoomAPI.setPlayerStatus(PlayerStatus.NOT_READY);
                     else
-                        RoomAPI.setPlayerStatus(PlayerStatus.READY);
+                        RoomAPI.setPlayerStatus(PlayerStatus.MISSING_BEATMAP);
 
                     return null;
                 }, null);
