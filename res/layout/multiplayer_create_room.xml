@@ -132,6 +132,7 @@
                             android:layout_marginTop="12dp"
                             android:padding="8dp"
                             android:textSize="14sp"
+                            android:singleLine="true"
                             android:maxLength="32"
                             android:imeOptions="actionDone"
                             android:hint="Leave empty to no password"
