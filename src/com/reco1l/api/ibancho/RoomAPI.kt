@@ -324,6 +324,7 @@ object RoomAPI
     /**
      * Change room mods.
      */
+    @JvmStatic
     fun setRoomMods(mods: String?): Emitter = socket!!.emit("roomModsChanged", mods)
 
     /**
@@ -389,6 +390,7 @@ object RoomAPI
     /**
      * Change player mods.
      */
+    @JvmStatic
     fun setPlayerMods(mods: String?): Emitter = socket!!.emit("playerModsChanged", mods)
 
     /**

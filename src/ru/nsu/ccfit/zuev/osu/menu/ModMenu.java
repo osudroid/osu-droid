@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.framework.lang.execution.Async;
+import com.reco1l.legacy.data.MultiplayerConverter;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
@@ -140,18 +141,25 @@ public class ModMenu implements IModSwitcher {
         }
         InGameSettingMenu.getInstance().dismiss();
 
-        if (!Multiplayer.isMultiplayer)
+        if (!Multiplayer.isConnected)
             return;
 
-        RoomScene.INSTANCE.setAwaitModsChange(true);
+        //noinspection DataFlowIssue
+        var currentMods = MultiplayerConverter.stringToMods(RoomScene.getRoom().getMods());
 
-        Async.run(() -> {
+        if (!currentMods.equals(mod))
+        {
+            RoomScene.INSTANCE.setAwaitModsChange(true);
 
-            if (Multiplayer.isRoomHost)
-                RoomAPI.INSTANCE.setRoomMods(modsToString(mod));
-            else
-                RoomAPI.INSTANCE.setPlayerMods(modsToString(mod));
-        });
+            Async.run(() -> {
+
+                if (Multiplayer.isRoomHost)
+                    RoomAPI.setRoomMods(modsToString(mod));
+                else
+                    RoomAPI.setPlayerMods(modsToString(mod));
+            });
+        }
+
     }
 
     public void hideByFrag() {
