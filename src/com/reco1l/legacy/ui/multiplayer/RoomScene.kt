@@ -830,11 +830,20 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomMatchStart()
     {
+        if (player!!.status != READY)
+            return
+
         RoomAPI.setPlayerStatus(PLAYING)
         getGlobal().gameScene.start()
     }
 
-    override fun onRoomMatchSkip() = getGlobal().gameScene.skip()
+    override fun onRoomMatchSkip()
+    {
+        if (getGlobal().engine.scene != getGlobal().gameScene.scene)
+            return
+
+        getGlobal().gameScene.skip()
+    }
 
 
     // Leaderboard
