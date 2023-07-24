@@ -22,8 +22,6 @@ import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.fragment.BaseFragment
 import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.framework.extensions.orAsyncCatch
-import com.reco1l.framework.extensions.orCatch
-import com.reco1l.framework.lang.async
 import com.reco1l.framework.lang.uiThread
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.RGBColor
@@ -120,14 +118,20 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
         RoomScene.chatPreview.setContentText(content)
     }
 
-    private fun sendMessage()
+    private fun hideKeyboard()
     {
-        val message = field?.text.takeUnless { it.isNullOrEmpty() } ?: return
-        field?.text = null
         field?.clearFocus()
 
         val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-        imm?.hideSoftInputFromWindow(field?.windowToken, 0);
+        imm?.hideSoftInputFromWindow(field?.windowToken, 0)
+    }
+
+    private fun sendMessage()
+    {
+        hideKeyboard()
+
+        val message = field?.text.takeUnless { it.isNullOrEmpty() } ?: return
+        field?.text = null
 
         { RoomAPI.sendMessage(message.toString()) }.orAsyncCatch {
 
@@ -182,7 +186,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
     @SuppressLint("ClickableViewAccessibility")
     private fun toggleVisibility()
     {
-        field?.clearFocus()
+        hideKeyboard()
 
         if (isExtended)
         {
@@ -257,7 +261,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
     {
         if (isExtended)
         {
-            toggleVisibility()
+            uiThread { toggleVisibility() }
             return
         }
 
