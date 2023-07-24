@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.text.SpannableStringBuilder
+import android.text.Spanned
 import android.text.method.ScrollingMovementMethod
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -25,6 +26,7 @@ import com.reco1l.framework.extensions.orAsyncCatch
 import com.reco1l.framework.lang.uiThread
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.RGBColor
+import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osuplus.R
 import kotlin.math.abs
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
@@ -74,15 +76,9 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
                 .start()
     }
 
-    fun onRoomChatMessage(username: String, message: String) = uiThread {
-
-        var color = if (username == RoomScene.player!!.name) "#FF4081" else "#FF679B"
-
-        if (username in DEV_NAMES)
-            color = "#9E00FF"
-
-        val html = "<font color=$color>$username:</font> <font color=#000000>$message</font>"
-        val spanned = HtmlCompat.fromHtml(html, FROM_HTML_MODE_LEGACY)
+    private fun appendText(spanned: Spanned)
+    {
+        ResourceManager.getInstance().getSound("heartbeat")?.play()
 
         if (log.isNotEmpty())
         {
@@ -91,6 +87,19 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
         log.append(spanned)
 
         text?.text = log
+    }
+
+    fun onRoomChatMessage(username: String, message: String) = uiThread {
+
+        var color = if (username == RoomScene.player!!.name) "#FF4081" else "#FF679B"
+
+        if (username in DEV_NAMES)
+            color = "#9E00FF"
+
+        val html = "<font color=$color><b>$username: </b></font> <font color=#000000>$message</font>"
+        val spanned = HtmlCompat.fromHtml(html, FROM_HTML_MODE_LEGACY)
+
+        appendText(spanned)
         showPreview(" $message", tag = "$username:", tagColor = color)
     }
 
@@ -99,13 +108,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
         val htmlError = "<font color=$color>${message}</font>"
         val spanned = HtmlCompat.fromHtml(htmlError, FROM_HTML_MODE_LEGACY)
 
-        if (log.isNotEmpty())
-        {
-            log.appendLine()
-        }
-        log.append(spanned)
-
-        text?.text = log
+        appendText(spanned)
         showPreview(message, contentColor = color)
     }
 
