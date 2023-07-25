@@ -1,6 +1,9 @@
 package com.reco1l.legacy.ui.multiplayer
 
+import android.net.Uri
 import com.reco1l.api.ibancho.LobbyAPI
+import com.reco1l.api.ibancho.RoomAPI
+import com.reco1l.framework.extensions.className
 import com.reco1l.framework.extensions.orAsyncCatch
 import com.reco1l.framework.lang.glThread
 import org.anddev.andengine.entity.modifier.LoopEntityModifier
@@ -11,14 +14,16 @@ import org.anddev.andengine.entity.scene.background.SpriteBackground
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent
-import ru.nsu.ccfit.zuev.osu.Config
-import ru.nsu.ccfit.zuev.osu.ToastLogger
+import org.anddev.andengine.util.MathUtils
+import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
+import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as global
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as resources
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager.getInstance as getOnline
 
 object LobbyScene : Scene()
 {
@@ -199,6 +204,39 @@ object LobbyScene : Scene()
         }
     }
 
+
+    // Connection
+
+    fun connectFromLink(link: Uri)
+    {
+        if (Multiplayer.isConnected)
+            return
+
+        GlobalManager.getInstance().songService.isGaming = true
+        Multiplayer.isMultiplayer = true
+
+        {
+            LoadingScreen().show()
+
+            GlobalManager.getInstance().mainActivity.checkNewSkins()
+            GlobalManager.getInstance().mainActivity.checkNewBeatmaps()
+            LibraryManager.INSTANCE.updateLibrary(true)
+
+            RoomScene.load()
+            load()
+
+            val roomID = link.pathSegments[0].toLong()
+            val password = if (link.pathSegments.size > 1) link.pathSegments[1] else null
+
+            RoomAPI.connectToRoom(roomID, getOnline().userId, getOnline().username, password)
+
+        }.orAsyncCatch {
+
+            ToastLogger.showText("Failed to connect room: ${it.className} - ${it.message}", true)
+            it.printStackTrace()
+            back()
+        }
+    }
 
     // Update events
 

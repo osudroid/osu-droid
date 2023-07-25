@@ -17,6 +17,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -46,11 +47,10 @@ import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
+import com.reco1l.api.ibancho.LobbyAPI;
 import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.api.ibancho.data.PlayerStatus;
 import com.reco1l.framework.extensions.LangUtil;
-import com.reco1l.framework.lang.Execution;
-import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
@@ -113,6 +113,9 @@ public class MainActivity extends BaseGameActivity implements
     private boolean willReplay = false;
     private static boolean activityVisible = true;
     private boolean autoclickerDialogShown = false;
+
+    // Multiplayer
+    private Uri roomInviteLink;
 
     @Override
     public Engine onLoadEngine() {
@@ -359,6 +362,12 @@ public class MainActivity extends BaseGameActivity implements
                 initPreferences();
                 availableInternalMemory();
                 initAccessibilityDetector();
+
+                if (roomInviteLink != null) {
+                    LobbyScene.INSTANCE.connectFromLink(roomInviteLink);
+                    return;
+                }
+
                 if (willReplay) {
                     GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
                     willReplay = false;
@@ -614,15 +623,17 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     protected void onStart() {
-//        this.enableAccelerometerSensor(this);
-        if (getIntent().getAction() != null
-                && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
-            if (ContentResolver.SCHEME_FILE.equals(getIntent().getData().getScheme())) {
-                beatmapToAdd = getIntent().getData().getPath();
-            }
-            if (BuildConfig.DEBUG) {
-                System.out.println(getIntent());
-                System.out.println(getIntent().getData().getEncodedPath());
+        if (getIntent().getAction() != null && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
+
+            var data = getIntent().getData();
+
+            if (data != null) {
+
+                if ("odmp".equals(data.getScheme()))
+                    roomInviteLink = data;
+
+                if (ContentResolver.SCHEME_FILE.equals(getIntent().getData().getScheme()))
+                    beatmapToAdd = getIntent().getData().getPath();
             }
         }
         super.onStart();

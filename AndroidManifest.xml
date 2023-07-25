@@ -56,6 +56,16 @@
             android:name="com.edlplan.ui.ImportReplayActivity"
             android:label="@string/act_import_replay">
 
+            <!--Multiplayer invite link-->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="odmp"/>
+            </intent-filter>
+
             <!-- firefox and file explorer -->
             <intent-filter>
                 <action

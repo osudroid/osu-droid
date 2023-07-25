@@ -1,6 +1,9 @@
 package com.reco1l.legacy.ui.multiplayer
 
 import android.animation.Animator
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context.*
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -27,12 +30,14 @@ import com.reco1l.framework.lang.async
 import com.reco1l.framework.lang.uiThread
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.MainActivity
+import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
-import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.osu.menu.SettingsMenu
+import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResourceManager
 import ru.nsu.ccfit.zuev.skins.SkinManager.getInstance as getSkinManager
+
 
 /**
  * Based on [SettingsMenu]
@@ -77,6 +82,18 @@ class RoomOptions : SettingsFragment()
         if (Multiplayer.isRoomHost)
         {
             addPreferencesFromResource(R.xml.multiplayer_room_settings)
+
+            findPreference<Preference>("room_link")!!.onPreferenceClickListener = OnPreferenceClickListener {
+
+                val clipboard = requireContext().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+
+                val link = "odmp://${RoomScene.room!!.id}/"
+                val data = ClipData.newPlainText("Link de invitación", link)
+
+                clipboard.setPrimaryClip(data)
+                ToastLogger.showText("Link copied to clipboard, if the room has a password you can type at the end of the URL.", false)
+                true
+            }
 
             findPreference<EditTextPreference>("room_name")!!.apply {
 

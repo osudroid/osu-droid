@@ -4,6 +4,11 @@
     <PreferenceCategory
             android:title="Room options">
 
+        <Preference
+                android:key="room_link"
+                android:title="Get invite link"
+                android:summary="Copy invite link to clipboard"/>
+
         <EditTextPreference
                 android:key="room_name"
                 android:title="Room name"
