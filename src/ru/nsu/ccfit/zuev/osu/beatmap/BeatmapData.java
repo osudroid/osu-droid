@@ -270,10 +270,7 @@ public class BeatmapData {
         track.setBeatmapSetID(metadata.beatmapSetID);
 
         // Difficulty
-        track.setOverallDifficulty(difficulty.od);
-        track.setApproachRate(difficulty.ar);
-        track.setHpDrain(difficulty.hp);
-        track.setCircleSize(difficulty.cs);
+        track.applyDifficulty(this);
 
         // Events
         track.setBackground(events.backgroundFilename);
