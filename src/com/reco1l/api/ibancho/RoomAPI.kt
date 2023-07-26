@@ -13,7 +13,6 @@ import io.socket.emitter.Emitter
 import io.socket.emitter.Emitter.Listener
 import org.json.JSONArray
 import org.json.JSONObject
-import kotlin.Exception
 
 object RoomAPI
 {
@@ -199,7 +198,7 @@ object RoomAPI
 
         socket?.off()
         socket = null
-        roomEventListener?.onRoomConnectFail(it[0] as Exception)
+        roomEventListener?.onRoomConnectFail(it[0].toString())
 
     }
 

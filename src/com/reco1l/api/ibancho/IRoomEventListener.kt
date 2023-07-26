@@ -27,7 +27,7 @@ interface IRoomEventListener
     /**
      * Called when the connection fails.
      */
-    fun onRoomConnectFail(e: Exception)
+    fun onRoomConnectFail(error: String?)
 
     /**
      * Emitted when the server encounters an error in processing info (maybe this can be displayed in a toast message).
