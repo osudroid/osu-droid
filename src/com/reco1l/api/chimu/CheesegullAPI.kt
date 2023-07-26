@@ -82,22 +82,4 @@ object CheesegullAPI
         it.query = query
         return it.executeAndGetJson().toArray()?.mapIntoListOf<T>()
     }
-
-    // osu!droid functions
-
-    /**
-     * Get beatmap information in JSON format.
-     */
-    fun GET_beatmapRaw(md5: String): JsonContent = JsonRequester(BEATMAP_BY_MD5 + md5).use {
-
-        return it.executeAndGetJson()
-    }
-
-    /**
-     * Get beatmap set information in JSON format.
-     */
-    fun GET_beatmapSetRaw(id: Long): JsonContent = JsonRequester(BEATMAP_SET_BY_ID + id).use {
-
-        return it.executeAndGetJson()
-    }
 }
