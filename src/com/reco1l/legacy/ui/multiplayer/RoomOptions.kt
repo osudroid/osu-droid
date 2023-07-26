@@ -22,6 +22,7 @@ import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.SkinPathPreference
 import com.edlplan.ui.fragment.LoadingFragment
 import com.edlplan.ui.fragment.SettingsFragment
+import com.reco1l.api.ibancho.LobbyAPI
 import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.api.ibancho.data.RoomTeam
 import com.reco1l.api.ibancho.data.TeamMode
@@ -87,8 +88,8 @@ class RoomOptions : SettingsFragment()
 
                 val clipboard = requireContext().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
 
-                val link = "odmp://${RoomScene.room!!.id}/"
-                val data = ClipData.newPlainText("Link de invitación", link)
+                val link = "${LobbyAPI.HOST}/${RoomScene.room!!.id}/"
+                val data = ClipData.newPlainText("Invitation link", link)
 
                 clipboard.setPrimaryClip(data)
                 ToastLogger.showText("Link copied to clipboard, if the room has a password you can type at the end of the URL.", false)

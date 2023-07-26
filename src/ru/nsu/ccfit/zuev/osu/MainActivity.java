@@ -629,7 +629,7 @@ public class MainActivity extends BaseGameActivity implements
 
             if (data != null) {
 
-                if ("odmp".equals(data.getScheme()))
+                if (data.toString().startsWith(LobbyAPI.HOST))
                     roomInviteLink = data;
 
                 if (ContentResolver.SCHEME_FILE.equals(getIntent().getData().getScheme()))
