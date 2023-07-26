@@ -1,8 +1,6 @@
 package com.reco1l.framework.net
 
-import com.reco1l.framework.extensions.className
 import com.reco1l.framework.extensions.iterator
-import com.reco1l.framework.extensions.logI
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -51,7 +49,7 @@ class JsonContent() : JSONObject()
             }
             return
         }
-        throw JSONException("Not a JSON:\n$source")
+        throw JSONException(source)
     }
 
 
