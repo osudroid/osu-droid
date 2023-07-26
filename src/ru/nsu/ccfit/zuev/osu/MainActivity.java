@@ -709,7 +709,8 @@ public class MainActivity extends BaseGameActivity implements
 
         if (getEngine() != null && !hasFocus) {
 
-            if (getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()
+            if (GlobalManager.getInstance().getGameScene() != null
+                    && getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()
                     && GlobalManager.getInstance().getGameScene() != null) {
 
                 if (!GlobalManager.getInstance().getGameScene().isPaused() && !Multiplayer.isMultiplayer)
