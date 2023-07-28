@@ -4,7 +4,6 @@ import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -18,12 +17,14 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.os.*;
-
-import androidx.annotation.NonNull;
-import androidx.preference.PreferenceManager;
-import androidx.core.content.PermissionChecker;
-
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.PowerManager;
+import android.os.StatFs;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -34,14 +35,18 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
-
 import android.widget.Toast;
+
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.PermissionChecker;
+import androidx.preference.PreferenceManager;
+
 import com.edlplan.ui.ActivityOverlay;
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
-import com.edlplan.ui.fragment.BuildTypeNoticeFragment;
-
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+
+import net.lingala.zip4j.ZipFile;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
@@ -62,24 +67,17 @@ import org.anddev.andengine.util.Debug;
 import java.io.File;
 import java.io.IOException;
 import java.math.RoundingMode;
-import java.security.Security;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import net.lingala.zip4j.ZipFile;
-
-import pub.devrel.easypermissions.AppSettingsDialog;
-import pub.devrel.easypermissions.EasyPermissions;
 import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
+import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.SpritePool;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
@@ -88,7 +86,6 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.menu.FilterMenu;
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
-import ru.nsu.ccfit.zuev.osu.menu.SettingsMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SplashScene;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
@@ -98,7 +95,6 @@ public class MainActivity extends BaseGameActivity implements
         IAccelerometerListener {
     public static SongService songService;
     public ServiceConnection connection;
-    public BroadcastReceiver onNotifyButtonClick;
     private PowerManager.WakeLock wakeLock = null;
     private String beatmapToAdd = null;
     private SaveServiceObject saveServiceObject;
@@ -257,10 +253,6 @@ public class MainActivity extends BaseGameActivity implements
             Editor editor = prefs.edit();
             editor.putBoolean("onlineSet", true);
             editor.commit();
-
-            //TODO removed auto registration at first launch
-            /*OnlineInitializer initializer = new OnlineInitializer(this);
-            initializer.createInitDialog();*/
         }
     }
 
@@ -268,11 +260,19 @@ public class MainActivity extends BaseGameActivity implements
     public void onLoadResources() {
         Config.setTextureQuality(1);
         ResourceManager.getInstance().Init(mEngine, this);
+        ResourceManager.getInstance().loadHighQualityAsset("welcome", "gfx/welcome.png");
+        ResourceManager.getInstance().loadHighQualityAsset("loading_start", "gfx/loading.png");
+
+        ResourceManager.getInstance().loadSound("welcome", "sfx/welcome.ogg", false);
+        ResourceManager.getInstance().loadSound("welcome_piano", "sfx/welcome_piano.ogg", false);
+
+        // Setting the scene as fast as we can
+        getEngine().setScene(SplashScene.INSTANCE.getScene());
+
         ResourceManager.getInstance().loadHighQualityAsset("logo", "logo.png");
         ResourceManager.getInstance().loadHighQualityAsset("play", "play.png");
-        //ResourceManager.getInstance().loadHighQualityAsset("multiplayer", "multiplayer.png");
-        //ResourceManager.getInstance().loadHighQualityAsset("solo", "solo.png");
         ResourceManager.getInstance().loadHighQualityAsset("exit", "exit.png");
+        ResourceManager.getInstance().loadHighQualityAsset("chimu", "chimu.png");
         ResourceManager.getInstance().loadHighQualityAsset("options", "options.png");
         ResourceManager.getInstance().loadHighQualityAsset("offline-avatar", "offline-avatar.png");
         ResourceManager.getInstance().loadHighQualityAsset("star", "gfx/star.png");
@@ -292,33 +292,43 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
         ResourceManager.getInstance().loadFont("smallFont", null, 21, Color.WHITE);
         ResourceManager.getInstance().loadStrokeFont("strokeFont", null, 36, Color.BLACK, Color.WHITE);
-
-        BassAudioPlayer.initDevice();
-
     }
 
     @Override
     public Scene onLoadScene() {
-        return new SplashScene().getScene();
+        return SplashScene.INSTANCE.getScene();
     }
 
     @Override
     public void onLoadComplete() {
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
+        new AsyncTask() {
+            @Override
             public void run() {
+                BassAudioPlayer.initDevice();
                 GlobalManager.getInstance().init();
                 analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
                 GlobalManager.getInstance().setLoadingProgress(50);
-                Config.loadSkins();
                 checkNewSkins();
+                Config.loadSkins();
                 checkNewBeatmaps();
-                if (!LibraryManager.getInstance().loadLibraryCache(MainActivity.this, true)) {
-                    LibraryManager.getInstance().scanLibrary(MainActivity.this);
+                if (!LibraryManager.INSTANCE.loadLibraryCache(true)) {
+                    LibraryManager.INSTANCE.scanLibrary();
                     System.gc();
                 }
+                SplashScene.INSTANCE.playWelcomeAnimation();
+                try
+                {
+                    // Allow the welcome animation to progress before entering onComplete state.
+                    Thread.sleep(2500);
+                }
+                catch (InterruptedException ignored)
+                {
+                }
+                Updater.getInstance().checkForUpdates(false, true);
             }
 
-            public void onComplete() {  
+            @Override
+            public void onComplete() {
                 GlobalManager.getInstance().setInfo("");
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
@@ -332,7 +342,7 @@ public class MainActivity extends BaseGameActivity implements
                     willReplay = false;
                 }
             }
-        });
+        }.execute();
     }
     /*
     Accuracy isn't the best, but it's sufficient enough
@@ -391,10 +401,6 @@ public class MainActivity extends BaseGameActivity implements
                 }});
 
         ActivityOverlay.initial(this, frameLayout.getId());
-
-        if ("pre_release".equals(BuildConfig.BUILD_TYPE) || BuildConfig.DEBUG) {
-            BuildTypeNoticeFragment.single.get().show();
-        }
     }
 
     public void checkNewBeatmaps() {
@@ -407,27 +413,21 @@ public class MainActivity extends BaseGameActivity implements
                         StringTable.get(R.string.message_lib_importing),
                         false);
 
-                if(FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath())) {
-                    String folderName = beatmapToAdd.substring(0, beatmapToAdd.length() - 4);
-                    // We have imported the beatmap!
-                    ToastLogger.showText(
-                            StringTable.format(R.string.message_lib_imported, folderName),
-                            true);
-                }
-
-                // LibraryManager.getInstance().sort();
-                LibraryManager.getInstance().savetoCache(MainActivity.this);
+                FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath());
+                // LibraryManager.INSTANCE.sort();
+                LibraryManager.INSTANCE.saveToCache();
             } else if (file.getName().endsWith(".odr")) {
                 willReplay = true;
             }
         } else if (mainDir.exists() && mainDir.isDirectory()) {
             File[] filelist = FileUtils.listFiles(mainDir, ".osz");
-            final ArrayList<String> beatmaps = new ArrayList<String>();
+            final ArrayList<String> beatmaps = new ArrayList<>();
             for (final File file : filelist) {
-                ZipFile zip = new ZipFile(file);
-                if(zip.isValidZipFile()) {
-                    beatmaps.add(file.getPath());
-                }
+                try (var zip = new ZipFile(file)) {
+                    if (zip.isValidZipFile()) {
+                        beatmaps.add(file.getPath());
+                    }
+                } catch (IOException ignored) {}
             }
 
             File beatmapDir = new File(Config.getBeatmapPath());
@@ -435,10 +435,11 @@ public class MainActivity extends BaseGameActivity implements
                     && beatmapDir.isDirectory()) {
                 filelist = FileUtils.listFiles(beatmapDir, ".osz");
                 for (final File file : filelist) {
-                    ZipFile zip = new ZipFile(file);
-                    if(zip.isValidZipFile()) {
-                        beatmaps.add(file.getPath());
-                    }
+                    try (var zip = new ZipFile(file)) {
+                        if (zip.isValidZipFile()) {
+                            beatmaps.add(file.getPath());
+                        }
+                    } catch (IOException ignored) {}
                 }
             }
 
@@ -448,10 +449,11 @@ public class MainActivity extends BaseGameActivity implements
                     && downloadDir.isDirectory()) {
                 filelist = FileUtils.listFiles(downloadDir, ".osz");
                 for (final File file : filelist) {
-                    ZipFile zip = new ZipFile(file);
-                    if(zip.isValidZipFile()) {
-                        beatmaps.add(file.getPath());
-                    }
+                    try (var zip = new ZipFile(file)) {
+                        if (zip.isValidZipFile()) {
+                            beatmaps.add(file.getPath());
+                        }
+                    } catch (IOException ignored) {}
                 }
             }
 
@@ -462,18 +464,12 @@ public class MainActivity extends BaseGameActivity implements
                         R.string.message_lib_importing_several,
                         beatmaps.size()), false);
                 for (final String beatmap : beatmaps) {
-                    if(FileUtils.extractZip(beatmap, Config.getBeatmapPath())) {
-                        String folderName = beatmap.substring(0, beatmap.length() - 4);
-                        // We have imported the beatmap!
-                        ToastLogger.showText(
-                                StringTable.format(R.string.message_lib_imported, folderName),
-                                true);
-                    }
+                    FileUtils.extractZip(beatmap, Config.getBeatmapPath());
                 }
                 // Config.setDELETE_OSZ(deleteOsz);
 
-                // LibraryManager.getInstance().sort();
-                LibraryManager.getInstance().savetoCache(MainActivity.this);
+                // LibraryManager.INSTANCE.sort();
+                LibraryManager.INSTANCE.saveToCache();
             }
         }
     }
@@ -490,10 +486,11 @@ public class MainActivity extends BaseGameActivity implements
             final File[] files = FileUtils.listFiles(skinDir, ".osk");
 
             for (final File file : files) {
-                ZipFile zip = new ZipFile(file);
-                if(zip.isValidZipFile()) {
-                    skins.add(file.getPath());
-                }
+                try (var zip = new ZipFile(file)) {
+                    if (zip.isValidZipFile()) {
+                        skins.add(file.getPath());
+                    }
+                } catch (IOException ignored) {}
             }
         }
 
@@ -506,10 +503,11 @@ public class MainActivity extends BaseGameActivity implements
             final File[] files = FileUtils.listFiles(downloadDir, ".osk");
 
             for (final File file : files) {
-                ZipFile zip = new ZipFile(file);
-                if(zip.isValidZipFile()) {
-                    skins.add(file.getPath());
-                }
+                try (var zip = new ZipFile(file)) {
+                    if (zip.isValidZipFile()) {
+                        skins.add(file.getPath());
+                    }
+                } catch (IOException ignored) {}
             }
         }
 
@@ -568,26 +566,6 @@ public class MainActivity extends BaseGameActivity implements
         onBeginBindService();
     }
 
-    public void onCreateNotifyReceiver() {
-        if (filter == null) {
-            //过滤器创建
-            filter = new IntentFilter();
-            filter.addAction("Notify_cancel");
-        }
-
-        //按钮广播监听
-        onNotifyButtonClick = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals("Notify_cancel")) {
-                    songService.stop();
-                    GlobalManager.getInstance().getMainScene().exit();
-                }
-            }
-        };
-        registerReceiver(onNotifyButtonClick, filter);
-    }
-
     public void onBeginBindService() {
         if (connection == null && songService == null) {
             connection = new ServiceConnection() {
@@ -607,9 +585,6 @@ public class MainActivity extends BaseGameActivity implements
             };
 
             bindService(new Intent(MainActivity.this, SongService.class), connection, BIND_AUTO_CREATE);
-            if (Build.VERSION.SDK_INT > 10) {
-                onCreateNotifyReceiver();
-            }
         }
         GlobalManager.getInstance().setSongService(songService);
         GlobalManager.getInstance().setSaveServiceObject(saveServiceObject);
@@ -644,7 +619,7 @@ public class MainActivity extends BaseGameActivity implements
         }
         if (GlobalManager.getInstance().getMainScene() != null) {
             if (songService != null && Build.VERSION.SDK_INT > 10) {
-                if (songService.hideNotifyPanel()) {
+                if (songService.hideNotification()) {
                     if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
                     GlobalManager.getInstance().getMainScene().loadBeatmapInfo();
                     GlobalManager.getInstance().getMainScene().loadTimeingPoints(false);
@@ -670,28 +645,14 @@ public class MainActivity extends BaseGameActivity implements
         }
         if (GlobalManager.getInstance().getMainScene() != null) {
             BeatmapInfo beatmapInfo = GlobalManager.getInstance().getMainScene().beatmapInfo;
-            if (songService != null && beatmapInfo != null && !songService.isGaming()/* && !songService.isSettingMenu()*/) {
-                if (Build.VERSION.SDK_INT > 10) {
-                    songService.showNotifyPanel();
+            if (songService != null && beatmapInfo != null && !songService.isGaming()) {
+                songService.showNotification();
 
-                    if (wakeLock == null) {
-                        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-                        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "osudroid:MainActivity");
-                    }
-                    wakeLock.acquire();
-
-                    if (beatmapInfo.getArtistUnicode() != null && beatmapInfo.getTitleUnicode() != null) {
-                        songService.updateTitleText(beatmapInfo.getTitleUnicode(), beatmapInfo.getArtistUnicode());
-                    } else if (beatmapInfo.getArtist() != null && beatmapInfo.getTitle() != null) {
-                        songService.updateTitleText(beatmapInfo.getTitle(), beatmapInfo.getArtist());
-                    } else {
-                        songService.updateTitleText("QAQ I cant load info", " ");
-                    }
-                    songService.updateCoverImage(beatmapInfo.getTrack(0).getBackground());
-                    songService.updateStatus();
-                } else {
-                    songService.stop();
+                if (wakeLock == null) {
+                    PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+                    wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "osudroid:MainActivity");
                 }
+                wakeLock.acquire();
             } else {
                 if (songService != null) {
                     songService.pause();
@@ -924,5 +885,11 @@ public class MainActivity extends BaseGameActivity implements
             finish();
             return false;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
+        super.onDestroy();
     }
 }

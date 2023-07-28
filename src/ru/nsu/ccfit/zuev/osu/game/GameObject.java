@@ -5,6 +5,7 @@ import android.graphics.PointF;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 
 public abstract class GameObject {
+
     protected boolean endsCombo;
     protected boolean autoPlay = false;
     protected float hitTime = 0;
@@ -51,7 +52,7 @@ public abstract class GameObject {
         return startHit;
     }
 
-    public void tryHit(float dt) {return;};
+    public void tryHit(float dt) {}
 
-    public PointF getPos() {return pos;};
+    public PointF getPos() {return pos;}
 }

@@ -71,7 +71,7 @@ public class GlobalManager {
         getGameScene().setOldScene(getSongMenu().getScene());
         if (songService != null) {
             songService.stop();
-            songService.hideNotifyPanel();
+            songService.hideNotification();
         }
     }
 

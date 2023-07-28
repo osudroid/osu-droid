@@ -7,6 +7,10 @@ import android.util.Log;
 
 import com.dgsrz.bancho.security.SecurityUtils;
 
+import com.reco1l.framework.data.IniReader;
+import com.reco1l.legacy.data.SkinConverter;
+import com.reco1l.legacy.data.SkinIniConverter;
+import com.reco1l.legacy.engine.BlankTextureRegion;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.font.FontFactory;
@@ -30,12 +34,15 @@ import java.util.regex.Pattern;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
+import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
 import ru.nsu.ccfit.zuev.osu.helper.QualityAssetBitmapSource;
 import ru.nsu.ccfit.zuev.osu.helper.QualityFileBitmapSource;
 import ru.nsu.ccfit.zuev.osu.helper.ScaledBitmapSource;
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinJsonReader;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
+import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
 public class ResourceManager {
     private static ResourceManager mgr = new ResourceManager();
@@ -117,13 +124,41 @@ public class ResourceManager {
         }
         if (skinFiles != null) {
             JSONObject skinjson = null;
-            File skinJson = new File(folder, "skin.json");
-            if (skinJson.exists()) {
+            File jsonFile = new File(folder, "skin.json");
+            if (jsonFile.exists()) {
                 try {
-                    skinjson = new JSONObject(OsuSkin.readFull(skinJson));
+                    skinjson = new JSONObject(OsuSkin.readFull(jsonFile));
                 } catch (Exception e) {
                     e.printStackTrace();
                     skinjson = null;
+                }
+            }
+            else
+            {
+                var iniFile = new File(folder, "skin.ini");
+
+                if (iniFile.exists())
+                {
+                    GlobalManager.getInstance().setInfo("Converting skin.ini to skin.json...");
+
+                    try (var ini = new IniReader(iniFile))
+                    {
+                        skinjson = SkinIniConverter.convertToJson(ini);
+                        SkinIniConverter.saveToFile(skinjson, jsonFile);
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+
+                    SkinConverter.ensureOptionalTexture(new File(folder, "sliderendcircle.png"));
+                    SkinConverter.ensureOptionalTexture(new File(folder, "sliderendcircleoverlay.png"));
+
+                    SkinConverter.ensureTexture(new File(folder, "selection-mods.png"));
+                    SkinConverter.ensureTexture(new File(folder, "selection-random.png"));
+                    SkinConverter.ensureTexture(new File(folder, "selection-options.png"));
+
+                    skinFiles = FileUtils.listFiles(skinFolder);
                 }
             }
             if (skinjson == null) skinjson = new JSONObject();
@@ -435,8 +470,8 @@ public class ResourceManager {
         TextureRegion region;
         if (external) {
             final File texFile = new File(file);
-            if (texFile.exists() == false) {
-                return textures.values().iterator().next();
+            if (!texFile.exists()) {
+                return new BlankTextureRegion();
             }
             final QualityFileBitmapSource source = new QualityFileBitmapSource(
                     texFile);
@@ -451,7 +486,7 @@ public class ResourceManager {
             }
 
             int errorCount = 0;
-            while (source.preload() == false && errorCount < 3) {
+            while (!source.preload() && errorCount < 3) {
                 errorCount++;
             }
             if (errorCount >= 3) {
@@ -482,7 +517,7 @@ public class ResourceManager {
                 th *= 2;
             }
             int errorCount = 0;
-            while (source.preload() == false && errorCount < 3) {
+            while (!source.preload() && errorCount < 3) {
                 errorCount++;
             }
             if (errorCount >= 3) {
@@ -573,15 +608,45 @@ public class ResourceManager {
         }
     }
 
+    public TextureRegion getTextureWithPrefix(StringSkinData prefix, String name)
+    {
+        var defaultName = prefix.getDefaultValue() + "-" + name;
+        if (SkinManager.isSkinEnabled() && customTextures.containsKey(defaultName)) {
+            return customTextures.get(defaultName);
+        }
+
+        var customName = prefix.getCurrentValue() + "-" + name;
+
+        if (!textures.containsKey(customName)) {
+            loadTexture(customName, Config.getSkinPath() + customName.replace("\\", "") + ".png", true);
+        }
+
+        if (textures.get(customName) != null) {
+            return textures.get(customName);
+        }
+        return textures.get(defaultName);
+    }
+
     public TextureRegion getTexture(final String resname) {
         if (SkinManager.isSkinEnabled() && customTextures.containsKey(resname)) {
             return customTextures.get(resname);
         }
-        if (textures.containsKey(resname) == false) {
+        if (!textures.containsKey(resname)) {
             Debug.i("Loading texture: " + resname);
+
             return loadTexture(resname, "gfx/" + resname + ".png", false);
         }
         return textures.get(resname);
+    }
+
+    public TextureRegion getAvatarTextureIfLoaded(final String avatarURL) {
+        var region = getTextureIfLoaded(MD5Calcuator.getStringMD5(avatarURL));
+
+        if (region == null) {
+            region = getTextureIfLoaded(MD5Calcuator.getStringMD5(OnlineManager.defaultAvatarURL));
+        }
+
+        return region;
     }
 
     public TextureRegion getTextureIfLoaded(final String resname) {

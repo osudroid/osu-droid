@@ -15,8 +15,7 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
+import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -108,17 +107,12 @@ public class PropertiesLibrary {
         if (context == null) {
             return;
         }
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
-
-
+        new AsyncTask() {
+            @Override
             public void run() {
                 save(context);
             }
-
-
-            public void onComplete() {
-            }
-        });
+        }.execute();
     }
 
     public BeatmapProperties getProperties(final String path) {

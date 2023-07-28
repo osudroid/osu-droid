@@ -23,7 +23,7 @@ public abstract class SkinData<I> implements IDefaultableData<I> {
 
     @Override
     public I getDefaultValue() {
-        return data.getCurrentValue();
+        return data.getDefaultValue();
     }
 
     @Override

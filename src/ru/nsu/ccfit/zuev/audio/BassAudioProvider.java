@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.audio;
 
 import android.content.res.AssetManager;
+import android.util.Log;
 
 import com.un4seen.bass.BASS;
 import com.un4seen.bass.BASS_FX;
@@ -16,9 +17,10 @@ public class BassAudioProvider {
     public static final int DECODER_DOUBLE_TIME = 1;
     public static final int DECODER_NIGHT_CORE = 2;
     public static final int WINDOW_FFT = 1024;
+    public static final int DEFAULT_FREQUENCY = 44100;
 
     private int channel = 0;
-    private BASS.FloatValue freq = new BASS.FloatValue();
+    private final BASS.FloatValue freq = new BASS.FloatValue();
     private int fileFlag = 0;
     private int decoder = 0;
     private int multiplier = 0;
@@ -27,10 +29,37 @@ public class BassAudioProvider {
 
     public BassAudioProvider() {
         freq.value = 1.0f;
-        BASS.BASS_Init(-1, 44100, BASS.BASS_DEVICE_LATENCY);
-        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_BUFFER, 0);
-        // BASS.BASS_SetConfig(BASS.BASS_CONFIG_BUFFER, 100);
-        // BASS.BASS_SetConfig(BASS.BASS_CONFIG_UPDATEPERIOD, 10);
+        configureBASS();
+    }
+
+    /**
+     * Configures BASS to the default setting that the game is using.
+     */
+    public static void configureBASS() {
+        // Initialize BASS if it's not initialized already. This allows us to get the device ID for reinitialization later.
+        BASS.BASS_Init(-1, DEFAULT_FREQUENCY, BASS.BASS_DEVICE_LATENCY);
+
+        // This likely doesn't help, but also doesn't seem to cause any issues or any CPU increase.
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_UPDATEPERIOD, 5);
+
+        // Reduce latency to a known sane minimum.
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_PERIOD, 5);
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_BUFFER, 10);
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_BUFFER, 100);
+
+        // Ensure there are no brief delays on audio operations (causing stream stalls etc.) after periods of silence.
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_NONSTOP, 1);
+
+        // Reinitialize BASS under the current configuration.
+        BASS.BASS_Init(BASS.BASS_GetDevice(), DEFAULT_FREQUENCY, BASS.BASS_DEVICE_REINIT);
+    }
+
+    public static void logBASSConfig() {
+        Log.i("BASS-Config", "Update period:          " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_UPDATEPERIOD));
+        Log.i("BASS-Config", "Device period:          " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_DEV_PERIOD));
+        Log.i("BASS-Config", "Device buffer length:   " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_DEV_BUFFER));
+        Log.i("BASS-Config", "Playback buffer length: " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_BUFFER));
+        Log.i("BASS-Config", "Device nonstop:         " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_DEV_NONSTOP));
     }
 
     public boolean prepare(final String fileName) {

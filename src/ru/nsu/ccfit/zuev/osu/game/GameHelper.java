@@ -11,8 +11,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -21,15 +19,13 @@ import ru.nsu.ccfit.zuev.osu.polygon.Spline;
 
 public class GameHelper {
     public static ControlPoints controlPoints;
-    private static double binomTable[][];
-    private static int binomTableN;
     private static float tickRate = 1;
     private static float scale = 1;
     private static float speed = 1;
     private static float difficulty = 1;
     private static float approachRate = 1;
     private static float drain = 0;
-    private static float stackLatient = 0;
+    private static float stackLeniency = 0;
     private static float timeMultiplier = 0;
     private static RGBColor sliderColor = new RGBColor();
     private static boolean hidden = false;
@@ -43,6 +39,7 @@ public class GameHelper {
     private static boolean autopilotMod = false;
     private static boolean suddenDeath = false;
     private static boolean perfect = false;
+    private static boolean scoreV2;
     private static boolean useReplay;
     private static boolean isKiai = false;
     private static boolean auto = false;
@@ -53,31 +50,10 @@ public class GameHelper {
     private static float globalTime = 0;
     private static Spline.CurveTypes curveType;
     private static int gameid = 0;
-    private static Queue<SliderPath> pathPool = new LinkedList<GameHelper.SliderPath>();
-    private static Queue<PointF> pointPool = new LinkedList<PointF>();
+    private static final Queue<SliderPath> pathPool = new LinkedList<>();
+    private static final Queue<PointF> pointPool = new LinkedList<>();
 
     private static DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
-
-    static {
-        binomTableN = 35;
-        binomTable = new double[binomTableN][binomTableN];
-        for (int n = 0; n < binomTableN; n++) {
-            for (int k = 0; k < binomTableN; k++) {
-                if (n == 0) {
-                    binomTable[n][k] = 0;
-                    continue;
-                }
-                if (k == 0) {
-                    binomTable[n][k] = 1;
-                    continue;
-                }
-                binomTable[n][k] = 1;
-                for (int i = 1; i <= k; i++) {
-                    binomTable[n][k] *= (n - k + i) / (double) i;
-                }
-            }
-        }
-    }
 
     public static DifficultyHelper getDifficultyHelper() {
         return difficultyHelper;
@@ -119,91 +95,21 @@ public class GameHelper {
         gameid = (new Random().nextInt(233333333) + 1);
     }
 
-    public static PointF getBezier(final float t, final ArrayList<PointF> points) {
-        final PointF b = newPointF();
-        b.set(0, 0);
-        final int n = points.size() - 1;
-        // This is formula for Bezier curve from wiki:
-        // B(t) = Sum[i = 0..n]( Bi(t) * Pi )
-        for (int i = 0; i <= n; i++) {
-            // Bi(t) = C(n,i) * t^i * (1-t)^(n-i)
-            final double bi = binomial(n, i) * Math.pow(t, i)
-                    * Math.pow(1 - t, n - i);
-            b.x += points.get(i).x * bi;
-            b.y += points.get(i).y * bi;
-        }
-
-        return b;
-    }
-
-    private static double binomial(final int n, final int k) {
-        if (n <= 0) {
-            return 0;
-        }
-        if (k <= 0) {
-            return 1;
-        }
-        if (n < binomTableN && k < binomTableN) {
-            return binomTable[n][k];
-        } else {
-            return binomial(n - 1, k - 1) + binomial(n - 1, k);
-        }
-    }
-
-    public static ArrayList<PointF> parseSection(
-            final ArrayList<PointF> rawPoints) {
-        final ArrayList<PointF> result = new ArrayList<PointF>();
-        final PointF pos = rawPoints.get(0);
-        final PointF endpos = rawPoints.get(rawPoints.size() - 1);
-
-        if (rawPoints.size() < 2) {
-            result.add(pos);
-            return result;
-        }
-
-        result.add(pos);
-        result.add(getBezier(0.5f, rawPoints));
-        result.add(endpos);
-        int index = 0;
-
-        final ArrayList<Float> ts = new ArrayList<Float>();
-        ts.add(0f);
-        ts.add(0.5f);
-        ts.add(1F);
-        float step2 = Constants.SLIDER_STEP * scale;
-//		if (Config.isLowpolySliders() == false) {
-//			step2 = Constants.HIGH_SLIDER_STEP * scale;
-//		}
-        step2 *= step2;
-        while (index < result.size() - 1) {
-            while (Utils.squaredDistance(result.get(index).x,
-                    result.get(index).y, result.get(index + 1).x,
-                    result.get(index + 1).y) > step2) {
-                final float t = (ts.get(index) + ts.get(index + 1)) / 2f;
-                result.add(index + 1, getBezier(t, rawPoints));
-                ts.add(index + 1, t);
-            }
-            index++;
-        }
-
-        return result;
-    }
-
     public static SliderPath calculatePath(final PointF pos,
                                            final String[] data, final float maxLength, final float offset) {
-        final ArrayList<ArrayList<PointF>> points = new ArrayList<ArrayList<PointF>>();
-        points.add(new ArrayList<PointF>());
+        final ArrayList<ArrayList<PointF>> points = new ArrayList<>();
+        points.add(new ArrayList<>());
         int lastIndex = 0;
         points.get(lastIndex).add(pos);
 
         final SliderPath path = newPath();
 
         for (final String s : data) {
-            if (s == data[0]) {
+            if (s.equals(data[0])) {
                 curveType = Spline.getCurveType(s.charAt(0));
                 continue;
             }
-            final String[] nums = s.split("[:]");
+            final String[] nums = s.split(":");
             final PointF point = newPointF();
             point.set(Integer.parseInt(nums[0]), Integer.parseInt(nums[1]));
             point.x += offset;
@@ -211,11 +117,11 @@ public class GameHelper {
             final PointF ppoint = points.get(lastIndex).get(
                     points.get(lastIndex).size() - 1);
             if (point.x == ppoint.x && point.y == ppoint.y
-                    || (Config.isAccurateSlider() == false && (data[0].equals("L") || data[0].equals("C")))) {
-                if (Config.isAccurateSlider() == false && (data[0].equals("L") || data[0].equals("C"))) {
+                    || data[0].equals("C")) {
+                if (data[0].equals("C")) {
                     points.get(lastIndex).add(point);
                 }
-                points.add(new ArrayList<PointF>());
+                points.add(new ArrayList<>());
                 lastIndex++;
             }
             points.get(lastIndex).add(point);
@@ -228,26 +134,18 @@ public class GameHelper {
 
         MainCycle:
         for (final ArrayList<PointF> plist : points) {
-            if (Config.isAccurateSlider() == true) {
-                final Spline spline = Spline.getInstance();
-                spline.setControlPoints(plist);
-                spline.setType(curveType);
-                spline.Refresh();
-                section = spline.getPoints();
-            } else {
-                section = parseSection(plist);
-            }
+            final Spline spline = Spline.getInstance();
+            spline.setControlPoints(plist);
+            spline.setType(curveType);
+            spline.Refresh();
+            section = spline.getPoints();
+
             // Debug.i("section size=" + section.size());
-            boolean firstPut = false;
             for (final PointF p : section) {
                 if (pind < 0
                         || Math.abs(p.x - path.points.get(pind).x)
                         + Math.abs(p.y - path.points.get(pind).y) > 1f) {
-                    if (firstPut == false) {
-                        firstPut = true;
-                        path.boundIndexes.add(path.points.size());
-                    }
-                    if (path.points.isEmpty() == false) {
+                    if (!path.points.isEmpty()) {
                         vec.set(p.x - path.points.get(path.points.size() - 1).x,
                                 p.y - path.points.get(path.points.size() - 1).y);
                         trackLength += Utils.length(vec);
@@ -257,15 +155,9 @@ public class GameHelper {
                     pind++;
 
                     if (trackLength >= maxLength) {
-                        if (path.points.isEmpty() == false) {
-                            path.boundIndexes.add(path.points.size() - 1);
-                        }
                         break MainCycle;
                     }
                 }
-            }
-            if (path.points.isEmpty() == false) {
-                path.boundIndexes.add(path.points.size() - 1);
             }
         }
 
@@ -315,12 +207,9 @@ public class GameHelper {
     }
 
     public static void putPath(final SliderPath path) {
-        for (final PointF p : path.points) {
-            pointPool.add(p);
-        }
+        pointPool.addAll(path.points);
         path.points.clear();
         path.length.clear();
-        path.boundIndexes.clear();
         pathPool.add(path);
     }
 
@@ -338,12 +227,12 @@ public class GameHelper {
         return pointPool.poll();
     }
 
-    public static float getStackLatient() {
-        return stackLatient;
+    public static float getStackLeniency() {
+        return stackLeniency;
     }
 
-    public static void setStackLatient(final float stackLatient) {
-        GameHelper.stackLatient = stackLatient;
+    public static void setStackLeniency(final float stackLeniency) {
+        GameHelper.stackLeniency = stackLeniency;
     }
 
     public static RGBColor getSliderColor() {
@@ -424,6 +313,14 @@ public class GameHelper {
         GameHelper.perfect = perfect;
     }
 
+    public static boolean isScoreV2() {
+        return scoreV2;
+    }
+
+    public static void setScoreV2(boolean scoreV2) {
+        GameHelper.scoreV2 = scoreV2;
+    }
+
     public static boolean isUseReplay() {
         return useReplay;
     }
@@ -433,8 +330,7 @@ public class GameHelper {
     }
 
     public static boolean isKiai() {
-        if (OsuSkin.get().isDisableKiai()) return false;
-        return isKiai;
+        return !OsuSkin.get().isDisableKiai() && isKiai;
     }
 
     public static void setKiai(final boolean isKiai) {
@@ -541,8 +437,7 @@ public class GameHelper {
     }
 
     public static class SliderPath {
-        public ArrayList<PointF> points = new ArrayList<PointF>();
-        public ArrayList<Float> length = new ArrayList<Float>();
-        public ArrayList<Integer> boundIndexes = new ArrayList<Integer>();
+        public ArrayList<PointF> points = new ArrayList<>();
+        public ArrayList<Float> length = new ArrayList<>();
     }
 }

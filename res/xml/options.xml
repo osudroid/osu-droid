@@ -34,7 +34,7 @@
             android:key="background" android:title="@string/opt_bg_title"
             android:summary="@string/opt_bg_summary" android:defaultValue="1"/>
         <SeekBarPreference android:summary="@string/opt_bgbrightness_summary" android:title="@string/opt_bgbrightness_title"
-            android:key="bgbrightness" app:min="1" app:showSeekBarValue="true" android:defaultValue="25"/>
+            android:key="bgbrightness" app:showSeekBarValue="true" android:defaultValue="25"/>
         <CheckBoxPreference android:title="@string/opt_enable_video_title" android:summary="@string/opt_enable_video_summary"
             android:key="enableVideo" android:defaultValue="false" />
         <!-- <ListPreference android:entries="@array/bg_brightness_names" android:title="@string/opt_bgbrightness_title"
@@ -62,11 +62,16 @@
             android:title="@string/opt_largeimages_title" android:key="images" android:defaultValue="false"/>
         <CheckBoxPreference android:summary="@string/opt_fps_summary" android:title="@string/opt_fps_title"
             android:key="fps" android:defaultValue="true"/>
-        <CheckBoxPreference android:key="sliderborders" android:title="@string/opt_sliderborders_title"
-            android:summary="@string/opt_sliderborders_summary" android:defaultValue="true"/>
         <CheckBoxPreference android:key="complexanimations" android:defaultValue="true"
             android:title="@string/opt_complexanimations_title"
             android:summary="@string/opt_complexanimations_summary"/>
+
+        <CheckBoxPreference
+                android:key="snakingInSliders"
+                android:defaultValue="true"
+                android:title="@string/opt_snakingInSliders_title"
+                android:summary="@string/opt_snakingInSliders_summary"/>
+
         <CheckBoxPreference android:summary="@string/opt_showcursor_summary"
             android:title="@string/opt_showcursor_title" android:key="showcursor"
             android:defaultValue="false"/>
@@ -86,8 +91,6 @@
             <!-- android:title="@string/opt_long_trail_title" android:defaultValue="false"/> -->
         <CheckBoxPreference android:key="dither" android:title="@string/opt_dither_title"
             android:summary="@string/opt_dither_summary" android:defaultValue="true"/>
-        <CheckBoxPreference android:key="superSlider" android:summary="@string/opt_superSlider_summary"
-            android:title="@string/opt_superSlider_title" android:defaultValue="true"/>
         <CheckBoxPreference android:key="trianglesAnimation" android:title="@string/opt_triangles_animation_title"
             android:summary="@string/opt_triangles_animation_summary" android:defaultValue="true"/>
 
@@ -122,7 +125,7 @@
             android:summary="@string/opt_sound_volume_summary" android:key="soundvolume"
             android:defaultValue="100"/> -->
         <SeekBarPreference android:summary="@string/opt_offset_summary" android:title="@string/opt_offset_title"
-            android:key="offset" app:min="-100" app:showSeekBarValue="true" android:defaultValue="0"/>
+            android:key="offset" app:min="-250" android:max="250" app:showSeekBarValue="true" android:defaultValue="0"/>
         <!-- <EditTextPreference android:title="@string/opt_offset_title" android:summary="@string/opt_offset_summary"
             android:key="offset" android:defaultValue="0"/> -->
         <ListPreference android:entries="@array/metronome_switch_names" android:title="@string/opt_metronome_switch_title"
@@ -146,6 +149,8 @@
             android:defaultValue="/sdcard/osu!droid/Songs"/>
         <CheckBoxPreference android:key="scandownload" android:summary="@string/opt_scandownload_summary"
             android:title="@string/opt_scandownload_title" android:defaultValue="false"/>
+        <CheckBoxPreference android:key="deleteUnimportedBeatmaps" android:title="@string/opt_deleteUnimportedBeatmaps_title"
+            android:summary="@string/opt_deleteUnimportedBeatmaps_summary" android:defaultValue="false"/>
         <Preference android:key="clear" android:title="@string/opt_clear_title"
             android:summary="@string/opt_clear_summary"/>
         <Preference android:key="clear_properties" android:title="@string/opt_clearprops_title"
@@ -176,6 +181,9 @@
         <CheckBoxPreference android:key="displayScoreStatistics"
             android:title="@string/opt_display_score_statistics_title"
             android:summary="@string/opt_display_score_statistics_summary" android:defaultValue="true"/>
+        <CheckBoxPreference android:key="displayRealTimePPCounter"
+            android:title="@string/opt_display_realtime_pp_counter_title"
+            android:summary="@string/opt_display_realtime_pp_counter_summary" android:defaultValue="false"/>
         <!--CheckBoxPreference android:key="enableExtension" android:title="@string/opt_enable_extension_title"
                             android:defaultValue="false"/>
         <Preference android:key="downloadExtension" android:title="@string/opt_download_extension_title" /-->

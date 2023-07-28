@@ -1,6 +1,8 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
 import com.edlplan.ui.fragment.InGameSettingMenu;
+import com.rian.difficultycalculator.attributes.DifficultyAttributes;
+import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
@@ -17,10 +19,13 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
+import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
+import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.game.mods.IModSwitcher;
 import ru.nsu.ccfit.zuev.osu.game.mods.ModButton;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyReCalculator;
+import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.TextButton;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -179,14 +184,32 @@ public class ModMenu implements IModSwitcher {
                     (new Thread() {
                         public void run() {
                             if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != null){
-                                DifficultyReCalculator rec = new DifficultyReCalculator();
-                                float newstar = rec.recalculateStar(
-                                        GlobalManager.getInstance().getSongMenu().getSelectedTrack(),
-                                        rec.getCS(GlobalManager.getInstance().getSongMenu().getSelectedTrack()),
-                                        getSpeed());
-                                if (newstar != 0f) {
-                                    GlobalManager.getInstance().getSongMenu().setStarsDisplay(newstar);
+                                BeatmapData beatmapData = new BeatmapParser(
+                                        GlobalManager.getInstance().getSongMenu().getSelectedTrack().getFilename()
+                                ).parse(true);
+
+                                if (beatmapData == null) {
+                                    GlobalManager.getInstance().getSongMenu().setStarsDisplay(0);
+                                    return;
                                 }
+
+                                DifficultyCalculationParameters parameters = new DifficultyCalculationParameters();
+                                parameters.mods = getMod();
+                                parameters.customSpeedMultiplier = changeSpeed;
+
+                                if (enableForceAR) {
+                                    parameters.forcedAR = forceAR;
+                                }
+
+                                DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
+                                        beatmapData,
+                                        parameters
+                                );
+
+
+                                GlobalManager.getInstance().getSongMenu().setStarsDisplay(
+                                        GameHelper.Round(attributes.starRating, 2)
+                                );
                             }
                         }
                     }).start();
@@ -270,14 +293,14 @@ public class ModMenu implements IModSwitcher {
 
             handleModFlags(flag, GameMod.MOD_HARDROCK, new GameMod[]{GameMod.MOD_EASY});
             handleModFlags(flag, GameMod.MOD_EASY, new GameMod[]{GameMod.MOD_HARDROCK});
-            handleModFlags(flag, GameMod.MOD_AUTOPILOT, new GameMod[]{GameMod.MOD_RELAX, GameMod.MOD_PERFECT, GameMod.MOD_SUDDENDEATH, GameMod.MOD_AUTO, GameMod.MOD_NOFAIL});
+            handleModFlags(flag, GameMod.MOD_AUTOPILOT, new GameMod[]{GameMod.MOD_RELAX, GameMod.MOD_SUDDENDEATH, GameMod.MOD_AUTO, GameMod.MOD_NOFAIL});
             handleModFlags(flag, GameMod.MOD_AUTO, new GameMod[]{GameMod.MOD_RELAX, GameMod.MOD_AUTOPILOT, GameMod.MOD_PERFECT, GameMod.MOD_SUDDENDEATH});
-            handleModFlags(flag, GameMod.MOD_RELAX, new GameMod[]{GameMod.MOD_AUTO, GameMod.MOD_PERFECT, GameMod.MOD_SUDDENDEATH, GameMod.MOD_NOFAIL, GameMod.MOD_AUTOPILOT});
+            handleModFlags(flag, GameMod.MOD_RELAX, new GameMod[]{GameMod.MOD_AUTO, GameMod.MOD_SUDDENDEATH, GameMod.MOD_NOFAIL, GameMod.MOD_AUTOPILOT});
             handleModFlags(flag, GameMod.MOD_DOUBLETIME, new GameMod[]{GameMod.MOD_NIGHTCORE, GameMod.MOD_HALFTIME});
             handleModFlags(flag, GameMod.MOD_NIGHTCORE, new GameMod[]{GameMod.MOD_DOUBLETIME, GameMod.MOD_HALFTIME});
             handleModFlags(flag, GameMod.MOD_HALFTIME, new GameMod[]{GameMod.MOD_DOUBLETIME, GameMod.MOD_NIGHTCORE});
-            handleModFlags(flag, GameMod.MOD_SUDDENDEATH, new GameMod[]{GameMod.MOD_NOFAIL, GameMod.MOD_PERFECT, GameMod.MOD_AUTOPILOT, GameMod.MOD_RELAX, GameMod.MOD_AUTO});
-            handleModFlags(flag, GameMod.MOD_PERFECT, new GameMod[]{GameMod.MOD_NOFAIL, GameMod.MOD_SUDDENDEATH, GameMod.MOD_AUTOPILOT, GameMod.MOD_RELAX, GameMod.MOD_AUTO});
+            handleModFlags(flag, GameMod.MOD_SUDDENDEATH, new GameMod[]{GameMod.MOD_NOFAIL, GameMod.MOD_PERFECT, GameMod.MOD_AUTO});
+            handleModFlags(flag, GameMod.MOD_PERFECT, new GameMod[]{GameMod.MOD_NOFAIL, GameMod.MOD_SUDDENDEATH, GameMod.MOD_AUTO});
             handleModFlags(flag, GameMod.MOD_NOFAIL, new GameMod[]{GameMod.MOD_PERFECT, GameMod.MOD_SUDDENDEATH, GameMod.MOD_AUTOPILOT, GameMod.MOD_RELAX});
 
             if (modsRemoved) {
@@ -332,6 +355,10 @@ public class ModMenu implements IModSwitcher {
 
     public boolean isEnableForceAR(){
         return enableForceAR;
+    }
+
+    public boolean isDefaultFLFollowDelay() {
+        return FLfollowDelay == 0.12f;
     }
 
     public void setEnableForceAR(boolean t){

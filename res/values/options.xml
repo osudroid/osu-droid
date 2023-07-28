@@ -143,12 +143,11 @@
     <!-- <string name="opt_vbroffset_title">VBR offset</string>
     <string name="opt_vbroffset_summary">Offset for mp3\'s encoded with variable bitrate (built-in player only)</string> -->
 
-    <string name="opt_sliderborders_title">Slider borders</string>
-    <string name="opt_sliderborders_summary">Draw borders along slider tracks. Disable for better performance</string>
-
     <string name="opt_complexanimations_title">Complex effects</string>
-    <string name="opt_complexanimations_summary">Enable advanced graphical effects (eg. snaking sliders). Disable for better performance</string>
+    <string name="opt_complexanimations_summary">Enable advanced graphical effects and animations. Disable for better performance</string>
 
+    <string name="opt_snakingInSliders_title">Use snaking in sliders</string>
+    <string name="opt_snakingInSliders_summary">Enable sliders gradually snaking from start</string>
 
     <string name="opt_other_title">Miscellaneous</string>
     <string name="opt_multitouch_title">Multi-touch</string>
@@ -299,9 +298,9 @@
     <string name="opt_scandownload_summary">Scan /Download directory for new beatmaps and skins (might not work with SD card)</string>
     <string name="opt_scandownload_title">Scan Download</string>
 
-    <string name="opt_superSlider_title">Super Slider</string>
-    <string name="opt_superSlider_summary">Perfect shape slider!</string>
-	
+    <string name="opt_deleteUnimportedBeatmaps_summary">Delete beatmaps that cannot be imported. Will apply in future beatmap import operations.</string>
+    <string name="opt_deleteUnimportedBeatmaps_title">Delete Unimported Beatmaps</string>
+
     <string name="opt_flashlight_follow_delay_title">FL Follow delay</string>
     <string name="opt_changespeed_title">Speed Modify</string>
     <string name="opt_forcear_title">Force AR</string>
@@ -335,6 +334,9 @@
 
     <string name="opt_safe_beatmap_bg_title">Safe beatmap background</string>
     <string name="opt_safe_beatmap_bg_summary">Change all of the beatmaps\' background to the menu-background image from your skin</string>
+
+    <string name="opt_display_realtime_pp_counter_title">Display real-time PP counter</string>
+    <string name="opt_display_realtime_pp_counter_summary">Displays a real-time PP counter during gameplay. May increase loading time significantly, especially in long beatmaps</string>
 
     <string name="opt_enable_video_title">Enable video</string>
     <string name="opt_enable_video_summary">Enable video playback during gameplay (Android 6 or newer)</string>

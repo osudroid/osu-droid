@@ -314,7 +314,7 @@ public class MenuItem {
         freeBackground();
         visible = false;
         deleted = true;
-        LibraryManager.getInstance().deleteMap(beatmap);
+        LibraryManager.INSTANCE.deleteMap(beatmap);
     }
 
     public boolean isVisible() {
