@@ -277,6 +277,8 @@ public class BeatmapData {
 
         // Events
         track.setBackground(events.backgroundFilename);
+        track.setVideoStartTime(events.videoStartTime);
+        track.setVideo(events.videoFilename);
 
         // Timing points
         for (TimingControlPoint point : timingPoints.timing.getControlPoints()) {

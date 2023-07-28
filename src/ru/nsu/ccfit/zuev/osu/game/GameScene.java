@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 import android.os.SystemClock;
 
-import com.dgsrz.bancho.game.sprite.VideoSprite;
 import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.ProxySprite;
@@ -12,6 +11,8 @@ import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
 import com.edlplan.ui.fragment.InGameSettingMenu;
+import com.reco1l.legacy.engine.VideoSprite;
+import com.reco1l.legacy.engine.VideoSpriteKt;
 import com.rian.difficultycalculator.attributes.TimedDifficultyAttributes;
 import com.rian.difficultycalculator.beatmap.hitobject.HitObject;
 import com.rian.difficultycalculator.beatmap.hitobject.HitObjectWithDuration;
@@ -44,11 +45,9 @@ import org.anddev.andengine.util.modifier.IModifier;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -291,20 +290,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     mVideo.detachSelf();
                 }
                 videoHasStarted = false;
-                int xOffset = track.getVideo().getxOffset();
-                int yOffset = track.getVideo().getyOffset();
-                mVideo = new VideoSprite(
-                    xOffset,
-                    yOffset,
-                    Config.getRES_WIDTH() + xOffset,
-                    Config.getRES_HEIGHT() + yOffset
-                );
-                mVideo.setDataSource(track.getBeatmap().getPath() + "/" + track.getVideo().getPath());
+
+                var path = track.getBeatmap().getPath() + "/" + track.getVideo();
+                var size = VideoSpriteKt.getVideoSize(path);
+
+                mVideo = new VideoSprite(path);
                 mVideo.setAlpha(0f);
-                videoStartTime = track.getVideo().getStartTime() / 1000f;
+                videoStartTime = track.getVideoStartTime() / 1000f;
                 float brightness = Config.getBackgroundBrightness();
                 mVideo.setColor(brightness, brightness, brightness);
-            } catch (IOException e) {
+
+            } catch (Exception e) {
                 Debug.e("Load video " + e.getMessage());
                 mVideo = null;
             }

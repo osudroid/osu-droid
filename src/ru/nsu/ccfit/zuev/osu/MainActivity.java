@@ -892,4 +892,8 @@ public class MainActivity extends BaseGameActivity implements
         NotificationManagerCompat.from(getApplicationContext()).cancelAll();
         super.onDestroy();
     }
+
+    public RenderSurfaceView getRenderSurface() {
+        return mRenderSurfaceView;
+    }
 }

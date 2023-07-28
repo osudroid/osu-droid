@@ -15,6 +15,16 @@ public class BeatmapEvents {
     public String backgroundFilename;
 
     /**
+     * The file name of this beatmap's background video.
+     */
+    public String videoFilename;
+
+    /**
+     * The beatmap's background video start time.
+     */
+    public int videoStartTime;
+
+    /**
      * The breaks this beatmap has.
      */
     public ArrayList<BreakPeriod> breaks = new ArrayList<>();
