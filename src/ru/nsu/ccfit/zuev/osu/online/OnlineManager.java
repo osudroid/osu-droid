@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu.online;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Build;
 import android.os.Bundle;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -398,7 +397,7 @@ public class OnlineManager {
         return username;
     }
 
-    public String getUserId() {
+    public long getUserId() {
         return userId;
     }
 
