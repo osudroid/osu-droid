@@ -1,138 +1,42 @@
 package com.reco1l.legacy.engine
 
-import android.graphics.Point
-import android.graphics.SurfaceTexture
-import android.media.MediaMetadataRetriever
-import android.media.MediaPlayer
-import android.media.PlaybackParams
-import android.opengl.GLES10
-import android.os.Build
-import android.view.Surface
 import org.anddev.andengine.engine.camera.Camera
-import org.anddev.andengine.entity.primitive.Rectangle
-import org.anddev.andengine.opengl.util.GLHelper
-import ru.nsu.ccfit.zuev.osu.Config
+import org.anddev.andengine.entity.sprite.Sprite
 import javax.microedition.khronos.opengles.GL10
-import kotlin.math.roundToLong
 
-fun getVideoSize(videoPath: String): Point
+class VideoSprite(source: String) : Sprite(0f, 0f, VideoTexture(source).toRegion())
 {
-    val retriever = MediaMetadataRetriever()
-    retriever.setDataSource(videoPath)
 
-    val widthString = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
-    val heightString = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
-
-    val width = widthString?.toIntOrNull() ?: 0
-    val height = heightString?.toIntOrNull() ?: 0
-
-    return Point(width, height)
-}
-
-class VideoSprite(source: String) : Rectangle(0f, 0f, 0f, 0f), MediaPlayer.OnVideoSizeChangedListener
-{
+    val texture = textureRegion.texture as VideoTexture
 
     val isPlaying
-        get() = player.isPlaying
+        get() = texture.isPlaying
 
 
-    private val player = MediaPlayer().apply {
+    fun play() = texture.play()
 
-        setOnVideoSizeChangedListener(this@VideoSprite)
-        setDataSource(source)
-        prepare()
-        setVolume(0f, 0f)
+    fun pause() = texture.pause()
 
-    }
+    fun stop() = texture.stop()
 
-    private var surfaceTexture: SurfaceTexture? = null
-
-    private var texture: Int? = null
+    fun release() = texture.release()
 
 
+    fun seekTo(seconds: Double) = texture.seekTo(seconds)
 
-    fun play() = player.start()
+    fun setPlaybackSpeed(speed: Float) = texture.setPlaybackSpeed(speed)
 
-    fun pause() = player.pause()
 
-    fun stop() = player.stop()
-
-    fun release()
+    override fun doDraw(pGL: GL10, pCamera: Camera?)
     {
-        player.release()
+        onInitDraw(pGL)
+        pGL.glEnable(VideoTexture.GL_TEXTURE_EXTERNAL_OES)
 
-        if (texture != null)
-            GLES10.glDeleteTextures(1, intArrayOf(texture!!), 0)
-    }
+        textureRegion.onApply(pGL)
 
-    fun setPlaybackSpeed(speed: Float)
-    {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-        {
-            player.playbackParams = PlaybackParams().setSpeed(speed)
-        }
-    }
+        onApplyVertices(pGL)
+        drawVertices(pGL, pCamera)
 
-    fun seekTo(seconds: Double)
-    {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        {
-            player.seekTo((seconds * 1000).roundToLong(), MediaPlayer.SEEK_CLOSEST_SYNC)
-        }
-    }
-
-
-    override fun onVideoSizeChanged(mp: MediaPlayer?, width: Int, height: Int)
-    {
-        setSize(width.toFloat(), height.toFloat())
-        setPosition((Config.getRES_WIDTH() - width) / 2f, (Config.getRES_HEIGHT() - height) / 2f)
-    }
-
-    override fun onInitDraw(graphics: GL10?)
-    {
-        GLHelper.setColor(graphics, mRed, mGreen, mBlue, mAlpha)
-        GLHelper.blendFunction(graphics, mSourceBlendFunction, mDestinationBlendFunction)
-
-        GLHelper.enableTextures(graphics)
-        GLHelper.enableVertexArray(graphics)
-        GLHelper.enableTexCoordArray(graphics)
-    }
-
-    override fun doDraw(graphics: GL10, camera: Camera?)
-    {
-        graphics.glEnable(GL_TEXTURE_EXTERNAL_OES)
-
-        if (texture == null)
-        {
-            val textures = IntArray(1)
-            graphics.glGenTextures(1, textures, 0)
-            texture = textures[0]
-
-            graphics.glBindTexture(GL_TEXTURE_EXTERNAL_OES, texture!!)
-            graphics.glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST.toFloat())
-            graphics.glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR.toFloat())
-
-            surfaceTexture = SurfaceTexture(texture!!)
-            surfaceTexture!!.setDefaultBufferSize(Config.getRES_WIDTH(), Config.getRES_HEIGHT())
-
-            Surface(surfaceTexture).also {
-
-                player.setSurface(it)
-                it.release()
-            }
-        }
-        onInitDraw(graphics)
-
-        graphics.glBindTexture(GL_TEXTURE_EXTERNAL_OES, texture!!)
-        surfaceTexture!!.updateTexImage()
-
-        onApplyVertices(graphics)
-        drawVertices(graphics, camera)
-        graphics.glDisable(GL_TEXTURE_EXTERNAL_OES)
-    }
-
-    companion object
-    {
-        const val GL_TEXTURE_EXTERNAL_OES = 0x8D65
+        pGL.glDisable(VideoTexture.GL_TEXTURE_EXTERNAL_OES)
     }
 }
