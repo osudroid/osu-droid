@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public enum LibraryManager {
     INSTANCE;
-    private static final String VERSION = "library4.0";
+    private static final String VERSION = "library4.1";
     private static final List<BeatmapInfo> library = Collections.synchronizedList(new ArrayList<>());
     private Integer fileCount = 0;
     private int currentIndex = 0;
