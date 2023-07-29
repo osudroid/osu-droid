@@ -834,11 +834,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomMatchStart()
     {
-        if (player!!.status == READY)
-        {
-            RoomAPI.setPlayerStatus(PLAYING)
+        if (getGlobal().engine.scene is LoadingScene)
             getGlobal().gameScene.start()
-        }
 
         // Updating player list
         playerList!!.updateItems()
