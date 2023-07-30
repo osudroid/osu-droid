@@ -57,11 +57,6 @@ data class Room(
      * The array containing the players, null values are empty slots. The array size correspond to [maxPlayers].
      */
     var players: Array<RoomPlayer?> = arrayOfNulls(maxPlayers)
-        set(value)
-        {
-            field = value
-            sortPlayers()
-        }
 
     /**
      * The host/room owner UID.
@@ -113,20 +108,6 @@ data class Room(
      */
     fun getPlayerByUID(uid: Long) = activePlayers.find { it.id == uid }
 
-    /**
-     * Returns the index of the player in the array by its UID.
-     */
-    fun indexOfPlayer(uid: Long) = players.indexOfFirst { it?.id == uid }.takeUnless { it == -1 }
-
-    /**
-     * Sort players array placing host and non-null first.
-     */
-    private fun sortPlayers()
-    {
-        val comparison = compareBy<RoomPlayer?> { it != null && it.id == host }.thenBy { it != null }
-
-        players = players.sortedWith(comparison).toTypedArray()
-    }
 
     /**
      * Special handling to add a player in the array.
@@ -145,12 +126,23 @@ data class Room(
      */
     fun removePlayer(uid: Long) : RoomPlayer?
     {
-        val index = indexOfPlayer(uid) ?: return null
+        val index = players.indexOfFirst { it?.id == uid }.takeUnless { it == -1 } ?: return null
         val removed = players[index]
 
         players[index] = null
         sortPlayers()
 
         return removed
+    }
+
+
+    /**
+     * Sort players array placing host and non-null first.
+     */
+    private fun sortPlayers()
+    {
+        val comparison = compareBy<RoomPlayer?> { it != null && it.id == host }.thenBy { it != null }
+
+        players = players.sortedWith(comparison).toTypedArray()
     }
 }
