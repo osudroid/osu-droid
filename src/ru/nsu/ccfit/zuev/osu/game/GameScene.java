@@ -172,8 +172,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private String replayFile;
     private float avgOffset;
     private int offsetRegs;
-    private boolean kiai = false;
-    private Rectangle kiaiRect = null;
     private Sprite bgSprite = null;
     private Sprite unranked;
     private ChangeableText replayText;
@@ -1189,13 +1187,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             effectOffset += 25;
             timeOffset += 0.25f;
         }
-
-        kiai = false;
-        kiaiRect = new Rectangle(0, 0, Config.getRES_WIDTH(),
-                Config.getRES_HEIGHT());
-        kiaiRect.setVisible(false);
-        kiaiRect.setColor(1, 1, 1);
-        bgScene.attachChild(kiaiRect, 0);
 
         unranked = new Sprite(0, 0, ResourceManager.getInstance().getTexture("play-unranked"));
         unranked.setPosition(Config.getRES_WIDTH() / 2 - unranked.getWidth() / 2, 80);
