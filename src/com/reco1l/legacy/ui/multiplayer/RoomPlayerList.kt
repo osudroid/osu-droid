@@ -33,20 +33,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
         }
     }
 
-    fun updateItems()
-    {
-        val activePlayers = room.activePlayers
-
-        // At this point 'childCount' must equal 'maxPlayers'
-        for (i in 0 until childCount)
-        {
-            // We're showing non-null slots first
-            if (i > activePlayers.lastIndex)
-                setItem(i, null)
-            else
-                setItem(i, activePlayers[i])
-        }
-    }
+    fun updateItems() = room.players.forEachIndexed { i, player -> setItem(i, player) }
 
     private fun setItem(index: Int, player: RoomPlayer?)
     {
