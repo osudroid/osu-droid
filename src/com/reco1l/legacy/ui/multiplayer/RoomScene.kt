@@ -861,16 +861,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onPlayerJoin(player: RoomPlayer)
     {
-        var wasAlready = false
+        room!!.addPlayer(player)
 
-        // Determining if the player was already in the room (reconnect)
-        val index = room!!.indexOfPlayer(player.id)?.also { wasAlready = true } ?: room!!.players.indexOfFirst { it == null }
-
-        // Updating values
-        room!!.players[index] = player
-
-        if (!wasAlready)
-            chat.onSystemChatMessage("Player ${player.name} joined.", "#007BFF")
+        // Chat message
+        chat.onSystemChatMessage("Player ${player.name} joined.", "#007BFF")
 
         // Updating state text
         stateText.text = "${room!!.activePlayers.size} / ${room!!.maxPlayers} players. ${room!!.readyPlayers.size} players ready."
@@ -881,22 +875,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onPlayerLeft(uid: Long)
     {
-        val index = room!!.indexOfPlayer(uid)
-
-        // Can never be the case
-        if (index == null)
-        {
-            playerList!!.updateItems()
-            return
-        }
+        val player = room!!.removePlayer(uid)
 
         // Notifying in chat
-        room!!.getPlayerByUID(uid)?.also {
-            chat.onSystemChatMessage("Player ${it.name} left.", "#007BFF")
-        }
-
-        // Updating values
-        room!!.players[index] = null
+        if (player != null)
+            chat.onSystemChatMessage("Player ${player.name} left.", "#007BFF")
 
         // Updating state text
         stateText.text = "${room!!.activePlayers.size} / ${room!!.maxPlayers} players. ${room!!.readyPlayers.size} players ready."
@@ -907,15 +890,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onPlayerKick(uid: Long)
     {
-        val index = room!!.indexOfPlayer(uid)
-
-        // Can never be the case
-        if (index == null)
-        {
-            playerList!!.updateItems()
-            return
-        }
-
         if (uid == player!!.id)
         {
             back()
@@ -931,13 +905,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             return
         }
 
-        // Notifying in chat
-        room!!.getPlayerByUID(uid)?.also {
-            chat.onSystemChatMessage("Player ${it.name} was kicked.", "#FF0000")
-        }
+        val player = room!!.removePlayer(uid)
 
-        // Updating values
-        room!!.players[index] = null
+        // Notifying in chat
+        if (player != null)
+            chat.onSystemChatMessage("Player ${player.name} was kicked.", "#FF0000")
 
         // Updating state text
         stateText.text = "${room!!.activePlayers.size} / ${room!!.maxPlayers} players. ${room!!.readyPlayers.size} players ready."

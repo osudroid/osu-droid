@@ -1,6 +1,8 @@
 package com.reco1l.legacy.ui.multiplayer
 
 import com.reco1l.api.ibancho.data.*
+import com.reco1l.api.ibancho.data.PlayerStatus.*
+import com.reco1l.api.ibancho.data.RoomTeam.*
 import com.reco1l.framework.lang.glThread
 import com.reco1l.legacy.data.modsToReadable
 import com.reco1l.legacy.ui.entity.ScrollableList
@@ -31,7 +33,20 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
         }
     }
 
-    fun updateItems() = room.players.forEachIndexed { i, it -> setItem(i, it) }
+    fun updateItems()
+    {
+        val activePlayers = room.activePlayers
+
+        // At this point 'childCount' must equal 'maxPlayers'
+        for (i in 0 until childCount)
+        {
+            // We're showing non-null slots first
+            if (i > activePlayers.lastIndex)
+                setItem(i, null)
+            else
+                setItem(i, activePlayers[i])
+        }
+    }
 
     private fun setItem(index: Int, player: RoomPlayer?)
     {
@@ -39,11 +54,12 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
 
         item.room = room
         item.player = player
-        item.isHost = player?.let { it.id == room.host } ?: false
-        item.isVisible = true
+        item.isHost = player?.id == room.host
 
-        glThread { item.load() }
-        RoomScene.registerTouchArea(item)
+        glThread {
+            item.load()
+            RoomScene.registerTouchArea(item)
+        }
     }
 
     override fun detachSelf(): Boolean
@@ -66,77 +82,74 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
 
         var isHost: Boolean = false
 
-        private val stateIndicator = Rectangle(0f, 0f, 5f, height)
 
-        private val nameText = ChangeableText(20f, 16f, getResources().getFont("smallFont"), "", 64)
+        private val state = Rectangle(0f, 0f, 5f, height)
 
-        private val infoText = ChangeableText(20f, nameText.y + nameText.height, getResources().getFont("smallFont"), "", 64)
+        private val text = ChangeableText(20f, 16f, getResources().getFont("smallFont"), "", 64)
 
         private var hostIcon: Sprite? = null
 
         private var missingIcon: Sprite? = null
 
+
         private var moved = false
         private var dx = 0f
         private var dy = 0f
 
+
         init
         {
-            attachChild(stateIndicator)
-            attachChild(nameText)
-            attachChild(infoText)
+            attachChild(state)
+            attachChild(text)
         }
+
 
         fun load()
         {
+            setColor(1f, 1f, 1f, 0.15f)
+
             hostIcon?.detachSelf()
             missingIcon?.detachSelf()
             hostIcon = null
             missingIcon = null
 
-            if (room == null)
+            text.text = ""
+            text.isVisible = false
+            state.isVisible = false
+
+            if (room == null || player == null)
                 return
 
-            if (player == null)
-            {
-                stateIndicator.setColor(1f, 1f, 1f)
-                setColor(1f, 1f, 1f, 0.15f)
-
-                nameText.text = "empty"
-                infoText.text = ""
-
-                return
-            }
+            state.isVisible = true
+            text.isVisible = true
+            text.text = "${player!!.name}\n${modsToReadable(player!!.mods)}"
 
             if (room!!.teamMode == TeamMode.TEAM_VS_TEAM)
             {
                 when (player!!.team)
                 {
-                    RoomTeam.RED -> setColor(1f, 0.2f, 0.2f, 0.15f)
-                    RoomTeam.BLUE -> setColor(0.2f, 0.2f, 1f, 0.15f)
+                    RED -> setColor(1f, 0.2f, 0.2f, 0.15f)
+                    BLUE -> setColor(0.2f, 0.2f, 1f, 0.15f)
                     else -> setColor(1f, 1f, 1f, 0.15f)
                 }
             }
             else setColor(1f, 1f, 1f, 0.15f)
 
-            nameText.text = player!!.name
-            infoText.text = modsToReadable(player!!.mods)
-
             when (player!!.status)
             {
-                PlayerStatus.MISSING_BEATMAP ->
+                MISSING_BEATMAP ->
                 {
                     val icon = getResources().getTexture("missing")
 
-                    missingIcon = Sprite(nameText.x + nameText.width + 5f, nameText.y + (nameText.height - icon.height) / 2f, icon)
+                    missingIcon = Sprite(text.x + text.width + 5f, text.y + (text.height - icon.height) / 2f, icon)
                     attachChild(missingIcon)
 
-                    stateIndicator.setColor(1f, 0.1f, 0.1f)
+                    state.setColor(1f, 0.1f, 0.1f)
                 }
 
-                PlayerStatus.NOT_READY -> stateIndicator.setColor(1f, 0.1f, 0.1f)
-                PlayerStatus.READY -> stateIndicator.setColor(0.1f, 1f, 0.1f)
-                PlayerStatus.PLAYING -> stateIndicator.setColor(0.1f, 0.1f, 1f)
+                NOT_READY -> state.setColor(1f, 0.1f, 0.1f)
+                READY -> state.setColor(0.1f, 1f, 0.1f)
+                PLAYING -> state.setColor(0.1f, 0.1f, 1f)
             }
 
             if (isHost)
