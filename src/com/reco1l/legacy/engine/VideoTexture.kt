@@ -123,7 +123,10 @@ class VideoTexture(val source: String)
     fun setPlaybackSpeed(speed: Float)
     {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            player.playbackParams.setSpeed(speed)
+        {
+            val newParams = player.playbackParams.setSpeed(speed)
+            player.playbackParams = newParams
+        }
     }
 
 

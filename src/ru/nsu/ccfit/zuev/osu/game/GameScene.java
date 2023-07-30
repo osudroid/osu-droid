@@ -225,7 +225,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             mVideo.release();
         }
 
-
         if (Config.isEnableVideo() && lastTrack.getVideo() != null
                 // Unfortunately MediaPlayer API doesn't allow to change playback speed on APIs < 23, so in that case
                 // the video will not be shown.
