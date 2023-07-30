@@ -58,14 +58,16 @@ object Multiplayer
         if (array.length() == 0)
             return
 
-        val list = mutableListOf<StatisticV2>().apply {
+        val list = mutableListOf<StatisticV2>()
 
-            for (i in 0 until array.length())
-            {
-                val json = array.optJSONObject(i) ?: continue
-                add(jsonToStatistic(json))
-            }
+        for (i in 0 until array.length())
+        {
+            val json = array.optJSONObject(i) ?: continue
+            list.add(jsonToStatistic(json))
         }
+
+        if (list.isEmpty())
+            return
 
         // Replacing server statistic with local
         val ownScoreIndex = list.indexOfFirst { it.playerName == getOnline().username }.takeUnless { it == -1 }
