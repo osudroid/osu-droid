@@ -1,12 +1,14 @@
 package com.reco1l.legacy.ui.multiplayer
 
+import com.reco1l.framework.extensions.className
+import com.reco1l.framework.extensions.logE
 import com.reco1l.legacy.data.jsonToScoreboardItem
 import com.reco1l.legacy.data.jsonToStatistic
 import org.json.JSONArray
-import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoard.ScoreBoardItems
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
+import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager.getInstance as getOnline
 
 object Multiplayer
 {
@@ -46,7 +48,7 @@ object Multiplayer
 
             jsonToScoreboardItem(json)
         }
-        GlobalManager.getInstance().gameScene.scoreBoard?.initScoreboard()
+        getGlobal().gameScene.scoreBoard?.initScoreboard()
     }
 
     fun onFinalLeaderboard(array: JSONArray)
@@ -56,7 +58,7 @@ object Multiplayer
         if (array.length() == 0)
             return
 
-        val dataList = mutableListOf<StatisticV2>().apply {
+        val list = mutableListOf<StatisticV2>().apply {
 
             for (i in 0 until array.length())
             {
@@ -65,13 +67,21 @@ object Multiplayer
             }
         }
 
-        dataList.find { it.playerName == OnlineManager.getInstance().username } ?: run {
-            dataList.add(GlobalManager.getInstance().gameScene.stat)
+        // Replacing server statistic with local
+        val ownScoreIndex = list.indexOfFirst { it.playerName == getOnline().username }.takeUnless { it == -1 }
+        val ownScore = getGlobal().gameScene.stat
+
+        // This should never happen
+        if (ownScoreIndex == null)
+        {
+            list.add(ownScore)
+            "Player score wasn't found in final leaderboard".logE(className)
         }
+        else list[ownScoreIndex] = ownScore
 
-        finalData = dataList.toTypedArray()
+        finalData = list.toTypedArray()
 
-        GlobalManager.getInstance().scoring.setRoomStatistics(finalData)
+        getGlobal().scoring.setRoomStatistics(finalData)
     }
 }
 
