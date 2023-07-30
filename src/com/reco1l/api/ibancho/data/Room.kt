@@ -117,6 +117,7 @@ data class Room(
         val index = players.indexOfFirst { it?.id == player.id || it == null }
 
         players[index] = player
+        sortPlayers()
     }
 
     /**
@@ -124,7 +125,7 @@ data class Room(
      *
      * @return The removed player or `null` if it wasn't on the array.
      */
-    fun removePlayer(uid: Long) : RoomPlayer?
+    fun removePlayer(uid: Long): RoomPlayer?
     {
         val index = players.indexOfFirst { it?.id == uid }.takeUnless { it == -1 } ?: return null
         val removed = players[index]
@@ -141,8 +142,18 @@ data class Room(
      */
     private fun sortPlayers()
     {
-        val comparison = compareBy<RoomPlayer?> { it != null && it.id == host }.thenBy { it != null }
-
-        players = players.sortedWith(comparison).toTypedArray()
+        players = players.sortedWith { a, b ->
+            when
+            {
+                // Empty slots goes at the end
+                a == null -> 1
+                b == null -> -1
+                // If it's the host we set it always first
+                a.id == host -> -1
+                b.id == host -> 1
+                // If none of the conditions above are true, means the position of the item is correct.
+                else -> 0
+            }
+        }.toTypedArray()
     }
 }
