@@ -1894,6 +1894,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         scoreBoard = null;
         videoStarted = false;
 
+        if (mVideo != null) {
+            mVideo.release();
+            mVideo = null;
+        }
+
         if (GlobalManager.getInstance().getSongService() != null) {
             GlobalManager.getInstance().getSongService().stop();
             GlobalManager.getInstance().getSongService().preLoad(filePath);
