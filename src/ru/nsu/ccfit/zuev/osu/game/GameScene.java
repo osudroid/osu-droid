@@ -223,6 +223,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (mVideo != null) {
             mVideo.release();
+            mVideo = null;
         }
 
         if (Config.isEnableVideo() && lastTrack.getVideo() != null
