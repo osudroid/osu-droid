@@ -20,7 +20,7 @@ public class BeatmapEvents {
     public String videoFilename;
 
     /**
-     * The beatmap's background video start time.
+     * The beatmap's background video start time in milliseconds.
      */
     public int videoStartTime;
 
