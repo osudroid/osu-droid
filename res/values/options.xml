@@ -339,5 +339,5 @@
     <string name="opt_display_realtime_pp_counter_summary">Displays a real-time PP counter during gameplay. May increase loading time significantly, especially in long beatmaps</string>
 
     <string name="opt_enable_video_title">Enable video</string>
-    <string name="opt_enable_video_summary">Enable video playback during gameplay (Android 6 or newer)</string>
+    <string name="opt_enable_video_summary">Enable video playback during gameplay (MP4 only). Support for speed-changing mods is only available in Android 6 or later</string>
 </resources>
