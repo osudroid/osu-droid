@@ -5,6 +5,7 @@ import android.media.MediaMetadataRetriever
 import android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT
 import android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH
 import android.media.MediaPlayer
+import android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES
 import android.os.Build
 import android.view.Surface
 import org.anddev.andengine.opengl.texture.Texture
@@ -128,10 +129,4 @@ class VideoTexture(val source: String)
 
 
     fun toRegion() = TextureRegion(this, 0, 0, width, height)
-
-
-    companion object
-    {
-        const val GL_TEXTURE_EXTERNAL_OES = 0x8D65
-    }
 }

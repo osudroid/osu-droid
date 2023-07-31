@@ -1,5 +1,6 @@
 package com.reco1l.legacy.engine
 
+import android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES
 import org.anddev.andengine.engine.Engine
 import org.anddev.andengine.engine.camera.Camera
 import org.anddev.andengine.entity.sprite.Sprite
@@ -41,14 +42,14 @@ class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, V
     override fun doDraw(pGL: GL10, pCamera: Camera?)
     {
         onInitDraw(pGL)
-        pGL.glEnable(VideoTexture.GL_TEXTURE_EXTERNAL_OES)
+        pGL.glEnable(GL_TEXTURE_EXTERNAL_OES)
 
         textureRegion.onApply(pGL)
 
         onApplyVertices(pGL)
         drawVertices(pGL, pCamera)
 
-        pGL.glDisable(VideoTexture.GL_TEXTURE_EXTERNAL_OES)
+        pGL.glDisable(GL_TEXTURE_EXTERNAL_OES)
     }
 
     override fun finalize()
