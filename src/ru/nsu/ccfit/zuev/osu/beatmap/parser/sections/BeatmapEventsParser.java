@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.beatmap.parser.sections;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.game.BreakPeriod;
 
@@ -25,8 +24,8 @@ public class BeatmapEventsParser extends BeatmapSectionParser {
             }
 
             if (line.startsWith("1") || line.startsWith(("Video"))) {
+                data.events.videoStartTime = parseInt(pars[1]);
                 data.events.videoFilename = pars[2].substring(1, pars[2].length() - 1);
-                data.events.videoStartTime = Utils.tryParseInt(pars[1], 0);
             }
         }
 
