@@ -1864,9 +1864,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     for (final GameObject obj : passiveObjects) {
                         obj.update(difference);
                     }
-                    GlobalManager.getInstance().getSongService().seekTo((int) Math.ceil((skipTime - 0.5f) * 1000));
+                    final int seekTime = (int) Math.ceil((skipTime - 0.5f) * 1000);
+                    GlobalManager.getInstance().getSongService().seekTo(seekTime);
                     if (mVideo != null) {
-                        mVideo.seekTo(mVideo.getTime() + (int) Math.ceil((skipTime - 0.5f) * 1000));
+                        // Offset video seek by its start time.
+                        mVideo.seekTo(seekTime - (int) (videoStartTime * 1000));
                     }
                     secPassed = skipTime - 0.5f;
                     skipBtn.detachSelf();
