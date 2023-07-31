@@ -79,7 +79,7 @@ class VideoTexture(val source: String)
 
     override fun bind(pGL: GL10)
     {
-        if (!isLoadedToHardware || !player.isPlaying)
+        if (!isLoadedToHardware)
             return
 
         bindTextureOnHardware(pGL)
