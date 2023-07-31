@@ -160,6 +160,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Sprite skipBtn;
     private float skipTime;
     private boolean musicStarted;
+    private boolean videoStarted;
     private float distToNextObject;
     private float timeMultiplier = 1.0f;
     private CursorEntity[] cursorSprites;
@@ -183,7 +184,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private int sliderIndex = 0;
 
     private float videoStartTime;
-    private boolean videoHasStarted;
 
     private StoryboardSprite storyboardSprite;
     private ProxySprite storyboardOverlayProxy;
@@ -230,7 +230,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 // the video will not be shown.
                 && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M || timeMultiplier == 1.0f)) {
             try {
-                videoHasStarted = false;
+                videoStarted = false;
                 mVideo = new VideoSprite(lastTrack.getBeatmap().getPath() + "/" + lastTrack.getVideo(), engine);
 
                 var factor = Config.getRES_HEIGHT() / mVideo.getHeight();
@@ -1552,13 +1552,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (mVideo != null && secPassed >= videoStartTime) {
-            if (!mVideo.isPlaying() && !videoHasStarted) {
-
+            if (!videoStarted) {
                 mVideo.setPlayback(timeMultiplier);
-
-                // This flag is needed to prevent race conditions for when the player is pausing the game.
-                videoHasStarted = true;
+                videoStarted = true;
             }
+
             if (mVideo.getAlpha() < 1.0f) {
                 mVideo.setAlpha(Math.min(mVideo.getAlpha() + 0.03f, 1.0f));
             }
@@ -1894,7 +1892,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         breakPeriods.clear();
         cursorSprites = null;
         scoreBoard = null;
-        videoHasStarted = false;
+        videoStarted = false;
 
         if (GlobalManager.getInstance().getSongService() != null) {
             GlobalManager.getInstance().getSongService().stop();
