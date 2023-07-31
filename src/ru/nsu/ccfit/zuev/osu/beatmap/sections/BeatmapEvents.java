@@ -49,6 +49,9 @@ public class BeatmapEvents {
         }
 
         backgroundColor = source.backgroundColor != null ? new RGBColor(backgroundColor) : null;
+
+        videoFilename = source.videoFilename;
+        videoStartTime = source.videoStartTime;
     }
 
     /**
