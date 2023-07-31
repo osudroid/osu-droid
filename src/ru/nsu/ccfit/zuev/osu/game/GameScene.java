@@ -238,6 +238,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                 mVideo.setPosition((Config.getRES_WIDTH() - mVideo.getWidth()) / 2f, (Config.getRES_HEIGHT() - mVideo.getHeight()) / 2f);
                 mVideo.setColor(brightness, brightness, brightness);
+                mVideo.setPlaybackSpeed(timeMultiplier);
                 mVideo.setScale(factor);
                 mVideo.setAlpha(0f);
 
@@ -850,11 +851,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (cdSpeed != 0 && objects.peek().getTime() - secPassed >= cdSpeed * Countdown.COUNTDOWN_LENGTH) {
                 addPassiveObject(new Countdown(this, bgScene, cdSpeed, 0, objects.peek().getTime() - secPassed));
             }
-        }
-
-        if (mVideo != null) {
-            mVideo.seekTo((int) (skipTime * 1000));
-            mVideo.setPlaybackSpeed(timeMultiplier);
         }
 
         float lastObjectTime = 0;
@@ -2389,7 +2385,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             GlobalManager.getInstance().getSongService().pause();
         }
-        if (mVideo != null && mVideo.isPlaying()) {
+        if (mVideo != null) {
             mVideo.pause();
         }
         paused = true;
@@ -2409,7 +2405,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             GlobalManager.getInstance().getSongService().pause();
         }
-        if (mVideo != null && mVideo.isPlaying()) {
+        if (mVideo != null) {
             mVideo.stop();
         }
         paused = true;
