@@ -29,7 +29,6 @@ import org.anddev.andengine.entity.modifier.LoopEntityModifier;
 import org.anddev.andengine.entity.modifier.MoveXModifier;
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
-import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
@@ -239,9 +238,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                 mVideo.setPosition((Config.getRES_WIDTH() - mVideo.getWidth()) / 2f, (Config.getRES_HEIGHT() - mVideo.getHeight()) / 2f);
                 mVideo.setColor(brightness, brightness, brightness);
-                mVideo.setPlaybackSpeed(timeMultiplier);
                 mVideo.setScale(factor);
                 mVideo.setAlpha(0f);
+
+                if (videoStartTime < 0)
+                    mVideo.seekTo((int) Math.abs(videoStartTime * 1000));
 
                 bgSprite = mVideo;
                 scene.setBackground(new SpriteBackground(bgSprite));
@@ -1550,9 +1551,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
 
-        if (mVideo != null && secPassed >= videoStartTime && musicStarted) {
+        if (mVideo != null && secPassed >= videoStartTime) {
             if (!mVideo.isPlaying() && !videoHasStarted) {
-                mVideo.play();
+
+                mVideo.setPlayback(timeMultiplier);
+
                 // This flag is needed to prevent race conditions for when the player is pausing the game.
                 videoHasStarted = true;
             }
@@ -1865,7 +1868,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     }
                     GlobalManager.getInstance().getSongService().seekTo((int) Math.ceil((skipTime - 0.5f) * 1000));
                     if (mVideo != null) {
-                        mVideo.seekTo((int) Math.ceil((skipTime - 0.5f) * 1000));
+                        mVideo.seekTo(mVideo.getTime() + (int) Math.ceil((skipTime - 0.5f) * 1000));
                     }
                     secPassed = skipTime - 0.5f;
                     skipBtn.detachSelf();
@@ -2387,7 +2390,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GlobalManager.getInstance().getSongService().pause();
         }
         if (mVideo != null) {
-            mVideo.pause();
+            mVideo.setPlayback(0);
         }
         paused = true;
         scene.setChildScene(menu.getScene(), false, true, true);
@@ -2407,7 +2410,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GlobalManager.getInstance().getSongService().pause();
         }
         if (mVideo != null) {
-            mVideo.stop();
+            mVideo.setPlayback(0);
         }
         paused = true;
         scene.setChildScene(menu.getScene(), false, true, true);
@@ -2432,7 +2435,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (mVideo != null && !mVideo.isPlaying()) {
-            mVideo.play();
+            mVideo.setPlayback(timeMultiplier);
         }
 
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() != Status.PLAYING && secPassed > 0) {

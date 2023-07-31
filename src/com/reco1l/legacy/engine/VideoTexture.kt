@@ -4,6 +4,7 @@ import android.graphics.SurfaceTexture
 import android.media.MediaPlayer
 import android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES
 import android.os.Build
+import android.util.Log
 import android.view.Surface
 import org.anddev.andengine.opengl.texture.Texture
 import org.anddev.andengine.opengl.texture.TextureOptions
@@ -27,6 +28,8 @@ class VideoTexture(val source: String)
     val isPlaying
         get() = player.isPlaying
 
+    val time
+        get() = player.currentPosition
 
     private val player = MediaPlayer().also {
 
@@ -34,22 +37,15 @@ class VideoTexture(val source: String)
         it.setVolume(0f, 0f)
         it.isLooping = false
         it.prepare()
-
-        width = it.videoWidth
-        height = it.videoHeight
     }
 
 
     private var surfaceTexture: SurfaceTexture? = null
 
-    private var width = 0
 
-    private var height = 0
+    override fun getWidth() = player.videoWidth
 
-
-    override fun getWidth() = width
-
-    override fun getHeight() = height
+    override fun getHeight() = player.videoHeight
 
 
     override fun writeTextureToHardware(pGL: GL10) = Unit
@@ -90,19 +86,15 @@ class VideoTexture(val source: String)
         }
     }
 
-
-    fun play() = player.start()
-
-    fun pause() = player.pause()
-
-    fun stop() = player.stop()
-
     fun release() = player.release()
 
-    fun seekTo(ms: Int) = player.seekTo(ms)
+    fun seekTo(ms: Int)
+    {
+        Log.i("VIDEO", "Seek position: $ms")
+        player.seekTo(ms)
+    }
 
-
-    fun setPlaybackSpeed(speed: Float)
+    fun setPlayback(speed: Float)
     {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
         {
