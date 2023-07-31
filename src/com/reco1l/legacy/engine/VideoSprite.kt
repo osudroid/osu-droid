@@ -1,10 +1,11 @@
 package com.reco1l.legacy.engine
 
+import org.anddev.andengine.engine.Engine
 import org.anddev.andengine.engine.camera.Camera
 import org.anddev.andengine.entity.sprite.Sprite
 import javax.microedition.khronos.opengles.GL10
 
-class VideoSprite(source: String) : Sprite(0f, 0f, VideoTexture(source).toRegion())
+class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, VideoTexture(source).toRegion())
 {
 
     val texture = textureRegion.texture as VideoTexture
@@ -13,16 +14,26 @@ class VideoSprite(source: String) : Sprite(0f, 0f, VideoTexture(source).toRegion
         get() = texture.isPlaying
 
 
+    init
+    {
+        engine.textureManager.loadTexture(texture)
+    }
+
+
     fun play() = texture.play()
 
     fun pause() = texture.pause()
 
     fun stop() = texture.stop()
 
-    fun release() = texture.release()
+    fun release()
+    {
+        texture.release()
+        engine.textureManager.unloadTexture(texture)
+    }
 
 
-    fun seekTo(seconds: Double) = texture.seekTo(seconds)
+    fun seekTo(seconds: Int) = texture.seekTo(seconds)
 
     fun setPlaybackSpeed(speed: Float) = texture.setPlaybackSpeed(speed)
 
@@ -38,5 +49,11 @@ class VideoSprite(source: String) : Sprite(0f, 0f, VideoTexture(source).toRegion
         drawVertices(pGL, pCamera)
 
         pGL.glDisable(VideoTexture.GL_TEXTURE_EXTERNAL_OES)
+    }
+
+    override fun finalize()
+    {
+        release()
+        super.finalize()
     }
 }

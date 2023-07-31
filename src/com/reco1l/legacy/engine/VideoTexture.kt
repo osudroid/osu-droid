@@ -5,7 +5,6 @@ import android.media.MediaMetadataRetriever
 import android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT
 import android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH
 import android.media.MediaPlayer
-import android.media.MediaPlayer.*
 import android.os.Build
 import android.view.Surface
 import org.anddev.andengine.opengl.texture.Texture
@@ -67,26 +66,25 @@ class VideoTexture(val source: String)
 
     override fun getHeight() = height
 
+
     override fun writeTextureToHardware(pGL: GL10) = Unit
 
-    fun toRegion() = TextureRegion(this, 0, 0, width, height)
+    override fun bindTextureOnHardware(pGL: GL10) = pGL.glBindTexture(GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
 
-
-    override fun generateHardwareTextureID(pGL: GL10)
+    override fun deleteTextureOnHardware(pGL: GL10?)
     {
-        val textures = IntArray(1)
-        pGL.glGenTextures(1, textures, 0)
-        mHardwareTextureID = textures[0]
+        surfaceTexture?.release()
+        surfaceTexture = null
+        super.deleteTextureOnHardware(pGL)
     }
 
-    override fun bindTextureOnHardware(pGL: GL10) = pGL.glBindTexture(GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
 
     override fun bind(pGL: GL10)
     {
         if (!isLoadedToHardware)
-            loadToHardware(pGL)
-        else
-            bindTextureOnHardware(pGL)
+            return
+
+        bindTextureOnHardware(pGL)
 
         if (surfaceTexture == null)
         {
@@ -97,7 +95,14 @@ class VideoTexture(val source: String)
             surface.release()
         }
 
-        surfaceTexture?.updateTexImage()
+        try
+        {
+            surfaceTexture?.updateTexImage()
+        }
+        catch (_: Exception)
+        {
+            isUpdateOnHardwareNeeded = true
+        }
     }
 
 
@@ -109,16 +114,8 @@ class VideoTexture(val source: String)
 
     fun release() = player.release()
 
+    fun seekTo(ms: Int) = player.seekTo(ms)
 
-    fun seekTo(seconds: Double)
-    {
-        val ms = seconds * 1000
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            player.seekTo(ms.toLong(), SEEK_CLOSEST_SYNC)
-        else
-            player.seekTo(ms.toInt())
-    }
 
     fun setPlaybackSpeed(speed: Float)
     {
@@ -128,6 +125,9 @@ class VideoTexture(val source: String)
             player.playbackParams = newParams
         }
     }
+
+
+    fun toRegion() = TextureRegion(this, 0, 0, width, height)
 
 
     companion object

@@ -231,7 +231,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M || timeMultiplier == 1.0f)) {
             try {
                 videoHasStarted = false;
-                mVideo = new VideoSprite(lastTrack.getBeatmap().getPath() + "/" + lastTrack.getVideo());
+                mVideo = new VideoSprite(lastTrack.getBeatmap().getPath() + "/" + lastTrack.getVideo(), engine);
 
                 var factor = Config.getRES_HEIGHT() / mVideo.getHeight();
                 float brightness = Config.getBackgroundBrightness();
@@ -853,7 +853,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (mVideo != null) {
-            mVideo.seekTo(skipTime);
+            mVideo.seekTo((int) (skipTime * 1000));
             mVideo.setPlaybackSpeed(timeMultiplier);
         }
 
@@ -1833,6 +1833,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 engine.setScene(oldScene);
             }
 
+            if (mVideo != null) {
+                mVideo.release();
+                mVideo = null;
+            }
+
         } else if (objects.isEmpty() && activeObjects.isEmpty()) {
             gameStarted = false;
             leadOut += dt;
@@ -1862,10 +1867,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         obj.update(difference);
                     }
                     GlobalManager.getInstance().getSongService().seekTo((int) Math.ceil((skipTime - 0.5f) * 1000));
-                    secPassed = skipTime - 0.5f;
                     if (mVideo != null) {
-                        mVideo.seekTo(Math.ceil(secPassed));
+                        mVideo.seekTo((int) Math.ceil((skipTime - 0.5f) * 1000));
                     }
+                    secPassed = skipTime - 0.5f;
                     skipBtn.detachSelf();
                     skipBtn = null;
                     return;
@@ -1898,11 +1903,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
         }
 
-        /*try {
-            android.os.Debug.dumpHprofData(Environment.getExternalStorageDirectory().getPath()+"/dd.hprof");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
         if (replaying) {
             replayFile = null;
             ModMenu.getInstance().setMod(Replay.oldMod);
@@ -1910,12 +1910,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             ModMenu.getInstance().setForceAR(Replay.oldForceAR);
             ModMenu.getInstance().setEnableForceAR(Replay.oldEnableForceAR);
             ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
-        }
-
-        if (mVideo != null) {
-            mVideo.release();
-            mVideo.detachSelf();
-            mVideo = null;
         }
     }
 
