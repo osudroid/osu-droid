@@ -2437,7 +2437,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             EdExtensionHelper.onResume(lastTrack);
         }
 
-        if (mVideo != null && !mVideo.isPlaying()) {
+        if (mVideo != null && !mVideo.isPlaying() && videoStarted) {
             mVideo.setPlayback(timeMultiplier);
         }
 
