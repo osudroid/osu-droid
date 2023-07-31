@@ -1,9 +1,6 @@
 package com.reco1l.legacy.engine
 
 import android.graphics.SurfaceTexture
-import android.media.MediaMetadataRetriever
-import android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT
-import android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH
 import android.media.MediaPlayer
 import android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES
 import android.os.Build
@@ -37,6 +34,9 @@ class VideoTexture(val source: String)
         it.setVolume(0f, 0f)
         it.isLooping = false
         it.prepare()
+
+        width = it.videoWidth
+        height = it.videoHeight
     }
 
 
@@ -45,22 +45,6 @@ class VideoTexture(val source: String)
     private var width = 0
 
     private var height = 0
-
-
-    init
-    {
-        resolveFrameSize()
-    }
-
-
-    private fun resolveFrameSize()
-    {
-        val retriever = MediaMetadataRetriever()
-        retriever.setDataSource(source)
-
-        width = retriever.extractMetadata(METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull() ?: 0
-        height = retriever.extractMetadata(METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
-    }
 
 
     override fun getWidth() = width
