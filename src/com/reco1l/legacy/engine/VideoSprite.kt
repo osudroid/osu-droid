@@ -41,14 +41,9 @@ class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, V
     override fun doDraw(pGL: GL10, pCamera: Camera?)
     {
         onInitDraw(pGL)
-        pGL.glEnable(VideoTexture.GL_TEXTURE_EXTERNAL_OES)
-
         textureRegion.onApply(pGL)
-
         onApplyVertices(pGL)
         drawVertices(pGL, pCamera)
-
-        pGL.glDisable(VideoTexture.GL_TEXTURE_EXTERNAL_OES)
     }
 
     override fun finalize()

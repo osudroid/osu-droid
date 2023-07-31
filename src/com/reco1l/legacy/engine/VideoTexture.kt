@@ -69,8 +69,6 @@ class VideoTexture(val source: String)
 
     override fun writeTextureToHardware(pGL: GL10) = Unit
 
-    override fun bindTextureOnHardware(pGL: GL10) = pGL.glBindTexture(GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
-
     override fun deleteTextureOnHardware(pGL: GL10?)
     {
         surfaceTexture?.release()
@@ -81,12 +79,12 @@ class VideoTexture(val source: String)
 
     override fun bind(pGL: GL10)
     {
-        if (!isLoadedToHardware)
+        if (!isLoadedToHardware || !player.isPlaying)
             return
 
         bindTextureOnHardware(pGL)
 
-        if (surfaceTexture == null)
+        if (surfaceTexture == null && mHardwareTextureID != -1)
         {
             surfaceTexture = SurfaceTexture(mHardwareTextureID)
 
@@ -128,10 +126,4 @@ class VideoTexture(val source: String)
 
 
     fun toRegion() = TextureRegion(this, 0, 0, width, height)
-
-
-    companion object
-    {
-        const val GL_TEXTURE_EXTERNAL_OES = 0x8D65
-    }
 }
