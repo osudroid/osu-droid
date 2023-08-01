@@ -414,6 +414,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             it.setPosition(Config.getRES_WIDTH() - 410f - 6f, 6f)
             attachChild(it)
+
+            glThread { it.setInfo() }
         }
     }
 

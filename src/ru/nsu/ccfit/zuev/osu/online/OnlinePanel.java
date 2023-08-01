@@ -125,7 +125,7 @@ public class OnlinePanel extends Entity {
         attachChild(messageLayer);
     }
 
-    void setInfo() {
+    public void setInfo() {
         nameText.setText(OnlineManager.getInstance().getUsername());
         StringBuilder scoreBuilder = new StringBuilder("Score: ");
         scoreBuilder.append(OnlineManager.getInstance().getScore());
