@@ -263,18 +263,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         } else
             this.replayFile = rFile;
 
-        // Avoid parsing beatmap if the track didn't change.
-        if (track != lastTrack) {
-            BeatmapParser parser = new BeatmapParser(track.getFilename());
-            if (parser.openFile()) {
-                beatmapData = parser.parse(true);
-            } else {
-                Debug.e("startGame: cannot open file");
-                ToastLogger.showText(
-                        StringTable.format(R.string.message_error_open,
-                                track.getFilename()), true);
-                return false;
-            }
+        BeatmapParser parser = new BeatmapParser(track.getFilename());
+        if (parser.openFile()) {
+            beatmapData = parser.parse(true);
+        } else {
+            Debug.e("startGame: cannot open file");
+            ToastLogger.showText(
+                    StringTable.format(R.string.message_error_open,
+                            track.getFilename()), true);
+            return false;
         }
 
         if (beatmapData == null) {
