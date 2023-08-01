@@ -84,7 +84,6 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
-import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierFactory;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -565,7 +564,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         offsetRegs = 0;
 
         File trackFile = new File(track.getFilename());
-        trackMD5 = FileUtils.getMD5Checksum(trackFile);
+        trackMD5 = beatmapData.getMD5();
         replaying = false;
         replay = new Replay();
         replay.setObjectCount(objects.size());
