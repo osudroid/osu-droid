@@ -54,7 +54,7 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
         if (actionId == EditorInfo.IME_ACTION_SEND)
         {
             field?.clearFocus()
-            LobbyScene.searchQuery = v?.text?.toString()
+            LobbyScene.searchQuery = v?.text?.trim()?.takeUnless { it.isBlank() }?.toString()
             return true
         }
         return false
