@@ -61,7 +61,7 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
 
     override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean
     {
-        if (actionId == EditorInfo.IME_ACTION_SEND)
+        if (actionId == EditorInfo.IME_ACTION_DONE)
         {
             hideKeyboard()
             LobbyScene.searchQuery = v?.text?.trim()?.takeUnless { it.isBlank() }?.toString()
@@ -74,7 +74,7 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
     {
         if (keyCode == KeyEvent.KEYCODE_ENTER && v is EditText)
         {
-            onEditorAction(v, EditorInfo.IME_ACTION_SEND, event)
+            onEditorAction(v, EditorInfo.IME_ACTION_DONE, event)
             return true
         }
         return false
