@@ -6,6 +6,7 @@ import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
+import com.dgsrz.bancho.security.SecurityUtils
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
@@ -84,6 +85,11 @@ class LobbyCreateRoom : BaseFragment()
                     )
                 }
 
+                var signStr = "${name}_${maxBar.progress}"
+                if (password != null) {
+                    signStr += "_${password}"
+                }
+
                 try
                 {
                     val roomId = LobbyAPI.createRoom(
@@ -91,6 +97,7 @@ class LobbyCreateRoom : BaseFragment()
                             beatmap,
                             getOnline().userId,
                             getOnline().username,
+                            SecurityUtils.signRequest(signStr),
                             password,
                             maxBar.progress
                     )

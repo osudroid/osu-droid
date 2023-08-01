@@ -65,7 +65,7 @@ object LobbyAPI
     /**
      * Create room and get the ID.
      */
-    fun createRoom(name: String, beatmap: RoomBeatmap?, hostUID: Long, hostUsername: String, password: String? = null, maxPlayers: Int = 8) : Long
+    fun createRoom(name: String, beatmap: RoomBeatmap?, hostUID: Long, hostUsername: String, sign: String, password: String? = null, maxPlayers: Int = 8) : Long
     {
         JsonRequester("$HOST$CREATE_ROOM").use { request ->
 
@@ -83,6 +83,8 @@ object LobbyAPI
 
                 if (!password.isNullOrBlank())
                     put("password", password)
+
+                put("sign", sign)
             }
 
             return request.executeAndGetJson().getString("id").toLong()
