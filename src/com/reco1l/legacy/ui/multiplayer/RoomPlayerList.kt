@@ -56,7 +56,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
             val item = getChild(i) as PlayerItem
             RoomScene.unregisterTouchArea(item)
         }
-        detachChildren()
+        glThread { detachChildren() }
         return super.detachSelf()
     }
 
