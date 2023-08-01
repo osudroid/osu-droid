@@ -148,6 +148,13 @@ public class OnlinePanel extends Entity {
         attachChild(onlineLayer);
     }
 
+    public void setAvatar()
+    {
+        var avatarUrl = OnlineManager.getInstance().getAvatarURL();
+        var textureName = OnlineScoring.getInstance().isAvatarLoaded() && !avatarUrl.isEmpty() ? avatarUrl : null;
+        setAvatar(textureName);
+    }
+
     void setAvatar(final String texname) {
         if (avatar != null)
             avatar.detachSelf();
