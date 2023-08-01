@@ -1,5 +1,6 @@
 package com.reco1l.api.ibancho
 
+import com.dgsrz.bancho.security.SecurityUtils
 import com.reco1l.api.ibancho.data.*
 import com.reco1l.api.ibancho.data.Room
 import com.reco1l.api.ibancho.data.RoomTeam
@@ -230,6 +231,7 @@ object RoomAPI
         auth["uid"] = userId.toString()
         auth["username"] = username
         auth["version"] = API_VERSION.toString()
+        auth["authSign"] = SecurityUtils.signRequest("${userId}_$username")
 
         if (!roomPassword.isNullOrBlank())
             auth["password"] = roomPassword

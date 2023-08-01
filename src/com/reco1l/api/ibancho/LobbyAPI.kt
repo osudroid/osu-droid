@@ -11,8 +11,20 @@ import org.json.JSONObject
 
 object LobbyAPI
 {
+    /**
+     * The hostname.
+     */
+    const val HOST = "https://multi.osudroid.moe"
 
+    /**
+     * Endpoint to get a rooms list.
+     */
+    private const val GET_ROOMS = "/getrooms"
 
+    /**
+     * Endpoint to create a room.
+     */
+    private const val CREATE_ROOM = "/createroom"
 
     /**
      * Get room list.
