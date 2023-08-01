@@ -1,6 +1,7 @@
 package com.reco1l.legacy.ui.multiplayer
 
 import android.net.Uri
+import com.dgsrz.bancho.security.SecurityUtils
 import com.reco1l.api.ibancho.LobbyAPI
 import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.framework.extensions.className
@@ -259,7 +260,7 @@ object LobbyScene : Scene()
 
         awaitList = true
         {
-            val list = LobbyAPI.getRooms(searchQuery)
+            val list = LobbyAPI.getRooms(searchQuery, SecurityUtils.signRequest(searchQuery ?: ""))
 
             // Updating list
             glThread {

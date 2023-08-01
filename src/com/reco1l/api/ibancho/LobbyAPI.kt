@@ -17,16 +17,18 @@ object LobbyAPI
     /**
      * Get room list.
      */
-    fun getRooms(query: String?): List<Room>
+    fun getRooms(query: String?, sign: String): List<Room>
     {
         JsonRequester("$HOST$GET_ROOMS").use {
 
             //it.log = false
 
-            if (query != null)
-                it.query = QueryContent().apply {
+            it.query = QueryContent().apply {
+                put("sign", sign)
+
+                if (query != null)
                     put("query", query)
-                }
+            }
 
             val list = mutableListOf<Room>()
             val array = it.executeAndGetJson().toArray() ?: return list
