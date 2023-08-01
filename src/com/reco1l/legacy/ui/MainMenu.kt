@@ -8,11 +8,15 @@ import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.MainScene
 import ru.nsu.ccfit.zuev.osu.MainScene.MusicOption
+import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
+import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
 import ru.nsu.ccfit.zuev.osu.menu.SettingsMenu
+import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as resources
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager.getInstance as getOnline
 
 class MainMenu(val main: MainScene)
 {
@@ -122,6 +126,12 @@ class MainMenu(val main: MainScene)
             if (touchEvent.isActionUp)
             {
                 setColor(1f, 1f, 1f)
+
+                if (!getOnline().isStayOnline) {
+                    ToastLogger.showText(StringTable.format(R.string.multiplayer_not_online), true)
+                    return true
+                }
+
                 if (main.isOnExitAnim) return true
 
                 getGlobal().songService.isGaming = true
