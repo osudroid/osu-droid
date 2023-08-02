@@ -142,7 +142,6 @@ public class MainActivity extends BaseGameActivity implements
         Debug.i("screen inches: " + screenInches);
         Config.setScaleMultiplier((float) ((11 - 5.2450170716245195) / 5));
 
-        Config.setTextureQuality(1);
         final PowerManager manager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = manager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
                 "osudroid:osu");
@@ -269,7 +268,6 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public void onLoadResources() {
-        Config.setTextureQuality(1);
         ResourceManager.getInstance().Init(mEngine, this);
         ResourceManager.getInstance().loadHighQualityAsset("welcome", "gfx/welcome.png");
         ResourceManager.getInstance().loadHighQualityAsset("loading_start", "gfx/loading.png");

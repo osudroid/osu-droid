@@ -84,7 +84,6 @@ public class Config {
         errorMeter,
         spinnerStyle,
         backgroundQuality,
-        textureQuality,
         metronomeSwitch;
     
     private static float soundVolume,
@@ -113,7 +112,6 @@ public class Config {
         comboburst = prefs.getBoolean("comboburst", false);
         corovans = prefs.getBoolean("images", false);
         showFPS = prefs.getBoolean("fps", false);
-        textureQuality = prefs.getBoolean("lowtextures", false) ? 2 : 1;
         errorMeter = Integer.parseInt(prefs.getString("errormeter", "0"));
         spinnerStyle = Integer.parseInt(prefs.getString("spinnerstyle", "0"));
         showFirstApproachCircle = prefs.getBoolean("showfirstapproachcircle", false);
@@ -439,11 +437,7 @@ public class Config {
     }
 
     public static int getTextureQuality() {
-        return textureQuality;
-    }
-
-    public static void setTextureQuality(final int textureQuality) {
-        Config.textureQuality = textureQuality;
+        return 1;
     }
 
     public static float getBackgroundBrightness() {
