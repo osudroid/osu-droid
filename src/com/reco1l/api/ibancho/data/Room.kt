@@ -108,7 +108,15 @@ data class Room(
     /**
      * Get player by the given UID.
      */
-    fun getPlayerByUID(uid: Long) = activePlayers.find { it.id == uid }
+    fun getPlayerByUID(uid: Long): RoomPlayer?
+    {
+        val index = activePlayers.find { it.id == uid }
+
+        if (index == null)
+            multiLog("getPlayerByUID() - Unable to find user with UID: $uid")
+
+        return index
+    }
 
 
     /**
