@@ -12,14 +12,4 @@ data class RoomBeatmap
 
     var parentSetID: Long? = null
 
-    override fun toString() = """
-        {
-            "md5":"$md5",
-            "title":"$title",
-            "artist":"$artist",
-            "creator":"$creator",
-            "version":"$version"
-        }
-    """.trimIndent()
-
 }

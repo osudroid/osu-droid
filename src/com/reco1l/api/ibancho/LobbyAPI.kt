@@ -90,7 +90,14 @@ object LobbyAPI
                         .put("username", hostUsername)
 
                 if (beatmap != null)
-                    put("beatmap", JSONObject(beatmap.toString()))
+                {
+                    putGroup("beatmap")
+                            .put("md5", beatmap.md5)
+                            .put("title", beatmap.title)
+                            .put("artist", beatmap.artist)
+                            .put("creator", beatmap.creator)
+                            .put("version", beatmap.version)
+                }
 
                 if (!password.isNullOrBlank())
                     put("password", password)
