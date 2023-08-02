@@ -29,18 +29,17 @@ object LobbyAPI
     /**
      * Get room list.
      */
-    fun getRooms(query: String?, sign: String): List<Room>
+    fun getRooms(query: String?, sign: String?): List<Room>
     {
         JsonRequester("$HOST$GET_ROOMS").use {
 
             //it.log = false
 
-            it.query = QueryContent().apply {
-                put("sign", sign)
-
-                if (query != null)
+            if (sign != null || query != null)
+                it.query = QueryContent().apply {
+                    put("sign", sign)
                     put("query", query)
-            }
+                }
 
             val list = mutableListOf<Room>()
             val array = it.executeAndGetJson().toArray() ?: return list
@@ -77,7 +76,7 @@ object LobbyAPI
     /**
      * Create room and get the ID.
      */
-    fun createRoom(name: String, beatmap: RoomBeatmap?, hostUID: Long, hostUsername: String, sign: String, password: String? = null, maxPlayers: Int = 8) : Long
+    fun createRoom(name: String, beatmap: RoomBeatmap?, hostUID: Long, hostUsername: String, sign: String?, password: String? = null, maxPlayers: Int = 8): Long
     {
         JsonRequester("$HOST$CREATE_ROOM").use { request ->
 

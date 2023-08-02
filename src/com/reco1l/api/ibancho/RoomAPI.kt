@@ -231,7 +231,11 @@ object RoomAPI
         auth["uid"] = userId.toString()
         auth["username"] = username
         auth["version"] = API_VERSION.toString()
-        auth["authSign"] = SecurityUtils.signRequest("${userId}_$username")
+
+        val sign = SecurityUtils.signRequest("${userId}_$username")
+
+        if (sign != null)
+            auth["authSign"] = sign
 
         if (!roomPassword.isNullOrBlank())
             auth["password"] = roomPassword

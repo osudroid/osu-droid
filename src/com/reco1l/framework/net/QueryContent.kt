@@ -11,9 +11,9 @@ class QueryContent
     private var useAmpersand = false
 
 
-    fun put(key: String, value: Any)
+    fun put(key: String, value: Any?)
     {
-        val string = value.toString().takeUnless { it.isEmpty() } ?: return
+        val string = value?.toString()?.trim()?.takeUnless { it.isBlank() } ?: return
 
         if (useAmpersand)
         {
