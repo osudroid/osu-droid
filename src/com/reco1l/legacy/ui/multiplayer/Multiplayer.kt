@@ -3,7 +3,6 @@ package com.reco1l.legacy.ui.multiplayer
 import android.text.format.DateFormat
 import android.util.Log
 import com.reco1l.framework.extensions.className
-import com.reco1l.framework.extensions.logE
 import com.reco1l.legacy.data.jsonToScoreboardItem
 import com.reco1l.legacy.data.jsonToStatistic
 import org.json.JSONArray
@@ -63,8 +62,15 @@ object Multiplayer
     {
         finalData = null
 
-        if (array.length() == 0)
+        // If player isn't in the Scoring scene anymore we skip this.
+        if (getGlobal().engine.scene != getGlobal().scoring.scene)
             return
+
+        if (array.length() == 0)
+        {
+            multiLog("WARNING: Server provided empty final leaderboard.")
+            return
+        }
 
         val list = mutableListOf<StatisticV2>()
 
@@ -78,16 +84,20 @@ object Multiplayer
             return
 
         // Replacing server statistic with local
-        val ownScoreIndex = list.indexOfFirst { it.playerName == getOnline().username }.takeUnless { it == -1 }
         val ownScore = getGlobal().gameScene.stat
+        val ownScoreIndex = list.indexOfFirst { it.playerName == getOnline().username }.takeUnless { it == -1 }
 
-        // This should never happen
-        if (ownScoreIndex == null)
+        if (ownScore != null)
         {
-            list.add(ownScore)
-            "Player score wasn't found in final leaderboard".logE(className)
+            // This should never happen
+            if (ownScoreIndex == null)
+            {
+                list.add(ownScore)
+                multiLog("WARNING: Player score wasn't found in final leaderboard.")
+            }
+            else list[ownScoreIndex] = ownScore
         }
-        else list[ownScoreIndex] = ownScore
+        else multiLog("WARNING: Player score is null at final leaderboard.")
 
         finalData = list.toTypedArray()
 
@@ -113,6 +123,6 @@ object Multiplayer
     }
 }
 
-fun Any.multiLog(text: String) = Multiplayer.log(text)
+fun multiLog(text: String) = Multiplayer.log(text)
 
-fun Any.multiLog(e: Throwable) = Multiplayer.log(e)
+fun multiLog(e: Throwable) = Multiplayer.log(e)
