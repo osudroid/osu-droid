@@ -500,7 +500,7 @@ public class ScoringScene {
 
         // In case the scene was reloaded
         if (statistics != null)
-            setRoomStatistics(statistics);
+            scene.attachChild(new StatisticSelector(statistics));
 
         //save and upload score
         if (track != null && mapMD5 != null) {
@@ -535,12 +535,7 @@ public class ScoringScene {
     public void setRoomStatistics(StatisticV2[] stats)
     {
         statistics = stats;
-
-        if (scene != null)
-        {
-            var playerSelector = new StatisticSelector(statistics);
-            scene.attachChild(playerSelector);
-        }
+        load(currentStatistic, track, GlobalManager.getInstance().getSongService(), null, null, null);
     }
 
     public void back() {
