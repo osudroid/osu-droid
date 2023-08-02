@@ -869,7 +869,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         room!!.addPlayer(player)
 
         // Chat message
-        chat.onSystemChatMessage("Player ${player.name} joined.", "#007BFF")
+        chat.onSystemChatMessage("Player ${player.name} (ID: ${player.id}) joined.", "#007BFF")
 
         // Updating state text
         stateText.text = "${room!!.activePlayers.size} / ${room!!.maxPlayers} players. ${room!!.readyPlayers.size} players ready."
@@ -884,7 +884,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Notifying in chat
         if (player != null)
-            chat.onSystemChatMessage("Player ${player.name} left.", "#007BFF")
+            chat.onSystemChatMessage("Player ${player.name} (ID: $uid) left.", "#007BFF")
 
         // Updating state text
         stateText.text = "${room!!.activePlayers.size} / ${room!!.maxPlayers} players. ${room!!.readyPlayers.size} players ready."
@@ -914,7 +914,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Notifying in chat
         if (player != null)
-            chat.onSystemChatMessage("Player ${player.name} was kicked.", "#FF0000")
+            chat.onSystemChatMessage("Player ${player.name} (ID: $uid) was kicked.", "#FF0000")
 
         // Updating state text
         stateText.text = "${room!!.activePlayers.size} / ${room!!.maxPlayers} players. ${room!!.readyPlayers.size} players ready."
