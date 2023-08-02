@@ -10,7 +10,6 @@ import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
 import com.reco1l.framework.extensions.className
 import com.reco1l.framework.extensions.orAsyncCatch
-import com.reco1l.framework.extensions.orCatch
 import com.reco1l.framework.lang.uiThread
 import com.reco1l.legacy.data.modsToReadable
 import com.reco1l.legacy.ui.entity.ScrollableList
@@ -39,49 +38,40 @@ class LobbyRoomList : ScrollableList()
         rooms.forEach { addItem(it) }
     }
 
-    private fun connectToRoom(room: Room)
-    {
-        if (!room.isLocked)
-        {
-            { RoomAPI.connectToRoom(room.id, getOnline().userId, getOnline().username, null) }.orCatch {
+    private fun showPasswordPrompt(room: Room) = uiThread {
 
-                ToastLogger.showText("Failed to connect room: ${it.className} - ${it.message}", true)
-                it.printStackTrace()
-                LobbyScene.show()
+        val input = EditText(getGlobal().mainActivity)
+        input.inputType = EditorInfo.TYPE_TEXT_VARIATION_PASSWORD
+
+        AlertDialog.Builder(getGlobal().mainActivity).apply {
+
+            setTitle(room.name)
+            setMessage("Please enter the password:")
+            setView(input)
+            setCancelable(false)
+            setPositiveButton("Join") { dialog, _ ->
+
+                val password = input.text.toString()
+                dialog.dismiss()
+                connectToRoom(room, password)
             }
-            return
-        }
 
-        uiThread {
+            setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+        }.show()
+    }
 
-            val input = EditText(getGlobal().mainActivity)
-            input.inputType = EditorInfo.TYPE_TEXT_VARIATION_PASSWORD
+    private fun connectToRoom(room: Room, password: String? = null)
+    {
+        multiLog("Trying to connect socket...")
 
-            AlertDialog.Builder(getGlobal().mainActivity).apply {
+        LobbyScene.search.dismiss()
+        LoadingScreen().show();
 
-                setTitle(room.name)
-                setMessage("Please enter the password:")
-                setView(input)
-                setCancelable(false)
-                setPositiveButton("Join") { dialog, _ ->
+        { RoomAPI.connectToRoom(room.id, getOnline().userId, getOnline().username, password) }.orAsyncCatch {
 
-                    val password = input.text.toString()
-                    dialog.dismiss();
-
-                    { RoomAPI.connectToRoom(room.id, getOnline().userId, getOnline().username, password) }.orAsyncCatch {
-
-                        ToastLogger.showText("Failed to connect room: ${it.className} - ${it.message}", true)
-                        it.printStackTrace()
-                        LobbyScene.show()
-                    }
-                }
-
-                setNegativeButton("Cancel") { dialog, _ ->
-
-                    dialog.dismiss()
-                    LobbyScene.show()
-                }
-            }.show()
+            ToastLogger.showText("Failed to connect room: ${it.className} - ${it.message}", true)
+            multiLog(it)
+            LobbyScene.show()
         }
     }
 
@@ -118,9 +108,12 @@ class LobbyRoomList : ScrollableList()
                     if (moved || isScroll)
                         return false
 
-                    LobbyScene.search.dismiss()
-                    LoadingScreen().show()
-                    connectToRoom(room)
+                    if (room.isLocked)
+                        showPasswordPrompt(room)
+                    else
+                        connectToRoom(room)
+
+                    return true
                 }
 
                 if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 10)
