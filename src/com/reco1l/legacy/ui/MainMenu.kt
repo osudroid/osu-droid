@@ -144,6 +144,8 @@ class MainMenu(val main: MainScene)
                     getGlobal().mainActivity.checkNewBeatmaps()
                     LibraryManager.INSTANCE.updateLibrary(true)
 
+                    getGlobal().songMenu.reload()
+
                     RoomScene.load()
                     LobbyScene.load()
                     LobbyScene.show()
