@@ -1,5 +1,7 @@
 package com.reco1l.api.ibancho.data
 
+import com.reco1l.legacy.ui.multiplayer.multiLog
+
 data class Room(
         /**
          * The room ID.
@@ -114,9 +116,13 @@ data class Room(
      */
     fun addPlayer(player: RoomPlayer)
     {
-        val index = players.indexOfFirst { it?.id == player.id || it == null }
+        val index = players.indexOfFirst { it != null && it.id == player.id || it == null }
 
-        players[index] = player
+        if (index in players.indices)
+            players[index] = player
+        else
+            multiLog("addPlayer() - Invalid index: $index (Array size: ${players.size})")
+
         sortPlayers()
     }
 
@@ -127,12 +133,17 @@ data class Room(
      */
     fun removePlayer(uid: Long): RoomPlayer?
     {
-        val index = players.indexOfFirst { it?.id == uid }.takeUnless { it == -1 } ?: return null
-        val removed = players[index]
+        val index = players.indexOfFirst { it != null && it.id == uid }
+        var removed: RoomPlayer? = null
 
-        players[index] = null
+        if (index in players.indices)
+        {
+            removed = players[index]
+            players[index] = null
+        }
+        else multiLog("removePlayer() - Invalid index: $index (Array size: ${players.size})")
+
         sortPlayers()
-
         return removed
     }
 
