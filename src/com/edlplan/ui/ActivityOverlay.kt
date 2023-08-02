@@ -40,7 +40,7 @@ object ActivityOverlay {
         if (fragmentManager != null) {
             if (displayingOverlay.contains(fragment)) {
                 displayingOverlay.remove(fragment)
-                fragmentManager!!.beginTransaction().remove(fragment).commit()
+                fragmentManager!!.beginTransaction().remove(fragment).commitAllowingStateLoss()
             }
         }
     }
