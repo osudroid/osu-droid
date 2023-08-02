@@ -4,7 +4,6 @@ import android.graphics.SurfaceTexture
 import android.media.MediaPlayer
 import android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES
 import android.os.Build
-import android.util.Log
 import android.view.Surface
 import org.anddev.andengine.opengl.texture.Texture
 import org.anddev.andengine.opengl.texture.TextureOptions
@@ -59,6 +58,7 @@ class VideoTexture(val source: String)
             return
 
         bindTextureOnHardware(pGL)
+        applyTextureOptions(pGL)
 
         if (surfaceTexture == null)
         {
