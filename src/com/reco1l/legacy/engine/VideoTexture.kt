@@ -24,13 +24,6 @@ class VideoTexture(val source: String)
         ), null)
 {
 
-
-    val isPlaying
-        get() = player.isPlaying
-
-    val time
-        get() = player.currentPosition
-
     private val player = MediaPlayer().also {
 
         it.setDataSource(source)
@@ -86,15 +79,22 @@ class VideoTexture(val source: String)
         }
     }
 
+    fun play() = player.start()
+
+    fun pause() = player.pause()
+
     fun release() = player.release()
 
     fun seekTo(ms: Int)
     {
-        Log.i("VIDEO", "Seek position: $ms")
-        player.seekTo(ms)
+        // Unfortunately in old versions we can't seek at closest frame from the desired position.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            player.seekTo(ms.toLong(), MediaPlayer.SEEK_CLOSEST)
+        else
+            player.seekTo(ms)
     }
 
-    fun setPlayback(speed: Float)
+    fun setPlaybackSpeed(speed: Float)
     {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
         {

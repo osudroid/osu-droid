@@ -5,19 +5,11 @@ import org.anddev.andengine.engine.Engine
 import org.anddev.andengine.engine.camera.Camera
 import org.anddev.andengine.entity.sprite.Sprite
 import javax.microedition.khronos.opengles.GL10
-import kotlin.math.absoluteValue
 
 class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, VideoTexture(source).toRegion())
 {
 
     val texture = textureRegion.texture as VideoTexture
-
-    val isPlaying
-        get() = texture.isPlaying
-
-    val time
-        get() = texture.time
-
 
     init
     {
@@ -29,11 +21,6 @@ class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, V
         texture.release()
         engine.textureManager.unloadTexture(texture)
     }
-
-    fun seekTo(ms: Int) = texture.seekTo(ms)
-
-    fun setPlayback(speed: Float) = texture.setPlayback(speed)
-
 
     override fun doDraw(pGL: GL10, pCamera: Camera?)
     {

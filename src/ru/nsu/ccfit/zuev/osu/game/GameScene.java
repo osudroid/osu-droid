@@ -4,6 +4,7 @@ import android.graphics.PointF;
 import android.os.Build;
 import android.os.SystemClock;
 
+import android.util.Log;
 import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.ProxySprite;
@@ -177,13 +178,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private ChangeableText replayText;
     private String title, artist, version;
     private ComboBurst comboBurst;
-    private VideoSprite mVideo = null;
     private int failcount = 0;
     private float lastObjectHitTime = 0;
     private SliderPath[] sliderPaths = null;
     private int sliderIndex = 0;
 
-    private float videoStartTime;
+    // Video support
+    private VideoSprite mVideo;
+    private float videoOffset;
 
     private StoryboardSprite storyboardSprite;
     private ProxySprite storyboardOverlayProxy;
@@ -240,9 +242,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 mVideo.setColor(brightness, brightness, brightness);
                 mVideo.setScale(factor);
                 mVideo.setAlpha(0f);
-
-                if (videoStartTime < 0)
-                    mVideo.seekTo((int) Math.abs(videoStartTime * 1000));
 
                 bgSprite = mVideo;
                 scene.setBackground(new SpriteBackground(bgSprite));
@@ -350,7 +349,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         title = beatmapData.metadata.title;
         artist = beatmapData.metadata.artist;
         version = beatmapData.metadata.version;
-        videoStartTime = beatmapData.events.videoStartTime / 1000f;
+        videoOffset = beatmapData.events.videoStartTime / 1000f;
 
         scale = (float) ((Config.getRES_HEIGHT() / 480.0f)
                 * (54.42 - beatmapData.difficulty.cs * 4.48)
@@ -809,6 +808,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         secPassed = -leadIn / 1000f;
         if (secPassed > -1) {
             secPassed = -1;
+        }
+
+        if (videoOffset < 0) {
+            secPassed = Math.min(videoOffset, secPassed);
         }
 
         if (!objects.isEmpty()) {
@@ -1542,24 +1545,25 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        if (secPassed >= 0 && musicStarted == false) {
+        if (mVideo != null && secPassed >= videoOffset)
+        {
+            if (!videoStarted) {
+                mVideo.getTexture().play();
+                mVideo.getTexture().setPlaybackSpeed(timeMultiplier);
+                videoStarted = true;
+            }
+
+            if (mVideo.getAlpha() < 1.0f)
+                mVideo.setAlpha(Math.min(mVideo.getAlpha() + 0.03f, 1.0f));
+        }
+
+        if (secPassed >= 0 && !musicStarted) {
             GlobalManager.getInstance().getSongService().play();
             GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
             totalLength = GlobalManager.getInstance().getSongService().getLength();
             musicStarted = true;
             secPassed = 0;
             return;
-        }
-
-        if (mVideo != null && secPassed >= videoStartTime) {
-            if (!videoStarted) {
-                mVideo.setPlayback(timeMultiplier);
-                videoStarted = true;
-            }
-
-            if (mVideo.getAlpha() < 1.0f) {
-                mVideo.setAlpha(Math.min(mVideo.getAlpha() + 0.03f, 1.0f));
-            }
         }
 
         boolean shouldBePunished = false;
@@ -1868,7 +1872,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     GlobalManager.getInstance().getSongService().seekTo(seekTime);
                     if (mVideo != null) {
                         // Offset video seek by its start time.
-                        mVideo.seekTo(seekTime - (int) (videoStartTime * 1000));
+                        var videoSeekTime = seekTime - (int) (videoOffset * 1000);
+                        Log.i("VIDEO", "Seeking to: " + videoSeekTime);
+                        mVideo.getTexture().seekTo(videoSeekTime);
                     }
                     secPassed = skipTime - 0.5f;
                     skipBtn.detachSelf();
@@ -2395,7 +2401,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GlobalManager.getInstance().getSongService().pause();
         }
         if (mVideo != null) {
-            mVideo.setPlayback(0);
+            mVideo.getTexture().pause();
         }
         paused = true;
         scene.setChildScene(menu.getScene(), false, true, true);
@@ -2415,7 +2421,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GlobalManager.getInstance().getSongService().pause();
         }
         if (mVideo != null) {
-            mVideo.setPlayback(0);
+            mVideo.getTexture().pause();
         }
         paused = true;
         scene.setChildScene(menu.getScene(), false, true, true);
@@ -2439,8 +2445,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             EdExtensionHelper.onResume(lastTrack);
         }
 
-        if (mVideo != null && !mVideo.isPlaying() && videoStarted) {
-            mVideo.setPlayback(timeMultiplier);
+        if (mVideo != null && videoStarted) {
+            mVideo.getTexture().play();
         }
 
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() != Status.PLAYING && secPassed > 0) {
