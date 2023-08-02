@@ -13,6 +13,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import org.apache.http.HttpException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -252,6 +253,9 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            if (Multiplayer.isMultiplayer)
+                Multiplayer.log("\"Sorry, abnormal program will now exit.\"");
+
             // 结束所有Activity
             SaveServiceObject.finishAllActivities();
             //退出程序
@@ -276,6 +280,9 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
         if (context == null) {
             return false;
         }
+
+        if (Multiplayer.isMultiplayer)
+            Multiplayer.log(ex);
 
         final String crashReport = getCrashReport(context, ex);
         // 显示异常信息&发送报告

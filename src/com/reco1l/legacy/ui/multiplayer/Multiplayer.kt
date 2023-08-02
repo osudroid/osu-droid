@@ -1,17 +1,22 @@
 package com.reco1l.legacy.ui.multiplayer
 
+import android.text.format.DateFormat
+import android.util.Log
 import com.reco1l.framework.extensions.className
 import com.reco1l.framework.extensions.logE
 import com.reco1l.legacy.data.jsonToScoreboardItem
 import com.reco1l.legacy.data.jsonToStatistic
 import org.json.JSONArray
+import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoard.ScoreBoardItems
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
+import java.io.File
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.getInstance as getOnline
 
 object Multiplayer
 {
+
     /**Indicates if player is in multiplayer mode */
     @JvmField
     var isMultiplayer = false
@@ -31,6 +36,9 @@ object Multiplayer
     /**Array containing final leaderboard*/
     @JvmStatic
     var finalData: Array<StatisticV2>? = null
+
+
+    private val LOG_FILE = File("${Config.getCorePath()}/Log", "multi_log.txt")
 
 
     @JvmStatic
@@ -85,7 +93,26 @@ object Multiplayer
 
         getGlobal().scoring.setRoomStatistics(finalData)
     }
+
+    // Logging
+
+    @JvmStatic
+    fun log(text: String)
+    {
+        val timestamp = DateFormat.format("hh:mm:ss", System.currentTimeMillis())
+
+        LOG_FILE.appendText("\n[$timestamp] $text")
+    }
+
+    @JvmStatic
+    fun log(e: Throwable)
+    {
+        val timestamp = DateFormat.format("hh:mm:ss", System.currentTimeMillis())
+
+        LOG_FILE.appendText("\n[$timestamp] Unexpected exception: ${e.className}\n${Log.getStackTraceString(e)}")
+    }
 }
 
+fun Any.multiLog(text: String) = Multiplayer.log(text)
 
-
+fun Any.multiLog(e: Throwable) = Multiplayer.log(e)
