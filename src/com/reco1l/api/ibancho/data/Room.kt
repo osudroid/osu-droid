@@ -104,6 +104,12 @@ data class Room(
     val redTeamPlayers
         get() = activePlayers.filter { it.team == RoomTeam.RED }
 
+    /**
+     * Get the host Player instance.
+     */
+    val hostPlayer
+        get() = activePlayers.find { it.id == host }
+
 
     /**
      * Get player by the given UID.
