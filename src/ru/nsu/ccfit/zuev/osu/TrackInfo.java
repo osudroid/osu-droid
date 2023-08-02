@@ -214,6 +214,17 @@ public class TrackInfo implements Serializable {
     // proper way to compare
     @Override
     public boolean equals(Object o) {
-        return o == this || o instanceof TrackInfo && ((TrackInfo) o).md5.equals(md5);
+
+        if (o == this)
+            return true;
+
+        if (o instanceof TrackInfo) {
+            var track = (TrackInfo) o;
+
+            return md5 != null
+                    && track.md5 != null
+                    && track.md5.equals(md5);
+        }
+        return true;
     }
 }
