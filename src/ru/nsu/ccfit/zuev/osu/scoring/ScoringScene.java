@@ -54,8 +54,6 @@ public class ScoringScene {
     // Multiplayer
     public StatisticV2 currentStatistic;
 
-    private StatisticV2[] statistics;
-
 
     public ScoringScene(final Engine pEngine, final GameScene pGame,
                         final SongMenu pMenu) {
@@ -499,8 +497,8 @@ public class ScoringScene {
         scene.attachChild(playerInfo);
 
         // In case the scene was reloaded
-        if (statistics != null)
-            scene.attachChild(new StatisticSelector(statistics));
+        if (Multiplayer.finalData != null)
+            scene.attachChild(new StatisticSelector(Multiplayer.finalData));
 
         //save and upload score
         if (track != null && mapMD5 != null) {
@@ -531,16 +529,13 @@ public class ScoringScene {
         }
     }
 
-    // Called by the server when all players in the room has submitted its score
-    public void setRoomStatistics(StatisticV2[] stats)
-    {
-        statistics = stats;
+    public void reload() {
         load(currentStatistic, track, GlobalManager.getInstance().getSongService(), null, null, null);
     }
 
     public void back() {
         ResourceManager.getInstance().getSound("applause").stop();
-        statistics = null;
+        Multiplayer.finalData = null;
         currentStatistic = null;
 
         if (Multiplayer.isMultiplayer)

@@ -34,7 +34,7 @@ object Multiplayer
     var liveData: Array<ScoreBoardItems>? = null
 
     /**Array containing final leaderboard*/
-    @JvmStatic
+    @JvmField
     var finalData: Array<StatisticV2>? = null
 
 
@@ -69,10 +69,6 @@ object Multiplayer
     fun onFinalLeaderboard(array: JSONArray)
     {
         finalData = null
-
-        // If player isn't in the Scoring scene anymore we skip this.
-        if (getGlobal().engine.scene != getGlobal().scoring.scene)
-            return
 
         if (array.length() == 0)
         {
@@ -109,7 +105,8 @@ object Multiplayer
 
         finalData = list.toTypedArray()
 
-        getGlobal().scoring.setRoomStatistics(finalData)
+        // Reloading results screen
+        getGlobal().scoring.reload()
     }
 
     // Logging

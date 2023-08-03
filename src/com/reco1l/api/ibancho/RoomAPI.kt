@@ -203,7 +203,7 @@ object RoomAPI
 
         val array = it[0] as JSONArray
 
-        multiLog("\nRECEIVED: allPlayersScoreSubmitted\n${array.toString(3)}")
+        multiLog("RECEIVED: allPlayersScoreSubmitted\n${array.toString(3)}")
         roomEventListener?.onRoomFinalLeaderboard(array)
     }
 
