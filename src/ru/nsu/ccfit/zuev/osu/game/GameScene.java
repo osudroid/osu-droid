@@ -1929,13 +1929,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         new PointF(Config.getRES_WIDTH(), Config
                                 .getRES_HEIGHT())) < 250) {
 
-                    if (Multiplayer.isMultiplayer)
+                    if (Multiplayer.isConnected)
                     {
                         if (!isSkipRequested)
                         {
                             isSkipRequested = true;
                             ResourceManager.getInstance().getSound("menuhit").play();
                             skipBtn.setVisible(false);
+
                             Async.run(RoomAPI.INSTANCE::requestSkip);
                             ToastLogger.showText("Skip requested", false);
                         }
