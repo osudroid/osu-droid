@@ -120,8 +120,8 @@ class RoomPlayerMenu : BaseFragment()
 
     private fun playOnLoadAnim()
     {
-        val body = findViewById<View>(R.id.fullLayout)
-        body!!.alpha = 0f
+        val body = findViewById<View>(R.id.fullLayout) ?: return
+        body.alpha = 0f
         body.translationY = 200f
         body.animate().cancel()
         body.animate()
@@ -135,8 +135,8 @@ class RoomPlayerMenu : BaseFragment()
 
     private fun playEndAnim(action: Runnable?)
     {
-        val body = findViewById<View>(R.id.fullLayout)
-        body!!.animate().cancel()
+        val body = findViewById<View>(R.id.fullLayout) ?: return
+        body.animate().cancel()
         body.animate()
                 .translationY(200f)
                 .alpha(0f)
