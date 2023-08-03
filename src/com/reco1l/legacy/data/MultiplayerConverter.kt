@@ -140,7 +140,7 @@ fun statisticToJson(stats: StatisticV2, isLiveScore: Boolean) = JSONObject().app
         put("combo", if (RoomScene.room!!.winCondition == WinCondition.MAX_COMBO) stats.maxCombo else stats.combo)
         return@apply
     }
-    else put("score", stats.totalScore)
+    else put("score", stats.modifiedTotalScore)
 
     put("username", stats.playerName)
     put("modstring", modsToString(stats.mod))
