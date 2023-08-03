@@ -93,6 +93,12 @@ data class Room(
         get() = activePlayers.filter { it.status == PlayerStatus.READY }
 
     /**
+     * Returns an array of all players that has the current beatmap.
+     */
+    val playersWithBeatmap
+        get() = activePlayers.filter { it.status != PlayerStatus.MISSING_BEATMAP }
+
+    /**
      * The array of players that corresponds to the BLUE team.
      */
     val blueTeamPlayers

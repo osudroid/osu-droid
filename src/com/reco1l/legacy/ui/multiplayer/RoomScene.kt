@@ -248,34 +248,32 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     if (!Multiplayer.isRoomHost)
                         return false
 
-                    if (room!!.teamMode == HEAD_TO_HEAD)
+                    // This can never happen, but we handle it just in case.
+                    if (room!!.beatmap == null)
                     {
-                        // Checking if there's at least another player that isn't the host that has state READY.
-                        if (room!!.activePlayers.any { it != player && it.status == READY })
-                        {
-                            RoomAPI.notifyMatchPlay()
-                            return true
-                        }
-                        ToastLogger.showText("At least 2 players needs to be ready to start a match!", true)
+                        ToastLogger.showText("You've to select a beatmap first.", true)
+                        return true
                     }
-                    else
-                    {
-                        val redTeam = room!!.redTeamPlayers
-                        val blueTeam = room!!.blueTeamPlayers
 
-                        if (redTeam.isEmpty() || blueTeam.isEmpty())
+                    // Filtering host from the array
+                    val playersWithBeatmap = room!!.playersWithBeatmap.filterNot { it == player }
+
+                    if (room!!.teamMode == TEAM_VS_TEAM)
+                    {
+                        if (room!!.redTeamPlayers.isEmpty() || room!!.blueTeamPlayers.isEmpty())
                         {
                             ToastLogger.showText("At least 1 player per team to start a match!", true)
                             return true
                         }
-
-                        if (redTeam.any { it.status == READY } && blueTeam.any { it.status == READY })
-                        {
-                            RoomAPI.notifyMatchPlay()
-                            return true
-                        }
-                        ToastLogger.showText("At least 1 player per team needs to be ready to start a match!", true)
                     }
+
+                    // Checking if all players that have the beatmap are READY.
+                    if (playersWithBeatmap.all { it.status == READY })
+                    {
+                        RoomAPI.notifyMatchPlay()
+                        return true
+                    }
+                    ToastLogger.showText("All players with beatmap needs to be ready!", true)
                 }
                 else uiThread {
                     options = RoomOptions()
