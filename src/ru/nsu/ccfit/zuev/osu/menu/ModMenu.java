@@ -148,7 +148,7 @@ public class ModMenu implements IModSwitcher {
             //noinspection DataFlowIssue
             var currentMods = MultiplayerConverter.stringToMods(RoomScene.getRoom().getMods());
 
-            if (!currentMods.equals(mod))
+            if (!currentMods.containsAll(mod))
             {
                 RoomScene.INSTANCE.setAwaitModsChange(true);
                 RoomAPI.setRoomMods(modsToString(mod));
