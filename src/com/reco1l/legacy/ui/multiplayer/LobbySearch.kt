@@ -59,12 +59,15 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
         imm?.hideSoftInputFromWindow(field?.windowToken, 0)
     }
 
-    override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean
+    override fun onEditorAction(view: TextView?, actionId: Int, event: KeyEvent?): Boolean
     {
-        if (actionId == EditorInfo.IME_ACTION_DONE)
+        if (actionId == EditorInfo.IME_ACTION_SEND)
         {
+            val text = view?.text?.toString()
             hideKeyboard()
-            LobbyScene.searchQuery = v?.text?.trim()?.takeUnless { it.isBlank() }?.toString()
+
+            LobbyScene.searchQuery = text
+            field?.setText(text)
             return true
         }
         return false
@@ -74,7 +77,7 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
     {
         if (keyCode == KeyEvent.KEYCODE_ENTER && v is EditText)
         {
-            onEditorAction(v, EditorInfo.IME_ACTION_DONE, event)
+            onEditorAction(v, EditorInfo.IME_ACTION_SEND, event)
             return true
         }
         return false

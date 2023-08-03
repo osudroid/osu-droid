@@ -146,7 +146,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
 
     override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean
     {
-        if (actionId == EditorInfo.IME_ACTION_SEARCH)
+        if (actionId == EditorInfo.IME_ACTION_SEND)
         {
             sendMessage()
             return true
@@ -158,7 +158,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
     {
         if (keyCode == KeyEvent.KEYCODE_ENTER && v is TextView)
         {
-            onEditorAction(v, EditorInfo.IME_ACTION_SEARCH, event)
+            onEditorAction(v, EditorInfo.IME_ACTION_SEND, event)
             return true
         }
         return false

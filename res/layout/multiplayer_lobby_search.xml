@@ -118,7 +118,7 @@
                     android:layout_alignParentBottom="true"
                     android:hint="Search..."
                     android:singleLine="true"
-                    android:imeOptions="actionDone"
+                    android:imeOptions="actionSend"
                     android:background="#FFF"
                     android:textColor="#000000"
             />
