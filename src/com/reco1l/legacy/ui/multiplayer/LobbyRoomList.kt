@@ -5,6 +5,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.api.ibancho.data.Room
+import com.reco1l.api.ibancho.data.RoomStatus.*
 import com.reco1l.api.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
@@ -150,10 +151,11 @@ class LobbyRoomList : ScrollableList()
 
         // Info
 
-        val teamMode = when (room.teamMode)
+        val status = when (room.status)
         {
-            HEAD_TO_HEAD -> "Head to Head"
-            TEAM_VS_TEAM -> "Team vs Team"
+            CHANGING_BEATMAP -> "Changing beatmap"
+            PLAYING -> "Playing a match"
+            else -> "Waiting for players"
         }
 
         val winCondition = when (room.winCondition)
@@ -166,7 +168,7 @@ class LobbyRoomList : ScrollableList()
 
         val infoText = """
             ${room.playerCount} / ${room.maxPlayers} - ${room.playerNames}
-            $teamMode - $winCondition - ${
+            $status - $winCondition - ${
             when
             {
                 room.isFreeMods ->
