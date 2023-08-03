@@ -106,7 +106,7 @@ object Multiplayer
         finalData = list.toTypedArray()
 
         // Reloading results screen
-        getGlobal().scoring.reload()
+        getGlobal().scoring.updateLeaderboard()
     }
 
     // Logging

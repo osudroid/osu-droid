@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.scoring;
 
 import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.edlplan.framework.utils.functionality.SmartIterator;
+import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.reco1l.legacy.ui.multiplayer.StatisticSelector;
@@ -53,6 +54,8 @@ public class ScoringScene {
 
     // Multiplayer
     public StatisticV2 currentStatistic;
+
+    private StatisticSelector selector;
 
 
     public ScoringScene(final Engine pEngine, final GameScene pGame,
@@ -497,8 +500,9 @@ public class ScoringScene {
         scene.attachChild(playerInfo);
 
         // In case the scene was reloaded
-        if (Multiplayer.finalData != null)
-            scene.attachChild(new StatisticSelector(Multiplayer.finalData));
+        if (Multiplayer.isMultiplayer) {
+            updateLeaderboard();
+        }
 
         //save and upload score
         if (track != null && mapMD5 != null) {
@@ -529,8 +533,24 @@ public class ScoringScene {
         }
     }
 
-    public void reload() {
-        load(currentStatistic, track, GlobalManager.getInstance().getSongService(), null, null, null);
+    public void updateLeaderboard() {
+
+        if (Multiplayer.finalData != null) {
+
+            if (selector != null) {
+                var oldSelector = selector;
+                Execution.glThread(() -> {
+                    oldSelector.detachSelf();
+                    oldSelector.detachChildren();
+                    return null;
+                });
+            }
+
+            selector = new StatisticSelector(Multiplayer.finalData);
+
+            if (scene != null)
+                scene.attachChild(selector);
+        }
     }
 
     public void back() {
