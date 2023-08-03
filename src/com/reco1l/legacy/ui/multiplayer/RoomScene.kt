@@ -9,8 +9,6 @@ import com.reco1l.api.ibancho.data.PlayerStatus.*
 import com.reco1l.api.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
-import com.reco1l.framework.extensions.className
-import com.reco1l.framework.extensions.logE
 import com.reco1l.framework.extensions.orCatch
 import com.reco1l.framework.lang.glThread
 import com.reco1l.framework.lang.uiThread
@@ -33,7 +31,6 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.MOD_SCOREV2
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen.LoadingScene
-import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
 import ru.nsu.ccfit.zuev.osu.scoring.Replay
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
@@ -438,7 +435,15 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     private fun updateInformation()
     {
+        // Update room name text
+        titleText.text = room!!.name
+
+        // Update room state text
+        stateText.text = "${room!!.activePlayers.size} / ${room!!.maxPlayers} players. ${room!!.readyPlayers.size} players ready."
+
+        // Update room info text
         infoText.text = """
+            Host: ${room!!.hostPlayer?.name}
             Team mode: ${
             when (room!!.teamMode)
             {
@@ -458,6 +463,34 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             Free mods: ${if (room!!.isFreeMods) "Yes" else "No"}
             Mods: ${modsToReadable(room!!.mods)}
         """.trimIndent()
+    }
+
+    private fun updateButtons()
+    {
+        if (player!!.status == READY)
+        {
+            readyButton!!.setText("Not ready")
+            readyButton!!.setColor(0.9f, 0.2f, 0.2f)
+
+            modsButton!!.isVisible = false
+            secondaryButton!!.isVisible = Multiplayer.isRoomHost
+
+            if (Multiplayer.isRoomHost)
+            {
+                secondaryButton!!.setText("Start match!")
+                secondaryButton!!.setColor(0.2f, 0.9f, 0.2f)
+            }
+            return
+        }
+
+        readyButton!!.setText("Ready")
+        readyButton!!.setColor(0.2f, 0.9f, 0.2f)
+
+        secondaryButton!!.isVisible = true
+        secondaryButton!!.setText("Options")
+        secondaryButton!!.setColor(0.2f, 0.2f, 0.2f)
+
+        modsButton!!.isVisible = Multiplayer.isRoomHost || room!!.isFreeMods
     }
 
 
@@ -548,14 +581,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         awaitBeatmapChange = false
         awaitStatusChange = false
 
-        // Reloading player list
-        playerList?.detachSelf()
-        playerList = RoomPlayerList(newRoom)
-        attachChild(playerList, 1)
-
-        // Reloading mod menu
-        getModMenu().reload()
-
         // Finding our player object
         player = newRoom.getPlayerByUID(getOnline().userId) ?: run {
 
@@ -563,16 +588,31 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             back()
             return
         }
-        onPlayerStatusChange(player!!.id, player!!.status)
 
-        // Applying all changes
-        onRoomHostChange(newRoom.host)
-        onRoomNameChange(newRoom.name)
-        onRoomModsChange(newRoom.mods)
+        // Determine if it's the host
+        Multiplayer.isRoomHost = player!!.id == newRoom.host
+
+        // Reloading player list
+        playerList?.detachSelf()
+        playerList = RoomPlayerList(newRoom)
+        attachChild(playerList, 1)
+
+        // Reloading mod menu
+        getModMenu().reload()
+        getModMenu().setMods(stringToMods(newRoom.mods), newRoom.isFreeMods)
+
+        // Updating player mods for other clients
+        awaitModsChange = true
+        RoomAPI.setPlayerMods(modsToString(getModMenu().mod))
+
+        // Setting beatmap
         onRoomBeatmapChange(newRoom.beatmap)
-        onRoomFreeModsChange(newRoom.isFreeMods)
 
+        // Updating UI
+        updateButtons()
+        updateInformation()
         playerList!!.updateItems()
+
         show()
     }
 
@@ -586,12 +626,13 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 || getGlobal().engine.scene is LoadingScene
                 || getGlobal().engine.scene == getGlobal().songMenu.scene)
             back()
+        else
+            multiLog("Disconnected from socket while playing.")
     }
 
     override fun onRoomConnectFail(error: String?)
     {
         room = null
-        error?.logE(className)
         ToastLogger.showText("Failed to connect room: $error", true)
         back()
     }
@@ -602,7 +643,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     override fun onRoomNameChange(name: String)
     {
         room!!.name = name
-        titleText.text = name
+        updateInformation()
     }
 
     override fun onRoomBeatmapChange(beatmap: RoomBeatmap?)
@@ -614,26 +655,21 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         room!!.beatmap = beatmap
         trackButton!!.beatmap = beatmap
 
-        // If beatmap is `null` means no beatmap is selected
-        if (beatmap == null)
-        {
-            awaitBeatmapChange = false
-            updateBackground(null)
-            RoomAPI.setPlayerStatus(NOT_READY)
-            return
-        }
-
         // Searching if the track is in our library
-        val localTrack = library.findTrackByMD5(beatmap.md5)
+        val localTrack = beatmap?.let { library.findTrackByMD5(it.md5) }
+
+        if (localTrack == null)
+            multiLog("Beatmaps wasn't locally found.")
 
         // Updating player status.
-        if (localTrack == null)
-            RoomAPI.setPlayerStatus(MISSING_BEATMAP)
-        else
+        if (localTrack != null || beatmap == null)
             RoomAPI.setPlayerStatus(NOT_READY)
+        else
+            RoomAPI.setPlayerStatus(MISSING_BEATMAP)
 
         // Updating track button.
-        trackButton!!.loadTrack(localTrack)
+        if (beatmap != null)
+            trackButton!!.loadTrack(localTrack)
 
         // Updating background
         updateBackground(localTrack?.background)
@@ -642,10 +678,13 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         awaitBeatmapChange = false
 
         // Playing selected track
-        if (localTrack == null || localTrack == getGlobal().selectedTrack)
-            return
-
         getGlobal().selectedTrack = localTrack
+
+        if (localTrack == null)
+        {
+            getGlobal().songService.stop()
+            return
+        }
 
         // Preventing from change song when host is in room while other players are in gameplay
         if (getGlobal().engine.scene != getGlobal().gameScene.scene)
@@ -668,29 +707,13 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Reloading mod menu
         glThread {
             clearChildScene()
-            getModMenu().init()
-        }
 
-        // Hiding mod button in case isn't the host when free mods is disabled
-        modsButton!!.isVisible = Multiplayer.isRoomHost || room!!.isFreeMods
+            getModMenu().init()
+            getModMenu().update()
+        }
 
         // Updating buttons visibility
-        if (player!!.status == READY)
-        {
-            secondaryButton!!.isVisible = Multiplayer.isRoomHost
-
-            if (Multiplayer.isRoomHost)
-            {
-                secondaryButton!!.setText("Start match!")
-                secondaryButton!!.setColor(0.2f, 0.9f, 0.2f)
-            }
-        }
-        else
-        {
-            secondaryButton!!.isVisible = true
-            secondaryButton!!.setText("Options")
-            secondaryButton!!.setColor(0.2f, 0.2f, 0.2f)
-        }
+        updateButtons()
 
         // Updating player list
         playerList!!.updateItems()
@@ -872,7 +895,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         chat.onSystemChatMessage("Player ${player.name} (ID: ${player.id}) joined.", "#007BFF")
 
         // Updating state text
-        stateText.text = "${room!!.activePlayers.size} / ${room!!.maxPlayers} players. ${room!!.readyPlayers.size} players ready."
+        updateInformation()
 
         // Updating player list
         playerList!!.updateItems()
@@ -887,7 +910,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             chat.onSystemChatMessage("Player ${player.name} (ID: $uid) left.", "#007BFF")
 
         // Updating state text
-        stateText.text = "${room!!.activePlayers.size} / ${room!!.maxPlayers} players. ${room!!.readyPlayers.size} players ready."
+        updateInformation()
 
         // Updating player list
         playerList!!.updateItems()
@@ -917,7 +940,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             chat.onSystemChatMessage("Player ${player.name} (ID: $uid) was kicked.", "#FF0000")
 
         // Updating state text
-        stateText.text = "${room!!.activePlayers.size} / ${room!!.maxPlayers} players. ${room!!.readyPlayers.size} players ready."
+        updateInformation()
 
         // Updating player list
         playerList!!.updateItems()
@@ -931,43 +954,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         if (uid == player!!.id)
         {
             awaitStatusChange = false
-
-            when (player!!.status)
-            {
-                NOT_READY, MISSING_BEATMAP ->
-                {
-                    modsButton!!.isVisible = Multiplayer.isRoomHost || room!!.isFreeMods
-
-                    readyButton!!.setText("Ready")
-                    readyButton!!.setColor(0.2f, 0.9f, 0.2f)
-
-                    secondaryButton!!.isVisible = true
-                    secondaryButton!!.setText("Options")
-                    secondaryButton!!.setColor(0.2f, 0.2f, 0.2f)
-                }
-
-                READY ->
-                {
-                    modsButton!!.isVisible = false
-
-                    readyButton!!.setText("Not ready")
-                    readyButton!!.setColor(0.9f, 0.2f, 0.2f)
-
-                    secondaryButton!!.isVisible = Multiplayer.isRoomHost
-
-                    if (Multiplayer.isRoomHost)
-                    {
-                        secondaryButton!!.setText("Start match!")
-                        secondaryButton!!.setColor(0.2f, 0.9f, 0.2f)
-                    }
-                }
-
-                PLAYING -> Unit // Not listening
-            }
+            updateButtons()
         }
 
         // Updating state text
-        stateText.text = "${room!!.activePlayers.size} / ${room!!.maxPlayers} players. ${room!!.readyPlayers.size} players ready."
+        updateInformation()
 
         // Updating player list
         playerList!!.updateItems()
