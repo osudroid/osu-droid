@@ -106,7 +106,7 @@ class LobbyCreateRoom : BaseFragment()
                 }
                 catch (e: Exception)
                 {
-                    ToastLogger.showText("Failed to create room: ${e.message}", true)
+                    ToastLogger.showText("Failed to create a room: ${e.message}", true)
                     e.printStackTrace()
                     LobbyScene.show()
                 }
