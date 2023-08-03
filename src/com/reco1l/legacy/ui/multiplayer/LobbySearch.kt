@@ -63,11 +63,8 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
     {
         if (actionId == EditorInfo.IME_ACTION_SEND)
         {
-            val text = view?.text?.toString()
             hideKeyboard()
-
-            LobbyScene.searchQuery = text
-            field?.setText(text)
+            LobbyScene.searchQuery = view?.text?.toString()
             return true
         }
         return false
