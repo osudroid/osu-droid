@@ -261,8 +261,11 @@ public class ModMenu implements IModSwitcher {
                 return false;
             }
         };
-        scene.attachChild(resetText);
-        scene.registerTouchArea(resetText);
+
+        if (!Multiplayer.isMultiplayer) {
+            scene.attachChild(resetText);
+            scene.registerTouchArea(resetText);
+        }
         resetText.setScale(1.2f);
 
         final TextButton back = new TextButton(ResourceManager
