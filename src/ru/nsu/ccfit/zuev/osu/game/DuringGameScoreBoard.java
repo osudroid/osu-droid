@@ -8,6 +8,7 @@ import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import kotlinx.coroutines.Job;
+import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
@@ -39,6 +40,8 @@ public class DuringGameScoreBoard extends GameObject {
     private float itemHeight;
     private long lastRankChange;
     private Job initTask;
+
+    private Entity entity;
 
     private final float paddingTop = 15;
     private final float paddingLeft = 10;
@@ -135,20 +138,18 @@ public class DuringGameScoreBoard extends GameObject {
             initTask.cancel(null);
         }
 
-        initTask = Execution.async(() -> {
-            final var oldBoard = boards;
+        if (entity != null)
             Execution.glThread(() -> {
-                if (oldBoard != null) {
-                    int i = oldBoard.length - 1;
-                    while (i >= 0)
-                    {
-                        Sprite board = oldBoard[i];
-                        board.detachSelf();
-                        i--;
-                    }
-                }
+                entity.detachSelf();
+                entity.detachChildren();
                 return null;
             });
+
+        initTask = Execution.async(() -> {
+
+            entity = new Entity();
+            entity.setChildrenIgnoreUpdate(true);
+            scene.attachChild(entity);
 
             ScoreBoard.ScoreBoardItems[] items;
             if (Multiplayer.isConnected)
@@ -237,7 +238,7 @@ public class DuringGameScoreBoard extends GameObject {
                 s.attachChild(info);
                 s.setVisible(i == 0 || scoreBoardData.length - i < 3);
                 boards[i] = s;
-                scene.attachChild(s);
+                entity.attachChild(s);
             }
             playerSprite = new Sprite(0, 0, tex);
             playerSprite.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
@@ -263,7 +264,7 @@ public class DuringGameScoreBoard extends GameObject {
             playerSprite.attachChild(playerText);
             itemHeight = 83;
             boards[posNow] = playerSprite;
-            scene.attachChild(playerSprite);
+            entity.attachChild(playerSprite);
 
             if (Multiplayer.isConnected)
             {
