@@ -44,7 +44,7 @@ object Multiplayer
     {
         val date = DateFormat.format("yyyy/MM/dd hh:mm:ss", System.currentTimeMillis())
 
-        LOG_FILE.appendText("\n\n[$date] Client ${MainActivity.versionCode} started.")
+        LOG_FILE.appendText("\n\n[$date] Client ${MainActivity.versionName} started.")
     }
 
 

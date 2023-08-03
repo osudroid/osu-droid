@@ -102,7 +102,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class MainActivity extends BaseGameActivity implements
         IAccelerometerListener {
 
-    public static int versionCode = -1;
+    public static String versionName;
 
     public static SongService songService;
     public ServiceConnection connection;
@@ -582,7 +582,7 @@ public class MainActivity extends BaseGameActivity implements
         super.onCreate(pSavedInstanceState);
 
         try {
-            versionCode = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_ACTIVITIES).versionCode;
+            versionName = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_ACTIVITIES).versionName;
         }
         catch (Exception ignored) {}
 
