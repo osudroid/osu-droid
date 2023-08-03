@@ -101,6 +101,9 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class MainActivity extends BaseGameActivity implements
         IAccelerometerListener {
+
+    public static int versionCode = -1;
+
     public static SongService songService;
     public ServiceConnection connection;
     private PowerManager.WakeLock wakeLock = null;
@@ -577,6 +580,12 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     protected void onCreate(Bundle pSavedInstanceState) {
         super.onCreate(pSavedInstanceState);
+
+        try {
+            versionCode = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_ACTIVITIES).versionCode;
+        }
+        catch (Exception ignored) {}
+
         if (this.mEngine == null) {
             return;
         }

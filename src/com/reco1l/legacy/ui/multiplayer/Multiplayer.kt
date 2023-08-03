@@ -7,6 +7,7 @@ import com.reco1l.legacy.data.jsonToScoreboardItem
 import com.reco1l.legacy.data.jsonToStatistic
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.MainActivity
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoard.ScoreBoardItems
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import java.io.File
@@ -38,6 +39,13 @@ object Multiplayer
 
 
     private val LOG_FILE = File("${Config.getCorePath()}/Log", "multi_log.txt")
+
+    init
+    {
+        val date = DateFormat.format("yyyy/MM/dd hh:mm:ss", System.currentTimeMillis())
+
+        LOG_FILE.appendText("\n\n[$date] Client ${MainActivity.versionCode} started.")
+    }
 
 
     @JvmStatic
