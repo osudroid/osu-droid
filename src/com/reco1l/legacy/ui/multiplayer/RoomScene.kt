@@ -620,9 +620,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         ToastLogger.showText("Disconnected from room", true)
 
         // If player is in one of these scenes we go back.
-        if (getGlobal().engine.scene == this
-                || getGlobal().engine.scene is LoadingScene
-                || getGlobal().engine.scene == getGlobal().songMenu.scene)
+        if (getGlobal().engine.scene != getGlobal().gameScene.scene)
             back()
         else
             multiLog("Disconnected from socket while playing.")
