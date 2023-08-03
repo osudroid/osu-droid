@@ -240,7 +240,7 @@ public class DuringGameScoreBoard extends GameObject {
                 rankText.setScale(1.7f);
                 rankText.setColor(0.6f, 0.6f, 0.6f, 0.9f);
                 rankText.setText("#" + (i + 1));
-                rankText.setPosition(100 - ranks[i].getWidth(), paddingTop * 2);
+                rankText.setPosition(100 - rankText.getWidth(), paddingTop * 2);
                 s.attachChild(rankText);
                 s.attachChild(info);
                 s.setVisible(i == 0 || scoreBoardData.length - i < 3);
