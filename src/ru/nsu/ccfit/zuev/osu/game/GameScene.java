@@ -1895,8 +1895,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     }
 
                     if (Multiplayer.isConnected)
+                    {
+                        Multiplayer.log("Match ended, moving to results scene.");
                         Async.run(() -> RoomAPI.submitFinalScore(stat.toJson(false)));
-
+                    }
                     scoringScene.load(stat, lastTrack, GlobalManager.getInstance().getSongService(), replayFile, trackMD5, null);
                 }
                 GlobalManager.getInstance().getSongService().setVolume(0.2f);
@@ -2514,6 +2516,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (Multiplayer.isConnected)
                 Async.run(() -> RoomAPI.submitFinalScore(stat.toJson(false)));
 
+            Multiplayer.log("Player left the match.");
             RoomScene.INSTANCE.show();
             return;
         }
@@ -2537,6 +2540,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         {
             if (Multiplayer.isConnected)
             {
+                Multiplayer.log("Player has lost, moving to room scene.");
+
                 Async.run(() -> RoomAPI.submitFinalScore(stat.toJson(false)));
                 RoomScene.INSTANCE.show();
             }
