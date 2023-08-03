@@ -104,13 +104,11 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList()
                 dx = localX
                 dy = localY
 
-                alpha = 0.6f
                 return true
             }
 
             if (event.isActionUp)
             {
-                alpha = 0.3f
 
                 if (moved || isScroll)
                     return false
@@ -120,7 +118,6 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList()
 
             if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 10)
             {
-                alpha = 0.3f
                 moved = true
             }
             return false
