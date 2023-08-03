@@ -28,6 +28,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
 
             val item = PlayerItem()
             attachChild(item)
+            RoomScene.registerTouchArea(item)
 
             itemHeight = item.height
         }
@@ -41,12 +42,9 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
 
         item.room = room
         item.player = player
-        item.isHost = player?.id == room.host
+        item.isHost = player != null && player.id == room.host
 
-        glThread {
-            item.load()
-            RoomScene.registerTouchArea(item)
-        }
+        glThread { item.load() }
     }
 
     override fun detachSelf(): Boolean

@@ -127,6 +127,9 @@ public class DuringGameScoreBoard extends GameObject {
         while (i < size)
         {
             var sprite = boards[i];
+
+            if (sprite == null) continue;
+
             sprite.setPosition(0, initialY + itemHeight * Math.min(i, 3));
             sprite.setVisible(i <= (posNow > 3 ? 2 : 3) || i == posNow);
             i++;
@@ -138,12 +141,15 @@ public class DuringGameScoreBoard extends GameObject {
             initTask.cancel(null);
         }
 
-        if (entity != null)
+        if (entity != null) {
+            var oldEntity = entity;
+
             Execution.glThread(() -> {
-                entity.detachSelf();
-                entity.detachChildren();
+                oldEntity.detachSelf();
+                oldEntity.detachChildren();
                 return null;
             });
+        }
 
         initTask = Execution.async(() -> {
 
@@ -226,17 +232,19 @@ public class DuringGameScoreBoard extends GameObject {
                 info.setScaleCenter(0, 0);
                 info.setScale(0.65f);
                 info.setColor(0.85f, 0.85f, 0.9f);
-                ranks[i] = new ChangeableText(paddingLeft, paddingTop,
+
+                var rankText = new ChangeableText(paddingLeft, paddingTop,
                         ResourceManager.getInstance().getFont("CaptionFont"), "#1", 5);
-                ranks[i].setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-                ranks[i].setScaleCenter(0, 0);
-                ranks[i].setScale(1.7f);
-                ranks[i].setColor(0.6f, 0.6f, 0.6f, 0.9f);
-                ranks[i].setText("#" + (i + 1));
-                ranks[i].setPosition(100 - ranks[i].getWidth(), paddingTop * 2);
-                s.attachChild(ranks[i]);
+                rankText.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+                rankText.setScaleCenter(0, 0);
+                rankText.setScale(1.7f);
+                rankText.setColor(0.6f, 0.6f, 0.6f, 0.9f);
+                rankText.setText("#" + (i + 1));
+                rankText.setPosition(100 - ranks[i].getWidth(), paddingTop * 2);
+                s.attachChild(rankText);
                 s.attachChild(info);
                 s.setVisible(i == 0 || scoreBoardData.length - i < 3);
+                ranks[i] = rankText;
                 boards[i] = s;
                 entity.attachChild(s);
             }
