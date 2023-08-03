@@ -20,6 +20,7 @@ import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
+import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as global
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as resources
@@ -83,7 +84,7 @@ object LobbyScene : Scene()
         attachChild(top)
 
         // Title
-        titleText.text = "Multiplayer lobby"
+        titleText.text = "Multiplayer Lobby"
         attachChild(titleText)
 
         // Info
@@ -172,7 +173,7 @@ object LobbyScene : Scene()
             }
         }
 
-        createButton = object : TextButton(resources().getFont("CaptionFont"), "Create new room")
+        createButton = object : TextButton(resources().getFont("CaptionFont"), "Create New Room")
         {
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
@@ -239,7 +240,7 @@ object LobbyScene : Scene()
 
         }.orAsyncCatch {
 
-            ToastLogger.showText("Failed to connect room: ${it.className} - ${it.message}", true)
+            ToastLogger.showText("Failed to connect to the room: ${it.className} - ${it.message}", true)
             it.printStackTrace()
             back()
         }
@@ -271,13 +272,14 @@ object LobbyScene : Scene()
             glThread {
                 roomList.setList(list)
                 awaitList = false
+                val roomCount = roomList.childCount
 
                 // Updating info text
                 infoText.text = if (searchQuery.isNullOrEmpty())
                 {
-                    "Showing ${roomList.childCount} matches."
+                    "Showing $roomCount ${if (roomCount == 1) "match" else "matches"}."
                 }
-                else "Searching for \"$searchQuery\", showing ${roomList.childCount} results."
+                else "Searching for \"$searchQuery\", showing $roomCount ${if (roomCount == 1) "result" else "results"}."
             }
 
             // Hiding loading icon

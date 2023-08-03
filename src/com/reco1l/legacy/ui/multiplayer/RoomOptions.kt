@@ -92,7 +92,7 @@ class RoomOptions : SettingsFragment()
                 val data = ClipData.newPlainText("Invitation link", link)
 
                 clipboard.setPrimaryClip(data)
-                ToastLogger.showText("Link copied to clipboard, if the room has a password you can type at the end of the URL.", false)
+                ToastLogger.showText("Link copied to clipboard. If the room has a password, you can write it at the end of the link.", false)
                 true
             }
 
