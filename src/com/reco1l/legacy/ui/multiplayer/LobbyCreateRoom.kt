@@ -74,7 +74,8 @@ class LobbyCreateRoom : BaseFragment()
                 val name = nameField.text.toString()
                 val password = passwordField!!.text.toString().takeUnless { it.isEmpty() }
 
-                val beatmap = getGlobal().selectedTrack?.let {
+                // Track MD5 should never be null.
+                val beatmap = getGlobal().selectedTrack?.takeUnless { it.mD5 == null }?.let {
 
                     RoomBeatmap(
                             md5 = it.mD5,
