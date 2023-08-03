@@ -20,7 +20,6 @@ import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
-import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as global
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as resources
@@ -37,7 +36,9 @@ object LobbyScene : Scene()
         set(value)
         {
             field = value
-            updateList()
+
+            if (!awaitList)
+                updateList()
         }
 
 
@@ -249,7 +250,6 @@ object LobbyScene : Scene()
     fun updateList()
     {
         // Hiding buttons
-        search.dismiss()
         createButton?.isVisible = false
         refreshButton?.isVisible = false
 
@@ -271,6 +271,13 @@ object LobbyScene : Scene()
             glThread {
                 roomList.setList(list)
                 awaitList = false
+
+                // Updating info text
+                infoText.text = if (searchQuery.isNullOrEmpty())
+                {
+                    "Showing ${roomList.childCount} matches."
+                }
+                else "Searching for \"$searchQuery\", showing ${roomList.childCount} results."
             }
 
             // Hiding loading icon
@@ -280,16 +287,6 @@ object LobbyScene : Scene()
             // Showing buttons
             createButton?.isVisible = true
             refreshButton?.isVisible = true
-
-            // Updating info text
-            infoText.text = if (searchQuery.isNullOrEmpty())
-            {
-                "Showing ${roomList.childCount} matches."
-            }
-            else "Searching for \"$searchQuery\", showing ${roomList.childCount} results."
-
-            // Showing search fragment
-            search.show()
 
         }.orAsyncCatch {
 
@@ -333,6 +330,8 @@ object LobbyScene : Scene()
         updateBackground()
         global().engine.scene = this
         updateList()
+
+        search.show()
     }
 
 

@@ -39,6 +39,8 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
         reload()
 
         field = findViewById(R.id.search_field)!!
+        field!!.setOnEditorActionListener(this)
+        field!!.setOnKeyListener(this)
 
         findViewById<View>(R.id.frg_header)!!.animate().cancel()
         findViewById<View>(R.id.frg_header)!!.alpha = 0f
