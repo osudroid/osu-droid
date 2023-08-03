@@ -659,7 +659,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         val localTrack = beatmap?.let { library.findTrackByMD5(it.md5) }
 
         if (localTrack == null)
-            multiLog("Beatmaps wasn't locally found.")
+            multiLog("The beatmap was not found in local library.")
 
         // Updating player status.
         if (localTrack != null || beatmap == null)
