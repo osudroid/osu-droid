@@ -851,7 +851,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             getGlobal().songMenu.game.startGame(getGlobal().selectedTrack, null)
 
             // Hiding any player menu if its shown
-            uiThread { playerList!!.menu?.dismiss() }
+            uiThread { playerList!!.menu.dismiss() }
         }
 
         // Updating player list

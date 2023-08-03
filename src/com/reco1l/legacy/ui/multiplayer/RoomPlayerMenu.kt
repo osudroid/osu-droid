@@ -19,23 +19,33 @@ class RoomPlayerMenu : BaseFragment()
 
     override val layoutID = R.layout.multiplayer_room_player_menu
 
-    private lateinit var player: RoomPlayer
+
+    var player: RoomPlayer? = null
+
 
     private var webView: WebViewFragment? = null
+
 
     init
     {
         isDismissOnBackgroundClick = true
     }
 
+
     override fun onLoadView()
     {
-        findViewById<TextView>(R.id.room_player)!!.text = player.name
+        if (player == null)
+        {
+            dismiss()
+            return
+        }
+
+        findViewById<TextView>(R.id.room_player)!!.text = player!!.name
 
         findViewById<View>(R.id.room_profile)!!.setOnClickListener {
 
             webView = WebViewFragment().apply {
-                setURL(WebViewFragment.PROFILE_URL + player.id)
+                setURL(WebViewFragment.PROFILE_URL + player!!.id)
                 show()
             }
         }
@@ -44,7 +54,7 @@ class RoomPlayerMenu : BaseFragment()
 
         fun updateText()
         {
-            if (player.isMuted)
+            if (player!!.isMuted)
                 muteText.text = "Unmute"
             else
                 muteText.text = "Mute"
@@ -53,7 +63,7 @@ class RoomPlayerMenu : BaseFragment()
         updateText()
 
         findViewById<View>(R.id.room_mute)!!.setOnClickListener {
-            player.isMuted = !player.isMuted
+            player!!.isMuted = !player!!.isMuted
             updateText()
         }
 
@@ -69,7 +79,7 @@ class RoomPlayerMenu : BaseFragment()
         kick.setOnClickListener {
             AlertDialog.Builder(getGlobal().mainActivity).apply {
 
-                setTitle("Kick ${player.name}")
+                setTitle("Kick ${player!!.name}")
                 setMessage("Are you sure?")
                 setPositiveButton("Yes") { dialog, _ ->
 
@@ -77,7 +87,7 @@ class RoomPlayerMenu : BaseFragment()
                     dismiss()
 
                     if (Multiplayer.isConnected)
-                        RoomAPI.kickPlayer(player.id)
+                        RoomAPI.kickPlayer(player!!.id)
                 }
                 setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
 
@@ -88,7 +98,7 @@ class RoomPlayerMenu : BaseFragment()
 
             AlertDialog.Builder(getGlobal().mainActivity).apply {
 
-                setTitle("Make ${player.name} room host")
+                setTitle("Make ${player!!.name} room host")
                 setMessage("Are you sure?")
                 setPositiveButton("Yes") { dialog, _ ->
 
@@ -96,14 +106,12 @@ class RoomPlayerMenu : BaseFragment()
                     dismiss()
 
                     if (Multiplayer.isConnected)
-                        RoomAPI.setRoomHost(player.id)
+                        RoomAPI.setRoomHost(player!!.id)
                 }
                 setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
 
             }.show()
         }
-
-        findViewById<TextView>(R.id.room_player)!!.text = player.name
 
         playOnLoadAnim()
     }
@@ -143,12 +151,6 @@ class RoomPlayerMenu : BaseFragment()
                              })
                 .start()
         playBackgroundHideOutAnim(200)
-    }
-
-    fun show(player: RoomPlayer)
-    {
-        this.player = player
-        show()
     }
 
     override fun dismiss()

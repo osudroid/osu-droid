@@ -18,7 +18,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
 {
 
-    var menu: RoomPlayerMenu? = null
+    val menu = RoomPlayerMenu()
 
     init
     {
@@ -152,42 +152,39 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
         {
             handleScrolling(event)
 
-            return when
+            if (event.isActionDown)
             {
-                event.isActionDown ->
-                {
-                    moved = false
-                    dx = localX
-                    dy = localY
+                moved = false
+                dx = localX
+                dy = localY
 
-                    alpha = 0.25f
-                    true
-                }
-
-                event.isActionUp ->
-                {
-                    alpha = 0.15f
-
-                    if (moved || isScroll)
-                        return false
-
-                    if (RoomScene.player != player && player != null)
-                    {
-                        menu = RoomPlayerMenu()
-                        menu!!.show(player!!)
-                    }
-                    true
-                }
-
-                event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 10 ->
-                {
-                    moved = true
-                    alpha = 0.15f
-                    false
-                }
-
-                else -> false
+                alpha = 0.25f
+                return true
             }
+
+            if (event.isActionUp)
+            {
+                alpha = 0.15f
+
+                if (moved || isScroll)
+                    return true
+
+                if (player != null && RoomScene.player != player)
+                {
+                    menu.player = player
+                    menu.show()
+                }
+                return true
+            }
+
+            if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 10)
+            {
+                moved = true
+                alpha = 0.15f
+                return true
+            }
+
+            return false
         }
     }
 }
