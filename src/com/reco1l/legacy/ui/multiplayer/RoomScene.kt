@@ -17,6 +17,7 @@ import com.reco1l.legacy.data.modsToString
 import com.reco1l.legacy.data.stringToMods
 import com.reco1l.legacy.ui.entity.BeatmapButton
 import com.reco1l.legacy.ui.entity.ComposedText
+import org.anddev.andengine.engine.camera.SmoothCamera
 import org.anddev.andengine.entity.primitive.Rectangle
 import org.anddev.andengine.entity.scene.Scene
 import org.anddev.andengine.entity.scene.background.SpriteBackground
@@ -527,6 +528,14 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     fun show()
     {
+        (getGlobal().camera as SmoothCamera).apply {
+
+            setZoomFactorDirect(1f)
+
+            if (Config.isShrinkPlayfieldDownwards())
+                setCenterDirect(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f)
+        }
+
         if (!Multiplayer.isConnected)
         {
             back()
