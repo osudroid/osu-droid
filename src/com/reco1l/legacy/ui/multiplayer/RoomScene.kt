@@ -458,8 +458,26 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 SCORE_V2 -> "Score V2"
             }
         }
-            Free mods: ${if (room!!.isFreeMods) "Yes" else "No"}
-            Mods: ${modsToReadable(room!!.mods)}
+            Mods: ${
+            when
+            {
+                room!!.isFreeMods ->
+                {
+                    var modsText = "Free mods"
+
+                    if (room!!.mods != null)
+                    {
+                        if ('d' in room!!.mods!! || 'c' in room!!.mods!!)
+                            modsText += ", DT"
+                        if ('t' in room!!.mods!!)
+                            modsText += ", HT"
+                    }
+                    modsText
+                }
+
+                else -> modsToReadable(room!!.mods)
+            }
+        }
         """.trimIndent()
     }
 
