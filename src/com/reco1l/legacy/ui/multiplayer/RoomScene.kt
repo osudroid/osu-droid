@@ -917,6 +917,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         if (uid == player!!.id)
         {
+            multiLog("Kicked from room.")
             back()
             uiThread {
                 AlertDialog.Builder(getGlobal().mainActivity).apply {
@@ -970,7 +971,5 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         playerList!!.updateItems()
     }
 
-    fun init()
-    {
-    }
+    fun init() = Unit
 }
