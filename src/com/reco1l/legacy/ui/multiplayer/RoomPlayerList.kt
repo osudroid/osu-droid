@@ -120,13 +120,21 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
             }
             else setColor(1f, 1f, 1f, 0.15f)
 
+            if (isHost)
+            {
+                val icon = getResources().getTexture("crown")
+
+                hostIcon = Sprite(width - icon.width - 15f, (height - icon.height) / 2f, icon)
+                attachChild(hostIcon)
+            }
+
             when (player!!.status)
             {
                 MISSING_BEATMAP ->
                 {
                     val icon = getResources().getTexture("missing")
 
-                    missingIcon = Sprite(text.x + text.width + 5f, text.y + (text.height - icon.height) / 2f, icon)
+                    missingIcon = Sprite(width - icon.width - 15f - (hostIcon?.let { it.width - 5f } ?: 0f), (height - icon.height) / 2f, icon)
                     attachChild(missingIcon)
 
                     state.setColor(1f, 0.1f, 0.1f)
@@ -135,14 +143,6 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
                 NOT_READY -> state.setColor(1f, 0.1f, 0.1f)
                 READY -> state.setColor(0.1f, 1f, 0.1f)
                 PLAYING -> state.setColor(0.1f, 0.1f, 1f)
-            }
-
-            if (isHost)
-            {
-                val icon = getResources().getTexture("crown")
-
-                hostIcon = Sprite(width - icon.width - 10f, (height - icon.height) / 2f, icon)
-                attachChild(hostIcon)
             }
         }
 
