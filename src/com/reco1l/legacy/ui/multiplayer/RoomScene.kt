@@ -719,6 +719,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             getModMenu().update()
         }
 
+        // Updating host text
+        updateInformation()
+
         // Updating buttons visibility
         updateButtons()
 
