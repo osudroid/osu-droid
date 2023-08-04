@@ -22,8 +22,8 @@ import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
 import ru.nsu.ccfit.zuev.skins.OsuSkin
-import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as global
-import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as resources
+import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
+import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.getInstance as getOnline
 
 object LobbyScene : Scene()
@@ -54,11 +54,11 @@ object LobbyScene : Scene()
 
     private val onlinePanel = OnlinePanel()
 
-    private val titleText = ChangeableText(20f, 20f, resources().getFont("bigFont"), "", 100)
+    private val titleText = ChangeableText(20f, 20f, getResources().getFont("bigFont"), "", 100)
 
-    private val infoText = ChangeableText(20f, 0f, resources().getFont("smallFont"), "", 100)
+    private val infoText = ChangeableText(20f, 0f, getResources().getFont("smallFont"), "", 100)
 
-    private val loading = Sprite(0f, 0f, resources().getTexture("loading_start"))
+    private val loading = Sprite(0f, 0f, getResources().getTexture("loading_start"))
 
 
     /**Await lock for the list refresh*/
@@ -105,10 +105,10 @@ object LobbyScene : Scene()
         val layoutBackButton = OsuSkin.get().getLayout("BackButton")
         val loadedBackTextures = mutableListOf<String>()
 
-        if (resources().isTextureLoaded("menu-back-0"))
+        if (getResources().isTextureLoaded("menu-back-0"))
         {
             for (i in 0..59)
-                if (resources().isTextureLoaded("menu-back-$i")) loadedBackTextures.add("menu-back-$i")
+                if (getResources().isTextureLoaded("menu-back-$i")) loadedBackTextures.add("menu-back-$i")
         }
         else loadedBackTextures.add("menu-back")
 
@@ -165,7 +165,7 @@ object LobbyScene : Scene()
         onlinePanel.setPosition(Config.getRES_WIDTH() - 410f - 6f, 6f)
         attachChild(onlinePanel)
 
-        createButton = object : TextButton(resources().getFont("CaptionFont"), "Create New Room")
+        createButton = object : TextButton(getResources().getFont("CaptionFont"), "Create New Room")
         {
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
@@ -183,7 +183,7 @@ object LobbyScene : Scene()
             registerTouchArea(it)
         }
 
-        refreshButton = object : TextButton(resources().getFont("CaptionFont"), "Refresh")
+        refreshButton = object : TextButton(getResources().getFont("CaptionFont"), "Refresh")
         {
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
@@ -212,14 +212,14 @@ object LobbyScene : Scene()
         if (Multiplayer.isConnected)
             return
 
-        GlobalManager.getInstance().songService.isGaming = true
+        getGlobal().songService.isGaming = true
         Multiplayer.isMultiplayer = true
 
         {
             LoadingScreen().show()
 
-            GlobalManager.getInstance().mainActivity.checkNewSkins()
-            GlobalManager.getInstance().mainActivity.checkNewBeatmaps()
+            getGlobal().mainActivity.checkNewSkins()
+            getGlobal().mainActivity.checkNewBeatmaps()
             LibraryManager.INSTANCE.updateLibrary(true)
 
             RoomScene.load()
@@ -301,7 +301,7 @@ object LobbyScene : Scene()
 
     private fun updateBackground()
     {
-        (resources().getTexture("::background") ?: resources().getTexture("menu-background")).also {
+        (getResources().getTexture("::background") ?: getResources().getTexture("menu-background")).also {
 
             val height = it.height * (Config.getRES_WIDTH() / it.width.toFloat())
             val width = Config.getRES_WIDTH().toFloat()
@@ -321,15 +321,15 @@ object LobbyScene : Scene()
         search.dismiss()
 
         Multiplayer.isMultiplayer = false
-        global().songService.isGaming = false
+        getGlobal().songService.isGaming = false
 
-        global().mainScene.show()
+        getGlobal().mainScene.show()
     }
 
     fun show()
     {
         updateBackground()
-        global().engine.scene = this
+        getGlobal().engine.scene = this
         updateList()
 
         search.show()
