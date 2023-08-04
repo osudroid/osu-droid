@@ -254,7 +254,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
                 e.printStackTrace();
             }
             if (Multiplayer.isMultiplayer)
-                Multiplayer.log("\"Sorry, abnormal program will now exit.\"");
+                Multiplayer.log("CRASH");
 
             // 结束所有Activity
             SaveServiceObject.finishAllActivities();

@@ -44,7 +44,7 @@ object Multiplayer
     {
         val date = DateFormat.format("yyyy/MM/dd hh:mm:ss", System.currentTimeMillis())
 
-        LOG_FILE.appendText("\n\n[$date] Client ${MainActivity.versionName} started.")
+        LOG_FILE.writeText("[$date] Client ${MainActivity.versionName} started.")
     }
 
 
@@ -107,7 +107,6 @@ object Multiplayer
             }
             else list[ownScoreIndex] = ownScore
         }
-        else multiLog("WARNING: Player score is null at final leaderboard.")
 
         finalData = list.toTypedArray()
 
