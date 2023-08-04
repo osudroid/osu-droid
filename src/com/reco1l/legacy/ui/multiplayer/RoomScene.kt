@@ -721,10 +721,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomHostChange(uid: Long)
     {
-        if (room!!.host != uid)
-            chat.onSystemChatMessage("Player ${room!!.getPlayerByUID(uid)?.name} is now the room host.", "#007BFF")
-
         room!!.host = uid
+
+        chat.onSystemChatMessage("Player ${room!!.getPlayerByUID(uid)?.name} is now the room host.", "#007BFF")
 
         // Defining if is the host
         Multiplayer.isRoomHost = getOnline().userId == uid
@@ -752,6 +751,12 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Updating player list
         playerList!!.updateItems()
+
+        // Update status
+        if (hasLocalTrack || room!!.beatmap == null)
+            RoomAPI.setPlayerStatus(NOT_READY)
+        else
+            RoomAPI.setPlayerStatus(MISSING_BEATMAP)
     }
 
 
