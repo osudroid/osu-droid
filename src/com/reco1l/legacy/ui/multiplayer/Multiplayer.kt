@@ -130,7 +130,7 @@ object Multiplayer
     {
         val timestamp = DateFormat.format("hh:mm:ss", System.currentTimeMillis())
 
-        LOG_FILE.appendText("\n[$timestamp] Unexpected exception: ${e.className}\n${Log.getStackTraceString(e)}")
+        LOG_FILE.appendText("\n[$timestamp] EXCEPTION: ${e.className}\n${Log.getStackTraceString(e)}")
     }
 }
 
