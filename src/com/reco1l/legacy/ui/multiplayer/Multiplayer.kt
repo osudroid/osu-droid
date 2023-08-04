@@ -70,6 +70,10 @@ object Multiplayer
     {
         finalData = null
 
+        // Avoiding data parsing if user left from ScoringScene
+        if (getGlobal().engine.scene == RoomScene || getGlobal().engine.scene == getGlobal().songMenu.scene)
+            return
+
         if (array.length() == 0)
         {
             multiLog("WARNING: Server provided empty final leaderboard.")

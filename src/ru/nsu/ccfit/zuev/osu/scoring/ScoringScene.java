@@ -542,14 +542,19 @@ public class ScoringScene {
                 Execution.glThread(() -> {
                     oldSelector.detachSelf();
                     oldSelector.detachChildren();
+
+                    if (scene != null)
+                        scene.unregisterTouchArea(oldSelector);
                     return null;
                 });
             }
 
             selector = new StatisticSelector(Multiplayer.finalData);
 
-            if (scene != null)
+            if (scene != null) {
                 scene.attachChild(selector);
+                scene.registerTouchArea(selector);
+            }
         }
     }
 

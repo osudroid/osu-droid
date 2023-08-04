@@ -4,6 +4,7 @@ import android.opengl.GLES20
 import com.reco1l.api.ibancho.data.WinCondition.ACCURACY
 import com.reco1l.legacy.ui.entity.ScrollableList
 import com.reco1l.legacy.ui.multiplayer.RoomScene.room
+import org.anddev.andengine.entity.scene.Scene.ITouchArea
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent
@@ -18,7 +19,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 /**
  * Scoreboard list used for multiplayer scores in results screen.
  */
-class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList()
+class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchArea
 {
 
     private var selected: StatisticV2? = getGlobal().scoring.currentStatistic
@@ -48,7 +49,7 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList()
             item.setColor(0.5f, 0.5f, 1f)
 
         attachChild(item)
-        getGlobal().scoring.scene.registerTouchArea(item)
+        registerTouchArea(item)
 
         itemHeight = 100f
     }
@@ -123,4 +124,8 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList()
             return false
         }
     }
+
+    override fun contains(pX: Float, pY: Float): Boolean = pX in (570f .. 570f + 140f)
+
+    override fun onAreaTouched(event: TouchEvent?, x: Float, y: Float) = super.onSceneTouchEvent(event)
 }
