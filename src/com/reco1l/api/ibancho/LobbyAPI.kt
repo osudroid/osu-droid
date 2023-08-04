@@ -30,7 +30,7 @@ object LobbyAPI
     {
         JsonRequester("$HOST$GET_ROOMS").use {
 
-            //it.log = false
+            it.log = false
 
             if (sign != null || query != null)
                 it.query = QueryContent().apply {
