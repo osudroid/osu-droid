@@ -169,22 +169,12 @@ data class Room(
 
 
     /**
-     * Sort players array placing host and non-null first.
+     * Sort players array placing non-null first.
      */
     private fun sortPlayers()
     {
-        players = players.sortedWith { a, b ->
-            when
-            {
-                // Empty slots goes at the end
-                a == null -> 1
-                b == null -> -1
-                // If it's the host we set it always first
-                a.id == host -> -1
-                b.id == host -> 1
-                // If none of the conditions above are true, means the position of the item is correct.
-                else -> 0
-            }
-        }.toTypedArray()
+        players = players
+                .sortedWith { a, b -> (a == null).compareTo(b == null) }
+                .toTypedArray()
     }
 }
