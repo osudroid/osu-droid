@@ -527,22 +527,25 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     fun show()
     {
-        if (Multiplayer.isConnected)
-        {
-            // Setting player status to NOT_READY
-            awaitStatusChange = true
-
-            if (hasLocalTrack || room!!.beatmap == null)
-                RoomAPI.setPlayerStatus(NOT_READY)
-            else
-                RoomAPI.setPlayerStatus(MISSING_BEATMAP)
-        }
-        else
+        if (!Multiplayer.isConnected)
         {
             back()
             return
         }
+
         getGlobal().engine.scene = this
+
+        // Updating beatmap just in case
+        onRoomBeatmapChange(room!!.beatmap)
+
+        // Setting player status to NOT_READY
+        awaitStatusChange = true
+
+        if (hasLocalTrack || room!!.beatmap == null)
+            RoomAPI.setPlayerStatus(NOT_READY)
+        else
+            RoomAPI.setPlayerStatus(MISSING_BEATMAP)
+
         chat.show()
     }
 
@@ -603,9 +606,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Updating player mods for other clients
         awaitModsChange = true
         RoomAPI.setPlayerMods(modsToString(getModMenu().mod))
-
-        // Setting beatmap
-        onRoomBeatmapChange(newRoom.beatmap)
 
         // Updating UI
         updateButtons()
@@ -668,6 +668,13 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         if (beatmap != null)
             trackButton!!.loadTrack(localTrack)
 
+        // Preventing from change song when host is in room while other players are in gameplay
+        if (getGlobal().engine.scene != this)
+        {
+            awaitBeatmapChange = false
+            return
+        }
+
         // Updating background
         updateBackground(localTrack?.background)
 
@@ -683,12 +690,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             return
         }
 
-        // Preventing from change song when host is in room while other players are in gameplay
-        if (getGlobal().engine.scene != getGlobal().gameScene.scene)
-        {
-            getGlobal().songService.preLoad(localTrack.beatmap.music)
-            getGlobal().songService.play()
-        }
+        getGlobal().songService.preLoad(localTrack.beatmap.music)
+        getGlobal().songService.play()
     }
 
     override fun onRoomHostChange(uid: Long)
