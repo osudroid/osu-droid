@@ -1,13 +1,10 @@
 package com.reco1l.api.ibancho
 
 import com.reco1l.api.ibancho.data.*
-import com.reco1l.framework.extensions.className
-import com.reco1l.framework.extensions.iterator
-import com.reco1l.framework.extensions.logWithMessage
+import com.reco1l.framework.extensions.orCatch
 import com.reco1l.framework.net.JsonContent
 import com.reco1l.framework.net.JsonRequester
 import com.reco1l.framework.net.QueryContent
-import org.json.JSONObject
 
 object LobbyAPI
 {
@@ -41,16 +38,15 @@ object LobbyAPI
                     put("query", query)
                 }
 
-            val list = mutableListOf<Room>()
-            val array = it.executeAndGetJson().toArray() ?: return list
+            val array = it.executeAndGetJson().toArray() ?: return emptyList()
 
-            for (data in array)
-            {
-                val json = data as JSONObject
+            return List(array.length()) { i ->
 
-                try
-                {
-                    val room = Room(
+                val json = array.optJSONObject(i)
+
+                return@List {
+
+                    Room(
                             id = json.getLong("id"),
                             name = json.getString("name"),
                             isLocked = json.getBoolean("isLocked"),
@@ -60,16 +56,13 @@ object LobbyAPI
                             teamMode = TeamMode.from(json.getInt("teamMode")),
                             winCondition = WinCondition.from(json.getInt("winCondition")),
                             playerCount = json.getInt("playerCount"),
-                            playerNames = json.getString("playerNames")
+                            playerNames = json.getString("playerNames"),
+                            status = RoomStatus.from(json.getInt("status"))
                     )
-                    list.add(room)
-                }
-                catch (e: Exception)
-                {
-                    e.logWithMessage(className) { "Failed to parse room" }
-                }
-            }
-            return list
+
+                }.orCatch { null }
+
+            }.filterNotNull()
         }
     }
 

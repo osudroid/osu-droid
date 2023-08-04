@@ -51,7 +51,12 @@ data class Room(
         /**
          * The room win condition.
          */
-        var winCondition: WinCondition
+        var winCondition: WinCondition,
+
+        /**
+         * The room status.
+         */
+        var status: RoomStatus? = null
 
 )
 {
@@ -69,11 +74,6 @@ data class Room(
             field = value
             sortPlayers()
         }
-
-    /**
-     * The room status.
-     */
-    var status: RoomStatus? = null
 
     /**
      * The current beatmap.
