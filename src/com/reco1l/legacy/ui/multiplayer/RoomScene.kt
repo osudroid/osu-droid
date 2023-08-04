@@ -735,6 +735,13 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             getModMenu().init()
             getModMenu().update()
+
+            // If we're the host we set our mods as room mods
+            if (Multiplayer.isRoomHost)
+            {
+                awaitModsChange = true
+                RoomAPI.setRoomMods(modsToString(getModMenu().mod))
+            }
         }
 
         // Updating host text
