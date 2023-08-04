@@ -248,17 +248,17 @@ public class DuringGameScoreBoard extends GameObject {
                 boards[i] = s;
                 entity.attachChild(s);
             }
-            playerSprite = new Sprite(0, 0, tex);
+            var playerSprite = new Sprite(0, 0, tex);
             playerSprite.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
             playerSprite.setAlpha(0.5f);
             playerSprite.setColor(0.5f, 0.5f, 1);
-            playerText = new ChangeableText(paddingLeft, paddingTop,
+            var playerText = new ChangeableText(paddingLeft, paddingTop,
                     ResourceManager.getInstance().getFont("font"),
                     currentUsername + "\n0\n0x", 100);
             playerText.setScaleCenter(0, 0);
             playerText.setScale(0.65f);
             playerText.setColor(0.85f, 0.85f, 0.9f);
-            playerRank = new ChangeableText(paddingLeft, paddingTop,
+            var playerRank = new ChangeableText(paddingLeft, paddingTop,
                     ResourceManager.getInstance().getFont("CaptionFont"),
                     "#1", 5);
             playerRank.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
@@ -271,6 +271,9 @@ public class DuringGameScoreBoard extends GameObject {
             playerSprite.attachChild(playerRank);
             playerSprite.attachChild(playerText);
             itemHeight = 83;
+            this.playerText = playerText;
+            this.playerRank = playerRank;
+            this.playerSprite = playerSprite;
             boards[posNow] = playerSprite;
             entity.attachChild(playerSprite);
 
