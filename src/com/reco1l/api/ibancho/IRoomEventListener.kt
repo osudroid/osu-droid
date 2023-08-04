@@ -100,7 +100,7 @@ interface IRoomEventListener
     /**
      * Emit when the player sends a chat message.
      */
-    fun onRoomChatMessage(username: String?, message: String)
+    fun onRoomChatMessage(uid: Long?, message: String)
 
 
     // Score related events

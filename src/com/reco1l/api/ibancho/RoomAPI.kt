@@ -131,7 +131,13 @@ object RoomAPI
     private val chatMessage = Listener {
 
         //multiLog("RECEIVED: chatMessage -> ${it.contentToString()}")
-        roomEventListener?.onRoomChatMessage(it[0] as? String, it[1] as String)
+
+        var id: Long? = null
+
+        if (it.size > 1)
+            id = (it[0] as String).toLong()
+
+        roomEventListener?.onRoomChatMessage(id, it[1] as String)
     }
 
     private val liveScoreData = Listener {

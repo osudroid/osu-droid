@@ -579,15 +579,19 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onServerError(error: String) = ToastLogger.showText(error, true)
 
-    override fun onRoomChatMessage(username: String?, message: String)
+    override fun onRoomChatMessage(uid: Long?, message: String)
     {
         // If username is null considering it as system message
-        if (username != null)
+        if (uid != null)
         {
-            val player = room!!.activePlayers.find { it.name == username } ?: return
+            val player = room!!.getPlayerByUID(uid) ?: run {
+
+                multiLog("WARNING: Unable to find user by ID on chat message")
+                return
+            }
 
             if (!player.isMuted)
-                chat.onRoomChatMessage(username, message)
+                chat.onRoomChatMessage(player.name, message)
         }
         else
             chat.onSystemChatMessage(message, "#007BFF")
