@@ -32,4 +32,7 @@ data class RoomPlayer
          * Locally used to indicate the player is muted.
          */
         var isMuted = false
+
+
+        override fun equals(other: Any?) = other === this || other is RoomPlayer && other.id == id
 }

@@ -125,7 +125,7 @@ data class Room(
         val index = activePlayers.find { it.id == uid }
 
         if (index == null)
-            multiLog("getPlayerByUID() - Unable to find user with UID: $uid")
+            multiLog("WARNING: Unable to find user with UID: $uid")
 
         return index
     }
@@ -133,17 +133,31 @@ data class Room(
 
     /**
      * Special handling to add a player in the array.
+     *
+     * @return `true` if it was successfully added, `false` it if wasn't or if it was already in the array (this can
+     * happen due to reconnection).
      */
-    fun addPlayer(player: RoomPlayer)
+    fun addPlayer(player: RoomPlayer): Boolean
     {
-        val index = players.indexOfFirst { it != null && it.id == player.id || it == null }
+        /** @see [RoomPlayer.equals] */
+        var index = players.indexOf(player)
+        val wasAlready = index in players.indices
 
-        if (index in players.indices)
-            players[index] = player
+        if (wasAlready)
+            multiLog("WARNING: Tried to add player while it was already in the array.")
         else
-            multiLog("addPlayer() - Invalid index: $index (Array size: ${players.size})")
+            index = players.indexOfFirst { it == null }
 
+        // Handling invalid index
+        if (index !in players.indices)
+        {
+            multiLog("WARNING: Tried to add player with invalid index: $index")
+            return false
+        }
+
+        players[index] = player
         sortPlayers()
+        return !wasAlready
     }
 
     /**

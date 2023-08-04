@@ -758,6 +758,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     override fun onRoomFreeModsChange(isFreeMods: Boolean)
     {
         room!!.isFreeMods = isFreeMods
+
         // Update room info text
         updateInformation()
 
@@ -886,10 +887,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onPlayerJoin(player: RoomPlayer)
     {
-        room!!.addPlayer(player)
-
-        // Chat message
-        chat.onSystemChatMessage("Player ${player.name} (ID: ${player.id}) joined.", "#007BFF")
+        // We send the message if the player wasn't in the room, sometimes this event can be called by a reconnection.
+        if (room!!.addPlayer(player))
+            chat.onSystemChatMessage("Player ${player.name} (ID: ${player.id}) joined.", "#007BFF")
 
         // Updating state text
         updateInformation()
