@@ -154,16 +154,15 @@ data class Room(
     fun removePlayer(uid: Long): RoomPlayer?
     {
         val index = players.indexOfFirst { it != null && it.id == uid }
-        var removed: RoomPlayer? = null
+        val removed = players.getOrNull(index)
 
-        if (index in players.indices)
+        if (removed != null)
         {
-            removed = players[index]
             players[index] = null
+            sortPlayers()
         }
-        else multiLog("removePlayer() - Invalid index: $index (Array size: ${players.size})")
+        else multiLog("WARNING: Tried to remove a player with invalid index: $index")
 
-        sortPlayers()
         return removed
     }
 
