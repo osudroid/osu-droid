@@ -304,10 +304,10 @@ object LobbyScene : Scene()
     {
         (resources().getTexture("::background") ?: resources().getTexture("menu-background")).also {
 
-            val height = it.height.toFloat() * (Config.getRES_WIDTH() / it.width.toFloat())
-            val menuBg = Sprite(0f, (Config.getRES_HEIGHT() - height) / 2f, Config.getRES_WIDTH().toFloat(), height, it)
+            val height = it.height * (Config.getRES_WIDTH() / it.width).toFloat()
+            val width = Config.getRES_WIDTH().toFloat()
 
-            background = SpriteBackground(menuBg)
+            background = SpriteBackground(Sprite(0f, (Config.getRES_HEIGHT() - height) / 2f, width, height, it))
         }
     }
 

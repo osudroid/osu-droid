@@ -32,7 +32,6 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.MOD_SCOREV2
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen.LoadingScene
-import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
 import ru.nsu.ccfit.zuev.osu.scoring.Replay
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
@@ -426,11 +425,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         val texture = if (path != null) getResources().loadBackground(path) else getResources().getTexture("menu-background")
 
-        val height = texture.height.toFloat() * (Config.getRES_WIDTH() / texture.width.toFloat())
-        val menuBg = Sprite(0f, (Config.getRES_HEIGHT() - height) / 2f, Config.getRES_WIDTH()
-                .toFloat(), height, texture)
+        val height = texture.height * (Config.getRES_WIDTH() / texture.width).toFloat()
+        val width = Config.getRES_WIDTH().toFloat()
 
-        background = SpriteBackground(menuBg)
+        background = SpriteBackground(Sprite(0f, (Config.getRES_HEIGHT() - height) / 2f, width, height, texture))
     }
 
     private fun updateInformation()
