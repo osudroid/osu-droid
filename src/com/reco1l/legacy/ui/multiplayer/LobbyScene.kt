@@ -337,22 +337,5 @@ object LobbyScene : Scene()
     }
 
 
-    // Test
-
-    private fun checkUID(): Boolean
-    {
-        if (getOnline().userId != -1L) return true
-
-        { getOnline().userId = LobbyAPI.getID() }.orCatch {
-
-            ToastLogger.showText("Unable to generate user ID: ${it.className} - ${it.message}", true)
-            back()
-            return false
-        }
-
-        return getOnline().userId != -1L
-    }
-
-
     fun init() = Unit
 }
