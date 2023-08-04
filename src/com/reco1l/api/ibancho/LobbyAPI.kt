@@ -23,6 +23,16 @@ object LobbyAPI
      */
     private const val CREATE_ROOM = "/createroom"
 
+
+    private const val GET_ID = "/id"
+
+
+    fun getID(): Long = JsonRequester("$HOST$GET_ID").use {
+
+        return it.executeAndGetJson().getString("id").toLong()
+    }
+
+
     /**
      * Get room list.
      */
