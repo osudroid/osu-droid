@@ -63,7 +63,9 @@ object Multiplayer
 
             jsonToScoreboardItem(json)
         }
-        getGlobal().gameScene.scoreBoard?.initScoreboard()
+
+        if (getGlobal().engine.scene == getGlobal().gameScene.scene)
+            getGlobal().gameScene.scoreBoard?.initScoreboard()
     }
 
     fun onFinalLeaderboard(array: JSONArray)

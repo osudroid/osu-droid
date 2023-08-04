@@ -18,6 +18,13 @@ fun async(block: () -> Unit) = GlobalScope.launch {
 }
 
 /**
+ * Run a task ignoring exceptions on asynchronous using Kotlin Coroutines API.
+ */
+fun asyncIgnoreExceptions(block: () -> Unit) = GlobalScope.launch {
+    try { block() } catch (e: Exception) { e.printStackTrace() }
+}
+
+/**
  * Run a delayed task on asynchronous using Kotlin Coroutines API.
  */
 fun delayed(time: Long, block: () -> Unit) = GlobalScope.launch {

@@ -151,7 +151,7 @@ public class DuringGameScoreBoard extends GameObject {
             });
         }
 
-        initTask = Execution.async(() -> {
+        initTask = Execution.asyncIgnoreExceptions(() -> {
 
             entity = new Entity();
             entity.setChildrenIgnoreUpdate(true);
