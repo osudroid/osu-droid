@@ -45,14 +45,14 @@ object LobbyScene : Scene()
 
     private var backButton: Sprite? = null
 
-    private var onlinePanel: OnlinePanel? = null
-
     private var createButton: TextButton? = null
 
     private var refreshButton: TextButton? = null
 
 
     private val roomList = LobbyRoomList()
+
+    private val onlinePanel = OnlinePanel()
 
     private val titleText = ChangeableText(20f, 20f, resources().getFont("bigFont"), "", 100)
 
@@ -162,16 +162,8 @@ object LobbyScene : Scene()
         }
 
         // Online panel
-        onlinePanel = OnlinePanel().also {
-
-            it.setPosition(Config.getRES_WIDTH() - 410f - 6f, 6f)
-            attachChild(it)
-
-            glThread {
-                it.setInfo()
-                it.setAvatar()
-            }
-        }
+        onlinePanel.setPosition(Config.getRES_WIDTH() - 410f - 6f, 6f)
+        attachChild(onlinePanel)
 
         createButton = object : TextButton(resources().getFont("CaptionFont"), "Create New Room")
         {
@@ -247,6 +239,13 @@ object LobbyScene : Scene()
     }
 
     // Update events
+
+    @JvmStatic
+    fun updateOnlinePanel() = glThread {
+
+        onlinePanel.setInfo()
+        onlinePanel.setAvatar()
+    }
 
     fun updateList()
     {

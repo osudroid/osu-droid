@@ -32,6 +32,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.MOD_SCOREV2
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen.LoadingScene
+import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
 import ru.nsu.ccfit.zuev.osu.scoring.Replay
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
@@ -111,8 +112,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     private var backButton: Sprite? = null
 
-    private var onlinePanel: OnlinePanel? = null
-
     private var readyButton: TextButton? = null
 
     private var secondaryButton: TextButton? = null
@@ -125,6 +124,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     private var options: RoomOptions? = null
 
+
+    private val onlinePanel = OnlinePanel()
 
     private val titleText = ChangeableText(20f, 20f, getResources().getFont("bigFont"), "", 100)
 
@@ -406,20 +407,18 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         }
 
         // Online panel
-        onlinePanel = OnlinePanel().also {
-
-            it.setPosition(Config.getRES_WIDTH() - 410f - 6f, 6f)
-            attachChild(it)
-
-            glThread {
-                it.setInfo()
-                it.setAvatar()
-            }
-        }
+        onlinePanel.setPosition(Config.getRES_WIDTH() - 410f - 6f, 6f)
+        attachChild(onlinePanel)
     }
 
-
     // Update events
+
+    @JvmStatic
+    fun updateOnlinePanel() = glThread {
+
+        onlinePanel.setInfo()
+        onlinePanel.setAvatar()
+    }
 
     private fun updateBackground(path: String?)
     {
