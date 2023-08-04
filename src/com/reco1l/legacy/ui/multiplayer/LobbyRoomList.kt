@@ -47,7 +47,7 @@ class LobbyRoomList : ScrollableList()
         AlertDialog.Builder(getGlobal().mainActivity).apply {
 
             setTitle(room.name)
-            setMessage("Please enter the password:")
+            setMessage("Please enter the room password:")
             setView(input)
             setCancelable(false)
             setPositiveButton("Join") { dialog, _ ->
@@ -70,7 +70,7 @@ class LobbyRoomList : ScrollableList()
 
         { RoomAPI.connectToRoom(room.id, getOnline().userId, getOnline().username, password) }.orAsyncCatch {
 
-            ToastLogger.showText("Failed to connect room: ${it.className} - ${it.message}", true)
+            ToastLogger.showText("Failed to connect to the room: ${it.className} - ${it.message}", true)
             multiLog(it)
             LobbyScene.show()
         }

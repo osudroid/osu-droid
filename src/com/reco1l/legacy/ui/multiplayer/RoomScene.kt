@@ -31,6 +31,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.MOD_SCOREV2
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen.LoadingScene
+import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
 import ru.nsu.ccfit.zuev.osu.scoring.Replay
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
@@ -198,14 +199,14 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     {
                         if (room!!.beatmap == null)
                         {
-                            ToastLogger.showText("Cannot set ready when host is changing beatmap.", true)
+                            ToastLogger.showText("Cannot ready the when host is changing beatmap.", true)
                             awaitStatusChange = false
                             return true
                         }
 
                         if (room!!.teamMode == TEAM_VS_TEAM && player!!.team == null)
                         {
-                            ToastLogger.showText("You need to select a team before to set ready.", true)
+                            ToastLogger.showText("You must select a team first!", true)
                             awaitStatusChange = false
                             return true
                         }
@@ -215,7 +216,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     READY -> RoomAPI.setPlayerStatus(NOT_READY)
                     MISSING_BEATMAP ->
                     {
-                        ToastLogger.showText("Beatmap is missing, cannot set ready.", true)
+                        ToastLogger.showText("Beatmap is missing, cannot ready.", true)
                         awaitStatusChange = false
                     }
 
@@ -251,7 +252,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     // This can never happen, but we handle it just in case.
                     if (room!!.beatmap == null)
                     {
-                        ToastLogger.showText("You've to select a beatmap first.", true)
+                        ToastLogger.showText("You must select a beatmap first.", true)
                         return true
                     }
 
@@ -262,7 +263,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     {
                         if (room!!.redTeamPlayers.isEmpty() || room!!.blueTeamPlayers.isEmpty())
                         {
-                            ToastLogger.showText("At least 1 player per team to start a match!", true)
+                            ToastLogger.showText("At least 1 player per team is needed to start a match!", true)
                             return true
                         }
                     }
@@ -273,7 +274,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                         RoomAPI.notifyMatchPlay()
                         return true
                     }
-                    ToastLogger.showText("All players with beatmap needs to be ready!", true)
+                    ToastLogger.showText("All players with the beatmap need to be ready!", true)
                 }
                 else uiThread {
                     options = RoomOptions()
@@ -437,7 +438,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         titleText.text = room!!.name
 
         // Update room state text
-        stateText.text = "${room!!.activePlayers.size} / ${room!!.maxPlayers} players. ${room!!.readyPlayers.size} players ready."
+        stateText.text = "${room!!.activePlayers.size} / ${room!!.maxPlayers} players. ${room!!.readyPlayers.size} ${if (room!!.readyPlayers.size == 1) "player" else "players"} ready."
 
         // Update room info text
         infoText.text = """
@@ -445,8 +446,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             Team mode: ${
             when (room!!.teamMode)
             {
-                HEAD_TO_HEAD -> "Head to Head"
-                TEAM_VS_TEAM -> "Team vs Team"
+                HEAD_TO_HEAD -> "Head-to-head"
+                TEAM_VS_TEAM -> "Team VS"
             }
         } 
             Win condition: ${
@@ -617,7 +618,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     override fun onRoomDisconnect()
     {
         room = null
-        ToastLogger.showText("Disconnected from room", true)
+        ToastLogger.showText("Disconnected from the room", true)
 
         // If player is in one of these scenes we go back.
         if (getGlobal().engine.scene != getGlobal().gameScene.scene)
@@ -629,7 +630,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     override fun onRoomConnectFail(error: String?)
     {
         room = null
-        ToastLogger.showText("Failed to connect room: $error", true)
+        ToastLogger.showText("Failed to connect to the room: $error", true)
         back()
     }
 
