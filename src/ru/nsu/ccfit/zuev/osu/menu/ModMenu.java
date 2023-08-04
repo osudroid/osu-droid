@@ -88,13 +88,11 @@ public class ModMenu implements IModSwitcher {
     {
         // Ensure selected mods are visually selected
         synchronized (modButtons) {
-            if (!modButtons.isEmpty()) {
-                for (GameMod key : modButtons.keySet()) {
-                    var button = modButtons.get(key);
+            for (GameMod key : modButtons.keySet()) {
+                var button = modButtons.get(key);
 
-                    if (button != null)
-                        button.setModEnabled(mod.contains(key));
-                }
+                if (button != null)
+                    button.setModEnabled(mod.contains(key));
             }
 
             // Updating multiplier text just in case
@@ -140,21 +138,16 @@ public class ModMenu implements IModSwitcher {
         }
         InGameSettingMenu.getInstance().dismiss();
 
-        if (!Multiplayer.isConnected)
-            return;
-
-        if (Multiplayer.isRoomHost)
+        if (Multiplayer.isConnected)
         {
-            //noinspection DataFlowIssue
-            var currentMods = MultiplayerConverter.stringToMods(RoomScene.getRoom().getMods());
+            RoomScene.INSTANCE.setAwaitModsChange(true);
 
-            if (!currentMods.containsAll(mod))
-            {
-                RoomScene.INSTANCE.setAwaitModsChange(true);
+            // The room mods are the same as the host mods
+            if (Multiplayer.isRoomHost)
                 RoomAPI.setRoomMods(modsToString(mod));
-            }
+            else
+                RoomAPI.setPlayerMods(modsToString(mod));
         }
-        else RoomAPI.setPlayerMods(modsToString(mod));
     }
 
     public void hideByFrag() {

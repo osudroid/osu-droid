@@ -761,25 +761,31 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         room!!.mods = mods
 
-        // Update room info text
-        updateInformation()
+        val newMods = stringToMods(mods)
+
+        // Updating status if the mods were changed
+        if (newMods != getModMenu().mod)
+        {
+            awaitStatusChange = true
+
+            if (hasLocalTrack || room!!.beatmap == null)
+                RoomAPI.setPlayerStatus(NOT_READY)
+            else
+                RoomAPI.setPlayerStatus(MISSING_BEATMAP)
+        }
 
         // If free mods is enabled it'll keep player mods and enforce speed changing mods and ScoreV2
-        getModMenu().setMods(stringToMods(mods), room!!.isFreeMods)
+        getModMenu().setMods(newMods, room!!.isFreeMods)
 
         // Updating player mods
         awaitModsChange = true
         RoomAPI.setPlayerMods(modsToString(getModMenu().mod))
 
-        // Setting player status to NOT_READY
-        awaitStatusChange = true
-
-        if (hasLocalTrack || room!!.beatmap == null)
-            RoomAPI.setPlayerStatus(NOT_READY)
-        else
-            RoomAPI.setPlayerStatus(MISSING_BEATMAP)
+        // Update room info text
+        updateInformation()
     }
 
+    /**This method is used purely to update UI in other clients*/
     override fun onPlayerModsChange(uid: Long, mods: String?)
     {
         // Updating player mods
