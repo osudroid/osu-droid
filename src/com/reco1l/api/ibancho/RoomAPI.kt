@@ -4,8 +4,6 @@ import com.dgsrz.bancho.security.SecurityUtils
 import com.reco1l.api.ibancho.data.*
 import com.reco1l.api.ibancho.data.Room
 import com.reco1l.api.ibancho.data.RoomTeam
-import com.reco1l.framework.extensions.className
-import com.reco1l.framework.extensions.logI
 import com.reco1l.legacy.ui.multiplayer.multiLog
 import io.socket.client.IO
 import io.socket.client.Socket
@@ -33,6 +31,11 @@ object RoomAPI
 
 
     private var socket: Socket? = null
+        set(value)
+        {
+            field = value
+            multiLog("Socket set to $value")
+        }
 
 
     // https://gist.github.com/Rian8337/ceab4d3b179cbeee7dd548cfcf145b95
@@ -82,7 +85,7 @@ object RoomAPI
     }
 
     private val playerStatusChanged = Listener {
-        multiLog("RECEIVED: playerStatusChanged -> ${it.contentToString()}")
+        //multiLog("RECEIVED: playerStatusChanged -> ${it.contentToString()}")
 
         val id = (it[0] as String).toLong()
         val status = PlayerStatus.from(it[1] as Int)
@@ -259,7 +262,7 @@ object RoomAPI
         if (!roomPassword.isNullOrBlank())
             auth["password"] = roomPassword
 
-        multiLog("connectToRoom($roomId, $userId, $username, $roomPassword) - API VERSION: $API_VERSION")
+        multiLog("Starting connection -> $roomId, $userId, $username")
 
         socket = IO.socket(url, IO.Options().also { it.auth = auth }).apply {
 
@@ -286,9 +289,6 @@ object RoomAPI
             on("allPlayersScoreSubmitted", allPlayersScoreSubmitted)
             on("error", error)
 
-            on(Socket.EVENT_CONNECT) {
-                "Connected successfully".logI(className)
-            }
             on(Socket.EVENT_CONNECT_ERROR, onConnectionError)
             on(Socket.EVENT_DISCONNECT, onDisconnect)
 
@@ -301,7 +301,7 @@ object RoomAPI
     fun disconnect()
     {
         if (socket == null)
-            multiLog("Tried to disconnect from a null socket.")
+            multiLog("WARNING: Tried to disconnect from a null socket.")
 
         socket?.apply {
 
@@ -331,7 +331,7 @@ object RoomAPI
         }
 
         socket!!.emit("beatmapChanged", json)
-        multiLog("changeBeatmap($md5, $title, $artist, $version, $creator)")
+        multiLog("EMITTED: beatmapChanged -> $md5, $title, $artist, $version, $creator")
     }
 
     /**
@@ -340,7 +340,7 @@ object RoomAPI
     fun kickPlayer(uid: Long)
     {
         socket!!.emit("playerKicked", uid.toString())
-        multiLog("kickPlayer($uid)")
+        multiLog("EMITTED: playerKicked -> $uid")
     }
 
     /**
@@ -349,7 +349,7 @@ object RoomAPI
     fun notifyMatchPlay()
     {
         socket!!.emit("playBeatmap")
-        multiLog("notifyMatchPlay()")
+        multiLog("EMITTED: playBeatmap")
     }
 
     /**
@@ -358,7 +358,7 @@ object RoomAPI
     fun setRoomHost(uid: Long)
     {
         socket!!.emit("hostChanged", uid.toString())
-        multiLog("setRoomHost($uid)")
+        multiLog("EMITTED: hostChanged -> $uid")
     }
 
     /**
@@ -368,7 +368,7 @@ object RoomAPI
     fun setRoomMods(mods: String?)
     {
         socket!!.emit("roomModsChanged", mods)
-        multiLog("setRoomMods($mods)")
+        multiLog("EMITTED: roomModsChanged -> $mods")
     }
 
     /**
@@ -377,7 +377,7 @@ object RoomAPI
     fun setRoomFreeMods(value: Boolean)
     {
         socket!!.emit("freeModsSettingChanged", value)
-        multiLog("setRoomFreeMods($value)")
+        multiLog("EMITTED: freeModsSettingChanged -> $value")
     }
 
     /**
@@ -386,7 +386,7 @@ object RoomAPI
     fun setRoomTeamMode(mode: TeamMode)
     {
         socket!!.emit("teamModeChanged", mode.ordinal)
-        multiLog("setRoomTeamMode(${mode.name})")
+        multiLog("EMITTED: teamModeChanged -> $mode")
     }
 
     /**
@@ -395,7 +395,7 @@ object RoomAPI
     fun setRoomWinCondition(condition: WinCondition)
     {
         socket!!.emit("winConditionChanged", condition.ordinal)
-        multiLog("setRoomWinCondition(${condition.name})")
+        multiLog("EMITTED: winConditionChanged -> $condition")
     }
 
     /**
@@ -404,7 +404,7 @@ object RoomAPI
     fun setRoomName(name: String)
     {
         socket!!.emit("roomNameChanged", name)
-        multiLog("setRoomName($name)")
+        multiLog("EMITTED: roomNameChanged -> $name")
     }
 
     /**
@@ -413,7 +413,7 @@ object RoomAPI
     fun setRoomPassword(password: String)
     {
         socket!!.emit("roomPasswordChanged", password)
-        multiLog("setRoomPassword($password)")
+        //multiLog("EMITTED: roomPasswordChanged -> $password")
     }
 
     // All players
@@ -425,7 +425,7 @@ object RoomAPI
     fun submitFinalScore(json: JSONObject?)
     {
         socket!!.emit("scoreSubmission", json)
-        multiLog("submitFinalScore()\n${json?.toString(2)}")
+        multiLog("EMITTED: scoreSubmission\n${json?.toString(2)}")
     }
 
     /**
@@ -437,7 +437,7 @@ object RoomAPI
         socket!!.emit("liveScoreData", json)
 
         // We don't indent here to avoid spam
-        multiLog("submitLiveScore() - $json")
+        multiLog("EMITTED: liveScoreData -> $json")
     }
 
     /**
@@ -446,7 +446,7 @@ object RoomAPI
     fun notifyBeatmapLoaded()
     {
         socket!!.emit("beatmapLoadComplete")
-        multiLog("notifyBeatmapLoaded()")
+        multiLog("EMITTED: beatmapLoadComplete")
     }
 
     /**
@@ -455,7 +455,7 @@ object RoomAPI
     fun requestSkip()
     {
         socket!!.emit("skipRequested")
-        multiLog("requestSkip()")
+        multiLog("EMITTED: skipRequested")
     }
 
     /**
@@ -464,7 +464,7 @@ object RoomAPI
     fun sendMessage(message: String)
     {
         socket!!.emit("chatMessage", message)
-        //multiLog("sendMessage($message)")
+        //multiLog("EMITTED: chatMessage -> $message")
     }
 
     /**
@@ -474,7 +474,7 @@ object RoomAPI
     fun setPlayerStatus(status: PlayerStatus)
     {
         socket!!.emit("playerStatusChanged", status.ordinal)
-        multiLog("setPlayerStatus(${status.name})")
+        multiLog("EMITTED: playerStatusChanged -> $status")
     }
 
     /**
@@ -484,7 +484,7 @@ object RoomAPI
     fun setPlayerMods(mods: String?)
     {
         socket!!.emit("playerModsChanged", mods)
-        multiLog("setPlayerMods($mods)")
+        multiLog("EMITTED: playerModsChanged -> $mods")
     }
 
     /**
@@ -493,7 +493,7 @@ object RoomAPI
     fun setPlayerTeam(team: RoomTeam)
     {
         socket!!.emit("teamChanged", team.ordinal)
-        multiLog("setPlayerTeam(${team.name})")
+        multiLog("EMITTED: teamChanged -> $team")
     }
 
 }
