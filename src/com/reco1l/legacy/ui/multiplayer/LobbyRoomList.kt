@@ -155,7 +155,7 @@ class LobbyRoomList : ScrollableList()
         {
             CHANGING_BEATMAP -> "Changing beatmap"
             PLAYING -> "Playing a match"
-            else -> "Waiting for players"
+            else -> "Idle"
         }
 
         val winCondition = when (room.winCondition)
