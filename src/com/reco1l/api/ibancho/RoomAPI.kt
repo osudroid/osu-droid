@@ -307,8 +307,8 @@ object RoomAPI
         socket?.apply {
 
             multiLog("Disconnected from socket.")
-            disconnect()
             off()
+            disconnect()
         }
         socket = null
     }
