@@ -1298,12 +1298,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (Multiplayer.isMultiplayer)
         {
-            realTimeElapsed += pSecondsElapsed * 1000;
+            realTimeElapsed += (long) (pSecondsElapsed * 1000);
 
             // Sending statistics data every 3000ms
             if (realTimeElapsed > 3000 && !breakAnimator.isBreak())
             {
-                realTimeElapsed = 0;
+                realTimeElapsed %= 3000;
 
                 Execution.async(() -> {
                     // This can happen when the player disconnects while playing
