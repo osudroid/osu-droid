@@ -153,3 +153,16 @@ fun statisticToJson(stats: StatisticV2, isLiveScore: Boolean) = JSONObject().app
     put("miss", stats.misses)
 
 }
+
+/**
+ * Determine if the two mods sets has the same forced mods (DT, NC, HF and SV2)
+ */
+fun EnumSet<GameMod>.equalsForcedMods(other: EnumSet<GameMod>): Boolean
+{
+    // DoubleTime & NightCore
+    return (MOD_DOUBLETIME in this || MOD_NIGHTCORE in this) == (MOD_DOUBLETIME in other || MOD_NIGHTCORE in other)
+            // HalfTime
+            && (MOD_HALFTIME in this == MOD_HALFTIME in other)
+            // ScoreV2
+            && (MOD_SCOREV2 in this == MOD_SCOREV2 in other)
+}

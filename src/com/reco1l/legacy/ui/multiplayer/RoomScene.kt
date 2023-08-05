@@ -12,6 +12,7 @@ import com.reco1l.api.ibancho.data.WinCondition.*
 import com.reco1l.framework.extensions.orCatch
 import com.reco1l.framework.lang.glThread
 import com.reco1l.framework.lang.uiThread
+import com.reco1l.legacy.data.equalsForcedMods
 import com.reco1l.legacy.data.modsToReadable
 import com.reco1l.legacy.data.modsToString
 import com.reco1l.legacy.data.stringToMods
@@ -765,16 +766,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         val newMods = stringToMods(mods)
 
-        // Updating status if the mods were changed
-        if (newMods != getModMenu().mod)
-        {
-            awaitStatusChange = true
-
-            if (hasLocalTrack || room!!.beatmap == null)
-                RoomAPI.setPlayerStatus(NOT_READY)
-            else
-                RoomAPI.setPlayerStatus(MISSING_BEATMAP)
-        }
+        // Updating status if the mods were changed, if free mods is enabled we only compare forced mods otherwise we
+        // compare total equality (if the two sets are the same)
+        if (if (room!!.isFreeMods) !newMods.equalsForcedMods(getModMenu().mod) else newMods != getModMenu().mod)
+            invalidateStatus()
 
         // If free mods is enabled it'll keep player mods and enforce speed changing mods and ScoreV2
         getModMenu().setMods(newMods, room!!.isFreeMods)
