@@ -50,7 +50,7 @@ public class ScoringScene {
     private SongService songService;
     private StatisticV2 replayStat;
     private int replayID = -1;
-    private TrackInfo track;
+    public TrackInfo track;
 
     // Multiplayer
     public StatisticV2 currentStatistic;

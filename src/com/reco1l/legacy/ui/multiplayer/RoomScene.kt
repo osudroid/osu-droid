@@ -682,14 +682,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomBeatmapChange(beatmap: RoomBeatmap?)
     {
-        // Setting await lock
-        awaitStatusChange = true
-
         // Updating values
         room!!.beatmap = beatmap
 
         // Searching the beatmap in the library
-        getGlobal().selectedTrack = beatmap?.let { library.findTrackByMD5(it.md5) }
+        getGlobal().selectedTrack = library.findTrackByMD5(beatmap?.md5)
 
         // Updating track button
         trackButton!!.updateBeatmap(beatmap)
@@ -862,9 +859,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Updating player list
         playerList!!.updateItems()
-
-        // Setting player status to NOT_READY
-        awaitStatusChange = true
 
         // Invalidating player status
         invalidateStatus()

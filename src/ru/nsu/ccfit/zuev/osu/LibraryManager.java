@@ -355,6 +355,9 @@ public enum LibraryManager {
 
     @Nullable
     public TrackInfo findTrackByMD5(String md5) {
+        if (md5 == null)
+            return null;
+
         synchronized (library) {
             int i = library.size() - 1;
 
@@ -365,7 +368,7 @@ public enum LibraryManager {
                 while (j >= 0) {
                     var track = tracks.get(j);
 
-                    if (Objects.equals(track.getMD5(), md5))
+                    if (md5.equals(track.getMD5()))
                         return track;
                     --j;
                 }

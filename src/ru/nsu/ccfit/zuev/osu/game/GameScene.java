@@ -324,12 +324,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 throw new FileNotFoundException(musicFile.getPath());
             }
 
-            /*
-            if (musicFile.getName().endsWith(".ogg")) {
-                totalOffset += Config.getOggOffset();
-            } */
-
-            //music = new BassAudioPlayer(musicFile.getPath());
             filePath = musicFile.getPath();
 
         } catch (final Exception e) {
