@@ -56,13 +56,13 @@ object ActivityOverlay {
                 fragmentManager!!.beginTransaction()
                         .remove(fragment)
                         .add(containerId, fragment, tag)
-                        .commit()
+                        .commitAllowingStateLoss()
                 return
             }
             displayingOverlay.add(fragment)
             fragmentManager!!.beginTransaction()
                     .add(containerId, fragment, tag)
-                    .commit()
+                    .commitAllowingStateLoss()
         }
     }
 
