@@ -116,19 +116,11 @@ data class Room(
     val hostPlayer
         get() = activePlayers.find { it.id == host }
 
-
     /**
-     * Get player by the given UID.
+     * Get the players list in map format using UIDs as keys.
      */
-    fun getPlayerByUID(uid: Long): RoomPlayer?
-    {
-        val index = activePlayers.find { it.id == uid }
-
-        if (index == null)
-            multiLog("WARNING: Unable to find user with UID: $uid")
-
-        return index
-    }
+    val playersMap
+        get() = activePlayers.associateBy { it.id }
 
 
     /**

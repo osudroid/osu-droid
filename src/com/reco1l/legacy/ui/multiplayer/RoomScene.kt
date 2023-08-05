@@ -612,7 +612,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         awaitStatusChange = false
 
         // Finding our player object
-        player = newRoom.getPlayerByUID(getOnline().userId) ?: run {
+        player = newRoom.playersMap[getOnline().userId] ?: run {
 
             ToastLogger.showText("Unable to find player", false)
             back()
@@ -726,7 +726,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         room!!.host = uid
 
-        chat.onSystemChatMessage("Player ${room!!.getPlayerByUID(uid)?.name} is now the room host.", "#007BFF")
+        chat.onSystemChatMessage("Player ${room!!.playersMap[uid]?.name} is now the room host.", "#007BFF")
 
         // Defining if is the host
         Multiplayer.isRoomHost = getOnline().userId == uid
@@ -797,7 +797,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     override fun onPlayerModsChange(uid: Long, mods: String?)
     {
         // Updating player mods
-        room!!.getPlayerByUID(uid)!!.mods = mods
+        room!!.playersMap[uid]!!.mods = mods
 
         // Updating player list
         playerList!!.updateItems()
@@ -999,7 +999,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     override fun onPlayerStatusChange(uid: Long, status: PlayerStatus)
     {
         // Updating player status
-        room!!.getPlayerByUID(uid)!!.status = status
+        room!!.playersMap[uid]!!.status = status
 
         if (uid == player!!.id)
         {
@@ -1017,7 +1017,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     override fun onPlayerTeamChange(uid: Long, team: RoomTeam?)
     {
         // Updating player team
-        room!!.getPlayerByUID(uid)!!.team = team
+        room!!.playersMap[uid]!!.team = team
 
         // Updating player list
         playerList!!.updateItems()
