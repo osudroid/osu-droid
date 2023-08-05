@@ -112,7 +112,7 @@ fun jsonToStatistic(json: JSONObject) = StatisticV2().apply {
     combo = json.optInt("combo")
 
     // Provided by event 'scoreSubmission'
-    mod = stringToMods(if (json.isNull("mods")) null else json.getString("mods"))
+    mod = stringToMods(if (json.isNull("modstring")) null else json.getString("modstring"))
     maxCombo = json.optInt("maxCombo")
     hit300k = json.optInt("geki")
     hit300 = json.optInt("perfect")
