@@ -628,7 +628,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         attachChild(playerList, 1)
 
         // Reloading mod menu
-        getModMenu().reload()
+        getModMenu().mod = stringToMods(player!!.mods)
+        getModMenu().init()
         getModMenu().setMods(stringToMods(newRoom.mods), newRoom.isFreeMods)
 
         // Updating player mods for other clients
