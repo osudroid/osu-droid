@@ -862,17 +862,22 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Update room info text
         updateInformation()
 
-        // If win condition is Score V2 we add the mod.
-        val roomMods = stringToMods(room!!.mods)
-        roomMods.remove(MOD_SCOREV2)
+        if (Multiplayer.isRoomHost)
+        {
+            awaitModsChange = true
 
-        if (winCondition == SCORE_V2)
-            roomMods.add(MOD_SCOREV2)
+            // If win condition is Score V2 we add the mod.
+            val roomMods = stringToMods(room!!.mods).apply {
 
-        awaitModsChange = true
+                if (winCondition == SCORE_V2)
+                    add(MOD_SCOREV2)
+                else
+                    remove(MOD_SCOREV2)
+            }
 
-        // Applying to all room
-        RoomAPI.setRoomMods(modsToString(roomMods))
+            // Applying to all room
+            RoomAPI.setRoomMods(modsToString(roomMods))
+        }
 
         // Updating player list
         playerList!!.updateItems()
