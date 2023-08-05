@@ -85,12 +85,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
      */
     var awaitModsChange = false
 
-    /**
-     * Indicates that the player has the beatmap locally.
-     */
-    @JvmField
-    var hasLocalTrack = false
-
 
     val chat = RoomChat()
 
@@ -692,23 +686,12 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Updating values
         room!!.beatmap = beatmap
-        trackButton!!.beatmap = beatmap
 
-        // Searching if the track is in our library
-        val localTrack = beatmap?.let { library.findTrackByMD5(it.md5) }
+        // Searching the beatmap in the library
+        getGlobal().selectedTrack = beatmap?.let { library.findTrackByMD5(it.md5) }
 
-        if (localTrack == null)
-            multiLog("The beatmap was not found in local library.")
-
-        // Updating player status.
-        if (localTrack != null || beatmap == null)
-            RoomAPI.setPlayerStatus(NOT_READY)
-        else
-            RoomAPI.setPlayerStatus(MISSING_BEATMAP)
-
-        // Updating track button.
-        if (beatmap != null)
-            trackButton!!.loadTrack(localTrack)
+        // Updating track button
+        trackButton!!.updateBeatmap(beatmap)
 
         // Preventing from change song when host is in room while other players are in gameplay
         if (getGlobal().engine.scene != this)
@@ -717,22 +700,22 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             return
         }
 
+        // Updating player status
+        invalidateStatus()
+
         // Updating background
-        updateBackground(localTrack?.background)
+        updateBackground(getGlobal().selectedTrack?.background)
 
         // Releasing await lock
         awaitBeatmapChange = false
 
-        // Playing selected track
-        getGlobal().selectedTrack = localTrack
-
-        if (localTrack == null)
+        if (getGlobal().selectedTrack == null)
         {
             getGlobal().songService.stop()
             return
         }
 
-        getGlobal().songService.preLoad(localTrack.beatmap.music)
+        getGlobal().songService.preLoad(getGlobal().selectedTrack.beatmap.music)
         getGlobal().songService.play()
     }
 
