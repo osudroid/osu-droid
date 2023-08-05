@@ -626,6 +626,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Finding our player object
         player = newRoom.playersMap[getOnline().userId] ?: run {
 
+            multiLog("ERROR: Unable to find player in the map.")
             ToastLogger.showText("Unable to find player", false)
             back()
             return
