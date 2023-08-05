@@ -520,9 +520,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             awaitStatusChange = false
     }
 
-
-    // Clearing
-
     fun clear()
     {
         room = null
@@ -871,6 +868,12 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         if (player!!.status == READY)
         {
+            if (getGlobal().selectedTrack == null)
+            {
+                multiLog("WARNING: Attempt to start match with null track.")
+                return
+            }
+
             getGlobal().songMenu.stopMusic()
 
             Replay.oldMod = getModMenu().mod
@@ -879,7 +882,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             Replay.oldEnableForceAR = getModMenu().isEnableForceAR
             Replay.oldFLFollowDelay = getModMenu().fLfollowDelay
 
-            getGlobal().songMenu.game.startGame(getGlobal().selectedTrack, null)
+            getGlobal().gameScene.startGame(getGlobal().selectedTrack, null)
 
             // Hiding any player menu if its shown
             uiThread { playerList!!.menu.dismiss() }
