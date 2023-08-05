@@ -1464,6 +1464,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
         if (breakAnimator.isOver()) {
+
+            // Ensure the chat is dismissed if it's still shown
+            RoomScene.INSTANCE.getChat().dismiss();
+
             gameStarted = true;
             if(scorebar != null) scorebar.setVisible(true);
             if(GameHelper.isFlashLight()){
