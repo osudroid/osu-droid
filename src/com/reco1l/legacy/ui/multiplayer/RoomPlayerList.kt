@@ -134,7 +134,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
                 {
                     val icon = getResources().getTexture("missing")
 
-                    missingIcon = Sprite(width - icon.width - 15f - (hostIcon?.let { it.width - 5f } ?: 0f), (height - icon.height) / 2f, icon)
+                    missingIcon = Sprite(width - icon.width - 15f - (hostIcon?.let { it.width + 10f } ?: 0f), (height - icon.height) / 2f, icon)
                     attachChild(missingIcon)
 
                     state.setColor(1f, 0.1f, 0.1f)
