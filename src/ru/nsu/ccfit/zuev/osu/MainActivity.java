@@ -679,7 +679,14 @@ public class MainActivity extends BaseGameActivity implements
         if (GlobalManager.getInstance().getEngine() != null && GlobalManager.getInstance().getGameScene() != null
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
             SpritePool.getInstance().purge();
-            GlobalManager.getInstance().getGameScene().pause();
+
+            if (Multiplayer.isMultiplayer)
+            {
+                ToastLogger.showText("You've left the match.", true);
+                GlobalManager.getInstance().getGameScene().quit();
+                Multiplayer.log("Player left the match.");
+            }
+            else GlobalManager.getInstance().getGameScene().pause();
         }
         if (GlobalManager.getInstance().getMainScene() != null) {
             BeatmapInfo beatmapInfo = GlobalManager.getInstance().getMainScene().beatmapInfo;

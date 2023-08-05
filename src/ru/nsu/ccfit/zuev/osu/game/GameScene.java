@@ -2009,11 +2009,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
         }
 
-        /*try {
-            android.os.Debug.dumpHprofData(Environment.getExternalStorageDirectory().getPath()+"/dd.hprof");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
         if (replaying) {
             replayFile = null;
             ModMenu.getInstance().setMod(Replay.oldMod);
@@ -2505,7 +2500,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (Multiplayer.isMultiplayer)
         {
-            if (backPressCount < 1 && GlobalManager.getInstance().getMainActivity().hasWindowFocus())
+            if (backPressCount < 1)
             {
                 lastTimeBackPress = System.currentTimeMillis();
                 backPressCount++;
