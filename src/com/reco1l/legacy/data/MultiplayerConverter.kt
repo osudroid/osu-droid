@@ -7,7 +7,7 @@ import com.reco1l.legacy.ui.multiplayer.RoomScene
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*
-import ru.nsu.ccfit.zuev.osu.menu.ScoreBoard.ScoreBoardItems
+import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import java.util.*
 
@@ -91,7 +91,7 @@ fun modsToString(mod: EnumSet<GameMod>): String
     return s.toString()
 }
 
-fun jsonToScoreboardItem(json: JSONObject) = ScoreBoardItems().apply {
+fun jsonToScoreboardItem(json: JSONObject) = ScoreBoardItem().apply {
 
     userName = json.getString("username")
     playScore = json.getInt("score")

@@ -21,7 +21,7 @@ import java.util.Locale;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.menu.ScoreBoard;
+import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
@@ -31,7 +31,7 @@ public class DuringGameScoreBoard extends GameObject {
     private final String isNotMe;
     private Sprite[] boards;
     private ChangeableText[] ranks;
-    private ScoreBoard.ScoreBoardItems[] scoreBoardData;
+    private ScoreBoardItem[] scoreBoardData;
     private int posNow;
     private String currentUsername;
     private ChangeableText playerRank;
@@ -73,7 +73,7 @@ public class DuringGameScoreBoard extends GameObject {
 
         // Reinitialize scoreboard if data changes.
         // This should only be done if the scoreboard data comes from an online source.
-        final ScoreBoard.ScoreBoardItems[] items = GlobalManager.getInstance().getSongMenu().getBoard();
+        final ScoreBoardItem[] items = GlobalManager.getInstance().getSongMenu().getBoard();
         int replayID = GlobalManager.getInstance().getScoring().getReplayID();
         if (replayID == -1 && (scoreBoardData == null || scoreBoardData.length != items.length)) {
             initScoreboard();
@@ -157,7 +157,7 @@ public class DuringGameScoreBoard extends GameObject {
             entity.setChildrenIgnoreUpdate(true);
             scene.attachChild(entity);
 
-            ScoreBoard.ScoreBoardItems[] items;
+            ScoreBoardItem[] items;
             if (Multiplayer.isConnected)
             {
                 items = Multiplayer.getLiveData();
@@ -172,7 +172,7 @@ public class DuringGameScoreBoard extends GameObject {
                 scoreBoardData = items;
             } else {
                 int replayIndex = -1;
-                scoreBoardData = new ScoreBoard.ScoreBoardItems[items.length - 1];
+                scoreBoardData = new ScoreBoardItem[items.length - 1];
                 for (int i = 0; i < items.length; i++) {
                     if (replayID == items[i].scoreId) {
                         replayIndex = i;

@@ -8,7 +8,7 @@ import com.reco1l.legacy.data.jsonToStatistic
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.MainActivity
-import ru.nsu.ccfit.zuev.osu.menu.ScoreBoard.ScoreBoardItems
+import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import java.io.File
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
@@ -31,7 +31,7 @@ object Multiplayer
 
     /**Array containing live leaderboard*/
     @JvmStatic
-    var liveData: Array<ScoreBoardItems>? = null
+    var liveData: Array<ScoreBoardItem>? = null
 
     /**Array containing final leaderboard*/
     @JvmField

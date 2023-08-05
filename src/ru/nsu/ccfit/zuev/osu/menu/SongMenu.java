@@ -124,7 +124,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         scoreScene = ss;
     }
 
-    public ScoreBoard.ScoreBoardItems[] getBoard() {
+    public ScoreBoardItem[] getBoard() {
         return board.getScoreBoardItems();
     }
 

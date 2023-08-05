@@ -2,10 +2,8 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.content.Context;
 import android.database.Cursor;
-import com.reco1l.api.ibancho.data.WinCondition;
 import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
-import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -28,7 +26,6 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 import java.io.File;
-import java.text.NumberFormat;
 import java.util.*;
 
 public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
@@ -63,7 +60,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     private float downTime = -1;
     private int _scoreID = -1;
     private boolean moved = false;
-    private ScoreBoardItems[] scoreItems = new ScoreBoardItems[0];
+    private ScoreBoardItem[] scoreItems = new ScoreBoardItem[0];
 
     private static final Object mutex = new Object();
 
@@ -287,7 +284,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
 
                     loadingText.setText(OnlineManager.getInstance().getFailMessage());
 
-                    scoreItems = new ScoreBoardItems[scores.size()];
+                    scoreItems = new ScoreBoardItem[scores.size()];
                     long lastTotalScore = 0;
 
                     for (int i = scores.size() - 1; i >= 0; --i) {
@@ -317,7 +314,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
 
                         initSprite(titleStr, accStr, data[4], true, scoreID, data[7], data[1]);
 
-                        ScoreBoardItems items = new ScoreBoardItems();
+                        ScoreBoardItem items = new ScoreBoardItem();
                         items.set(data[1], Integer.parseInt(data[3]), Integer.parseInt(data[2]), scoreID);
                         scoreItems[i] = items;
                     }
@@ -367,7 +364,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         wasOnline = showOnlineScores;
 
         synchronized (mutex) {
-            scoreItems = new ScoreBoardItems[0];
+            scoreItems = new ScoreBoardItem[0];
             viewNumber++;
         }
 
@@ -391,7 +388,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
             percentShow = 0;
             scoreSet.moveToLast();
             long lastTotalScore = 0;
-            scoreItems = new ScoreBoardItems[scoreSet.getCount()];
+            scoreItems = new ScoreBoardItem[scoreSet.getCount()];
             for (int i = scoreSet.getCount() - 1; i >= 0; --i) {
                 scoreSet.moveToPosition(i);
                 final int scoreID = scoreSet.getInt(0);
@@ -412,7 +409,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
 
                 initSprite(titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null);
 
-                scoreItems[i] = new ScoreBoardItems();
+                scoreItems[i] = new ScoreBoardItem();
                 scoreItems[i].set(scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")), scoreID);
             }
         }
@@ -620,7 +617,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         }
     }
 
-    public ScoreBoardItems[] getScoreBoardItems() {
+    public ScoreBoardItem[] getScoreBoardItems() {
         synchronized (mutex) {
             return scoreItems;
         }
@@ -628,36 +625,6 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
 
     public Scene getScene() {
         return scene;
-    }
-
-    public static class ScoreBoardItems {
-        public String userName;
-        public int playScore;
-        public int scoreId;
-        public int maxCombo;
-
-        /**Only shown in multiplayer when room win condition is Accuracy*/
-        public float accuracy = -1;
-
-        public void set(String name, int com, int scr, int id) {
-            userName = name;
-            maxCombo = com;
-            playScore = scr;
-            scoreId = id;
-        }
-
-        public String get() {
-            var text = userName + "\n" + NumberFormat.getNumberInstance(Locale.US).format(playScore) + "\n";
-
-            //noinspection DataFlowIssue
-            if (Multiplayer.isConnected && RoomScene.getRoom().getWinCondition() == WinCondition.ACCURACY)
-            {
-                text += String.format(Locale.ENGLISH, "%2.2f%%", accuracy * 100f);
-            }
-            else text += NumberFormat.getNumberInstance(Locale.US).format(maxCombo) + "x";
-
-            return text;
-        }
     }
 
     static class Avatar {
