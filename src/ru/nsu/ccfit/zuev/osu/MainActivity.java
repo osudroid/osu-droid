@@ -48,9 +48,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import com.reco1l.api.ibancho.LobbyAPI;
-import com.reco1l.api.ibancho.RoomAPI;
-import com.reco1l.api.ibancho.data.PlayerStatus;
-import com.reco1l.framework.extensions.LangUtil;
+import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
@@ -728,18 +726,10 @@ public class MainActivity extends BaseGameActivity implements
                     && (getEngine().getScene() == RoomScene.INSTANCE
                     || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()))
             {
-                RoomScene.awaitStatusChange = true;
-
-                LangUtil.orAsyncCatch(() -> {
-
-                    //noinspection DataFlowIssue
-                    if (RoomScene.hasLocalTrack || RoomScene.getRoom().getBeatmap() == null)
-                        RoomAPI.setPlayerStatus(PlayerStatus.NOT_READY);
-                    else
-                        RoomAPI.setPlayerStatus(PlayerStatus.MISSING_BEATMAP);
-
+                Execution.asyncIgnoreExceptions(() -> {
+                    RoomScene.INSTANCE.invalidateStatus();
                     return null;
-                }, null);
+                });
             }
         }
 

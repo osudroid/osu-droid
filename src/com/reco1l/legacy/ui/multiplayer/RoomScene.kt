@@ -214,7 +214,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                         RoomAPI.setPlayerStatus(READY)
                     }
 
-                    READY -> RoomAPI.setPlayerStatus(NOT_READY)
+                    READY -> invalidateStatus()
                     MISSING_BEATMAP ->
                     {
                         ToastLogger.showText("Beatmap is missing, cannot ready.", true)
@@ -508,6 +508,23 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         modsButton!!.isVisible = Multiplayer.isRoomHost || room!!.isFreeMods
     }
 
+    // Actions
+
+    fun invalidateStatus()
+    {
+        awaitStatusChange = true
+
+        var newStatus = NOT_READY
+
+        if (room!!.beatmap != null && getGlobal().selectedTrack == null)
+            newStatus = MISSING_BEATMAP
+
+        if (player!!.status != newStatus)
+            RoomAPI.setPlayerStatus(newStatus)
+        else
+            awaitStatusChange = false
+    }
+
 
     // Clearing
 
@@ -562,13 +579,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Updating beatmap just in case
         onRoomBeatmapChange(room!!.beatmap)
 
-        // Setting player status to NOT_READY
-        awaitStatusChange = true
-
-        if (hasLocalTrack || room!!.beatmap == null)
-            RoomAPI.setPlayerStatus(NOT_READY)
-        else
-            RoomAPI.setPlayerStatus(MISSING_BEATMAP)
+        // Invalidating status
+        invalidateStatus()
 
         chat.show()
     }
@@ -583,7 +595,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // If username is null considering it as system message
         if (uid != null)
         {
-            val player = room!!.getPlayerByUID(uid) ?: run {
+            val player = room!!.playersMap[uid] ?: run {
 
                 multiLog("WARNING: Unable to find user by ID on chat message")
                 return
@@ -757,10 +769,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         playerList!!.updateItems()
 
         // Update status
-        if (hasLocalTrack || room!!.beatmap == null)
-            RoomAPI.setPlayerStatus(NOT_READY)
-        else
-            RoomAPI.setPlayerStatus(MISSING_BEATMAP)
+        invalidateStatus()
     }
 
 
@@ -827,13 +836,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         awaitModsChange = true
         RoomAPI.setPlayerMods(room!!.mods)
 
-        // Setting player status to NOT_READY
-        awaitStatusChange = true
-
-        if (hasLocalTrack || room!!.beatmap == null)
-            RoomAPI.setPlayerStatus(NOT_READY)
-        else
-            RoomAPI.setPlayerStatus(MISSING_BEATMAP)
+        // Invalidating player status
+        invalidateStatus()
     }
 
     override fun onRoomTeamModeChange(mode: TeamMode)
@@ -849,10 +853,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Setting player status to NOT_READY
         awaitStatusChange = true
 
-        if (hasLocalTrack || room!!.beatmap == null)
-            RoomAPI.setPlayerStatus(NOT_READY)
-        else
-            RoomAPI.setPlayerStatus(MISSING_BEATMAP)
+        // Invalidating player status
+        invalidateStatus()
     }
 
     override fun onRoomWinConditionChange(winCondition: WinCondition)
@@ -885,10 +887,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Setting player status to NOT_READY
         awaitStatusChange = true
 
-        if (hasLocalTrack || room!!.beatmap == null)
-            RoomAPI.setPlayerStatus(NOT_READY)
-        else
-            RoomAPI.setPlayerStatus(MISSING_BEATMAP)
+        // Invalidating player status
+        invalidateStatus()
     }
 
 
