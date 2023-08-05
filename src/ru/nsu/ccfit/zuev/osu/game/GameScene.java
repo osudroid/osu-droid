@@ -211,7 +211,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     /**Indicates that the player has requested skip*/
     private boolean isSkipRequested = false;
 
-    /**Last time the live score was sent to server, this is used to send the score every 3s (real time)*/
+    /**Real time elapsed in milliseconds since the game has started*/
     private long realTimeElapsed = 0;
 
     // End multiplayer
@@ -1314,7 +1314,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             // Setting a delay of 300ms for the player to tap back button again.
-            if (lastTimeBackPress > 0f && lastTimeBackPress - pSecondsElapsed * 1000f > 300)
+            if (lastTimeBackPress > 0f && lastTimeBackPress - realTimeElapsed > 500)
             {
                 lastTimeBackPress = -1f;
                 backPressCount = 0;
@@ -2507,6 +2507,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         {
             if (backPressCount < 1 && GlobalManager.getInstance().getMainActivity().hasWindowFocus())
             {
+                lastTimeBackPress = System.currentTimeMillis();
                 backPressCount++;
                 ToastLogger.showText("Tap twice to exit to room.", false);
                 return;
