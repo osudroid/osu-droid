@@ -1301,7 +1301,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             realTimeElapsed += pSecondsElapsed * 1000;
 
             // Sending statistics data every 3000ms
-            if (realTimeElapsed > 3000)
+            if (realTimeElapsed > 3000 && !breakAnimator.isBreak())
             {
                 realTimeElapsed = 0;
 
