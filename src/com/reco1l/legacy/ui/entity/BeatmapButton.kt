@@ -56,7 +56,7 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
     {
-        if (!event.isActionUp || RoomScene.player!!.status == PlayerStatus.READY || RoomScene.awaitBeatmapChange)
+        if (!event.isActionUp || Multiplayer.player!!.status == PlayerStatus.READY || RoomScene.awaitBeatmapChange)
             return true
 
         getResources().getSound("menuclick")?.play()
@@ -81,7 +81,7 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
 
 
         // If the room beatmap has set a 'parentSetID' it means that the beatmap can be downloaded trough Chimu.moe
-        if (getGlobal().selectedTrack == null) RoomScene.room!!.beatmap?.apply {
+        if (getGlobal().selectedTrack == null) Multiplayer.room!!.beatmap?.apply {
 
             // If it's null the beatmap isn't available on Chimu servers.
             if (parentSetID == null)

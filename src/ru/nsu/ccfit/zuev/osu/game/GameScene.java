@@ -48,13 +48,7 @@ import org.anddev.andengine.util.modifier.IModifier;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Queue;
+import java.util.*;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -93,6 +87,7 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.PauseMenu;
+import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem;
 import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
@@ -213,6 +208,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     /**Real time elapsed in milliseconds since the game has started*/
     private long realTimeElapsed = 0;
+
+    /**Last score data chunk sent to server, used to determine if the data was changed.*/
+    private ScoreBoardItem lastScoreSent = null;
 
     // End multiplayer
 
@@ -604,6 +602,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         lastTimeBackPress = -1f;
         isSkipRequested = false;
         realTimeElapsed = 0;
+        lastScoreSent = null;
 
         paused = false;
         gameStarted = false;
@@ -1294,21 +1293,29 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         {
             realTimeElapsed += (long) (pSecondsElapsed * 1000);
 
-            // Sending statistics data every 3000ms
-            if (realTimeElapsed > 3000 && !breakAnimator.isBreak())
+            // Sending statistics data every 3000ms if data was changed
+            if (realTimeElapsed > 3000)
             {
                 realTimeElapsed %= 3000;
 
-                Execution.async(() -> {
-                    // This can happen when the player disconnects while playing
-                    if (Multiplayer.isConnected)
-                        RoomAPI.submitLiveScore(stat.toJson(true));
-                    return null;
-                });
+                if (Multiplayer.isConnected)
+                {
+                    var liveScore = stat.toBoardItem();
+
+                    if (!Objects.equals(liveScore, lastScoreSent))
+                    {
+                        lastScoreSent = liveScore;
+
+                        Execution.asyncIgnoreExceptions(() -> {
+                            RoomAPI.submitLiveScore(lastScoreSent.toJson());
+                            return null;
+                        });
+                    }
+                }
             }
 
             // Setting a delay of 300ms for the player to tap back button again.
-            if (lastTimeBackPress > 0f && lastTimeBackPress - realTimeElapsed > 500)
+            if (lastTimeBackPress > 0 && realTimeElapsed - lastTimeBackPress > 300)
             {
                 lastTimeBackPress = -1f;
                 backPressCount = 0;
@@ -1895,19 +1902,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     if (Multiplayer.isConnected)
                     {
                         Multiplayer.log("Match ended, moving to results scene.");
-                        Async.run(() -> RoomAPI.submitFinalScore(stat.toJson(false)));
+                        RoomScene.INSTANCE.getChat().show();
+
+                        Execution.asyncIgnoreExceptions(() -> {
+                            RoomAPI.submitFinalScore(stat.toJson());
+                            return null;
+                        });
+
+                        ToastLogger.showText("Loading room statistics...", false);
                     }
                     scoringScene.load(stat, lastTrack, GlobalManager.getInstance().getSongService(), replayFile, trackMD5, null);
                 }
                 GlobalManager.getInstance().getSongService().setVolume(0.2f);
                 engine.setScene(scoringScene.getScene());
-
-                if (Multiplayer.isConnected)
-                {
-                    RoomScene.INSTANCE.getChat().show();
-                    ToastLogger.showText("Loading room statistics...", false);
-                }
-
             } else {
                 engine.setScene(oldScene);
             }
@@ -2498,20 +2505,23 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (Multiplayer.isMultiplayer)
         {
-            if (backPressCount < 1)
+            if (backPressCount > 1)
             {
-                lastTimeBackPress = System.currentTimeMillis();
-                backPressCount++;
-                ToastLogger.showText("Tap twice to exit to room.", false);
+                // Room being null can happen when the player disconnects from socket while playing
+                if (Multiplayer.isConnected)
+                    Execution.asyncIgnoreExceptions(() -> {
+                        RoomAPI.submitFinalScore(stat.toJson());
+                        return null;
+                    });
+
+                Multiplayer.log("Player left the match.");
+                RoomScene.INSTANCE.show();
                 return;
             }
 
-            // Room being null can happen when the player disconnects from socket while playing
-            if (Multiplayer.isConnected)
-                Async.run(() -> RoomAPI.submitFinalScore(stat.toJson(false)));
-
-            Multiplayer.log("Player left the match.");
-            RoomScene.INSTANCE.show();
+            lastTimeBackPress = System.currentTimeMillis();
+            backPressCount++;
+            ToastLogger.showText("Tap twice to exit to room.", false);
             return;
         }
 
@@ -2536,10 +2546,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             {
                 Multiplayer.log("Player has lost, moving to room scene.");
 
-                Async.run(() -> RoomAPI.submitFinalScore(stat.toJson(false)));
-                RoomScene.INSTANCE.show();
+                Execution.asyncIgnoreExceptions(() -> {
+                    RoomAPI.submitFinalScore(stat.toJson());
+                    return null;
+                });
             }
-            else RoomScene.INSTANCE.back();
+
+            RoomScene.INSTANCE.show();
             return;
         }
 

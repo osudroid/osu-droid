@@ -2,14 +2,15 @@
 
 package com.reco1l.legacy.data
 
-import com.reco1l.api.ibancho.data.WinCondition
-import com.reco1l.legacy.ui.multiplayer.RoomScene
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import java.util.*
+
+
+// Mods
 
 fun modsToReadable(mods: String?): String
 {
@@ -91,27 +92,28 @@ fun modsToString(mod: EnumSet<GameMod>): String
     return s.toString()
 }
 
+
+// Statistics
+
+/**
+ * Specifically made to handle `liveScoreData` event.
+ */
 fun jsonToScoreboardItem(json: JSONObject) = ScoreBoardItem().apply {
 
     userName = json.getString("username")
     playScore = json.getInt("score")
-
-    // Provided by event 'liveScoreData'
-    maxCombo = json.optInt("combo")
+    maxCombo = json.getInt("combo")
     accuracy = json.getDouble("accuracy").toFloat()
-
 }
 
+/**
+ * Specifically made to handle `scoreSubmission` event.
+ */
 fun jsonToStatistic(json: JSONObject) = StatisticV2().apply {
 
     playerName = json.getString("username")
     totalScore = json.getInt("score")
     time = System.currentTimeMillis()
-
-    // Provided by event 'liveScoreData'
-    combo = json.optInt("combo")
-
-    // Provided by event 'scoreSubmission'
     mod = stringToMods(if (json.isNull("modstring")) null else json.getString("modstring"))
     maxCombo = json.optInt("maxCombo")
     hit300k = json.optInt("geki")
@@ -121,38 +123,11 @@ fun jsonToStatistic(json: JSONObject) = StatisticV2().apply {
     hit50 = json.optInt("bad")
     misses = json.optInt("miss")
     notes = hit300 + hit100 + hit50 + misses
-
-    // Special case, only 'liveScoreData' provides it but 'scoreSubmission' doesn't and must be calculated in client.
-    accuracy = if (json.has("accuracy"))
-        json.getDouble("accuracy").toFloat()
-    else
-        (hit300 * 6f + hit100 * 2f + hit50) / ((hit300 + hit100 + hit50 + misses) * 6f)
-
+    accuracy = (hit300 * 6f + hit100 * 2f + hit50) / ((hit300 + hit100 + hit50 + misses) * 6f)
 }
 
-fun statisticToJson(stats: StatisticV2, isLiveScore: Boolean) = JSONObject().apply {
 
-    put("accuracy", stats.accuracyForServer)
-
-    if (isLiveScore)
-    {
-        put("score", stats.modifiedTotalScore)
-        put("combo", if (RoomScene.room!!.winCondition == WinCondition.MAX_COMBO) stats.maxCombo else stats.combo)
-        return@apply
-    }
-    else put("score", stats.modifiedTotalScore)
-
-    put("username", stats.playerName)
-    put("modstring", modsToString(stats.mod))
-    put("maxCombo", stats.maxCombo)
-    put("geki", stats.hit300k)
-    put("perfect", stats.hit300)
-    put("katu", stats.hit100k)
-    put("good", stats.hit100)
-    put("bad", stats.hit50)
-    put("miss", stats.misses)
-
-}
+// Utilities
 
 /**
  * Determine if the two mods sets has the same forced mods (DT, NC, HF and SV2)

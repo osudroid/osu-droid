@@ -167,7 +167,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
                 if (moved || isScroll)
                     return true
 
-                if (player != null && RoomScene.player != player)
+                if (player != null && Multiplayer.player != player)
                 {
                     menu.player = player
                     menu.show()

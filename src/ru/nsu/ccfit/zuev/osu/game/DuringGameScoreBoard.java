@@ -6,7 +6,6 @@ import com.reco1l.api.ibancho.data.RoomTeam;
 import com.reco1l.api.ibancho.data.TeamMode;
 import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
-import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import kotlinx.coroutines.Job;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
@@ -190,10 +189,10 @@ public class DuringGameScoreBoard extends GameObject {
             if (Multiplayer.isConnected)
             {
                 //noinspection DataFlowIssue
-                if (RoomScene.getRoom().getTeamMode() == TeamMode.TEAM_VS_TEAM)
+                if (Multiplayer.room.getTeamMode() == TeamMode.TEAM_VS_TEAM)
                 {
                     //noinspection DataFlowIssue
-                    if (RoomScene.getPlayer().getTeam() == RoomTeam.RED)
+                    if (Multiplayer.player.getTeam() == RoomTeam.RED)
                         currentUsername = "Red Team";
                     else
                         currentUsername = "Blue Team";

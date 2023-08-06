@@ -18,6 +18,10 @@ import com.reco1l.legacy.data.modsToString
 import com.reco1l.legacy.data.stringToMods
 import com.reco1l.legacy.ui.entity.BeatmapButton
 import com.reco1l.legacy.ui.entity.ComposedText
+import com.reco1l.legacy.ui.multiplayer.Multiplayer.isConnected
+import com.reco1l.legacy.ui.multiplayer.Multiplayer.isRoomHost
+import com.reco1l.legacy.ui.multiplayer.Multiplayer.player
+import com.reco1l.legacy.ui.multiplayer.Multiplayer.room
 import org.anddev.andengine.engine.camera.SmoothCamera
 import org.anddev.andengine.entity.primitive.Rectangle
 import org.anddev.andengine.entity.scene.Scene
@@ -44,29 +48,6 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager.getInstance as getOnline
 
 object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 {
-
-    /**
-     * The current room, it can become `null` if socket disconnects.
-     */
-    @JvmStatic
-    var room: Room? = null
-        set(value)
-        {
-            Multiplayer.isConnected = value != null
-
-            if (value == null)
-            {
-                Multiplayer.isRoomHost = false
-                player = null
-            }
-            field = value
-        }
-
-    /**
-     * The player that correspond us according to client UID, it can become `null` if socket disconnects.
-     */
-    @JvmStatic
-    var player: RoomPlayer? = null
 
     /**
      * Indicates that the host can change beatmap (it should be false while a change request was done)
@@ -242,7 +223,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 if (player!!.status == READY)
                 {
                     // Button shouldn't be visible at this point so ignoring input
-                    if (!Multiplayer.isRoomHost)
+                    if (!isRoomHost)
                         return false
 
                     // This can never happen, but we handle it just in case.
@@ -359,7 +340,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
-                if (!Multiplayer.isRoomHost && !room!!.isFreeMods || awaitModsChange || player!!.status == READY)
+                if (!isRoomHost && !room!!.isFreeMods || awaitModsChange || player!!.status == READY)
                     return true
 
                 if (event.isActionDown)
@@ -483,9 +464,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             readyButton!!.setColor(0.9f, 0.2f, 0.2f)
 
             modsButton!!.isVisible = false
-            secondaryButton!!.isVisible = Multiplayer.isRoomHost
+            secondaryButton!!.isVisible = isRoomHost
 
-            if (Multiplayer.isRoomHost)
+            if (isRoomHost)
             {
                 secondaryButton!!.setText("Start match!")
                 secondaryButton!!.setColor(0.2f, 0.9f, 0.2f)
@@ -500,7 +481,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         secondaryButton!!.setText("Options")
         secondaryButton!!.setColor(0.2f, 0.2f, 0.2f)
 
-        modsButton!!.isVisible = Multiplayer.isRoomHost || room!!.isFreeMods
+        modsButton!!.isVisible = isRoomHost || room!!.isFreeMods
     }
 
     // Actions
@@ -523,6 +504,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     fun clear()
     {
         room = null
+        player = null
+        isRoomHost = false
+        isConnected = false
 
         // Clearing chat
         chat.log.clear()
@@ -560,7 +544,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 setCenterDirect(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f)
         }
 
-        if (!Multiplayer.isConnected)
+        if (!isConnected)
         {
             back()
             return
@@ -609,6 +593,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Setting new room
         room = newRoom
+        isConnected = true
 
         // Releasing await locks just in case
         awaitModsChange = false
@@ -625,7 +610,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         }
 
         // Determine if it's the host
-        Multiplayer.isRoomHost = player!!.id == newRoom.host
+        isRoomHost = player!!.id == newRoom.host
 
         // Reloading player list
         playerList?.detachSelf()
@@ -651,7 +636,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomDisconnect()
     {
-        room = null
+        clear()
         ToastLogger.showText("Disconnected from the room", true)
 
         // If player is in one of these scenes we go back.
@@ -663,7 +648,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomConnectFail(error: String?)
     {
-        room = null
+        clear()
         ToastLogger.showText("Failed to connect to the room: $error", true)
         back()
     }
@@ -721,7 +706,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         chat.onSystemChatMessage("Player ${room!!.playersMap[uid]?.name} is now the room host.", "#007BFF")
 
         // Defining if is the host
-        Multiplayer.isRoomHost = getOnline().userId == uid
+        isRoomHost = getOnline().userId == uid
 
         // Reloading mod menu
         glThread {
@@ -731,7 +716,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             getModMenu().update()
 
             // If we're the host we set our mods as room mods
-            if (Multiplayer.isRoomHost)
+            if (isRoomHost)
             {
                 awaitModsChange = true
                 RoomAPI.setRoomMods(modsToString(getModMenu().mod))
@@ -800,7 +785,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Closing mod menu, to enforce mod menu scene update
         clearChildScene()
         // Hiding mod button in case isn't the host when free mods is disabled
-        modsButton!!.isVisible = Multiplayer.isRoomHost || room!!.isFreeMods
+        modsButton!!.isVisible = isRoomHost || room!!.isFreeMods
 
         // Updating mod set
         getModMenu().setMods(stringToMods(room!!.mods), room!!.isFreeMods)
@@ -837,7 +822,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Update room info text
         updateInformation()
 
-        if (Multiplayer.isRoomHost)
+        if (isRoomHost)
         {
             awaitModsChange = true
 

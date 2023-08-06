@@ -2,6 +2,8 @@ package com.reco1l.legacy.ui.multiplayer
 
 import android.text.format.DateFormat
 import android.util.Log
+import com.reco1l.api.ibancho.data.Room
+import com.reco1l.api.ibancho.data.RoomPlayer
 import com.reco1l.framework.extensions.className
 import com.reco1l.legacy.data.jsonToScoreboardItem
 import com.reco1l.legacy.data.jsonToStatistic
@@ -17,23 +19,45 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager.getInstance as getOnline
 object Multiplayer
 {
 
-    /**Indicates if player is in multiplayer mode */
+    /**
+     * The current room, it can become `null` if socket disconnects.
+     */
+    @JvmField
+    var room: Room? = null
+
+    /**
+     * The player that correspond us according to client UID, it can become `null` if socket disconnects.
+     */
+    @JvmField
+    var player: RoomPlayer? = null
+
+    /**
+     * Indicates if player is in multiplayer mode
+     */
     @JvmField
     var isMultiplayer = false
 
-    /**Indicates if player is room host */
+    /**
+     * Indicates if player is room host
+     */
     @JvmField
     var isRoomHost = false
 
-    /**Indicates that the player is in a room or not */
+    /**
+     * Indicates that the player is in a room or not
+     */
     @JvmField
     var isConnected = false
 
-    /**Array containing live leaderboard*/
+    /**
+     * Array containing live leaderboard
+     */
     @JvmStatic
     var liveData: Array<ScoreBoardItem>? = null
 
-    /**Array containing final leaderboard*/
+    /**
+     * Array containing final leaderboard
+     */
     @JvmField
     var finalData: Array<StatisticV2>? = null
 

@@ -3,7 +3,6 @@ package com.reco1l.legacy.ui.multiplayer
 import android.opengl.GLES20
 import com.reco1l.api.ibancho.data.WinCondition.ACCURACY
 import com.reco1l.legacy.ui.entity.ScrollableList
-import com.reco1l.legacy.ui.multiplayer.RoomScene.room
 import org.anddev.andengine.entity.scene.Scene.ITouchArea
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
@@ -76,7 +75,7 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
 
             text.setColor(0.85f, 0.85f, 0.9f)
             text.text = "${stats.playerName}\n${getNumberInstance(US).format(stats.modifiedTotalScore)}\n"
-            text.text += when (room!!.winCondition)
+            text.text += when (Multiplayer.room!!.winCondition)
             {
                 ACCURACY -> String.format(ENGLISH, "%2.2f%%", stats.accuracyForServer * 100f)
                 else -> "${getNumberInstance(US).format(stats.maxCombo)}x"

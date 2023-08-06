@@ -7,12 +7,15 @@ import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Random;
 
+import com.reco1l.api.ibancho.data.WinCondition;
 import com.reco1l.legacy.data.MultiplayerConverter;
+import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 
 public class StatisticV2 implements Serializable {
@@ -797,9 +800,37 @@ public class StatisticV2 implements Serializable {
     }
 
     /**
-     * Converts the statistic into a JSON object readable by the multiplayer server.
+     * Converts the statistic into a JSONObject readable by the multiplayer server.
      */
-    public JSONObject toJson(boolean isLiveScore) {
-        return MultiplayerConverter.statisticToJson(this, isLiveScore);
+    public JSONObject toJson(){
+        return new JSONObject() {{
+            try {
+                put("accuracy", getAccuracyForServer());
+                put("score", getModifiedTotalScore());
+                put("username", playerName);
+                put("modstring", MultiplayerConverter.modsToString(mod));
+                put("maxCombo", maxCombo);
+                put("geki", hit300k);
+                put("perfect", hit300);
+                put("katu", hit100k);
+                put("good", hit100);
+                put("bad", hit50);
+                put("miss", misses);
+            } catch (Exception e) {
+                Multiplayer.log(e);
+            }
+        }};
     }
+
+    /**
+     * Converts the statistic to a ScoreBoardItem, used specifically for Multiplayer.
+     */
+    public ScoreBoardItem toBoardItem() {
+
+        //noinspection DataFlowIssue
+        var combo = !Multiplayer.isConnected || Multiplayer.room.getWinCondition() != WinCondition.MAX_COMBO ? currentCombo : maxCombo;
+
+        return new ScoreBoardItem(playerName, getModifiedTotalScore(), combo, getAccuracyForServer());
+    }
+
 }

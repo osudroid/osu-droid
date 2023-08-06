@@ -59,8 +59,8 @@ class RoomOptions : SettingsFragment()
 
         findPreference<ListPreference>("player_team")!!.apply {
 
-            isEnabled = RoomScene.room!!.teamMode == TeamMode.TEAM_VS_TEAM
-            value = RoomScene.player!!.team?.ordinal?.toString()
+            isEnabled = Multiplayer.room!!.teamMode == TeamMode.TEAM_VS_TEAM
+            value = Multiplayer.player!!.team?.ordinal?.toString()
 
             setOnPreferenceChangeListener { _, newValue ->
 
@@ -75,7 +75,7 @@ class RoomOptions : SettingsFragment()
 
             setOnPreferenceChangeListener { _, newValue ->
                 Config.setUseNightcoreOnMultiplayer(newValue as Boolean)
-                RoomScene.onRoomModsChange(RoomScene.room!!.mods)
+                RoomScene.onRoomModsChange(Multiplayer.room!!.mods)
                 true
             }
         }
@@ -88,7 +88,7 @@ class RoomOptions : SettingsFragment()
 
                 val clipboard = requireContext().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
 
-                val link = "${LobbyAPI.HOST}/${RoomScene.room!!.id}/"
+                val link = "${LobbyAPI.HOST}/${Multiplayer.room!!.id}/"
                 val data = ClipData.newPlainText("Invitation link", link)
 
                 clipboard.setPrimaryClip(data)
@@ -98,7 +98,7 @@ class RoomOptions : SettingsFragment()
 
             findPreference<EditTextPreference>("room_name")!!.apply {
 
-                text = RoomScene.room!!.name
+                text = Multiplayer.room!!.name
 
                 setOnPreferenceChangeListener { _, newValue ->
 
@@ -126,7 +126,7 @@ class RoomOptions : SettingsFragment()
 
             findPreference<CheckBoxPreference>("room_free_mods")!!.apply {
 
-                isChecked = RoomScene.room!!.isFreeMods
+                isChecked = Multiplayer.room!!.isFreeMods
 
                 setOnPreferenceChangeListener { _, newValue ->
                     val value = newValue as Boolean
@@ -138,7 +138,7 @@ class RoomOptions : SettingsFragment()
 
             findPreference<ListPreference>("room_versus_mode")!!.apply {
 
-                value = RoomScene.room!!.teamMode.ordinal.toString()
+                value = Multiplayer.room!!.teamMode.ordinal.toString()
 
                 setOnPreferenceChangeListener { _, newValue ->
 
@@ -151,7 +151,7 @@ class RoomOptions : SettingsFragment()
 
             findPreference<ListPreference>("room_win_condition")!!.apply {
 
-                value = RoomScene.room!!.winCondition.ordinal.toString()
+                value = Multiplayer.room!!.winCondition.ordinal.toString()
 
                 setOnPreferenceChangeListener { _, newValue ->
                     val winCondition = WinCondition.from((newValue as String).toInt())
@@ -188,7 +188,7 @@ class RoomOptions : SettingsFragment()
 
                         LobbyScene.load()
                         RoomScene.load()
-                        RoomScene.onRoomConnect(RoomScene.room!!)
+                        RoomScene.onRoomConnect(Multiplayer.room!!)
 
                         uiThread {
                             loading.dismiss()

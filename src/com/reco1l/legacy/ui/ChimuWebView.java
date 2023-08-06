@@ -201,7 +201,7 @@ public class ChimuWebView extends WebViewFragment implements IDownloaderObserver
         mActivity.runOnUiThread(mFragment::dismiss);
 
         if (Multiplayer.isConnected)
-            RoomScene.INSTANCE.onRoomBeatmapChange(RoomScene.getRoom().getBeatmap());
+            RoomScene.INSTANCE.onRoomBeatmapChange(Multiplayer.room.getBeatmap());
     }
 
     @Override
