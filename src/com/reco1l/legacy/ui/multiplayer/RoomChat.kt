@@ -89,11 +89,11 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
         text?.text = log
     }
 
-    fun onRoomChatMessage(username: String, message: String) = uiThread {
+    fun onRoomChatMessage(uid: Long, username: String, message: String) = uiThread {
 
-        var color = if (username == Multiplayer.player!!.name) "#FF4081" else "#FF679B"
+        var color = if (uid == Multiplayer.player!!.id) "#FF4081" else "#FF679B"
 
-        if (username in DEV_NAMES)
+        if (uid in DEV_UIDS)
             color = "#9E00FF"
 
         val html = "<font color=$color><b>$username: </b></font> <font color=#000000>$message</font>"
@@ -278,10 +278,10 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
 
     companion object
     {
-        val DEV_NAMES = arrayOf(
-                "Rian8337",
-                "Reco1l",
-                "Acivev"
+        val DEV_UIDS = arrayOf<Long>(
+                51076,
+                55374,
+                307054
         )
     }
 }
