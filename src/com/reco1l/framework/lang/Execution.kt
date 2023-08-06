@@ -8,7 +8,9 @@
 package com.reco1l.framework.lang
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.Runnable
 import ru.nsu.ccfit.zuev.osu.GlobalManager
+import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
 /**
  * Run a task on asynchronous using Kotlin Coroutines API.
@@ -34,7 +36,7 @@ fun delayed(time: Long, block: () -> Unit) = GlobalScope.launch {
 
 // Exclusive osu!droid
 
-fun uiThread(block: () -> Unit) = GlobalManager.getInstance().mainActivity.runOnUiThread(block)
+fun uiThread(block: Runnable) = getGlobal().mainActivity.runOnUiThread(block)
 
-fun glThread(block: () -> Unit) = GlobalManager.getInstance().engine.runOnUpdateThread(block)
+fun glThread(block: Runnable) = getGlobal().engine.runOnUpdateThread(block)
 

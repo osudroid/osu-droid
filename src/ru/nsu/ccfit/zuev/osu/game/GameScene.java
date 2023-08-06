@@ -1987,7 +1987,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 skipBtn.detachSelf();
                 skipBtn = null;
             }
-            return null;
         });
     }
 

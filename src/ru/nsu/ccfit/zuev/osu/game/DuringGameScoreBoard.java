@@ -146,7 +146,6 @@ public class DuringGameScoreBoard extends GameObject {
             Execution.glThread(() -> {
                 oldEntity.detachSelf();
                 oldEntity.detachChildren();
-                return null;
             });
         }
 

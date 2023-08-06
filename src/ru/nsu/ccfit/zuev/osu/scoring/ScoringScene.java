@@ -548,7 +548,6 @@ public class ScoringScene {
 
                     if (scene != null)
                         scene.unregisterTouchArea(oldSelector);
-                    return null;
                 });
             }
 
