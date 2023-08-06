@@ -22,6 +22,7 @@ import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.fragment.BaseFragment
 import com.reco1l.api.ibancho.RoomAPI
+import com.reco1l.api.ibancho.data.RoomPlayer
 import com.reco1l.framework.extensions.orAsyncCatch
 import com.reco1l.framework.lang.uiThread
 import org.anddev.andengine.input.touch.TouchEvent
@@ -89,18 +90,18 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
         text?.text = log
     }
 
-    fun onRoomChatMessage(uid: Long, username: String, message: String) = uiThread {
+    fun onRoomChatMessage(player: RoomPlayer, message: String) = uiThread {
 
-        var color = if (uid == Multiplayer.player!!.id) "#FF4081" else "#FF679B"
+        var color = if (player.id == Multiplayer.player!!.id) "#FF4081" else "#FF679B"
 
-        if (uid in DEV_UIDS)
+        if (player.id in DEV_UIDS)
             color = "#9E00FF"
 
-        val html = "<font color=$color><b>$username: </b></font> <font color=#000000>$message</font>"
+        val html = "<font color=$color><b>${player.name}: </b></font> <font color=#000000>$message</font>"
         val spanned = HtmlCompat.fromHtml(html, FROM_HTML_MODE_LEGACY)
 
         appendText(spanned)
-        showPreview(" $message", tag = "$username:", tagColor = color)
+        showPreview(" $message", tag = "${player.name}:", tagColor = color)
     }
 
     fun onSystemChatMessage(message: String, color: String) = uiThread {

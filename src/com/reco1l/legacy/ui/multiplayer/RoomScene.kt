@@ -578,7 +578,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             }
 
             if (!player.isMuted)
-                chat.onRoomChatMessage(player.id, player.name, message)
+                chat.onRoomChatMessage(player, message)
         }
         else
             chat.onSystemChatMessage(message, "#007BFF")
