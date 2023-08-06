@@ -2505,7 +2505,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (Multiplayer.isMultiplayer)
         {
-            if (backPressCount > 1)
+            if (backPressCount > 0)
             {
                 // Room being null can happen when the player disconnects from socket while playing
                 if (Multiplayer.isConnected)
