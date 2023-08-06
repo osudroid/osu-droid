@@ -731,9 +731,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Updating player list
         playerList!!.updateItems()
-
-        // Update status
-        invalidateStatus()
     }
 
 
