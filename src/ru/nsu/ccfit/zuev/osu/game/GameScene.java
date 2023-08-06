@@ -2038,7 +2038,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         onExit();
-        ResourceManager.getInstance().getSound("failsound").stop();
         if (GlobalManager.getInstance().getCamera() instanceof SmoothCamera) {
             SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
             camera.setZoomFactorDirect(1f);
@@ -2053,6 +2052,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             RoomScene.INSTANCE.show();
             return;
         }
+        ResourceManager.getInstance().getSound("failsound").stop();
         engine.setScene(oldScene);
     }
 
@@ -2514,7 +2514,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     });
 
                 Multiplayer.log("Player left the match.");
-                RoomScene.INSTANCE.show();
+                quit();
                 return;
             }
 
@@ -2550,8 +2550,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     return null;
                 });
             }
-
-            RoomScene.INSTANCE.show();
+            quit();
             return;
         }
 
