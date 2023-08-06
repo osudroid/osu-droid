@@ -39,8 +39,10 @@ public class Entity implements IEntity {
 	private static final ParameterCallable<IEntity> PARAMETERCALLABLE_DETACHCHILD = new ParameterCallable<IEntity>() {
 		@Override
 		public void call(final IEntity pEntity) {
-			pEntity.setParent(null);
-			pEntity.onDetached();
+			if (pEntity != null) {
+				pEntity.setParent(null);
+				pEntity.onDetached();
+			}
 		}
 	};
 
