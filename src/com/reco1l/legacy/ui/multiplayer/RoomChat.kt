@@ -92,7 +92,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
 
     fun onRoomChatMessage(player: RoomPlayer, message: String) = uiThread {
 
-        var color = if (player.id == Multiplayer.player!!.id) "#FF4081" else "#FF679B"
+        var color = if (player == Multiplayer.player) "#FC2D72" else "#FF679B"
 
         if (player.id in DEV_UIDS)
             color = "#9E00FF"
