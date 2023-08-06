@@ -22,6 +22,11 @@ public class BeatmapEventsParser extends BeatmapSectionParser {
                 int end = Math.max(start, data.getOffsetTime(parseInt(pars[2])));
                 data.events.breaks.add(new BreakPeriod(start, end));
             }
+
+            if (line.startsWith("1") || line.startsWith(("Video"))) {
+                data.events.videoStartTime = parseInt(pars[1]);
+                data.events.videoFilename = pars[2].substring(1, pars[2].length() - 1);
+            }
         }
 
         if (pars.length >= 5 && line.startsWith("3")) {

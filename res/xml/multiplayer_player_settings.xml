@@ -14,14 +14,22 @@
 
         <CheckBoxPreference
                 android:key="player_nightcore"
-                android:title="Use NightCore"
-                android:summary="Enable NightCore mod instead when DoubleTime is enabled."
+                android:title="Use NightCore instead of DoubleTime"
         />
 
         <CheckBoxPreference
                 android:key="showscoreboard"
                 android:title="Show leaderboard"
-                android:summary="Show live leaderboard while playing."
+        />
+
+        <CheckBoxPreference
+                android:key="enableStoryboard"
+                android:title="@string/opt_enableStoryboard_title"
+        />
+
+        <CheckBoxPreference
+                android:key="enableVideo"
+                android:title="Enable video"
         />
 
     </PreferenceCategory>

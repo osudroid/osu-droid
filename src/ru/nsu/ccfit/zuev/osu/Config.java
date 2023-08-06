@@ -77,7 +77,8 @@ public class Config {
         safeBeatmapBg,
         trianglesAnimation,
         displayRealTimePPCounter,
-        useNightcoreOnMultiplayer;
+        useNightcoreOnMultiplayer,
+        videoEnabled;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -119,6 +120,7 @@ public class Config {
         showScoreboard = prefs.getBoolean("showscoreboard", true);
         enableStoryboard = prefs.getBoolean("enableStoryboard", false);
         trianglesAnimation = prefs.getBoolean("trianglesAnimation", true);
+        videoEnabled = prefs.getBoolean("enableVideo", false);
 
         setSize();
 
@@ -777,5 +779,13 @@ public class Config {
 
     public static void setUseNightcoreOnMultiplayer(boolean value) {
         useNightcoreOnMultiplayer = value;
+    }
+
+    public static boolean isVideoEnabled() {
+        return videoEnabled;
+    }
+
+    public static void setVideoEnabled(boolean value) {
+        videoEnabled = value;
     }
 }
