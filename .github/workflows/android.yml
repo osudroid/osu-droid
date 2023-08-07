@@ -27,4 +27,7 @@ jobs:
     - name: Assemble Debug
       run: ./gradlew assembleDebug
     - name: Release Debug Apk
-      run: mv app-debug.apk app/build/outputs/apk/debug/
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-debug
+        path: out/app-debug.apk
