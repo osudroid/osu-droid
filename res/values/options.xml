@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="bg_quality_names">
+        <item>Ultra</item>
         <item>High</item>
         <item>Medium</item>
-        <item>Low</item>
+	<item>Low</item>
+	<item>Lower</item>
         <item>Disabled</item>
     </string-array>
     <string-array name="bg_quality_values">
         <item>1</item>
         <item>2</item>
-        <item>4</item>
+        <item>3</item>
+	<item>4</item>
+	<item>6</item>
         <item>0</item>
     </string-array>
     <!-- <string-array name="bg_brightness_names">
@@ -63,6 +67,8 @@
         <item>90%</item>
         <item>85%</item>
         <item>80%</item>
+	<item>75%</item>
+	<item>70%</item>
     </string-array>
     <string-array name="set_playfield_values">
         <item>100</item>
@@ -70,6 +76,8 @@
         <item>90</item>
         <item>85</item>
         <item>80</item>
+	<item>75</item>
+	<item>70</item>
     </string-array>
     <string name="opt_main">Settings</string>
 
