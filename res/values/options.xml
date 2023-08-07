@@ -345,4 +345,7 @@
 
     <string name="opt_display_realtime_pp_counter_title">Display real-time PP counter</string>
     <string name="opt_display_realtime_pp_counter_summary">Displays a real-time PP counter during gameplay. May increase loading time significantly, especially in long beatmaps</string>
+
+    <string name="opt_use_hd_assets_title">Use HD (@2x) assets</string>
+    <string name="opt_use_hd_assets_summart">Use high definition assets if skin contains those (may cause lag)</string>
 </resources>
