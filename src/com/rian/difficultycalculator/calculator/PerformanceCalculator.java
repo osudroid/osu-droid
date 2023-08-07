@@ -159,6 +159,7 @@ public class PerformanceCalculator {
         aimValue *= getComboScalingFactor();
 
         if (!difficultyAttributes.mods.contains(GameMod.MOD_RELAX)) {
+            aimValue *= 1.50;
             // AR scaling
             double approachRateFactor = 0;
             if (difficultyAttributes.approachRate > 10.33) {
@@ -195,9 +196,6 @@ public class PerformanceCalculator {
     }
 
     private double calculateSpeedValue() {
-        if (difficultyAttributes.mods.contains(GameMod.MOD_RELAX)) {
-            return 0;
-        }
 
         double speedValue = Math.pow(5 * Math.max(1, difficultyAttributes.speedDifficulty / 0.0675) - 4, 3) / 100000;
 
@@ -223,7 +221,7 @@ public class PerformanceCalculator {
         }
 
         if (difficultyAttributes.mods.contains(GameMod.MOD_RELAX)) {
-            speedValue *= 1.10;
+            speedValue *= 1.50;
         }
 
         if (difficultyAttributes.mods.contains(GameMod.MOD_HIDDEN)) {
@@ -247,9 +245,6 @@ public class PerformanceCalculator {
     }
 
     private double calculateAccuracyValue() {
-        if (difficultyAttributes.mods.contains(GameMod.MOD_RELAX)) {
-            return 0;
-        }
 
         // This percentage only considers HitCircles of any value - in this part of the calculation we focus on hitting the timing hit window.
         double betterAccuracyPercentage = 0;
