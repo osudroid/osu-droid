@@ -155,9 +155,9 @@ public class DifficultyCalculator {
         attributes.aimSliderFactor = attributes.aimDifficulty > 0 ? aimRatingNoSliders / attributes.aimDifficulty : 1;
 
         if (parameters != null && parameters.mods.contains(GameMod.MOD_RELAX)) {
-            attributes.aimDifficulty *= 0.9;
-            attributes.speedDifficulty = 0;
-            attributes.flashlightDifficulty *= 0.7;
+            attributes.aimDifficulty *= 1;
+            attributes.speedDifficulty *= 1;
+            attributes.flashlightDifficulty *= 1;
         }
 
         double baseAimPerformance = Math.pow(5 * Math.max(1, attributes.aimDifficulty / 0.0675) - 4, 3) / 100000;
