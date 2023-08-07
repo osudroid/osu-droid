@@ -65,7 +65,7 @@ public class PerformanceCalculator {
 
         if (difficultyAttributes.mods.contains(GameMod.MOD_RELAX)) {
             // Reworking the PP for Relax (may not match with osu! stable or lazer)
-            multiplier *= Math.max(2.75, 1 - 0 * effectiveMissCount);
+            multiplier *= Math.max(2.80, 0.9 - 0 * effectiveMissCount);
             
             // Graph: https://www.desmos.com/calculator/bc9eybdthb
             // We use OD13.3 as maximum since it's the value at which great hit window becomes 0.
