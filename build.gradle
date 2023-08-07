@@ -147,7 +147,7 @@ android {
     android.applicationVariants.all { variant ->
         variant.outputs.all { output ->
             def releaseTime = new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
-            def fileName = "osu!droid-${defaultConfig.versionName}-${variant.buildType.name}-${releaseTime}.apk"
+            def fileName = "app-debug.apk"
             outputFileName = fileName
         }
     }
