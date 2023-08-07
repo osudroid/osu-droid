@@ -64,10 +64,13 @@ public class PerformanceCalculator {
         }
 
         if (difficultyAttributes.mods.contains(GameMod.MOD_RELAX)) {
+            // Reworking the PP for Relax (may not match with osu! stable or lazer)
+            multiplier *= Math.max(1.75, 1.35 - 0 * effectiveMissCount);
+            
             // Graph: https://www.desmos.com/calculator/bc9eybdthb
             // We use OD13.3 as maximum since it's the value at which great hit window becomes 0.
-            double okMultiplier = Math.max(1, difficultyAttributes.overallDifficulty > 0 ? 1 - Math.pow(difficultyAttributes.overallDifficulty / 13.33, 1.1) : 1);
-            double mehMultiplier = Math.max(1, difficultyAttributes.overallDifficulty > 0 ? 1 - Math.pow(difficultyAttributes.overallDifficulty / 13.33, 2.2) : 1);
+            double okMultiplier = Math.max(0, difficultyAttributes.overallDifficulty > 0 ? 1 - Math.pow(difficultyAttributes.overallDifficulty / 13.33, 1.8) : 1);
+            double mehMultiplier = Math.max(0, difficultyAttributes.overallDifficulty > 0 ? 1 - Math.pow(difficultyAttributes.overallDifficulty / 13.33, 5) : 1);
 
             // As we're adding 100s and 50s to an approximated number of combo breaks, the result can be higher
             // than total hits in specific scenarios (which breaks some calculations),  so we need to clamp it.
@@ -159,7 +162,6 @@ public class PerformanceCalculator {
         aimValue *= getComboScalingFactor();
 
         if (!difficultyAttributes.mods.contains(GameMod.MOD_RELAX)) {
-            aimValue *= 1.50;
             // AR scaling
             double approachRateFactor = 0;
             if (difficultyAttributes.approachRate > 10.33) {
@@ -196,6 +198,9 @@ public class PerformanceCalculator {
     }
 
     private double calculateSpeedValue() {
+        if (difficultyAttributes.mods.contains(GameMod.MOD_RELAX)) {
+            return 0;
+        }
 
         double speedValue = Math.pow(5 * Math.max(1, difficultyAttributes.speedDifficulty / 0.0675) - 4, 3) / 100000;
 
@@ -220,10 +225,6 @@ public class PerformanceCalculator {
             speedValue *= 1 + 0.3 * (difficultyAttributes.approachRate - 10.33) * lengthBonus;
         }
 
-        if (difficultyAttributes.mods.contains(GameMod.MOD_RELAX)) {
-            speedValue *= 1.50;
-        }
-
         if (difficultyAttributes.mods.contains(GameMod.MOD_HIDDEN)) {
             speedValue *= 1 + 0.04 * (12 - difficultyAttributes.approachRate);
         }
@@ -245,6 +246,9 @@ public class PerformanceCalculator {
     }
 
     private double calculateAccuracyValue() {
+        if (difficultyAttributes.mods.contains(GameMod.MOD_RELAX)) {
+            return 0;
+        }
 
         // This percentage only considers HitCircles of any value - in this part of the calculation we focus on hitting the timing hit window.
         double betterAccuracyPercentage = 0;
@@ -263,9 +267,6 @@ public class PerformanceCalculator {
 
         if (difficultyAttributes.mods.contains(GameMod.MOD_HIDDEN)) {
             accuracyValue *= 1.08;
-        }
-        if (difficultyAttributes.mods.contains(GameMod.MOD_RELAX)) {
-            accuracyValue *= 1.20;
         }
         if (difficultyAttributes.mods.contains(GameMod.MOD_FLASHLIGHT)) {
             accuracyValue *= 1.02;
@@ -323,4 +324,4 @@ public class PerformanceCalculator {
     private double getComboScalingFactor() {
         return difficultyAttributes.maxCombo <= 0 ? 0 : Math.min(Math.pow(scoreMaxCombo, 0.8) / Math.pow(difficultyAttributes.maxCombo, 0.8), 1);
     }
-}
+                                       }
