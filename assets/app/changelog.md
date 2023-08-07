@@ -1,7 +1,13 @@
-Changelog for 1.6.8 Patch (July 4, 2023)
+osudroid!relax Changelog for 1.6.8 (August 7, 2023)
 =================== 
 
-## Bug fixes
+## Changes
 
-- Fixed a bug where the game may crash if gameplay is started while the in-game leaderboard is still waiting for data
-- Fixed a bug where the mod menu's "settings" button can potentially be visible outside the mod menu
+- First initial debug release
+- Reworked performance points (pp) *sort of* match with osu! stable, that's only exclusive when having the relax mod
+- Made the relax mod ranked
+- Renamed apk name from "osu!droid" to "osudroid!relax"
+
+## Note
+
+THIS IS ACTUALLY NOT AKATSUKI, but it's preferred to be akatsuki droid
