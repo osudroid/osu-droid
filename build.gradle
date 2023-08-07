@@ -89,7 +89,7 @@ android {
     buildTypes {
         debug {
             resValue "string", "app_name", "osudroid!relax-debug"
-            applicationIdSuffix '.relax.debug'
+            applicationIdSuffix '.debug'
             firebaseCrashlytics {
                 mappingFileUploadEnabled false
             }
