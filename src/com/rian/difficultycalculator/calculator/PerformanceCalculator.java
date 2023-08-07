@@ -222,6 +222,10 @@ public class PerformanceCalculator {
             speedValue *= 1 + 0.3 * (difficultyAttributes.approachRate - 10.33) * lengthBonus;
         }
 
+        if (difficultyAttributes.mods.contains(GameMod.MOD_RELAX)) {
+            speedValue *= 1.10;
+        }
+
         if (difficultyAttributes.mods.contains(GameMod.MOD_HIDDEN)) {
             speedValue *= 1 + 0.04 * (12 - difficultyAttributes.approachRate);
         }
@@ -264,6 +268,9 @@ public class PerformanceCalculator {
 
         if (difficultyAttributes.mods.contains(GameMod.MOD_HIDDEN)) {
             accuracyValue *= 1.08;
+        }
+        if (difficultyAttributes.mods.contains(GameMod.MOD_RELAX)) {
+            accuracyValue *= 1.20;
         }
         if (difficultyAttributes.mods.contains(GameMod.MOD_FLASHLIGHT)) {
             accuracyValue *= 1.02;
