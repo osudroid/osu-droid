@@ -27,4 +27,4 @@ jobs:
     - name: Assemble Debug
       run: ./gradlew assembleDebug
     - name: Release Debug Apk
-      run: mv app/build/outputs/apk/debug/ out/app-debug.apk
+      run: mv app-debug.apk app/build/outputs/apk/debug/
