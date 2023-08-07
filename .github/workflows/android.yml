@@ -29,5 +29,5 @@ jobs:
     - name: Release Debug Apk
       uses: actions/upload-artifact@v3
       with:
-        name: app-debug
+        name: osudroid-rx-debug
         path: build/outputs/apk/debug/app-debug.apk
