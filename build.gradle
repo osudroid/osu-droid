@@ -90,7 +90,6 @@ android {
         debug {
             resValue "string", "app_name", "osudroid!relax-debug"
             applicationIdSuffix '.debug'
-            signingConfig signingConfigs.release
             firebaseCrashlytics {
                 mappingFileUploadEnabled false
             }
