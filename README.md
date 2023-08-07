@@ -24,6 +24,10 @@ please take note that this is not akatsuki, but on android. i made this project 
 
 osudroid!relax is currently in development, it's updates are up to date with the osu!droid github repository, *except for the server*
 
+## Contributing
+
+Any contributions are free, and it's updated along with the debug `.apk` once done, don't worry
+
 ## License
 
 osudroid!relax is licensed under the [Apache License 2.0](https://opensource.org/licenses/Apache-2.0)
