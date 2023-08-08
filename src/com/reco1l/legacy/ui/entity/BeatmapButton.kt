@@ -32,11 +32,11 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
 
     private val stars = Array(10) { i ->
 
-        val texture = getResources().getTexture("star")
-        val sprite = Sprite(20f + texture.width * 0.5f * i, creatorInfo.y + 20f, texture)
+        Sprite(0f, 0f, getResources().getTexture("star")).also {
 
-        sprite.setScale(0.5f)
-        sprite
+            it.setScale(0.5f)
+            it.setPosition(20f + it.widthScaled * i, creatorInfo.y + 20f)
+        }
     }
 
 
