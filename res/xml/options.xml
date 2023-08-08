@@ -198,6 +198,10 @@
             android:summary="@string/opt_safe_beatmap_bg_summary" android:defaultValue="false"/>
         <CheckBoxPreference android:key="receiveAnnouncements" android:title="@string/opt_receive_announcements_title"
             android:summary="@string/opt_receive_announcements_summary" android:defaultValue="true"/>
+	<CheckBoxPreference android:key="shrinkPlayfieldBeside" android:title="@string/opt_shrink_playfield_beside_title"
+            android:summary="@string/opt_shrink_playfield_beside_summary" android:defaultValue="false"/>
+	<CheckBoxPreference android:key="useHdAssets" android:title="@string/opt_use_hd_assets_title"
+            android:summary="@string/opt_use_hd_assets_summary" android:defaultValue="false"/>
     </PreferenceScreen>
 
     <Preference android:key="update" android:title="@string/opt_update_title"
