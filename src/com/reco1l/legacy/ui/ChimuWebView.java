@@ -6,10 +6,10 @@ import android.net.Uri;
 import android.view.View;
 import com.edlplan.ui.fragment.LoadingFragment;
 import com.edlplan.ui.fragment.WebViewFragment;
+import com.reco1l.framework.extensions.StringUtil;
 import com.reco1l.framework.net.Downloader;
 import com.reco1l.framework.net.IDownloaderObserver;
 import com.reco1l.framework.net.SizeMeasure;
-import com.reco1l.framework.util.FileUtil;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import im.delight.android.webview.AdvancedWebView;
@@ -111,8 +111,8 @@ public class ChimuWebView extends WebViewFragment implements IDownloaderObserver
 
     public void startDownload(String url, String filename)
     {
-        String name = FileUtil.decodeUTF8(filename);
-        filename = FileUtil.validateChars(name);
+        String name = StringUtil.decodeUtf8(filename);
+        filename = StringUtil.forFilesystem(name);
 
         if (!filename.endsWith(FILE_EXTENSION))
         {
