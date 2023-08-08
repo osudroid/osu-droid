@@ -634,7 +634,7 @@ public class MainActivity extends BaseGameActivity implements
 
             if (data != null) {
 
-                if (data.toString().startsWith(LobbyAPI.HOST))
+                if (data.toString().startsWith(LobbyAPI.INVITE_HOST))
                     roomInviteLink = data;
 
                 if (ContentResolver.SCHEME_FILE.equals(getIntent().getData().getScheme()))

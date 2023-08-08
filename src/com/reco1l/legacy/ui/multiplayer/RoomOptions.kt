@@ -88,7 +88,7 @@ class RoomOptions : SettingsFragment()
 
                 val clipboard = requireContext().getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
 
-                val link = "${LobbyAPI.HOST}/${Multiplayer.room!!.id}/"
+                val link = "${LobbyAPI.INVITE_HOST}/${Multiplayer.room!!.id}/"
                 val data = ClipData.newPlainText("Invitation link", link)
 
                 clipboard.setPrimaryClip(data)

@@ -14,6 +14,11 @@ object LobbyAPI
     const val HOST = "https://multi.osudroid.moe"
 
     /**
+     * The invite link host.
+     */
+    const val INVITE_HOST = "https://odmp"
+
+    /**
      * Endpoint to get a rooms list.
      */
     private const val GET_ROOMS = "/getrooms"
