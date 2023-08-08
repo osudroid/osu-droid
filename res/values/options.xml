@@ -6,7 +6,10 @@
         <item>Medium</item>
 	<item>Low</item>
 	<item>Lower</item>
-        <item>Disabled</item>
+	<item>Much Lower</item>
+	<item>Insanely Lower</item>
+	<item>Lowest</item>
+        <item>Potato Mode</item>
     </string-array>
     <string-array name="bg_quality_values">
         <item>1</item>
@@ -14,7 +17,10 @@
         <item>3</item>
 	<item>4</item>
 	<item>6</item>
-        <item>0</item>
+	<item>8</item>
+	<item>10</item>
+	<item>12</item>
+        <item>14</item>
     </string-array>
     <!-- <string-array name="bg_brightness_names">
         <item>100%</item>
@@ -69,6 +75,10 @@
         <item>80%</item>
 	<item>75%</item>
 	<item>70%</item>
+	<item>65%</item>
+	<item>60%</item>
+	<item>55%</item>
+	<item>50%</item>
     </string-array>
     <string-array name="set_playfield_values">
         <item>100</item>
@@ -78,6 +88,10 @@
         <item>80</item>
 	<item>75</item>
 	<item>70</item>
+	<item>65</item>
+	<item>60</item>
+        <item>55</item>
+	<item>50</item>
     </string-array>
     <string name="opt_main">Settings</string>
 
