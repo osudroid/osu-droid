@@ -54,6 +54,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
      *
      * This is only used if [player] is the room host.
      */
+    @JvmField
     var awaitBeatmapChange = false
 
     /**
@@ -65,6 +66,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     /**
      * Indicates that the player can change its mods, its purpose is to await server changes.
      */
+    @JvmField
     var awaitModsChange = false
 
 
@@ -555,8 +557,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         getGlobal().engine.scene = this
 
-        // Updating beatmap just in case
-        onRoomBeatmapChange(room!!.beatmap)
+        // Updating beatmap just in case only if there's no await lock.
+        if (!awaitBeatmapChange)
+            onRoomBeatmapChange(room!!.beatmap)
 
         // Invalidating status
         invalidateStatus()

@@ -140,7 +140,7 @@ public class ModMenu implements IModSwitcher {
 
         if (Multiplayer.isConnected)
         {
-            RoomScene.INSTANCE.setAwaitModsChange(true);
+            RoomScene.awaitModsChange = true;
 
             // The room mods are the same as the host mods
             if (Multiplayer.isRoomHost)

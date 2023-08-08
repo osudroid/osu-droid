@@ -1201,16 +1201,20 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         if (Multiplayer.isMultiplayer)
         {
+
             // Locking host from change beatmap before the server responses to beatmapChange
-            RoomScene.INSTANCE.setAwaitBeatmapChange(true);
+            RoomScene.awaitBeatmapChange = true;
+
+            // Showing scene
             RoomScene.INSTANCE.show();
 
             if (!Multiplayer.isConnected)
                 return;
 
+            // Now we update the beatmap
             if (selectedTrack != null)
             {
-                RoomAPI.INSTANCE.changeBeatmap(
+                RoomAPI.changeBeatmap(
                         selectedTrack.getMD5(),
                         selectedTrack.getBeatmap().getTitle(),
                         selectedTrack.getBeatmap().getArtist(),
@@ -1218,8 +1222,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         selectedTrack.getMode()
                 );
             }
-            else RoomAPI.INSTANCE.changeBeatmap();
-
+            else RoomAPI.changeBeatmap();
             return;
         }
         GlobalManager.getInstance().getMainScene().show();
