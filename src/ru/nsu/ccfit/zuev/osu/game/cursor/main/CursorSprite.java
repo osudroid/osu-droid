@@ -24,7 +24,7 @@ public class CursorSprite extends Sprite implements ISliderListener {
     }
 
     public ScaleModifier clickInModifier() {
-        return new ScaleModifier(clickAnimationTime, getScaleX(), baseSize * 1.25f);
+        return new ScaleModifier(clickAnimationTime, getScaleX(), baseSize);
     }
 
     public ScaleModifier clickOutModifier() {
