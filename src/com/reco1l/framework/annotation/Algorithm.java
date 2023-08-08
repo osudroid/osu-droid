@@ -1,9 +1,9 @@
-package com.reco1l.framework.util;
+package com.reco1l.framework.annotation;
 
 import androidx.annotation.StringDef;
 
-import static com.reco1l.framework.util.Algorithm.MD5;
-import static com.reco1l.framework.util.Algorithm.SHA_256;
+import static com.reco1l.framework.annotation.Algorithm.MD5;
+import static com.reco1l.framework.annotation.Algorithm.SHA_256;
 
 /**
  * Hash algorithm constants.

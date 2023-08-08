@@ -5,35 +5,13 @@
 
 package com.reco1l.framework.extensions
 
-import com.reco1l.framework.util.Algorithm
+import com.reco1l.framework.annotation.Algorithm
 import net.lingala.zip4j.ZipFile
 import org.apache.commons.io.FileUtils
 import java.io.*
 import java.security.DigestInputStream
 import java.security.MessageDigest
 import java.util.*
-
-
-/**
- * Creates a `.txt` file and prints the String text inside it.
- *
- * @param text   The text to be printed into the file.
- */
-@Throws(IOException::class)
-fun File.printText(text: String?)
-{
-    FileWriter(this, true).use { fw ->
-
-        PrintWriter(fw).use { pw ->
-
-            if (!createNewFile())
-            {
-                pw.print("\n\n")
-            }
-            pw.println(text)
-        }
-    }
-}
 
 
 /**
