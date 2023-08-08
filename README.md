@@ -24,6 +24,8 @@ please take note that this is not akatsuki, but on android. i made this project 
 
 osudroid!relax is currently in development, it's updates are up to date with the osu!droid github repository, *except for the server*
 
+to test the latest debug builds before the release, please [click here](https://github.com/PayToUse/osudroid-rx/actions) to view the latest updates being made
+
 ## Contributing
 
 Any contributions are free, and it's updated along with the debug `.apk` once done, don't worry
