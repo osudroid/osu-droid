@@ -22,7 +22,7 @@ interface IRoomEventListener
      * Called when the player disconnects from room socket, keep in mind this is also called when the user manually
      * disconnects.
      */
-    fun onRoomDisconnect()
+    fun onRoomDisconnect(reason: String?)
 
     /**
      * Called when the connection fails.

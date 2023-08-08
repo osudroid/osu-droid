@@ -634,10 +634,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         show()
     }
 
-    override fun onRoomDisconnect()
+    override fun onRoomDisconnect(reason: String?)
     {
         clear()
-        ToastLogger.showText("Disconnected from the room", true)
+        ToastLogger.showText("Disconnected from the room${reason?.let { ": $it" } ?: "" }", true)
 
         // If player is in one of these scenes we go back.
         if (getGlobal().engine.scene != getGlobal().gameScene.scene)
