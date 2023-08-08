@@ -105,7 +105,7 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
 
         if (beatmap == null)
         {
-            trackTitle.text = "Room is changing beatmap..."
+            trackTitle.text = if (Multiplayer.isRoomHost) "Tap to select a beatmap." else "Room is changing beatmap..."
             creatorInfo.text = ""
             return
         }
