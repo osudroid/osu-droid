@@ -711,6 +711,14 @@ public class Config {
         Config.shrinkPlayfieldDownwards = shrinkPlayfieldDownwards;
     }
 
+    public static boolean isShrinkPlayfieldBeside() {
+        return shrinkPlayfieldBeside;
+    }
+
+    public static void setShrinkPlayfieldBeside(boolean shrinkPlayfieldBeside) {
+        Config.shrinkPlayfieldBeside = shrinkPlayfieldBeside;
+    }
+
     public static boolean isHideReplayMarquee() {
         return hideReplayMarquee;
     }
