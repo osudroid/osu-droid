@@ -92,10 +92,12 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
 
     fun onRoomChatMessage(player: RoomPlayer, message: String) = uiThread {
 
-        var color = if (player == Multiplayer.player) "#FC2D72" else "#FF679B"
-
-        if (player.id in DEV_UIDS)
-            color = "#9E00FF"
+        val color = when(player.id)
+        {
+            Multiplayer.player!!.id -> "#5245F7"
+            in DEV_UIDS -> "#9E00FF"
+            else -> "#F8558C"
+        }
 
         val html = "<font color=$color><b>${player.name}: </b></font> <font color=#000000>$message</font>"
         val spanned = HtmlCompat.fromHtml(html, FROM_HTML_MODE_LEGACY)
@@ -280,9 +282,9 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
     companion object
     {
         val DEV_UIDS = arrayOf<Long>(
-                51076,
-                55374,
-                307054
+                51076, // Rian3887
+                55374, // Acivev
+                307054 // Reco1l
         )
     }
 }
