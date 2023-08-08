@@ -196,8 +196,7 @@ public class ModMenu implements IModSwitcher {
         // Used to define the X offset of each button according to its visibility
         int factor = 1;
 
-        if (!Multiplayer.isMultiplayer)
-            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-nofail", GameMod.MOD_NOFAIL);
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-nofail", GameMod.MOD_NOFAIL);
 
         if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost)
             addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-halftime", GameMod.MOD_HALFTIME);
