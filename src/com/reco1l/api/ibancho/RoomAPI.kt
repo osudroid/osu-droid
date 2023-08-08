@@ -31,11 +31,6 @@ object RoomAPI
 
 
     private var socket: Socket? = null
-        set(value)
-        {
-            field = value
-            multiLog("Socket set to $value")
-        }
 
 
     // https://gist.github.com/Rian8337/ceab4d3b179cbeee7dd548cfcf145b95
@@ -220,8 +215,8 @@ object RoomAPI
 
     // Default listeners
 
-    private val onConnectionError = Listener {
-        multiLog("RECEIVED: onConnectionError -> ${it.contentToString()}")
+    private val connectError = Listener {
+        multiLog("RECEIVED: connect_error -> ${it.contentToString()}")
 
         socket?.off()
         socket = null
@@ -229,13 +224,15 @@ object RoomAPI
         roomEventListener?.onRoomConnectFail(it[0].toString())
     }
 
-    private val onDisconnect = Listener {
-        multiLog("RECEIVED: onDisconnect -> ${it.contentToString()}")
+    private val disconnect = Listener {
+        multiLog("RECEIVED: disconnect -> ${it.contentToString()}")
 
         socket?.off()
         socket = null
 
-        roomEventListener?.onRoomDisconnect()
+        val reason = it.getOrNull(0) as? String
+
+        roomEventListener?.onRoomDisconnect(reason)
     }
 
     // Emitters
@@ -290,8 +287,8 @@ object RoomAPI
             on("allPlayersScoreSubmitted", allPlayersScoreSubmitted)
             on("error", error)
 
-            on(Socket.EVENT_CONNECT_ERROR, onConnectionError)
-            on(Socket.EVENT_DISCONNECT, onDisconnect)
+            on(Socket.EVENT_CONNECT_ERROR, connectError)
+            on(Socket.EVENT_DISCONNECT, disconnect)
 
         }.connect()
     }
