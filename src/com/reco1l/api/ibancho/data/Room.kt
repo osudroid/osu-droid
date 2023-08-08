@@ -93,24 +93,6 @@ data class Room(
         get() = activePlayers.filter { it.status == PlayerStatus.READY }
 
     /**
-     * Returns an array of all players that has the current beatmap.
-     */
-    val playersWithBeatmap
-        get() = activePlayers.filter { it.status != PlayerStatus.MISSING_BEATMAP }
-
-    /**
-     * The array of players that corresponds to the BLUE team.
-     */
-    val blueTeamPlayers
-        get() = activePlayers.filter { it.team == RoomTeam.BLUE }
-
-    /**
-     * The array of players that corresponds to the RED team.
-     */
-    val redTeamPlayers
-        get() = activePlayers.filter { it.team == RoomTeam.RED }
-
-    /**
      * Get the host Player instance.
      */
     val hostPlayer
@@ -121,6 +103,13 @@ data class Room(
      */
     val playersMap
         get() = activePlayers.associateBy { it.id }
+
+    /**
+     * Get the players list of a team in a map format.
+     */
+    val teamMap
+        get() = activePlayers.groupBy { it.team }
+
 
 
     /**
