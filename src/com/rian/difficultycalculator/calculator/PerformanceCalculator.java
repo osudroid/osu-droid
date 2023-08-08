@@ -63,6 +63,11 @@ public class PerformanceCalculator {
             multiplier *= Math.max(0.9, 1 - 0.02 * effectiveMissCount);
         }
 
+        if (difficultyAttributes.mods.contains(GameMod.MOD_PRECISE)) {
+            // Making the PP get atleast a reward for Precise (because there's no effect, it just makes the game difficult)
+            multiplier *= Math.max(1.1, 1.1 - 0.05 * effectiveMissCount);
+        }
+
         if (difficultyAttributes.mods.contains(GameMod.MOD_RELAX)) {
             // Reworking the PP for Relax (may not match with osu! stable or lazer)
             multiplier *= Math.max(2.80, 0.9 - 0 * effectiveMissCount);
