@@ -301,7 +301,12 @@ object LobbyScene : Scene()
 
     private fun updateBackground()
     {
-        (getResources().getTexture("::background") ?: getResources().getTexture("menu-background")).also {
+        var texture = getResources().getTexture("menu-background")
+
+        if (!Config.isSafeBeatmapBg())
+                texture = getResources().getTexture("::background") ?: texture
+
+        texture?.also {
 
             val height = it.height * (Config.getRES_WIDTH() / it.width.toFloat())
             val width = Config.getRES_WIDTH().toFloat()
