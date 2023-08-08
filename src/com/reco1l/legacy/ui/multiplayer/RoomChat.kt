@@ -108,6 +108,8 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
 
     fun onSystemChatMessage(message: String, color: String) = uiThread {
 
+        multiLog("System message: $message")
+
         val htmlError = "<font color=$color>${message}</font>"
         val spanned = HtmlCompat.fromHtml(htmlError, FROM_HTML_MODE_LEGACY)
 
