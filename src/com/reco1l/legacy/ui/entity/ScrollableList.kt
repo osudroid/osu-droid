@@ -104,7 +104,7 @@ abstract class ScrollableList : Scene(), IScrollDetectorListener
         }
     }
 
-    override fun onScroll(pScollDetector: ScrollDetector?, pTouchEvent: TouchEvent, pDistanceX: Float, pDistanceY: Float)
+    override fun onScroll(pScrollDetector: ScrollDetector?, pTouchEvent: TouchEvent, pDistanceX: Float, pDistanceY: Float)
     {
         when (pTouchEvent.action)
         {
