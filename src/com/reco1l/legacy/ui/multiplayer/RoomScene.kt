@@ -398,7 +398,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     private fun updateBackground(path: String?)
     {
-        val texture = if (path != null) getResources().loadBackground(path) else getResources().getTexture("menu-background")
+        val texture = if (path != null && !Config.isSafeBeatmapBg())
+            getResources().loadBackground(path) else getResources().getTexture("menu-background")
 
         val height = texture.height * (Config.getRES_WIDTH() / texture.width.toFloat())
         val width = Config.getRES_WIDTH().toFloat()
