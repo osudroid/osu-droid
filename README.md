@@ -17,11 +17,13 @@ the main purpose why i renamed this to **osudroid!relax** is because i made the 
 
 the other purpose of this is just nothing, but to play using relax casually.
 
+## Features
+this build has much more features, along with the cursor parities with rimu! compared to osu!droid (no offense, i do not hate the original build)
+
 ## Note
 please take note that this is not akatsuki, but on android. i made this project for testing purposes if it works on another server. you can also [click here](https://akatsuki.gg) to visit the website if you want.
 
 ## Status
-
 osudroid!relax is currently in development, it's updates are up to date with the osu!droid github repository, *except for the server*
 
 to test the latest debug builds before the release, please [click here](https://github.com/PayToUse/osudroid-rx/actions) to view the latest updates being made
