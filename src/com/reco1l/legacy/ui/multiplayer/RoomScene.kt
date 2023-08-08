@@ -428,7 +428,21 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         titleText.text = room!!.name
 
         // Update room state text
-        stateText.text = "${room!!.activePlayers.size} / ${room!!.maxPlayers} players. ${room!!.readyPlayers.size} ${if (room!!.readyPlayers.size == 1) "player" else "players"} ready."
+        stateText.text = buildString {
+
+            append(room!!.activePlayers.size).append(" / ").append(room!!.maxPlayers).append(" players")
+            append(" - ")
+            append(room!!.readyPlayers.size).append(" ready")
+
+            // Showing the amount of players per team if it's team vs team mode.
+            if (room!!.teamMode == TEAM_VS_TEAM)
+            {
+                val team = room!!.teamMap
+
+                append(" - ")
+                append("Red Team: ").append(team[RED]?.size ?: 0).append(" vs Blue Team: ").append(team[BLUE]?.size ?: 0)
+            }
+        }
 
         // Update room info text
         infoText.text = """
