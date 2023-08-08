@@ -416,11 +416,10 @@ public enum LibraryManager {
     }
 
     public void updateLibrary(boolean force) {
-        saveToCache();
-
         if (!loadLibraryCache(force)) {
             scanLibrary();
         }
+        saveToCache();
     }
 
     private static final class LibraryCacheManager {
