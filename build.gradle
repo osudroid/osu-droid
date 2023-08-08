@@ -176,7 +176,6 @@ dependencies {
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlJavaExt:d91c53fcff'
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:d91c53fcff'
     implementation project(path: ':LibBASS')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'com.github.delight-im:Android-AdvancedWebView:v3.2.1'
