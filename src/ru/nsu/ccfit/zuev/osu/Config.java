@@ -76,7 +76,9 @@ public class Config {
         enableStoryboard,
         safeBeatmapBg,
         trianglesAnimation,
-        displayRealTimePPCounter;
+        displayRealTimePPCounter,
+        shrinkPlayfieldBeside,
+        useHdAssets;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
