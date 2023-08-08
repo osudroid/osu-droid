@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.trail;
 
-import org.anddev.andengine.entity.particle.ParticleSystem;
+    import org.anddev.andengine.entity.particle.ParticleSystem;
 import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
 import org.anddev.andengine.entity.particle.initializer.ScaleInitializer;
 import org.anddev.andengine.entity.particle.modifier.AlphaModifier;
@@ -9,23 +9,21 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorSprite;
-
 public class CursorTrail extends ParticleSystem {
+
     public CursorTrail(
             PointParticleEmitter emitter,
-            int trailAmount,
-            int longTrailRateMultiplier, int longTrailMaxMultiplier,
+            int minRate,
+            int maxRate, int max,
             float trailSize,
             TextureRegion pTextureRegion
     ) {
         super(
-            emitter,
-            Config.isUseLongTrail()? trailAmount * longTrailRateMultiplier : trailAmount,
-            Config.isUseLongTrail()? trailAmount * longTrailRateMultiplier : trailAmount,
-            Config.isUseLongTrail()? trailAmount * longTrailMaxMultiplier : trailAmount,
-            pTextureRegion
+                emitter,
+                minRate,
+                maxRate,
+                max,
+                pTextureRegion
         );
 
         fadeOut();
@@ -35,11 +33,9 @@ public class CursorTrail extends ParticleSystem {
     }
 
     private void fadeOut() {
-        float defaultLifeTime = 0.1875f;
-        float longLifeTime = defaultLifeTime * 1;
-        float lifeTime = Config.isUseLongTrail()? longLifeTime : defaultLifeTime;
+        float lifeTime = 0.075f;
 
         addParticleModifier(new ExpireModifier(lifeTime));
-        addParticleModifier(new AlphaModifier(1.0f, 0.0f, 0f, lifeTime));
+        addParticleModifier(new AlphaModifier(1f, 0f, 1f, 1f));
     }
 }
