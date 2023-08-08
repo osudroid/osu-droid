@@ -6,6 +6,7 @@ import com.reco1l.api.ibancho.IRoomEventListener
 import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.api.ibancho.data.*
 import com.reco1l.api.ibancho.data.PlayerStatus.*
+import com.reco1l.api.ibancho.data.RoomTeam.*
 import com.reco1l.api.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
@@ -236,20 +237,30 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                         return true
                     }
 
-                    // Filtering host from the array
-                    val playersWithBeatmap = room!!.playersWithBeatmap.filterNot { it == player }
-
+                    // If it's team vs team we check if there's at least one per team
                     if (room!!.teamMode == TEAM_VS_TEAM)
                     {
-                        if (room!!.redTeamPlayers.isEmpty() || room!!.blueTeamPlayers.isEmpty())
+                        val team = room!!.teamMap
+
+                        if (team[RED].isNullOrEmpty() || team[BLUE].isNullOrEmpty())
                         {
                             ToastLogger.showText("At least 1 player per team is needed to start a match!", true)
                             return true
                         }
                     }
 
-                    // Checking if all players that have the beatmap are READY.
-                    if (playersWithBeatmap.all { it.status == READY })
+                    // Filtering players that can start the match, we ignore players that doesn't have the beatmap
+                    val players = room!!.activePlayers.filter { it.status != MISSING_BEATMAP }
+
+                    // Checking if there's at least 2 players
+                    if (players.isEmpty() || players.size == 1)
+                    {
+                        ToastLogger.showText("At least 2 players need to be ready!", true)
+                        return true
+                    }
+
+                    // Checking if all players that can play are ready.
+                    if (players.all { it.status == READY })
                     {
                         getResources().getSound("menuhit")?.play()
                         RoomAPI.notifyMatchPlay()
