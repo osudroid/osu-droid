@@ -109,6 +109,8 @@ class LobbyRoomList : ScrollableList()
                     if (moved || isScroll)
                         return false
 
+                    getResources().getSound("menuclick")?.play()
+
                     if (room.isLocked)
                         showPasswordPrompt(room)
                     else

@@ -167,6 +167,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 if (!event.isActionUp || awaitStatusChange)
                     return false
 
+                getResources().getSound("menuclick")?.play()
                 awaitStatusChange = true
 
                 // Switching status
@@ -248,6 +249,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     // Checking if all players that have the beatmap are READY.
                     if (playersWithBeatmap.all { it.status == READY })
                     {
+                        getResources().getSound("menuhit")?.play()
                         RoomAPI.notifyMatchPlay()
                         return true
                     }

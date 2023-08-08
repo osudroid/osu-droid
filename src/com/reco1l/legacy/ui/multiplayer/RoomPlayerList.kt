@@ -167,6 +167,8 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
                 if (moved || isScroll)
                     return true
 
+                getResources().getSound("menuclick")?.play()
+
                 if (player != null && Multiplayer.player != player)
                 {
                     menu.player = player
