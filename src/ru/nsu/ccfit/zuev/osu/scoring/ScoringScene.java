@@ -507,7 +507,7 @@ public class ScoringScene {
         //save and upload score
         if (track != null && mapMD5 != null) {
             ResourceManager.getInstance().getSound("applause").play();
-            if (Multiplayer.isMultiplayer && !GlobalManager.getInstance().getGameScene().hasFailed) {
+            if (!Multiplayer.isMultiplayer || !GlobalManager.getInstance().getGameScene().hasFailed) {
                 ScoreLibrary.getInstance().addScore(track.getFilename(), stat, replay);
             }
 
