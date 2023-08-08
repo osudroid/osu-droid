@@ -78,7 +78,8 @@ public class Config {
         trianglesAnimation,
         displayRealTimePPCounter,
         useNightcoreOnMultiplayer,
-        videoEnabled;
+        videoEnabled,
+        deleteUnsupportedVideos;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -206,6 +207,7 @@ public class Config {
         if (beatmapPath.charAt(beatmapPath.length() - 1) != '/') {
             beatmapPath += "/";
         }
+        deleteUnsupportedVideos = prefs.getBoolean("deleteUnsupportedVideos", true);
 
         // other
         playMusicPreview = prefs.getBoolean("musicpreview", true);
@@ -787,5 +789,9 @@ public class Config {
 
     public static void setVideoEnabled(boolean value) {
         videoEnabled = value;
+    }
+
+    public static boolean isDeleteUnsupportedVideos() {
+        return deleteUnsupportedVideos;
     }
 }

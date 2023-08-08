@@ -9,6 +9,7 @@ import com.reco1l.framework.extensions.orCatch
 import org.anddev.andengine.opengl.texture.Texture
 import org.anddev.andengine.opengl.texture.TextureOptions
 import org.anddev.andengine.opengl.texture.region.TextureRegion
+import java.io.File
 import javax.microedition.khronos.opengles.GL10
 
 class VideoTexture(val source: String)
@@ -99,4 +100,15 @@ class VideoTexture(val source: String)
 
 
     fun toRegion() = TextureRegion(this, 0, 0, width, height)
+
+
+    companion object
+    {
+        /**
+         * See [MediaPlayer documentation](https://developer.android.com/guide/topics/media/platform/supported-formats)
+         */
+        val SUPPORTED_VIDEO_FORMATS = arrayOf("3gp", "mp4", "mkv", "webm")
+
+        fun isSupportedVideo(file: File): Boolean = file.extension.lowercase() in SUPPORTED_VIDEO_FORMATS
+    }
 }
