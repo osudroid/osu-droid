@@ -1,14 +1,11 @@
-osudroid!relax Changelog for 1.6.8 (August 7, 2023)
+osudroid!relax Changelog for 1.6.8 (August 8, 2023)
 =================== 
 
 ## Changes
 
-- First initial debug release
-- Reworked performance points (pp) *sort of* match with osu! stable, that's only exclusive when having the relax mod
-- Made the relax mod ranked
-- Renamed apk name from "osu!droid" to "osudroid!relax"
-- Signing Enabled (not available yet)
+- Changed the Hard Rock (HR) mod's multiplier from 1.06x to 1.12 (Stable parity)
+- Changed the fade time of the cursor trail (test, not avilable yet)
 
 ## Note
 
-THIS IS ACTUALLY NOT AKATSUKI, but it's preferred to be akatsuki droid
+This is the second update of the game, but in the future, some features coming to osu!droid in the future will be synced with this build. 
