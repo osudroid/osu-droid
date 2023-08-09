@@ -47,11 +47,12 @@ object AccessibilityDetector
 
         isIllegalServiceDetected = illegalServices.isNotEmpty()
 
-
-        if (isIllegalServiceDetected && alert == null)
-            alert = showAlert(context, illegalServices)
-        else
-            alert?.dismiss()
+        if (isIllegalServiceDetected)
+        {
+            if (alert == null)
+                alert = showAlert(context, illegalServices)
+        }
+        else alert?.dismiss()
 
     }, 0, 1000, TimeUnit.MILLISECONDS)!!
 
@@ -71,6 +72,7 @@ object AccessibilityDetector
 
         setTitle(R.string.accessibility_detector_title)
         setMessage(message)
+        setCancelable(false)
         setPositiveButton(R.string.accessibility_detector_settings) { _, _ ->
 
             val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
