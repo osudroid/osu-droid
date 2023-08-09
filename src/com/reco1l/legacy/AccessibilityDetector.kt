@@ -77,12 +77,16 @@ object AccessibilityDetector
         setTitle(R.string.accessibility_detector_title)
         setMessage(message)
         setCancelable(false)
-        setNeutralButton(R.string.accessibility_detector_settings) { _, _ ->
 
-            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-            context.startActivity(intent)
-            alert = null
-        }
+        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+
+        if (intent.resolveActivity(context.packageManager) != null)
+            setNeutralButton(R.string.accessibility_detector_settings) { _, _ ->
+
+                context.startActivity(intent)
+                alert = null
+            }
+
         setNegativeButton(R.string.accessibility_detector_exit) { alert, _ ->
 
             context.forcedExit()
