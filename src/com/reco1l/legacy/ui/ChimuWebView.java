@@ -6,16 +6,16 @@ import android.net.Uri;
 import android.view.View;
 import com.edlplan.ui.fragment.LoadingFragment;
 import com.edlplan.ui.fragment.WebViewFragment;
+import com.reco1l.framework.extensions.StringUtil;
 import com.reco1l.framework.net.Downloader;
 import com.reco1l.framework.net.IDownloaderObserver;
 import com.reco1l.framework.net.SizeMeasure;
-import com.reco1l.framework.util.FileUtil;
+import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import im.delight.android.webview.AdvancedWebView;
 import net.lingala.zip4j.ZipFile;
 import org.apache.commons.io.FilenameUtils;
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.LibraryManager;
-import ru.nsu.ccfit.zuev.osu.ToastLogger;
+import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -32,6 +32,8 @@ public class ChimuWebView extends WebViewFragment implements IDownloaderObserver
 
     public static final Uri MIRROR = Uri.parse("https://chimu.moe/en/beatmaps?mode=0");
 
+    public static final ChimuWebView INSTANCE = new ChimuWebView();
+
     public static final String FILE_EXTENSION = ".osz";
 
     //----------------------------------------------------------------------------------------------------------------//
@@ -39,7 +41,10 @@ public class ChimuWebView extends WebViewFragment implements IDownloaderObserver
     private DownloadingFragment mFragment;
 
     private AdvancedWebView mWebView;
+    
     private String mCurrentFilename;
+    
+    private final MainActivity mActivity = GlobalManager.getInstance().getMainActivity();
 
     //----------------------------------------------------------------------------------------------------------------//
 
@@ -67,7 +72,7 @@ public class ChimuWebView extends WebViewFragment implements IDownloaderObserver
         assert mWebView != null;
 
         mWebView.addPermittedHostname(MIRROR.getHost());
-        mWebView.setListener(getActivity(), new AdvancedWebView.Listener()
+        mWebView.setListener(mActivity, new AdvancedWebView.Listener()
         {
             final LoadingFragment fragment = new LoadingFragment();
 
@@ -92,36 +97,7 @@ public class ChimuWebView extends WebViewFragment implements IDownloaderObserver
             @Override
             public void onDownloadRequested(String url, String filename, String mimeType, long contentLength, String contentDisposition, String userAgent)
             {
-                String name = FileUtil.decodeUTF8(filename);
-                filename = FileUtil.validateChars(name);
-
-                if (!filename.endsWith(FILE_EXTENSION))
-                {
-                    ToastLogger.showText("Failed to start download, invalid file extension.", true);
-                    return;
-                }
-
-                mCurrentFilename = FilenameUtils.removeExtension(name);
-
-                File directory = getActivity().getExternalFilesDir(DIRECTORY_DOWNLOADS);
-                File file = new File(directory, filename + FILE_EXTENSION);
-
-                Downloader downloader = new Downloader(file, url);
-
-                mFragment = new DownloadingFragment();
-                mFragment.setDownloader(downloader, () -> {
-
-                    mFragment.getText().setVisibility(View.VISIBLE);
-                    mFragment.getText().setText(R.string.chimu_connecting);
-                    mFragment.getButton().setVisibility(View.VISIBLE);
-                    mFragment.getButton().setText(R.string.chimu_cancel);
-
-                    downloader.setObserver(ChimuWebView.this);
-                    downloader.download();
-
-                    mFragment.getButton().setOnClickListener(v -> downloader.cancel());
-                });
-                mFragment.show();
+                startDownload(url, filename);
             }
 
             @Override
@@ -131,6 +107,40 @@ public class ChimuWebView extends WebViewFragment implements IDownloaderObserver
                 startActivity(intent);
             }
         });
+    }
+
+    public void startDownload(String url, String filename)
+    {
+        String name = StringUtil.decodeUtf8(filename);
+        filename = StringUtil.forFilesystem(name);
+
+        if (!filename.endsWith(FILE_EXTENSION))
+        {
+            ToastLogger.showText("Failed to start download, invalid file extension.", true);
+            return;
+        }
+
+        mCurrentFilename = FilenameUtils.removeExtension(name);
+
+        File directory = mActivity.getExternalFilesDir(DIRECTORY_DOWNLOADS);
+        File file = new File(directory, filename + FILE_EXTENSION);
+
+        Downloader downloader = new Downloader(file, url);
+
+        mFragment = new DownloadingFragment();
+        mFragment.setDownloader(downloader, () -> {
+
+            mFragment.getText().setVisibility(View.VISIBLE);
+            mFragment.getText().setText(R.string.chimu_connecting);
+            mFragment.getButton().setVisibility(View.VISIBLE);
+            mFragment.getButton().setText(R.string.chimu_cancel);
+
+            downloader.setObserver(ChimuWebView.this);
+            downloader.download();
+
+            mFragment.getButton().setOnClickListener(v -> downloader.cancel());
+        });
+        mFragment.show();
     }
 
     //----------------------------------------------------------------------------------------------------------------//
@@ -147,7 +157,7 @@ public class ChimuWebView extends WebViewFragment implements IDownloaderObserver
     @Override
     public void onDownloadStart(Downloader downloader)
     {
-        getActivity().runOnUiThread(() -> {
+        mActivity.runOnUiThread(() -> {
             mFragment.getText().setText(StringTable.format(R.string.chimu_downloading, mCurrentFilename));
         });
     }
@@ -155,7 +165,7 @@ public class ChimuWebView extends WebViewFragment implements IDownloaderObserver
     @Override
     public void onDownloadEnd(Downloader downloader)
     {
-        getActivity().runOnUiThread(() -> {
+        mActivity.runOnUiThread(() -> {
             mFragment.getProgressBar().setVisibility(View.GONE);
             mFragment.getProgressBar().setIndeterminate(true);
             mFragment.getProgressBar().setVisibility(View.VISIBLE);
@@ -170,14 +180,14 @@ public class ChimuWebView extends WebViewFragment implements IDownloaderObserver
         {
             if (!zip.isValidZipFile())
             {
-                getActivity().runOnUiThread(mFragment::dismiss);
+                mActivity.runOnUiThread(mFragment::dismiss);
                 ToastLogger.showText("Import failed, invalid ZIP file.", true);
                 return;
             }
 
             if (!FileUtils.extractZip(file.getPath(), Config.getBeatmapPath()))
             {
-                getActivity().runOnUiThread(mFragment::dismiss);
+                mActivity.runOnUiThread(mFragment::dismiss);
                 ToastLogger.showText("Import failed, unable to extract ZIP file.", true);
                 return;
             }
@@ -188,32 +198,35 @@ public class ChimuWebView extends WebViewFragment implements IDownloaderObserver
         {
             ToastLogger.showText("Import failed: " + e.getMessage(), true);
         }
-        getActivity().runOnUiThread(mFragment::dismiss);
+        mActivity.runOnUiThread(mFragment::dismiss);
+
+        if (Multiplayer.isConnected)
+            RoomScene.INSTANCE.onRoomBeatmapChange(Multiplayer.room.getBeatmap());
     }
 
     @Override
     public void onDownloadCancel(Downloader downloader)
     {
         ToastLogger.showText("Download canceled.", true);
-        getActivity().runOnUiThread(mFragment::dismiss);
+        mActivity.runOnUiThread(mFragment::dismiss);
     }
 
     @Override
     public void onDownloadUpdate(Downloader downloader)
     {
-        String info = String.format("\n%.3f kb/s (%d%%)", downloader.getSpeed(SizeMeasure.MBPS), downloader.getProgress());
+        String info = String.format("\n%.3f kb/s (%d%%)", downloader.getSpeed(SizeMeasure.MBPS), (int) downloader.getProgress());
 
-        getActivity().runOnUiThread(() -> {
+        mActivity.runOnUiThread(() -> {
             mFragment.getText().setText(StringTable.format(R.string.chimu_downloading, mCurrentFilename) + info);
             mFragment.getProgressBar().setIndeterminate(false);
-            mFragment.getProgressBar().setProgress(downloader.getProgress());
+            mFragment.getProgressBar().setProgress((int) downloader.getProgress());
         });
     }
 
     @Override
     public void onDownloadFail(Downloader downloader)
     {
-        getActivity().runOnUiThread(mFragment::dismiss);
+        mActivity.runOnUiThread(mFragment::dismiss);
 
         if (downloader.getException() != null)
         {

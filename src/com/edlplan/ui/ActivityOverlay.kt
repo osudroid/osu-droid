@@ -40,7 +40,7 @@ object ActivityOverlay {
         if (fragmentManager != null) {
             if (displayingOverlay.contains(fragment)) {
                 displayingOverlay.remove(fragment)
-                fragmentManager!!.beginTransaction().remove(fragment).commit()
+                fragmentManager!!.beginTransaction().remove(fragment).commitAllowingStateLoss()
             }
         }
     }
@@ -56,13 +56,13 @@ object ActivityOverlay {
                 fragmentManager!!.beginTransaction()
                         .remove(fragment)
                         .add(containerId, fragment, tag)
-                        .commit()
+                        .commitAllowingStateLoss()
                 return
             }
             displayingOverlay.add(fragment)
             fragmentManager!!.beginTransaction()
                     .add(containerId, fragment, tag)
-                    .commit()
+                    .commitAllowingStateLoss()
         }
     }
 

@@ -121,4 +121,9 @@ public class BeatmapInfo implements Serializable {
     public void setPreviewTime(final int previewTime) {
         this.previewTime = previewTime;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return o == this || o instanceof BeatmapInfo && ((BeatmapInfo) o).getPath().equals(path);
+    }
 }

@@ -15,10 +15,7 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.ToastLogger;
-import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 
 public class LoadingScreen implements IUpdateHandler {
@@ -79,6 +76,9 @@ public class LoadingScreen implements IUpdateHandler {
         return scene;
     }
 
+    public void show() {
+        GlobalManager.getInstance().getEngine().setScene(scene);
+    }
 
     @SuppressLint("DefaultLocale")
     public void onUpdate(final float pSecondsElapsed) {

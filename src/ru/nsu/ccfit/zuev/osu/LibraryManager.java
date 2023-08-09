@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.os.Build;
 import org.anddev.andengine.util.Debug;
+import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
 
 public enum LibraryManager {
     INSTANCE;
-    private static final String VERSION = "library4.0";
+    private static final String VERSION = "library4.2";
     private static final List<BeatmapInfo> library = Collections.synchronizedList(new ArrayList<>());
     private Integer fileCount = 0;
     private int currentIndex = 0;
@@ -352,6 +353,31 @@ public enum LibraryManager {
         return currentIndex = 0;
     }
 
+    @Nullable
+    public TrackInfo findTrackByMD5(String md5) {
+        if (md5 == null)
+            return null;
+
+        synchronized (library) {
+            int i = library.size() - 1;
+
+            while (i >= 0) {
+                var tracks = library.get(i).getTracks();
+
+                int j = tracks.size() - 1;
+                while (j >= 0) {
+                    var track = tracks.get(j);
+
+                    if (md5.equals(track.getMD5()))
+                        return track;
+                    --j;
+                }
+                --i;
+            }
+        }
+        return null;
+    }
+
     public int findBeatmapById(int mapSetId) {
         synchronized (library) {
             for (int i = 0; i < library.size(); i++) {
@@ -390,11 +416,10 @@ public enum LibraryManager {
     }
 
     public void updateLibrary(boolean force) {
-        saveToCache();
-
         if (!loadLibraryCache(force)) {
             scanLibrary();
         }
+        saveToCache();
     }
 
     private static final class LibraryCacheManager {

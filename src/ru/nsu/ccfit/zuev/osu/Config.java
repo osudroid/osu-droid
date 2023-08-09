@@ -76,14 +76,14 @@ public class Config {
         enableStoryboard,
         safeBeatmapBg,
         trianglesAnimation,
-        displayRealTimePPCounter;
+        displayRealTimePPCounter,
+        useNightcoreOnMultiplayer;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
         errorMeter,
         spinnerStyle,
         backgroundQuality,
-        textureQuality,
         metronomeSwitch;
     
     private static float soundVolume,
@@ -112,7 +112,6 @@ public class Config {
         comboburst = prefs.getBoolean("comboburst", false);
         corovans = prefs.getBoolean("images", false);
         showFPS = prefs.getBoolean("fps", false);
-        textureQuality = prefs.getBoolean("lowtextures", false) ? 2 : 1;
         errorMeter = Integer.parseInt(prefs.getString("errormeter", "0"));
         spinnerStyle = Integer.parseInt(prefs.getString("spinnerstyle", "0"));
         showFirstApproachCircle = prefs.getBoolean("showfirstapproachcircle", false);
@@ -221,6 +220,9 @@ public class Config {
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
+
+        // Multiplayer
+        useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
 
         if(receiveAnnouncements) {
             FirebaseMessaging.getInstance().subscribeToTopic("announcements");
@@ -435,11 +437,7 @@ public class Config {
     }
 
     public static int getTextureQuality() {
-        return textureQuality;
-    }
-
-    public static void setTextureQuality(final int textureQuality) {
-        Config.textureQuality = textureQuality;
+        return 1;
     }
 
     public static float getBackgroundBrightness() {
@@ -773,4 +771,11 @@ public class Config {
         skins.put(name, path);
     }
 
+    public static boolean isUseNightcoreOnMultiplayer() {
+        return useNightcoreOnMultiplayer;
+    }
+
+    public static void setUseNightcoreOnMultiplayer(boolean value) {
+        useNightcoreOnMultiplayer = value;
+    }
 }

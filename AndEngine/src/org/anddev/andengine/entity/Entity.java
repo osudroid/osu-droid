@@ -1,9 +1,6 @@
 package org.anddev.andengine.entity;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -13,6 +10,7 @@ import org.anddev.andengine.engine.handler.UpdateHandlerList;
 import org.anddev.andengine.entity.modifier.EntityModifierList;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.IEntityModifier.IEntityModifierMatcher;
+import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.ParameterCallable;
 import org.anddev.andengine.util.SmartList;
 import org.anddev.andengine.util.Transformation;
@@ -41,8 +39,10 @@ public class Entity implements IEntity {
 	private static final ParameterCallable<IEntity> PARAMETERCALLABLE_DETACHCHILD = new ParameterCallable<IEntity>() {
 		@Override
 		public void call(final IEntity pEntity) {
-			pEntity.setParent(null);
-			pEntity.onDetached();
+			if (pEntity != null) {
+				pEntity.setParent(null);
+				pEntity.onDetached();
+			}
 		}
 	};
 
@@ -1047,8 +1047,22 @@ public class Entity implements IEntity {
 	public void onManagedDrawChildren(final GL10 pGL, final Camera pCamera) {
 		final ArrayList<IEntity> children = this.mChildren;
 		final int childCount = children.size();
-		for(int i = 0; i < childCount; i++) {
-			children.get(i).onDraw(pGL, pCamera);
+		int i = 0;
+		while (i < childCount) {
+			IEntity child;
+			try {
+				child = children.get(i);
+
+				if (child == null)
+					throw new ConcurrentModificationException();
+
+			} catch (Exception e) {
+				Debug.e("Failed to draw child at index " + i);
+				++i;
+				continue;
+			}
+			child.onDraw(pGL, pCamera);
+			++i;
 		}
 	}
 
@@ -1063,8 +1077,21 @@ public class Entity implements IEntity {
 		if(this.mChildren != null && !this.mChildrenIgnoreUpdate) {
 			final ArrayList<IEntity> entities = this.mChildren;
 			final int entityCount = entities.size();
-			for(int i = 0; i < entityCount; i++) {
-				entities.get(i).onUpdate(pSecondsElapsed);
+			int i = 0;
+			while (i < entityCount) {
+				IEntity entity;
+				try {
+					entity = entities.get(i);
+
+					if (entity == null)
+						throw new ConcurrentModificationException();
+
+				} catch (Exception e) {
+					Debug.e("Failed to update entity at index " + i);
+					break;
+				}
+				entity.onUpdate(pSecondsElapsed);
+				++i;
 			}
 		}
 	}

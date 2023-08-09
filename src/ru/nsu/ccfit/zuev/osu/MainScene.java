@@ -1,6 +1,5 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PointF;
@@ -11,6 +10,7 @@ import android.util.Log;
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
 
 import com.reco1l.legacy.ui.ChimuWebView;
+import com.reco1l.legacy.ui.MainMenu;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
@@ -58,15 +58,12 @@ import javax.microedition.khronos.opengles.GL10;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.SongProgressBar;
 import ru.nsu.ccfit.zuev.osu.game.TimingPoint;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierFactory;
-import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
-import ru.nsu.ccfit.zuev.osu.menu.SettingsMenu;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
@@ -83,11 +80,10 @@ public class MainScene implements IUpdateHandler {
     public SongProgressBar progressBar;
     public BeatmapInfo beatmapInfo;
     private Context context;
-    private Sprite logo, logoOverlay, play, options, exit, background, lastBackground;
+    private Sprite logo, logoOverlay, background, lastBackground;
     private Sprite music_nowplay;
     private Scene scene;
     private ChangeableText musicInfoText;
-    //    private ArrayList<BeatmapInfo> beatmaps;
     private Random random = new Random();
     private Rectangle[] spectrum = new Rectangle[120];
     private float[] peakLevel = new float[120];
@@ -120,12 +116,14 @@ public class MainScene implements IUpdateHandler {
     //    private int playIndex = 0;
 //    private int lastPlayIndex = -1;
     private long lastHit = 0;
-    private boolean isOnExitAnim = false;
+    public boolean isOnExitAnim = false;
 
     private boolean isMenuShowed = false;
     private boolean doMenuShow = false;
     private float showPassTime = 0, syncPassedTime = 0;
     private float menuBarX = 0, playY, optionsY, exitY;
+
+    private MainMenu menu;
 
 
     public void load(Context context) {
@@ -184,126 +182,7 @@ public class MainScene implements IUpdateHandler {
         logoOverlay.setScale(1.07f);
         logoOverlay.setAlpha(0.2f);
 
-        play = new Sprite(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 3,
-                60 + 82 - 32, ResourceManager.getInstance().getTexture("play")) {
-
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-                    setColor(0.7f, 0.7f, 0.7f);
-                    if (hitsound != null) {
-                        hitsound.play();
-                    }
-                    return true;
-                }
-                if (pSceneTouchEvent.isActionUp()) {
-                    setColor(1, 1, 1);
-                    if (isOnExitAnim) return true;
-                    GlobalManager.getInstance().getSongService().setGaming(true);
-                    if (GlobalManager.getInstance().getCamera().getRotation() == 0) {
-                        Utils.setAccelerometerSign(1);
-                    } else {
-                        Utils.setAccelerometerSign(-1);
-                    }
-//                    final Intent intent = new Intent(
-//                            MainManager.getInstance().getMainActivity(), OsuActivity.class);
-//                    MainManager.getInstance().getMainActivity().startActivity(intent);
-                    new AsyncTask() {
-                        @Override
-                        public void run() {
-                            GlobalManager.getInstance().getEngine().setScene(new LoadingScreen().getScene());
-                            GlobalManager.getInstance().getMainActivity().checkNewSkins();
-                            GlobalManager.getInstance().getMainActivity().checkNewBeatmaps();
-                            if (!LibraryManager.INSTANCE.loadLibraryCache(true)) {
-                                LibraryManager.INSTANCE.scanLibrary();
-                                System.gc();
-                            }
-                            GlobalManager.getInstance().getSongMenu().reload();
-                            /* To fixed skin load bug in some Android 10
-                            if (Build.VERSION.SDK_INT >= 29) {
-                                String skinNow = Config.getSkinPath();
-                                ResourceManager.getInstance().loadSkin(skinNow);
-                            } */
-                        }
-
-                        @Override
-                        public void onComplete() {
-                            musicControl(MusicOption.PLAY);
-                            GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getSongMenu().getScene());
-                            GlobalManager.getInstance().getSongMenu().select();
-                        }
-                    }.execute();
-                    return true;
-                }
-                return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX,
-                        pTouchAreaLocalY);
-            }
-
-        };
-
-        options = new Sprite(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 3,
-                60 + 3 * 82 - 64, ResourceManager.getInstance().getTexture(
-                "options")) {
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-                    setColor(0.7f, 0.7f, 0.7f);
-                    if (hitsound != null) {
-                        hitsound.play();
-                    }
-                    return true;
-                }
-                if (pSceneTouchEvent.isActionUp()) {
-                    setColor(1, 1, 1);
-                    if (isOnExitAnim) return true;
-                    GlobalManager.getInstance().getSongService().setGaming(true);
-                    // GlobalManager.getInstance().getSongService().setIsSettingMenu(true);
-                    /* final Intent intent = new Intent(GlobalManager.getInstance().getMainActivity(),
-                            SettingsMenu.class);
-                    GlobalManager.getInstance().getMainActivity().startActivity(intent); */
-                    GlobalManager.getInstance().getMainActivity().runOnUiThread(() ->
-                        new SettingsMenu().show());
-                    return true;
-                }
-                return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX,
-                        pTouchAreaLocalY);
-            }
-        };
-
-        exit = new Sprite(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 3, 60
-                + 5 * 82 - 128 + 32, ResourceManager.getInstance().getTexture(
-                "exit")) {
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-                    setColor(0.7f, 0.7f, 0.7f);
-                    // if (hitsound != null) {
-                    //     hitsound.play();
-                    // }
-                    return true;
-                }
-                if (pSceneTouchEvent.isActionUp()) {
-                    if (GlobalManager.getInstance().getCamera().getRotation() == 0) {
-                        Utils.setAccelerometerSign(1);
-                    } else {
-                        Utils.setAccelerometerSign(-1);
-                    }
-                    setColor(1, 1, 1);
-
-                    showExitDialog();
-
-                    return true;
-                }
-                return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX,
-                        pTouchAreaLocalY);
-            }
-        };
+        menu = new MainMenu(this);
 
         final Text author = new Text(10, 530, ResourceManager
                 .getInstance().getFont("font"),
@@ -560,7 +439,7 @@ public class MainScene implements IUpdateHandler {
                 {
                     setColor(1, 1, 1);
                     musicControl(MusicOption.STOP);
-                    new ChimuWebView().show();
+                    ChimuWebView.INSTANCE.show();
                     return true;
                 }
 
@@ -568,31 +447,33 @@ public class MainScene implements IUpdateHandler {
             }
         };
 
-        play.setAlpha(0f);
-        options.setAlpha(0f);
-        exit.setAlpha(0f);
+        menu.getFirst().setAlpha(0f);
+        menu.getSecond().setAlpha(0f);
+        menu.getThird().setAlpha(0f);
 
         logo.setPosition((Config.getRES_WIDTH() - logo.getWidth()) / 2, (Config.getRES_HEIGHT() - logo.getHeight()) / 2);
         logoOverlay.setPosition((Config.getRES_WIDTH() - logo.getWidth()) / 2, (Config.getRES_HEIGHT() - logo.getHeight()) / 2);
-        options.setScale(Config.getRES_WIDTH() / 1024f);
-        play.setScale(Config.getRES_WIDTH() / 1024f);
-        exit.setScale(Config.getRES_WIDTH() / 1024f);
-        options.setPosition(options.getX(), (Config.getRES_HEIGHT() - options.getHeight()) / 2);
-        play.setPosition(play.getX(), options.getY() - play.getHeight() - 40 * Config.getRES_WIDTH() / 1024f);
-        exit.setPosition(exit.getX(), options.getY() + options.getHeight() + 40 * Config.getRES_WIDTH() / 1024f);
 
-        menuBarX = play.getX();
-        playY = play.getScaleY();
-        exitY = exit.getScaleY();
+        menu.getSecond().setScale(Config.getRES_WIDTH() / 1024f);
+        menu.getFirst().setScale(Config.getRES_WIDTH() / 1024f);
+        menu.getThird().setScale(Config.getRES_WIDTH() / 1024f);
+
+        menu.getSecond().setPosition(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 3f, (Config.getRES_HEIGHT() - menu.getSecond().getHeight()) / 2);
+        menu.getFirst().setPosition(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 3f, menu.getSecond().getY() - menu.getFirst().getHeight() - 40 * Config.getRES_WIDTH() / 1024f);
+        menu.getThird().setPosition(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 3f, menu.getSecond().getY() + menu.getSecond().getHeight() + 40 * Config.getRES_WIDTH() / 1024f);
+
+        menuBarX = menu.getFirst().getX();
+        playY = menu.getFirst().getScaleY();
+        exitY = menu.getThird().getScaleY();
 
         scene.attachChild(lastBackground, 0);
         scene.attachChild(bgTopRect);
         scene.attachChild(bgbottomRect);
         scene.attachChild(author);
         scene.attachChild(yasonline);
-        scene.attachChild(play);
-        scene.attachChild(options);
-        scene.attachChild(exit);
+
+        menu.attachButtons();
+
         scene.attachChild(logo);
         scene.attachChild(logoOverlay);
         scene.attachChild(music_nowplay);
@@ -755,39 +636,43 @@ public class MainScene implements IUpdateHandler {
             for (int i = 0; i < spectrum.length; i++) {
                 spectrum[i].registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2, Config.getRES_WIDTH() / 3, EaseExponentialOut.getInstance()));
             }
-            play.registerEntityModifier(new ParallelEntityModifier(
+            menu.getFirst().registerEntityModifier(new ParallelEntityModifier(
                     new MoveXModifier(0.5f, menuBarX - 100, menuBarX, EaseElasticOut.getInstance()),
                     new org.anddev.andengine.entity.modifier.AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
-            options.registerEntityModifier(new ParallelEntityModifier(
+            menu.getSecond().registerEntityModifier(new ParallelEntityModifier(
                     new MoveXModifier(0.5f, menuBarX - 100, menuBarX, EaseElasticOut.getInstance()),
                     new org.anddev.andengine.entity.modifier.AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
-            exit.registerEntityModifier(new ParallelEntityModifier(
+            menu.getThird().registerEntityModifier(new ParallelEntityModifier(
                     new MoveXModifier(0.5f, menuBarX - 100, menuBarX, EaseElasticOut.getInstance()),
                     new org.anddev.andengine.entity.modifier.AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
-            scene.registerTouchArea(play);
-            scene.registerTouchArea(options);
-            scene.registerTouchArea(exit);
+            scene.registerTouchArea(menu.getFirst());
+            scene.registerTouchArea(menu.getSecond());
+            scene.registerTouchArea(menu.getThird());
             isMenuShowed = true;
         }
 
         if (doMenuShow == true && isMenuShowed == true) {
             if (showPassTime > 10000f) {
-                scene.unregisterTouchArea(play);
-                scene.unregisterTouchArea(options);
-                scene.unregisterTouchArea(exit);
-                play.registerEntityModifier(new ParallelEntityModifier(
+
+                menu.showFirstMenu();
+                scene.unregisterTouchArea(menu.getFirst());
+                scene.unregisterTouchArea(menu.getSecond());
+                scene.unregisterTouchArea(menu.getThird());
+
+                menu.getFirst().registerEntityModifier(new ParallelEntityModifier(
                         new MoveXModifier(1f, menuBarX, menuBarX - 50, EaseExponentialOut.getInstance()),
                         new org.anddev.andengine.entity.modifier.AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
-                options.registerEntityModifier(new ParallelEntityModifier(
+                menu.getSecond().registerEntityModifier(new ParallelEntityModifier(
                         new MoveXModifier(1f, menuBarX, menuBarX - 50, EaseExponentialOut.getInstance()),
                         new org.anddev.andengine.entity.modifier.AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
-                exit.registerEntityModifier(new ParallelEntityModifier(
+                menu.getThird().registerEntityModifier(new ParallelEntityModifier(
                         new MoveXModifier(1f, menuBarX, menuBarX - 50, EaseExponentialOut.getInstance()),
                         new org.anddev.andengine.entity.modifier.AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
+
                 logo.registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2,
                         EaseBounceOut.getInstance()));
-                logoOverlay.registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2,
-                        EaseBounceOut.getInstance()));
+                logoOverlay.registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, EaseBounceOut.getInstance()));
+
                 for (int i = 0; i < spectrum.length; i++) {
                     spectrum[i].registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3, Config.getRES_WIDTH() / 2, EaseBounceOut.getInstance()));
                 }
@@ -970,6 +855,7 @@ public class MainScene implements IUpdateHandler {
         if (trackInfos != null && trackInfos.size() > 0) {
             int trackIndex = random.nextInt(trackInfos.size());
             selectedTrack = trackInfos.get(trackIndex);
+            GlobalManager.getInstance().setSelectedTrack(selectedTrack);
 
             if (selectedTrack.getBackground() != null) {
                 try {
@@ -1068,13 +954,13 @@ public class MainScene implements IUpdateHandler {
             wakeLock.release();
         }
 
-        scene.unregisterTouchArea(play);
-        scene.unregisterTouchArea(options);
-        scene.unregisterTouchArea(exit);
+        scene.unregisterTouchArea(menu.getFirst());
+        scene.unregisterTouchArea(menu.getSecond());
+        scene.unregisterTouchArea(menu.getThird());
 
-        play.setAlpha(0);
-        options.setAlpha(0);
-        exit.setAlpha(0);
+        menu.getFirst().setAlpha(0);
+        menu.getSecond().setAlpha(0);
+        menu.getThird().setAlpha(0);
 
         //ResourceManager.getInstance().loadSound("seeya", "sfx/seeya.wav", false).play();
         //Allow customize Seeya Sounds from Skins
