@@ -30,9 +30,6 @@ object AccessibilityDetector
     private var alert: AlertDialog? = null
 
 
-    private var isExiting = false
-
-
     @JvmStatic
     fun start(context: MainActivity) = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate({
 
@@ -52,9 +49,9 @@ object AccessibilityDetector
 
         context.runOnUiThread {
 
-            if (isIllegalServiceDetected && !isExiting)
+            if (isIllegalServiceDetected)
             {
-                if (alert == null || !alert!!.isShowing)
+                if (alert == null)
                     alert = showAlert(context, illegalServices)
 
                 return@runOnUiThread
@@ -87,12 +84,11 @@ object AccessibilityDetector
 
             val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
             context.startActivity(intent)
-
+            alert = null
         }
         setNegativeButton(R.string.accessibility_detector_exit) { alert, _ ->
 
             context.forcedExit()
-            isExiting = true
             alert.dismiss()
         }
 
