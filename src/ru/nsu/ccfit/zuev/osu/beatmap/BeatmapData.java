@@ -263,6 +263,7 @@ public class BeatmapData {
             info.setTags(metadata.tags);
         }
 
+        track.setMD5(md5);
         track.setCreator(metadata.creator);
         track.setMode(metadata.version);
         track.setPublicName(metadata.artist + " - " + metadata.title);

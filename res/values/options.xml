@@ -36,6 +36,45 @@
         <item>2</item>
         <item>0</item>
     </string-array>
+
+    <!--Multiplayer-->
+
+    <string-array name="team_versus_names">
+        <item>Head to Head</item>
+        <item>Team vs Team</item>
+    </string-array>
+
+    <string-array name="team_versus_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <string-array name="win_condition_names">
+        <item>Score V1</item>
+        <item>Accuracy</item>
+        <item>Max combo</item>
+        <item>Score V2</item>
+    </string-array>
+
+    <string-array name="win_condition_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="team_names">
+        <item>Red</item>
+        <item>Blue</item>
+    </string-array>
+
+    <string-array name="team_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <!--End multiplayer-->
+
     <string-array name="spinner_style_names">
         <item>Modern</item>
         <item>Classical</item>
@@ -337,4 +376,9 @@
 
     <string name="opt_display_realtime_pp_counter_title">Display real-time PP counter</string>
     <string name="opt_display_realtime_pp_counter_summary">Displays a real-time PP counter during gameplay. May increase loading time significantly, especially in long beatmaps</string>
+
+    <!--Video support-->
+    <string name="opt_delete_unsupported_videos_title">Delete unsupported videos</string>
+    <string name="opt_delete_unsupported_videos_summary">Delete videos with unsupported formats (.avi and .flv)</string>
+
 </resources>

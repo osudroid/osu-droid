@@ -130,6 +130,10 @@ public class AnimSprite extends Sprite {
         }
     }
 
+    public int getFrame() {
+        return frame;
+    }
+
     public void setAnimTime(float animTime) {
         this.animTime = animTime;
         updateFrame();

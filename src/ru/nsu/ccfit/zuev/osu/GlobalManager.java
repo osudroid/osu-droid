@@ -43,7 +43,6 @@ public class GlobalManager {
     }
 
     public void setSelectedTrack(TrackInfo selectedTrack) {
-        if (selectedTrack == null) return;
         this.selectedTrack = selectedTrack;
     }
 

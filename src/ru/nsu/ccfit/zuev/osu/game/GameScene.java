@@ -1,9 +1,9 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
+import android.os.Build;
 import android.os.SystemClock;
 
-import com.dgsrz.bancho.game.sprite.VideoSprite;
 import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.ProxySprite;
@@ -12,6 +12,12 @@ import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
 import com.edlplan.ui.fragment.InGameSettingMenu;
+import com.reco1l.api.ibancho.RoomAPI;
+import com.reco1l.framework.lang.Execution;
+import com.reco1l.framework.lang.execution.Async;
+import com.reco1l.legacy.engine.VideoSprite;
+import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.rian.difficultycalculator.attributes.TimedDifficultyAttributes;
 import com.rian.difficultycalculator.beatmap.hitobject.HitObject;
 import com.rian.difficultycalculator.beatmap.hitobject.HitObjectWithDuration;
@@ -44,14 +50,7 @@ import org.anddev.andengine.util.modifier.IModifier;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Queue;
+import java.util.*;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -90,6 +89,7 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.PauseMenu;
+import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem;
 import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
@@ -140,7 +140,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private BreakAnimator breakAnimator;
     private ScoreBar scorebar;
     private SongProgressBar progressBar;
-    private DuringGameScoreBoard scoreBoard;
+    public DuringGameScoreBoard scoreBoard;
     private HitErrorMeter hitErrorMeter;
     private Metronome metronome;
     private boolean isFirst = true;
@@ -150,7 +150,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private float overallDifficulty;
     private float rawDrain;
     private float drain;
-    private StatisticV2 stat;
+    public StatisticV2 stat;
     private boolean gameStarted;
     private float totalOffset;
     //private IMusicPlayer music = null;
@@ -171,15 +171,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private String replayFile;
     private float avgOffset;
     private int offsetRegs;
-    private boolean kiai = false;
     private Rectangle kiaiRect = null;
     private Sprite bgSprite = null;
     private Sprite unranked;
     private ChangeableText replayText;
     private String title, artist, version;
     private ComboBurst comboBurst;
-    private VideoSprite mVideo = null;
-    private Sprite[] ScoreBoardSprite;
     private int failcount = 0;
     private float lastObjectHitTime = 0;
     private SliderPath[] sliderPaths = null;
@@ -196,6 +193,39 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private long previousFrameTime;
 
     private boolean mIsAuto;
+
+    // Video support
+
+    /**The video sprite*/
+    private VideoSprite video;
+
+    /**Video offset aka video start time in seconds*/
+    private float videoOffset;
+
+    /**Whether the video has started*/
+    private boolean videoStarted;
+
+    // Multiplayer
+
+    /**Count of times that user pressed the back button*/
+    private int backPressCount = 0;
+
+    /**Indicates the last time that the user pressed the back button, used to reset {@code backPressCount}*/
+    private float lastTimeBackPress = -1f;
+
+    /**Indicates that the player has failed and the score shouldn't be submitted*/
+    public boolean hasFailed = false;
+
+    /**Indicates that the player has requested skip*/
+    private boolean isSkipRequested = false;
+
+    /**Real time elapsed in milliseconds since the game has started*/
+    private long realTimeElapsed = 0;
+
+    /**Last score data chunk sent to server, used to determine if the data was changed.*/
+    private ScoreBoardItem lastScoreSent = null;
+
+    // End multiplayer
 
     public GameScene(final Engine engine) {
         this.engine = engine;
@@ -219,6 +249,40 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private void setBackground() {
         boolean bgset = false;
         bgSprite = null;
+
+
+        if (video != null) {
+            video.release();
+            video = null;
+        }
+
+        if (Config.isVideoEnabled() && beatmapData.events.videoFilename != null
+                // Unfortunately MediaPlayer API doesn't allow to change playback speed on APIs < 23, so in that case
+                // the video will not be shown.
+                && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M || timeMultiplier == 1.0f)) {
+            try {
+                videoStarted = false;
+                videoOffset = beatmapData.events.videoStartTime / 1000f;
+
+                video = new VideoSprite(lastTrack.getBeatmap().getPath() + "/" + beatmapData.events.videoFilename, engine);
+
+                var factor = Config.getRES_HEIGHT() / video.getHeight();
+                float brightness = Config.getBackgroundBrightness();
+
+                video.setPosition((Config.getRES_WIDTH() - video.getWidth()) / 2f, (Config.getRES_HEIGHT() - video.getHeight()) / 2f);
+                video.setColor(brightness, brightness, brightness);
+                video.setScale(factor);
+                video.setAlpha(0f);
+
+                bgSprite = video;
+                scene.setBackground(new SpriteBackground(bgSprite));
+                return;
+            } catch (Exception e) {
+                e.printStackTrace();
+                video = null;
+            }
+        }
+
         if (storyboardSprite != null) {
             if (storyboardSprite.isStoryboardAvailable()) {
                 storyboardSprite.setBrightness(Config.getBackgroundBrightness());
@@ -277,17 +341,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return false;
         }
 
-//        try {
-//            float height = 720;
-//            height *= 1. * Config.getRES_WIDTH() / 1280;
-//            mVideo = new VideoSprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
-//            mVideo.setDataSource(Environment.getExternalStorageDirectory().getPath() + "/PV.mp4");
-//            mVideo.setAlpha(0f);
-//            // mVideo.play();
-//        } catch (IOException e) {
-//            Log.i("Load avi", e.getMessage());
-//        }
-
         // TODO skin manager
         SkinManager.getInstance().loadBeatmapSkin(beatmapData.getFolder());
 
@@ -313,12 +366,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 throw new FileNotFoundException(musicFile.getPath());
             }
 
-            /*
-            if (musicFile.getName().endsWith(".ogg")) {
-                totalOffset += Config.getOggOffset();
-            } */
-
-            //music = new BassAudioPlayer(musicFile.getPath());
             filePath = musicFile.getPath();
 
         } catch (final Exception e) {
@@ -331,22 +378,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         artist = beatmapData.metadata.artist;
         version = beatmapData.metadata.version;
 
-        // r = 54.42 - 4.48 * cs
-        // Reading beatmap settings
-
-        //TextureRegion appcircleTex = ResourceManager.getInstance().getTexture("approachcircle");
 
         scale = (float) ((Config.getRES_HEIGHT() / 480.0f)
                 * (54.42 - beatmapData.difficulty.cs * 4.48)
                 * 2 / GameObjectSize.BASE_OBJECT_SIZE)
                 + 0.5f * Config.getScaleMultiplier();
 
-/*        scale = (10 - Float.parseFloat(beatmapData.getData("Difficulty",
-                "CircleSize")))
-                * 0.125f
-                + 0.625f
-                + 0.125f
-                * Config.getScaleMultiplier();*/
 
         float rawApproachRate = beatmapData.difficulty.ar;
         approachRate = (float) GameHelper.ar2ms(rawApproachRate) / 1000f;
@@ -407,22 +444,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GameHelper.setHalfTime(true);
             GameHelper.setTimeMultiplier(4 / 3f);
         }
-
-        /*
-        if (ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME) || ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE)) {
-//            approachRate = approachRate * 2 / 3;
-//            overallDifficulty = (float) GameHelper.ms2od(GameHelper.od2ms(overallDifficulty) * 2 / 3);
-            GameHelper.setTimeMultiplier(2 / 3f);
-        } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_HALFTIME)) {
-//            approachRate = approachRate * 4 / 3;
-//            overallDifficulty = (float) GameHelper.ms2od(GameHelper.od2ms(overallDifficulty) * 4 / 3);
-            GameHelper.setTimeMultiplier(4 / 3f);
-        } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_SPEEDUP)) {
-            GameHelper.setTimeMultiplier(4 / 5f);
-        } else {
-            GameHelper.setTimeMultiplier(1f);
-        }
-        */
 
         if (ModMenu.getInstance().getMod().contains(GameMod.MOD_REALLYEASY)) {
             scale += 0.125f;
@@ -564,7 +585,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         offsetRegs = 0;
 
         File trackFile = new File(track.getFilename());
-        trackMD5 = beatmapData.getMD5();
+        trackMD5 = track.getMD5();
         replaying = false;
         replay = new Replay();
         replay.setObjectCount(objects.size());
@@ -577,20 +598,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 return false;
             } else
                 replay.countMarks(overallDifficulty);
-        //} else if (!OnlineManager.getInstance().isStayOnline()) {
-        //    replay = null;
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO)) {
             replay = null;
         }
-        /*
-        else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO) ||
-                ModMenu.getInstance().getMod().contains(GameMod.MOD_RELAX) ||
-                ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTOPILOT)) {
-            replay = null;
-        }
-         */
-        //TODO fix replays ^^
-        // replay = null;
 
         //TODO online
         if (!replaying)
@@ -600,16 +610,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             storyboardSprite.loadStoryboard(track.getFilename());
         }
 
-
         System.gc();
-
         GameObjectPool.getInstance().preload();
-
-       /* try {
-            music.prepare();
-
-        } catch (final Exception e) {
-        }*/
 
         ppText = null;
         if (Config.isDisplayRealTimePPCounter()) {
@@ -636,9 +638,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             stackNotes();
             calculateAllSliderPaths();
         }
+
+        // Resetting variables before starting the game.
+        Multiplayer.clearLeaderboard();
+        hasFailed = false;
+        backPressCount = 0;
+        lastTimeBackPress = -1f;
+        isSkipRequested = false;
+        realTimeElapsed = 0;
+        lastScoreSent = null;
+
         paused = false;
         gameStarted = false;
-
         return true;
     }
 
@@ -719,7 +730,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private void prepareScene() {
         scene.setOnSceneTouchListener(this);
-        // bgScene.attachChild(mVideo);
         if (GlobalManager.getInstance().getCamera() instanceof SmoothCamera) {
             SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
             camera.setZoomFactorDirect(Config.getPlayfieldSize());
@@ -846,6 +856,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         secPassed = -leadIn / 1000f;
         if (secPassed > -1) {
             secPassed = -1;
+        }
+
+        if (videoOffset < 0) {
+            secPassed = Math.min(videoOffset, secPassed);
         }
 
         if (!objects.isEmpty()) {
@@ -1222,7 +1236,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             timeOffset += 0.25f;
         }
 
-        kiai = false;
         kiaiRect = new Rectangle(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT());
         kiaiRect.setVisible(false);
@@ -1266,26 +1279,24 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             fgScene.attachChild(flashlightSprite, 0);
         }
 
-/*        PointF point1 = Utils.trackToRealCoords(new PointF(0, 0));
-        PointF point2 = Utils.trackToRealCoords(new PointF(0, Constants.MAP_HEIGHT));
-        PointF point3 = Utils.trackToRealCoords(new PointF(Constants.MAP_WIDTH, Constants.MAP_HEIGHT));
-        PointF point4 = Utils.trackToRealCoords(new PointF(Constants.MAP_WIDTH, 0));
+        // Returning here to avoid start the game instantly
+        if (Multiplayer.isMultiplayer)
+        {
+            RoomAPI.INSTANCE.notifyBeatmapLoaded();
+            return;
+        }
 
-        Line line1 = new Line(point1.x, point1.y, point2.x, point2.y);
-        line1.setColor(255 / 255f, 0, 0);
-        bgScene.attachChild(line1);
+        leadOut = 0;
+        musicStarted = false;
+        engine.setScene(scene);
+        scene.registerUpdateHandler(this);
+    }
 
-        Line line2 = new Line(point2.x, point2.y, point3.x, point3.y);
-        line2.setColor(255 / 255f, 0, 0);
-        bgScene.attachChild(line2);
+    // This is used by the multiplayer system, is called once all players in the room completes beatmap loading.
+    public void start() {
 
-        Line line3 = new Line(point3.x, point3.y, point4.x, point4.y);
-        line3.setColor(255 / 255f, 0, 0);
-        bgScene.attachChild(line3);
-
-        Line line4 = new Line(point4.x, point4.y, point1.x, point1.y);
-        line4.setColor(255 / 255f, 0, 0);
-        bgScene.attachChild(line4);*/
+        if (skipTime <= 1)
+            RoomScene.INSTANCE.getChat().dismiss();
 
         leadOut = 0;
         musicStarted = false;
@@ -1324,6 +1335,40 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
             secPassed += dt;
         }
+
+        if (Multiplayer.isMultiplayer)
+        {
+            realTimeElapsed += (long) (pSecondsElapsed * 1000);
+
+            // Sending statistics data every 3000ms if data was changed
+            if (realTimeElapsed > 3000)
+            {
+                realTimeElapsed %= 3000;
+
+                if (Multiplayer.isConnected)
+                {
+                    var liveScore = stat.toBoardItem();
+
+                    if (!Objects.equals(liveScore, lastScoreSent))
+                    {
+                        lastScoreSent = liveScore;
+
+                        Execution.asyncIgnoreExceptions(() -> {
+                            RoomAPI.submitLiveScore(lastScoreSent.toJson());
+                            return null;
+                        });
+                    }
+                }
+            }
+
+            // Setting a delay of 300ms for the player to tap back button again.
+            if (lastTimeBackPress > 0 && realTimeElapsed - lastTimeBackPress > 300)
+            {
+                lastTimeBackPress = -1f;
+                backPressCount = 0;
+            }
+        }
+
         float gtime;
         if (soundTimingPoint == null || soundTimingPoint.getTime() > secPassed) {
             gtime = 0;
@@ -1458,11 +1503,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if(GameHelper.isFlashLight()){
                     flashlightSprite.onBreak(true);
                 }
+
+                if (Multiplayer.isConnected)
+                    RoomScene.INSTANCE.getChat().show();
+
                 if(scorebar != null) scorebar.setVisible(false);
                 breakPeriods.poll();
             }
         }
         if (breakAnimator.isOver()) {
+
+            // Ensure the chat is dismissed if it's still shown
+            RoomScene.INSTANCE.getChat().dismiss();
+
             gameStarted = true;
             if(scorebar != null) scorebar.setVisible(true);
             if(GameHelper.isFlashLight()){
@@ -1492,9 +1545,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     stat.changeHp(1f);
                 }
                 else {
-                    gameover();
+                    if (Multiplayer.isMultiplayer)
+                    {
+                        if (!hasFailed)
+                            ToastLogger.showText("You failed but you can continue playing.", false);
+                        hasFailed = true;
+                    } else {
+                        gameover();
+                        return;
+                    }
                 }
-                return;
             }
         }
 
@@ -1607,7 +1667,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        if (secPassed >= 0 && musicStarted == false) {
+        if (video != null && secPassed >= videoOffset)
+        {
+            if (!videoStarted) {
+                video.getTexture().play();
+                video.getTexture().setPlaybackSpeed(timeMultiplier);
+                videoStarted = true;
+            }
+
+            if (video.getAlpha() < 1.0f)
+                video.setAlpha(Math.min(video.getAlpha() + 0.03f, 1.0f));
+        }
+
+        if (secPassed >= 0 && !musicStarted) {
             GlobalManager.getInstance().getSongService().play();
             GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
             totalLength = GlobalManager.getInstance().getSongService().getLength();
@@ -1615,15 +1687,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             secPassed = 0;
             return;
         }
-//        if (secPassed >= 0) {
-//            if (!mVideo.getIsPlaying()) {
-//                mVideo.play();
-//            }
-//            if (mVideo.getAlpha() < 1.0f) {
-//                float alpha = mVideo.getAlpha();
-//                mVideo.setAlpha(Math.min(alpha + 0.03f, 1.0f));
-//            }
-//        }
 
         boolean shouldBePunished = false;
 
@@ -1880,12 +1943,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     }
 
                     EdExtensionHelper.onEndGame(lastTrack, stat);
-                    if (storyboardSprite != null) {
-                        storyboardSprite.releaseStoryboard();
-                        storyboardSprite = null;
-                        storyboardOverlayProxy.setDrawProxy(null);
-                    }
 
+                    if (Multiplayer.isConnected)
+                    {
+                        Multiplayer.log("Match ended, moving to results scene.");
+                        RoomScene.INSTANCE.getChat().show();
+
+                        Execution.asyncIgnoreExceptions(() -> {
+                            RoomAPI.submitFinalScore(stat.toJson());
+                            return null;
+                        });
+
+                        ToastLogger.showText("Loading room statistics...", false);
+                    }
                     scoringScene.load(stat, lastTrack, GlobalManager.getInstance().getSongService(), replayFile, trackMD5, null);
                 }
                 GlobalManager.getInstance().getSongService().setVolume(0.2f);
@@ -1894,66 +1964,95 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 engine.setScene(oldScene);
             }
 
+            if (storyboardSprite != null) {
+                storyboardSprite.releaseStoryboard();
+                storyboardSprite = null;
+                storyboardOverlayProxy.setDrawProxy(null);
+            }
+
+            if (video != null) {
+                video.release();
+                video = null;
+                videoStarted = false;
+            }
+
         } else if (objects.isEmpty() && activeObjects.isEmpty()) {
             gameStarted = false;
             leadOut += dt;
         }
 
-        // TODO skip button
         if (secPassed > skipTime - 1f && skipBtn != null) {
+            RoomScene.INSTANCE.getChat().dismiss();
             skipBtn.detachSelf();
             skipBtn = null;
         } else if (skipBtn != null) {
             for (final Cursor c : cursors) {
-                if (c.mouseDown == true
+                if (c.mouseDown
                         && Utils.distance(
                         c.mousePos,
                         new PointF(Config.getRES_WIDTH(), Config
                                 .getRES_HEIGHT())) < 250) {
 
-                    /*if (music.getStatus() != Status.PLAYING) {
-                        music.play();
-                        music.setVolume(Config.getBgmVolume());
-                        totalLength = music.getLength();
-                        musicStarted = true;
-                    }*/
-                    if (GlobalManager.getInstance().getSongService().getStatus() != Status.PLAYING) {
-                        GlobalManager.getInstance().getSongService().play();
-                        GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
-                        totalLength = GlobalManager.getInstance().getSongService().getLength();
-                        musicStarted = true;
+                    if (Multiplayer.isConnected)
+                    {
+                        if (!isSkipRequested)
+                        {
+                            isSkipRequested = true;
+                            ResourceManager.getInstance().getSound("menuhit").play();
+                            skipBtn.setVisible(false);
+
+                            Async.run(RoomAPI.INSTANCE::requestSkip);
+                            ToastLogger.showText("Skip requested", false);
+                        }
+                        return;
                     }
-                    ResourceManager.getInstance().getSound("menuhit").play();
-                    final float difference = skipTime - 0.5f - secPassed;
-                    for (final GameObject obj : passiveObjects) {
-                        obj.update(difference);
+                    if (skipBtn != null) {
+                        skipBtn.detachSelf();
+                        skipBtn = null;
                     }
-                    //music.seekTo((int) Math.ceil((skipTime - 0.5f) * 1000));
-                    GlobalManager.getInstance().getSongService().seekTo((int) Math.ceil((skipTime - 0.5f) * 1000));
-                    secPassed = skipTime - 0.5f;
-                    skipBtn.detachSelf();
-                    skipBtn = null;
+                    skip();
                     return;
                 }
             }
         }
 
-/*        if (GameHelper.isKiai() && Config.isComplexAnimations() && Config.getBackgroundBrightness() != 0) {
-            final float kiaiModifier = Math
-                    .max(0,
-                            1 - GameHelper.getGlobalTime() /
-                                    GameHelper.getKiaiTickLength()) * 0.15f;
-            final float a = Math.min(1, kiaiModifier);
-            if (kiai == false) {
-                kiaiRect.setVisible(true);
+    }
+
+    public void skip()
+    {
+        RoomScene.INSTANCE.getChat().dismiss();
+
+        if (secPassed > skipTime - 1f)
+            return;
+
+        if (GlobalManager.getInstance().getSongService().getStatus() != Status.PLAYING) {
+            GlobalManager.getInstance().getSongService().play();
+            GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
+            totalLength = GlobalManager.getInstance().getSongService().getLength();
+            musicStarted = true;
+        }
+        ResourceManager.getInstance().getSound("menuhit").play();
+        final float difference = skipTime - 0.5f - secPassed;
+        for (final GameObject obj : passiveObjects) {
+            obj.update(difference);
+        }
+
+        secPassed = skipTime - 0.5f;
+        int seekTime = (int) Math.ceil(secPassed * 1000);
+
+        GlobalManager.getInstance().getSongService().seekTo(seekTime);
+        if (video != null) {
+            var videoSeekTime = seekTime - (int) (videoOffset * 1000);
+            video.getTexture().seekTo(videoSeekTime);
+        }
+
+        Execution.glThread(() -> {
+            if (skipBtn != null) {
+                skipBtn.detachSelf();
+                skipBtn = null;
             }
-            kiai = true;
-            kiaiRect.setAlpha(a);
-        } else if (kiai == true) {
-            kiaiRect.setVisible(false);
-            kiai = false;
-        }*/
-    } // update(float dt)
+        });
+    }
 
     private void onExit() {
 
@@ -1978,11 +2077,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
         }
 
-        /*try {
-            android.os.Debug.dumpHprofData(Environment.getExternalStorageDirectory().getPath()+"/dd.hprof");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
         if (replaying) {
             replayFile = null;
             ModMenu.getInstance().setMod(Replay.oldMod);
@@ -2007,8 +2101,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             storyboardOverlayProxy.setDrawProxy(null);
         }
 
+        if (video != null) {
+            video.release();
+            video = null;
+            videoStarted = false;
+        }
+
         onExit();
-        ResourceManager.getInstance().getSound("failsound").stop();
         if (GlobalManager.getInstance().getCamera() instanceof SmoothCamera) {
             SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
             camera.setZoomFactorDirect(1f);
@@ -2017,6 +2116,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
         scene = new Scene();
+
+        if (Multiplayer.isMultiplayer)
+        {
+            RoomScene.INSTANCE.show();
+            return;
+        }
+        ResourceManager.getInstance().getSound("failsound").stop();
         engine.setScene(oldScene);
     }
 
@@ -2037,7 +2143,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (writeReplay) replay.addObjectScore(objectId, ResultType.MISS);
             if (GameHelper.isPerfect()) {
                 gameover();
-                restartGame();
+
+                if (!Multiplayer.isMultiplayer)
+                    restartGame();
             }
             if (GameHelper.isSuddenDeath()) {
                 stat.changeHp(-1.0f);
@@ -2057,7 +2165,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             comboWas100 = true;
             if(GameHelper.isPerfect()){
                 gameover();
-                restartGame();
+
+                if (!Multiplayer.isMultiplayer)
+                    restartGame();
             }
         } else if (score == 100) {
             comboWas100 = true;
@@ -2071,12 +2181,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
             if(GameHelper.isPerfect()){
                 gameover();
-                restartGame();
+                if (!Multiplayer.isMultiplayer)
+                    restartGame();
             }
         } else if (score == 300) {
             if (writeReplay) replay.addObjectScore(objectId, ResultType.HIT300);
-            if (endCombo && comboWasMissed == false) {
-                if (comboWas100 == false) {
+            if (endCombo && !comboWasMissed) {
+                if (!comboWas100) {
                     stat.registerHit(300, true, true);
                     scoreName = "hit300g";
                 } else {
@@ -2461,23 +2572,61 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
 
+        if (Multiplayer.isMultiplayer)
+        {
+            if (backPressCount > 0)
+            {
+                // Room being null can happen when the player disconnects from socket while playing
+                if (Multiplayer.isConnected)
+                    Execution.asyncIgnoreExceptions(() -> {
+                        RoomAPI.submitFinalScore(stat.toJson());
+                        return null;
+                    });
+
+                Multiplayer.log("Player left the match.");
+                quit();
+                return;
+            }
+
+            lastTimeBackPress = System.currentTimeMillis();
+            backPressCount++;
+            ToastLogger.showText("Tap twice to exit to room.", false);
+            return;
+        }
+
         if (!replaying) {
             EdExtensionHelper.onPauseGame(lastTrack);
         }
 
-        // totalOffset += Config.getPauseOffset();
-        final PauseMenu menu = new PauseMenu(engine, this, false);
-        /*if (music != null && music.getStatus() == Status.PLAYING) {
-            music.pause();
-        }*/
+        if (video != null) {
+            video.getTexture().pause();
+        }
+
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             GlobalManager.getInstance().getSongService().pause();
         }
         paused = true;
+
+        final PauseMenu menu = new PauseMenu(engine, this, false);
         scene.setChildScene(menu.getScene(), false, true, true);
     }
 
     public void gameover() {
+
+        if (Multiplayer.isMultiplayer)
+        {
+            if (Multiplayer.isConnected)
+            {
+                Multiplayer.log("Player has lost, moving to room scene.");
+
+                Execution.asyncIgnoreExceptions(() -> {
+                    RoomAPI.submitFinalScore(stat.toJson());
+                    return null;
+                });
+            }
+            quit();
+            return;
+        }
 
         if (!replaying) {
             EdExtensionHelper.onGameover(lastTrack);
@@ -2487,9 +2636,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         ResourceManager.getInstance().getSound("failsound").play();
         final PauseMenu menu = new PauseMenu(engine, this, true);
         gameStarted = false;
-        /*if (music != null && music.getStatus() == Status.PLAYING) {
-            music.pause();
-        }*/
+
+        if (video != null) {
+            video.getTexture().pause();
+        }
+
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             GlobalManager.getInstance().getSongService().pause();
         }
@@ -2510,14 +2661,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             quit();
             return;
         }
-        /*if (music != null && music.getStatus() != Status.PLAYING && secPassed > 0) {
-            music.play();
-            music.setVolume(Config.getBgmVolume());
-            totalLength = music.getLength();
-        }*/
 
         if (!replaying) {
             EdExtensionHelper.onResume(lastTrack);
+        }
+
+        if (video != null && videoStarted) {
+            video.getTexture().play();
         }
 
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() != Status.PLAYING && secPassed > 0) {
