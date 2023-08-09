@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+	<string name="accessibility_detector_title">Disable Accessibility Services</string>
+	<string name="accessibility_detector_message">The following accessibility services must be disabled in order to play:</string>
+	<string name="accessibility_detector_settings">Go to accessibility settings</string>
+	<string name="accessibility_detector_exit">Exit game</string>
+
 	<string name="chimu_cancel">Cancel</string>
 	<string name="chimu_connecting">Connecting to server...</string>
 	<string name="chimu_downloading">Downloading beatmap %s...</string>
