@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import org.anddev.andengine.entity.modifier.DelayModifier;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
@@ -148,6 +150,9 @@ public class BreakAnimator extends GameObject {
                 sp.setVisible(true);
                 sp.setIgnoreUpdate(false);
             }
+
+            if (Multiplayer.isMultiplayer)
+                RoomScene.INSTANCE.getChat().dismiss();
         }
         if (length > 1) {
             if (time < 0.5f) {

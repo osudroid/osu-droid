@@ -116,6 +116,15 @@ public class InGameSettingMenu extends BaseFragment {
                     .commit();
         });
 
+        CheckBox enableVideo = findViewById(R.id.enableVideo);
+        enableVideo.setChecked(Config.isVideoEnabled());
+        enableVideo.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Config.setVideoEnabled(isChecked);
+            PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
+                    .putBoolean("enableVideo", isChecked)
+                    .commit();
+        });
+
         enableNCWhenSpeedChange = findViewById(R.id.enableNCwhenSpeedChange);
         enableNCWhenSpeedChange.setChecked(ModMenu.getInstance().isEnableNCWhenSpeedChange());
         enableNCWhenSpeedChange.setOnCheckedChangeListener((buttonView, isChecked) -> {

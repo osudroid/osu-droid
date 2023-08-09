@@ -15,6 +15,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -42,6 +43,11 @@ import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
+import com.reco1l.api.ibancho.LobbyAPI;
+import com.reco1l.framework.lang.Execution;
+import com.reco1l.legacy.ui.multiplayer.LobbyScene;
+import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.reco1l.legacy.AccessibilityDetector;
 import net.lingala.zip4j.ZipFile;
 
@@ -66,10 +72,6 @@ import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
@@ -90,6 +92,9 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class MainActivity extends BaseGameActivity implements
         IAccelerometerListener {
+
+    public static String versionName;
+
     public static SongService songService;
     public ServiceConnection connection;
     private PowerManager.WakeLock wakeLock = null;
@@ -100,6 +105,9 @@ public class MainActivity extends BaseGameActivity implements
     private FirebaseCrashlytics crashlytics;
     private boolean willReplay = false;
     private static boolean activityVisible = true;
+
+    // Multiplayer
+    private Uri roomInviteLink;
 
     @Override
     public Engine onLoadEngine() {
@@ -126,7 +134,6 @@ public class MainActivity extends BaseGameActivity implements
         Debug.i("screen inches: " + screenInches);
         Config.setScaleMultiplier((float) ((11 - 5.2450170716245195) / 5));
 
-        Config.setTextureQuality(1);
         final PowerManager manager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = manager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
                 "osudroid:osu");
@@ -253,7 +260,6 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public void onLoadResources() {
-        Config.setTextureQuality(1);
         ResourceManager.getInstance().Init(mEngine, this);
         ResourceManager.getInstance().loadHighQualityAsset("welcome", "gfx/welcome.png");
         ResourceManager.getInstance().loadHighQualityAsset("loading_start", "gfx/loading.png");
@@ -266,11 +272,20 @@ public class MainActivity extends BaseGameActivity implements
 
         ResourceManager.getInstance().loadHighQualityAsset("logo", "logo.png");
         ResourceManager.getInstance().loadHighQualityAsset("play", "play.png");
+        ResourceManager.getInstance().loadHighQualityAsset("solo", "solo.png");
+        ResourceManager.getInstance().loadHighQualityAsset("multi", "multi.png");
+        ResourceManager.getInstance().loadHighQualityAsset("back", "back.png");
         ResourceManager.getInstance().loadHighQualityAsset("exit", "exit.png");
         ResourceManager.getInstance().loadHighQualityAsset("chimu", "chimu.png");
         ResourceManager.getInstance().loadHighQualityAsset("options", "options.png");
         ResourceManager.getInstance().loadHighQualityAsset("offline-avatar", "offline-avatar.png");
         ResourceManager.getInstance().loadHighQualityAsset("star", "gfx/star.png");
+        ResourceManager.getInstance().loadHighQualityAsset("chat", "chat.png");
+        ResourceManager.getInstance().loadHighQualityAsset("team_vs", "team_vs.png");
+        ResourceManager.getInstance().loadHighQualityAsset("head_head", "head_head.png");
+        ResourceManager.getInstance().loadHighQualityAsset("crown", "crown.png");
+        ResourceManager.getInstance().loadHighQualityAsset("missing", "missing.png");
+        ResourceManager.getInstance().loadHighQualityAsset("lock", "lock.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_play", "music_play.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_pause", "music_pause.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_stop", "music_stop.png");
@@ -287,6 +302,8 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
         ResourceManager.getInstance().loadFont("smallFont", null, 21, Color.WHITE);
         ResourceManager.getInstance().loadStrokeFont("strokeFont", null, 36, Color.BLACK, Color.WHITE);
+
+        ResourceManager.getInstance().loadSound("heartbeat", "sfx/heartbeat.ogg", false);
     }
 
     @Override
@@ -296,6 +313,12 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     public void onLoadComplete() {
+
+        // Initializing this class because they contain fragments in its constructors that should be initialized in
+        // main thread because of the Looper.
+        LobbyScene.INSTANCE.init();
+        RoomScene.INSTANCE.init();
+
         new AsyncTask() {
             @Override
             public void run() {
@@ -311,14 +334,11 @@ public class MainActivity extends BaseGameActivity implements
                     System.gc();
                 }
                 SplashScene.INSTANCE.playWelcomeAnimation();
-                try
-                {
+                try {
                     // Allow the welcome animation to progress before entering onComplete state.
                     Thread.sleep(2500);
                 }
-                catch (InterruptedException ignored)
-                {
-                }
+                catch (InterruptedException ignored) {}
                 Updater.getInstance().checkForUpdates(false, true);
             }
 
@@ -332,6 +352,12 @@ public class MainActivity extends BaseGameActivity implements
                 initPreferences();
                 availableInternalMemory();
                 AccessibilityDetector.start(MainActivity.this);
+
+                if (roomInviteLink != null) {
+                    LobbyScene.INSTANCE.connectFromLink(roomInviteLink);
+                    return;
+                }
+
                 if (willReplay) {
                     GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
                     willReplay = false;
@@ -543,6 +569,12 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     protected void onCreate(Bundle pSavedInstanceState) {
         super.onCreate(pSavedInstanceState);
+
+        try {
+            versionName = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_ACTIVITIES).versionName;
+        }
+        catch (Exception ignored) {}
+
         if (this.mEngine == null) {
             return;
         }
@@ -587,15 +619,17 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     protected void onStart() {
-//        this.enableAccelerometerSensor(this);
-        if (getIntent().getAction() != null
-                && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
-            if (ContentResolver.SCHEME_FILE.equals(getIntent().getData().getScheme())) {
-                beatmapToAdd = getIntent().getData().getPath();
-            }
-            if (BuildConfig.DEBUG) {
-                System.out.println(getIntent());
-                System.out.println(getIntent().getData().getEncodedPath());
+        if (getIntent().getAction() != null && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
+
+            var data = getIntent().getData();
+
+            if (data != null) {
+
+                if (data.toString().startsWith(LobbyAPI.INVITE_HOST))
+                    roomInviteLink = data;
+
+                if (ContentResolver.SCHEME_FILE.equals(getIntent().getData().getScheme()))
+                    beatmapToAdd = getIntent().getData().getPath();
             }
         }
         super.onStart();
@@ -636,7 +670,14 @@ public class MainActivity extends BaseGameActivity implements
         if (GlobalManager.getInstance().getEngine() != null && GlobalManager.getInstance().getGameScene() != null
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
             SpritePool.getInstance().purge();
-            GlobalManager.getInstance().getGameScene().pause();
+
+            if (Multiplayer.isMultiplayer)
+            {
+                ToastLogger.showText("You've left the match.", true);
+                GlobalManager.getInstance().getGameScene().quit();
+                Multiplayer.log("Player left the match.");
+            }
+            else GlobalManager.getInstance().getGameScene().pause();
         }
         if (GlobalManager.getInstance().getMainScene() != null) {
             BeatmapInfo beatmapInfo = GlobalManager.getInstance().getMainScene().beatmapInfo;
@@ -668,14 +709,28 @@ public class MainActivity extends BaseGameActivity implements
         if (this.mEngine == null) {
             return;
         }
-        if (GlobalManager.getInstance().getEngine() != null
-                && GlobalManager.getInstance().getGameScene() != null
-                && !hasFocus
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
-            if (!GlobalManager.getInstance().getGameScene().isPaused()) {
-                GlobalManager.getInstance().getGameScene().pause();
+
+        if (getEngine() != null && !hasFocus) {
+
+            if (GlobalManager.getInstance().getGameScene() != null
+                    && getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()
+                    && GlobalManager.getInstance().getGameScene() != null) {
+
+                if (!GlobalManager.getInstance().getGameScene().isPaused() && !Multiplayer.isMultiplayer)
+                    GlobalManager.getInstance().getGameScene().pause();
+            }
+
+            if (Multiplayer.isConnected
+                    && (getEngine().getScene() == RoomScene.INSTANCE
+                    || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()))
+            {
+                Execution.asyncIgnoreExceptions(() -> {
+                    RoomScene.INSTANCE.invalidateStatus();
+                    return null;
+                });
             }
         }
+
         if (hasFocus && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Config.isHideNaviBar()) {
             getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -731,11 +786,7 @@ public class MainActivity extends BaseGameActivity implements
         }
         if (GlobalManager.getInstance().getScoring() != null && keyCode == KeyEvent.KEYCODE_BACK
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getScoring().getScene()) {
-            GlobalManager.getInstance().getScoring().replayMusic();
-            GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getSongMenu().getScene());
-            GlobalManager.getInstance().getSongMenu().updateScore();
-            ResourceManager.getInstance().getSound("applause").stop();
-            GlobalManager.getInstance().getScoring().setReplayID(-1);
+            GlobalManager.getInstance().getScoring().back();
             return true;
         }
         if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ENTER)
@@ -752,14 +803,6 @@ public class MainActivity extends BaseGameActivity implements
                     FilterMenu.getInstance().hideMenu();
                 }
             }
-
-            /*if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == PropsMenu.getInstance()
-                    .getScene()) {
-                PropsMenu.getInstance().saveChanges();
-                if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                    InputManager.getInstance().toggleKeyboard();
-                }
-            }*/
 
             if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == ModMenu.getInstance().getScene()) {
                 ModMenu.getInstance().hide();
@@ -785,6 +828,24 @@ public class MainActivity extends BaseGameActivity implements
 
                 if (GlobalManager.getInstance().getEngine().getScene() instanceof LoadingScreen.LoadingScene) {
                     return true;
+                }
+
+                if (Multiplayer.isMultiplayer) {
+                    if (GlobalManager.getInstance().getEngine().getScene() == LobbyScene.INSTANCE) {
+                        LobbyScene.INSTANCE.back();
+                        return true;
+                    }
+
+                    if (GlobalManager.getInstance().getEngine().getScene() == RoomScene.INSTANCE) {
+
+                        if (RoomScene.INSTANCE.hasChildScene() && RoomScene.INSTANCE.getChildScene() == ModMenu.getInstance().getScene())
+                        {
+                            ModMenu.getInstance().hide();
+                            return true;
+                        }
+                        runOnUiThread(RoomScene.INSTANCE.getLeaveDialog()::show);
+                        return true;
+                    }
                 }
 
                 GlobalManager.getInstance().getMainScene().showExitDialog();

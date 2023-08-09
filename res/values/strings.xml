@@ -191,4 +191,7 @@
 	<!-- Beatmap parser errors -->
 	<string name="beatmap_parser_cannot_open_file" formatted="false">Failed loading %s: Could not open beatmap file</string>
 	<string name="beatmap_parser_music_not_found" formatted="false">Failed loading %s: Could not find audio file</string>
+
+	<!-- Multiplayer errors -->
+	<string name="multiplayer_not_online">You must be logged in to the server to play multiplayer!</string>
 </resources>

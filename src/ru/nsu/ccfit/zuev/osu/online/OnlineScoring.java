@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
+import com.reco1l.legacy.ui.multiplayer.LobbyScene;
+import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
@@ -56,6 +58,9 @@ public class OnlineScoring {
         panel.setInfo();
         if (secondPanel != null)
             secondPanel.setInfo();
+
+        LobbyScene.updateOnlinePanel();
+        RoomScene.updateOnlinePanel();
     }
 
     public void updatePanelAvatars() {
@@ -64,6 +69,9 @@ public class OnlineScoring {
         panel.setAvatar(texname);
         if (secondPanel != null)
             secondPanel.setAvatar(texname);
+
+        LobbyScene.updateOnlinePanel();
+        RoomScene.updateOnlinePanel();
     }
 
     public void login() {

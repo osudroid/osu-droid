@@ -84,6 +84,7 @@ public class ResourceManager {
     public void loadSkin(String folder) {
         loadFont("smallFont", null, 21, Color.WHITE);
         loadFont("middleFont", null, 24, Color.WHITE);
+        loadFont("bigFont", null, 36, Color.WHITE);
         loadFont("font", null, 28, Color.WHITE);
         loadStrokeFont("strokeFont", null, 36, Color.BLACK, Color.WHITE);
         loadFont("CaptionFont", null, 35, Color.WHITE);
@@ -437,13 +438,13 @@ public class ResourceManager {
                     textures.get("::background").getTexture());
         }
         if (file == null) {
-            return null;
+            return textures.get("menu-background");
         }
         int tw = 16, th = 16;
         TextureRegion region;
         final ScaledBitmapSource source = new ScaledBitmapSource(new File(file));
         if (source.getWidth() == 0 || source.getHeight() == 0) {
-            return null;
+            return textures.get("menu-background");
         }
         while (tw < source.getWidth()) {
             tw *= 2;
