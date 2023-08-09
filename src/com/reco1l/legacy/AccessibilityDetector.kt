@@ -33,9 +33,6 @@ object AccessibilityDetector
     @JvmStatic
     fun start(context: MainActivity) = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate({
 
-        if (!context.hasWindowFocus())
-            return@scheduleAtFixedRate
-
         // Getting the accessibility manager.
         val manager = context.getSystemService(ACCESSIBILITY_SERVICE) as AccessibilityManager
 
