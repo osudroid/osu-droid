@@ -42,7 +42,7 @@ object AccessibilityDetector
         // Filtering services that can perform gestures.
         val illegalServices = manager.getEnabledAccessibilityServiceList(FEEDBACK_ALL_MASK).filter {
 
-            CAPABILITY_CAN_PERFORM_GESTURES and it.capabilities == CAPABILITY_CAN_PERFORM_GESTURES
+            (CAPABILITY_CAN_PERFORM_GESTURES and it.capabilities) == CAPABILITY_CAN_PERFORM_GESTURES
         }
 
         isIllegalServiceDetected = illegalServices.isNotEmpty()
