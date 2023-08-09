@@ -57,7 +57,7 @@ object AccessibilityDetector
         else
         {
             alert?.dismiss()
-            alert = null;
+            alert = null
         }
 
     }, 0, 1000, TimeUnit.MILLISECONDS)!!
