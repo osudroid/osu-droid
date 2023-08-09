@@ -47,12 +47,19 @@ object AccessibilityDetector
 
         isIllegalServiceDetected = illegalServices.isNotEmpty()
 
-        if (isIllegalServiceDetected)
-        {
-            if (alert == null)
-                alert = showAlert(context, illegalServices)
+        context.runOnUiThread {
+
+            if (isIllegalServiceDetected)
+            {
+                if (alert == null || !alert!!.isShowing)
+                    alert = showAlert(context, illegalServices)
+
+                return@runOnUiThread
+            }
+
+            alert?.dismiss()
+            alert = null
         }
-        else alert?.dismiss()
 
     }, 0, 1000, TimeUnit.MILLISECONDS)!!
 
