@@ -154,7 +154,7 @@
                 android:key="deleteUnsupportedVideos"
                 android:title="@string/opt_delete_unsupported_videos_title"
                 android:summary="@string/opt_delete_unsupported_videos_summary"
-                android:defaultValue="false"/>
+                android:defaultValue="true"/>
 
         <Preference android:key="clear" android:title="@string/opt_clear_title"
             android:summary="@string/opt_clear_summary"/>
