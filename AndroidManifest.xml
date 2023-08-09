@@ -112,10 +112,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                        android:scheme="https"
-                        android:host="multi.osudroid.moe"
-                />
+                <!--We keep the scheme, so it can be treated as URL in other apps such as Discord-->
+                <data android:scheme="https" android:host="odmp"/>
             </intent-filter>
 
             <intent-filter>

@@ -1020,6 +1020,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Updating player list
         playerList!!.updateItems()
+
+        // Update information text
+        updateInformation()
     }
 
     fun init() = Unit

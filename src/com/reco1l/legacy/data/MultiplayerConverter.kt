@@ -18,8 +18,8 @@ fun modsToReadable(mods: String?): String
 
     val b = StringBuilder()
 
-    if ('a' in mods) b.append("Auto, ")
-    if ('x' in mods) b.append("Relax, ")
+    if ('a' in mods) b.append("AU, ")
+    if ('x' in mods) b.append("RX, ")
     if ('p' in mods) b.append("AP, ")
     if ('e' in mods) b.append("EZ, ")
     if ('n' in mods) b.append("NF, ")
@@ -35,7 +35,7 @@ fun modsToReadable(mods: String?): String
     if ('u' in mods) b.append("SD, ")
     if ('f' in mods) b.append("PF, ")
     if ('b' in mods) b.append("SU, ")
-    if ('v' in mods) b.append("ScoreV2, ")
+    if ('v' in mods) b.append("SV2, ")
 
     return b.substring(0, b.length - 2)
 }
