@@ -71,16 +71,16 @@ object AccessibilityDetector
             append(context.getString(R.string.accessibility_detector_message))
             appendLine()
 
-            for (service in services) service.resolveInfo?.activityInfo?.name.let {
+            for (service in services) service.resolveInfo.serviceInfo.let {
                 appendLine()
-                append(it)
+                append(it.packageName)
             }
         }
 
         setTitle(R.string.accessibility_detector_title)
         setMessage(message)
         setCancelable(false)
-        setPositiveButton(R.string.accessibility_detector_settings) { _, _ ->
+        setNeutralButton(R.string.accessibility_detector_settings) { _, _ ->
 
             val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
             context.startActivity(intent)
