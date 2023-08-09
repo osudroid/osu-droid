@@ -50,9 +50,15 @@ object AccessibilityDetector
         if (isIllegalServiceDetected)
         {
             if (alert == null)
-                alert = showAlert(context, illegalServices)
+                context.runOnUiThread {
+                    alert = showAlert(context, illegalServices)
+                }
         }
-        else alert?.dismiss()
+        else
+        {
+            alert?.dismiss()
+            alert = null;
+        }
 
     }, 0, 1000, TimeUnit.MILLISECONDS)!!
 
