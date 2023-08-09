@@ -77,7 +77,9 @@ public class Config {
         safeBeatmapBg,
         trianglesAnimation,
         displayRealTimePPCounter,
-        useNightcoreOnMultiplayer;
+        useNightcoreOnMultiplayer,
+        videoEnabled,
+        deleteUnsupportedVideos;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -119,6 +121,7 @@ public class Config {
         showScoreboard = prefs.getBoolean("showscoreboard", true);
         enableStoryboard = prefs.getBoolean("enableStoryboard", false);
         trianglesAnimation = prefs.getBoolean("trianglesAnimation", true);
+        videoEnabled = prefs.getBoolean("enableVideo", false);
 
         setSize();
 
@@ -204,6 +207,7 @@ public class Config {
         if (beatmapPath.charAt(beatmapPath.length() - 1) != '/') {
             beatmapPath += "/";
         }
+        deleteUnsupportedVideos = prefs.getBoolean("deleteUnsupportedVideos", true);
 
         // other
         playMusicPreview = prefs.getBoolean("musicpreview", true);
@@ -777,5 +781,17 @@ public class Config {
 
     public static void setUseNightcoreOnMultiplayer(boolean value) {
         useNightcoreOnMultiplayer = value;
+    }
+
+    public static boolean isVideoEnabled() {
+        return videoEnabled;
+    }
+
+    public static void setVideoEnabled(boolean value) {
+        videoEnabled = value;
+    }
+
+    public static boolean isDeleteUnsupportedVideos() {
+        return deleteUnsupportedVideos;
     }
 }

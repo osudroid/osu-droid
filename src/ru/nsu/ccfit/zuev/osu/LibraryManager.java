@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.os.Build;
+import com.reco1l.legacy.engine.VideoTexture;
 import org.anddev.andengine.util.Debug;
 import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
@@ -286,6 +287,19 @@ public enum LibraryManager {
             if (track.getBackground() != null) {
                 track.setBackground(info.getPath() + "/"
                         + track.getBackground());
+            }
+
+            if (data.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
+                try {
+                    var videoFile = new File(info.getPath(), data.events.videoFilename);
+
+                    if (!VideoTexture.Companion.isSupportedVideo(videoFile)) {
+                        //noinspection ResultOfMethodCallIgnored
+                        videoFile.delete();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             info.addTrack(track);
         }

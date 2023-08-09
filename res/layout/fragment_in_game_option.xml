@@ -133,6 +133,14 @@
                             android:layout_height="wrap_content"
                             android:text="@string/opt_enableStoryboard_title" />
 
+						<CheckBox
+								android:id="@+id/enableVideo"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginLeft="5dp"
+								android:layout_weight="1"
+								android:text="Enable video" />
+
                         <CheckBox
                             android:id="@+id/showScoreboard"
                             android:layout_width="wrap_content"
