@@ -160,7 +160,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Sprite skipBtn;
     private float skipTime;
     private boolean musicStarted;
-    private boolean videoStarted;
     private float distToNextObject;
     private float timeMultiplier = 1.0f;
     private CursorEntity[] cursorSprites;
@@ -202,6 +201,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     /**Video offset aka video start time in seconds*/
     private float videoOffset;
+
+    /**Whether the video has started*/
+    private boolean videoStarted;
 
     // Multiplayer
 
