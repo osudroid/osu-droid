@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.Manifest;
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -9,7 +8,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -31,7 +29,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.accessibility.AccessibilityManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
@@ -42,10 +39,10 @@ import androidx.core.content.PermissionChecker;
 import androidx.preference.PreferenceManager;
 
 import com.edlplan.ui.ActivityOverlay;
-import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
+import com.reco1l.legacy.AccessibilityDetector;
 import net.lingala.zip4j.ZipFile;
 
 import org.anddev.andengine.engine.Engine;
@@ -98,13 +95,11 @@ public class MainActivity extends BaseGameActivity implements
     private PowerManager.WakeLock wakeLock = null;
     private String beatmapToAdd = null;
     private SaveServiceObject saveServiceObject;
-    private IntentFilter filter;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private FirebaseAnalytics analytics;
     private FirebaseCrashlytics crashlytics;
     private boolean willReplay = false;
     private static boolean activityVisible = true;
-    private boolean autoclickerDialogShown = false;
 
     @Override
     public Engine onLoadEngine() {
@@ -336,7 +331,7 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().getMainScene().loadBeatmap();
                 initPreferences();
                 availableInternalMemory();
-                initAccessibilityDetector();
+                AccessibilityDetector.start(MainActivity.this);
                 if (willReplay) {
                     GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
                     willReplay = false;
@@ -710,9 +705,8 @@ public class MainActivity extends BaseGameActivity implements
             return false;
         }
 
-        if(autoclickerDialogShown) {
+        if (AccessibilityDetector.isIllegalServiceDetected())
             return false;
-        }
 
         if (event.getAction() != KeyEvent.ACTION_DOWN) {
             return super.onKeyDown(keyCode, event);
@@ -811,41 +805,12 @@ public class MainActivity extends BaseGameActivity implements
         return super.onKeyDown(keyCode, event);
     }
 
-    private void forcedExit() {
+    public void forcedExit() {
         if(GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
             GlobalManager.getInstance().getGameScene().quit();
         }
         GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
         GlobalManager.getInstance().getMainScene().exit();
-    }
-
-    private void initAccessibilityDetector() {
-        ScheduledExecutorService scheduledExecutorService =
-            Executors.newSingleThreadScheduledExecutor();
-        scheduledExecutorService
-            .scheduleAtFixedRate(() -> {
-                AccessibilityManager manager = (AccessibilityManager)
-                    getSystemService(Context.ACCESSIBILITY_SERVICE);
-                List<AccessibilityServiceInfo> activeServices = new ArrayList<AccessibilityServiceInfo>(
-                    manager.getEnabledAccessibilityServiceList(
-                        AccessibilityServiceInfo.FEEDBACK_ALL_MASK));
-
-                for(AccessibilityServiceInfo activeService : activeServices) {
-                     int capabilities = activeService.getCapabilities();
-                    if((AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES & capabilities)
-                            == AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES) {
-                        if(!autoclickerDialogShown && activityVisible) {
-                            runOnUiThread(() -> {
-                                ConfirmDialogFragment dialog = new ConfirmDialogFragment()
-                                    .setMessage(R.string.message_autoclicker_detected);
-                                dialog.setOnDismissListener(() -> forcedExit());
-                                dialog.showForResult(isAccepted -> forcedExit());
-                            });
-                            autoclickerDialogShown = true;
-                        }
-                    }
-                }
-            }, 0, 1, TimeUnit.SECONDS);
     }
 
     public long getVersionCode() {
