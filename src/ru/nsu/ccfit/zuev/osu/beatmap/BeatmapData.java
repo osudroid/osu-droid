@@ -79,6 +79,11 @@ public class BeatmapData {
     private String folder;
 
     /**
+     * The name of the <code>.osu</code> file of this beatmap.
+     */
+    private String filename = "";
+
+    /**
      * The MD5 hash of this beatmap.
      */
     private String md5;
@@ -105,6 +110,7 @@ public class BeatmapData {
      */
     private BeatmapData(BeatmapData source) {
         folder = source.folder;
+        filename = source.filename;
         formatVersion = source.formatVersion;
         md5 = source.md5;
 
@@ -143,6 +149,20 @@ public class BeatmapData {
      */
     public void setFolder(String path) {
         folder = path;
+    }
+
+    /**
+     * Gets the name of the <code>.osu</code> file of this beatmap.
+     */
+    public String getFilename() {
+        return filename;
+    }
+
+    /**
+     * Sets the name of the <code>.osu</code> file of this beatmap.
+     */
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 
     /**
@@ -196,7 +216,7 @@ public class BeatmapData {
 
     /**
      * Returns a time combined with beatmap-wide time offset.
-     *
+     * <br>
      * Beatmap version 4 and lower had an incorrect offset. Stable has this set as 24ms off.
      *
      * @param time The time.
@@ -207,7 +227,7 @@ public class BeatmapData {
 
     /**
      * Returns a time combined with beatmap-wide time offset.
-     *
+     * <br>
      * Beatmap version 4 and lower had an incorrect offset. Stable has this set as 24ms off.
      *
      * @param time The time.
@@ -217,22 +237,21 @@ public class BeatmapData {
     }
 
     /**
-     * Given a <code>BeatmapInfo</code> and <code>TrackInfo</code>, populate its metadata
-     * with this <code>BeatmapData</code>.
+     * Given a <code>BeatmapInfo</code>, populate its metadata with this <code>BeatmapData</code>.
      *
      * @param info The <code>BeatmapInfo</code> to populate.
-     * @param track The <code>TrackInfo</code> to populate.
-     * @return Whether the given <code>BeatmapInfo</code> and <code>TrackInfo</code> was successfully populated.
+     * @return Whether the given <code>BeatmapInfo</code> was successfully populated.
      */
-    public boolean populateMetadata(final BeatmapInfo info, final TrackInfo track) {
+    public boolean populateMetadata(final BeatmapInfo info) {
         // General
         if (info.getMusic() == null) {
             final File musicFile = new File(info.getPath(), general.audioFilename);
             if (!musicFile.exists()) {
                 ToastLogger.showText(StringTable.format(R.string.beatmap_parser_music_not_found,
-                        track.getFilename().substring(0, track.getFilename().length() - 4)), true);
+                        filename.substring(0, Math.max(0, filename.length() - 4))), true);
                 return false;
             }
+
             info.setMusic(musicFile.getPath());
             info.setPreviewTime(general.previewTime);
         }
@@ -263,6 +282,16 @@ public class BeatmapData {
             info.setTags(metadata.tags);
         }
 
+        return true;
+    }
+
+    /**
+     * Given a <code>TrackInfo</code>, populate its metadata with this <code>BeatmapData</code>.
+     *
+     * @param track The <code>TrackInfo</code> to populate.
+     * @return Whether the given <code>TrackInfo</code> was successfully populated.
+     */
+    public boolean populateMetadata(final TrackInfo track) {
         track.setMD5(md5);
         track.setCreator(metadata.creator);
         track.setMode(metadata.version);
@@ -271,7 +300,10 @@ public class BeatmapData {
         track.setBeatmapSetID(metadata.beatmapSetID);
 
         // Difficulty
-        track.applyDifficulty(this);
+        track.setOverallDifficulty(difficulty.od);
+        track.setApproachRate(difficulty.ar);
+        track.setHpDrain(difficulty.hp);
+        track.setCircleSize(difficulty.cs);
 
         // Events
         track.setBackground(events.backgroundFilename);

@@ -120,6 +120,7 @@ public class BeatmapParser {
 
         data.setMD5(FileUtils.getMD5Checksum(file));
         data.setFolder(file.getParent());
+        data.setFilename(file.getPath());
         data.setFormatVersion(beatmapFormatVersion);
 
         BeatmapGeneralParser generalParser = new BeatmapGeneralParser();

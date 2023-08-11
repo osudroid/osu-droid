@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
-
 import java.io.Serializable;
 
 public class TrackInfo implements Serializable {
@@ -96,16 +94,32 @@ public class TrackInfo implements Serializable {
         return hpDrain;
     }
 
+    public void setHpDrain(float hpDrain) {
+        this.hpDrain = hpDrain;
+    }
+
     public float getOverallDifficulty() {
         return overallDifficulty;
+    }
+
+    public void setOverallDifficulty(float overallDifficulty) {
+        this.overallDifficulty = overallDifficulty;
     }
 
     public float getApproachRate() {
         return approachRate;
     }
 
+    public void setApproachRate(float approachRate) {
+        this.approachRate = approachRate;
+    }
+
     public float getCircleSize() {
         return circleSize;
+    }
+
+    public void setCircleSize(float circleSize) {
+        this.circleSize = circleSize;
     }
 
     public float getBpmMax() {
@@ -194,18 +208,6 @@ public class TrackInfo implements Serializable {
 
     public String getMD5() {
         return md5;
-    }
-
-
-    /**
-     * Intended to be used at SongMenu reparse.
-     */
-    public void applyDifficulty(BeatmapData data) {
-
-        overallDifficulty = data.difficulty.od;
-        approachRate = data.difficulty.ar;
-        circleSize = data.difficulty.cs;
-        hpDrain = data.difficulty.hp;
     }
 
     // Sometimes when the library is reloaded there can be 2 instances for the same beatmap so checking its MD5 is the
