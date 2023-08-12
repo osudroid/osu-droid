@@ -530,31 +530,31 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         timingPoints = new LinkedList<>();
         activeTimingPoints = new LinkedList<>();
-        currentTimingPoint = null;
+
+        // Find the first uninherited timing point.
+        currentTimingPoint = new TimingPoint(
+                // This is the default uninherited timing point.
+                // If there are no uninherited timing points, this will be used.
+                // Reference: https://osu.ppy.sh/wiki/en/Client/File_formats/Osu_%28file_format%29#timing-points
+                new String[] {"0", "1000", "4", "0", "0", "100", "1", "0"},
+                null
+        );
+
+        for (final String s : beatmapData.rawTimingPoints) {
+            final TimingPoint tp = new TimingPoint(s.split("[,]"),
+                    currentTimingPoint);
+            if (!tp.wasInderited()) {
+                currentTimingPoint = tp;
+                break;
+            }
+        }
+
         for (final String s : beatmapData.rawTimingPoints) {
             final TimingPoint tp = new TimingPoint(s.split("[,]"),
                     currentTimingPoint);
             timingPoints.add(tp);
             if (!tp.wasInderited()) {
                 currentTimingPoint = tp;
-            }
-        }
-
-        if (currentTimingPoint == null) {
-            // No uninherited timing points, use default uninherited timing point.
-            currentTimingPoint = new TimingPoint(
-                    // https://osu.ppy.sh/wiki/en/Client/File_formats/Osu_%28file_format%29#timing-points
-                    new String[] {"0", "1000", "4", "0", "0", "100", "1", "0"},
-                    null
-            );
-
-            for (final String s : beatmapData.rawTimingPoints) {
-                final TimingPoint tp = new TimingPoint(s.split("[,]"),
-                        currentTimingPoint);
-                timingPoints.add(tp);
-                if (!tp.wasInderited()) {
-                    currentTimingPoint = tp;
-                }
             }
         }
 
