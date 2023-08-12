@@ -278,7 +278,7 @@ public enum LibraryManager {
             track.setCreator("unknown");
 
             final BeatmapData data = parser.parse(true);
-            if (data == null || !data.populateMetadata(info, track)) {
+            if (data == null || !data.populateMetadata(info) || !data.populateMetadata(track)) {
                 if (Config.isDeleteUnimportedBeatmaps()) {
                     file.delete();
                 }

@@ -12,6 +12,7 @@ import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
+import com.reco1l.framework.lang.execution.Async;
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
 import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 
@@ -997,31 +998,32 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         mapper.setText(mapperStr);
         beatmapInfo2.setText(binfoStr2);
         changeDimensionInfo(track);
-        (new Thread() {
-            public void run() {
-                BeatmapData beatmapData = new BeatmapParser(selectedTrack.getFilename()).parse(true);
+        Async.run(() -> {
+            BeatmapData beatmapData = new BeatmapParser(selectedTrack.getFilename()).parse(true);
 
-                if (beatmapData == null) {
-                    setStarsDisplay(0);
-                    return;
-                }
-
-                DifficultyCalculationParameters parameters = new DifficultyCalculationParameters();
-                parameters.mods = ModMenu.getInstance().getMod();
-                parameters.customSpeedMultiplier = ModMenu.getInstance().getChangeSpeed();
-
-                if (ModMenu.getInstance().isEnableForceAR()) {
-                    parameters.forcedAR = ModMenu.getInstance().getForceAR();
-                }
-
-                DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
-                        beatmapData,
-                        parameters
-                );
-
-                setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
+            if (beatmapData == null) {
+                setStarsDisplay(0);
+                return;
             }
-        }).start();
+
+            beatmapData.populateMetadata(track);
+            changeDimensionInfo(track);
+
+            DifficultyCalculationParameters parameters = new DifficultyCalculationParameters();
+            parameters.mods = ModMenu.getInstance().getMod();
+            parameters.customSpeedMultiplier = ModMenu.getInstance().getChangeSpeed();
+
+            if (ModMenu.getInstance().isEnableForceAR()) {
+                parameters.forcedAR = ModMenu.getInstance().getForceAR();
+            }
+
+            DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
+                    beatmapData,
+                    parameters
+            );
+
+            setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
+        });
     }
 
     public void selectTrack(final TrackInfo track, boolean reloadBG) {
