@@ -63,7 +63,6 @@ public class Config {
         hitLighting,
         useDither,
         useParticles,
-        useLongTrail,
         useCustomComboColors,
         forceRomanized,
         fixFrameOffset,
@@ -188,7 +187,6 @@ public class Config {
         hitLighting = prefs.getBoolean("hitlighting", hitLighting);
         useDither = prefs.getBoolean("dither", useDither);
         useParticles = prefs.getBoolean("particles", useParticles);
-        useLongTrail = prefs.getBoolean("longTrail", useLongTrail);
         useCustomComboColors = prefs.getBoolean("useCustomColors", useCustomComboColors);
         comboColors = new RGBColor[4];
         for (int i = 1; i <= 4; i++) {
@@ -579,14 +577,6 @@ public class Config {
 
     public static void setUseParticles(boolean useParticles) {
         Config.useParticles = useParticles;
-    }
-
-    public static boolean isUseLongTrail() {
-        return useLongTrail;
-    }
-
-    public static void setUseLongTrail(boolean useLongTrail) {
-        Config.useLongTrail = useLongTrail;
     }
 
     public static String getSkinPath() {
