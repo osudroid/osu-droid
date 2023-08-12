@@ -199,7 +199,7 @@ public class BeatmapParser {
             populateObjectData(data);
         } catch (IOException e) {
             Log.e("BeatmapParser.parse", e.getMessage());
-            return data;
+            return null;
         }
 
         return data;
