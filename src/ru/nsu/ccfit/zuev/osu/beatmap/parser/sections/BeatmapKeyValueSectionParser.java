@@ -10,9 +10,9 @@ import java.util.Arrays;
 public abstract class BeatmapKeyValueSectionParser extends BeatmapSectionParser {
     /**
      * Obtains the property of a line.
-     *
+     * <br><br>
      * For example, <code>ApproachRate:9</code> will be split into <code>["ApproachRate", "9"]</code>.
-     *
+     * <br><br>
      * Will return <code>null</code> for invalid lines.
      *
      * @param line The line.
