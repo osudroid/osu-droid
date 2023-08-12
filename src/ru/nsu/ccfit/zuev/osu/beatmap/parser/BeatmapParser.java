@@ -60,6 +60,14 @@ public class BeatmapParser {
         file = new File(path);
     }
 
+    private static final BeatmapGeneralParser generalParser = new BeatmapGeneralParser();
+    private static final BeatmapMetadataParser metadataParser = new BeatmapMetadataParser();
+    private static final BeatmapDifficultyParser difficultyParser = new BeatmapDifficultyParser();
+    private static final BeatmapEventsParser eventsParser = new BeatmapEventsParser();
+    private static final BeatmapControlPointsParser controlPointsParser = new BeatmapControlPointsParser();
+    private static final BeatmapColorParser colorParser = new BeatmapColorParser();
+    private static final BeatmapHitObjectsParser hitObjectsParser = new BeatmapHitObjectsParser();
+
     /**
      * Attempts to open the beatmap file.
      *
@@ -122,14 +130,6 @@ public class BeatmapParser {
         data.setFolder(file.getParent());
         data.setFilename(file.getPath());
         data.setFormatVersion(beatmapFormatVersion);
-
-        BeatmapGeneralParser generalParser = new BeatmapGeneralParser();
-        BeatmapMetadataParser metadataParser = new BeatmapMetadataParser();
-        BeatmapDifficultyParser difficultyParser = new BeatmapDifficultyParser();
-        BeatmapEventsParser eventsParser = new BeatmapEventsParser();
-        BeatmapControlPointsParser controlPointsParser = new BeatmapControlPointsParser();
-        BeatmapColorParser colorParser = new BeatmapColorParser();
-        BeatmapHitObjectsParser hitObjectsParser = new BeatmapHitObjectsParser();
 
         String s;
 
