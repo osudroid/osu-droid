@@ -148,7 +148,11 @@ public class TextureManager {
 						Debug.e(e);
 					}
 				}
-				texturesLoaded.add(textureToBeLoaded);
+
+				if (textureToBeLoaded.isLoadedToHardware())
+					texturesLoaded.add(textureToBeLoaded);
+				else
+					texturesToBeUnloaded.add(textureToBeLoaded);
 			}
 		}
 
