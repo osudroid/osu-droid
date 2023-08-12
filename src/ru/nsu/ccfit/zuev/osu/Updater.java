@@ -74,7 +74,7 @@ public class Updater {
                     }
                     ResponseBody response = httpGet(OnlineManager.endpoint + "update.php?lang=" + lang);
                     UpdateVO updateInfo = new Gson().fromJson(response.string(), UpdateVO.class);
-                    if (!newUpdate && updateInfo.getVersionCode() > mActivity.getVersionCode()) {
+                    if (!newUpdate && updateInfo != null && updateInfo.getVersionCode() > mActivity.getVersionCode()) {
                         changelogMsg = updateInfo.getChangelog();
                         downloadUrl = updateInfo.getLink();
                         newUpdate = true;
