@@ -284,10 +284,6 @@ public enum LibraryManager {
                 }
                 continue;
             }
-            if (track.getBackground() != null) {
-                track.setBackground(info.getPath() + "/"
-                        + track.getBackground());
-            }
 
             if (data.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
                 try {
