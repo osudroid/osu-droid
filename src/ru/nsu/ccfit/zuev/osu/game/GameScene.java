@@ -26,6 +26,7 @@ import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
+import org.anddev.andengine.engine.options.TouchOptions;
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.DelayModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
@@ -1285,11 +1286,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             RoomAPI.INSTANCE.notifyBeatmapLoaded();
             return;
         }
-
-        leadOut = 0;
-        musicStarted = false;
-        engine.setScene(scene);
-        scene.registerUpdateHandler(this);
+        start();
     }
 
     // This is used by the multiplayer system, is called once all players in the room completes beatmap loading.
@@ -1300,6 +1297,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         leadOut = 0;
         musicStarted = false;
+
+        // Handle input in its own thread
+        var touchOptions = new TouchOptions();
+        touchOptions.setRunOnUpdateThread(false);
+        engine.getTouchController().applyTouchOptions(touchOptions);
+
         engine.setScene(scene);
         scene.registerUpdateHandler(this);
     }
@@ -1964,6 +1967,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 engine.setScene(oldScene);
             }
 
+            // Handle input back in update thread
+            var touchOptions = new TouchOptions();
+            touchOptions.setRunOnUpdateThread(true);
+            engine.getTouchController().applyTouchOptions(touchOptions);
+
             if (storyboardSprite != null) {
                 storyboardSprite.releaseStoryboard();
                 storyboardSprite = null;
@@ -2089,7 +2097,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public void quit() {
 
-        //游戏中退出，通过暂停菜单
+        // Handle input back in update thread
+        var touchOptions = new TouchOptions();
+        touchOptions.setRunOnUpdateThread(true);
+        engine.getTouchController().applyTouchOptions(touchOptions);
 
         if (!replaying) {
             EdExtensionHelper.onQuitGame(lastTrack);
