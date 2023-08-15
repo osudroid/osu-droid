@@ -33,12 +33,7 @@ import org.anddev.andengine.util.HorizontalAlign;
 import org.anddev.andengine.util.MathUtils;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
@@ -109,6 +104,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private AnimSprite scoringSwitcher = null;
     private AsyncTask boardTask;
     private GroupType groupType = GroupType.MapSet;
+
+    private Timer previousSelectionTimer;
+    private final long previousSelectionInterval = 1000;
+    private boolean previousSelectionPerformed;
+    private final LinkedList<MenuItem> previousSelectedItems = new LinkedList<>();
 
     public SongMenu() {
     }
@@ -493,7 +493,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             boolean moved = false;
             private float dx = 0, dy = 0;
 
-
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
@@ -502,6 +501,40 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     moved = false;
                     dx = pTouchAreaLocalX;
                     dy = pTouchAreaLocalY;
+
+                    if (previousSelectionTimer != null) {
+                        previousSelectionTimer.cancel();
+                    }
+
+                    previousSelectionTimer = new Timer();
+                    previousSelectionTimer.scheduleAtFixedRate(new TimerTask() {
+                        @Override
+                        public void run() {
+                            MenuItem previousItem = previousSelectedItems.pollLast();
+                            if (previousItem == null) {
+                                cancel();
+                                return;
+                            }
+
+                            previousSelectionPerformed = true;
+
+                            ResourceManager.getInstance().getSound("menuclick")
+                                    .play();
+                            previousItem.select(true, true);
+                        }
+
+                        @Override
+                        public boolean cancel() {
+                            if (previousSelectionTimer != null) {
+                                previousSelectionTimer.cancel();
+                                previousSelectionTimer = null;
+                            }
+
+                            return super.cancel();
+                        }
+                    }, previousSelectionInterval, previousSelectionInterval);
+
+                    previousSelectionPerformed = false;
                     return true;
                 }
                 if (pSceneTouchEvent.isActionUp()) {
@@ -509,7 +542,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     if (!isSelectComplete) {
                         return true;
                     }
-                    if (!moved) {
+
+                    if (previousSelectionTimer != null) {
+                        previousSelectionTimer.cancel();
+                    }
+
+                    if (!moved && !previousSelectionPerformed) {
                         velocityY = 0;
                         if (items.size() <= 1) {
                             return true;
@@ -535,6 +573,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                                 .play();
                         items.get(index).select(true, true);
                     }
+
+                    previousSelectionPerformed = false;
                     return true;
                 }
                 if (pSceneTouchEvent.isActionOutside()
@@ -543,6 +583,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         pTouchAreaLocalY) > 50)) {
                     moved = true;
                     setFrame(0);
+
+                    if (pSceneTouchEvent.isActionOutside() && previousSelectionTimer != null) {
+                        previousSelectionTimer.cancel();
+                    }
                 }
                 return false;
             }
@@ -830,6 +874,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         secondsSinceLastSelect = 0;
         if (selectedItem != null) {
             selectedItem.deselect();
+
+            if (!previousSelectionPerformed) {
+                while (previousSelectedItems.size() >= 10) {
+                    previousSelectedItems.pollFirst();
+                }
+                previousSelectedItems.addLast(selectedItem);
+            }
         }
 
         selectedItem = item;
