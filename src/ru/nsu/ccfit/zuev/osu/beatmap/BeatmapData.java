@@ -306,7 +306,7 @@ public class BeatmapData {
         track.setCircleSize(difficulty.cs);
 
         // Events
-        track.setBackground(folder + File.pathSeparator + events.backgroundFilename);
+        track.setBackground(folder + "/" + events.backgroundFilename);
 
         // Timing points
         for (TimingControlPoint point : timingPoints.timing.getControlPoints()) {
