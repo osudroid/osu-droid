@@ -35,19 +35,6 @@ fun <T : Any> KClass<T>.createInstance(vararg parameters: Any?): T
 }
 
 /**
- * Iterate over all class fields of a specific type.
- *
- * @param type The type of the fields to filter.
- * @param action The action to execute.
- */
-inline fun <reified T : Any> Any.forEachFieldOf(type: KClass<T>, action: (T) -> Unit)
-{
-    this::class.memberProperties
-            .filter { it.returnType.classifier == type }
-            .forEach { action(it.getter.call(this) as T) }
-}
-
-/**
  * Improved comparator with ascending boolean property.
  */
 inline fun <T> compareBy(ascending: Boolean, crossinline selector: (T) -> Comparable<*>?) = Comparator<T> { a, b ->
