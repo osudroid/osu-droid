@@ -50,7 +50,7 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
 
         this.attachChild(trackTitle)
         this.attachChild(creatorInfo)
-        stars.forEach { attachChild(it) }
+        stars.iterator().forEach { attachChild(it) }
     }
 
 
@@ -101,7 +101,7 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
 
     fun updateBeatmap(beatmap: RoomBeatmap?)
     {
-        stars.forEach { it.isVisible = false }
+        stars.iterator().forEach { it.isVisible = false }
 
         if (beatmap == null)
         {

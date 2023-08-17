@@ -36,7 +36,7 @@ class LobbyRoomList : ScrollableList()
             LobbyScene.unregisterTouchArea(item)
         }
         detachChildren()
-        rooms.forEach { addItem(it) }
+        rooms.iterator().forEach { addItem(it) }
     }
 
     private fun showPasswordPrompt(room: Room) = uiThread {

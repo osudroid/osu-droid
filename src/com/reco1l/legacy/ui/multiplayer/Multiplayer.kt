@@ -5,6 +5,7 @@ import android.util.Log
 import com.reco1l.api.ibancho.data.Room
 import com.reco1l.api.ibancho.data.RoomPlayer
 import com.reco1l.framework.extensions.className
+import com.reco1l.framework.extensions.toDate
 import com.reco1l.legacy.data.jsonToScoreboardItem
 import com.reco1l.legacy.data.jsonToStatistic
 import org.json.JSONArray
@@ -66,9 +67,7 @@ object Multiplayer
 
     init
     {
-        val date = DateFormat.format("yyyy/MM/dd hh:mm:ss", System.currentTimeMillis())
-
-        LOG_FILE.writeText("[$date] Client ${MainActivity.versionName} started.")
+        LOG_FILE.writeText("[${"yyyy/MM/dd hh:mm:ss".toDate()}] Client ${MainActivity.versionName} started.")
     }
 
 
