@@ -7,7 +7,6 @@ import ru.nsu.ccfit.zuev.osuplus.BuildConfig
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.superclasses
 
 /**
