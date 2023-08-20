@@ -45,13 +45,14 @@ import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
 public class ResourceManager {
-    private static ResourceManager mgr = new ResourceManager();
-    private final Map<String, Font> fonts = new HashMap<String, Font>();
-    private final Map<String, TextureRegion> textures = new HashMap<String, TextureRegion>();
-    private final Map<String, BassSoundProvider> sounds = new HashMap<String, BassSoundProvider>();
-    private final Map<String, BassSoundProvider> customSounds = new HashMap<String, BassSoundProvider>();
-    private final Map<String, TextureRegion> customTextures = new HashMap<String, TextureRegion>();
-    private final Map<String, Integer> customFrameCount = new HashMap<String, Integer>();
+    private final static ResourceManager mgr = new ResourceManager();
+    private final Map<String, Font> fonts = new HashMap<>();
+    private final Map<String, TextureRegion> textures = new HashMap<>();
+    private final Map<String, BassSoundProvider> sounds = new HashMap<>();
+    private final Map<String, BassSoundProvider> customSounds = new HashMap<>();
+    private final Map<String, TextureRegion> customTextures = new HashMap<>();
+    private final Map<String, Integer> customFrameCount = new HashMap<>();
+    private final BassSoundProvider emptySound = new BassSoundProvider();
     private Engine engine;
     private Context context;
 
@@ -700,7 +701,9 @@ public class ResourceManager {
     }
 
     public BassSoundProvider getSound(final String resname) {
-        return sounds.get(resname);
+        var sound = sounds.get(resname);
+
+        return sound != null ? sound : emptySound;
     }
 
     public void loadCustomSound(final File file) {
@@ -720,7 +723,9 @@ public class ResourceManager {
             }
         }
         try {
-            snd.prepare(file.getPath());
+            if (!snd.prepare(file.getPath())) {
+                return;
+            }
         } catch (final Exception e) {
             Debug.e("ResourceManager.loadCustomSound: " + e.getMessage(), e);
             return;

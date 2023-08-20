@@ -7,7 +7,6 @@ import ru.nsu.ccfit.zuev.osuplus.BuildConfig
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.superclasses
 
 /**
@@ -32,19 +31,6 @@ fun <T : Any> KClass<T>.createInstance(vararg parameters: Any?): T
     val arguments = params.associateWith { parameters[params.indexOf(it)] }
 
     return constructor.callBy(arguments)
-}
-
-/**
- * Iterate over all class fields of a specific type.
- *
- * @param type The type of the fields to filter.
- * @param action The action to execute.
- */
-inline fun <reified T : Any> Any.forEachFieldOf(type: KClass<T>, action: (T) -> Unit)
-{
-    this::class.memberProperties
-            .filter { it.returnType.classifier == type }
-            .forEach { action(it.getter.call(this) as T) }
 }
 
 /**

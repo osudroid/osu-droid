@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 public enum LibraryManager {
     INSTANCE;
-    private static final String VERSION = "library4.2";
+    private static final String VERSION = "library4.1";
     private static final List<BeatmapInfo> library = Collections.synchronizedList(new ArrayList<>());
     private Integer fileCount = 0;
     private int currentIndex = 0;
@@ -283,10 +283,6 @@ public enum LibraryManager {
                     file.delete();
                 }
                 continue;
-            }
-            if (track.getBackground() != null) {
-                track.setBackground(info.getPath() + "/"
-                        + track.getBackground());
             }
 
             if (data.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
