@@ -321,6 +321,10 @@ public class MenuItem {
         return visible && (!deleted);
     }
 
+    public boolean isDeleted() {
+        return deleted;
+    }
+
     public void stopScroll(final float y) {
         listener.get().stopScroll(y);
     }

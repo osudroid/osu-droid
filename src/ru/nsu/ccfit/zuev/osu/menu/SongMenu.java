@@ -511,6 +511,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         @Override
                         public void run() {
                             MenuItem previousItem = previousSelectedItems.pollLast();
+                            while (previousItem != null && previousItem.isDeleted()) {
+                                previousItem = previousSelectedItems.pollLast();
+                            }
+
                             if (previousItem == null) {
                                 cancel();
                                 return;
