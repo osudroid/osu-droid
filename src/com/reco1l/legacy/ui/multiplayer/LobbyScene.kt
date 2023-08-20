@@ -169,7 +169,8 @@ object LobbyScene : Scene()
         {
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
-                if (!event.isActionUp) return false
+                if (!event.isActionUp || awaitList)
+                    return false
 
                 getResources().getSound("menuclick")?.play()
                 LobbyCreateRoom().show()
@@ -188,7 +189,7 @@ object LobbyScene : Scene()
         {
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
-                if (!event.isActionUp)
+                if (!event.isActionUp || awaitList)
                     return false
 
                 getResources().getSound("menuclick")?.play()
