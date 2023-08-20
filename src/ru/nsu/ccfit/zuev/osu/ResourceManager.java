@@ -720,7 +720,9 @@ public class ResourceManager {
             }
         }
         try {
-            snd.prepare(file.getPath());
+            if (!snd.prepare(file.getPath())) {
+                return;
+            }
         } catch (final Exception e) {
             Debug.e("ResourceManager.loadCustomSound: " + e.getMessage(), e);
             return;
