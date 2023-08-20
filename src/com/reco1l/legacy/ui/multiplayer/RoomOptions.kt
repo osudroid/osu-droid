@@ -329,7 +329,7 @@ class RoomOptions : SettingsFragment()
             return
 
         playOnDismissAnim {
-            Config.loadConfig(activity)
+            Config.loadConfig(getGlobal().mainActivity)
             getGlobal().songService.volume = Config.getBgmVolume()
             super.dismiss()
         }
