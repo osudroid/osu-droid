@@ -510,6 +510,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     previousSelectionTimer.scheduleAtFixedRate(new TimerTask() {
                         @Override
                         public void run() {
+                            if (!isSelectComplete) {
+                                return;
+                            }
+
                             MenuItem previousItem = previousSelectedItems.pollLast();
                             while (previousItem != null && previousItem.isDeleted()) {
                                 previousItem = previousSelectedItems.pollLast();
