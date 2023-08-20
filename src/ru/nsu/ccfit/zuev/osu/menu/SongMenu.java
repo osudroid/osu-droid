@@ -533,11 +533,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                         @Override
                         public boolean cancel() {
-                            if (previousSelectionTimer != null) {
-                                previousSelectionTimer.cancel();
-                                previousSelectionTimer = null;
-                            }
-
+                            previousSelectionTimer = null;
                             return super.cancel();
                         }
                     }, previousSelectionInterval, previousSelectionInterval);
@@ -547,12 +543,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
                 if (pSceneTouchEvent.isActionUp()) {
                     setFrame(0);
-                    if (!isSelectComplete) {
-                        return true;
-                    }
 
                     if (previousSelectionTimer != null) {
                         previousSelectionTimer.cancel();
+                    }
+
+                    if (!isSelectComplete) {
+                        return true;
                     }
 
                     if (!moved && !previousSelectionPerformed) {
