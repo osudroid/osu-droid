@@ -63,7 +63,7 @@ object Multiplayer
     var finalData: Array<StatisticV2>? = null
 
 
-    private val LOG_FILE = File("${Config.getCorePath()}/Log", "multi_log.txt")
+    private val LOG_FILE = File("${Config.getDefaultCorePath()}/Log", "multi_log.txt")
 
     init
     {
