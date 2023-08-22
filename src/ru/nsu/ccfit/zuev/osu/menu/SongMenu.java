@@ -1262,8 +1262,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private void back(boolean resetMultiplayerBeatmap) {
         unbindDataBaseChangedListener();
 
-        if (Multiplayer.isMultiplayer && resetMultiplayerBeatmap) {
-            resetMultiplayerRoomBeatmap();
+        if (Multiplayer.isMultiplayer) {
+            if (resetMultiplayerBeatmap) {
+                resetMultiplayerRoomBeatmap();
+            }
+
+            RoomScene.INSTANCE.show();
             return;
         }
 
@@ -1277,9 +1281,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         // Locking host from change beatmap before the server responses to beatmapChange
         RoomScene.awaitBeatmapChange = true;
-
-        // Showing scene
-        RoomScene.INSTANCE.show();
 
         if (!Multiplayer.isConnected) {
             return;
@@ -1308,9 +1309,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         // Locking host from change beatmap before the server responses to beatmapChange
         RoomScene.awaitBeatmapChange = true;
-
-        // Showing scene
-        RoomScene.INSTANCE.show();
 
         if (!Multiplayer.isConnected) {
             return;
