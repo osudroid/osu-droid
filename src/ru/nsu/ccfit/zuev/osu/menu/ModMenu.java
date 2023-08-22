@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.api.ibancho.RoomAPI;
-import com.reco1l.legacy.data.MultiplayerConverter;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
@@ -49,7 +48,8 @@ public class ModMenu implements IModSwitcher {
     private boolean enableForceAR = false;
     private boolean enableNCWhenSpeedChange = false;
     private boolean modsRemoved = false;
-    private float FLfollowDelay = 0.12f;
+    private final float defaultFLFollowDelay = 0.12f;
+    private float FLfollowDelay = defaultFLFollowDelay;
 
     private ModMenu() {
         mod = EnumSet.noneOf(GameMod.class);
@@ -445,7 +445,11 @@ public class ModMenu implements IModSwitcher {
     }
 
     public boolean isDefaultFLFollowDelay() {
-        return FLfollowDelay == 0.12f;
+        return FLfollowDelay == defaultFLFollowDelay;
+    }
+
+    public void resetFLFollowDelay() {
+        FLfollowDelay = defaultFLFollowDelay;
     }
 
     public void setEnableForceAR(boolean t){

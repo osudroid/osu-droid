@@ -652,6 +652,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         getModMenu().mod = stringToMods(player!!.mods)
         getModMenu().init()
         getModMenu().setMods(stringToMods(newRoom.mods), newRoom.isFreeMods)
+        getModMenu().changeSpeed = newRoom.speedMultiplier.toFloat()
+        getModMenu().isEnableForceAR = false
+        getModMenu().resetFLFollowDelay()
 
         // Updating player mods for other clients
         awaitModsChange = true
