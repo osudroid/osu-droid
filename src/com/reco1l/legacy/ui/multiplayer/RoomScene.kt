@@ -699,6 +699,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     override fun onRoomBeatmapChange(beatmap: RoomBeatmap?)
     {
         // Updating values
+        if (room!!.beatmap != null) {
+            room!!.previousBeatmap = room!!.beatmap
+        }
+
         room!!.beatmap = beatmap
 
         // Searching the beatmap in the library

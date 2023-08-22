@@ -85,6 +85,11 @@ data class Room(
     var beatmap: RoomBeatmap? = null
 
     /**
+     * The previous beatmap.
+     */
+    var previousBeatmap: RoomBeatmap? = null
+
+    /**
      * Besides [players] it provides an array trimmed with no empty slots.
      */
     val activePlayers
