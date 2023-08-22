@@ -166,7 +166,6 @@ object RoomAPI
             this.players = players
             host = json.getJSONObject("host").getString("uid").toLong()
             beatmap = parseBeatmap(json.optJSONObject("beatmap"))
-            previousBeatmap = beatmap
             status = RoomStatus.from(json.getInt("status"))
 
         }

@@ -83,6 +83,12 @@ data class Room(
      * The current beatmap.
      */
     var beatmap: RoomBeatmap? = null
+        set(value) {
+            if (value != null)
+                previousBeatmap = value
+
+            field = value
+        }
 
     /**
      * The previous beatmap.
