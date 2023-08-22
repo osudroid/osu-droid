@@ -1100,7 +1100,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             ResourceManager.getInstance().getSound("menuhit").play();
             if (Multiplayer.isMultiplayer)
             {
-                back();
+                setMultiplayerRoomBeatmap(selectedTrack);
+                back(false);
                 return;
             }
             stopMusic();
@@ -1255,35 +1256,78 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void back() {
+        back(true);
+    }
+
+    private void back(boolean resetMultiplayerBeatmap) {
         unbindDataBaseChangedListener();
 
-        if (Multiplayer.isMultiplayer)
-        {
-
-            // Locking host from change beatmap before the server responses to beatmapChange
-            RoomScene.awaitBeatmapChange = true;
-
-            // Showing scene
-            RoomScene.INSTANCE.show();
-
-            if (!Multiplayer.isConnected)
-                return;
-
-            // Now we update the beatmap
-            if (selectedTrack != null)
-            {
-                RoomAPI.changeBeatmap(
-                        selectedTrack.getMD5(),
-                        selectedTrack.getBeatmap().getTitle(),
-                        selectedTrack.getBeatmap().getArtist(),
-                        selectedTrack.getCreator(),
-                        selectedTrack.getMode()
-                );
-            }
-            else RoomAPI.changeBeatmap();
+        if (Multiplayer.isMultiplayer && resetMultiplayerBeatmap) {
+            resetMultiplayerRoomBeatmap();
             return;
         }
+
         GlobalManager.getInstance().getMainScene().show();
+    }
+
+    private void resetMultiplayerRoomBeatmap() {
+        if (!Multiplayer.isMultiplayer) {
+            return;
+        }
+
+        // Locking host from change beatmap before the server responses to beatmapChange
+        RoomScene.awaitBeatmapChange = true;
+
+        // Showing scene
+        RoomScene.INSTANCE.show();
+
+        if (!Multiplayer.isConnected) {
+            return;
+        }
+
+        // Now we update the beatmap
+        if (Multiplayer.room != null && Multiplayer.room.getPreviousBeatmap() != null) {
+            var beatmap = Multiplayer.room.getPreviousBeatmap();
+
+            RoomAPI.changeBeatmap(
+                    beatmap.getMd5(),
+                    beatmap.getTitle(),
+                    beatmap.getArtist(),
+                    beatmap.getVersion(),
+                    beatmap.getCreator()
+            );
+        } else {
+            RoomAPI.changeBeatmap();
+        }
+    }
+
+    private void setMultiplayerRoomBeatmap(TrackInfo track) {
+        if (!Multiplayer.isMultiplayer) {
+            return;
+        }
+
+        // Locking host from change beatmap before the server responses to beatmapChange
+        RoomScene.awaitBeatmapChange = true;
+
+        // Showing scene
+        RoomScene.INSTANCE.show();
+
+        if (!Multiplayer.isConnected) {
+            return;
+        }
+
+        // Now we update the beatmap
+        if (track != null) {
+            RoomAPI.changeBeatmap(
+                    track.getMD5(),
+                    track.getBeatmap().getTitle(),
+                    track.getBeatmap().getArtist(),
+                    track.getCreator(),
+                    track.getMode()
+            );
+        } else {
+            RoomAPI.changeBeatmap();
+        }
     }
 
     public void bindDataBaseChangedListener() {
