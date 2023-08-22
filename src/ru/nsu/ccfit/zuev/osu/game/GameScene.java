@@ -248,9 +248,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void setBackground() {
-        boolean bgset = false;
         bgSprite = null;
-
 
         if (video != null) {
             video.release();
@@ -277,7 +275,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                 bgSprite = video;
                 scene.setBackground(new SpriteBackground(bgSprite));
-                return;
             } catch (Exception e) {
                 e.printStackTrace();
                 video = null;
@@ -291,8 +288,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        if (beatmapData.events.backgroundFilename != null) {
-            bgset = true;
+        if (bgSprite == null && beatmapData.events.backgroundFilename != null) {
             final TextureRegion tex = Config.isSafeBeatmapBg() ? ResourceManager.getInstance().getTexture("menu-background") : ResourceManager.getInstance().getTextureIfLoaded("::background");
             if (tex != null) {
                 float brightness = Config.getBackgroundBrightness();
@@ -304,7 +300,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        if (!bgset && beatmapData.events.backgroundColor != null) {
+        if (bgSprite == null && beatmapData.events.backgroundColor != null) {
             final float bright = Config.getBackgroundBrightness();
             scene.setBackground(new ColorBackground(
                     beatmapData.events.backgroundColor.r() * bright / 255f,
