@@ -281,11 +281,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        if (storyboardSprite != null) {
-            if (storyboardSprite.isStoryboardAvailable()) {
-                storyboardSprite.setBrightness(Config.getBackgroundBrightness());
-                return;
-            }
+        if (storyboardSprite != null && storyboardSprite.isStoryboardAvailable()) {
+            storyboardSprite.setBrightness(Config.getBackgroundBrightness());
         }
 
         if (bgSprite == null && beatmapData.events.backgroundFilename != null) {

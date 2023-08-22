@@ -34,11 +34,9 @@ public class StoryboardSprite extends SupportSprite {
     OsuStoryboard storyboard;
     OsbPlayer osbPlayer;
     TextureQuad backgroundQuad;
-    TextureQuad forgroundQuad;
-    boolean replaceBackground;
+    TextureQuad foregroundQuad;
     String loadedOsu;
     private double time;
-    private boolean needUpdate = false;
 
     public StoryboardSprite(float width, float height) {
         super(width, height);
@@ -82,10 +80,10 @@ public class StoryboardSprite extends SupportSprite {
         backgroundQuad = new TextureQuad();
         backgroundQuad.anchor = Anchor.TopLeft;
         backgroundQuad.setTextureAndSize(region);
-        forgroundQuad = new TextureQuad();
-        forgroundQuad.anchor = Anchor.TopLeft;
-        forgroundQuad.setTextureAndSize(region);
-        forgroundQuad.alpha.value = 1 - brightness;
+        foregroundQuad = new TextureQuad();
+        foregroundQuad.anchor = Anchor.TopLeft;
+        foregroundQuad.setTextureAndSize(region);
+        foregroundQuad.alpha.value = 1 - brightness;
     }
 
     public void updateTime(double time) {
@@ -138,26 +136,6 @@ public class StoryboardSprite extends SupportSprite {
             return;
         }
 
-        if (replaceBackground) {
-            if (backgroundQuad != null) {
-                backgroundQuad.size.set(canvas.getWidth(), canvas.getHeight());
-                TextureQuadBatch.getDefaultBatch().add(backgroundQuad);
-                BatchEngine.flush();
-            }
-        } else {
-            if (backgroundQuad == null) {
-                backgroundQuad = new TextureQuad();
-            }
-            backgroundQuad.anchor = Anchor.Center;
-            backgroundQuad.setTextureAndSize(context.texturePool.get(storyboard.backgroundFile));
-            backgroundQuad.position.set(canvas.getWidth() / 2, canvas.getHeight() / 2);
-            backgroundQuad.enableScale().scale.set(
-                    Math.min(
-                            canvas.getWidth() / backgroundQuad.size.x,
-                            canvas.getHeight() / backgroundQuad.size.y));
-            TextureQuadBatch.getDefaultBatch().add(backgroundQuad);
-        }
-
         canvas.getBlendSetting().save();
         canvas.save();
         float scale = Math.max(640 / canvas.getWidth(), 480 / canvas.getHeight());
@@ -177,9 +155,9 @@ public class StoryboardSprite extends SupportSprite {
         canvas.restore();
         canvas.getBlendSetting().restore();
 
-        if (forgroundQuad != null) {
-            forgroundQuad.size.set(canvas.getWidth(), canvas.getHeight());
-            TextureQuadBatch.getDefaultBatch().add(forgroundQuad);
+        if (foregroundQuad != null) {
+            foregroundQuad.size.set(canvas.getWidth(), canvas.getHeight());
+            TextureQuadBatch.getDefaultBatch().add(foregroundQuad);
             BatchEngine.flush();
         }
     }
@@ -299,16 +277,9 @@ public class StoryboardSprite extends SupportSprite {
             return;
         }
 
-        replaceBackground = storyboard.needReplaceBackground();
         Tracker.createTmpNode("PackTextures").wrap(() -> {
             //Set<String> all = new HashSet<>();// = storyboard.getAllNeededTextures();
             HashMap<String, Integer> counted = countTextureUsedTimes(storyboard);
-            if ((!replaceBackground) && storyboard.backgroundFile != null) {
-                counted.put(
-                        storyboard.backgroundFile,
-                        counted.get(storyboard.backgroundFile) == null ?
-                                1 : (counted.get(storyboard.backgroundFile) + 1));
-            }
 
             SmartIterator<String> allToPack = SmartIterator.wrap(counted.keySet().iterator())
                     .applyFilter(s -> counted.get(s) >= 15);
