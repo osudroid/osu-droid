@@ -159,7 +159,8 @@ object RoomAPI
                 teamMode = TeamMode.from(json.getInt("teamMode")),
                 winCondition = WinCondition.from(json.getInt("winCondition")),
                 playerCount = activePlayers.size,
-                playerNames = activePlayers.joinToString(separator = ", ") { p -> p.name }
+                playerNames = activePlayers.joinToString(separator = ", ") { p -> p.name },
+                speedMultiplier = json.getDouble("speedMultiplier")
         ).apply {
 
             this.players = players

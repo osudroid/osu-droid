@@ -63,7 +63,8 @@ object LobbyAPI
                             winCondition = WinCondition.from(json.getInt("winCondition")),
                             playerCount = json.getInt("playerCount"),
                             playerNames = json.getString("playerNames"),
-                            status = RoomStatus.from(json.getInt("status"))
+                            status = RoomStatus.from(json.getInt("status")),
+                            speedMultiplier = json.getDouble("speedMultiplier")
                     )
 
                 }.orCatch { null }

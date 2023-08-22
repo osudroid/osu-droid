@@ -56,8 +56,12 @@ data class Room(
         /**
          * The room status.
          */
-        var status: RoomStatus? = null
+        var status: RoomStatus? = null,
 
+        /**
+         * The speed multiplier.
+         */
+        var speedMultiplier: Double
 )
 {
     /**
