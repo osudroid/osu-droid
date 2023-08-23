@@ -514,7 +514,8 @@ public class ScoringScene {
             if (stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
                     OnlineManager.getInstance().isReadyToSend()) {
 
-                if (GlobalManager.getInstance().getGameScene().hasFailed)
+                if (GlobalManager.getInstance().getGameScene().hasFailed ||
+                        (Multiplayer.isMultiplayer && !Config.isSubmitScoreOnMultiplayer()))
                     return;
 
                 boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator()).applyFilter(m -> m.unranked).hasNext();

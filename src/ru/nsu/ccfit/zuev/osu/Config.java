@@ -78,7 +78,8 @@ public class Config {
         displayRealTimePPCounter,
         useNightcoreOnMultiplayer,
         videoEnabled,
-        deleteUnsupportedVideos;
+        deleteUnsupportedVideos,
+        submitScoreOnMultiplayer;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -225,6 +226,7 @@ public class Config {
 
         // Multiplayer
         useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
+        submitScoreOnMultiplayer = prefs.getBoolean("player_submitScore", true);
 
         if(receiveAnnouncements) {
             FirebaseMessaging.getInstance().subscribeToTopic("announcements");
@@ -783,5 +785,13 @@ public class Config {
 
     public static boolean isDeleteUnsupportedVideos() {
         return deleteUnsupportedVideos;
+    }
+
+    public static boolean isSubmitScoreOnMultiplayer() {
+        return submitScoreOnMultiplayer;
+    }
+
+    public static void setSubmitScoreOnMultiplayer(boolean submitScoreOnMultiplayer) {
+        Config.submitScoreOnMultiplayer = submitScoreOnMultiplayer;
     }
 }

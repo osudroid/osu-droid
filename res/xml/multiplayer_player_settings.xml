@@ -13,6 +13,13 @@
         />
 
         <CheckBoxPreference
+                android:key="player_submitScore"
+                android:title="Enable score submission"
+                android:summary="Submit your score at the end of the round if you did not fail"
+                android:defaultValue="true"
+        />
+
+        <CheckBoxPreference
                 android:key="player_nightcore"
                 android:title="Use NightCore"
                 android:summary="Enable NightCore mod instead when DoubleTime is enabled"
