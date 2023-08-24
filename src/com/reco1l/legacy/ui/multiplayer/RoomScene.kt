@@ -786,8 +786,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     override fun onRoomRemoveSliderLockChange(isEnabled: Boolean) {
         room!!.isRemoveSliderLock = isEnabled
 
-        RoomAPI.setRoomRemoveSliderLock(isEnabled)
-
         updateInformation()
     }
 
