@@ -13,9 +13,7 @@ import com.reco1l.api.ibancho.data.WinCondition.*
 import com.reco1l.framework.extensions.orCatch
 import com.reco1l.framework.lang.glThread
 import com.reco1l.framework.lang.uiThread
-import com.reco1l.legacy.data.modsToReadable
 import com.reco1l.legacy.data.modsToString
-import com.reco1l.legacy.data.stringToMods
 import com.reco1l.legacy.ui.entity.BeatmapButton
 import com.reco1l.legacy.ui.entity.ComposedText
 import com.reco1l.legacy.ui.multiplayer.Multiplayer.isConnected
@@ -33,7 +31,6 @@ import org.anddev.andengine.util.MathUtils
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ToastLogger
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
