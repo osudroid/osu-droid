@@ -1538,7 +1538,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)
                     && !stat.getMod().contains(GameMod.MOD_AUTO);
 
-            stat.isAlive = stat.getHp() == 1f || !isDeath;
+            stat.isAlive = stat.isAlive
+                    // Player is alive - they will only die if HP reaches 0.
+                    ? !isDeath
+                    // Player is not alive - they will only recover if HP reaches 1.
+                    : stat.getHp() == 1f;
 
             if (isDeath) {
                 if (stat.getMod().contains(GameMod.MOD_EASY) && failcount < 3) {
