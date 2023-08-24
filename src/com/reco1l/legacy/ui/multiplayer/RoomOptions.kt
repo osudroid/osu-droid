@@ -224,6 +224,11 @@ class RoomOptions : SettingsFragment()
             preferenceScreen = it as PreferenceScreen
             true
         }
+
+        // Individual settings
+        findPreference<CheckBoxPreference>("removeSliderLock")!!.apply {
+            isEnabled = Multiplayer.isRoomHost
+        }
     }
 
     override fun onNavigateToScreen(preferenceScreen: PreferenceScreen)
