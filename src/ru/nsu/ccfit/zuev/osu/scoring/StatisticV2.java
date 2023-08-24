@@ -59,6 +59,13 @@ public class StatisticV2 implements Serializable {
     private float negativeHitOffsetSum;
     private float unstableRate;
 
+    /**
+     * Indicates that the player is alive (HP hasn't reached 0, or it recovered), this is exclusively used for
+     * multiplayer.
+     */
+    public boolean isAlive = true;
+
+
     public StatisticV2() {
         playerName = null;
         if (Config.isStayOnline()) {
@@ -816,6 +823,7 @@ public class StatisticV2 implements Serializable {
                 put("good", hit100);
                 put("bad", hit50);
                 put("miss", misses);
+                put("isAlive", isAlive);
             } catch (Exception e) {
                 Multiplayer.log(e);
             }
@@ -830,7 +838,7 @@ public class StatisticV2 implements Serializable {
         //noinspection DataFlowIssue
         var combo = !Multiplayer.isConnected || Multiplayer.room.getWinCondition() != WinCondition.MAX_COMBO ? currentCombo : maxCombo;
 
-        return new ScoreBoardItem(playerName, getModifiedTotalScore(), combo, getAccuracyForServer());
+        return new ScoreBoardItem(playerName, getModifiedTotalScore(), combo, getAccuracyForServer(), isAlive);
     }
 
 }

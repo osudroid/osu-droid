@@ -222,26 +222,32 @@ public class DuringGameScoreBoard extends GameObject {
                 if (Multiplayer.isConnected && i == posNow)
                     continue;
 
+                var data = scoreBoardData[i];
+
                 Sprite s = new Sprite(0, 0, tex);
                 s.setAlpha(0.5f);
-                s.setColor(scoreBoardData[i].userName.equals(currentUsername) && !currentUsername.equals("osu!") ? 1 : 0.5f, 0.5f, 0.5f);
+                s.setColor(data.userName.equals(currentUsername) && !currentUsername.equals("osu!") ? 1 : 0.5f, 0.5f, 0.5f);
                 final Text info = new Text(paddingLeft, paddingTop,
-                        ResourceManager.getInstance().getFont("font"), scoreBoardData[i].get());
+                        ResourceManager.getInstance().getFont("font"), data.get());
                 info.setScaleCenter(0, 0);
                 info.setScale(0.65f);
-                info.setColor(0.85f, 0.85f, 0.9f);
 
                 var rankText = new ChangeableText(paddingLeft, paddingTop,
                         ResourceManager.getInstance().getFont("CaptionFont"), "#1", 5);
                 rankText.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
                 rankText.setScaleCenter(0, 0);
                 rankText.setScale(1.7f);
-                rankText.setColor(0.6f, 0.6f, 0.6f, 0.9f);
                 rankText.setText("#" + (i + 1));
                 rankText.setPosition(100 - rankText.getWidth(), paddingTop * 2);
                 s.attachChild(rankText);
                 s.attachChild(info);
                 s.setVisible(i == 0 || scoreBoardData.length - i < 3);
+
+                if (data.isAlive)
+                    info.setColor(0.85f, 0.85f, 0.9f);
+                else
+                    info.setColor(1f, 0.5f, 0.5f);
+
                 ranks[i] = rankText;
                 boards[i] = s;
                 entity.attachChild(s);
@@ -277,11 +283,19 @@ public class DuringGameScoreBoard extends GameObject {
 
             if (Multiplayer.isConnected)
             {
+                var data = scoreBoardData[posNow];
+
                 playerRank.setText("#" + (posNow + 1));
                 playerRank.setPosition(100 - playerRank.getWidth(), paddingTop * 2);
-                playerText.setText(scoreBoardData[posNow].get());
+                playerText.setText(data.get());
                 playerText.setScaleCenter(0, 0);
                 playerText.setScale(0.65f);
+
+                if (data.isAlive)
+                    playerText.setColor(0.85f, 0.85f, 0.9f);
+                else
+                    playerText.setColor(1f, 0.5f, 0.5f);
+
                 updatePositions();
                 return null;
             }

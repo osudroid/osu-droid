@@ -1531,11 +1531,20 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 rate = 1 + drain / (2f * distToNextObject);
             }
             stat.changeHp(-rate * 0.01f * dt);
-            if (stat.getHp() <= 0
-                    && stat.getMod().contains(GameMod.MOD_NOFAIL) == false
-                    && stat.getMod().contains(GameMod.MOD_RELAX) == false
-                    && stat.getMod().contains(GameMod.MOD_AUTOPILOT) == false
-                    && stat.getMod().contains(GameMod.MOD_AUTO) == false) {
+
+            var isDeath = stat.getHp() <= 0
+                    && !stat.getMod().contains(GameMod.MOD_NOFAIL)
+                    && !stat.getMod().contains(GameMod.MOD_RELAX)
+                    && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)
+                    && !stat.getMod().contains(GameMod.MOD_AUTO);
+
+            stat.isAlive = stat.isAlive
+                    // Player is alive - they will only die if HP reaches 0.
+                    ? !isDeath
+                    // Player is not alive - they will only recover if HP reaches 1.
+                    : stat.getHp() == 1f;
+
+            if (isDeath) {
                 if (stat.getMod().contains(GameMod.MOD_EASY) && failcount < 3) {
                     failcount++;
                     stat.changeHp(1f);
@@ -1545,6 +1554,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     {
                         if (!hasFailed)
                             ToastLogger.showText("You failed but you can continue playing.", false);
+
                         hasFailed = true;
                     } else {
                         gameover();
