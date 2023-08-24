@@ -292,6 +292,10 @@ public class Config {
         return removeSliderLock;
     }
 
+    public static void setRemoveSliderLock(boolean removeSliderLock) {
+        Config.removeSliderLock = removeSliderLock;
+    }
+
     public static boolean isCalculateSliderPathInGameStart() {
         return calculateSliderPathInGameStart;
     }
