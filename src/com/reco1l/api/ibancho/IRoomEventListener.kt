@@ -74,6 +74,10 @@ interface IRoomEventListener
      */
     fun onRoomBeatmapChange(beatmap: RoomBeatmap?)
 
+    /**
+     * Emit when the host changes the remove slider lock setting.
+     */
+    fun onRoomRemoveSliderLockChange(isEnabled: Boolean)
 
     // Match related events
 

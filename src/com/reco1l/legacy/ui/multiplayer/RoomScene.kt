@@ -483,6 +483,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 else -> modsToReadable(room!!.mods)
             }
         }
+            Remove Slider Lock: ${if (room!!.isRemoveSliderLock == true) "Enabled" else "Disabled" }
         """.trimIndent()
     }
 
@@ -793,6 +794,14 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         RoomAPI.setPlayerMods(modsToString(getModMenu().mod))
 
         // Update room info text
+        updateInformation()
+    }
+
+    override fun onRoomRemoveSliderLockChange(isEnabled: Boolean) {
+        room!!.isRemoveSliderLock = isEnabled
+
+        RoomAPI.setRoomRemoveSliderLock(isEnabled)
+
         updateInformation()
     }
 
