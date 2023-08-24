@@ -73,7 +73,11 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
             this.width = 140f
             this.height = 100f
 
-            text.setColor(0.85f, 0.85f, 0.9f)
+            if (stats.isAlive)
+                text.setColor(0.85f, 0.85f, 0.9f)
+            else
+                text.setColor(1f, 0.5f, 0.5f)
+
             text.text = "${stats.playerName}\n${getNumberInstance(US).format(stats.modifiedTotalScore)}\n"
             text.text += when (Multiplayer.room!!.winCondition)
             {

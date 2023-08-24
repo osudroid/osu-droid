@@ -26,14 +26,20 @@ public class ScoreBoardItem {
      */
     public float accuracy = -1;
 
+    /**
+     * Indicates that the player is alive (HP hasn't reached 0, or it recovered)
+     */
+    public boolean isAlive = true;
+
 
     public ScoreBoardItem() {}
 
-    public ScoreBoardItem(String userName, int playScore, int maxCombo, float accuracy) {
+    public ScoreBoardItem(String userName, int playScore, int maxCombo, float accuracy, boolean isAlive) {
         this.userName = userName;
         this.playScore = playScore;
         this.maxCombo = maxCombo;
         this.accuracy = accuracy;
+        this.isAlive = isAlive;
     }
 
 
