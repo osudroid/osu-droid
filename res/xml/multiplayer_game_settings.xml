@@ -105,8 +105,6 @@
                                 android:summary="@string/opt_lowdelay_summary" android:defaultValue="true"/>
             <CheckBoxPreference android:key="fixFrameOffset" android:title="@string/opt_fix_frame_offset_title"
                                 android:summary="@string/opt_fix_frame_offset_summary" android:defaultValue="true"/>
-            <CheckBoxPreference android:key="removeSliderLock" android:title="@string/opt_remove_sliderlock_spinnerlock_title"
-                                android:summary="@string/opt_remove_sliderlock_spinnerlock_summary" android:defaultValue="false"/>
             <CheckBoxPreference android:key="calculateSliderPathInGameStart" android:title="@string/opt_calculate_slider_path_in_game_start_title"
                                 android:summary="@string/opt_calculate_slider_path_in_game_start_summary" android:defaultValue="false"/>
             <CheckBoxPreference android:key="displayScoreStatistics"
