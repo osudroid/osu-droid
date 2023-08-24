@@ -79,6 +79,12 @@ object RoomAPI
         roomEventListener?.onRoomFreeModsChange(it[0] as Boolean)
     }
 
+    private val removeSliderLockChanged = Listener {
+        multiLog("RECEIVED: removeSliderLockChanged -> ${it.contentToString()}")
+
+        roomEventListener?.onRoomRemoveSliderLockChange(it[0] as Boolean)
+    }
+
     private val playerStatusChanged = Listener {
         //multiLog("RECEIVED: playerStatusChanged -> ${it.contentToString()}")
 
@@ -269,6 +275,7 @@ object RoomAPI
             on("hostChanged", hostChanged)
             on("playerKicked", playerKicked)
             on("playerModsChanged", playerModsChanged)
+            on("removeSliderLockChanged", removeSliderLockChanged)
             on("roomModsChanged", roomModsChanged)
             on("freeModsSettingChanged", freeModsSettingChanged)
             on("playerStatusChanged", playerStatusChanged)
@@ -369,6 +376,14 @@ object RoomAPI
     {
         socket!!.emit("roomModsChanged", mods)
         multiLog("EMITTED: roomModsChanged -> $mods")
+    }
+
+    /**
+     * Change the remove slider lock setting.
+     */
+    fun setRoomRemoveSliderLock(isEnabled: Boolean) {
+        socket!!.emit("removeSliderLockChanged", isEnabled)
+        multiLog("EMITTED: removeSliderLockChanged -> $isEnabled")
     }
 
     /**
