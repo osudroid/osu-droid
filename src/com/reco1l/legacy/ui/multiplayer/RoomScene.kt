@@ -177,7 +177,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     {
                         if (room!!.beatmap == null)
                         {
-                            ToastLogger.showText("Cannot ready the when host is changing beatmap.", true)
+                            ToastLogger.showText("Cannot ready when the host is changing beatmap.", true)
                             awaitStatusChange = false
                             return true
                         }
