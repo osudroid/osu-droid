@@ -93,6 +93,7 @@ public class ScoreBoardItem {
         return Objects.equals(other.userName, userName)
                 && other.playScore == playScore
                 && other.maxCombo == maxCombo
-                && other.accuracy == accuracy;
+                && other.accuracy == accuracy
+                && other.isAlive == isAlive;
     }
 }
