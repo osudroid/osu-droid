@@ -4,7 +4,6 @@ import com.reco1l.api.ibancho.data.*
 import com.reco1l.api.ibancho.data.PlayerStatus.*
 import com.reco1l.api.ibancho.data.RoomTeam.*
 import com.reco1l.framework.lang.glThread
-import com.reco1l.legacy.data.modsToReadable
 import com.reco1l.legacy.ui.entity.ScrollableList
 import org.anddev.andengine.entity.primitive.Rectangle
 import org.anddev.andengine.entity.sprite.Sprite
@@ -107,7 +106,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
 
             state.isVisible = true
             text.isVisible = true
-            text.text = "${player!!.name}\n${modsToReadable(player!!.mods)}"
+            text.text = "${player!!.name}\n${player!!.mods}"
 
             if (room!!.teamMode == TeamMode.TEAM_VS_TEAM)
             {

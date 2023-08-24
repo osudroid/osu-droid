@@ -61,16 +61,16 @@ object RoomAPI
         multiLog("RECEIVED: playerModsChanged -> ${it.contentToString()}")
 
         val id = (it[0] as String).toLong()
-        val mods = it[1] as String?
+        val json = it[1] as JSONObject
 
-        playerEventListener?.onPlayerModsChange(id, mods)
+        playerEventListener?.onPlayerModsChange(id, parseMods(json))
     }
 
     private val roomModsChanged = Listener {
         multiLog("RECEIVED: roomModsChanged -> ${it.contentToString()}")
 
-        val mods = it[0] as String?
-        roomEventListener?.onRoomModsChange(mods)
+        val json = it[0] as JSONObject
+        roomEventListener?.onRoomModsChange(parseMods(json))
     }
 
     private val freeModsSettingChanged = Listener {
@@ -160,7 +160,7 @@ object RoomAPI
                 name = json.getString("name"),
                 isLocked = json.getBoolean("isLocked"),
                 maxPlayers = json.getInt("maxPlayers"),
-                mods = json.getString("mods"),
+                mods = parseMods(json.getJSONObject("mods")),
                 isFreeMods = json.getBoolean("isFreeMod"),
                 teamMode = TeamMode.from(json.getInt("teamMode")),
                 winCondition = WinCondition.from(json.getInt("winCondition")),
@@ -373,10 +373,18 @@ object RoomAPI
      * Change room mods.
      */
     @JvmStatic
-    fun setRoomMods(mods: String?)
+    fun setRoomMods(mods: String?, speedMultiplier: Float, flFollowDelay: Float, forceAR: Float? = null)
     {
-        socket!!.emit("roomModsChanged", mods)
-        multiLog("EMITTED: roomModsChanged -> $mods")
+        val json = JSONObject().apply {
+
+            put("mods", mods)
+            put("speedMultiplier", speedMultiplier)
+            put("flFollowDelay", flFollowDelay)
+            put("forceAR", forceAR)
+
+        }
+        socket!!.emit("roomModsChanged", json)
+        multiLog("EMITTED: roomModsChanged -> $json")
     }
 
     /**
@@ -497,10 +505,20 @@ object RoomAPI
      * Change player mods.
      */
     @JvmStatic
-    fun setPlayerMods(mods: String?)
+    @JvmOverloads
+    fun setPlayerMods(mods: String?, speedMultiplier: Float, flFollowDelay: Float, forceAR: Float? = null)
     {
-        socket!!.emit("playerModsChanged", mods)
-        multiLog("EMITTED: playerModsChanged -> $mods")
+        val json = JSONObject().apply {
+
+            put("mods", mods)
+            put("speedMultiplier", speedMultiplier)
+            put("flFollowDelay", flFollowDelay)
+            put("forceAR", forceAR)
+
+        }
+        socket!!.emit("playerModsChanged", json)
+
+        multiLog("EMITTED: playerModsChanged -> $json")
     }
 
     /**

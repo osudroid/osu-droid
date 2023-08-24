@@ -4,6 +4,7 @@ import com.reco1l.api.ibancho.data.RoomBeatmap
 import com.reco1l.api.ibancho.data.TeamMode
 import com.reco1l.api.ibancho.data.WinCondition
 import com.reco1l.api.ibancho.data.Room
+import com.reco1l.legacy.ui.multiplayer.RoomMods
 import org.json.JSONArray
 
 interface IRoomEventListener
@@ -47,7 +48,7 @@ interface IRoomEventListener
     /**
      * Emit when the host changes mods in a non-free mods setting or speed-changing mods in free mods setting.
      */
-    fun onRoomModsChange(mods: String?)
+    fun onRoomModsChange(mods: RoomMods)
 
     /**
      * Emit when the host changes the free mod setting.

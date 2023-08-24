@@ -2,7 +2,9 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.api.ibancho.RoomAPI;
+import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.ui.multiplayer.RoomMods;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
 import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
@@ -76,11 +78,7 @@ public class ModMenu implements IModSwitcher {
         parent = scene;
         setSelectedTrack(selectedTrack);
         scene.setChildScene(getScene(), false, true, true);
-
-        // TODO Custom mods support for multiplayer.
-        if (!Multiplayer.isMultiplayer)
-            InGameSettingMenu.getInstance().show();
-
+        Execution.uiThread(InGameSettingMenu.getInstance()::show);
         update();
     }
 
@@ -100,14 +98,16 @@ public class ModMenu implements IModSwitcher {
         }
     }
 
-    public void setMods(EnumSet<GameMod> mods, boolean isFreeMods)
+    public void setMods(RoomMods mods, boolean isFreeMods)
     {
+        var modSet = mods.getSet();
+
         if (!isFreeMods)
-            mod = mods;
+            mod = modSet;
 
         if (!Multiplayer.isRoomHost)
         {
-            if (mods.contains(GameMod.MOD_DOUBLETIME) || mods.contains(GameMod.MOD_NIGHTCORE))
+            if (modSet.contains(GameMod.MOD_DOUBLETIME) || modSet.contains(GameMod.MOD_NIGHTCORE))
             {
                 mod.remove(Config.isUseNightcoreOnMultiplayer() ? GameMod.MOD_DOUBLETIME : GameMod.MOD_NIGHTCORE);
                 mod.add(Config.isUseNightcoreOnMultiplayer() ? GameMod.MOD_NIGHTCORE : GameMod.MOD_DOUBLETIME);
@@ -118,15 +118,22 @@ public class ModMenu implements IModSwitcher {
             }
         }
 
-        if (mods.contains(GameMod.MOD_SCOREV2))
+        if (modSet.contains(GameMod.MOD_SCOREV2))
             mod.add(GameMod.MOD_SCOREV2);
         else
             mod.remove(GameMod.MOD_SCOREV2);
 
-        if (mods.contains(GameMod.MOD_HALFTIME))
+        if (modSet.contains(GameMod.MOD_HALFTIME))
             mod.add(GameMod.MOD_HALFTIME);
         else
             mod.remove(GameMod.MOD_HALFTIME);
+
+        changeSpeed = mods.getSpeedMultiplier();
+        FLfollowDelay = mods.getFlFollowDelay();
+        enableForceAR = mods.getForceAR() != null;
+
+        if (enableForceAR)
+            forceAR = mods.getForceAR();
 
         update();
     }
@@ -144,9 +151,9 @@ public class ModMenu implements IModSwitcher {
 
             // The room mods are the same as the host mods
             if (Multiplayer.isRoomHost)
-                RoomAPI.setRoomMods(modsToString(mod));
+                RoomAPI.setRoomMods(modsToString(mod), changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
             else
-                RoomAPI.setPlayerMods(modsToString(mod));
+                RoomAPI.setPlayerMods(modsToString(mod), changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
         }
     }
 

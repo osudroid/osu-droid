@@ -4,6 +4,8 @@ import com.reco1l.api.ibancho.data.PlayerStatus
 import com.reco1l.api.ibancho.data.RoomBeatmap
 import com.reco1l.api.ibancho.data.RoomPlayer
 import com.reco1l.api.ibancho.data.RoomTeam
+import com.reco1l.legacy.data.stringToMods
+import com.reco1l.legacy.ui.multiplayer.RoomMods
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -17,7 +19,7 @@ internal fun parsePlayer(o: JSONObject): RoomPlayer
             name = o.getString("username"),
             status = PlayerStatus.from(o.getInt("status")),
             team = if (o.isNull("team")) null else o.getInt("team").let { n -> RoomTeam.from(n) },
-            mods = if (o.isNull("mods")) null else o.optString("mods")
+            mods = parseMods(o.getJSONObject("mods"))
     )
 }
 
@@ -49,4 +51,17 @@ internal fun parseBeatmap(o: JSONObject?): RoomBeatmap?
         if (!o.isNull("beatmapSetId"))
             parentSetID = o.getString("beatmapSetId").toLong()
     }
+}
+
+/**
+ * Parse a [JSONObject] of mods to [RoomMods]
+ */
+internal fun parseMods(o: JSONObject): RoomMods
+{
+    return RoomMods(
+        set = stringToMods(o.optString("mods")),
+        speedMultiplier = o.getDouble("speedMultiplier").toFloat(),
+        flFollowDelay = o.getDouble("flFollowDelay").toFloat(),
+        forceAR = o.optDouble("forceAR").toFloat()
+    )
 }

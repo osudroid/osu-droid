@@ -1,5 +1,6 @@
 package com.reco1l.api.ibancho.data
 
+import com.reco1l.legacy.ui.multiplayer.RoomMods
 import com.reco1l.legacy.ui.multiplayer.multiLog
 
 data class Room(
@@ -36,7 +37,7 @@ data class Room(
         /**
          * The enabled mods.
          */
-        var mods: String?,
+        var mods: RoomMods,
 
         /**
          * Free mods condition
