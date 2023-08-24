@@ -12,7 +12,6 @@ import com.reco1l.api.ibancho.data.WinCondition.*
 import com.reco1l.framework.extensions.className
 import com.reco1l.framework.extensions.orAsyncCatch
 import com.reco1l.framework.lang.uiThread
-import com.reco1l.legacy.data.modsToReadable
 import com.reco1l.legacy.ui.entity.ScrollableList
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.Text
@@ -170,26 +169,7 @@ class LobbyRoomList : ScrollableList()
 
         val infoText = """
             ${room.playerCount} / ${room.maxPlayers} - ${room.playerNames}
-            $status - $winCondition - ${
-            when
-            {
-                room.isFreeMods ->
-                {
-                    var modsText = "Free mods"
-
-                    if (room.mods != null)
-                    {
-                        if ('d' in room.mods!! || 'c' in room.mods!!)
-                            modsText += ", DT"
-                        if ('t' in room.mods!!)
-                            modsText += ", HT"
-                    }
-                    modsText
-                }
-
-                else -> modsToReadable(room.mods)
-            }
-        }
+            $status - $winCondition - ${room.mods}
         """.trimIndent()
 
         Text(0f, 0f, getResources().getFont("smallFont"), infoText).also {

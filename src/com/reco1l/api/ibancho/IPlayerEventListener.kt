@@ -3,6 +3,7 @@ package com.reco1l.api.ibancho
 import com.reco1l.api.ibancho.data.PlayerStatus
 import com.reco1l.api.ibancho.data.RoomPlayer
 import com.reco1l.api.ibancho.data.RoomTeam
+import com.reco1l.legacy.ui.multiplayer.RoomMods
 
 interface IPlayerEventListener
 {
@@ -30,7 +31,7 @@ interface IPlayerEventListener
      * @param uid The player UID that changed mods.
      * @param mods The mods string.
      */
-    fun onPlayerModsChange(uid: Long, mods: String?)
+    fun onPlayerModsChange(uid: Long, mods: RoomMods)
 
     /**
      * Emit when the player changes their state.

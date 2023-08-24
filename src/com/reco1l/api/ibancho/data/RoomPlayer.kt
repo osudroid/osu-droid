@@ -1,5 +1,7 @@
 package com.reco1l.api.ibancho.data
 
+import com.reco1l.legacy.ui.multiplayer.RoomMods
+
 data class RoomPlayer
 (
         /**
@@ -25,7 +27,7 @@ data class RoomPlayer
         /**
          * The player mods.
          */
-        var mods: String?
+        var mods: RoomMods
 )
 {
         /**

@@ -13,7 +13,6 @@ import com.reco1l.api.ibancho.data.WinCondition.*
 import com.reco1l.framework.extensions.orCatch
 import com.reco1l.framework.lang.glThread
 import com.reco1l.framework.lang.uiThread
-import com.reco1l.legacy.data.equalsForcedMods
 import com.reco1l.legacy.data.modsToReadable
 import com.reco1l.legacy.data.modsToString
 import com.reco1l.legacy.data.stringToMods
@@ -34,7 +33,8 @@ import org.anddev.andengine.util.MathUtils
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ToastLogger
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.MOD_SCOREV2
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen.LoadingScene
@@ -447,43 +447,18 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Update room info text
         infoText.text = """
             Host: ${room!!.hostPlayer?.name}
-            Team mode: ${
-            when (room!!.teamMode)
-            {
-                HEAD_TO_HEAD -> "Head-to-head"
-                TEAM_VS_TEAM -> "Team VS"
-            }
-        } 
+            Team mode: ${if (room!!.teamMode == HEAD_TO_HEAD) "Head-to-head" else "Team VS"}
             Win condition: ${
-            when (room!!.winCondition)
-            {
-                SCORE_V1 -> "Score V1"
-                ACCURACY -> "Accuracy"
-                MAX_COMBO -> "Max combo"
-                SCORE_V2 -> "Score V2"
-            }
-        }
-            Mods: ${
-            when
-            {
-                room!!.isFreeMods ->
+                when (room!!.winCondition)
                 {
-                    var modsText = "Free mods"
-
-                    if (room!!.mods != null)
-                    {
-                        if ('d' in room!!.mods!! || 'c' in room!!.mods!!)
-                            modsText += ", DT"
-                        if ('t' in room!!.mods!!)
-                            modsText += ", HT"
-                    }
-                    modsText
+                    SCORE_V1 -> "Score V1"
+                    ACCURACY -> "Accuracy"
+                    MAX_COMBO -> "Max combo"
+                    SCORE_V2 -> "Score V2"
                 }
-
-                else -> modsToReadable(room!!.mods)
             }
-        }
-            Remove Slider Lock: ${if (room!!.isRemoveSliderLock == true) "Enabled" else "Disabled" }
+            Mods: ${room!!.mods}
+            Remove Slider Lock: ${if (room!!.isRemoveSliderLock) "Enabled" else "Disabled" }
         """.trimIndent()
     }
 
@@ -649,17 +624,20 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         playerList = RoomPlayerList(newRoom)
         attachChild(playerList, 1)
 
-        // Reloading mod menu
-        getModMenu().mod = stringToMods(player!!.mods)
+        // Reloading mod menu, we set player mods first in case the scene was reloaded (due to skin change).
+        getModMenu().setMods(player!!.mods, false)
         getModMenu().init()
-        getModMenu().setMods(stringToMods(newRoom.mods), newRoom.isFreeMods)
-        getModMenu().changeSpeed = newRoom.speedMultiplier.toFloat()
-        getModMenu().isEnableForceAR = false
-        getModMenu().resetFLFollowDelay()
+        getModMenu().setMods(newRoom.mods, newRoom.isFreeMods)
 
         // Updating player mods for other clients
         awaitModsChange = true
-        RoomAPI.setPlayerMods(modsToString(getModMenu().mod))
+
+        RoomAPI.setPlayerMods(
+            modsToString(getModMenu().mod),
+            getModMenu().changeSpeed,
+            getModMenu().fLfollowDelay,
+            if (getModMenu().isEnableForceAR) getModMenu().forceAR else null
+        )
 
         // Updating UI
         updateButtons()
@@ -758,7 +736,13 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             if (isRoomHost)
             {
                 awaitModsChange = true
-                RoomAPI.setRoomMods(modsToString(getModMenu().mod))
+
+                RoomAPI.setRoomMods(
+                    modsToString(getModMenu().mod),
+                    getModMenu().changeSpeed,
+                    getModMenu().fLfollowDelay,
+                    if (getModMenu().isEnableForceAR) getModMenu().forceAR else null
+                )
             }
         }
 
@@ -775,23 +759,25 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     // Mods
 
-    override fun onRoomModsChange(mods: String?)
+    override fun onRoomModsChange(mods: RoomMods)
     {
-        room!!.mods = mods
-
-        val newMods = stringToMods(mods)
-
-        // Updating status if the mods were changed, if free mods is enabled we only compare forced mods otherwise we
-        // compare total equality (if the two sets are the same)
-        if (if (room!!.isFreeMods) !newMods.equalsForcedMods(getModMenu().mod) else newMods != getModMenu().mod)
+        if (mods != room!!.mods)
             invalidateStatus()
 
+        room!!.mods = mods
+
         // If free mods is enabled it'll keep player mods and enforce speed changing mods and ScoreV2
-        getModMenu().setMods(newMods, room!!.isFreeMods)
+        getModMenu().setMods(mods, room!!.isFreeMods)
 
         // Updating player mods
         awaitModsChange = true
-        RoomAPI.setPlayerMods(modsToString(getModMenu().mod))
+
+        RoomAPI.setPlayerMods(
+            modsToString(getModMenu().mod),
+            getModMenu().changeSpeed,
+            getModMenu().fLfollowDelay,
+            if (getModMenu().isEnableForceAR) getModMenu().forceAR else null
+        )
 
         // Update room info text
         updateInformation()
@@ -806,7 +792,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     }
 
     /**This method is used purely to update UI in other clients*/
-    override fun onPlayerModsChange(uid: Long, mods: String?)
+    override fun onPlayerModsChange(uid: Long, mods: RoomMods)
     {
         // Updating player mods
         room!!.playersMap[uid]!!.mods = mods
@@ -832,11 +818,17 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         modsButton!!.isVisible = isRoomHost || room!!.isFreeMods
 
         // Updating mod set
-        getModMenu().setMods(stringToMods(room!!.mods), room!!.isFreeMods)
+        getModMenu().setMods(room!!.mods, room!!.isFreeMods)
 
         // Updating player mods
         awaitModsChange = true
-        RoomAPI.setPlayerMods(room!!.mods)
+
+        RoomAPI.setPlayerMods(
+            modsToString(getModMenu().mod),
+            getModMenu().changeSpeed,
+            getModMenu().fLfollowDelay,
+            if (getModMenu().isEnableForceAR) getModMenu().forceAR else null
+        )
 
         // Invalidating player status
         invalidateStatus()
@@ -871,7 +863,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             awaitModsChange = true
 
             // If win condition is Score V2 we add the mod.
-            val roomMods = stringToMods(room!!.mods).apply {
+            val roomMods = room!!.mods.set.apply {
 
                 if (winCondition == SCORE_V2)
                     add(MOD_SCOREV2)
@@ -880,7 +872,12 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             }
 
             // Applying to all room
-            RoomAPI.setRoomMods(modsToString(roomMods))
+            RoomAPI.setRoomMods(
+                modsToString(roomMods),
+                getModMenu().changeSpeed,
+                getModMenu().fLfollowDelay,
+                if (getModMenu().isEnableForceAR) getModMenu().forceAR else null
+            )
         }
 
         // Updating player list
