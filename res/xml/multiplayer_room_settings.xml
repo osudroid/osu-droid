@@ -43,6 +43,12 @@
                 android:summary="Change room win condition"
         />
 
+        <CheckBoxPreference
+                android:key="room_removeSliderLock"
+                android:title="@string/opt_remove_sliderlock_spinnerlock_title"
+                android:summary="@string/opt_remove_sliderlock_spinnerlock_summary"
+        />
+
     </PreferenceCategory>
 
 

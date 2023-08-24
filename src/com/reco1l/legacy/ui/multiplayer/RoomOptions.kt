@@ -160,6 +160,15 @@ class RoomOptions : SettingsFragment()
                     true
                 }
             }
+
+            findPreference<CheckBoxPreference>("room_removeSliderLock")!!.apply {
+                isChecked = Multiplayer.room!!.isRemoveSliderLock == true
+
+                setOnPreferenceChangeListener { _, newValue ->
+                    RoomAPI.setRoomRemoveSliderLock(newValue as Boolean)
+                    true
+                }
+            }
         }
 
         loadGameSettings()
@@ -223,11 +232,6 @@ class RoomOptions : SettingsFragment()
         findPreference<PreferenceScreen>("advancedopts")!!.onPreferenceClickListener = OnPreferenceClickListener {
             preferenceScreen = it as PreferenceScreen
             true
-        }
-
-        // Individual settings
-        findPreference<CheckBoxPreference>("removeSliderLock")!!.apply {
-            isEnabled = Multiplayer.isRoomHost
         }
     }
 
