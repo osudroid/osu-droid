@@ -59,9 +59,9 @@ internal fun parseBeatmap(o: JSONObject?): RoomBeatmap?
 internal fun parseMods(o: JSONObject): RoomMods
 {
     return RoomMods(
-        set = stringToMods(o.optString("mods")),
+        set = stringToMods(if (!o.isNull("mods")) o.getString("mods") else ""),
         speedMultiplier = o.getDouble("speedMultiplier").toFloat(),
         flFollowDelay = o.getDouble("flFollowDelay").toFloat(),
-        forceAR = o.optDouble("forceAR").toFloat()
+        forceAR = if (!o.isNull("forceAR")) o.getDouble("forceAR").toFloat() else null
     )
 }
