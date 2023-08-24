@@ -166,7 +166,6 @@ object RoomAPI
                 winCondition = WinCondition.from(json.getInt("winCondition")),
                 playerCount = activePlayers.size,
                 playerNames = activePlayers.joinToString(separator = ", ") { p -> p.name },
-                speedMultiplier = json.getDouble("speedMultiplier"),
                 isRemoveSliderLock = json.getBoolean("isRemoveSliderLock")
         ).apply {
 

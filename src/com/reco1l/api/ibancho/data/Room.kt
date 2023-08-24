@@ -60,11 +60,6 @@ data class Room(
         var status: RoomStatus? = null,
 
         /**
-         * The speed multiplier.
-         */
-        var speedMultiplier: Double,
-
-        /**
          * Whether the remove slider lock setting is enabled.
          *
          * This value is not provided when the room is being searched.
