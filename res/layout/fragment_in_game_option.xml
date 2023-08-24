@@ -37,7 +37,7 @@
 		android:layout_alignParentBottom="true"
 		android:gravity="center"
 		android:orientation="vertical"
-		android:translationY="0dp">
+		android:translationY="200dp">
 
 
 		<RelativeLayout
