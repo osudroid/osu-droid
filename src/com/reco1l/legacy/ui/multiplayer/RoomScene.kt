@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import com.reco1l.api.ibancho.IPlayerEventListener
 import com.reco1l.api.ibancho.IRoomEventListener
 import com.reco1l.api.ibancho.RoomAPI
+import com.reco1l.api.ibancho.SpectatorAPI
 import com.reco1l.api.ibancho.data.*
 import com.reco1l.api.ibancho.data.PlayerStatus.*
 import com.reco1l.api.ibancho.data.RoomTeam.*
@@ -11,6 +12,7 @@ import com.reco1l.api.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
 import com.reco1l.framework.extensions.orCatch
+import com.reco1l.framework.lang.async
 import com.reco1l.framework.lang.glThread
 import com.reco1l.framework.lang.uiThread
 import com.reco1l.legacy.data.modsToString
@@ -708,6 +710,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             getGlobal().songService.stop()
             return
         }
+
+        if (beatmap != null)
+            async {
+                SpectatorAPI.changeBeatmap(beatmap.md5)
+            }
 
         getGlobal().songService.preLoad(getGlobal().selectedTrack.beatmap.music)
         getGlobal().songService.play()

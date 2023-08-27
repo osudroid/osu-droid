@@ -19,13 +19,11 @@ import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-import java.io.File;
 import java.util.*;
 
 public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
@@ -176,7 +174,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         return sb.toString();
     }
 
-    private synchronized void initSprite(String title, String acc, String markStr, final boolean showOnline, final int scoreID, String avaURL, final String username) {
+    private synchronized void initSprite(String title, String acc, String markStr, final boolean showOnline, final int scoreID, String avaURL, final String username, final String hash) {
         final TextureRegion tex = ResourceManager.getInstance().getTexture(
                 "menu-button-background").deepCopy();
         tex.setHeight(107);
@@ -208,7 +206,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                     if (Multiplayer.isMultiplayer)
                         return true;
 
-                    listener.openScore(scoreID, showOnline, username);
+                    listener.openScore(scoreID, showOnline, username, hash);
                     GlobalManager.getInstance().getScoring().setReplayID(scoreID);
                     return true;
                 } else if (pSceneTouchEvent.isActionOutside() || pSceneTouchEvent.isActionMove() && MathUtils.distance(dx, dy, pTouchAreaLocalX, pTouchAreaLocalY) > 10) {
@@ -261,12 +259,11 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         this.onlineTask = new AsyncTask() {
             @Override
             public void run() {
-                File trackFile = new File(track.getFilename());
-                String hash = FileUtils.getMD5Checksum(trackFile);
+                String hash = track.getMD5();
                 List<String> scores;
 
                 try {
-                    scores = OnlineManager.getInstance().getTop(trackFile, hash);
+                    scores = OnlineManager.getInstance().getTop(hash);
                 } catch (OnlineManager.OnlineManagerException e) {
                     Debug.e("Cannot load scores " + e.getMessage());
                     synchronized (mutex) {
@@ -312,7 +309,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                                 + (lastTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
                         lastTotalScore = currTotalScore;
 
-                        initSprite(titleStr, accStr, data[4], true, scoreID, data[7], data[1]);
+                        initSprite(titleStr, accStr, data[4], true, scoreID, data[7], data[1], hash);
 
                         ScoreBoardItem items = new ScoreBoardItem();
                         items.set(data[1], Integer.parseInt(data[3]), Integer.parseInt(data[2]), scoreID);
@@ -334,7 +331,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                                     + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(Integer.parseInt(data[6]) / 1000f, 2)) + "%" + "\n"
                                     + "-";
 
-                            initSprite(titleStr, accStr, data[4], true, scoreID, data[9], data[1]);
+                            initSprite(titleStr, accStr, data[4], true, scoreID, data[9], data[1], hash);
                         }
                     }
 
@@ -407,7 +404,7 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                         + (lastTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
                 lastTotalScore = currTotalScore;
 
-                initSprite(titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null);
+                initSprite(titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null, track.getMD5());
 
                 scoreItems[i] = new ScoreBoardItem();
                 scoreItems[i].set(scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")), scoreID);

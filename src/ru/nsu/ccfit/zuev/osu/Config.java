@@ -515,7 +515,7 @@ public class Config {
     }
 
     public static boolean isStayOnline() {
-        return stayOnline && BuildType.hasOnlineAccess();
+        return stayOnline;
     }
 
     public static void setStayOnline(boolean stayOnline) {

@@ -5,8 +5,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 
+import android.util.Base64;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import com.rian.spectator.SpectatorDataManager;
 import okhttp3.OkHttpClient;
 
 import org.anddev.andengine.util.Debug;
@@ -19,13 +21,15 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
 import ru.nsu.ccfit.zuev.osu.online.PostBuilder.RequestException;
+import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public class OnlineManager {
-    public static final String hostname = "osudroid.moe";
-    public static final String endpoint = "https://" + hostname + "/api/";
-    public static final String defaultAvatarURL = "https://" + hostname + "/user/avatar/0.png";
+    public static final String hostname = "droidpp.osudroid.moe";
+    public static final String endpoint = "https://" + hostname + "/api/droid";
+    public static final String defaultAvatarURL = "https://osudroid.moe/user/avatar/0.png";
     private static final String onlineVersion = "34";
 
     public static final OkHttpClient client = new OkHttpClient();
@@ -56,8 +60,8 @@ public class OnlineManager {
         return instance;
     }
 
-    public static String getReplayURL(int playID) {
-        return endpoint + "upload/" + playID + ".odr";
+    public static String getReplayURL(int userID, String hash) {
+        return endpoint + "getReplay?userID=" + userID + "&hash=" + hash;
     }
 
     public void Init(Context context) {
@@ -273,15 +277,43 @@ public class OnlineManager {
         return true;
     }
 
-    public ArrayList<String> getTop(final File trackFile, final String hash) throws OnlineManagerException {
+    public String sendSpectatorData(String roomId, byte[] data) throws OnlineManagerException {
+        System.out.println("Data length: " + data.length);
+
         PostBuilder post = new PostBuilder();
-        post.addParam("filename", trackFile.getName());
+        post.addParam("userID", String.valueOf(userId));
+        post.addParam("roomID", roomId);
+        post.addParam("data", Base64.encodeToString(data, Base64.URL_SAFE));
+
+        ArrayList<String> response = sendRequest(post, endpoint + "spectatorData");
+
+        if (response == null || response.isEmpty()) {
+            return "FAILED";
+        }
+
+        return response.get(0);
+    }
+
+    public ArrayList<String> sendPlaySettings(StatisticV2 stat, final String hash) throws OnlineManagerException {
+        PostBuilder post = new PostBuilder();
+        post.addParam("userID", String.valueOf(userId));
+        post.addParam("modstring", stat.getModString());
+        post.addParam("hash", hash);
+        post.addParam("isSliderLock", Config.isRemoveSliderLock() ? "1" : "0");
+        post.addParam("isSliderAccuracy", stat.getMod().contains(GameMod.MOD_SCOREV2) ? "1" : "0");
+        post.addParam("spectatorDataVersion", String.valueOf(SpectatorDataManager.SPECTATOR_DATA_VERSION));
+
+        return sendRequest(post, endpoint + "spectatorPlayerSettings");
+    }
+
+    public ArrayList<String> getTop(final String hash) throws OnlineManagerException {
+        PostBuilder post = new PostBuilder();
         post.addParam("hash", hash);
 
-        ArrayList<String> response = sendRequest(post, endpoint + "getrank.php");
+        ArrayList<String> response = sendRequest(post, endpoint + "getLeaderboard");
 
         if (response == null) {
-            return new ArrayList<String>();
+            return new ArrayList<>();
         }
 
         response.remove(0);

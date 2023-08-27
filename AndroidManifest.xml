@@ -113,7 +113,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <!--We keep the scheme, so it can be treated as URL in other apps such as Discord-->
-                <data android:scheme="https" android:host="odmp"/>
+                <data android:scheme="https" android:host="tourney.odmp"/>
             </intent-filter>
 
             <intent-filter>

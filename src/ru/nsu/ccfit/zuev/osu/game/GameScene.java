@@ -23,6 +23,7 @@ import com.rian.difficultycalculator.beatmap.hitobject.HitObject;
 import com.rian.difficultycalculator.beatmap.hitobject.HitObjectWithDuration;
 import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 
+import com.rian.spectator.SpectatorDataManager;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -92,6 +93,7 @@ import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.PauseMenu;
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem;
 import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
@@ -192,6 +194,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private ChangeableText ppText;
 
     private long previousFrameTime;
+    private SpectatorDataManager spectatorDataManager;
 
     private boolean mIsAuto;
 
@@ -633,6 +636,46 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             calculateAllSliderPaths();
         }
 
+        stat = new StatisticV2();
+        stat.setMod(ModMenu.getInstance().getMod());
+        float multiplier = 1 + rawDifficulty / 10f + rawDrain / 10f;
+        multiplier += (beatmapData.difficulty.cs - 3) / 4f;
+
+        stat.setDiffModifier(multiplier);
+        stat.setMaxObjectsCount(lastTrack.getTotalHitObjectCount());
+        stat.setMaxHighestCombo(lastTrack.getMaxCombo());
+        stat.setEnableForceAR(ModMenu.getInstance().isEnableForceAR());
+        stat.setForceAR(ModMenu.getInstance().getForceAR());
+        stat.setChangeSpeed(ModMenu.getInstance().getChangeSpeed());
+        stat.setFLFollowDelay(ModMenu.getInstance().getFLfollowDelay());
+
+        if (!replaying && OnlineManager.getInstance().isStayOnline() && replay != null) {
+            ArrayList<String> response = null;
+
+            try {
+                response = OnlineManager.getInstance().sendPlaySettings(stat, trackMD5);
+            } catch (OnlineManager.OnlineManagerException e) {
+                e.printStackTrace();
+            }
+
+            if (response == null) {
+                ToastLogger.showText(
+                        OnlineManager.getInstance().getFailMessage(),
+                        true
+                );
+
+                spectatorDataManager = null;
+                return false;
+            }
+
+            if (response.size() >= 2) {
+                spectatorDataManager = new SpectatorDataManager(this, replay, stat);
+                spectatorDataManager.setRoomId(response.get(1));
+            }
+        } else {
+            spectatorDataManager = null;
+        }
+
         // Resetting variables before starting the game.
         Multiplayer.clearLeaderboard();
         hasFailed = false;
@@ -801,20 +844,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             });
         }
 
-        stat = new StatisticV2();
-        stat.setMod(ModMenu.getInstance().getMod());
         mIsAuto = stat.getMod() != null && stat.getMod().contains(GameMod.MOD_AUTO);
-
-        float multiplier = 1 + rawDifficulty / 10f + rawDrain / 10f;
-        multiplier += (beatmapData.difficulty.cs - 3) / 4f;
-
-        stat.setDiffModifier(multiplier);
-        stat.setMaxObjectsCount(lastTrack.getTotalHitObjectCount());
-        stat.setMaxHighestCombo(lastTrack.getMaxCombo());
-        stat.setEnableForceAR(ModMenu.getInstance().isEnableForceAR());
-        stat.setForceAR(ModMenu.getInstance().getForceAR());
-        stat.setChangeSpeed(ModMenu.getInstance().getChangeSpeed());
-        stat.setFLFollowDelay(ModMenu.getInstance().getFLfollowDelay());
 
         GameHelper.setHardrock(stat.getMod().contains(GameMod.MOD_HARDROCK));
         GameHelper.setDoubleTime(stat.getMod().contains(GameMod.MOD_DOUBLETIME));
@@ -1933,6 +1963,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
             }
             if (scoringScene != null) {
+                if (spectatorDataManager != null) {
+                    spectatorDataManager.setGameEnded(true);
+                }
+
                 if (replaying) {
                     ModMenu.getInstance().setMod(Replay.oldMod);
                     ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
@@ -2081,6 +2115,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         cursorSprites = null;
         scoreBoard = null;
 
+        stopSpectatorDataSubmission();
+
         if (GlobalManager.getInstance().getSongService() != null) {
             GlobalManager.getInstance().getSongService().stop();
             GlobalManager.getInstance().getSongService().preLoad(filePath);
@@ -2155,6 +2191,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             comboWasMissed = true;
             stat.registerHit(0, false, false);
             if (writeReplay) replay.addObjectScore(objectId, ResultType.MISS);
+            if (spectatorDataManager != null) {
+                spectatorDataManager.addObjectData(objectId);
+            }
             if (GameHelper.isPerfect()) {
                 gameover();
 
@@ -2212,6 +2251,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 stat.registerHit(300, false, false);
                 scoreName = "hit300";
             }
+        }
+
+        if (spectatorDataManager != null) {
+            spectatorDataManager.addObjectData(objectId);
         }
 
         if (endCombo) {
@@ -2669,6 +2712,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         scene.getChildScene().back();
         paused = false;
+        if (spectatorDataManager != null) {
+            spectatorDataManager.resumeTimer((long) (secPassed % 5) * 1000);
+        }
+
         if (stat.getHp() <= 0 && !stat.getMod().contains(GameMod.MOD_NOFAIL)
                 && !stat.getMod().contains(GameMod.MOD_RELAX)
                 && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)) {
@@ -3056,5 +3103,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         return timedDifficultyAttributes.get(l);
+    }
+
+    public float getSecPassed() {
+        return secPassed;
+    }
+
+    public void stopSpectatorDataSubmission() {
+        if (spectatorDataManager == null) {
+            return;
+        }
+
+        spectatorDataManager.pauseTimer();
+        spectatorDataManager = null;
     }
 }

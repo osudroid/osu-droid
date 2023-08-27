@@ -11,7 +11,7 @@ public interface MenuItemListener {
 
     void setY(float y);
 
-    void openScore(int id, boolean showOnline, final String playerName);
+    void openScore(int id, boolean showOnline, final String playerName, final String hash);
 
     void playMusic(final String filename, final int previewTime);
 
