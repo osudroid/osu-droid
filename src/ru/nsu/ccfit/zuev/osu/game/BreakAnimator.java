@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import org.anddev.andengine.entity.modifier.DelayModifier;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
@@ -16,6 +18,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class BreakAnimator extends GameObject {
     private final Scene scene;
@@ -97,7 +100,7 @@ public class BreakAnimator extends GameObject {
         }
         if (showMark) {
             final TextureRegion zeroRect = ResourceManager.getInstance()
-                    .getTexture("score-0");
+                    .getTextureWithPrefix(OsuSkin.get().getScorePrefix(), "0");
             mark = new Sprite(Config.getRES_WIDTH() - zeroRect.getWidth() * 11,
                     Utils.toRes(5), ResourceManager.getInstance().getTexture(
                     "ranking-" + stat.getMark() + "-small"));
@@ -147,6 +150,9 @@ public class BreakAnimator extends GameObject {
                 sp.setVisible(true);
                 sp.setIgnoreUpdate(false);
             }
+
+            if (Multiplayer.isMultiplayer)
+                RoomScene.INSTANCE.getChat().dismiss();
         }
         if (length > 1) {
             if (time < 0.5f) {

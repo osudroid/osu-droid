@@ -17,6 +17,7 @@ import com.edlplan.ui.EasingHelper;
 
 import java.util.Locale;
 
+import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import org.anddev.andengine.input.touch.TouchEvent;
 
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -116,18 +117,29 @@ public class InGameSettingMenu extends BaseFragment {
                     .commit();
         });
 
+        CheckBox enableVideo = findViewById(R.id.enableVideo);
+        enableVideo.setChecked(Config.isVideoEnabled());
+        enableVideo.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Config.setVideoEnabled(isChecked);
+            PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
+                    .putBoolean("enableVideo", isChecked)
+                    .commit();
+        });
+
         enableNCWhenSpeedChange = findViewById(R.id.enableNCwhenSpeedChange);
         enableNCWhenSpeedChange.setChecked(ModMenu.getInstance().isEnableNCWhenSpeedChange());
         enableNCWhenSpeedChange.setOnCheckedChangeListener((buttonView, isChecked) -> {
             ModMenu.getInstance().setEnableNCWhenSpeedChange(isChecked);
         });
 
+        TextView speedText = findViewById(R.id.changeSpeedText);
+
         enableSpeedChange = findViewById(R.id.enableSpeedChange);
         enableSpeedChange.setChecked(ModMenu.getInstance().getChangeSpeed() != 1.0f);
         enableSpeedChange.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (!isChecked) {
                 ModMenu.getInstance().setChangeSpeed(1.0f);
-                ((TextView) findViewById(R.id.changeSpeedText)).setText(String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().getChangeSpeed()));
+                speedText.setText(String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().getChangeSpeed()));
                 changeSpeed.setProgress(10);
                 ModMenu.getInstance().updateMultiplierText();
             }
@@ -186,7 +198,7 @@ public class InGameSettingMenu extends BaseFragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 float p = 0.5f + 0.05f * progress;
-                ((TextView) findViewById(R.id.changeSpeedText)).setText(String.format(Locale.getDefault(), "%.2fx", p));
+                speedText.setText(String.format(Locale.getDefault(), "%.2fx", p));
                 if (p == 1.0f){
                     enableSpeedChange.setChecked(false);
                 }
@@ -200,7 +212,7 @@ public class InGameSettingMenu extends BaseFragment {
             public void onStartTrackingTouch(SeekBar seekBar) {
                 int progress = seekBar.getProgress();
                 float p = 0.5f + 0.05f * progress;
-                ((TextView) findViewById(R.id.changeSpeedText)).setText(String.format(Locale.getDefault(), "%.2fx", p));
+                speedText.setText(String.format(Locale.getDefault(), "%.2fx", p));
                 if (p == 1.0f){
                     enableSpeedChange.setChecked(false);
                 }
@@ -214,7 +226,7 @@ public class InGameSettingMenu extends BaseFragment {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 int progress = seekBar.getProgress();
                 float p = 0.5f + 0.05f * progress;
-                ((TextView) findViewById(R.id.changeSpeedText)).setText(String.format(Locale.getDefault(), "%.2fx", p));
+                speedText.setText(String.format(Locale.getDefault(), "%.2fx", p));
                 ModMenu.getInstance().setChangeSpeed(p);
                 if (p == 1.0f){
                     enableSpeedChange.setChecked(false);
@@ -225,7 +237,7 @@ public class InGameSettingMenu extends BaseFragment {
                 }
             }
         });
-        ((TextView) findViewById(R.id.changeSpeedText)).setText(String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().getChangeSpeed()));
+        speedText.setText(String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().getChangeSpeed()));
 
         forceAR = findViewById(R.id.forceARBar);
         forceAR.setProgress((int)(ModMenu.getInstance().getForceAR() * 10));
@@ -280,6 +292,20 @@ public class InGameSettingMenu extends BaseFragment {
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
         ((TextView) findViewById(R.id.forceARText)).setText(String.format("AR%.1f", ModMenu.getInstance().getForceAR()));
+
+        TextView speedLabel = findViewById(R.id.speed_modify_label);
+
+        if (Multiplayer.isMultiplayer && !Multiplayer.isRoomHost) {
+            enableSpeedChange.setVisibility(View.GONE);
+            changeSpeed.setVisibility(View.GONE);
+            speedText.setVisibility(View.GONE);
+            speedLabel.setVisibility(View.GONE);
+        } else {
+            enableSpeedChange.setVisibility(View.VISIBLE);
+            changeSpeed.setVisibility(View.VISIBLE);
+            speedText.setVisibility(View.VISIBLE);
+            speedLabel.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override

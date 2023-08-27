@@ -7,6 +7,7 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import javax.microedition.khronos.opengles.GL10;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
 public class AnimSprite extends Sprite {
 
@@ -19,10 +20,29 @@ public class AnimSprite extends Sprite {
 
     private final int count;
     private final TextureRegion[] regions;
-    private int frame;
-    private float animTime;
+    private int frame = 0;
+    private float animTime = 0;
     private float fps;
     private LoopType loopType = LoopType.LOOP;
+
+    public AnimSprite(float px, float py, StringSkinData prefix, String name, int count, float fps)
+    {
+        super(px, py, ResourceManager.getInstance().getTextureWithPrefix(prefix, (name != null ? name : "") + (count == 1 ? "" : "0")));
+        if (count == 0) {
+            count = 1;
+        }
+        this.count = count;
+        this.fps = fps;
+
+        regions = new TextureRegion[count];
+        for (int i = 0; i < count; i++) {
+            regions[i] = ResourceManager.getInstance().getTextureWithPrefix(prefix, (name != null ? name : "") + (count == 1 ? "" : i));
+        }
+
+        if (fps == 0) {
+            loopType = LoopType.FROZE;
+        }
+    }
 
     public AnimSprite(final float px, final float py, final String texname,
                       int count, final float fps) {
@@ -32,8 +52,6 @@ public class AnimSprite extends Sprite {
         }
         this.count = count;
         this.fps = fps;
-        this.frame = 0;
-        this.animTime = 0;
         regions = new TextureRegion[count];
         for (int i = 0; i < count; i++) {
             regions[i] = ResourceManager.getInstance().getTexture(texname + i);
@@ -48,8 +66,6 @@ public class AnimSprite extends Sprite {
         super(px, py, ResourceManager.getInstance().getTextureIfLoaded(textures[0]));
         this.count = textures.length;
         this.fps = fps;
-        this.frame = 0;
-        this.animTime = 0;
         regions = new TextureRegion[count];
         for (int i = 0; i < count; i++) {
             regions[i] = ResourceManager.getInstance().getTextureIfLoaded(textures[i]);
@@ -112,6 +128,10 @@ public class AnimSprite extends Sprite {
             this.animTime = (frame + 0.0001f) / fps;
             updateFrame();
         }
+    }
+
+    public int getFrame() {
+        return frame;
     }
 
     public void setAnimTime(float animTime) {

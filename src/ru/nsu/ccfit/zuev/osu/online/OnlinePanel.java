@@ -125,7 +125,7 @@ public class OnlinePanel extends Entity {
         attachChild(messageLayer);
     }
 
-    void setInfo() {
+    public void setInfo() {
         nameText.setText(OnlineManager.getInstance().getUsername());
         StringBuilder scoreBuilder = new StringBuilder("Score: ");
         scoreBuilder.append(OnlineManager.getInstance().getScore());
@@ -148,12 +148,19 @@ public class OnlinePanel extends Entity {
         attachChild(onlineLayer);
     }
 
+    public void setAvatar()
+    {
+        var avatarUrl = OnlineManager.getInstance().getAvatarURL();
+        var textureName = OnlineScoring.getInstance().isAvatarLoaded() && !avatarUrl.isEmpty() ? avatarUrl : null;
+        setAvatar(textureName);
+    }
+
     void setAvatar(final String texname) {
         if (avatar != null)
             avatar.detachSelf();
         avatar = null;
         if (texname == null) return;
-        TextureRegion tex = ResourceManager.getInstance().getTextureIfLoaded(texname);
+        TextureRegion tex = ResourceManager.getInstance().getAvatarTextureIfLoaded(texname);
         if (tex == null) return;
 
         Debug.i("Avatar is set!");

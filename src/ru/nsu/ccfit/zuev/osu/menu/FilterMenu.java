@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -366,7 +367,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
                 s = StringTable.get(R.string.menu_search_sort_creator);
                 break;
         }
-        sortText.setText(s);
+        ((Activity) configContext).runOnUiThread(() -> sortText.setText(s));
     }
 
     public Scene getScene() {

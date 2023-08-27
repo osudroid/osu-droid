@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+            android:title="Player options">
+
+        <ListPreference
+                android:key="player_team"
+                android:title="Team"
+                android:entries="@array/team_names"
+                android:entryValues="@array/team_values"
+                android:summary="Change team"
+        />
+
+        <CheckBoxPreference
+                android:key="player_submitScore"
+                android:title="Enable score submission"
+                android:summary="Submit your score at the end of the round if you did not fail"
+                android:defaultValue="true"
+        />
+
+        <CheckBoxPreference
+                android:key="player_nightcore"
+                android:title="Use NightCore"
+                android:summary="Enable NightCore mod instead when DoubleTime is enabled"
+        />
+
+        <CheckBoxPreference
+                android:key="showscoreboard"
+                android:title="Show leaderboard"
+                android:summary="Show live leaderboard while playing"
+        />
+
+        <CheckBoxPreference
+                android:key="enableStoryboard"
+                android:title="@string/opt_enableStoryboard_title"
+        />
+
+        <CheckBoxPreference
+                android:key="enableVideo"
+                android:title="Enable video"
+        />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

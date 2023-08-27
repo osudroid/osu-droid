@@ -10,6 +10,7 @@ public class TrackInfo implements Serializable {
     private String publicName;
     private String mode;
     private String creator;
+    private String md5;
     private String background = null;
     private int beatmapID = 0;
     private int beatmapSetID = 0;
@@ -199,5 +200,31 @@ public class TrackInfo implements Serializable {
 
     public void setMaxCombo(int maxCombo) {
         this.maxCombo = maxCombo;
+    }
+
+    public void setMD5(String md5) {
+        this.md5 = md5;
+    }
+
+    public String getMD5() {
+        return md5;
+    }
+
+    // Sometimes when the library is reloaded there can be 2 instances for the same beatmap so checking its MD5 is the
+    // proper way to compare
+    @Override
+    public boolean equals(Object o) {
+
+        if (o == this)
+            return true;
+
+        if (o instanceof TrackInfo) {
+            var track = (TrackInfo) o;
+
+            return md5 != null
+                    && track.md5 != null
+                    && track.md5.equals(md5);
+        }
+        return false;
     }
 }

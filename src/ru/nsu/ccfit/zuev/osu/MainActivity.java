@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.Manifest;
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -9,7 +8,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -17,29 +15,41 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.os.*;
-
-import androidx.preference.PreferenceManager;
-import androidx.core.content.PermissionChecker;
-
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.PowerManager;
+import android.os.StatFs;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.accessibility.AccessibilityManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
-
 import android.widget.Toast;
-import com.edlplan.ui.ActivityOverlay;
-import com.edlplan.ui.fragment.ConfirmDialogFragment;
-import com.edlplan.ui.fragment.BuildTypeNoticeFragment;
 
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.PermissionChecker;
+import androidx.preference.PreferenceManager;
+
+import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+
+import com.reco1l.api.ibancho.LobbyAPI;
+import com.reco1l.framework.lang.Execution;
+import com.reco1l.legacy.ui.multiplayer.LobbyScene;
+import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.ui.multiplayer.RoomScene;
+import com.reco1l.legacy.AccessibilityDetector;
+import net.lingala.zip4j.ZipFile;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
@@ -62,18 +72,11 @@ import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-import net.lingala.zip4j.ZipFile;
 
 import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTaskLoader;
-import ru.nsu.ccfit.zuev.osu.async.OsuAsyncCallback;
+import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.SpritePool;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
@@ -89,18 +92,22 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class MainActivity extends BaseGameActivity implements
         IAccelerometerListener {
+
+    public static String versionName;
+
     public static SongService songService;
     public ServiceConnection connection;
     private PowerManager.WakeLock wakeLock = null;
     private String beatmapToAdd = null;
     private SaveServiceObject saveServiceObject;
-    private IntentFilter filter;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private FirebaseAnalytics analytics;
     private FirebaseCrashlytics crashlytics;
     private boolean willReplay = false;
     private static boolean activityVisible = true;
-    private boolean autoclickerDialogShown = false;
+
+    // Multiplayer
+    private Uri roomInviteLink;
 
     @Override
     public Engine onLoadEngine() {
@@ -127,7 +134,6 @@ public class MainActivity extends BaseGameActivity implements
         Debug.i("screen inches: " + screenInches);
         Config.setScaleMultiplier((float) ((11 - 5.2450170716245195) / 5));
 
-        Config.setTextureQuality(1);
         final PowerManager manager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = manager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
                 "osudroid:osu");
@@ -249,25 +255,37 @@ public class MainActivity extends BaseGameActivity implements
             Editor editor = prefs.edit();
             editor.putBoolean("onlineSet", true);
             editor.commit();
-
-            //TODO removed auto registration at first launch
-            /*OnlineInitializer initializer = new OnlineInitializer(this);
-            initializer.createInitDialog();*/
         }
     }
 
     @Override
     public void onLoadResources() {
-        Config.setTextureQuality(1);
         ResourceManager.getInstance().Init(mEngine, this);
+        ResourceManager.getInstance().loadHighQualityAsset("welcome", "gfx/welcome.png");
+        ResourceManager.getInstance().loadHighQualityAsset("loading_start", "gfx/loading.png");
+
+        ResourceManager.getInstance().loadSound("welcome", "sfx/welcome.ogg", false);
+        ResourceManager.getInstance().loadSound("welcome_piano", "sfx/welcome_piano.ogg", false);
+
+        // Setting the scene as fast as we can
+        getEngine().setScene(SplashScene.INSTANCE.getScene());
+
         ResourceManager.getInstance().loadHighQualityAsset("logo", "logo.png");
         ResourceManager.getInstance().loadHighQualityAsset("play", "play.png");
-        //ResourceManager.getInstance().loadHighQualityAsset("multiplayer", "multiplayer.png");
-        //ResourceManager.getInstance().loadHighQualityAsset("solo", "solo.png");
+        ResourceManager.getInstance().loadHighQualityAsset("solo", "solo.png");
+        ResourceManager.getInstance().loadHighQualityAsset("multi", "multi.png");
+        ResourceManager.getInstance().loadHighQualityAsset("back", "back.png");
         ResourceManager.getInstance().loadHighQualityAsset("exit", "exit.png");
+        ResourceManager.getInstance().loadHighQualityAsset("chimu", "chimu.png");
         ResourceManager.getInstance().loadHighQualityAsset("options", "options.png");
         ResourceManager.getInstance().loadHighQualityAsset("offline-avatar", "offline-avatar.png");
         ResourceManager.getInstance().loadHighQualityAsset("star", "gfx/star.png");
+        ResourceManager.getInstance().loadHighQualityAsset("chat", "chat.png");
+        ResourceManager.getInstance().loadHighQualityAsset("team_vs", "team_vs.png");
+        ResourceManager.getInstance().loadHighQualityAsset("head_head", "head_head.png");
+        ResourceManager.getInstance().loadHighQualityAsset("crown", "crown.png");
+        ResourceManager.getInstance().loadHighQualityAsset("missing", "missing.png");
+        ResourceManager.getInstance().loadHighQualityAsset("lock", "lock.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_play", "music_play.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_pause", "music_pause.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_stop", "music_stop.png");
@@ -285,32 +303,47 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadFont("smallFont", null, 21, Color.WHITE);
         ResourceManager.getInstance().loadStrokeFont("strokeFont", null, 36, Color.BLACK, Color.WHITE);
 
-        BassAudioPlayer.initDevice();
-
+        ResourceManager.getInstance().loadSound("heartbeat", "sfx/heartbeat.ogg", false);
     }
 
     @Override
     public Scene onLoadScene() {
-        return new SplashScene().getScene();
+        return SplashScene.INSTANCE.getScene();
     }
 
     @Override
     public void onLoadComplete() {
-        new AsyncTaskLoader().execute(new OsuAsyncCallback() {
+
+        // Initializing this class because they contain fragments in its constructors that should be initialized in
+        // main thread because of the Looper.
+        LobbyScene.INSTANCE.init();
+        RoomScene.INSTANCE.init();
+
+        new AsyncTask() {
+            @Override
             public void run() {
+                BassAudioPlayer.initDevice();
                 GlobalManager.getInstance().init();
                 analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
                 GlobalManager.getInstance().setLoadingProgress(50);
-                Config.loadSkins();
                 checkNewSkins();
+                Config.loadSkins();
                 checkNewBeatmaps();
-                if (!LibraryManager.getInstance().loadLibraryCache(MainActivity.this, true)) {
-                    LibraryManager.getInstance().scanLibrary(MainActivity.this);
+                if (!LibraryManager.INSTANCE.loadLibraryCache(true)) {
+                    LibraryManager.INSTANCE.scanLibrary();
                     System.gc();
                 }
+                SplashScene.INSTANCE.playWelcomeAnimation();
+                try {
+                    // Allow the welcome animation to progress before entering onComplete state.
+                    Thread.sleep(2500);
+                }
+                catch (InterruptedException ignored) {}
+                Updater.getInstance().checkForUpdates(false, true);
             }
 
-            public void onComplete() {  
+            @Override
+            public void onComplete() {
                 GlobalManager.getInstance().setInfo("");
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
@@ -318,13 +351,19 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().getMainScene().loadBeatmap();
                 initPreferences();
                 availableInternalMemory();
-                initAccessibilityDetector();
+                AccessibilityDetector.start(MainActivity.this);
+
+                if (roomInviteLink != null) {
+                    LobbyScene.INSTANCE.connectFromLink(roomInviteLink);
+                    return;
+                }
+
                 if (willReplay) {
                     GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
                     willReplay = false;
                 }
             }
-        });
+        }.execute();
     }
     /*
     Accuracy isn't the best, but it's sufficient enough
@@ -383,10 +422,6 @@ public class MainActivity extends BaseGameActivity implements
                 }});
 
         ActivityOverlay.initial(this, frameLayout.getId());
-
-        if ("pre_release".equals(BuildConfig.BUILD_TYPE) || BuildConfig.DEBUG) {
-            BuildTypeNoticeFragment.single.get().show();
-        }
     }
 
     public void checkNewBeatmaps() {
@@ -399,27 +434,21 @@ public class MainActivity extends BaseGameActivity implements
                         StringTable.get(R.string.message_lib_importing),
                         false);
 
-                if(FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath())) {
-                    String folderName = beatmapToAdd.substring(0, beatmapToAdd.length() - 4);
-                    // We have imported the beatmap!
-                    ToastLogger.showText(
-                            StringTable.format(R.string.message_lib_imported, folderName),
-                            true);
-                }
-
-                // LibraryManager.getInstance().sort();
-                LibraryManager.getInstance().savetoCache(MainActivity.this);
+                FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath());
+                // LibraryManager.INSTANCE.sort();
+                LibraryManager.INSTANCE.saveToCache();
             } else if (file.getName().endsWith(".odr")) {
                 willReplay = true;
             }
         } else if (mainDir.exists() && mainDir.isDirectory()) {
             File[] filelist = FileUtils.listFiles(mainDir, ".osz");
-            final ArrayList<String> beatmaps = new ArrayList<String>();
+            final ArrayList<String> beatmaps = new ArrayList<>();
             for (final File file : filelist) {
-                ZipFile zip = new ZipFile(file);
-                if(zip.isValidZipFile()) {
-                    beatmaps.add(file.getPath());
-                }
+                try (var zip = new ZipFile(file)) {
+                    if (zip.isValidZipFile()) {
+                        beatmaps.add(file.getPath());
+                    }
+                } catch (IOException ignored) {}
             }
 
             File beatmapDir = new File(Config.getBeatmapPath());
@@ -427,10 +456,11 @@ public class MainActivity extends BaseGameActivity implements
                     && beatmapDir.isDirectory()) {
                 filelist = FileUtils.listFiles(beatmapDir, ".osz");
                 for (final File file : filelist) {
-                    ZipFile zip = new ZipFile(file);
-                    if(zip.isValidZipFile()) {
-                        beatmaps.add(file.getPath());
-                    }
+                    try (var zip = new ZipFile(file)) {
+                        if (zip.isValidZipFile()) {
+                            beatmaps.add(file.getPath());
+                        }
+                    } catch (IOException ignored) {}
                 }
             }
 
@@ -440,10 +470,11 @@ public class MainActivity extends BaseGameActivity implements
                     && downloadDir.isDirectory()) {
                 filelist = FileUtils.listFiles(downloadDir, ".osz");
                 for (final File file : filelist) {
-                    ZipFile zip = new ZipFile(file);
-                    if(zip.isValidZipFile()) {
-                        beatmaps.add(file.getPath());
-                    }
+                    try (var zip = new ZipFile(file)) {
+                        if (zip.isValidZipFile()) {
+                            beatmaps.add(file.getPath());
+                        }
+                    } catch (IOException ignored) {}
                 }
             }
 
@@ -454,18 +485,12 @@ public class MainActivity extends BaseGameActivity implements
                         R.string.message_lib_importing_several,
                         beatmaps.size()), false);
                 for (final String beatmap : beatmaps) {
-                    if(FileUtils.extractZip(beatmap, Config.getBeatmapPath())) {
-                        String folderName = beatmap.substring(0, beatmap.length() - 4);
-                        // We have imported the beatmap!
-                        ToastLogger.showText(
-                                StringTable.format(R.string.message_lib_imported, folderName),
-                                true);
-                    }
+                    FileUtils.extractZip(beatmap, Config.getBeatmapPath());
                 }
                 // Config.setDELETE_OSZ(deleteOsz);
 
-                // LibraryManager.getInstance().sort();
-                LibraryManager.getInstance().savetoCache(MainActivity.this);
+                // LibraryManager.INSTANCE.sort();
+                LibraryManager.INSTANCE.saveToCache();
             }
         }
     }
@@ -482,10 +507,11 @@ public class MainActivity extends BaseGameActivity implements
             final File[] files = FileUtils.listFiles(skinDir, ".osk");
 
             for (final File file : files) {
-                ZipFile zip = new ZipFile(file);
-                if(zip.isValidZipFile()) {
-                    skins.add(file.getPath());
-                }
+                try (var zip = new ZipFile(file)) {
+                    if (zip.isValidZipFile()) {
+                        skins.add(file.getPath());
+                    }
+                } catch (IOException ignored) {}
             }
         }
 
@@ -498,10 +524,11 @@ public class MainActivity extends BaseGameActivity implements
             final File[] files = FileUtils.listFiles(downloadDir, ".osk");
 
             for (final File file : files) {
-                ZipFile zip = new ZipFile(file);
-                if(zip.isValidZipFile()) {
-                    skins.add(file.getPath());
-                }
+                try (var zip = new ZipFile(file)) {
+                    if (zip.isValidZipFile()) {
+                        skins.add(file.getPath());
+                    }
+                } catch (IOException ignored) {}
             }
         }
 
@@ -542,6 +569,12 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     protected void onCreate(Bundle pSavedInstanceState) {
         super.onCreate(pSavedInstanceState);
+
+        try {
+            versionName = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_ACTIVITIES).versionName;
+        }
+        catch (Exception ignored) {}
+
         if (this.mEngine == null) {
             return;
         }
@@ -586,15 +619,17 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     protected void onStart() {
-//        this.enableAccelerometerSensor(this);
-        if (getIntent().getAction() != null
-                && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
-            if (ContentResolver.SCHEME_FILE.equals(getIntent().getData().getScheme())) {
-                beatmapToAdd = getIntent().getData().getPath();
-            }
-            if (BuildConfig.DEBUG) {
-                System.out.println(getIntent());
-                System.out.println(getIntent().getData().getEncodedPath());
+        if (getIntent().getAction() != null && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
+
+            var data = getIntent().getData();
+
+            if (data != null) {
+
+                if (data.toString().startsWith(LobbyAPI.INVITE_HOST))
+                    roomInviteLink = data;
+
+                if (ContentResolver.SCHEME_FILE.equals(getIntent().getData().getScheme()))
+                    beatmapToAdd = getIntent().getData().getPath();
             }
         }
         super.onStart();
@@ -635,7 +670,14 @@ public class MainActivity extends BaseGameActivity implements
         if (GlobalManager.getInstance().getEngine() != null && GlobalManager.getInstance().getGameScene() != null
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
             SpritePool.getInstance().purge();
-            GlobalManager.getInstance().getGameScene().pause();
+
+            if (Multiplayer.isMultiplayer)
+            {
+                ToastLogger.showText("You've left the match.", true);
+                GlobalManager.getInstance().getGameScene().quit();
+                Multiplayer.log("Player left the match.");
+            }
+            else GlobalManager.getInstance().getGameScene().pause();
         }
         if (GlobalManager.getInstance().getMainScene() != null) {
             BeatmapInfo beatmapInfo = GlobalManager.getInstance().getMainScene().beatmapInfo;
@@ -667,14 +709,28 @@ public class MainActivity extends BaseGameActivity implements
         if (this.mEngine == null) {
             return;
         }
-        if (GlobalManager.getInstance().getEngine() != null
-                && GlobalManager.getInstance().getGameScene() != null
-                && !hasFocus
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
-            if (!GlobalManager.getInstance().getGameScene().isPaused()) {
-                GlobalManager.getInstance().getGameScene().pause();
+
+        if (getEngine() != null && !hasFocus) {
+
+            if (GlobalManager.getInstance().getGameScene() != null
+                    && getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()
+                    && GlobalManager.getInstance().getGameScene() != null) {
+
+                if (!GlobalManager.getInstance().getGameScene().isPaused() && !Multiplayer.isMultiplayer)
+                    GlobalManager.getInstance().getGameScene().pause();
+            }
+
+            if (Multiplayer.isConnected
+                    && (getEngine().getScene() == RoomScene.INSTANCE
+                    || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()))
+            {
+                Execution.asyncIgnoreExceptions(() -> {
+                    RoomScene.INSTANCE.invalidateStatus();
+                    return null;
+                });
             }
         }
+
         if (hasFocus && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Config.isHideNaviBar()) {
             getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -704,9 +760,8 @@ public class MainActivity extends BaseGameActivity implements
             return false;
         }
 
-        if(autoclickerDialogShown) {
+        if (AccessibilityDetector.isIllegalServiceDetected())
             return false;
-        }
 
         if (event.getAction() != KeyEvent.ACTION_DOWN) {
             return super.onKeyDown(keyCode, event);
@@ -731,11 +786,7 @@ public class MainActivity extends BaseGameActivity implements
         }
         if (GlobalManager.getInstance().getScoring() != null && keyCode == KeyEvent.KEYCODE_BACK
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getScoring().getScene()) {
-            GlobalManager.getInstance().getScoring().replayMusic();
-            GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getSongMenu().getScene());
-            GlobalManager.getInstance().getSongMenu().updateScore();
-            ResourceManager.getInstance().getSound("applause").stop();
-            GlobalManager.getInstance().getScoring().setReplayID(-1);
+            GlobalManager.getInstance().getScoring().back();
             return true;
         }
         if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ENTER)
@@ -752,14 +803,6 @@ public class MainActivity extends BaseGameActivity implements
                     FilterMenu.getInstance().hideMenu();
                 }
             }
-
-            /*if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == PropsMenu.getInstance()
-                    .getScene()) {
-                PropsMenu.getInstance().saveChanges();
-                if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                    InputManager.getInstance().toggleKeyboard();
-                }
-            }*/
 
             if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == ModMenu.getInstance().getScene()) {
                 ModMenu.getInstance().hide();
@@ -787,6 +830,24 @@ public class MainActivity extends BaseGameActivity implements
                     return true;
                 }
 
+                if (Multiplayer.isMultiplayer) {
+                    if (GlobalManager.getInstance().getEngine().getScene() == LobbyScene.INSTANCE) {
+                        LobbyScene.INSTANCE.back();
+                        return true;
+                    }
+
+                    if (GlobalManager.getInstance().getEngine().getScene() == RoomScene.INSTANCE) {
+
+                        if (RoomScene.INSTANCE.hasChildScene() && RoomScene.INSTANCE.getChildScene() == ModMenu.getInstance().getScene())
+                        {
+                            ModMenu.getInstance().hide();
+                            return true;
+                        }
+                        runOnUiThread(RoomScene.INSTANCE.getLeaveDialog()::show);
+                        return true;
+                    }
+                }
+
                 GlobalManager.getInstance().getMainScene().showExitDialog();
             }
             return true;
@@ -805,41 +866,12 @@ public class MainActivity extends BaseGameActivity implements
         return super.onKeyDown(keyCode, event);
     }
 
-    private void forcedExit() {
+    public void forcedExit() {
         if(GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
             GlobalManager.getInstance().getGameScene().quit();
         }
         GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
         GlobalManager.getInstance().getMainScene().exit();
-    }
-
-    private void initAccessibilityDetector() {
-        ScheduledExecutorService scheduledExecutorService =
-            Executors.newSingleThreadScheduledExecutor();
-        scheduledExecutorService
-            .scheduleAtFixedRate(() -> {
-                AccessibilityManager manager = (AccessibilityManager)
-                    getSystemService(Context.ACCESSIBILITY_SERVICE);
-                List<AccessibilityServiceInfo> activeServices = new ArrayList<AccessibilityServiceInfo>(
-                    manager.getEnabledAccessibilityServiceList(
-                        AccessibilityServiceInfo.FEEDBACK_ALL_MASK));
-
-                for(AccessibilityServiceInfo activeService : activeServices) {
-                     int capabilities = activeService.getCapabilities();
-                    if((AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES & capabilities)
-                            == AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES) {
-                        if(!autoclickerDialogShown && activityVisible) {
-                            runOnUiThread(() -> {
-                                ConfirmDialogFragment dialog = new ConfirmDialogFragment()
-                                    .setMessage(R.string.message_autoclicker_detected);
-                                dialog.setOnDismissListener(() -> forcedExit());
-                                dialog.showForResult(isAccepted -> forcedExit());
-                            });
-                            autoclickerDialogShown = true;
-                        }
-                    }
-                }
-            }, 0, 1, TimeUnit.SECONDS);
     }
 
     public long getVersionCode() {
@@ -879,5 +911,11 @@ public class MainActivity extends BaseGameActivity implements
             finish();
             return false;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
+        super.onDestroy();
     }
 }

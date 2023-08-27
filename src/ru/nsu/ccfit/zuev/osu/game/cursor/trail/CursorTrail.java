@@ -15,18 +15,11 @@ import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorSprite;
 public class CursorTrail extends ParticleSystem {
     public CursorTrail(
             PointParticleEmitter emitter,
-            int trailAmount,
-            int longTrailRateMultiplier, int longTrailMaxMultiplier,
+            int spawnRate,
             float trailSize,
             TextureRegion pTextureRegion
     ) {
-        super(
-            emitter,
-            Config.isUseLongTrail()? trailAmount * longTrailRateMultiplier : trailAmount,
-            Config.isUseLongTrail()? trailAmount * longTrailRateMultiplier : trailAmount,
-            Config.isUseLongTrail()? trailAmount * longTrailMaxMultiplier : trailAmount,
-            pTextureRegion
-        );
+        super(emitter, spawnRate, spawnRate, spawnRate, pTextureRegion);
 
         fadeOut();
         setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
@@ -35,11 +28,7 @@ public class CursorTrail extends ParticleSystem {
     }
 
     private void fadeOut() {
-        float defaultLifeTime = 0.25f;
-        float longLifeTime = defaultLifeTime * 2;
-        float lifeTime = Config.isUseLongTrail()? longLifeTime : defaultLifeTime;
-
-        addParticleModifier(new ExpireModifier(lifeTime));
-        addParticleModifier(new AlphaModifier(1.0f, 0.0f, 0f, lifeTime));
+        addParticleModifier(new ExpireModifier(0.10f));
+        addParticleModifier(new AlphaModifier(1.0f, 0.0f, 0f, 0.10f));
     }
 }

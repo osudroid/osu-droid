@@ -6,5 +6,6 @@
 
     <color name="frgDialogStyleBackground">#55000000</color>
     <color name="frgBodyBackgroundLight">#EFFFFFFF</color>
+    <color name="frgBodyBackgroundDark">#72000000</color>
     <color name="triangleBackground">#DDFD7CB5</color>
 </resources>

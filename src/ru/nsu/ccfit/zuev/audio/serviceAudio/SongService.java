@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.audio.serviceAudio;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
@@ -10,8 +11,11 @@ import android.util.Log;
 
 import java.io.File;
 
+import androidx.core.app.NotificationManagerCompat;
 import ru.nsu.ccfit.zuev.audio.Status;
+import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
+import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 
 
@@ -41,8 +45,29 @@ public class SongService extends Service {
     public boolean onUnbind(Intent intent) {
         System.out.println("Service unbind");
         hideNotification();
+        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
         exit();
         return super.onUnbind(intent);
+    }
+
+    @Override
+    public void onDestroy() {
+        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
+    }
+
+    @Override
+    public void onLowMemory() {
+        NotificationManagerCompat.from(getApplicationContext()).cancelAll();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -72,8 +97,11 @@ public class SongService extends Service {
 
     public boolean preLoad(String filePath, float speed, boolean enableNC) {
         if (checkFileExist(filePath)) {
-            if (audioFunc == null) return false;
-                audioFunc.setLoop(false);
+            if (audioFunc == null) {
+                return false;
+            }
+
+            audioFunc.setLoop(false);
             return audioFunc.preLoad(filePath, speed, enableNC);
         }
         return false;
@@ -99,6 +127,14 @@ public class SongService extends Service {
         if (audioFunc == null) return false;
         notify.updateState();
         return audioFunc.stop();
+    }
+
+    public void stopWithoutNotify()
+    {
+        if (audioFunc != null)
+        {
+            audioFunc.stop();
+        }
     }
 
     public boolean exit() {
@@ -185,12 +221,28 @@ public class SongService extends Service {
             Log.w("SongService", "NOT SHOW THE NOTIFY CUZ IS GAMING");
             return;
         }
+
+        if (audioFunc != null) {
+            audioFunc.onGamePause();
+            reloadCurrentAudio();
+        }
+
         notify.show();
         notify.updateSong(GlobalManager.getInstance().getMainScene().getBeatmapInfo());
         notify.updateState();
     }
 
     public boolean hideNotification() {
+        // Checking if the notification is shown is pretty hacky, but for now it is the case
+        // only if the player leaves the game from the main menu, which is when we want to
+        // reload BASS after being altered in `showNotification` and reload the audio.
+        if (notify.isShowing) {
+            if (audioFunc != null) {
+                audioFunc.onGameResume();
+            }
+            reloadCurrentAudio();
+        }
+
         return notify.hide();
     }
 
@@ -210,6 +262,24 @@ public class SongService extends Service {
 
     public boolean isRunningForeground() {
         return MainActivity.isActivityVisible();
+    }
+
+    private void reloadCurrentAudio() {
+        Status pastStatus = getStatus();
+
+        pause();
+        setVolume(Config.getBgmVolume());
+
+        // Reload audio, otherwise it will be choppy or offset for whatever reason.
+        if (LibraryManager.INSTANCE.getBeatmap() != null) {
+            int position = getPosition();
+            preLoad(LibraryManager.INSTANCE.getBeatmap().getMusic());
+            seekTo(position);
+        }
+
+        if (audioFunc != null && pastStatus != Status.STOPPED && pastStatus != Status.PAUSED) {
+            audioFunc.resume();
+        }
     }
 
     public class ReturnBindObject extends Binder {

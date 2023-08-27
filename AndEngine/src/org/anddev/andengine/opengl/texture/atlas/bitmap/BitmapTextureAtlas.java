@@ -156,7 +156,8 @@ public class BitmapTextureAtlas extends TextureAtlas<IBitmapTextureAtlasSource> 
 				final Bitmap bitmap = bitmapTextureAtlasSource.onLoadBitmap(bitmapConfig);
 				try {
 					if(bitmap == null) {
-						throw new IllegalArgumentException(bitmapTextureAtlasSource.getClass().getSimpleName() + ": " + bitmapTextureAtlasSource.toString() + " returned a null Bitmap.");
+						unloadFromHardware(pGL);
+						return;
 					}
 					if(preMultipyAlpha) {
 						//System.out.println("load preMultipyAlpha texture");

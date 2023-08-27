@@ -16,11 +16,6 @@ public class BassSoundProvider {
     private int sample = 0;
     private int channel = 0;
 
-    public BassSoundProvider() {
-        BASS.BASS_Init(-1, 44100, BASS.BASS_DEVICE_LATENCY);
-        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_BUFFER, 0);
-    }
-
     public boolean prepare(final String fileName) {
         free();
         if (fileName != null && fileName.length() > 0) {

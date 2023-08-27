@@ -2,12 +2,17 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.opengl.GLES20;
 
+import com.reco1l.api.ibancho.data.RoomTeam;
+import com.reco1l.api.ibancho.data.TeamMode;
+import com.reco1l.framework.lang.Execution;
+import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import kotlinx.coroutines.Job;
+import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.entity.text.Text;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.HorizontalAlign;
 
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -15,15 +20,17 @@ import java.util.Locale;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.menu.ScoreBoard;
+import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public class DuringGameScoreBoard extends GameObject {
+    private final Scene scene;
     private final StatisticV2 stat;
+    private final String isNotMe;
     private Sprite[] boards;
     private ChangeableText[] ranks;
-    private ScoreBoard.ScoreBoardItems[] scoreBoardDatas;
+    private ScoreBoardItem[] scoreBoardData;
     private int posNow;
     private String currentUsername;
     private ChangeableText playerRank;
@@ -31,98 +38,56 @@ public class DuringGameScoreBoard extends GameObject {
     private Sprite playerSprite;
     private float itemHeight;
     private long lastRankChange;
+    private Job initTask;
 
-    private float paddingTop = 15, paddingLeft = 10;
+    private Entity entity;
+
+    private final float paddingTop = 15;
+    private final float paddingLeft = 10;
 
     public DuringGameScoreBoard(final Scene scene, final StatisticV2 stat, String isNotMe) {
-        final ScoreBoard.ScoreBoardItems[] items = GlobalManager.getInstance().getSongMenu().getBoard();
+        this.scene = scene;
         this.stat = stat;
-        int replayid = GlobalManager.getInstance().getScoring().getReplayID();
-        if (replayid == -1) scoreBoardDatas = items;
-        else {
-            int replayIndex = -1;
-            scoreBoardDatas = new ScoreBoard.ScoreBoardItems[items.length - 1];
-            for (int i = 0; i < items.length; i++) {
-                if (replayid == items[i].scoreId) {
-                    replayIndex = i;
-                    continue;
-                }
-                scoreBoardDatas[i - (replayIndex != -1 ? 1 : 0)] = items[i];
-            }
-        }
-        posNow = scoreBoardDatas.length;
-        currentUsername = isNotMe != null ? isNotMe :
-                OnlineScoring.getInstance().getPanel() == null ?
-                        Config.getLocalUsername() :
-                        Config.getOnlineUsername();
-        TextureRegion tex = ResourceManager.getInstance().getTexture("menu-button-background").deepCopy();
-        tex.setHeight(90);
-        tex.setWidth(130);
-        boards = new Sprite[scoreBoardDatas.length + 1];
-        ranks = new ChangeableText[scoreBoardDatas.length];
-        for (int i = 0; i < scoreBoardDatas.length; i++) {
-            Sprite s = new Sprite(0, 0, tex);
-            s.setAlpha(0.5f);
-            s.setColor(scoreBoardDatas[i].userName.equals(currentUsername) && !currentUsername.equals("osu!") ? 1 : 0.5f, 0.5f, 0.5f);
-            final Text info = new Text(paddingLeft, paddingTop,
-                    ResourceManager.getInstance().getFont("font"), scoreBoardDatas[i].get());
-            info.setScaleCenter(0, 0);
-            info.setScale(0.65f);
-            info.setColor(0.85f, 0.85f, 0.9f);
-            ranks[i] = new ChangeableText(paddingLeft, paddingTop,
-                    ResourceManager.getInstance().getFont("CaptionFont"), "#1", 5);
-            ranks[i].setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-            ranks[i].setScaleCenter(0, 0);
-            ranks[i].setScale(1.7f);
-            ranks[i].setColor(0.6f, 0.6f, 0.6f, 0.9f);
-            ranks[i].setText("#" + (i + 1));
-            ranks[i].setPosition(100 - ranks[i].getWidth(), paddingTop * 2);
-            s.attachChild(ranks[i]);
-            s.attachChild(info);
-            s.setVisible(i == 0 || scoreBoardDatas.length - i < 3);
-            boards[i] = s;
-            scene.attachChild(s);
-        }
-        playerSprite = new Sprite(0, 0, tex);
-        playerSprite.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-        playerSprite.setAlpha(0.5f);
-        playerSprite.setColor(0.5f, 0.5f, 1);
-        playerText = new ChangeableText(paddingLeft, paddingTop,
-                ResourceManager.getInstance().getFont("font"),
-                currentUsername + "\n0\n0x", 100);
-        playerText.setScaleCenter(0, 0);
-        playerText.setScale(0.65f);
-        playerText.setColor(0.85f, 0.85f, 0.9f);
-        playerRank = new ChangeableText(paddingLeft, paddingTop,
-                ResourceManager.getInstance().getFont("CaptionFont"),
-                "#1", 5);
-        playerRank.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-        playerRank.setScaleCenter(0, 0);
-        playerRank.setScale(1.7f);
-        playerRank.setColor(0.6f, 0.6f, 0.6f, 0.9f);
-        playerRank.setText("#" + (!GlobalManager.getInstance().getSongMenu().isBoardOnline() || posNow < (replayid == -1 ? 20 : 19) ?
-                String.valueOf(posNow + 1) : "?"));
-        playerRank.setPosition(100 - playerRank.getWidth(), paddingTop * 2);
-        playerSprite.attachChild(playerRank);
-        playerSprite.attachChild(playerText);
-        itemHeight = 83;//playerSprite.getHeight();
-        boards[posNow] = playerSprite;
-        scene.attachChild(playerSprite);
-        lastRankChange = System.currentTimeMillis();
+        this.isNotMe = isNotMe;
+
+        initScoreboard();
     }
 
     @Override
     public void update(float dt) {
-        float passedAfterChange = (System.currentTimeMillis() - lastRankChange) * 0.001f;
-        playerSprite.setColor(passedAfterChange < 1 ? 1 - 0.5f * passedAfterChange : 0.5f, passedAfterChange < 1 ? 1 - 0.5f * passedAfterChange : 0.5f, 1, passedAfterChange < 1 ? 1 - 0.5f * passedAfterChange : 0.5f);
+
+        // Updating color animation at the update thread
+        if (playerSprite != null)
+        {
+            float passedAfterChange = (System.currentTimeMillis() - lastRankChange) * 0.001f;
+
+            playerSprite.setColor(passedAfterChange < 1 ? 1 - 0.5f * passedAfterChange : 0.5f,
+                                  passedAfterChange < 1 ? 1 - 0.5f * passedAfterChange : 0.5f, 1,
+                                  passedAfterChange < 1 ? 1 - 0.5f * passedAfterChange : 0.5f);
+        }
+
+        if (initTask == null || !initTask.isCompleted() || Multiplayer.isMultiplayer) {
+            return;
+        }
+
+        // Reinitialize scoreboard if data changes.
+        // This should only be done if the scoreboard data comes from an online source.
+        final ScoreBoardItem[] items = GlobalManager.getInstance().getSongMenu().getBoard();
+        int replayID = GlobalManager.getInstance().getScoring().getReplayID();
+        if (replayID == -1 && (scoreBoardData == null || scoreBoardData.length != items.length)) {
+            initScoreboard();
+            return;
+        }
+
         int score = stat.getAutoTotalScore();
         playerText.setText(currentUsername + "\n" +
-                NumberFormat.getNumberInstance(Locale.US).format(score) + "\n" +
-                NumberFormat.getNumberInstance(Locale.US).format(stat.getMaxCombo()) + "x");
+                                   NumberFormat.getNumberInstance(Locale.US).format(score) + "\n" +
+                                   NumberFormat.getNumberInstance(Locale.US).format(stat.getMaxCombo()) + "x");
         playerText.setScaleCenter(0, 0);
         playerText.setScale(0.65f);
+
         for (int i = posNow - 1; i >= 0; i--) {
-            if (score > scoreBoardDatas[i].playScore) {
+            if (score > scoreBoardData[i].playScore) {
                 posNow = i;
                 ranks[i].setText("#" + (i + 2));
                 ranks[i].setPosition(100 - ranks[i].getWidth(), paddingTop * 2);
@@ -138,17 +103,204 @@ public class DuringGameScoreBoard extends GameObject {
             }
         }
         if (boards.length > 4 && posNow > 3) {
-            playerSprite.setPosition(0, Config.getRES_HEIGHT() / 2);
-            boards[posNow - 1].setPosition(0, Config.getRES_HEIGHT() / 2 - itemHeight * 1);
-            boards[posNow - 2].setPosition(0, Config.getRES_HEIGHT() / 2 - itemHeight * 2);
-            boards[0].setPosition(0, Config.getRES_HEIGHT() / 2 - itemHeight * 3);
+            playerSprite.setPosition(0, Config.getRES_HEIGHT() / 2f);
+            boards[posNow - 1].setPosition(0, Config.getRES_HEIGHT() / 2f - itemHeight * 1);
+            boards[posNow - 2].setPosition(0, Config.getRES_HEIGHT() / 2f - itemHeight * 2);
+            boards[0].setPosition(0, Config.getRES_HEIGHT() / 2f - itemHeight * 3);
         } else {
             for (int i = 0; i < 4; i++) {
                 if (boards.length <= i) break;
                 boards[i].setPosition(0,
-                        Config.getRES_HEIGHT() / 2 + itemHeight * (i - (posNow <= i ? 2 : 3)));
+                        Config.getRES_HEIGHT() / 2f + itemHeight * (i - (posNow <= i ? 2 : 3)));
             }
-            playerSprite.setPosition(0, Config.getRES_HEIGHT() / 2 + itemHeight * (posNow - 3));
+            playerSprite.setPosition(0, Config.getRES_HEIGHT() / 2f + itemHeight * (posNow - 3));
         }
+    }
+
+    private void updatePositions()
+    {
+        var initialY = Config.getRES_HEIGHT() / 2f - itemHeight * 3;
+
+        int size = boards.length;
+        int i = 0;
+        while (i < size)
+        {
+            var sprite = boards[i];
+
+            if (sprite == null) continue;
+
+            sprite.setPosition(0, initialY + itemHeight * Math.min(i, 3));
+            sprite.setVisible(i <= (posNow > 3 ? 2 : 3) || i == posNow);
+            i++;
+        }
+    }
+
+    public void initScoreboard() {
+        if (initTask != null) {
+            initTask.cancel(null);
+        }
+
+        if (entity != null) {
+            var oldEntity = entity;
+
+            Execution.glThread(() -> {
+                oldEntity.detachSelf();
+                oldEntity.detachChildren();
+            });
+        }
+
+        initTask = Execution.asyncIgnoreExceptions(() -> {
+
+            entity = new Entity();
+            entity.setChildrenIgnoreUpdate(true);
+            scene.attachChild(entity);
+
+            ScoreBoardItem[] items;
+            if (Multiplayer.isConnected)
+            {
+                items = Multiplayer.getLiveData();
+
+                if (items == null || items.length == 0)
+                    return null;
+            }
+            else items = GlobalManager.getInstance().getSongMenu().getBoard();
+
+            int replayID = Multiplayer.isConnected ? -1 : GlobalManager.getInstance().getScoring().getReplayID();
+            if (replayID == -1) {
+                scoreBoardData = items;
+            } else {
+                int replayIndex = -1;
+                scoreBoardData = new ScoreBoardItem[items.length - 1];
+                for (int i = 0; i < items.length; i++) {
+                    if (replayID == items[i].scoreId) {
+                        replayIndex = i;
+                        continue;
+                    }
+                    scoreBoardData[i - (replayIndex != -1 ? 1 : 0)] = items[i];
+                }
+            }
+
+            currentUsername = isNotMe != null ? isNotMe :
+                    OnlineScoring.getInstance().getPanel() == null ?
+                            Config.getLocalUsername() :
+                            Config.getOnlineUsername();
+
+            if (Multiplayer.isConnected)
+            {
+                //noinspection DataFlowIssue
+                if (Multiplayer.room.getTeamMode() == TeamMode.TEAM_VS_TEAM)
+                {
+                    //noinspection DataFlowIssue
+                    if (Multiplayer.player.getTeam() == RoomTeam.RED)
+                        currentUsername = "Red Team";
+                    else
+                        currentUsername = "Blue Team";
+                }
+
+                int i = scoreBoardData.length - 1;
+                while (i >= 0)
+                {
+                    if (scoreBoardData[i].userName.equals(currentUsername))
+                    {
+                        if (posNow != i)
+                            lastRankChange = System.currentTimeMillis();
+                        posNow = i;
+                        break;
+                    }
+                    --i;
+                }
+            }
+            else posNow = scoreBoardData.length;
+
+            TextureRegion tex = ResourceManager.getInstance().getTexture("menu-button-background").deepCopy();
+            tex.setHeight(90);
+            tex.setWidth(130);
+            boards = new Sprite[Multiplayer.isConnected ? scoreBoardData.length : scoreBoardData.length + 1];
+            ranks = new ChangeableText[scoreBoardData.length];
+            for (int i = 0; i < scoreBoardData.length; i++) {
+
+                if (Multiplayer.isConnected && i == posNow)
+                    continue;
+
+                var data = scoreBoardData[i];
+
+                Sprite s = new Sprite(0, 0, tex);
+                s.setAlpha(0.5f);
+                s.setColor(data.userName.equals(currentUsername) && !currentUsername.equals("osu!") ? 1 : 0.5f, 0.5f, 0.5f);
+                final Text info = new Text(paddingLeft, paddingTop,
+                        ResourceManager.getInstance().getFont("font"), data.get());
+                info.setScaleCenter(0, 0);
+                info.setScale(0.65f);
+
+                var rankText = new ChangeableText(paddingLeft, paddingTop,
+                        ResourceManager.getInstance().getFont("CaptionFont"), "#1", 5);
+                rankText.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+                rankText.setScaleCenter(0, 0);
+                rankText.setScale(1.7f);
+                rankText.setText("#" + (i + 1));
+                rankText.setPosition(100 - rankText.getWidth(), paddingTop * 2);
+                s.attachChild(rankText);
+                s.attachChild(info);
+                s.setVisible(i == 0 || scoreBoardData.length - i < 3);
+
+                if (data.isAlive)
+                    info.setColor(0.85f, 0.85f, 0.9f);
+                else
+                    info.setColor(1f, 0.5f, 0.5f);
+
+                ranks[i] = rankText;
+                boards[i] = s;
+                entity.attachChild(s);
+            }
+            var playerSprite = new Sprite(0, 0, tex);
+            playerSprite.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+            playerSprite.setAlpha(0.5f);
+            playerSprite.setColor(0.5f, 0.5f, 1);
+            var playerText = new ChangeableText(paddingLeft, paddingTop,
+                    ResourceManager.getInstance().getFont("font"),
+                    currentUsername + "\n0\n0x", 100);
+            playerText.setScaleCenter(0, 0);
+            playerText.setScale(0.65f);
+            playerText.setColor(0.85f, 0.85f, 0.9f);
+            var playerRank = new ChangeableText(paddingLeft, paddingTop,
+                    ResourceManager.getInstance().getFont("CaptionFont"),
+                    "#1", 5);
+            playerRank.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+            playerRank.setScaleCenter(0, 0);
+            playerRank.setScale(1.7f);
+            playerRank.setColor(0.6f, 0.6f, 0.6f, 0.9f);
+            playerRank.setText("#" + (!GlobalManager.getInstance().getSongMenu().isBoardOnline() || posNow < (replayID == -1 ? 20 : 19) ?
+                    String.valueOf(posNow + 1) : "?"));
+            playerRank.setPosition(100 - playerRank.getWidth(), paddingTop * 2);
+            playerSprite.attachChild(playerRank);
+            playerSprite.attachChild(playerText);
+            itemHeight = 83;
+            this.playerText = playerText;
+            this.playerRank = playerRank;
+            this.playerSprite = playerSprite;
+            boards[posNow] = playerSprite;
+            entity.attachChild(playerSprite);
+
+            if (Multiplayer.isConnected)
+            {
+                var data = scoreBoardData[posNow];
+
+                playerRank.setText("#" + (posNow + 1));
+                playerRank.setPosition(100 - playerRank.getWidth(), paddingTop * 2);
+                playerText.setText(data.get());
+                playerText.setScaleCenter(0, 0);
+                playerText.setScale(0.65f);
+
+                if (data.isAlive)
+                    playerText.setColor(0.85f, 0.85f, 0.9f);
+                else
+                    playerText.setColor(1f, 0.5f, 0.5f);
+
+                updatePositions();
+                return null;
+            }
+            lastRankChange = System.currentTimeMillis();
+            return null;
+        });
     }
 }

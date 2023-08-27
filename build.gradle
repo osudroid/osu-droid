@@ -1,6 +1,6 @@
 buildscript {
-    ext {
-        kotlin_version = '1.5.21'
+    ext{
+        kotlin_version = '1.7.0'
     }
     repositories {
         google()
@@ -30,7 +30,7 @@ def getReleaseVersionCode() {
 }
 
 def getReleaseVersionName() {
-    def baseline = '1.6.8'
+    def baseline = '1.7.0'
     def versionName = baseline + new Date().format('(yyMMdd)')
     println('versionName: ' + versionName)
     return versionName
@@ -132,8 +132,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     useLibrary 'org.apache.http.legacy'
@@ -176,5 +176,14 @@ dependencies {
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlJavaExt:d91c53fcff'
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:d91c53fcff'
     implementation project(path: ':LibBASS')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'com.github.delight-im:Android-AdvancedWebView:v3.2.1'
+
+    // Multiplayer
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.10"
+    implementation ('io.socket:socket.io-client:2.1.0') {
+        exclude group: 'org.json', module: 'json'
+    }
 }

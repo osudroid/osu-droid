@@ -19,6 +19,7 @@ public class SkinJsonReader extends SkinReader {
     private JSONObject currentLayoutData;
     private JSONObject currentColorData;
     private JSONObject currentCursorData;
+    private JSONObject currentFontsData;
 
     private SkinJsonReader() {
 
@@ -59,6 +60,18 @@ public class SkinJsonReader extends SkinReader {
             currentCursorData = c;
             loadCursor();
         });
+        load("Fonts", currentData, (c) -> {
+            currentFontsData = c;
+            loadFonts();
+        });
+    }
+
+    @Override
+    protected void loadFonts()
+    {
+        OsuSkin.get().hitCirclePrefix.setFromJson(currentFontsData);
+        OsuSkin.get().scorePrefix.setFromJson(currentFontsData);
+        OsuSkin.get().comboPrefix.setFromJson(currentFontsData);
     }
 
     @Override
@@ -83,7 +96,7 @@ public class SkinJsonReader extends SkinReader {
         OsuSkin skin = OsuSkin.get();
         JSONObject data = currentSliderData;
         skin.sliderBodyWidth.setFromJson(data);
-        skin.sliderBodyWidth.setFromJson(data);
+        skin.sliderBorderWidth.setFromJson(data);
         skin.sliderBodyBaseAlpha.setFromJson(data);
         skin.sliderHintWidth.setFromJson(data);
         skin.sliderHintShowMinLength.setFromJson(data);

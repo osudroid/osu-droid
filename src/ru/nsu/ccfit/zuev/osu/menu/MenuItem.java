@@ -314,11 +314,15 @@ public class MenuItem {
         freeBackground();
         visible = false;
         deleted = true;
-        LibraryManager.getInstance().deleteMap(beatmap);
+        LibraryManager.INSTANCE.deleteMap(beatmap);
     }
 
     public boolean isVisible() {
         return visible && (!deleted);
+    }
+
+    public boolean isDeleted() {
+        return deleted;
     }
 
     public void stopScroll(final float y) {

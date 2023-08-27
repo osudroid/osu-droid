@@ -35,6 +35,8 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class NotifyPlayer {
 
+    public static int NOTIFICATION_ID = 1;
+
     private final MainActivity mActivity = GlobalManager.getInstance().getMainActivity();
     private Context context;
 
@@ -89,14 +91,14 @@ public class NotifyPlayer {
                         break;
                     case actionPrev:
                         service.stop();
-                        BeatmapInfo prevBeatmap = LibraryManager.getInstance().getPrevBeatmap();
+                        BeatmapInfo prevBeatmap = LibraryManager.INSTANCE.getPrevBeatmap();
                         service.preLoad(prevBeatmap.getMusic());
                         updateSong(prevBeatmap);
                         service.play();
                         break;
                     case actionNext:
                         service.stop();
-                        BeatmapInfo nextBeatmap = LibraryManager.getInstance().getNextBeatmap();
+                        BeatmapInfo nextBeatmap = LibraryManager.INSTANCE.getNextBeatmap();
                         service.preLoad(nextBeatmap.getMusic());
                         updateSong(nextBeatmap);
                         service.play();
@@ -119,7 +121,7 @@ public class NotifyPlayer {
         int drawable = isPlaying ? R.drawable.v_pause : R.drawable.v_play;
 
         builder.mActions.set(1, new NotificationCompat.Action(drawable, actionPlay, play));
-        manager.notify(1, builder.build());
+        manager.notify(NOTIFICATION_ID, builder.build());
     }
 
     public void updateSong(BeatmapInfo beatmap) {
@@ -151,7 +153,7 @@ public class NotifyPlayer {
         builder.setLargeIcon(bitmap != null ? bitmap : defaultIcon);
 
         notification = builder.build();
-        manager.notify(1, notification);
+        manager.notify(NOTIFICATION_ID, notification);
     }
 
     public void show() {
@@ -160,14 +162,14 @@ public class NotifyPlayer {
         if (notification == null)
             create();
 
-        manager.notify(1, notification);
+        manager.notify(NOTIFICATION_ID, notification);
         isShowing = true;
     }
 
     public boolean hide() {
         if (!isShowing)
             return false;
-        manager.cancel(1);
+        manager.cancel(NOTIFICATION_ID);
         isShowing = false;
         return true;
     }
@@ -200,7 +202,6 @@ public class NotifyPlayer {
                 .setContentText("artist")
                 .setOnlyAlertOnce(true)
                 .setSound(null)
-                .setOngoing(true)
                 .setShowWhen(false)
                 .setContentIntent(openApp)
                 .addAction(R.drawable.v_prev, actionPrev, prev)

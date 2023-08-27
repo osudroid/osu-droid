@@ -64,7 +64,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_alignParentBottom="true"
-				android:layout_centerHorizontal="true">
+			    android:layout_marginLeft="30dp">
 
 				<View
 					android:layout_width="100dp"
@@ -77,13 +77,12 @@
 					android:alpha="0.5" />
 
 				<TextView
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_centerInParent="true"
-					android:text="Settings"
-					android:textColor="#FFFFFFFF"
-					android:textSize="15sp"
-					android:textStyle="bold" />
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Settings"
+						android:textColor="#FFFFFFFF"
+						android:textSize="15sp"
+						android:textStyle="bold" android:layout_centerInParent="true"/>
 
 			</RelativeLayout>
 		</RelativeLayout>
@@ -117,7 +116,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="20dp"
+                    android:layout_margin="12dp"
                     android:orientation="vertical">
 
 
@@ -133,6 +132,14 @@
                             android:layout_height="wrap_content"
                             android:text="@string/opt_enableStoryboard_title" />
 
+						<CheckBox
+								android:id="@+id/enableVideo"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_marginLeft="5dp"
+								android:layout_weight="1"
+								android:text="Enable video" />
+
                         <CheckBox
                             android:id="@+id/showScoreboard"
                             android:layout_width="wrap_content"
@@ -143,6 +150,8 @@
                     </LinearLayout>
 
 					<RelativeLayout
+						android:layout_marginTop="12dp"
+						android:layout_marginBottom="10dp"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content">
 
@@ -196,9 +205,10 @@
                         </TableRow>
 
 						<RelativeLayout
-							android:layout_marginTop="10dp"
+							android:layout_marginTop="12dp"
 							android:layout_width="match_parent"
-							android:layout_height="wrap_content">
+							android:layout_height="wrap_content"
+							android:layout_marginBottom="12dp">
 
 							<View
 								android:layout_width="match_parent"
@@ -210,22 +220,13 @@
 								android:layout_height="2dp" />
 						</RelativeLayout>
 
-						<TextView
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:layout_marginTop="10dp"
-							android:layout_weight="3"
-							android:gravity="center"
-							android:textAlignment="center"
-							android:text="@string/unranked_features"
-							android:textColor="#FF0000" />
-
                         <TableRow
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1">
 
                             <TextView
+								android:id="@+id/speed_modify_label"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textAlignment="textEnd"
@@ -253,27 +254,36 @@
                                 android:text="1.00x" />
                         </TableRow>
 
-                        <TableRow
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1">
+						<TableRow
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_weight="1">
 
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="0dp"/>
+							<View
+								android:layout_width="0dp"
+								android:layout_height="0dp"/>
 
-                            <CheckBox
-                                android:id="@+id/enableNCwhenSpeedChange"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"/>
+							<CheckBox
+								android:id="@+id/enableNCwhenSpeedChange"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"/>
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
 								android:layout_marginLeft="15dp"
-                                android:text="@string/opt_enablenc_whenspeedchange_title"/>
-                        </TableRow>
+								android:text="@string/opt_enablenc_whenspeedchange_title"/>
+						</TableRow>
 
+						<TextView
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="10dp"
+							android:layout_weight="3"
+							android:gravity="center"
+							android:textAlignment="center"
+							android:text="@string/unranked_features"
+							android:textColor="#FF0000" />
 
                         <TableRow
                             android:layout_width="wrap_content"

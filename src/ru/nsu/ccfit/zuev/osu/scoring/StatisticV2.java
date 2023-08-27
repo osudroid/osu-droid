@@ -7,21 +7,27 @@ import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Random;
 
+import com.reco1l.api.ibancho.data.WinCondition;
+import com.reco1l.legacy.data.MultiplayerConverter;
+import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 
 public class StatisticV2 implements Serializable {
     private static final long serialVersionUID = 8339570462000129479L;
+    private static final Random random = new Random();
+
     int hit300 = 0, hit100 = 0, hit50 = 0;
     int hit300k = 0, hit100k = 0;
     int misses = 0;
     int maxCombo = 0;
     float accuracy = -1;
     long time = 0;
-    private Random random;
     private int notes = 0;
     private boolean perfect = false;
     private int currentCombo = 0;
@@ -53,8 +59,14 @@ public class StatisticV2 implements Serializable {
     private float negativeHitOffsetSum;
     private float unstableRate;
 
+    /**
+     * Indicates that the player is alive (HP hasn't reached 0, or it recovered), this is exclusively used for
+     * multiplayer.
+     */
+    public boolean isAlive = true;
+
+
     public StatisticV2() {
-        random = new Random();
         playerName = null;
         if (Config.isStayOnline()) {
             playerName = OnlineManager.getInstance().getUsername();
@@ -136,7 +148,7 @@ public class StatisticV2 implements Serializable {
         for (GameMod m : mod) {
             mult *= m.scoreMultiplier;
         }
-        if (changeSpeed != 1.0f){
+        if (changeSpeed != 1.0f) {
             mult *= getSpeedChangeScoreMultiplier();
         }
         return (int) (totalScore * mult);
@@ -221,6 +233,16 @@ public class StatisticV2 implements Serializable {
                 currentCombo = 0;
                 break;
         }
+    }
+
+    public float getAccuracyForServer() {
+
+        var value = (hit300 * 6f + hit100 * 2f + hit50) / ((hit300 + hit100 + hit50 + misses) * 6f);
+
+        if (Double.isNaN(value) || Double.isInfinite(value))
+            value = 0;
+
+        return value;
     }
 
     public float getAccuracy() {
@@ -339,6 +361,10 @@ public class StatisticV2 implements Serializable {
         this.mark = mark;
     }
 
+    public void setTotalScore(int totalScore) {
+        this.totalScore = totalScore;
+    }
+
     public int getMaxCombo() {
         if (currentCombo > maxCombo) {
             maxCombo = currentCombo;
@@ -352,6 +378,10 @@ public class StatisticV2 implements Serializable {
 
     public int getNotes() {
         return notes;
+    }
+
+    public void setNotes(int notes) {
+        this.notes = notes;
     }
 
     public int getHit300() {
@@ -412,6 +442,10 @@ public class StatisticV2 implements Serializable {
 
     public int getCombo() {
         return currentCombo;
+    }
+
+    public void setCombo(int combo) {
+        currentCombo = combo;
     }
 
     public long getTime() {
@@ -771,4 +805,40 @@ public class StatisticV2 implements Serializable {
             }
         }
     }
+
+    /**
+     * Converts the statistic into a JSONObject readable by the multiplayer server.
+     */
+    public JSONObject toJson(){
+        return new JSONObject() {{
+            try {
+                put("accuracy", getAccuracyForServer());
+                put("score", getModifiedTotalScore());
+                put("username", playerName);
+                put("modstring", MultiplayerConverter.modsToString(mod));
+                put("maxCombo", maxCombo);
+                put("geki", hit300k);
+                put("perfect", hit300);
+                put("katu", hit100k);
+                put("good", hit100);
+                put("bad", hit50);
+                put("miss", misses);
+                put("isAlive", isAlive);
+            } catch (Exception e) {
+                Multiplayer.log(e);
+            }
+        }};
+    }
+
+    /**
+     * Converts the statistic to a ScoreBoardItem, used specifically for Multiplayer.
+     */
+    public ScoreBoardItem toBoardItem() {
+
+        //noinspection DataFlowIssue
+        var combo = !Multiplayer.isConnected || Multiplayer.room.getWinCondition() != WinCondition.MAX_COMBO ? currentCombo : maxCombo;
+
+        return new ScoreBoardItem(playerName, getModifiedTotalScore(), combo, getAccuracyForServer(), isAlive);
+    }
+
 }

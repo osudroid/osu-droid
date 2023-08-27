@@ -10,6 +10,7 @@ import android.util.DisplayMetrics;
 import androidx.preference.PreferenceManager;
 
 import com.edlplan.favorite.FavoriteLibrary;
+import com.edlplan.framework.math.FMath;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.File;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
 import org.anddev.andengine.engine.Engine;
@@ -39,17 +41,17 @@ public class Config {
 
     private static boolean DELETE_OSZ,
         SCAN_DOWNLOAD,
+        deleteUnimportedBeatmaps,
         showFirstApproachCircle,
         comboburst,
         useCustomSkins,
         useCustomSounds,
         corovans,
         showFPS,
-        sliderBorders,
         complexAnimations,
+        snakingInSliders,
         playMusicPreview,
         showCursor,
-        accurateSlider,
         shrinkPlayfieldDownwards,
         hideNaviBar,
         showScoreboard,
@@ -62,7 +64,6 @@ public class Config {
         hitLighting,
         useDither,
         useParticles,
-        useLongTrail,
         useCustomComboColors,
         forceRomanized,
         fixFrameOffset,
@@ -72,17 +73,20 @@ public class Config {
         hideReplayMarquee,
         hideInGameUI,
         receiveAnnouncements,
-        useSuperSlider,
         enableStoryboard,
         safeBeatmapBg,
-        trianglesAnimation;
+        trianglesAnimation,
+        displayRealTimePPCounter,
+        useNightcoreOnMultiplayer,
+        videoEnabled,
+        deleteUnsupportedVideos,
+        submitScoreOnMultiplayer;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
         errorMeter,
         spinnerStyle,
         backgroundQuality,
-        textureQuality,
         metronomeSwitch;
     
     private static float soundVolume,
@@ -111,7 +115,6 @@ public class Config {
         comboburst = prefs.getBoolean("comboburst", false);
         corovans = prefs.getBoolean("images", false);
         showFPS = prefs.getBoolean("fps", false);
-        textureQuality = prefs.getBoolean("lowtextures", false) ? 2 : 1;
         errorMeter = Integer.parseInt(prefs.getString("errormeter", "0"));
         spinnerStyle = Integer.parseInt(prefs.getString("spinnerstyle", "0"));
         showFirstApproachCircle = prefs.getBoolean("showfirstapproachcircle", false);
@@ -119,21 +122,18 @@ public class Config {
         showScoreboard = prefs.getBoolean("showscoreboard", true);
         enableStoryboard = prefs.getBoolean("enableStoryboard", false);
         trianglesAnimation = prefs.getBoolean("trianglesAnimation", true);
+        videoEnabled = prefs.getBoolean("enableVideo", false);
 
         setSize();
 
         setPlayfieldSize(Integer.parseInt(prefs.getString(
             "playfieldsize", "100")) / 100f);
         shrinkPlayfieldDownwards = prefs.getBoolean("shrinkPlayfieldDownwards", true);
-        sliderBorders = prefs.getBoolean("sliderborders", true);
         complexAnimations = prefs.getBoolean("complexanimations", true);
-        accurateSlider = true;
-
-        useSuperSlider = prefs.getBoolean("superSlider", false);
+        snakingInSliders = prefs.getBoolean("snakingInSliders", true);
 
         try {
-            int off = prefs.getInt("offset", 0);
-            offset = (int) (Math.signum(off) * Math.min(250, Math.abs(off)));
+            offset = (int) FMath.clamp(prefs.getInt("offset", 0), -250, 250);
             backgroundBrightness = prefs.getInt("bgbrightness", 25) / 100f;
             soundVolume = prefs.getInt("soundvolume", 100) / 100f;
             bgmVolume = prefs.getInt("bgmvolume", 100) / 100f;
@@ -147,8 +147,8 @@ public class Config {
                 .putInt("cursorSize", 50)
                 .commit();
             Config.loadConfig(context);
+            return;
         }
-        
 
         //advanced
         defaultCorePath = Environment.getExternalStorageDirectory() + "/osu!droid/";
@@ -189,7 +189,6 @@ public class Config {
         hitLighting = prefs.getBoolean("hitlighting", hitLighting);
         useDither = prefs.getBoolean("dither", useDither);
         useParticles = prefs.getBoolean("particles", useParticles);
-        useLongTrail = prefs.getBoolean("longTrail", useLongTrail);
         useCustomComboColors = prefs.getBoolean("useCustomColors", useCustomComboColors);
         comboColors = new RGBColor[4];
         for (int i = 1; i <= 4; i++) {
@@ -199,6 +198,7 @@ public class Config {
         // beatmaps
         DELETE_OSZ = prefs.getBoolean("deleteosz", true);
         SCAN_DOWNLOAD = prefs.getBoolean("scandownload", false);
+        deleteUnimportedBeatmaps = prefs.getBoolean("deleteUnimportedBeatmaps", false);
         forceRomanized = prefs.getBoolean("forceromanized", false);
         beatmapPath = prefs.getString("directory", corePath + "Songs/");
         if (beatmapPath.length() == 0) {
@@ -207,6 +207,7 @@ public class Config {
         if (beatmapPath.charAt(beatmapPath.length() - 1) != '/') {
             beatmapPath += "/";
         }
+        deleteUnsupportedVideos = prefs.getBoolean("deleteUnsupportedVideos", true);
 
         // other
         playMusicPreview = prefs.getBoolean("musicpreview", true);
@@ -222,6 +223,11 @@ public class Config {
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
+        displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
+
+        // Multiplayer
+        useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
+        submitScoreOnMultiplayer = prefs.getBoolean("player_submitScore", true);
 
         if(receiveAnnouncements) {
             FirebaseMessaging.getInstance().subscribeToTopic("announcements");
@@ -279,16 +285,12 @@ public class Config {
         Config.enableStoryboard = enableStoryboard;
     }
 
-    public static boolean isUseSuperSlider() {
-        return useSuperSlider;
-    }
-
     public static boolean isFixFrameOffset() {
         return fixFrameOffset;
     }
 
     public static boolean isRemoveSliderLock() {
-        return removeSliderLock;
+        return Multiplayer.isMultiplayer ? Multiplayer.room != null && Multiplayer.room.isRemoveSliderLock() : removeSliderLock;
     }
 
     public static boolean isCalculateSliderPathInGameStart() {
@@ -297,6 +299,10 @@ public class Config {
 
     public static boolean isDisplayScoreStatistics() {
         return displayScoreStatistics;
+    }
+
+    public static boolean isDisplayRealTimePPCounter() {
+        return displayRealTimePPCounter;
     }
 
     public static boolean isEnableExtension() {
@@ -411,6 +417,14 @@ public class Config {
         SCAN_DOWNLOAD = sCAN_DOWNLOAD;
     }
 
+    public static boolean isDeleteUnimportedBeatmaps() {
+        return deleteUnimportedBeatmaps;
+    }
+
+    public static void setDeleteUnimportedBeatmaps(boolean deleteUnimportedBeatmaps) {
+        Config.deleteUnimportedBeatmaps = deleteUnimportedBeatmaps;
+    }
+
     public static boolean isUseCustomSkins() {
         return useCustomSkins;
     }
@@ -428,11 +442,7 @@ public class Config {
     }
 
     public static int getTextureQuality() {
-        return textureQuality;
-    }
-
-    public static void setTextureQuality(final int textureQuality) {
-        Config.textureQuality = textureQuality;
+        return 1;
     }
 
     public static float getBackgroundBrightness() {
@@ -443,16 +453,13 @@ public class Config {
         Config.backgroundBrightness = backgroundBrightness;
     }
 
-    public static boolean isSliderBorders() {
-        return sliderBorders;
-    }
-
-    public static void setSliderBorders(final boolean sliderBorders) {
-        Config.sliderBorders = sliderBorders;
-    }
-
     public static boolean isComplexAnimations() {
         return complexAnimations;
+    }
+
+    public static boolean isSnakingInSliders()
+    {
+        return snakingInSliders;
     }
 
     public static void setComplexAnimations(final boolean complexAnimations) {
@@ -481,14 +488,6 @@ public class Config {
 
     public static void setShowCursor(final boolean showCursor) {
         Config.showCursor = showCursor;
-    }
-
-    public static boolean isAccurateSlider() {
-        return accurateSlider;
-    }
-
-    public static void setAccurateSlider(final boolean accurateSlider) {
-        Config.accurateSlider = accurateSlider;
     }
 
     public static float getScaleMultiplier() {
@@ -581,14 +580,6 @@ public class Config {
 
     public static void setUseParticles(boolean useParticles) {
         Config.useParticles = useParticles;
-    }
-
-    public static boolean isUseLongTrail() {
-        return useLongTrail;
-    }
-
-    public static void setUseLongTrail(boolean useLongTrail) {
-        Config.useLongTrail = useLongTrail;
     }
 
     public static String getSkinPath() {
@@ -777,4 +768,31 @@ public class Config {
         skins.put(name, path);
     }
 
+    public static boolean isUseNightcoreOnMultiplayer() {
+        return useNightcoreOnMultiplayer;
+    }
+
+    public static void setUseNightcoreOnMultiplayer(boolean value) {
+        useNightcoreOnMultiplayer = value;
+    }
+
+    public static boolean isVideoEnabled() {
+        return videoEnabled;
+    }
+
+    public static void setVideoEnabled(boolean value) {
+        videoEnabled = value;
+    }
+
+    public static boolean isDeleteUnsupportedVideos() {
+        return deleteUnsupportedVideos;
+    }
+
+    public static boolean isSubmitScoreOnMultiplayer() {
+        return submitScoreOnMultiplayer;
+    }
+
+    public static void setSubmitScoreOnMultiplayer(boolean submitScoreOnMultiplayer) {
+        Config.submitScoreOnMultiplayer = submitScoreOnMultiplayer;
+    }
 }
