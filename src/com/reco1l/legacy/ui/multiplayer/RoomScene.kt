@@ -615,6 +615,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             return
         }
 
+        async {
+            SpectatorAPI.joinRoom(newRoom.id, player!!)
+        }
+
         // Determine if it's the host
         isRoomHost = player!!.id == newRoom.host
 
@@ -648,6 +652,13 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomDisconnect(reason: String?)
     {
+        val roomId = room!!.id
+        val uid = player!!.id
+
+        async {
+            SpectatorAPI.leaveRoom(roomId, uid)
+        }
+
         clear()
         ToastLogger.showText("Disconnected from the room${reason?.let { ": $it" } ?: "" }", true)
 
@@ -660,6 +671,13 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomConnectFail(error: String?)
     {
+        val roomId = room!!.id
+        val uid = player!!.id
+
+        async {
+            SpectatorAPI.leaveRoom(roomId, uid)
+        }
+
         clear()
         ToastLogger.showText("Failed to connect to the room: $error", true)
         back()
@@ -711,9 +729,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             return
         }
 
-        if (beatmap != null)
+        if (isRoomHost && beatmap != null)
             async {
-                SpectatorAPI.changeBeatmap(beatmap.md5)
+                SpectatorAPI.changeBeatmap(room!!.id, beatmap.md5)
             }
 
         getGlobal().songService.preLoad(getGlobal().selectedTrack.beatmap.music)
@@ -772,6 +790,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // If free mods is enabled it'll keep player mods and enforce speed changing mods and ScoreV2
         getModMenu().setMods(mods, room!!.isFreeMods)
+
+        if (isRoomHost)
+            async {
+                SpectatorAPI.changeMods(room!!.id, mods)
+            }
 
         // Updating player mods
         awaitModsChange = true
@@ -839,6 +862,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     override fun onRoomTeamModeChange(mode: TeamMode)
     {
         room!!.teamMode = mode
+
+        if (isRoomHost)
+            async {
+                SpectatorAPI.changeTeamMode(room!!.id, mode)
+            }
 
         // Update room info text
         updateInformation()
@@ -1028,6 +1056,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         // Updating player team
         room!!.playersMap[uid]!!.team = team
+
+        if (uid == player!!.id && team != null)
+            async {
+                SpectatorAPI.changeTeam(room!!.id, uid, team)
+            }
 
         // Updating player list
         playerList!!.updateItems()
