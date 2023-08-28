@@ -12,7 +12,10 @@ import com.reco1l.legacy.ui.multiplayer.multiLog
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 
 object SpectatorAPI {
-    private const val ENDPOINT = "${OnlineManager.endpoint}/events/"
+    private const val MAIN_ENDPOINT = OnlineManager.endpoint + "/"
+    private const val START_PLAYING = "startPlaying"
+
+    private const val EVENTS_ENDPOINT = "${OnlineManager.endpoint}/events/"
     private const val CHANGE_BEATMAP = "changeBeatmap"
     private const val JOIN_ROOM = "playerJoined"
     private const val LEAVE_ROOM = "playerLeft"
@@ -20,8 +23,23 @@ object SpectatorAPI {
     private const val CHANGE_TEAM = "playerTeamChange"
     private const val CHANGE_TEAM_MODE = "teamModeChange"
 
+    fun startPlaying(roomId: Long) {
+        JsonRequester("$MAIN_ENDPOINT$START_PLAYING").use {
+            it.jsonInsertion = JsonContent().apply {
+                put("roomId", roomId)
+                put("sign", SecurityUtils.signRequest(roomId.toString()))
+            }
+
+            try {
+                it.execute()
+            } catch (e: Exception) {
+                multiLog(e)
+            }
+        }
+    }
+
     fun changeBeatmap(roomId: Long, md5: String) {
-        JsonRequester("$ENDPOINT$CHANGE_BEATMAP").use {
+        JsonRequester("$EVENTS_ENDPOINT$CHANGE_BEATMAP").use {
             it.jsonInsertion = JsonContent().apply {
                 put("roomId", roomId)
                 put("hash", md5)
@@ -37,7 +55,7 @@ object SpectatorAPI {
     }
 
     fun joinRoom(roomId: Long, player: RoomPlayer) {
-        JsonRequester("$ENDPOINT$JOIN_ROOM").use {
+        JsonRequester("$EVENTS_ENDPOINT$JOIN_ROOM").use {
             it.jsonInsertion = JsonContent().apply {
                 put("roomId", roomId)
 
@@ -63,7 +81,7 @@ object SpectatorAPI {
     }
 
     fun leaveRoom(roomId: Long, uid: Long) {
-        JsonRequester("$ENDPOINT$LEAVE_ROOM").use {
+        JsonRequester("$EVENTS_ENDPOINT$LEAVE_ROOM").use {
             it.jsonInsertion = JsonContent().apply {
                 put("roomId", roomId)
                 put("uid", uid)
@@ -79,28 +97,15 @@ object SpectatorAPI {
     }
 
     fun changeMods(roomId: Long, mods: RoomMods) {
-        JsonRequester("$ENDPOINT$CHANGE_MODS").use {
+        JsonRequester("$EVENTS_ENDPOINT$CHANGE_MODS").use {
             it.jsonInsertion = JsonContent().apply {
                 val modString = modsToString(mods.set)
 
                 put("roomId", roomId)
                 put("mods", modString)
                 put("speedMultiplier", mods.speedMultiplier)
-                put("flFollowDelay", mods.flFollowDelay)
-                put("forceAR", mods.forceAR)
 
-                put(
-                    "sign",
-                    SecurityUtils.signRequest(
-                        """
-                            $roomId
-                            $modString
-                            ${mods.speedMultiplier}
-                            ${mods.flFollowDelay}
-                            ${if (mods.forceAR != null) mods.forceAR else ""}
-                        """.trimIndent()
-                    )
-                )
+                put("sign", SecurityUtils.signRequest("$roomId$modString${mods.speedMultiplier}"))
             }
 
             try {
@@ -112,7 +117,7 @@ object SpectatorAPI {
     }
 
     fun changeTeam(roomId: Long, uid: Long, team: RoomTeam) {
-        JsonRequester("$ENDPOINT$CHANGE_TEAM").use {
+        JsonRequester("$EVENTS_ENDPOINT$CHANGE_TEAM").use {
             it.jsonInsertion = JsonContent().apply {
                 put("roomId", roomId)
                 put("uid", uid)
@@ -130,7 +135,7 @@ object SpectatorAPI {
     }
 
     fun changeTeamMode(roomId: Long, teamMode: TeamMode) {
-        JsonRequester("$ENDPOINT$CHANGE_TEAM_MODE").use {
+        JsonRequester("$EVENTS_ENDPOINT$CHANGE_TEAM_MODE").use {
             it.jsonInsertion = JsonContent().apply {
                 put("roomId", roomId)
                 put("mode", teamMode.ordinal)

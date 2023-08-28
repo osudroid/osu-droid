@@ -599,10 +599,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             replay = null;
         }
 
-        //TODO online
-        if (!replaying)
-            OnlineScoring.getInstance().startPlay(track, trackMD5);
-
         if (Config.isEnableStoryboard()) {
             storyboardSprite.loadStoryboard(track.getFilename());
         }

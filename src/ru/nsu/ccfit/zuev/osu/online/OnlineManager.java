@@ -174,63 +174,7 @@ public class OnlineManager {
         return true;
     }
 
-    public void startPlay(final TrackInfo track, final String hash) throws OnlineManagerException {
-        Debug.i("Starting play...");
-        playID = null;
-        final BeatmapInfo beatmap = track.getBeatmap();
-        if (beatmap == null) return;
-
-        File trackfile = new File(track.getFilename());
-        trackfile.getParentFile().getName();
-        String osuID = trackfile.getParentFile().getName();
-        Debug.i("osuid = " + osuID);
-        if (osuID.matches("^[0-9]+ .*"))
-            osuID = osuID.substring(0, osuID.indexOf(' '));
-        else
-            osuID = null;
-
-        PostBuilder post = new PostBuilder();
-        post.addParam("userID", String.valueOf(userId));
-        post.addParam("ssid", ssid);
-        post.addParam("filename", trackfile.getName());
-        post.addParam("hash", hash);
-        post.addParam("songTitle", beatmap.getTitle());
-        post.addParam("songArtist", beatmap.getArtist());
-        post.addParam("songCreator", beatmap.getCreator());
-        if (osuID != null)
-            post.addParam("songID", osuID);
-
-        ArrayList<String> response = sendRequest(post, endpoint + "submit.php");
-
-        if (response == null) {
-            if (failMessage.equals("Cannot log in") && stayOnline) {
-                if (tryToLogIn()) {
-                    startPlay(track, hash);
-                }
-            }
-            return;
-        }
-
-        if (response.size() < 2) {
-            failMessage = "Invalid server response";
-            return;
-        }
-
-        String[] resp = response.get(1).split("\\s+");
-        if (resp.length < 2) {
-            failMessage = "Invalid server response";
-            return;
-        }
-
-        if (!resp[0].equals("1")) {
-            return;
-        }
-
-        playID = resp[1];
-        Debug.i("Getting play ID = " + playID);
-    }
-
-    public boolean sendRecord(String data) throws OnlineManagerException {
+    public boolean sendRecord(String data, String mapMD5, String replay) throws OnlineManagerException {
         if (playID == null || playID.length() == 0) {
             failMessage = "I don't have play ID";
             return false;
@@ -243,7 +187,7 @@ public class OnlineManager {
         post.addParam("playID", playID);
         post.addParam("data", data);
 
-        ArrayList<String> response = sendRequest(post, endpoint + "submit.php");
+        ArrayList<String> response = sendRequest(post, endpoint + "submit");
 
         if (response == null) {
             return false;
@@ -392,11 +336,12 @@ public class OnlineManager {
         OnlineFileOperator.sendFile(endpoint + "upload.php", filename, String.valueOf(replayID));
     }
 
-    public String getScorePack(int playid) throws OnlineManagerException {
+    public String getScorePack(int userId, String hash) throws OnlineManagerException {
         PostBuilder post = new PostBuilder();
-        post.addParam("playID", String.valueOf(playid));
+        post.addParam("userID", String.valueOf(userId));
+        post.addParam("hash", hash);
 
-        ArrayList<String> response = sendRequest(post, endpoint + "gettop.php");
+        ArrayList<String> response = sendRequest(post, endpoint + "getScore");
 
         if (response == null || response.size() < 2) {
             return "";

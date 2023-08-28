@@ -651,13 +651,11 @@ public class StatisticV2 implements Serializable {
         builder.append(' ');
         builder.append(getMisses());
         builder.append(' ');
-        builder.append((int) (getAccuracy() * 100000f));
+        builder.append(getUnstableRate());
         builder.append(' ');
-        builder.append(getTime());
+        builder.append(Config.isRemoveSliderLock() ? '1' : '0');
         builder.append(' ');
-        builder.append(isPerfect() ? 1 : 0);
-        builder.append(' ');
-        builder.append(getPlayerName());
+        builder.append(mod.contains(GameMod.MOD_SCOREV2) ? '1' : '0');
         return builder.toString();
     }
 

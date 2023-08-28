@@ -944,6 +944,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             uiThread { playerList!!.menu.dismiss() }
         }
 
+        if (isRoomHost)
+            async {
+                SpectatorAPI.startPlaying(room!!.id)
+            }
+
         // Updating player list
         playerList!!.updateItems()
     }

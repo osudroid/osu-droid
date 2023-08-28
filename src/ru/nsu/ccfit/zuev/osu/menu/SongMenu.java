@@ -1221,7 +1221,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 @Override
                 public void run() {
                     try {
-                        String scorePack = OnlineManager.getInstance().getScorePack(id);
+                        String scorePack = OnlineManager.getInstance().getScorePack(id, hash);
                         String[] params = scorePack.split("\\s+");
                         if (params.length < 11) return;
 

@@ -115,36 +115,10 @@ public class OnlineScoring {
         }.execute();
     }
 
-    public void startPlay(final TrackInfo track, final String hash) {
-        if (OnlineManager.getInstance().isStayOnline() == false)
+    public void sendRecord(final StatisticV2 record, final SendingPanel panel, final String mapMD5, final String replay) {
+        if (!OnlineManager.getInstance().isStayOnline())
             return;
-        new AsyncTask() {
-            @Override
-            public void run() {
-                synchronized (onlineMutex) {
-
-                    for (int i = 0; i < attemptCount; i++) {
-                        try {
-                            OnlineManager.getInstance().startPlay(track, hash);
-                        } catch (OnlineManager.OnlineManagerException e) {
-                            Debug.e("Login error: " + e.getMessage());
-                            continue;
-                        }
-                        break;
-                    }
-
-                    if (OnlineManager.getInstance().getFailMessage().length() > 0) {
-                        ToastLogger.showText(OnlineManager.getInstance().getFailMessage(), true);
-                    }
-                }
-            }
-        }.execute();
-    }
-
-    public void sendRecord(final StatisticV2 record, final SendingPanel panel, final String replay) {
-        if (OnlineManager.getInstance().isStayOnline() == false)
-            return;
-        if (OnlineManager.getInstance().isReadyToSend() == false)
+        if (!OnlineManager.getInstance().isReadyToSend())
             return;
 
         Debug.i("Sending score");
@@ -163,7 +137,7 @@ public class OnlineScoring {
                         }
 
                         try {
-                            success = OnlineManager.getInstance().sendRecord(recordData);
+                            success = OnlineManager.getInstance().sendRecord(recordData, mapMD5, replay);
                         } catch (OnlineManager.OnlineManagerException e) {
                             Debug.e("Login error: " + e.getMessage());
                             success = false;

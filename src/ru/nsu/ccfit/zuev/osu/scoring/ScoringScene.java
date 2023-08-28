@@ -511,19 +511,10 @@ public class ScoringScene {
                 ScoreLibrary.getInstance().addScore(track.getFilename(), stat, replay);
             }
 
-            if (stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
+            if (!Multiplayer.isMultiplayer && stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
                     OnlineManager.getInstance().isReadyToSend()) {
-
-                if (GlobalManager.getInstance().getGameScene().hasFailed ||
-                        (Multiplayer.isMultiplayer && !Config.isSubmitScoreOnMultiplayer()))
-                    return;
-
                 boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator()).applyFilter(m -> m.unranked).hasNext();
-                if (hasUnrankedMod
-                    || Config.isRemoveSliderLock()
-                    || ModMenu.getInstance().isEnableForceAR()
-                    || !ModMenu.getInstance().isDefaultFLFollowDelay()
-                    ) {
+                if (hasUnrankedMod) {
                     return;
                 }
 
@@ -532,7 +523,7 @@ public class ScoringScene {
                 sendingPanel.setPosition(Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));
                 scene.registerTouchArea(sendingPanel.getDismissTouchArea());
                 scene.attachChild(sendingPanel);
-                ScoreLibrary.getInstance().sendScoreOnline(stat, replay, sendingPanel);
+                ScoreLibrary.getInstance().sendScoreOnline(stat, replay, mapMD5, sendingPanel);
             }
         }
     }
