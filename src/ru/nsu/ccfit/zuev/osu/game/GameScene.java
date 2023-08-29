@@ -161,7 +161,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Sprite skipBtn;
     private float skipTime;
     private boolean musicStarted;
-    private float distToNextObject;
+    private double distToNextObject;
     private float timeMultiplier = 1.0f;
     private CursorEntity[] cursorSprites;
     private AutoCursor autoCursor;
@@ -469,7 +469,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (scale < 0.001f){
             scale = 0.001f;
         }
-        GameHelper.setSpeed((float) beatmapData.difficulty.sliderMultiplier * 100);
+        GameHelper.setSpeed(beatmapData.difficulty.sliderMultiplier * 100);
         GameHelper.setTickRate((float) beatmapData.difficulty.sliderTickRate);
         GameHelper.setScale(scale);
         GameHelper.setDifficulty(overallDifficulty);
@@ -1365,7 +1365,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        float gtime;
+        double gtime;
         if (soundTimingPoint == null || soundTimingPoint.getTime() > secPassed) {
             gtime = 0;
         } else {
@@ -1526,11 +1526,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (gameStarted) {
-            float rate = 0.375f;
+            double rate = 0.375f;
             if (drain > 0 && distToNextObject > 0) {
                 rate = 1 + drain / (2f * distToNextObject);
             }
-            stat.changeHp(-rate * 0.01f * dt);
+            stat.changeHp((float) -rate * 0.01f * dt);
 
             var isDeath = stat.getHp() <= 0
                     && !stat.getMod().contains(GameMod.MOD_NOFAIL)
@@ -2831,17 +2831,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
 
-    public void registerAccuracy(final float acc) {
+    public void registerAccuracy(final double acc) {
         if (hitErrorMeter != null) {
-            hitErrorMeter.putErrorResult(acc);
+            hitErrorMeter.putErrorResult((float) acc);
         }
         avgOffset += acc;
         offsetRegs++;
 
-        stat.addHitOffset(acc);
+        stat.addHitOffset((float) acc);
 
         if (replaying) {
-            scoringScene.getReplayStat().addHitOffset(acc);
+            scoringScene.getReplayStat().addHitOffset((float) acc);
         }
     }
 

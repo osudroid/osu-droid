@@ -106,9 +106,9 @@ public class MainScene implements IUpdateHandler {
     private boolean musicStarted;
     private BassSoundProvider hitsound;
 
-    private float bpmLength = 1000;
-    private float lastBpmLength = 0;
-    private float offset = 0;
+    private double bpmLength = 1000;
+    private double lastBpmLength = 0;
+    private double offset = 0;
     private float beatPassTime = 0;
     private float lastBeatPassTime = 0;
     private boolean doChange = false;
@@ -684,18 +684,12 @@ public class MainScene implements IUpdateHandler {
             }
         }
 
-//        if (offset != 0) {
-//            beatPassTime += offset;
-//            offset = 0;
-//        }
-
         if (beatPassTime - lastBeatPassTime >= bpmLength - offset) {
             lastBeatPassTime = beatPassTime;
             offset = 0;
             if (logo != null) {
-//				logo.clearEntityModifiers();
-                logo.registerEntityModifier(new SequenceEntityModifier(new org.anddev.andengine.entity.modifier.ScaleModifier(bpmLength / 1000 * 0.9f, 1f, 1.07f),
-                        new org.anddev.andengine.entity.modifier.ScaleModifier(bpmLength / 1000 * 0.07f, 1.07f, 1f)));
+                logo.registerEntityModifier(new SequenceEntityModifier(new org.anddev.andengine.entity.modifier.ScaleModifier((float) (bpmLength / 1000 * 0.9f), 1f, 1.07f),
+                        new org.anddev.andengine.entity.modifier.ScaleModifier((float) (bpmLength / 1000 * 0.07f), 1.07f, 1f)));
             }
         }
 
