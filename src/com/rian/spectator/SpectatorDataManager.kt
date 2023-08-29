@@ -119,7 +119,7 @@ class SpectatorDataManager(
                     flush()
                     byteArrayOutputStream.flush()
 
-                    val message: String = OnlineManager.getInstance().sendSpectatorData(
+                    val message = OnlineManager.getInstance().sendSpectatorData(
                         roomId,
                         byteArrayOutputStream.toByteArray()
                     )
@@ -231,6 +231,6 @@ class SpectatorDataManager(
     protected fun finalize() = pauseTimer()
 
     companion object {
-        const val SPECTATOR_DATA_VERSION = 2
+        const val SPECTATOR_DATA_VERSION = 3
     }
 }
