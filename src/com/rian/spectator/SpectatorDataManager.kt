@@ -6,6 +6,7 @@ import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException
 import ru.nsu.ccfit.zuev.osu.scoring.Replay
+import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayObjectData
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType
 import java.io.ByteArrayOutputStream
@@ -21,18 +22,25 @@ class SpectatorDataManager(
     private val replay: Replay,
     private val stat: StatisticV2
 ) {
-    private val objectData = mutableListOf<SpectatorObjectData>()
-    private var beginningCursorMoveIndexes = IntArray(GameScene.CursorCount)
-    private val endCursorMoveIndexes = IntArray(GameScene.CursorCount)
-    private var roomId = ""
+    private val objectData = mutableListOf<ReplayObjectData>()
     private var beginningObjectDataIndex = 0
     private var endObjectDataIndex = 0
+
+    private val events = mutableListOf<SpectatorEvent>()
+    private var beginningEventIndex = 0
+    private var endEventIndex = 0
+
+    private var beginningCursorMoveIndexes = IntArray(GameScene.CursorCount)
+    private val endCursorMoveIndexes = IntArray(GameScene.CursorCount)
+
+    private var roomId = ""
+
     private val submissionTimer = Timer()
     private val submissionPeriod = 5000L
     private var isPaused = false
     private var gameEnded = false
 
-    private val task: TimerTask = object : TimerTask() {
+    private val task = object : TimerTask() {
         override fun run() {
             val secPassed = gameScene.secPassed
             val gameHasEnded = gameEnded
@@ -45,6 +53,7 @@ class SpectatorDataManager(
                     }
 
                     endObjectDataIndex = objectData.size
+                    endEventIndex = events.size
 
                     writeFloat(secPassed)
                     writeInt(stat.getModifiedTotalScore())
@@ -76,13 +85,9 @@ class SpectatorDataManager(
 
                     writeInt(endObjectDataIndex - beginningObjectDataIndex)
                     for (i in beginningObjectDataIndex until endObjectDataIndex) {
-                        val specData = objectData[i]
-                        val data = specData.data
+                        val data = objectData[i]
 
                         writeInt(i)
-                        writeInt(specData.currentScore)
-                        writeInt(specData.currentCombo)
-                        writeFloat(specData.currentAccuracy)
                         writeShort(data.accuracy.toInt())
 
                         if (data.tickSet == null || data.tickSet.length() == 0) {
@@ -99,6 +104,16 @@ class SpectatorDataManager(
                             write(bytes)
                         }
                         writeByte(data.result.toInt())
+                    }
+
+                    writeInt(endEventIndex - beginningEventIndex)
+                    for (i in beginningEventIndex until endEventIndex) {
+                        val event = events[i]
+
+                        writeFloat(event.time)
+                        writeInt(event.score)
+                        writeInt(event.combo)
+                        writeFloat(event.accuracy)
                     }
 
                     flush()
@@ -148,6 +163,7 @@ class SpectatorDataManager(
 
             beginningCursorMoveIndexes = endCursorMoveIndexes.clone()
             beginningObjectDataIndex = endObjectDataIndex
+            beginningEventIndex = endEventIndex
         }
     }
 
@@ -165,14 +181,12 @@ class SpectatorDataManager(
      * @param objectId The ID of the object.
      */
     fun addObjectData(objectId: Int) =
-        objectData.add(
-            SpectatorObjectData(
-                stat.getModifiedTotalScore(),
-                stat.combo,
-                stat.getAccuracy(),
-                replay.objectData[objectId]
-            )
-        )
+        objectData.add(replay.objectData[objectId])
+
+    /**
+     * Adds a spectator event.
+     */
+    fun addEvent() = SpectatorEvent(gameScene.secPassed * 1000, stat.modifiedTotalScore, stat.combo, stat.accuracy)
 
     /**
      * Resumes the timer after a specified delay.

@@ -94,7 +94,6 @@ import ru.nsu.ccfit.zuev.osu.menu.PauseMenu;
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem;
 import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
-import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
@@ -2189,6 +2188,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (writeReplay) replay.addObjectScore(objectId, ResultType.MISS);
             if (spectatorDataManager != null) {
                 spectatorDataManager.addObjectData(objectId);
+                spectatorDataManager.addEvent();
             }
             if (GameHelper.isPerfect()) {
                 gameover();
@@ -2251,6 +2251,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (spectatorDataManager != null) {
             spectatorDataManager.addObjectData(objectId);
+            spectatorDataManager.addEvent();
         }
 
         if (endCombo) {
@@ -2347,6 +2348,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 gameover();
             }
             stat.registerHit(0, true, false);
+            if (spectatorDataManager != null) {
+                spectatorDataManager.addEvent();
+            }
             return;
         }
 
@@ -2373,6 +2377,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 break;
         }
 
+        if (spectatorDataManager != null) {
+            spectatorDataManager.addEvent();
+        }
+
         if (score > 10) {
             switch (type) {
                 case GameObjectListener.SLIDER_START:
@@ -2395,6 +2403,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     public void onSpinnerHit(int id, final int score, final boolean endCombo, int totalScore) {
         if (score == 1000) {
             stat.registerHit(score, false, false);
+            if (spectatorDataManager != null) {
+                spectatorDataManager.addEvent();
+            }
             return;
         }
 
