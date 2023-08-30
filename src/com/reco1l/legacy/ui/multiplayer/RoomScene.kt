@@ -263,6 +263,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     {
                         getResources().getSound("menuhit")?.play()
                         RoomAPI.notifyMatchPlay()
+                        async {
+                            SpectatorAPI.startPlaying(room!!.id)
+                        }
                         return true
                     }
                     ToastLogger.showText("All players with the beatmap need to be ready!", true)
@@ -616,7 +619,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         }
 
         async {
-            SpectatorAPI.joinRoom(newRoom.id, player!!)
+            SpectatorAPI.joinRoom(newRoom.id, player!!.id)
         }
 
         // Determine if it's the host
@@ -791,11 +794,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // If free mods is enabled it'll keep player mods and enforce speed changing mods and ScoreV2
         getModMenu().setMods(mods, room!!.isFreeMods)
 
-        if (isRoomHost)
-            async {
-                SpectatorAPI.changeMods(room!!.id, mods)
-            }
-
         // Updating player mods
         awaitModsChange = true
 
@@ -862,11 +860,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     override fun onRoomTeamModeChange(mode: TeamMode)
     {
         room!!.teamMode = mode
-
-        if (isRoomHost)
-            async {
-                SpectatorAPI.changeTeamMode(room!!.id, mode)
-            }
 
         // Update room info text
         updateInformation()
@@ -943,11 +936,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             // Hiding any player menu if its shown
             uiThread { playerList!!.menu.dismiss() }
         }
-
-        if (isRoomHost)
-            async {
-                SpectatorAPI.startPlaying(room!!.id)
-            }
 
         // Updating player list
         playerList!!.updateItems()
@@ -1061,11 +1049,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         // Updating player team
         room!!.playersMap[uid]!!.team = team
-
-        if (uid == player!!.id && team != null)
-            async {
-                SpectatorAPI.changeTeam(room!!.id, uid, team)
-            }
 
         // Updating player list
         playerList!!.updateItems()
