@@ -674,13 +674,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomConnectFail(error: String?)
     {
-        val roomId = room!!.id
-        val uid = player!!.id
-
-        async {
-            SpectatorAPI.leaveRoom(roomId, uid)
-        }
-
         clear()
         ToastLogger.showText("Failed to connect to the room: $error", true)
         back()

@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 
 import android.util.Base64;
-import com.google.firebase.analytics.FirebaseAnalytics;
 
 import com.rian.spectator.SpectatorDataManager;
 import okhttp3.OkHttpClient;
@@ -155,11 +154,6 @@ public class OnlineManager {
         } else {
             avatarURL = "";
         }
-
-        Bundle bParams = new Bundle();
-        bParams.putString(FirebaseAnalytics.Param.METHOD, "ingame");
-        GlobalManager.getInstance().getMainActivity().getAnalytics().logEvent(FirebaseAnalytics.Event.LOGIN,
-            bParams);
 
         return true;
     }

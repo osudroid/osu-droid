@@ -269,7 +269,10 @@ object RoomAPI
 
         multiLog("Starting connection -> $roomId, $userId, $username")
 
-        socket = IO.socket(url, IO.Options().also { it.auth = auth }).apply {
+        socket = IO.socket(url, IO.Options().also {
+            it.auth = auth
+            it.path = "/api/tournament/socket.io"
+        }).apply {
 
             on("beatmapChanged", beatmapChanged)
             on("hostChanged", hostChanged)

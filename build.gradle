@@ -9,8 +9,6 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.2'
-        classpath 'com.google.gms:google-services:4.3.10'
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.7.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -30,7 +28,7 @@ def getReleaseVersionCode() {
 }
 
 def getReleaseVersionName() {
-    def baseline = '1.7.0'
+    def baseline = '1.7.0-tournament'
     def versionName = baseline + new Date().format('(yyMMdd)')
     println('versionName: ' + versionName)
     return versionName
@@ -43,8 +41,6 @@ if (localPropertiesFile.exists()) {
 }
 
 apply plugin: 'com.android.application'
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
@@ -89,10 +85,7 @@ android {
     buildTypes {
         debug {
             resValue "string", "app_name", "osu!droid-tournament-debug"
-            applicationIdSuffix '.debug'
-            firebaseCrashlytics {
-                mappingFileUploadEnabled false
-            }
+            applicationIdSuffix '.tournament.debug'
         }
 
         release {
@@ -101,9 +94,7 @@ android {
 //            minifyEnabled true
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
             signingConfig signingConfigs.release
-            firebaseCrashlytics {
-                mappingFileUploadEnabled false
-            }
+            applicationIdSuffix '.tournament'
         }
 
         pre_release {
@@ -114,9 +105,7 @@ android {
 //            debuggable true
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
             signingConfig signingConfigs.release
-            firebaseCrashlytics {
-                mappingFileUploadEnabled false
-            }
+            applicationIdSuffix '.tournament'
         }
     }
 
@@ -159,9 +148,6 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.preference:preference:1.1.1'
     implementation 'com.google.android.material:material:1.4.0'
-    implementation 'com.google.firebase:firebase-crashlytics:18.2.1'
-    implementation 'com.google.firebase:firebase-analytics:19.0.1'
-    implementation 'com.google.firebase:firebase-messaging:22.0.0'
 
     // implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     // implementation 'io.reactivex.rxjava2:rxjava:2.2.21'

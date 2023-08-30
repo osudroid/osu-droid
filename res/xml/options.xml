@@ -203,8 +203,6 @@
             android:summary="@string/opt_shrink_playfield_downwards_summary" android:defaultValue="false"/>
         <CheckBoxPreference android:key="safebeatmapbg" android:title="@string/opt_safe_beatmap_bg_title"
             android:summary="@string/opt_safe_beatmap_bg_summary" android:defaultValue="false"/>
-        <CheckBoxPreference android:key="receiveAnnouncements" android:title="@string/opt_receive_announcements_title"
-            android:summary="@string/opt_receive_announcements_summary" android:defaultValue="true"/>
     </PreferenceScreen>
 
     <Preference android:key="update" android:title="@string/opt_update_title"

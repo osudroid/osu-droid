@@ -11,7 +11,6 @@ import androidx.preference.PreferenceManager;
 
 import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.framework.math.FMath;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.File;
 import java.util.HashMap;
@@ -72,7 +71,6 @@ public class Config {
         displayScoreStatistics,
         hideReplayMarquee,
         hideInGameUI,
-        receiveAnnouncements,
         enableStoryboard,
         safeBeatmapBg,
         trianglesAnimation,
@@ -221,19 +219,12 @@ public class Config {
         displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", false);
         hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
-        receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
 
         // Multiplayer
         useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
         submitScoreOnMultiplayer = prefs.getBoolean("player_submitScore", true);
-
-        if(receiveAnnouncements) {
-            FirebaseMessaging.getInstance().subscribeToTopic("announcements");
-        }else {
-            FirebaseMessaging.getInstance().unsubscribeFromTopic("announcements"); 
-        }
 
         //Init
         onlineDeviceID = prefs.getString("installID", null);
@@ -720,14 +711,6 @@ public class Config {
 
     public static void setHideInGameUI(boolean hideInGameUI) {
         Config.hideInGameUI = hideInGameUI;
-    }
-
-    public static boolean isReceiveAnnouncements() {
-        return receiveAnnouncements;
-    }
-
-    public static void setReceiveAnnouncements(boolean receiveAnnouncements) {
-        Config.receiveAnnouncements = receiveAnnouncements;
     }
 
     public static boolean isSafeBeatmapBg() {
