@@ -320,11 +320,6 @@ public class OnlineManager {
         }
     }
 
-    public void sendReplay(String filename) {
-        Debug.i("Sending replay '" + filename + "' for id = " + replayID);
-        OnlineFileOperator.sendFile(endpoint + "upload.php", filename, String.valueOf(replayID));
-    }
-
     public String getScorePack(int userId, String hash) throws OnlineManagerException {
         PostBuilder post = new PostBuilder();
         post.addParam("userID", String.valueOf(userId));
