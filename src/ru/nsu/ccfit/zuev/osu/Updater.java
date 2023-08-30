@@ -48,65 +48,65 @@ public class Updater {
     }
 
     public void checkForUpdates(boolean showLoading, boolean showSnackbar) {
-        new AsyncTask() {
-            @Override
-            public void run() {
-                try {
-                    mActivity.runOnUiThread(() -> {
-                      if (showSnackbar) {
-                            Snackbar.make(mActivity.findViewById(android.R.id.content),
-                                    StringTable.get(R.string.update_info_checking), 1500).show();
-                        } else {
-                            GlobalManager.getInstance().setInfo(StringTable.get(R.string.update_info_checking));
-                        }
-
-                        if (showLoading && loadingFragment == null) {
-                            loadingFragment = new LoadingFragment();
-                            loadingFragment.show();
-                        }
-                    });
-
-                    String lang;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        lang = mActivity.getResources().getConfiguration().getLocales().get(0).getLanguage();
-                    } else {
-                        lang = mActivity.getResources().getConfiguration().locale.getLanguage();
-                    }
-                    ResponseBody response = httpGet(OnlineManager.endpoint + "update.php?lang=" + lang);
-                    UpdateVO updateInfo = new Gson().fromJson(response.string(), UpdateVO.class);
-                    if (!newUpdate && updateInfo != null && updateInfo.getVersionCode() > mActivity.getVersionCode()) {
-                        changelogMsg = updateInfo.getChangelog();
-                        downloadUrl = updateInfo.getLink();
-                        newUpdate = true;
-                    }
-                } catch (IOException e) {
-                    Debug.e("Updater onRun: " + e.getMessage(), e);
-                }
-            }
-
-            @Override
-            public void onComplete() {
-                mActivity.runOnUiThread(() -> {
-                    if (showLoading && loadingFragment != null) {
-                        loadingFragment.dismiss();
-                        loadingFragment = null;
-                    }
-
-                    if (newUpdate) {
-                        new UpdateDialogFragment()
-                                .setChangelogMessage(changelogMsg)
-                                .setDownloadUrl(downloadUrl)
-                                .show();
-                     } else {
-                        if (showSnackbar) {
-                            Snackbar.make(mActivity.findViewById(android.R.id.content),
-                                    StringTable.get(R.string.update_info_latest), 1500).show();
-                        } else {
-                            GlobalManager.getInstance().setInfo(StringTable.get(R.string.update_info_latest));
-                        }
-                    }
-                });
-            }
-        }.execute();
+//        new AsyncTask() {
+//            @Override
+//            public void run() {
+//                try {
+//                    mActivity.runOnUiThread(() -> {
+//                      if (showSnackbar) {
+//                            Snackbar.make(mActivity.findViewById(android.R.id.content),
+//                                    StringTable.get(R.string.update_info_checking), 1500).show();
+//                        } else {
+//                            GlobalManager.getInstance().setInfo(StringTable.get(R.string.update_info_checking));
+//                        }
+//
+//                        if (showLoading && loadingFragment == null) {
+//                            loadingFragment = new LoadingFragment();
+//                            loadingFragment.show();
+//                        }
+//                    });
+//
+//                    String lang;
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//                        lang = mActivity.getResources().getConfiguration().getLocales().get(0).getLanguage();
+//                    } else {
+//                        lang = mActivity.getResources().getConfiguration().locale.getLanguage();
+//                    }
+//                    ResponseBody response = httpGet(OnlineManager.endpoint + "update.php?lang=" + lang);
+//                    UpdateVO updateInfo = new Gson().fromJson(response.string(), UpdateVO.class);
+//                    if (!newUpdate && updateInfo != null && updateInfo.getVersionCode() > mActivity.getVersionCode()) {
+//                        changelogMsg = updateInfo.getChangelog();
+//                        downloadUrl = updateInfo.getLink();
+//                        newUpdate = true;
+//                    }
+//                } catch (IOException e) {
+//                    Debug.e("Updater onRun: " + e.getMessage(), e);
+//                }
+//            }
+//
+//            @Override
+//            public void onComplete() {
+//                mActivity.runOnUiThread(() -> {
+//                    if (showLoading && loadingFragment != null) {
+//                        loadingFragment.dismiss();
+//                        loadingFragment = null;
+//                    }
+//
+//                    if (newUpdate) {
+//                        new UpdateDialogFragment()
+//                                .setChangelogMessage(changelogMsg)
+//                                .setDownloadUrl(downloadUrl)
+//                                .show();
+//                     } else {
+//                        if (showSnackbar) {
+//                            Snackbar.make(mActivity.findViewById(android.R.id.content),
+//                                    StringTable.get(R.string.update_info_latest), 1500).show();
+//                        } else {
+//                            GlobalManager.getInstance().setInfo(StringTable.get(R.string.update_info_latest));
+//                        }
+//                    }
+//                });
+//            }
+//        }.execute();
     }
 }
