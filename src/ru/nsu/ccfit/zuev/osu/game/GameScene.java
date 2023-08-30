@@ -3105,6 +3105,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         return secPassed;
     }
 
+    public BeatmapData getBeatmapData() {
+        return beatmapData;
+    }
+
     public void stopSpectatorDataSubmission() {
         if (spectatorDataManager == null) {
             return;

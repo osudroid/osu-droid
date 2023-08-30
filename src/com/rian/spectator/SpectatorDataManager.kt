@@ -1,6 +1,9 @@
 package com.rian.spectator
 
 import android.util.Log
+import com.rian.difficultycalculator.beatmap.hitobject.HitObject
+import com.rian.difficultycalculator.beatmap.hitobject.HitObjectWithDuration
+import com.rian.difficultycalculator.beatmap.hitobject.Slider
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
@@ -22,7 +25,7 @@ class SpectatorDataManager(
     private val replay: Replay,
     private val stat: StatisticV2
 ) {
-    private val objectData = mutableListOf<ReplayObjectData>()
+    private val objectData = mutableListOf<SpectatorObjectData>()
     private var beginningObjectDataIndex = 0
     private var endObjectDataIndex = 0
 
@@ -85,9 +88,11 @@ class SpectatorDataManager(
 
                     writeInt(endObjectDataIndex - beginningObjectDataIndex)
                     for (i in beginningObjectDataIndex until endObjectDataIndex) {
-                        val data = objectData[i]
+                        val objData = objectData[i]
+                        val data = objData.data
 
                         writeInt(i)
+                        writeDouble(objData.time)
                         writeShort(data.accuracy.toInt())
 
                         if (data.tickSet == null || data.tickSet.length() == 0) {
@@ -103,6 +108,7 @@ class SpectatorDataManager(
                             writeByte(bytes.size)
                             write(bytes)
                         }
+
                         writeByte(data.result.toInt())
                     }
 
@@ -180,8 +186,14 @@ class SpectatorDataManager(
      *
      * @param objectId The ID of the object.
      */
-    fun addObjectData(objectId: Int) =
-        objectData.add(replay.objectData[objectId])
+    fun addObjectData(objectId: Int) {
+        val obj = gameScene.beatmapData.hitObjects.objects[objectId]
+        val replayData = replay.objectData[objectId]
+
+        val time = if (obj is Slider) obj.endTime else obj.startTime + replayData.accuracy
+
+        objectData.add(SpectatorObjectData(time, replayData))
+    }
 
     /**
      * Adds a spectator event.
@@ -234,3 +246,6 @@ class SpectatorDataManager(
         const val SPECTATOR_DATA_VERSION = 3
     }
 }
+
+val HitObject.endTime: Double
+    get() = if (this is HitObjectWithDuration) this.endTime else this.startTime
