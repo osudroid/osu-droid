@@ -16,11 +16,9 @@ import org.anddev.andengine.util.Debug;
 import java.io.File;
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
 import ru.nsu.ccfit.zuev.osu.online.PostBuilder.RequestException;
@@ -28,7 +26,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public class OnlineManager {
     public static final String hostname = "droidpp.osudroid.moe";
-    public static final String endpoint = "https://" + hostname + "/api/droid";
+    public static final String endpoint = "https://" + hostname + "/api/droid/";
     public static final String defaultAvatarURL = "https://osudroid.moe/user/avatar/0.png";
     private static final String onlineVersion = "34";
 
@@ -39,7 +37,7 @@ public class OnlineManager {
     private String failMessage = "";
 
     private boolean stayOnline = true;
-    private String ssid = "";
+    private String sessionId = "";
     private long userId = -1L;
     private String playID = "";
 
@@ -131,7 +129,7 @@ public class OnlineManager {
                 ));
         post.addParam("version", onlineVersion);
 
-        ArrayList<String> response = sendRequest(post, endpoint + "login.php");
+        ArrayList<String> response = sendRequest(post, endpoint + "login");
 
         if (response == null) {
             return false;
@@ -147,7 +145,7 @@ public class OnlineManager {
             return false;
         }
         userId = Long.parseLong(params[0]);
-        ssid = params[1];
+        sessionId = params[1];
         rank = Integer.parseInt(params[2]);
         score = Long.parseLong(params[3]);
         accuracy = Integer.parseInt(params[4]) / 100000f;
@@ -175,19 +173,10 @@ public class OnlineManager {
     }
 
     public boolean sendRecord(String data, String mapMD5, String replay) throws OnlineManagerException {
-        if (playID == null || playID.length() == 0) {
-            failMessage = "I don't have play ID";
-            return false;
-        }
 
         Debug.i("Sending record...");
 
-        PostBuilder post = new PostBuilder();
-        post.addParam("userID", String.valueOf(userId));
-        post.addParam("playID", playID);
-        post.addParam("data", data);
-
-        ArrayList<String> response = sendRequest(post, endpoint + "submit");
+        ArrayList<String> response = OnlineFileOperator.sendScore(endpoint + "submit", data, replay, mapMD5);
 
         if (response == null) {
             return false;
@@ -376,6 +365,10 @@ public class OnlineManager {
 
     public long getUserId() {
         return userId;
+    }
+
+    public String getSessionId() {
+        return sessionId;
     }
 
     public String getPassword() {

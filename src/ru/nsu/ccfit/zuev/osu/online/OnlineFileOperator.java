@@ -2,10 +2,13 @@ package ru.nsu.ccfit.zuev.osu.online;
 
 import com.dgsrz.bancho.security.SecurityUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -22,6 +25,57 @@ import org.anddev.andengine.util.Debug;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
 public class OnlineFileOperator {
+    public static ArrayList<String> sendScore(String url, String data, String replayFileName, String mapMD5) {
+        try {
+            File file = new File(replayFileName);
+            if (!file.exists()) {
+                Debug.i(replayFileName + " does not exist.");
+                return null;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(OnlineManager.getInstance().getUserId());
+            sb.append("_");
+            sb.append(data);
+            sb.append("_");
+            sb.append(mapMD5);
+            sb.append("_");
+            sb.append(OnlineManager.getInstance().getSessionId());
+
+            String signature = SecurityUtils.signRequest(sb.toString());
+
+            MediaType mime = MediaType.parse("application/octet-stream");
+            RequestBody fileBody = RequestBody.create(mime, file);
+            RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                    .addFormDataPart("uploadedFile", file.getName(), fileBody)
+                    .addFormDataPart("userID", String.valueOf(OnlineManager.getInstance().getUserId()))
+                    .addFormDataPart("data", data)
+                    .addFormDataPart("hash", mapMD5)
+                    .addFormDataPart("sessionId", OnlineManager.getInstance().getSessionId())
+                    .addFormDataPart("sign", signature)
+                    .build();
+            Request request = new Request.Builder().url(url)
+                    .post(requestBody).build();
+            Response response = OnlineManager.client.newCall(request).execute();
+
+            ArrayList<String> responseList = new ArrayList<>();
+            String line;
+            BufferedReader reader = new BufferedReader(new StringReader(response.body().string()));
+            while((line = reader.readLine()) != null) {
+                Debug.i(String.format("request [%d]: %s", responseList.size(), line));
+                responseList.add(line);
+            }
+
+            return responseList;
+        } catch (final IOException e) {
+            Debug.e("sendFile IOException " + e.getMessage(), e);
+        } catch (final Exception e) {
+            Debug.e("sendFile Exception " + e.getMessage(), e);
+        }
+
+        return null;
+    }
+
 
     public static void sendFile(String urlstr, String filename, String replayID) {
         try {
