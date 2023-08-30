@@ -9,7 +9,6 @@ import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException
 import ru.nsu.ccfit.zuev.osu.scoring.Replay
-import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayObjectData
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType
 import java.io.ByteArrayOutputStream
