@@ -1557,7 +1557,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
             stat.changeHp(-rate * 0.01f * dt);
 
-            var isDeath = stat.getHp() <= 0
+            var isDeath = Multiplayer.isMultiplayer
+                    && stat.getHp() <= 0
                     && !stat.getMod().contains(GameMod.MOD_NOFAIL)
                     && !stat.getMod().contains(GameMod.MOD_RELAX)
                     && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)
@@ -1570,22 +1571,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     : stat.getHp() == 1f;
 
             if (isDeath) {
-                if (stat.getMod().contains(GameMod.MOD_EASY) && failcount < 3) {
-                    failcount++;
-                    stat.changeHp(1f);
-                }
-                else {
-                    if (Multiplayer.isMultiplayer)
-                    {
-                        if (!hasFailed)
-                            ToastLogger.showText("You failed but you can continue playing.", false);
+                if (!hasFailed)
+                    ToastLogger.showText("You failed but you can continue playing.", false);
 
-                        hasFailed = true;
-                    } else {
-                        gameover();
-                        return;
-                    }
-                }
+                hasFailed = true;
             }
         }
 
