@@ -10,7 +10,7 @@ object SpectatorAPI {
     private const val MAIN_ENDPOINT = OnlineManager.endpoint + "/"
     private const val START_PLAYING = "startPlaying"
 
-    private const val EVENTS_ENDPOINT = "${OnlineManager.endpoint}/events/"
+    private const val EVENTS_ENDPOINT = "${OnlineManager.endpoint}events/"
     private const val CHANGE_BEATMAP = "changeBeatmap"
     private const val JOIN_ROOM = "playerJoined"
     private const val LEAVE_ROOM = "playerLeft"
