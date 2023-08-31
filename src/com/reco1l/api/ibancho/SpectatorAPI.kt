@@ -30,12 +30,15 @@ object SpectatorAPI {
         }
     }
 
-    fun changeBeatmap(roomId: Long, md5: String) {
+    fun changeBeatmap(roomId: Long, beatmapsetId: Long?, md5: String) {
         JsonRequester("$EVENTS_ENDPOINT$CHANGE_BEATMAP").use {
             it.jsonInsertion = JsonContent().apply {
                 put("roomId", roomId)
+                put("beatmapsetId", beatmapsetId)
                 put("hash", md5)
-                put("sign", SecurityUtils.signRequest("${roomId}_$md5"))
+                put("sign", SecurityUtils.signRequest(
+                    "${roomId}${if (beatmapsetId != null) "_$beatmapsetId" else ""}_$md5"
+                ))
             }
 
             try {
