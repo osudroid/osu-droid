@@ -35,7 +35,7 @@ object SpectatorAPI {
             it.jsonInsertion = JsonContent().apply {
                 put("roomId", roomId)
                 put("hash", md5)
-                put("sign", SecurityUtils.signRequest("$roomId$md5"))
+                put("sign", SecurityUtils.signRequest("${roomId}_$md5"))
             }
 
             try {
@@ -51,7 +51,7 @@ object SpectatorAPI {
             it.jsonInsertion = JsonContent().apply {
                 put("roomId", roomId)
                 put("uid", uid)
-                put("sign", SecurityUtils.signRequest("$roomId$uid"))
+                put("sign", SecurityUtils.signRequest("${roomId}_$uid"))
             }
 
             try {
@@ -67,7 +67,7 @@ object SpectatorAPI {
             it.jsonInsertion = JsonContent().apply {
                 put("roomId", roomId)
                 put("uid", uid)
-                put("sign", SecurityUtils.signRequest("$roomId$uid"))
+                put("sign", SecurityUtils.signRequest("${roomId}_$uid"))
             }
 
             try {
