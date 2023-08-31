@@ -200,7 +200,6 @@ public class OnlineManager {
 
         PostBuilder post = new PostBuilder();
         post.addParam("userID", String.valueOf(userId));
-        post.addParam("sessionId", sessionId);
         post.addParam("roomID", String.valueOf(roomId));
         post.addParam("data", Base64.encodeToString(data, Base64.URL_SAFE));
 
