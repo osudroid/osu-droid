@@ -663,7 +663,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        if (Multiplayer.isMultiplayer && Multiplayer.isConnected) {
+        if (Multiplayer.isMultiplayer && Multiplayer.isConnected && Multiplayer.room != null) {
             spectatorDataManager = new SpectatorDataManager(Multiplayer.room.getId(), this, replay, stat);
         }
 
