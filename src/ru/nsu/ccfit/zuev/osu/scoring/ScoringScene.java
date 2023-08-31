@@ -511,8 +511,7 @@ public class ScoringScene {
                 ScoreLibrary.getInstance().addScore(track.getFilename(), stat, replay);
             }
 
-            if (!Multiplayer.isMultiplayer && stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
-                    OnlineManager.getInstance().isReadyToSend()) {
+            if (!Multiplayer.isMultiplayer && stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline()) {
                 boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator()).applyFilter(m -> m.unranked).hasNext();
                 if (hasUnrankedMod) {
                     return;

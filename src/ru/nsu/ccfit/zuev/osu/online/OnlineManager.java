@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu.online;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Bundle;
 
 import android.util.Base64;
 
@@ -16,7 +15,6 @@ import java.io.File;
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
@@ -38,7 +36,6 @@ public class OnlineManager {
     private boolean stayOnline = true;
     private String sessionId = "";
     private long userId = -1L;
-    private String playID = "";
 
     private String username = "";
     private String password = "";
@@ -48,7 +45,6 @@ public class OnlineManager {
     private float accuracy = 0;
     private String avatarURL = "";
     private int mapRank;
-    private int replayID = 0;
 
     public static OnlineManager getInstance() {
         if (instance == null) {
@@ -196,21 +192,16 @@ public class OnlineManager {
         accuracy = Integer.parseInt(resp[2]) / 100000f;
         mapRank = Integer.parseInt(resp[3]);
 
-        if (resp.length >= 5) {
-            replayID = Integer.parseInt(resp[4]);
-        } else
-            replayID = 0;
-
         return true;
     }
 
-    public String sendSpectatorData(String roomId, byte[] data) throws OnlineManagerException {
+    public String sendSpectatorData(Long roomId, byte[] data) throws OnlineManagerException {
         System.out.println("Data length: " + data.length);
 
         PostBuilder post = new PostBuilder();
         post.addParam("userID", String.valueOf(userId));
         post.addParam("sessionId", sessionId);
-        post.addParam("roomID", roomId);
+        post.addParam("roomID", String.valueOf(roomId));
         post.addParam("data", Base64.encodeToString(data, Base64.URL_SAFE));
 
         ArrayList<String> response = sendRequest(post, endpoint + "spectatorData");
@@ -376,10 +367,6 @@ public class OnlineManager {
 
     public void setStayOnline(boolean stayOnline) {
         this.stayOnline = stayOnline;
-    }
-
-    public boolean isReadyToSend() {
-        return (playID != null);
     }
 
     public int getMapRank() {

@@ -118,8 +118,6 @@ public class OnlineScoring {
     public void sendRecord(final StatisticV2 record, final SendingPanel panel, final String mapMD5, final String replay) {
         if (!OnlineManager.getInstance().isStayOnline())
             return;
-        if (!OnlineManager.getInstance().isReadyToSend())
-            return;
 
         Debug.i("Sending score");
 

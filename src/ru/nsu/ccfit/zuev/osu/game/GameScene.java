@@ -659,16 +659,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         true
                 );
 
-                spectatorDataManager = null;
                 return false;
             }
+        }
 
-            if (response.size() >= 2) {
-                spectatorDataManager = new SpectatorDataManager(this, replay, stat);
-                spectatorDataManager.setRoomId(response.get(1));
-            }
-        } else {
-            spectatorDataManager = null;
+        if (Multiplayer.isMultiplayer && Multiplayer.isConnected) {
+            spectatorDataManager = new SpectatorDataManager(Multiplayer.room.getId(), this, replay, stat);
         }
 
         // Resetting variables before starting the game.

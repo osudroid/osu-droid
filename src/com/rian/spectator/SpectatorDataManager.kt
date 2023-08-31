@@ -20,6 +20,7 @@ import java.util.*
  * Holds spectator data that will be sent to the server periodically.
  */
 class SpectatorDataManager(
+    private val roomId: Long,
     private val gameScene: GameScene,
     private val replay: Replay,
     private val stat: StatisticV2
@@ -34,8 +35,6 @@ class SpectatorDataManager(
 
     private var beginningCursorMoveIndexes = IntArray(GameScene.CursorCount)
     private val endCursorMoveIndexes = IntArray(GameScene.CursorCount)
-
-    private var roomId = ""
 
     private val submissionTimer = Timer()
     private val submissionPeriod = 5000L
@@ -223,15 +222,6 @@ class SpectatorDataManager(
 
         submissionTimer.cancel()
         isPaused = true
-    }
-
-    /**
-     * Sets the room ID of this manager.
-     *
-     * @param id The room ID.
-     */
-    fun setRoomId(id: String) {
-        roomId = id
     }
 
     fun setGameEnded(gameEnded: Boolean) {
