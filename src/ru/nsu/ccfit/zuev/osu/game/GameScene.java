@@ -644,7 +644,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         stat.setChangeSpeed(ModMenu.getInstance().getChangeSpeed());
         stat.setFLFollowDelay(ModMenu.getInstance().getFLfollowDelay());
 
-        if (!replaying && OnlineManager.getInstance().isStayOnline() && replay != null) {
+        if (!Multiplayer.isMultiplayer && !replaying && OnlineManager.getInstance().isStayOnline() && replay != null) {
             ArrayList<String> response = null;
 
             try {
