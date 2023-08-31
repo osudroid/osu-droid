@@ -196,7 +196,8 @@ class SpectatorDataManager(
     /**
      * Adds a spectator event.
      */
-    fun addEvent() = SpectatorEvent(gameScene.secPassed * 1000, stat.modifiedTotalScore, stat.combo, stat.accuracy)
+    fun addEvent() =
+        events.add(SpectatorEvent(gameScene.secPassed * 1000, stat.modifiedTotalScore, stat.combo, stat.accuracy))
 
     /**
      * Resumes the timer after a specified delay.
