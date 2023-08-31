@@ -727,7 +727,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         if (isRoomHost && beatmap != null)
             async {
-                SpectatorAPI.changeBeatmap(room!!.id, beatmap.md5)
+                SpectatorAPI.changeBeatmap(room!!.id, beatmap.parentSetID, beatmap.md5)
             }
 
         getGlobal().songService.preLoad(getGlobal().selectedTrack.beatmap.music)
