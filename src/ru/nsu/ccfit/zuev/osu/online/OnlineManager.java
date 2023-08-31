@@ -209,6 +209,7 @@ public class OnlineManager {
 
         PostBuilder post = new PostBuilder();
         post.addParam("userID", String.valueOf(userId));
+        post.addParam("sessionId", sessionId);
         post.addParam("roomID", roomId);
         post.addParam("data", Base64.encodeToString(data, Base64.URL_SAFE));
 
@@ -224,6 +225,7 @@ public class OnlineManager {
     public ArrayList<String> sendPlaySettings(StatisticV2 stat, final String hash) throws OnlineManagerException {
         PostBuilder post = new PostBuilder();
         post.addParam("userID", String.valueOf(userId));
+        post.addParam("sessionId", sessionId);
         post.addParam("modstring", stat.getModString());
         post.addParam("hash", hash);
         post.addParam("isSliderLock", Config.isRemoveSliderLock() ? "1" : "0");
