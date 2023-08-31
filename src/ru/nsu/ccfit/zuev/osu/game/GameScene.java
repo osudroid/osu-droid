@@ -3105,6 +3105,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         return beatmapData;
     }
 
+    public DifficultyHelper getDifficultyHelper() {
+        return difficultyHelper;
+    }
+
+    public float getOverallDifficulty() {
+        return overallDifficulty;
+    }
+
     public void stopSpectatorDataSubmission() {
         if (spectatorDataManager == null) {
             return;

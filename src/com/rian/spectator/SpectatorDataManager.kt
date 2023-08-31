@@ -1,9 +1,9 @@
 package com.rian.spectator
 
 import android.util.Log
+import com.rian.difficultycalculator.beatmap.hitobject.HitCircle
 import com.rian.difficultycalculator.beatmap.hitobject.HitObject
 import com.rian.difficultycalculator.beatmap.hitobject.HitObjectWithDuration
-import com.rian.difficultycalculator.beatmap.hitobject.Slider
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
@@ -188,7 +188,15 @@ class SpectatorDataManager(
         val obj = gameScene.beatmapData.hitObjects.objects[objectId]
         val replayData = replay.objectData[objectId]
 
-        val time = if (obj is Slider) obj.endTime else obj.startTime + replayData.accuracy
+        var time = obj.endTime
+        if (obj is HitCircle) {
+            // Special handling for circles that are not tapped.
+            time += (
+                if (replayData.accuracy == 10000.toShort())
+                    gameScene.difficultyHelper.hitWindowFor50(gameScene.overallDifficulty) * 1000
+                else replayData.accuracy
+            ).toDouble()
+        }
 
         objectData.add(SpectatorObjectData(time, replayData))
     }
