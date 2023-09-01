@@ -114,7 +114,7 @@ fun jsonToStatistic(json: JSONObject) = StatisticV2().apply {
     playerName = json.getString("username")
     totalScore = json.getInt("score")
     time = System.currentTimeMillis()
-    mod = stringToMods(if (json.isNull("modstring")) null else json.getString("modstring"))
+    setModFromString(if (json.isNull("modstring")) "" else json.getString("modstring"))
     maxCombo = json.optInt("maxCombo")
     hit300k = json.optInt("geki")
     hit300 = json.optInt("perfect")
