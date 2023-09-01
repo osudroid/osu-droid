@@ -813,7 +813,7 @@ public class StatisticV2 implements Serializable {
         return new JSONObject() {{
             try {
                 put("accuracy", getAccuracyForServer());
-                put("score", getModifiedTotalScore());
+                put("score", getTotalScore());
                 put("username", playerName);
                 put("modstring", MultiplayerConverter.modsToString(mod));
                 put("maxCombo", maxCombo);
