@@ -455,6 +455,10 @@ public class ModMenu implements IModSwitcher {
         return FLfollowDelay == defaultFLFollowDelay;
     }
 
+    public float getDefaultFLFollowDelay() {
+        return defaultFLFollowDelay;
+    }
+
     public void resetFLFollowDelay() {
         FLfollowDelay = defaultFLFollowDelay;
     }

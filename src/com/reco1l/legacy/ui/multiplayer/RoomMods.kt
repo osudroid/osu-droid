@@ -4,6 +4,7 @@ import com.reco1l.legacy.data.modsToReadable
 import com.reco1l.legacy.data.modsToString
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu.getInstance as getModMenu
 import java.util.*
 
 data class RoomMods(
@@ -36,7 +37,7 @@ data class RoomMods(
                 if (speedMultiplier != 1f)
                     append(", ${speedMultiplier}x")
 
-                if (flFollowDelay != 1f)
+                if (flFollowDelay != getModMenu().defaultFLFollowDelay)
                     append(", ${flFollowDelay * 1000}ms FL delay")
 
                 if (forceAR != null)
