@@ -16,28 +16,31 @@ fun modsToReadable(mods: String?): String
 {
     if (mods.isNullOrEmpty()) return "None"
 
-    val b = StringBuilder()
+    return buildString {
 
-    if ('a' in mods) b.append("AU, ")
-    if ('x' in mods) b.append("RX, ")
-    if ('p' in mods) b.append("AP, ")
-    if ('e' in mods) b.append("EZ, ")
-    if ('n' in mods) b.append("NF, ")
-    if ('r' in mods) b.append("HR, ")
-    if ('h' in mods) b.append("HD, ")
-    if ('i' in mods) b.append("FL, ")
-    if ('d' in mods) b.append("DT, ")
-    if ('c' in mods) b.append("NC, ")
-    if ('t' in mods) b.append("HT, ")
-    if ('s' in mods) b.append("PR, ")
-    if ('l' in mods) b.append("REZ, ")
-    if ('m' in mods) b.append("SC, ")
-    if ('u' in mods) b.append("SD, ")
-    if ('f' in mods) b.append("PF, ")
-    if ('b' in mods) b.append("SU, ")
-    if ('v' in mods) b.append("SV2, ")
+        for (c in mods) when (c)
+        {
+            'a' -> append("AU, ")
+            'x' -> append("RX, ")
+            'p' -> append("AP, ")
+            'e' -> append("EZ, ")
+            'n' -> append("NF, ")
+            'r' -> append("HR, ")
+            'h' -> append("HD, ")
+            'i' -> append("FL, ")
+            'd' -> append("DT, ")
+            'c' -> append("NC, ")
+            't' -> append("HT, ")
+            's' -> append("PR, ")
+            'l' -> append("REZ, ")
+            'm' -> append("SC, ")
+            'u' -> append("SD, ")
+            'f' -> append("PF, ")
+            'b' -> append("SU, ")
+            'v' -> append("SV2, ")
+        }
 
-    return b.substring(0, b.length - 2)
+    }.substringBeforeLast(',')
 }
 
 fun stringToMods(data: String?): EnumSet<GameMod>
@@ -46,50 +49,53 @@ fun stringToMods(data: String?): EnumSet<GameMod>
 
     if (data.isNullOrEmpty()) return mod
 
-    if ('a' in data) mod += MOD_AUTO
-    if ('x' in data) mod += MOD_RELAX
-    if ('p' in data) mod += MOD_AUTOPILOT
-    if ('e' in data) mod += MOD_EASY
-    if ('n' in data) mod += MOD_NOFAIL
-    if ('r' in data) mod += MOD_HARDROCK
-    if ('h' in data) mod += MOD_HIDDEN
-    if ('i' in data) mod += MOD_FLASHLIGHT
-    if ('d' in data) mod += MOD_DOUBLETIME
-    if ('c' in data) mod += MOD_NIGHTCORE
-    if ('t' in data) mod += MOD_HALFTIME
-    if ('s' in data) mod += MOD_PRECISE
-    if ('m' in data) mod += MOD_SMALLCIRCLE
-    if ('l' in data) mod += MOD_REALLYEASY
-    if ('u' in data) mod += MOD_SUDDENDEATH
-    if ('f' in data) mod += MOD_PERFECT
-    if ('v' in data) mod += MOD_SCOREV2
-
+    for (c in data) when (c)
+    {
+        'a' -> mod += MOD_AUTO
+        'x' -> mod += MOD_RELAX
+        'p' -> mod += MOD_AUTOPILOT
+        'e' -> mod += MOD_EASY
+        'n' -> mod += MOD_NOFAIL
+        'r' -> mod += MOD_HARDROCK
+        'h' -> mod += MOD_HIDDEN
+        'i' -> mod += MOD_FLASHLIGHT
+        'd' -> mod += MOD_DOUBLETIME
+        'c' -> mod += MOD_NIGHTCORE
+        't' -> mod += MOD_HALFTIME
+        's' -> mod += MOD_PRECISE
+        'm' -> mod += MOD_SMALLCIRCLE
+        'l' -> mod += MOD_REALLYEASY
+        'u' -> mod += MOD_SUDDENDEATH
+        'f' -> mod += MOD_PERFECT
+        'v' -> mod += MOD_SCOREV2
+    }
     return mod
 }
 
-fun modsToString(mod: EnumSet<GameMod>): String
-{
-    val s = StringBuilder()
+fun modsToString(mod: EnumSet<GameMod>) = buildString {
 
-    if (MOD_AUTO in mod) s.append('a')
-    if (MOD_RELAX in mod) s.append('x')
-    if (MOD_AUTOPILOT in mod) s.append('p')
-    if (MOD_EASY in mod) s.append('e')
-    if (MOD_NOFAIL in mod) s.append('n')
-    if (MOD_HARDROCK in mod) s.append('r')
-    if (MOD_HIDDEN in mod) s.append('h')
-    if (MOD_FLASHLIGHT in mod) s.append('i')
-    if (MOD_DOUBLETIME in mod) s.append('d')
-    if (MOD_NIGHTCORE in mod) s.append('c')
-    if (MOD_HALFTIME in mod) s.append('t')
-    if (MOD_PRECISE in mod) s.append('s')
-    if (MOD_SMALLCIRCLE in mod) s.append('m')
-    if (MOD_REALLYEASY in mod) s.append('l')
-    if (MOD_PERFECT in mod) s.append('f')
-    if (MOD_SUDDENDEATH in mod) s.append('u')
-    if (MOD_SCOREV2 in mod) s.append('v')
+    for (m in mod) when (m)
+    {
+        MOD_AUTO -> append('a')
+        MOD_RELAX -> append('x')
+        MOD_AUTOPILOT -> append('p')
+        MOD_EASY -> append('e')
+        MOD_NOFAIL -> append('n')
+        MOD_HARDROCK -> append('r')
+        MOD_HIDDEN -> append('h')
+        MOD_FLASHLIGHT -> append('i')
+        MOD_DOUBLETIME -> append('d')
+        MOD_NIGHTCORE -> append('c')
+        MOD_HALFTIME -> append('t')
+        MOD_PRECISE -> append('s')
+        MOD_SMALLCIRCLE -> append('m')
+        MOD_REALLYEASY -> append('l')
+        MOD_PERFECT -> append('f')
+        MOD_SUDDENDEATH -> append('u')
+        MOD_SCOREV2 -> append('v')
 
-    return s.toString()
+        else -> Unit
+    }
 }
 
 
