@@ -37,7 +37,7 @@ data class RoomMods(
                     append(", ${speedMultiplier}x")
 
                 if (flFollowDelay != 1f)
-                    append(", ${flFollowDelay}ms")
+                    append(", ${flFollowDelay * 1000}ms FL delay")
 
                 if (forceAR != null)
                     append(", AR $forceAR")
