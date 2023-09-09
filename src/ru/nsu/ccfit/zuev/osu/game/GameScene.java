@@ -1526,9 +1526,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (gameStarted) {
-            double rate = 0.375f;
+            double rate = 0.375;
             if (drain > 0 && distToNextObject > 0) {
-                rate = 1 + drain / (2f * distToNextObject);
+                rate = 1 + drain / (2 * distToNextObject);
             }
             stat.changeHp((float) -rate * 0.01f * dt);
 
