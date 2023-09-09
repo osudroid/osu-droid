@@ -2838,10 +2838,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         avgOffset += acc;
         offsetRegs++;
 
-        stat.addHitOffset((float) acc);
+        stat.addHitOffset(acc);
 
         if (replaying) {
-            scoringScene.getReplayStat().addHitOffset((float) acc);
+            scoringScene.getReplayStat().addHitOffset(acc);
         }
     }
 
