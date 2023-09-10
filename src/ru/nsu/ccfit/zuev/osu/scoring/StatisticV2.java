@@ -65,6 +65,10 @@ public class StatisticV2 implements Serializable {
      */
     public boolean isAlive = true;
 
+    /**
+     * Whether the player can fail.
+     */
+    public boolean canFail = true;
 
     public StatisticV2() {
         playerName = null;
@@ -131,9 +135,13 @@ public class StatisticV2 implements Serializable {
         hp += amount;
         if (hp < 0) {
             hp = 0;
+            if (canFail) {
+                isAlive = false;
+            }
         }
         if (hp > 1) {
             hp = 1;
+            isAlive = true;
         }
     }
 

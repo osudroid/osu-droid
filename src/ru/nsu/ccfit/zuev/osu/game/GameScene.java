@@ -803,6 +803,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         stat = new StatisticV2();
         stat.setMod(ModMenu.getInstance().getMod());
         mIsAuto = stat.getMod() != null && stat.getMod().contains(GameMod.MOD_AUTO);
+        stat.canFail = !stat.getMod().contains(GameMod.MOD_NOFAIL)
+                && !stat.getMod().contains(GameMod.MOD_RELAX)
+                && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)
+                && !stat.getMod().contains(GameMod.MOD_AUTO);
 
         float multiplier = 1 + Math.min(rawDifficulty, 10) / 10f + Math.min(rawDrain, 10) / 10f;
 
@@ -1528,19 +1532,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
             stat.changeHp(-rate * 0.01f * dt);
 
-            var isDeath = stat.getHp() <= 0
-                    && !stat.getMod().contains(GameMod.MOD_NOFAIL)
-                    && !stat.getMod().contains(GameMod.MOD_RELAX)
-                    && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)
-                    && !stat.getMod().contains(GameMod.MOD_AUTO);
-
-            stat.isAlive = stat.isAlive
-                    // Player is alive - they will only die if HP reaches 0.
-                    ? !isDeath
-                    // Player is not alive - they will only recover if HP reaches 1.
-                    : stat.getHp() == 1f;
-
-            if (isDeath) {
+            if (stat.getHp() <= 0 && stat.canFail) {
                 if (stat.getMod().contains(GameMod.MOD_EASY) && failcount < 3) {
                     failcount++;
                     stat.changeHp(1f);
