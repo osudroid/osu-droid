@@ -29,8 +29,23 @@ public class BassAudioFunc {
     private BroadcastReceiver receiver;
     private LocalBroadcastManager broadcastManager;
 
+    /**
+     * Whether the game is currently on focus.
+     */
     private boolean onFocus;
+
+    /**
+     * The playback buffer length that is used when the game is on focus, in seconds.
+     * <br>
+     * This is pretty low to achieve the smallest latency possible without introducing CPU overhead.
+     */
     private final float onFocusBufferLength = 0.1f;
+
+    /**
+     * The playback buffer length that is used when the game is not on focus, in seconds.
+     * <br>
+     * This is a lot higher than the value used in {@link #onFocusBufferLength} to reduce CPU usage.
+     */
     private final float offFocusBufferLength = 0.5f;
 
     public BassAudioFunc() {
