@@ -55,7 +55,7 @@ public class MultiTouchController extends BaseTouchController {
 			case MotionEvent.ACTION_MOVE:
 				return this.onHandleTouchMove(pMotionEvent);
 			default:
-				throw new IllegalArgumentException("Invalid Action detected: " + action);
+				return false;
 		}
 	}
 
