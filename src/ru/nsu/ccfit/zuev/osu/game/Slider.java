@@ -40,10 +40,10 @@ public class Slider extends GameObject {
     private TimingPoint timing;
     private CircleNumber number;
     private SliderPath path;
-    private float passedTime;
-    private float preTime;
-    private float tickTime;
-    private float maxTime;
+    private double passedTime;
+    private double preTime;
+    private double tickTime;
+    private double maxTime;
     private float scale;
     private int repeatCount;
     private boolean reverse;
@@ -637,7 +637,7 @@ public class Slider extends GameObject {
         }
 
         if (GameHelper.isKiai()) {
-            final float kiaiModifier = Math.max(0, 1 - GameHelper.getGlobalTime() / GameHelper.getKiaiTickLength()) * 0.50f;
+            final float kiaiModifier = (float) Math.max(0, 1 - GameHelper.getGlobalTime() / GameHelper.getKiaiTickLength()) * 0.50f;
             final float r = Math.min(1, circleColor.r() + (1 - circleColor.r()) * kiaiModifier);
             final float g = Math.min(1, circleColor.g() + (1 - circleColor.g()) * kiaiModifier);
             final float b = Math.min(1, circleColor.b() + (1 - circleColor.b()) * kiaiModifier);
@@ -652,7 +652,7 @@ public class Slider extends GameObject {
 
         if (passedTime < 0) // we at approach time
         {
-            float percentage = 1 + passedTime / preTime;
+            float percentage = (float) (1 + passedTime / preTime);
             // calculating size of approach circle
             approachCircle.setScale(scale * (1 + 2f * (1 - percentage)));
             if (startHit) {
@@ -724,8 +724,7 @@ public class Slider extends GameObject {
 
             ball = SpritePool.getInstance().getAnimSprite("sliderb",
                     SkinManager.getFrames("sliderb"));
-            ball.setFps(0.1f * GameHelper.getSpeed() * scale
-                    / timing.getBeatLength());
+            ball.setFps((float) (0.1f * GameHelper.getSpeed() * scale / timing.getBeatLength()));
             ball.setScale(scale);
             ball.setFlippedHorizontal(false);
 
@@ -741,9 +740,8 @@ public class Slider extends GameObject {
             scene.attachChild(followCircle);
         }
         // Ball positiong
-        final float percentage = passedTime / maxTime;
-        final PointF ballpos = getPercentPosition(reverse ? 1 - percentage
-                : percentage, ballAngle);
+        final float percentage = (float) (passedTime / maxTime);
+        final PointF ballpos = getPercentPosition(reverse ? 1 - percentage : percentage, ballAngle);
         // Calculating if cursor in follow circle bounds
         final float radius = Utils.toRes(128) * scale;
         boolean inRadius = false;
@@ -761,19 +759,8 @@ public class Slider extends GameObject {
         listener.onTrackingSliders(inRadius);
         tickTime += dt;
 
-        /*
-        if (!mIsAnimating)
-        {
-            float newScale = scale * (1.1f - 0.1f * tickTime * GameHelper.getTickRate() / timing.getBeatLength());
-
-            if (newScale <= scale * 1.1f && newScale >= scale * -1.1f)
-            {
-                followCircle.setScale(newScale);
-            }
-        }*/
-
         if (Config.isComplexAnimations()) {
-            float remainTime = (maxTime * GameHelper.getTimeMultiplier() * repeatCount) - passedTime;
+            float remainTime = (float) ((maxTime * GameHelper.getTimeMultiplier() * repeatCount) - passedTime);
 
             if (inRadius && !mWasInRadius) {
                 mWasInRadius = true;
@@ -827,8 +814,8 @@ public class Slider extends GameObject {
 
                 if (Config.isComplexAnimations() && !mIsAnimating) {
                     followCircle.clearEntityModifiers();
-                    followCircle.registerEntityModifier(new ScaleModifier(
-                        Math.min((float) tickInterval / GameHelper.getTickRate(), 0.2f) * GameHelper.getTimeMultiplier(),
+                    followCircle.registerEntityModifier(new ScaleModifier((float)
+                        Math.min(tickInterval / GameHelper.getTickRate(), 0.2f) * GameHelper.getTimeMultiplier(),
                         scale * 1.1f, scale, EaseQuadOut.getInstance()));
                 }
 
@@ -871,7 +858,7 @@ public class Slider extends GameObject {
         if (GameHelper.isHidden()) {
             // New duration from completed fade in to end (before fading out)
             float realFadeInDuration = fadeInDuration / GameHelper.getTimeMultiplier();
-            float fadeOutDuration = (maxTime * repeatCount + preTime - realFadeInDuration) * GameHelper.getTimeMultiplier();
+            float fadeOutDuration = (float) ((maxTime * repeatCount + preTime - realFadeInDuration) * GameHelper.getTimeMultiplier());
 
             abstractSliderBody.applyFadeAdjustments(fadeInDuration, fadeOutDuration);
         } else {

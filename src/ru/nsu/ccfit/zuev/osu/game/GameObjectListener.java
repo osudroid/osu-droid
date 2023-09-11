@@ -41,7 +41,7 @@ public interface GameObjectListener {
 
     int getCursorsCount();
 
-    void registerAccuracy(float acc);
+    void registerAccuracy(double acc);
     
     void updateAutoBasedPos(float pX, float pY);
 
