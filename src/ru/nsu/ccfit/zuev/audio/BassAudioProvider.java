@@ -29,20 +29,13 @@ public class BassAudioProvider {
 
     public BassAudioProvider() {
         freq.value = 1.0f;
-        configureBASS();
-    }
 
-    /**
-     * Configures BASS to the default setting that the game is using.
-     */
-    public static void configureBASS() {
         // This likely doesn't help, but also doesn't seem to cause any issues or any CPU increase.
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_UPDATEPERIOD, 5);
 
         // Reduce latency to a known sane minimum.
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_PERIOD, 5);
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_BUFFER, 10);
-        BASS.BASS_SetConfig(BASS.BASS_CONFIG_BUFFER, 100);
 
         // Ensure there are no brief delays on audio operations (causing stream stalls etc.) after periods of silence.
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_NONSTOP, 1);
