@@ -39,6 +39,8 @@ public class BassAudioFunc {
     public void onGameResume() {
         onFocus = true;
 
+        // Use a lower update period to minimize latency. This results in higher CPU usage, but it is necessary
+        // to provide a smooth gameplay experience.
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_UPDATEPERIOD, 5);
 
         if (channel != 0) {
@@ -49,6 +51,8 @@ public class BassAudioFunc {
     public void onGamePause() {
         onFocus = false;
 
+        // Use a higher update period to reduce CPU usage. Minimum latency is not required here,
+        // only smooth audio playback without stutters.
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_UPDATEPERIOD, 100);
 
         if (channel != 0) {
