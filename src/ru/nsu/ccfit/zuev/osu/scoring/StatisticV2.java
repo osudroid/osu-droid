@@ -54,10 +54,10 @@ public class StatisticV2 implements Serializable {
     private int bonusScore = 0;
     private float flFollowDelay = FlashLightEntity.defaultMoveDelayS;
     private int positiveTotalOffsetSum;
-    private float positiveHitOffsetSum;
+    private double positiveHitOffsetSum;
     private int negativeTotalOffsetSum;
-    private float negativeHitOffsetSum;
-    private float unstableRate;
+    private double negativeHitOffsetSum;
+    private double unstableRate;
 
     /**
      * Indicates that the player is alive (HP hasn't reached 0, or it recovered), this is exclusively used for
@@ -65,6 +65,10 @@ public class StatisticV2 implements Serializable {
      */
     public boolean isAlive = true;
 
+    /**
+     * Whether the player can fail.
+     */
+    public boolean canFail = true;
 
     public StatisticV2() {
         playerName = null;
@@ -131,9 +135,13 @@ public class StatisticV2 implements Serializable {
         hp += amount;
         if (hp < 0) {
             hp = 0;
+            if (canFail) {
+                isAlive = false;
+            }
         }
         if (hp > 1) {
             hp = 1;
+            isAlive = true;
         }
     }
 
@@ -700,12 +708,12 @@ public class StatisticV2 implements Serializable {
         enableForceAR = t;
     }
 
-    public float getUnstableRate() {
+    public double getUnstableRate() {
         return unstableRate;
     }
 
-    public void addHitOffset(float accuracy) {
-        float msAccuracy = accuracy * 1000;
+    public void addHitOffset(double accuracy) {
+        double msAccuracy = accuracy * 1000;
 
         // Update hit offset
         if (accuracy >= 0) {
@@ -719,23 +727,23 @@ public class StatisticV2 implements Serializable {
         // Update unstable rate
         // Reference: https://math.stackexchange.com/questions/775391/can-i-calculate-the-new-standard-deviation-when-adding-a-value-without-knowing-t
         int totalOffsetSum = positiveTotalOffsetSum + negativeTotalOffsetSum;
-        float hitOffsetSum = positiveHitOffsetSum + negativeHitOffsetSum;
+        double hitOffsetSum = positiveHitOffsetSum + negativeHitOffsetSum;
 
         if (totalOffsetSum > 1) {
-            float avgOffset = hitOffsetSum / totalOffsetSum;
+            double avgOffset = hitOffsetSum / totalOffsetSum;
 
-            unstableRate = 10 * (float) Math.sqrt(
+            unstableRate = 10 * Math.sqrt(
                 ((totalOffsetSum - 1) * Math.pow(unstableRate / 10, 2) +
                     (msAccuracy - avgOffset / totalOffsetSum) * (msAccuracy - (avgOffset - msAccuracy) / (totalOffsetSum - 1))) / totalOffsetSum
             );
         }
     }
     
-    public float getNegativeHitError() {
+    public double getNegativeHitError() {
         return negativeTotalOffsetSum == 0 ? 0 : negativeHitOffsetSum / negativeTotalOffsetSum;
     }
     
-    public float getPositiveHitError() {
+    public double getPositiveHitError() {
         return positiveTotalOffsetSum == 0 ? 0 : positiveHitOffsetSum / positiveTotalOffsetSum;
     }
     
@@ -813,9 +821,9 @@ public class StatisticV2 implements Serializable {
         return new JSONObject() {{
             try {
                 put("accuracy", getAccuracyForServer());
-                put("score", getModifiedTotalScore());
+                put("score", getTotalScore());
                 put("username", playerName);
-                put("modstring", MultiplayerConverter.modsToString(mod));
+                put("modstring", getModString());
                 put("maxCombo", maxCombo);
                 put("geki", hit300k);
                 put("perfect", hit300);

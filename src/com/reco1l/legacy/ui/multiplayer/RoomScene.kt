@@ -250,20 +250,15 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     val players = room!!.activePlayers.filter { it.status != MISSING_BEATMAP }
 
                     // Checking if there's at least 2 players
-                    if (players.isEmpty() || players.size == 1)
+                    if (players.size <= 1)
                     {
-                        ToastLogger.showText("At least 2 players need to be ready!", true)
+                        ToastLogger.showText("At least 2 players need to have the beatmap!", true)
                         return true
                     }
 
-                    // Checking if all players that can play are ready.
-                    if (players.all { it.status == READY })
-                    {
-                        getResources().getSound("menuhit")?.play()
-                        RoomAPI.notifyMatchPlay()
-                        return true
-                    }
-                    ToastLogger.showText("All players with the beatmap need to be ready!", true)
+                    getResources().getSound("menuhit")?.play()
+                    RoomAPI.notifyMatchPlay()
+                    return true
                 }
                 else uiThread {
                     options = RoomOptions()
@@ -471,7 +466,15 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             if (isRoomHost)
             {
-                secondaryButton!!.setText("Start match!")
+                room!!.activePlayers.run {
+                    val playersReady = filter { it.status == READY }
+
+                    secondaryButton!!.setText(
+                        if (playersReady.size == size) "Start Game!"
+                        else "Force Start Game! (${playersReady.size}/${size})"
+                    )
+                }
+
                 secondaryButton!!.setColor(0.2f, 0.9f, 0.2f)
             }
             return
@@ -887,7 +890,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomMatchPlay()
     {
-        if (player!!.status == READY)
+        if (player!!.status != MISSING_BEATMAP)
         {
             if (getGlobal().selectedTrack == null)
             {

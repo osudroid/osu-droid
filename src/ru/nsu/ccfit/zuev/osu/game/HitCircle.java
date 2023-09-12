@@ -229,7 +229,7 @@ public class HitCircle extends GameObject {
         }
 
         if (GameHelper.isKiai()) {
-            final float kiaiModifier = Math.max(0, 1 - GameHelper.getGlobalTime() / GameHelper.getKiaiTickLength()) * 0.50f;
+            final float kiaiModifier = (float) Math.max(0, 1 - GameHelper.getGlobalTime() / GameHelper.getKiaiTickLength()) * 0.50f;
             final float r = Math.min(1, color.r() + (1 - color.r()) * kiaiModifier);
             final float g = Math.min(1, color.g() + (1 - color.g()) * kiaiModifier);
             final float b = Math.min(1, color.b() + (1 - color.b()) * kiaiModifier);

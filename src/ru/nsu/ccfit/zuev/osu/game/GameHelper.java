@@ -19,9 +19,9 @@ import ru.nsu.ccfit.zuev.osu.polygon.Spline;
 
 public class GameHelper {
     public static ControlPoints controlPoints;
-    private static float tickRate = 1;
+    private static double tickRate = 1;
     private static float scale = 1;
-    private static float speed = 1;
+    private static double speed = 1;
     private static float difficulty = 1;
     private static float approachRate = 1;
     private static float drain = 0;
@@ -43,11 +43,11 @@ public class GameHelper {
     private static boolean useReplay;
     private static boolean isKiai = false;
     private static boolean auto = false;
-    private static float beatLength = 0;
-    private static float timingOffset = 0;
+    private static double beatLength = 0;
+    private static double timingOffset = 0;
     private static int timeSignature = 4;
-    private static float initalBeatLength = 0;
-    private static float globalTime = 0;
+    private static double initalBeatLength = 0;
+    private static double globalTime = 0;
     private static Spline.CurveTypes curveType;
     private static int gameid = 0;
     private static final Queue<SliderPath> pathPool = new LinkedList<>();
@@ -79,11 +79,11 @@ public class GameHelper {
         GameHelper.difficulty = difficulty;
     }
 
-    public static float getTickRate() {
+    public static double getTickRate() {
         return tickRate;
     }
 
-    public static void setTickRate(final float tickRate) {
+    public static void setTickRate(final double tickRate) {
         GameHelper.tickRate = tickRate;
     }
 
@@ -198,11 +198,11 @@ public class GameHelper {
         GameHelper.timeMultiplier = timeMultiplier;
     }
 
-    public static float getSpeed() {
+    public static double getSpeed() {
         return speed;
     }
 
-    public static void setSpeed(final float speed) {
+    public static void setSpeed(final double speed) {
         GameHelper.speed = speed;
     }
 
@@ -337,27 +337,27 @@ public class GameHelper {
         GameHelper.isKiai = isKiai;
     }
 
-    public static float getGlobalTime() {
+    public static double getGlobalTime() {
         return globalTime;
     }
 
-    public static void setGlobalTime(final float globalTime) {
+    public static void setGlobalTime(final double globalTime) {
         GameHelper.globalTime = globalTime;
     }
 
-    public static float getBeatLength() {
+    public static double getBeatLength() {
         return beatLength;
     }
 
-    public static void setBeatLength(final float beatLength) {
+    public static void setBeatLength(final double beatLength) {
         GameHelper.beatLength = beatLength;
     }
 
-    public static float getTimingOffset() {
+    public static double getTimingOffset() {
         return timingOffset;
     }
 
-    public static void setTimingOffset(float timingOffset) {
+    public static void setTimingOffset(double timingOffset) {
         GameHelper.timingOffset = timingOffset;
     }
 
@@ -369,19 +369,19 @@ public class GameHelper {
         GameHelper.timeSignature = timeSignature;
     }
 
-    public static float getInitalBeatLength() {
+    public static double getInitalBeatLength() {
         return initalBeatLength;
     }
 
-    public static void setInitalBeatLength(float initalBeatLength) {
+    public static void setInitalBeatLength(double initalBeatLength) {
         GameHelper.initalBeatLength = initalBeatLength;
     }
 
-    public static float getSliderTickLength() {
+    public static double getSliderTickLength() {
         return 100f * initalBeatLength / speed;
     }
 
-    public static float getKiaiTickLength() {
+    public static double getKiaiTickLength() {
         return initalBeatLength;
     }
 

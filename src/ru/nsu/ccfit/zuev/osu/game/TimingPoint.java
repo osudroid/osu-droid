@@ -4,19 +4,19 @@ import ru.nsu.ccfit.zuev.osu.Constants;
 
 public class TimingPoint {
     private static String defaultSound = "normal";
-    float time;
-    float beatLength;
+    double time;
+    double beatLength;
     int signature = 4;
     String hitSound;
     int customSound = 0;
     float volume;
     boolean inherited = false;
     boolean kiai;
-    private float speed;
+    private final double speed;
 
     public TimingPoint(final String[] data, final TimingPoint prevData) {
         time = Float.parseFloat(data[0]) / 1000.0f;
-        beatLength = Float.parseFloat(data[1]);
+        beatLength = Double.parseDouble(data[1]);
         if (beatLength < 0 && prevData != null) {
             inherited = true;
             speed = -100.0f / beatLength;
@@ -57,7 +57,7 @@ public class TimingPoint {
             volume = 1;
         }
         if (data.length > 7) {
-            kiai = (data[7].equals("0") == false);
+            kiai = (!data[7].equals("0"));
         } else {
             kiai = false;
         }
@@ -87,7 +87,7 @@ public class TimingPoint {
         return volume;
     }
 
-    public float getBeatLength() {
+    public double getBeatLength() {
         return beatLength;
     }
 
@@ -95,7 +95,7 @@ public class TimingPoint {
         return signature;
     }
 
-    public float getTime() {
+    public double getTime() {
         return time;
     }
 
@@ -103,11 +103,8 @@ public class TimingPoint {
         return kiai;
     }
 
-    public float getSpeed() {
+    public double getSpeed() {
         return speed;
     }
 
-    public float getBpm() {
-        return 600.0f / beatLength;
-    }
 }

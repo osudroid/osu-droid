@@ -13,7 +13,6 @@ import com.un4seen.bass.BASS_FX;
 
 import java.nio.ByteBuffer;
 
-import ru.nsu.ccfit.zuev.audio.BassAudioProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.Config;
 
@@ -30,36 +29,50 @@ public class BassAudioFunc {
     private BroadcastReceiver receiver;
     private LocalBroadcastManager broadcastManager;
 
+    /**
+     * Whether the game is currently on focus.
+     */
+    private boolean onFocus;
+
+    /**
+     * The playback buffer length that is used when the game is on focus, in seconds.
+     * <br>
+     * This is pretty low to achieve the smallest latency possible without introducing CPU overhead.
+     */
+    private final float onFocusBufferLength = 0.1f;
+
+    /**
+     * The playback buffer length that is used when the game is not on focus, in seconds.
+     * <br>
+     * This is a lot higher than the value used in {@link #onFocusBufferLength} to reduce CPU usage.
+     */
+    private final float offFocusBufferLength = 0.5f;
+
     public BassAudioFunc() {
-        onGameResume();
     }
 
     public void onGameResume() {
-        BassAudioProvider.configureBASS();
-        BassAudioProvider.logBASSConfig();
+        onFocus = true;
+
+        // Use a lower update period to minimize latency. This results in higher CPU usage, but it is necessary
+        // to provide a smooth gameplay experience.
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_UPDATEPERIOD, 5);
+
+        if (channel != 0) {
+            BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_BUFFER, onFocusBufferLength);
+        }
     }
 
     public void onGamePause() {
-        // Reset BASS configurations to their default values.
-        // https://www.un4seen.com/doc/#bass/BASS_CONFIG_UPDATEPERIOD.html
+        onFocus = false;
+
+        // Use a higher update period to reduce CPU usage. Minimum latency is not required here,
+        // only smooth audio playback without stutters.
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_UPDATEPERIOD, 100);
 
-        // https://www.un4seen.com/doc/#bass/BASS_CONFIG_DEV_PERIOD.html
-        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_PERIOD, 10);
-
-        // https://www.un4seen.com/doc/#bass/BASS_CONFIG_BUFFER.html
-        BASS.BASS_SetConfig(BASS.BASS_CONFIG_BUFFER, 500);
-
-        // https://www.un4seen.com/doc/#bass/BASS_CONFIG_DEV_NONSTOP.html
-        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_NONSTOP, 0);
-
-        // This is needed for `NotifyPlayer` so that the music does not get choppy.
-        // Unsure why it is needed.
-        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_BUFFER, 0);
-
-        // Reinitialize BASS under the current configuration.
-        BASS.BASS_Init(BASS.BASS_GetDevice(), BassAudioProvider.DEFAULT_FREQUENCY, BASS.BASS_DEVICE_REINIT);
-        BassAudioProvider.logBASSConfig();
+        if (channel != 0) {
+            BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_BUFFER, offFocusBufferLength);
+        }
     }
 
     public boolean pause() {
@@ -115,6 +128,12 @@ public class BassAudioFunc {
                 BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, 25.0f);
                 break;
         }
+
+        if (channel != 0) {
+            // Use smaller buffer length on focus for smaller latency.
+            BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_BUFFER, onFocus ? onFocusBufferLength : offFocusBufferLength);
+        }
+
         return channel != 0;
     }
 
@@ -146,6 +165,12 @@ public class BassAudioFunc {
         else{
             BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, (speed - 1.0f) * 100);
         }
+
+        if (channel != 0) {
+            // Use smaller buffer length on focus for smaller latency.
+            BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_BUFFER, onFocus ? onFocusBufferLength : offFocusBufferLength);
+        }
+
         return channel != 0;
     }
 
