@@ -357,9 +357,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             {
                 var child = getChild(i);
 
-                // This checks nullability in case the loading was stopped, this iteration also needs to be stopped.
                 if (!(child instanceof Sprite))
-                    return;
+                    continue;
 
                 var sprite = (Sprite) child;
                 sprite.setPosition(sprite.getX(), y);
@@ -393,9 +392,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             {
                 var child = getChild(i);
 
-                // This checks nullability in case the loading was stopped, this iteration also needs to be stopped.
                 if (!(child instanceof Sprite))
-                    return;
+                    continue;
 
                 var sprite = (Sprite) child;
                 sprite.setPosition(-160, 146 + 0.8f * percentShow * i * (sprite.getHeight() - 32));
