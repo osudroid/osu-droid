@@ -518,16 +518,20 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         chat.log.clear()
         chat.dismiss()
 
+        // Clearing entities
+        glThread {
+            getModMenu().hide()
+
+            playerList?.detachSelf()
+            playerList = null
+        }
+
         // Hide any player menu if its shown
         uiThread {
             playerList?.menu?.dismiss()
             options?.dismiss()
             Unit
         }
-
-        // Clearing player list
-        playerList?.detachSelf()
-        playerList = null
     }
 
 
