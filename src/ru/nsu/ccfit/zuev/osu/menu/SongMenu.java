@@ -102,7 +102,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private ChangeableText trackInfo, mapper, beatmapInfo, beatmapInfo2, dimensionInfo;
     private boolean isSelectComplete = true;
     private AnimSprite scoringSwitcher = null;
-    private AsyncTask boardTask;
     private GroupType groupType = GroupType.MapSet;
 
     private Timer previousSelectionTimer;
@@ -675,7 +674,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
                                              float pTouchAreaLocalX, float pTouchAreaLocalY) {
                     if (!pSceneTouchEvent.isActionDown()) return false;
-                    board.cancelLoadAvatar();
                     toggleScoringSwitcher();
                     return true;
                 }
@@ -1121,18 +1119,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         EdExtensionHelper.onSelectTrack(selectedTrack);
         GlobalManager.getInstance().setSelectedTrack(track);
         updateInfo(track);
-        board.cancelLoadAvatar();
-        if (boardTask != null) {
-            boardTask.cancel(true);
-            board.cancelLoadOnlineScores();
-        }
-        boardTask = new AsyncTask() {
-            @Override
-            public void run() {
-                board.init(track);
-            }
-        };
-        boardTask.execute();
+        board.init(track);
 
         final int quality = Config.getBackgroundQuality();
         synchronized (backgroundMutex) {
@@ -1402,18 +1389,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void reloadScoreBroad() {
-        board.cancelLoadAvatar();
-        if (boardTask != null) {
-            boardTask.cancel(true);
-            board.cancelLoadOnlineScores();
-        }
-        boardTask = new AsyncTask() {
-            @Override
-            public void run() {
-                board.init(selectedTrack);
-            }
-        };
-        boardTask.execute();
+        board.init(selectedTrack);
     }
 
     public void select() {
