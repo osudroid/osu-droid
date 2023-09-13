@@ -56,7 +56,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
     private LoadTask currentTask;
 
-    private boolean awaitAvatarTask;
+    private Runnable currentAvatarTask;
 
     private final ExecutorService loadExecutor = Executors.newSingleThreadExecutor();
 
@@ -336,7 +336,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         SyncTaskManager.getInstance().run(() -> {
 
             detachChildren();
-            awaitAvatarTask = false;
+            currentAvatarTask = null;
             attachChild(loadingText);
 
             if (track == null)
@@ -527,8 +527,6 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
         private final boolean showOnline;
         
-        private boolean shouldLoadAvatar;
-
 
         private ScoreItem(ExecutorService avatarExecutor, String title, String acc, String markStr, boolean showOnline, int scoreID, String avaURL, String username) {
             super(-150, 40,  ResourceManager.getInstance().getTexture("menu-button-background").deepCopy());
@@ -545,16 +543,15 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             setColor(0, 0, 0);
             setAlpha(0.5f);
 
-            shouldLoadAvatar = showOnlineScores
+            var shouldLoadAvatar = showOnlineScores
                     && Config.getLoadAvatar()
                     && avaURL != null
                     && avatarExecutor != null;
 
-            if (shouldLoadAvatar)
-            {
-                avatarTask = () -> {
-                    avatarTask = null;
+            avatarTask = shouldLoadAvatar ? new Runnable() {
 
+                @Override
+                public void run() {
                     var texture = ResourceManager.getInstance().getTexture("emptyavatar");
 
                     if (!avatarExecutor.isShutdown() && OnlineManager.getInstance().loadAvatarToTextureManager(avaURL)) {
@@ -564,12 +561,12 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                             texture = avatarTexture;
                     }
 
-                    var child = new Sprite(55, 12, 90, 90, texture);
-                    attachChild(child);
+                    attachChild(new Sprite(55, 12, 90, 90, texture));
 
-                    awaitAvatarTask = false;
-                };
-            }
+                    if (currentAvatarTask == this)
+                        currentAvatarTask = null;
+                }
+            } : null;
 
             int pos = shouldLoadAvatar ? 90 : 0;
 
@@ -603,14 +600,18 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             super.onManagedUpdate(pSecondsElapsed);
 
             // This is to avoid loading avatars when the scene was changed (game started or user gone back to main menu).
-            if (shouldLoadAvatar && !awaitAvatarTask && avatarTask != null) {
+            if (avatarTask != null && currentAvatarTask == null) {
+
+                var task = avatarTask;
+                avatarTask = null;
+                currentAvatarTask = task;
+
                 try {
-                    awaitAvatarTask = true;
-                    avatarExecutor.submit(avatarTask);
+                    avatarExecutor.submit(task);
                 } catch (RejectedExecutionException e) {
-                    awaitAvatarTask = false;
+                    if (currentAvatarTask == task)
+                        currentAvatarTask = null;
                 }
-                shouldLoadAvatar = false;
             }
         }
 
