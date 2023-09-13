@@ -345,7 +345,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     {
         super.onManagedUpdate(pSecondsElapsed);
         secPassed += pSecondsElapsed;
-        if (getChildCount() == 0) {
+        if (getChildCount() <= 1) {
             return;
         }
 
