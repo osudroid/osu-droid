@@ -522,7 +522,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
 
         private ScoreItem(ExecutorService avatarExecutor, String title, String acc, String markStr, boolean showOnline, int scoreID, String avaURL, String username) {
-            super(0f, 0f,  ResourceManager.getInstance().getTexture("menu-button-background").deepCopy());
+            super(-150, 40,  ResourceManager.getInstance().getTexture("menu-button-background").deepCopy());
             this.avatarExecutor = avatarExecutor;
             this.showOnline = showOnline;
             this.username = username;
