@@ -33,6 +33,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     private final ChangeableText loadingText;
     private float percentShow = -1;
     private boolean showOnlineScores = false;
+    private TrackInfo lastTrack;
     private boolean wasOnline = false;
     private boolean isScroll = false;
 
@@ -312,11 +313,12 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         if (currentTask != null && currentTask.avatarExecutor != null)
             currentTask.avatarExecutor.shutdownNow();
 
-        if (showOnlineScores == wasOnline && wasOnline) {
+        if (lastTrack == track && showOnlineScores == wasOnline && wasOnline) {
             return;
         }
 
         loadingText.setText("");
+        lastTrack = track;
         wasOnline = showOnlineScores;
         scoreItems = new ScoreBoardItem[0];
 
@@ -331,6 +333,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 initFromOnline(track);
                 return;
             }
+
             initFromLocal(track);
         });
     }
