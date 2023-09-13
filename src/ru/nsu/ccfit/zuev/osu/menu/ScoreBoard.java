@@ -326,6 +326,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
             detachChildren();
 
+            attachChild(loadingText);
+
             if (track == null)
                 return;
 
