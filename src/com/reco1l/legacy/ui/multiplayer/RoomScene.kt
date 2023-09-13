@@ -6,7 +6,8 @@ import com.reco1l.api.ibancho.IRoomEventListener
 import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.api.ibancho.data.*
 import com.reco1l.api.ibancho.data.PlayerStatus.*
-import com.reco1l.api.ibancho.data.RoomTeam.*
+import com.reco1l.api.ibancho.data.RoomTeam.BLUE
+import com.reco1l.api.ibancho.data.RoomTeam.RED
 import com.reco1l.api.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
@@ -31,7 +32,7 @@ import org.anddev.andengine.util.MathUtils
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ToastLogger
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.MOD_SCOREV2
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen.LoadingScene
@@ -653,7 +654,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomDisconnect(reason: String?)
     {
-        clear()
         ToastLogger.showText("Disconnected from the room${reason?.let { ": $it" } ?: "" }", true)
 
         // If player is in one of these scenes we go back.
@@ -665,7 +665,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomConnectFail(error: String?)
     {
-        clear()
         ToastLogger.showText("Failed to connect to the room: $error", true)
         back()
     }
