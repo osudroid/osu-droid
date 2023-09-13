@@ -513,7 +513,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     private class ScoreItem extends Sprite {
 
 
-        private float dx = 0, dy = 0;
+        private float dx = 0;
+
+        private float dy = 0;
 
         private TextureRegion avatarTexture;
 
