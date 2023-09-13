@@ -340,7 +340,10 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         });
     }
 
-    public void update(final float pSecondsElapsed) {
+    @Override
+    protected void onManagedUpdate(float pSecondsElapsed)
+    {
+        super.onManagedUpdate(pSecondsElapsed);
         secPassed += pSecondsElapsed;
         if (getChildCount() == 0) {
             return;

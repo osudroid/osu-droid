@@ -828,7 +828,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         expandSelectedItem(pSecondsElapsed);
 
-        board.update(pSecondsElapsed);
         updateScrollbar(camY + Config.getRES_HEIGHT() / 2f, oy);
     }
 
