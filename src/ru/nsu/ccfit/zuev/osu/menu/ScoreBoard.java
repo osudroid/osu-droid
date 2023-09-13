@@ -553,6 +553,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             if (shouldLoadAvatar)
             {
                 avatarTask = () -> {
+                    avatarTask = null;
 
                     var texture = ResourceManager.getInstance().getTexture("emptyavatar");
 
@@ -567,7 +568,6 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     attachChild(child);
 
                     awaitAvatarTask = false;
-                    avatarTask = null;
                 };
             }
 
