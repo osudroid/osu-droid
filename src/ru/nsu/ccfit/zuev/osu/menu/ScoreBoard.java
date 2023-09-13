@@ -223,7 +223,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     if (!isActive())
                         return;
 
-                    attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, data[4], true, scoreID, data[7], data[1]));
+                    attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, data[4], true, scoreID, data[7], data[1]), 0);
 
                     ScoreBoardItem item = new ScoreBoardItem();
                     item.set(data[1], Integer.parseInt(data[3]), Integer.parseInt(data[2]), scoreID);
@@ -295,7 +295,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                         if (!isActive())
                             return;
 
-                        attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null));
+                        attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null), 0);
 
                         var item = new ScoreBoardItem();
                         item.set(scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")), scoreID);
