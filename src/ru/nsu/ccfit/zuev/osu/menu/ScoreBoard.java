@@ -559,6 +559,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         {
             if (avatarTexture != null)
                 ResourceManager.getInstance().unloadTexture(avatarTexture);
+
+            mainScene.unregisterTouchArea(this);
         }
 
         @Override
