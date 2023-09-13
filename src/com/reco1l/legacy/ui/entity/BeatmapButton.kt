@@ -3,6 +3,7 @@ package com.reco1l.legacy.ui.entity
 import com.reco1l.api.chimu.CheesegullAPI
 import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.api.ibancho.data.PlayerStatus
+import com.reco1l.api.ibancho.data.PlayerStatus.READY
 import com.reco1l.api.ibancho.data.RoomBeatmap
 import com.reco1l.framework.extensions.orAsyncCatch
 import com.reco1l.legacy.ui.ChimuWebView.FILE_EXTENSION
@@ -56,7 +57,7 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
     {
-        if (!event.isActionUp || Multiplayer.player!!.status == PlayerStatus.READY || RoomScene.awaitBeatmapChange)
+        if (!event.isActionUp || Multiplayer.player!!.status == READY || RoomScene.awaitBeatmapChange || RoomScene.awaitStatusChange)
             return true
 
         getResources().getSound("menuclick")?.play()

@@ -348,7 +348,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
-                if (!isRoomHost && !room!!.isFreeMods || awaitModsChange || player!!.status == READY)
+                if (!isRoomHost && !room!!.isFreeMods || awaitModsChange || awaitStatusChange || player!!.status == READY)
                     return true
 
                 if (event.isActionDown)
