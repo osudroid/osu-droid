@@ -56,6 +56,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
     private LoadTask currentTask;
 
+    private boolean awaitAvatarTask;
+
     private final ExecutorService loadExecutor = Executors.newSingleThreadExecutor();
 
 
@@ -334,7 +336,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         SyncTaskManager.getInstance().run(() -> {
 
             detachChildren();
-
+            awaitAvatarTask = false;
             attachChild(loadingText);
 
             if (track == null)
@@ -519,15 +521,13 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
         private final ExecutorService avatarExecutor;
 
-        private final String avaURL;
-
         private final String username;
 
         private final int scoreID;
 
         private final boolean showOnline;
         
-        private final boolean shouldLoadAvatar;
+        private boolean shouldLoadAvatar;
 
 
         private ScoreItem(ExecutorService avatarExecutor, String title, String acc, String markStr, boolean showOnline, int scoreID, String avaURL, String username) {
@@ -536,7 +536,6 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             this.showOnline = showOnline;
             this.username = username;
             this.scoreID = scoreID;
-            this.avaURL = avaURL;
 
             setHeight(107);
             setScale(0.65f);
@@ -550,6 +549,27 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     && Config.getLoadAvatar()
                     && avaURL != null
                     && avatarExecutor != null;
+
+            if (shouldLoadAvatar)
+            {
+                avatarTask = () -> {
+
+                    var texture = ResourceManager.getInstance().getTexture("emptyavatar");
+
+                    if (!avatarExecutor.isShutdown() && OnlineManager.getInstance().loadAvatarToTextureManager(avaURL)) {
+                        avatarTexture = ResourceManager.getInstance().getAvatarTextureIfLoaded(avaURL);
+
+                        if (avatarTexture != null)
+                            texture = avatarTexture;
+                    }
+
+                    var child = new Sprite(55, 12, 90, 90, texture);
+                    attachChild(child);
+
+                    awaitAvatarTask = false;
+                    avatarTask = null;
+                };
+            }
 
             int pos = shouldLoadAvatar ? 90 : 0;
 
@@ -580,35 +600,18 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         @Override
         protected void onManagedUpdate(float pSecondsElapsed)
         {
-            // This is to avoid loading avatars when the scene was changed (game started or user gone back to main menu)
-            // this method is called by the parent scene only if it's showing.
-            if (shouldLoadAvatar && avatarTask == null) {
-                avatarTask = () -> {
-                    // Means the entity was detached.
-                    if (getParent() == null)
-                        return;
+            super.onManagedUpdate(pSecondsElapsed);
 
-                    var texture = ResourceManager.getInstance().getTexture("emptyavatar");
-
-                    if (!avatarExecutor.isShutdown() && OnlineManager.getInstance().loadAvatarToTextureManager(avaURL)) {
-                        avatarTexture = ResourceManager.getInstance().getAvatarTextureIfLoaded(avaURL);
-
-                        if (avatarTexture != null)
-                            texture = avatarTexture;
-                    }
-
-                    var child = new Sprite(55, 12, 90, 90, texture);
-                    attachChild(child);
-                };
-
+            // This is to avoid loading avatars when the scene was changed (game started or user gone back to main menu).
+            if (shouldLoadAvatar && !awaitAvatarTask && avatarTask != null) {
                 try {
+                    awaitAvatarTask = true;
                     avatarExecutor.submit(avatarTask);
                 } catch (RejectedExecutionException e) {
-                    // Nothing, means the executor was shutdown.
+                    awaitAvatarTask = false;
                 }
+                shouldLoadAvatar = false;
             }
-
-            super.onManagedUpdate(pSecondsElapsed);
         }
 
         @Override
