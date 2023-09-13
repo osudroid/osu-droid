@@ -418,7 +418,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     }
 
     @Override
-    public void onScroll(ScrollDetector pScollDetector, TouchEvent pTouchEvent, float pDistanceX, float pDistanceY) {
+    public void onScroll(ScrollDetector pScrollDetector, TouchEvent pTouchEvent, float pDistanceX, float pDistanceY) {
         switch (pTouchEvent.getAction()) {
             case TouchEvent.ACTION_DOWN:
                 velocityY = 0;
