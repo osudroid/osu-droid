@@ -523,9 +523,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             this.scoreID = scoreID;
             this.avaURL = avaURL;
 
-            setHeight(107f);
-            setHeight(724f);
-            camY = -146f;
+            setHeight(107);
+            setWidth(724);
+            camY = -146;
 
             setColor(0, 0, 0);
             setAlpha(0.5f);
