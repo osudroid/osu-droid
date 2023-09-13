@@ -567,7 +567,6 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             // This is to avoid loading avatars when the scene was changed (game started or user gone back to main menu)
             // this method is called by the parent scene only if it's showing.
             if (shouldLoadAvatar && avatarTask == null) {
-                // Peak Kotlin usage.
                 avatarTask = () -> {
                     // Means the entity was detached.
                     if (getParent() == null)
