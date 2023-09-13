@@ -309,7 +309,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
     public synchronized void init(final TrackInfo track) {
 
-        if (currentTask != null)
+        if (currentTask != null && currentTask.avatarExecutor != null)
             currentTask.avatarExecutor.shutdownNow();
 
         if (showOnlineScores == wasOnline && wasOnline) {
