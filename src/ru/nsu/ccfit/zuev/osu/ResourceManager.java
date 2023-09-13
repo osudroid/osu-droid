@@ -863,6 +863,11 @@ public class ResourceManager {
         }
     }
 
+    public void unloadTexture(TextureRegion texture) {
+        engine.getTextureManager().unloadTexture(texture.getTexture());
+        textures.remove(texture);
+    }
+
     public void initSecurityUtils() {
         SecurityUtils.getAppSignature(context, context.getPackageName());
     }
