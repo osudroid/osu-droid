@@ -2,8 +2,6 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.database.Cursor;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
-import kotlin.coroutines.EmptyCoroutineContext;
-import kotlinx.coroutines.*;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -27,6 +25,7 @@ import java.io.File;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetectorListener {
     private final Scene mainScene;
@@ -57,8 +56,6 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     private LoadTask currentTask;
 
     private final ExecutorService loadExecutor = Executors.newSingleThreadExecutor();
-
-    private final CoroutineScope avatarCoroutine = CoroutineScopeKt.CoroutineScope(Dispatchers.getDefault());
 
 
     public ScoreBoard(final Scene scene, final Entity layer, final MenuItemListener listener) {
@@ -170,7 +167,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     private void initFromOnline(final TrackInfo track) {
         loadingText.setText("Loading scores...");
 
-        currentTask = new LoadTask() {
+        currentTask = new LoadTask(true) {
 
             @Override
             public void run() {
@@ -226,7 +223,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     if (!isActive())
                         return;
 
-                    attachChild(new ScoreItem(titleStr, accStr, data[4], true, scoreID, data[7], data[1]));
+                    attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, data[4], true, scoreID, data[7], data[1]));
 
                     ScoreBoardItem item = new ScoreBoardItem();
                     item.set(data[1], Integer.parseInt(data[3]), Integer.parseInt(data[2]), scoreID);
@@ -249,7 +246,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                                 + "-";
 
                         if (isActive())
-                            attachChild(new ScoreItem(titleStr, accStr, data[4], true, scoreID, data[9], data[1]));
+                            attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, data[4], true, scoreID, data[9], data[1]));
                     }
                 }
                 percentShow = 0;
@@ -260,7 +257,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
     private void initFromLocal(TrackInfo track) {
 
-        currentTask = new LoadTask() {
+        currentTask = new LoadTask(false) {
 
             @Override
             public void run() {
@@ -298,7 +295,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                         if (!isActive())
                             return;
 
-                        attachChild(new ScoreItem(titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null));
+                        attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null));
 
                         var item = new ScoreBoardItem();
                         item.set(scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")), scoreID);
@@ -311,6 +308,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     }
 
     public synchronized void init(final TrackInfo track) {
+
+        if (currentTask != null)
+            currentTask.avatarExecutor.shutdownNow();
 
         if (showOnlineScores == wasOnline && wasOnline) {
             return;
@@ -480,6 +480,12 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
     private abstract class LoadTask implements Runnable {
 
+        protected final ExecutorService avatarExecutor;
+
+        LoadTask(boolean fromOnline) {
+            avatarExecutor = fromOnline ? Executors.newSingleThreadExecutor() : null;
+        }
+
         protected final boolean isActive() {
             return currentTask == this;
         }
@@ -494,9 +500,10 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
         private TextureRegion avatarTexture;
 
-        private Job avatarJob;
+        private Runnable avatarTask;
 
-        
+        private final ExecutorService avatarExecutor;
+
         private final String avaURL;
         
         private final String username;
@@ -508,8 +515,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         private final boolean shouldLoadAvatar;
 
 
-        private ScoreItem(String title, String acc, String markStr, boolean showOnline, int scoreID, String avaURL, String username) {
+        private ScoreItem(ExecutorService avatarExecutor, String title, String acc, String markStr, boolean showOnline, int scoreID, String avaURL, String username) {
             super(0f, 0f,  ResourceManager.getInstance().getTexture("menu-button-background").deepCopy());
+            this.avatarExecutor = avatarExecutor;
             this.showOnline = showOnline;
             this.username = username;
             this.scoreID = scoreID;
@@ -524,7 +532,11 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             setScale(0.65f);
             setWidth(getWidth() * 1.1f);
 
-            shouldLoadAvatar = showOnlineScores && Config.getLoadAvatar() && avaURL != null;
+            shouldLoadAvatar = showOnlineScores
+                    && Config.getLoadAvatar()
+                    && avaURL != null
+                    && avatarExecutor != null;
+
             int pos = shouldLoadAvatar ? 90 : 0;
 
             var text = new Text(pos + 160, 20, ResourceManager.getInstance().getFont("font"), title);
@@ -545,9 +557,6 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         @Override
         public void onDetached()
         {
-            if (avatarJob != null)
-                avatarJob.cancel(null);
-
             if (avatarTexture != null)
                 ResourceManager.getInstance().unloadTexture(avatarTexture);
         }
@@ -557,27 +566,31 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         {
             // This is to avoid loading avatars when the scene was changed (game started or user gone back to main menu)
             // this method is called by the parent scene only if it's showing.
-            if (shouldLoadAvatar && avatarJob == null) {
+            if (shouldLoadAvatar && avatarTask == null) {
                 // Peak Kotlin usage.
-                avatarJob = BuildersKt.launch(avatarCoroutine, EmptyCoroutineContext.INSTANCE, CoroutineStart.DEFAULT, (coroutineScope, continuation) -> {
-        
+                avatarTask = () -> {
                     // Means the entity was detached.
                     if (getParent() == null)
-                        return null;
-        
+                        return;
+
                     var texture = ResourceManager.getInstance().getTexture("emptyavatar");
-        
-                    if (OnlineManager.getInstance().loadAvatarToTextureManager(avaURL)) {
+
+                    if (!avatarExecutor.isShutdown() && OnlineManager.getInstance().loadAvatarToTextureManager(avaURL)) {
                         avatarTexture = ResourceManager.getInstance().getAvatarTextureIfLoaded(avaURL);
-        
+
                         if (avatarTexture != null)
                             texture = avatarTexture;
                     }
-        
+
                     var child = new Sprite(55, 12, 90, 90, texture);
                     attachChild(child);
-                    return null;
-                });
+                };
+
+                try {
+                    avatarExecutor.submit(avatarTask);
+                } catch (RejectedExecutionException e) {
+                    // Nothing, means the executor was shutdown.
+                }
             }
 
             super.onManagedUpdate(pSecondsElapsed);
