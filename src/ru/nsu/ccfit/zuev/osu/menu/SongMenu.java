@@ -188,7 +188,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         bgDimRect.setColor(0, 0, 0, 0.2f);
         backLayer.attachChild(bgDimRect);
 
-        board = new ScoreBoard(scene, backLayer, this, context);
+        board = new ScoreBoard(scene, backLayer, this);
 
         float oy = 10;
         for (final BeatmapInfo i : LibraryManager.INSTANCE.getLibrary()) {
