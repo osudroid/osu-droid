@@ -194,9 +194,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 var items = new ScoreBoardItem[scores.size()];
                 scoreItems = items;
 
-                long lastTotalScore = 0;
+                long nextTotalScore = 0;
 
-                for (int i = scores.size() - 1; i >= 0 && isActive(); --i) {
+                for (int i = 0; i < scores.size() && isActive(); ++i) {
                     Debug.i(scores.get(i));
 
                     String[] data = scores.get(i).split("\\s+");
@@ -215,16 +215,25 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                             + data[1] + "\n"
                             + StringTable.format(R.string.menu_score, totalScore, Integer.parseInt(data[3]));
 
-                    final long diffTotalScore = currTotalScore - lastTotalScore;
+                    if (i < scores.size() - 1) {
+                        String[] nextData = scores.get(i + 1).split("\\s+");
+
+                        if (nextData.length >= 8 && nextData.length != 10) {
+                            nextTotalScore = Long.parseLong(nextData[2]);
+                        }
+                    } else {
+                        nextTotalScore = 0;
+                    }
+
+                    final long diffTotalScore = currTotalScore - nextTotalScore;
 
                     final String accStr = convertModString(data[5]) + "\n" + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(Integer.parseInt(data[6]) / 1000f, 2)) + "%" + "\n"
-                            + (lastTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
-                    lastTotalScore = currTotalScore;
+                            + (nextTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
 
                     if (!isActive())
                         return;
 
-                    attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, data[4], true, scoreID, data[7], data[1]), 0);
+                    attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, data[4], true, scoreID, data[7], data[1]));
 
                     ScoreBoardItem item = new ScoreBoardItem();
                     item.set(data[1], Integer.parseInt(data[3]), Integer.parseInt(data[2]), scoreID);
