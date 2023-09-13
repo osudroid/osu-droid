@@ -530,13 +530,12 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             this.avaURL = avaURL;
 
             setHeight(107);
-            setWidth(724);
+            setScale(0.65f);
+            setWidth(724 * 1.1f);
             camY = -146;
 
             setColor(0, 0, 0);
             setAlpha(0.5f);
-            setScale(0.65f);
-            setWidth(getWidth() * 1.1f);
 
             shouldLoadAvatar = showOnlineScores
                     && Config.getLoadAvatar()
