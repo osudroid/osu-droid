@@ -230,7 +230,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     items[i] = item;
                 }
 
-                if (scores.size() > 0) {
+                if (!scores.isEmpty()) {
                     String[] data = scores.get(scores.size() - 1).split("\\s+");
 
                     if (data.length == 10) {
@@ -273,7 +273,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
                     var items = new ScoreBoardItem[scoreSet.getCount()];                     
                     scoreItems = items;
-                    
+
                     for (int i = scoreSet.getCount() - 1; i >= 0 && isActive(); --i) {
                         scoreSet.moveToPosition(i);
                         final int scoreID = scoreSet.getInt(0);
@@ -505,7 +505,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         private final ExecutorService avatarExecutor;
 
         private final String avaURL;
-        
+
         private final String username;
 
         private final int scoreID;
