@@ -626,7 +626,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 moved = false;
                 setAlpha(0.8f);
                 listener.stopScroll(getY() + localY);
-                dx = localX; dy = localY;
+                dx = localX;
+                dy = localY;
                 downTime = 0;
                 _scoreID = scoreID;
                 return true;
