@@ -563,6 +563,10 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                             texture = avatarTexture;
                     }
 
+                    if (getParent() == null) {
+                        onDetached();
+                        return;
+                    }
                     attachChild(new Sprite(55, 12, 90, 90, texture));
 
                     if (currentAvatarTask == this)
