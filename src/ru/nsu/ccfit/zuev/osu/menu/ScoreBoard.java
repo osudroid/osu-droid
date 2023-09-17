@@ -356,6 +356,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     {
         super.onManagedUpdate(pSecondsElapsed);
         secPassed += pSecondsElapsed;
+
+        // The first child is always the loading text, and only leaderboard items need to be updated.
         if (getChildCount() <= 1) {
             return;
         }
