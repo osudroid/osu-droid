@@ -110,8 +110,8 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
             return
         }
 
-        trackTitle.text = "${beatmap.version} (${beatmap.creator})"
-        creatorInfo.text = "${beatmap.title} by ${beatmap.artist}"
+        trackTitle.text = "${beatmap.artist} - ${beatmap.title}"
+        creatorInfo.text = "Mapped by ${beatmap.creator} // ${beatmap.version}"
 
         if (getGlobal().selectedTrack == null)
         {
