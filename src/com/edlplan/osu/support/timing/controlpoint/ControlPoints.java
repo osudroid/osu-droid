@@ -16,6 +16,12 @@ public class ControlPoints {
 
     private final ArrayList<SampleControlPoint> samplePoints = new ArrayList<>();
 
+    private static final DifficultyControlPoint defaultDifficultyPoint = new DifficultyControlPoint();
+
+    public ControlPoints() {
+        defaultDifficultyPoint.setSpeedMultiplier(1);
+    }
+
     public void load(TimingPoints points) {
         ArrayList<TimingPoint> res = points.getTimingPointList();
         TimingControlPoint preTp;
@@ -160,11 +166,11 @@ public class ControlPoints {
 
     public DifficultyControlPoint getDifficultyPointAt(double time) {
         if (difficultyPoints.size() == 0) {
-            return null;
+            return defaultDifficultyPoint;
         }
-        DifficultyControlPoint difficultyControlPoint = binarySearch(difficultyPoints, time, difficultyPoints.get(0));
+        DifficultyControlPoint difficultyControlPoint = binarySearch(difficultyPoints, time, defaultDifficultyPoint);
         if (difficultyControlPoint == null) {
-            return new DifficultyControlPoint();
+            return defaultDifficultyPoint;
         } else {
             return difficultyControlPoint;
         }
