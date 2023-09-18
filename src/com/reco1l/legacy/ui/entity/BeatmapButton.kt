@@ -132,6 +132,6 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
     companion object
     {
         private val DEFAULT_COLOR = RGBColor(25 / 255f, 25 / 255f, 240 / 255f)
-        private val DEFAULT_TEXT_COLOR = RGBColor(1f, 1f, 1f)
+        val DEFAULT_TEXT_COLOR = RGBColor(1f, 1f, 1f)
     }
 }
