@@ -40,10 +40,9 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
         }
     }
 
-    private var pressed = false
     private var moved = false
-    private var initialX = 0f
-    private var initialY = 0f
+    private var initialX: Float? = null
+    private var initialY: Float? = null
 
 
     init
@@ -63,23 +62,23 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
     {
         if (event.isActionDown) {
-            pressed = true
             moved = false
             initialX = localX
             initialY = localY
         }
 
-        if (event.isActionOutside || event.isActionMove && MathUtils.distance(initialX, initialY, localX, localY) > 30) {
+        if (event.isActionOutside || initialX == null || initialY == null ||
+            event.isActionMove && MathUtils.distance(initialX!!, initialY!!, localX, localY) > 30) {
             moved = true
         }
 
-        if (!pressed || moved || !event.isActionUp || Multiplayer.player!!.status == READY || RoomScene.awaitBeatmapChange || RoomScene.awaitStatusChange)
+        if (moved || !event.isActionUp || Multiplayer.player!!.status == READY || RoomScene.awaitBeatmapChange || RoomScene.awaitStatusChange)
             return true
 
         getResources().getSound("menuclick")?.play()
 
-        pressed = false
-        moved = false
+        initialX = null
+        initialY = null
 
         if (Multiplayer.isRoomHost)
         {
