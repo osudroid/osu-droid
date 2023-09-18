@@ -29,7 +29,7 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
 
     private val trackTitle = ChangeableText(32f, 20f, getResources().getFont("smallFont"), "", 100)
 
-    private val creatorInfo = ChangeableText(32f, trackTitle.height + 20, getResources().getFont("smallFont"), "", 100)
+    private val creatorInfo = ChangeableText(32f, trackTitle.height + 20, getResources().getFont("smallFont"), "", 200)
 
     private val stars = Array(10) { i ->
 
