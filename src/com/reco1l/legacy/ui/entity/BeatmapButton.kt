@@ -11,6 +11,7 @@ import com.reco1l.legacy.ui.multiplayer.RoomScene
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent
+import org.anddev.andengine.util.MathUtils
 import ru.nsu.ccfit.zuev.osu.RGBColor
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.menu.MenuItemTrack
@@ -39,6 +40,11 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
         }
     }
 
+    private var pressed = false
+    private var moved = false
+    private var initialX = 0f
+    private var initialY = 0f
+
 
     init
     {
@@ -56,10 +62,24 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
     {
-        if (!event.isActionUp || Multiplayer.player!!.status == READY || RoomScene.awaitBeatmapChange || RoomScene.awaitStatusChange)
+        if (event.isActionDown) {
+            pressed = true
+            moved = false
+            initialX = localX
+            initialY = localY
+        }
+
+        if (event.isActionOutside || event.isActionMove && MathUtils.distance(initialX, initialY, localX, localY) > 30) {
+            moved = true
+        }
+
+        if (!pressed || moved || !event.isActionUp || Multiplayer.player!!.status == READY || RoomScene.awaitBeatmapChange || RoomScene.awaitStatusChange)
             return true
 
         getResources().getSound("menuclick")?.play()
+
+        pressed = false
+        moved = false
 
         if (Multiplayer.isRoomHost)
         {
