@@ -224,7 +224,7 @@ public final class BeatmapDifficultyCalculator {
     /**
      * Invalidates expired cache.
      */
-    public void invalidateExpiredCache() {
+    public static void invalidateExpiredCache() {
         long currentTime = System.currentTimeMillis();
 
         for (var iterator = difficultyCacheManager.entrySet().iterator(); iterator.hasNext();) {
