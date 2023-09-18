@@ -1306,8 +1306,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     track.getMD5(),
                     track.getBeatmap().getTitle(),
                     track.getBeatmap().getArtist(),
-                    track.getCreator(),
-                    track.getMode()
+                    track.getMode(),
+                    track.getCreator()
             );
         } else {
             RoomAPI.changeBeatmap();
