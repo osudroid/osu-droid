@@ -82,6 +82,7 @@ import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.SpritePool;
+import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.InputManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -358,6 +359,7 @@ public class MainActivity extends BaseGameActivity implements
 
                 scheduledExecutor.scheduleAtFixedRate(() -> {
                     AccessibilityDetector.check(MainActivity.this);
+                    BeatmapDifficultyCalculator.invalidateExpiredCache();
                 }, 0, 1000, TimeUnit.MILLISECONDS);
 
                 if (roomInviteLink != null) {
