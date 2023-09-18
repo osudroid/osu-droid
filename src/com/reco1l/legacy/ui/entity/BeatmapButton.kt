@@ -145,7 +145,12 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
             return
         }
 
-        stars.forEachIndexed { i, it -> it.isVisible = getGlobal().selectedTrack.difficulty >= i }
+        val difficulty = getGlobal().selectedTrack.difficulty
+
+        stars.forEachIndexed { i, it ->
+            it.isVisible = difficulty >= i
+            it.setScale(0.5f * (difficulty - i).coerceIn(0f, 1f))
+        }
     }
 
 
