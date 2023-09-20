@@ -76,7 +76,7 @@ public class StoryboardSprite extends SupportSprite {
     }
 
     public void setBrightness(float brightness) {
-        TextureRegion region = TextureHelper.create1xRegion(Color.argb(255, 0, 0, 0));
+        TextureRegion region = TextureHelper.create1xRegion(Color.argb(0, 0, 0, 0));
         backgroundQuad = new TextureQuad();
         backgroundQuad.anchor = Anchor.TopLeft;
         backgroundQuad.setTextureAndSize(region);

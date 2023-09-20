@@ -10,8 +10,6 @@ import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import ru.nsu.ccfit.zuev.osu.MainActivity
 import ru.nsu.ccfit.zuev.osuplus.R
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 object AccessibilityDetector
 {
@@ -31,7 +29,7 @@ object AccessibilityDetector
 
 
     @JvmStatic
-    fun start(context: MainActivity) = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate({
+    fun check(context: MainActivity) {
 
         // Getting the accessibility manager.
         val manager = context.getSystemService(ACCESSIBILITY_SERVICE) as AccessibilityManager
@@ -57,8 +55,7 @@ object AccessibilityDetector
             alert?.dismiss()
             alert = null
         }
-
-    }, 0, 1000, TimeUnit.MILLISECONDS)!!
+    }
 
 
     private fun showAlert(context: MainActivity, services: List<AccessibilityServiceInfo>) = AlertDialog.Builder(context).apply {

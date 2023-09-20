@@ -1,8 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import android.content.Context;
 import android.database.Cursor;
-import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
@@ -16,7 +14,6 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.MathUtils;
 import ru.nsu.ccfit.zuev.osu.*;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -25,25 +22,20 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
-public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
-    private final Scene scene;
+public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetectorListener {
     private final Scene mainScene;
     private final MenuItemListener listener;
     private final ChangeableText loadingText;
-    private final List<Sprite> sprites;
-    private final List<Avatar> avatars;
     private float percentShow = -1;
-    private long viewNumber = 0;
     private boolean showOnlineScores = false;
     private TrackInfo lastTrack;
     private boolean wasOnline = false;
-    private boolean isCanceled = false;
     private boolean isScroll = false;
 
-    private AsyncTask onlineTask;
-    private Async avatarTask;
-    private final Context context;
     private final SurfaceScrollDetector mScrollDetector;
 
     private float maxY = 100500;
@@ -60,20 +52,20 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     private boolean moved = false;
     private ScoreBoardItem[] scoreItems = new ScoreBoardItem[0];
 
-    private static final Object mutex = new Object();
 
-    public ScoreBoard(final Scene scene, final Entity layer, final MenuItemListener listener, final Context context) {
-        this.scene = new Scene();
+    private LoadTask currentTask;
+
+    private Runnable currentAvatarTask;
+
+    private final ExecutorService loadExecutor = Executors.newSingleThreadExecutor();
+
+
+    public ScoreBoard(final Scene scene, final Entity layer, final MenuItemListener listener) {
         this.mainScene = scene;
-        this.context = context;
-        this.scene.setBackgroundEnabled(false);
-        layer.attachChild(this.scene);
+        layer.attachChild(this);
 
-        this.loadingText = new ChangeableText(Utils.toRes(5), Utils.toRes(230), ResourceManager.getInstance().getFont("strokeFont"), "", 50);
-        this.scene.attachChild(this.loadingText);
-
-        this.sprites = Collections.synchronizedList(new ArrayList<>(50));
-        this.avatars = Collections.synchronizedList(new ArrayList<>(50));
+        this.loadingText = new ChangeableText(5, 230, ResourceManager.getInstance().getFont("strokeFont"), "", 50);
+        this.attachChild(this.loadingText);
 
         this.listener = listener;
         this.mScrollDetector = new SurfaceScrollDetector(this);
@@ -174,288 +166,218 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         return sb.toString();
     }
 
-    private synchronized void initSprite(String title, String acc, String markStr, final boolean showOnline, final int scoreID, String avaURL, final String username, final String hash) {
-        final TextureRegion tex = ResourceManager.getInstance().getTexture(
-                "menu-button-background").deepCopy();
-        tex.setHeight(107);
-        tex.setWidth(724);
-        camY = -146;
-
-        Sprite sprite = new Sprite(Utils.toRes(-150), Utils.toRes(40), tex) {
-            private float dx = 0, dy = 0;
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX,
-                                         final float pTouchAreaLocalY) {
-                mScrollDetector.onTouchEvent(pSceneTouchEvent);
-                mScrollDetector.setEnabled(true);
-
-                if (pSceneTouchEvent.isActionDown()) {
-                    moved = false;
-                    this.setAlpha(0.8f);
-                    listener.stopScroll(getY() + pTouchAreaLocalY);
-                    dx = pTouchAreaLocalX; dy = pTouchAreaLocalY;
-                    downTime = 0;
-                    _scoreID = scoreID;
-                    return true;
-                } else if (pSceneTouchEvent.isActionUp() && !moved && !isScroll) {
-                    downTime = -1;
-                    this.setAlpha(0.5f);
-
-                    if (Multiplayer.isMultiplayer)
-                        return true;
-
-                    listener.openScore(scoreID, showOnline, username, hash);
-                    GlobalManager.getInstance().getScoring().setReplayID(scoreID);
-                    return true;
-                } else if (pSceneTouchEvent.isActionOutside() || pSceneTouchEvent.isActionMove() && MathUtils.distance(dx, dy, pTouchAreaLocalX, pTouchAreaLocalY) > 10) {
-                    downTime = -1;
-                    this.setAlpha(0.5f);
-                    moved = true;
-                }
-                return false;
-            }
-        };
-        sprite.setColor(0, 0, 0);
-        sprite.setAlpha(0.5f);
-        sprite.setScale(0.65f);
-        sprite.setWidth(sprite.getWidth() * 1.1f);
-
-        int pos = 0;
-        if (showOnlineScores) {
-            pos = 90;
-            avatars.add(0, new Avatar(username, avaURL));
-        }
-
-        final Text text = new Text(Utils.toRes(pos + 160), Utils.toRes(20),
-                ResourceManager.getInstance().getFont("font"), title);
-        final Text accText = new Text(Utils.toRes(670), Utils.toRes(12),
-                ResourceManager.getInstance().getFont("smallFont"), acc);
-        final Sprite mark = new Sprite(Utils.toRes(pos + 80), Utils.toRes(35),
-                ResourceManager.getInstance().getTexture(
-                        "ranking-" + markStr + "-small"));
-
-        text.setScale(1.2f);
-        mark.setScale(1.5f);
-        mark.setPosition(pos + mark.getWidth() / 2 + 60, mark.getY());
-        sprite.attachChild(text);
-        sprite.attachChild(accText);
-        sprite.attachChild(mark);
-
-        scene.attachChild(sprite);
-        mainScene.registerTouchArea(sprite);
-
-        height = sprite.getHeight();
-        sprites.add(0, sprite);
-    }
-
     private void initFromOnline(final TrackInfo track) {
-        final long currentNumber = viewNumber;
         loadingText.setText("Loading scores...");
 
-        cancelLoadOnlineScores();
+        currentTask = new LoadTask(true) {
 
-        this.onlineTask = new AsyncTask() {
             @Override
             public void run() {
-                String hash = track.getMD5();
                 List<String> scores;
 
                 try {
-                    scores = OnlineManager.getInstance().getTop(hash);
+                    scores = OnlineManager.getInstance().getTop(track.getMD5());
                 } catch (OnlineManager.OnlineManagerException e) {
                     Debug.e("Cannot load scores " + e.getMessage());
-                    synchronized (mutex) {
-                        if (currentNumber == viewNumber) {
-                            loadingText.setText("Cannot load scores");
-                        }
-                    }
+
+                    if (isActive())
+                        loadingText.setText("Cannot load scores");
                     return;
                 }
 
-                synchronized (mutex) {
-                    if (currentNumber != viewNumber) {
+                if (!isActive())
+                    return;
+
+                loadingText.setText(OnlineManager.getInstance().getFailMessage());
+
+                var items = new ScoreBoardItem[scores.size()];
+                scoreItems = items;
+
+                long nextTotalScore = 0;
+
+                for (int i = 0; i < scores.size() && isActive(); ++i) {
+                    Debug.i(scores.get(i));
+
+                    String[] data = scores.get(i).split("\\s+");
+
+                    if (data.length < 8 || data.length == 10) {
+                        continue;
+                    }
+
+                    final int scoreID = Integer.parseInt(data[0]);
+                    final String totalScore = formatScore(Integer.parseInt(data[2]));
+                    final long currTotalScore = Long.parseLong(data[2]);
+
+                    final String titleStr = "#"
+                            + (i + 1)
+                            + " "
+                            + data[1] + "\n"
+                            + StringTable.format(R.string.menu_score, totalScore, Integer.parseInt(data[3]));
+
+                    if (i < scores.size() - 1) {
+                        String[] nextData = scores.get(i + 1).split("\\s+");
+
+                        if (nextData.length >= 8 && nextData.length != 10) {
+                            nextTotalScore = Long.parseLong(nextData[2]);
+                        }
+                    } else {
+                        nextTotalScore = 0;
+                    }
+
+                    final long diffTotalScore = currTotalScore - nextTotalScore;
+
+                    final String accStr = convertModString(data[5]) + "\n" + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(Integer.parseInt(data[6]) / 1000f, 2)) + "%" + "\n"
+                            + (nextTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
+
+                    if (!isActive())
+                        return;
+
+                    attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, data[4], true, scoreID, data[7], data[1], track.getMD5()));
+
+                    ScoreBoardItem item = new ScoreBoardItem();
+                    item.set(data[1], Integer.parseInt(data[3]), Integer.parseInt(data[2]), scoreID);
+                    items[i] = item;
+                }
+
+                if (!scores.isEmpty()) {
+                    String[] data = scores.get(scores.size() - 1).split("\\s+");
+
+                    if (data.length == 10) {
+                        final int scoreID = Integer.parseInt(data[0]);
+                        final String totalScore = formatScore(Integer.parseInt(data[2]));
+                        final String titleStr = "#"
+                                + data[7]
+                                + " of "
+                                + "\n"
+                                + StringTable.format(R.string.menu_score, totalScore, Integer.parseInt(data[3]));
+                        final String accStr = convertModString(data[5]) + "\n"
+                                + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(Integer.parseInt(data[6]) / 1000f, 2)) + "%" + "\n"
+                                + "-";
+
+                        if (isActive())
+                            attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, data[4], true, scoreID, data[9], data[1], track.getMD5()));
+                    }
+                }
+                percentShow = 0;
+            }
+        };
+        loadExecutor.submit(currentTask);
+    }
+
+    private void initFromLocal(TrackInfo track) {
+
+        currentTask = new LoadTask(false) {
+
+            @Override
+            public void run() {
+                String[] columns = { "id", "playername", "score", "combo", "mark", "accuracy", "mode" };
+                try (Cursor scoreSet = ScoreLibrary.getInstance().getMapScores(columns, track.getFilename())) {
+                    if (scoreSet == null || scoreSet.getCount() == 0 || !isActive()) {
                         return;
                     }
 
-                    loadingText.setText(OnlineManager.getInstance().getFailMessage());
-
-                    scoreItems = new ScoreBoardItem[scores.size()];
+                    percentShow = 0;
+                    scoreSet.moveToLast();
                     long lastTotalScore = 0;
 
-                    for (int i = scores.size() - 1; i >= 0; --i) {
-                        Debug.i(scores.get(i));
+                    var items = new ScoreBoardItem[scoreSet.getCount()];
+                    scoreItems = items;
 
-                        String[] data = scores.get(i).split("\\s+");
+                    for (int i = scoreSet.getCount() - 1; i >= 0 && isActive(); --i) {
+                        scoreSet.moveToPosition(i);
+                        final int scoreID = scoreSet.getInt(0);
 
-                        if (data.length < 8 || data.length == 10) {
-                            continue;
-                        }
-
-                        final int scoreID = Integer.parseInt(data[0]);
-                        final String totalScore = formatScore(Integer.parseInt(data[2]));
-                        final long currTotalScore = Long.parseLong(data[2]);
-
+                        final String totalScore = formatScore(scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")));
+                        final long currTotalScore = scoreSet.getLong(scoreSet.getColumnIndexOrThrow("score"));
                         final String titleStr = "#"
                                 + (i + 1)
                                 + " "
-                                + data[1] + "\n"
-                                + StringTable.format(R.string.menu_score, totalScore, Integer.parseInt(data[3]));
-
+                                + scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername"))
+                                + "\n"
+                                + StringTable.format(R.string.menu_score, totalScore, scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")));
                         final long diffTotalScore = currTotalScore - lastTotalScore;
-
-                        final String accStr = convertModString(data[5]) + "\n" + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(Integer.parseInt(data[6]) / 1000f, 2)) + "%" + "\n"
+                        final String accStr = convertModString(scoreSet.getString(scoreSet.getColumnIndexOrThrow("mode"))) + "\n"
+                                + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(scoreSet.getFloat(scoreSet.getColumnIndexOrThrow("accuracy")) * 100, 2)) + "%" + "\n"
                                 + (lastTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
                         lastTotalScore = currTotalScore;
 
-                        initSprite(titleStr, accStr, data[4], true, scoreID, data[7], data[1], hash);
+                        if (!isActive())
+                            return;
 
-                        ScoreBoardItem items = new ScoreBoardItem();
-                        items.set(data[1], Integer.parseInt(data[3]), Integer.parseInt(data[2]), scoreID);
-                        scoreItems[i] = items;
+                        attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null, track.getMD5()), 0);
+
+                        var item = new ScoreBoardItem();
+                        item.set(scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")), scoreID);
+                        items[i] = item;
                     }
-
-                    if (scores.size() > 0) {
-                        String[] data = scores.get(scores.size() - 1).split("\\s+");
-
-                        if (data.length == 10) {
-                            final int scoreID = Integer.parseInt(data[0]);
-                            final String totalScore = formatScore(Integer.parseInt(data[2]));
-                            final String titleStr = "#"
-                                    + data[7]
-                                    + " of "
-                                    + "\n"
-                                    + StringTable.format(R.string.menu_score, totalScore, Integer.parseInt(data[3]));
-                            final String accStr = convertModString(data[5]) + "\n"
-                                    + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(Integer.parseInt(data[6]) / 1000f, 2)) + "%" + "\n"
-                                    + "-";
-
-                            initSprite(titleStr, accStr, data[4], true, scoreID, data[9], data[1], hash);
-                        }
-                    }
-
-                    percentShow = 0;
-                }
-            }
-
-            @Override
-            public void onComplete() {
-                isCanceled = false;
-                if (Utils.isWifi(context) || Config.getLoadAvatar()) {
-                    loadAvatar();
                 }
             }
         };
-        onlineTask.execute();
+        loadExecutor.submit(currentTask);
     }
 
-    public void init(final TrackInfo track) {
+    public synchronized void init(final TrackInfo track) {
+
+        if (currentTask != null && currentTask.avatarExecutor != null)
+            currentTask.avatarExecutor.shutdownNow();
+
         if (lastTrack == track && showOnlineScores == wasOnline && wasOnline) {
             return;
         }
 
-        cancelLoadOnlineScores();
-
+        loadingText.setText("");
         lastTrack = track;
         wasOnline = showOnlineScores;
+        scoreItems = new ScoreBoardItem[0];
 
-        synchronized (mutex) {
-            scoreItems = new ScoreBoardItem[0];
-            viewNumber++;
-        }
+        SyncTaskManager.getInstance().run(() -> {
 
-        clear();
-        if (track == null) {
-            return;
-        }
+            detachChildren();
+            currentAvatarTask = null;
+            attachChild(loadingText);
 
-        loadingText.setText("");
-        if (OnlineManager.getInstance().isStayOnline() && showOnlineScores) {
-            initFromOnline(track);
-            return;
-        }
+            if (track == null)
+                return;
 
-        String[] columns = { "id", "playername", "score", "combo", "mark", "accuracy", "mode" };
-        try (Cursor scoreSet = ScoreLibrary.getInstance().getMapScores(columns, track.getFilename())) {
-            if (scoreSet == null || scoreSet.getCount() == 0) {
+            if (OnlineManager.getInstance().isStayOnline() && showOnlineScores) {
+                initFromOnline(track);
                 return;
             }
 
-            percentShow = 0;
-            scoreSet.moveToLast();
-            long lastTotalScore = 0;
-            scoreItems = new ScoreBoardItem[scoreSet.getCount()];
-            for (int i = scoreSet.getCount() - 1; i >= 0; --i) {
-                scoreSet.moveToPosition(i);
-                final int scoreID = scoreSet.getInt(0);
-
-                final String totalScore = formatScore(scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")));
-                final long currTotalScore = scoreSet.getLong(scoreSet.getColumnIndexOrThrow("score"));
-                final String titleStr = "#"
-                        + (i + 1)
-                        + " "
-                        + scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername"))
-                        + "\n"
-                        + StringTable.format(R.string.menu_score, totalScore, scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")));
-                final long diffTotalScore = currTotalScore - lastTotalScore;
-                final String accStr = convertModString(scoreSet.getString(scoreSet.getColumnIndexOrThrow("mode"))) + "\n"
-                        + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(scoreSet.getFloat(scoreSet.getColumnIndexOrThrow("accuracy")) * 100, 2)) + "%" + "\n"
-                        + (lastTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
-                lastTotalScore = currTotalScore;
-
-                initSprite(titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null, track.getMD5());
-
-                scoreItems[i] = new ScoreBoardItem();
-                scoreItems[i].set(scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")), scoreID);
-            }
-        }
+            initFromLocal(track);
+        });
     }
 
-    public void clear() {
-        if (sprites.isEmpty()) {
-            return;
-        }
-
-        synchronized (sprites) {
-            final Sprite[] spritesArray = sprites.toArray(new Sprite[0]);
-            sprites.clear();
-            SyncTaskManager.getInstance().run(() -> {
-                for (final Sprite sprite : spritesArray) {
-                    if (sprite != null) {
-                        mainScene.unregisterTouchArea(sprite);
-                        sprite.detachSelf();
-                    }
-                }
-            });
-        }
-
-        synchronized (avatars) {
-            avatars.clear();
-        }
-    }
-
-    public void update(final float pSecondsElapsed) {
+    @Override
+    protected void onManagedUpdate(float pSecondsElapsed)
+    {
+        super.onManagedUpdate(pSecondsElapsed);
         secPassed += pSecondsElapsed;
-        if (sprites.isEmpty()) {
+
+        // The first child is always the loading text, and only leaderboard items need to be updated.
+        if (getChildCount() <= 1) {
             return;
         }
 
         if (percentShow == -1) {
             float y = -camY;
-            synchronized (sprites) {
-                for (final Sprite sprite : sprites) {
-                    if (sprite == null) {
-                        break;
-                    }
-                    sprite.setPosition(sprite.getX(), y);
-                    y += 0.8f * (sprite.getHeight() - Utils.toRes(32));
-                }
+
+            var count = getChildCount();
+            for (int i = 0; i < count; i++)
+            {
+                var child = getChild(i);
+
+                if (!(child instanceof Sprite))
+                    continue;
+
+                var sprite = (Sprite) child;
+                sprite.setPosition(sprite.getX(), y);
+                y += 0.8f * (sprite.getHeight() - 32);
             }
 
             y += camY;
             camY += velocityY * pSecondsElapsed;
-            maxY = y - 0.8f * (Config.getRES_HEIGHT() - 110 - (height - Utils.toRes(32)));
+            maxY = y - 0.8f * (Config.getRES_HEIGHT() - 110 - (height - 32));
 
             if (camY <= -146 && velocityY < 0 || camY > maxY && velocityY > 0) {
                 camY -= velocityY * pSecondsElapsed;
@@ -463,8 +385,8 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 isScroll = false;
             }
 
-            if (Math.abs(velocityY) > Utils.toRes(500) * pSecondsElapsed) {
-                velocityY -= Utils.toRes(10) * pSecondsElapsed * Math.signum(velocityY);
+            if (Math.abs(velocityY) > 500 * pSecondsElapsed) {
+                velocityY -= 10 * pSecondsElapsed * Math.signum(velocityY);
             } else {
                 velocityY = 0;
                 isScroll = false;
@@ -475,10 +397,16 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
                 percentShow = 1;
             }
 
-            synchronized (sprites) {
-                for (int i = 0; i < sprites.size(); i++) {
-                    sprites.get(i).setPosition(Utils.toRes(-160), Utils.toRes(146) + 0.8f * percentShow * i * (sprites.get(i).getHeight() - Utils.toRes(32)));
-                }
+            var count = getChildCount();
+            for (int i = 0; i < count; i++)
+            {
+                var child = getChild(i);
+
+                if (!(child instanceof Sprite))
+                    continue;
+
+                var sprite = (Sprite) child;
+                sprite.setPosition(-160, 146 + 0.8f * percentShow * i * (sprite.getHeight() - 32));
             }
 
             if (percentShow == 1) {
@@ -499,59 +427,8 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
         }
     }
 
-    public void loadAvatar() {
-        avatarTask = Async.run(() -> {
-            try {
-                synchronized (avatars) {
-                    int i = 0;
-                    int size = avatars.size();
-
-                    while (i < size) {
-                        if (isCanceled) {
-                            break;
-                        }
-                        var avatar = avatars.get(i);
-                        var texture = ResourceManager.getInstance().getTexture("emptyavatar");
-
-                        if (OnlineManager.getInstance().loadAvatarToTextureManager(avatar.getAvaUrl())) {
-                            var tex = ResourceManager.getInstance().getAvatarTextureIfLoaded(avatar.getAvaUrl());
-
-                            texture = tex != null ? tex : texture;
-                        }
-
-                        if (showOnlineScores) {
-                            synchronized (sprites) {
-                                var sprite = sprites.get(i);
-                                var child = new Sprite(55, 12, Utils.toRes(90), Utils.toRes(90), texture);
-
-                                SyncTaskManager.getInstance().run(() -> sprite.attachChild(child));
-                            }
-                        }
-                        i++;
-                    }
-                }
-            } catch (Exception e) {
-                isCanceled = false;
-                Debug.e(e.getMessage());
-            }
-        });
-    }
-
-    public void cancelLoadOnlineScores() {
-        if (this.onlineTask != null) {
-            this.onlineTask.cancel(true);
-        }
-    }
-
-    public void cancelLoadAvatar() {
-        if (this.avatarTask != null) {
-            isCanceled = true;
-            avatarTask.getExecutor().shutdownNow();
-        }
-    }
-
     @Override
-    public void onScroll(ScrollDetector pScollDetector, TouchEvent pTouchEvent, float pDistanceX, float pDistanceY) {
+    public void onScroll(ScrollDetector pScrollDetector, TouchEvent pTouchEvent, float pDistanceX, float pDistanceY) {
         switch (pTouchEvent.getAction()) {
             case TouchEvent.ACTION_DOWN:
                 velocityY = 0;
@@ -609,44 +486,173 @@ public class ScoreBoard implements ScrollDetector.IScrollDetectorListener {
     }
 
     public void setShowOnlineScores(boolean showOnlineScores) {
-        synchronized (mutex) {
-            this.showOnlineScores = showOnlineScores;
-        }
+        this.showOnlineScores = showOnlineScores;
     }
 
     public ScoreBoardItem[] getScoreBoardItems() {
-        synchronized (mutex) {
-            return scoreItems;
-        }
+        return scoreItems;
     }
 
-    public Scene getScene() {
-        return scene;
+
+    private abstract class LoadTask implements Runnable {
+
+        protected final ExecutorService avatarExecutor;
+
+        LoadTask(boolean fromOnline) {
+            avatarExecutor = fromOnline ? Executors.newSingleThreadExecutor() : null;
+        }
+
+        protected final boolean isActive() {
+            return currentTask == this;
+        }
+
     }
 
-    static class Avatar {
-        private String userName;
-        private String avaUrl;
 
-        public Avatar(String userName, String avaUrl) {
-            this.userName = userName;
-            this.avaUrl = avaUrl;
+    private class ScoreItem extends Sprite {
+
+
+        private float dx = 0;
+
+        private float dy = 0;
+
+        private TextureRegion avatarTexture;
+
+        private Runnable avatarTask;
+
+        private final ExecutorService avatarExecutor;
+
+        private final String username;
+
+        private final int scoreID;
+
+        private final String hash;
+
+        private final boolean showOnline;
+
+
+        private ScoreItem(ExecutorService avatarExecutor, String title, String acc, String markStr, boolean showOnline, int scoreID, String avaURL, String username, String hash) {
+            super(-150, 40,  ResourceManager.getInstance().getTexture("menu-button-background").deepCopy());
+            this.avatarExecutor = avatarExecutor;
+            this.showOnline = showOnline;
+            this.username = username;
+            this.scoreID = scoreID;
+            this.hash = hash;
+
+            setHeight(107);
+            setScale(0.65f);
+            setWidth(724 * 1.1f);
+            camY = -146;
+
+            setColor(0, 0, 0);
+            setAlpha(0.5f);
+
+            var shouldLoadAvatar = showOnlineScores
+                    && Config.getLoadAvatar()
+                    && avaURL != null
+                    && avatarExecutor != null;
+
+            avatarTask = shouldLoadAvatar ? new Runnable() {
+
+                @Override
+                public void run() {
+                    var texture = ResourceManager.getInstance().getTexture("emptyavatar");
+
+                    if (!avatarExecutor.isShutdown() && OnlineManager.getInstance().loadAvatarToTextureManager(avaURL)) {
+                        avatarTexture = ResourceManager.getInstance().getAvatarTextureIfLoaded(avaURL);
+
+                        if (avatarTexture != null)
+                            texture = avatarTexture;
+                    }
+
+                    if (getParent() == null) {
+                        onDetached();
+                        return;
+                    }
+                    attachChild(new Sprite(55, 12, 90, 90, texture));
+
+                    if (currentAvatarTask == this)
+                        currentAvatarTask = null;
+                }
+            } : null;
+
+            int pos = shouldLoadAvatar ? 90 : 0;
+
+            var text = new Text(pos + 160, 20, ResourceManager.getInstance().getFont("font"), title);
+            var accText = new Text(670, 12, ResourceManager.getInstance().getFont("smallFont"), acc);
+            var mark = new Sprite(pos + 80, 35, ResourceManager.getInstance().getTexture("ranking-" + markStr + "-small"));
+
+            text.setScale(1.2f);
+            mark.setScale(1.5f);
+            mark.setPosition(pos + mark.getWidth() / 2 + 60, mark.getY());
+            attachChild(text);
+            attachChild(accText);
+            attachChild(mark);
+
+            mainScene.registerTouchArea(this);
+            height = getHeight();
         }
 
-        public String getUserName() {
-            return userName;
+        @Override
+        public void onDetached()
+        {
+            if (avatarTexture != null)
+                ResourceManager.getInstance().unloadTexture(avatarTexture);
+
+            mainScene.unregisterTouchArea(this);
         }
 
-        public void setUserName(String userName) {
-            this.userName = userName;
+        @Override
+        protected void onManagedUpdate(float pSecondsElapsed)
+        {
+            super.onManagedUpdate(pSecondsElapsed);
+
+            // This is to avoid loading avatars when the scene was changed (game started or user gone back to main menu).
+            if (avatarTask != null && currentAvatarTask == null) {
+
+                var task = avatarTask;
+                avatarTask = null;
+                currentAvatarTask = task;
+
+                try {
+                    avatarExecutor.submit(task);
+                } catch (RejectedExecutionException e) {
+                    if (currentAvatarTask == task)
+                        currentAvatarTask = null;
+                }
+            }
         }
 
-        public String getAvaUrl() {
-            return avaUrl;
-        }
+        @Override
+        public boolean onAreaTouched(TouchEvent event, float localX, float localY) {
+            mScrollDetector.onTouchEvent(event);
+            mScrollDetector.setEnabled(true);
 
-        public void setAvaUrl(String avaUrl) {
-            this.avaUrl = avaUrl;
+            if (event.isActionDown()) {
+                moved = false;
+                setAlpha(0.8f);
+                listener.stopScroll(getY() + localY);
+                dx = localX;
+                dy = localY;
+                downTime = 0;
+                _scoreID = scoreID;
+                return true;
+            } else if (event.isActionUp() && !moved && !isScroll) {
+                downTime = -1;
+                setAlpha(0.5f);
+
+                if (Multiplayer.isMultiplayer)
+                    return true;
+
+                listener.openScore(scoreID, showOnline, username, hash);
+                GlobalManager.getInstance().getScoring().setReplayID(scoreID);
+                return true;
+            } else if (event.isActionOutside() || event.isActionMove() && MathUtils.distance(dx, dy, localX, localY) > 10) {
+                downTime = -1;
+                setAlpha(0.5f);
+                moved = true;
+            }
+            return false;
         }
     }
 }

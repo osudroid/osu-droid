@@ -21,7 +21,7 @@ public class Metronome {
             return;
         }
 
-        float playSeconds = elapsedTime - GameHelper.getTimingOffset();
+        float playSeconds = (float) (elapsedTime - GameHelper.getTimingOffset());
         int beatIndex = (int) (playSeconds * 2 / GameHelper.getBeatLength());
 
         if (beatIndex < 0) {

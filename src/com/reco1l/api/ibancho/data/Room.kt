@@ -87,8 +87,8 @@ data class Room(
      */
     var beatmap: RoomBeatmap? = null
         set(value) {
-            if (value != null)
-                previousBeatmap = value
+            if (field != null)
+                previousBeatmap = field
 
             field = value
         }
@@ -97,6 +97,7 @@ data class Room(
      * The previous beatmap.
      */
     var previousBeatmap: RoomBeatmap? = null
+        private set
 
     /**
      * Besides [players] it provides an array trimmed with no empty slots.

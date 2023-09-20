@@ -254,9 +254,6 @@
     <string name="opt_corepath_title">Main directory</string>
     <string name="opt_corepath_summary">osu!droid main directory</string>
 
-    <string name="opt_lowdelay_title">Input delay</string>
-    <string name="opt_lowdelay_summary">Reduces input delay. Disable it if you feel uncomfortable.</string>
-
     <string name="opt_fix_frame_offset_title">Fix a random offset.</string>
     <string name="opt_fix_frame_offset_summary">Try to fix the offset between input time and frame time.</string>
     

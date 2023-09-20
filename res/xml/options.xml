@@ -123,7 +123,7 @@
             android:summary="@string/opt_sound_volume_summary" android:key="soundvolume"
             android:defaultValue="100"/> -->
         <SeekBarPreference android:summary="@string/opt_offset_summary" android:title="@string/opt_offset_title"
-            android:key="offset" app:min="-250" android:max="250" app:showSeekBarValue="true" android:defaultValue="0"/>
+            android:key="offset" app:min="-500" android:max="500" app:showSeekBarValue="true" android:defaultValue="0"/>
         <!-- <EditTextPreference android:title="@string/opt_offset_title" android:summary="@string/opt_offset_summary"
             android:key="offset" android:defaultValue="0"/> -->
         <ListPreference android:entries="@array/metronome_switch_names" android:title="@string/opt_metronome_switch_title"
@@ -175,8 +175,6 @@
             android:title="@string/opt_syncmusic_title"/>
         <CheckBoxPreference android:key="hidenavibar" android:summary="@string/opt_hide_navibar_summary"
             android:title="@string/opt_hide_navibar_title" android:defaultValue="false"/>
-        <CheckBoxPreference android:key="lowDelay" android:title="@string/opt_lowdelay_title"
-            android:summary="@string/opt_lowdelay_summary" android:defaultValue="true"/>
         <CheckBoxPreference android:key="fixFrameOffset" android:title="@string/opt_fix_frame_offset_title"
             android:summary="@string/opt_fix_frame_offset_summary" android:defaultValue="true"/>
         <CheckBoxPreference android:key="removeSliderLock" android:title="@string/opt_remove_sliderlock_spinnerlock_title"

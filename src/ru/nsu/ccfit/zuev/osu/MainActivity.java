@@ -70,6 +70,9 @@ import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
@@ -77,6 +80,7 @@ import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.SpritePool;
+import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.InputManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -101,6 +105,7 @@ public class MainActivity extends BaseGameActivity implements
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean willReplay = false;
     private static boolean activityVisible = true;
+    private static final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
     // Multiplayer
     private Uri roomInviteLink;
@@ -343,7 +348,11 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().getMainScene().loadBeatmap();
                 initPreferences();
                 availableInternalMemory();
-                AccessibilityDetector.start(MainActivity.this);
+
+                scheduledExecutor.scheduleAtFixedRate(() -> {
+                    AccessibilityDetector.check(MainActivity.this);
+                    BeatmapDifficultyCalculator.invalidateExpiredCache();
+                }, 0, 1000, TimeUnit.MILLISECONDS);
 
                 if (roomInviteLink != null) {
                     LobbyScene.INSTANCE.connectFromLink(roomInviteLink);

@@ -7,7 +7,8 @@ import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.api.ibancho.SpectatorAPI
 import com.reco1l.api.ibancho.data.*
 import com.reco1l.api.ibancho.data.PlayerStatus.*
-import com.reco1l.api.ibancho.data.RoomTeam.*
+import com.reco1l.api.ibancho.data.RoomTeam.BLUE
+import com.reco1l.api.ibancho.data.RoomTeam.RED
 import com.reco1l.api.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
@@ -40,6 +41,8 @@ import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen.LoadingScene
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
 import ru.nsu.ccfit.zuev.osu.scoring.Replay
 import ru.nsu.ccfit.zuev.skins.OsuSkin
+import java.text.SimpleDateFormat
+import java.util.*
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.LibraryManager.INSTANCE as library
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
@@ -112,6 +115,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     private val infoText = ChangeableText(0f, 0f, getResources().getFont("smallFont"), "", 100)
 
 
+    private val beatmapInfoText = ChangeableText(10f, 10f, getResources().getFont("smallFont"), "", 150)
+
+    private var beatmapInfoRectangle: Rectangle? = null
+
     init
     {
         RoomAPI.playerEventListener = this
@@ -160,6 +167,19 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Info text
         infoText.setPosition(trackButton!!.x + 20f, trackButton!!.y + trackButton!!.height + 10f)
         attachChild(infoText)
+
+        // Beatmap info
+        beatmapInfoRectangle = Rectangle(0f, 0f, trackButton!!.width * 0.75f, 0f).also {
+            it.setColor(0f, 0f, 0f, 0.9f)
+            it.isVisible = false
+
+            beatmapInfoText.detachSelf()
+            it.attachChild(beatmapInfoText)
+
+            attachChild(it)
+        }
+
+        OsuSkin.get().getColor("MenuItemDefaultTextColor", BeatmapButton.DEFAULT_TEXT_COLOR).apply(beatmapInfoText)
 
         // Ready button, this button will switch player status
         readyButton = object : TextButton(getResources().getFont("CaptionFont"), "Ready")
@@ -252,23 +272,18 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     val players = room!!.activePlayers.filter { it.status != MISSING_BEATMAP }
 
                     // Checking if there's at least 2 players
-                    if (players.isEmpty() || players.size == 1)
+                    if (players.size <= 1)
                     {
-                        ToastLogger.showText("At least 2 players need to be ready!", true)
+                        ToastLogger.showText("At least 2 players need to have the beatmap!", true)
                         return true
                     }
 
-                    // Checking if all players that can play are ready.
-                    if (players.all { it.status == READY })
-                    {
-                        getResources().getSound("menuhit")?.play()
-                        RoomAPI.notifyMatchPlay()
-                        async {
-                            SpectatorAPI.startPlaying(room!!.id)
-                        }
-                        return true
+                    getResources().getSound("menuhit")?.play()
+                    RoomAPI.notifyMatchPlay()
+                    async {
+                        SpectatorAPI.startPlaying(room!!.id)
                     }
-                    ToastLogger.showText("All players with the beatmap need to be ready!", true)
+                    return true
                 }
                 else uiThread {
                     options = RoomOptions()
@@ -357,7 +372,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
-                if (!isRoomHost && !room!!.isFreeMods || awaitModsChange || player!!.status == READY)
+                if (!isRoomHost && !room!!.isFreeMods || awaitModsChange || awaitStatusChange || player!!.status == READY)
                     return true
 
                 if (event.isActionDown)
@@ -402,6 +417,19 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Online panel
         onlinePanel.setPosition(Config.getRES_WIDTH() - 410f - 6f, 6f)
         attachChild(onlinePanel)
+
+        sortChildren()
+    }
+
+    override fun onSceneTouchEvent(event: TouchEvent): Boolean {
+        trackButton?.also {
+            beatmapInfoRectangle?.isVisible =
+                !event.isActionUp &&
+                event.x in it.x..(it.x + it.width) &&
+                event.y in it.y..(it.y + it.height)
+        }
+
+        return super.onSceneTouchEvent(event)
     }
 
     // Update events
@@ -476,7 +504,15 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             if (isRoomHost)
             {
-                secondaryButton!!.setText("Start match!")
+                room!!.activePlayers.run {
+                    val playersReady = filter { it.status == READY }
+
+                    secondaryButton!!.setText(
+                        if (playersReady.size == size) "Start Game!"
+                        else "Force Start Game! (${playersReady.size}/${size})"
+                    )
+                }
+
                 secondaryButton!!.setColor(0.2f, 0.9f, 0.2f)
             }
             return
@@ -490,6 +526,27 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         secondaryButton!!.setColor(0.2f, 0.2f, 0.2f)
 
         modsButton!!.isVisible = isRoomHost || room!!.isFreeMods
+    }
+
+    private fun updateBeatmapInfo() {
+        getGlobal().selectedTrack?.also {
+            val dateFormat = SimpleDateFormat(if (it.musicLength > 3600 * 1000) "HH:mm:ss" else "mm:ss")
+            dateFormat.timeZone = TimeZone.getTimeZone("GMT+0")
+
+            beatmapInfoText.text =
+                "BPM: ${if (it.bpmMin == it.bpmMax) "%.1f".format(it.bpmMin) else "%.1f-%.1f".format(it.bpmMin, it.bpmMax)}" +
+                "  Length: ${dateFormat.format(it.musicLength)}\n" +
+                "CS:${it.circleSize} AR:${it.approachRate} OD:${it.overallDifficulty} HP:${it.hpDrain} Star Rating: ${it.difficulty}"
+        } ?: run { beatmapInfoText.text = "" }
+
+        beatmapInfoRectangle!!.also {
+            it.width = beatmapInfoText.width + 20
+            it.height = beatmapInfoText.height + 20
+
+            trackButton!!.let { t ->
+                it.setPosition(t.x + t.width - it.width - 20, t.y + t.height)
+            }
+        }
     }
 
     // Actions
@@ -520,16 +577,20 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         chat.log.clear()
         chat.dismiss()
 
+        // Clearing entities
+        glThread {
+            getModMenu().hide()
+
+            playerList?.detachSelf()
+            playerList = null
+        }
+
         // Hide any player menu if its shown
         uiThread {
             playerList?.menu?.dismiss()
             options?.dismiss()
             Unit
         }
-
-        // Clearing player list
-        playerList?.detachSelf()
-        playerList = null
     }
 
 
@@ -662,7 +723,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             SpectatorAPI.leaveRoom(roomId, uid)
         }
 
-        clear()
         ToastLogger.showText("Disconnected from the room${reason?.let { ": $it" } ?: "" }", true)
 
         // If player is in one of these scenes we go back.
@@ -674,7 +734,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomConnectFail(error: String?)
     {
-        clear()
         ToastLogger.showText("Failed to connect to the room: $error", true)
         back()
     }
@@ -715,6 +774,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Updating background
         updateBackground(getGlobal().selectedTrack?.background)
+
+        updateBeatmapInfo()
 
         // Releasing await lock
         awaitBeatmapChange = false
@@ -908,7 +969,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomMatchPlay()
     {
-        if (player!!.status == READY)
+        if (player!!.status != MISSING_BEATMAP)
         {
             if (getGlobal().selectedTrack == null)
             {

@@ -162,7 +162,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Sprite skipBtn;
     private float skipTime;
     private boolean musicStarted;
-    private float distToNextObject;
+    private double distToNextObject;
     private float timeMultiplier = 1.0f;
     private CursorEntity[] cursorSprites;
     private AutoCursor autoCursor;
@@ -209,12 +209,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private boolean videoStarted;
 
     // Multiplayer
-
-    /**Count of times that user pressed the back button*/
-    private int backPressCount = 0;
-
     /**Indicates the last time that the user pressed the back button, used to reset {@code backPressCount}*/
-    private float lastTimeBackPress = -1f;
+    private float lastBackPressTime = -1f;
 
     /**Indicates that the player has failed and the score shouldn't be submitted*/
     public boolean hasFailed = false;
@@ -224,6 +220,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     /**Real time elapsed in milliseconds since the game has started*/
     private long realTimeElapsed = 0;
+
+    /**Real time elapsed in milliseconds since the latest statistic data was sent*/
+    private long statisticDataTimeElapsed = 0;
 
     /**Last score data chunk sent to server, used to determine if the data was changed.*/
     private ScoreBoardItem lastScoreSent = null;
@@ -471,7 +470,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (scale < 0.001f){
             scale = 0.001f;
         }
-        GameHelper.setSpeed((float) beatmapData.difficulty.sliderMultiplier * 100);
+        GameHelper.setSpeed(beatmapData.difficulty.sliderMultiplier * 100);
         GameHelper.setTickRate((float) beatmapData.difficulty.sliderTickRate);
         GameHelper.setScale(scale);
         GameHelper.setDifficulty(overallDifficulty);
@@ -631,10 +630,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             calculateAllSliderPaths();
         }
 
-        stat = new StatisticV2();
-        stat.setMod(ModMenu.getInstance().getMod());
-        float multiplier = 1 + rawDifficulty / 10f + rawDrain / 10f;
-        multiplier += (beatmapData.difficulty.cs - 3) / 4f;
+        mIsAuto = stat.getMod() != null && stat.getMod().contains(GameMod.MOD_AUTO);
+        stat.canFail = !stat.getMod().contains(GameMod.MOD_NOFAIL)
+                && !stat.getMod().contains(GameMod.MOD_RELAX)
+                && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)
+                && !stat.getMod().contains(GameMod.MOD_AUTO);
+
+        float multiplier = 1 + Math.min(rawDifficulty, 10) / 10f + Math.min(rawDrain, 10) / 10f;
+
+        // The maximum CS of osu!droid mapped to osu!standard is ~17.62.
+        multiplier += (Math.min(beatmapData.difficulty.cs, 17.62f) - 3) / 4f;
 
         stat.setDiffModifier(multiplier);
         stat.setMaxObjectsCount(lastTrack.getTotalHitObjectCount());
@@ -670,10 +675,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         // Resetting variables before starting the game.
         Multiplayer.clearLeaderboard();
         hasFailed = false;
-        backPressCount = 0;
-        lastTimeBackPress = -1f;
+        lastBackPressTime = -1f;
         isSkipRequested = false;
         realTimeElapsed = 0;
+        statisticDataTimeElapsed = 0;
         lastScoreSent = null;
 
         paused = false;
@@ -834,8 +839,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
             });
         }
-
-        mIsAuto = stat.getMod() != null && stat.getMod().contains(GameMod.MOD_AUTO);
 
         GameHelper.setHardrock(stat.getMod().contains(GameMod.MOD_HARDROCK));
         GameHelper.setDoubleTime(stat.getMod().contains(GameMod.MOD_DOUBLETIME));
@@ -1355,12 +1358,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (Multiplayer.isMultiplayer)
         {
-            realTimeElapsed += (long) (pSecondsElapsed * 1000);
+            long mSecElapsed = (long) (pSecondsElapsed * 1000);
+            realTimeElapsed += mSecElapsed;
+            statisticDataTimeElapsed += mSecElapsed;
 
             // Sending statistics data every 3000ms if data was changed
-            if (realTimeElapsed > 3000)
+            if (statisticDataTimeElapsed > 3000)
             {
-                realTimeElapsed %= 3000;
+                statisticDataTimeElapsed %= 3000;
 
                 if (Multiplayer.isConnected)
                 {
@@ -1377,16 +1382,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     }
                 }
             }
-
-            // Setting a delay of 300ms for the player to tap back button again.
-            if (lastTimeBackPress > 0 && realTimeElapsed - lastTimeBackPress > 300)
-            {
-                lastTimeBackPress = -1f;
-                backPressCount = 0;
-            }
         }
 
-        float gtime;
+        double gtime;
         if (soundTimingPoint == null || soundTimingPoint.getTime() > secPassed) {
             gtime = 0;
         } else {
@@ -1547,30 +1545,29 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (gameStarted) {
-            float rate = 0.375f;
+            double rate = 0.375;
             if (drain > 0 && distToNextObject > 0) {
-                rate = 1 + drain / (2f * distToNextObject);
+                rate = 1 + drain / (2 * distToNextObject);
             }
-            stat.changeHp(-rate * 0.01f * dt);
+            stat.changeHp((float) -rate * 0.01f * dt);
 
-            var isDeath = Multiplayer.isMultiplayer
-                    && stat.getHp() <= 0
-                    && !stat.getMod().contains(GameMod.MOD_NOFAIL)
-                    && !stat.getMod().contains(GameMod.MOD_RELAX)
-                    && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)
-                    && !stat.getMod().contains(GameMod.MOD_AUTO);
+            if (stat.getHp() <= 0 && stat.canFail) {
+                if (stat.getMod().contains(GameMod.MOD_EASY) && failcount < 3) {
+                    failcount++;
+                    stat.changeHp(1f);
+                }
+                else {
+                    if (Multiplayer.isMultiplayer)
+                    {
+                        if (!hasFailed)
+                            ToastLogger.showText("You failed but you can continue playing.", false);
 
-            stat.isAlive = stat.isAlive
-                    // Player is alive - they will only die if HP reaches 0.
-                    ? !isDeath
-                    // Player is not alive - they will only recover if HP reaches 1.
-                    : stat.getHp() == 1f;
-
-            if (isDeath) {
-                if (!hasFailed)
-                    ToastLogger.showText("You failed but you can continue playing.", false);
-
-                hasFailed = true;
+                        hasFailed = true;
+                    } else {
+                        gameover();
+                        return;
+                    }
+                }
             }
         }
 
@@ -2623,7 +2620,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (Multiplayer.isMultiplayer)
         {
-            if (backPressCount > 0)
+            // Setting a delay of 300ms for the player to tap back button again.
+            if (lastBackPressTime > 0 && realTimeElapsed - lastBackPressTime > 300)
             {
                 // Room being null can happen when the player disconnects from socket while playing
                 if (Multiplayer.isConnected)
@@ -2637,8 +2635,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 return;
             }
 
-            lastTimeBackPress = System.currentTimeMillis();
-            backPressCount++;
+            lastBackPressTime = System.currentTimeMillis();
             ToastLogger.showText("Tap twice to exit to room.", false);
             return;
         }
@@ -2870,9 +2867,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
 
-    public void registerAccuracy(final float acc) {
+    public void registerAccuracy(final double acc) {
         if (hitErrorMeter != null) {
-            hitErrorMeter.putErrorResult(acc);
+            hitErrorMeter.putErrorResult((float) acc);
         }
         avgOffset += acc;
         offsetRegs++;

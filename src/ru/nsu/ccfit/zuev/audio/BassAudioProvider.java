@@ -29,15 +29,6 @@ public class BassAudioProvider {
 
     public BassAudioProvider() {
         freq.value = 1.0f;
-        configureBASS();
-    }
-
-    /**
-     * Configures BASS to the default setting that the game is using.
-     */
-    public static void configureBASS() {
-        // Initialize BASS if it's not initialized already. This allows us to get the device ID for reinitialization later.
-        BASS.BASS_Init(-1, DEFAULT_FREQUENCY, BASS.BASS_DEVICE_LATENCY);
 
         // This likely doesn't help, but also doesn't seem to cause any issues or any CPU increase.
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_UPDATEPERIOD, 5);
@@ -45,16 +36,13 @@ public class BassAudioProvider {
         // Reduce latency to a known sane minimum.
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_PERIOD, 5);
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_BUFFER, 10);
-        BASS.BASS_SetConfig(BASS.BASS_CONFIG_BUFFER, 100);
 
         // Ensure there are no brief delays on audio operations (causing stream stalls etc.) after periods of silence.
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_NONSTOP, 1);
 
-        // Reinitialize BASS under the current configuration.
-        BASS.BASS_Init(BASS.BASS_GetDevice(), DEFAULT_FREQUENCY, BASS.BASS_DEVICE_REINIT);
-    }
+        BASS.BASS_Init(-1, DEFAULT_FREQUENCY, BASS.BASS_DEVICE_LATENCY);
 
-    public static void logBASSConfig() {
+        Log.i("BASS-Config", "BASS initialized");
         Log.i("BASS-Config", "Update period:          " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_UPDATEPERIOD));
         Log.i("BASS-Config", "Device period:          " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_DEV_PERIOD));
         Log.i("BASS-Config", "Device buffer length:   " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_DEV_BUFFER));

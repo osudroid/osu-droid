@@ -1,6 +1,5 @@
 package ru.nsu.ccfit.zuev.audio.serviceAudio;
 
-import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
@@ -13,9 +12,7 @@ import java.io.File;
 
 import androidx.core.app.NotificationManagerCompat;
 import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 
 
@@ -224,7 +221,6 @@ public class SongService extends Service {
 
         if (audioFunc != null) {
             audioFunc.onGamePause();
-            reloadCurrentAudio();
         }
 
         notify.show();
@@ -235,12 +231,9 @@ public class SongService extends Service {
     public boolean hideNotification() {
         // Checking if the notification is shown is pretty hacky, but for now it is the case
         // only if the player leaves the game from the main menu, which is when we want to
-        // reload BASS after being altered in `showNotification` and reload the audio.
-        if (notify.isShowing) {
-            if (audioFunc != null) {
-                audioFunc.onGameResume();
-            }
-            reloadCurrentAudio();
+        // reload BASS after being altered in `showNotification`.
+        if (notify.isShowing && audioFunc != null) {
+            audioFunc.onGameResume();
         }
 
         return notify.hide();
@@ -262,24 +255,6 @@ public class SongService extends Service {
 
     public boolean isRunningForeground() {
         return MainActivity.isActivityVisible();
-    }
-
-    private void reloadCurrentAudio() {
-        Status pastStatus = getStatus();
-
-        pause();
-        setVolume(Config.getBgmVolume());
-
-        // Reload audio, otherwise it will be choppy or offset for whatever reason.
-        if (LibraryManager.INSTANCE.getBeatmap() != null) {
-            int position = getPosition();
-            preLoad(LibraryManager.INSTANCE.getBeatmap().getMusic());
-            seekTo(position);
-        }
-
-        if (audioFunc != null && pastStatus != Status.STOPPED && pastStatus != Status.PAUSED) {
-            audioFunc.resume();
-        }
     }
 
     public class ReturnBindObject extends Binder {

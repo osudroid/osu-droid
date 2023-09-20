@@ -20,7 +20,6 @@ import java.util.UUID;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
-import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.util.Debug;
 
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
@@ -176,11 +175,6 @@ public class Config {
         }
 
         syncMusic = prefs.getBoolean("syncMusic", syncMusic);
-        if (prefs.getBoolean("lowDelay", true)) {
-            Engine.INPUT_PAUSE_DURATION = 0;
-        } else {
-            Engine.INPUT_PAUSE_DURATION = 20;
-        }
         enableExtension = false;// prefs.getBoolean("enableExtension", false);
         cachePath = context.getCacheDir().getPath();
         burstEffects = prefs.getBoolean("bursts", burstEffects);

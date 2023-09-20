@@ -28,9 +28,9 @@ public class Updater {
     private boolean newUpdate = false;
     private String changelogMsg, downloadUrl;
     private LoadingFragment loadingFragment;
-    private MainActivity mActivity;
+    private final MainActivity mActivity;
 
-    private static Updater instance = new Updater();
+    private static final Updater instance = new Updater();
 
     private Updater() {
         mActivity = GlobalManager.getInstance().getMainActivity();
@@ -51,35 +51,35 @@ public class Updater {
 //        new AsyncTask() {
 //            @Override
 //            public void run() {
-//                try {
-//                    mActivity.runOnUiThread(() -> {
-//                      if (showSnackbar) {
-//                            Snackbar.make(mActivity.findViewById(android.R.id.content),
-//                                    StringTable.get(R.string.update_info_checking), 1500).show();
-//                        } else {
-//                            GlobalManager.getInstance().setInfo(StringTable.get(R.string.update_info_checking));
-//                        }
-//
-//                        if (showLoading && loadingFragment == null) {
-//                            loadingFragment = new LoadingFragment();
-//                            loadingFragment.show();
-//                        }
-//                    });
-//
-//                    String lang;
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//                        lang = mActivity.getResources().getConfiguration().getLocales().get(0).getLanguage();
+//                mActivity.runOnUiThread(() -> {
+//                    if (showSnackbar) {
+//                        Snackbar.make(mActivity.findViewById(android.R.id.content),
+//                                StringTable.get(R.string.update_info_checking), 1500).show();
 //                    } else {
-//                        lang = mActivity.getResources().getConfiguration().locale.getLanguage();
+//                        GlobalManager.getInstance().setInfo(StringTable.get(R.string.update_info_checking));
 //                    }
-//                    ResponseBody response = httpGet(OnlineManager.endpoint + "update.php?lang=" + lang);
+//
+//                    if (showLoading && loadingFragment == null) {
+//                        loadingFragment = new LoadingFragment();
+//                        loadingFragment.show();
+//                    }
+//                });
+//
+//                String lang;
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//                    lang = mActivity.getResources().getConfiguration().getLocales().get(0).getLanguage();
+//                } else {
+//                    lang = mActivity.getResources().getConfiguration().locale.getLanguage();
+//                }
+//
+//                try (ResponseBody response = httpGet(OnlineManager.endpoint + "update.php?lang=" + lang)) {
 //                    UpdateVO updateInfo = new Gson().fromJson(response.string(), UpdateVO.class);
 //                    if (!newUpdate && updateInfo != null && updateInfo.getVersionCode() > mActivity.getVersionCode()) {
 //                        changelogMsg = updateInfo.getChangelog();
 //                        downloadUrl = updateInfo.getLink();
 //                        newUpdate = true;
 //                    }
-//                } catch (IOException e) {
+//                } catch (Exception e) {
 //                    Debug.e("Updater onRun: " + e.getMessage(), e);
 //                }
 //            }
