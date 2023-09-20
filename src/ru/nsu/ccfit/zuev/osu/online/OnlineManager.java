@@ -277,6 +277,7 @@ public class OnlineManager {
         PostBuilder post = new PostBuilder();
         post.addParam("filename", trackFile.getName());
         post.addParam("hash", hash);
+        post.addParam("uid", String.valueOf(userId));
 
         ArrayList<String> response = sendRequest(post, endpoint + "getrank.php");
 
