@@ -203,7 +203,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
                     String[] data = scores.get(i).split("\\s+");
 
-                    if (data.length < 8 || data.length == 10) {
+                    if (data.length < 8 || data.length > 9) {
                         continue;
                     }
 
@@ -212,7 +212,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     final long currTotalScore = Long.parseLong(data[2]);
 
                     final String titleStr = "#"
-                            + (i + 1)
+                            + (data.length == 9 ? data[8] : (i + 1))
                             + " "
                             + data[1] + "\n"
                             + StringTable.format(R.string.menu_score, totalScore, Integer.parseInt(data[3]));
@@ -240,26 +240,6 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     ScoreBoardItem item = new ScoreBoardItem();
                     item.set(data[1], Integer.parseInt(data[3]), Integer.parseInt(data[2]), scoreID);
                     items[i] = item;
-                }
-
-                if (!scores.isEmpty()) {
-                    String[] data = scores.get(scores.size() - 1).split("\\s+");
-
-                    if (data.length == 10) {
-                        final int scoreID = Integer.parseInt(data[0]);
-                        final String totalScore = formatScore(Integer.parseInt(data[2]));
-                        final String titleStr = "#"
-                                + data[7]
-                                + " of "
-                                + "\n"
-                                + StringTable.format(R.string.menu_score, totalScore, Integer.parseInt(data[3]));
-                        final String accStr = convertModString(data[5]) + "\n"
-                                + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(Integer.parseInt(data[6]) / 1000f, 2)) + "%" + "\n"
-                                + "-";
-
-                        if (isActive())
-                            attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, data[4], true, scoreID, data[9], data[1]));
-                    }
                 }
                 percentShow = 0;
             }
