@@ -35,6 +35,12 @@ Tapping on the beatmap card inside a multiplayer room will display a popup that 
 
 For multiplayer room hosts, they may swipe briefly when viewing this popup to avoid entering the song selection menu.
 
+## "Personal best" in global leaderboard
+
+If your score does not reach the top 50 in a beatmap, it will be displayed at the very bottom of the global leaderboard with its global rank.
+
+In a future version, the score will persist and will not scroll as a part of the global leaderboard.
+
 # Changes
 
 ## Select the previously picked beatmap when switching from song selection menu to multiplayer room
