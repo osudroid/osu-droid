@@ -8,7 +8,6 @@ import org.anddev.andengine.entity.text.ChangeableText
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
-import kotlin.math.min
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 
@@ -88,80 +87,82 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
             }
         }
 
-        var playerPosition = getChildIndex(player)
-        var positionChanged = false
+        val lastPlayerPosition = getChildIndex(player)
+        var playerPosition = lastPlayerPosition
 
-        var index = 0
-        while (index < spriteCount)
+        if (!isMultiplayer)
         {
-            val sprite = getChild(index) as? BoardItem ?: break
-
-            // We don't rely on 'i' because it may get changed.
-            var position = index
-
-            if (!isMultiplayer && index < playerPosition)
+            var i = 0
+            while (i < spriteCount)
             {
-                if (player.data.playScore >= sprite.data.playScore)
+                val sprite = getChild(i) as BoardItem
+
+                if (i < lastPlayerPosition)
                 {
-                    player.data.rank = sprite.data.rank
-                    sprite.data.rank++
+                    if (player.data.playScore >= sprite.data.playScore)
+                    {
+                        player.data.rank = sprite.data.rank
+                        sprite.data.rank++
 
-                    playerPosition--
-                    position++
-                    positionChanged = true
+                        playerPosition--
 
-                    sprite.updateRank()
-                    player.updateRank()
+                        sprite.updateRank()
+                        player.updateRank()
 
-                    lastRankChange = System.currentTimeMillis()
+                        lastRankChange = System.currentTimeMillis()
+                    }
                 }
+                ++i
             }
-
-            sprite.isVisible = when
-            {
-                // First and player positions are always shown.
-                position == 0 || sprite == player -> true
-
-                // If player position is lower than max allowed bound then wee apply the same bound to this sprite
-                playerPosition == maxAllowed && position < maxAllowed -> true
-                playerPosition < maxAllowed && position <= maxAllowed -> true
-
-                // If the player position is beyond the max allowed bound
-                playerPosition > maxAllowed && position > playerPosition - maxAllowed + 1 && position < playerPosition -> true
-
-                else -> false
-            }
-            ++index
         }
 
-        if (positionChanged)
+        if (playerPosition != lastPlayerPosition)
             setChildIndex(player, playerPosition)
+
+        super.onManagedUpdate(secondsElapsed)
+
+        val maxY = VERTICAL_PADDING + SPRITE_HEIGHT * maxAllowed
 
         if (playerPosition <= maxAllowed)
         {
             var i = 0
-            val limit = min(maxAllowed, spriteCount - 1)
-            while (i < limit)
+            while (i < spriteCount)
             {
-                getChild(i).setPosition(0f, VERTICAL_PADDING + SPRITE_HEIGHT * i)
+                val sprite = getChild(i)
+
+                sprite.setPosition(0f, if (i > maxAllowed) maxY else VERTICAL_PADDING + SPRITE_HEIGHT * i)
+                sprite.isVisible = i < maxAllowed
                 ++i
             }
-        } else {
-            val maxY = VERTICAL_PADDING + SPRITE_HEIGHT * maxAllowed
+        } else
+        {
+            // Computing the bound from player position towards the limit of sprites that can be shown.
+            val boundIndex: Int = playerPosition - maxAllowed + 1
 
             var i = playerPosition
             while (i >= 0)
             {
                 val sprite = getChild(i)
 
-                if (i >= playerPosition - maxAllowed)
-                    sprite.setPosition(0f, maxY - SPRITE_HEIGHT * (1 + playerPosition - i))
-                else
-                    sprite.setPosition(0f, VERTICAL_PADDING)
+                // Showing only sprites that are between the bound index exclusive up to player position inclusive, the
+                // first sprite will always be shown so that's why the bound index is exclusive.
+                sprite.isVisible = i == 0 || i in boundIndex + 1..playerPosition
+
+                sprite.setPosition(0f, when (i) {
+
+                    // First always on top
+                    0 -> VERTICAL_PADDING
+
+                    // Sprites outside the bounds will be placed at its respective limit, at this point this sprite
+                    // shouldn't be visible.
+                    !in boundIndex .. playerPosition -> if (i < boundIndex) VERTICAL_PADDING else maxY
+
+                    // Placing sprites respectively from maxY accounting for first sprite
+                    else -> maxY - SPRITE_HEIGHT * (1 + playerPosition - i)
+                })
                 --i
             }
         }
-        super.onManagedUpdate(secondsElapsed)
     }
 
 
