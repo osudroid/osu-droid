@@ -97,7 +97,7 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
             {
                 val sprite = getChild(i) as BoardItem
 
-                if (i < lastPlayerPosition)
+                if (i < lastPlayerPosition && sprite != player)
                 {
                     if (player.data.playScore >= sprite.data.playScore)
                     {
