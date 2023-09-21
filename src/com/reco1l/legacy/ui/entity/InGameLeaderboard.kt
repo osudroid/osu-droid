@@ -182,8 +182,6 @@ class InGameLeaderboard(var playerName: String, private val statistics: Statisti
             attachChild(it)
         }
 
-        Debug.i("Leaderboard invalidated")
-
         lastRankChange = System.currentTimeMillis()
     }
 
