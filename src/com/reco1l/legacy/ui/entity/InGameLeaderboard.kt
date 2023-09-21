@@ -93,24 +93,21 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
         if (!isMultiplayer)
         {
             var i = 0
-            while (i < spriteCount)
+            while (i < lastPlayerPosition)
             {
                 val sprite = getChild(i) as BoardItem
 
-                if (i < lastPlayerPosition && sprite != player)
+                if (player.data.playScore >= sprite.data.playScore)
                 {
-                    if (player.data.playScore >= sprite.data.playScore)
-                    {
-                        player.data.rank = sprite.data.rank
-                        sprite.data.rank++
+                    player.data.rank = sprite.data.rank
+                    sprite.data.rank++
 
-                        playerPosition--
+                    playerPosition--
 
-                        sprite.updateRank()
-                        player.updateRank()
+                    sprite.updateRank()
+                    player.updateRank()
 
-                        lastRankChange = System.currentTimeMillis()
-                    }
+                    lastRankChange = System.currentTimeMillis()
                 }
                 ++i
             }
