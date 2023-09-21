@@ -5,7 +5,6 @@ import com.reco1l.legacy.ui.multiplayer.Multiplayer.isMultiplayer
 import org.anddev.andengine.entity.Entity
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
-import org.anddev.andengine.util.Debug
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
@@ -38,7 +37,7 @@ class InGameLeaderboard(var playerName: String, private val statistics: Statisti
 
             // We consider that if it's in replay mode the length should be the same, in case it's not then the
             // length should be +1 greater (because of the new score).
-            if (items == null || (items.size + if (isReplaying) 0 else 1) != childCount)
+            if (items == null || items.size + (if (isReplaying) 0 else 1) != childCount)
             {
                 invalidate(items)
                 return
