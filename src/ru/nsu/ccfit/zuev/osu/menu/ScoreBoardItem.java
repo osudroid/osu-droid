@@ -49,11 +49,11 @@ public class ScoreBoardItem implements Cloneable {
     }
 
 
-    public void set(int rankPos, String name, int com, int scr, int id) {
+    public void set(int rankPos, String name, int combo, int score, int id) {
         rank = rankPos;
         userName = name;
-        maxCombo = com;
-        playScore = scr;
+        maxCombo = combo;
+        playScore = score;
         scoreId = id;
     }
 
