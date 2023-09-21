@@ -246,7 +246,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
                     ScoreBoardItem item = new ScoreBoardItem();
                     item.set(beatmapRank, playerName, combo, currentTotalScore, scoreID);
-                    items.add(item);
+
+                    if (!isPersonalBest)
+                        items.add(item);
                 }
                 scoreItems = items;
                 percentShow = 0;
