@@ -8,7 +8,6 @@ import java.util.Locale;
 import java.util.Random;
 
 import com.reco1l.api.ibancho.data.WinCondition;
-import com.reco1l.legacy.data.MultiplayerConverter;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -69,6 +68,12 @@ public class StatisticV2 implements Serializable {
      * Whether the player can fail.
      */
     public boolean canFail = true;
+
+    /**
+     * The score multiplier accounting for ranked mods.
+     */
+    private float rankedScoreMultiplier = Float.NaN;
+
 
     public StatisticV2() {
         playerName = null;
@@ -163,17 +168,21 @@ public class StatisticV2 implements Serializable {
     }
 
     public int getAutoTotalScore() {
-        float mult = 1;
-        for (GameMod m : mod) {
-            if (m.unranked) {
-                continue;
+        // Optimization :P
+        if (Float.isNaN(rankedScoreMultiplier)) {
+            float mult = 1;
+            for (GameMod m : mod) {
+                if (m.unranked) {
+                    continue;
+                }
+                mult *= m.scoreMultiplier;
             }
-            mult *= m.scoreMultiplier;
+            if (changeSpeed != 1.0f){
+                mult *= getSpeedChangeScoreMultiplier();
+            }
+            rankedScoreMultiplier = mult;
         }
-        if (changeSpeed != 1.0f){
-            mult *= getSpeedChangeScoreMultiplier();
-        }
-        return (int) (totalScore * mult);
+        return (int) (totalScore * rankedScoreMultiplier);
     }
 
     public void registerSpinnerHit() {

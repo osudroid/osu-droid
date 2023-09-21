@@ -16,6 +16,7 @@ import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.framework.lang.Execution;
 import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.engine.VideoSprite;
+import com.reco1l.legacy.ui.entity.InGameLeaderboard;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.rian.difficultycalculator.attributes.TimedDifficultyAttributes;
@@ -92,6 +93,7 @@ import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.PauseMenu;
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem;
 import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
@@ -141,7 +143,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private BreakAnimator breakAnimator;
     private ScoreBar scorebar;
     private SongProgressBar progressBar;
-    public DuringGameScoreBoard scoreBoard;
+    public InGameLeaderboard scoreBoard;
     private HitErrorMeter hitErrorMeter;
     private Metronome metronome;
     private boolean isFirst = true;
@@ -1255,7 +1257,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             unranked.setVisible(true);
         }
 
-        String playname = null;
+        String playname = Config.getLocalUsername();
+
         replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
         replayText.setVisible(false);
         replayText.setPosition(0, 140);
@@ -1267,10 +1270,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(40,
                     Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
             replayText.setVisible(!Config.isHideReplayMarquee());
+        } else if (Multiplayer.room != null && Multiplayer.room.isTeamVersus()) {
+
+            //noinspection DataFlowIssue
+            playname = Multiplayer.player.getTeam().toString();
+
+        } else if (OnlineManager.getInstance().isStayOnline()) {
+            playname = Config.getOnlineUsername();
         }
+
         if (Config.isShowScoreboard()) {
-            scoreBoard = new DuringGameScoreBoard(fgScene, stat, playname);
-            addPassiveObject(scoreBoard);
+            scoreBoard = new InGameLeaderboard(playname, stat);
+            fgScene.attachChild(scoreBoard);
         }
 
         if (GameHelper.isFlashLight()){

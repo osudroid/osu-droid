@@ -13,6 +13,7 @@ import org.anddev.andengine.input.touch.detector.SurfaceScrollDetector;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.MathUtils;
+import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
@@ -51,7 +52,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     private float downTime = -1;
     private int _scoreID = -1;
     private boolean moved = false;
-    private ScoreBoardItem[] scoreItems = new ScoreBoardItem[0];
+    private ArrayList<ScoreBoardItem> scoreItems = null;
 
 
     private LoadTask currentTask;
@@ -193,8 +194,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
                 loadingText.setText(OnlineManager.getInstance().getFailMessage());
 
-                var items = new ScoreBoardItem[scores.size()];
-                scoreItems = items;
+                var items = new ArrayList<ScoreBoardItem>(scores.size());
 
                 long nextTotalScore = 0;
 
@@ -210,6 +210,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     final int scoreID = Integer.parseInt(data[0]);
                     final String totalScore = formatScore(Integer.parseInt(data[2]));
                     final long currTotalScore = Long.parseLong(data[2]);
+
+                    var rank = data.length == 9 ? Integer.parseInt(data[8]) : (i + 1);
 
                     final String titleStr = "#"
                             + (data.length == 9 ? data[8] : (i + 1))
@@ -238,9 +240,10 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, data[4], true, scoreID, data[7], data[1]));
 
                     ScoreBoardItem item = new ScoreBoardItem();
-                    item.set(data[1], Integer.parseInt(data[3]), Integer.parseInt(data[2]), scoreID);
-                    items[i] = item;
+                    item.set(rank, data[1], Integer.parseInt(data[3]), Integer.parseInt(data[2]), scoreID);
+                    items.add(item);
                 }
+                scoreItems = items;
                 percentShow = 0;
             }
         };
@@ -263,8 +266,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     scoreSet.moveToLast();
                     long lastTotalScore = 0;
 
-                    var items = new ScoreBoardItem[scoreSet.getCount()];                     
-                    scoreItems = items;
+                    var items = new ArrayList<ScoreBoardItem>(scoreSet.getCount());
 
                     for (int i = scoreSet.getCount() - 1; i >= 0 && isActive(); --i) {
                         scoreSet.moveToPosition(i);
@@ -290,9 +292,10 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                         attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null), 0);
 
                         var item = new ScoreBoardItem();
-                        item.set(scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")), scoreID);
-                        items[i] = item;
+                        item.set(i + 1, scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")), scoreID);
+                        items.add(item);
                     }
+                    scoreItems = items;
                 }
             }
         };
@@ -311,7 +314,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         loadingText.setText("");
         lastTrack = track;
         wasOnline = showOnlineScores;
-        scoreItems = new ScoreBoardItem[0];
+        scoreItems = null;
 
         SyncTaskManager.getInstance().run(() -> {
 
@@ -472,7 +475,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         this.showOnlineScores = showOnlineScores;
     }
 
-    public ScoreBoardItem[] getScoreBoardItems() {
+    @Nullable
+    public ArrayList<ScoreBoardItem> getScoreBoardItems() {
         return scoreItems;
     }
 

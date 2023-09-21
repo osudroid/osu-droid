@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.reco1l.api.ibancho.data.WinCondition;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
@@ -9,11 +10,16 @@ import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Objects;
 
-public class ScoreBoardItem {
+public class ScoreBoardItem implements Cloneable {
 
     public String userName;
     public int playScore;
     public int scoreId;
+
+    /**
+     * The rank position in the leaderboard.
+     */
+    public int rank = -1;
 
     /**
      * In single player this is always 'maxCombo', in multiplayer if the room win condition isn't Max Combo it'll be
@@ -43,7 +49,8 @@ public class ScoreBoardItem {
     }
 
 
-    public void set(String name, int com, int scr, int id) {
+    public void set(int rankPos, String name, int com, int scr, int id) {
+        rank = rankPos;
         userName = name;
         maxCombo = com;
         playScore = scr;
@@ -95,5 +102,11 @@ public class ScoreBoardItem {
                 && other.maxCombo == maxCombo
                 && other.accuracy == accuracy
                 && other.isAlive == isAlive;
+    }
+
+    @NonNull
+    @Override
+    public ScoreBoardItem clone() throws CloneNotSupportedException {
+        return (ScoreBoardItem) super.clone();
     }
 }
