@@ -171,17 +171,16 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
     {
         detachChildren()
 
-        if (items.isNullOrEmpty())
-            return
-
-        var list: List<ScoreBoardItem> = items
+        var list: List<ScoreBoardItem> = items ?: emptyList()
 
         fun appendNewItem() = ScoreBoardItem().apply {
 
             userName = playerName
 
-            // When using local leaderboard we can know the last rank, so we apply it.
-            if (!getGlobal().songMenu.isBoardOnline)
+            // Setting the initial rank as the last rank, in local leaderboard it'll always be the last index because
+            // it's based on the local database. In online the server database provides up to 50 scores, so we can't know
+            // the actual last rank of it unless the provided leaderboard size is lower than 50.
+            if (!getGlobal().songMenu.isBoardOnline || items.isNullOrEmpty() || items.size < 50)
                 rank = list.size + 1
 
             list = list + this
@@ -193,10 +192,13 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
             // it to the last index as empty score.
             isReplaying ->
             {
-                list = items.mapNotNull { if (it.scoreId == replayId) null else it.clone() }
+                if (list.isNotEmpty())
+                {
+                    list = list.mapNotNull { if (it.scoreId == replayId) null else it.clone() }
 
-                // Reordering ranks according to indexes.
-                list.forEachIndexed { i, it -> it.rank = i + 1 }
+                    // Reordering ranks according to indexes.
+                    list.forEachIndexed { i, it -> it.rank = i + 1 }
+                }
 
                 // Setting replay data rank as empty score and shifting the rest of scores, it will eventually set back
                 // to the corresponding values.
@@ -204,12 +206,14 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
             }
 
             // In multiplayer, we try to find the corresponding data according to the username.
-            isMultiplayer -> items.find { it.userName == playerName }
+            isMultiplayer -> list.find { it.userName == playerName }
 
             // In solo we just append a new data.
             else ->
             {
-                list = list.map { it.clone() }
+                if (list.isNotEmpty())
+                    list = list.map { it.clone() }
+
                 appendNewItem()
             }
         }
