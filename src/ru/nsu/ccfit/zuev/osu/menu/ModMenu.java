@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.framework.lang.Execution;
+import com.reco1l.legacy.data.MultiplayerConverter;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomMods;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
@@ -36,7 +37,6 @@ import ru.nsu.ccfit.zuev.osu.helper.TextButton;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-import static com.reco1l.legacy.data.MultiplayerConverter.*;
 
 public class ModMenu implements IModSwitcher {
 
@@ -151,11 +151,13 @@ public class ModMenu implements IModSwitcher {
         {
             RoomScene.awaitModsChange = true;
 
+            var string = MultiplayerConverter.modsToString(mod);
+
             // The room mods are the same as the host mods
             if (Multiplayer.isRoomHost)
-                RoomAPI.setRoomMods(modsToString(mod), changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
+                RoomAPI.setRoomMods(string, changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
             else
-                RoomAPI.setPlayerMods(modsToString(mod), changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
+                RoomAPI.setPlayerMods(string, changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
         }
     }
 

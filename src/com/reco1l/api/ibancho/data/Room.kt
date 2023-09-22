@@ -195,4 +195,7 @@ data class Room(
                 .sortedWith { a, b -> (a == null).compareTo(b == null) }
                 .toTypedArray()
     }
+
+
+    fun modsToReadableString() = mods.toString(this)
 }

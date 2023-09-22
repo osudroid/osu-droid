@@ -1,10 +1,9 @@
 package com.reco1l.legacy.ui.multiplayer
 
+import com.reco1l.api.ibancho.data.Room
 import com.reco1l.legacy.data.modsToReadable
-import com.reco1l.legacy.data.modsToString
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu.getInstance as getModMenu
 import java.util.*
 
 data class RoomMods(
@@ -20,17 +19,29 @@ data class RoomMods(
 )
 {
 
-    override fun toString() = buildString {
-        append(modsToReadable(modsToString(set)))
+    override fun toString() = modsToReadable(set, speedMultiplier, flFollowDelay, forceAR)
 
-        if (speedMultiplier != 1f)
-            append(", ${speedMultiplier}x")
+    fun toString(room: Room): String
+    {
+        if (set.isEmpty())
+            return if (room.isFreeMods) "Free mods" else "None"
 
-        if (MOD_FLASHLIGHT in set && flFollowDelay != getModMenu().defaultFLFollowDelay)
-            append(", ${flFollowDelay * 1000}ms FL delay")
+        return if (room.isFreeMods) buildString {
 
-        if (forceAR != null)
-            append(", AR $forceAR")
+            append("Free mods, ")
+
+            if (MOD_DOUBLETIME in set || MOD_NIGHTCORE in set)
+                append("DT, ")
+
+            if (MOD_HALFTIME in set)
+                append("HT, ")
+
+            if (speedMultiplier != 1f)
+                append("%.2fx, ".format(speedMultiplier))
+
+            deleteCharAt(lastIndexOf(", "))
+        }
+        else toString()
     }
 
     override fun equals(other: Any?): Boolean
