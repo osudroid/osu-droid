@@ -92,8 +92,8 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
 
         if (!isMultiplayer)
         {
-            var i = 0
-            while (i < lastPlayerPosition)
+            var i = lastPlayerPosition - 1
+            while (i >= 0)
             {
                 val sprite = getChild(i) as BoardItem
 
@@ -109,7 +109,7 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
 
                     lastRankChange = System.currentTimeMillis()
                 }
-                ++i
+                --i
             }
         }
 
