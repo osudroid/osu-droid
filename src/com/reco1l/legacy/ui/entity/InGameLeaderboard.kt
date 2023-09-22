@@ -257,7 +257,7 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
             when
             {
                 // Setting red color if the score belongs to the player, but it's not the current one.
-                data.userName == playerName && playerName != "osu!" -> setColor(1f, 0.5f, 0.5f)
+                getGlobal().songMenu.isBoardOnline && data.userName == playerName && playerName != "osu!" -> setColor(1f, 0.5f, 0.5f)
 
                 else -> setColor(0.5f, 0.5f, 0.5f)
             }
