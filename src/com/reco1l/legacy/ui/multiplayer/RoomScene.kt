@@ -483,7 +483,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 }
             }
             Mods: ${room!!.mods}
-            Remove Slider Lock: ${if (room!!.isRemoveSliderLock) "Enabled" else "Disabled" }
+            Slider Lock: ${if (!room!!.isRemoveSliderLock) "Enabled" else "Disabled" }
         """.trimIndent()
     }
 
