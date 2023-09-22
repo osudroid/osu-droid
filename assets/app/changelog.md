@@ -1,4 +1,4 @@
-Version 1.7.1 Update (September 20, 2023)
+Version 1.7.1 Update (September 22, 2023)
 =========================================
 
 # Additions
