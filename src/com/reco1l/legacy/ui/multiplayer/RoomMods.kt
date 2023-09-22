@@ -20,31 +20,17 @@ data class RoomMods(
 )
 {
 
-    override fun toString(): String
-    {
-        return if (Multiplayer.room?.isFreeMods == true)
-        {
-            buildString {
+    override fun toString() = buildString {
+        append(modsToReadable(modsToString(set)))
 
-                append("Free mods")
+        if (speedMultiplier != 1f)
+            append(", ${speedMultiplier}x")
 
-                if (MOD_DOUBLETIME in set || MOD_NIGHTCORE in set)
-                    append(", DT")
+        if (MOD_FLASHLIGHT in set && flFollowDelay != getModMenu().defaultFLFollowDelay)
+            append(", ${flFollowDelay * 1000}ms FL delay")
 
-                if (MOD_HALFTIME in set)
-                    append(", HT")
-
-                if (speedMultiplier != 1f)
-                    append(", ${speedMultiplier}x")
-
-                if (flFollowDelay != getModMenu().defaultFLFollowDelay)
-                    append(", ${flFollowDelay * 1000}ms FL delay")
-
-                if (forceAR != null)
-                    append(", AR $forceAR")
-            }
-        }
-        else modsToReadable(modsToString(set))
+        if (forceAR != null)
+            append(", AR $forceAR")
     }
 
     override fun equals(other: Any?): Boolean
