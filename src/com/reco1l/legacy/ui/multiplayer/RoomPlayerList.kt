@@ -54,6 +54,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
     {
         if (!isValid)
         {
+            isValid = true
             room.players.forEachIndexed { i, player ->
 
                 val item = getChild(i) as PlayerItem
@@ -64,7 +65,6 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
 
                 item.load()
             }
-            isValid = true
         }
 
         super.onManagedUpdate(pSecondsElapsed)
