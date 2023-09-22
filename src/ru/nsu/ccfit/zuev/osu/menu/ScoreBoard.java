@@ -215,7 +215,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
                     final int scoreID = Integer.parseInt(data[0]);
 
-                    var isPersonalBest = data.length == 9;
+                    var isInLeaderboard = data.length == 8;
+                    var isPersonalBest = data.length == 9 || data[1].equals(OnlineManager.getInstance().getUsername());
+
                     var playerName = isPersonalBest ? OnlineManager.getInstance().getUsername() : data[1];
                     var currentTotalScore = Integer.parseInt(data[2]);
                     var combo = Integer.parseInt(data[3]);
@@ -223,7 +225,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     var modString = data[5];
                     var accuracy = GameHelper.Round(Integer.parseInt(data[6]) / 1000f, 2);
                     var avatarURL = data[7];
-                    var beatmapRank = isPersonalBest ? Integer.parseInt(data[8]) : (i + 1);
+                    var beatmapRank = isPersonalBest && !isInLeaderboard ? Integer.parseInt(data[8]) : (i + 1);
 
                     final String titleStr = "#"
                             + beatmapRank
@@ -248,18 +250,17 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     if (!isActive())
                         return;
 
-                    var sprite = new ScoreItem(avatarExecutor, titleStr, accStr, mark, true, scoreID, avatarURL, playerName, isPersonalBest);
-
                     if (isPersonalBest)
-                        attachChild(sprite, 0);
-                    else
-                        attachChild(sprite);
+                        attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, mark, true, scoreID, avatarURL, playerName, true), 0);
 
-                    ScoreBoardItem item = new ScoreBoardItem();
-                    item.set(beatmapRank, playerName, combo, currentTotalScore, scoreID);
+                    if (isInLeaderboard) {
+                        attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, mark, true, scoreID, avatarURL, playerName, false));
 
-                    if (!isPersonalBest)
+                        ScoreBoardItem item = new ScoreBoardItem();
+                        item.set(beatmapRank, playerName, combo, currentTotalScore, scoreID);
+
                         items.add(item);
+                    }
                 }
                 scoreItems = items;
                 percentShow = 0;
