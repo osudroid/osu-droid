@@ -105,7 +105,17 @@ public class ModMenu implements IModSwitcher {
         var modSet = mods.getSet();
 
         if (!isFreeMods)
+        {
             mod = modSet;
+            
+            FLfollowDelay = mods.getFlFollowDelay();
+            enableForceAR = mods.getForceAR() != null;
+
+            if (enableForceAR)
+                forceAR = mods.getForceAR();
+        }
+
+        changeSpeed = mods.getSpeedMultiplier();
 
         if (!Multiplayer.isRoomHost)
         {
@@ -129,13 +139,6 @@ public class ModMenu implements IModSwitcher {
             mod.add(GameMod.MOD_HALFTIME);
         else
             mod.remove(GameMod.MOD_HALFTIME);
-
-        changeSpeed = mods.getSpeedMultiplier();
-        FLfollowDelay = mods.getFlFollowDelay();
-        enableForceAR = mods.getForceAR() != null;
-
-        if (enableForceAR)
-            forceAR = mods.getForceAR();
 
         update();
     }
