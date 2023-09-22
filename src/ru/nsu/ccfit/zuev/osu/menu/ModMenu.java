@@ -383,6 +383,10 @@ public class ModMenu implements IModSwitcher {
 
         if (mod.contains(flag)) {
             mod.remove(flag);
+
+            if (flag == GameMod.MOD_FLASHLIGHT)
+                resetFLFollowDelay();
+
             returnValue = false;
         } else {
             mod.add(flag);
