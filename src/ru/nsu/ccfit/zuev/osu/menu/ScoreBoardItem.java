@@ -7,10 +7,16 @@ import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import org.json.JSONObject;
 
 import java.text.NumberFormat;
+import java.util.Formatter;
 import java.util.Locale;
 import java.util.Objects;
 
 public class ScoreBoardItem implements Cloneable {
+
+    private static final NumberFormat NUMBER_FORMAT = NumberFormat.getNumberInstance(Locale.US);
+
+    private static final Formatter DECIMAL_FORMAT = new Formatter(Locale.ENGLISH);
+
 
     public String userName;
     public int playScore;
@@ -49,23 +55,23 @@ public class ScoreBoardItem implements Cloneable {
     }
 
 
-    public void set(int rankPos, String name, int com, int scr, int id) {
+    public void set(int rankPos, String name, int combo, int score, int id) {
         rank = rankPos;
         userName = name;
-        maxCombo = com;
-        playScore = scr;
+        maxCombo = combo;
+        playScore = score;
         scoreId = id;
     }
 
 
     public String get() {
-        var text = userName + "\n" + NumberFormat.getNumberInstance(Locale.US).format(playScore) + "\n";
+        var text = userName + "\n" + NUMBER_FORMAT.format(playScore) + "\n";
 
         //noinspection DataFlowIssue
         if (Multiplayer.isConnected && Multiplayer.room.getWinCondition() == WinCondition.ACCURACY)
-            text += String.format(Locale.ENGLISH, "%2.2f%%", accuracy * 100f);
+            text += DECIMAL_FORMAT.format("%2.2f%%", accuracy * 100f);
         else
-            text += NumberFormat.getNumberInstance(Locale.US).format(maxCombo) + "x";
+            text += NUMBER_FORMAT.format(maxCombo) + "x";
 
         return text;
     }

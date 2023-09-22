@@ -5,16 +5,13 @@ import com.reco1l.legacy.ui.multiplayer.Multiplayer.isMultiplayer
 import org.anddev.andengine.entity.Entity
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
-import org.anddev.andengine.util.Debug
 import ru.nsu.ccfit.zuev.osu.Config
-import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
-import kotlin.math.min
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 
-class InGameLeaderboard(var playerName: String, private val statistics: StatisticV2) : Entity(0f, 0f)
+class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) : Entity(0f, 0f)
 {
 
     var nextItems: List<ScoreBoardItem>? = null
@@ -25,44 +22,50 @@ class InGameLeaderboard(var playerName: String, private val statistics: Statisti
     private var lastRankChange = 0L
 
 
+    // This determines the max amount of sprites that can be shown according to the user screen height.
+    private val maxAllowed = (Config.getRES_HEIGHT() - VERTICAL_PADDING * 2).toInt() / SPRITE_HEIGHT
+
     private val replayId get() = getGlobal().scoring.replayID
 
     private val isReplaying get() = replayId != -1
 
 
+    init
+    {
+        isChildrenIgnoreUpdate = true
+    }
+
+
     override fun onManagedUpdate(secondsElapsed: Float)
     {
+        val spriteCount = childCount
+
         if (!isMultiplayer)
         {
-            val items = GlobalManager.getInstance().songMenu.board
+            val items = getGlobal().songMenu.board
 
             // We consider that if it's in replay mode the length should be the same, in case it's not then the
             // length should be +1 greater (because of the new score).
-            if (items == null || (items.size + if (isReplaying) 0 else 1) != childCount)
-            {
-                invalidate(items)
-                return
-            }
+            if (items != null && spriteCount == 0)
+                nextItems = items
         }
-        else if (nextItems != null) {
 
+        if (nextItems != null)
+        {
             val items = nextItems
             nextItems = null
             invalidate(items)
         }
 
-        val count = childCount
-
-        if (count == 0 || playerSprite == null)
+        if (spriteCount == 0 || playerSprite == null)
         {
             super.onManagedUpdate(secondsElapsed)
             return
         }
 
-        val playerSprite = playerSprite!!
+        val player = playerSprite!!
 
-
-        playerSprite.apply {
+        player.apply {
 
             // Animating rank change
             val elapsed = (System.currentTimeMillis() - lastRankChange) * 0.001f
@@ -72,51 +75,95 @@ class InGameLeaderboard(var playerName: String, private val statistics: Statisti
             // Updating score data, we skip this on multiplayer because the data must be already updated at this point.
             if (!isMultiplayer) data.apply {
 
-                playScore = statistics.autoTotalScore
-                maxCombo = statistics.maxCombo
-                accuracy = statistics.accuracy
+                // Updating info only if needed.
+                if (playScore != stats.autoTotalScore || maxCombo != stats.maxCombo || accuracy != stats.accuracy)
+                {
+                    playScore = stats.autoTotalScore
+                    maxCombo = stats.maxCombo
+                    accuracy = stats.accuracy
+
+                    updateInfo()
+                }
             }
         }
 
+        val lastPlayerPosition = getChildIndex(player)
+        var playerPosition = lastPlayerPosition
 
-        // This determines the max amount of sprites that can be shown according to the user screen height.
-        val maxAllowed = ((Config.getRES_HEIGHT() - VERTICAL_PADDING * 2.5) / SPRITE_HEIGHT).toInt()
-
-        for (i in 0 until count)
+        if (!isMultiplayer)
         {
-            val sprite = getChild(i) as? BoardItem ?: break
-
-            if (!isMultiplayer && sprite.bindingPosition < playerSprite.bindingPosition)
+            var i = lastPlayerPosition - 1
+            while (i >= 0)
             {
-                if (playerSprite.data.playScore >= sprite.data.playScore)
-                {
-                    // Setting the new player rank
-                    val newPosition = sprite.bindingPosition + 1
+                val sprite = getChild(i) as BoardItem
 
-                    sprite.data.rank = playerSprite.bindingPosition + 1
-                    playerSprite.data.rank = newPosition
+                if (player.data.playScore >= sprite.data.playScore)
+                {
+                    player.data.rank = sprite.data.rank
+                    sprite.data.rank++
+
+                    playerPosition--
+
+                    sprite.updateRank()
+                    player.updateRank()
 
                     lastRankChange = System.currentTimeMillis()
                 }
+                --i
             }
-
-            sprite.isVisible = when
-            {
-                // First and player positions are always shown.
-                sprite.bindingPosition == 0 || sprite == playerSprite -> true
-
-                // Showing only if the sprite index is lower than the limit of allowed sprites, if it corresponds to
-                // the last index of allowed sprites it'll show only if the player sprite index isn't greater than
-                // the max allowed (because the player sprite is always shown).
-                sprite.bindingPosition <= if (playerSprite.bindingPosition > maxAllowed) maxAllowed - 1 else maxAllowed -> true
-
-                else -> false
-            }
-
-            // Updating position
-            sprite.setPosition(0f, VERTICAL_PADDING + SPRITE_HEIGHT * min(sprite.bindingPosition, maxAllowed))
         }
+
+        if (playerPosition != lastPlayerPosition)
+            setChildIndex(player, playerPosition)
+
         super.onManagedUpdate(secondsElapsed)
+
+        val maxY = VERTICAL_PADDING + SPRITE_HEIGHT * (maxAllowed - 1)
+
+        if (playerPosition < maxAllowed)
+        {
+            var i = 0
+            while (i < spriteCount)
+            {
+                val sprite = getChild(i)
+
+                sprite.setPosition(0f, if (i >= maxAllowed) maxY else VERTICAL_PADDING + SPRITE_HEIGHT * i)
+                sprite.isVisible = i < maxAllowed
+                ++i
+            }
+        } else
+        {
+            // Computing the bound from player position towards the limit of sprites that can be shown.
+            val minBound: Int = playerPosition - maxAllowed + 1
+            val showRange = minBound + 1 until playerPosition
+
+            var i = 0
+            while (i < spriteCount)
+            {
+                val sprite = getChild(i)
+
+                // Showing only sprites that are between the bound index exclusive up to player position inclusive, the
+                // first sprite will always be shown so that's why the bound index is exclusive.
+                sprite.isVisible = i == 0 || i == playerPosition || i in showRange
+
+                sprite.setPosition(0f, when (i) {
+
+                    // First always on top
+                    0 -> VERTICAL_PADDING
+
+                    // Player always on bottom
+                    playerPosition -> maxY
+
+                    // Sprites outside the bounds will be placed at its respective limit, at this point this sprite
+                    // shouldn't be visible.
+                    !in showRange -> if (i < minBound) VERTICAL_PADDING else maxY
+
+                    // Placing sprites respectively from maxY accounting for first sprite
+                    else -> maxY - SPRITE_HEIGHT * (playerPosition - i)
+                })
+                i++
+            }
+        }
     }
 
 
@@ -127,64 +174,67 @@ class InGameLeaderboard(var playerName: String, private val statistics: Statisti
         if (items.isNullOrEmpty())
             return
 
-        // Removing replay score data from the list.
-        val list = items.toMutableList()
+        var list: List<ScoreBoardItem> = items
 
-        val playerIndex = when
+        fun appendNewItem() = ScoreBoardItem().apply {
+
+            userName = playerName
+
+            // When using local leaderboard we can know the last rank, so we apply it.
+            if (!getGlobal().songMenu.isBoardOnline)
+                rank = list.size + 1
+
+            list = list + this
+        }
+
+        val playerItem = when
         {
-            isReplaying -> list.indexOfFirst { it.scoreId == replayId }
-            isMultiplayer -> list.indexOfFirst { it.userName == playerName }
+            // In replay mode we try to find the corresponding data according to the replay ID, once we find it we append
+            // it to the last index as empty score.
+            isReplaying ->
+            {
+                list = items.mapNotNull { if (it.scoreId == replayId) null else it.clone() }
 
-            // In single player we just append a new item corresponding to the new score.
+                // Reordering ranks according to indexes.
+                list.forEachIndexed { i, it -> it.rank = i + 1 }
+
+                // Setting replay data rank as empty score and shifting the rest of scores, it will eventually set back
+                // to the corresponding values.
+                appendNewItem()
+            }
+
+            // In multiplayer, we try to find the corresponding data according to the username.
+            isMultiplayer -> items.find { it.userName == playerName }
+
+            // In solo we just append a new data.
             else ->
             {
-                list.add(ScoreBoardItem().apply { userName = playerName })
-                list.lastIndex
+                list = list.map { it.clone() }
+                appendNewItem()
             }
         }
 
-        list.mapIndexed { index, it ->
+        var i = list.size - 1
+        while (i >= 0)
+        {
+            val it = list[i]
+            val sprite = BoardItem(it)
 
-            // Setting replay data rank as empty score and shifting the rest of scores, it will eventually set back to
-            // the corresponding values.
-            if (isReplaying)
-                BoardItem(it.clone().apply {
-
-                    rank = when
-                    {
-                        index == playerIndex -> -1
-                        index > playerIndex -> rank - 1
-                        else -> rank
-                    }
-
-                    if (index == playerIndex)
-                    {
-                        playScore = 0
-                        accuracy = 0f
-                        maxCombo = 0
-                    }
-                })
-            else BoardItem(it)
-
-        }.forEachIndexed { index, it ->
-
-            if (index == playerIndex)
+            if (it == playerItem)
             {
-                // Setting blue color if it's the current score item.
-                it.setColor(0.5f, 1f, 0.5f)
+                sprite.setColor(0.5f, 1f, 0.5f)
 
-                playerSprite = it
+                // This is mostly used for multiplayer when the list gets invalidated we try to figure if the rank
+                // was changed by referencing the old player sprite.
+                if (playerSprite?.data?.rank != it.rank)
+                    lastRankChange = System.currentTimeMillis()
+
+                playerSprite = sprite
             }
 
-            // Showing once all scores has been added.
-            it.alpha = 0.5f
-
-            attachChild(it)
+            attachChild(sprite, 0)
+            --i
         }
-
-        Debug.i("Leaderboard invalidated")
-
-        lastRankChange = System.currentTimeMillis()
     }
 
 
@@ -196,24 +246,23 @@ class InGameLeaderboard(var playerName: String, private val statistics: Statisti
 
         val rank: ChangeableText
 
-        val bindingPosition get() = data.rank.let { if (it == -1) parent.childCount - 1 else it - 1 }
-
 
         init
         {
+            isVisible = false
             height = 90f
             width = 130f
-            alpha = 0f
+            alpha = 0.5f
 
             when
             {
                 // Setting red color if the score belongs to the player, but it's not the current one.
-                data.userName == playerName && playerName != "osu!" -> setColor(1f, 0.5f, 0.5f)
+                getGlobal().songMenu.isBoardOnline && data.userName == playerName && playerName != "osu!" -> setColor(1f, 0.5f, 0.5f)
 
                 else -> setColor(0.5f, 0.5f, 0.5f)
             }
 
-            info = ChangeableText(10f, 15f, getResources().getFont("font"), data.get(), 100)
+            info = ChangeableText(10f, 15f, getResources().getFont("font"), "", 100)
             info.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
             info.setColor(0.85f, 0.85f, 0.9f)
             info.setScaleCenter(0f, 0f)
@@ -221,6 +270,7 @@ class InGameLeaderboard(var playerName: String, private val statistics: Statisti
 
             rank = ChangeableText(10f, 15f, getResources().getFont("CaptionFont"), "", 5)
             rank.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+            rank.setPosition(100 - rank.width, 30f)
             rank.setColor(0.6f, 0.6f, 0.6f, 0.9f)
             rank.setScaleCenter(0f, 0f)
             rank.setScale(1.7f)
@@ -232,19 +282,22 @@ class InGameLeaderboard(var playerName: String, private val statistics: Statisti
                 info.setColor(0.85f, 0.85f, 0.9f)
             else
                 info.setColor(1f, 0.5f, 0.5f)
+
+            updateInfo()
+            updateRank()
         }
 
-
-        override fun onManagedUpdate(pSecondsElapsed: Float)
+        fun updateInfo()
         {
             info.text = data.get()
             info.setScaleCenter(0f, 0f)
             info.setScale(0.65f)
+        }
 
-            rank.text = "#${data.rank.let { if (it == -1) '?' else it }}"
+        fun updateRank()
+        {
+            rank.text = if (data.rank == -1) "#?" else "#${data.rank}"
             rank.setPosition(100 - rank.width, 30f)
-
-            super.onManagedUpdate(pSecondsElapsed)
         }
     }
 
@@ -253,6 +306,6 @@ class InGameLeaderboard(var playerName: String, private val statistics: Statisti
     {
         private const val SPRITE_HEIGHT = 83
 
-        private const val VERTICAL_PADDING = SPRITE_HEIGHT * 1.5f
+        private const val VERTICAL_PADDING = SPRITE_HEIGHT.toFloat()
     }
 }
