@@ -120,7 +120,7 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
 
         val maxY = VERTICAL_PADDING + SPRITE_HEIGHT * (maxAllowed - 1)
 
-        if (playerPosition <= maxAllowed)
+        if (playerPosition < maxAllowed)
         {
             var i = 0
             while (i < spriteCount)
