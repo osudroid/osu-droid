@@ -248,7 +248,12 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     if (!isActive())
                         return;
 
-                    attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, mark, true, scoreID, avatarURL, playerName));
+                    var sprite = new ScoreItem(avatarExecutor, titleStr, accStr, data[4], true, scoreID, data[7], data[1], isPersonalBest);
+
+                    if (isPersonalBest)
+                        attachChild(sprite, 0);
+                    else
+                        attachChild(sprite);
 
                     ScoreBoardItem item = new ScoreBoardItem();
                     item.set(beatmapRank, playerName, combo, currentTotalScore, scoreID);
@@ -309,7 +314,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                         if (!isActive())
                             return;
 
-                        attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null));
+                        attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null, false));
 
                         var item = new ScoreBoardItem();
                         item.set(i + 1, scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")), scoreID);
@@ -537,16 +542,47 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         private final boolean showOnline;
         
 
-        private ScoreItem(ExecutorService avatarExecutor, String title, String acc, String markStr, boolean showOnline, int scoreID, String avaURL, String username) {
+        private ScoreItem(
+                ExecutorService avatarExecutor,
+                String title,
+                String acc,
+                String markStr,
+                boolean showOnline,
+                int scoreID,
+                String avaURL,
+                String username,
+                boolean isPersonalBest) {
             super(-150, 40,  ResourceManager.getInstance().getTexture("menu-button-background").deepCopy());
+
             this.avatarExecutor = avatarExecutor;
             this.showOnline = showOnline;
             this.username = username;
             this.scoreID = scoreID;
 
-            setHeight(107);
-            setScale(0.65f);
+            var baseY = 0f;
             setWidth(724 * 1.1f);
+
+            if (isPersonalBest) {
+
+                var topText = new Text(
+                        getWidth() / 2f,
+                        0f,
+                        ResourceManager.getInstance().getFont("strokeFont"),
+                        "Personal Best");
+
+                attachChild(topText);
+                baseY = topText.getHeight() + 5;
+
+                topText.setScale(0.8f);
+                topText.setPosition((getWidth() - topText.getWidthScaled()) / 2f, 20f);
+
+                setHeight(baseY + 120);
+
+            } else {
+                setHeight(107);
+            }
+
+            setScale(0.65f);
             camY = -146;
 
             setColor(0, 0, 0);
@@ -557,6 +593,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     && avaURL != null
                     && avatarExecutor != null;
 
+            float finalBaseY = baseY;
             avatarTask = shouldLoadAvatar ? new Runnable() {
 
                 @Override
@@ -574,7 +611,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                         onDetached();
                         return;
                     }
-                    attachChild(new Sprite(55, 12, 90, 90, texture));
+                    attachChild(new Sprite(55, finalBaseY + 12, 90, 90, texture));
 
                     if (currentAvatarTask == this)
                         currentAvatarTask = null;
@@ -583,9 +620,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
             int pos = shouldLoadAvatar ? 90 : 0;
 
-            var text = new Text(pos + 160, 20, ResourceManager.getInstance().getFont("font"), title);
-            var accText = new Text(670, 12, ResourceManager.getInstance().getFont("smallFont"), acc);
-            var mark = new Sprite(pos + 80, 35, ResourceManager.getInstance().getTexture("ranking-" + markStr + "-small"));
+            var text = new Text(pos + 160, baseY + 20, ResourceManager.getInstance().getFont("font"), title);
+            var accText = new Text(670, baseY + 12, ResourceManager.getInstance().getFont("smallFont"), acc);
+            var mark = new Sprite(pos + 80, baseY + 35, ResourceManager.getInstance().getTexture("ranking-" + markStr + "-small"));
 
             text.setScale(1.2f);
             mark.setScale(1.5f);
