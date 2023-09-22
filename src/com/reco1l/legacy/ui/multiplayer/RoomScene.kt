@@ -572,19 +572,16 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         chat.log.clear()
         chat.dismiss()
 
-        // Clearing entities
-        glThread {
-            getModMenu().hide()
-
-            playerList?.detachSelf()
-            playerList = null
-        }
-
-        // Hide any player menu if its shown
         uiThread {
             playerList?.menu?.dismiss()
             options?.dismiss()
-            Unit
+
+            glThread {
+                getModMenu().hide()
+
+                playerList?.detachSelf()
+                playerList = null
+            }
         }
     }
 
@@ -700,7 +697,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Updating UI
         updateButtons()
         updateInformation()
-        playerList!!.updateItems()
+        playerList!!.invalidate()
 
         show()
     }
@@ -811,7 +808,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateButtons()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
 
@@ -854,7 +851,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         room!!.playersMap[uid]!!.mods = mods
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
 
         // Removing await lock
         if (uid == player!!.id)
@@ -898,7 +895,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
 
         // Setting player status to NOT_READY
         awaitStatusChange = true
@@ -937,7 +934,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         }
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
 
         // Invalidating player status
         invalidateStatus()
@@ -971,7 +968,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         }
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onRoomMatchStart()
@@ -980,7 +977,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             getGlobal().gameScene.start()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onRoomMatchSkip()
@@ -1011,7 +1008,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onPlayerLeft(uid: Long)
@@ -1026,7 +1023,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onPlayerKick(uid: Long)
@@ -1057,7 +1054,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onPlayerStatusChange(uid: Long, status: PlayerStatus)
@@ -1075,7 +1072,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onPlayerTeamChange(uid: Long, team: RoomTeam?)
@@ -1084,7 +1081,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         room!!.playersMap[uid]!!.team = team
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
 
         // Update information text
         updateInformation()
