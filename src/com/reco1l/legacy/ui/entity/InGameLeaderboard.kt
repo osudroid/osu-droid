@@ -176,8 +176,8 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
 
             userName = playerName
 
-            // In single player we've to set the last index of the list as the initial rank.
-            if (isReplaying && !getGlobal().songMenu.isBoardOnline)
+            // When using local leaderboard we can know the last rank, so we apply it.
+            if (!getGlobal().songMenu.isBoardOnline)
                 rank = list.size + 1
 
             list = list + this
