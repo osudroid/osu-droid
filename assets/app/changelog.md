@@ -37,9 +37,9 @@ For multiplayer room hosts, they may swipe briefly when viewing this popup to av
 
 ## "Personal best" in global leaderboard
 
-If your score does not reach the top 50 in a beatmap, it will be displayed at the very bottom of the global leaderboard with its global rank.
+Your personal best in a beatmap will be displayed at the top of the global leaderboard with its global rank.
 
-In a future version, the score will persist and will not scroll as a part of the global leaderboard.
+Note that the personal best box is intended to scroll along with the global leaderboard to give room for other scores. 
 
 # Changes
 
