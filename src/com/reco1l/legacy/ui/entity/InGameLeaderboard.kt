@@ -175,6 +175,11 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
         fun appendNewItem() = ScoreBoardItem().apply {
 
             userName = playerName
+
+            // In single player we've to set the last index of the list as the initial rank.
+            if (isReplaying && !getGlobal().songMenu.isBoardOnline)
+                rank = list.size + 1
+
             list = list + this
         }
 
