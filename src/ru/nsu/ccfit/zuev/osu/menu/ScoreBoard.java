@@ -153,7 +153,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         for (int i = 0; i < split.length; i++) {
             var str = split[i];
 
-            if (str.length() == 0)
+            if (str.isEmpty())
                 continue;
 
             if (str.charAt(0) == 'x' && str.length() == 5) {
