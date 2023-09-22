@@ -22,6 +22,7 @@ import org.anddev.andengine.input.touch.TouchEvent;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -37,6 +38,7 @@ public class InGameSettingMenu extends BaseFragment {
     private SeekBar changeSpeed;
     private SeekBar forceAR;
     private SeekBar flashlightFollowDelay;
+    private TextView followDelayText;
 
     private final int greenColor = Color.parseColor("#62c700");
 
@@ -275,21 +277,37 @@ public class InGameSettingMenu extends BaseFragment {
         
         ((TextView) findViewById(R.id.forceARText)).setText(String.format(Locale.getDefault(), "AR%.1f", ModMenu.getInstance().getForceAR()));
 
+        followDelayText = findViewById(R.id.flashlightFollowDelayText);
+
         flashlightFollowDelay = findViewById(R.id.flashlightFollowDelayBar);
         flashlightFollowDelay.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            boolean containsFlashlight = false;
+
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                if (!containsFlashlight)
+                    return;
+
                 ModMenu.getInstance().setFLfollowDelay((float) Math.round(progress * 1200f) / (10f * 1000f));
                 applyCustomModColor();
-                ((TextView) findViewById(R.id.flashlightFollowDelayText))
-                    .setText(String.format(Locale.getDefault(), "%.1fms", progress * FlashLightEntity.defaultMoveDelayMS));
+                followDelayText.setText(String.format(Locale.getDefault(), "%.0fms", progress * FlashLightEntity.defaultMoveDelayMS));
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                containsFlashlight = ModMenu.getInstance().getMod().contains(GameMod.MOD_FLASHLIGHT);
+            }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (containsFlashlight)
+                    return;
+
+                ModMenu.getInstance().resetFLFollowDelay();
+                followDelayText.setText(String.format(Locale.getDefault(), "%.0fms", ModMenu.getInstance().getFLfollowDelay()));
+            }
         });
         ((TextView) findViewById(R.id.forceARText)).setText(String.format("AR%.1f", ModMenu.getInstance().getForceAR()));
 
@@ -325,6 +343,9 @@ public class InGameSettingMenu extends BaseFragment {
 
     @SuppressLint("ClickableViewAccessibility")
     protected void toggleSettingPanel() {
+
+        followDelayText.setText(String.format(Locale.getDefault(), "%.0fms", ModMenu.getInstance().getFLfollowDelay()));
+
         if (isSettingPanelShow()) {
             playHidePanelAnim();
             findViewById(R.id.frg_background).setOnTouchListener(null);
