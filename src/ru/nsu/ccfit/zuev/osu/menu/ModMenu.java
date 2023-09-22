@@ -107,7 +107,7 @@ public class ModMenu implements IModSwitcher {
         if (!isFreeMods)
         {
             mod = modSet;
-            
+
             FLfollowDelay = mods.getFlFollowDelay();
             enableForceAR = mods.getForceAR() != null;
 
@@ -144,6 +144,10 @@ public class ModMenu implements IModSwitcher {
     }
 
     public void hide() {
+        hide(true);
+    }
+
+    public void hide(boolean updatePlayerMods) {
         if (parent != null) {
             parent.clearChildScene();
             parent = null;
@@ -159,7 +163,7 @@ public class ModMenu implements IModSwitcher {
             // The room mods are the same as the host mods
             if (Multiplayer.isRoomHost)
                 RoomAPI.setRoomMods(string, changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
-            else
+            else if (updatePlayerMods)
                 RoomAPI.setPlayerMods(string, changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
         }
     }

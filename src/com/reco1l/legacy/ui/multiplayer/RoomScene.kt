@@ -782,23 +782,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Reloading mod menu
         glThread {
-            clearChildScene()
+            getModMenu().hide(false)
 
+            // Reloading buttons sprites
             getModMenu().init()
             getModMenu().update()
-
-            // If we're the host we set our mods as room mods
-            if (isRoomHost)
-            {
-                awaitModsChange = true
-
-                RoomAPI.setRoomMods(
-                    modsToString(getModMenu().mod),
-                    getModMenu().changeSpeed,
-                    getModMenu().fLfollowDelay,
-                    if (getModMenu().isEnableForceAR) getModMenu().forceAR else null
-                )
-            }
         }
 
         // Updating host text
@@ -865,23 +853,14 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Update room info text
         updateInformation()
 
-        // Closing mod menu, to enforce mod menu scene update
-        clearChildScene()
-        // Hiding mod button in case isn't the host when free mods is disabled
-        modsButton!!.isVisible = isRoomHost || room!!.isFreeMods
-
-        // Updating mod set
-        getModMenu().setMods(room!!.mods, room!!.isFreeMods)
-
         // Updating player mods
         awaitModsChange = true
 
-        RoomAPI.setPlayerMods(
-            modsToString(getModMenu().mod),
-            getModMenu().changeSpeed,
-            getModMenu().fLfollowDelay,
-            if (getModMenu().isEnableForceAR) getModMenu().forceAR else null
-        )
+        // Hiding mod button in case isn't the host when free mods is disabled
+        modsButton!!.isVisible = isRoomHost || room!!.isFreeMods
+
+        // Closing mod menu, to enforce mod menu scene update
+        getModMenu().hide(false)
 
         // Invalidating player status
         invalidateStatus()
