@@ -118,7 +118,7 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
 
         super.onManagedUpdate(secondsElapsed)
 
-        val maxY = VERTICAL_PADDING + SPRITE_HEIGHT * maxAllowed
+        val maxY = VERTICAL_PADDING + SPRITE_HEIGHT * (maxAllowed - 1)
 
         if (playerPosition <= maxAllowed)
         {
@@ -134,30 +134,34 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
         } else
         {
             // Computing the bound from player position towards the limit of sprites that can be shown.
-            val boundIndex: Int = playerPosition - maxAllowed + 1
+            val minBound: Int = playerPosition - maxAllowed + 1
+            val showRange = minBound + 1 until playerPosition
 
-            var i = playerPosition
-            while (i >= 0)
+            var i = 0
+            while (i < spriteCount)
             {
                 val sprite = getChild(i)
 
                 // Showing only sprites that are between the bound index exclusive up to player position inclusive, the
                 // first sprite will always be shown so that's why the bound index is exclusive.
-                sprite.isVisible = i == 0 || i in boundIndex + 1..playerPosition
+                sprite.isVisible = i == 0 || i == playerPosition || i in showRange
 
                 sprite.setPosition(0f, when (i) {
 
                     // First always on top
                     0 -> VERTICAL_PADDING
 
+                    // Player always on bottom
+                    playerPosition -> maxY
+
                     // Sprites outside the bounds will be placed at its respective limit, at this point this sprite
                     // shouldn't be visible.
-                    !in boundIndex .. playerPosition -> if (i < boundIndex) VERTICAL_PADDING else maxY
+                    !in showRange -> if (i < minBound) VERTICAL_PADDING else maxY
 
                     // Placing sprites respectively from maxY accounting for first sprite
-                    else -> maxY - SPRITE_HEIGHT * (1 + playerPosition - i)
+                    else -> maxY - SPRITE_HEIGHT * (playerPosition - i)
                 })
-                --i
+                i++
             }
         }
     }
