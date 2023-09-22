@@ -606,6 +606,8 @@ public class StatisticV2 implements Serializable {
         }
         if (strMod.length > 1)
             setExtraModFromString(strMod[1]);
+
+        computeRankedScoreMultiplier();
     }
 
     public String getReplayName() {
@@ -813,6 +815,8 @@ public class StatisticV2 implements Serializable {
                 flFollowDelay = Float.parseFloat(str.substring(3));
             }
         }
+
+        computeRankedScoreMultiplier();
     }
 
     /**
