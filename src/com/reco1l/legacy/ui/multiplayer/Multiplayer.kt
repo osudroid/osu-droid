@@ -51,12 +51,6 @@ object Multiplayer
     var isConnected = false
 
     /**
-     * Array containing live leaderboard
-     */
-    @JvmStatic
-    var liveData: Array<ScoreBoardItem>? = null
-
-    /**
      * Array containing final leaderboard
      */
     @JvmField
@@ -82,21 +76,20 @@ object Multiplayer
     @JvmStatic
     fun clearLeaderboard()
     {
-        liveData = null
         finalData = null
     }
 
 
     fun onLiveLeaderboard(array: JSONArray)
     {
-        liveData = Array(array.length()) { i ->
+        if (getGlobal().engine.scene != getGlobal().gameScene.scene)
+            return
+
+        getGlobal().gameScene.scoreBoard?.nextItems = MutableList(array.length()) { i ->
             val json = array.getJSONObject(i)
 
-            jsonToScoreboardItem(json)
+            jsonToScoreboardItem(json).apply { rank = i + 1 }
         }
-
-        if (getGlobal().engine.scene == getGlobal().gameScene.scene)
-            getGlobal().gameScene.scoreBoard?.initScoreboard()
     }
 
     fun onFinalLeaderboard(array: JSONArray)

@@ -129,6 +129,11 @@ data class Room(
     val teamMap
         get() = activePlayers.groupBy { it.team }
 
+    /**
+     * Determines if the room team mode is team vs team.
+     */
+    val isTeamVersus
+        get() = teamMode == TeamMode.TEAM_VS_TEAM
 
 
     /**
