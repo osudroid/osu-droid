@@ -292,7 +292,7 @@ public class InGameSettingMenu extends BaseFragment {
 
                 ModMenu.getInstance().setFLfollowDelay((float) Math.round(progress * 1200f) / (10f * 1000f));
                 applyCustomModColor();
-                followDelayText.setText(String.format(Locale.getDefault(), "%.0fms", progress * FlashLightEntity.defaultMoveDelayMS));
+                followDelayText.setText(progress * FlashLightEntity.defaultMoveDelayMS + "ms");
             }
 
             @Override
@@ -306,7 +306,7 @@ public class InGameSettingMenu extends BaseFragment {
                     return;
 
                 ModMenu.getInstance().resetFLFollowDelay();
-                followDelayText.setText(String.format(Locale.getDefault(), "%.0fms", ModMenu.getInstance().getFLfollowDelay()));
+                followDelayText.setText((int) (ModMenu.getInstance().getFLfollowDelay() * 1000) + "ms");
             }
         });
         ((TextView) findViewById(R.id.forceARText)).setText(String.format("AR%.1f", ModMenu.getInstance().getForceAR()));
