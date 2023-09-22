@@ -20,11 +20,15 @@ fun modsToReadable(
     forceAR: Float?/* = null*/,
 ): String
 {
-    if (mods.isNullOrEmpty()) return "None"
+    if (mods.isNullOrEmpty()
+        && speedMultiplier == 1f
+        && flFollowDelay == ModMenu.DEFAULT_FL_FOLLOW_DELAY
+        && forceAR == null)
+        return "None"
 
     return buildString {
 
-        for (m in mods) when (m)
+        if (!mods.isNullOrEmpty()) for (m in mods) when (m)
         {
             MOD_AUTO -> append("AU, ")
             MOD_RELAX -> append("RX, ")
@@ -58,8 +62,7 @@ fun modsToReadable(
         if (forceAR != null)
             append("AR $forceAR, ")
 
-        deleteCharAt(lastIndexOf(", "))
-    }
+    }.substringBeforeLast(',')
 }
 
 fun stringToMods(data: String?): EnumSet<GameMod>
