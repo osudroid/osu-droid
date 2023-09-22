@@ -38,9 +38,7 @@ data class RoomMods(
 
             if (speedMultiplier != 1f)
                 append("%.2fx, ".format(speedMultiplier))
-
-            deleteCharAt(lastIndexOf(", "))
-        }
+        }.substringBeforeLast(',')
         else toString()
     }
 
