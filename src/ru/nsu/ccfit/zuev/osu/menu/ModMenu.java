@@ -39,6 +39,9 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 import static com.reco1l.legacy.data.MultiplayerConverter.*;
 
 public class ModMenu implements IModSwitcher {
+
+    public static final float DEFAULT_FL_FOLLOW_DELAY = 0.12f;
+
     private static final ModMenu instance = new ModMenu();
     private Scene scene = null, parent;
     private EnumSet<GameMod> mod;
@@ -50,8 +53,7 @@ public class ModMenu implements IModSwitcher {
     private boolean enableForceAR = false;
     private boolean enableNCWhenSpeedChange = false;
     private boolean modsRemoved = false;
-    private final float defaultFLFollowDelay = 0.12f;
-    private float FLfollowDelay = defaultFLFollowDelay;
+    private float FLfollowDelay = DEFAULT_FL_FOLLOW_DELAY;
 
     private ModMenu() {
         mod = EnumSet.noneOf(GameMod.class);
@@ -452,15 +454,11 @@ public class ModMenu implements IModSwitcher {
     }
 
     public boolean isDefaultFLFollowDelay() {
-        return FLfollowDelay == defaultFLFollowDelay;
-    }
-
-    public float getDefaultFLFollowDelay() {
-        return defaultFLFollowDelay;
+        return FLfollowDelay == DEFAULT_FL_FOLLOW_DELAY;
     }
 
     public void resetFLFollowDelay() {
-        FLfollowDelay = defaultFLFollowDelay;
+        FLfollowDelay = DEFAULT_FL_FOLLOW_DELAY;
     }
 
     public void setEnableForceAR(boolean t){
