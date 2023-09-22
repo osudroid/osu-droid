@@ -169,7 +169,7 @@ class LobbyRoomList : ScrollableList()
 
         val infoText = """
             ${room.playerCount} / ${room.maxPlayers} - ${room.playerNames}
-            $status - $winCondition - ${room.mods}
+            $status - $winCondition - ${room.modsToReadableString()}
         """.trimIndent()
 
         Text(0f, 0f, getResources().getFont("smallFont"), infoText).also {
