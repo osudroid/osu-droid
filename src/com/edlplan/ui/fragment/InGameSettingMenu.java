@@ -338,7 +338,7 @@ public class InGameSettingMenu extends BaseFragment {
         // Updating FL follow delay text value
         var flFollowDelay = ModMenu.getInstance().getFLfollowDelay();
         followDelayText.setText((int) (flFollowDelay * 1000) + "ms");
-        flashlightFollowDelay.setProgress((int) (flFollowDelay * 1000 / (FlashLightEntity.defaultMoveDelayMS * flashlightFollowDelay.getMax())));
+        flashlightFollowDelay.setProgress((int) (flFollowDelay * 1000 / FlashLightEntity.defaultMoveDelayMS));
 
         // Updating speed multiplier seekbar visibility
         int visibility = Multiplayer.isMultiplayer && !Multiplayer.isRoomHost ? View.GONE : View.VISIBLE;
