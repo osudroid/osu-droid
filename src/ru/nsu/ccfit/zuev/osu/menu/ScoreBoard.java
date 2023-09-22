@@ -248,7 +248,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     if (!isActive())
                         return;
 
-                    var sprite = new ScoreItem(avatarExecutor, titleStr, accStr, data[4], true, scoreID, data[7], data[1], isPersonalBest);
+                    var sprite = new ScoreItem(avatarExecutor, titleStr, accStr, mark, true, scoreID, avatarURL, playerName, isPersonalBest);
 
                     if (isPersonalBest)
                         attachChild(sprite, 0);
