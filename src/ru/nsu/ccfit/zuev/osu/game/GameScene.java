@@ -2602,7 +2602,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 return;
             }
 
-            lastBackPressTime = System.currentTimeMillis();
+            lastBackPressTime = realTimeElapsed;
             ToastLogger.showText("Tap twice to exit to room.", false);
             return;
         }
