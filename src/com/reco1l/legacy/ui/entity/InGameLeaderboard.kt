@@ -23,7 +23,7 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
 
 
     // This determines the max amount of sprites that can be shown according to the user screen height.
-    private val maxAllowed = ((Config.getRES_HEIGHT() - VERTICAL_PADDING * 2) / SPRITE_HEIGHT).toInt()
+    private val maxAllowed = (Config.getRES_HEIGHT() - VERTICAL_PADDING * 2).toInt() / SPRITE_HEIGHT
 
     private val replayId get() = getGlobal().scoring.replayID
 
@@ -127,7 +127,7 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
             {
                 val sprite = getChild(i)
 
-                sprite.setPosition(0f, if (i > maxAllowed) maxY else VERTICAL_PADDING + SPRITE_HEIGHT * i)
+                sprite.setPosition(0f, if (i >= maxAllowed) maxY else VERTICAL_PADDING + SPRITE_HEIGHT * i)
                 sprite.isVisible = i < maxAllowed
                 ++i
             }
@@ -198,7 +198,11 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
             isMultiplayer -> items.find { it.userName == playerName }
 
             // In solo we just append a new data.
-            else -> appendNewItem()
+            else ->
+            {
+                list = list.map { it.clone() }
+                appendNewItem()
+            }
         }
 
         var i = list.size - 1
@@ -293,6 +297,6 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
     {
         private const val SPRITE_HEIGHT = 83
 
-        private const val VERTICAL_PADDING = SPRITE_HEIGHT * 1.5f
+        private const val VERTICAL_PADDING = SPRITE_HEIGHT.toFloat()
     }
 }
