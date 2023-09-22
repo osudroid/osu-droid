@@ -166,7 +166,6 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
     private String formatScore(StringBuilder sb, int score) {
         sb.setLength(0);
-        sb.setLength(16);
         sb.append(Math.abs(score));
         for (int i = sb.length() - 3; i > 0; i -= 3) {
             sb.insert(i, ' ');
