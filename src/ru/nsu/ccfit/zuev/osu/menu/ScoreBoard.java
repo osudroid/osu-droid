@@ -275,41 +275,48 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                         return;
                     }
 
-                    percentShow = 0;
-                    scoreSet.moveToLast();
-                    long lastTotalScore = 0;
-
                     var items = new ArrayList<ScoreBoardItem>(scoreSet.getCount());
                     var sb = new StringBuilder();
 
-                    for (int i = scoreSet.getCount() - 1; i >= 0 && isActive(); --i) {
+                    int nextTotalScore;
+
+                    for (int i = 0; i < scoreSet.getCount() && isActive(); ++i) {
                         scoreSet.moveToPosition(i);
                         final int scoreID = scoreSet.getInt(0);
 
-                        final String totalScore = formatScore(sb, scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")));
-                        final long currTotalScore = scoreSet.getLong(scoreSet.getColumnIndexOrThrow("score"));
+                        final int currTotalScore = scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score"));
+                        final String totalScore = formatScore(sb, currTotalScore);
                         final String titleStr = "#"
                                 + (i + 1)
                                 + " "
                                 + scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername"))
                                 + "\n"
                                 + StringTable.format(R.string.menu_score, totalScore, scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")));
-                        final long diffTotalScore = currTotalScore - lastTotalScore;
+
+                        if (i < scoreSet.getCount() - 1) {
+                            scoreSet.moveToPosition(i + 1);
+                            nextTotalScore = scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score"));
+                            scoreSet.moveToPosition(i);
+                        } else {
+                            nextTotalScore = 0;
+                        }
+
+                        final long diffTotalScore = currTotalScore - nextTotalScore;
                         final String accStr = convertModString(sb, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mode"))) + "\n"
                                 + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(scoreSet.getFloat(scoreSet.getColumnIndexOrThrow("accuracy")) * 100, 2)) + "%" + "\n"
-                                + (lastTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
-                        lastTotalScore = currTotalScore;
+                                + (nextTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
 
                         if (!isActive())
                             return;
 
-                        attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null), 0);
+                        attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null));
 
                         var item = new ScoreBoardItem();
                         item.set(i + 1, scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")), scoreID);
                         items.add(item);
                     }
                     scoreItems = items;
+                    percentShow = 0;
                 }
             }
         };
