@@ -1,3 +1,27 @@
+Version 1.7.1 Update Hotfix (September 23, 2023)
+=========================================
+
+# Changes
+
+- The color for failing players in multiplayer live leaderboard is now different
+- Only show score submission panel after the replay is uploaded
+- Shortened "remove slider lock" text in multiplayer room
+- Shortened "FL follow delay" text in player list in multiplayer room
+- Only allow Flashlight (FL) follow delay changes if FL is enabled
+- Show in-game leaderboard even if the leaderboard only consist of the currently playing score
+
+# Bug Fixes
+
+- Fixed wrong mods when viewing a room from multiplayer lobby
+- Fixed not detailed "Free Mods" description on player list in multiplayer room under free mods
+- Fixed "tap twice to exit" not working during gameplay in multiplayer
+- Fixed a potential crash when someone leaves during gameplay in multiplayer
+- Fixed avatars potentially not showing in solo global leaderboard
+- Fixed player list not clearing properly when leaving and joining a multiplayer room
+- Fixed multiplayer room host's force AR and FL follow delay being applied to other players in the room under free mods
+- Fixed floating beatmap information box displaying even when there is no currently picked beatmap
+- Fixed player fail/recovery state not being sent to multiplayer server
+
 Version 1.7.1 Update (September 22, 2023)
 =========================================
 
