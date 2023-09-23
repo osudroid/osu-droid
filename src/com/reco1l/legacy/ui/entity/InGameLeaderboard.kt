@@ -38,15 +38,13 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
 
     override fun onManagedUpdate(secondsElapsed: Float)
     {
-        val spriteCount = childCount
-
         if (!isMultiplayer)
         {
             val items = getGlobal().songMenu.board
 
             // We consider that if it's in replay mode the length should be the same, in case it's not then the
             // length should be +1 greater (because of the new score).
-            if (items != null && spriteCount == 0)
+            if (items != null && childCount == 0)
                 nextItems = items
         }
 
@@ -56,6 +54,8 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
             nextItems = null
             invalidate(items)
         }
+
+        val spriteCount = childCount
 
         if (spriteCount == 0 || playerSprite == null)
         {
