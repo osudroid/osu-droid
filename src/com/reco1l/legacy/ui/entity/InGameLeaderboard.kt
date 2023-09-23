@@ -19,7 +19,7 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
 
     private var playerSprite: BoardItem? = null
 
-    private var lastRankChange = 0L
+    private var lastTimeDataChange = 0L
 
 
     // This determines the max amount of sprites that can be shown according to the user screen height.
@@ -69,7 +69,7 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
         player.apply {
 
             // Animating rank change
-            val elapsed = (System.currentTimeMillis() - lastRankChange) * 0.001f
+            val elapsed = (System.currentTimeMillis() - lastTimeDataChange) * 0.001f
 
             when
             {
@@ -118,7 +118,7 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
                     sprite.updateRank()
                     player.updateRank()
 
-                    lastRankChange = System.currentTimeMillis()
+                    lastTimeDataChange = System.currentTimeMillis()
                 }
                 --i
             }
@@ -239,10 +239,15 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
 
             if (it == playerItem)
             {
-                // This is mostly used for multiplayer when the list gets invalidated we try to figure if the rank
-                // was changed by referencing the old player sprite.
+                // This is only used for multiplayer when the list gets invalidated we try to figure if the rank was
+                // changed by referencing the old player sprite.
                 if (playerSprite?.data?.rank != it.rank)
-                    lastRankChange = System.currentTimeMillis()
+                    lastTimeDataChange = System.currentTimeMillis()
+
+                // Determining if the player 'isAlive' was changed from the last time the leaderboard was invalidated,
+                // this is only used for multiplayer.
+                if (playerSprite?.data?.isAlive != it.isAlive)
+                    lastTimeDataChange = System.currentTimeMillis()
 
                 playerSprite = sprite
             }
