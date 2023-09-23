@@ -108,7 +108,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     private val titleText = ChangeableText(20f, 20f, getResources().getFont("bigFont"), "", 100)
 
-    private val stateText = ChangeableText(0f, 0f, getResources().getFont("smallFont"), "", 100)
+    private val stateText = ChangeableText(0f, 0f, getResources().getFont("smallFont"), "", 250)
 
     private val infoText = ChangeableText(0f, 0f, getResources().getFont("smallFont"), "", 100)
 
@@ -482,8 +482,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     SCORE_V2 -> "Score V2"
                 }
             }
-            Mods: ${room!!.mods}
-            Remove Slider Lock: ${if (room!!.isRemoveSliderLock) "Enabled" else "Disabled" }
+            Mods: ${room!!.modsToReadableString()}
+            Slider Lock: ${if (!room!!.isRemoveSliderLock) "Enabled" else "Disabled" }
         """.trimIndent()
     }
 
@@ -572,19 +572,16 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         chat.log.clear()
         chat.dismiss()
 
-        // Clearing entities
-        glThread {
-            getModMenu().hide()
-
-            playerList?.detachSelf()
-            playerList = null
-        }
-
-        // Hide any player menu if its shown
         uiThread {
             playerList?.menu?.dismiss()
             options?.dismiss()
-            Unit
+
+            glThread {
+                getModMenu().hide()
+
+                playerList?.detachSelf()
+                playerList = null
+            }
         }
     }
 
@@ -700,7 +697,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Updating UI
         updateButtons()
         updateInformation()
-        playerList!!.updateItems()
+        playerList!!.invalidate()
 
         show()
     }
@@ -785,23 +782,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Reloading mod menu
         glThread {
-            clearChildScene()
+            getModMenu().hide(false)
 
+            // Reloading buttons sprites
             getModMenu().init()
             getModMenu().update()
-
-            // If we're the host we set our mods as room mods
-            if (isRoomHost)
-            {
-                awaitModsChange = true
-
-                RoomAPI.setRoomMods(
-                    modsToString(getModMenu().mod),
-                    getModMenu().changeSpeed,
-                    getModMenu().fLfollowDelay,
-                    if (getModMenu().isEnableForceAR) getModMenu().forceAR else null
-                )
-            }
         }
 
         // Updating host text
@@ -811,7 +796,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateButtons()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
 
@@ -854,7 +839,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         room!!.playersMap[uid]!!.mods = mods
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
 
         // Removing await lock
         if (uid == player!!.id)
@@ -868,23 +853,14 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Update room info text
         updateInformation()
 
-        // Closing mod menu, to enforce mod menu scene update
-        clearChildScene()
-        // Hiding mod button in case isn't the host when free mods is disabled
-        modsButton!!.isVisible = isRoomHost || room!!.isFreeMods
-
-        // Updating mod set
-        getModMenu().setMods(room!!.mods, room!!.isFreeMods)
-
         // Updating player mods
         awaitModsChange = true
 
-        RoomAPI.setPlayerMods(
-            modsToString(getModMenu().mod),
-            getModMenu().changeSpeed,
-            getModMenu().fLfollowDelay,
-            if (getModMenu().isEnableForceAR) getModMenu().forceAR else null
-        )
+        // Hiding mod button in case isn't the host when free mods is disabled
+        modsButton!!.isVisible = isRoomHost || room!!.isFreeMods
+
+        // Closing mod menu, to enforce mod menu scene update
+        getModMenu().hide(false)
 
         // Invalidating player status
         invalidateStatus()
@@ -898,7 +874,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
 
         // Setting player status to NOT_READY
         awaitStatusChange = true
@@ -937,7 +913,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         }
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
 
         // Invalidating player status
         invalidateStatus()
@@ -971,7 +947,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         }
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onRoomMatchStart()
@@ -980,7 +956,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             getGlobal().gameScene.start()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onRoomMatchSkip()
@@ -1011,7 +987,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onPlayerLeft(uid: Long)
@@ -1026,7 +1002,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onPlayerKick(uid: Long)
@@ -1057,7 +1033,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onPlayerStatusChange(uid: Long, status: PlayerStatus)
@@ -1075,7 +1051,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onPlayerTeamChange(uid: Long, team: RoomTeam?)
@@ -1084,7 +1060,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         room!!.playersMap[uid]!!.team = team
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
 
         // Update information text
         updateInformation()

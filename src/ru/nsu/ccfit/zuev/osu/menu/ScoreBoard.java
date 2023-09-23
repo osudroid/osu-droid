@@ -278,6 +278,12 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 String[] columns = { "id", "playername", "score", "combo", "mark", "accuracy", "mode" };
                 try (Cursor scoreSet = ScoreLibrary.getInstance().getMapScores(columns, track.getFilename())) {
                     if (scoreSet == null || scoreSet.getCount() == 0 || !isActive()) {
+
+                        // This allows the in-game leaderboard to show even if the local database is empty, it'll append
+                        // the player score (because the in-game leaderboard assumes that the board finished loading only
+                        // if the scores list isn't null).
+                        if (isActive())
+                            scoreItems = new ArrayList<>();
                         return;
                     }
 
