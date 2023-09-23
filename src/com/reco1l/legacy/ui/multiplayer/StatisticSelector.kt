@@ -132,6 +132,8 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
 
             if (event.isActionUp)
             {
+                velocityY = 0f
+
                 if (moved || isScroll)
                     return false
 
