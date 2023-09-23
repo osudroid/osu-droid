@@ -237,6 +237,23 @@ public class BeatmapData {
     }
 
     /**
+     * Gets the duration of this beatmap in milliseconds.
+     */
+    public int getDuration() {
+        if (hitObjects.getObjects().isEmpty()) {
+            return 0;
+        }
+
+        HitObject lastObject = hitObjects.getObjects().get(hitObjects.getObjects().size() - 1);
+
+        if (lastObject instanceof HitObjectWithDuration) {
+            return (int) ((HitObjectWithDuration) lastObject).getEndTime();
+        } else {
+            return (int) lastObject.getStartTime();
+        }
+    }
+
+    /**
      * Given a <code>BeatmapInfo</code>, populate its metadata with this <code>BeatmapData</code>.
      *
      * @param info The <code>BeatmapInfo</code> to populate.
@@ -325,13 +342,7 @@ public class BeatmapData {
         track.setHitCircleCount(hitObjects.getCircleCount());
         track.setSliderCount(hitObjects.getSliderCount());
         track.setSpinnerCount(hitObjects.getSpinnerCount());
-
-        HitObject lastObject = hitObjects.getObjects().get(hitObjects.getObjects().size() - 1);
-
-        track.setMusicLength((int) lastObject.getStartTime());
-        if (lastObject instanceof HitObjectWithDuration) {
-            track.setMusicLength((int) ((HitObjectWithDuration) lastObject).getEndTime());
-        }
+        track.setMusicLength(getDuration());
         track.setMaxCombo(getMaxCombo());
 
         DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(this);

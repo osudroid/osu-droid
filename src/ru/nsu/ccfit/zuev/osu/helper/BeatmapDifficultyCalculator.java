@@ -23,9 +23,9 @@ public final class BeatmapDifficultyCalculator {
     private static final DifficultyCalculator difficultyCalculator = new DifficultyCalculator();
 
     /**
-     * Cache of difficulty calculations, mapped by MD5 hash.
+     * Cache of difficulty calculations, mapped by MD5 hash of a beatmap.
      */
-    private static final HashMap<String, BeatmapDifficultyCache> difficultyCache = new HashMap<>();
+    private static final HashMap<String, BeatmapDifficultyCacheManager> difficultyCacheManager = new HashMap<>();
 
     /**
      * Constructs a <code>DifficultyCalculationParameters</code> from a <code>StatisticV2</code>.
@@ -107,9 +107,10 @@ public final class BeatmapDifficultyCalculator {
      */
     public static DifficultyAttributes calculateDifficulty(
             final BeatmapData beatmap, final DifficultyCalculationParameters parameters) {
-        var cache = difficultyCache.get(beatmap.getMD5());
-        if (cache != null) {
-            var attributes = cache.getDifficultyCache(parameters);
+        var cacheManager = difficultyCacheManager.get(beatmap.getMD5());
+
+        if (cacheManager != null) {
+            var attributes = cacheManager.getDifficultyCache(parameters);
 
             if (attributes != null) {
                 return attributes;
@@ -119,7 +120,7 @@ public final class BeatmapDifficultyCalculator {
         var attributes = difficultyCalculator.calculate(
                 constructDifficultyBeatmap(beatmap), parameters);
 
-        addCache(beatmap.getMD5(), parameters, attributes);
+        addCache(beatmap, parameters, attributes);
 
         return attributes;
     }
@@ -165,9 +166,10 @@ public final class BeatmapDifficultyCalculator {
      */
     public static List<TimedDifficultyAttributes> calculateTimedDifficulty(
             final BeatmapData beatmap, final DifficultyCalculationParameters parameters) {
-        var cache = difficultyCache.get(beatmap.getMD5());
-        if (cache != null) {
-            var attributes = cache.getTimedDifficultyCache(parameters);
+        var cacheManager = difficultyCacheManager.get(beatmap.getMD5());
+
+        if (cacheManager != null) {
+            var attributes = cacheManager.getTimedDifficultyCache(parameters);
 
             if (attributes != null) {
                 return attributes;
@@ -177,7 +179,7 @@ public final class BeatmapDifficultyCalculator {
         var attributes = difficultyCalculator.calculateTimed(
                 constructDifficultyBeatmap(beatmap), parameters);
 
-        addCache(beatmap.getMD5(), parameters, attributes);
+        addCache(beatmap, parameters, attributes);
 
         return attributes;
     }
@@ -220,6 +222,23 @@ public final class BeatmapDifficultyCalculator {
     }
 
     /**
+     * Invalidates expired cache.
+     */
+    public static void invalidateExpiredCache() {
+        long currentTime = System.currentTimeMillis();
+
+        for (var iterator = difficultyCacheManager.entrySet().iterator(); iterator.hasNext();) {
+            var entry = iterator.next().getValue();
+
+            entry.invalidateExpiredCache(currentTime);
+
+            if (entry.isEmpty()) {
+                iterator.remove();
+            }
+        }
+    }
+
+    /**
      * Constructs a <code>DifficultyBeatmap</code> from a <code>BeatmapData</code>.
      *
      * @param data The <code>BeatmapData</code> to construct the <code>DifficultyBeatmap</code> from.
@@ -244,48 +263,51 @@ public final class BeatmapDifficultyCalculator {
     /**
      * Adds a cache to the difficulty cache.
      *
-     * @param md5 The MD5 hash of the beatmap to cache.
+     * @param beatmap The beatmap to cache.
      * @param parameters The difficulty calculation parameters to cache.
      * @param attributes The difficulty attributes to cache.
      */
-    private static void addCache(String md5, DifficultyCalculationParameters parameters,
+    private static void addCache(BeatmapData beatmap, DifficultyCalculationParameters parameters,
                                  DifficultyAttributes attributes) {
-        var cache = difficultyCache.get(md5);
+        var md5 = beatmap.getMD5();
+        var cacheManager = difficultyCacheManager.get(md5);
 
-        if (cache == null) {
-            cache = new BeatmapDifficultyCache();
-            difficultyCache.put(md5, cache);
+        if (cacheManager == null) {
+            cacheManager = new BeatmapDifficultyCacheManager();
+            difficultyCacheManager.put(md5, cacheManager);
         }
 
-        cache.addCache(parameters, attributes);
+        cacheManager.addCache(parameters, attributes, 60 * 1000);
     }
 
     /**
      * Adds a cache to the difficulty cache.
      *
-     * @param md5 The MD5 hash of the beatmap to cache.
+     * @param beatmap The beatmap to cache.
      * @param parameters The difficulty calculation parameters to cache.
      * @param attributes The timed difficulty attributes to cache.
      */
-    private static void addCache(String md5, DifficultyCalculationParameters parameters,
+    private static void addCache(BeatmapData beatmap, DifficultyCalculationParameters parameters,
                                  List<TimedDifficultyAttributes> attributes) {
-        var cache = difficultyCache.get(md5);
+        var md5 = beatmap.getMD5();
+        var cacheManager = difficultyCacheManager.get(md5);
 
-        if (cache == null) {
-            cache = new BeatmapDifficultyCache();
-            difficultyCache.put(md5, cache);
+        if (cacheManager == null) {
+            cacheManager = new BeatmapDifficultyCacheManager();
+            difficultyCacheManager.put(md5, cacheManager);
         }
 
-        cache.addCache(parameters, attributes);
+        // Allow a maximum of 5 minutes of living cache.
+        cacheManager.addCache(parameters, attributes, Math.min(beatmap.getDuration(), 5 * 60 * 1000));
     }
 
     /**
      * A cache holder for a beatmap.
      */
-    private static final class BeatmapDifficultyCache {
-        private final HashMap<DifficultyCalculationParameters, DifficultyAttributes>
+    private static final class BeatmapDifficultyCacheManager {
+        private final HashMap<DifficultyCalculationParameters, BeatmapDifficultyCache<DifficultyAttributes>>
                 attributeCache = new HashMap<>();
-        private final HashMap<DifficultyCalculationParameters, List<TimedDifficultyAttributes>>
+        private final HashMap<DifficultyCalculationParameters, BeatmapDifficultyCache<List<TimedDifficultyAttributes>>>
                 timedAttributeCache = new HashMap<>();
 
         /**
@@ -293,9 +315,11 @@ public final class BeatmapDifficultyCalculator {
          *
          * @param parameters The difficulty parameters of the difficulty attributes.
          * @param attributes The difficulty attributes to cache.
+         * @param timeToLive The duration at which this cache is allowed to live, in milliseconds.
          */
-        public void addCache(DifficultyCalculationParameters parameters, DifficultyAttributes attributes) {
-            addCache(parameters, attributes, attributeCache);
+        public void addCache(DifficultyCalculationParameters parameters, DifficultyAttributes attributes,
+                             long timeToLive) {
+            addCache(parameters, attributes, attributeCache, timeToLive);
         }
 
         /**
@@ -303,9 +327,11 @@ public final class BeatmapDifficultyCalculator {
          *
          * @param parameters The difficulty parameters of the difficulty attributes.
          * @param attributes The timed difficulty attributes to cache.
+         * @param timeToLive The duration at which this cache is allowed to live, in milliseconds.
          */
-        public void addCache(DifficultyCalculationParameters parameters, List<TimedDifficultyAttributes> attributes) {
-            addCache(parameters, attributes, timedAttributeCache);
+        public void addCache(DifficultyCalculationParameters parameters, List<TimedDifficultyAttributes> attributes,
+                             long timeToLive) {
+            addCache(parameters, attributes, timedAttributeCache, timeToLive);
         }
 
         /**
@@ -329,15 +355,51 @@ public final class BeatmapDifficultyCalculator {
         }
 
         /**
+         * Whether this cache manager does not hold any cache.
+         */
+        public boolean isEmpty() {
+            return attributeCache.isEmpty() && timedAttributeCache.isEmpty();
+        }
+
+        /**
+         * Invalidates all expired cache in this manager.
+         *
+         * @param currentTime The time to invalidate the cache against, in milliseconds.
+         */
+        public void invalidateExpiredCache(long currentTime) {
+            invalidateExpiredCache(currentTime, attributeCache);
+            invalidateExpiredCache(currentTime, timedAttributeCache);
+        }
+
+        /**
+         * Invalidates all expired cache of a cache map in this manager.
+         *
+         * @param currentTime The time to invalidate the cache against, in milliseconds.
+         * @param cacheMap The map.
+         */
+        private <T> void invalidateExpiredCache(long currentTime,
+                                                HashMap<DifficultyCalculationParameters, BeatmapDifficultyCache<T>> cacheMap) {
+            for (var iterator = cacheMap.entrySet().iterator(); iterator.hasNext();) {
+                var entry = iterator.next().getValue();
+
+                if (entry.isExpired(currentTime)) {
+                    iterator.remove();
+                }
+            }
+        }
+
+        /**
          * Adds a difficulty attributes cache to a cache map.
          *
          * @param parameters The difficulty calculation parameter to cache.
          * @param cache The difficulty attributes cache to add.
          * @param cacheMap The map to add the cache to.
+         * @param timeToLive The duration at which this cache is allowed to live, in milliseconds.
          * @param <T> The difficulty attributes cache type.
          */
         private <T> void addCache(DifficultyCalculationParameters parameters, T cache,
-                                  HashMap<DifficultyCalculationParameters, T> cacheMap) {
+                                  HashMap<DifficultyCalculationParameters, BeatmapDifficultyCache<T>> cacheMap,
+                                  long timeToLive) {
             if (parameters != null) {
                 // Copy the parameter for caching.
                 parameters = parameters.copy();
@@ -346,7 +408,7 @@ public final class BeatmapDifficultyCalculator {
                 parameters = new DifficultyCalculationParameters();
             }
 
-            cacheMap.put(parameters, cache);
+            cacheMap.put(parameters, new BeatmapDifficultyCache<>(cache, timeToLive));
         }
 
         /**
@@ -358,7 +420,7 @@ public final class BeatmapDifficultyCalculator {
          * @param <T> The difficulty attributes cache type.
          */
         private <T> T getCache(DifficultyCalculationParameters parameters,
-                               HashMap<DifficultyCalculationParameters, T> cacheMap) {
+                               HashMap<DifficultyCalculationParameters, BeatmapDifficultyCache<T>> cacheMap) {
             if (parameters != null) {
                 // Copy the parameter for caching.
                 parameters = parameters.copy();
@@ -369,7 +431,7 @@ public final class BeatmapDifficultyCalculator {
 
             for (var cache : cacheMap.entrySet()) {
                 if (isParameterEqual(cache.getKey(), parameters)) {
-                    return cache.getValue();
+                    return cache.getValue().cache;
                 }
             }
 
@@ -402,6 +464,41 @@ public final class BeatmapDifficultyCalculator {
             // Check whether mods are equal.
             return parameter1.mods.size() == parameter2.mods.size() &&
                     parameter1.mods.containsAll(parameter2.mods);
+        }
+    }
+
+    /**
+     * Represents a beatmap difficulty cache.
+     */
+    private static final class BeatmapDifficultyCache<T> {
+        /**
+         * The time at which this cache was generated, in milliseconds.
+         */
+        public final long generatedTime = System.currentTimeMillis();
+
+        /**
+         * The duration at which this cache is allowed to live, in milliseconds.
+         */
+        public final long timeToLive;
+
+        /**
+         * The cached data.
+         */
+        public final T cache;
+
+        public BeatmapDifficultyCache(T cache, long timeToLive) {
+            this.cache = cache;
+            this.timeToLive = timeToLive;
+        }
+
+        /**
+         * Determines whether this cache has expired.
+         *
+         * @param time The time to test against, in milliseconds.
+         * @return Whether the cache has expired.
+         */
+        public boolean isExpired(long time) {
+            return generatedTime + timeToLive > time;
         }
     }
 }

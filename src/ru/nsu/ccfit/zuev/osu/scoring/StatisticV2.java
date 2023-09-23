@@ -8,7 +8,6 @@ import java.util.Locale;
 import java.util.Random;
 
 import com.reco1l.api.ibancho.data.WinCondition;
-import com.reco1l.legacy.data.MultiplayerConverter;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -70,6 +69,12 @@ public class StatisticV2 implements Serializable {
      */
     public boolean canFail = true;
 
+    /**
+     * The score multiplier accounting for ranked mods.
+     */
+    private float rankedScoreMultiplier = 1;
+
+
     public StatisticV2() {
         playerName = null;
         if (Config.isStayOnline()) {
@@ -99,6 +104,7 @@ public class StatisticV2 implements Serializable {
         diffModifier = stat.diffModifier;
         mod = stat.mod.clone();
         setPlayerName(Config.getLocalUsername());
+        computeRankedScoreMultiplier();
     }
 
     public StatisticV2(final String[] params) {
@@ -125,6 +131,7 @@ public class StatisticV2 implements Serializable {
         if (params.length >= 14) {
             playerName = params[13];
         }
+        computeRankedScoreMultiplier();
     }
 
     public float getHp() {
@@ -163,17 +170,7 @@ public class StatisticV2 implements Serializable {
     }
 
     public int getAutoTotalScore() {
-        float mult = 1;
-        for (GameMod m : mod) {
-            if (m.unranked) {
-                continue;
-            }
-            mult *= m.scoreMultiplier;
-        }
-        if (changeSpeed != 1.0f){
-            mult *= getSpeedChangeScoreMultiplier();
-        }
-        return (int) (totalScore * mult);
+        return (int) (totalScore * rankedScoreMultiplier);
     }
 
     public void registerSpinnerHit() {
@@ -470,6 +467,8 @@ public class StatisticV2 implements Serializable {
 
     public void setMod(final EnumSet<GameMod> mod) {
         this.mod = mod.clone();
+
+        computeRankedScoreMultiplier();
     }
 
     public float getDiffModifier() {
@@ -607,6 +606,8 @@ public class StatisticV2 implements Serializable {
         }
         if (strMod.length > 1)
             setExtraModFromString(strMod[1]);
+
+        computeRankedScoreMultiplier();
     }
 
     public String getReplayName() {
@@ -682,6 +683,8 @@ public class StatisticV2 implements Serializable {
 
     public void setChangeSpeed(float speed){
         changeSpeed = speed;
+
+        computeRankedScoreMultiplier();
     }
 
     public float getForceAR(){
@@ -812,6 +815,8 @@ public class StatisticV2 implements Serializable {
                 flFollowDelay = Float.parseFloat(str.substring(3));
             }
         }
+
+        computeRankedScoreMultiplier();
     }
 
     /**
@@ -849,4 +854,19 @@ public class StatisticV2 implements Serializable {
         return new ScoreBoardItem(playerName, getModifiedTotalScore(), combo, getAccuracyForServer(), isAlive);
     }
 
+    private void computeRankedScoreMultiplier() {
+        rankedScoreMultiplier = 1;
+
+        for (GameMod m : mod) {
+            if (m.unranked) {
+                continue;
+            }
+
+            rankedScoreMultiplier *= m.scoreMultiplier;
+        }
+
+        if (changeSpeed != 1f) {
+            rankedScoreMultiplier *= getSpeedChangeScoreMultiplier();
+        }
+    }
 }

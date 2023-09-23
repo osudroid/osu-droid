@@ -3,7 +3,6 @@ package com.reco1l.legacy.ui.multiplayer
 import com.reco1l.api.ibancho.data.*
 import com.reco1l.api.ibancho.data.PlayerStatus.*
 import com.reco1l.api.ibancho.data.RoomTeam.*
-import com.reco1l.framework.lang.glThread
 import com.reco1l.legacy.ui.entity.ScrollableList
 import org.anddev.andengine.entity.primitive.Rectangle
 import org.anddev.andengine.entity.sprite.Sprite
@@ -19,6 +18,9 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
 
     val menu = RoomPlayerMenu()
 
+    var isValid = false
+
+
     init
     {
         for (i in 0 until room.maxPlayers)
@@ -33,29 +35,41 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
         }
     }
 
-    fun updateItems() = room.players.forEachIndexed { i, player -> setItem(i, player) }
 
-    private fun setItem(index: Int, player: RoomPlayer?)
+    fun invalidate()
     {
-        val item = getChild(index) as PlayerItem
-
-        item.room = room
-        item.player = player
-        item.isHost = player != null && player.id == room.host
-
-        glThread { item.load() }
+        isValid = false
     }
 
     override fun detachSelf(): Boolean
     {
         for (i in 0 until childCount)
-        {
-            val item = getChild(i) as PlayerItem
-            RoomScene.unregisterTouchArea(item)
-        }
-        glThread { detachChildren() }
-        return super.detachSelf()
+            RoomScene.unregisterTouchArea(getChild(i) as ITouchArea)
+
+        return RoomScene.detachChild(this)
     }
+
+
+    override fun onManagedUpdate(pSecondsElapsed: Float)
+    {
+        if (!isValid)
+        {
+            isValid = true
+            room.players.forEachIndexed { i, player ->
+
+                val item = getChild(i) as PlayerItem
+
+                item.room = room
+                item.player = player
+                item.isHost = player != null && player.id == room.host
+
+                item.load()
+            }
+        }
+
+        super.onManagedUpdate(pSecondsElapsed)
+    }
+
 
     inner class PlayerItem : Rectangle(40f, 0f, Config.getRES_WIDTH() * 0.4f, 80f)
     {

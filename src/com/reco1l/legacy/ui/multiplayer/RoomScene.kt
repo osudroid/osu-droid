@@ -6,7 +6,8 @@ import com.reco1l.api.ibancho.IRoomEventListener
 import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.api.ibancho.data.*
 import com.reco1l.api.ibancho.data.PlayerStatus.*
-import com.reco1l.api.ibancho.data.RoomTeam.*
+import com.reco1l.api.ibancho.data.RoomTeam.BLUE
+import com.reco1l.api.ibancho.data.RoomTeam.RED
 import com.reco1l.api.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
@@ -31,13 +32,15 @@ import org.anddev.andengine.util.MathUtils
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ToastLogger
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.MOD_SCOREV2
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen.LoadingScene
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
 import ru.nsu.ccfit.zuev.osu.scoring.Replay
 import ru.nsu.ccfit.zuev.skins.OsuSkin
+import java.text.SimpleDateFormat
+import java.util.*
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.LibraryManager.INSTANCE as library
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
@@ -105,10 +108,14 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     private val titleText = ChangeableText(20f, 20f, getResources().getFont("bigFont"), "", 100)
 
-    private val stateText = ChangeableText(0f, 0f, getResources().getFont("smallFont"), "", 100)
+    private val stateText = ChangeableText(0f, 0f, getResources().getFont("smallFont"), "", 250)
 
     private val infoText = ChangeableText(0f, 0f, getResources().getFont("smallFont"), "", 100)
 
+
+    private val beatmapInfoText = ChangeableText(10f, 10f, getResources().getFont("smallFont"), "", 150)
+
+    private var beatmapInfoRectangle: Rectangle? = null
 
     init
     {
@@ -158,6 +165,19 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Info text
         infoText.setPosition(trackButton!!.x + 20f, trackButton!!.y + trackButton!!.height + 10f)
         attachChild(infoText)
+
+        // Beatmap info
+        beatmapInfoRectangle = Rectangle(0f, 0f, trackButton!!.width * 0.75f, 0f).also {
+            it.setColor(0f, 0f, 0f, 0.9f)
+            it.isVisible = false
+
+            beatmapInfoText.detachSelf()
+            it.attachChild(beatmapInfoText)
+
+            attachChild(it)
+        }
+
+        OsuSkin.get().getColor("MenuItemDefaultTextColor", BeatmapButton.DEFAULT_TEXT_COLOR).apply(beatmapInfoText)
 
         // Ready button, this button will switch player status
         readyButton = object : TextButton(getResources().getFont("CaptionFont"), "Ready")
@@ -347,7 +367,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
-                if (!isRoomHost && !room!!.isFreeMods || awaitModsChange || player!!.status == READY)
+                if (!isRoomHost && !room!!.isFreeMods || awaitModsChange || awaitStatusChange || player!!.status == READY)
                     return true
 
                 if (event.isActionDown)
@@ -392,6 +412,20 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Online panel
         onlinePanel.setPosition(Config.getRES_WIDTH() - 410f - 6f, 6f)
         attachChild(onlinePanel)
+
+        sortChildren()
+    }
+
+    override fun onSceneTouchEvent(event: TouchEvent): Boolean {
+        trackButton?.also {
+            beatmapInfoRectangle?.isVisible =
+                getGlobal().selectedTrack != null &&
+                !event.isActionUp &&
+                event.x in it.x..(it.x + it.width) &&
+                event.y in it.y..(it.y + it.height)
+        }
+
+        return super.onSceneTouchEvent(event)
     }
 
     // Update events
@@ -449,8 +483,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     SCORE_V2 -> "Score V2"
                 }
             }
-            Mods: ${room!!.mods}
-            Remove Slider Lock: ${if (room!!.isRemoveSliderLock) "Enabled" else "Disabled" }
+            Mods: ${room!!.modsToReadableString()}
+            Slider Lock: ${if (!room!!.isRemoveSliderLock) "Enabled" else "Disabled" }
         """.trimIndent()
     }
 
@@ -490,6 +524,31 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         modsButton!!.isVisible = isRoomHost || room!!.isFreeMods
     }
 
+    private fun updateBeatmapInfo() {
+        getGlobal().selectedTrack?.also {
+            val dateFormat = SimpleDateFormat(if (it.musicLength > 3600 * 1000) "HH:mm:ss" else "mm:ss")
+            dateFormat.timeZone = TimeZone.getTimeZone("GMT+0")
+
+            beatmapInfoText.text =
+                "BPM: ${if (it.bpmMin == it.bpmMax) "%.1f".format(it.bpmMin) else "%.1f-%.1f".format(it.bpmMin, it.bpmMax)}" +
+                "  Length: ${dateFormat.format(it.musicLength)}\n" +
+                "CS:${it.circleSize} AR:${it.approachRate} OD:${it.overallDifficulty} HP:${it.hpDrain} Star Rating: ${it.difficulty}"
+        } ?: run { beatmapInfoText.text = "" }
+
+        beatmapInfoRectangle!!.also {
+            if (getGlobal().selectedTrack == null) {
+                it.isVisible = false
+            }
+
+            it.width = beatmapInfoText.width + 20
+            it.height = beatmapInfoText.height + 20
+
+            trackButton!!.let { t ->
+                it.setPosition(t.x + t.width - it.width - 20, t.y + t.height)
+            }
+        }
+    }
+
     // Actions
 
     fun invalidateStatus()
@@ -518,16 +577,17 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         chat.log.clear()
         chat.dismiss()
 
-        // Hide any player menu if its shown
         uiThread {
             playerList?.menu?.dismiss()
             options?.dismiss()
-            Unit
-        }
 
-        // Clearing player list
-        playerList?.detachSelf()
-        playerList = null
+            glThread {
+                getModMenu().hide()
+
+                playerList?.detachSelf()
+                playerList = null
+            }
+        }
     }
 
 
@@ -642,14 +702,13 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Updating UI
         updateButtons()
         updateInformation()
-        playerList!!.updateItems()
+        playerList!!.invalidate()
 
         show()
     }
 
     override fun onRoomDisconnect(reason: String?)
     {
-        clear()
         ToastLogger.showText("Disconnected from the room${reason?.let { ": $it" } ?: "" }", true)
 
         // If player is in one of these scenes we go back.
@@ -661,7 +720,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomConnectFail(error: String?)
     {
-        clear()
         ToastLogger.showText("Failed to connect to the room: $error", true)
         back()
     }
@@ -703,6 +761,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Updating background
         updateBackground(getGlobal().selectedTrack?.background)
 
+        updateBeatmapInfo()
+
         // Releasing await lock
         awaitBeatmapChange = false
 
@@ -727,23 +787,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Reloading mod menu
         glThread {
-            clearChildScene()
+            getModMenu().hide(false)
 
+            // Reloading buttons sprites
             getModMenu().init()
             getModMenu().update()
-
-            // If we're the host we set our mods as room mods
-            if (isRoomHost)
-            {
-                awaitModsChange = true
-
-                RoomAPI.setRoomMods(
-                    modsToString(getModMenu().mod),
-                    getModMenu().changeSpeed,
-                    getModMenu().fLfollowDelay,
-                    if (getModMenu().isEnableForceAR) getModMenu().forceAR else null
-                )
-            }
         }
 
         // Updating host text
@@ -753,7 +801,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateButtons()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
 
@@ -796,7 +844,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         room!!.playersMap[uid]!!.mods = mods
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
 
         // Removing await lock
         if (uid == player!!.id)
@@ -810,23 +858,14 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Update room info text
         updateInformation()
 
-        // Closing mod menu, to enforce mod menu scene update
-        clearChildScene()
-        // Hiding mod button in case isn't the host when free mods is disabled
-        modsButton!!.isVisible = isRoomHost || room!!.isFreeMods
-
-        // Updating mod set
-        getModMenu().setMods(room!!.mods, room!!.isFreeMods)
-
         // Updating player mods
         awaitModsChange = true
 
-        RoomAPI.setPlayerMods(
-            modsToString(getModMenu().mod),
-            getModMenu().changeSpeed,
-            getModMenu().fLfollowDelay,
-            if (getModMenu().isEnableForceAR) getModMenu().forceAR else null
-        )
+        // Hiding mod button in case isn't the host when free mods is disabled
+        modsButton!!.isVisible = isRoomHost || room!!.isFreeMods
+
+        // Closing mod menu, to enforce mod menu scene update
+        getModMenu().hide(false)
 
         // Invalidating player status
         invalidateStatus()
@@ -840,7 +879,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
 
         // Setting player status to NOT_READY
         awaitStatusChange = true
@@ -879,7 +918,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         }
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
 
         // Invalidating player status
         invalidateStatus()
@@ -913,7 +952,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         }
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onRoomMatchStart()
@@ -922,7 +961,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             getGlobal().gameScene.start()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onRoomMatchSkip()
@@ -953,7 +992,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onPlayerLeft(uid: Long)
@@ -968,7 +1007,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onPlayerKick(uid: Long)
@@ -999,7 +1038,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onPlayerStatusChange(uid: Long, status: PlayerStatus)
@@ -1017,7 +1056,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
     }
 
     override fun onPlayerTeamChange(uid: Long, team: RoomTeam?)
@@ -1026,7 +1065,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         room!!.playersMap[uid]!!.team = team
 
         // Updating player list
-        playerList!!.updateItems()
+        playerList!!.invalidate()
 
         // Update information text
         updateInformation()

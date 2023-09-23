@@ -174,10 +174,10 @@ public class OnlineScoring {
                             if (OnlineManager.getInstance().getFailMessage().equals("Invalid record data"))
                                 i = attemptCount;
                         } else if (success) {
+                            OnlineManager.getInstance().sendReplay(replay);
                             updatePanels();
                             OnlineManager mgr = OnlineManager.getInstance();
                             panel.show(mgr.getMapRank(), mgr.getScore(), mgr.getRank(), mgr.getAccuracy());
-                            OnlineManager.getInstance().sendReplay(replay);
                             break;
                         }
 

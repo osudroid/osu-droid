@@ -22,6 +22,7 @@ import org.anddev.andengine.input.touch.TouchEvent;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -37,6 +38,9 @@ public class InGameSettingMenu extends BaseFragment {
     private SeekBar changeSpeed;
     private SeekBar forceAR;
     private SeekBar flashlightFollowDelay;
+    private TextView followDelayText;
+    private TextView speedLabel;
+    private TextView speedText;
 
     private final int greenColor = Color.parseColor("#62c700");
 
@@ -132,7 +136,7 @@ public class InGameSettingMenu extends BaseFragment {
             ModMenu.getInstance().setEnableNCWhenSpeedChange(isChecked);
         });
 
-        TextView speedText = findViewById(R.id.changeSpeedText);
+        speedText = findViewById(R.id.changeSpeedText);
 
         enableSpeedChange = findViewById(R.id.enableSpeedChange);
         enableSpeedChange.setChecked(ModMenu.getInstance().getChangeSpeed() != 1.0f);
@@ -275,37 +279,42 @@ public class InGameSettingMenu extends BaseFragment {
         
         ((TextView) findViewById(R.id.forceARText)).setText(String.format(Locale.getDefault(), "AR%.1f", ModMenu.getInstance().getForceAR()));
 
+        followDelayText = findViewById(R.id.flashlightFollowDelayText);
+
         flashlightFollowDelay = findViewById(R.id.flashlightFollowDelayBar);
         flashlightFollowDelay.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            boolean containsFlashlight = false;
+
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                if (!containsFlashlight)
+                    return;
+
                 ModMenu.getInstance().setFLfollowDelay((float) Math.round(progress * 1200f) / (10f * 1000f));
                 applyCustomModColor();
-                ((TextView) findViewById(R.id.flashlightFollowDelayText))
-                    .setText(String.format(Locale.getDefault(), "%.1fms", progress * FlashLightEntity.defaultMoveDelayMS));
+                followDelayText.setText(progress * FlashLightEntity.defaultMoveDelayMS + "ms");
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                containsFlashlight = ModMenu.getInstance().getMod().contains(GameMod.MOD_FLASHLIGHT);
+            }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (containsFlashlight)
+                    return;
+
+                seekBar.setProgress(0);
+                ModMenu.getInstance().resetFLFollowDelay();
+                followDelayText.setText((int) (ModMenu.getInstance().getFLfollowDelay() * 1000) + "ms");
+            }
         });
         ((TextView) findViewById(R.id.forceARText)).setText(String.format("AR%.1f", ModMenu.getInstance().getForceAR()));
 
-        TextView speedLabel = findViewById(R.id.speed_modify_label);
-
-        if (Multiplayer.isMultiplayer && !Multiplayer.isRoomHost) {
-            enableSpeedChange.setVisibility(View.GONE);
-            changeSpeed.setVisibility(View.GONE);
-            speedText.setVisibility(View.GONE);
-            speedLabel.setVisibility(View.GONE);
-        } else {
-            enableSpeedChange.setVisibility(View.VISIBLE);
-            changeSpeed.setVisibility(View.VISIBLE);
-            speedText.setVisibility(View.VISIBLE);
-            speedLabel.setVisibility(View.VISIBLE);
-        }
+        speedLabel = findViewById(R.id.speed_modify_label);
     }
 
     @Override
@@ -325,6 +334,20 @@ public class InGameSettingMenu extends BaseFragment {
 
     @SuppressLint("ClickableViewAccessibility")
     protected void toggleSettingPanel() {
+
+        // Updating FL follow delay text value
+        var flFollowDelay = ModMenu.getInstance().getFLfollowDelay();
+        followDelayText.setText((int) (flFollowDelay * 1000) + "ms");
+        flashlightFollowDelay.setProgress((int) (flFollowDelay * 1000 / FlashLightEntity.defaultMoveDelayMS));
+
+        // Updating speed multiplier seekbar visibility
+        int visibility = Multiplayer.isMultiplayer && !Multiplayer.isRoomHost ? View.GONE : View.VISIBLE;
+        enableSpeedChange.setVisibility(visibility);
+        changeSpeed.setVisibility(visibility);
+        speedText.setVisibility(visibility);
+        speedLabel.setVisibility(visibility);
+
+
         if (isSettingPanelShow()) {
             playHidePanelAnim();
             findViewById(R.id.frg_background).setOnTouchListener(null);

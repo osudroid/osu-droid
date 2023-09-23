@@ -43,6 +43,7 @@ public class Replay {
     private String md5 = "";
     private String mapFile = "";
     private String mapName = "";
+    private boolean isSaving;
     public static float oldChangeSpeed = 1.0f;
     public static float oldForceAR = 9.0f;
     public static boolean oldEnableForceAR = false;
@@ -93,24 +94,26 @@ public class Replay {
     }
 
     public void addPress(final float time, final PointF pos, final int pid) {
-        if (pid > GameScene.CursorCount) return;
+        if (pid > GameScene.CursorCount || isSaving) return;
         int itime = Math.max(0, (int) (time * 1000));
         cursorMoves.get(pid).pushBack(this, itime, pos.x, pos.y, TouchType.DOWN);
     }
 
     public void addMove(final float time, final PointF pos, final int pid) {
-        if (pid > GameScene.CursorCount) return;
+        if (pid > GameScene.CursorCount || isSaving) return;
         int itime = Math.max(0, (int) (time * 1000));
         cursorMoves.get(pid).pushBack(this, itime, pos.x, pos.y, TouchType.MOVE);
     }
 
     public void addUp(final float time, final int pid) {
-        if (pid > GameScene.CursorCount) return;
+        if (pid > GameScene.CursorCount || isSaving) return;
         int itime = Math.max(0, (int) (time * 1000));
         cursorMoves.get(pid).pushBack(itime, TouchType.UP);
     }
 
     public void save(final String filename) {
+        isSaving = true;
+
         for (int i = 0; i < cursorMoves.size(); i++)
             Debug.i("Replay contains " + cursorMoves.get(i).size + " moves for finger " + i);
         Debug.i("Skipped " + pointsSkipped + " points");
@@ -125,9 +128,11 @@ public class Replay {
             os = new ObjectOutputStream(zip);
         } catch (final FileNotFoundException e) {
             Debug.e("File not found " + filename, e);
+            isSaving = false;
             return;
         } catch (final IOException e) {
             Debug.e("IOException: " + e.getMessage(), e);
+            isSaving = false;
             return;
         }
 
@@ -180,6 +185,7 @@ public class Replay {
             }
         } catch (final IOException e) {
             Debug.e("IOException: " + e.getMessage(), e);
+            isSaving = false;
             return;
         }
 
@@ -192,6 +198,7 @@ public class Replay {
             Debug.e("IOException: " + e.getMessage(), e);
         }
 
+        isSaving = false;
     }
 
     @SuppressWarnings("unchecked")

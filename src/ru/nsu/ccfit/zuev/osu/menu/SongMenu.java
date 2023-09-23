@@ -35,6 +35,7 @@ import org.anddev.andengine.util.MathUtils;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
@@ -102,7 +103,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private ChangeableText trackInfo, mapper, beatmapInfo, beatmapInfo2, dimensionInfo;
     private boolean isSelectComplete = true;
     private AnimSprite scoringSwitcher = null;
-    private AsyncTask boardTask;
     private GroupType groupType = GroupType.MapSet;
 
     private Timer previousSelectionTimer;
@@ -125,7 +125,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         scoreScene = ss;
     }
 
-    public ScoreBoardItem[] getBoard() {
+    @Nullable
+    public ArrayList<ScoreBoardItem> getBoard() {
         return board.getScoreBoardItems();
     }
 
@@ -189,7 +190,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         bgDimRect.setColor(0, 0, 0, 0.2f);
         backLayer.attachChild(bgDimRect);
 
-        board = new ScoreBoard(scene, backLayer, this, context);
+        board = new ScoreBoard(scene, backLayer, this);
 
         float oy = 10;
         for (final BeatmapInfo i : LibraryManager.INSTANCE.getLibrary()) {
@@ -675,7 +676,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
                                              float pTouchAreaLocalX, float pTouchAreaLocalY) {
                     if (!pSceneTouchEvent.isActionDown()) return false;
-                    board.cancelLoadAvatar();
                     toggleScoringSwitcher();
                     return true;
                 }
@@ -830,7 +830,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         expandSelectedItem(pSecondsElapsed);
 
-        board.update(pSecondsElapsed);
         updateScrollbar(camY + Config.getRES_HEIGHT() / 2f, oy);
     }
 
@@ -1121,18 +1120,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         EdExtensionHelper.onSelectTrack(selectedTrack);
         GlobalManager.getInstance().setSelectedTrack(track);
         updateInfo(track);
-        board.cancelLoadAvatar();
-        if (boardTask != null) {
-            boardTask.cancel(true);
-            board.cancelLoadOnlineScores();
-        }
-        boardTask = new AsyncTask() {
-            @Override
-            public void run() {
-                board.init(track);
-            }
-        };
-        boardTask.execute();
+        board.init(track);
 
         final int quality = Config.getBackgroundQuality();
         synchronized (backgroundMutex) {
@@ -1320,8 +1308,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     track.getMD5(),
                     track.getBeatmap().getTitle(),
                     track.getBeatmap().getArtist(),
-                    track.getCreator(),
-                    track.getMode()
+                    track.getMode(),
+                    track.getCreator()
             );
         } else {
             RoomAPI.changeBeatmap();
@@ -1402,18 +1390,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void reloadScoreBroad() {
-        board.cancelLoadAvatar();
-        if (boardTask != null) {
-            boardTask.cancel(true);
-            board.cancelLoadOnlineScores();
-        }
-        boardTask = new AsyncTask() {
-            @Override
-            public void run() {
-                board.init(selectedTrack);
-            }
-        };
-        boardTask.execute();
+        board.init(selectedTrack);
     }
 
     public void select() {

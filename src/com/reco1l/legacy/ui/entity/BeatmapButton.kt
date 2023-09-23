@@ -2,7 +2,7 @@ package com.reco1l.legacy.ui.entity
 
 import com.reco1l.api.chimu.CheesegullAPI
 import com.reco1l.api.ibancho.RoomAPI
-import com.reco1l.api.ibancho.data.PlayerStatus
+import com.reco1l.api.ibancho.data.PlayerStatus.READY
 import com.reco1l.api.ibancho.data.RoomBeatmap
 import com.reco1l.framework.extensions.orAsyncCatch
 import com.reco1l.legacy.ui.ChimuWebView.FILE_EXTENSION
@@ -11,6 +11,7 @@ import com.reco1l.legacy.ui.multiplayer.RoomScene
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent
+import org.anddev.andengine.util.MathUtils
 import ru.nsu.ccfit.zuev.osu.RGBColor
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.menu.MenuItemTrack
@@ -28,7 +29,7 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
 
     private val trackTitle = ChangeableText(32f, 20f, getResources().getFont("smallFont"), "", 100)
 
-    private val creatorInfo = ChangeableText(32f, trackTitle.height + 20, getResources().getFont("smallFont"), "", 100)
+    private val creatorInfo = ChangeableText(32f, trackTitle.height + 20, getResources().getFont("smallFont"), "", 200)
 
     private val stars = Array(10) { i ->
 
@@ -38,6 +39,10 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
             it.setPosition(20f + it.widthScaled * i, creatorInfo.y + 20f)
         }
     }
+
+    private var moved = false
+    private var initialX: Float? = null
+    private var initialY: Float? = null
 
 
     init
@@ -56,10 +61,24 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
     {
-        if (!event.isActionUp || Multiplayer.player!!.status == PlayerStatus.READY || RoomScene.awaitBeatmapChange)
+        if (event.isActionDown) {
+            moved = false
+            initialX = localX
+            initialY = localY
+        }
+
+        if (event.isActionOutside || initialX == null || initialY == null ||
+            event.isActionMove && MathUtils.distance(initialX!!, initialY!!, localX, localY) > 30) {
+            moved = true
+        }
+
+        if (moved || !event.isActionUp || Multiplayer.player!!.status == READY || RoomScene.awaitBeatmapChange || RoomScene.awaitStatusChange)
             return true
 
         getResources().getSound("menuclick")?.play()
+
+        initialX = null
+        initialY = null
 
         if (Multiplayer.isRoomHost)
         {
@@ -110,8 +129,8 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
             return
         }
 
-        trackTitle.text = "${beatmap.version} (${beatmap.creator})"
-        creatorInfo.text = "${beatmap.title} by ${beatmap.artist}"
+        trackTitle.text = "${beatmap.artist} - ${beatmap.title}"
+        creatorInfo.text = "Mapped by ${beatmap.creator} // ${beatmap.version}"
 
         if (getGlobal().selectedTrack == null)
         {
@@ -125,13 +144,18 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
             return
         }
 
-        stars.forEachIndexed { i, it -> it.isVisible = getGlobal().selectedTrack.difficulty >= i }
+        val difficulty = getGlobal().selectedTrack.difficulty
+
+        stars.forEachIndexed { i, it ->
+            it.isVisible = difficulty >= i
+            it.setScale(0.5f * (difficulty - i).coerceIn(0f, 1f))
+        }
     }
 
 
     companion object
     {
         private val DEFAULT_COLOR = RGBColor(25 / 255f, 25 / 255f, 240 / 255f)
-        private val DEFAULT_TEXT_COLOR = RGBColor(1f, 1f, 1f)
+        val DEFAULT_TEXT_COLOR = RGBColor(1f, 1f, 1f)
     }
 }
