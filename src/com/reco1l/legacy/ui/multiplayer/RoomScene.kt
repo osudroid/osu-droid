@@ -450,6 +450,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     private fun updateInformation()
     {
+        updateButtons()
+
         // Update room name text
         titleText.text = room!!.name
 
@@ -700,7 +702,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         )
 
         // Updating UI
-        updateButtons()
         updateInformation()
         playerList!!.invalidate()
 
@@ -796,9 +797,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Updating host text
         updateInformation()
-
-        // Updating buttons visibility
-        updateButtons()
 
         // Updating player list
         playerList!!.invalidate()
@@ -1047,10 +1045,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         room!!.playersMap[uid]!!.status = status
 
         if (uid == player!!.id)
-        {
             awaitStatusChange = false
-            updateButtons()
-        }
 
         // Updating state text
         updateInformation()
