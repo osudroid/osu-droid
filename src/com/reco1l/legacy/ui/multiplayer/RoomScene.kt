@@ -419,6 +419,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     override fun onSceneTouchEvent(event: TouchEvent): Boolean {
         trackButton?.also {
             beatmapInfoRectangle?.isVisible =
+                getGlobal().selectedTrack != null &&
                 !event.isActionUp &&
                 event.x in it.x..(it.x + it.width) &&
                 event.y in it.y..(it.y + it.height)
@@ -535,6 +536,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         } ?: run { beatmapInfoText.text = "" }
 
         beatmapInfoRectangle!!.also {
+            if (getGlobal().selectedTrack == null) {
+                it.isVisible = false
+            }
+
             it.width = beatmapInfoText.width + 20
             it.height = beatmapInfoText.height + 20
 
