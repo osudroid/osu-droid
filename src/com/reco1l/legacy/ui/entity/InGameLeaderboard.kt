@@ -29,6 +29,8 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
 
     private val isReplaying get() = replayId != -1
 
+    private val isGlobalLeaderboard get() = getGlobal().songMenu.isBoardOnline
+
 
     init
     {
@@ -69,14 +71,24 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
 
             // Animating rank change
             val elapsed = (System.currentTimeMillis() - lastRankChange) * 0.001f
-            val component = if (elapsed < 1) 1 - 0.5f * elapsed else 0.5f
-            setColor(component, component, 1f, component)
+
+            when
+            {
+                elapsed < 1 -> setColor(
+                    1 + (r - 1) * elapsed,
+                    1 + (g - 1) * elapsed,
+                    1 + (b - 1) * elapsed,
+                    1 + (a - 1) * elapsed
+                )
+
+                else -> setColor(r, g, b, a)
+            }
 
             // Updating score data, we skip this on multiplayer because the data must be already updated at this point.
             if (!isMultiplayer) data.apply {
 
                 // Updating info only if needed.
-                if (playScore != stats.autoTotalScore || maxCombo != stats.maxCombo || accuracy != stats.accuracy)
+                if (playScore != stats.autoTotalScore)
                 {
                     playScore = stats.autoTotalScore
                     maxCombo = stats.maxCombo
@@ -180,7 +192,7 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
             // Setting the initial rank as the last rank, in local leaderboard it'll always be the last index because
             // it's based on the local database. In online the server database provides up to 50 scores, so we can't know
             // the actual last rank of it unless the provided leaderboard size is lower than 50.
-            if (!getGlobal().songMenu.isBoardOnline || items.isNullOrEmpty() || items.size < 50)
+            if (!isGlobalLeaderboard || items.isNullOrEmpty() || items.size < 50)
                 rank = list.size + 1
 
             list = list + this
@@ -226,8 +238,6 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
 
             if (it == playerItem)
             {
-                sprite.setColor(0.5f, 1f, 0.5f)
-
                 // This is mostly used for multiplayer when the list gets invalidated we try to figure if the rank
                 // was changed by referencing the old player sprite.
                 if (playerSprite?.data?.rank != it.rank)
@@ -235,7 +245,7 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
 
                 playerSprite = sprite
             }
-
+            sprite.updateColors()
             attachChild(sprite, 0)
             --i
         }
@@ -250,42 +260,31 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
 
         val rank: ChangeableText
 
+        // Storing target values, this is used when animating color changes.
+        var r = 0.5f
+        var g = 0.5f
+        var b = 0.5f
+        var a = 0.5f
 
         init
         {
             isVisible = false
             height = 90f
             width = 130f
-            alpha = 0.5f
-
-            when
-            {
-                // Setting red color if the score belongs to the player, but it's not the current one.
-                getGlobal().songMenu.isBoardOnline && data.userName == playerName && playerName != "osu!" -> setColor(1f, 0.5f, 0.5f)
-
-                else -> setColor(0.5f, 0.5f, 0.5f)
-            }
 
             info = ChangeableText(10f, 15f, getResources().getFont("font"), "", 100)
             info.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
-            info.setColor(0.85f, 0.85f, 0.9f)
             info.setScaleCenter(0f, 0f)
             info.setScale(0.65f)
 
             rank = ChangeableText(10f, 15f, getResources().getFont("CaptionFont"), "", 5)
             rank.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
             rank.setPosition(100 - rank.width, 30f)
-            rank.setColor(0.6f, 0.6f, 0.6f, 0.9f)
             rank.setScaleCenter(0f, 0f)
             rank.setScale(1.7f)
 
             attachChild(rank)
             attachChild(info)
-
-            if (data.isAlive)
-                info.setColor(0.85f, 0.85f, 0.9f)
-            else
-                info.setColor(1f, 0.5f, 0.5f)
 
             updateInfo()
             updateRank()
@@ -302,6 +301,50 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
         {
             rank.text = if (data.rank == -1) "#?" else "#${data.rank}"
             rank.setPosition(100 - rank.width, 30f)
+        }
+
+        fun updateColors()
+        {
+            r = 0.5f
+            g = 0.5f
+            b = 0.5f
+            a = 0.5f
+
+            if (data.isAlive || !isMultiplayer)
+            {
+                val isOwnScore = !isMultiplayer && isGlobalLeaderboard && data.userName == playerName
+
+                info.setColor(0.9f, 0.9f, 0.9f)
+                rank.setColor(0.6f, 0.6f, 0.6f, 0.9f)
+
+                if (playerSprite == this) b = 1f else
+                {
+                    if (isOwnScore)
+                        r = 1f
+
+                    setColor(r, g, b, a)
+                }
+                return
+            }
+
+            rank.setColor(1f, 0.6f, 0.6f, 0.9f)
+            info.setColor(1f, 0.8f, 0.8f)
+            a = 0.25f
+
+            if (playerSprite == this)
+            {
+                r = 1f
+                g = 0.6f
+                b = 0.6f
+            }
+            else
+            {
+                r = 1f
+                g = 0.4f
+                b = 0.4f
+
+                setColor(r, g, b, a)
+            }
         }
     }
 
