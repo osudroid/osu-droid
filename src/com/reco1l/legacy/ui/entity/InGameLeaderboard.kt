@@ -62,10 +62,7 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
         val spriteCount = childCount
 
         if (spriteCount == 0 || playerSprite == null)
-        {
-            super.onManagedUpdate(secondsElapsed)
             return
-        }
 
         val player = playerSprite!!
 
