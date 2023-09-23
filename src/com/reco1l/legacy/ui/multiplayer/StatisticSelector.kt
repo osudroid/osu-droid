@@ -55,8 +55,7 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
 
 
     inner class BoardItem(val index: Int, private val stats: StatisticV2) :
-
-            Sprite(570f, 0f, getResources().getTexture("menu-button-background").deepCopy())
+            Sprite(570f, 0f, getResources().getTexture("menu-button-background"))
     {
         private var moved = false
         private var dx = 0f
