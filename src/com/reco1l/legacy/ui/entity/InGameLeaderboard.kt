@@ -340,14 +340,14 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
             if (playerSprite == this)
             {
                 r = 1f
-                g = 0.6f
-                b = 0.6f
+                g = 0.4f
+                b = 0.4f
             }
             else
             {
                 r = 1f
-                g = 0.4f
-                b = 0.4f
+                g = 0.6f
+                b = 0.6f
 
                 setColor(r, g, b, a)
             }

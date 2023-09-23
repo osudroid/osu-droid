@@ -61,9 +61,9 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
             item.rank.setColor(1f, 0.6f, 0.6f, 0.9f)
 
             if (isSelected)
-                item.setColor(1f, 0.6f, 0.6f, 0.25f)
-            else
                 item.setColor(1f, 0.4f, 0.4f, 0.25f)
+            else
+                item.setColor(1f, 0.6f, 0.6f, 0.25f)
         }
 
         attachChild(item)
