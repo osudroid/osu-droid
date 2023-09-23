@@ -78,17 +78,20 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
             else
                 text.setColor(1f, 0.5f, 0.5f)
 
-            text.text = "${stats.playerName}\n${getNumberInstance(US).format(stats.modifiedTotalScore)}\n"
-            text.text += when (Multiplayer.room!!.winCondition)
-            {
-                ACCURACY -> String.format(ENGLISH, "%2.2f%%", stats.accuracyForServer * 100f)
-                else -> "${getNumberInstance(US).format(stats.maxCombo)}x"
-            }
+            text.text = """
+                ${stats.playerName}
+                ${getNumberInstance(US).format(stats.modifiedTotalScore)}
+                ${when (Multiplayer.room!!.winCondition)
+                    {
+                        ACCURACY -> "%2.2f%%".format(ENGLISH, stats.accuracyForServer * 100f)
+                        else -> "${getNumberInstance(US).format(stats.maxCombo)}x"
+                    }
+                }
+            """.trimIndent()
             text.setScaleCenter(0f, 0f)
             text.setScale(0.65f)
 
             rank.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
-            rank.setColor(0.6f, 0.6f, 0.6f, 0.9f)
             rank.text = "#${index + 1}"
             rank.setScaleCenter(0f, 0f)
             rank.setScale(1.7f)
