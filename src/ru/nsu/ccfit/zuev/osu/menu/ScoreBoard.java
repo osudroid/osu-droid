@@ -565,8 +565,13 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             this.username = username;
             this.scoreID = scoreID;
 
+            var shouldLoadAvatar = showOnlineScores
+                    && Config.getLoadAvatar()
+                    && avaURL != null
+                    && avatarExecutor != null;
+
+            int baseX = shouldLoadAvatar ? 90 : 0;
             var baseY = 0f;
-            setWidth(724 * 1.1f);
 
             if (isPersonalBest) {
 
@@ -579,8 +584,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 attachChild(topText);
                 baseY = topText.getHeight() + 5;
 
+                topText.setPosition((getWidth() + baseX - topText.getWidth()) / 2f, 20f);
                 topText.setScale(0.8f);
-                topText.setPosition((getWidth() - topText.getWidthScaled()) / 2f, 20f);
 
                 setHeight(baseY + 120);
 
@@ -589,15 +594,11 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             }
 
             setScale(0.65f);
+            setWidth(724 * 1.1f);
             camY = -146;
 
             setColor(0, 0, 0);
             setAlpha(0.5f);
-
-            var shouldLoadAvatar = showOnlineScores
-                    && Config.getLoadAvatar()
-                    && avaURL != null
-                    && avatarExecutor != null;
 
             float finalBaseY = baseY;
             avatarTask = shouldLoadAvatar ? new Runnable() {
@@ -624,15 +625,14 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 }
             } : null;
 
-            int pos = shouldLoadAvatar ? 90 : 0;
 
-            var text = new Text(pos + 160, baseY + 20, ResourceManager.getInstance().getFont("font"), title);
+            var text = new Text(baseX + 160, baseY + 20, ResourceManager.getInstance().getFont("font"), title);
             var accText = new Text(670, baseY + 12, ResourceManager.getInstance().getFont("smallFont"), acc);
-            var mark = new Sprite(pos + 80, baseY + 35, ResourceManager.getInstance().getTexture("ranking-" + markStr + "-small"));
+            var mark = new Sprite(baseX + 80, baseY + 35, ResourceManager.getInstance().getTexture("ranking-" + markStr + "-small"));
 
             text.setScale(1.2f);
             mark.setScale(1.5f);
-            mark.setPosition(pos + mark.getWidth() / 2 + 60, mark.getY());
+            mark.setPosition(baseX + mark.getWidth() / 2 + 60, mark.getY());
             attachChild(text);
             attachChild(accText);
             attachChild(mark);
