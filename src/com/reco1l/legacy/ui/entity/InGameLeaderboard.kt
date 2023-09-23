@@ -50,7 +50,9 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
                 nextItems = items
         }
 
-        if (nextItems != null)
+        val isInvalidated = nextItems != null
+
+        if (isInvalidated)
         {
             val items = nextItems
             nextItems = null
@@ -125,55 +127,57 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
             }
         }
 
-        if (playerPosition != lastPlayerPosition)
-            setChildIndex(player, playerPosition)
-
-        super.onManagedUpdate(secondsElapsed)
-
-        val maxY = VERTICAL_PADDING + SPRITE_HEIGHT * (maxAllowed - 1)
-
-        if (playerPosition < maxAllowed)
+        // Updating positions only if needed.
+        if (playerPosition != lastPlayerPosition || isInvalidated)
         {
-            var i = 0
-            while (i < spriteCount)
+            if (playerPosition != lastPlayerPosition)
+                setChildIndex(player, playerPosition)
+
+            val maxY = VERTICAL_PADDING + SPRITE_HEIGHT * (maxAllowed - 1)
+
+            if (playerPosition < maxAllowed)
             {
-                val sprite = getChild(i)
+                var i = 0
+                while (i < spriteCount)
+                {
+                    val sprite = getChild(i)
 
-                sprite.setPosition(0f, if (i >= maxAllowed) maxY else VERTICAL_PADDING + SPRITE_HEIGHT * i)
-                sprite.isVisible = i < maxAllowed
-                ++i
-            }
-        } else
-        {
-            // Computing the bound from player position towards the limit of sprites that can be shown.
-            val minBound: Int = playerPosition - maxAllowed + 1
-            val showRange = minBound + 1 until playerPosition
-
-            var i = 0
-            while (i < spriteCount)
+                    sprite.setPosition(0f, if (i >= maxAllowed) maxY else VERTICAL_PADDING + SPRITE_HEIGHT * i)
+                    sprite.isVisible = i < maxAllowed
+                    ++i
+                }
+            } else
             {
-                val sprite = getChild(i)
+                // Computing the bound from player position towards the limit of sprites that can be shown.
+                val minBound: Int = playerPosition - maxAllowed + 1
+                val showRange = minBound + 1 until playerPosition
 
-                // Showing only sprites that are between the bound index exclusive up to player position inclusive, the
-                // first sprite will always be shown so that's why the bound index is exclusive.
-                sprite.isVisible = i == 0 || i == playerPosition || i in showRange
+                var i = 0
+                while (i < spriteCount)
+                {
+                    val sprite = getChild(i)
 
-                sprite.setPosition(0f, when (i) {
+                    // Showing only sprites that are between the bound index exclusive up to player position inclusive, the
+                    // first sprite will always be shown so that's why the bound index is exclusive.
+                    sprite.isVisible = i == 0 || i == playerPosition || i in showRange
 
-                    // First always on top
-                    0 -> VERTICAL_PADDING
+                    sprite.setPosition(0f, when (i) {
 
-                    // Player always on bottom
-                    playerPosition -> maxY
+                        // First always on top
+                        0 -> VERTICAL_PADDING
 
-                    // Sprites outside the bounds will be placed at its respective limit, at this point this sprite
-                    // shouldn't be visible.
-                    !in showRange -> if (i < minBound) VERTICAL_PADDING else maxY
+                        // Player always on bottom
+                        playerPosition -> maxY
 
-                    // Placing sprites respectively from maxY accounting for first sprite
-                    else -> maxY - SPRITE_HEIGHT * (playerPosition - i)
-                })
-                i++
+                        // Sprites outside the bounds will be placed at its respective limit, at this point this sprite
+                        // shouldn't be visible.
+                        !in showRange -> if (i < minBound) VERTICAL_PADDING else maxY
+
+                        // Placing sprites respectively from maxY accounting for first sprite
+                        else -> maxY - SPRITE_HEIGHT * (playerPosition - i)
+                    })
+                    i++
+                }
             }
         }
     }
