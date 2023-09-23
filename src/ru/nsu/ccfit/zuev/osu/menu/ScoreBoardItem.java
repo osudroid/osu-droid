@@ -85,6 +85,7 @@ public class ScoreBoardItem implements Cloneable {
                 put("accuracy", accuracy);
                 put("score", playScore);
                 put("combo", maxCombo);
+                put("isAlive", isAlive);
             } catch (Exception e) {
                 Multiplayer.log(e);
             }
