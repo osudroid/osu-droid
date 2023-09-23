@@ -29,18 +29,13 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class InGameSettingMenu extends BaseFragment {
 
     private static InGameSettingMenu menu;
-    private CheckBox enableStoryboard;
-    private CheckBox showScoreboard;
-    private CheckBox enableNCWhenSpeedChange;
     private CheckBox enableSpeedChange;
-    private CheckBox enableForceAR;
-    private SeekBar backgroundBrightness;
     private SeekBar changeSpeed;
-    private SeekBar forceAR;
     private SeekBar flashlightFollowDelay;
     private TextView followDelayText;
-    private TextView speedLabel;
     private TextView speedText;
+
+    private View speedModifyRow;
 
     private final int greenColor = Color.parseColor("#62c700");
 
@@ -91,19 +86,16 @@ public class InGameSettingMenu extends BaseFragment {
             } else if (event.getAction() == TouchEvent.ACTION_UP) {
                 v.animate().cancel();
                 v.animate().scaleY(1).scaleX(1).setDuration(100).translationY(0).start();
-                if (event.getX() < v.getWidth()
-                        && event.getY() < v.getHeight()
-                        && event.getX() > 0
-                        && event.getY() > 0) {
-                }
                 return true;
             }
             return false;
         });
 
+        speedModifyRow = findViewById(R.id.speed_modify);
+
         findViewById(R.id.frg_background).setClickable(false);
 
-        enableStoryboard = findViewById(R.id.enableStoryboard);
+        CheckBox enableStoryboard = findViewById(R.id.enableStoryboard);
         enableStoryboard.setChecked(Config.isEnableStoryboard());
         enableStoryboard.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Config.setEnableStoryboard(isChecked);
@@ -112,7 +104,7 @@ public class InGameSettingMenu extends BaseFragment {
                     .commit();
         });
 
-        showScoreboard = findViewById(R.id.showScoreboard);
+        CheckBox showScoreboard = findViewById(R.id.showScoreboard);
         showScoreboard.setChecked(Config.isShowScoreboard());
         showScoreboard.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Config.setShowScoreboard(isChecked);
@@ -130,7 +122,7 @@ public class InGameSettingMenu extends BaseFragment {
                     .commit();
         });
 
-        enableNCWhenSpeedChange = findViewById(R.id.enableNCwhenSpeedChange);
+        CheckBox enableNCWhenSpeedChange = findViewById(R.id.enableNCwhenSpeedChange);
         enableNCWhenSpeedChange.setChecked(ModMenu.getInstance().isEnableNCWhenSpeedChange());
         enableNCWhenSpeedChange.setOnCheckedChangeListener((buttonView, isChecked) -> {
             ModMenu.getInstance().setEnableNCWhenSpeedChange(isChecked);
@@ -152,14 +144,14 @@ public class InGameSettingMenu extends BaseFragment {
             }
         });
 
-        enableForceAR = findViewById(R.id.enableForceAR);
+        CheckBox enableForceAR = findViewById(R.id.enableForceAR);
         enableForceAR.setChecked(ModMenu.getInstance().isEnableForceAR());
         enableForceAR.setOnCheckedChangeListener((buttonView, isChecked) -> {
             ModMenu.getInstance().setEnableForceAR(isChecked);
             ModMenu.getInstance().updateMultiplierText();
         });
 
-        backgroundBrightness = findViewById(R.id.backgroundBrightnessBar);
+        SeekBar backgroundBrightness = findViewById(R.id.backgroundBrightnessBar);
         backgroundBrightness.setProgress(
                 PreferenceManager.getDefaultSharedPreferences(getContext()).getInt("bgbrightness", 25));
         backgroundBrightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -243,7 +235,7 @@ public class InGameSettingMenu extends BaseFragment {
         });
         speedText.setText(String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().getChangeSpeed()));
 
-        forceAR = findViewById(R.id.forceARBar);
+        SeekBar forceAR = findViewById(R.id.forceARBar);
         forceAR.setProgress((int)(ModMenu.getInstance().getForceAR() * 10));
         forceAR.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -314,12 +306,7 @@ public class InGameSettingMenu extends BaseFragment {
         });
         ((TextView) findViewById(R.id.forceARText)).setText(String.format("AR%.1f", ModMenu.getInstance().getForceAR()));
 
-        speedLabel = findViewById(R.id.speed_modify_label);
-    }
-
-    @Override
-    public void show() {
-        super.show();
+        updateVisibility();
     }
 
     @Override
@@ -332,21 +319,20 @@ public class InGameSettingMenu extends BaseFragment {
         return findViewById(R.id.fullLayout) != null && Math.abs(findViewById(R.id.fullLayout).getTranslationY()) < 10;
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    protected void toggleSettingPanel() {
-
+    private void updateVisibility() {
         // Updating FL follow delay text value
         var flFollowDelay = ModMenu.getInstance().getFLfollowDelay();
         followDelayText.setText((int) (flFollowDelay * 1000) + "ms");
         flashlightFollowDelay.setProgress((int) (flFollowDelay * 1000 / FlashLightEntity.defaultMoveDelayMS));
 
         // Updating speed multiplier seekbar visibility
-        int visibility = Multiplayer.isMultiplayer && !Multiplayer.isRoomHost ? View.GONE : View.VISIBLE;
-        enableSpeedChange.setVisibility(visibility);
-        changeSpeed.setVisibility(visibility);
-        speedText.setVisibility(visibility);
-        speedLabel.setVisibility(visibility);
+        if (Multiplayer.isMultiplayer)
+            speedModifyRow.setVisibility(Multiplayer.isRoomHost ? View.VISIBLE : View.GONE);
+    }
 
+    @SuppressLint("ClickableViewAccessibility")
+    protected void toggleSettingPanel() {
+        updateVisibility();
 
         if (isSettingPanelShow()) {
             playHidePanelAnim();

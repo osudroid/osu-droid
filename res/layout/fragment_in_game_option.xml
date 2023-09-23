@@ -37,7 +37,7 @@
 		android:layout_alignParentBottom="true"
 		android:gravity="center"
 		android:orientation="vertical"
-		android:translationY="200dp">
+		android:translationY="0dp">
 
 
 		<RelativeLayout
@@ -221,12 +221,12 @@
 						</RelativeLayout>
 
                         <TableRow
+							android:id="@+id/speed_modify"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1">
 
                             <TextView
-								android:id="@+id/speed_modify_label"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textAlignment="textEnd"
