@@ -44,8 +44,27 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
 
         val item = BoardItem(index, stats)
 
-        if (stats.playerName == selected?.playerName)
-            item.setColor(0.5f, 0.5f, 1f)
+        val isSelected = stats.playerName == selected?.playerName
+        if (stats.isAlive)
+        {
+            item.text.setColor(0.9f, 0.9f, 0.9f)
+            item.rank.setColor(0.6f, 0.6f, 0.6f, 0.9f)
+
+            if (isSelected)
+                item.setColor(0.5f, 0.5f, 1f, 0.5f)
+            else
+                item.setColor(0.5f, 0.5f, 0.5f, 0.5f)
+        }
+        else
+        {
+            item.text.setColor(1f, 0.8f, 0.8f)
+            item.rank.setColor(1f, 0.6f, 0.6f, 0.9f)
+
+            if (isSelected)
+                item.setColor(1f, 0.6f, 0.6f, 0.25f)
+            else
+                item.setColor(1f, 0.4f, 0.4f, 0.25f)
+        }
 
         attachChild(item)
         registerTouchArea(item)
@@ -57,25 +76,22 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
     inner class BoardItem(val index: Int, private val stats: StatisticV2) :
             Sprite(570f, 0f, getResources().getTexture("menu-button-background"))
     {
+
         private var moved = false
         private var dx = 0f
         private var dy = 0f
 
-        private val text = ChangeableText(10f, 15f, getResources().getFont("font"), "", 100)
 
-        private val rank = ChangeableText(10f, 15f, getResources().getFont("CaptionFont"), "", 5)
+        val text = ChangeableText(10f, 15f, getResources().getFont("font"), "", 100)
+
+        val rank = ChangeableText(10f, 15f, getResources().getFont("CaptionFont"), "", 5)
+
 
         init
         {
-            this.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
-            this.setColor(0.5f, 0.5f, 0.5f)
-            this.width = 140f
-            this.height = 100f
-
-            if (stats.isAlive)
-                text.setColor(0.85f, 0.85f, 0.9f)
-            else
-                text.setColor(1f, 0.5f, 0.5f)
+            setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+            width = 140f
+            height = 100f
 
             text.text = """
                 ${stats.playerName}
@@ -100,6 +116,7 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
             this.attachChild(text)
         }
 
+
         override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
         {
             handleScrolling(event)
@@ -115,7 +132,6 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
 
             if (event.isActionUp)
             {
-
                 if (moved || isScroll)
                     return false
 
@@ -123,9 +139,8 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
             }
 
             if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 10)
-            {
                 moved = true
-            }
+
             return false
         }
     }
