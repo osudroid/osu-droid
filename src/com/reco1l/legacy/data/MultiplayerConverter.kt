@@ -131,6 +131,7 @@ fun jsonToScoreboardItem(json: JSONObject) = ScoreBoardItem().apply {
     playScore = json.getInt("score")
     maxCombo = json.getInt("combo")
     accuracy = json.getDouble("accuracy").toFloat()
+    isAlive = json.getBoolean("isAlive")
 }
 
 /**
