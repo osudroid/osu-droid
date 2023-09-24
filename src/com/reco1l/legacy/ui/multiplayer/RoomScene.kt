@@ -1013,6 +1013,12 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         if (uid == player!!.id)
         {
             multiLog("Kicked from room.")
+
+            if (getGlobal().engine.scene == getGlobal().gameScene.scene) {
+                ToastLogger.showText("You were kicked by the room host, but you can continue playing.", true)
+                return
+            }
+
             back()
             uiThread {
                 AlertDialog.Builder(getGlobal().mainActivity).apply {
