@@ -859,7 +859,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             secPassed = -1;
         }
 
-        if (videoOffset < 0) {
+        if (video != null && videoOffset < 0) {
             secPassed = Math.min(videoOffset, secPassed);
         }
 
