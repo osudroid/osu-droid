@@ -87,9 +87,9 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
             if (!isMultiplayer) data.apply {
 
                 // Updating info only if needed.
-                if (playScore != stats.autoTotalScore)
+                if (playScore != stats.modifiedTotalScore)
                 {
-                    playScore = stats.autoTotalScore
+                    playScore = stats.modifiedTotalScore
                     maxCombo = stats.maxCombo
                     accuracy = stats.accuracy
 
