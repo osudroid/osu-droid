@@ -1,27 +1,18 @@
 package com.edlplan.framework.support.osb;
 
-import android.graphics.Color;
-
-import com.edlplan.andengine.TextureHelper;
 import com.edlplan.edlosbsupport.OsuStoryboard;
 import com.edlplan.edlosbsupport.OsuStoryboardLayer;
 import com.edlplan.edlosbsupport.elements.IStoryboardElement;
 import com.edlplan.edlosbsupport.elements.StoryboardAnimationSprite;
 import com.edlplan.edlosbsupport.parser.OsbFileParser;
 import com.edlplan.edlosbsupport.player.OsbPlayer;
-import com.edlplan.framework.math.Anchor;
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.SupportSprite;
-import com.edlplan.framework.support.batch.BatchEngine;
-import com.edlplan.framework.support.batch.object.TextureQuad;
-import com.edlplan.framework.support.batch.object.TextureQuadBatch;
 import com.edlplan.framework.support.graphics.BaseCanvas;
 import com.edlplan.framework.support.graphics.texture.TexturePool;
 import com.edlplan.framework.support.util.Tracker;
 import com.edlplan.framework.utils.functionality.SmartIterator;
-
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import java.io.File;
 import java.util.HashMap;
@@ -33,8 +24,6 @@ public class StoryboardSprite extends SupportSprite {
     OsbContext context = new OsbContext();
     OsuStoryboard storyboard;
     OsbPlayer osbPlayer;
-    TextureQuad backgroundQuad;
-    TextureQuad foregroundQuad;
     String loadedOsu;
     private double time;
 
@@ -75,16 +64,6 @@ public class StoryboardSprite extends SupportSprite {
         return context.texturePool;
     }
 
-    public void setBrightness(float brightness) {
-        TextureRegion region = TextureHelper.create1xRegion(Color.argb(0, 0, 0, 0));
-        backgroundQuad = new TextureQuad();
-        backgroundQuad.anchor = Anchor.TopLeft;
-        backgroundQuad.setTextureAndSize(region);
-        foregroundQuad = new TextureQuad();
-        foregroundQuad.anchor = Anchor.TopLeft;
-        foregroundQuad.setTextureAndSize(region);
-        foregroundQuad.alpha.value = 1 - brightness;
-    }
 
     public void updateTime(double time) {
         if (Math.abs(this.time - time) > 10) {
@@ -154,12 +133,6 @@ public class StoryboardSprite extends SupportSprite {
 
         canvas.restore();
         canvas.getBlendSetting().restore();
-
-        if (foregroundQuad != null) {
-            foregroundQuad.size.set(canvas.getWidth(), canvas.getHeight());
-            TextureQuadBatch.getDefaultBatch().add(foregroundQuad);
-            BatchEngine.flush();
-        }
     }
 
     private File findOsb(String osuFile) {
