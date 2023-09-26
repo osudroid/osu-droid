@@ -450,6 +450,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     private fun updateInformation()
     {
+        updateButtons()
+
         // Update room name text
         titleText.text = room!!.name
 
@@ -700,7 +702,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         )
 
         // Updating UI
-        updateButtons()
         updateInformation()
         playerList!!.invalidate()
 
@@ -796,9 +797,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Updating host text
         updateInformation()
-
-        // Updating buttons visibility
-        updateButtons()
 
         // Updating player list
         playerList!!.invalidate()
@@ -1015,6 +1013,12 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         if (uid == player!!.id)
         {
             multiLog("Kicked from room.")
+
+            if (getGlobal().engine.scene == getGlobal().gameScene.scene) {
+                ToastLogger.showText("You were kicked by the room host, but you can continue playing.", true)
+                return
+            }
+
             back()
             uiThread {
                 AlertDialog.Builder(getGlobal().mainActivity).apply {
@@ -1047,10 +1051,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         room!!.playersMap[uid]!!.status = status
 
         if (uid == player!!.id)
-        {
             awaitStatusChange = false
-            updateButtons()
-        }
 
         // Updating state text
         updateInformation()

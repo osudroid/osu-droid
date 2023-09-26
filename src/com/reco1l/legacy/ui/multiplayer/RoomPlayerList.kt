@@ -175,6 +175,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
 
             if (event.isActionUp)
             {
+                velocityY = 0f
                 alpha = 0.15f
 
                 if (moved || isScroll)

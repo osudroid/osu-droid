@@ -103,6 +103,7 @@ class LobbyRoomList : ScrollableList()
 
                 if (event.isActionUp)
                 {
+                    velocityY = 0f
                     alpha = 0.3f
 
                     if (moved || isScroll)

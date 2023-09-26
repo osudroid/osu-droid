@@ -165,6 +165,8 @@ public class ModMenu implements IModSwitcher {
                 RoomAPI.setRoomMods(string, changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
             else if (updatePlayerMods)
                 RoomAPI.setPlayerMods(string, changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
+            else
+                RoomScene.awaitModsChange = false;
         }
     }
 
