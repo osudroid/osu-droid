@@ -15,6 +15,7 @@ import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.framework.lang.Execution;
 import com.reco1l.framework.lang.execution.Async;
+import com.reco1l.legacy.engine.BlankTextureRegion;
 import com.reco1l.legacy.engine.VideoSprite;
 import com.reco1l.legacy.ui.entity.InGameLeaderboard;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
@@ -265,47 +266,71 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 videoOffset = beatmapData.events.videoStartTime / 1000f;
 
                 video = new VideoSprite(lastTrack.getBeatmap().getPath() + "/" + beatmapData.events.videoFilename, engine);
-
-                var factor = Config.getRES_HEIGHT() / video.getHeight();
-                float brightness = Config.getBackgroundBrightness();
-
-                video.setPosition((Config.getRES_WIDTH() - video.getWidth()) / 2f, (Config.getRES_HEIGHT() - video.getHeight()) / 2f);
-                video.setColor(brightness, brightness, brightness);
-                video.setScale(factor);
                 video.setAlpha(0f);
 
                 bgSprite = video;
-                scene.setBackground(new SpriteBackground(bgSprite));
             } catch (Exception e) {
                 e.printStackTrace();
                 video = null;
             }
         }
 
-        if (storyboardSprite != null && storyboardSprite.isStoryboardAvailable()) {
-            storyboardSprite.setBrightness(Config.getBackgroundBrightness());
+        if (bgSprite == null && beatmapData.events.backgroundFilename != null) {
+            var tex = Config.isSafeBeatmapBg() ?
+                    ResourceManager.getInstance().getTexture("menu-background")
+                    :
+                    ResourceManager.getInstance().getTextureIfLoaded("::background");
+
+            if (tex != null)
+                bgSprite = new Sprite(0, 0, tex);
         }
 
-        if (bgSprite == null && beatmapData.events.backgroundFilename != null) {
-            final TextureRegion tex = Config.isSafeBeatmapBg() ? ResourceManager.getInstance().getTexture("menu-background") : ResourceManager.getInstance().getTextureIfLoaded("::background");
-            if (tex != null) {
-                float brightness = Config.getBackgroundBrightness();
-                float height = tex.getHeight();
-                height *= Config.getRES_WIDTH() / (float) tex.getWidth();
-                bgSprite = new Sprite(0, (Config.getRES_HEIGHT() - height) / 2, Config.getRES_WIDTH(), height, tex);
-                bgSprite.setColor(brightness, brightness, brightness);
-                scene.setBackground(new SpriteBackground(bgSprite));
+        if (bgSprite == null) {
+            bgSprite = new Sprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), new BlankTextureRegion());
+
+            if (beatmapData.events.backgroundColor != null)
+                beatmapData.events.backgroundColor.apply(bgSprite);
+            else
+                bgSprite.setColor(0f, 0f, 0f);
+        }
+
+        if (Config.isEnableStoryboard()) {
+
+            if (storyboardSprite == null)
+                storyboardSprite = new StoryboardSprite(bgSprite.getWidth(), bgSprite.getHeight());
+
+            if (storyboardOverlayProxy == null)
+                storyboardOverlayProxy = new ProxySprite(bgSprite.getWidth(), bgSprite.getHeight());
+
+            storyboardOverlayProxy.detachSelf();
+            storyboardSprite.detachSelf();
+            storyboardSprite.setOverlayDrawProxy(storyboardOverlayProxy);
+            storyboardSprite.loadStoryboard(beatmapData.getFilename());
+
+            if (storyboardSprite.isStoryboardAvailable()) {
+                bgSprite.attachChild(storyboardSprite);
+                bgSprite.attachChild(storyboardOverlayProxy);
             }
         }
 
-        if (bgSprite == null && beatmapData.events.backgroundColor != null) {
-            final float bright = Config.getBackgroundBrightness();
-            scene.setBackground(new ColorBackground(
-                    beatmapData.events.backgroundColor.r() * bright / 255f,
-                    beatmapData.events.backgroundColor.g() * bright / 255f,
-                    beatmapData.events.backgroundColor.b() * bright / 255f
-            ));
+        // Cleaning these properties, they might be not null if game was restarted.
+        if (!Config.isEnableStoryboard() || !storyboardSprite.isStoryboardAvailable()) {
+            storyboardSprite = null;
+            storyboardOverlayProxy = null;
         }
+
+        var dimRectangle = new Rectangle(0f, 0f, bgSprite.getWidth(), bgSprite.getHeight());
+        dimRectangle.setColor(0f, 0f, 0f, 1.0f - Config.getBackgroundBrightness());
+        bgSprite.attachChild(dimRectangle);
+
+        var factor = Config.isKeepBackgroundAspectRatio() ?
+                Config.getRES_HEIGHT() / bgSprite.getHeight()
+                :
+                Config.getRES_WIDTH() / bgSprite.getWidth();
+
+        bgSprite.setScale(factor);
+        bgSprite.setPosition((Config.getRES_WIDTH() - bgSprite.getWidth()) / 2f, (Config.getRES_HEIGHT() - bgSprite.getHeight()) / 2f);
+        scene.setBackground(new SpriteBackground(bgSprite));
     }
 
     private boolean loadGame(final TrackInfo track, final String rFile) {
@@ -601,10 +626,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (!replaying)
             OnlineScoring.getInstance().startPlay(track, trackMD5);
 
-        if (Config.isEnableStoryboard()) {
-            storyboardSprite.loadStoryboard(track.getFilename());
-        }
-
         System.gc();
         GameObjectPool.getInstance().preload();
 
@@ -666,26 +687,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         scene = new Scene();
-        if (Config.isEnableStoryboard()) {
-            if (storyboardSprite == null) {
-                storyboardSprite = new StoryboardSprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
-                storyboardOverlayProxy = new ProxySprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
-                storyboardSprite.setOverlayDrawProxy(storyboardOverlayProxy);
-            } else {
-                storyboardSprite.detachSelf();
-            }
-
-            scene.attachChild(storyboardSprite);
-        }
         bgScene = new Scene();
         mgScene = new Scene();
         fgScene = new Scene();
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
-        if (storyboardOverlayProxy != null) {
-            storyboardOverlayProxy.detachSelf();
-            scene.attachChild(storyboardOverlayProxy);
-        }
         scene.attachChild(fgScene);
         scene.setBackground(new ColorBackground(0, 0, 0));
         bgScene.setBackgroundEnabled(false);
@@ -2814,7 +2820,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createBurstEffectSliderReverse(final PointF pos, float ang, final RGBColor color) {
-        if (!Config.isComplexAnimations() || !Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN)) 
+        if (!Config.isComplexAnimations() || !Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
             return;
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("reversearrow");
         burst1.hit.setRotation(ang);
@@ -2965,7 +2971,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     public boolean getReplaying() {
         return replaying;
     }
-    
+
     public boolean saveFailedReplay() {
         stat.setTime(System.currentTimeMillis());
         if (replay != null && replaying == false) {

@@ -79,7 +79,8 @@ public class Config {
         useNightcoreOnMultiplayer,
         videoEnabled,
         deleteUnsupportedVideos,
-        submitScoreOnMultiplayer;
+        submitScoreOnMultiplayer,
+        keepBackgroundAspectRatio;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -122,6 +123,7 @@ public class Config {
         enableStoryboard = prefs.getBoolean("enableStoryboard", false);
         trianglesAnimation = prefs.getBoolean("trianglesAnimation", true);
         videoEnabled = prefs.getBoolean("enableVideo", false);
+        keepBackgroundAspectRatio = prefs.getBoolean("keepBackgroundAspectRatio", false);
 
         setSize();
 
@@ -788,5 +790,9 @@ public class Config {
 
     public static void setSubmitScoreOnMultiplayer(boolean submitScoreOnMultiplayer) {
         Config.submitScoreOnMultiplayer = submitScoreOnMultiplayer;
+    }
+
+    public static boolean isKeepBackgroundAspectRatio() {
+        return keepBackgroundAspectRatio;
     }
 }
