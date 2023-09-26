@@ -39,7 +39,7 @@
         <CheckBoxPreference
                 android:key="keepBackgroundAspectRatio"
                 android:title="Keep background aspect ratio"
-                android:summary="When enabled, the background (and storyboard) will not be scaled to fill screen bounds"
+                android:summary="When enabled, the background (and storyboard) will not be scaled to fill screen bounds during gameplay"
                 android:defaultValue="false"
         />
 
