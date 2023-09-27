@@ -110,7 +110,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     private val stateText = ChangeableText(0f, 0f, getResources().getFont("smallFont"), "", 250)
 
-    private val infoText = ChangeableText(0f, 0f, getResources().getFont("smallFont"), "", 100)
+    private val infoText = ChangeableText(0f, 0f, getResources().getFont("smallFont"), "", 200)
 
 
     private val beatmapInfoText = ChangeableText(10f, 10f, getResources().getFont("smallFont"), "", 150)
