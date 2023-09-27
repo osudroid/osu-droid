@@ -1,3 +1,23 @@
+Version 1.7.1 Update Hotfix 2 (September 27, 2023)
+=========================================
+
+# Additions
+
+## "Keep background aspect ratio" option
+
+When enabled, the background (and storyboard) will not be scaled to fill screen bounds during gameplay.
+
+# Bug Fixes
+
+- Fixed an issue where failing players are not displayed in live leaderboard and ranking screen in multiplayer
+- Fixed an issue where kicking a player in multiplayer while they are in gameplay will cause the player to crash
+- Fixed an issue where the live leaderboard in multiplayer does not account for unranked mods
+- Fixed an issue where video offset is applied in gameplay when video is not enabled/present
+- Fixed an issue where game settings may be desynchronized when accessed from different places
+- Fixed an issue where room info text may unexpectedly truncate in multiplayer
+- Fixed an issue where the game may potentially crash when connecting to a multiplayer room
+- Fixed an issue where background brightness setting does not apply to storyboard
+
 Version 1.7.1 Update Hotfix (September 23, 2023)
 =========================================
 
