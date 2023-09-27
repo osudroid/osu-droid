@@ -175,7 +175,31 @@ object RoomAPI
             status = RoomStatus.from(json.getInt("status"))
 
         }
+
         roomEventListener?.onRoomConnect(room)
+
+        socket!!.apply {
+            on("beatmapChanged", beatmapChanged)
+            on("hostChanged", hostChanged)
+            on("playerKicked", playerKicked)
+            on("playerModsChanged", playerModsChanged)
+            on("removeSliderLockChanged", removeSliderLockChanged)
+            on("roomModsChanged", roomModsChanged)
+            on("freeModsSettingChanged", freeModsSettingChanged)
+            on("playerStatusChanged", playerStatusChanged)
+            on("teamModeChanged", teamModeChanged)
+            on("winConditionChanged", winConditionChanged)
+            on("teamChanged", teamChanged)
+            on("roomNameChanged", roomNameChanged)
+            on("playBeatmap", playBeatmap)
+            on("chatMessage", chatMessage)
+            on("liveScoreData", liveScoreData)
+            on("playerJoined", playerJoined)
+            on("playerLeft", playerLeft)
+            on("allPlayersBeatmapLoadComplete", allPlayersBeatmapLoadComplete)
+            on("allPlayersSkipRequested", allPlayersSkipRequested)
+            on("allPlayersScoreSubmitted", allPlayersScoreSubmitted)
+        }
     }
 
     private val playerJoined = Listener {
@@ -271,28 +295,7 @@ object RoomAPI
 
         socket = IO.socket(url, IO.Options().also { it.auth = auth }).apply {
 
-            on("beatmapChanged", beatmapChanged)
-            on("hostChanged", hostChanged)
-            on("playerKicked", playerKicked)
-            on("playerModsChanged", playerModsChanged)
-            on("removeSliderLockChanged", removeSliderLockChanged)
-            on("roomModsChanged", roomModsChanged)
-            on("freeModsSettingChanged", freeModsSettingChanged)
-            on("playerStatusChanged", playerStatusChanged)
-            on("teamModeChanged", teamModeChanged)
-            on("winConditionChanged", winConditionChanged)
-            on("teamChanged", teamChanged)
-            on("roomNameChanged", roomNameChanged)
-            on("playBeatmap", playBeatmap)
-            on("chatMessage", chatMessage)
-            on("liveScoreData", liveScoreData)
-
             on("initialConnection", initialConnection)
-            on("playerJoined", playerJoined)
-            on("playerLeft", playerLeft)
-            on("allPlayersBeatmapLoadComplete", allPlayersBeatmapLoadComplete)
-            on("allPlayersSkipRequested", allPlayersSkipRequested)
-            on("allPlayersScoreSubmitted", allPlayersScoreSubmitted)
             on("error", error)
 
             on(Socket.EVENT_CONNECT_ERROR, connectError)
