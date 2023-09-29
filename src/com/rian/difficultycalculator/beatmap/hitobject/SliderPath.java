@@ -142,7 +142,7 @@ public class SliderPath {
         }
 
         if (calculatedLength != expectedDistance) {
-            // In osu-stable, if the last two control points of a slider are equal, extension is not performed.
+            // In osu-stable, if the last two path points of a slider are equal, extension is not performed.
             if (calculatedPath.size() >= 2 &&
                     calculatedPath.get(calculatedPath.size() - 1).equals(calculatedPath.get(calculatedPath.size() - 2)) &&
                     expectedDistance > calculatedLength) {
