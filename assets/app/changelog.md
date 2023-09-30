@@ -21,6 +21,7 @@ When enabled, the background (and storyboard) will not be scaled to fill screen 
 - Fixed an issue where room info text may unexpectedly truncate in multiplayer
 - Fixed an issue where the game may potentially crash when connecting to a multiplayer room
 - Fixed an issue where background brightness setting does not apply to storyboard
+- Fixed an issue where SD, RX, and AP may be incompatible when picked in the mod menu in a certain order
 
 Version 1.7.1 Update Hotfix (September 23, 2023)
 =========================================
