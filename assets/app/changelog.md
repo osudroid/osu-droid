@@ -1,4 +1,4 @@
-Version 1.7.1 Update Hotfix 2 (September 27, 2023)
+Version 1.7.1 Update Hotfix 2 (September 30, 2023)
 =========================================
 
 # Additions
@@ -9,6 +9,10 @@ When enabled, the background (and storyboard) will not be scaled to fill screen 
 
 # Bug Fixes
 
+- Fixed an issue where editing a beatmap file may result in incorrectly submitted scores to the server
+- Fixed an issue where an invalid perfect circle slider path approximation fails to fall back to Bézier approximation
+- Fixed an issue where slider path approximation in difficulty calculation may be incorrect
+- Fixed an issue where the accuracy of players are continuously appended in multiplayer live leaderboard
 - Fixed an issue where failing players are not displayed in live leaderboard and ranking screen in multiplayer
 - Fixed an issue where kicking a player in multiplayer while they are in gameplay will cause the player to crash
 - Fixed an issue where the live leaderboard in multiplayer does not account for unranked mods
