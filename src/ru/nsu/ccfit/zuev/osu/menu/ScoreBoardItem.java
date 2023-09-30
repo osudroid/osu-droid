@@ -15,7 +15,9 @@ public class ScoreBoardItem implements Cloneable {
 
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getNumberInstance(Locale.US);
 
-    private static final Formatter DECIMAL_FORMAT = new Formatter(Locale.ENGLISH);
+
+    private static final StringBuilder accSb = new StringBuilder();
+    private static final Formatter DECIMAL_FORMAT = new Formatter(accSb, Locale.ENGLISH);
 
 
     public String userName;
@@ -68,9 +70,10 @@ public class ScoreBoardItem implements Cloneable {
         var text = userName + "\n" + NUMBER_FORMAT.format(playScore) + "\n";
 
         //noinspection DataFlowIssue
-        if (Multiplayer.isConnected && Multiplayer.room.getWinCondition() == WinCondition.ACCURACY)
+        if (Multiplayer.isConnected && Multiplayer.room.getWinCondition() == WinCondition.ACCURACY) {
+            accSb.setLength(0);
             text += DECIMAL_FORMAT.format("%2.2f%%", accuracy * 100f);
-        else
+        } else
             text += NUMBER_FORMAT.format(maxCombo) + "x";
 
         return text;
