@@ -51,6 +51,7 @@ fun convertToJson(ini: IniReader) = JsonContent().apply {
     putGroup("Fonts").apply {
 
         put("hitCirclePrefix", ini["Fonts", "HitCirclePrefix"] ?: "default")
+        put("hitCircleOverlap", ini["Fonts", "HitCircleOverlap"] ?: -2)
         put("scorePrefix", ini["Fonts", "ScorePrefix"] ?: "score")
         put("comboPrefix", ini["Fonts", "ComboPrefix"] ?: "score")
     }
