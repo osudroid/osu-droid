@@ -187,7 +187,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private int sliderIndex = 0;
 
     private StoryboardSprite storyboardSprite;
-    private ProxySprite storyboardOverlayProxy;
 
     private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
@@ -299,24 +298,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (storyboardSprite == null)
                 storyboardSprite = new StoryboardSprite(bgSprite.getWidth(), bgSprite.getHeight());
 
-            if (storyboardOverlayProxy == null)
-                storyboardOverlayProxy = new ProxySprite(bgSprite.getWidth(), bgSprite.getHeight());
-
-            storyboardOverlayProxy.detachSelf();
             storyboardSprite.detachSelf();
-            storyboardSprite.setOverlayDrawProxy(storyboardOverlayProxy);
             storyboardSprite.loadStoryboard(beatmapData.getFilename());
 
-            if (storyboardSprite.isStoryboardAvailable()) {
+            if (storyboardSprite.isStoryboardAvailable())
                 bgSprite.attachChild(storyboardSprite);
-                bgSprite.attachChild(storyboardOverlayProxy);
-            }
         }
 
         // Cleaning these properties, they might be not null if game was restarted.
         if (!Config.isEnableStoryboard() || !storyboardSprite.isStoryboardAvailable()) {
             storyboardSprite = null;
-            storyboardOverlayProxy = null;
         }
 
         var dimRectangle = new Rectangle(0f, 0f, bgSprite.getWidth(), bgSprite.getHeight());
@@ -1983,7 +1974,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (storyboardSprite != null) {
                 storyboardSprite.releaseStoryboard();
                 storyboardSprite = null;
-                storyboardOverlayProxy.setDrawProxy(null);
             }
 
             if (video != null) {
@@ -2117,7 +2107,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (storyboardSprite != null) {
             storyboardSprite.releaseStoryboard();
             storyboardSprite = null;
-            storyboardOverlayProxy.setDrawProxy(null);
         }
 
         if (video != null) {
