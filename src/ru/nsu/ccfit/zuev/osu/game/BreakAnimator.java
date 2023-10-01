@@ -4,11 +4,8 @@ import android.graphics.PointF;
 
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
-import org.anddev.andengine.entity.modifier.DelayModifier;
-import org.anddev.andengine.entity.modifier.FadeInModifier;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.LoopEntityModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
+import org.anddev.andengine.entity.modifier.*;
+import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
@@ -32,15 +29,15 @@ public class BreakAnimator extends GameObject {
     private boolean showMark = false;
     private boolean isbreak = false;
     private boolean over = false;
-    private Sprite bgSprite = null;
+    private Rectangle dimRectangle = null;
 
     public BreakAnimator(final GameObjectListener listener, final Scene scene,
-                         final StatisticV2 stat, final boolean showMark, Sprite bgSprtie) {
+                         final StatisticV2 stat, final boolean showMark, Rectangle bgSprtie) {
         length = 0;
         this.showMark = showMark;
         this.scene = scene;
         this.stat = stat;
-        this.bgSprite = bgSprtie;
+        this.dimRectangle = bgSprtie;
         listener.addPassiveObject(this);
 
         for (int i = 0; i < 4; i++) {
@@ -112,18 +109,16 @@ public class BreakAnimator extends GameObject {
     }
 
     private void setBgFade(float percent) {
-        if (bgSprite != null) {
+        if (dimRectangle != null) {
             float brightness = Config.getBackgroundBrightness();
-            bgSprite.setColor(brightness + percent * (1 - brightness),
-                    brightness + percent * (1 - brightness),
-                    brightness + percent * (1 - brightness));
+            dimRectangle.setAlpha(brightness - percent);
         }
     }
 
     private void resumeBgFade() {
-        if (bgSprite != null) {
+        if (dimRectangle != null) {
             float brightness = Config.getBackgroundBrightness();
-            bgSprite.setColor(brightness, brightness, brightness);
+            dimRectangle.setAlpha(1f - brightness);
         }
     }
 

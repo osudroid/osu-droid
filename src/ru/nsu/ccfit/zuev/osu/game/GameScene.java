@@ -6,7 +6,6 @@ import android.os.SystemClock;
 
 import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.framework.math.FMath;
-import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
@@ -176,7 +175,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private float avgOffset;
     private int offsetRegs;
     private Rectangle kiaiRect = null;
-    private Sprite bgSprite = null;
+    private Rectangle dimRectangle = null;
     private Sprite unranked;
     private ChangeableText replayText;
     private String title, artist, version;
@@ -187,7 +186,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private int sliderIndex = 0;
 
     private StoryboardSprite storyboardSprite;
-    private ProxySprite storyboardOverlayProxy;
 
     private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
@@ -250,12 +248,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void setBackground() {
-        bgSprite = null;
+        dimRectangle = null;
 
         if (video != null) {
             video.release();
             video = null;
         }
+
+        Sprite bgSprite = null;
 
         if (Config.isVideoEnabled() && beatmapData.events.videoFilename != null
                 // Unfortunately MediaPlayer API doesn't allow to change playback speed on APIs < 23, so in that case
@@ -299,27 +299,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (storyboardSprite == null)
                 storyboardSprite = new StoryboardSprite(bgSprite.getWidth(), bgSprite.getHeight());
 
-            if (storyboardOverlayProxy == null)
-                storyboardOverlayProxy = new ProxySprite(bgSprite.getWidth(), bgSprite.getHeight());
-
-            storyboardOverlayProxy.detachSelf();
             storyboardSprite.detachSelf();
-            storyboardSprite.setOverlayDrawProxy(storyboardOverlayProxy);
             storyboardSprite.loadStoryboard(beatmapData.getFilename());
 
-            if (storyboardSprite.isStoryboardAvailable()) {
+            if (storyboardSprite.isStoryboardAvailable())
                 bgSprite.attachChild(storyboardSprite);
-                bgSprite.attachChild(storyboardOverlayProxy);
-            }
         }
 
         // Cleaning these properties, they might be not null if game was restarted.
         if (!Config.isEnableStoryboard() || !storyboardSprite.isStoryboardAvailable()) {
             storyboardSprite = null;
-            storyboardOverlayProxy = null;
         }
 
-        var dimRectangle = new Rectangle(0f, 0f, bgSprite.getWidth(), bgSprite.getHeight());
+        dimRectangle = new Rectangle(0f, 0f, bgSprite.getWidth(), bgSprite.getHeight());
         dimRectangle.setColor(0f, 0f, 0f, 1.0f - Config.getBackgroundBrightness());
         bgSprite.attachChild(dimRectangle);
 
@@ -957,7 +949,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setGlobalTime(0);
 
         float effectOffset = 155 - 25;
-        breakAnimator = new BreakAnimator(this, fgScene, stat, beatmapData.general.letterboxInBreaks, bgSprite);
+        breakAnimator = new BreakAnimator(this, fgScene, stat, beatmapData.general.letterboxInBreaks, dimRectangle);
         if(!Config.isHideInGameUI()){
             scorebar = new ScoreBar(this, fgScene, stat);
             addPassiveObject(scorebar);
@@ -1983,7 +1975,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (storyboardSprite != null) {
                 storyboardSprite.releaseStoryboard();
                 storyboardSprite = null;
-                storyboardOverlayProxy.setDrawProxy(null);
             }
 
             if (video != null) {
@@ -2117,7 +2108,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (storyboardSprite != null) {
             storyboardSprite.releaseStoryboard();
             storyboardSprite = null;
-            storyboardOverlayProxy.setDrawProxy(null);
         }
 
         if (video != null) {

@@ -19,6 +19,8 @@ import java.util.HashMap;
 
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
+import static com.edlplan.edlosbsupport.elements.StoryboardSprite.*;
+
 public class StoryboardSprite extends SupportSprite {
 
     OsbContext context = new OsbContext();
@@ -26,6 +28,9 @@ public class StoryboardSprite extends SupportSprite {
     OsbPlayer osbPlayer;
     String loadedOsu;
     private double time;
+
+    private final Vec2 startOffset = new Vec2();
+
 
     public StoryboardSprite(float width, float height) {
         super(width, height);
@@ -78,34 +83,6 @@ public class StoryboardSprite extends SupportSprite {
         return storyboard != null;
     }
 
-    public void setOverlayDrawProxy(ProxySprite proxy) {
-        proxy.setDrawProxy(this::drawOverlay);
-    }
-
-    public void drawOverlay(BaseCanvas canvas) {
-        if (storyboard == null) {
-            return;
-        }
-
-        canvas.getBlendSetting().save();
-        canvas.save();
-        float scale = Math.max(640 / canvas.getWidth(), 480 / canvas.getHeight());
-        Vec2 startOffset = new Vec2(canvas.getWidth() / 2, canvas.getHeight() / 2)
-                .minus(640 * 0.5f / scale, 480 * 0.5f / scale);
-
-        canvas.translate(startOffset.x, startOffset.y).expendAxis(scale);
-
-        if (context.engines != null) {
-            for (LayerRenderEngine engine : context.engines) {
-                if (engine != null && engine.getLayer() == com.edlplan.edlosbsupport.elements.StoryboardSprite.Layer.Overlay) {
-                    engine.draw(canvas);
-                }
-            }
-        }
-
-        canvas.restore();
-        canvas.getBlendSetting().restore();
-    }
 
     @Override
     protected void onSupportDraw(BaseCanvas canvas) {
@@ -118,16 +95,20 @@ public class StoryboardSprite extends SupportSprite {
         canvas.getBlendSetting().save();
         canvas.save();
         float scale = Math.max(640 / canvas.getWidth(), 480 / canvas.getHeight());
-        Vec2 startOffset = new Vec2(canvas.getWidth() / 2, canvas.getHeight() / 2)
-                .minus(640 * 0.5f / scale, 480 * 0.5f / scale);
+        startOffset.set(canvas.getWidth() / 2, canvas.getHeight() / 2);
+        startOffset.minus(640 * 0.5f / scale, 480 * 0.5f / scale);
 
         canvas.translate(startOffset.x, startOffset.y).expendAxis(scale);
 
         if (context.engines != null) {
-            for (LayerRenderEngine engine : context.engines) {
-                if (engine != null && engine.getLayer() != com.edlplan.edlosbsupport.elements.StoryboardSprite.Layer.Overlay) {
+            int i = 0;
+            int length = context.engines.length;
+            while (i < length) {
+                var engine = context.engines[i];
+                if (engine != null && engine.getLayer() != Layer.Overlay) {
                     engine.draw(canvas);
                 }
+                i++;
             }
         }
 
@@ -198,9 +179,9 @@ public class StoryboardSprite extends SupportSprite {
 
     private void loadFromCache() {
 
-        context.engines = new LayerRenderEngine[com.edlplan.edlosbsupport.elements.StoryboardSprite.Layer.values().length];
+        context.engines = new LayerRenderEngine[Layer.values().length];
         for (int i = 0; i < context.engines.length; i++) {
-            context.engines[i] = new LayerRenderEngine(com.edlplan.edlosbsupport.elements.StoryboardSprite.Layer.values()[i]);
+            context.engines[i] = new LayerRenderEngine(Layer.values()[i]);
         }
 
         if (storyboard == null) {
@@ -238,9 +219,9 @@ public class StoryboardSprite extends SupportSprite {
         TexturePool pool = new TexturePool(dir);
 
         context.texturePool = pool;
-        context.engines = new LayerRenderEngine[com.edlplan.edlosbsupport.elements.StoryboardSprite.Layer.values().length];
+        context.engines = new LayerRenderEngine[Layer.values().length];
         for (int i = 0; i < context.engines.length; i++) {
-            context.engines[i] = new LayerRenderEngine(com.edlplan.edlosbsupport.elements.StoryboardSprite.Layer.values()[i]);
+            context.engines[i] = new LayerRenderEngine(Layer.values()[i]);
         }
 
         loadOsb(osuFile);
