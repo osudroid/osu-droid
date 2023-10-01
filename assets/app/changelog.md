@@ -1,7 +1,12 @@
-Version 1.7.1 Update Hotfix 2 (September 30, 2023)
+Version 1.7.1 Update Hotfix 2 (October 1, 2023)
 =========================================
 
 # Additions
+
+## "Hit circle overlap" skin.json setting
+
+This setting lives under the "Fonts" section of skin.json, and determines the overlapping pixels between combo numbers
+in a hit object. This is set to -2 by default and only accepts integers. Negative integers will add a gap.
 
 ## "Keep background aspect ratio" option
 
@@ -22,6 +27,7 @@ When enabled, the background (and storyboard) will not be scaled to fill screen 
 - Fixed an issue where the game may potentially crash when connecting to a multiplayer room
 - Fixed an issue where background brightness setting does not apply to storyboard
 - Fixed an issue where SD, RX, and AP may be incompatible when picked in the mod menu in a certain order
+- Fixed an issue where combo numbers in hit objects are misaligned when there are more than 2 numbers
 
 Version 1.7.1 Update Hotfix (September 23, 2023)
 =========================================
