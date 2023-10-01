@@ -21,6 +21,7 @@ public class OsuSkin {
     protected final FloatSkinData sliderBodyBaseAlpha = new FloatSkinData("sliderBodyBaseAlpha", 0.7f);
     protected final FloatSkinData sliderHintAlpha = new FloatSkinData("sliderHintAlpha");
     protected final FloatSkinData sliderHintShowMinLength = new FloatSkinData("sliderHintShowMinLength", 300f);
+    protected final FloatSkinData hitCircleOverlap = new FloatSkinData("hitCircleOverlap", -2);
 
     protected final BooleanSkinData limitComboTextLength = new BooleanSkinData("limitComboTextLength");
     protected final BooleanSkinData disableKiai = new BooleanSkinData("disableKiai");
@@ -144,19 +145,20 @@ public class OsuSkin {
         return color == null ? fallback : color;
     }
 
-    public StringSkinData getHitCirclePrefix()
-    {
+    public StringSkinData getHitCirclePrefix() {
         return hitCirclePrefix;
     }
 
-    public StringSkinData getScorePrefix()
-    {
+    public StringSkinData getScorePrefix() {
         return scorePrefix;
     }
 
-    public StringSkinData getComboPrefix()
-    {
+    public StringSkinData getComboPrefix() {
         return comboPrefix;
+    }
+
+    public float getHitCircleOverlap() {
+        return hitCircleOverlap.getCurrentValue();
     }
 
     public void reset() {

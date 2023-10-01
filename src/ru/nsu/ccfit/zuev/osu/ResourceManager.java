@@ -134,22 +134,15 @@ public class ResourceManager {
                     e.printStackTrace();
                     skinjson = null;
                 }
-            }
-            else
-            {
+            } else {
                 var iniFile = new File(folder, "skin.ini");
 
-                if (iniFile.exists())
-                {
-                    GlobalManager.getInstance().setInfo("Converting skin.ini to skin.json...");
+                if (iniFile.exists()) {
+                    GlobalManager.getInstance().setInfo("Reading skin.ini...");
 
-                    try (var ini = new IniReader(iniFile))
-                    {
+                    try (var ini = new IniReader(iniFile)) {
                         skinjson = SkinIniConverter.convertToJson(ini);
-                        SkinIniConverter.saveToFile(skinjson, jsonFile);
-                    }
-                    catch (Exception e)
-                    {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 
@@ -471,12 +464,20 @@ public class ResourceManager {
         int tw = 4, th = 4;
         TextureRegion region;
         if (external) {
-            final File texFile = new File(file);
+            var texFile = new File(file);
+            var isHDTexture = false;
+
             if (!texFile.exists()) {
-                return new BlankTextureRegion();
+
+                var dotIndex = file.lastIndexOf('.');
+
+                texFile = new File(file.substring(0, dotIndex) + "@2x" + file.substring(dotIndex));
+                isHDTexture = texFile.exists();
+
+                if (!isHDTexture)
+                    return new BlankTextureRegion();
             }
-            final QualityFileBitmapSource source = new QualityFileBitmapSource(
-                    texFile);
+            final QualityFileBitmapSource source = new QualityFileBitmapSource(texFile, isHDTexture ? 2 : 1);
             if (source.getWidth() == 0 || source.getHeight() == 0) {
                 return null;
             }
@@ -538,7 +539,6 @@ public class ResourceManager {
         if (region.getHeight() > 1) {
             region.setHeight(region.getHeight() - 1);
         }
-
 
         return region;
     }
