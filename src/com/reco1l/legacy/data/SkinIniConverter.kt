@@ -92,19 +92,3 @@ private fun parseComboColors(ini: IniReader) = mutableListOf<String>().also {
     }
 
 }.takeUnless { it.isEmpty() }?.toTypedArray()
-
-//--------------------------------------------------------------------------------------------------------------------//
-
-fun JSONObject.saveToFile(file: File) = try
-{
-    FileWriter(file).use {
-
-        it.write(toString(4))
-        it.flush()
-    }
-}
-catch (e: IOException)
-{
-    e.printStackTrace()
-    ToastLogger.showText("Failed to save converted JSON file.", true)
-}

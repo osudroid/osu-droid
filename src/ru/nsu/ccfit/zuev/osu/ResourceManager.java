@@ -134,22 +134,15 @@ public class ResourceManager {
                     e.printStackTrace();
                     skinjson = null;
                 }
-            }
-            else
-            {
+            } else {
                 var iniFile = new File(folder, "skin.ini");
 
-                if (iniFile.exists())
-                {
-                    GlobalManager.getInstance().setInfo("Converting skin.ini to skin.json...");
+                if (iniFile.exists()) {
+                    GlobalManager.getInstance().setInfo("Reading skin.ini...");
 
-                    try (var ini = new IniReader(iniFile))
-                    {
+                    try (var ini = new IniReader(iniFile)) {
                         skinjson = SkinIniConverter.convertToJson(ini);
-                        SkinIniConverter.saveToFile(skinjson, jsonFile);
-                    }
-                    catch (Exception e)
-                    {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 
