@@ -55,6 +55,10 @@ fun convertToJson(ini: IniReader) = JsonContent().apply {
         put("comboPrefix", ini["Fonts", "ComboPrefix"] ?: "score")
     }
 
+    putGroup("Utils").apply {
+        put("comboTextScale", 0.8f)
+    }
+
     putGroup("Layout").apply {
 
         putGroup("BackButton").put("scaleWhenHold", false)
