@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import android.util.Log;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import org.anddev.andengine.entity.modifier.*;
@@ -111,7 +112,7 @@ public class BreakAnimator extends GameObject {
     private void setBgFade(float percent) {
         if (dimRectangle != null) {
             float brightness = Config.getBackgroundBrightness();
-            dimRectangle.setAlpha(brightness - percent);
+            dimRectangle.setAlpha((1 - brightness) * (1 - percent));
         }
     }
 
