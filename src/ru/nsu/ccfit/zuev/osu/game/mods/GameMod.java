@@ -6,7 +6,7 @@ public enum GameMod {
      * sd, pf, sc, re, fl
      */
     MOD_NOFAIL("nf", 0.5f),
-    MOD_AUTO("auto", 0, true),
+    MOD_AUTO("auto", 1, true),
     MOD_EASY("es", 0.5f),
     MOD_HARDROCK("hr", 1.06f),
     MOD_HIDDEN("hd", 1.06f),

@@ -1608,7 +1608,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
             accText.changeText(strBuilder);
             strBuilder.setLength(0);
-            strBuilder.append(stat.getAutoTotalScore());
+            strBuilder.append(stat.getTotalScoreWithMultiplier());
             while (strBuilder.length() < 8) {
                 strBuilder.insert(0, '0');
             }
