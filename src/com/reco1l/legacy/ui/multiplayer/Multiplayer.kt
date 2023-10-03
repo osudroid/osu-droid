@@ -119,6 +119,8 @@ object Multiplayer
                 WinCondition.MAX_COMBO -> sortByDescending { it.maxCombo }
                 else -> Unit
             }
+
+            sortByDescending { it.isAlive }
         }
 
         if (list.isEmpty())
