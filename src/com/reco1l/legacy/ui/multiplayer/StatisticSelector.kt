@@ -95,7 +95,7 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
 
             text.text = """
                 ${stats.playerName}
-                ${getNumberInstance(US).format(stats.modifiedTotalScore)}
+                ${getNumberInstance(US).format(stats.totalScoreWithMultiplier)}
                 ${when (Multiplayer.room!!.winCondition)
                     {
                         ACCURACY -> "%2.2f%%".format(ENGLISH, stats.accuracyForServer * 100f)

@@ -143,11 +143,7 @@ public class ScoringScene {
         rankingText.setPosition(Config.getRES_WIDTH() * 5 / 6 - rankingText.getWidth() / 2, 0);
         scene.attachChild(rankingText);
 
-        int totalScore = stat.getModifiedTotalScore();
-        if (totalScore == 0) {
-            totalScore = stat.getAutoTotalScore();
-        }
-        String scoreStr = String.valueOf(totalScore);
+        String scoreStr = String.valueOf(stat.getTotalScoreWithMultiplier());
         while (scoreStr.length() < 8) {
             scoreStr = '0' + scoreStr;
         }
@@ -511,7 +507,7 @@ public class ScoringScene {
                 ScoreLibrary.getInstance().addScore(track.getFilename(), stat, replay);
             }
 
-            if (stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline() &&
+            if (stat.getTotalScoreWithMultiplier() > 0 && OnlineManager.getInstance().isStayOnline() &&
                     OnlineManager.getInstance().isReadyToSend()) {
 
                 if (GlobalManager.getInstance().getGameScene().hasFailed ||

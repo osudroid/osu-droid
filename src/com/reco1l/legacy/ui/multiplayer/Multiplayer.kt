@@ -4,6 +4,7 @@ import android.text.format.DateFormat
 import android.util.Log
 import com.reco1l.api.ibancho.data.Room
 import com.reco1l.api.ibancho.data.RoomPlayer
+import com.reco1l.api.ibancho.data.WinCondition
 import com.reco1l.framework.extensions.className
 import com.reco1l.framework.extensions.toDate
 import com.reco1l.legacy.data.jsonToScoreboardItem
@@ -11,7 +12,6 @@ import com.reco1l.legacy.data.jsonToStatistic
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.MainActivity
-import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import java.io.File
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
@@ -106,12 +106,21 @@ object Multiplayer
             return
         }
 
-        val list = mutableListOf<StatisticV2>()
+        val list = mutableListOf<StatisticV2>().apply {
+            for (i in 0 until array.length())
+            {
+                val json = array.optJSONObject(i) ?: continue
+                add(jsonToStatistic(json))
+            }
 
-        for (i in 0 until array.length())
-        {
-            val json = array.optJSONObject(i) ?: continue
-            list.add(jsonToStatistic(json))
+            when (room?.winCondition) {
+                WinCondition.SCORE_V1, WinCondition.SCORE_V2 -> sortByDescending { it.totalScoreWithMultiplier }
+                WinCondition.ACCURACY -> sortByDescending { it.accuracyForServer }
+                WinCondition.MAX_COMBO -> sortByDescending { it.maxCombo }
+                else -> Unit
+            }
+
+            sortByDescending { it.isAlive }
         }
 
         if (list.isEmpty())
