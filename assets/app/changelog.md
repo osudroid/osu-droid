@@ -1,3 +1,19 @@
+Version 1.7.1 Update Hotfix 3 (October 3, 2023)
+=========================================
+
+# Changes
+
+- The score multiplier of the Auto mod is now 1 instead of 0
+- Increased the opacity of player buttons in multiplayer ranking screen
+
+# Bug Fixes
+
+- Fixed an issue where the background dim in gameplay does not fade in and out properly during breaks
+- Fixed an issue where the in-game leaderboard does not work when the Auto mod is used
+- Fixed an issue where scores are sorted in multiplayer ranking screen without taking mod score multipliers into account
+- Fixed an issue where the in-game leaderboard data takes a long time to update when using a very low mod score multiplier
+- Fixed an issue where the score display during gameplay ignores unranked mods' score multipliers
+
 Version 1.7.1 Update Hotfix 2 (October 1, 2023)
 =========================================
 
