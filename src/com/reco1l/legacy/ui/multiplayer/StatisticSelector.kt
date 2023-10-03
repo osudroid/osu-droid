@@ -51,9 +51,9 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
             item.rank.setColor(0.6f, 0.6f, 0.6f, 0.9f)
 
             if (isSelected)
-                item.setColor(0.5f, 0.5f, 1f, 0.5f)
+                item.setColor(0.5f, 0.5f, 1f, 0.9f)
             else
-                item.setColor(0.5f, 0.5f, 0.5f, 0.5f)
+                item.setColor(0.5f, 0.5f, 0.5f, 0.9f)
         }
         else
         {
@@ -61,9 +61,9 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
             item.rank.setColor(1f, 0.6f, 0.6f, 0.9f)
 
             if (isSelected)
-                item.setColor(1f, 0.4f, 0.4f, 0.25f)
+                item.setColor(1f, 0.4f, 0.4f, 0.9f)
             else
-                item.setColor(1f, 0.6f, 0.6f, 0.25f)
+                item.setColor(1f, 0.6f, 0.6f, 0.9f)
         }
 
         attachChild(item)
