@@ -130,6 +130,7 @@
                             android:id="@+id/enableStoryboard"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+							android:saveEnabled="false"
                             android:text="@string/opt_enableStoryboard_title" />
 
 						<CheckBox
@@ -138,6 +139,7 @@
 								android:layout_height="wrap_content"
 								android:layout_marginLeft="5dp"
 								android:layout_weight="1"
+								android:saveEnabled="false"
 								android:text="Enable video" />
 
                         <CheckBox
@@ -146,6 +148,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="5dp"
                             android:layout_weight="1"
+							android:saveEnabled="false"
                             android:text="@string/opt_show_scoreboard_title" />
                     </LinearLayout>
 
@@ -195,12 +198,14 @@
                                 android:layout_width="350dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
+								android:saveEnabled="false"
                                 android:max="100" />
 
                             <TextView
                                 android:id="@+id/bgBrightnessText"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+								android:saveEnabled="false"
                                 android:text="25%" />
                         </TableRow>
 
@@ -221,12 +226,12 @@
 						</RelativeLayout>
 
                         <TableRow
+							android:id="@+id/speed_modify"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1">
 
                             <TextView
-								android:id="@+id/speed_modify_label"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textAlignment="textEnd"
@@ -238,19 +243,22 @@
                             <CheckBox
                                 android:id="@+id/enableSpeedChange"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"/>
+                                android:layout_height="wrap_content"
+								android:saveEnabled="false" />
 
                             <SeekBar
                                 android:id="@+id/changeSpeedBar"
                                 android:layout_width="350dp"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
+								android:saveEnabled="false"
                                 android:max="30" />
 
                             <TextView
                                 android:id="@+id/changeSpeedText"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+								android:saveEnabled="false"
                                 android:text="1.00x" />
                         </TableRow>
 
@@ -266,7 +274,8 @@
 							<CheckBox
 								android:id="@+id/enableNCwhenSpeedChange"
 								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"/>
+								android:layout_height="wrap_content"
+								android:saveEnabled="false" />
 
 							<TextView
 								android:layout_width="wrap_content"
@@ -302,7 +311,8 @@
                             <CheckBox
                                 android:id="@+id/enableForceAR"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"/>
+                                android:layout_height="wrap_content"
+								android:saveEnabled="false" />
 
                             <SeekBar
                                 android:id="@+id/forceARBar"
@@ -353,13 +363,15 @@
 								android:layout_width="350dp"
 								android:layout_height="wrap_content"
 								android:layout_gravity="center_vertical"
+								android:saveEnabled="false"
 								android:min="1"
 								android:max="10"/>
 							<TextView
 								android:id="@+id/flashlightFollowDelayText"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
-								android:text="120.0ms"/>
+								android:saveEnabled="false"
+								android:text="120ms"/>
 						</TableRow>
 
 					</TableLayout>

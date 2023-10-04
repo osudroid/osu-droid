@@ -110,9 +110,12 @@ public class SliderPath {
         for (int i = 0; i < controlPoints.size(); ++i) {
             if (i == controlPoints.size() - 1 || controlPoints.get(i).equals(controlPoints.get(i + 1))) {
                 int spanEnd = i + 1;
-                List<Vector2> cpSpan = controlPoints.subList(spanStart, spanEnd);
+                List<Vector2> subPath = calculateSubPath(controlPoints.subList(spanStart, spanEnd));
 
-                for (Vector2 t : calculateSubPath(cpSpan)) {
+                // Skip the first vertex if it is the same as the last vertex from the previous segment
+                int skipFirst = !calculatedPath.isEmpty() && !subPath.isEmpty() && calculatedPath.get(calculatedPath.size() - 1).equals(subPath.get(0)) ? 1 : 0;
+
+                for (Vector2 t : subPath.subList(skipFirst, subPath.size())) {
                     if (calculatedPath.isEmpty() || !calculatedPath.get(calculatedPath.size() - 1).equals(t)) {
                         calculatedPath.add(t);
                     }
@@ -139,9 +142,9 @@ public class SliderPath {
         }
 
         if (calculatedLength != expectedDistance) {
-            // In osu-stable, if the last two control points of a slider are equal, extension is not performed.
-            if (controlPoints.size() >= 2 &&
-                    controlPoints.get(controlPoints.size() - 1).equals(controlPoints.get(controlPoints.size() - 2)) &&
+            // In osu-stable, if the last two path points of a slider are equal, extension is not performed.
+            if (calculatedPath.size() >= 2 &&
+                    calculatedPath.get(calculatedPath.size() - 1).equals(calculatedPath.get(calculatedPath.size() - 2)) &&
                     expectedDistance > calculatedLength) {
                 return;
             }
@@ -152,7 +155,7 @@ public class SliderPath {
 
             if (calculatedLength > expectedDistance) {
                 // The path will be shortened further, in which case we should trim any more unnecessary lengths and their associated path segments
-                while (cumulativeLength.size() > 0 && cumulativeLength.get(cumulativeLength.size() - 1) >= expectedDistance) {
+                while (!cumulativeLength.isEmpty() && cumulativeLength.get(cumulativeLength.size() - 1) >= expectedDistance) {
                     cumulativeLength.remove(cumulativeLength.size() - 1);
                     calculatedPath.remove(pathEndIndex--);
                 }
@@ -188,7 +191,14 @@ public class SliderPath {
                     break;
                 }
 
-                return PathApproximator.approximateCircularArc(subControlPoints);
+                List<Vector2> subPath = PathApproximator.approximateCircularArc(subControlPoints);
+
+                // If for some reason a circular arc could not be fit to the 3 given points, fall back to a numerically stable Bézier approximation.
+                if (subPath.isEmpty()) {
+                    break;
+                }
+
+                return subPath;
             case Catmull:
                 return PathApproximator.approximateCatmull(subControlPoints);
         }

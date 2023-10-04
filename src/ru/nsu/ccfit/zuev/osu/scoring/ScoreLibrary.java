@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.sql.DBOpenHelper;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
@@ -146,12 +147,12 @@ public class ScoreLibrary {
     public void sendScoreOnline(final StatisticV2 stat, final String mapMD5, final String replay,
                                 final SendingPanel panel) {
         Debug.i("Preparing for online!");
-        if (stat.getModifiedTotalScore() <= 0) return;
+        if (stat.getTotalScoreWithMultiplier() <= 0) return;
         OnlineScoring.getInstance().sendRecord(stat, panel, mapMD5, replay);
     }
 
     public void addScore(final String trackPath, final StatisticV2 stat, final String replay) {
-        if (stat.getModifiedTotalScore() == 0) {
+        if (stat.getTotalScoreWithMultiplier() == 0 || stat.getMod().contains(GameMod.MOD_AUTO)) {
             return;
         }
         final String track = getTrackPath(trackPath);
@@ -162,7 +163,7 @@ public class ScoreLibrary {
         values.put("playername", stat.getPlayerName());
         values.put("replayfile", replay);
         values.put("mode", stat.getModString());
-        values.put("score", stat.getModifiedTotalScore());
+        values.put("score", stat.getTotalScoreWithMultiplier());
         values.put("combo", stat.getMaxCombo());
         values.put("mark", stat.getMark());
         values.put("h300k", stat.getHit300k());

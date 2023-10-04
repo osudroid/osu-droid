@@ -57,7 +57,7 @@ class SpectatorDataManager(
                     endEventIndex = events.size
 
                     writeFloat(secPassed)
-                    writeInt(stat.getModifiedTotalScore())
+                    writeInt(stat.totalScoreWithMultiplier)
                     writeInt(stat.combo)
                     writeFloat(stat.getAccuracy())
                     writeInt(stat.hit300)
@@ -202,12 +202,6 @@ class SpectatorDataManager(
     }
 
     /**
-     * Adds a spectator event.
-     */
-    fun addEvent() =
-        events.add(SpectatorEvent(gameScene.secPassed * 1000, stat.modifiedTotalScore, stat.combo, stat.accuracy))
-
-    /**
      * Resumes the timer after a specified delay.
      *
      * @param delay The delay.
@@ -220,6 +214,12 @@ class SpectatorDataManager(
         submissionTimer.scheduleAtFixedRate(task, delay, submissionPeriod)
         isPaused = false
     }
+
+    /**
+     * Adds a spectator event.
+     */
+    fun addEvent() =
+        events.add(SpectatorEvent(gameScene.secPassed * 1000, stat.totalScoreWithMultiplier, stat.combo, stat.accuracy))
 
     /**
      * Pauses the timer.

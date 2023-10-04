@@ -143,11 +143,7 @@ public class ScoringScene {
         rankingText.setPosition(Config.getRES_WIDTH() * 5 / 6 - rankingText.getWidth() / 2, 0);
         scene.attachChild(rankingText);
 
-        int totalScore = stat.getModifiedTotalScore();
-        if (totalScore == 0) {
-            totalScore = stat.getAutoTotalScore();
-        }
-        String scoreStr = String.valueOf(totalScore);
+        String scoreStr = String.valueOf(stat.getTotalScoreWithMultiplier());
         while (scoreStr.length() < 8) {
             scoreStr = '0' + scoreStr;
         }
@@ -505,24 +501,31 @@ public class ScoringScene {
         }
 
         //save and upload score
-        if (track != null && mapMD5 != null) {
+        if (track != null && track.getMD5() != null && track.getMD5().equals(mapMD5)) {
             ResourceManager.getInstance().getSound("applause").play();
             if (!Multiplayer.isMultiplayer || !GlobalManager.getInstance().getGameScene().hasFailed) {
                 ScoreLibrary.getInstance().addScore(track.getFilename(), stat, replay);
             }
 
-            if (!Multiplayer.isMultiplayer && stat.getModifiedTotalScore() > 0 && OnlineManager.getInstance().isStayOnline()) {
-                boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator()).applyFilter(m -> m.unranked).hasNext();
-                if (hasUnrankedMod) {
-                    return;
-                }
+            if (stat.getTotalScoreWithMultiplier() > 0 && OnlineManager.getInstance().isStayOnline()) {
 
-                SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
-                        OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy());
-                sendingPanel.setPosition(Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));
-                scene.registerTouchArea(sendingPanel.getDismissTouchArea());
-                scene.attachChild(sendingPanel);
-                ScoreLibrary.getInstance().sendScoreOnline(stat, replay, mapMD5, sendingPanel);
+                if (GlobalManager.getInstance().getGameScene().hasFailed ||
+                        (Multiplayer.isMultiplayer && !Config.isSubmitScoreOnMultiplayer()))
+                    return;
+
+                if (!Multiplayer.isMultiplayer && stat.getTotalScoreWithMultiplier() > 0 && OnlineManager.getInstance().isStayOnline()) {
+                    boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator()).applyFilter(m -> m.unranked).hasNext();
+                    if (hasUnrankedMod) {
+                        return;
+                    }
+
+                    SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
+                            OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy());
+                    sendingPanel.setPosition(Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));
+                    scene.registerTouchArea(sendingPanel.getDismissTouchArea());
+                    scene.attachChild(sendingPanel);
+                    ScoreLibrary.getInstance().sendScoreOnline(stat, mapMD5, replay, sendingPanel);
+                }
             }
         }
     }

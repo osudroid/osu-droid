@@ -8,7 +8,6 @@ import java.util.Locale;
 import java.util.Random;
 
 import com.reco1l.api.ibancho.data.WinCondition;
-import com.reco1l.legacy.data.MultiplayerConverter;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -70,6 +69,12 @@ public class StatisticV2 implements Serializable {
      */
     public boolean canFail = true;
 
+    /**
+     * The score multiplier from mods.
+     */
+    private float modScoreMultiplier = 1;
+
+
     public StatisticV2() {
         playerName = null;
         if (Config.isStayOnline()) {
@@ -99,6 +104,7 @@ public class StatisticV2 implements Serializable {
         diffModifier = stat.diffModifier;
         mod = stat.mod.clone();
         setPlayerName(Config.getLocalUsername());
+        computeModScoreMultiplier();
     }
 
     public StatisticV2(final String[] params) {
@@ -125,6 +131,7 @@ public class StatisticV2 implements Serializable {
         if (params.length >= 14) {
             playerName = params[13];
         }
+        computeModScoreMultiplier();
     }
 
     public float getHp() {
@@ -149,31 +156,11 @@ public class StatisticV2 implements Serializable {
         return totalScore;
     }
 
-    public int getModifiedTotalScore() {
+    public int getTotalScoreWithMultiplier() {
         if (forcedScore > 0)
             return forcedScore;
-        float mult = 1;
-        for (GameMod m : mod) {
-            mult *= m.scoreMultiplier;
-        }
-        if (changeSpeed != 1.0f) {
-            mult *= getSpeedChangeScoreMultiplier();
-        }
-        return (int) (totalScore * mult);
-    }
 
-    public int getAutoTotalScore() {
-        float mult = 1;
-        for (GameMod m : mod) {
-            if (m.unranked) {
-                continue;
-            }
-            mult *= m.scoreMultiplier;
-        }
-        if (changeSpeed != 1.0f){
-            mult *= getSpeedChangeScoreMultiplier();
-        }
-        return (int) (totalScore * mult);
+        return (int) (totalScore * modScoreMultiplier);
     }
 
     public void registerSpinnerHit() {
@@ -470,6 +457,8 @@ public class StatisticV2 implements Serializable {
 
     public void setMod(final EnumSet<GameMod> mod) {
         this.mod = mod.clone();
+
+        computeModScoreMultiplier();
     }
 
     public float getDiffModifier() {
@@ -607,6 +596,8 @@ public class StatisticV2 implements Serializable {
         }
         if (strMod.length > 1)
             setExtraModFromString(strMod[1]);
+
+        computeModScoreMultiplier();
     }
 
     public String getReplayName() {
@@ -641,7 +632,7 @@ public class StatisticV2 implements Serializable {
             mstring = "-";
         builder.append(mstring);
         builder.append(' ');
-        builder.append(getModifiedTotalScore());
+        builder.append(getTotalScoreWithMultiplier());
         builder.append(' ');
         builder.append(getMaxCombo());
         builder.append(' ');
@@ -680,6 +671,8 @@ public class StatisticV2 implements Serializable {
 
     public void setChangeSpeed(float speed){
         changeSpeed = speed;
+
+        computeModScoreMultiplier();
     }
 
     public float getForceAR(){
@@ -810,6 +803,8 @@ public class StatisticV2 implements Serializable {
                 flFollowDelay = Float.parseFloat(str.substring(3));
             }
         }
+
+        computeModScoreMultiplier();
     }
 
     /**
@@ -844,7 +839,18 @@ public class StatisticV2 implements Serializable {
         //noinspection DataFlowIssue
         var combo = !Multiplayer.isConnected || Multiplayer.room.getWinCondition() != WinCondition.MAX_COMBO ? currentCombo : maxCombo;
 
-        return new ScoreBoardItem(playerName, getModifiedTotalScore(), combo, getAccuracyForServer(), isAlive);
+        return new ScoreBoardItem(playerName, getTotalScoreWithMultiplier(), combo, getAccuracyForServer(), isAlive);
     }
 
+    private void computeModScoreMultiplier() {
+        modScoreMultiplier = 1;
+
+        for (GameMod m : mod) {
+            modScoreMultiplier *= m.scoreMultiplier;
+        }
+
+        if (changeSpeed != 1f) {
+            modScoreMultiplier *= getSpeedChangeScoreMultiplier();
+        }
+    }
 }

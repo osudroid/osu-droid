@@ -11,6 +11,7 @@ import com.rian.difficultycalculator.calculator.PerformanceCalculationParameters
 import com.rian.difficultycalculator.calculator.PerformanceCalculator;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
@@ -25,7 +26,7 @@ public final class BeatmapDifficultyCalculator {
     /**
      * Cache of difficulty calculations, mapped by MD5 hash of a beatmap.
      */
-    private static final HashMap<String, BeatmapDifficultyCacheManager> difficultyCacheManager = new HashMap<>();
+    private static final LRUCache<String, BeatmapDifficultyCacheManager> difficultyCacheManager = new LRUCache<>(10);
 
     /**
      * Constructs a <code>DifficultyCalculationParameters</code> from a <code>StatisticV2</code>.
@@ -302,13 +303,34 @@ public final class BeatmapDifficultyCalculator {
     }
 
     /**
+     * An implementation of least-recently-used cache using {@link LinkedHashMap}s.
+     *
+     * @param <K> The key of the cache.
+     * @param <V> The value to cache.
+     */
+    private static final class LRUCache<K, V> extends LinkedHashMap<K, V> {
+        private final int maxSize;
+
+        public LRUCache(int maxSize) {
+            super((int) Math.ceil(maxSize / 0.75f), 0.75f, true);
+
+            this.maxSize = maxSize;
+        }
+
+        @Override
+        protected boolean removeEldestEntry(Entry<K, V> eldest) {
+            return size() > maxSize;
+        }
+    }
+
+    /**
      * A cache holder for a beatmap.
      */
     private static final class BeatmapDifficultyCacheManager {
-        private final HashMap<DifficultyCalculationParameters, BeatmapDifficultyCache<DifficultyAttributes>>
-                attributeCache = new HashMap<>();
-        private final HashMap<DifficultyCalculationParameters, BeatmapDifficultyCache<List<TimedDifficultyAttributes>>>
-                timedAttributeCache = new HashMap<>();
+        private final LRUCache<DifficultyCalculationParameters, BeatmapDifficultyCache<DifficultyAttributes>>
+                attributeCache = new LRUCache<>(5);
+        private final LRUCache<DifficultyCalculationParameters, BeatmapDifficultyCache<List<TimedDifficultyAttributes>>>
+                timedAttributeCache = new LRUCache<>(3);
 
         /**
          * Adds a difficulty attributes cache.

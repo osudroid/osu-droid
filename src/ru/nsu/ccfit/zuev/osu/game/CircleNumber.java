@@ -29,31 +29,27 @@ public class CircleNumber extends Entity
 
     public void init(final PointF pos, float scale) {
         scale *= OsuSkin.get().getComboTextScale();
-        final String snum = String.valueOf(Math.abs(num));
 
-        float twidth = 0;
-        final PointF hitpos = new PointF();
+        var overlap = OsuSkin.get().getHitCircleOverlap();
+        float maxWidthScaled = 0f;
+        float maxHeight = 0f;
 
         for (int i = 0; i < getChildCount(); i++)
         {
             // We assume all attached child are Sprite
             var sprite = (Sprite) getChild(i);
-            var tex = sprite.getTextureRegion();
 
-            hitpos.set(twidth + pos.x, pos.y - tex.getHeight() / 2f);
-            twidth += (snum.charAt(i) == '1' && snum.length() > 1) ? scale * tex.getWidth() / 1.5f : scale * tex.getWidth();
-
-            sprite.setPosition(hitpos.x, hitpos.y);
             sprite.setScale(scale);
+            sprite.setPosition(maxWidthScaled, 0f);
+
+            maxWidthScaled += sprite.getWidthScaled() - overlap;
+            maxHeight = Math.max(maxHeight, sprite.getHeight());
         }
 
-        twidth /= 2;
+        // Computing max width without scale, so we can properly align the entity.
+        var maxWidth = getLastChild().getX() + ((Sprite) getLastChild()).getWidth();
 
-        for (int i = 0; i < getChildCount(); i++)
-        {
-            var sp = getChild(i);
-            sp.setPosition(sp.getX() - twidth / scale, sp.getY());
-        }
+        setPosition(pos.x - maxWidth / 2f, pos.y - maxHeight / 2f);
     }
 
     public int getNum() {
@@ -66,12 +62,9 @@ public class CircleNumber extends Entity
         var count = getChildCount();
 
         if (count > 0)
-        {
             for (int i = 0; i < count; i++)
-            {
                 getChild(i).setAlpha(pAlpha);
-            }
-        }
+
         super.setAlpha(pAlpha);
     }
 
@@ -79,19 +72,15 @@ public class CircleNumber extends Entity
     public float getAlpha()
     {
         if (getFirstChild() != null)
-        {
             return getFirstChild().getAlpha();
-        }
+
         return super.getAlpha();
     }
 
     // The default registerEntityModifier() doesn't apply the modifiers to the nested Entities, so we've to apply to each one.
     // Modifiers cannot be shared between multiple Entities, and using deepCopy() can be expensive, so we use a supplier instead.
-    public void registerEntityModifiers(Supplier<IEntityModifier> modifier)
-    {
+    public void registerEntityModifiers(Supplier<IEntityModifier> modifier) {
         for (int i = 0; i < getChildCount(); i++)
-        {
             getChild(i).registerEntityModifier(modifier.get());
-        }
     }
 }

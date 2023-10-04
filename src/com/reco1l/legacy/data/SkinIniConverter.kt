@@ -17,7 +17,7 @@ fun convertToJson(ini: IniReader) = JsonContent().apply {
 
     putGroup("Cursor").apply {
 
-        put("rotateCursor", ini["General", "RotateCursor"] ?: true)
+        put("rotateCursor", ini["General", "CursorRotate"] ?: true)
     }
 
     putGroup("ComboColor").apply {
@@ -51,8 +51,13 @@ fun convertToJson(ini: IniReader) = JsonContent().apply {
     putGroup("Fonts").apply {
 
         put("hitCirclePrefix", ini["Fonts", "HitCirclePrefix"] ?: "default")
+        put("hitCircleOverlap", ini["Fonts", "HitCircleOverlap"] ?: -2)
         put("scorePrefix", ini["Fonts", "ScorePrefix"] ?: "score")
         put("comboPrefix", ini["Fonts", "ComboPrefix"] ?: "score")
+    }
+
+    putGroup("Utils").apply {
+        put("comboTextScale", 0.8f)
     }
 
     putGroup("Layout").apply {
@@ -87,19 +92,3 @@ private fun parseComboColors(ini: IniReader) = mutableListOf<String>().also {
     }
 
 }.takeUnless { it.isEmpty() }?.toTypedArray()
-
-//--------------------------------------------------------------------------------------------------------------------//
-
-fun JSONObject.saveToFile(file: File) = try
-{
-    FileWriter(file).use {
-
-        it.write(toString(4))
-        it.flush()
-    }
-}
-catch (e: IOException)
-{
-    e.printStackTrace()
-    ToastLogger.showText("Failed to save converted JSON file.", true)
-}

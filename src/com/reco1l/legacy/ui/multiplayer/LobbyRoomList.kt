@@ -103,6 +103,7 @@ class LobbyRoomList : ScrollableList()
 
                 if (event.isActionUp)
                 {
+                    velocityY = 0f
                     alpha = 0.3f
 
                     if (moved || isScroll)
@@ -169,7 +170,7 @@ class LobbyRoomList : ScrollableList()
 
         val infoText = """
             ${room.playerCount} / ${room.maxPlayers} - ${room.playerNames}
-            $status - $winCondition - ${room.mods}
+            $status - $winCondition - ${room.modsToReadableString()}
         """.trimIndent()
 
         Text(0f, 0f, getResources().getFont("smallFont"), infoText).also {

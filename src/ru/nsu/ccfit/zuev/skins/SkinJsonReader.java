@@ -70,6 +70,7 @@ public class SkinJsonReader extends SkinReader {
     protected void loadFonts()
     {
         OsuSkin.get().hitCirclePrefix.setFromJson(currentFontsData);
+        OsuSkin.get().hitCircleOverlap.setFromJson(currentFontsData);
         OsuSkin.get().scorePrefix.setFromJson(currentFontsData);
         OsuSkin.get().comboPrefix.setFromJson(currentFontsData);
     }

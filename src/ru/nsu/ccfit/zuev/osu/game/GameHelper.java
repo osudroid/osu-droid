@@ -107,6 +107,13 @@ public class GameHelper {
         for (final String s : data) {
             if (s.equals(data[0])) {
                 curveType = Spline.getCurveType(s.charAt(0));
+
+                if (curveType == Spline.CurveTypes.PerfectCurve && data.length != 3) {
+                    // A perfect circle curve must have exactly 3 control points: the initial position, and 2 other control points.
+                    // Fallback to a Bézier curve if there are more or less control points.
+                    curveType = Spline.CurveTypes.Bezier;
+                }
+
                 continue;
             }
             final String[] nums = s.split(":");
@@ -139,6 +146,13 @@ public class GameHelper {
             spline.setType(curveType);
             spline.Refresh();
             section = spline.getPoints();
+
+            // If for some reason a circular arc could not be fit to the 3 given points, fall back to a numerically stable Bézier approximation.
+            if (curveType == Spline.CurveTypes.PerfectCurve && section.isEmpty()) {
+                spline.setType(Spline.CurveTypes.Bezier);
+                spline.Refresh();
+                section = spline.getPoints();
+            }
 
             // Debug.i("section size=" + section.size());
             for (final PointF p : section) {

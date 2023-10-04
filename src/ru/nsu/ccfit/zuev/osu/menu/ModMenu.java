@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.framework.lang.Execution;
+import com.reco1l.legacy.data.MultiplayerConverter;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomMods;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
@@ -36,9 +37,11 @@ import ru.nsu.ccfit.zuev.osu.helper.TextButton;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-import static com.reco1l.legacy.data.MultiplayerConverter.*;
 
 public class ModMenu implements IModSwitcher {
+
+    public static final float DEFAULT_FL_FOLLOW_DELAY = 0.12f;
+
     private static final ModMenu instance = new ModMenu();
     private Scene scene = null, parent;
     private EnumSet<GameMod> mod;
@@ -50,8 +53,7 @@ public class ModMenu implements IModSwitcher {
     private boolean enableForceAR = false;
     private boolean enableNCWhenSpeedChange = false;
     private boolean modsRemoved = false;
-    private final float defaultFLFollowDelay = 0.12f;
-    private float FLfollowDelay = defaultFLFollowDelay;
+    private float FLfollowDelay = DEFAULT_FL_FOLLOW_DELAY;
 
     private ModMenu() {
         mod = EnumSet.noneOf(GameMod.class);
@@ -103,7 +105,17 @@ public class ModMenu implements IModSwitcher {
         var modSet = mods.getSet();
 
         if (!isFreeMods)
+        {
             mod = modSet;
+
+            FLfollowDelay = mods.getFlFollowDelay();
+            enableForceAR = mods.getForceAR() != null;
+
+            if (enableForceAR)
+                forceAR = mods.getForceAR();
+        }
+
+        changeSpeed = mods.getSpeedMultiplier();
 
         if (!Multiplayer.isRoomHost)
         {
@@ -128,17 +140,14 @@ public class ModMenu implements IModSwitcher {
         else
             mod.remove(GameMod.MOD_HALFTIME);
 
-        changeSpeed = mods.getSpeedMultiplier();
-        FLfollowDelay = mods.getFlFollowDelay();
-        enableForceAR = mods.getForceAR() != null;
-
-        if (enableForceAR)
-            forceAR = mods.getForceAR();
-
         update();
     }
 
     public void hide() {
+        hide(true);
+    }
+
+    public void hide(boolean updatePlayerMods) {
         if (parent != null) {
             parent.clearChildScene();
             parent = null;
@@ -149,11 +158,15 @@ public class ModMenu implements IModSwitcher {
         {
             RoomScene.awaitModsChange = true;
 
+            var string = MultiplayerConverter.modsToString(mod);
+
             // The room mods are the same as the host mods
             if (Multiplayer.isRoomHost)
-                RoomAPI.setRoomMods(modsToString(mod), changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
+                RoomAPI.setRoomMods(string, changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
+            else if (updatePlayerMods)
+                RoomAPI.setPlayerMods(string, changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
             else
-                RoomAPI.setPlayerMods(modsToString(mod), changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
+                RoomScene.awaitModsChange = false;
         }
     }
 
@@ -382,15 +395,19 @@ public class ModMenu implements IModSwitcher {
 
         if (mod.contains(flag)) {
             mod.remove(flag);
+
+            if (flag == GameMod.MOD_FLASHLIGHT)
+                resetFLFollowDelay();
+
             returnValue = false;
         } else {
             mod.add(flag);
 
             handleModFlags(flag, GameMod.MOD_HARDROCK, new GameMod[]{GameMod.MOD_EASY});
             handleModFlags(flag, GameMod.MOD_EASY, new GameMod[]{GameMod.MOD_HARDROCK});
-            handleModFlags(flag, GameMod.MOD_AUTOPILOT, new GameMod[]{GameMod.MOD_RELAX, GameMod.MOD_SUDDENDEATH, GameMod.MOD_AUTO, GameMod.MOD_NOFAIL});
+            handleModFlags(flag, GameMod.MOD_AUTOPILOT, new GameMod[]{GameMod.MOD_RELAX, GameMod.MOD_AUTO, GameMod.MOD_NOFAIL});
             handleModFlags(flag, GameMod.MOD_AUTO, new GameMod[]{GameMod.MOD_RELAX, GameMod.MOD_AUTOPILOT, GameMod.MOD_PERFECT, GameMod.MOD_SUDDENDEATH});
-            handleModFlags(flag, GameMod.MOD_RELAX, new GameMod[]{GameMod.MOD_AUTO, GameMod.MOD_SUDDENDEATH, GameMod.MOD_NOFAIL, GameMod.MOD_AUTOPILOT});
+            handleModFlags(flag, GameMod.MOD_RELAX, new GameMod[]{GameMod.MOD_AUTO, GameMod.MOD_NOFAIL, GameMod.MOD_AUTOPILOT});
             handleModFlags(flag, GameMod.MOD_DOUBLETIME, new GameMod[]{GameMod.MOD_NIGHTCORE, GameMod.MOD_HALFTIME});
             handleModFlags(flag, GameMod.MOD_NIGHTCORE, new GameMod[]{GameMod.MOD_DOUBLETIME, GameMod.MOD_HALFTIME});
             handleModFlags(flag, GameMod.MOD_HALFTIME, new GameMod[]{GameMod.MOD_DOUBLETIME, GameMod.MOD_NIGHTCORE});
@@ -453,15 +470,11 @@ public class ModMenu implements IModSwitcher {
     }
 
     public boolean isDefaultFLFollowDelay() {
-        return FLfollowDelay == defaultFLFollowDelay;
-    }
-
-    public float getDefaultFLFollowDelay() {
-        return defaultFLFollowDelay;
+        return FLfollowDelay == DEFAULT_FL_FOLLOW_DELAY;
     }
 
     public void resetFLFollowDelay() {
-        FLfollowDelay = defaultFLFollowDelay;
+        FLfollowDelay = DEFAULT_FL_FOLLOW_DELAY;
     }
 
     public void setEnableForceAR(boolean t){

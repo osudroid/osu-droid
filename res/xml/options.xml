@@ -40,6 +40,12 @@
             android:defaultValue="25" android:entryValues="@array/bg_brightness_values"/> -->
         <com.edlplan.ui.SkinPathPreference android:title="@string/opt_skinpath_title" android:summary="@string/opt_skinpath_summary"
             android:key="skinPath" android:entries="@array/placeholder_array" android:entryValues="@array/placeholder_array"/>
+        <CheckBoxPreference
+                android:key="keepBackgroundAspectRatio"
+                android:title="Keep background aspect ratio"
+                android:summary="When enabled, the background (and storyboard) will not be scaled to fill screen bounds during gameplay"
+                android:defaultValue="false"
+        />
         <ListPreference android:entries="@array/error_meter_display_names" android:title="@string/opt_error_meter_display_title"
             android:key="errormeter" android:summary="@string/opt_error_meter_display_summary"
             android:defaultValue="0" android:entryValues="@array/error_meter_display_values"/>

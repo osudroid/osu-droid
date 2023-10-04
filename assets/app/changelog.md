@@ -1,4 +1,75 @@
-Version 1.7.1 Update (September 20, 2023)
+Version 1.7.1 Update Hotfix 3 (October 3, 2023)
+=========================================
+
+# Changes
+
+- The score multiplier of the Auto mod is now 1 instead of 0
+- Increased the opacity of player buttons in multiplayer ranking screen
+
+# Bug Fixes
+
+- Fixed an issue where the background dim in gameplay does not fade in and out properly during breaks
+- Fixed an issue where the in-game leaderboard does not work when the Auto mod is used
+- Fixed an issue where scores are sorted in multiplayer ranking screen without taking mod score multipliers into account
+- Fixed an issue where the in-game leaderboard data takes a long time to update when using a very low mod score multiplier
+- Fixed an issue where the score display during gameplay ignores unranked mods' score multipliers
+
+Version 1.7.1 Update Hotfix 2 (October 1, 2023)
+=========================================
+
+# Additions
+
+## "Hit circle overlap" skin.json setting
+
+This setting lives under the "Fonts" section of skin.json, and determines the overlapping pixels between combo numbers
+in a hit object. This is set to -2 by default and only accepts integers. Negative integers will add a gap.
+
+## "Keep background aspect ratio" option
+
+When enabled, the background (and storyboard) will not be scaled to fill screen bounds during gameplay.
+
+# Bug Fixes
+
+- Fixed an issue where editing a beatmap file may result in incorrectly submitted scores to the server
+- Fixed an issue where an invalid perfect circle slider path approximation fails to fall back to Bézier approximation
+- Fixed an issue where slider path approximation in difficulty calculation may be incorrect
+- Fixed an issue where the accuracy of players are continuously appended in multiplayer live leaderboard
+- Fixed an issue where failing players are not displayed in live leaderboard and ranking screen in multiplayer
+- Fixed an issue where kicking a player in multiplayer while they are in gameplay will cause the player to crash
+- Fixed an issue where the live leaderboard in multiplayer does not account for unranked mods
+- Fixed an issue where video offset is applied in gameplay when video is not enabled/present
+- Fixed an issue where game settings may be desynchronized when accessed from different places
+- Fixed an issue where room info text may unexpectedly truncate in multiplayer
+- Fixed an issue where the game may potentially crash when connecting to a multiplayer room
+- Fixed an issue where background brightness setting does not apply to storyboard
+- Fixed an issue where SD, RX, and AP may be incompatible when picked in the mod menu in a certain order
+- Fixed an issue where combo numbers in hit objects are misaligned when there are more than 2 numbers
+
+Version 1.7.1 Update Hotfix (September 23, 2023)
+=========================================
+
+# Changes
+
+- The color for failing players in multiplayer live leaderboard is now different
+- Only show score submission panel after the replay is uploaded
+- Shortened "remove slider lock" text in multiplayer room
+- Shortened "FL follow delay" text in player list in multiplayer room
+- Only allow Flashlight (FL) follow delay changes if FL is enabled
+- Show in-game leaderboard even if the leaderboard only consist of the currently playing score
+
+# Bug Fixes
+
+- Fixed wrong mods when viewing a room from multiplayer lobby
+- Fixed not detailed "Free Mods" description on player list in multiplayer room under free mods
+- Fixed "tap twice to exit" not working during gameplay in multiplayer
+- Fixed a potential crash when someone leaves during gameplay in multiplayer
+- Fixed avatars potentially not showing in solo global leaderboard
+- Fixed player list not clearing properly when leaving and joining a multiplayer room
+- Fixed multiplayer room host's force AR and FL follow delay being applied to other players in the room under free mods
+- Fixed floating beatmap information box displaying even when there is no currently picked beatmap
+- Fixed player fail/recovery state not being sent to multiplayer server
+
+Version 1.7.1 Update (September 22, 2023)
 =========================================
 
 # Additions
@@ -34,6 +105,12 @@ In order for a player to recover from the failing state, they need to restore th
 Tapping on the beatmap card inside a multiplayer room will display a popup that contains the BPM, length, CS, AR, OD, HP, and star rating of the beatmap.
 
 For multiplayer room hosts, they may swipe briefly when viewing this popup to avoid entering the song selection menu.
+
+## "Personal best" in global leaderboard
+
+Your personal best in a beatmap will be displayed at the top of the global leaderboard with its global rank.
+
+Note that the personal best box is intended to scroll along with the global leaderboard to give room for other scores. 
 
 # Changes
 

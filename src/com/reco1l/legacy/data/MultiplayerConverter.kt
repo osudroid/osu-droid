@@ -5,6 +5,7 @@ package com.reco1l.legacy.data
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import java.util.*
@@ -12,33 +13,54 @@ import java.util.*
 
 // Mods
 
-fun modsToReadable(mods: String?): String
+fun modsToReadable(
+    mods: EnumSet<GameMod>?,
+    speedMultiplier: Float/* = 1f*/,
+    flFollowDelay: Float/* = ModMenu.DEFAULT_FL_FOLLOW_DELAY*/,
+    forceAR: Float?/* = null*/,
+): String
 {
-    if (mods.isNullOrEmpty()) return "None"
+    if (mods.isNullOrEmpty()
+        && speedMultiplier == 1f
+        && flFollowDelay == ModMenu.DEFAULT_FL_FOLLOW_DELAY
+        && forceAR == null)
+        return "None"
 
     return buildString {
 
-        for (c in mods) when (c)
+        if (!mods.isNullOrEmpty()) for (m in mods) when (m)
         {
-            'a' -> append("AU, ")
-            'x' -> append("RX, ")
-            'p' -> append("AP, ")
-            'e' -> append("EZ, ")
-            'n' -> append("NF, ")
-            'r' -> append("HR, ")
-            'h' -> append("HD, ")
-            'i' -> append("FL, ")
-            'd' -> append("DT, ")
-            'c' -> append("NC, ")
-            't' -> append("HT, ")
-            's' -> append("PR, ")
-            'l' -> append("REZ, ")
-            'm' -> append("SC, ")
-            'u' -> append("SD, ")
-            'f' -> append("PF, ")
-            'b' -> append("SU, ")
-            'v' -> append("SV2, ")
+            MOD_AUTO -> append("AU, ")
+            MOD_RELAX -> append("RX, ")
+            MOD_AUTOPILOT -> append("AP, ")
+            MOD_EASY -> append("EZ, ")
+            MOD_NOFAIL -> append("NF, ")
+            MOD_HARDROCK -> append("HR, ")
+            MOD_HIDDEN -> append("HD, ")
+            MOD_FLASHLIGHT ->
+            {
+                if (flFollowDelay == ModMenu.DEFAULT_FL_FOLLOW_DELAY)
+                    append("FL, ")
+                else
+                    append("FL ${(flFollowDelay * 1000).toInt()}ms, ")
+            }
+            MOD_DOUBLETIME -> append("DT, ")
+            MOD_NIGHTCORE -> append("NC, ")
+            MOD_HALFTIME -> append("HT, ")
+            MOD_PRECISE -> append("PR, ")
+            MOD_SMALLCIRCLE -> append("SC, ")
+            MOD_REALLYEASY -> append("REZ, ")
+            MOD_PERFECT -> append("PF, ")
+            MOD_SUDDENDEATH -> append("SD, ")
+            MOD_SCOREV2 -> append("SV2, ")
+            else -> Unit
         }
+
+        if (speedMultiplier != 1f)
+            append("%.2fx, ".format(speedMultiplier))
+
+        if (forceAR != null)
+            append("AR $forceAR, ")
 
     }.substringBeforeLast(',')
 }
@@ -93,7 +115,6 @@ fun modsToString(mod: EnumSet<GameMod>) = buildString {
         MOD_PERFECT -> append('f')
         MOD_SUDDENDEATH -> append('u')
         MOD_SCOREV2 -> append('v')
-
         else -> Unit
     }
 }
@@ -110,6 +131,7 @@ fun jsonToScoreboardItem(json: JSONObject) = ScoreBoardItem().apply {
     playScore = json.getInt("score")
     maxCombo = json.getInt("combo")
     accuracy = json.getDouble("accuracy").toFloat()
+    isAlive = json.getBoolean("isAlive")
 }
 
 /**

@@ -20,9 +20,9 @@ import java.io.File
 class IniReader(file: File) : Closeable
 {
 
-    private val buffer = file.source().buffer()
+    val map = HashMap<String, HashMap<String, Any>>()
 
-    private val map = HashMap<String, HashMap<String, Any>>()
+    private val buffer = file.source().buffer()
 
     private var currentLine: String? = null
 
@@ -139,8 +139,20 @@ class IniReader(file: File) : Closeable
     /**
      * Returns the value from the desired command and section cast as the inferred type or `null`.
      */
-    @Suppress("UNCHECKED_CAST")
-    operator fun <T> get(section: String, key: String): T? = map[section]?.get(key) as? T
+    inline operator fun <reified T> get(section: String, key: String): T?
+    {
+        val value = map[section]?.get(key) ?: return null
+
+        if (T::class == Boolean::class && value is Int) {
+            return when(value) {
+                0 -> false as T
+                1 -> true as T
+                else -> null
+            }
+        }
+
+        return map[section]?.get(key) as? T
+    }
 
     //----------------------------------------------------------------------------------------------------------------//
 

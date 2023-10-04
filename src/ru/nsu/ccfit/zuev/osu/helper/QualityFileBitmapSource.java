@@ -23,31 +23,31 @@ public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
 
     private InputFactory fileBitmapInput;
 
-    private int inSampleSize = ru.nsu.ccfit.zuev.osu.Config.getTextureQuality();
+    private int inSampleSize = 1;
 
     public QualityFileBitmapSource(final File pFile) {
         this(pFile, 0, 0);
     }
 
     public QualityFileBitmapSource(final InputFactory pFile) {
-        this(pFile, 0, 0);
+        this(pFile, 0, 0, 1);
     }
 
-    public QualityFileBitmapSource(final InputFactory pFile, int inSampleSize) {
-        this(pFile, 0, 0);
-        this.inSampleSize = inSampleSize;
+    public QualityFileBitmapSource(final File pFile, int inSampleSize) {
+        this(() -> new FileInputStream(pFile), 0, 0, inSampleSize);
     }
 
     public QualityFileBitmapSource(final File pFile,
                                    final int pTexturePositionX, final int pTexturePositionY) {
-        this(() -> new FileInputStream(pFile), pTexturePositionX, pTexturePositionY);
+        this(() -> new FileInputStream(pFile), pTexturePositionX, pTexturePositionY, 1);
     }
 
     public QualityFileBitmapSource(final InputFactory pFile,
-                                   final int pTexturePositionX, final int pTexturePositionY) {
+                                   final int pTexturePositionX, final int pTexturePositionY, int inSampleSize) {
         super(pTexturePositionX, pTexturePositionY);
 
         fileBitmapInput = pFile;
+        this.inSampleSize = inSampleSize;
 
         final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
         decodeOptions.inJustDecodeBounds = true;

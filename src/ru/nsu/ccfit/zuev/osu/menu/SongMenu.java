@@ -35,6 +35,7 @@ import org.anddev.andengine.util.MathUtils;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
@@ -124,7 +125,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         scoreScene = ss;
     }
 
-    public ScoreBoardItem[] getBoard() {
+    @Nullable
+    public ArrayList<ScoreBoardItem> getBoard() {
         return board.getScoreBoardItems();
     }
 

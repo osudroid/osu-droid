@@ -150,7 +150,7 @@ public class Replay {
                 os.writeInt(stat.getHit100());
                 os.writeInt(stat.getHit50());
                 os.writeInt(stat.getMisses());
-                os.writeInt(stat.getModifiedTotalScore());
+                os.writeInt(stat.getTotalScoreWithMultiplier());
                 os.writeInt(stat.getMaxCombo());
                 os.writeFloat(stat.getAccuracy());
                 os.writeBoolean(stat.isPerfect());

@@ -24,10 +24,10 @@ abstract class ScrollableList : Scene(), IScrollDetectorListener
     private var pointerId = -1
     private var initialY = -1f
     private var touchY: Float? = null
-    private var velocityY = 0f
     private var secPassed = 0f
     private var tapTime = 0f
 
+    protected var velocityY = 0f
     protected var camY = -146f
     protected var itemHeight = 0f
 
@@ -43,11 +43,11 @@ abstract class ScrollableList : Scene(), IScrollDetectorListener
         scrollDetector.isEnabled = true
     }
 
-    override fun onManagedUpdate(pSecondsElapsed: Float)
+    override fun onManagedUpdate(secondsElapsed: Float)
     {
-        super.onManagedUpdate(pSecondsElapsed)
+        super.onManagedUpdate(secondsElapsed)
 
-        secPassed += pSecondsElapsed
+        secPassed += secondsElapsed
 
         if (childCount == 0)
             return
@@ -65,31 +65,29 @@ abstract class ScrollableList : Scene(), IScrollDetectorListener
             }
 
             y += camY
-            camY += velocityY * pSecondsElapsed
+            camY += velocityY * secondsElapsed
             maxY = y - 0.8f * (Config.getRES_HEIGHT() - 110 - (itemHeight - 32))
+
             if (camY <= -146 && velocityY < 0 || camY > maxY && velocityY > 0)
             {
-                camY -= velocityY * pSecondsElapsed
+                camY -= velocityY * secondsElapsed
                 velocityY = 0f
                 isScroll = false
             }
-            if (abs(velocityY) > Utils.toRes(500) * pSecondsElapsed)
-            {
-                velocityY -= Utils.toRes(10) * pSecondsElapsed * sign(velocityY)
-            }
-            else
+
+            if (abs(velocityY) <= Utils.toRes(500) * secondsElapsed)
             {
                 velocityY = 0f
                 isScroll = false
             }
+            else velocityY -= Utils.toRes(10) * secondsElapsed * sign(velocityY)
         }
         else
         {
-            percentShow += pSecondsElapsed * 4
+            percentShow += secondsElapsed * 4
+
             if (percentShow > 1)
-            {
                 percentShow = 1f
-            }
 
             for (i in 0 until childCount)
             {
@@ -98,40 +96,39 @@ abstract class ScrollableList : Scene(), IScrollDetectorListener
             }
 
             if (percentShow == 1f)
-            {
                 percentShow = -1f
-            }
         }
     }
 
-    override fun onScroll(pScrollDetector: ScrollDetector?, pTouchEvent: TouchEvent, pDistanceX: Float, pDistanceY: Float)
+    override fun onScroll(scrollDetector: ScrollDetector?, event: TouchEvent, distanceX: Float, distanceY: Float)
     {
-        when (pTouchEvent.action)
+        when (event.action)
         {
             TouchEvent.ACTION_DOWN ->
             {
                 velocityY = 0f
-                touchY = pTouchEvent.y
-                pointerId = pTouchEvent.pointerID
+                touchY = event.y
+                pointerId = event.pointerID
                 tapTime = secPassed
                 initialY = touchY!!
                 isScroll = true
             }
 
-            TouchEvent.ACTION_MOVE -> if (pointerId == -1 || pointerId == pTouchEvent.pointerID)
+            TouchEvent.ACTION_MOVE -> if (pointerId == -1 || pointerId == event.pointerID)
             {
                 isScroll = true
                 if (initialY == -1f)
                 {
                     velocityY = 0f
-                    touchY = pTouchEvent.y
-                    pointerId = pTouchEvent.pointerID
+                    touchY = event.y
+                    pointerId = event.pointerID
                     tapTime = secPassed
                     initialY = touchY!!
                 }
-                val dy = pTouchEvent.y - touchY!!
+                val dy = event.y - touchY!!
                 camY -= dy
-                touchY = pTouchEvent.y
+                touchY = event.y
+
                 if (camY <= -146)
                 {
                     camY = -146f
@@ -144,9 +141,10 @@ abstract class ScrollableList : Scene(), IScrollDetectorListener
                 }
             }
 
-            else -> if (pointerId == -1 || pointerId == pTouchEvent.pointerID)
+            else -> if (pointerId == -1 || pointerId == event.pointerID)
             {
                 touchY = null
+
                 if (secPassed - tapTime < 0.001f || initialY == -1f)
                 {
                     velocityY = 0f
@@ -154,7 +152,7 @@ abstract class ScrollableList : Scene(), IScrollDetectorListener
                 }
                 else
                 {
-                    velocityY = (initialY - pTouchEvent.y) / (secPassed - tapTime)
+                    velocityY = (initialY - event.y) / (secPassed - tapTime)
                     isScroll = true
                 }
                 pointerId = -1
