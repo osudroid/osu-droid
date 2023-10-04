@@ -22,8 +22,8 @@ import ru.nsu.ccfit.zuev.osu.online.PostBuilder.RequestException;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public class OnlineManager {
-    public static final String hostname = "10.0.2.2:3002";
-    public static final String endpoint = "http://" + hostname + "/api/droid/";
+    public static final String hostname = "droidpp.osudroid.moe";
+    public static final String endpoint = "https://" + hostname + "/api/droid/";
     public static final String defaultAvatarURL = "https://osudroid.moe/user/avatar/0.png";
     private static final String onlineVersion = "36";
 
