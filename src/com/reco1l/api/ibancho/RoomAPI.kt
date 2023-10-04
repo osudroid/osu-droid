@@ -17,7 +17,7 @@ object RoomAPI
     /**
      * The API version.
      */
-    private const val API_VERSION = 4
+    private const val API_VERSION = 3
 
     /**
      * The listener for player events.
