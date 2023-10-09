@@ -140,7 +140,7 @@ fun jsonToScoreboardItem(json: JSONObject) = ScoreBoardItem().apply {
 fun jsonToStatistic(json: JSONObject) = StatisticV2().apply {
 
     playerName = json.getString("username")
-    totalScore = json.getInt("score")
+    setForcedScore(json.getInt("score"))
     time = System.currentTimeMillis()
     setModFromString(if (json.isNull("modstring")) "" else json.getString("modstring"))
     maxCombo = json.optInt("maxCombo")
