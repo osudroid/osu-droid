@@ -156,8 +156,7 @@
                 <action android:name="android.intent.action.EDIT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="file"/>
-                <data
-                    android:pathPattern=".*\.osz" />
+                <data android:pathPattern=".*\\.osz" />
             </intent-filter>
         </activity>
 
