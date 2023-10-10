@@ -151,7 +151,7 @@ class IniReader(file: File) : Closeable
             }
         }
 
-        return map[section]?.get(key) as? T
+        return value as? T
     }
 
     //----------------------------------------------------------------------------------------------------------------//
