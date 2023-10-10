@@ -814,7 +814,7 @@ public class StatisticV2 implements Serializable {
         return new JSONObject() {{
             try {
                 put("accuracy", getAccuracyForServer());
-                put("score", getTotalScore());
+                put("score", getTotalScoreWithMultiplier());
                 put("username", playerName);
                 put("modstring", getModString());
                 put("maxCombo", maxCombo);
