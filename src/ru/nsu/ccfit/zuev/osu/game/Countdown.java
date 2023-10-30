@@ -103,6 +103,11 @@ public class Countdown extends GameObject {
         scene.attachChild(count3, 0);
     }
 
+    private void playIfNotNull(String resname) {
+        var sound = ResourceManager.getInstance().getCustomSound(resname, 1);
+        if (sound != null)
+            sound.play();
+    }
 
     @Override
     public void update(final float dt) {
@@ -112,39 +117,35 @@ public class Countdown extends GameObject {
         timepassed += dt;
 
         if (timepassed >= 0 && timepassed - dt < 0) {
-            BassSoundProvider provider = ResourceManager.getInstance().getCustomSound("readys", 1);
-            if (provider != null) {
-                provider.play();
-                //TODO : Fix  the bug of crashing on countdown
-            }
+            playIfNotNull("readys");
             ready.setVisible(true);
             ready.setIgnoreUpdate(false);
         }
 
         if (timepassed >= COUNTDOWN_LENGTH * speed * 2 / 6
                 && timepassed - dt < COUNTDOWN_LENGTH * speed * 2 / 6) {
-            ResourceManager.getInstance().getCustomSound("count3s", 1).play();
+            playIfNotNull("count3s");
             count3.setVisible(true);
             count3.setIgnoreUpdate(false);
         }
 
         if (timepassed >= COUNTDOWN_LENGTH * speed * 3 / 6
                 && timepassed - dt < COUNTDOWN_LENGTH * speed * 3 / 6) {
-            ResourceManager.getInstance().getCustomSound("count2s", 1).play();
+            playIfNotNull("count2s");
             count2.setVisible(true);
             count2.setIgnoreUpdate(false);
         }
 
         if (timepassed >= COUNTDOWN_LENGTH * speed * 4 / 6
                 && timepassed - dt < COUNTDOWN_LENGTH * speed * 4 / 6) {
-            ResourceManager.getInstance().getCustomSound("count1s", 1).play();
+            playIfNotNull("count1s");
             count1.setVisible(true);
             count1.setIgnoreUpdate(false);
         }
 
         if (timepassed >= COUNTDOWN_LENGTH * speed * 5 / 6
                 && timepassed - dt < COUNTDOWN_LENGTH * speed * 5 / 6) {
-            ResourceManager.getInstance().getCustomSound("gos", 1).play();
+            playIfNotNull("gos");
             go.setVisible(true);
             go.setIgnoreUpdate(false);
         }
