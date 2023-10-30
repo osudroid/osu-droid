@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
@@ -17,6 +16,8 @@ public class GameScoreText {
     private final ArrayList<AnimSprite> digits = new ArrayList<AnimSprite>();
     private float scale = 0;
     private boolean hasX = false;
+    private float width;
+    private String text;
 
     public GameScoreText(StringSkinData prefix, final float x, final float y, final String mask,
                          final float scale) {
@@ -51,37 +52,44 @@ public class GameScoreText {
         this.characters.put('x', scoreX);
     }
 
-    public void changeText(final StringBuilder text) {
+    public void changeText(final String text) {
+        if (text.equals(this.text))
+            return;
+        this.text = text;
+
         int j = 0;
-        float digitsWidth = 0;
-        for (int i = 0; i < text.length(); i++) {
-            if (j >= digits.size()) {
+        width = 0;
+        var textLength = text.length();
+        var digitsSize = digits.size();
+
+        for (int i = 0; i < textLength; i++) {
+            if (j >= digitsSize) {
                 break;
             }
-            if (text.charAt(i) >= '0' && text.charAt(i) <= '9') {
-                int digit = text.charAt(i) - '0';
-                digits.get(j).setVisible(true);
-                digits.get(j).setFrame(digit);
-                digits.get(j).setWidth(digits.get(j).getFrameWidth() * scale);
-                digits.get(j).setPosition(digits.get(0).getX() + digitsWidth, digits.get(j).getY());
-                digitsWidth += digits.get(j).getWidth();
+            var digit = digits.get(j);
+            var ch = text.charAt(i);
+
+            if (ch >= '0' && ch <= '9') {
+                digit.setVisible(true);
+                digit.setFrame(ch - '0');
+                digit.setWidth(digit.getFrameWidth() * scale);
+                digit.setPosition(digits.get(0).getX() + width, digit.getY());
+                width += digit.getWidth();
                 j++;
-            } else if (text.charAt(i) == '*') {
-                digits.get(j).setVisible(false);
+            } else if (ch == '*') {
+                digit.setVisible(false);
                 j++;
-                // TODO
             } else {
-                char character = text.charAt(i);
-                if (characters.containsKey(character)) {
-                    AnimSprite sprite = characters.get(character);
-                    sprite.setPosition(digits.get(0).getX() + digitsWidth, sprite.getY());
-                    digitsWidth += sprite.getWidth();
+                if (characters.containsKey(ch)) {
+                    AnimSprite sprite = characters.get(ch);
+                    sprite.setPosition(digits.get(0).getX() + width, sprite.getY());
+                    width += sprite.getWidth();
                 }
             }
         }
         if (hasX) {
             letters[letters.length - 1].setPosition(digits.get(0).getX()
-                    + digitsWidth, letters[letters.length - 1].getY());
+                    + width, letters[letters.length - 1].getY());
         }
     }
 
@@ -103,5 +111,9 @@ public class GameScoreText {
             sp.setPosition(x + width, y);
             width += sp.getWidth();
         }
+    }
+
+    public float getWidth() {
+        return width;
     }
 }

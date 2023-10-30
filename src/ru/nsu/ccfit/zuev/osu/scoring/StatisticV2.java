@@ -259,7 +259,7 @@ public class StatisticV2 implements Serializable {
             return;
         }
         //如果使用scorev2
-        if (mod.contains(GameMod.MOD_SCOREV2)){
+        if (GameHelper.isScoreV2()) {
             if (amount == 1000) {
                 bonusScore += amount;
             }

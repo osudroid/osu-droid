@@ -12,12 +12,10 @@ import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 
-import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 
 public class Countdown extends GameObject {
@@ -153,18 +151,12 @@ public class Countdown extends GameObject {
         if (timepassed >= COUNTDOWN_LENGTH * speed
                 && timepassed - dt < COUNTDOWN_LENGTH * speed) {
             scene = null;
-            SyncTaskManager.getInstance().run(new Runnable() {
-
-
-                public void run() {
-                    listener.removePassiveObject(Countdown.this);
-                    ready.detachSelf();
-                    go.detachSelf();
-                    count1.detachSelf();
-                    count2.detachSelf();
-                    count3.detachSelf();
-                }
-            });
+            listener.removePassiveObject(Countdown.this);
+            ready.detachSelf();
+            go.detachSelf();
+            count1.detachSelf();
+            count2.detachSelf();
+            count3.detachSelf();
         }
     }
 

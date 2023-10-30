@@ -47,6 +47,10 @@ public class ModernSpinner extends Spinner {
     private PointF oldMouse;
     private float totalTime;
 
+    private final PointF v = new PointF();
+    private final PointF vNormalized = new PointF();
+    private final PointF oldMouseNormalized = new PointF();
+
     public ModernSpinner() {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
         center = Utils.trackToRealCoords(new PointF(Constants.MAP_WIDTH / 2,
@@ -139,7 +143,8 @@ public class ModernSpinner extends Spinner {
         }
 
         final PointF mouse = autoPlay ? center : listener.getMousePos(cursorIndex);
-        final PointF v = new PointF(mouse.x - center.x, mouse.y - center.y);
+        v.x = mouse.x - center.x;
+        v.y = mouse.y - center.y;
         for (int i = 0; i < listener.getCursorsCount(); i++) {
             if (oldMouse == null || listener.isMousePressed(this, i)) {
                 oldMouse = v;
@@ -150,8 +155,8 @@ public class ModernSpinner extends Spinner {
         top.setRotation(degree);
         bottom.setRotation(degree / 2);
         // bottom.setRotation(-degree);
-        final PointF v1 = Utils.normalize(v);
-        final PointF v2 = Utils.normalize(oldMouse);
+        final PointF v1 = Utils.normalize(v, vNormalized);
+        final PointF v2 = Utils.normalize(oldMouse, oldMouseNormalized);
         float dfill = v1.x * v2.y - v1.y * v2.x;
         if (autoPlay) {
             dfill = 5 * 4 * dt;

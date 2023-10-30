@@ -53,6 +53,12 @@ public class Spinner extends GameObject {
     private float totalTime;
     private boolean did = false;
 
+    // This is the original name of the variable, im not sure what it does.
+    private final PointF v = new PointF();
+    private final PointF vNormalized = new PointF();
+    private final PointF oldMouseNormalized = new PointF();
+
+
     public Spinner() {
         ResourceManager.getInstance().checkSpinnerTextures();
         this.pos = new PointF(Constants.MAP_WIDTH / 2,Constants.MAP_HEIGHT / 2);
@@ -260,7 +266,8 @@ public class Spinner extends GameObject {
 
         final PointF mouse = autoPlay ? center : listener
                 .getMousePos(firstIndex);
-        final PointF v = new PointF(mouse.x - center.x, mouse.y - center.y);
+        v.x = mouse.x - center.x;
+        v.y = mouse.y - center.y;
         for (int i = 0; i < listener.getCursorsCount(); i++) {
             if (oldMouse == null || listener.isMousePressed(this, i)) {
                 oldMouse = v;
@@ -268,8 +275,8 @@ public class Spinner extends GameObject {
             }
         }
         circle.setRotation(MathUtils.radToDeg(Utils.direction(v)));
-        final PointF v1 = Utils.normalize(v);
-        final PointF v2 = Utils.normalize(oldMouse);
+        final PointF v1 = Utils.normalize(v, vNormalized);
+        final PointF v2 = Utils.normalize(oldMouse, oldMouseNormalized);
         float dfill = v1.x * v2.y - v1.y * v2.x;
         if (autoPlay) {
             dfill = 5 * 4 * dt;

@@ -169,7 +169,7 @@ public class HitCircle extends GameObject {
 
     private double hitOffsetToPreviousFrame() {
         // 因为这里是阻塞队列, 所以提前点的地方会影响判断
-        for (int i = 0; i < listener.getCursorsCount(); i++) {
+        for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
             if (listener.isMousePressed(this, i)
                     && Utils.squaredDistance(pos, listener.getMousePos(i)) <= radius) {
                 return listener.downFrameOffset(i);
@@ -200,10 +200,8 @@ public class HitCircle extends GameObject {
                 listener.registerAccuracy(replayObjectData.accuracy / 1000f);
                 passedTime = -1;
                 // Remove circle and register hit in update thread
-                SyncTaskManager.getInstance().run(() -> {
-                    listener.onCircleHit(id, replayObjectData.accuracy / 1000f, pos,endsCombo, replayObjectData.result, color);
-                    removeFromScene();
-                });
+                listener.onCircleHit(id, replayObjectData.accuracy / 1000f, pos,endsCombo, replayObjectData.result, color);
+                removeFromScene();
                 return;
             }
         } else if (passedTime * 2 > time && isHit()) {
@@ -221,10 +219,8 @@ public class HitCircle extends GameObject {
             // Remove circle and register hit in update thread
             float finalSignAcc = signAcc;
             startHit = true;
-            SyncTaskManager.getInstance().run(() -> {
-                listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, color);
-                removeFromScene();
-            });
+            listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, color);
+            removeFromScene();
             return;
         }
 
@@ -244,10 +240,8 @@ public class HitCircle extends GameObject {
             playSound();
             passedTime = -1;
             // Remove circle and register hit in update thread
-            SyncTaskManager.getInstance().run(() -> {
-                listener.onCircleHit(id, 0, pos, endsCombo, ResultType.HIT300.getId(), color);
-                removeFromScene();
-            });
+            listener.onCircleHit(id, 0, pos, endsCombo, ResultType.HIT300.getId(), color);
+            removeFromScene();
             return;
         }
 
@@ -291,10 +285,8 @@ public class HitCircle extends GameObject {
                 passedTime = -1;
                 final byte forcedScore = (replayObjectData == null) ? 0 : replayObjectData.result;
 
-                SyncTaskManager.getInstance().run(() -> {
-                    removeFromScene();
-                    listener.onCircleHit(id, 10, pos, false, forcedScore, color);
-                });
+                removeFromScene();
+                listener.onCircleHit(id, 10, pos, false, forcedScore, color);
             }
         }
     } // update(float dt)
@@ -315,11 +307,8 @@ public class HitCircle extends GameObject {
             passedTime = -1;
             // Remove circle and register hit in update thread
             float finalSignAcc = signAcc;
-            SyncTaskManager.getInstance().run(() -> {
-                listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, color);
-                removeFromScene();
-            });
-            
+            listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, color);
+            removeFromScene();
         }
     }
 }

@@ -733,10 +733,7 @@ public class MainActivity extends BaseGameActivity implements
                     && (getEngine().getScene() == RoomScene.INSTANCE
                     || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()))
             {
-                Execution.asyncIgnoreExceptions(() -> {
-                    RoomScene.INSTANCE.invalidateStatus();
-                    return null;
-                });
+                Execution.asyncIgnoreExceptions(() -> RoomScene.INSTANCE.invalidateStatus());
             }
         }
 

@@ -40,6 +40,7 @@ public class GameHelper {
     private static boolean suddenDeath = false;
     private static boolean perfect = false;
     private static boolean scoreV2;
+    private static boolean isEasy;
     private static boolean useReplay;
     private static boolean isKiai = false;
     private static boolean auto = false;
@@ -255,6 +256,14 @@ public class GameHelper {
 
     public static void setSliderColor(final RGBColor sliderColor) {
         GameHelper.sliderColor = sliderColor;
+    }
+
+    public static boolean isEasy() {
+        return isEasy;
+    }
+
+    public static void setEasy(boolean isEasy) {
+        GameHelper.isEasy = isEasy;
     }
 
     public static boolean isHardrock() {

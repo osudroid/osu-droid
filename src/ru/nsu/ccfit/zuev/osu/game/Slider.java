@@ -449,7 +449,8 @@ public class Slider extends GameObject {
         endArrow.detachSelf();
         SpritePool.getInstance().putAnimSprite("sliderb", ball);
         SpritePool.getInstance().putSprite("sliderfollowcircle", followCircle);
-        for (final Sprite sp : ticks) {
+        for (int i = 0, ticksSize = ticks.size(); i < ticksSize; i++) {
+            Sprite sp = ticks.get(i);
             sp.detachSelf();
             SpritePool.getInstance().putSprite("sliderscorepoint", sp);
         }
@@ -577,7 +578,7 @@ public class Slider extends GameObject {
             ));
         }
 
-        SyncTaskManager.getInstance().run(this::removeFromScene);
+        removeFromScene();
     }
 
     private boolean isHit() {
@@ -719,7 +720,7 @@ public class Slider extends GameObject {
 
         if (ball == null) // if ball still don't exist
         {
-            SyncTaskManager.getInstance().run(number::detachSelf);
+            number.detachSelf();
             approachCircle.setAlpha(0);
 
             ball = SpritePool.getInstance().getAnimSprite("sliderb",
@@ -743,9 +744,9 @@ public class Slider extends GameObject {
         final float percentage = (float) (passedTime / maxTime);
         final PointF ballpos = getPercentPosition(reverse ? 1 - percentage : percentage, ballAngle);
         // Calculating if cursor in follow circle bounds
-        final float radius = Utils.toRes(128) * scale;
+        final float radius = 128 * scale;
         boolean inRadius = false;
-        for (int i = 0; i < listener.getCursorsCount(); i++) {
+        for (int i = 0, cursorCount = listener.getCursorsCount(); i < cursorCount; i++) {
             if (autoPlay
                     || (listener.isMouseDown(i) && Utils
                     .squaredDistance(listener.getMousePos(i), ballpos) <= radius
