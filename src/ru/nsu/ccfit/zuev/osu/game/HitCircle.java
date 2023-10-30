@@ -152,8 +152,7 @@ public class HitCircle extends GameObject {
     }
 
     private boolean isHit() {
-        // 因为这里是阻塞队列, 所以提前点的地方会影响判断
-        for (int i = 0; i < listener.getCursorsCount(); i++) {
+        for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
             if (listener.isMousePressed(this, i)
                     && Utils.squaredDistance(pos, listener.getMousePos(i)) <= radius) {
                 return true;

@@ -28,10 +28,7 @@ import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.engine.options.TouchOptions;
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.DelayModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.LoopEntityModifier;
 import org.anddev.andengine.entity.modifier.MoveXModifier;
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
@@ -48,7 +45,6 @@ import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.modifier.IModifier;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -136,7 +132,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private boolean comboWasMissed = false;
     private boolean comboWas100 = false;
     private LinkedList<GameObject> activeObjects;
-    private LinkedList<GameObject> passiveObjects = new LinkedList<GameObject>();
+    private LinkedList<GameObject> passiveObjects;
+    private LinkedList<GameObject> expiredObjects;
     private GameScoreText comboText, accText, scoreText;  //显示的文字  连击数  ACC  分数
     private GameScoreTextShadow scoreShadow;
     private Queue<BreakPeriod> breakPeriods = new LinkedList<BreakPeriod>();
@@ -506,6 +503,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         activeObjects = new LinkedList<>();
         passiveObjects = new LinkedList<>();
+        expiredObjects = new LinkedList<>();
         lastObjectId = -1;
 
         GameHelper.setSliderColor(SkinManager.getInstance().getSliderColor());
@@ -1608,49 +1606,24 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        updatePassiveObjects(dt);
-
-        while (!activeObjects.isEmpty()) {
-            var obj = activeObjects.peek();
-
-            if (Config.isRemoveSliderLock()) {
-                // Last to be click.
-                if (!obj.isStartHit()) {
-                    lastObjectHitTime = obj.getHitTime();
-                }
-            }
-            obj.update(dt);
-
-            if (obj == activeObjects.peekLast())
-                break;
+        for (int i = 0, size = expiredObjects.size(); i < size; i++) {
+            var object = expiredObjects.get(i);
+            // Since we're going to remove them and same objects aren't added to both list we can
+            // share the same list to remove them.
+            activeObjects.remove(object);
+            passiveObjects.remove(object);
         }
+        expiredObjects.clear();
 
-        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
-            autoCursor.moveToObject(activeObjects.peek(), secPassed, approachRate, this);
-        }
-
-        int clickCount = 0;
         for (int i = 0; i < CursorCount; i++) {
-            if (cursorIIsDown[i])
-                clickCount++;
             cursorIIsDown[i] = false;
         }
 
-        for (int i = 0; i < clickCount - 1; i++){
-            while (!activeObjects.isEmpty()) {
-                var obj = activeObjects.peek();
+        updatePassiveObjects(dt);
+        updateActiveObjects(dt);
 
-                if (Config.isRemoveSliderLock()) {
-                    // Last to be click.
-                    if (!obj.isStartHit()) {
-                        lastObjectHitTime = obj.getHitTime();
-                    }
-                }
-                obj.tryHit(dt);
-
-                if (obj == activeObjects.peekLast())
-                    break;
-            }
+        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
+            autoCursor.moveToObject(activeObjects.peek(), secPassed, approachRate, this);
         }
 
         if (video != null && secPassed >= videoOffset)
@@ -2006,14 +1979,22 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
     }
 
-    private void updatePassiveObjects(float deltaTime) {
-        while (!passiveObjects.isEmpty()) {
-            var obj = passiveObjects.peek();
-            //noinspection DataFlowIssue Can not be null since the while condition, ignore the IDE warning.
+    private void updateActiveObjects(float deltaTime) {
+        for (int i = 0, size = activeObjects.size(); i < size; i++) {
+            var obj = activeObjects.get(i);
+            // Check last to be click.
+            if (Config.isRemoveSliderLock()) {
+                if (!obj.isStartHit())
+                    lastObjectHitTime = obj.getHitTime();
+            }
             obj.update(deltaTime);
+            obj.tryHit(deltaTime);
+        }
+    }
 
-            if (obj == passiveObjects.peekLast())
-                break;
+    private void updatePassiveObjects(float deltaTime) {
+        for (int i = 0, size = passiveObjects.size(); i < size; i++) {
+            passiveObjects.get(i).update(deltaTime);
         }
     }
 
@@ -2500,7 +2481,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void removeObject(final GameObject object) {
-        activeObjects.remove(object);
+        expiredObjects.add(object);
     }
 
     public boolean onSceneTouchEvent(final Scene pScene,
@@ -2669,7 +2650,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
 
     public void removePassiveObject(final GameObject object) {
-        passiveObjects.remove(object);
+        expiredObjects.add(object);
     }
 
     private void createHitEffect(final PointF pos, final String name, RGBColor color) {

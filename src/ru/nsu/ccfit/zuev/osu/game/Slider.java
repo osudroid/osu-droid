@@ -582,8 +582,8 @@ public class Slider extends GameObject {
     }
 
     private boolean isHit() {
-        float radius = Utils.sqr(Utils.toRes(64) * scale);
-        for (int i = 0; i < listener.getCursorsCount(); i++) {
+        float radius = Utils.sqr(64 * scale);
+        for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
             if (listener.isMousePressed(this, i)
                     && Utils.squaredDistance(startPosition, listener.getMousePos(i)) <= radius) {
                 return true;
