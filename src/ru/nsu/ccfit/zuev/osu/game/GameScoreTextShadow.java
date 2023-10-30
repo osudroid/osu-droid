@@ -10,15 +10,15 @@ import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class GameScoreTextShadow extends GameObject {
-    private final GameScoreText scoreText;
+    private final GameScoreText comboText;
     private final AnimSprite[] letters;
     private final ArrayList<AnimSprite> digits = new ArrayList<AnimSprite>();
     private boolean hasX = false;
     private String text = "";
 
     public GameScoreTextShadow(float x, float y, final String mask,
-                               final float scale, GameScoreText scoreText) {
-        this.scoreText = scoreText;
+                               final float scale, GameScoreText comboText) {
+        this.comboText = comboText;
         letters = new AnimSprite[mask.length()];
         float width = 0;
 
@@ -82,6 +82,8 @@ public class GameScoreTextShadow extends GameObject {
             letters[letters.length - 1].setPosition(digits.get(0).getX()
                     + digitsWidth, letters[letters.length - 1].getY());
         }
+        // Set previous text if wasn't set yet.
+        comboText.changeText(this.text);
         this.text = text;
 
         letters[0].setAlpha(0.6f);
@@ -111,7 +113,7 @@ public class GameScoreTextShadow extends GameObject {
                 sp.setAlpha(alpha);
             }
         } else {
-            scoreText.changeText(text);
+            comboText.changeText(text);
         }
     }
 

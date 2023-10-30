@@ -965,7 +965,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             scoreText.attachToScene(fgScene);
             if (Config.isComplexAnimations()) {
                 scoreShadow = new GameScoreTextShadow(0, Config.getRES_HEIGHT()
-                        - Utils.toRes(90), "0000x", 1.5f, scoreText);
+                        - Utils.toRes(90), "0000x", 1.5f, comboText);
                 scoreShadow.attachToScene(bgScene);
                 passiveObjects.add(scoreShadow);
             }
