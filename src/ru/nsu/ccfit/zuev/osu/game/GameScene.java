@@ -1620,12 +1620,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         expiredObjects.clear();
 
+        updatePassiveObjects(dt);
+        updateActiveObjects(dt);
+
         for (int i = 0; i < CursorCount; i++) {
             cursorIIsDown[i] = false;
         }
 
-        updatePassiveObjects(dt);
-        updateActiveObjects(dt);
+        tryHitActiveObjects(dt);
 
         if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
             autoCursor.moveToObject(activeObjects.peek(), secPassed, approachRate, this);
@@ -1984,16 +1986,20 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
     }
 
+    private void tryHitActiveObjects(float deltaTime) {
+        for (int i = 0, size = activeObjects.size(); i < size; i++) {
+            activeObjects.get(i).tryHit(deltaTime);
+        }
+    }
+
     private void updateActiveObjects(float deltaTime) {
         for (int i = 0, size = activeObjects.size(); i < size; i++) {
             var obj = activeObjects.get(i);
-            // Check last to be click.
-            if (Config.isRemoveSliderLock()) {
-                if (!obj.isStartHit())
-                    lastObjectHitTime = obj.getHitTime();
-            }
             obj.update(deltaTime);
-            obj.tryHit(deltaTime);
+
+            if (Config.isRemoveSliderLock() && !obj.isStartHit()) {
+                lastObjectHitTime = obj.getHitTime();
+            }
         }
     }
 
