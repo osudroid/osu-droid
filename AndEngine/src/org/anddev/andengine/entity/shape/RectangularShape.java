@@ -83,16 +83,22 @@ public abstract class RectangularShape extends Shape {
 	}
 
 	public void setWidth(final float pWidth) {
+		if (pWidth == mWidth)
+			return;
 		this.mWidth = pWidth;
 		this.updateVertexBuffer();
 	}
 
 	public void setHeight(final float pHeight) {
+		if (pHeight == mHeight)
+			return;
 		this.mHeight = pHeight;
 		this.updateVertexBuffer();
 	}
 
 	public void setSize(final float pWidth, final float pHeight) {
+		if (mWidth == pWidth && mHeight == pHeight)
+			return;
 		this.mWidth = pWidth;
 		this.mHeight = pHeight;
 		this.updateVertexBuffer();

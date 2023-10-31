@@ -212,6 +212,8 @@ public class Entity implements IEntity {
 
 	@Override
 	public void setPosition(final float pX, final float pY) {
+		if (pX == mX && pY == mY)
+			return;
 		this.mX = pX;
 		this.mY = pY;
 		this.mLocalToParentTransformationDirty = true;
@@ -238,6 +240,8 @@ public class Entity implements IEntity {
 
 	@Override
 	public void setRotation(final float pRotation) {
+		if (mRotation == pRotation)
+			return;
 		this.mRotation = pRotation;
 		this.mLocalToParentTransformationDirty = true;
 		this.mParentToLocalTransformationDirty = true;
@@ -306,6 +310,8 @@ public class Entity implements IEntity {
 
 	@Override
 	public void setScale(final float pScale) {
+		if (mScaleX == pScale && mScaleY == pScale)
+			return;
 		this.mScaleX = pScale;
 		this.mScaleY = pScale;
 		this.mLocalToParentTransformationDirty = true;
