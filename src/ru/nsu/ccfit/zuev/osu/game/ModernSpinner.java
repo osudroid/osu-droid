@@ -149,6 +149,9 @@ public class ModernSpinner extends Spinner {
             }
         }
 
+        if (mouse == null)
+            return;
+
         float degree = MathUtils.radToDeg(Utils.direction(currMouse));
         top.setRotation(degree);
         bottom.setRotation(degree / 2);

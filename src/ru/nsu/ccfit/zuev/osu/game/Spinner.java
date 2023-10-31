@@ -268,6 +268,9 @@ public class Spinner extends GameObject {
             }
         }
 
+        if (mouse == null)
+            return;
+
         circle.setRotation(MathUtils.radToDeg(Utils.direction(currMouse)));
 
         var len1 = Utils.length(currMouse);
