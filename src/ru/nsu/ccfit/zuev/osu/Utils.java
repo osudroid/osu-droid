@@ -152,10 +152,10 @@ public class Utils {
         return (float) Math.sqrt(vector.x * vector.x + vector.y * vector.y);
     }
 
-    public static PointF normalize(PointF vector) {
+    public static PointF normalize(final PointF vector) {
         final float len = length(vector);
         if (Math.abs(len) < 0.0001f) {
-            return new PointF(0f, 0f);
+            return new PointF(0, 0);
         }
         return new PointF(vector.x / len, vector.y / len);
     }
