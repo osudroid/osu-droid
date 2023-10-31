@@ -37,6 +37,9 @@ public class CursorEntity extends Entity {
 
         attachChild(cursorSprite);
         setVisible(false);
+
+        // Not necessary to update by itself since it's done by GameScene.
+        setIgnoreUpdate(true);
     }
 
     public void setShowing(boolean showing) {
