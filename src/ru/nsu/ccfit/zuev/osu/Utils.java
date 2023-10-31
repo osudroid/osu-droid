@@ -152,14 +152,12 @@ public class Utils {
         return (float) Math.sqrt(vector.x * vector.x + vector.y * vector.y);
     }
 
-    public static PointF normalize(PointF vector, PointF instance) {
-        instance.set(0f, 0f);
+    public static PointF normalize(PointF vector) {
         final float len = length(vector);
         if (Math.abs(len) < 0.0001f) {
-            return instance;
+            return new PointF(0f, 0f);
         }
-        instance.set(vector.x / len, vector.y / len);
-        return instance;
+        return new PointF(vector.x / len, vector.y / len);
     }
 
     public static float distance(final PointF v1, final PointF v2) {

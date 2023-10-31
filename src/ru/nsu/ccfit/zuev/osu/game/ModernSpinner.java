@@ -47,9 +47,8 @@ public class ModernSpinner extends Spinner {
     private PointF oldMouse;
     private float totalTime;
 
-    private final PointF v = new PointF();
-    private final PointF vNormalized = new PointF();
-    private final PointF oldMouseNormalized = new PointF();
+    private final PointF currMouse = new PointF();
+
 
     public ModernSpinner() {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
@@ -129,35 +128,40 @@ public class ModernSpinner extends Spinner {
 
     @Override
     public void update(float dt) {
-        boolean isTouched = false;
-        int cursorIndex = -1;
-        for (int i = 0; i < listener.getCursorsCount(); i++) {
-            if (listener.isMouseDown(i)) {
-                cursorIndex = i;
-                isTouched = true;
-                break;
-            }
-        }
-        if (!isTouched && !autoPlay) {
-            return;
-        }
 
-        final PointF mouse = autoPlay ? center : listener.getMousePos(cursorIndex);
-        v.x = mouse.x - center.x;
-        v.y = mouse.y - center.y;
-        for (int i = 0; i < listener.getCursorsCount(); i++) {
+        PointF mouse = null;
+
+        for (int i = 0, count = listener.getCursorsCount(); i < count; ++i) {
+            if (mouse == null) {
+                if (autoPlay) {
+                    mouse = center;
+                } else if (listener.isMouseDown(i)) {
+                    mouse = listener.getMousePos(i);
+                } else {
+                    continue;
+                }
+                currMouse.set(mouse.x - center.x, mouse.y - center.y);
+            } else {
+                continue;
+            }
+
             if (oldMouse == null || listener.isMousePressed(this, i)) {
-                oldMouse = v;
+                oldMouse = currMouse;
                 return;
             }
         }
-        float degree = MathUtils.radToDeg(Utils.direction(v));
+
+        if (mouse == null)
+            return;
+
+        float degree = MathUtils.radToDeg(Utils.direction(currMouse));
         top.setRotation(degree);
         bottom.setRotation(degree / 2);
-        // bottom.setRotation(-degree);
-        final PointF v1 = Utils.normalize(v, vNormalized);
-        final PointF v2 = Utils.normalize(oldMouse, oldMouseNormalized);
-        float dfill = v1.x * v2.y - v1.y * v2.x;
+
+        var len1 = Utils.length(currMouse);
+        var len2 = Utils.length(oldMouse);
+        var dfill = (currMouse.x / len1) * (oldMouse.y / len2) - (currMouse.y / len1) * (oldMouse.x / len2);
+
         if (autoPlay) {
             dfill = 5 * 4 * dt;
             degree = (rotations + dfill / 4f) * 360;
@@ -220,7 +224,7 @@ public class ModernSpinner extends Spinner {
                 stat.changeHp(rate * 0.01f * totalTime / needRotations);
             }
         }
-        oldMouse = v;
+        oldMouse = currMouse;
     }
 
     public void removeFromScene() {

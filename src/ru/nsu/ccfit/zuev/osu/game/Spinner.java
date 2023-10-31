@@ -53,10 +53,7 @@ public class Spinner extends GameObject {
     private float totalTime;
     private boolean did = false;
 
-    // This is the original name of the variable, im not sure what it does.
-    private final PointF v = new PointF();
-    private final PointF vNormalized = new PointF();
-    private final PointF oldMouseNormalized = new PointF();
+    private final PointF currMouse = new PointF();
 
 
     public Spinner() {
@@ -251,33 +248,37 @@ public class Spinner extends GameObject {
         if (circle.getAlpha() == 0) {
             return;
         }
-        boolean mdown = false;
-        int firstIndex = -1;
-        for (int i = 0; i < listener.getCursorsCount(); i++) {
-            if (listener.isMouseDown(i)) {
-                firstIndex = i;
-                mdown = true;
-                break;
-            }
-        }
-        if (mdown == false && !autoPlay) {
-            return;
-        }
+        PointF mouse = null;
 
-        final PointF mouse = autoPlay ? center : listener
-                .getMousePos(firstIndex);
-        v.x = mouse.x - center.x;
-        v.y = mouse.y - center.y;
-        for (int i = 0; i < listener.getCursorsCount(); i++) {
+        for (int i = 0, count = listener.getCursorsCount(); i < count; ++i) {
+            if (mouse == null) {
+                if (autoPlay) {
+                    mouse = center;
+                } else if (listener.isMouseDown(i)) {
+                    mouse = listener.getMousePos(i);
+                } else {
+                    continue;
+                }
+                currMouse.set(mouse.x - center.x, mouse.y - center.y);
+            } else {
+                continue;
+            }
+
             if (oldMouse == null || listener.isMousePressed(this, i)) {
-                oldMouse = v;
+                oldMouse = currMouse;
                 return;
             }
         }
-        circle.setRotation(MathUtils.radToDeg(Utils.direction(v)));
-        final PointF v1 = Utils.normalize(v, vNormalized);
-        final PointF v2 = Utils.normalize(oldMouse, oldMouseNormalized);
-        float dfill = v1.x * v2.y - v1.y * v2.x;
+
+        if (mouse == null)
+            return;
+
+        circle.setRotation(MathUtils.radToDeg(Utils.direction(currMouse)));
+
+        var len1 = Utils.length(currMouse);
+        var len2 = Utils.length(oldMouse);
+        var dfill = (currMouse.x / len1) * (oldMouse.y / len2) - (currMouse.y / len1) * (oldMouse.x / len2);
+
         if (autoPlay) {
             dfill = 5 * 4 * dt;
             circle.setRotation((rotations + dfill / 4f) * 360);
@@ -336,6 +337,6 @@ public class Spinner extends GameObject {
                 metreY + metre.getHeight() * (1 - Math.abs(percentfill)));
         mregion.setTexturePosition(0,
                 (int) (metre.getBaseHeight() * (1 - Math.abs(percentfill))));
-        oldMouse = v;
+        oldMouse = currMouse;
     }
 }
