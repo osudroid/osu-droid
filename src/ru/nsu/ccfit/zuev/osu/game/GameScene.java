@@ -2493,7 +2493,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
 
-    private PointF applyCursorTrackCoordinates(PointF pos, float rawX, float rawY) {
+    private PointF applyCursorTrackCoordinates(Cursor cursor) {
+
+        var rawX = cursor.mousePos.x;
+        var rawY = cursor.mousePos.y;
+
         var width = Config.getRES_WIDTH();
         var height = Config.getRES_WIDTH();
 
@@ -2508,9 +2512,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         rawX *= Constants.MAP_WIDTH / (float) Constants.MAP_ACTUAL_WIDTH;
         rawY *= Constants.MAP_HEIGHT / (float) Constants.MAP_ACTUAL_HEIGHT;
 
-        pos.x = rawX;
-        pos.y = rawY;
-        return pos;
+        cursor.trackPos.x = rawX;
+        cursor.trackPos.y = rawY;
+        return cursor.trackPos;
     }
 
 
@@ -2540,9 +2544,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             for (var value : cursors)
                 value.mouseOldDown = false;
 
-            PointF gamePoint = applyCursorTrackCoordinates(cursors[i].trackPos, pTouchX, pTouchY);
             cursor.mousePos.x = pTouchX;
             cursor.mousePos.y = pTouchY;
+            PointF gamePoint = applyCursorTrackCoordinates(cursor);
 
             if (sprite != null) {
                 sprite.setShowing(true);
@@ -2554,9 +2558,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
             cursorIIsDown[i] = true;
         } else if (pSceneTouchEvent.isActionMove()) {
-            PointF gamePoint = applyCursorTrackCoordinates(cursors[i].trackPos, pTouchX, pTouchY);
             cursor.mousePos.x = pTouchX;
             cursor.mousePos.y = pTouchY;
+            PointF gamePoint = applyCursorTrackCoordinates(cursor);
 
             if (sprite != null) {
                 sprite.setPosition(cursor.mousePos.x, cursor.mousePos.y);
