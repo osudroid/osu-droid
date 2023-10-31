@@ -1621,14 +1621,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         tryHitActiveObjects(dt);
 
         // Clearing expired objects.
-        for (int i = 0, size = expiredObjects.size(); i < size; i++) {
-            var object = expiredObjects.get(i);
+        while (!expiredObjects.isEmpty()) {
+            var object = expiredObjects.poll();
             // Since we're going to remove them and same objects aren't added to both list we can
             // share the same list to remove them.
             activeObjects.remove(object);
             passiveObjects.remove(object);
         }
-        expiredObjects.clear();
 
         if (video != null && secPassed >= videoOffset)
         {
