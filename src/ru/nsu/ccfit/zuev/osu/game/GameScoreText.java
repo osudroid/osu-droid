@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
@@ -16,14 +17,15 @@ public class GameScoreText {
     private final ArrayList<AnimSprite> digits = new ArrayList<AnimSprite>();
     private float scale = 0;
     private boolean hasX = false;
-    private float width;
     private String text;
+    private final float digitWidth;
 
     public GameScoreText(StringSkinData prefix, final float x, final float y, final String mask,
                          final float scale) {
         AnimSprite scoreComma = null;
         AnimSprite scorePercent = null;
         AnimSprite scoreX = null;
+        digitWidth = ResourceManager.getInstance().getTextureWithPrefix(prefix, "0").getWidth();
         letters = new AnimSprite[mask.length()];
         float width = 0;
         for (int i = 0; i < mask.length(); i++) {
@@ -58,7 +60,7 @@ public class GameScoreText {
         this.text = text;
 
         int j = 0;
-        width = 0;
+        var totalWidth = 0;
         var textLength = text.length();
         var digitsSize = digits.size();
 
@@ -73,8 +75,8 @@ public class GameScoreText {
                 digit.setVisible(true);
                 digit.setFrame(ch - '0');
                 digit.setWidth(digit.getFrameWidth() * scale);
-                digit.setPosition(digits.get(0).getX() + width, digit.getY());
-                width += digit.getWidth();
+                digit.setPosition(digits.get(0).getX() + totalWidth, digit.getY());
+                totalWidth += digit.getWidth();
                 j++;
             } else if (ch == '*') {
                 digit.setVisible(false);
@@ -82,14 +84,14 @@ public class GameScoreText {
             } else {
                 if (characters.containsKey(ch)) {
                     AnimSprite sprite = characters.get(ch);
-                    sprite.setPosition(digits.get(0).getX() + width, sprite.getY());
-                    width += sprite.getWidth();
+                    sprite.setPosition(digits.get(0).getX() + totalWidth, sprite.getY());
+                    totalWidth += sprite.getWidth();
                 }
             }
         }
         if (hasX) {
             letters[letters.length - 1].setPosition(digits.get(0).getX()
-                    + width, letters[letters.length - 1].getY());
+                    + totalWidth, letters[letters.length - 1].getY());
         }
     }
 
@@ -113,7 +115,7 @@ public class GameScoreText {
         }
     }
 
-    public float getWidth() {
-        return width;
+    public float getDigitWidth() {
+        return digitWidth;
     }
 }

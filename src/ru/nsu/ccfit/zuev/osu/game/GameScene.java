@@ -1570,7 +1570,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 comboText.changeText(comboStr);
             }
 
-            //连击数////////////////////////
             strBuilder.setLength(0);
             float rawAccuracy = stat.getAccuracy() * 100f;
             strBuilder.append((int) rawAccuracy);
@@ -1594,7 +1593,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 strBuilder.insert(0, '0');
             }
 
-            scoreText.setPosition(Config.getRES_WIDTH() - scoreText.getWidth(), 0);
+            int scoreTextOffset = 0;
+            while (strBuilder.length() < 10) {
+                strBuilder.insert(0, '*');
+                scoreTextOffset++;
+            }
+
+            scoreText.setPosition(Config.getRES_WIDTH() - scoreText.getDigitWidth() * (9.25f - scoreTextOffset), 0);
             scoreText.changeText(strBuilder.toString());
         }
 
