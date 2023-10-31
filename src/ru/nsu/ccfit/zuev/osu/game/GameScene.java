@@ -1612,6 +1612,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         updatePassiveObjects(dt);
+
+        lastObjectHitTime = getLastObjectHitTime();
         updateActiveObjects(dt);
 
         if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
@@ -1622,6 +1624,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             cursorIIsDown[i] = false;
         }
 
+        lastObjectHitTime = getLastObjectHitTime();
         tryHitActiveObjects(dt);
 
         // Clearing expired objects.
@@ -1984,6 +1987,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
             }
         }
+    }
+
+    private float getLastObjectHitTime() {
+        if (Config.isRemoveSliderLock()) {
+            for (int i = 0, size = activeObjects.size(); i < size; i++) {
+                var obj = activeObjects.get(i);
+                if (!obj.isStartHit())
+                    return obj.getHitTime();
+            }
+        }
+        return lastObjectHitTime;
     }
 
     private void tryHitActiveObjects(float deltaTime) {
