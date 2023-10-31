@@ -1433,10 +1433,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         } else if (cursorSprites != null) {
             for (int i = 0; i < CursorCount; i++) {
                 cursorSprites[i].update(dt);
-                if (cursors[i].mouseDown) {
-                    if (cursors[i].mousePressed) {
-                        cursorSprites[i].click();
-                    }
+
+                if (replaying) {
+                    cursorSprites[i].setPosition(cursors[i].mousePos.x, cursors[i].mousePos.y);
+                    cursorSprites[i].setShowing(cursors[i].mouseDown);
+                }
+
+                if (cursors[i].mouseDown && cursors[i].mousePressed) {
+                    cursorSprites[i].click();
                 }
             }
         }
