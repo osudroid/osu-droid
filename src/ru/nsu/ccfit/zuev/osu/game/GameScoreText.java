@@ -17,7 +17,6 @@ public class GameScoreText {
     private final ArrayList<AnimSprite> digits = new ArrayList<AnimSprite>();
     private float scale = 0;
     private boolean hasX = false;
-    private String text;
     private final float digitWidth;
 
     public GameScoreText(StringSkinData prefix, final float x, final float y, final String mask,
@@ -55,16 +54,11 @@ public class GameScoreText {
     }
 
     public void changeText(final String text) {
-        if (text.equals(this.text))
-            return;
-        this.text = text;
-
         int j = 0;
         var totalWidth = 0;
-        var textLength = text.length();
         var digitsSize = digits.size();
 
-        for (int i = 0; i < textLength; i++) {
+        for (int i = 0, length = text.length(); i < length; i++) {
             if (j >= digitsSize) {
                 break;
             }
@@ -82,8 +76,8 @@ public class GameScoreText {
                 digit.setVisible(false);
                 j++;
             } else {
-                if (characters.containsKey(ch)) {
-                    AnimSprite sprite = characters.get(ch);
+                var sprite = characters.get(ch);
+                if (sprite != null) {
                     sprite.setPosition(digits.get(0).getX() + totalWidth, sprite.getY());
                     totalWidth += sprite.getWidth();
                 }
