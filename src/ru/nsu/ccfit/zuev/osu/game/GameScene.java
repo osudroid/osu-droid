@@ -1611,6 +1611,20 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
+        updatePassiveObjects(dt);
+        updateActiveObjects(dt);
+
+        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
+            autoCursor.moveToObject(activeObjects.peek(), secPassed, approachRate, this);
+        }
+
+        for (int i = 0; i < CursorCount; i++) {
+            cursorIIsDown[i] = false;
+        }
+
+        tryHitActiveObjects(dt);
+
+        // Clearing expired objects.
         for (int i = 0, size = expiredObjects.size(); i < size; i++) {
             var object = expiredObjects.get(i);
             // Since we're going to remove them and same objects aren't added to both list we can
@@ -1619,19 +1633,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             passiveObjects.remove(object);
         }
         expiredObjects.clear();
-
-        updatePassiveObjects(dt);
-        updateActiveObjects(dt);
-
-        for (int i = 0; i < CursorCount; i++) {
-            cursorIIsDown[i] = false;
-        }
-
-        tryHitActiveObjects(dt);
-
-        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
-            autoCursor.moveToObject(activeObjects.peek(), secPassed, approachRate, this);
-        }
 
         if (video != null && secPassed >= videoOffset)
         {
