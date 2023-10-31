@@ -141,8 +141,6 @@ public class ModernSpinner extends Spinner {
                     continue;
                 }
                 currMouse.set(mouse.x - center.x, mouse.y - center.y);
-            } else {
-                continue;
             }
 
             if (oldMouse == null || listener.isMousePressed(this, i)) {
@@ -151,9 +149,6 @@ public class ModernSpinner extends Spinner {
             }
         }
 
-        if (mouse == null)
-            return;
-
         float degree = MathUtils.radToDeg(Utils.direction(currMouse));
         top.setRotation(degree);
         bottom.setRotation(degree / 2);
@@ -161,6 +156,9 @@ public class ModernSpinner extends Spinner {
         var len1 = Utils.length(currMouse);
         var len2 = Utils.length(oldMouse);
         var dfill = (currMouse.x / len1) * (oldMouse.y / len2) - (currMouse.y / len1) * (oldMouse.x / len2);
+
+        if (Math.abs(len1) < 0.0001f || Math.abs(len2) < 0.0001f)
+            dfill = 0;
 
         if (autoPlay) {
             dfill = 5 * 4 * dt;
