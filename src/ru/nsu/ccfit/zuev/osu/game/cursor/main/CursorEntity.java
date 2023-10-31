@@ -32,9 +32,11 @@ public class CursorEntity extends Entity {
 
             emitter = new PointParticleEmitter(particleOffsetX, particleOffsetY);
             particles = new CursorTrail(emitter, spawnRate, cursorSprite.baseSize, trailTex);
+            particles.setParticlesSpawnEnabled(false);
         }
 
         attachChild(cursorSprite);
+        setVisible(false);
     }
 
     public void setShowing(boolean showing) {

@@ -1432,15 +1432,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             autoCursor.update(dt);
         } else if (cursorSprites != null) {
             for (int i = 0; i < CursorCount; i++) {
-                cursorSprites[i].setPosition(cursors[i].mousePos.x, cursors[i].mousePos.y);
                 cursorSprites[i].update(dt);
                 if (cursors[i].mouseDown) {
-                    cursorSprites[i].setShowing(true);
                     if (cursors[i].mousePressed) {
                         cursorSprites[i].click();
                     }
-                } else {
-                    cursorSprites[i].setShowing(false);
                 }
             }
         }
@@ -2496,6 +2492,28 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         expiredObjects.add(object);
     }
 
+
+    private PointF applyCursorTrackCoordinates(PointF pos, float rawX, float rawY) {
+        var width = Config.getRES_WIDTH();
+        var height = Config.getRES_WIDTH();
+
+        if (GameHelper.isHardrock()) {
+            rawY -= height / 2f;
+            rawY *= -1;
+            rawY += height / 2f;
+        }
+        rawY -= (height - Constants.MAP_ACTUAL_HEIGHT) / 2f;
+        rawX -= (width - Constants.MAP_ACTUAL_WIDTH) / 2f;
+
+        rawX *= Constants.MAP_WIDTH / (float) Constants.MAP_ACTUAL_WIDTH;
+        rawY *= Constants.MAP_HEIGHT / (float) Constants.MAP_ACTUAL_HEIGHT;
+
+        pos.x = rawX;
+        pos.y = rawY;
+        return pos;
+    }
+
+
     public boolean onSceneTouchEvent(final Scene pScene,
                                      final TouchEvent pSceneTouchEvent) {
         if (pSceneTouchEvent.getPointerID() < 0
@@ -2509,27 +2527,51 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         final int i = pSceneTouchEvent.getPointerID();
         float pTouchX = FMath.clamp(pSceneTouchEvent.getX(), 0, Config.getRES_WIDTH());
         float pTouchY = FMath.clamp(pSceneTouchEvent.getY(), 0, Config.getRES_HEIGHT());
+
+        var cursor = cursors[i];
+        var sprite = !GameHelper.isAuto() && !GameHelper.isAutopilotMod() && cursorSprites != null
+                ? cursorSprites[i]
+                : null;
+
         if (pSceneTouchEvent.isActionDown()) {
-            cursors[i].mouseDown = true;
-            cursors[i].mouseDownOffsetMS = (pSceneTouchEvent.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier;
-            for (int j = 0; j < cursors.length; j++)
-                cursors[j].mouseOldDown = false;
-            PointF gamePoint = Utils.realToTrackCoords(new PointF(pTouchX, pTouchY));
-            cursors[i].mousePos.x = pTouchX;
-            cursors[i].mousePos.y = pTouchY;
+            cursor.mouseDown = true;
+            cursor.mouseDownOffsetMS = (pSceneTouchEvent.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier;
+
+            for (var value : cursors)
+                value.mouseOldDown = false;
+
+            PointF gamePoint = applyCursorTrackCoordinates(cursors[i].trackPos, pTouchX, pTouchY);
+            cursor.mousePos.x = pTouchX;
+            cursor.mousePos.y = pTouchY;
+
+            if (sprite != null) {
+                sprite.setShowing(true);
+                sprite.setPosition(cursor.mousePos.x, cursor.mousePos.y);
+            }
+
             if (replay != null) {
                 replay.addPress(secPassed, gamePoint, i);
             }
             cursorIIsDown[i] = true;
         } else if (pSceneTouchEvent.isActionMove()) {
-            PointF gamePoint = Utils.realToTrackCoords(new PointF(pTouchX, pTouchY));
-            cursors[i].mousePos.x = pTouchX;
-            cursors[i].mousePos.y = pTouchY;
+            PointF gamePoint = applyCursorTrackCoordinates(cursors[i].trackPos, pTouchX, pTouchY);
+            cursor.mousePos.x = pTouchX;
+            cursor.mousePos.y = pTouchY;
+
+            if (sprite != null) {
+                sprite.setPosition(cursor.mousePos.x, cursor.mousePos.y);
+            }
+
             if (replay != null) {
                 replay.addMove(secPassed, gamePoint, i);
             }
         } else if (pSceneTouchEvent.isActionUp()) {
-            cursors[i].mouseDown = false;
+            cursor.mouseDown = false;
+
+            if (sprite != null) {
+                sprite.setShowing(false);
+            }
+
             if (replay != null) {
                 replay.addUp(secPassed, i);
             }
