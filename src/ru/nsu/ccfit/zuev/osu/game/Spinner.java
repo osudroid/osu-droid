@@ -129,23 +129,11 @@ public class Spinner extends GameObject {
         approachCircle.registerEntityModifier(new SequenceEntityModifier(
                 new IEntityModifierListener() {
 
-                    public void onModifierStarted(
-                            final IModifier<IEntity> pModifier,
-                            final IEntity pItem) {
-                        // TODO Auto-generated method stub
-
+                    public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
                     }
 
-                    public void onModifierFinished(
-                            final IModifier<IEntity> pModifier,
-                            final IEntity pItem) {
-                        SyncTaskManager.getInstance().run(new Runnable() {
-
-
-                            public void run() {
-                                removeFromScene();
-                            }
-                        });
+                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                        SyncTaskManager.getInstance().run(Spinner.this::removeFromScene);
                     }
                 },
                 new SequenceEntityModifier(
@@ -310,14 +298,14 @@ public class Spinner extends GameObject {
                 clear = true;
             } else if (Math.abs(rotations) > 1) {
                 if (bonusScore != null) {
-                    bonusScore.detachFromScene(scene);
+                    scene.detachChild(bonusScore);
                 }
                 rotations -= 1 * Math.signum(rotations);
                 bonusScore = new ScoreNumber(center.x, center.y + 100,
                         String.valueOf(score * 1000), 1.1f, true);
                 listener.onSpinnerHit(id, 1000, false, 0);
                 score++;
-                bonusScore.attachToScene(scene);
+                scene.attachChild(bonusScore);
                 ResourceManager.getInstance().getSound("spinnerbonus").play();
                 float rate = 0.375f;
                 if (GameHelper.getDrain() > 0) {

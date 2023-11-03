@@ -109,11 +109,7 @@ public class ModernSpinner extends Spinner {
 
                             @Override
                             public void onModifierFinished(final IModifier<IEntity> pModifier, final IEntity pItem) {
-                                SyncTaskManager.getInstance().run(new Runnable() {
-                                    public void run() {
-                                        removeFromScene();
-                                    }
-                                });
+                                SyncTaskManager.getInstance().run(ModernSpinner.this::removeFromScene);
                             }
                         },
                         new SequenceEntityModifier(
@@ -197,14 +193,14 @@ public class ModernSpinner extends Spinner {
                 clear = true;
             } else if (Math.abs(rotations) > 1) {
                 if (bonusScore != null) {
-                    bonusScore.detachFromScene(scene);
+                    scene.detachChild(bonusScore);
                 }
                 rotations -= 1 * Math.signum(rotations);
                 bonusScore = new ScoreNumber(center.x, center.y + 100,
                         String.valueOf(score * 1000), 1.1f, true);
                 listener.onSpinnerHit(id, 1000, false, 0);
                 score++;
-                bonusScore.attachToScene(scene);
+                scene.attachChild(bonusScore);
                 ResourceManager.getInstance().getSound("spinnerbonus").play();
                 glow.registerEntityModifier(new SequenceEntityModifier(
                         new ColorModifier(0.1f, 0f, 1f, 0.8f, 1f, 1f, 1f),
