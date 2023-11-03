@@ -2030,19 +2030,21 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             musicStarted = true;
         }
         ResourceManager.getInstance().getSound("menuhit").play();
-        final float difference = skipTime - 0.5f - secPassed;
-        updatePassiveObjects(difference);
+        float difference = skipTime - 0.5f - secPassed;
 
         secPassed = skipTime - 0.5f;
         int seekTime = (int) Math.ceil(secPassed * 1000);
-
-        GlobalManager.getInstance().getSongService().seekTo(seekTime);
-        if (video != null) {
-            var videoSeekTime = seekTime - (int) (videoOffset * 1000);
-            video.getTexture().seekTo(videoSeekTime);
-        }
+        int videoSeekTime = seekTime - (int) (videoOffset * 1000);
 
         Execution.glThread(() -> {
+
+            updatePassiveObjects(difference);
+
+            GlobalManager.getInstance().getSongService().seekTo(seekTime);
+            if (video != null) {
+                video.getTexture().seekTo(videoSeekTime);
+            }
+
             if (skipBtn != null) {
                 skipBtn.detachSelf();
                 skipBtn = null;
