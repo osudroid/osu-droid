@@ -263,7 +263,12 @@ public class Spinner extends GameObject {
             }
 
             if (oldMouse == null || listener.isMousePressed(this, i)) {
-                oldMouse = new PointF(currMouse.x, currMouse.y);
+                if (oldMouse == null) {
+                    oldMouse = new PointF();
+                }
+
+                oldMouse.x = currMouse.x;
+                oldMouse.y = currMouse.y;
                 return;
             }
         }
