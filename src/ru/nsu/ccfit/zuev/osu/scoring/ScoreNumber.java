@@ -14,7 +14,7 @@ public class ScoreNumber extends Entity {
 
     public ScoreNumber(final float x, final float y, final String text, final float scale, final boolean center) {
         super(x, y);
-        float width = 0;
+        float totalWidth = 0;
         for (int i = 0; i < text.length(); i++) {
 
             var ch = text.charAt(i);
@@ -31,20 +31,20 @@ public class ScoreNumber extends Entity {
                 textureName = "x";
             }
 
-            letter = new Sprite(x + width * scale, y, ResourceManager.getInstance().getTextureWithPrefix(OsuSkin.get().getScorePrefix(), textureName));
+            letter = new Sprite(totalWidth * scale, 0, ResourceManager.getInstance().getTextureWithPrefix(OsuSkin.get().getScorePrefix(), textureName));
             letter.setSize(letter.getWidth() * scale, letter.getHeight() * scale);
 
-            width += letter.getWidth() * scale;
+            totalWidth += letter.getWidth() * scale;
             height = letter.getHeight() * scale;
 
             attachChild(letter);
         }
 
         if (center) {
-            width /= 2 * scale;
+            totalWidth /= 2 * scale;
             for (int i = 0, count = getChildCount(); i < count; i++) {
                 var sp = getChild(i);
-                sp.setPosition(sp.getX() - width, sp.getY());
+                sp.setPosition(sp.getX() - totalWidth, sp.getY());
                 sp.registerEntityModifier(new SequenceEntityModifier(
                         new ScaleModifier(0.2f, scale, scale * 1.5f),
                         new ScaleModifier(0.4f, scale * 1.5f, scale)));
