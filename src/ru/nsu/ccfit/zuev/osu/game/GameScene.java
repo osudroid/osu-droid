@@ -2516,7 +2516,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         var rawY = cursor.mousePos.y;
 
         var width = Config.getRES_WIDTH();
-        var height = Config.getRES_WIDTH();
+        var height = Config.getRES_HEIGHT();
 
         if (GameHelper.isHardrock()) {
             rawY -= height / 2f;
