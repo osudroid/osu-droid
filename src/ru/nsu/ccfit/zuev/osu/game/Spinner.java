@@ -263,7 +263,7 @@ public class Spinner extends GameObject {
             }
 
             if (oldMouse == null || listener.isMousePressed(this, i)) {
-                oldMouse = currMouse;
+                oldMouse = new PointF(currMouse.x, currMouse.y);
                 return;
             }
         }
@@ -338,6 +338,8 @@ public class Spinner extends GameObject {
                 metreY + metre.getHeight() * (1 - Math.abs(percentfill)));
         mregion.setTexturePosition(0,
                 (int) (metre.getBaseHeight() * (1 - Math.abs(percentfill))));
-        oldMouse = currMouse;
+
+        oldMouse.x = currMouse.x;
+        oldMouse.y = currMouse.y;
     }
 }

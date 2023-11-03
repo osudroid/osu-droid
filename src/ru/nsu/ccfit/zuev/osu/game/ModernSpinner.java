@@ -144,7 +144,7 @@ public class ModernSpinner extends Spinner {
             }
 
             if (oldMouse == null || listener.isMousePressed(this, i)) {
-                oldMouse = currMouse;
+                oldMouse = new PointF(currMouse.x, currMouse.y);
                 return;
             }
         }
@@ -225,7 +225,9 @@ public class ModernSpinner extends Spinner {
                 stat.changeHp(rate * 0.01f * totalTime / needRotations);
             }
         }
-        oldMouse = currMouse;
+
+        oldMouse.x = currMouse.x;
+        oldMouse.y = currMouse.y;
     }
 
     public void removeFromScene() {
