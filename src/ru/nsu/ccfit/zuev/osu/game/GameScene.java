@@ -1612,8 +1612,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         updatePassiveObjects(dt);
-
-        lastObjectHitTime = getLastObjectHitTime();
         updateActiveObjects(dt);
 
         if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
@@ -2008,12 +2006,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private void updateActiveObjects(float deltaTime) {
         for (int i = 0, size = activeObjects.size(); i < size; i++) {
-            var obj = activeObjects.get(i);
-            obj.update(deltaTime);
-
-            if (Config.isRemoveSliderLock() && !obj.isStartHit()) {
-                lastObjectHitTime = obj.getHitTime();
-            }
+            activeObjects.get(i).update(deltaTime);
         }
     }
 
