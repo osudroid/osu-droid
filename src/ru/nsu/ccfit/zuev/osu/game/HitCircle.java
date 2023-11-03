@@ -153,13 +153,16 @@ public class HitCircle extends GameObject {
 
     private boolean isHit() {
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
-            if (listener.isMousePressed(this, i)
-                    && Utils.squaredDistance(pos, listener.getMousePos(i)) <= radius) {
+
+            var inPosition = Utils.squaredDistance(pos, listener.getMousePos(i)) <= radius;
+            if (GameHelper.isRelaxMod() && passedTime - time >= 0 && inPosition) {
                 return true;
-            } else if (GameHelper.isAutopilotMod() && listener.isMousePressed(this, i)) {
+            }
+
+            var isPressed = listener.isMousePressed(this, i);
+            if (isPressed && inPosition) {
                 return true;
-            } else if (GameHelper.isRelaxMod() && passedTime - time >= 0 &&
-                    Utils.squaredDistance(pos, listener.getMousePos(i)) <= radius) {
+            } else if (GameHelper.isAutopilotMod() && isPressed) {
                 return true;
             }
         }
