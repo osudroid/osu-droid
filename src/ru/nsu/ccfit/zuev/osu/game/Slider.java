@@ -695,8 +695,8 @@ public class Slider extends GameObject {
             } else if (percentage - dt / preTime <= 0.5f) {
                 // Setting up positions of slider parts
                 approachCircle.setAlpha(1);
-                for (final Sprite sp : ticks) {
-                    sp.setAlpha(1);
+                for (int i = 0, ticksSize = ticks.size(); i < ticksSize; i++) {
+                    ticks.get(i).setAlpha(1);
                 }
                 if (repeatCount > 1) {
                     endArrow.setAlpha(1);
