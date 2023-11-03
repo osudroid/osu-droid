@@ -2632,6 +2632,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             video.getTexture().pause();
         }
 
+        // Release all pressed cursors to avoid getting stuck at resume.
+        for (int i = 0; i < CursorCount; ++i) {
+            var cursor = cursors[i];
+
+            if (cursor.mouseDown) {
+                cursor.mouseDown = false;
+                if (!replaying && replay != null) {
+                    replay.addUp(secPassed, i);
+                }
+            }
+            cursorSprites[i].setShowing(false);
+        }
+
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             GlobalManager.getInstance().getSongService().pause();
         }
