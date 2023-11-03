@@ -2635,16 +2635,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         // Release all pressed cursors to avoid getting stuck at resume.
-        for (int i = 0; i < CursorCount; ++i) {
-            var cursor = cursors[i];
+        if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod() && !replaying) {
+            for (int i = 0; i < CursorCount; ++i) {
+                var cursor = cursors[i];
 
-            if (cursor.mouseDown) {
-                cursor.mouseDown = false;
-                if (!replaying && replay != null) {
-                    replay.addUp(secPassed, i);
+                if (cursor.mouseDown) {
+                    cursor.mouseDown = false;
+
+                    if (replay != null)
+                        replay.addUp(secPassed, i);
                 }
+                if (cursorSprites != null)
+                    cursorSprites[i].setShowing(false);
             }
-            cursorSprites[i].setShowing(false);
         }
 
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
