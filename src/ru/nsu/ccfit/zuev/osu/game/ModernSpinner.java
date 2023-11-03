@@ -147,9 +147,7 @@ public class ModernSpinner extends Spinner {
                 if (oldMouse == null) {
                     oldMouse = new PointF();
                 }
-
-                oldMouse.x = currMouse.x;
-                oldMouse.y = currMouse.y;
+                oldMouse.set(currMouse);
                 return;
             }
         }
