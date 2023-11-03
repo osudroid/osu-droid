@@ -750,14 +750,14 @@ public class Slider extends GameObject {
         final float radius = 128 * scale;
         boolean inRadius = false;
         for (int i = 0, cursorCount = listener.getCursorsCount(); i < cursorCount; i++) {
-            if (autoPlay
-                    || (listener.isMouseDown(i) && Utils
-                    .squaredDistance(listener.getMousePos(i), ballpos) <= radius
-                    * radius)) {
+
+            var isPressed = listener.isMouseDown(i);
+
+            if (autoPlay || (isPressed && Utils.squaredDistance(listener.getMousePos(i), ballpos) <= radius * radius)) {
                 inRadius = true;
                 break;
             }
-            if (GameHelper.isAutopilotMod() && listener.isMouseDown(i))
+            if (GameHelper.isAutopilotMod() && isPressed)
                 inRadius = true;
         }
         listener.onTrackingSliders(inRadius);
