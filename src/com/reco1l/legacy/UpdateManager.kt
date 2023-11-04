@@ -1,9 +1,8 @@
 package com.reco1l.legacy
 
 import android.content.Intent
-import android.content.Intent.ACTION_VIEW
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-import android.net.Uri
+import android.content.Intent.*
+import androidx.core.content.FileProvider
 import androidx.preference.PreferenceManager
 import com.edlplan.ui.fragment.MarkdownFragment
 import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_INDEFINITE
@@ -19,6 +18,7 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.updateEndpoint
+import ru.nsu.ccfit.zuev.osuplus.BuildConfig.APPLICATION_ID
 import ru.nsu.ccfit.zuev.osuplus.R.string.changelog_title
 import ru.nsu.ccfit.zuev.osuplus.R.string.chimu_cancel
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_dialog_button_changelog
@@ -30,7 +30,6 @@ import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_checking
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_downloading
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_failed
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_latest
-import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_starting
 import java.io.File
 
 
@@ -38,6 +37,9 @@ object UpdateManager: IDownloaderObserver
 {
 
     private val mainActivity = GlobalManager.getInstance().mainActivity
+
+    private val preferences
+        get() = PreferenceManager.getDefaultSharedPreferences(mainActivity)
 
     private val cacheDirectory = File(mainActivity.cacheDir, "updates").apply { mkdirs() }
 
@@ -49,33 +51,34 @@ object UpdateManager: IDownloaderObserver
     private var newVersionCode: Long = mainActivity.versionCode
     
 
-    fun onActivityStart()
-    {
-        // Finding if there's a "pending changelog". This means the game was previously updated, we're 
+    fun onActivityStart() = uiThread {
+        // Finding if there's a "pending changelog". This means the game was previously updated, we're
         // showing the changelog after update with a prompt asking user to show.
-        PreferenceManager.getDefaultSharedPreferences(mainActivity).apply {
+        preferences.apply {
 
+            val latestUpdate = getLong("latestVersionCode", mainActivity.versionCode)
             val pendingChangelog = getString("pendingChangelog", null)
-            if (!pendingChangelog.isNullOrEmpty())
-            {
-                snackBar.apply {
-                    
-                    // Will only dismiss if user wants.
-                    duration = LENGTH_INDEFINITE
-                    
-                    // Show changelog button.
-                    setAction(update_dialog_button_changelog) {
 
-                        MarkdownFragment().apply {
-                            setTitle(changelog_title)
-                            setMarkdown(pendingChangelog)
-                            show()
+            if (!pendingChangelog.isNullOrEmpty()) {
+                if (latestUpdate > mainActivity.versionCode) {
+                    snackBar.apply {
+
+                        // Will only dismiss if user wants.
+                        duration = LENGTH_INDEFINITE
+
+                        // Show changelog button.
+                        setAction(update_dialog_button_changelog) {
+
+                            MarkdownFragment().apply {
+                                setTitle(changelog_title)
+                                setMarkdown(pendingChangelog)
+                                show()
+                            }
                         }
+                        setText(update_info_updated)
+                        show()
                     }
-                    setText(update_info_updated)
-                    show()
                 }
-
                 // Now we're removing the cached changelog.
                 edit().putString("pendingChangelog", null).apply()
             }
@@ -160,7 +163,7 @@ object UpdateManager: IDownloaderObserver
                     }
 
                     // Storing change log link to show once the user update to next version.
-                    PreferenceManager.getDefaultSharedPreferences(mainActivity).apply {
+                    preferences.apply {
                         edit().putString("pendingChangelog", changelogUrl).apply()
                     }
 
@@ -178,30 +181,23 @@ object UpdateManager: IDownloaderObserver
 
         val intent = Intent(ACTION_VIEW).apply {
 
-            setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive")
-            flags = FLAG_ACTIVITY_NEW_TASK
+            val uri = FileProvider.getUriForFile(mainActivity, "$APPLICATION_ID.fileProvider", file)
+
+            setDataAndType(uri, "application/vnd.android.package-archive")
+            addFlags(FLAG_GRANT_READ_URI_PERMISSION)
         }
         mainActivity.startActivity(intent)
     }
     
     private fun onDownloadNewUpdate(file: File) {
 
-        val url = downloadURL ?: return
+        // Empty string: At this point download URL shouldn't be null but if it is the case (which is weird) we set an
+        // empty string so the downloader invokes onDownloadFail() and a prompt is shown to user rather than nothing.
+        val url = downloadURL ?: ""
         
-        snackBar.apply {
-
-            // Will only dismiss if user wants.
-            duration = LENGTH_INDEFINITE
-
-            setText(update_info_starting)
-            setAction(null, null)
-            show()
-        }
-        
-        Downloader(file, url).apply {
-            observer = this@UpdateManager
-            download()
-        }
+        val downloader = Downloader(file, url)
+        downloader.observer = this
+        downloader.download()
     }
     
     
@@ -210,6 +206,10 @@ object UpdateManager: IDownloaderObserver
         if (newVersionCode <= mainActivity.versionCode) {
             onAlreadyLatestVersion(true)
             return@uiThread
+        }
+
+        preferences.apply {
+            edit().putLong("latestVersionCode", newVersionCode).apply()
         }
 
         snackBar.apply {
@@ -267,7 +267,7 @@ object UpdateManager: IDownloaderObserver
 
     override fun onDownloadUpdate(downloader: Downloader) = uiThread {
 
-        snackBar.setText(StringTable.format(update_info_downloading, downloader.progress))
+        snackBar.setText(StringTable.format(update_info_downloading, downloader.progress.toInt()))
     }
 
     override fun onDownloadEnd(downloader: Downloader) {
@@ -276,6 +276,9 @@ object UpdateManager: IDownloaderObserver
     }
 
     override fun onDownloadFail(downloader: Downloader) {
+
+        downloader.exception?.printStackTrace()
+
         uiThread {
             snackBar.apply {
 
