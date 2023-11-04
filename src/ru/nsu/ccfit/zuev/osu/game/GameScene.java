@@ -2545,8 +2545,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 ? cursorSprites[id]
                 : null;
 
-        cursor.mousePos.x = event.getX();
-        cursor.mousePos.y = event.getY();
+        cursor.mousePos.x = FMath.clamp(event.getX(), 0, Config.getRES_WIDTH());
+        cursor.mousePos.y = FMath.clamp(event.getY(), 0, Config.getRES_HEIGHT());
+
         if (sprite != null) {
             sprite.setPosition(cursor.mousePos.x, cursor.mousePos.y);
         }
