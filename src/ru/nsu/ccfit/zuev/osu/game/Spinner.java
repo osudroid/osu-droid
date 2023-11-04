@@ -330,7 +330,6 @@ public class Spinner extends GameObject {
         mregion.setTexturePosition(0,
                 (int) (metre.getBaseHeight() * (1 - Math.abs(percentfill))));
 
-        oldMouse.x = currMouse.x;
-        oldMouse.y = currMouse.y;
+        oldMouse.set(currMouse);
     }
 }

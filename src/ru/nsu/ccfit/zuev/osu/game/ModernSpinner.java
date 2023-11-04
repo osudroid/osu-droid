@@ -225,8 +225,7 @@ public class ModernSpinner extends Spinner {
             }
         }
 
-        oldMouse.x = currMouse.x;
-        oldMouse.y = currMouse.y;
+        oldMouse.set(currMouse);
     }
 
     public void removeFromScene() {
