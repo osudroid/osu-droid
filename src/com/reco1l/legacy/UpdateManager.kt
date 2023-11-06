@@ -169,7 +169,10 @@ object UpdateManager: IDownloaderObserver
 
                     onFoundNewUpdate()
                 }
-            } catch (_: Exception) {
+            } catch (exception: Exception) {
+
+                exception.printStackTrace()
+
                 // TODO: Custom prompt for errors?
                 onAlreadyLatestVersion(silently)
             }
