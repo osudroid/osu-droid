@@ -17,7 +17,7 @@ object RoomAPI
     /**
      * The API version.
      */
-    private const val API_VERSION = 4
+    private const val API_VERSION = 5
 
     /**
      * The listener for player events.
@@ -281,6 +281,7 @@ object RoomAPI
         val auth = mutableMapOf<String, String>()
         val sign = SecurityUtils.signRequest("${userId}_$username")
 
+        auth["type"] = "0"
         auth["uid"] = userId.toString()
         auth["username"] = username
         auth["version"] = API_VERSION.toString()
@@ -467,6 +468,16 @@ object RoomAPI
 
         // We don't indent here to avoid spam
         multiLog("EMITTED: liveScoreData -> $json")
+    }
+
+    /**
+     * Sends spectator data.
+     */
+    @JvmStatic
+    fun submitSpectatorData(data: ByteArray) {
+        socket!!.emit("spectatorData", data)
+
+        multiLog("EMITTED: spectatorData")
     }
 
     /**

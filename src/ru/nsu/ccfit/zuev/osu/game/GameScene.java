@@ -686,7 +686,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (Multiplayer.isMultiplayer && Multiplayer.isConnected && Multiplayer.room != null) {
-            spectatorDataManager = new SpectatorDataManager(Multiplayer.room.getId(), this, replay, stat);
+            spectatorDataManager = new SpectatorDataManager(this, replay, stat);
         }
 
         // Resetting variables before starting the game.

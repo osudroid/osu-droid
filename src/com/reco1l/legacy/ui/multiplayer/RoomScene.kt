@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import com.reco1l.api.ibancho.IPlayerEventListener
 import com.reco1l.api.ibancho.IRoomEventListener
 import com.reco1l.api.ibancho.RoomAPI
-import com.reco1l.api.ibancho.SpectatorAPI
 import com.reco1l.api.ibancho.data.*
 import com.reco1l.api.ibancho.data.PlayerStatus.*
 import com.reco1l.api.ibancho.data.RoomTeam.BLUE
@@ -13,7 +12,6 @@ import com.reco1l.api.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
 import com.reco1l.framework.extensions.orCatch
-import com.reco1l.framework.lang.async
 import com.reco1l.framework.lang.glThread
 import com.reco1l.framework.lang.uiThread
 import com.reco1l.legacy.data.modsToString
@@ -280,9 +278,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
                     getResources().getSound("menuhit")?.play()
                     RoomAPI.notifyMatchPlay()
-                    async {
-                        SpectatorAPI.startPlaying(room!!.id)
-                    }
                     return true
                 }
                 else uiThread {
@@ -683,10 +678,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             return
         }
 
-        async {
-            SpectatorAPI.joinRoom(newRoom.id, player!!.id)
-        }
-
         // Determine if it's the host
         isRoomHost = player!!.id == newRoom.host
 
@@ -719,13 +710,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomDisconnect(reason: String?)
     {
-        val roomId = room!!.id
-        val uid = player!!.id
-
-        async {
-            SpectatorAPI.leaveRoom(roomId, uid)
-        }
-
         ToastLogger.showText("Disconnected from the room${reason?.let { ": $it" } ?: "" }", true)
 
         // If player is in one of these scenes we go back.
@@ -788,11 +772,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             getGlobal().songService.stop()
             return
         }
-
-        if (isRoomHost && beatmap != null)
-            async {
-                SpectatorAPI.changeBeatmap(room!!.id, beatmap.parentSetID, beatmap.md5)
-            }
 
         getGlobal().songService.preLoad(getGlobal().selectedTrack.beatmap.music)
         getGlobal().songService.play()

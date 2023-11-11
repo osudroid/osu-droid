@@ -1,12 +1,12 @@
 package com.rian.spectator
 
 import android.util.Log
+import com.reco1l.api.ibancho.RoomAPI
 import com.rian.difficultycalculator.beatmap.hitobject.HitCircle
 import com.rian.difficultycalculator.beatmap.hitobject.HitObject
 import com.rian.difficultycalculator.beatmap.hitobject.HitObjectWithDuration
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.game.GameScene
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException
 import ru.nsu.ccfit.zuev.osu.scoring.Replay
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
@@ -20,7 +20,6 @@ import java.util.*
  * Holds spectator data that will be sent to the server periodically.
  */
 class SpectatorDataManager(
-    private val roomId: Long,
     private val gameScene: GameScene,
     private val replay: Replay,
     private val stat: StatisticV2
@@ -123,27 +122,19 @@ class SpectatorDataManager(
                     flush()
                     byteArrayOutputStream.flush()
 
-                    val message = OnlineManager.getInstance().sendSpectatorData(
-                        roomId,
-                        byteArrayOutputStream.toByteArray()
-                    )
+                    RoomAPI.submitSpectatorData(byteArrayOutputStream.toByteArray())
 
                     close()
                     byteArrayOutputStream.close()
 
-                    if (message == "FAILED") {
-                        gameScene.stopSpectatorDataSubmission()
-                        return
-                    }
-
-                    postDataSend(message == "SUCCESS", gameHasEnded)
+                    postDataSend(gameHasEnded)
                 }
             } catch (e: IOException) {
                 Log.e("SpectatorDataManager", "IOException: " + e.message, e)
-                postDataSend(success = false, gameHasEnded = false)
+                postDataSend()
             } catch (e: OnlineManagerException) {
                 Log.e("SpectatorDataManager", "OnlineManagerException: " + e.message, e)
-                postDataSend(success = false, gameHasEnded = false)
+                postDataSend()
             } finally {
                 try {
                     byteArrayOutputStream.flush()
@@ -154,11 +145,7 @@ class SpectatorDataManager(
             }
         }
 
-        private fun postDataSend(success: Boolean, gameHasEnded: Boolean) {
-            if (!success) {
-                return
-            }
-
+        private fun postDataSend(gameHasEnded: Boolean = false) {
             if (gameHasEnded) {
                 cancel()
                 gameScene.stopSpectatorDataSubmission()
@@ -239,10 +226,6 @@ class SpectatorDataManager(
 
     @Throws(Throwable::class)
     protected fun finalize() = pauseTimer()
-
-    companion object {
-        const val SPECTATOR_DATA_VERSION = 3
-    }
 }
 
 val HitObject.endTime: Double

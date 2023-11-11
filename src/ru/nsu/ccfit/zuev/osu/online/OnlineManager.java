@@ -4,9 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import android.util.Base64;
-
-import com.rian.spectator.SpectatorDataManager;
 import okhttp3.OkHttpClient;
 
 import org.anddev.andengine.util.Debug;
@@ -195,23 +192,6 @@ public class OnlineManager {
         return true;
     }
 
-    public String sendSpectatorData(Long roomId, byte[] data) throws OnlineManagerException {
-        System.out.println("Data length: " + data.length);
-
-        PostBuilder post = new PostBuilder();
-        post.addParam("userID", String.valueOf(userId));
-        post.addParam("roomID", String.valueOf(roomId));
-        post.addParam("data", Base64.encodeToString(data, Base64.URL_SAFE));
-
-        ArrayList<String> response = sendRequest(post, endpoint + "spectatorData");
-
-        if (response == null || response.isEmpty()) {
-            return "FAILED";
-        }
-
-        return response.get(0);
-    }
-
     public ArrayList<String> sendPlaySettings(StatisticV2 stat, final String hash) throws OnlineManagerException {
         PostBuilder post = new PostBuilder();
         post.addParam("userID", String.valueOf(userId));
@@ -220,9 +200,8 @@ public class OnlineManager {
         post.addParam("hash", hash);
         post.addParam("isSliderLock", Config.isRemoveSliderLock() ? "1" : "0");
         post.addParam("isSliderAccuracy", stat.getMod().contains(GameMod.MOD_SCOREV2) ? "1" : "0");
-        post.addParam("spectatorDataVersion", String.valueOf(SpectatorDataManager.SPECTATOR_DATA_VERSION));
 
-        return sendRequest(post, endpoint + "spectatorPlayerSettings");
+        return sendRequest(post, endpoint + "verifyPlaySettings");
     }
 
     public ArrayList<String> getTop(final String hash) throws OnlineManagerException {
