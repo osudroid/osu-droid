@@ -59,10 +59,6 @@ class SpectatorDataManager(
                     writeInt(stat.totalScoreWithMultiplier)
                     writeInt(stat.combo)
                     writeFloat(stat.getAccuracy())
-                    writeInt(stat.hit300)
-                    writeInt(stat.hit100)
-                    writeInt(stat.hit50)
-                    writeInt(stat.misses)
 
                     writeInt(replay.cursorMoves.size)
                     for (i in beginningCursorMoveIndexes.indices) {
