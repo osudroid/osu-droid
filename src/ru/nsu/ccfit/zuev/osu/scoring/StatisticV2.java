@@ -285,8 +285,8 @@ public class StatisticV2 implements Serializable {
                         break;
                 }
             }
-            totalScore = (int)(MAX_SCORE * (ACC_PORTION * Math.pow(acc , 10) * percentage
-                    + COMBO_PORTION * maxcb / maxHighestCombo) + bonusScore);
+            totalScore = (int)(MAX_SCORE * (ACC_PORTION * Math.pow(acc, 8) * percentage
+                    + COMBO_PORTION * acc * maxcb / maxHighestCombo) + bonusScore);
         } else if (amount + amount * currentCombo * diffModifier / 25 > 0) {
             // It is possible for score addition to be a negative number due to
             // difficulty modifier, hence the prior check.
