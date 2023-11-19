@@ -108,6 +108,7 @@ public class OnlineManager {
         post.addParam("username", username);
         post.addParam("password", sha256(password + "taikotaiko"));
         post.addParam("email", email);
+        post.addParam("version", onlineVersion);
 
         ArrayList<String> response = sendRequest(post, endpoint + "register");
 
