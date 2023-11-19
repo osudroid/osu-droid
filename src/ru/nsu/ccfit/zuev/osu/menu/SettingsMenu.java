@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import android.animation.Animator;
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
@@ -37,6 +36,7 @@ import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.online.OnlineInitializer;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
@@ -163,8 +163,8 @@ public class SettingsMenu extends SettingsFragment {
         });
         final Preference register = findPreference("registerAcc");
         register.setOnPreferenceClickListener(preference -> {
-            Intent intent = new Intent(ACTION_VIEW, Uri.parse(REGISTER_URL));
-            startActivity(intent);
+            var initializer = new OnlineInitializer(getActivity());
+            initializer.createInitDialog();
             return true;
         });
 

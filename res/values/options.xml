@@ -224,7 +224,7 @@
     <string name="opt_stayonline_title">Server Connection</string>
     <string name="opt_stayonline_summary">Connect to osu!droid server</string>
 
-    <string name="opt_login_title">Login</string>
+    <string name="opt_login_title">Username</string>
     <string name="opt_login_summary">Your online name</string>
 
     <string name="opt_password_title">Password</string>

@@ -9,6 +9,8 @@ import okhttp3.OkHttpClient;
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -98,6 +100,18 @@ public class OnlineManager {
 
 
         return response;
+    }
+
+    public boolean register(final String username, final String password, final String email)
+            throws OnlineManagerException {
+        PostBuilder post = new PostBuilder();
+        post.addParam("username", username);
+        post.addParam("password", sha256(password + "taikotaiko"));
+        post.addParam("email", email);
+
+        ArrayList<String> response = sendRequest(post, endpoint + "register");
+
+        return response != null;
     }
 
     public boolean logIn() throws OnlineManagerException {
@@ -377,5 +391,22 @@ public class OnlineManager {
                 .replace("'", "\\'")
                 .replace("\"", "\\\"")
                 .replace("\\", "\\\\");
+    }
+
+    private static String sha256(final String base) {
+        try{
+            final MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            final byte[] hash = digest.digest(base.getBytes(StandardCharsets.UTF_8));
+            final StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                final String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1)
+                    hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
     }
 }

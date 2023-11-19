@@ -110,7 +110,7 @@
 	<string name="downloader_page" formatted="false">Page %d of %d</string>
 	<string name="downloader_nomaps">No beatmaps found</string>
 
-	<string name="hint_login">Login</string>
+	<string name="hint_login">Username</string>
 	<string name="hint_password">Password</string>
 
 	<string name="replay_invalid">Cannot load replay</string>
