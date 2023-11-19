@@ -101,8 +101,6 @@
                                 android:title="@string/opt_syncmusic_title"/>
             <CheckBoxPreference android:key="hidenavibar" android:summary="@string/opt_hide_navibar_summary"
                                 android:title="@string/opt_hide_navibar_title" android:defaultValue="false"/>
-            <CheckBoxPreference android:key="lowDelay" android:title="@string/opt_lowdelay_title"
-                                android:summary="@string/opt_lowdelay_summary" android:defaultValue="true"/>
             <CheckBoxPreference android:key="fixFrameOffset" android:title="@string/opt_fix_frame_offset_title"
                                 android:summary="@string/opt_fix_frame_offset_summary" android:defaultValue="true"/>
             <CheckBoxPreference android:key="calculateSliderPathInGameStart" android:title="@string/opt_calculate_slider_path_in_game_start_title"

@@ -1,4 +1,4 @@
-Version 1.7.1 Update Hotfix 3 (October 3, 2023)
+Version 1.7.1 Update Hotfix 3 (October 19, 2023)
 =========================================
 
 # Changes
@@ -13,6 +13,7 @@ Version 1.7.1 Update Hotfix 3 (October 3, 2023)
 - Fixed an issue where scores are sorted in multiplayer ranking screen without taking mod score multipliers into account
 - Fixed an issue where the in-game leaderboard data takes a long time to update when using a very low mod score multiplier
 - Fixed an issue where the score display during gameplay ignores unranked mods' score multipliers
+- Fixed an issue where the "reduce input delay" option still exists in multiplayer options
 
 Version 1.7.1 Update Hotfix 2 (October 1, 2023)
 =========================================
