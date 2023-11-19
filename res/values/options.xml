@@ -230,8 +230,8 @@
     <string name="opt_password_title">Password</string>
     <string name="opt_password_summary">Password of your account</string>
 
-    <string name="opt_register_title">Register</string>
-    <string name="opt_register_summary">Register a new account</string>
+    <string name="opt_register_title">Register Password</string>
+    <string name="opt_register_summary">Register your account\'s password</string>
 
     <string name="opt_loadavatar_title">Load Avatar</string>
     <string name="opt_loadavatar_summary">Load without WiFi connection.</string>
