@@ -130,7 +130,7 @@ public class OnlineManager {
         post.addParam("username", username);
         post.addParam(
                 "password",
-                MD5Calcuator.getStringMD5(
+                sha256(
                         escapeHTMLSpecialCharacters(addSlashes(String.valueOf(password).trim())) + "taikotaiko"
                 ));
         post.addParam("version", onlineVersion);
