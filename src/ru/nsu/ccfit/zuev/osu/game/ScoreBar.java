@@ -20,16 +20,16 @@ public class ScoreBar extends GameObject {
     private final float width;
     private float lasthp = 0;
 
+    private final boolean isAnimated;
+
     public ScoreBar(final GameObjectListener listener, final Scene scene,
                     final StatisticV2 stat) {
         this.stat = stat;
         bg = new Sprite(0, 0, ResourceManager.getInstance().getTexture(
                 "scorebar-bg"));
         bg.setScaleCenter(0, 0);
-		/*final int colourFrames = SkinManager.getFrames("scorebar-colour");
-		colour = new AnimSprite(Utils.toRes(5), Utils.toRes(16),
-				"scorebar-colour-", colourFrames, colourFrames);*/
-        if (ResourceManager.getInstance().isTextureLoaded("scorebar-colour-0")) {
+        isAnimated = ResourceManager.getInstance().isTextureLoaded("scorebar-colour-0");
+        if (isAnimated) {
             List<String> loadedScoreBarTextures = new ArrayList<>();
             for (int i = 0; i < 60; i++) {
                 if (ResourceManager.getInstance().isTextureLoaded("scorebar-colour-" + i))
@@ -42,9 +42,6 @@ public class ScoreBar extends GameObject {
                     ResourceManager.getInstance().getTexture("scorebar-colour"));
         }
         width = colour.getWidth();
-		/*for (int i = 0; i < colour.getTextureRegionCount(); i++) {
-			colour.setTextureRegion(i, colour.getTextureRegionAt(i).deepCopy());
-		}*/
         ki = ResourceManager.getInstance().isTextureLoaded("scorebar-kidanger")
                 ? new AnimSprite(0, 0, 0, "scorebar-ki", "scorebar-kidanger", "scorebar-kidanger2")
                 : new AnimSprite(0, 0, 0, "scorebar-ki");
@@ -70,27 +67,24 @@ public class ScoreBar extends GameObject {
             hp = speed * dt * Math.signum(hp - lasthp) + lasthp;
         }
 
-		/*for (int i = 0; i < colour.getTextureRegionCount(); i++) {
-			colour.getTextureRegionAt(i).setWidth((int) (width * hp));
-		}*/
-        colour.setWidth(width * hp);
+        var translationX = width * (1 - Math.abs(hp));
+        colour.setPosition(5 - translationX, colour.getY());
 
-        ki.setPosition(Utils.toRes(5) + colour.getWidth() - ki.getWidth() / 2,
-                Utils.toRes(16) + colour.getHeight() / 2 - ki.getHeight() / 2);
-        //ki.setScale(hp>lasthp?1.2f:1);
+        if (isAnimated) {
+            var sprite = (AnimSprite) colour;
+
+            for (int i = 0, count = sprite.getTextureRegionCount(); i < count; i++) {
+                sprite.getTextureRegionAt(i).setTexturePosition((int) -translationX, 0);
+            }
+        } else {
+            colour.getTextureRegion().setTexturePosition((int) -translationX, 0);
+        }
+
+        ki.setPosition(5 + colour.getX() + width - ki.getWidth() / 2, 16 + colour.getHeight() / 2 - ki.getHeight() / 2);
         ki.setFrame(hp > 0.49 ? 0
                 : hp > 0.24 ? 1
                 : 2);
         lasthp = hp;
-		/*if (hp < 0.5f) {
-			if (hp < 0.25f) {
-				ki.setFrame(2);
-			} else {
-				ki.setFrame(1);
-			}
-		} else {
-			ki.setFrame(0);
-		}*/
     }
 
     public void flush() {
