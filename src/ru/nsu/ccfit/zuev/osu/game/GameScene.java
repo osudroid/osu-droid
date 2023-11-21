@@ -178,7 +178,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private String title, artist, version;
     private ComboBurst comboBurst;
     private int failcount = 0;
-    private float lastObjectHitTime = 0;
+    private float lastActiveObjectHitTime = 0;
     private SliderPath[] sliderPaths = null;
     private int sliderIndex = 0;
 
@@ -530,7 +530,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         comboNum = -1;
         currentComboNum = 0;
-        lastObjectHitTime = 0;
+        lastActiveObjectHitTime = 0;
         final SampleBank defSound = beatmapData.general.sampleBank;
         if (defSound == SampleBank.soft) {
             TimingPoint.setDefaultSound("soft");
@@ -1611,20 +1611,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        updatePassiveObjects(dt);
-        updateActiveObjects(dt);
-
-        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
-            autoCursor.moveToObject(activeObjects.peek(), secPassed, approachRate, this);
-        }
-
-        for (int i = 0; i < CursorCount; i++) {
-            cursorIIsDown[i] = false;
-        }
-
-        lastObjectHitTime = getLastObjectHitTime();
-        tryHitActiveObjects(dt);
-
         // Clearing expired objects.
         while (!expiredObjects.isEmpty()) {
             var object = expiredObjects.poll();
@@ -1632,6 +1618,31 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             // share the same list to remove them.
             activeObjects.remove(object);
             passiveObjects.remove(object);
+        }
+
+        updatePassiveObjects(dt);
+        if (Config.isRemoveSliderLock()) {
+            updateLastActiveObjectHitTime();
+        }
+        updateActiveObjects(dt);
+
+        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
+            autoCursor.moveToObject(activeObjects.peek(), secPassed, approachRate, this);
+        }
+
+        var downPressCursorCount = 0;
+
+        for (int i = 0; i < CursorCount; i++) {
+            if (cursorIIsDown[i])
+                downPressCursorCount++;
+            cursorIIsDown[i] = false;
+        }
+
+        for (int i = 0; i < downPressCursorCount - 1; i++) {
+            if (Config.isRemoveSliderLock()) {
+                updateLastActiveObjectHitTime();
+            }
+            tryHitActiveObjects(dt);
         }
 
         if (video != null && secPassed >= videoOffset)
@@ -1987,15 +1998,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
     }
 
-    private float getLastObjectHitTime() {
-        if (Config.isRemoveSliderLock()) {
-            for (int i = 0, size = activeObjects.size(); i < size; i++) {
-                var obj = activeObjects.get(i);
-                if (!obj.isStartHit())
-                    return obj.getHitTime();
-            }
+    private void updateLastActiveObjectHitTime() {
+        for (int i = 0, size = activeObjects.size(); i < size; i++) {
+            var obj = activeObjects.get(i);
+            if (!obj.isStartHit())
+                lastActiveObjectHitTime = obj.getHitTime();
         }
-        return lastObjectHitTime;
     }
 
     private void tryHitActiveObjects(float deltaTime) {
@@ -2483,7 +2491,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         if (Config.isRemoveSliderLock()){
             if(activeObjects.isEmpty()
-                || Math.abs(object.getHitTime() - lastObjectHitTime) > 0.001f) {
+                || Math.abs(object.getHitTime() - lastActiveObjectHitTime) > 0.001f) {
                 return false;
             }
         }
