@@ -526,28 +526,37 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         modsButton!!.isVisible = isRoomHost || room!!.isFreeMods
     }
 
-    private fun updateBeatmapInfo() {
-        getGlobal().selectedTrack?.also {
-            val dateFormat = SimpleDateFormat(if (it.musicLength > 3600 * 1000) "HH:mm:ss" else "mm:ss")
-            dateFormat.timeZone = TimeZone.getTimeZone("GMT+0")
+    private fun updateBeatmapInfo()
+    {
+        beatmapInfoRectangle!!.isVisible = getGlobal().selectedTrack?.let { track ->
 
-            beatmapInfoText.text =
-                "BPM: ${if (it.bpmMin == it.bpmMax) "%.1f".format(it.bpmMin) else "%.1f-%.1f".format(it.bpmMin, it.bpmMax)}" +
-                "  Length: ${dateFormat.format(it.musicLength)}\n" +
-                "CS:${it.circleSize} AR:${it.approachRate} OD:${it.overallDifficulty} HP:${it.hpDrain} Star Rating: ${it.difficulty}"
-        } ?: run { beatmapInfoText.text = "" }
+            val df = SimpleDateFormat(if (track.musicLength > 3600 * 1000) "HH:mm:ss" else "mm:ss")
+            df.timeZone = TimeZone.getTimeZone("GMT+0")
 
-        beatmapInfoRectangle!!.also {
-            if (getGlobal().selectedTrack == null) {
-                it.isVisible = false
-            }
+            beatmapInfoText.text = """
+                Length: ${
+                    SimpleDateFormat(if (track.musicLength > 3600 * 1000) "HH:mm:ss" else "mm:ss").let {
+                        it.timeZone = TimeZone.getTimeZone("GMT+0")
+                        it.format(track.musicLength)
+                    }
+                } BPM: ${
+                    if (track.bpmMin == track.bpmMax) 
+                        "%.1f".format(track.bpmMin) 
+                    else 
+                        "%.1f-%.1f".format(track.bpmMin, track.bpmMax)
+                } 
+                CS: ${track.circleSize} AR: ${track.approachRate} OD: ${track.overallDifficulty} HP: ${track.hpDrain} Star Rating: ${track.difficulty}
+            """.trimIndent()
 
-            it.width = beatmapInfoText.width + 20
-            it.height = beatmapInfoText.height + 20
+            true
+        } ?: false
 
-            trackButton!!.let { t ->
-                it.setPosition(t.x + t.width - it.width - 20, t.y + t.height)
-            }
+        beatmapInfoRectangle!!.also { rect ->
+
+            rect.width = beatmapInfoText.width + 20
+            rect.height = beatmapInfoText.height + 20
+
+            trackButton!!.let { rect.setPosition(it.x + it.width - rect.width - 20, it.y + it.height) }
         }
     }
 
