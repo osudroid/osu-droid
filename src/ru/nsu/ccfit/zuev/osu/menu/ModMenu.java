@@ -20,6 +20,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -54,6 +55,12 @@ public class ModMenu implements IModSwitcher {
     private boolean enableNCWhenSpeedChange = false;
     private boolean modsRemoved = false;
     private float FLfollowDelay = DEFAULT_FL_FOLLOW_DELAY;
+
+
+    private Float customAR = null;
+    private Float customOD = null;
+    private Float customHP = null;
+    private Float customCS = null;
 
     private ModMenu() {
         mod = EnumSet.noneOf(GameMod.class);
@@ -161,12 +168,29 @@ public class ModMenu implements IModSwitcher {
             var string = MultiplayerConverter.modsToString(mod);
 
             // The room mods are the same as the host mods
-            if (Multiplayer.isRoomHost)
-                RoomAPI.setRoomMods(string, changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
-            else if (updatePlayerMods)
-                RoomAPI.setPlayerMods(string, changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
-            else
+            if (Multiplayer.isRoomHost) {
+                RoomAPI.setRoomMods(
+                        string,
+                        changeSpeed,
+                        FLfollowDelay,
+                        customAR,
+                        customOD,
+                        customCS,
+                        customHP
+                );
+            } else if (updatePlayerMods) {
+                RoomAPI.setPlayerMods(
+                        string,
+                        changeSpeed,
+                        FLfollowDelay,
+                        customAR,
+                        customOD,
+                        customCS,
+                        customHP
+                );
+            } else {
                 RoomScene.awaitModsChange = false;
+            }
         }
     }
 
@@ -456,28 +480,12 @@ public class ModMenu implements IModSwitcher {
         changeSpeed = speed;
     }
 
-    public float getForceAR(){
-        return forceAR;
-    }
-
-    public void setForceAR(float ar){
-        forceAR = ar;
-    }
-
-    public boolean isEnableForceAR(){
-        return enableForceAR;
-    }
-
     public boolean isDefaultFLFollowDelay() {
         return FLfollowDelay == DEFAULT_FL_FOLLOW_DELAY;
     }
 
     public void resetFLFollowDelay() {
         FLfollowDelay = DEFAULT_FL_FOLLOW_DELAY;
-    }
-
-    public void setEnableForceAR(boolean t){
-        enableForceAR = t;
     }
 
     public boolean isEnableNCWhenSpeedChange(){
@@ -492,4 +500,56 @@ public class ModMenu implements IModSwitcher {
         changeMultiplierText();
     }
 
+
+
+    public boolean isCustomAR() {
+        return customAR != null;
+    }
+
+    public Float getCustomAR() {
+        return customAR;
+    }
+
+    public void setCustomAR(@Nullable Float customAR) {
+        this.customAR = customAR;
+    }
+
+
+    public boolean isCustomOD() {
+        return customOD != null;
+    }
+
+    public Float getCustomOD() {
+        return customOD;
+    }
+
+    public void setCustomOD(@Nullable Float customOD) {
+        this.customOD = customOD;
+    }
+
+
+    public boolean isCustomHP() {
+        return customHP != null;
+    }
+
+    public Float getCustomHP() {
+        return customHP;
+    }
+
+    public void setCustomHP(@Nullable Float customHP) {
+        this.customHP = customHP;
+    }
+
+
+    public boolean isCustomCS() {
+        return customCS != null;
+    }
+
+    public Float getCustomCS() {
+        return customCS;
+    }
+
+    public void setCustomCS(@Nullable Float customCS) {
+        this.customCS = customCS;
+    }
 }

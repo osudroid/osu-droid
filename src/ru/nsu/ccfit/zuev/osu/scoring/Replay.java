@@ -45,9 +45,12 @@ public class Replay {
     private String mapName = "";
     private boolean isSaving;
     public static float oldChangeSpeed = 1.0f;
-    public static float oldForceAR = 9.0f;
-    public static boolean oldEnableForceAR = false;
     public static float oldFLFollowDelay = FlashLightEntity.defaultMoveDelayS;
+
+    public static Float oldCustomAR;
+    public static Float oldCustomOD;
+    public static Float oldCustomCS;
+    public static Float oldCustomHP;
 
     public Replay() {
         cursorMoves.add(new MoveArray(200));

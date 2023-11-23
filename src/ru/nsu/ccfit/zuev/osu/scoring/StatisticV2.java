@@ -9,6 +9,7 @@ import java.util.Random;
 
 import com.reco1l.api.ibancho.data.WinCondition;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
@@ -43,8 +44,6 @@ public class StatisticV2 implements Serializable {
     private int forcedScore = -1;
     private String mark = null;
     private float changeSpeed = 1.0f;
-    private float forceAR = 9.0f;
-    private boolean enableForceAR = false;
     private final int MAX_SCORE = 1000000;
     private final float ACC_PORTION = 0.3f;
     private final float COMBO_PORTION = 0.7f;
@@ -57,6 +56,12 @@ public class StatisticV2 implements Serializable {
     private int negativeTotalOffsetSum;
     private double negativeHitOffsetSum;
     private double unstableRate;
+
+    private Float customAR;
+    private Float customOD;
+    private Float customCS;
+    private Float customHP;
+
 
     /**
      * Indicates that the player is alive (HP hasn't reached 0, or it recovered), this is exclusively used for
@@ -677,17 +682,57 @@ public class StatisticV2 implements Serializable {
         computeModScoreMultiplier();
     }
 
-    public float getForceAR(){
-        return forceAR;
+
+    public boolean isCustomAR() {
+        return customAR != null;
     }
 
-    public void setForceAR(float ar){
-        forceAR = ar;
+    public float getCustomAR(){
+        return customAR;
     }
 
-    public boolean isEnableForceAR(){
-        return enableForceAR;
+    public void setCustomAR(@Nullable Float ar) {
+        customAR = ar;
     }
+
+    public boolean isCustomOD() {
+        return customOD != null;
+    }
+
+    public Float getCustomOD() {
+        return customOD;
+    }
+
+    public void setCustomOD(@Nullable Float customOD) {
+        this.customOD = customOD;
+    }
+
+
+    public boolean isCustomHP() {
+        return customHP != null;
+    }
+
+    public Float getCustomHP() {
+        return customHP;
+    }
+
+    public void setCustomHP(@Nullable Float customHP) {
+        this.customHP = customHP;
+    }
+
+
+    public boolean isCustomCS() {
+        return customCS != null;
+    }
+
+    public Float getCustomCS() {
+        return customCS;
+    }
+
+    public void setCustomCS(@Nullable Float customCS) {
+        this.customCS = customCS;
+    }
+
 
     public void setFLFollowDelay(float delay) {
         flFollowDelay = delay;
@@ -695,10 +740,6 @@ public class StatisticV2 implements Serializable {
 
     public float getFLFollowDelay() {
         return flFollowDelay;
-    }
-
-    public void setEnableForceAR(boolean t){
-        enableForceAR = t;
     }
 
     public double getUnstableRate() {
@@ -778,8 +819,17 @@ public class StatisticV2 implements Serializable {
         if (changeSpeed != 1){
             builder.append(String.format(Locale.ENGLISH, "x%.2f|", changeSpeed));
         }
-        if (enableForceAR){
-            builder.append(String.format(Locale.ENGLISH, "AR%.1f|", forceAR));
+        if (isCustomAR()){
+            builder.append(String.format(Locale.ENGLISH, "AR%.1f|", customAR));
+        }
+        if (isCustomOD()){
+            builder.append(String.format(Locale.ENGLISH, "OD%.1f|", customOD));
+        }
+        if (isCustomCS()){
+            builder.append(String.format(Locale.ENGLISH, "CS%.1f|", customCS));
+        }
+        if (isCustomHP()){
+            builder.append(String.format(Locale.ENGLISH, "HP%.1f|", customHP));
         }
         if (flFollowDelay != FlashLightEntity.defaultMoveDelayS) {
             builder.append(String.format(Locale.ENGLISH, "FLD%.2f|", flFollowDelay));
@@ -798,8 +848,16 @@ public class StatisticV2 implements Serializable {
                 continue;
             }
             if (str.startsWith("AR")){
-                enableForceAR = true;
-                forceAR = Float.parseFloat(str.substring(2));
+                customAR = Float.parseFloat(str.substring(2));
+            }
+            if (str.startsWith("OD")){
+                customOD = Float.parseFloat(str.substring(2));
+            }
+            if (str.startsWith("CS")){
+                customCS = Float.parseFloat(str.substring(2));
+            }
+            if (str.startsWith("HP")){
+                customHP = Float.parseFloat(str.substring(2));
             }
             if (str.startsWith("FLD")) {
                 flFollowDelay = Float.parseFloat(str.substring(3));

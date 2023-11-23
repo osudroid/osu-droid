@@ -392,7 +392,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
 
         scale = (float) ((Config.getRES_HEIGHT() / 480.0f)
-                * (54.42 - beatmapData.difficulty.cs * 4.48)
+                * (54.42 - (ModMenu.getInstance().isCustomCS() ? ModMenu.getInstance().getCustomCS() : beatmapData.difficulty.cs) * 4.48)
                 * 2 / GameObjectSize.BASE_OBJECT_SIZE)
                 + 0.5f * Config.getScaleMultiplier();
 
@@ -474,9 +474,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             scale -= (float) ((Config.getRES_HEIGHT() / 480.0f) * (4 * 4.48)
             * 2 / GameObjectSize.BASE_OBJECT_SIZE);
         }
-        //Force AR
-        if (ModMenu.getInstance().isEnableForceAR()){
-            approachRate = (float) GameHelper.ar2ms(ModMenu.getInstance().getForceAR()) / 1000f * timeMultiplier;
+
+        if (ModMenu.getInstance().isCustomAR()){
+            approachRate = (float) GameHelper.ar2ms(ModMenu.getInstance().getCustomAR()) / 1000f * timeMultiplier;
+        }
+        if (ModMenu.getInstance().isCustomOD()) {
+            overallDifficulty = ModMenu.getInstance().getCustomOD();
+        }
+        if (ModMenu.getInstance().isCustomHP()) {
+            drain = ModMenu.getInstance().getCustomHP();
         }
 
         GameHelper.setRelaxMod(ModMenu.getInstance().getMod().contains(GameMod.MOD_RELAX));
@@ -629,8 +635,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             parameters.mods = ModMenu.getInstance().getMod().clone();
             parameters.customSpeedMultiplier = ModMenu.getInstance().getChangeSpeed();
 
-            if (ModMenu.getInstance().isEnableForceAR()) {
-                parameters.forcedAR = ModMenu.getInstance().getForceAR();
+            // TODO PP calculation doesn't account for custom CS, OD and HP attributes currently.
+            if (ModMenu.getInstance().isCustomAR()) {
+                parameters.forcedAR = ModMenu.getInstance().getCustomAR();
             }
 
             timedDifficultyAttributes = BeatmapDifficultyCalculator.calculateTimedDifficulty(
@@ -710,9 +717,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 } else {
                     ModMenu.getInstance().setMod(Replay.oldMod);
                     ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
-                    ModMenu.getInstance().setForceAR(Replay.oldForceAR);
-                    ModMenu.getInstance().setEnableForceAR(Replay.oldEnableForceAR);
                     ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
+
+                    ModMenu.getInstance().setCustomAR(Replay.oldCustomAR);
+                    ModMenu.getInstance().setCustomOD(Replay.oldCustomOD);
+                    ModMenu.getInstance().setCustomCS(Replay.oldCustomCS);
+                    ModMenu.getInstance().setCustomHP(Replay.oldCustomHP);
+
                     quit();
                 }
             }
@@ -816,8 +827,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         stat.setDiffModifier(multiplier);
         stat.setMaxObjectsCount(lastTrack.getTotalHitObjectCount());
         stat.setMaxHighestCombo(lastTrack.getMaxCombo());
-        stat.setEnableForceAR(ModMenu.getInstance().isEnableForceAR());
-        stat.setForceAR(ModMenu.getInstance().getForceAR());
+
+        stat.setCustomAR(ModMenu.getInstance().getCustomAR());
+        stat.setCustomOD(ModMenu.getInstance().getCustomOD());
+        stat.setCustomCS(ModMenu.getInstance().getCustomCS());
+        stat.setCustomHP(ModMenu.getInstance().getCustomHP());
+
         stat.setChangeSpeed(ModMenu.getInstance().getChangeSpeed());
         stat.setFLFollowDelay(ModMenu.getInstance().getFLfollowDelay());
 
@@ -1250,7 +1265,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             .applyFilter(m -> m.unranked).hasNext();
         if (hasUnrankedMod
                 || Config.isRemoveSliderLock()
-                || ModMenu.getInstance().isEnableForceAR()
+                || ModMenu.getInstance().isCustomAR()
+                || ModMenu.getInstance().isCustomOD()
+                || ModMenu.getInstance().isCustomCS()
+                || ModMenu.getInstance().isCustomHP()
                 || !ModMenu.getInstance().isDefaultFLFollowDelay()) {
             unranked.setVisible(true);
         }
@@ -1933,9 +1951,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (replaying) {
                     ModMenu.getInstance().setMod(Replay.oldMod);
                     ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
-                    ModMenu.getInstance().setForceAR(Replay.oldForceAR);
-                    ModMenu.getInstance().setEnableForceAR(Replay.oldEnableForceAR);
                     ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
+
+                    ModMenu.getInstance().setCustomAR(Replay.oldCustomAR);
+                    ModMenu.getInstance().setCustomOD(Replay.oldCustomOD);
+                    ModMenu.getInstance().setCustomCS(Replay.oldCustomCS);
+                    ModMenu.getInstance().setCustomHP(Replay.oldCustomHP);
                 }
 
                 if (replaying)
@@ -2088,9 +2109,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             replayFile = null;
             ModMenu.getInstance().setMod(Replay.oldMod);
             ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
-            ModMenu.getInstance().setForceAR(Replay.oldForceAR);
-            ModMenu.getInstance().setEnableForceAR(Replay.oldEnableForceAR);
             ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
+
+            Replay.oldCustomAR = ModMenu.getInstance().getCustomAR();
+            Replay.oldCustomOD = ModMenu.getInstance().getCustomOD();
+            Replay.oldCustomCS = ModMenu.getInstance().getCustomCS();
+            Replay.oldCustomHP = ModMenu.getInstance().getCustomHP();
         }
     }
 

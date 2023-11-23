@@ -1021,15 +1021,28 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 4 / 3), 2);
             od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 4 / 3), 2);
         }
-        if (ModMenu.getInstance().isEnableForceAR()) {
-            float oriAr = ar;
-            ar = ModMenu.getInstance().getForceAR();
-            if (ar > oriAr) {
-                dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-            } else if (ar < oriAr) {
-                dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
-            }
+        float rawAR = ar;
+        float rawOD = od;
+        float rawCS = cs;
+        float rawHP = hp;
+
+        if (ModMenu.getInstance().isCustomAR()) {
+            ar = ModMenu.getInstance().getCustomAR();
         }
+        if (ModMenu.getInstance().isCustomOD()) {
+            od = ModMenu.getInstance().getCustomOD();
+        }
+        if (ModMenu.getInstance().isCustomCS()) {
+            cs = ModMenu.getInstance().getCustomCS();
+        }
+        if (ModMenu.getInstance().isCustomHP()) {
+            hp = ModMenu.getInstance().getCustomHP();
+        }
+
+        if (ar != rawAR || od != rawOD || cs != rawCS || hp != rawHP) {
+            dimensionInfo.setColor(256 / 255f, 180 / 255f, 0 / 255f);
+        }
+
         dimensionStringBuilder.append("AR: ").append(GameHelper.Round(ar, 2)).append(" ")
                 .append("OD: ").append(GameHelper.Round(od, 2)).append(" ")
                 .append("CS: ").append(GameHelper.Round(cs, 2)).append(" ")
@@ -1068,8 +1081,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             parameters.mods = ModMenu.getInstance().getMod();
             parameters.customSpeedMultiplier = ModMenu.getInstance().getChangeSpeed();
 
-            if (ModMenu.getInstance().isEnableForceAR()) {
-                parameters.forcedAR = ModMenu.getInstance().getForceAR();
+            // TODO Here too.
+            if (ModMenu.getInstance().isCustomAR()) {
+                parameters.forcedAR = ModMenu.getInstance().getCustomAR();
             }
 
             DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
@@ -1107,8 +1121,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
             Replay.oldMod = ModMenu.getInstance().getMod();
             Replay.oldChangeSpeed = ModMenu.getInstance().getChangeSpeed();
-            Replay.oldForceAR = ModMenu.getInstance().getForceAR();
-            Replay.oldEnableForceAR = ModMenu.getInstance().isEnableForceAR();
+
+            Replay.oldCustomAR = ModMenu.getInstance().getCustomAR();
+            Replay.oldCustomOD = ModMenu.getInstance().getCustomOD();
+            Replay.oldCustomCS = ModMenu.getInstance().getCustomCS();
+            Replay.oldCustomHP = ModMenu.getInstance().getCustomHP();
+
             Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
 
             game.startGame(track, null);
