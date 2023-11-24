@@ -13,6 +13,7 @@ import com.rian.difficultycalculator.calculator.PerformanceCalculator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -458,7 +459,7 @@ public final class BeatmapDifficultyCalculator {
             }
 
             for (var cache : cacheMap.entrySet()) {
-                if (cache.getKey() == parameters) {
+                if (cache.getKey().equals(parameters)) {
                     return cache.getValue().cache;
                 }
             }
