@@ -37,7 +37,7 @@
 		android:layout_alignParentBottom="true"
 		android:gravity="center"
 		android:orientation="vertical"
-		android:translationY="200dp">
+		android:translationY="260dp">
 
 
 		<RelativeLayout
@@ -91,7 +91,7 @@
 		<LinearLayout
 			android:id="@+id/optionBody"
 			android:layout_width="match_parent"
-			android:layout_height="200dp"
+			android:layout_height="260dp"
 			android:background="@color/frgBodyBackgroundLight"
 			android:clickable="true"
 			android:orientation="vertical">
