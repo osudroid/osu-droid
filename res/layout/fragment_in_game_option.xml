@@ -36,7 +36,8 @@
 		android:layout_height="wrap_content"
 		android:layout_alignParentBottom="true"
 		android:gravity="center"
-		android:orientation="vertical">
+		android:orientation="vertical"
+		android:translationY="260dp">
 
 
 		<RelativeLayout
