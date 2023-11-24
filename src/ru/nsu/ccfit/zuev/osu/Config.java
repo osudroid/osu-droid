@@ -126,9 +126,8 @@ public class Config {
         keepBackgroundAspectRatio = prefs.getBoolean("keepBackgroundAspectRatio", false);
 
         setSize();
+        setPlayfieldSize(prefs.getInt("playfieldSize", 100) / 100f);
 
-        setPlayfieldSize(Integer.parseInt(prefs.getString(
-            "playfieldsize", "100")) / 100f);
         shrinkPlayfieldDownwards = prefs.getBoolean("shrinkPlayfieldDownwards", true);
         complexAnimations = prefs.getBoolean("complexanimations", true);
         snakingInSliders = prefs.getBoolean("snakingInSliders", true);

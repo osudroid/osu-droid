@@ -200,9 +200,10 @@
                             android:title="@string/opt_enable_pp_title" android:defaultValue="true"/>
         <Preference android:key="clearPP" android:title="@string/opt_clear_pp_title"
                     android:summary="@string/opt_clear_pp_summary"/-->
-        <ListPreference android:entries="@array/set_playfield_names" android:title="@string/opt_setplayfield_title"
-            android:key="playfieldsize" android:summary="@string/opt_setplayfield_summary"
-            android:defaultValue="100" android:entryValues="@array/set_playfield_values"/>
+
+        <SeekBarPreference android:summary="@string/opt_setplayfield_summary" android:title="@string/opt_setplayfield_title"
+            android:key="playfieldSize" app:min="50" android:max="100" app:showSeekBarValue="true" android:defaultValue="100"/>
+
         <CheckBoxPreference android:key="shrinkPlayfieldDownwards" android:title="@string/opt_shrink_playfield_downwards_title"
             android:summary="@string/opt_shrink_playfield_downwards_summary" android:defaultValue="false"/>
         <CheckBoxPreference android:key="safebeatmapbg" android:title="@string/opt_safe_beatmap_bg_title"
