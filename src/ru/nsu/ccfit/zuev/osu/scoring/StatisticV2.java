@@ -915,7 +915,7 @@ public class StatisticV2 implements Serializable {
     }
 
     /**
-     * Determines if the score has the old SC mod enabled, this will be replaced with a custom SC when replaying.
+     * Determines if the score has the old SC mod enabled, this will be replaced with a custom CS when replaying.
      */
     public boolean isLegacySC() {
         return isLegacySC;
