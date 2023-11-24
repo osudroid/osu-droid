@@ -30,7 +30,7 @@ public class DifficultyCalculator {
             GameMod.MOD_DOUBLETIME, GameMod.MOD_HALFTIME, GameMod.MOD_NIGHTCORE,
             GameMod.MOD_SMALLCIRCLE, GameMod.MOD_RELAX, GameMod.MOD_EASY,
             GameMod.MOD_REALLYEASY, GameMod.MOD_HARDROCK, GameMod.MOD_HIDDEN,
-            GameMod.MOD_FLASHLIGHT, GameMod.MOD_SPEEDUP
+            GameMod.MOD_FLASHLIGHT
     );
 
     private static final double difficultyMultiplier = 0.0675;
