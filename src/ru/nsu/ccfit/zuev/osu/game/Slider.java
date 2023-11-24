@@ -21,6 +21,7 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 
@@ -207,7 +208,7 @@ public class Slider extends GameObject {
         approachCircle.setScale(scale * 2);
         approachCircle.setAlpha(0);
         Utils.putSpriteAnchorCenter(pos, approachCircle);
-        if (GameHelper.isHidden()) {
+        if (GameHelper.isHidden() || ModMenu.getInstance().isNegativeInfiniteAR()) {
             approachCircle.setVisible(Config.isShowFirstApproachCircle() && isFirstNote);
         }
 

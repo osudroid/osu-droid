@@ -32,9 +32,6 @@ public class InGameSettingMenu extends BaseFragment {
 
     private static InGameSettingMenu menu;
 
-    // Real negative infinity will load objects that aren't even visible due to overlap unnecessarily killing
-    // performance, we're using -999 as alternative.
-    private final static float NEGATIVE_INFINITY = -999f;
 
     private CheckBox negativeInfinityARToggle;
 
@@ -324,7 +321,7 @@ public class InGameSettingMenu extends BaseFragment {
 
             customARToggle.setEnabled(!isChecked);
             customARBar.setEnabled(!isChecked);
-            ModMenu.getInstance().setCustomAR(isChecked ? NEGATIVE_INFINITY : null);
+            ModMenu.getInstance().setCustomAR(isChecked ? ModMenu.NEGATIVE_INFINITY_AR : null);
 
             updateDifficultyAdjustValues();
         });
@@ -333,7 +330,7 @@ public class InGameSettingMenu extends BaseFragment {
 
             // This listener can be fired if user checks the negativeInfinityARToggle too, so in that case we prevent
             // to re-assign AR to null.
-            if (!ModMenu.getInstance().isCustomAR() || ModMenu.getInstance().getCustomAR() != NEGATIVE_INFINITY)
+            if (!ModMenu.getInstance().isCustomAR() || ModMenu.getInstance().getCustomAR() != ModMenu.NEGATIVE_INFINITY_AR)
                 ModMenu.getInstance().setCustomAR(isChecked ? customARBar.getProgress() / 10f : null);
 
             customARBar.setEnabled(isChecked);
@@ -439,7 +436,7 @@ public class InGameSettingMenu extends BaseFragment {
         var defaultAR = track != null ? track.getApproachRate() : 10;
 
         var isCustomAR = customAR != null;
-        var isNegativeInfinity = isCustomAR && customAR == NEGATIVE_INFINITY;
+        var isNegativeInfinity = isCustomAR && customAR == ModMenu.NEGATIVE_INFINITY_AR;
 
         negativeInfinityARToggle.setChecked(isNegativeInfinity);
 

@@ -41,6 +41,10 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class ModMenu implements IModSwitcher {
 
+    // Real negative infinity will load objects that aren't even visible due to overlap killing performance
+    // unnecessarily, we're using -999 as alternative instead.
+    public final static float NEGATIVE_INFINITY_AR = -999f;
+
     public static final float DEFAULT_FL_FOLLOW_DELAY = 0.12f;
 
     private static final ModMenu instance = new ModMenu();
@@ -503,6 +507,9 @@ public class ModMenu implements IModSwitcher {
     }
 
 
+    public boolean isNegativeInfiniteAR() {
+        return customAR != null && customAR == NEGATIVE_INFINITY_AR;
+    }
 
     public boolean isCustomAR() {
         return customAR != null;
