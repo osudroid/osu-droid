@@ -28,7 +28,7 @@ public class DifficultyCalculator {
      */
     public final EnumSet<GameMod> difficultyAdjustmentMods = EnumSet.of(
             GameMod.MOD_DOUBLETIME, GameMod.MOD_HALFTIME, GameMod.MOD_NIGHTCORE,
-            GameMod.MOD_SMALLCIRCLE, GameMod.MOD_RELAX, GameMod.MOD_EASY,
+            GameMod.MOD_RELAX, GameMod.MOD_EASY,
             GameMod.MOD_REALLYEASY, GameMod.MOD_HARDROCK, GameMod.MOD_HIDDEN,
             GameMod.MOD_FLASHLIGHT
     );
@@ -272,9 +272,10 @@ public class DifficultyCalculator {
             if (parameters.mods.contains(GameMod.MOD_REALLYEASY)) {
                 --cs;
             }
-            if (parameters.mods.contains(GameMod.MOD_SMALLCIRCLE)) {
+            // TODO Difficulty calculation implementation
+            /*if (parameters.mods.contains(GameMod.MOD_SMALLCIRCLE)) {
                 cs += 4f;
-            }
+            }*/
         }
 
         // 12.14 is the point at which the object radius approaches 0. Use the _very_ minimum value.

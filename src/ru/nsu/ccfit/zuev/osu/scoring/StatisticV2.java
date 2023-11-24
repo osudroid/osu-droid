@@ -12,6 +12,7 @@ import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
@@ -62,6 +63,7 @@ public class StatisticV2 implements Serializable {
     private Float customCS;
     private Float customHP;
 
+    private boolean isLegacySC = false;
 
     /**
      * Indicates that the player is alive (HP hasn't reached 0, or it recovered), this is exclusively used for
@@ -521,9 +523,6 @@ public class StatisticV2 implements Serializable {
         if (mod.contains(GameMod.MOD_PRECISE)) {
             s += "s";
         }
-        if (mod.contains(GameMod.MOD_SMALLCIRCLE)) {
-            s += "m";
-        }
         if (mod.contains(GameMod.MOD_REALLYEASY)) {
             s += "l";
         }
@@ -582,9 +581,10 @@ public class StatisticV2 implements Serializable {
                 case 's':
                     mod.add(GameMod.MOD_PRECISE);
                     break;
+                // Special handle for old removed SmallCircles mod.
                 case 'm':
-                    mod.add(GameMod.MOD_SMALLCIRCLE);
-                    break;    
+                    isLegacySC = true;
+                    break;
                 case 'l':
                     mod.add(GameMod.MOD_REALLYEASY);
                     break;    
@@ -912,5 +912,33 @@ public class StatisticV2 implements Serializable {
         if (changeSpeed != 1f) {
             modScoreMultiplier *= getSpeedChangeScoreMultiplier();
         }
+    }
+
+    /**
+     * Determines if the score has the old SC mod enabled, this will be replaced with a custom SC when replaying.
+     */
+    public boolean isLegacySC() {
+        return isLegacySC;
+    }
+
+    /**
+     * Applies the equivalent of the old SC mod with custom CS according to the track passed.
+     */
+    public void processLegacySC(TrackInfo track) {
+
+        var cs = track.getCircleSize();
+
+        for (GameMod m : mod) switch (m) {
+
+            case MOD_HARDROCK:
+                ++cs;
+                continue;
+
+            case MOD_EASY:
+            case MOD_REALLYEASY:
+                --cs;
+        }
+
+        customCS = cs + 4;
     }
 }

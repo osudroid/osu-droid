@@ -469,11 +469,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             approachRate = (float)(GameHelper.ar2ms(ar) / 1000f);
         }
 
-        if (ModMenu.getInstance().getMod().contains(GameMod.MOD_SMALLCIRCLE)) {
-            scale -= (float) ((Config.getRES_HEIGHT() / 480.0f) * (4 * 4.48)
-            * 2 / GameObjectSize.BASE_OBJECT_SIZE);
-        }
-
         if (ModMenu.getInstance().isCustomAR()){
             approachRate = (float) GameHelper.ar2ms(ModMenu.getInstance().getCustomAR()) / 1000f * timeMultiplier;
         }
@@ -1199,23 +1194,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (stat.getMod().contains(GameMod.MOD_FLASHLIGHT)) {
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "selection-mod-flashlight");
-            effect.init(
-                    fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
-                    scale,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
-                            .newDelayModifier(2 - timeOffset),
-                            new ParallelEntityModifier(ModifierFactory
-                                    .newFadeOutModifier(0.5f), ModifierFactory
-                                    .newScaleModifier(0.5f, 1, 1.5f))));
-            effectOffset += 25;
-            timeOffset += 0.25f;
-        }
-        if (stat.getMod().contains(GameMod.MOD_SMALLCIRCLE)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-smallcircle");
             effect.init(
                     fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils

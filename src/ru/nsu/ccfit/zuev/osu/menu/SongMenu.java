@@ -986,11 +986,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             hp *= 0.5f;
             dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
         }
-        if (mod.contains(GameMod.MOD_SMALLCIRCLE)) {
-            cs += 4f;
-            dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-        }
-        //
+
         @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
         String binfoStr = String.format(StringTable.get(R.string.binfoStr1), sdf.format(length),
@@ -1232,6 +1228,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         if (params.length < 11) return;
 
                         StatisticV2 stat = new StatisticV2(params);
+                        if (stat.isLegacySC()) {
+                            stat.processLegacySC(selectedTrack);
+                        }
+
                         stat.setPlayerName(playerName);
                         scoreScene.load(stat, null, null, OnlineManager.getReplayURL(id), null, selectedTrack);
                         engine.setScene(scoreScene.getScene());
@@ -1248,6 +1248,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
 
         StatisticV2 stat = ScoreLibrary.getInstance().getScore(id);
+        if (stat.isLegacySC()) {
+            stat.processLegacySC(selectedTrack);
+        }
+
         scoreScene.load(stat, null, null, stat.getReplayName(), null, selectedTrack);
         engine.setScene(scoreScene.getScene());
     }

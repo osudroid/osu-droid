@@ -424,13 +424,6 @@ public class ScoringScene {
             modX -= Utils.toRes(30);
             scene.attachChild(modSprite);
         }
-        if (stat.getMod().contains(GameMod.MOD_SMALLCIRCLE)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-smallcircle"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
-        }
-        //
 
         String infoStr = (trackInfo.getBeatmap().getArtistUnicode() == null || Config.isForceRomanized() ? trackInfo.getBeatmap().getArtist() : trackInfo.getBeatmap().getArtistUnicode()) + " - " +
                 (trackInfo.getBeatmap().getTitleUnicode() == null || Config.isForceRomanized() ? trackInfo.getBeatmap().getTitle() : trackInfo.getBeatmap().getTitleUnicode()) + " [" + trackInfo.getMode() + "]";

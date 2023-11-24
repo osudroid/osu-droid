@@ -117,6 +117,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 case 'l':
                     sb.append("REZ,");
                     break;
+                // Note: This is SmallCircles which is not available anymore, replaced with custom CS.
                 case 'm':
                     sb.append("SC,");
                     break;

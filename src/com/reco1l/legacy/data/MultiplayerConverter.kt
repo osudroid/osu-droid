@@ -54,7 +54,6 @@ fun modsToReadable(
             MOD_NIGHTCORE -> append("NC, ")
             MOD_HALFTIME -> append("HT, ")
             MOD_PRECISE -> append("PR, ")
-            MOD_SMALLCIRCLE -> append("SC, ")
             MOD_REALLYEASY -> append("REZ, ")
             MOD_PERFECT -> append("PF, ")
             MOD_SUDDENDEATH -> append("SD, ")
@@ -100,7 +99,6 @@ fun stringToMods(data: String?): EnumSet<GameMod>
         'c' -> mod += MOD_NIGHTCORE
         't' -> mod += MOD_HALFTIME
         's' -> mod += MOD_PRECISE
-        'm' -> mod += MOD_SMALLCIRCLE
         'l' -> mod += MOD_REALLYEASY
         'u' -> mod += MOD_SUDDENDEATH
         'f' -> mod += MOD_PERFECT
@@ -125,7 +123,6 @@ fun modsToString(mod: EnumSet<GameMod>) = buildString {
         MOD_NIGHTCORE -> append('c')
         MOD_HALFTIME -> append('t')
         MOD_PRECISE -> append('s')
-        MOD_SMALLCIRCLE -> append('m')
         MOD_REALLYEASY -> append('l')
         MOD_PERFECT -> append('f')
         MOD_SUDDENDEATH -> append('u')
