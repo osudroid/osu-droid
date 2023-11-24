@@ -324,7 +324,7 @@ public class ModMenu implements IModSwitcher {
                                 parameters.mods = getMod();
                                 parameters.customSpeedMultiplier = changeSpeed;
 
-                                // TODO here too Rian
+                                // TODO Difficulty calculation implementation
                                 if (isCustomAR()) {
                                     parameters.forcedAR = customAR;
                                 }
