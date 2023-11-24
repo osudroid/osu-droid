@@ -326,7 +326,7 @@ public class ModMenu implements IModSwitcher {
 
                                 // TODO Difficulty calculation implementation
                                 if (isCustomAR()) {
-                                    parameters.forcedAR = customAR;
+                                    parameters.customAR = customAR;
                                 }
 
                                 DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(

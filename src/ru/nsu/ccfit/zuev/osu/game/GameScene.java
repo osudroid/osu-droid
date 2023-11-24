@@ -631,7 +631,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             // TODO Difficulty calculation implementation.
             if (ModMenu.getInstance().isCustomAR()) {
-                parameters.forcedAR = ModMenu.getInstance().getCustomAR();
+                parameters.customAR = ModMenu.getInstance().getCustomAR();
             }
 
             timedDifficultyAttributes = BeatmapDifficultyCalculator.calculateTimedDifficulty(

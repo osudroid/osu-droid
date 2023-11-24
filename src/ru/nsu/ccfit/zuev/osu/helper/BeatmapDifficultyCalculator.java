@@ -47,7 +47,7 @@ public final class BeatmapDifficultyCalculator {
 
         // TODO Difficulty calculation implementation.
         if (stat.isCustomAR()) {
-            parameters.forcedAR = stat.getCustomAR();
+            parameters.customAR = stat.getCustomAR();
         }
 
         return parameters;

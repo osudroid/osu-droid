@@ -19,9 +19,9 @@ public class DifficultyCalculationParameters {
     public float customSpeedMultiplier = 1;
 
     /**
-     * The forced AR setting to calculate for. Set to <code>Double.NaN</code> to disable.
+     * The custom AR setting to calculate for. Set to <code>Float.NaN</code> to disable.
      */
-    public float forcedAR = Float.NaN;
+    public float customAR = Float.NaN;
 
     /**
      * Retrieves the overall speed multiplier to calculate for.
@@ -41,10 +41,10 @@ public class DifficultyCalculationParameters {
     }
 
     /**
-     * Whether force AR is used in this parameter.
+     * Whether custom AR is used in this parameter.
      */
-    public boolean isForceAR() {
-        return !Float.isNaN(forcedAR);
+    public boolean isCustomAR() {
+        return !Float.isNaN(customAR);
     }
 
     /**
@@ -56,7 +56,7 @@ public class DifficultyCalculationParameters {
         var copy = new DifficultyCalculationParameters();
 
         copy.mods = EnumSet.copyOf(mods);
-        copy.forcedAR = forcedAR;
+        copy.customAR = customAR;
         copy.customSpeedMultiplier = customSpeedMultiplier;
 
         return copy;
@@ -78,12 +78,12 @@ public class DifficultyCalculationParameters {
             return false;
         }
 
-        if (isForceAR() != other.isForceAR()) {
+        if (isCustomAR() != other.isCustomAR()) {
             return false;
         }
 
         // If both parameters enable force AR, check for equality.
-        if (isForceAR() && other.isForceAR() && forcedAR != other.forcedAR) {
+        if (isCustomAR() && other.isCustomAR() && customAR != other.customAR) {
             return false;
         }
 

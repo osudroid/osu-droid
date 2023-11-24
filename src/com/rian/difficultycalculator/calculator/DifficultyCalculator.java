@@ -184,7 +184,7 @@ public class DifficultyCalculator {
         float ar = beatmap.getDifficultyManager().getAR();
         double preempt = (ar <= 5) ? (1800 - 120 * ar) : (1950 - 150 * ar);
 
-        if (parameters != null && !parameters.isForceAR()) {
+        if (parameters != null && !parameters.isCustomAR()) {
             preempt /= parameters.getTotalSpeedMultiplier();
         }
 
@@ -290,8 +290,8 @@ public class DifficultyCalculator {
             return;
         }
 
-        if (parameters.isForceAR()) {
-            manager.setAR(parameters.forcedAR);
+        if (parameters.isCustomAR()) {
+            manager.setAR(parameters.customAR);
         } else {
             if (parameters.mods.contains(GameMod.MOD_HARDROCK)) {
                 ar *= 1.4f;
@@ -379,7 +379,7 @@ public class DifficultyCalculator {
                     objects,
                     objects.size(),
                     timePreempt,
-                    parameters != null && parameters.isForceAR()
+                    parameters != null && parameters.isCustomAR()
             ));
         }
 

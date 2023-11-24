@@ -1079,7 +1079,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
             // TODO Difficulty calculation implementation.
             if (ModMenu.getInstance().isCustomAR()) {
-                parameters.forcedAR = ModMenu.getInstance().getCustomAR();
+                parameters.customAR = ModMenu.getInstance().getCustomAR();
             }
 
             DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
