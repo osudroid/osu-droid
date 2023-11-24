@@ -28,9 +28,13 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
+import static java.lang.Float.NEGATIVE_INFINITY;
+
 public class InGameSettingMenu extends BaseFragment {
 
     private static InGameSettingMenu menu;
+
+    private CheckBox negativeInfinityARToggle;
 
     private View speedModifyRow;
     private SeekBar speedModifyBar;
@@ -108,6 +112,8 @@ public class InGameSettingMenu extends BaseFragment {
 
         speedModifyRow = findViewById(R.id.speed_modify);
         followDelayRow = findViewById(R.id.follow_delay_row);
+
+        negativeInfinityARToggle = findViewById(R.id.negative_infinity_ar);
 
         customARBar = findViewById(R.id.custom_ar_bar);
         customARText = findViewById(R.id.custom_ar_text);
@@ -304,12 +310,22 @@ public class InGameSettingMenu extends BaseFragment {
         customCSBar.setMax(110);
         customHPBar.setMax(110);
 
+        negativeInfinityARToggle.setOnCheckedChangeListener(null);
         customARToggle.setOnCheckedChangeListener(null);
         customODToggle.setOnCheckedChangeListener(null);
         customCSToggle.setOnCheckedChangeListener(null);
         customHPToggle.setOnCheckedChangeListener(null);
 
         updateDifficultyAdjustValues();
+
+        negativeInfinityARToggle.setOnCheckedChangeListener((view, isChecked) -> {
+
+            customARToggle.setEnabled(!isChecked);
+            customARBar.setEnabled(!isChecked);
+            ModMenu.getInstance().setCustomAR(NEGATIVE_INFINITY);
+
+            updateDifficultyAdjustValues();
+        });
 
         customARToggle.setOnCheckedChangeListener((view, isChecked) -> {
 
@@ -414,9 +430,13 @@ public class InGameSettingMenu extends BaseFragment {
         var track = GlobalManager.getInstance().getSelectedTrack();
 
         var customAR = ModMenu.getInstance().getCustomAR();
-        customARBar.setEnabled(customAR != null);
-        customARToggle.setChecked(customAR != null);
-        customARBar.setProgress((int) ((customAR != null ? customAR : track != null ? track.getApproachRate() : 10) * 10));
+        negativeInfinityARToggle.setEnabled(customAR != null && customAR == NEGATIVE_INFINITY);
+
+        var isCustom = customAR != null && customAR != NEGATIVE_INFINITY;
+        customARBar.setEnabled(isCustom);
+        customARToggle.setEnabled(isCustom);
+        customARToggle.setChecked(isCustom);
+        customARBar.setProgress((int) ((isCustom ? customAR : track != null ? track.getApproachRate() : 10) * 10));
         customARText.setText(String.valueOf(customARBar.getProgress() / 10f));
 
         var customOD = ModMenu.getInstance().getCustomOD();

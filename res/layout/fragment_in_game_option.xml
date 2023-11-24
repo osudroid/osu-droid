@@ -36,8 +36,7 @@
 		android:layout_height="wrap_content"
 		android:layout_alignParentBottom="true"
 		android:gravity="center"
-		android:orientation="vertical"
-		android:translationY="260dp">
+		android:orientation="vertical">
 
 
 		<RelativeLayout
@@ -232,21 +231,14 @@
 					</RelativeLayout>
 
 					<!--Pitch shift-->
-					<LinearLayout
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
+					<CheckBox
 						android:layout_marginBottom="14dp"
 						android:layout_marginHorizontal="14dp"
-						android:gravity="center_vertical">
-
-						<CheckBox
-							android:id="@+id/enableNCwhenSpeedChange"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:saveEnabled="false"
-							android:text="@string/opt_enablenc_whenspeedchange_title"/>
-
-					</LinearLayout>
+						android:id="@+id/enableNCwhenSpeedChange"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:saveEnabled="false"
+						android:text="@string/opt_enablenc_whenspeedchange_title"/>
 
 					<View
 						android:layout_width="match_parent"
@@ -288,6 +280,16 @@
 							android:text="AR 10.0" />
 
 					</RelativeLayout>
+
+					<!--Negative infinity AR-->
+					<CheckBox
+						android:id="@+id/negative_infinity_ar"
+						android:layout_marginBottom="8dp"
+						android:layout_marginHorizontal="14dp"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:saveEnabled="false"
+						android:text="Force negative infinity AR (Can reduce performance in some devices)"/>
 
 					<!--OD-->
 					<RelativeLayout
