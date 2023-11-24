@@ -1630,15 +1630,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             autoCursor.moveToObject(activeObjects.peek(), secPassed, approachRate, this);
         }
 
-        var downPressCursorCount = 0;
-
-        for (int i = 0; i < CursorCount; i++) {
-            if (cursorIIsDown[i])
-                downPressCursorCount++;
-            cursorIIsDown[i] = false;
-        }
-
         if (Config.isRemoveSliderLock()) {
+            var downPressCursorCount = 0;
+
+            for (int i = 0; i < CursorCount; i++) {
+                if (cursorIIsDown[i])
+                    downPressCursorCount++;
+                cursorIIsDown[i] = false;
+            }
+
             for (int i = 0; i < downPressCursorCount - 1; i++) {
                 updateLastActiveObjectHitTime();
                 tryHitActiveObjects(dt);
