@@ -91,7 +91,7 @@ object UpdateManager: IDownloaderObserver
     /**
      * Check for new game updates.
      * 
-     * @param silently If `true` no prompt will be show unless there's new updates.
+     * @param silently If `true` no prompt will be shown unless there's new updates.
      */
     fun checkNewUpdates(silently: Boolean)
     {
@@ -219,7 +219,7 @@ object UpdateManager: IDownloaderObserver
             
             // Will only dismiss if user wants.
             duration = LENGTH_INDEFINITE
-            
+
             setText(update_dialog_message)
             setAction(update_dialog_button_update) {
 
