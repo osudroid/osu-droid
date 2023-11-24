@@ -324,9 +324,14 @@ public class ModMenu implements IModSwitcher {
                                 parameters.mods = getMod();
                                 parameters.customSpeedMultiplier = changeSpeed;
 
-                                // TODO Difficulty calculation implementation
+                                if (isCustomCS()) {
+                                    parameters.customCS = customCS;
+                                }
                                 if (isCustomAR()) {
                                     parameters.customAR = customAR;
+                                }
+                                if (isCustomOD()) {
+                                    parameters.customOD = customOD;
                                 }
 
                                 DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(

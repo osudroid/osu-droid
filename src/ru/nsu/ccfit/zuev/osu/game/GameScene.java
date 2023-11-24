@@ -625,13 +625,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (Config.isDisplayRealTimePPCounter()) {
             // Calculate timed difficulty attributes
             DifficultyCalculationParameters parameters = new DifficultyCalculationParameters();
+            var modMenu = ModMenu.getInstance();
 
-            parameters.mods = ModMenu.getInstance().getMod().clone();
-            parameters.customSpeedMultiplier = ModMenu.getInstance().getChangeSpeed();
+            parameters.mods = modMenu.getMod().clone();
+            parameters.customSpeedMultiplier = modMenu.getChangeSpeed();
 
-            // TODO Difficulty calculation implementation.
-            if (ModMenu.getInstance().isCustomAR()) {
-                parameters.customAR = ModMenu.getInstance().getCustomAR();
+            if (modMenu.isCustomCS()) {
+                parameters.customCS = modMenu.getCustomCS();
+            }
+            if (modMenu.isCustomAR()) {
+                parameters.customAR = modMenu.getCustomAR();
+            }
+            if (modMenu.isCustomOD()) {
+                parameters.customOD = modMenu.getCustomOD();
             }
 
             timedDifficultyAttributes = BeatmapDifficultyCalculator.calculateTimedDifficulty(

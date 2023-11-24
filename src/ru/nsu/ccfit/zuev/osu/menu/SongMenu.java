@@ -1074,12 +1074,19 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             changeDimensionInfo(track);
 
             DifficultyCalculationParameters parameters = new DifficultyCalculationParameters();
-            parameters.mods = ModMenu.getInstance().getMod();
-            parameters.customSpeedMultiplier = ModMenu.getInstance().getChangeSpeed();
+            var modMenu = ModMenu.getInstance();
 
-            // TODO Difficulty calculation implementation.
-            if (ModMenu.getInstance().isCustomAR()) {
-                parameters.customAR = ModMenu.getInstance().getCustomAR();
+            parameters.mods = modMenu.getMod();
+            parameters.customSpeedMultiplier = modMenu.getChangeSpeed();
+
+            if (modMenu.isCustomCS()) {
+                parameters.customCS = modMenu.getCustomCS();
+            }
+            if (modMenu.isCustomAR()) {
+                parameters.customAR = modMenu.getCustomAR();
+            }
+            if (modMenu.isCustomOD()) {
+                parameters.customOD = modMenu.getCustomOD();
             }
 
             DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
