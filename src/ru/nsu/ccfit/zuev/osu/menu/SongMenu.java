@@ -1081,7 +1081,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             parameters.mods = ModMenu.getInstance().getMod();
             parameters.customSpeedMultiplier = ModMenu.getInstance().getChangeSpeed();
 
-            // TODO Here too.
+            // TODO Difficulty calculation implementation.
             if (ModMenu.getInstance().isCustomAR()) {
                 parameters.forcedAR = ModMenu.getInstance().getCustomAR();
             }

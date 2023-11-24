@@ -45,8 +45,8 @@ public final class BeatmapDifficultyCalculator {
         parameters.mods = stat.getMod().clone();
         parameters.customSpeedMultiplier = stat.getChangeSpeed();
 
+        // TODO Difficulty calculation implementation.
         if (stat.isCustomAR()) {
-            // TODO Here too Rian.
             parameters.forcedAR = stat.getCustomAR();
         }
 

@@ -635,7 +635,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             parameters.mods = ModMenu.getInstance().getMod().clone();
             parameters.customSpeedMultiplier = ModMenu.getInstance().getChangeSpeed();
 
-            // TODO PP calculation doesn't account for custom CS, OD and HP attributes currently.
+            // TODO Difficulty calculation implementation.
             if (ModMenu.getInstance().isCustomAR()) {
                 parameters.forcedAR = ModMenu.getInstance().getCustomAR();
             }
