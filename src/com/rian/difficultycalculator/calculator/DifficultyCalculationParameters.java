@@ -61,4 +61,33 @@ public class DifficultyCalculationParameters {
 
         return copy;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        if (!(obj instanceof DifficultyCalculationParameters)) {
+            return false;
+        }
+
+        var other = (DifficultyCalculationParameters) obj;
+
+        if (customSpeedMultiplier != other.customSpeedMultiplier) {
+            return false;
+        }
+
+        if (isForceAR() != other.isForceAR()) {
+            return false;
+        }
+
+        // If both parameters enable force AR, check for equality.
+        if (isForceAR() && other.isForceAR() && forcedAR != other.forcedAR) {
+            return false;
+        }
+
+        // Check whether mods are equal.
+        return mods.size() == other.mods.size() && mods.containsAll(other.mods);
+    }
 }

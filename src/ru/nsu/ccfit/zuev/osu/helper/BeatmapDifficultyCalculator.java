@@ -453,40 +453,12 @@ public final class BeatmapDifficultyCalculator {
             }
 
             for (var cache : cacheMap.entrySet()) {
-                if (isParameterEqual(cache.getKey(), parameters)) {
+                if (cache.getKey() == parameters) {
                     return cache.getValue().cache;
                 }
             }
 
             return null;
-        }
-
-        /**
-         * Determines if two calculation parameters are equal.
-         *
-         * @param parameter1 The first parameter.
-         * @param parameter2 The second parameter.
-         * @return Whether both calculation parameters are equal.
-         */
-        private boolean isParameterEqual(DifficultyCalculationParameters parameter1,
-                                         DifficultyCalculationParameters parameter2) {
-            if (parameter1.customSpeedMultiplier != parameter2.customSpeedMultiplier) {
-                return false;
-            }
-
-            if (parameter1.isForceAR() != parameter2.isForceAR()) {
-                return false;
-            }
-
-            // If both parameters enable force AR, check for equality.
-            if (parameter1.isForceAR() && parameter2.isForceAR()
-                    && parameter1.forcedAR != parameter2.forcedAR) {
-                return false;
-            }
-
-            // Check whether mods are equal.
-            return parameter1.mods.size() == parameter2.mods.size() &&
-                    parameter1.mods.containsAll(parameter2.mods);
         }
     }
 
