@@ -22,6 +22,7 @@ import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import org.anddev.andengine.input.touch.TouchEvent;
 
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
@@ -298,117 +299,143 @@ public class InGameSettingMenu extends BaseFragment {
 
     private void initializeDifficultyAdjustViews() {
 
-        customARToggle.setChecked(ModMenu.getInstance().isCustomAR());
+        customARBar.setMax(125);
+        customODBar.setMax(110);
+        customCSBar.setMax(110);
+        customHPBar.setMax(110);
+
+        customARToggle.setOnCheckedChangeListener(null);
+        customODToggle.setOnCheckedChangeListener(null);
+        customCSToggle.setOnCheckedChangeListener(null);
+        customHPToggle.setOnCheckedChangeListener(null);
+
+        updateDifficultyAdjustValues();
+
         customARToggle.setOnCheckedChangeListener((view, isChecked) -> {
 
-            if (!isChecked) {
-                ModMenu.getInstance().setCustomAR(null);
-            }
-
+            ModMenu.getInstance().setCustomAR(isChecked ? customARBar.getProgress() / 10f : null);
             customARBar.setEnabled(isChecked);
-            ModMenu.getInstance().updateMultiplierText();
 
+            updateDifficultyAdjustValues();
         });
 
-        var customAR = ModMenu.getInstance().getCustomAR();
-        customARBar.setProgress(customAR != null ? ((int) (customAR * 10)) : 0);
-        customARBar.setMax(125);
+        customODToggle.setOnCheckedChangeListener((view, isChecked) -> {
+
+            ModMenu.getInstance().setCustomOD(isChecked ? customODBar.getProgress() / 10f : null);
+            customODBar.setEnabled(isChecked);
+
+            updateDifficultyAdjustValues();
+        });
+
+        customCSToggle.setOnCheckedChangeListener((view, isChecked) -> {
+
+            ModMenu.getInstance().setCustomCS(isChecked ? customCSBar.getProgress() / 10f : null);
+            customCSBar.setEnabled(isChecked);
+
+            updateDifficultyAdjustValues();
+        });
+
+        customHPToggle.setOnCheckedChangeListener((view, isChecked) -> {
+
+            ModMenu.getInstance().setCustomHP(isChecked ? customHPBar.getProgress() / 10f : null);
+            customHPBar.setEnabled(isChecked);
+
+            updateDifficultyAdjustValues();
+        });
+
+
         customARBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
                     ModMenu.getInstance().setCustomAR(progress / 10f);
-                    customARText.setText("AR " + (progress / 10f));
                 }
+                customARText.setText(String.valueOf(progress / 10f));
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                ModMenu.getInstance().updateMultiplierText();
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {}
-            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-
-        customODToggle.setChecked(ModMenu.getInstance().isCustomOD());
-        customODToggle.setOnCheckedChangeListener((view, isChecked) -> {
-
-            if (!isChecked) {
-                ModMenu.getInstance().setCustomOD(null);
-            }
-
-            customODBar.setEnabled(isChecked);
-            ModMenu.getInstance().updateMultiplierText();
-        });
-
-        var customOD = ModMenu.getInstance().getCustomOD();
-        customODBar.setProgress(customOD != null ? ((int) (customOD * 10)) : 0);
-        customODBar.setMax(125);
         customODBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
                     ModMenu.getInstance().setCustomOD(progress / 10f);
-                    customODText.setText("OD " + (progress / 10f));
                 }
+                customODText.setText(String.valueOf(progress / 10f));
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                ModMenu.getInstance().updateMultiplierText();
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {}
-            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-
-        customCSToggle.setChecked(ModMenu.getInstance().isCustomCS());
-        customCSToggle.setOnCheckedChangeListener((view, isChecked) -> {
-
-            if (!isChecked) {
-                ModMenu.getInstance().setCustomCS(null);
-            }
-
-            customCSBar.setEnabled(isChecked);
-            ModMenu.getInstance().updateMultiplierText();
-        });
-
-        var customCS = ModMenu.getInstance().getCustomCS();
-        customCSBar.setProgress(customCS != null ? ((int) (customCS * 10)) : 0);
-        customCSBar.setMax(125);
         customCSBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
                     ModMenu.getInstance().setCustomCS(progress / 10f);
-                    customCSText.setText("CS " + (progress / 10f));
                 }
+                customCSText.setText(String.valueOf(progress / 10f));
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                ModMenu.getInstance().updateMultiplierText();
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {}
-            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-
-        customHPToggle.setChecked(ModMenu.getInstance().isCustomHP());
-        customHPToggle.setOnCheckedChangeListener((view, isChecked) -> {
-            if (!isChecked) {
-                ModMenu.getInstance().setCustomHP(null);
-            }
-            customHPBar.setEnabled(isChecked);
-            ModMenu.getInstance().updateMultiplierText();
-        });
-
-        var customHP = ModMenu.getInstance().getCustomHP();
-        customHPBar.setProgress(customHP != null ? ((int) (customHP * 10)) : 0);
-        customHPBar.setMax(125);
         customHPBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
                     ModMenu.getInstance().setCustomHP(progress / 10f);
-                    customHPText.setText("HP " + (progress / 10f));
                 }
+                customHPText.setText(String.valueOf(progress / 10f));
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                ModMenu.getInstance().updateMultiplierText();
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {}
-            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
-
     }
+
+    private void updateDifficultyAdjustValues() {
+
+        var track = GlobalManager.getInstance().getSelectedTrack();
+
+        var customAR = ModMenu.getInstance().getCustomAR();
+        customARBar.setEnabled(customAR != null);
+        customARToggle.setChecked(customAR != null);
+        customARBar.setProgress((int) ((customAR != null ? customAR : track != null ? track.getApproachRate() : 10) * 10));
+
+        var customOD = ModMenu.getInstance().getCustomOD();
+        customODBar.setEnabled(customOD != null);
+        customODToggle.setChecked(customOD != null);
+        customODBar.setProgress((int) ((customOD != null ? customOD : track != null ? track.getOverallDifficulty() : 10) * 10));
+
+        var customCS = ModMenu.getInstance().getCustomCS();
+        customCSBar.setEnabled(customCS != null);
+        customCSToggle.setChecked(customCS != null);
+        customCSBar.setProgress((int) ((customCS != null ? customCS : track != null ? track.getCircleSize() : 10) * 10));
+
+        var customHP = ModMenu.getInstance().getCustomHP();
+        customHPBar.setEnabled(customHP != null);
+        customHPToggle.setChecked(customHP != null);
+        customHPBar.setProgress((int) ((customHP != null ? customHP : track != null ? track.getHpDrain() : 10) * 10));
+
+        ModMenu.getInstance().updateMultiplierText();
+    }
+
 
     @Override
     public void dismiss() {
