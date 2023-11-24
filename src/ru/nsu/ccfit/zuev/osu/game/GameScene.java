@@ -2593,6 +2593,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 sprite.setShowing(false);
             }
             cursor.mouseDown = false;
+            cursorIIsDown[id] = false;
 
             if (replay != null) {
                 replay.addUp(secPassed, id);
