@@ -530,9 +530,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         beatmapInfoRectangle!!.isVisible = getGlobal().selectedTrack?.let { track ->
 
-            val df = SimpleDateFormat(if (track.musicLength > 3600 * 1000) "HH:mm:ss" else "mm:ss")
-            df.timeZone = TimeZone.getTimeZone("GMT+0")
-
             beatmapInfoText.text = """
                 Length: ${
                     SimpleDateFormat(if (track.musicLength > 3600 * 1000) "HH:mm:ss" else "mm:ss").let {
