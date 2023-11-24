@@ -322,14 +322,18 @@ public class InGameSettingMenu extends BaseFragment {
 
             customARToggle.setEnabled(!isChecked);
             customARBar.setEnabled(!isChecked);
-            ModMenu.getInstance().setCustomAR(NEGATIVE_INFINITY);
+            ModMenu.getInstance().setCustomAR(isChecked ? NEGATIVE_INFINITY : null);
 
             updateDifficultyAdjustValues();
         });
 
         customARToggle.setOnCheckedChangeListener((view, isChecked) -> {
 
-            ModMenu.getInstance().setCustomAR(isChecked ? customARBar.getProgress() / 10f : null);
+            // This listener can be fired if user checks the negativeInfinityARToggle too, so in that case we prevent
+            // to re-assign AR to null.
+            if (!ModMenu.getInstance().isCustomAR() || ModMenu.getInstance().getCustomAR() != NEGATIVE_INFINITY)
+                ModMenu.getInstance().setCustomAR(isChecked ? customARBar.getProgress() / 10f : null);
+
             customARBar.setEnabled(isChecked);
 
             updateDifficultyAdjustValues();
@@ -430,13 +434,17 @@ public class InGameSettingMenu extends BaseFragment {
         var track = GlobalManager.getInstance().getSelectedTrack();
 
         var customAR = ModMenu.getInstance().getCustomAR();
-        negativeInfinityARToggle.setChecked(customAR != null && customAR == NEGATIVE_INFINITY);
+        var defaultAR = track != null ? track.getApproachRate() : 10;
 
-        var isCustom = customAR != null && customAR != NEGATIVE_INFINITY;
-        customARBar.setEnabled(isCustom);
-        customARToggle.setEnabled(!negativeInfinityARToggle.isChecked());
-        customARToggle.setChecked(isCustom);
-        customARBar.setProgress((int) ((isCustom ? customAR : track != null ? track.getApproachRate() : 10) * 10));
+        var isCustomAR = customAR != null;
+        var isNegativeInfinity = isCustomAR && customAR == NEGATIVE_INFINITY;
+
+        negativeInfinityARToggle.setChecked(isNegativeInfinity);
+
+        customARToggle.setEnabled(!isNegativeInfinity);
+        customARToggle.setChecked(!isNegativeInfinity && isCustomAR);
+        customARBar.setEnabled(!isNegativeInfinity && isCustomAR);
+        customARBar.setProgress((int) ((isCustomAR && !isNegativeInfinity ? customAR : defaultAR) * 10));
         customARText.setText(String.valueOf(customARBar.getProgress() / 10f));
 
         var customOD = ModMenu.getInstance().getCustomOD();
