@@ -2001,8 +2001,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private void updateLastActiveObjectHitTime() {
         for (int i = 0, size = activeObjects.size(); i < size; i++) {
             var obj = activeObjects.get(i);
-            if (!obj.isStartHit())
+            if (!obj.isStartHit()) {
                 lastActiveObjectHitTime = obj.getHitTime();
+                break;
+            }
         }
     }
 
