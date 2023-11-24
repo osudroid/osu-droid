@@ -417,21 +417,25 @@ public class InGameSettingMenu extends BaseFragment {
         customARBar.setEnabled(customAR != null);
         customARToggle.setChecked(customAR != null);
         customARBar.setProgress((int) ((customAR != null ? customAR : track != null ? track.getApproachRate() : 10) * 10));
+        customARText.setText(String.valueOf(customARBar.getProgress() / 10f));
 
         var customOD = ModMenu.getInstance().getCustomOD();
         customODBar.setEnabled(customOD != null);
         customODToggle.setChecked(customOD != null);
         customODBar.setProgress((int) ((customOD != null ? customOD : track != null ? track.getOverallDifficulty() : 10) * 10));
+        customODText.setText(String.valueOf(customODBar.getProgress() / 10f));
 
         var customCS = ModMenu.getInstance().getCustomCS();
         customCSBar.setEnabled(customCS != null);
         customCSToggle.setChecked(customCS != null);
         customCSBar.setProgress((int) ((customCS != null ? customCS : track != null ? track.getCircleSize() : 10) * 10));
+        customCSText.setText(String.valueOf(customCSBar.getProgress() / 10f));
 
         var customHP = ModMenu.getInstance().getCustomHP();
         customHPBar.setEnabled(customHP != null);
         customHPToggle.setChecked(customHP != null);
         customHPBar.setProgress((int) ((customHP != null ? customHP : track != null ? track.getHpDrain() : 10) * 10));
+        customHPText.setText(String.valueOf(customHPBar.getProgress() / 10f));
 
         ModMenu.getInstance().updateMultiplierText();
     }
