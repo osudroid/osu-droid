@@ -158,7 +158,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
             if (str.charAt(0) == 'x' && str.length() == 5) {
                 sb.append(str.substring(1)).append("x,");
-            } else if (str.startsWith("AR")) {
+            } else if (str.startsWith("AR") || str.startsWith("OD") || str.startsWith("CS") || str.startsWith("HP")) {
                 sb.append(str).append(',');
             }
         }
