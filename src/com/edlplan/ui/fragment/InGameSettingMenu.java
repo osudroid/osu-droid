@@ -430,11 +430,11 @@ public class InGameSettingMenu extends BaseFragment {
         var track = GlobalManager.getInstance().getSelectedTrack();
 
         var customAR = ModMenu.getInstance().getCustomAR();
-        negativeInfinityARToggle.setEnabled(customAR != null && customAR == NEGATIVE_INFINITY);
+        negativeInfinityARToggle.setChecked(customAR != null && customAR == NEGATIVE_INFINITY);
 
         var isCustom = customAR != null && customAR != NEGATIVE_INFINITY;
         customARBar.setEnabled(isCustom);
-        customARToggle.setEnabled(isCustom);
+        customARToggle.setEnabled(!negativeInfinityARToggle.isChecked());
         customARToggle.setChecked(isCustom);
         customARBar.setProgress((int) ((isCustom ? customAR : track != null ? track.getApproachRate() : 10) * 10));
         customARText.setText(String.valueOf(customARBar.getProgress() / 10f));
