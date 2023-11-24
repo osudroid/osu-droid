@@ -34,6 +34,7 @@ public abstract class AsyncTask {
             t.setName("async::" + t.getName());
             run();
             handler.post(mOnComplete);
+            executor.shutdown();
         });
     }
 
