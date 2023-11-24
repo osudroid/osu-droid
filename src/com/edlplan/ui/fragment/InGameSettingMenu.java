@@ -28,11 +28,13 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-import static java.lang.Float.NEGATIVE_INFINITY;
-
 public class InGameSettingMenu extends BaseFragment {
 
     private static InGameSettingMenu menu;
+
+    // Real negative infinity will load objects that aren't even visible due to overlap unnecessarily killing
+    // performance, we're using -999 as alternative.
+    private final static float NEGATIVE_INFINITY = -999f;
 
     private CheckBox negativeInfinityARToggle;
 
