@@ -14,12 +14,17 @@ data class RoomMods(
 
     var flFollowDelay: Float,
 
-    var forceAR: Float?
+    var customAR: Float?,
 
+    var customOD: Float?,
+
+    var customCS: Float?,
+
+    var customHP: Float?
 )
 {
 
-    override fun toString() = modsToReadable(set, speedMultiplier, flFollowDelay, forceAR)
+    override fun toString() = modsToReadable(set, speedMultiplier, flFollowDelay, customAR, customOD, customCS, customHP)
 
     fun toString(room: Room): String
     {
@@ -38,8 +43,8 @@ data class RoomMods(
 
             if (speedMultiplier != 1f)
                 append("%.2fx, ".format(speedMultiplier))
-        }.substringBeforeLast(',')
-        else toString()
+
+        }.substringBeforeLast(',') else toString()
     }
 
     override fun equals(other: Any?): Boolean
@@ -64,7 +69,10 @@ data class RoomMods(
         return sameMods
                 && speedMultiplier == other.speedMultiplier
                 && flFollowDelay == other.flFollowDelay
-                && forceAR == other.forceAR
+                && customAR == other.customAR
+                && customOD == other.customOD
+                && customCS == other.customCS
+                && customHP == other.customHP
     }
 
     // Auto-generated this will help to check instance equality aka ===
@@ -73,7 +81,10 @@ data class RoomMods(
         var result = set.hashCode()
         result = 31 * result + speedMultiplier.hashCode()
         result = 31 * result + flFollowDelay.hashCode()
-        result = 31 * result + (forceAR?.hashCode() ?: 0)
+        result = 31 * result + (customAR?.hashCode() ?: 0)
+        result = 31 * result + (customOD?.hashCode() ?: 0)
+        result = 31 * result + (customCS?.hashCode() ?: 0)
+        result = 31 * result + (customHP?.hashCode() ?: 0)
         return result
     }
 }

@@ -15,15 +15,21 @@ import java.util.*
 
 fun modsToReadable(
     mods: EnumSet<GameMod>?,
-    speedMultiplier: Float/* = 1f*/,
-    flFollowDelay: Float/* = ModMenu.DEFAULT_FL_FOLLOW_DELAY*/,
-    forceAR: Float?/* = null*/,
+    speedMultiplier: Float,
+    flFollowDelay: Float,
+    customAR: Float?,
+    customOD: Float?,
+    customCS: Float?,
+    customHP: Float?,
 ): String
 {
     if (mods.isNullOrEmpty()
         && speedMultiplier == 1f
         && flFollowDelay == ModMenu.DEFAULT_FL_FOLLOW_DELAY
-        && forceAR == null)
+        && customAR == null
+        && customOD == null
+        && customCS == null
+        && customHP == null)
         return "None"
 
     return buildString {
@@ -59,8 +65,17 @@ fun modsToReadable(
         if (speedMultiplier != 1f)
             append("%.2fx, ".format(speedMultiplier))
 
-        if (forceAR != null)
-            append("AR $forceAR, ")
+        if (customAR != null)
+            append("AR $customAR, ")
+
+        if (customOD != null)
+            append("OD $customOD, ")
+
+        if (customCS != null)
+            append("CS $customCS, ")
+
+        if (customHP != null)
+            append("HP $customHP, ")
 
     }.substringBeforeLast(',')
 }

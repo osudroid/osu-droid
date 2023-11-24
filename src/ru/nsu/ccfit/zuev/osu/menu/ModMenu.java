@@ -50,8 +50,6 @@ public class ModMenu implements IModSwitcher {
     private TrackInfo selectedTrack;
     private final Map<GameMod, ModButton> modButtons = new TreeMap<>();
     private float changeSpeed = 1.0f;
-    private float forceAR = 9.0f;
-    private boolean enableForceAR = false;
     private boolean enableNCWhenSpeedChange = false;
     private boolean modsRemoved = false;
     private float FLfollowDelay = DEFAULT_FL_FOLLOW_DELAY;
@@ -116,10 +114,10 @@ public class ModMenu implements IModSwitcher {
             mod = modSet;
 
             FLfollowDelay = mods.getFlFollowDelay();
-            enableForceAR = mods.getForceAR() != null;
-
-            if (enableForceAR)
-                forceAR = mods.getForceAR();
+            customAR = mods.getCustomAR();
+            customOD = mods.getCustomOD();
+            customCS = mods.getCustomCS();
+            customHP = mods.getCustomHP();
         }
 
         changeSpeed = mods.getSpeedMultiplier();
@@ -328,8 +326,9 @@ public class ModMenu implements IModSwitcher {
                                 parameters.mods = getMod();
                                 parameters.customSpeedMultiplier = changeSpeed;
 
-                                if (enableForceAR) {
-                                    parameters.forcedAR = forceAR;
+                                // TODO here too Rian
+                                if (isCustomAR()) {
+                                    parameters.forcedAR = customAR;
                                 }
 
                                 DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
