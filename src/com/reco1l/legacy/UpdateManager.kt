@@ -129,7 +129,7 @@ object UpdateManager: IDownloaderObserver
                 // Directly navigate to installation if there's already a newer package.
                 if (newestVersionDownloaded > mainActivity.versionCode) {
                     newVersionCode = newestVersionDownloaded
-                    onFoundNewUpdate()
+                    onFoundNewUpdate(silently)
                     return@async
                 }
             }
@@ -139,7 +139,7 @@ object UpdateManager: IDownloaderObserver
                 
                 // Avoid new request if one was already done.
                 if (downloadURL != null) {
-                    onFoundNewUpdate()
+                    onFoundNewUpdate(silently)
                     return@async
                 }
                 
@@ -167,7 +167,7 @@ object UpdateManager: IDownloaderObserver
                         edit().putString("pendingChangelog", changelogUrl).apply()
                     }
 
-                    onFoundNewUpdate()
+                    onFoundNewUpdate(silently)
                 }
             } catch (exception: Exception) {
 
@@ -204,10 +204,10 @@ object UpdateManager: IDownloaderObserver
     }
     
     
-    private fun onFoundNewUpdate() = uiThread {
+    private fun onFoundNewUpdate(silently: Boolean) = uiThread {
 
         if (newVersionCode <= mainActivity.versionCode) {
-            onAlreadyLatestVersion(true)
+            onAlreadyLatestVersion(silently)
             return@uiThread
         }
 
