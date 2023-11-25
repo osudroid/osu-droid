@@ -687,7 +687,7 @@ public class StatisticV2 implements Serializable {
         return customAR != null;
     }
 
-    public float getCustomAR(){
+    public Float getCustomAR() {
         return customAR;
     }
 
