@@ -13,19 +13,26 @@ import org.json.JSONArray
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import kotlin.math.min
 
 
 fun convertToJson(ini: IniReader) = JsonContent().apply {
 
-    private fun convertToHex(ints: IntArray?) = if (ints == null || ints.isEmpty()) { null } else buildString {
+    fun convertToHex(ints: IntArray?): String?
+    {
+        if (ints == null || ints.isEmpty())
+            return null
 
-        append('#')
-        append("%02X".format(ints[0]))
-        append("%02X".format(ints[1]))
-        append("%02X".format(ints[2]))
+        return buildString {
+
+            append('#')
+            append("%02X".format(ints[0]))
+            append("%02X".format(ints[1]))
+            append("%02X".format(ints[2]))
+        }
     }
 
-    private fun parseComboColors(ini: IniReader) = mutableListOf<String>().also {
+    fun parseComboColors(ini: IniReader) = mutableListOf<String>().also {
 
         // osu! skins supports up to 7 combo colors
         for (i in 0 until 8)
@@ -57,11 +64,27 @@ fun convertToJson(ini: IniReader) = JsonContent().apply {
 
     putGroup("Slider").apply {
 
-        convertToHex(ini["Colours", "SliderTrackOverride"])?.also {
+        ini.get<IntArray?>("Colours", "SliderTrackOverride")?.also { trackColor ->
 
-            put("sliderBodyColor", it)
-            put("sliderFollowComboColor", false)
+            val hintColor = IntArray(trackColor.size) { min(255, it + 15) }
+
+            convertToHex(hintColor)?.also {
+
+                put("sliderHintColor", it)
+                put("sliderHintAlpha", 1f)
+                put("sliderHintWidth", 25f)
+                put("sliderHintEnable", true)
+                put("sliderHintShowMinLength", 1f)
+            }
+
+            convertToHex(trackColor)?.also {
+
+                put("sliderBodyColor", it)
+                put("sliderBodyBaseAlpha", 1f)
+                put("sliderFollowComboColor", false)
+            }
         }
+
         put("sliderBorderColor", convertToHex(ini["Colours", "SliderBorder"]) ?: "#FFFFFF")
     }
 
