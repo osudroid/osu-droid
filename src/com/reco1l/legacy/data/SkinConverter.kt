@@ -66,7 +66,7 @@ fun convertToJson(ini: IniReader) = JsonContent().apply {
 
         ini.get<IntArray?>("Colours", "SliderTrackOverride")?.also { trackColor ->
 
-            val hintColor = IntArray(trackColor.size) { min(255, it + 15) }
+            val hintColor = IntArray(trackColor.size) { min(255, trackColor[it] + 15) }
 
             convertToHex(hintColor)?.also {
 
