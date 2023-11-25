@@ -141,7 +141,7 @@ public class ResourceManager {
                     GlobalManager.getInstance().setInfo("Reading skin.ini...");
 
                     try (var ini = new IniReader(iniFile)) {
-                        skinjson = SkinIniConverter.convertToJson(ini);
+                        skinjson = SkinConverter.convertToJson(ini);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
