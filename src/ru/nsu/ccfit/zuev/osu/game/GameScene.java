@@ -28,10 +28,7 @@ import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.engine.options.TouchOptions;
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.DelayModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.LoopEntityModifier;
 import org.anddev.andengine.entity.modifier.MoveXModifier;
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
@@ -48,7 +45,6 @@ import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.modifier.IModifier;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -135,8 +131,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private int currentComboNum;
     private boolean comboWasMissed = false;
     private boolean comboWas100 = false;
-    private Queue<GameObject> activeObjects;
-    private LinkedList<GameObject> passiveObjects = new LinkedList<GameObject>();
+    private LinkedList<GameObject> activeObjects;
+    private LinkedList<GameObject> passiveObjects;
+    private LinkedList<GameObject> expiredObjects;
     private GameScoreText comboText, accText, scoreText;  //显示的文字  连击数  ACC  分数
     private GameScoreTextShadow scoreShadow;
     private Queue<BreakPeriod> breakPeriods = new LinkedList<BreakPeriod>();
@@ -181,7 +178,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private String title, artist, version;
     private ComboBurst comboBurst;
     private int failcount = 0;
-    private float lastObjectHitTime = 0;
+    private float lastActiveObjectHitTime = 0;
     private SliderPath[] sliderPaths = null;
     private int sliderIndex = 0;
 
@@ -194,7 +191,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private long previousFrameTime;
 
-    private boolean mIsAuto;
 
     // Video support
 
@@ -507,6 +503,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         activeObjects = new LinkedList<>();
         passiveObjects = new LinkedList<>();
+        expiredObjects = new LinkedList<>();
         lastObjectId = -1;
 
         GameHelper.setSliderColor(SkinManager.getInstance().getSliderColor());
@@ -533,7 +530,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         comboNum = -1;
         currentComboNum = 0;
-        lastObjectHitTime = 0;
+        lastActiveObjectHitTime = 0;
         final SampleBank defSound = beatmapData.general.sampleBank;
         if (defSound == SampleBank.soft) {
             TimingPoint.setDefaultSound("soft");
@@ -802,7 +799,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         stat = new StatisticV2();
         stat.setMod(ModMenu.getInstance().getMod());
-        mIsAuto = stat.getMod() != null && stat.getMod().contains(GameMod.MOD_AUTO);
         stat.canFail = !stat.getMod().contains(GameMod.MOD_NOFAIL)
                 && !stat.getMod().contains(GameMod.MOD_RELAX)
                 && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)
@@ -833,6 +829,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setSuddenDeath(stat.getMod().contains(GameMod.MOD_SUDDENDEATH));
         GameHelper.setPerfect(stat.getMod().contains(GameMod.MOD_PERFECT));
         GameHelper.setScoreV2(stat.getMod().contains(GameMod.MOD_SCOREV2));
+        GameHelper.setEasy(stat.getMod().contains(GameMod.MOD_EASY));
         difficultyHelper = stat.getMod().contains(GameMod.MOD_PRECISE) ?
                 DifficultyHelper.HighDifficulty : DifficultyHelper.StdDifficulty;
         GameHelper.setDifficultyHelper(difficultyHelper);
@@ -960,7 +957,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     "000.00%", 0.6f);
             comboText = new GameScoreText(OsuSkin.get().getComboPrefix(), Utils.toRes(2), Config.getRES_HEIGHT()
                     - Utils.toRes(95), "0000x", 1.5f);
-            comboText.changeText(new StringBuilder("0****"));
+            comboText.changeText("0****");
             scoreText = new GameScoreText(OsuSkin.get().getScorePrefix(), Config.getRES_WIDTH()
                     - scoreDigitTex.getWidth() * 7.25f, 0, "0000000000", 0.9f);
             comboText.attachToScene(fgScene);
@@ -968,7 +965,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             scoreText.attachToScene(fgScene);
             if (Config.isComplexAnimations()) {
                 scoreShadow = new GameScoreTextShadow(0, Config.getRES_HEIGHT()
-                        - Utils.toRes(90), "0000x", 1.5f);
+                        - Utils.toRes(90), "0000x", 1.5f, comboText);
                 scoreShadow.attachToScene(bgScene);
                 passiveObjects.add(scoreShadow);
             }
@@ -1318,8 +1315,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         return combos.get(num % combos.size());
     }
 
-    // TODO update
-
+    @Override
     public void onUpdate(final float pSecondsElapsed) {
         previousFrameTime = SystemClock.uptimeMillis();
         Utils.clearSoundMask();
@@ -1364,11 +1360,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     if (!Objects.equals(liveScore, lastScoreSent))
                     {
                         lastScoreSent = liveScore;
-
-                        Execution.asyncIgnoreExceptions(() -> {
-                            RoomAPI.submitLiveScore(lastScoreSent.toJson());
-                            return null;
-                        });
+                        Execution.asyncIgnoreExceptions(() -> RoomAPI.submitLiveScore(lastScoreSent.toJson()));
                     }
                 }
             }
@@ -1440,15 +1432,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             autoCursor.update(dt);
         } else if (cursorSprites != null) {
             for (int i = 0; i < CursorCount; i++) {
-                cursorSprites[i].setPosition(cursors[i].mousePos.x, cursors[i].mousePos.y);
                 cursorSprites[i].update(dt);
-                if (cursors[i].mouseDown) {
-                    cursorSprites[i].setShowing(true);
-                    if (cursors[i].mousePressed) {
-                        cursorSprites[i].click();
-                    }
-                } else {
-                    cursorSprites[i].setShowing(false);
+
+                if (replaying) {
+                    cursorSprites[i].setPosition(cursors[i].mousePos.x, cursors[i].mousePos.y);
+                    cursorSprites[i].setShowing(cursors[i].mouseDown);
+                }
+
+                if (cursors[i].mouseDown && cursors[i].mousePressed) {
+                    cursorSprites[i].click();
                 }
             }
         }
@@ -1542,7 +1534,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             stat.changeHp((float) -rate * 0.01f * dt);
 
             if (stat.getHp() <= 0 && stat.canFail) {
-                if (stat.getMod().contains(GameMod.MOD_EASY) && failcount < 3) {
+                if (GameHelper.isEasy() && failcount < 3) {
                     failcount++;
                     stat.changeHp(1f);
                 }
@@ -1566,30 +1558,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if(!Config.isHideInGameUI()) {
-            //连击数////////////////////////
-            final StringBuilder comboBuilder = new StringBuilder();
-            comboBuilder.setLength(0);
-            comboBuilder.append(stat.getCombo());
-            while (comboBuilder.length() < 5) {
-                comboBuilder.append('*');
+            strBuilder.setLength(0);
+            strBuilder.append(stat.getCombo());
+            while (strBuilder.length() < 5) {
+                strBuilder.append('*');
             }
+            var comboStr = strBuilder.toString();
             if (Config.isComplexAnimations()) {
-                scoreShadow.changeText(comboBuilder);
-                scoreShadow.registerEntityModifier(new DelayModifier(0.2f, new IEntityModifier.IEntityModifierListener() {
-                    @Override
-                    public void onModifierStarted(IModifier<IEntity> iModifier, IEntity iEntity) { 
-                    }
-                    @Override
-                    public void onModifierFinished(IModifier<IEntity> iModifier, IEntity iEntity) {
-                        //当CB数字阴影缩小完成的时候 更改CB数字
-                        comboText.changeText(comboBuilder);
-                    }
-                }));
+                scoreShadow.changeText(comboStr);
             } else {
-                comboText.changeText(comboBuilder);
+                comboText.changeText(comboStr);
             }
 
-            //连击数////////////////////////
             strBuilder.setLength(0);
             float rawAccuracy = stat.getAccuracy() * 100f;
             strBuilder.append((int) rawAccuracy);
@@ -1606,21 +1586,21 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (strBuilder.length() < 6) {
                 strBuilder.insert(0, '*');
             }
-            accText.changeText(strBuilder);
+            accText.changeText(strBuilder.toString());
             strBuilder.setLength(0);
             strBuilder.append(stat.getTotalScoreWithMultiplier());
             while (strBuilder.length() < 8) {
                 strBuilder.insert(0, '0');
             }
+
             int scoreTextOffset = 0;
             while (strBuilder.length() < 10) {
                 strBuilder.insert(0, '*');
                 scoreTextOffset++;
             }
-    
-            scoreText.setPosition(Config.getRES_WIDTH()
-                    - ResourceManager.getInstance().getTextureWithPrefix(OsuSkin.get().getScorePrefix(), "0").getWidth() * (9.25f - scoreTextOffset), 0);
-            scoreText.changeText(strBuilder);
+
+            scoreText.setPosition(Config.getRES_WIDTH() - scoreText.getDigitWidth() * (9.25f - scoreTextOffset), 0);
+            scoreText.changeText(strBuilder.toString());
         }
 
         if (comboBurst != null) {
@@ -1631,43 +1611,40 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        for (final GameObject obj : passiveObjects) {
-            obj.update(dt);
+        // Clearing expired objects.
+        while (!expiredObjects.isEmpty()) {
+            var object = expiredObjects.poll();
+            // Since we're going to remove them and same objects aren't added to both list we can
+            // share the same list to remove them.
+            activeObjects.remove(object);
+            passiveObjects.remove(object);
         }
 
-        if (Config.isRemoveSliderLock()){
-            GameObject lastObject = getLastTobeclickObject();
-            if (lastObject != null) {
-                lastObjectHitTime = getLastTobeclickObject().getHitTime();
-            }
+        updatePassiveObjects(dt);
+        if (Config.isRemoveSliderLock()) {
+            updateLastActiveObjectHitTime();
         }
-
-        for (final GameObject obj : activeObjects) {
-            obj.update(dt);
-        }
+        updateActiveObjects(dt);
 
         if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
             autoCursor.moveToObject(activeObjects.peek(), secPassed, approachRate, this);
         }
 
-        int clickCount = 0;
-        for (final boolean c : cursorIIsDown){
-            if (c == true) clickCount++;
-        }
-        for (int i = 0; i < CursorCount; i++) {
-            cursorIIsDown[i] = false;
-        }
+        if (Config.isRemoveSliderLock()) {
+            var downPressCursorCount = 0;
 
-        for (int i = 0; i < clickCount - 1; i++){
-            if (Config.isRemoveSliderLock()){
-                GameObject lastObject = getLastTobeclickObject();
-                if (lastObject != null) {
-                    lastObjectHitTime = getLastTobeclickObject().getHitTime();
-                }
+            for (int i = 0; i < CursorCount; i++) {
+                if (cursorIIsDown[i])
+                    downPressCursorCount++;
+                cursorIIsDown[i] = false;
             }
-            for (final GameObject obj : activeObjects) {
-                obj.tryHit(dt);
+
+            for (int i = 0; i < downPressCursorCount - 1; i++) {
+                updateLastActiveObjectHitTime();
+                tryHitActiveObjects(dt);
             }
+        } else {
+            tryHitActiveObjects(dt);
         }
 
         if (video != null && secPassed >= videoOffset)
@@ -1708,14 +1685,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 shouldBePunished = true;
             }
 
+            // Next object from the polled one, this returns null if the list if empty. That's why every
+            // usage of this is done if condition 'objects.isEmpty()' is false. Ignore IDE warnings.
+            var nextObj = objects.peek();
+
             // Stack notes
             // If Config.isCalculateSliderPathInGameStart(), do this in stackNotes()
             if (Config.isCalculateSliderPathInGameStart() == false &&
                 objects.isEmpty() == false && (objDefine & 1) > 0) {
-                if (objects.peek().getTime() - data.getTime() < 2f * GameHelper.getStackLeniency()
-                        && Utils.squaredDistance(pos, objects.peek().getPos()) < scale) {
-                    objects.peek().setPosOffset(
-                            data.getPosOffset() + Utils.toRes(4) * scale);
+                if (nextObj.getTime() - data.getTime() < 2f * GameHelper.getStackLeniency()
+                        && Utils.squaredDistance(pos, nextObj.getPos()) < scale) {
+                    nextObj.setPosOffset(
+                            data.getPosOffset() + 4 * scale);
                 }
             }
             // If this object is silder and isCalculateSliderPathInGameStart(), the pos is += in calculateAllSliderPaths()
@@ -1724,7 +1705,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 pos.y += data.getPosOffset();
             }
             if (objects.isEmpty() == false) {
-                distToNextObject = objects.peek().getTime() - data.getTime();
+                distToNextObject = nextObj.getTime() - data.getTime();
                 if (soundTimingPoint != null
                         && distToNextObject < soundTimingPoint.getBeatLength() / 2) {
                     distToNextObject = soundTimingPoint.getBeatLength() / 2;
@@ -1766,30 +1747,30 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         col.r(), col.g(), col.b(), scale, currentComboNum,
                         Integer.parseInt(params[4]), tempSound, isFirst);
                 circle.setEndsCombo(objects.isEmpty()
-                        || objects.peek().isNewCombo());
+                        || nextObj.isNewCombo());
                 addObject(circle);
                 isFirst = false;
                 if (objects.isEmpty() == false
-                        && objects.peek().isNewCombo() == false) {
+                        && nextObj.isNewCombo() == false) {
                     final FollowTrack track = GameObjectPool.getInstance()
                             .getTrack();
                     PointF end;
-                    if (objects.peek().getTime() > data.getTime()) {
+                    if (nextObj.getTime() > data.getTime()) {
                         end = data.getEnd();
                     } else {
                         end = data.getPos();
                     }
-                    track.init(this, bgScene, end, objects.peek().getPos(),
-                            objects.peek().getTime() - secPassed, approachRate,
+                    track.init(this, bgScene, end, nextObj.getPos(),
+                            nextObj.getTime() - secPassed, approachRate,
                             scale);
                 }
-                if (stat.getMod().contains(GameMod.MOD_AUTO)) {
+                if (GameHelper.isAuto()) {
                     circle.setAutoPlay();
                 }
                 circle.setHitTime(data.getTime());
 
                 if (objects.isEmpty() == false) {
-                    if (objects.peek().getTime() > data.getTime()) {
+                    if (nextObj.getTime() > data.getTime()) {
                         currentComboNum++;
                     }
                 }
@@ -1811,12 +1792,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         (endTime - data.getTime()) / timeMultiplier, rps, Integer.parseInt(params[4]),
                         tempSound, stat);
                 spinner.setEndsCombo(objects.isEmpty()
-                        || objects.peek().isNewCombo());
+                        || nextObj.isNewCombo());
                 addObject(spinner);
                 isFirst = false;
 
-                if (stat.getMod().contains(GameMod.MOD_AUTO) ||
-                        stat.getMod().contains(GameMod.MOD_AUTOPILOT)) {
+                if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
                     spinner.setAutoPlay();
                 }
 
@@ -1853,32 +1833,32 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     currentTimingPoint, soundspec, tempSound, isFirst, Double.parseDouble(params[2]));
                 }
                 slider.setEndsCombo(objects.isEmpty()
-                        || objects.peek().isNewCombo());
+                        || nextObj.isNewCombo());
                 addObject(slider);
                 isFirst = false;
 
                 if (objects.isEmpty() == false
-                        && objects.peek().isNewCombo() == false) {
+                        && nextObj.isNewCombo() == false) {
                     final FollowTrack track = GameObjectPool.getInstance()
                             .getTrack();
                     PointF end;
-                    if (objects.peek().getTime() > data.getTime()) {
+                    if (nextObj.getTime() > data.getTime()) {
                         end = data.getEnd();
                     } else {
                         end = data.getPos();
                     }
-                    track.init(this, bgScene, end, objects.peek().getPos(),
-                            objects.peek().getTime() - secPassed, approachRate,
+                    track.init(this, bgScene, end, nextObj.getPos(),
+                            nextObj.getTime() - secPassed, approachRate,
                             scale);
                 }
-                if (stat.getMod().contains(GameMod.MOD_AUTO)) {
+                if (GameHelper.isAuto()) {
                     slider.setAutoPlay();
                 }
                 slider.setHitTime(data.getTime());
 
 
                 if (objects.isEmpty() == false) {
-                    if (objects.peek().getTime() > data.getTime()) {
+                    if (nextObj.getTime() > data.getTime()) {
                         currentComboNum++;
                     }
                 }
@@ -1952,10 +1932,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         Multiplayer.log("Match ended, moving to results scene.");
                         RoomScene.INSTANCE.getChat().show();
 
-                        Execution.asyncIgnoreExceptions(() -> {
-                            RoomAPI.submitFinalScore(stat.toJson());
-                            return null;
-                        });
+                        Execution.asyncIgnoreExceptions(() -> RoomAPI.submitFinalScore(stat.toJson()));
 
                         ToastLogger.showText("Loading room statistics...", false);
                     }
@@ -1993,12 +1970,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             skipBtn.detachSelf();
             skipBtn = null;
         } else if (skipBtn != null) {
+
+            var maxPos = new PointF(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+
             for (final Cursor c : cursors) {
-                if (c.mouseDown
-                        && Utils.distance(
-                        c.mousePos,
-                        new PointF(Config.getRES_WIDTH(), Config
-                                .getRES_HEIGHT())) < 250) {
+                if (c.mouseDown && Utils.distance(c.mousePos, maxPos) < 250) {
 
                     if (Multiplayer.isConnected)
                     {
@@ -2022,7 +1998,34 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
             }
         }
+    }
 
+    private void updateLastActiveObjectHitTime() {
+        for (int i = 0, size = activeObjects.size(); i < size; i++) {
+            var obj = activeObjects.get(i);
+            if (!obj.isStartHit()) {
+                lastActiveObjectHitTime = obj.getHitTime();
+                break;
+            }
+        }
+    }
+
+    private void tryHitActiveObjects(float deltaTime) {
+        for (int i = 0, size = activeObjects.size(); i < size; i++) {
+            activeObjects.get(i).tryHit(deltaTime);
+        }
+    }
+
+    private void updateActiveObjects(float deltaTime) {
+        for (int i = 0, size = activeObjects.size(); i < size; i++) {
+            activeObjects.get(i).update(deltaTime);
+        }
+    }
+
+    private void updatePassiveObjects(float deltaTime) {
+        for (int i = 0, size = passiveObjects.size(); i < size; i++) {
+            passiveObjects.get(i).update(deltaTime);
+        }
     }
 
     public void skip()
@@ -2039,21 +2042,21 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             musicStarted = true;
         }
         ResourceManager.getInstance().getSound("menuhit").play();
-        final float difference = skipTime - 0.5f - secPassed;
-        for (final GameObject obj : passiveObjects) {
-            obj.update(difference);
-        }
+        float difference = skipTime - 0.5f - secPassed;
 
         secPassed = skipTime - 0.5f;
         int seekTime = (int) Math.ceil(secPassed * 1000);
-
-        GlobalManager.getInstance().getSongService().seekTo(seekTime);
-        if (video != null) {
-            var videoSeekTime = seekTime - (int) (videoOffset * 1000);
-            video.getTexture().seekTo(videoSeekTime);
-        }
+        int videoSeekTime = seekTime - (int) (videoOffset * 1000);
 
         Execution.glThread(() -> {
+
+            updatePassiveObjects(difference);
+
+            GlobalManager.getInstance().getSongService().seekTo(seekTime);
+            if (video != null) {
+                video.getTexture().seekTo(videoSeekTime);
+            }
+
             if (skipBtn != null) {
                 skipBtn.detachSelf();
                 skipBtn = null;
@@ -2487,12 +2490,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public boolean isMousePressed(final GameObject object, final int index) {
         // EnumSet.contains() internally uses an iterator, and it can be expensive to use everytime we want to use this method.
-        if (mIsAuto) {
+        if (GameHelper.isAuto()) {
             return false;
         }
         if (Config.isRemoveSliderLock()){
             if(activeObjects.isEmpty()
-                || Math.abs(object.getHitTime() - lastObjectHitTime) > 0.001f) {
+                || Math.abs(object.getHitTime() - lastActiveObjectHitTime) > 0.001f) {
                 return false;
             }
         }
@@ -2504,63 +2507,100 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         return cursors[index].mousePressed;
     }
 
-    private GameObject getLastTobeclickObject(){
-        for (GameObject note : activeObjects)
-        {
-            if (!note.isStartHit())
-            {
-                return note;
-            }
-        }
-        return null;
-    }
-
     @Override
     public double downFrameOffset(int index) {
         return cursors[index].mouseDownOffsetMS;
     }
 
     public void removeObject(final GameObject object) {
-        activeObjects.remove(object);
+        expiredObjects.add(object);
     }
 
-    public boolean onSceneTouchEvent(final Scene pScene,
-                                     final TouchEvent pSceneTouchEvent) {
-        if (pSceneTouchEvent.getPointerID() < 0
-                || pSceneTouchEvent.getPointerID() >= CursorCount) {
-            Debug.e("Invalid pointerID: " + pSceneTouchEvent.getPointerID());
-            return false;
+
+    private PointF applyCursorTrackCoordinates(Cursor cursor) {
+
+        var rawX = cursor.mousePos.x;
+        var rawY = cursor.mousePos.y;
+
+        var width = Config.getRES_WIDTH();
+        var height = Config.getRES_HEIGHT();
+
+        if (GameHelper.isHardrock()) {
+            rawY -= height / 2f;
+            rawY *= -1;
+            rawY += height / 2f;
         }
+        rawY -= (height - Constants.MAP_ACTUAL_HEIGHT) / 2f;
+        rawX -= (width - Constants.MAP_ACTUAL_WIDTH) / 2f;
+
+        rawX *= Constants.MAP_WIDTH / (float) Constants.MAP_ACTUAL_WIDTH;
+        rawY *= Constants.MAP_HEIGHT / (float) Constants.MAP_ACTUAL_HEIGHT;
+
+        cursor.trackPos.x = rawX;
+        cursor.trackPos.y = rawY;
+        return cursor.trackPos;
+    }
+
+
+    public boolean onSceneTouchEvent(final Scene pScene, final TouchEvent event) {
         if (replaying) {
             return false;
         }
-        final int i = pSceneTouchEvent.getPointerID();
-        float pTouchX = FMath.clamp(pSceneTouchEvent.getX(), 0, Config.getRES_WIDTH());
-        float pTouchY = FMath.clamp(pSceneTouchEvent.getY(), 0, Config.getRES_HEIGHT());
-        if (pSceneTouchEvent.isActionDown()) {
-            cursors[i].mouseDown = true;
-            cursors[i].mouseDownOffsetMS = (pSceneTouchEvent.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier;
-            for (int j = 0; j < cursors.length; j++)
-                cursors[j].mouseOldDown = false;
-            PointF gamePoint = Utils.realToTrackCoords(new PointF(pTouchX, pTouchY));
-            cursors[i].mousePos.x = pTouchX;
-            cursors[i].mousePos.y = pTouchY;
-            if (replay != null) {
-                replay.addPress(secPassed, gamePoint, i);
+
+        var id = event.getPointerID();
+        if (id < 0 || id >= CursorCount) {
+            return false;
+        }
+
+        var cursor = cursors[id];
+        var sprite = !GameHelper.isAuto() && !GameHelper.isAutopilotMod() && cursorSprites != null
+                ? cursorSprites[id]
+                : null;
+
+        cursor.mousePos.x = FMath.clamp(event.getX(), 0, Config.getRES_WIDTH());
+        cursor.mousePos.y = FMath.clamp(event.getY(), 0, Config.getRES_HEIGHT());
+
+        if (sprite != null) {
+            sprite.setPosition(cursor.mousePos.x, cursor.mousePos.y);
+        }
+
+        if (event.isActionDown()) {
+
+            if (sprite != null) {
+                sprite.setShowing(true);
             }
-            cursorIIsDown[i] = true;
-        } else if (pSceneTouchEvent.isActionMove()) {
-            PointF gamePoint = Utils.realToTrackCoords(new PointF(pTouchX, pTouchY));
-            cursors[i].mousePos.x = pTouchX;
-            cursors[i].mousePos.y = pTouchY;
+
+            cursor.mouseDown = true;
+            cursor.mouseDownOffsetMS = (event.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier;
+
+            for (var value : cursors)
+                value.mouseOldDown = false;
+
+            PointF gamePoint = applyCursorTrackCoordinates(cursor);
             if (replay != null) {
-                replay.addMove(secPassed, gamePoint, i);
+                replay.addPress(secPassed, gamePoint, id);
             }
-        } else if (pSceneTouchEvent.isActionUp()) {
-            cursors[i].mouseDown = false;
+            cursorIIsDown[id] = true;
+
+        } else if (event.isActionMove()) {
+
+            PointF gamePoint = applyCursorTrackCoordinates(cursor);
             if (replay != null) {
-                replay.addUp(secPassed, i);
+                replay.addMove(secPassed, gamePoint, id);
             }
+
+        } else if (event.isActionUp()) {
+
+            if (sprite != null) {
+                sprite.setShowing(false);
+            }
+            cursor.mouseDown = false;
+            cursorIIsDown[id] = false;
+
+            if (replay != null) {
+                replay.addUp(secPassed, id);
+            }
+
         } else {
             return false;
         }
@@ -2588,10 +2628,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             {
                 // Room being null can happen when the player disconnects from socket while playing
                 if (Multiplayer.isConnected)
-                    Execution.asyncIgnoreExceptions(() -> {
-                        RoomAPI.submitFinalScore(stat.toJson());
-                        return null;
-                    });
+                    Execution.asyncIgnoreExceptions(() -> RoomAPI.submitFinalScore(stat.toJson()));
 
                 Multiplayer.log("Player left the match.");
                 quit();
@@ -2611,6 +2648,22 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             video.getTexture().pause();
         }
 
+        // Release all pressed cursors to avoid getting stuck at resume.
+        if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod() && !replaying) {
+            for (int i = 0; i < CursorCount; ++i) {
+                var cursor = cursors[i];
+
+                if (cursor.mouseDown) {
+                    cursor.mouseDown = false;
+
+                    if (replay != null)
+                        replay.addUp(secPassed, i);
+                }
+                if (cursorSprites != null)
+                    cursorSprites[i].setShowing(false);
+            }
+        }
+
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             GlobalManager.getInstance().getSongService().pause();
         }
@@ -2627,11 +2680,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (Multiplayer.isConnected)
             {
                 Multiplayer.log("Player has lost, moving to room scene.");
-
-                Execution.asyncIgnoreExceptions(() -> {
-                    RoomAPI.submitFinalScore(stat.toJson());
-                    return null;
-                });
+                Execution.asyncIgnoreExceptions(() -> RoomAPI.submitFinalScore(stat.toJson()));
             }
             quit();
             return;
@@ -2697,7 +2746,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
 
     public void removePassiveObject(final GameObject object) {
-        passiveObjects.remove(object);
+        expiredObjects.add(object);
     }
 
     private void createHitEffect(final PointF pos, final String name, RGBColor color) {

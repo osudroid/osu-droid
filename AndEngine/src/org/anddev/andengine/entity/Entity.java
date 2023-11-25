@@ -212,6 +212,8 @@ public class Entity implements IEntity {
 
 	@Override
 	public void setPosition(final float pX, final float pY) {
+		if (pX == mX && pY == mY)
+			return;
 		this.mX = pX;
 		this.mY = pY;
 		this.mLocalToParentTransformationDirty = true;
@@ -238,6 +240,8 @@ public class Entity implements IEntity {
 
 	@Override
 	public void setRotation(final float pRotation) {
+		if (mRotation == pRotation)
+			return;
 		this.mRotation = pRotation;
 		this.mLocalToParentTransformationDirty = true;
 		this.mParentToLocalTransformationDirty = true;
@@ -306,6 +310,8 @@ public class Entity implements IEntity {
 
 	@Override
 	public void setScale(final float pScale) {
+		if (mScaleX == pScale && mScaleY == pScale)
+			return;
 		this.mScaleX = pScale;
 		this.mScaleY = pScale;
 		this.mLocalToParentTransformationDirty = true;
@@ -1047,22 +1053,13 @@ public class Entity implements IEntity {
 	public void onManagedDrawChildren(final GL10 pGL, final Camera pCamera) {
 		final ArrayList<IEntity> children = this.mChildren;
 		final int childCount = children.size();
-		int i = 0;
-		while (i < childCount) {
+		for (int i = 0; i < childCount; i++) {
 			IEntity child;
-			try {
-				child = children.get(i);
-
-				if (child == null)
-					throw new ConcurrentModificationException();
-
-			} catch (Exception e) {
+			try { child = children.get(i); } catch (Exception e) {
 				Debug.e("Failed to draw child at index " + i);
-				++i;
 				continue;
 			}
 			child.onDraw(pGL, pCamera);
-			++i;
 		}
 	}
 
@@ -1077,21 +1074,13 @@ public class Entity implements IEntity {
 		if(this.mChildren != null && !this.mChildrenIgnoreUpdate) {
 			final ArrayList<IEntity> entities = this.mChildren;
 			final int entityCount = entities.size();
-			int i = 0;
-			while (i < entityCount) {
+			for (int i = 0; i < entityCount; i++) {
 				IEntity entity;
-				try {
-					entity = entities.get(i);
-
-					if (entity == null)
-						throw new ConcurrentModificationException();
-
-				} catch (Exception e) {
+				try { entity = entities.get(i); } catch (Exception e) {
 					Debug.e("Failed to update entity at index " + i);
-					break;
+					continue;
 				}
 				entity.onUpdate(pSecondsElapsed);
-				++i;
 			}
 		}
 	}

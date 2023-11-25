@@ -126,25 +126,18 @@ public class FollowTrack extends GameObject {
 
         if (time >= timeLeft) {
             empty = true;
-            SyncTaskManager.getInstance().run(new Runnable() {
 
-
-                public void run() {
-                    for (final Sprite sp : points) {
-                        sp.detachSelf();
-                        if (sp instanceof AnimSprite) {
-                            SpritePool.getInstance().putAnimSprite(
-                                    "followpoint-", (AnimSprite) sp);
-                        } else {
-                            SpritePool.getInstance().putSprite("followpoint",
-                                    sp);
-                        }
-                    }
-                    listener.removePassiveObject(FollowTrack.this);
-                    GameObjectPool.getInstance().putTrac(FollowTrack.this);
+            for (int i = 0, pointsSize = points.size(); i < pointsSize; i++) {
+                Sprite sp = points.get(i);
+                sp.detachSelf();
+                if (sp instanceof AnimSprite) {
+                    SpritePool.getInstance().putAnimSprite("followpoint-", (AnimSprite) sp);
+                } else {
+                    SpritePool.getInstance().putSprite("followpoint", sp);
                 }
-            });
+            }
+            listener.removePassiveObject(FollowTrack.this);
+            GameObjectPool.getInstance().putTrac(FollowTrack.this);
         }
     }
-
 }

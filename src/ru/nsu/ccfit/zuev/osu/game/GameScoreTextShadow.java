@@ -6,18 +6,19 @@ import org.anddev.andengine.entity.scene.Scene;
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class GameScoreTextShadow extends GameObject {
+    private final GameScoreText comboText;
     private final AnimSprite[] letters;
     private final ArrayList<AnimSprite> digits = new ArrayList<AnimSprite>();
     private boolean hasX = false;
     private String text = "";
 
     public GameScoreTextShadow(float x, float y, final String mask,
-                               final float scale) {
+                               final float scale, GameScoreText comboText) {
+        this.comboText = comboText;
         letters = new AnimSprite[mask.length()];
         float width = 0;
 
@@ -50,23 +51,30 @@ public class GameScoreTextShadow extends GameObject {
         text = "0****";
     }
 
-    public void changeText(final StringBuilder text) {
-        if (this.text.equals(text.toString())) {
+    public void changeText(String text) {
+        if (text.equals(this.text)) {
             return;
         }
         int j = 0;
         float digitsWidth = 0;
-        for (int i = 0; i < text.length(); i++) {
-            if (j >= digits.size()) {
+
+        var textLength = text.length();
+        var digitsSize = digits.size();
+
+        for (int i = 0; i < textLength; i++) {
+            if (j >= digitsSize) {
                 break;
             }
-            if (text.charAt(i) >= '0' && text.charAt(i) <= '9') {
-                digits.get(j).setVisible(true);
-                digits.get(j).setFrame(text.charAt(i) - '0');
-                digitsWidth += digits.get(j).getWidth();
+            var digit = digits.get(j);
+            var ch = text.charAt(i);
+
+            if (ch >= '0' && ch <= '9') {
+                digit.setVisible(true);
+                digit.setFrame(ch - '0');
+                digitsWidth += digit.getWidth();
                 j++;
-            } else if (text.charAt(i) == '*') {
-                digits.get(j).setVisible(false);
+            } else if (ch == '*') {
+                digit.setVisible(false);
                 j++;
             }
         }
@@ -74,7 +82,9 @@ public class GameScoreTextShadow extends GameObject {
             letters[letters.length - 1].setPosition(digits.get(0).getX()
                     + digitsWidth, letters[letters.length - 1].getY());
         }
-        this.text = text.toString();
+        // Set previous text if wasn't set yet.
+        comboText.changeText(this.text);
+        this.text = text;
 
         letters[0].setAlpha(0.6f);
     }
@@ -97,13 +107,14 @@ public class GameScoreTextShadow extends GameObject {
             }
 
             letters[0].setScale(1.5f - Math.abs(0.6f - alpha));
-            letters[0].setPosition(Utils.toRes(20), Config.getRES_HEIGHT()
-                    - letters[0].getHeightScaled() - Utils.toRes(20));
+            letters[0].setPosition(20, Config.getRES_HEIGHT()
+                    - letters[0].getHeightScaled() - 20);
             for (final AnimSprite sp : letters) {
                 sp.setAlpha(alpha);
             }
+        } else {
+            comboText.changeText(text);
         }
-
     }
 
     public void registerEntityModifier(IEntityModifier modifier) {
