@@ -109,8 +109,6 @@ public class InGameSettingMenu extends BaseFragment {
         speedModifyRow = findViewById(R.id.speed_modify);
         followDelayRow = findViewById(R.id.follow_delay_row);
 
-        negativeInfinityARToggle = findViewById(R.id.negative_infinity_ar);
-
         customARBar = findViewById(R.id.custom_ar_bar);
         customARText = findViewById(R.id.custom_ar_text);
         customARToggle = findViewById(R.id.custom_ar_toggle);
@@ -306,7 +304,6 @@ public class InGameSettingMenu extends BaseFragment {
         customCSBar.setMax(110);
         customHPBar.setMax(110);
 
-        negativeInfinityARToggle.setOnCheckedChangeListener(null);
         customARToggle.setOnCheckedChangeListener(null);
         customODToggle.setOnCheckedChangeListener(null);
         customCSToggle.setOnCheckedChangeListener(null);
@@ -314,22 +311,9 @@ public class InGameSettingMenu extends BaseFragment {
 
         updateDifficultyAdjustValues();
 
-        negativeInfinityARToggle.setOnCheckedChangeListener((view, isChecked) -> {
-
-            customARToggle.setEnabled(!isChecked);
-            customARBar.setEnabled(!isChecked);
-            ModMenu.getInstance().setCustomAR(isChecked ? ModMenu.NEGATIVE_INFINITY_AR : null);
-
-            updateDifficultyAdjustValues();
-        });
-
         customARToggle.setOnCheckedChangeListener((view, isChecked) -> {
 
-            // This listener can be fired if user checks the negativeInfinityARToggle too, so in that case we prevent
-            // to re-assign AR to null.
-            if (!ModMenu.getInstance().isCustomAR() || ModMenu.getInstance().getCustomAR() != ModMenu.NEGATIVE_INFINITY_AR)
-                ModMenu.getInstance().setCustomAR(isChecked ? customARBar.getProgress() / 10f : null);
-
+            ModMenu.getInstance().setCustomAR(isChecked ? customARBar.getProgress() / 10f : null);
             customARBar.setEnabled(isChecked);
 
             updateDifficultyAdjustValues();
