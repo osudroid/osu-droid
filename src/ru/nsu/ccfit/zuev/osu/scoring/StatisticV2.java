@@ -909,6 +909,11 @@ public class StatisticV2 implements Serializable {
             modScoreMultiplier *= m.scoreMultiplier;
         }
 
+        if (isLegacySC) {
+            // The legacy SC mod has a 1.06 multiplier.
+            modScoreMultiplier *= 1.06f;
+        }
+
         if (changeSpeed != 1f) {
             modScoreMultiplier *= getSpeedChangeScoreMultiplier();
         }
