@@ -74,7 +74,8 @@ public class HitErrorMeter extends GameObject {
                 break;
             }
         }
-        for (final Rectangle result : onDisplayIndicators) {
+        for (int i = 0, size = onDisplayIndicators.size(); i < size; i++) {
+            var result = onDisplayIndicators.get(i);
             float currentAlpha = result.getAlpha() - 0.002f;
             result.setAlpha(currentAlpha);
         }

@@ -34,12 +34,12 @@ public class GameHelper {
     private static boolean relaxMod = false;
     private static boolean doubleTime = false;
     private static boolean nightCore = false;
-    private static boolean speedUp = false;
     private static boolean halfTime = false;
     private static boolean autopilotMod = false;
     private static boolean suddenDeath = false;
     private static boolean perfect = false;
     private static boolean scoreV2;
+    private static boolean isEasy;
     private static boolean useReplay;
     private static boolean isKiai = false;
     private static boolean auto = false;
@@ -257,6 +257,14 @@ public class GameHelper {
         GameHelper.sliderColor = sliderColor;
     }
 
+    public static boolean isEasy() {
+        return isEasy;
+    }
+
+    public static void setEasy(boolean isEasy) {
+        GameHelper.isEasy = isEasy;
+    }
+
     public static boolean isHardrock() {
         return hardrock;
     }
@@ -304,13 +312,6 @@ public class GameHelper {
         GameHelper.doubleTime = doubleTime;
     }
 
-    public static boolean isSpeedUp() {
-        return speedUp;
-    }
-
-    public static void setSpeedUp(final boolean speedUp) {
-        GameHelper.speedUp = speedUp;
-    }
     public static boolean isSuddenDeath() {
         return suddenDeath;
     }

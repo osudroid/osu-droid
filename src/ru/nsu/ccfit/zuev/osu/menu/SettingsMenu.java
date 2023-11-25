@@ -30,6 +30,8 @@ import com.google.android.material.snackbar.Snackbar;
 import java.io.File;
 
 import com.reco1l.framework.lang.execution.Async;
+import com.reco1l.legacy.UpdateManager;
+
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
@@ -40,7 +42,6 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineInitializer;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
-import ru.nsu.ccfit.zuev.osu.Updater;
 // import ru.nsu.ccfit.zuev.osu.game.SpritePool;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -170,7 +171,7 @@ public class SettingsMenu extends SettingsFragment {
 
         final Preference update = findPreference("update");
         update.setOnPreferenceClickListener(preference -> {
-            Updater.getInstance().checkForUpdates(true, true);
+            UpdateManager.INSTANCE.checkNewUpdates(false);
             return true;
         });
 

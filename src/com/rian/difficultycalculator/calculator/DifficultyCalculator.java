@@ -28,9 +28,9 @@ public class DifficultyCalculator {
      */
     public final EnumSet<GameMod> difficultyAdjustmentMods = EnumSet.of(
             GameMod.MOD_DOUBLETIME, GameMod.MOD_HALFTIME, GameMod.MOD_NIGHTCORE,
-            GameMod.MOD_SMALLCIRCLE, GameMod.MOD_RELAX, GameMod.MOD_EASY,
+            GameMod.MOD_RELAX, GameMod.MOD_EASY,
             GameMod.MOD_REALLYEASY, GameMod.MOD_HARDROCK, GameMod.MOD_HIDDEN,
-            GameMod.MOD_FLASHLIGHT, GameMod.MOD_SPEEDUP
+            GameMod.MOD_FLASHLIGHT
     );
 
     private static final double difficultyMultiplier = 0.0675;
@@ -184,7 +184,7 @@ public class DifficultyCalculator {
         float ar = beatmap.getDifficultyManager().getAR();
         double preempt = (ar <= 5) ? (1800 - 120 * ar) : (1950 - 150 * ar);
 
-        if (parameters != null && !parameters.isForceAR()) {
+        if (parameters != null && !parameters.isCustomAR()) {
             preempt /= parameters.getTotalSpeedMultiplier();
         }
 
@@ -262,7 +262,17 @@ public class DifficultyCalculator {
     private void processCS(BeatmapDifficultyManager manager, DifficultyCalculationParameters parameters) {
         float cs = manager.getCS();
 
-        if (parameters != null) {
+        // 12.14 is the point at which the object radius approaches 0. Use the _very_ minimum value.
+        final float maxValue = 12.13f;
+
+        if (parameters == null) {
+            manager.setCS(Math.min(cs, maxValue));
+            return;
+        }
+
+        if (parameters.isCustomCS()) {
+            manager.setCS(Math.min(maxValue, parameters.customCS));
+        } else {
             if (parameters.mods.contains(GameMod.MOD_HARDROCK)) {
                 ++cs;
             }
@@ -272,25 +282,22 @@ public class DifficultyCalculator {
             if (parameters.mods.contains(GameMod.MOD_REALLYEASY)) {
                 --cs;
             }
-            if (parameters.mods.contains(GameMod.MOD_SMALLCIRCLE)) {
-                cs += 4f;
-            }
-        }
 
-        // 12.14 is the point at which the object radius approaches 0. Use the _very_ minimum value.
-        manager.setCS(Math.min(cs, 12.13f));
+            manager.setCS(Math.min(cs, maxValue));
+        }
     }
 
     private void processAR(BeatmapDifficultyManager manager, DifficultyCalculationParameters parameters) {
         float ar = manager.getAR();
+        final float maxValue = 10f;
 
         if (parameters == null) {
-            manager.setAR(Math.min(ar, 10f));
+            manager.setAR(Math.min(ar, maxValue));
             return;
         }
 
-        if (parameters.isForceAR()) {
-            manager.setAR(parameters.forcedAR);
+        if (parameters.isCustomAR()) {
+            manager.setAR(parameters.customAR);
         } else {
             if (parameters.mods.contains(GameMod.MOD_HARDROCK)) {
                 ar *= 1.4f;
@@ -308,14 +315,22 @@ public class DifficultyCalculator {
                 ar -= parameters.customSpeedMultiplier - 1f;
             }
 
-            manager.setAR(Math.min(ar, 10f));
+            manager.setAR(Math.min(ar, maxValue));
         }
     }
 
     private void processOD(BeatmapDifficultyManager manager, DifficultyCalculationParameters parameters) {
         float od = manager.getOD();
+        final float maxValue = 10f;
 
-        if (parameters != null) {
+        if (parameters == null) {
+            manager.setOD(Math.min(od, maxValue));
+            return;
+        }
+
+        if (parameters.isCustomOD()) {
+            manager.setOD(parameters.customOD);
+        } else {
             if (parameters.mods.contains(GameMod.MOD_HARDROCK)) {
                 od *= 1.4f;
             }
@@ -325,9 +340,9 @@ public class DifficultyCalculator {
             if (parameters.mods.contains(GameMod.MOD_REALLYEASY)) {
                 od /= 2f;
             }
-        }
 
-        manager.setOD(Math.min(od, 10f));
+            manager.setOD(Math.min(od, maxValue));
+        }
     }
 
     private void processHP(BeatmapDifficultyManager manager, DifficultyCalculationParameters parameters) {
@@ -378,7 +393,7 @@ public class DifficultyCalculator {
                     objects,
                     objects.size(),
                     timePreempt,
-                    parameters != null && parameters.isForceAR()
+                    parameters != null && parameters.isCustomAR()
             ));
         }
 

@@ -47,6 +47,9 @@ public class ModernSpinner extends Spinner {
     private PointF oldMouse;
     private float totalTime;
 
+    private final PointF currMouse = new PointF();
+
+
     public ModernSpinner() {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
         center = Utils.trackToRealCoords(new PointF(Constants.MAP_WIDTH / 2,
@@ -106,11 +109,7 @@ public class ModernSpinner extends Spinner {
 
                             @Override
                             public void onModifierFinished(final IModifier<IEntity> pModifier, final IEntity pItem) {
-                                SyncTaskManager.getInstance().run(new Runnable() {
-                                    public void run() {
-                                        removeFromScene();
-                                    }
-                                });
+                                SyncTaskManager.getInstance().run(ModernSpinner.this::removeFromScene);
                             }
                         },
                         new SequenceEntityModifier(
@@ -125,34 +124,44 @@ public class ModernSpinner extends Spinner {
 
     @Override
     public void update(float dt) {
-        boolean isTouched = false;
-        int cursorIndex = -1;
-        for (int i = 0; i < listener.getCursorsCount(); i++) {
-            if (listener.isMouseDown(i)) {
-                cursorIndex = i;
-                isTouched = true;
-                break;
-            }
-        }
-        if (!isTouched && !autoPlay) {
-            return;
-        }
 
-        final PointF mouse = autoPlay ? center : listener.getMousePos(cursorIndex);
-        final PointF v = new PointF(mouse.x - center.x, mouse.y - center.y);
-        for (int i = 0; i < listener.getCursorsCount(); i++) {
+        PointF mouse = null;
+
+        for (int i = 0, count = listener.getCursorsCount(); i < count; ++i) {
+            if (mouse == null) {
+                if (autoPlay) {
+                    mouse = center;
+                } else if (listener.isMouseDown(i)) {
+                    mouse = listener.getMousePos(i);
+                } else {
+                    continue;
+                }
+                currMouse.set(mouse.x - center.x, mouse.y - center.y);
+            }
+
             if (oldMouse == null || listener.isMousePressed(this, i)) {
-                oldMouse = v;
+                if (oldMouse == null) {
+                    oldMouse = new PointF();
+                }
+                oldMouse.set(currMouse);
                 return;
             }
         }
-        float degree = MathUtils.radToDeg(Utils.direction(v));
+
+        if (mouse == null)
+            return;
+
+        float degree = MathUtils.radToDeg(Utils.direction(currMouse));
         top.setRotation(degree);
         bottom.setRotation(degree / 2);
-        // bottom.setRotation(-degree);
-        final PointF v1 = Utils.normalize(v);
-        final PointF v2 = Utils.normalize(oldMouse);
-        float dfill = v1.x * v2.y - v1.y * v2.x;
+
+        var len1 = Utils.length(currMouse);
+        var len2 = Utils.length(oldMouse);
+        var dfill = (currMouse.x / len1) * (oldMouse.y / len2) - (currMouse.y / len1) * (oldMouse.x / len2);
+
+        if (Math.abs(len1) < 0.0001f || Math.abs(len2) < 0.0001f)
+            dfill = 0;
+
         if (autoPlay) {
             dfill = 5 * 4 * dt;
             degree = (rotations + dfill / 4f) * 360;
@@ -184,14 +193,14 @@ public class ModernSpinner extends Spinner {
                 clear = true;
             } else if (Math.abs(rotations) > 1) {
                 if (bonusScore != null) {
-                    bonusScore.detachFromScene(scene);
+                    scene.detachChild(bonusScore);
                 }
                 rotations -= 1 * Math.signum(rotations);
                 bonusScore = new ScoreNumber(center.x, center.y + 100,
                         String.valueOf(score * 1000), 1.1f, true);
                 listener.onSpinnerHit(id, 1000, false, 0);
                 score++;
-                bonusScore.attachToScene(scene);
+                scene.attachChild(bonusScore);
                 ResourceManager.getInstance().getSound("spinnerbonus").play();
                 glow.registerEntityModifier(new SequenceEntityModifier(
                         new ColorModifier(0.1f, 0f, 1f, 0.8f, 1f, 1f, 1f),
@@ -215,7 +224,8 @@ public class ModernSpinner extends Spinner {
                 stat.changeHp(rate * 0.01f * totalTime / needRotations);
             }
         }
-        oldMouse = v;
+
+        oldMouse.set(currMouse);
     }
 
     public void removeFromScene() {

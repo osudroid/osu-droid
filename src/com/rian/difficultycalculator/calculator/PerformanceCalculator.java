@@ -122,13 +122,6 @@ public class PerformanceCalculator {
     }
 
     /**
-     * Gets the amount of hits that were successfully done.
-     */
-    private int getTotalSuccessfulHits() {
-        return countGreat + countOk + countMeh;
-    }
-
-    /**
      * Resets this calculator to its original state.
      */
     private void resetDefaults() {
@@ -204,7 +197,7 @@ public class PerformanceCalculator {
         // Longer maps are worth more
         double lengthBonus = 0.95 + 0.4 * Math.min(1, getTotalHits() / 2000d);
         if (getTotalHits() > 2000) {
-            lengthBonus += Math.log10(getTotalSuccessfulHits() / 2000d) * 0.5;
+            lengthBonus += Math.log10(getTotalHits() / 2000d) * 0.5;
         }
 
         speedValue *= lengthBonus;
@@ -252,7 +245,7 @@ public class PerformanceCalculator {
         int circleCount = difficultyAttributes.hitCircleCount;
 
         if (circleCount > 0) {
-            betterAccuracyPercentage = Math.max(0, ((countGreat - (getTotalHits() - circleCount)) * 6 + countOk * 2 + countMeh) / (circleCount * 6));
+            betterAccuracyPercentage = Math.max(0, ((countGreat - (getTotalHits() - circleCount)) * 6 + countOk * 2 + countMeh) / (circleCount * 6d));
         }
 
         // Lots of arbitrary values from testing.

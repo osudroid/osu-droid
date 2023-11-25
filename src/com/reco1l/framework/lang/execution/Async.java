@@ -28,8 +28,8 @@ public final class Async
 
         mExecutor.execute(() -> {
             Thread.currentThread().setName(THREAD_PREFIX + Thread.currentThread().getName());
-
             task.run();
+            mExecutor.shutdown();
         });
     }
 

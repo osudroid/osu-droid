@@ -32,9 +32,14 @@ public class CursorEntity extends Entity {
 
             emitter = new PointParticleEmitter(particleOffsetX, particleOffsetY);
             particles = new CursorTrail(emitter, spawnRate, cursorSprite.baseSize, trailTex);
+            particles.setParticlesSpawnEnabled(false);
         }
 
         attachChild(cursorSprite);
+        setVisible(false);
+
+        // Not necessary to update by itself since it's done by GameScene.
+        setIgnoreUpdate(true);
     }
 
     public void setShowing(boolean showing) {

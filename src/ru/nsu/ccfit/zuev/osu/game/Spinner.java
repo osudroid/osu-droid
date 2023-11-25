@@ -53,6 +53,9 @@ public class Spinner extends GameObject {
     private float totalTime;
     private boolean did = false;
 
+    private final PointF currMouse = new PointF();
+
+
     public Spinner() {
         ResourceManager.getInstance().checkSpinnerTextures();
         this.pos = new PointF(Constants.MAP_WIDTH / 2,Constants.MAP_HEIGHT / 2);
@@ -126,23 +129,11 @@ public class Spinner extends GameObject {
         approachCircle.registerEntityModifier(new SequenceEntityModifier(
                 new IEntityModifierListener() {
 
-                    public void onModifierStarted(
-                            final IModifier<IEntity> pModifier,
-                            final IEntity pItem) {
-                        // TODO Auto-generated method stub
-
+                    public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
                     }
 
-                    public void onModifierFinished(
-                            final IModifier<IEntity> pModifier,
-                            final IEntity pItem) {
-                        SyncTaskManager.getInstance().run(new Runnable() {
-
-
-                            public void run() {
-                                removeFromScene();
-                            }
-                        });
+                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                        SyncTaskManager.getInstance().run(Spinner.this::removeFromScene);
                     }
                 },
                 new SequenceEntityModifier(
@@ -245,32 +236,41 @@ public class Spinner extends GameObject {
         if (circle.getAlpha() == 0) {
             return;
         }
-        boolean mdown = false;
-        int firstIndex = -1;
-        for (int i = 0; i < listener.getCursorsCount(); i++) {
-            if (listener.isMouseDown(i)) {
-                firstIndex = i;
-                mdown = true;
-                break;
-            }
-        }
-        if (mdown == false && !autoPlay) {
-            return;
-        }
+        PointF mouse = null;
 
-        final PointF mouse = autoPlay ? center : listener
-                .getMousePos(firstIndex);
-        final PointF v = new PointF(mouse.x - center.x, mouse.y - center.y);
-        for (int i = 0; i < listener.getCursorsCount(); i++) {
+        for (int i = 0, count = listener.getCursorsCount(); i < count; ++i) {
+            if (mouse == null) {
+                if (autoPlay) {
+                    mouse = center;
+                } else if (listener.isMouseDown(i)) {
+                    mouse = listener.getMousePos(i);
+                } else {
+                    continue;
+                }
+                currMouse.set(mouse.x - center.x, mouse.y - center.y);
+            }
+
             if (oldMouse == null || listener.isMousePressed(this, i)) {
-                oldMouse = v;
+                if (oldMouse == null) {
+                    oldMouse = new PointF();
+                }
+                oldMouse.set(currMouse);
                 return;
             }
         }
-        circle.setRotation(MathUtils.radToDeg(Utils.direction(v)));
-        final PointF v1 = Utils.normalize(v);
-        final PointF v2 = Utils.normalize(oldMouse);
-        float dfill = v1.x * v2.y - v1.y * v2.x;
+
+        if (mouse == null)
+            return;
+
+        circle.setRotation(MathUtils.radToDeg(Utils.direction(currMouse)));
+
+        var len1 = Utils.length(currMouse);
+        var len2 = Utils.length(oldMouse);
+        var dfill = (currMouse.x / len1) * (oldMouse.y / len2) - (currMouse.y / len1) * (oldMouse.x / len2);
+
+        if (Math.abs(len1) < 0.0001f || Math.abs(len2) < 0.0001f)
+            dfill = 0;
+
         if (autoPlay) {
             dfill = 5 * 4 * dt;
             circle.setRotation((rotations + dfill / 4f) * 360);
@@ -288,7 +288,7 @@ public class Spinner extends GameObject {
 
         if (percentfill > 1 || clear) {
             percentfill = 1;
-            if (clear == false) {
+            if (!clear) {
                 clearText = SpritePool.getInstance().getCenteredSprite(
                         "spinner-clear", new PointF(center.x, center.y * 0.5f));
                 clearText.registerEntityModifier(new ParallelEntityModifier(
@@ -298,14 +298,14 @@ public class Spinner extends GameObject {
                 clear = true;
             } else if (Math.abs(rotations) > 1) {
                 if (bonusScore != null) {
-                    bonusScore.detachFromScene(scene);
+                    scene.detachChild(bonusScore);
                 }
                 rotations -= 1 * Math.signum(rotations);
                 bonusScore = new ScoreNumber(center.x, center.y + 100,
                         String.valueOf(score * 1000), 1.1f, true);
                 listener.onSpinnerHit(id, 1000, false, 0);
                 score++;
-                bonusScore.attachToScene(scene);
+                scene.attachChild(bonusScore);
                 ResourceManager.getInstance().getSound("spinnerbonus").play();
                 float rate = 0.375f;
                 if (GameHelper.getDrain() > 0) {
@@ -329,11 +329,7 @@ public class Spinner extends GameObject {
                 metreY + metre.getHeight() * (1 - Math.abs(percentfill)));
         mregion.setTexturePosition(0,
                 (int) (metre.getBaseHeight() * (1 - Math.abs(percentfill))));
-        oldMouse = v;
-    }
-    
-    @Override
-    public void tryHit(final float dt){
-        return;
+
+        oldMouse.set(currMouse);
     }
 }

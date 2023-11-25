@@ -526,28 +526,34 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         modsButton!!.isVisible = isRoomHost || room!!.isFreeMods
     }
 
-    private fun updateBeatmapInfo() {
-        getGlobal().selectedTrack?.also {
-            val dateFormat = SimpleDateFormat(if (it.musicLength > 3600 * 1000) "HH:mm:ss" else "mm:ss")
-            dateFormat.timeZone = TimeZone.getTimeZone("GMT+0")
+    private fun updateBeatmapInfo()
+    {
+        beatmapInfoRectangle!!.isVisible = getGlobal().selectedTrack?.let { track ->
 
-            beatmapInfoText.text =
-                "BPM: ${if (it.bpmMin == it.bpmMax) "%.1f".format(it.bpmMin) else "%.1f-%.1f".format(it.bpmMin, it.bpmMax)}" +
-                "  Length: ${dateFormat.format(it.musicLength)}\n" +
-                "CS:${it.circleSize} AR:${it.approachRate} OD:${it.overallDifficulty} HP:${it.hpDrain} Star Rating: ${it.difficulty}"
-        } ?: run { beatmapInfoText.text = "" }
+            beatmapInfoText.text = """
+                Length: ${
+                    SimpleDateFormat(if (track.musicLength > 3600 * 1000) "HH:mm:ss" else "mm:ss").let {
+                        it.timeZone = TimeZone.getTimeZone("GMT+0")
+                        it.format(track.musicLength)
+                    }
+                } BPM: ${
+                    if (track.bpmMin == track.bpmMax) 
+                        "%.1f".format(track.bpmMin) 
+                    else 
+                        "%.1f-%.1f".format(track.bpmMin, track.bpmMax)
+                } 
+                CS: ${track.circleSize} AR: ${track.approachRate} OD: ${track.overallDifficulty} HP: ${track.hpDrain} Star Rating: ${track.difficulty}
+            """.trimIndent()
 
-        beatmapInfoRectangle!!.also {
-            if (getGlobal().selectedTrack == null) {
-                it.isVisible = false
-            }
+            true
+        } ?: false
 
-            it.width = beatmapInfoText.width + 20
-            it.height = beatmapInfoText.height + 20
+        beatmapInfoRectangle!!.also { rect ->
 
-            trackButton!!.let { t ->
-                it.setPosition(t.x + t.width - it.width - 20, t.y + t.height)
-            }
+            rect.width = beatmapInfoText.width + 20
+            rect.height = beatmapInfoText.height + 20
+
+            trackButton!!.let { rect.setPosition(it.x + it.width - rect.width - 20, it.y + it.height) }
         }
     }
 
@@ -698,7 +704,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             modsToString(getModMenu().mod),
             getModMenu().changeSpeed,
             getModMenu().fLfollowDelay,
-            if (getModMenu().isEnableForceAR) getModMenu().forceAR else null
+            getModMenu().customAR,
+            getModMenu().customOD,
+            getModMenu().customCS,
+            getModMenu().customHP
         )
 
         // Updating UI
@@ -822,7 +831,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             modsToString(getModMenu().mod),
             getModMenu().changeSpeed,
             getModMenu().fLfollowDelay,
-            if (getModMenu().isEnableForceAR) getModMenu().forceAR else null
+            getModMenu().customAR,
+            getModMenu().customOD,
+            getModMenu().customCS,
+            getModMenu().customHP
         )
 
         // Update room info text
@@ -911,7 +923,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 modsToString(roomMods),
                 getModMenu().changeSpeed,
                 getModMenu().fLfollowDelay,
-                if (getModMenu().isEnableForceAR) getModMenu().forceAR else null
+                getModMenu().customAR,
+                getModMenu().customOD,
+                getModMenu().customCS,
+                getModMenu().customHP
             )
         }
 
@@ -939,9 +954,12 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             Replay.oldMod = getModMenu().mod
             Replay.oldChangeSpeed = getModMenu().changeSpeed
-            Replay.oldForceAR = getModMenu().forceAR
-            Replay.oldEnableForceAR = getModMenu().isEnableForceAR
             Replay.oldFLFollowDelay = getModMenu().fLfollowDelay
+
+            Replay.oldCustomAR = getModMenu().customAR
+            Replay.oldCustomOD = getModMenu().customOD
+            Replay.oldCustomCS = getModMenu().customCS
+            Replay.oldCustomHP = getModMenu().customHP
 
             getGlobal().gameScene.startGame(getGlobal().selectedTrack, null)
 

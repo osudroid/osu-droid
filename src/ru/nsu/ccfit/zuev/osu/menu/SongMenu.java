@@ -986,11 +986,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             hp *= 0.5f;
             dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
         }
-        if (mod.contains(GameMod.MOD_SMALLCIRCLE)) {
-            cs += 4f;
-            dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-        }
-        //
+
         @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
         String binfoStr = String.format(StringTable.get(R.string.binfoStr1), sdf.format(length),
@@ -1021,15 +1017,28 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 4 / 3), 2);
             od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 4 / 3), 2);
         }
-        if (ModMenu.getInstance().isEnableForceAR()) {
-            float oriAr = ar;
-            ar = ModMenu.getInstance().getForceAR();
-            if (ar > oriAr) {
-                dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-            } else if (ar < oriAr) {
-                dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
-            }
+        float rawAR = ar;
+        float rawOD = od;
+        float rawCS = cs;
+        float rawHP = hp;
+
+        if (ModMenu.getInstance().isCustomAR()) {
+            ar = ModMenu.getInstance().getCustomAR();
         }
+        if (ModMenu.getInstance().isCustomOD()) {
+            od = ModMenu.getInstance().getCustomOD();
+        }
+        if (ModMenu.getInstance().isCustomCS()) {
+            cs = ModMenu.getInstance().getCustomCS();
+        }
+        if (ModMenu.getInstance().isCustomHP()) {
+            hp = ModMenu.getInstance().getCustomHP();
+        }
+
+        if (ar != rawAR || od != rawOD || cs != rawCS || hp != rawHP) {
+            dimensionInfo.setColor(256 / 255f, 180 / 255f, 0 / 255f);
+        }
+
         dimensionStringBuilder.append("AR: ").append(GameHelper.Round(ar, 2)).append(" ")
                 .append("OD: ").append(GameHelper.Round(od, 2)).append(" ")
                 .append("CS: ").append(GameHelper.Round(cs, 2)).append(" ")
@@ -1065,11 +1074,19 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             changeDimensionInfo(track);
 
             DifficultyCalculationParameters parameters = new DifficultyCalculationParameters();
-            parameters.mods = ModMenu.getInstance().getMod();
-            parameters.customSpeedMultiplier = ModMenu.getInstance().getChangeSpeed();
+            var modMenu = ModMenu.getInstance();
 
-            if (ModMenu.getInstance().isEnableForceAR()) {
-                parameters.forcedAR = ModMenu.getInstance().getForceAR();
+            parameters.mods = modMenu.getMod();
+            parameters.customSpeedMultiplier = modMenu.getChangeSpeed();
+
+            if (modMenu.isCustomCS()) {
+                parameters.customCS = modMenu.getCustomCS();
+            }
+            if (modMenu.isCustomAR()) {
+                parameters.customAR = modMenu.getCustomAR();
+            }
+            if (modMenu.isCustomOD()) {
+                parameters.customOD = modMenu.getCustomOD();
             }
 
             DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
@@ -1107,8 +1124,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
             Replay.oldMod = ModMenu.getInstance().getMod();
             Replay.oldChangeSpeed = ModMenu.getInstance().getChangeSpeed();
-            Replay.oldForceAR = ModMenu.getInstance().getForceAR();
-            Replay.oldEnableForceAR = ModMenu.getInstance().isEnableForceAR();
+
+            Replay.oldCustomAR = ModMenu.getInstance().getCustomAR();
+            Replay.oldCustomOD = ModMenu.getInstance().getCustomOD();
+            Replay.oldCustomCS = ModMenu.getInstance().getCustomCS();
+            Replay.oldCustomHP = ModMenu.getInstance().getCustomHP();
+
             Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
 
             game.startGame(track, null);
@@ -1214,6 +1235,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         if (params.length < 11) return;
 
                         StatisticV2 stat = new StatisticV2(params);
+                        if (stat.isLegacySC()) {
+                            stat.processLegacySC(selectedTrack);
+                        }
+
                         stat.setPlayerName(playerName);
                         scoreScene.load(stat, null, null, OnlineManager.getReplayURL(id, hash), null, selectedTrack);
                         engine.setScene(scoreScene.getScene());
@@ -1230,6 +1255,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
 
         StatisticV2 stat = ScoreLibrary.getInstance().getScore(id);
+        if (stat.isLegacySC()) {
+            stat.processLegacySC(selectedTrack);
+        }
+
         scoreScene.load(stat, null, null, stat.getReplayName(), null, selectedTrack);
         engine.setScene(scoreScene.getScene());
     }

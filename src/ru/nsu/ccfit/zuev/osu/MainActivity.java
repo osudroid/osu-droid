@@ -43,6 +43,7 @@ import com.edlplan.ui.ActivityOverlay;
 
 import com.reco1l.api.ibancho.LobbyAPI;
 import com.reco1l.framework.lang.Execution;
+import com.reco1l.legacy.UpdateManager;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
@@ -336,7 +337,7 @@ public class MainActivity extends BaseGameActivity implements
                     Thread.sleep(2500);
                 }
                 catch (InterruptedException ignored) {}
-                Updater.getInstance().checkForUpdates(false, true);
+                UpdateManager.INSTANCE.onActivityStart();
             }
 
             @Override
@@ -721,10 +722,7 @@ public class MainActivity extends BaseGameActivity implements
                     && (getEngine().getScene() == RoomScene.INSTANCE
                     || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()))
             {
-                Execution.asyncIgnoreExceptions(() -> {
-                    RoomScene.INSTANCE.invalidateStatus();
-                    return null;
-                });
+                Execution.asyncIgnoreExceptions(() -> RoomScene.INSTANCE.invalidateStatus());
             }
         }
 

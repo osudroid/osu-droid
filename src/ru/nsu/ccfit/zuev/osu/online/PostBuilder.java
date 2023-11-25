@@ -74,7 +74,6 @@ public class PostBuilder {
     }
 
     private ArrayList<String> request(final String scriptUrl) throws RequestException {
-        String data = values.toString();
         ArrayList<String> response = new ArrayList<String>();
 
         try {

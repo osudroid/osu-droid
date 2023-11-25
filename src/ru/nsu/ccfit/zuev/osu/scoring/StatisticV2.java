@@ -9,8 +9,10 @@ import java.util.Random;
 
 import com.reco1l.api.ibancho.data.WinCondition;
 import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
@@ -43,8 +45,6 @@ public class StatisticV2 implements Serializable {
     private int forcedScore = -1;
     private String mark = null;
     private float changeSpeed = 1.0f;
-    private float forceAR = 9.0f;
-    private boolean enableForceAR = false;
     private final int MAX_SCORE = 1000000;
     private final float ACC_PORTION = 0.3f;
     private final float COMBO_PORTION = 0.7f;
@@ -57,6 +57,13 @@ public class StatisticV2 implements Serializable {
     private int negativeTotalOffsetSum;
     private double negativeHitOffsetSum;
     private double unstableRate;
+
+    private Float customAR;
+    private Float customOD;
+    private Float customCS;
+    private Float customHP;
+
+    private boolean isLegacySC = false;
 
     /**
      * Indicates that the player is alive (HP hasn't reached 0, or it recovered), this is exclusively used for
@@ -259,7 +266,7 @@ public class StatisticV2 implements Serializable {
             return;
         }
         //如果使用scorev2
-        if (mod.contains(GameMod.MOD_SCOREV2)){
+        if (GameHelper.isScoreV2()) {
             if (amount == 1000) {
                 bonusScore += amount;
             }
@@ -516,9 +523,6 @@ public class StatisticV2 implements Serializable {
         if (mod.contains(GameMod.MOD_PRECISE)) {
             s += "s";
         }
-        if (mod.contains(GameMod.MOD_SMALLCIRCLE)) {
-            s += "m";
-        }
         if (mod.contains(GameMod.MOD_REALLYEASY)) {
             s += "l";
         }
@@ -577,9 +581,10 @@ public class StatisticV2 implements Serializable {
                 case 's':
                     mod.add(GameMod.MOD_PRECISE);
                     break;
+                // Special handle for old removed SmallCircles mod.
                 case 'm':
-                    mod.add(GameMod.MOD_SMALLCIRCLE);
-                    break;    
+                    isLegacySC = true;
+                    break;
                 case 'l':
                     mod.add(GameMod.MOD_REALLYEASY);
                     break;    
@@ -675,17 +680,57 @@ public class StatisticV2 implements Serializable {
         computeModScoreMultiplier();
     }
 
-    public float getForceAR(){
-        return forceAR;
+
+    public boolean isCustomAR() {
+        return customAR != null;
     }
 
-    public void setForceAR(float ar){
-        forceAR = ar;
+    public Float getCustomAR() {
+        return customAR;
     }
 
-    public boolean isEnableForceAR(){
-        return enableForceAR;
+    public void setCustomAR(@Nullable Float ar) {
+        customAR = ar;
     }
+
+    public boolean isCustomOD() {
+        return customOD != null;
+    }
+
+    public Float getCustomOD() {
+        return customOD;
+    }
+
+    public void setCustomOD(@Nullable Float customOD) {
+        this.customOD = customOD;
+    }
+
+
+    public boolean isCustomHP() {
+        return customHP != null;
+    }
+
+    public Float getCustomHP() {
+        return customHP;
+    }
+
+    public void setCustomHP(@Nullable Float customHP) {
+        this.customHP = customHP;
+    }
+
+
+    public boolean isCustomCS() {
+        return customCS != null;
+    }
+
+    public Float getCustomCS() {
+        return customCS;
+    }
+
+    public void setCustomCS(@Nullable Float customCS) {
+        this.customCS = customCS;
+    }
+
 
     public void setFLFollowDelay(float delay) {
         flFollowDelay = delay;
@@ -693,10 +738,6 @@ public class StatisticV2 implements Serializable {
 
     public float getFLFollowDelay() {
         return flFollowDelay;
-    }
-
-    public void setEnableForceAR(boolean t){
-        enableForceAR = t;
     }
 
     public double getUnstableRate() {
@@ -776,8 +817,17 @@ public class StatisticV2 implements Serializable {
         if (changeSpeed != 1){
             builder.append(String.format(Locale.ENGLISH, "x%.2f|", changeSpeed));
         }
-        if (enableForceAR){
-            builder.append(String.format(Locale.ENGLISH, "AR%.1f|", forceAR));
+        if (isCustomAR()){
+            builder.append(String.format(Locale.ENGLISH, "AR%.1f|", customAR));
+        }
+        if (isCustomOD()){
+            builder.append(String.format(Locale.ENGLISH, "OD%.1f|", customOD));
+        }
+        if (isCustomCS()){
+            builder.append(String.format(Locale.ENGLISH, "CS%.1f|", customCS));
+        }
+        if (isCustomHP()){
+            builder.append(String.format(Locale.ENGLISH, "HP%.1f|", customHP));
         }
         if (flFollowDelay != FlashLightEntity.defaultMoveDelayS) {
             builder.append(String.format(Locale.ENGLISH, "FLD%.2f|", flFollowDelay));
@@ -796,8 +846,16 @@ public class StatisticV2 implements Serializable {
                 continue;
             }
             if (str.startsWith("AR")){
-                enableForceAR = true;
-                forceAR = Float.parseFloat(str.substring(2));
+                customAR = Float.parseFloat(str.substring(2));
+            }
+            if (str.startsWith("OD")){
+                customOD = Float.parseFloat(str.substring(2));
+            }
+            if (str.startsWith("CS")){
+                customCS = Float.parseFloat(str.substring(2));
+            }
+            if (str.startsWith("HP")){
+                customHP = Float.parseFloat(str.substring(2));
             }
             if (str.startsWith("FLD")) {
                 flFollowDelay = Float.parseFloat(str.substring(3));
@@ -849,8 +907,41 @@ public class StatisticV2 implements Serializable {
             modScoreMultiplier *= m.scoreMultiplier;
         }
 
+        if (isLegacySC) {
+            // The legacy SC mod has a 1.06 multiplier.
+            modScoreMultiplier *= 1.06f;
+        }
+
         if (changeSpeed != 1f) {
             modScoreMultiplier *= getSpeedChangeScoreMultiplier();
         }
+    }
+
+    /**
+     * Determines if the score has the old SC mod enabled, this will be replaced with a custom CS when replaying.
+     */
+    public boolean isLegacySC() {
+        return isLegacySC;
+    }
+
+    /**
+     * Applies the equivalent of the old SC mod with custom CS according to the track passed.
+     */
+    public void processLegacySC(TrackInfo track) {
+
+        var cs = track.getCircleSize();
+
+        for (GameMod m : mod) switch (m) {
+
+            case MOD_HARDROCK:
+                ++cs;
+                continue;
+
+            case MOD_EASY:
+            case MOD_REALLYEASY:
+                --cs;
+        }
+
+        customCS = cs + 4;
     }
 }

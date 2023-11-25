@@ -21,6 +21,7 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 
@@ -449,7 +450,8 @@ public class Slider extends GameObject {
         endArrow.detachSelf();
         SpritePool.getInstance().putAnimSprite("sliderb", ball);
         SpritePool.getInstance().putSprite("sliderfollowcircle", followCircle);
-        for (final Sprite sp : ticks) {
+        for (int i = 0, ticksSize = ticks.size(); i < ticksSize; i++) {
+            Sprite sp = ticks.get(i);
             sp.detachSelf();
             SpritePool.getInstance().putSprite("sliderscorepoint", sp);
         }
@@ -577,19 +579,22 @@ public class Slider extends GameObject {
             ));
         }
 
-        SyncTaskManager.getInstance().run(this::removeFromScene);
+        removeFromScene();
     }
 
     private boolean isHit() {
-        float radius = Utils.sqr(Utils.toRes(64) * scale);
-        for (int i = 0; i < listener.getCursorsCount(); i++) {
-            if (listener.isMousePressed(this, i)
-                    && Utils.squaredDistance(startPosition, listener.getMousePos(i)) <= radius) {
+        float radius = Utils.sqr(64 * scale);
+        for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
+
+            var inPosition = Utils.squaredDistance(startPosition, listener.getMousePos(i)) <= radius;
+            if (GameHelper.isRelaxMod() && passedTime >= 0 && inPosition) {
                 return true;
-            } else if (GameHelper.isAutopilotMod() && listener.isMousePressed(this, i)) {
+            }
+
+            var isPressed = listener.isMousePressed(this, i);
+            if (isPressed && inPosition) {
                 return true;
-            } else if (GameHelper.isRelaxMod() && passedTime >= 0 &&
-                    Utils.squaredDistance(startPosition, listener.getMousePos(i)) <= radius) {
+            } else if (GameHelper.isAutopilotMod() && isPressed) {
                 return true;
             }
         }
@@ -691,8 +696,8 @@ public class Slider extends GameObject {
             } else if (percentage - dt / preTime <= 0.5f) {
                 // Setting up positions of slider parts
                 approachCircle.setAlpha(1);
-                for (final Sprite sp : ticks) {
-                    sp.setAlpha(1);
+                for (int i = 0, ticksSize = ticks.size(); i < ticksSize; i++) {
+                    ticks.get(i).setAlpha(1);
                 }
                 if (repeatCount > 1) {
                     endArrow.setAlpha(1);
@@ -719,7 +724,7 @@ public class Slider extends GameObject {
 
         if (ball == null) // if ball still don't exist
         {
-            SyncTaskManager.getInstance().run(number::detachSelf);
+            number.detachSelf();
             approachCircle.setAlpha(0);
 
             ball = SpritePool.getInstance().getAnimSprite("sliderb",
@@ -743,17 +748,17 @@ public class Slider extends GameObject {
         final float percentage = (float) (passedTime / maxTime);
         final PointF ballpos = getPercentPosition(reverse ? 1 - percentage : percentage, ballAngle);
         // Calculating if cursor in follow circle bounds
-        final float radius = Utils.toRes(128) * scale;
+        final float radius = 128 * scale;
         boolean inRadius = false;
-        for (int i = 0; i < listener.getCursorsCount(); i++) {
-            if (autoPlay
-                    || (listener.isMouseDown(i) && Utils
-                    .squaredDistance(listener.getMousePos(i), ballpos) <= radius
-                    * radius)) {
+        for (int i = 0, cursorCount = listener.getCursorsCount(); i < cursorCount; i++) {
+
+            var isPressed = listener.isMouseDown(i);
+
+            if (autoPlay || (isPressed && Utils.squaredDistance(listener.getMousePos(i), ballpos) <= radius * radius)) {
                 inRadius = true;
                 break;
             }
-            if (GameHelper.isAutopilotMod() && listener.isMouseDown(i))
+            if (GameHelper.isAutopilotMod() && isPressed)
                 inRadius = true;
         }
         listener.onTrackingSliders(inRadius);

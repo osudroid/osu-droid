@@ -277,15 +277,22 @@ public class ScoringScene {
 
                         Replay.oldMod = ModMenu.getInstance().getMod();
                         Replay.oldChangeSpeed = ModMenu.getInstance().getChangeSpeed();
-                        Replay.oldForceAR = ModMenu.getInstance().getForceAR();
-                        Replay.oldEnableForceAR = ModMenu.getInstance().isEnableForceAR();
+
+                        Replay.oldCustomAR = ModMenu.getInstance().getCustomAR();
+                        Replay.oldCustomOD = ModMenu.getInstance().getCustomOD();
+                        Replay.oldCustomCS = ModMenu.getInstance().getCustomCS();
+                        Replay.oldCustomHP = ModMenu.getInstance().getCustomHP();
+
                         Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
 
                         ModMenu.getInstance().setMod(stat.getMod());
                         ModMenu.getInstance().setChangeSpeed(stat.getChangeSpeed());
-                        ModMenu.getInstance().setForceAR(stat.getForceAR());
-                        ModMenu.getInstance().setEnableForceAR(stat.isEnableForceAR());
                         ModMenu.getInstance().setFLfollowDelay(stat.getFLFollowDelay());
+
+                        ModMenu.getInstance().setCustomAR(stat.getCustomAR());
+                        ModMenu.getInstance().setCustomOD(stat.getCustomOD());
+                        ModMenu.getInstance().setCustomCS(stat.getCustomCS());
+                        ModMenu.getInstance().setCustomHP(stat.getCustomHP());
 
                         game.startGame(trackToReplay, replay);
 
@@ -417,13 +424,6 @@ public class ScoringScene {
             modX -= Utils.toRes(30);
             scene.attachChild(modSprite);
         }
-        if (stat.getMod().contains(GameMod.MOD_SMALLCIRCLE)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-smallcircle"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
-        }
-        //
 
         String infoStr = (trackInfo.getBeatmap().getArtistUnicode() == null || Config.isForceRomanized() ? trackInfo.getBeatmap().getArtist() : trackInfo.getBeatmap().getArtistUnicode()) + " - " +
                 (trackInfo.getBeatmap().getTitleUnicode() == null || Config.isForceRomanized() ? trackInfo.getBeatmap().getTitle() : trackInfo.getBeatmap().getTitleUnicode()) + " [" + trackInfo.getMode() + "]";
@@ -432,7 +432,10 @@ public class ScoringScene {
                 new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date(stat.getTime()));
         playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
         if (stat.getChangeSpeed() != 1 ||
-            stat.isEnableForceAR() ||
+            stat.isCustomAR() ||
+            stat.isCustomOD() ||
+            stat.isCustomCS() ||
+            stat.isCustomHP() ||
             stat.getFLFollowDelay() != FlashLightEntity.defaultMoveDelayS &&
             stat.getMod().contains(GameMod.MOD_FLASHLIGHT)) {
 
@@ -440,8 +443,17 @@ public class ScoringScene {
             if (stat.getChangeSpeed() != 1){
                 mapperStr += String.format(Locale.ENGLISH, "%.2fx,", stat.getChangeSpeed());
             }
-            if (stat.isEnableForceAR()){
-                mapperStr += String.format(Locale.ENGLISH, "AR%.1f,", stat.getForceAR());
+            if (stat.isCustomAR()){
+                mapperStr += String.format(Locale.ENGLISH, "AR%.1f,", stat.getCustomAR());
+            }
+            if (stat.isCustomOD()){
+                mapperStr += String.format(Locale.ENGLISH, "OD%.1f,", stat.getCustomOD());
+            }
+            if (stat.isCustomCS()){
+                mapperStr += String.format(Locale.ENGLISH, "CS%.1f,", stat.getCustomCS());
+            }
+            if (stat.isCustomHP()){
+                mapperStr += String.format(Locale.ENGLISH, "HP%.1f,", stat.getCustomHP());
             }
             if (stat.getFLFollowDelay() != FlashLightEntity.defaultMoveDelayS && stat.getMod().contains(GameMod.MOD_FLASHLIGHT)){
                 mapperStr += String.format(Locale.ENGLISH, "FLD%.2f,", stat.getFLFollowDelay());

@@ -379,14 +379,25 @@ object RoomAPI
      * Change room mods.
      */
     @JvmStatic
-    fun setRoomMods(mods: String?, speedMultiplier: Float, flFollowDelay: Float, forceAR: Float? = null)
+    fun setRoomMods(
+        mods: String?,
+        speedMultiplier: Float,
+        flFollowDelay: Float,
+        customAR: Float? = null,
+        customOD: Float? = null,
+        customCS: Float? = null,
+        customHP: Float? = null
+    )
     {
         val json = JSONObject().apply {
 
             put("mods", mods)
             put("speedMultiplier", speedMultiplier)
             put("flFollowDelay", flFollowDelay)
-            put("forceAR", forceAR)
+            put("customAR", customAR)
+            put("customOD", customOD)
+            put("customCS", customCS)
+            put("customHP", customHP)
 
         }
         socket!!.emit("roomModsChanged", json)
@@ -522,15 +533,26 @@ object RoomAPI
      */
     @JvmStatic
     @JvmOverloads
-    fun setPlayerMods(mods: String?, speedMultiplier: Float, flFollowDelay: Float, forceAR: Float? = null)
+    fun setPlayerMods(
+        mods: String?,
+        speedMultiplier: Float,
+        flFollowDelay: Float,
+        customAR: Float? = null,
+        customOD: Float? = null,
+        customCS: Float? = null,
+        customHP: Float? = null
+    )
     {
         val json = JSONObject().apply {
 
             put("mods", mods)
             put("speedMultiplier", speedMultiplier)
             put("flFollowDelay", flFollowDelay)
-            put("forceAR", forceAR)
 
+            put("customAR", customAR)
+            put("customOD", customOD)
+            put("customCS", customCS)
+            put("customHP", customHP)
         }
         socket!!.emit("playerModsChanged", json)
 

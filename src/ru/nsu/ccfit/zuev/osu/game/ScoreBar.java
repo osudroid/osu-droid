@@ -75,8 +75,8 @@ public class ScoreBar extends GameObject {
 		}*/
         colour.setWidth(width * hp);
 
-        ki.setPosition(Utils.toRes(5) + colour.getWidth() - ki.getWidth() / 2,
-                Utils.toRes(16) + colour.getHeight() / 2 - ki.getHeight() / 2);
+        ki.setPosition(5 + colour.getWidth() - ki.getWidth() / 2,
+                16 + colour.getHeight() / 2 - ki.getHeight() / 2);
         //ki.setScale(hp>lasthp?1.2f:1);
         ki.setFrame(hp > 0.49 ? 0
                 : hp > 0.24 ? 1

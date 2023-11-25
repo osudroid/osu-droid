@@ -9,7 +9,6 @@ package com.reco1l.framework.lang
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Runnable
-import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
 /**
@@ -22,8 +21,8 @@ fun async(block: () -> Unit) = GlobalScope.launch {
 /**
  * Run a task ignoring exceptions on asynchronous using Kotlin Coroutines API.
  */
-fun asyncIgnoreExceptions(block: () -> Unit) = GlobalScope.launch {
-    try { block() } catch (e: Exception) { e.printStackTrace() }
+fun asyncIgnoreExceptions(block: Runnable) = GlobalScope.launch {
+    try { block.run() } catch (e: Exception) { e.printStackTrace() }
 }
 
 /**

@@ -7,4 +7,7 @@
 
     <external-path name="osu_droid_export_path" path="osu!droid/"/>
 
+    <!--Where downloaded updates APK files will be located.-->
+    <cache-path name="cache" path="."/>
+
 </paths>
