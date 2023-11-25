@@ -37,7 +37,7 @@
 		android:layout_alignParentBottom="true"
 		android:gravity="center"
 		android:orientation="vertical"
-		android:translationY="200dp">
+		android:translationY="260dp">
 
 
 		<RelativeLayout
@@ -91,7 +91,7 @@
 		<LinearLayout
 			android:id="@+id/optionBody"
 			android:layout_width="match_parent"
-			android:layout_height="200dp"
+			android:layout_height="260dp"
 			android:background="@color/frgBodyBackgroundLight"
 			android:clickable="true"
 			android:orientation="vertical">
@@ -116,269 +116,328 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="12dp"
                     android:orientation="vertical">
 
-
+					<!--Basic options-->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="-5dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+						android:layout_margin="14dp">
 
                         <CheckBox
                             android:id="@+id/enableStoryboard"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
 							android:saveEnabled="false"
+							android:layout_marginRight="12dp"
                             android:text="@string/opt_enableStoryboard_title" />
 
 						<CheckBox
-								android:id="@+id/enableVideo"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:layout_marginLeft="5dp"
-								android:layout_weight="1"
-								android:saveEnabled="false"
-								android:text="Enable video" />
+							android:id="@+id/enableVideo"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:saveEnabled="false"
+							android:layout_marginRight="12dp"
+							android:text="Enable video" />
 
                         <CheckBox
                             android:id="@+id/showScoreboard"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="5dp"
                             android:layout_weight="1"
 							android:saveEnabled="false"
                             android:text="@string/opt_show_scoreboard_title" />
+
                     </LinearLayout>
-
-					<RelativeLayout
-						android:layout_marginTop="12dp"
-						android:layout_marginBottom="10dp"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content">
-
-						<View
-							android:layout_width="match_parent"
-							android:layout_height="2dp"
-							android:background="@color/triangleBackground" />
-
-						<com.edlplan.ui.TriangleEffectView
-							android:layout_width="match_parent"
-							android:layout_height="2dp" />
-					</RelativeLayout>
-
-                    <TableLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:gravity="center">
-
-                        <TableRow
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textAlignment="textEnd"
-                                android:gravity="end"
-								android:layout_marginEnd="7dp"
-								android:layout_marginRight="7dp"
-                                android:text="@string/opt_bgbrightness_title" />
-
-                            <CheckBox
-                                android:visibility="invisible"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content" />
-
-                            <SeekBar
-                                android:id="@+id/backgroundBrightnessBar"
-                                android:layout_width="350dp"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-								android:saveEnabled="false"
-                                android:max="100" />
-
-                            <TextView
-                                android:id="@+id/bgBrightnessText"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-								android:saveEnabled="false"
-                                android:text="25%" />
-                        </TableRow>
-
-						<RelativeLayout
-							android:layout_marginTop="12dp"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:layout_marginBottom="12dp">
-
-							<View
-								android:layout_width="match_parent"
-								android:layout_height="2dp"
-								android:background="@color/triangleBackground" />
-
-							<com.edlplan.ui.TriangleEffectView
-								android:layout_width="match_parent"
-								android:layout_height="2dp" />
-						</RelativeLayout>
-
-                        <TableRow
-							android:id="@+id/speed_modify"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textAlignment="textEnd"
-                                android:gravity="end"
-								android:layout_marginEnd="7dp"
-								android:layout_marginRight="7dp"
-                                android:text="@string/opt_changespeed_title" />
-
-                            <CheckBox
-                                android:id="@+id/enableSpeedChange"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-								android:saveEnabled="false" />
-
-                            <SeekBar
-                                android:id="@+id/changeSpeedBar"
-                                android:layout_width="350dp"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-								android:saveEnabled="false"
-                                android:max="30" />
-
-                            <TextView
-                                android:id="@+id/changeSpeedText"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-								android:saveEnabled="false"
-                                android:text="1.00x" />
-                        </TableRow>
-
-						<TableRow
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:layout_weight="1">
-
-							<View
-								android:layout_width="0dp"
-								android:layout_height="0dp"/>
-
-							<CheckBox
-								android:id="@+id/enableNCwhenSpeedChange"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:saveEnabled="false" />
-
-							<TextView
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:layout_marginLeft="15dp"
-								android:text="@string/opt_enablenc_whenspeedchange_title"/>
-						</TableRow>
-
-						<TextView
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:layout_marginTop="10dp"
-							android:layout_weight="3"
-							android:gravity="center"
-							android:textAlignment="center"
-							android:text="@string/unranked_features"
-							android:textColor="#FF0000" />
-
-                        <TableRow
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textAlignment="textEnd"
-                                android:gravity="end"
-								android:layout_marginEnd="7dp"
-								android:layout_marginRight="7dp"
-                                android:text="@string/opt_forcear_title" />
-
-                            <CheckBox
-                                android:id="@+id/enableForceAR"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-								android:saveEnabled="false" />
-
-                            <SeekBar
-                                android:id="@+id/forceARBar"
-                                android:layout_width="350dp"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:max="125" />
-
-                            <TextView
-                                android:id="@+id/forceARText"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="AR9.0" />
-                        </TableRow>
-                    
-                    <TextView
-							android:id="@+id/customize_mods"
-							android:layout_width="match_parent"
-							android:layout_height="wrap_content"
-							android:layout_marginTop="10dp"
-							android:layout_weight="3"
-							android:gravity="center"
-							android:textAlignment="center"
-							android:text="@string/mod_customization"
-							android:textColor="#62c700" />
-
-						<TableRow
-							android:layout_width="match_parent"
-							android:layout_height="match_parent"
-							android:layout_weight="1">
-
-							<TextView
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:textAlignment="textEnd"
-								android:gravity="end"
-								android:layout_marginEnd="7dp"
-								android:layout_marginRight="7dp"
-								android:text="@string/opt_flashlight_follow_delay_title" />
-
-							<CheckBox
-								android:visibility="invisible"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content" />
-
-							<SeekBar
-								android:id="@+id/flashlightFollowDelayBar"
-								android:layout_width="350dp"
-								android:layout_height="wrap_content"
-								android:layout_gravity="center_vertical"
-								android:saveEnabled="false"
-								android:min="1"
-								android:max="10"/>
-							<TextView
-								android:id="@+id/flashlightFollowDelayText"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:saveEnabled="false"
-								android:text="120ms"/>
-						</TableRow>
-
-					</TableLayout>
 
 					<View
 						android:layout_width="match_parent"
-						android:layout_height="50dp" />
+						android:layout_height="2dp"
+						android:background="@color/triangleBackground" />
+
+					<!--Brightness-->
+					<RelativeLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:paddingLeft="8dp"
+						android:paddingVertical="8dp"
+						android:layout_margin="14dp">
+
+						<TextView
+							android:id="@+id/bg_title"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textColor="#000"
+							android:text="@string/opt_bgbrightness_title" />
+
+						<SeekBar
+							android:id="@+id/backgroundBrightnessBar"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_centerVertical="true"
+							android:layout_toRightOf="@+id/bg_title"
+							android:layout_toLeftOf="@+id/bgBrightnessText"
+							android:saveEnabled="false" />
+
+						<TextView
+							android:id="@+id/bgBrightnessText"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_alignParentRight="true"
+							android:layout_centerVertical="true"
+							android:text="100%" />
+
+					</RelativeLayout>
+
+					<View
+						android:layout_width="match_parent"
+						android:layout_height="2dp"
+						android:background="@color/triangleBackground" />
+
+					<!--Speed modify-->
+					<RelativeLayout
+						android:id="@+id/speed_modify"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="14dp"
+						android:layout_marginBottom="8dp"
+						android:layout_marginHorizontal="14dp">
+
+						<CheckBox
+							android:id="@+id/enableSpeedChange"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_centerVertical="true"
+							android:saveEnabled="false"
+							android:text="@string/opt_changespeed_title" />
+
+						<SeekBar
+							android:id="@+id/changeSpeedBar"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_centerVertical="true"
+							android:layout_toLeftOf="@+id/changeSpeedText"
+							android:layout_toRightOf="@+id/enableSpeedChange"
+							android:saveEnabled="false" />
+
+						<TextView
+							android:id="@+id/changeSpeedText"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_alignParentEnd="true"
+							android:layout_centerVertical="true"
+							android:text="1.0x" />
+
+					</RelativeLayout>
+
+					<!--Pitch shift-->
+					<CheckBox
+						android:layout_marginBottom="14dp"
+						android:layout_marginHorizontal="14dp"
+						android:id="@+id/enableNCwhenSpeedChange"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:saveEnabled="false"
+						android:text="@string/opt_enablenc_whenspeedchange_title"/>
+
+					<View
+						android:layout_width="match_parent"
+						android:layout_height="2dp"
+						android:background="@color/triangleBackground" />
+
+
+					<!--AR-->
+					<RelativeLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="14dp"
+						android:layout_marginBottom="8dp"
+						android:layout_marginHorizontal="14dp">
+
+						<CheckBox
+							android:id="@+id/custom_ar_toggle"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_centerVertical="true"
+							android:saveEnabled="false"
+							android:text="@string/opt_forcear_title" />
+
+						<SeekBar
+							android:id="@+id/custom_ar_bar"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_centerVertical="true"
+							android:layout_toLeftOf="@+id/custom_ar_text"
+							android:layout_toRightOf="@+id/custom_ar_toggle"
+							android:saveEnabled="false" />
+
+						<TextView
+							android:id="@+id/custom_ar_text"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_alignParentEnd="true"
+							android:layout_centerVertical="true"
+							android:text="AR 10.0" />
+
+					</RelativeLayout>
+
+					<!--Negative infinity AR-->
+					<CheckBox
+						android:id="@+id/negative_infinity_ar"
+						android:layout_marginBottom="8dp"
+						android:layout_marginHorizontal="14dp"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:saveEnabled="false"
+						android:text="Force negative infinity AR (Can reduce performance in some devices)"/>
+
+					<!--OD-->
+					<RelativeLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginBottom="8dp"
+						android:layout_marginHorizontal="14dp">
+
+						<CheckBox
+							android:id="@+id/custom_od_toggle"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_centerVertical="true"
+							android:saveEnabled="false"
+							android:text="Force OD" />
+
+						<SeekBar
+							android:id="@+id/custom_od_bar"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_centerVertical="true"
+							android:layout_toRightOf="@+id/custom_od_toggle"
+							android:layout_toLeftOf="@+id/custom_od_text"
+							android:saveEnabled="false" />
+
+						<TextView
+							android:id="@+id/custom_od_text"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_alignParentEnd="true"
+							android:layout_centerVertical="true"
+							android:text="OD 10.0" />
+
+					</RelativeLayout>
+
+					<!--CS-->
+					<RelativeLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginBottom="8dp"
+						android:layout_marginHorizontal="14dp">
+
+						<CheckBox
+							android:id="@+id/custom_cs_toggle"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_centerVertical="true"
+							android:saveEnabled="false"
+							android:text="Force CS" />
+
+						<SeekBar
+							android:id="@+id/custom_cs_bar"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_centerVertical="true"
+							android:layout_toRightOf="@+id/custom_cs_toggle"
+							android:layout_toLeftOf="@+id/custom_cs_text"
+							android:max="100"
+							android:saveEnabled="false" />
+
+						<TextView
+							android:id="@+id/custom_cs_text"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_alignParentEnd="true"
+							android:layout_centerVertical="true"
+							android:text="CS 10.0" />
+
+					</RelativeLayout>
+
+					<!--HP-->
+					<RelativeLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginBottom="8dp"
+						android:layout_marginHorizontal="14dp">
+
+						<CheckBox
+							android:id="@+id/custom_hp_toggle"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_centerVertical="true"
+							android:saveEnabled="false"
+							android:text="Force HP" />
+
+						<SeekBar
+							android:id="@+id/custom_hp_bar"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_centerVertical="true"
+							android:layout_toRightOf="@+id/custom_hp_toggle"
+							android:layout_toLeftOf="@+id/custom_hp_text"
+							android:max="100"
+							android:saveEnabled="false" />
+
+						<TextView
+							android:id="@+id/custom_hp_text"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_alignParentEnd="true"
+							android:layout_centerVertical="true"
+							android:text="HP 10.0" />
+
+					</RelativeLayout>
+
+					<View
+						android:layout_width="match_parent"
+						android:layout_height="2dp"
+						android:background="@color/triangleBackground" />
+
+
+					<!--FL Follow Delay-->
+					<RelativeLayout
+						android:id="@+id/follow_delay_row"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:paddingLeft="8dp"
+						android:paddingVertical="8dp"
+						android:layout_margin="14dp">
+
+						<TextView
+							android:id="@+id/fl_title"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textColor="#000"
+							android:text="@string/opt_flashlight_follow_delay_title" />
+
+						<SeekBar
+							android:id="@+id/flashlightFollowDelayBar"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_centerVertical="true"
+							android:layout_toRightOf="@+id/fl_title"
+							android:layout_toLeftOf="@+id/flashlightFollowDelayText"
+							android:max="100"
+							android:saveEnabled="false" />
+
+						<TextView
+							android:id="@+id/flashlightFollowDelayText"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_alignParentEnd="true"
+							android:layout_centerVertical="true"
+							android:text="100%" />
+
+					</RelativeLayout>
+
                 </LinearLayout>
             </ScrollView>
 		</LinearLayout>

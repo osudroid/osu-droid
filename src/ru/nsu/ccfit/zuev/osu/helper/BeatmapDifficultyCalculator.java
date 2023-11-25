@@ -13,6 +13,7 @@ import com.rian.difficultycalculator.calculator.PerformanceCalculator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -45,8 +46,14 @@ public final class BeatmapDifficultyCalculator {
         parameters.mods = stat.getMod().clone();
         parameters.customSpeedMultiplier = stat.getChangeSpeed();
 
-        if (stat.isEnableForceAR()) {
-            parameters.forcedAR = stat.getForceAR();
+        if (stat.isCustomCS()) {
+            parameters.customCS = stat.getCustomCS();
+        }
+        if (stat.isCustomAR()) {
+            parameters.customAR = stat.getCustomAR();
+        }
+        if (stat.isCustomOD()) {
+            parameters.customOD = stat.getCustomOD();
         }
 
         return parameters;
@@ -452,40 +459,12 @@ public final class BeatmapDifficultyCalculator {
             }
 
             for (var cache : cacheMap.entrySet()) {
-                if (isParameterEqual(cache.getKey(), parameters)) {
+                if (cache.getKey().equals(parameters)) {
                     return cache.getValue().cache;
                 }
             }
 
             return null;
-        }
-
-        /**
-         * Determines if two calculation parameters are equal.
-         *
-         * @param parameter1 The first parameter.
-         * @param parameter2 The second parameter.
-         * @return Whether both calculation parameters are equal.
-         */
-        private boolean isParameterEqual(DifficultyCalculationParameters parameter1,
-                                         DifficultyCalculationParameters parameter2) {
-            if (parameter1.customSpeedMultiplier != parameter2.customSpeedMultiplier) {
-                return false;
-            }
-
-            if (parameter1.isForceAR() != parameter2.isForceAR()) {
-                return false;
-            }
-
-            // If both parameters enable force AR, check for equality.
-            if (parameter1.isForceAR() && parameter2.isForceAR()
-                    && parameter1.forcedAR != parameter2.forcedAR) {
-                return false;
-            }
-
-            // Check whether mods are equal.
-            return parameter1.mods.size() == parameter2.mods.size() &&
-                    parameter1.mods.containsAll(parameter2.mods);
         }
     }
 

@@ -62,6 +62,10 @@ internal fun parseMods(o: JSONObject): RoomMods
         set = stringToMods(if (!o.isNull("mods")) o.getString("mods") else ""),
         speedMultiplier = o.getDouble("speedMultiplier").toFloat(),
         flFollowDelay = o.getDouble("flFollowDelay").toFloat(),
-        forceAR = if (!o.isNull("forceAR")) o.getDouble("forceAR").toFloat() else null
+
+        customAR = if (!o.isNull("customAR")) o.getDouble("customAR").toFloat() else null,
+        customOD = if (!o.isNull("customOD")) o.getDouble("customOD").toFloat() else null,
+        customCS = if (!o.isNull("customCS")) o.getDouble("customCS").toFloat() else null,
+        customHP = if (!o.isNull("customHP")) o.getDouble("customHP").toFloat() else null
     )
 }

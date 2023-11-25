@@ -704,7 +704,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             modsToString(getModMenu().mod),
             getModMenu().changeSpeed,
             getModMenu().fLfollowDelay,
-            if (getModMenu().isEnableForceAR) getModMenu().forceAR else null
+            getModMenu().customAR,
+            getModMenu().customOD,
+            getModMenu().customCS,
+            getModMenu().customHP
         )
 
         // Updating UI
@@ -828,7 +831,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             modsToString(getModMenu().mod),
             getModMenu().changeSpeed,
             getModMenu().fLfollowDelay,
-            if (getModMenu().isEnableForceAR) getModMenu().forceAR else null
+            getModMenu().customAR,
+            getModMenu().customOD,
+            getModMenu().customCS,
+            getModMenu().customHP
         )
 
         // Update room info text
@@ -917,7 +923,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 modsToString(roomMods),
                 getModMenu().changeSpeed,
                 getModMenu().fLfollowDelay,
-                if (getModMenu().isEnableForceAR) getModMenu().forceAR else null
+                getModMenu().customAR,
+                getModMenu().customOD,
+                getModMenu().customCS,
+                getModMenu().customHP
             )
         }
 
@@ -945,9 +954,12 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             Replay.oldMod = getModMenu().mod
             Replay.oldChangeSpeed = getModMenu().changeSpeed
-            Replay.oldForceAR = getModMenu().forceAR
-            Replay.oldEnableForceAR = getModMenu().isEnableForceAR
             Replay.oldFLFollowDelay = getModMenu().fLfollowDelay
+
+            Replay.oldCustomAR = getModMenu().customAR
+            Replay.oldCustomOD = getModMenu().customOD
+            Replay.oldCustomCS = getModMenu().customCS
+            Replay.oldCustomHP = getModMenu().customHP
 
             getGlobal().gameScene.startGame(getGlobal().selectedTrack, null)
 

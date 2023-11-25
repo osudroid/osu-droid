@@ -13,6 +13,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -92,7 +93,7 @@ public class HitCircle extends GameObject {
         approachCircle.setScale(scale * 2);
         approachCircle.setAlpha(0);
         Utils.putSpriteAnchorCenter(pos, approachCircle);
-        if (GameHelper.isHidden()) {
+        if (GameHelper.isHidden() || ModMenu.getInstance().isNegativeInfiniteAR()) {
             approachCircle.setVisible(Config.isShowFirstApproachCircle() && this.isFirstNote);
         }
 

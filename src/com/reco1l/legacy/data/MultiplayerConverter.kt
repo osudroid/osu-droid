@@ -15,15 +15,21 @@ import java.util.*
 
 fun modsToReadable(
     mods: EnumSet<GameMod>?,
-    speedMultiplier: Float/* = 1f*/,
-    flFollowDelay: Float/* = ModMenu.DEFAULT_FL_FOLLOW_DELAY*/,
-    forceAR: Float?/* = null*/,
+    speedMultiplier: Float,
+    flFollowDelay: Float,
+    customAR: Float?,
+    customOD: Float?,
+    customCS: Float?,
+    customHP: Float?,
 ): String
 {
     if (mods.isNullOrEmpty()
         && speedMultiplier == 1f
         && flFollowDelay == ModMenu.DEFAULT_FL_FOLLOW_DELAY
-        && forceAR == null)
+        && customAR == null
+        && customOD == null
+        && customCS == null
+        && customHP == null)
         return "None"
 
     return buildString {
@@ -48,7 +54,6 @@ fun modsToReadable(
             MOD_NIGHTCORE -> append("NC, ")
             MOD_HALFTIME -> append("HT, ")
             MOD_PRECISE -> append("PR, ")
-            MOD_SMALLCIRCLE -> append("SC, ")
             MOD_REALLYEASY -> append("REZ, ")
             MOD_PERFECT -> append("PF, ")
             MOD_SUDDENDEATH -> append("SD, ")
@@ -59,8 +64,17 @@ fun modsToReadable(
         if (speedMultiplier != 1f)
             append("%.2fx, ".format(speedMultiplier))
 
-        if (forceAR != null)
-            append("AR $forceAR, ")
+        if (customAR != null)
+            append("AR $customAR, ")
+
+        if (customOD != null)
+            append("OD $customOD, ")
+
+        if (customCS != null)
+            append("CS $customCS, ")
+
+        if (customHP != null)
+            append("HP $customHP, ")
 
     }.substringBeforeLast(',')
 }
@@ -85,7 +99,6 @@ fun stringToMods(data: String?): EnumSet<GameMod>
         'c' -> mod += MOD_NIGHTCORE
         't' -> mod += MOD_HALFTIME
         's' -> mod += MOD_PRECISE
-        'm' -> mod += MOD_SMALLCIRCLE
         'l' -> mod += MOD_REALLYEASY
         'u' -> mod += MOD_SUDDENDEATH
         'f' -> mod += MOD_PERFECT
@@ -110,7 +123,6 @@ fun modsToString(mod: EnumSet<GameMod>) = buildString {
         MOD_NIGHTCORE -> append('c')
         MOD_HALFTIME -> append('t')
         MOD_PRECISE -> append('s')
-        MOD_SMALLCIRCLE -> append('m')
         MOD_REALLYEASY -> append('l')
         MOD_PERFECT -> append('f')
         MOD_SUDDENDEATH -> append('u')

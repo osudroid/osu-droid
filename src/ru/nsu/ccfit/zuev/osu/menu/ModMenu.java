@@ -20,6 +20,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -40,6 +41,10 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class ModMenu implements IModSwitcher {
 
+    // Real negative infinity will load objects that aren't even visible due to overlap killing performance
+    // unnecessarily, we're using -999 as alternative instead.
+    public final static float NEGATIVE_INFINITY_AR = -999f;
+
     public static final float DEFAULT_FL_FOLLOW_DELAY = 0.12f;
 
     private static final ModMenu instance = new ModMenu();
@@ -49,11 +54,15 @@ public class ModMenu implements IModSwitcher {
     private TrackInfo selectedTrack;
     private final Map<GameMod, ModButton> modButtons = new TreeMap<>();
     private float changeSpeed = 1.0f;
-    private float forceAR = 9.0f;
-    private boolean enableForceAR = false;
     private boolean enableNCWhenSpeedChange = false;
     private boolean modsRemoved = false;
     private float FLfollowDelay = DEFAULT_FL_FOLLOW_DELAY;
+
+
+    private Float customAR = null;
+    private Float customOD = null;
+    private Float customHP = null;
+    private Float customCS = null;
 
     private ModMenu() {
         mod = EnumSet.noneOf(GameMod.class);
@@ -109,10 +118,10 @@ public class ModMenu implements IModSwitcher {
             mod = modSet;
 
             FLfollowDelay = mods.getFlFollowDelay();
-            enableForceAR = mods.getForceAR() != null;
-
-            if (enableForceAR)
-                forceAR = mods.getForceAR();
+            customAR = mods.getCustomAR();
+            customOD = mods.getCustomOD();
+            customCS = mods.getCustomCS();
+            customHP = mods.getCustomHP();
         }
 
         changeSpeed = mods.getSpeedMultiplier();
@@ -161,12 +170,29 @@ public class ModMenu implements IModSwitcher {
             var string = MultiplayerConverter.modsToString(mod);
 
             // The room mods are the same as the host mods
-            if (Multiplayer.isRoomHost)
-                RoomAPI.setRoomMods(string, changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
-            else if (updatePlayerMods)
-                RoomAPI.setPlayerMods(string, changeSpeed, FLfollowDelay, enableForceAR ? forceAR : null);
-            else
+            if (Multiplayer.isRoomHost) {
+                RoomAPI.setRoomMods(
+                        string,
+                        changeSpeed,
+                        FLfollowDelay,
+                        customAR,
+                        customOD,
+                        customCS,
+                        customHP
+                );
+            } else if (updatePlayerMods) {
+                RoomAPI.setPlayerMods(
+                        string,
+                        changeSpeed,
+                        FLfollowDelay,
+                        customAR,
+                        customOD,
+                        customCS,
+                        customHP
+                );
+            } else {
                 RoomScene.awaitModsChange = false;
+            }
         }
     }
 
@@ -251,9 +277,7 @@ public class ModMenu implements IModSwitcher {
         if (!Multiplayer.isMultiplayer)
             addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-scorev2", GameMod.MOD_SCOREV2);
 
-        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-precise", GameMod.MOD_PRECISE);
-        addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-smallcircle", GameMod.MOD_SMALLCIRCLE);
-
+        addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-precise", GameMod.MOD_PRECISE);
 
         final TextButton resetText = new TextButton(ResourceManager
                 .getInstance().getFont("CaptionFont"),
@@ -304,8 +328,14 @@ public class ModMenu implements IModSwitcher {
                                 parameters.mods = getMod();
                                 parameters.customSpeedMultiplier = changeSpeed;
 
-                                if (enableForceAR) {
-                                    parameters.forcedAR = forceAR;
+                                if (isCustomCS()) {
+                                    parameters.customCS = customCS;
+                                }
+                                if (isCustomAR()) {
+                                    parameters.customAR = customAR;
+                                }
+                                if (isCustomOD()) {
+                                    parameters.customOD = customOD;
                                 }
 
                                 DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
@@ -456,28 +486,12 @@ public class ModMenu implements IModSwitcher {
         changeSpeed = speed;
     }
 
-    public float getForceAR(){
-        return forceAR;
-    }
-
-    public void setForceAR(float ar){
-        forceAR = ar;
-    }
-
-    public boolean isEnableForceAR(){
-        return enableForceAR;
-    }
-
     public boolean isDefaultFLFollowDelay() {
         return FLfollowDelay == DEFAULT_FL_FOLLOW_DELAY;
     }
 
     public void resetFLFollowDelay() {
         FLfollowDelay = DEFAULT_FL_FOLLOW_DELAY;
-    }
-
-    public void setEnableForceAR(boolean t){
-        enableForceAR = t;
     }
 
     public boolean isEnableNCWhenSpeedChange(){
@@ -492,4 +506,59 @@ public class ModMenu implements IModSwitcher {
         changeMultiplierText();
     }
 
+
+    public boolean isNegativeInfiniteAR() {
+        return customAR != null && customAR == NEGATIVE_INFINITY_AR;
+    }
+
+    public boolean isCustomAR() {
+        return customAR != null;
+    }
+
+    public Float getCustomAR() {
+        return customAR;
+    }
+
+    public void setCustomAR(@Nullable Float customAR) {
+        this.customAR = customAR;
+    }
+
+
+    public boolean isCustomOD() {
+        return customOD != null;
+    }
+
+    public Float getCustomOD() {
+        return customOD;
+    }
+
+    public void setCustomOD(@Nullable Float customOD) {
+        this.customOD = customOD;
+    }
+
+
+    public boolean isCustomHP() {
+        return customHP != null;
+    }
+
+    public Float getCustomHP() {
+        return customHP;
+    }
+
+    public void setCustomHP(@Nullable Float customHP) {
+        this.customHP = customHP;
+    }
+
+
+    public boolean isCustomCS() {
+        return customCS != null;
+    }
+
+    public Float getCustomCS() {
+        return customCS;
+    }
+
+    public void setCustomCS(@Nullable Float customCS) {
+        this.customCS = customCS;
+    }
 }
