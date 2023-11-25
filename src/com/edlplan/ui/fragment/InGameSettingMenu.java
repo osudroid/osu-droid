@@ -32,9 +32,6 @@ public class InGameSettingMenu extends BaseFragment {
 
     private static InGameSettingMenu menu;
 
-
-    private CheckBox negativeInfinityARToggle;
-
     private View speedModifyRow;
     private SeekBar speedModifyBar;
     private TextView speedModifyText;
@@ -433,34 +430,26 @@ public class InGameSettingMenu extends BaseFragment {
         var track = GlobalManager.getInstance().getSelectedTrack();
 
         var customAR = ModMenu.getInstance().getCustomAR();
-        var defaultAR = track != null ? track.getApproachRate() : 10;
-
-        var isCustomAR = customAR != null;
-        var isNegativeInfinity = isCustomAR && customAR == ModMenu.NEGATIVE_INFINITY_AR;
-
-        negativeInfinityARToggle.setChecked(isNegativeInfinity);
-
-        customARToggle.setEnabled(!isNegativeInfinity);
-        customARToggle.setChecked(!isNegativeInfinity && isCustomAR);
-        customARBar.setEnabled(!isNegativeInfinity && isCustomAR);
-        customARBar.setProgress((int) ((isCustomAR && !isNegativeInfinity ? customAR : defaultAR) * 10));
+        customARToggle.setChecked(customAR != null);
+        customARBar.setEnabled(customAR != null);
+        customARBar.setProgress((int) ((customAR != null ? customAR : track != null ? track.getApproachRate() : 10) * 10));
         customARText.setText(String.valueOf(customARBar.getProgress() / 10f));
 
         var customOD = ModMenu.getInstance().getCustomOD();
-        customODBar.setEnabled(customOD != null);
         customODToggle.setChecked(customOD != null);
+        customODBar.setEnabled(customOD != null);
         customODBar.setProgress((int) ((customOD != null ? customOD : track != null ? track.getOverallDifficulty() : 10) * 10));
         customODText.setText(String.valueOf(customODBar.getProgress() / 10f));
 
         var customCS = ModMenu.getInstance().getCustomCS();
-        customCSBar.setEnabled(customCS != null);
         customCSToggle.setChecked(customCS != null);
+        customCSBar.setEnabled(customCS != null);
         customCSBar.setProgress((int) ((customCS != null ? customCS : track != null ? track.getCircleSize() : 10) * 10));
         customCSText.setText(String.valueOf(customCSBar.getProgress() / 10f));
 
         var customHP = ModMenu.getInstance().getCustomHP();
-        customHPBar.setEnabled(customHP != null);
         customHPToggle.setChecked(customHP != null);
+        customHPBar.setEnabled(customHP != null);
         customHPBar.setProgress((int) ((customHP != null ? customHP : track != null ? track.getHpDrain() : 10) * 10));
         customHPText.setText(String.valueOf(customHPBar.getProgress() / 10f));
 
