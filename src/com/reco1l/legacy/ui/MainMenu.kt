@@ -58,14 +58,9 @@ class MainMenu(val main: MainScene)
             if (touchEvent.isActionUp)
             {
                 setColor(1f, 1f, 1f)
-                if (main.isOnExitAnim) return true
 
-                if (LibraryManager.INSTANCE.library.isEmpty())
-                {
-                    getGlobal().mainScene.musicControl(MusicOption.STOP)
-                    ChimuWebView.INSTANCE.show()
+                if (main.isOnExitAnim)
                     return true
-                }
 
                 getGlobal().songService.isGaming = true
 
@@ -76,11 +71,21 @@ class MainMenu(val main: MainScene)
                     getGlobal().mainActivity.checkNewBeatmaps()
                     LibraryManager.INSTANCE.updateLibrary(true)
 
-                    main.musicControl(MusicOption.PLAY)
+                    if (LibraryManager.INSTANCE.library.isEmpty())
+                    {
+                        main.musicControl(MusicOption.STOP)
 
-                    getGlobal().songMenu.reload()
-                    getGlobal().songMenu.show()
-                    getGlobal().songMenu.select()
+                        getGlobal().songService.isGaming = false
+                        getGlobal().engine.scene = main.scene
+
+                        ChimuWebView.INSTANCE.show()
+                    } else {
+                        main.musicControl(MusicOption.PLAY)
+
+                        getGlobal().songMenu.reload()
+                        getGlobal().songMenu.show()
+                        getGlobal().songMenu.select()
+                    }
                 }
                 return true
             }
