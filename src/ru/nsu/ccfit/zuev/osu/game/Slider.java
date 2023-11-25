@@ -21,7 +21,6 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 
@@ -332,24 +331,21 @@ public class Slider extends GameObject {
             superPath = superPath.fitToLinePath();
             superPath.measure();
 
+            var bodyWidth = OsuSkin.get().getSliderBodyWidth() - OsuSkin.get().getSliderBorderWidth() * scale;
             abstractSliderBody = new SliderBody2D(superPath);
-            abstractSliderBody.setBodyWidth(
-                    Utils.toRes(OsuSkin.get().getSliderBodyWidth() - OsuSkin.get().getSliderBorderWidth())
-                            * scale);
-            abstractSliderBody.setBorderWidth(Utils.toRes(OsuSkin.get().getSliderBodyWidth()) * scale);
+            abstractSliderBody.setBodyWidth(bodyWidth);
+            abstractSliderBody.setBorderWidth(OsuSkin.get().getSliderBodyWidth() * scale);
             abstractSliderBody.setSliderBodyBaseAlpha(OsuSkin.get().getSliderBodyBaseAlpha());
 
-            if (OsuSkin.get().isSliderHintEnable()) {
-                if (length > OsuSkin.get().getSliderHintShowMinLength()) {
-                    abstractSliderBody.setEnableHint(true);
-                    abstractSliderBody.setHintAlpha(OsuSkin.get().getSliderHintAlpha());
-                    abstractSliderBody.setHintWidth(Utils.toRes(OsuSkin.get().getSliderHintWidth()));
-                    RGBColor hintColor = OsuSkin.get().getSliderHintColor();
-                    if (hintColor != null) {
-                        abstractSliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b());
-                    } else {
-                        abstractSliderBody.setHintColor(color.r(), color.g(), color.b());
-                    }
+            if (OsuSkin.get().isSliderHintEnable() && length > OsuSkin.get().getSliderHintShowMinLength()) {
+                abstractSliderBody.setEnableHint(true);
+                abstractSliderBody.setHintAlpha(OsuSkin.get().getSliderHintAlpha());
+                abstractSliderBody.setHintWidth(Math.min(OsuSkin.get().getSliderHintWidth() * scale, bodyWidth));
+                RGBColor hintColor = OsuSkin.get().getSliderHintColor();
+                if (hintColor != null) {
+                    abstractSliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b());
+                } else {
+                    abstractSliderBody.setHintColor(color.r(), color.g(), color.b());
                 }
             }
 
