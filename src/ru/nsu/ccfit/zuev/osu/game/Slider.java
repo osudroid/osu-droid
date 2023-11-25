@@ -331,7 +331,7 @@ public class Slider extends GameObject {
             superPath = superPath.fitToLinePath();
             superPath.measure();
 
-            var bodyWidth = OsuSkin.get().getSliderBodyWidth() - OsuSkin.get().getSliderBorderWidth() * scale;
+            var bodyWidth = (OsuSkin.get().getSliderBodyWidth() - OsuSkin.get().getSliderBorderWidth()) * scale;
             abstractSliderBody = new SliderBody2D(superPath);
             abstractSliderBody.setBodyWidth(bodyWidth);
             abstractSliderBody.setBorderWidth(OsuSkin.get().getSliderBodyWidth() * scale);
