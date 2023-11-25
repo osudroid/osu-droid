@@ -9,7 +9,6 @@ import com.dgsrz.bancho.security.SecurityUtils;
 
 import com.reco1l.framework.data.IniReader;
 import com.reco1l.legacy.data.SkinConverter;
-import com.reco1l.legacy.data.SkinIniConverter;
 import com.reco1l.legacy.engine.BlankTextureRegion;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.opengl.font.Font;
