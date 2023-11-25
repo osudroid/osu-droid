@@ -93,7 +93,7 @@ public class HitCircle extends GameObject {
         approachCircle.setScale(scale * 2);
         approachCircle.setAlpha(0);
         Utils.putSpriteAnchorCenter(pos, approachCircle);
-        if (GameHelper.isHidden() || ModMenu.getInstance().isNegativeInfiniteAR()) {
+        if (GameHelper.isHidden()) {
             approachCircle.setVisible(Config.isShowFirstApproachCircle() && this.isFirstNote);
         }
 

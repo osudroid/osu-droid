@@ -388,7 +388,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
 
         scale = (float) ((Config.getRES_HEIGHT() / 480.0f)
-                * (54.42 - (ModMenu.getInstance().isCustomCS() ? ModMenu.getInstance().getCustomCS() : beatmapData.difficulty.cs) * 4.48)
+                * (54.42 - beatmapData.difficulty.cs * 4.48)
                 * 2 / GameObjectSize.BASE_OBJECT_SIZE)
                 + 0.5f * Config.getScaleMultiplier();
 
@@ -470,6 +470,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         if (ModMenu.getInstance().isCustomOD()) {
             overallDifficulty = ModMenu.getInstance().getCustomOD();
+        }
+        if (ModMenu.getInstance().isCustomCS()) {
+            scale = Config.getRES_HEIGHT() / 480.0f
+                    * (54.42f - ModMenu.getInstance().getCustomCS() * 4.48f)
+                    * 2f / GameObjectSize.BASE_OBJECT_SIZE
+                    + 0.5f * Config.getScaleMultiplier();
         }
         if (ModMenu.getInstance().isCustomHP()) {
             drain = ModMenu.getInstance().getCustomHP();
