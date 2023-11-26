@@ -247,7 +247,7 @@ public class DifficultyHitObject {
         }
 
         double fadeInStartTime = object.startTime - baseTimePreempt;
-        double fadeInDuration = timeFadeIn;
+        double fadeInDuration = isHidden ? baseTimePreempt * 0.4 : timeFadeIn;
 
         double nonHiddenOpacity = MathUtils.clamp((time - fadeInStartTime) / fadeInDuration, 0, 1);
 
