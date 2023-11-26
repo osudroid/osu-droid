@@ -219,7 +219,8 @@
 							android:layout_centerVertical="true"
 							android:layout_toLeftOf="@+id/changeSpeedText"
 							android:layout_toRightOf="@+id/enableSpeedChange"
-							android:saveEnabled="false" />
+							android:saveEnabled="false"
+							android:max="30" />
 
 						<TextView
 							android:id="@+id/changeSpeedText"
