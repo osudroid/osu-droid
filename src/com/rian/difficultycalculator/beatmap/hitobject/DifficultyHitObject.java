@@ -359,7 +359,7 @@ public class DifficultyHitObject {
 
             if (i == slider.nestedHitObjects.size() - 1) {
                 // The end of a slider has special aim rules due to the relaxed time constraint on position.
-                // There is both a lazy end position as well as the actual end slider position. We assume the player takes the simpler movement.
+                // There is both a lazy end position and the actual end slider position. We assume the player takes the simpler movement.
                 // For sliders that are circular, the lazy end position may actually be farther away than the sliders' true end.
                 // This code is designed to prevent buffing situations where lazy end is actually a less efficient movement.
                 Vector2 lazyMovement = slider.lazyEndPosition.subtract(currentCursorPosition);
