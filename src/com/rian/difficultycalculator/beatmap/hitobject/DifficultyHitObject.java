@@ -129,11 +129,6 @@ public class DifficultyHitObject {
     public double endTime;
 
     /**
-     * Adjusted velocity of the hit object, taking speed multiplier into account.
-     */
-    public double velocity;
-
-    /**
      * Other hit objects in the beatmap, including this hit object.
      */
     private final ArrayList<DifficultyHitObject> difficultyHitObjects;
@@ -264,7 +259,6 @@ public class DifficultyHitObject {
     private void setDistances(double clockRate) {
         if (object instanceof Slider) {
             Slider slider = (Slider) object;
-            velocity = slider.velocity * clockRate;
             computeSliderCursorPosition(slider);
 
             travelDistance = slider.lazyTravelDistance;
