@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.os.Process;
 
 import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.favorite.FavoriteLibrary;
@@ -1099,12 +1098,15 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void selectTrack(final TrackInfo track, boolean reloadBG) {
-        new Thread() {
-            @Override
-            public void run() {
-                if (board.isShowOnlineScores()) setRank();
-            }
-        }.start();
+
+        // Playing corresponding audio for the selected track.
+        if (selectedTrack == null || !Objects.equals(selectedTrack.getAudioFilename(), track.getAudioFilename())) {
+            playMusic(track.getAudioFilename(), track.getPreviewTime());
+        }
+
+        if (board.isShowOnlineScores()) {
+            Async.run(this::setRank);
+        }
 
         if (selectedTrack == track) {
             synchronized (bgLoaded) {
