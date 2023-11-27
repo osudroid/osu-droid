@@ -11,7 +11,7 @@ import com.reco1l.api.ibancho.data.RoomTeam.RED
 import com.reco1l.api.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
-import com.reco1l.framework.extensions.orCatch
+import com.reco1l.framework.extensions.ignoreException
 import com.reco1l.framework.lang.glThread
 import com.reco1l.framework.lang.uiThread
 import com.reco1l.legacy.data.modsToString
@@ -69,6 +69,12 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
      */
     @JvmField
     var awaitModsChange = false
+
+    /**
+     * Indicates if the client is waiting for a reconnection.
+     */
+    @JvmField
+    var isWaitingForReconnection = false
 
 
     val chat = RoomChat()
@@ -601,7 +607,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun back()
     {
-        { RoomAPI.disconnect() }.orCatch { }
+        ignoreException { RoomAPI.disconnect() }
         clear()
         LobbyScene.show()
     }
@@ -711,19 +717,27 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         show()
     }
 
-    override fun onRoomDisconnect(reason: String?)
+    override fun onRoomDisconnect(reason: String?, byUser: Boolean)
     {
-        ToastLogger.showText("Disconnected from the room${reason?.let { ": $it" } ?: "" }", true)
+        if (!byUser)
+        {
+            isWaitingForReconnection = true
+            chat.onSystemChatMessage("Connection lost, trying to reconnect...", "#FF0000")
+            return
+        }
 
-        // If player is in one of these scenes we go back.
-        if (getGlobal().engine.scene != getGlobal().gameScene.scene)
-            back()
-        else
-            multiLog("Disconnected from socket while playing.")
+        back()
+    }
+
+    override fun onRoomReconnect()
+    {
+        isWaitingForReconnection = false
+        chat.onSystemChatMessage("Connection was successfully restored.", "#007BFF")
     }
 
     override fun onRoomConnectFail(error: String?)
     {
+        isWaitingForReconnection = false
         ToastLogger.showText("Failed to connect to the room: $error", true)
         back()
     }

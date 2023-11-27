@@ -20,10 +20,16 @@ interface IRoomEventListener
     fun onRoomConnect(newRoom: Room)
 
     /**
+     * Emitted to client when it successfully reconnects upon lost connection state, if reconnection fails
+     * [onRoomConnectFail] is called.
+     */
+    fun onRoomReconnect()
+
+    /**
      * Called when the player disconnects from room socket, keep in mind this is also called when the user manually
      * disconnects.
      */
-    fun onRoomDisconnect(reason: String?)
+    fun onRoomDisconnect(reason: String?, byUser: Boolean)
 
     /**
      * Called when the connection fails.

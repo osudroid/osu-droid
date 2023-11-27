@@ -6,6 +6,7 @@ import com.reco1l.api.ibancho.data.Room
 import com.reco1l.api.ibancho.data.RoomTeam
 import com.reco1l.legacy.ui.multiplayer.multiLog
 import io.socket.client.IO
+import io.socket.client.Manager
 import io.socket.client.Socket
 import io.socket.emitter.Emitter.Listener
 import org.json.JSONArray
@@ -249,22 +250,42 @@ object RoomAPI
     private val connectError = Listener {
         multiLog("RECEIVED: connect_error -> ${it.contentToString()}")
 
+        roomEventListener?.onRoomConnectFail(it[0].toString())
+
         socket?.off()
         socket = null
-
-        roomEventListener?.onRoomConnectFail(it[0].toString())
     }
 
     private val disconnect = Listener {
         multiLog("RECEIVED: disconnect -> ${it.contentToString()}")
 
-        socket?.off()
-        socket = null
-
         val reason = it.getOrNull(0) as? String
 
-        roomEventListener?.onRoomDisconnect(reason)
+        roomEventListener?.onRoomDisconnect(
+            reason = reason,
+
+            // Socket was manually disconnected by either server or client.
+            byUser = reason == "io server disconnect" || reason == "io client disconnect"
+        )
     }
+
+    private val reconnect = Listener {
+
+        roomEventListener?.onRoomReconnect()
+
+        multiLog("RECEIVED: reconnect")
+    }
+
+    private val reconnectError = Listener {
+
+        multiLog("RECEIVED: reconnect_error")
+
+        roomEventListener?.onRoomConnectFail("connection lost.")
+
+        socket?.off()
+        socket = null
+    }
+
 
     // Emitters
 
@@ -300,6 +321,8 @@ object RoomAPI
 
             on(Socket.EVENT_CONNECT_ERROR, connectError)
             on(Socket.EVENT_DISCONNECT, disconnect)
+            on(Manager.EVENT_RECONNECT, reconnect)
+            on(Manager.EVENT_RECONNECT_FAILED, reconnectError)
 
         }.connect()
     }
@@ -310,7 +333,7 @@ object RoomAPI
     fun disconnect()
     {
         if (socket == null)
-            multiLog("WARNING: Tried to disconnect from a null socket.")
+            return
 
         socket?.apply {
 
