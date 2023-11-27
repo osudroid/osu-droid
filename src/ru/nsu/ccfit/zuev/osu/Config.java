@@ -285,7 +285,8 @@ public class Config {
     }
 
     public static boolean isRemoveSliderLock() {
-        return Multiplayer.isMultiplayer ? Multiplayer.room != null && Multiplayer.room.isRemoveSliderLock() : removeSliderLock;
+        //noinspection DataFlowIssue
+        return Multiplayer.isConnected() ? Multiplayer.room.isRemoveSliderLock() : removeSliderLock;
     }
 
     public static boolean isCalculateSliderPathInGameStart() {

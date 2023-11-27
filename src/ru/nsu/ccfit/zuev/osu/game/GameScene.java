@@ -1359,7 +1359,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             {
                 statisticDataTimeElapsed %= 3000;
 
-                if (Multiplayer.isConnected)
+                if (Multiplayer.isConnected())
                 {
                     var liveScore = stat.toBoardItem();
 
@@ -1507,7 +1507,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     flashlightSprite.onBreak(true);
                 }
 
-                if (Multiplayer.isConnected)
+                if (Multiplayer.isConnected())
                     RoomScene.INSTANCE.getChat().show();
 
                 if(scorebar != null) scorebar.setVisible(false);
@@ -1936,7 +1936,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                     EdExtensionHelper.onEndGame(lastTrack, stat);
 
-                    if (Multiplayer.isConnected)
+                    if (Multiplayer.isConnected())
                     {
                         Multiplayer.log("Match ended, moving to results scene.");
                         RoomScene.INSTANCE.getChat().show();
@@ -1985,7 +1985,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             for (final Cursor c : cursors) {
                 if (c.mouseDown && Utils.distance(c.mousePos, maxPos) < 250) {
 
-                    if (Multiplayer.isConnected)
+                    if (Multiplayer.isConnected())
                     {
                         if (!isSkipRequested)
                         {
@@ -2639,7 +2639,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (lastBackPressTime > 0 && realTimeElapsed - lastBackPressTime > 300)
             {
                 // Room being null can happen when the player disconnects from socket while playing
-                if (Multiplayer.isConnected)
+                if (Multiplayer.isConnected())
                     Execution.asyncIgnoreExceptions(() -> RoomAPI.submitFinalScore(stat.toJson()));
 
                 Multiplayer.log("Player left the match.");
@@ -2689,7 +2689,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (Multiplayer.isMultiplayer)
         {
-            if (Multiplayer.isConnected)
+            if (Multiplayer.isConnected())
             {
                 Multiplayer.log("Player has lost, moving to room scene.");
                 Execution.asyncIgnoreExceptions(() -> RoomAPI.submitFinalScore(stat.toJson()));

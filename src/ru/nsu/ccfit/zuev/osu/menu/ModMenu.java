@@ -159,7 +159,7 @@ public class ModMenu implements IModSwitcher {
         }
         InGameSettingMenu.getInstance().dismiss();
 
-        if (Multiplayer.isConnected)
+        if (Multiplayer.isConnected())
         {
             RoomScene.awaitModsChange = true;
 

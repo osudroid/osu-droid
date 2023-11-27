@@ -1299,7 +1299,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         // Locking host from change beatmap before the server responses to beatmapChange
         RoomScene.awaitBeatmapChange = true;
 
-        if (!Multiplayer.isConnected) {
+        if (!Multiplayer.isConnected()) {
             return;
         }
 
@@ -1327,7 +1327,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         // Locking host from change beatmap before the server responses to beatmapChange
         RoomScene.awaitBeatmapChange = true;
 
-        if (!Multiplayer.isConnected) {
+        if (!Multiplayer.isConnected()) {
             return;
         }
 

@@ -897,7 +897,7 @@ public class StatisticV2 implements Serializable {
     public ScoreBoardItem toBoardItem() {
 
         //noinspection DataFlowIssue
-        var combo = !Multiplayer.isConnected || Multiplayer.room.getWinCondition() != WinCondition.MAX_COMBO ? currentCombo : maxCombo;
+        var combo = !Multiplayer.isConnected() || Multiplayer.room.getWinCondition() != WinCondition.MAX_COMBO ? currentCombo : maxCombo;
 
         return new ScoreBoardItem(playerName, getTotalScoreWithMultiplier(), combo, getAccuracyForServer(), isAlive);
     }

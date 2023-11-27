@@ -580,7 +580,7 @@ public class ScoringScene {
         if (Multiplayer.isMultiplayer)
         {
             // Preventing NPEs when player gets disconnected while playing
-            if (!Multiplayer.isConnected)
+            if (!Multiplayer.isConnected())
                 RoomScene.INSTANCE.back();
             else
                 RoomScene.INSTANCE.show();

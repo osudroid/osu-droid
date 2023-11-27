@@ -579,7 +579,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         room = null
         player = null
         isRoomHost = false
-        isConnected = false
 
         // Clearing chat
         chat.log.clear()
@@ -668,7 +667,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Setting new room
         room = newRoom
-        isConnected = true
 
         // Releasing await locks just in case
         awaitModsChange = false

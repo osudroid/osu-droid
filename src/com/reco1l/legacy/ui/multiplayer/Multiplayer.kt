@@ -44,10 +44,11 @@ object Multiplayer
     var isRoomHost = false
 
     /**
-     * Indicates that the player is in a room or not
+     * Determines if there's an active connection between client and server.
      */
-    @JvmField
-    var isConnected = false
+    @JvmStatic
+    val isConnected
+        get() = room != null
 
     /**
      * Array containing final leaderboard
