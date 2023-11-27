@@ -460,7 +460,7 @@ public class InGameSettingMenu extends BaseFragment {
 
         // Updating speed multiplier seekbar visibility
         if (Multiplayer.isMultiplayer)
-            speedModifyRow.setVisibility(Multiplayer.isRoomHost ? View.VISIBLE : View.GONE);
+            speedModifyRow.setVisibility(Multiplayer.isRoomHost() ? View.VISIBLE : View.GONE);
     }
 
     @SuppressLint("ClickableViewAccessibility")

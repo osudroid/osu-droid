@@ -578,7 +578,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         room = null
         player = null
-        isRoomHost = false
 
         // Clearing chat
         chat.log.clear()
@@ -681,9 +680,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             back()
             return
         }
-
-        // Determine if it's the host
-        isRoomHost = player!!.id == newRoom.host
 
         // Reloading player list
         playerList?.detachSelf()
@@ -789,9 +785,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         room!!.host = uid
 
         chat.onSystemChatMessage("Player ${room!!.playersMap[uid]?.name} is now the room host.", "#007BFF")
-
-        // Defining if is the host
-        isRoomHost = getOnline().userId == uid
 
         // Reloading mod menu
         glThread {

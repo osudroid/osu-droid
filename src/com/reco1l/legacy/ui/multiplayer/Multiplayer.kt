@@ -40,8 +40,9 @@ object Multiplayer
     /**
      * Indicates if player is room host
      */
-    @JvmField
-    var isRoomHost = false
+    @JvmStatic
+    val isRoomHost
+        get() = player?.let { it.id == room?.id } ?: false
 
     /**
      * Determines if there's an active connection between client and server.
