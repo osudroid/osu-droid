@@ -280,7 +280,7 @@ object RoomAPI
 
         multiLog("RECEIVED: reconnect_error")
 
-        roomEventListener?.onRoomConnectFail("connection lost.")
+        roomEventListener?.onRoomConnectFail("connection lost")
 
         socket?.off()
         socket = null

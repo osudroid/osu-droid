@@ -737,8 +737,13 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomConnectFail(error: String?)
     {
-        isWaitingForReconnection = false
-        ToastLogger.showText("Failed to connect to the room: $error", true)
+        if (isWaitingForReconnection)
+        {
+            isWaitingForReconnection = false
+            ToastLogger.showText("The connection to server has been lost, check your internet connection.", true)
+        }
+        else ToastLogger.showText("Failed to connect to the room: $error", true)
+
         back()
     }
 
