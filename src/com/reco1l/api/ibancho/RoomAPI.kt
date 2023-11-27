@@ -340,7 +340,10 @@ object RoomAPI
 
         }
 
-        socket!!.emit("beatmapChanged", json)
+        socket?.emit("beatmapChanged", json) ?: run {
+			multiLog("Tried to emit event 'beatmapChanged' while socket is null.")
+			return
+		}
         multiLog("EMITTED: beatmapChanged -> $md5, $title, $artist, $version, $creator")
     }
 
@@ -349,7 +352,10 @@ object RoomAPI
      */
     fun kickPlayer(uid: Long)
     {
-        socket!!.emit("playerKicked", uid.toString())
+        socket?.emit("playerKicked", uid.toString()) ?: run {
+			multiLog("Tried to emit event 'playerKicked' while socket is null.")
+			return
+		}
         multiLog("EMITTED: playerKicked -> $uid")
     }
 
@@ -367,7 +373,10 @@ object RoomAPI
      */
     fun setRoomHost(uid: Long)
     {
-        socket!!.emit("hostChanged", uid.toString())
+        socket?.emit("hostChanged", uid.toString()) ?: run {
+			multiLog("Tried to emit event 'hostChanged' while socket is null.")
+			return
+		}
         multiLog("EMITTED: hostChanged -> $uid")
     }
 
@@ -396,7 +405,10 @@ object RoomAPI
             put("customHP", customHP)
 
         }
-        socket!!.emit("roomModsChanged", json)
+        socket?.emit("roomModsChanged", json) ?: run {
+			multiLog("Tried to emit event 'roomModsChanged' while socket is null.")
+			return
+		}
         multiLog("EMITTED: roomModsChanged -> $json")
     }
 
@@ -404,7 +416,10 @@ object RoomAPI
      * Change the remove slider lock setting.
      */
     fun setRoomRemoveSliderLock(isEnabled: Boolean) {
-        socket!!.emit("removeSliderLockChanged", isEnabled)
+        socket?.emit("removeSliderLockChanged", isEnabled) ?: run {
+			multiLog("Tried to emit event 'removeSliderLockChanged' while socket is null.")
+			return
+		}
         multiLog("EMITTED: removeSliderLockChanged -> $isEnabled")
     }
 
@@ -413,7 +428,10 @@ object RoomAPI
      */
     fun setRoomFreeMods(value: Boolean)
     {
-        socket!!.emit("freeModsSettingChanged", value)
+        socket?.emit("freeModsSettingChanged", value) ?: run {
+			multiLog("Tried to emit event 'freeModsSettingChanged' while socket is null.")
+			return
+		}
         multiLog("EMITTED: freeModsSettingChanged -> $value")
     }
 
@@ -422,7 +440,10 @@ object RoomAPI
      */
     fun setRoomTeamMode(mode: TeamMode)
     {
-        socket!!.emit("teamModeChanged", mode.ordinal)
+        socket?.emit("teamModeChanged", mode.ordinal) ?: run {
+			multiLog("Tried to emit event 'teamModeChanged' while socket is null.")
+			return
+		}
         multiLog("EMITTED: teamModeChanged -> $mode")
     }
 
@@ -431,7 +452,10 @@ object RoomAPI
      */
     fun setRoomWinCondition(condition: WinCondition)
     {
-        socket!!.emit("winConditionChanged", condition.ordinal)
+        socket?.emit("winConditionChanged", condition.ordinal) ?: run {
+			multiLog("Tried to emit event 'winConditionChanged' while socket is null.")
+			return
+		}
         multiLog("EMITTED: winConditionChanged -> $condition")
     }
 
@@ -440,7 +464,10 @@ object RoomAPI
      */
     fun setRoomName(name: String)
     {
-        socket!!.emit("roomNameChanged", name)
+        socket?.emit("roomNameChanged", name) ?: run {
+			multiLog("Tried to emit event 'roomNameChanged' while socket is null.")
+			return
+		}
         multiLog("EMITTED: roomNameChanged -> $name")
     }
 
@@ -449,7 +476,10 @@ object RoomAPI
      */
     fun setRoomPassword(password: String)
     {
-        socket!!.emit("roomPasswordChanged", password)
+        socket?.emit("roomPasswordChanged", password) ?: run {
+			multiLog("Tried to emit event 'roomPasswordChanged' while socket is null.")
+			return
+		}
         //multiLog("EMITTED: roomPasswordChanged -> $password")
     }
 
@@ -461,7 +491,10 @@ object RoomAPI
     @JvmStatic
     fun submitFinalScore(json: JSONObject?)
     {
-        socket!!.emit("scoreSubmission", json)
+        socket?.emit("scoreSubmission", json) ?: run {
+			multiLog("Tried to emit event 'scoreSubmission' while socket is null.")
+			return
+		}
         multiLog("EMITTED: scoreSubmission\n${json?.toString(2)}")
     }
 
@@ -471,7 +504,10 @@ object RoomAPI
     @JvmStatic
     fun submitLiveScore(json: JSONObject?)
     {
-        socket!!.emit("liveScoreData", json)
+        socket?.emit("liveScoreData", json) ?: run {
+			multiLog("Tried to emit event 'liveScoreData' while socket is null.")
+			return
+		}
 
         // We don't indent here to avoid spam
         multiLog("EMITTED: liveScoreData -> $json")
@@ -500,7 +536,10 @@ object RoomAPI
      */
     fun sendMessage(message: String)
     {
-        socket!!.emit("chatMessage", message)
+        socket?.emit("chatMessage", message) ?: run {
+			multiLog("Tried to emit event 'chatMessage' while socket is null.")
+			return
+		}
         //multiLog("EMITTED: chatMessage -> $message")
     }
 
@@ -510,7 +549,10 @@ object RoomAPI
     @JvmStatic
     fun setPlayerStatus(status: PlayerStatus)
     {
-        socket!!.emit("playerStatusChanged", status.ordinal)
+        socket?.emit("playerStatusChanged", status.ordinal) ?: run {
+			multiLog("Tried to emit event 'playerStatusChanged' while socket is null.")
+			return
+		}
         multiLog("EMITTED: playerStatusChanged -> $status")
     }
 
@@ -540,7 +582,10 @@ object RoomAPI
             put("customCS", customCS)
             put("customHP", customHP)
         }
-        socket!!.emit("playerModsChanged", json)
+        socket?.emit("playerModsChanged", json) ?: run {
+			multiLog("Tried to emit event 'playerModsChanged' while socket is null.")
+			return
+		}
 
         multiLog("EMITTED: playerModsChanged -> $json")
     }
@@ -550,7 +595,10 @@ object RoomAPI
      */
     fun setPlayerTeam(team: RoomTeam)
     {
-        socket!!.emit("teamChanged", team.ordinal)
+        socket?.emit("teamChanged", team.ordinal) ?: run {
+			multiLog("Tried to emit event 'teamChanged' while socket is null.")
+			return
+		}
         multiLog("EMITTED: teamChanged -> $team")
     }
 
