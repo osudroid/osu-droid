@@ -26,7 +26,6 @@ import com.reco1l.api.ibancho.data.RoomPlayer
 import com.reco1l.framework.extensions.orAsyncCatch
 import com.reco1l.framework.lang.uiThread
 import com.reco1l.legacy.Multiplayer
-import com.reco1l.legacy.multiLog
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.RGBColor
 import ru.nsu.ccfit.zuev.osu.ResourceManager
@@ -110,7 +109,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
 
     fun onSystemChatMessage(message: String, color: String) = uiThread {
 
-        multiLog("System message: $message")
+        Multiplayer.log("System message: $message")
 
         val htmlError = "<font color=$color>${message}</font>"
         val spanned = HtmlCompat.fromHtml(htmlError, FROM_HTML_MODE_LEGACY)

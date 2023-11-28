@@ -1,6 +1,6 @@
 package com.reco1l.api.ibancho.data
 
-import com.reco1l.legacy.multiLog
+import com.reco1l.legacy.Multiplayer
 
 data class Room(
     /**
@@ -153,14 +153,14 @@ data class Room(
         val wasAlready = index in players.indices
 
         if (wasAlready)
-            multiLog("WARNING: Tried to add player while it was already in the array.")
+            Multiplayer.log("WARNING: Tried to add player while it was already in the array.")
         else
             index = players.indexOfFirst { it == null }
 
         // Handling invalid index
         if (index !in players.indices)
         {
-            multiLog("WARNING: Tried to add player with invalid index: $index")
+            Multiplayer.log("WARNING: Tried to add player with invalid index: $index")
             return false
         }
 
@@ -184,7 +184,7 @@ data class Room(
             players[index] = null
             sortPlayers()
         }
-        else multiLog("WARNING: Tried to remove a player with invalid index: $index")
+        else Multiplayer.log("WARNING: Tried to remove a player with invalid index: $index")
 
         return removed
     }

@@ -12,7 +12,7 @@ import com.reco1l.api.ibancho.data.WinCondition.*
 import com.reco1l.framework.extensions.className
 import com.reco1l.framework.extensions.orAsyncCatch
 import com.reco1l.framework.lang.uiThread
-import com.reco1l.legacy.multiLog
+import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.ui.entity.ScrollableList
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.Text
@@ -63,7 +63,7 @@ class LobbyRoomList : ScrollableList()
 
     private fun connectToRoom(room: Room, password: String? = null)
     {
-        multiLog("Trying to connect socket...")
+        Multiplayer.log("Trying to connect socket...")
 
         LobbyScene.search.dismiss()
         LoadingScreen().show();
@@ -71,7 +71,7 @@ class LobbyRoomList : ScrollableList()
         { RoomAPI.connectToRoom(room.id, getOnline().userId, getOnline().username, password) }.orAsyncCatch {
 
             ToastLogger.showText("Failed to connect to the room: ${it.className} - ${it.message}", true)
-            multiLog(it)
+            Multiplayer.log(it)
             LobbyScene.show()
         }
     }

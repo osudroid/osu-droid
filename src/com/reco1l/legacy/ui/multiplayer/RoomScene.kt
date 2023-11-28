@@ -22,7 +22,6 @@ import com.reco1l.legacy.Multiplayer.isConnected
 import com.reco1l.legacy.Multiplayer.isRoomHost
 import com.reco1l.legacy.Multiplayer.player
 import com.reco1l.legacy.Multiplayer.room
-import com.reco1l.legacy.multiLog
 import org.anddev.andengine.engine.camera.SmoothCamera
 import org.anddev.andengine.entity.primitive.Rectangle
 import org.anddev.andengine.entity.scene.Scene
@@ -656,7 +655,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         {
             val player = room!!.playersMap[uid] ?: run {
 
-                multiLog("WARNING: Unable to find user by ID on chat message")
+                Multiplayer.log("WARNING: Unable to find user by ID on chat message")
                 return
             }
 
@@ -755,7 +754,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomConnectFail(error: String?)
     {
-        multiLog("ERROR: Failed to connect -> $error")
+        Multiplayer.log("ERROR: Failed to connect -> $error")
 
         if (Multiplayer.isReconnecting)
         {
@@ -974,7 +973,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         {
             if (getGlobal().selectedTrack == null)
             {
-                multiLog("WARNING: Attempt to start match with null track.")
+                Multiplayer.log("WARNING: Attempt to start match with null track.")
                 return
             }
 
@@ -1058,7 +1057,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         if (uid == player!!.id)
         {
-            multiLog("Kicked from room.")
+            Multiplayer.log("Kicked from room.")
 
             if (getGlobal().engine.scene == getGlobal().gameScene.scene) {
                 ToastLogger.showText("You were kicked by the room host, but you can continue playing.", true)
