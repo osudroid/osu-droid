@@ -86,9 +86,9 @@ object Multiplayer
 
     private var attemptCount = 0
 
-    private var reconnectionStartTime = 0L
+    private var reconnectionStartTimeMS = 0L
 
-    private var lastAttemptResponseTime = 0L
+    private var lastAttemptResponseTimeMS = 0L
 
     private var isWaitingAttemptResponse = false
 
@@ -164,7 +164,7 @@ object Multiplayer
 
     fun onReconnectAttempt(success: Boolean)
     {
-        lastAttemptResponseTime = System.currentTimeMillis()
+        lastAttemptResponseTimeMS = System.currentTimeMillis()
 
         if (success)
         {
@@ -199,7 +199,7 @@ object Multiplayer
         isReconnecting = true
 
         attemptCount = 0
-        reconnectionStartTime = System.currentTimeMillis()
+        reconnectionStartTimeMS = System.currentTimeMillis()
 
         reconnectionScope.launch {
 
@@ -208,14 +208,14 @@ object Multiplayer
                 val currentTime = System.currentTimeMillis()
 
                 // Timeout to reconnect was exceed.
-                if (currentTime - reconnectionStartTime >= 30000)
+                if (currentTime - reconnectionStartTimeMS >= 30000)
                 {
                     ToastLogger.showText("The connection to server has been lost, check your internet connection.", true)
                     RoomScene.back()
                     return@launch
                 }
 
-                if (currentTime - lastAttemptResponseTime >= 5000 || isWaitingAttemptResponse)
+                if (currentTime - lastAttemptResponseTimeMS >= 5000 || isWaitingAttemptResponse)
                     continue
 
                 try
