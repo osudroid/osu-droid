@@ -167,7 +167,8 @@ object RoomAPI
                 winCondition = WinCondition.from(json.getInt("winCondition")),
                 playerCount = activePlayers.size,
                 playerNames = activePlayers.joinToString(separator = ", ") { p -> p.name },
-                isRemoveSliderLock = json.getBoolean("isRemoveSliderLock")
+                isRemoveSliderLock = json.getBoolean("isRemoveSliderLock"),
+                sessionID = json.getString("sessionId")
         ).apply {
 
             this.players = players
@@ -263,27 +264,9 @@ object RoomAPI
 
         roomEventListener?.onRoomDisconnect(
             reason = reason,
-
             // Socket was manually disconnected by either server or client.
             byUser = reason == "io server disconnect" || reason == "io client disconnect"
         )
-    }
-
-    private val reconnect = Listener {
-
-        roomEventListener?.onRoomReconnect()
-
-        multiLog("RECEIVED: reconnect")
-    }
-
-    private val reconnectError = Listener {
-
-        multiLog("RECEIVED: reconnect_error")
-
-        roomEventListener?.onRoomConnectFail("connection lost")
-
-        socket?.off()
-        socket = null
     }
 
 
@@ -293,10 +276,17 @@ object RoomAPI
      * Connect to the specified room, if success it'll call [IRoomEventListener.onRoomConnect] if not
      * [IRoomEventListener.onRoomConnectFail]
      */
-    fun connectToRoom(roomId: Long, userId: Long, username: String, roomPassword: String?)
+    fun connectToRoom(
+        roomId: Long,
+        userId: Long,
+        username: String,
+        roomPassword: String? = null,
+        sessionID: String? = null
+    )
     {
-        if (socket != null)
-            throw IllegalStateException("Cannot connect to another room socket while there's already connected.")
+        // Clearing previous socket in case of reconnection.
+        socket?.off()
+        socket = null
 
         val url = "${LobbyAPI.HOST}/$roomId"
         val auth = mutableMapOf<String, String>()
@@ -305,6 +295,9 @@ object RoomAPI
         auth["uid"] = userId.toString()
         auth["username"] = username
         auth["version"] = API_VERSION.toString()
+
+        if (sessionID != null)
+            auth["sessionID"] = sessionID
 
         if (sign != null)
             auth["authSign"] = sign
@@ -321,8 +314,6 @@ object RoomAPI
 
             on(Socket.EVENT_CONNECT_ERROR, connectError)
             on(Socket.EVENT_DISCONNECT, disconnect)
-            on(Manager.EVENT_RECONNECT, reconnect)
-            on(Manager.EVENT_RECONNECT_FAILED, reconnectError)
 
         }.connect()
     }

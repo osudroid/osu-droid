@@ -64,7 +64,12 @@ data class Room(
          *
          * This value is not provided when the room is being searched.
          */
-        var isRemoveSliderLock: Boolean = false
+        var isRemoveSliderLock: Boolean = false,
+
+        /**
+         * The unique session ID.
+         */
+        val sessionID: String
 )
 {
     /**

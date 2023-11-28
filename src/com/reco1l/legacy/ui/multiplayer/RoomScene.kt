@@ -70,12 +70,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     @JvmField
     var awaitModsChange = false
 
-    /**
-     * Indicates if the client is waiting for a reconnection.
-     */
-    @JvmField
-    var isWaitingForReconnection = false
-
 
     val chat = RoomChat()
 
@@ -567,6 +561,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     fun invalidateStatus()
     {
+        // Status shouldn't be changed during reconnection because it's done by server, this function can be called by
+        // any of the updating functions. Changing status during reconnection can break the reconnection call hierarchy.
+        if (Multiplayer.isReconnecting)
+            return
+
         awaitStatusChange = true
 
         var newStatus = NOT_READY
@@ -607,6 +606,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun back()
     {
+        // Stopping the attempt loop if user cancels reconnection.
+        Multiplayer.isReconnecting = false
+
         ignoreException { RoomAPI.disconnect() }
         clear()
         LobbyScene.show()
@@ -679,13 +681,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         awaitStatusChange = false
 
         // Finding our player object
-        player = newRoom.playersMap[getOnline().userId] ?: run {
-
-            multiLog("ERROR: Unable to find player in the map.")
-            ToastLogger.showText("Unable to find player", false)
-            back()
-            return
-        }
+        player = newRoom.playersMap[getOnline().userId]!!
 
         // Reloading player list
         playerList?.detachSelf()
@@ -693,6 +689,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         attachChild(playerList, 1)
 
         // Reloading mod menu, we set player mods first in case the scene was reloaded (due to skin change).
+        clearChildScene()
         getModMenu().setMods(player!!.mods, false)
         getModMenu().init()
         getModMenu().setMods(newRoom.mods, newRoom.isFreeMods)
@@ -714,6 +711,26 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
         playerList!!.invalidate()
 
+        if (Multiplayer.isReconnecting)
+        {
+            onRoomBeatmapChange(room!!.beatmap)
+
+            Multiplayer.onReconnectAttempt(true)
+
+            // If the status returned by server is PLAYING then it means the match was forced to start while the player
+            // was disconnected.
+            if (player!!.status == PLAYING)
+            {
+                // Handling special case when the beatmap could have been changed and match was started while player was
+                // disconnected.
+                if (getGlobal().selectedTrack != null)
+                    onRoomMatchPlay()
+                else
+                    invalidateStatus()
+            }
+            return
+        }
+
         show()
     }
 
@@ -721,28 +738,28 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         if (!byUser)
         {
-            isWaitingForReconnection = true
+            // Setting await locks to avoid player emitting events that will be ignored.
+            awaitBeatmapChange = true
+            awaitStatusChange = true
+            awaitModsChange = true
+
             chat.onSystemChatMessage("Connection lost, trying to reconnect...", "#FF0000")
+            Multiplayer.onReconnect()
             return
         }
 
         back()
     }
 
-    override fun onRoomReconnect()
-    {
-        isWaitingForReconnection = false
-        chat.onSystemChatMessage("Connection was successfully restored.", "#007BFF")
-    }
-
     override fun onRoomConnectFail(error: String?)
     {
-        if (isWaitingForReconnection)
+        multiLog("ERROR: Failed to connect -> $error")
+
+        if (Multiplayer.isReconnecting)
         {
-            isWaitingForReconnection = false
-            ToastLogger.showText("The connection to server has been lost, check your internet connection.", true)
+            Multiplayer.onReconnectAttempt(false)
+            return
         }
-        else ToastLogger.showText("Failed to connect to the room: $error", true)
 
         back()
     }
@@ -783,7 +800,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Updating background
         updateBackground(getGlobal().selectedTrack?.background)
-
         updateBeatmapInfo()
 
         // Releasing await lock

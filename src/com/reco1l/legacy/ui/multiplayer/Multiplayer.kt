@@ -2,15 +2,20 @@ package com.reco1l.legacy.ui.multiplayer
 
 import android.text.format.DateFormat
 import android.util.Log
+import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.api.ibancho.data.Room
 import com.reco1l.api.ibancho.data.RoomPlayer
 import com.reco1l.framework.extensions.className
 import com.reco1l.framework.extensions.toDate
 import com.reco1l.legacy.data.jsonToScoreboardItem
 import com.reco1l.legacy.data.jsonToStatistic
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.MainActivity
+import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import java.io.File
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
@@ -38,6 +43,19 @@ object Multiplayer
     var isMultiplayer = false
 
     /**
+     * Indicates if the client is waiting for a reconnection.
+     */
+    @JvmField
+    var isReconnecting = false
+
+    /**
+     * Array containing final leaderboard
+     */
+    @JvmField
+    var finalData: Array<StatisticV2>? = null
+
+
+    /**
      * Indicates if player is room host
      */
     @JvmStatic
@@ -45,17 +63,14 @@ object Multiplayer
         get() = player?.let { it.id == room?.id } ?: false
 
     /**
-     * Determines if there's an active connection between client and server.
+     * Determines if the player is connected to a room. This doesn't ensure that the connection to socket is currently
+     * active it can be under reconnection state.
+     *
+     * Note: Any event emitted during reconnection is ignored.
      */
     @JvmStatic
     val isConnected
         get() = room != null
-
-    /**
-     * Array containing final leaderboard
-     */
-    @JvmField
-    var finalData: Array<StatisticV2>? = null
 
 
     private val LOG_FILE = File("${Config.getDefaultCorePath()}/Log", "multi_log.txt").apply {
@@ -66,18 +81,25 @@ object Multiplayer
             createNewFile()
     }
 
+    private val reconnectionScope by lazy { CoroutineScope(Dispatchers.Default) }
+
+
+    private var attemptCount = 0
+
+    private var reconnectionStartTime = 0L
+
+    private var lastAttemptResponseTime = 0L
+
+    private var isWaitingAttemptResponse = false
+
+
     init
     {
         LOG_FILE.writeText("[${"yyyy/MM/dd hh:mm:ss".toDate()}] Client ${MainActivity.versionName} started.")
     }
 
 
-    @JvmStatic
-    fun clearLeaderboard()
-    {
-        finalData = null
-    }
-
+    // Leaderboard
 
     fun onLiveLeaderboard(array: JSONArray)
     {
@@ -137,6 +159,89 @@ object Multiplayer
         getGlobal().scoring.updateLeaderboard()
     }
 
+
+    // Reconnection
+
+    fun onReconnectAttempt(success: Boolean)
+    {
+        lastAttemptResponseTime = System.currentTimeMillis()
+
+        if (success)
+        {
+            isReconnecting = false
+
+            RoomScene.chat.onSystemChatMessage("Connection was successfully restored.", "#007BFF")
+        }
+        else if (attemptCount < 5)
+        {
+            attemptCount++
+
+            RoomScene.chat.onSystemChatMessage("Failed to reconnect, trying again in 5 seconds...", "#FF0000")
+        }
+        else
+        {
+            isReconnecting = false
+
+            ToastLogger.showText("The connection to server has been lost, check your internet connection.", true)
+            RoomScene.back()
+        }
+
+        isWaitingAttemptResponse = false
+    }
+
+    fun onReconnect()
+    {
+        if (isReconnecting)
+        {
+            multiLog("WARNING: onReconnect() called while already trying to reconnect.")
+            return
+        }
+        isReconnecting = true
+
+        attemptCount = 0
+        reconnectionStartTime = System.currentTimeMillis()
+
+        reconnectionScope.launch {
+
+            while (isReconnecting)
+            {
+                val currentTime = System.currentTimeMillis()
+
+                // Timeout to reconnect was exceed.
+                if (currentTime - reconnectionStartTime >= 30000)
+                {
+                    ToastLogger.showText("The connection to server has been lost, check your internet connection.", true)
+                    RoomScene.back()
+                    return@launch
+                }
+
+                if (currentTime - lastAttemptResponseTime >= 5000 || isWaitingAttemptResponse)
+                    continue
+
+                try
+                {
+                    RoomAPI.connectToRoom(
+                        roomId = room!!.id,
+                        userId = getOnline().userId,
+                        username = getOnline().username,
+                        sessionID = room!!.sessionID
+                    )
+
+                    isWaitingAttemptResponse = true
+                }
+                catch (e: Exception)
+                {
+                    multiLog(e)
+
+                    // In this case the client didn't even succeed while creating the socket.
+                    onReconnectAttempt(false)
+                }
+
+            }
+        }
+    }
+
+
     // Logging
 
     @JvmStatic
@@ -145,6 +250,7 @@ object Multiplayer
         val timestamp = DateFormat.format("hh:mm:ss", System.currentTimeMillis())
 
         LOG_FILE.appendText("\n[$timestamp] $text")
+        Log.i("Multiplayer", text)
     }
 
     @JvmStatic
@@ -153,6 +259,7 @@ object Multiplayer
         val timestamp = DateFormat.format("hh:mm:ss", System.currentTimeMillis())
 
         LOG_FILE.appendText("\n[$timestamp] EXCEPTION: ${e.className}\n${Log.getStackTraceString(e)}")
+        Log.e("Multiplayer", "An exception has been thrown.", e)
     }
 }
 
