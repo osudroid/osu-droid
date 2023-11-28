@@ -124,7 +124,7 @@ object Multiplayer
 
         if (array.length() == 0)
         {
-            Multiplayer.log("WARNING: Server provided empty final leaderboard.")
+            log("WARNING: Server provided empty final leaderboard.")
             return
         }
 
@@ -149,7 +149,7 @@ object Multiplayer
             if (ownScoreIndex == null)
             {
                 list.add(ownScore)
-                Multiplayer.log("WARNING: Player score wasn't found in final leaderboard.")
+                log("WARNING: Player score wasn't found in final leaderboard.")
             }
             else list[ownScoreIndex] = ownScore
         }
@@ -194,7 +194,7 @@ object Multiplayer
     {
         if (isReconnecting)
         {
-            Multiplayer.log("WARNING: onReconnect() called while already trying to reconnect.")
+            log("WARNING: onReconnect() called while already trying to reconnect.")
             return
         }
         isReconnecting = true
@@ -232,7 +232,7 @@ object Multiplayer
                 }
                 catch (e: Exception)
                 {
-                    Multiplayer.log(e)
+                    log(e)
 
                     // In this case the client didn't even succeed while creating the socket.
                     onReconnectAttempt(false)
