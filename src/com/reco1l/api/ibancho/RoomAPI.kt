@@ -519,7 +519,7 @@ object RoomAPI
     fun submitLiveScore(json: JSONObject?)
     {
         socket?.emit("liveScoreData", json) ?: run {
-			multiLog("WARNING: Tried to emit event 'liveScoreData' while socket is null.")
+			//multiLog("WARNING: Tried to emit event 'liveScoreData' while socket is null.")
 			return
 		}
 
