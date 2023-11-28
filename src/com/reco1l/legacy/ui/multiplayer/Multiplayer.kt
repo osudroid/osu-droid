@@ -182,7 +182,7 @@ object Multiplayer
         {
             isReconnecting = false
 
-            ToastLogger.showText("The connection to server has been lost, check your internet connection.", true)
+            ToastLogger.showText("The connection to server has been lost, please check your internet connection.", true)
             RoomScene.back()
         }
 
@@ -210,7 +210,7 @@ object Multiplayer
                 // Timeout to reconnect was exceed.
                 if (currentTime - reconnectionStartTimeMS >= 30000)
                 {
-                    ToastLogger.showText("The connection to server has been lost, check your internet connection.", true)
+                    ToastLogger.showText("The connection to server has been lost, please check your internet connection.", true)
                     RoomScene.back()
                     return@launch
                 }
