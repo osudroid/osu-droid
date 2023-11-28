@@ -707,30 +707,23 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final String rfile = track != null ? replayFile : this.replayFile;
 
-        new AsyncTask() {
-            @Override
-            public void run() {
-                loadComplete = loadGame(track != null ? track : lastTrack, rfile);
+        Async.run(() -> {
+
+            if (loadGame(track != null ? track : lastTrack, rfile)) {
+                prepareScene();
+            } else {
+                ModMenu.getInstance().setMod(Replay.oldMod);
+                ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
+                ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
+
+                ModMenu.getInstance().setCustomAR(Replay.oldCustomAR);
+                ModMenu.getInstance().setCustomOD(Replay.oldCustomOD);
+                ModMenu.getInstance().setCustomCS(Replay.oldCustomCS);
+                ModMenu.getInstance().setCustomHP(Replay.oldCustomHP);
+
+                quit();
             }
-
-            @Override
-            public void onComplete() {
-                if (loadComplete) {
-                    prepareScene();
-                } else {
-                    ModMenu.getInstance().setMod(Replay.oldMod);
-                    ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
-                    ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
-
-                    ModMenu.getInstance().setCustomAR(Replay.oldCustomAR);
-                    ModMenu.getInstance().setCustomOD(Replay.oldCustomOD);
-                    ModMenu.getInstance().setCustomCS(Replay.oldCustomCS);
-                    ModMenu.getInstance().setCustomHP(Replay.oldCustomHP);
-
-                    quit();
-                }
-            }
-        }.execute();
+        });
 
         ResourceManager.getInstance().getSound("failsound").stop();
     }
