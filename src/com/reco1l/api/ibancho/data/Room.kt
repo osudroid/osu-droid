@@ -1,72 +1,71 @@
 package com.reco1l.api.ibancho.data
 
-import com.reco1l.legacy.ui.multiplayer.RoomMods
-import com.reco1l.legacy.ui.multiplayer.multiLog
+import com.reco1l.legacy.multiLog
 
 data class Room(
-        /**
+    /**
          * The room ID.
          */
         val id: Long,
 
-        /**
+    /**
          * The room name.
          */
         var name: String,
 
-        /**
+    /**
          * Indicates if the room has password.
          */
         var isLocked: Boolean,
 
-        /**
+    /**
          * The max amount of players.
          */
         val maxPlayers: Int,
 
-        /**
+    /**
          * The active player count.
          */
         var playerCount: Int,
 
-        /**
+    /**
          * The active player names concatenated.
          */
         var playerNames: String,
 
-        /**
+    /**
          * The enabled mods.
          */
         var mods: RoomMods,
 
-        /**
+    /**
          * Free mods condition
          */
         var isFreeMods: Boolean,
 
-        /**
+    /**
          * The room versus mode.
          */
         var teamMode: TeamMode,
 
-        /**
+    /**
          * The room win condition.
          */
         var winCondition: WinCondition,
 
-        /**
+    /**
          * The room status.
          */
         var status: RoomStatus? = null,
 
-        /**
+    /**
          * Whether the remove slider lock setting is enabled.
          *
          * This value is not provided when the room is being searched.
          */
         var isRemoveSliderLock: Boolean = false,
 
-        /**
+    /**
          * The unique session ID.
          */
         val sessionID: String

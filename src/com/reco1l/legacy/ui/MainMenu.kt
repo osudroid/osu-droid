@@ -2,7 +2,7 @@ package com.reco1l.legacy.ui
 
 import com.reco1l.framework.lang.async
 import com.reco1l.legacy.ui.multiplayer.LobbyScene
-import com.reco1l.legacy.ui.multiplayer.Multiplayer
+import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.ui.multiplayer.RoomScene
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.LibraryManager

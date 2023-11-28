@@ -25,6 +25,8 @@ import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.api.ibancho.data.RoomPlayer
 import com.reco1l.framework.extensions.orAsyncCatch
 import com.reco1l.framework.lang.uiThread
+import com.reco1l.legacy.Multiplayer
+import com.reco1l.legacy.multiLog
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.RGBColor
 import ru.nsu.ccfit.zuev.osu.ResourceManager

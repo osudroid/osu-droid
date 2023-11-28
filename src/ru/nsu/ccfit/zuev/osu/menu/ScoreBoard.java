@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.database.Cursor;
-import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.Multiplayer;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;

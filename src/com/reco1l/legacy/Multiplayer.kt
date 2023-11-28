@@ -1,4 +1,4 @@
-package com.reco1l.legacy.ui.multiplayer
+package com.reco1l.legacy
 
 import android.text.format.DateFormat
 import android.util.Log
@@ -9,6 +9,7 @@ import com.reco1l.framework.extensions.className
 import com.reco1l.framework.extensions.toDate
 import com.reco1l.legacy.data.jsonToScoreboardItem
 import com.reco1l.legacy.data.jsonToStatistic
+import com.reco1l.legacy.ui.multiplayer.RoomScene
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

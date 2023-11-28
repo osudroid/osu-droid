@@ -18,7 +18,7 @@ import com.edlplan.ui.EasingHelper;
 
 import java.util.Locale;
 
-import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.Multiplayer;
 import org.anddev.andengine.input.touch.TouchEvent;
 
 import ru.nsu.ccfit.zuev.osu.Config;

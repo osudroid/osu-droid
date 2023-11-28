@@ -7,6 +7,7 @@ import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.framework.extensions.className
 import com.reco1l.framework.extensions.orAsyncCatch
 import com.reco1l.framework.lang.glThread
+import com.reco1l.legacy.Multiplayer
 import org.anddev.andengine.entity.modifier.LoopEntityModifier
 import org.anddev.andengine.entity.modifier.RotationByModifier
 import org.anddev.andengine.entity.primitive.Rectangle

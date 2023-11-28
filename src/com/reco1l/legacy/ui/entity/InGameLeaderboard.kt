@@ -1,7 +1,7 @@
 package com.reco1l.legacy.ui.entity
 
 import android.opengl.GLES20
-import com.reco1l.legacy.ui.multiplayer.Multiplayer.isMultiplayer
+import com.reco1l.legacy.Multiplayer.isMultiplayer
 import org.anddev.andengine.entity.Entity
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText

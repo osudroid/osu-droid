@@ -8,7 +8,7 @@ import java.util.Locale;
 import java.util.Random;
 
 import com.reco1l.api.ibancho.data.WinCondition;
-import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.Multiplayer;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.Config;

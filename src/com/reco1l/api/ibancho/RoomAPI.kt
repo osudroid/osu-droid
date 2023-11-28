@@ -4,7 +4,7 @@ import com.dgsrz.bancho.security.SecurityUtils
 import com.reco1l.api.ibancho.data.*
 import com.reco1l.api.ibancho.data.Room
 import com.reco1l.api.ibancho.data.RoomTeam
-import com.reco1l.legacy.ui.multiplayer.multiLog
+import com.reco1l.legacy.multiLog
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter.Listener

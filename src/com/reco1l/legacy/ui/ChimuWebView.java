@@ -10,7 +10,7 @@ import com.reco1l.framework.extensions.StringUtil;
 import com.reco1l.framework.net.Downloader;
 import com.reco1l.framework.net.IDownloaderObserver;
 import com.reco1l.framework.net.SizeMeasure;
-import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import im.delight.android.webview.AdvancedWebView;
 import net.lingala.zip4j.ZipFile;

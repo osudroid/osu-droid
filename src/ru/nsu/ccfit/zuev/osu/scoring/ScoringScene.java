@@ -3,9 +3,9 @@ package ru.nsu.ccfit.zuev.osu.scoring;
 import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.reco1l.framework.lang.Execution;
-import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
-import com.reco1l.legacy.ui.multiplayer.StatisticSelector;
+import com.reco1l.legacy.ui.entity.StatisticSelector;
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
 import com.rian.difficultycalculator.attributes.PerformanceAttributes;
 

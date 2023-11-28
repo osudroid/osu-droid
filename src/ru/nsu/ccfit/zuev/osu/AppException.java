@@ -13,7 +13,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.Multiplayer;
 import org.apache.http.HttpException;
 import org.json.JSONException;
 import org.json.JSONObject;
