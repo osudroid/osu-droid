@@ -61,7 +61,7 @@ object Multiplayer
      */
     @JvmStatic
     val isRoomHost
-        get() = player?.let { it.id == room?.id } ?: false
+        get() = player?.let { it.id == room?.host } ?: false
 
     /**
      * Determines if the player is connected to a room. This doesn't ensure that the connection to socket is currently
