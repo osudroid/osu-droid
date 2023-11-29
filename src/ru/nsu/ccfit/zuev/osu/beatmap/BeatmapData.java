@@ -305,7 +305,14 @@ public class BeatmapData {
         track.setBeatmapSetID(metadata.beatmapSetID);
 
         // General
-        track.setAudioFilename(general.audioFilename);
+        var musicFile = new File(folder, general.audioFilename);
+        if (!musicFile.exists()) {
+            ToastLogger.showText(StringTable.format(R.string.beatmap_parser_music_not_found,
+                    filename.substring(0, Math.max(0, filename.length() - 4))), true);
+            return false;
+        }
+
+        track.setAudioFilename(musicFile.getPath());
         track.setPreviewTime(general.previewTime);
 
         // Difficulty
