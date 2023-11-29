@@ -60,17 +60,10 @@ public class CursorSprite extends Sprite implements ISliderListener {
         }
     }
 
-    @Override
-    public void onSliderStart() {
-
-    }
-
-    @Override
     public void onSliderTracking() {
         registerEntityModifier(clickInModifier());
     }
 
-    @Override
     public void onSliderEnd() {
         registerEntityModifier(clickOutModifier());
     }

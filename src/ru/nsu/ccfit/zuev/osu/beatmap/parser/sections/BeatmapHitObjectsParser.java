@@ -21,7 +21,6 @@ import ru.nsu.ccfit.zuev.osu.beatmap.constants.HitObjectType;
  */
 public class BeatmapHitObjectsParser extends BeatmapSectionParser {
 
-    @Override
     public void parse(BeatmapData data, String line) {
         final String[] pars = line.split(",");
 

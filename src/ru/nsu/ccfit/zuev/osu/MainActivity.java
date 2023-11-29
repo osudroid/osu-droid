@@ -6,7 +6,6 @@ import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -19,9 +18,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.os.StatFs;
 import android.util.DisplayMetrics;
@@ -77,7 +74,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
+import ru.nsu.ccfit.zuev.audio.BassAudioProvider;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
@@ -105,8 +102,6 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
 
     private static boolean activityVisible = true;
 
-    private final Handler handler = new Handler(Looper.getMainLooper());
-
     public ServiceConnection connection;
 
     private PowerManager.WakeLock wakeLock = null;
@@ -116,8 +111,6 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
     private SaveServiceObject saveServiceObject;
 
     private FirebaseAnalytics analytics;
-
-    private FirebaseCrashlytics crashlytics;
 
     private boolean willReplay = false;
 
@@ -134,7 +127,7 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
             return null;
         }
         analytics = FirebaseAnalytics.getInstance(this);
-        crashlytics = FirebaseCrashlytics.getInstance();
+        FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
         Config.loadConfig(this);
         initialGameDirectory();
         //Debug.setDebugLevel(Debug.DebugLevel.NONE);
@@ -142,13 +135,11 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
         ToastLogger.init(this);
         SyncTaskManager.getInstance().init(this);
         InputManager.setContext(this);
-        OnlineManager.getInstance().Init(getApplicationContext());
+        OnlineManager.getInstance().Init();
         crashlytics.setUserId(Config.getOnlineDeviceID());
 
         final DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
-/*        final double screenSize = Math.sqrt(Utils.sqr(dm.widthPixels / dm.xdpi)
-                + Utils.sqr(dm.heightPixels / dm.ydpi));*/
         double screenInches = Math.sqrt(Math.pow(dm.heightPixels, 2) + Math.pow(dm.widthPixels, 2)) / (dm.density * 160.0f);
         Debug.i("screen inches: " + screenInches);
         Config.setScaleMultiplier((float) ((11 - 5.2450170716245195) / 5));
@@ -213,7 +204,7 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
     private void initPreferences() {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        if (prefs.getString("playername", "").equals("")) {
+        if (prefs.getString("playername", "").isEmpty()) {
             final SharedPreferences.Editor editor = prefs.edit();
             editor.putString("playername", "Guest");
             editor.commit();
@@ -227,20 +218,16 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
             input.setText("Guest");
             alert.setView(input);
 
-            alert.setPositiveButton(StringTable.get(R.string.dialog_ok), new DialogInterface.OnClickListener() {
-
-                public void onClick(
-                    final DialogInterface dialog, final int whichButton) {
-                    final String value = input.getText().toString();
-                    editor.putString("playername", value);
-                    editor.commit();
-                }
+            alert.setPositiveButton(StringTable.get(R.string.dialog_ok), (dialog, whichButton) -> {
+                final String value = input.getText().toString();
+                editor.putString("playername", value);
+                editor.commit();
             });
 
             alert.show();
         }
 
-        if (prefs.getBoolean("qualitySet", false) == false) {
+        if (!prefs.getBoolean("qualitySet", false)) {
             final SharedPreferences.Editor editor = prefs.edit();
             editor.putBoolean("qualitySet", true);
             final DisplayMetrics dm = new DisplayMetrics();
@@ -254,7 +241,7 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
             editor.commit();
         }
 
-        if (prefs.getBoolean("onlineSet", false) == false) {
+        if (!prefs.getBoolean("onlineSet", false)) {
 
             Editor editor = prefs.edit();
             editor.putBoolean("onlineSet", true);
@@ -326,7 +313,7 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
 
             @Override
             public void run() {
-                BassAudioPlayer.initDevice();
+                BassAudioProvider.init();
                 GlobalManager.getInstance().init();
                 analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
                 GlobalManager.getInstance().setLoadingProgress(50);
@@ -479,16 +466,12 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
                 }
             }
 
-            if (beatmaps.size() > 0) {
-                // final boolean deleteOsz = Config.isDELETE_OSZ();
-                // Config.setDELETE_OSZ(true);
+            if (!beatmaps.isEmpty()) {
                 ToastLogger.showText(StringTable.format(R.string.message_lib_importing_several, beatmaps.size()), false);
                 for (final String beatmap : beatmaps) {
                     FileUtils.extractZip(beatmap, Config.getBeatmapPath());
                 }
-                // Config.setDELETE_OSZ(deleteOsz);
 
-                // LibraryManager.INSTANCE.sort();
                 LibraryManager.INSTANCE.saveToCache();
             }
         }
@@ -531,7 +514,7 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
             }
         }
 
-        if (skins.size() > 0) {
+        if (!skins.isEmpty()) {
             ToastLogger.showText(StringTable.format(R.string.message_skin_importing_several, skins.size()), false);
 
             for (final String skin : skins) {
@@ -543,10 +526,6 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
                 }
             }
         }
-    }
-
-    public Handler getHandler() {
-        return handler;
     }
 
     public FirebaseAnalytics getAnalytics() {
@@ -583,6 +562,7 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
                 }
                 Runtime.getRuntime().exec("logcat -f " + (f.getAbsolutePath()));
             } catch (IOException e) {
+                e.printStackTrace();
             }
         }
         onBeginBindService();
@@ -724,7 +704,7 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
             }
 
             if (Multiplayer.isConnected() && (getEngine().getScene() == RoomScene.INSTANCE || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene())) {
-                Execution.asyncIgnoreExceptions(() -> RoomScene.INSTANCE.invalidateStatus());
+                Execution.asyncIgnoreExceptions(RoomScene.INSTANCE::invalidateStatus);
             }
         }
 
@@ -812,7 +792,7 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
             GlobalManager.getInstance().getEngine() != null &&
             keyCode == KeyEvent.KEYCODE_MENU &&
             GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene() &&
-            GlobalManager.getInstance().getSongMenu().getScene().hasChildScene() == false) {
+            !GlobalManager.getInstance().getSongMenu().getScene().hasChildScene()) {
             GlobalManager.getInstance().getSongMenu().stopScroll(0);
             GlobalManager.getInstance().getSongMenu().showPropertiesMenu(null);
             return true;

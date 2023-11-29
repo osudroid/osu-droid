@@ -34,12 +34,10 @@ public class ModernSpinner extends Spinner {
     private final Sprite top;
 
     private final Sprite glow;
-    // private final Sprite spin;
-    // private final Sprite clear;
 
     private final PointF currMouse = new PointF();
 
-    public PointF center;
+    public final PointF center;
 
     private GameObjectListener listener;
 
@@ -68,7 +66,7 @@ public class ModernSpinner extends Spinner {
 
     public ModernSpinner() {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
-        center = Utils.trackToRealCoords(new PointF(Constants.MAP_WIDTH / 2, Constants.MAP_HEIGHT / 2));
+        center = Utils.trackToRealCoords(new PointF(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f));
         middle = SpritePool.getInstance().getCenteredSprite("spinner-middle", center);
         middle2 = SpritePool.getInstance().getCenteredSprite("spinner-middle2", center);
         bottom = SpritePool.getInstance().getCenteredSprite("spinner-bottom", center);
@@ -77,7 +75,7 @@ public class ModernSpinner extends Spinner {
     }
 
     public void init(
-        GameObjectListener listener, Scene scene, float aheadTime, float time, float rps, int sound, String tempSound, StatisticV2 stat) {
+        GameObjectListener listener, Scene scene, float aheadTime, float time, float rps, int sound, StatisticV2 stat) {
         this.scene = scene;
         this.needRotations = rps * time;
         this.listener = listener;
@@ -192,7 +190,6 @@ public class ModernSpinner extends Spinner {
         glow.setScale(0.9f + percent * 0.1f);
 
         if (percentfill > 1 || clear) {
-            percentfill = 1;
             if (!clear) {
                 // Clear Sprite
                 clear = true;
@@ -230,10 +227,6 @@ public class ModernSpinner extends Spinner {
     }
 
     public void removeFromScene() {
-        //        if (clearText != null) {
-        //            scene.detachChild(clearText);
-        //            SpritePool.getInstance().putSprite("spinner-clear", clearText);
-        //        }
         glow.clearEntityModifiers();
         scene.detachChild(middle);
         scene.detachChild(middle2);

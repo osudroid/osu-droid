@@ -63,10 +63,6 @@ public class Spinner extends GameObject {
 
     private int soundId;
 
-    private int sampleSet;
-
-    private int addition;
-
     private ScoreNumber bonusScore = null;
 
     private int score = 1;
@@ -77,12 +73,10 @@ public class Spinner extends GameObject {
 
     private float totalTime;
 
-    private boolean did = false;
-
 
     public Spinner() {
         ResourceManager.getInstance().checkSpinnerTextures();
-        this.pos = new PointF(Constants.MAP_WIDTH / 2, Constants.MAP_HEIGHT / 2);
+        this.pos = new PointF(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f);
         center = Utils.trackToRealCoords(pos);
         background = SpritePool.getInstance().getCenteredSprite("spinner-background", center);
         final float scaleX = Config.getRES_WIDTH() / background.getWidth();
@@ -90,7 +84,7 @@ public class Spinner extends GameObject {
 
         circle = SpritePool.getInstance().getCenteredSprite("spinner-circle", center);
         mregion = ResourceManager.getInstance().getTexture("spinner-metre").deepCopy();
-        metre = new Sprite(center.x - Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT(), mregion);
+        metre = new Sprite(center.x - Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT(), mregion);
         metre.setWidth(Config.getRES_WIDTH());
         metre.setHeight(background.getHeightScaled());
         approachCircle = SpritePool.getInstance().getCenteredSprite("spinner-approachcircle", center);
@@ -103,9 +97,7 @@ public class Spinner extends GameObject {
         final float pretime,
         final float time,
         final float rps,
-        final int sound,
-        final String tempSound,
-        final StatisticV2 stat) {
+        final int sound, final StatisticV2 stat) {
         clearText = null;
         fullrotations = 0;
         rotations = 0;
@@ -116,24 +108,13 @@ public class Spinner extends GameObject {
         }
         this.listener = listener;
         this.soundId = sound;
-        this.sampleSet = 0;
-        this.addition = 0;
         this.stat = stat;
         this.totalTime = time;
         startHit = true;
-        clear = false;
-        if (totalTime <= 0f) {
-            clear = true;
-        }
+        clear = totalTime <= 0f;
         bonusScore = null;
         score = 1;
         ResourceManager.getInstance().checkSpinnerTextures();
-
-        if (!Utils.isEmpty(tempSound)) {
-            final String[] group = tempSound.split(":");
-            this.sampleSet = Integer.parseInt(group[0]);
-            this.addition = Integer.parseInt(group[1]);
-        }
 
         final IEntityModifier appearMoifier = new SequenceEntityModifier(new DelayModifier(pretime * 0.75f), new FadeInModifier(pretime * 0.25f));
 

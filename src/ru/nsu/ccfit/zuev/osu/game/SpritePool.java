@@ -14,13 +14,13 @@ import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 
 public class SpritePool {
 
-    private static SpritePool instance = new SpritePool();
+    private static final SpritePool instance = new SpritePool();
 
-    private static int CAPACITY = 250;
+    private static final int CAPACITY = 250;
 
-    private final Map<String, LinkedList<Sprite>> sprites = new HashMap<String, LinkedList<Sprite>>();
+    private final Map<String, LinkedList<Sprite>> sprites = new HashMap<>();
 
-    private final Map<String, LinkedList<AnimSprite>> animsprites = new HashMap<String, LinkedList<AnimSprite>>();
+    private final Map<String, LinkedList<AnimSprite>> animsprites = new HashMap<>();
 
     int count = 0;
 
@@ -31,10 +31,6 @@ public class SpritePool {
 
     public static SpritePool getInstance() {
         return instance;
-    }
-
-    public int getSpritesCreated() {
-        return spritesCreated;
     }
 
     synchronized public void putSprite(final String name, final Sprite sprite) {
@@ -54,7 +50,7 @@ public class SpritePool {
         if (sprites.containsKey(name)) {
             sprites.get(name).add(sprite);
         } else {
-            final LinkedList<Sprite> list = new LinkedList<Sprite>();
+            final LinkedList<Sprite> list = new LinkedList<>();
             list.add(sprite);
             sprites.put(name, list);
         }
@@ -63,10 +59,10 @@ public class SpritePool {
     synchronized public Sprite getSprite(final String name) {
         if (sprites.containsKey(name)) {
             final LinkedList<Sprite> list = sprites.get(name);
-            while (list.isEmpty() == false && list.peek().hasParent() == true) {
+            while (!list.isEmpty() && list.peek().hasParent()) {
                 list.poll();
             }
-            if (list.isEmpty() == false) {
+            if (!list.isEmpty()) {
                 count--;
                 return list.poll();
             }
@@ -80,10 +76,10 @@ public class SpritePool {
         final String name, final PointF pos) {
         if (sprites.containsKey(name)) {
             final LinkedList<Sprite> list = sprites.get(name);
-            while (list.isEmpty() == false && list.peek().hasParent() == true) {
+            while (!list.isEmpty() && list.peek().hasParent()) {
                 list.poll();
             }
-            if (list.isEmpty() == false) {
+            if (!list.isEmpty()) {
                 count--;
                 final Sprite sp = list.poll();
                 sp.setPosition(pos.x - sp.getWidth() / 2, pos.y - sp.getHeight() / 2);
@@ -98,11 +94,10 @@ public class SpritePool {
     synchronized public AnimSprite getAnimSprite(final String name, int count) {
         if (animsprites.containsKey(name)) {
             final LinkedList<AnimSprite> list = animsprites.get(name);
-            while (list.isEmpty() == false && list.peek().hasParent() == true) {
+            while (!list.isEmpty() && list.peek().hasParent()) {
                 list.poll();
             }
-            if (list.isEmpty() == false) {
-                count--;
+            if (!list.isEmpty()) {
                 return list.poll();
             }
         }
@@ -129,7 +124,7 @@ public class SpritePool {
         if (animsprites.containsKey(name)) {
             animsprites.get(name).add(sprite);
         } else {
-            final LinkedList<AnimSprite> list = new LinkedList<AnimSprite>();
+            final LinkedList<AnimSprite> list = new LinkedList<>();
             list.add(sprite);
             animsprites.put(name, list);
         }

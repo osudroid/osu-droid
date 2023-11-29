@@ -5,13 +5,6 @@ package ru.nsu.ccfit.zuev.osu.storyboard;
  */
 public enum Command {
 
-    F, M, MX, MY, S, V, R, C, P, L, T, NONE;
+    F, M, MX, MY, S, V, R, C, P, L, T, NONE
 
-    public static Command getType(String type) {
-        try {
-            return valueOf(type.toUpperCase());
-        } catch (Exception e) {
-            return NONE;
-        }
-    }
 }

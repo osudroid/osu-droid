@@ -11,7 +11,6 @@ import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
  */
 public class BeatmapControlPointsParser extends BeatmapSectionParser {
 
-    @Override
     public void parse(BeatmapData data, String line) {
         final String[] pars = line.split(",");
 

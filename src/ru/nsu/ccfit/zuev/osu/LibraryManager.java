@@ -63,13 +63,13 @@ public enum LibraryManager {
 
     private static void fillEmptyFields(BeatmapInfo info) {
         info.setCreator(info.getTrack(0).getCreator());
-        if (info.getTitle().equals("")) {
+        if (info.getTitle().isEmpty()) {
             info.setTitle("unknown");
         }
-        if (info.getArtist().equals("")) {
+        if (info.getArtist().isEmpty()) {
             info.setArtist("unknown");
         }
-        if (info.getCreator().equals("")) {
+        if (info.getCreator().isEmpty()) {
             info.setCreator("unknown");
         }
     }
@@ -135,9 +135,7 @@ public enum LibraryManager {
             library.clear();
         }
 
-        ToastLogger.addToLog("Loading library...");
         if (!FileUtils.canUseSD()) {
-            ToastLogger.addToLog("Can't use SD card!");
             return true;
         }
 
@@ -182,7 +180,6 @@ public enum LibraryManager {
                             library.addAll((Collection<? extends BeatmapInfo>) obj);
                         }
 
-                        ToastLogger.addToLog("Library loaded");
                         if (forceUpdate) {
                             checkLibrary();
                         }
@@ -193,7 +190,6 @@ public enum LibraryManager {
         } catch (final IOException | ClassNotFoundException | ClassCastException e) {
             Debug.e("LibraryManager: " + e.getMessage(), e);
         }
-        ToastLogger.addToLog("Cannot load library!");
         return false;
     }
 
@@ -225,7 +221,6 @@ public enum LibraryManager {
     }
 
     public synchronized void scanLibrary() {
-        ToastLogger.addToLog("Caching library...");
         library.clear();
 
         final File dir = new File(Config.getBeatmapPath());
@@ -348,7 +343,7 @@ public enum LibraryManager {
     public BeatmapInfo getBeatmapByIndex(int index) {
         synchronized (library) {
             Debug.i("Music Changing Info: Require index :" + index + "/" + library.size());
-            if (library.size() == 0) {
+            if (library.isEmpty()) {
                 return null;
             }
             if (index < 0 || index >= library.size()) {
@@ -398,25 +393,6 @@ public enum LibraryManager {
             }
         }
         return null;
-    }
-
-    public int findBeatmapById(int mapSetId) {
-        synchronized (library) {
-            for (int i = 0; i < library.size(); i++) {
-                if (library.get(i).getTrack(0).getBeatmapSetID() == mapSetId) {
-                    return currentIndex = i;
-                }
-            }
-        }
-        return currentIndex = 0;
-    }
-
-    public int getCurrentIndex() {
-        return this.currentIndex;
-    }
-
-    public void setCurrentIndex(int index) {
-        this.currentIndex = index;
     }
 
     public TrackInfo findTrackByFileNameAndMD5(String fileName, String md5) {

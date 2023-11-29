@@ -105,38 +105,6 @@ public class BeatmapData {
     }
 
     /**
-     * Copy constructor.
-     *
-     * @param source The source to copy from.
-     */
-    private BeatmapData(BeatmapData source) {
-        folder = source.folder;
-        filename = source.filename;
-        formatVersion = source.formatVersion;
-        md5 = source.md5;
-
-        general = source.general.deepClone();
-        metadata = source.metadata.deepClone();
-        difficulty = source.difficulty.deepClone();
-        events = source.events.deepClone();
-        colors = source.colors.deepClone();
-        timingPoints = source.timingPoints.deepClone();
-        hitObjects = source.hitObjects.deepClone();
-
-        rawTimingPoints.addAll(source.rawTimingPoints);
-        rawHitObjects.addAll(source.rawHitObjects);
-    }
-
-    /**
-     * Deep clones this instance.
-     *
-     * @return The deep cloned instance.
-     */
-    public BeatmapData deepClone() {
-        return new BeatmapData(this);
-    }
-
-    /**
      * Gets the path of the parent folder of this beatmap.
      */
     public String getFolder() {
@@ -301,8 +269,6 @@ public class BeatmapData {
         track.setMD5(md5);
         track.setCreator(metadata.creator);
         track.setMode(metadata.version);
-        track.setPublicName(metadata.artist + " - " + metadata.title);
-        track.setBeatmapID(metadata.beatmapID);
         track.setBeatmapSetID(metadata.beatmapSetID);
 
         // General

@@ -17,11 +17,11 @@ public class GameScoreText {
 
     private final Map<Character, AnimSprite> characters;
 
-    private final ArrayList<AnimSprite> digits = new ArrayList<AnimSprite>();
+    private final ArrayList<AnimSprite> digits = new ArrayList<>();
 
     private final float digitWidth;
 
-    private float scale = 0;
+    private final float scale;
 
     private boolean hasX = false;
 
@@ -52,7 +52,7 @@ public class GameScoreText {
             width += letters[i].getWidth();
         }
         this.scale = scale;
-        this.characters = new HashMap<Character, AnimSprite>();
+        this.characters = new HashMap<>();
         this.characters.put('.', scoreComma);
         this.characters.put('%', scorePercent);
         this.characters.put('x', scoreX);
@@ -96,12 +96,6 @@ public class GameScoreText {
     public void attachToScene(final Scene scene) {
         for (final Sprite sp : letters) {
             scene.attachChild(sp, 0);
-        }
-    }
-
-    public void detachFromScene() {
-        for (final Sprite sp : letters) {
-            sp.detachSelf();
         }
     }
 

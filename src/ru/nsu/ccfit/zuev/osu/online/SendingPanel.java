@@ -16,17 +16,31 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 
 public class SendingPanel extends Rectangle {
 
-    private ChangeableText mapText, rankText, accText, scoreText;
+    private final ChangeableText mapText;
 
-    private ChangeableText buttonText;
+    private final ChangeableText rankText;
 
-    private Rectangle mapRect, rankRect, accRect, scoreRect;
+    private final ChangeableText accText;
 
-    private Sprite button;
+    private final ChangeableText scoreText;
 
-    private long rank, score;
+    private final ChangeableText buttonText;
 
-    private float accuracy;
+    private final Rectangle mapRect;
+
+    private final Rectangle rankRect;
+
+    private final Rectangle accRect;
+
+    private final Rectangle scoreRect;
+
+    private final Sprite button;
+
+    private final long rank;
+
+    private final long score;
+
+    private final float accuracy;
 
     private boolean canBeDismissed = false;
 

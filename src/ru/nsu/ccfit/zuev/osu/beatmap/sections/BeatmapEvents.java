@@ -28,7 +28,7 @@ public class BeatmapEvents {
     /**
      * The breaks this beatmap has.
      */
-    public ArrayList<BreakPeriod> breaks = new ArrayList<>();
+    public final ArrayList<BreakPeriod> breaks = new ArrayList<>();
 
     /**
      * The background color of this beatmap.

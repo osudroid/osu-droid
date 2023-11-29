@@ -136,14 +136,14 @@ public class ScoringScene {
         scene.attachChild(hit0s);
 
         final Sprite rankingText = new Sprite(Utils.toRes(580), 0, ResourceManager.getInstance().getTexture("ranking-title"));
-        rankingText.setPosition(Config.getRES_WIDTH() * 5 / 6 - rankingText.getWidth() / 2, 0);
+        rankingText.setPosition(Config.getRES_WIDTH() * 5f / 6f - rankingText.getWidth() / 2f, 0);
         scene.attachChild(rankingText);
 
-        String scoreStr = String.valueOf(stat.getTotalScoreWithMultiplier());
+        StringBuilder scoreStr = new StringBuilder(String.valueOf(stat.getTotalScoreWithMultiplier()));
         while (scoreStr.length() < 8) {
-            scoreStr = '0' + scoreStr;
+            scoreStr.insert(0, '0');
         }
-        final ScoreNumber scoreNum = new ScoreNumber(Utils.toRes(220 + x), Utils.toRes(18 + y), scoreStr, 1, false);
+        final ScoreNumber scoreNum = new ScoreNumber(Utils.toRes(220 + x), Utils.toRes(18 + y), scoreStr.toString(), 1, false);
         scoreNum.attachToScene(scene);
 
         final ScoreNumber hit300num = new ScoreNumber(Utils.toRes(138 + x), Utils.toRes(110 + y), stat.getHit300() + "x", 1, false);
@@ -164,7 +164,7 @@ public class ScoringScene {
         scene.attachChild(maxComboText);
         final Sprite accText = new Sprite(Utils.toRes(260 + x), Utils.toRes(332 + y), ResourceManager.getInstance().getTexture("ranking-accuracy"));
         scene.attachChild(accText);
-        final ScoreNumber maxCombo = new ScoreNumber(Utils.toRes(20 + x), Utils.toRes(maxComboText.getY() + 38), String.valueOf(stat.getMaxCombo()) + "x", 1, false);
+        final ScoreNumber maxCombo = new ScoreNumber(Utils.toRes(20 + x), Utils.toRes(maxComboText.getY() + 38), stat.getMaxCombo() + "x", 1, false);
         maxCombo.attachToScene(scene);
         final String accStr = String.format(Locale.ENGLISH, "%2.2f%%", stat.getAccuracy() * 100);
         final ScoreNumber accuracy = new ScoreNumber(Utils.toRes(260 + x), Utils.toRes(accText.getY() + 38), accStr, 1, false);
@@ -176,7 +176,7 @@ public class ScoringScene {
             mark.setScale(1.5f);
             mark.registerEntityModifier(new ParallelEntityModifier(new FadeInModifier(2), new ScaleModifier(2, 2, 1)));
         }
-        mark.setPosition(Config.getRES_WIDTH() * 5 / 6 - mark.getWidth() / 2, 80);
+        mark.setPosition(Config.getRES_WIDTH() * 5f / 6f - mark.getWidth() / 2f, 80);
 
         final Sprite backBtn = new Sprite(Utils.toRes(580), Utils.toRes(490), ResourceManager.getInstance().getTexture("ranking-back")) {
 
@@ -374,7 +374,6 @@ public class ScoringScene {
         //new mods in 1.6.8
         if (stat.getMod().contains(GameMod.MOD_REALLYEASY)) {
             final Sprite modSprite = new Sprite(modX, modY, ResourceManager.getInstance().getTexture("selection-mod-reallyeasy"));
-            modX -= Utils.toRes(30);
             scene.attachChild(modSprite);
         }
 
@@ -503,7 +502,7 @@ public class ScoringScene {
                 SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
                     OnlineManager.getInstance().getScore(),
                     OnlineManager.getInstance().getAccuracy());
-                sendingPanel.setPosition(Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));
+                sendingPanel.setPosition(Config.getRES_WIDTH() / 2f - 400, Utils.toRes(-300));
                 scene.registerTouchArea(sendingPanel.getDismissTouchArea());
                 scene.attachChild(sendingPanel);
                 ScoreLibrary.getInstance().sendScoreOnline(stat, replay, sendingPanel);
@@ -577,10 +576,6 @@ public class ScoringScene {
 
     public StatisticV2 getReplayStat() {
         return replayStat;
-    }
-
-    public void setReplayStat(StatisticV2 replayStat) {
-        this.replayStat = replayStat;
     }
 
     public int getReplayID() {

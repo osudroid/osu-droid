@@ -29,7 +29,87 @@ public class Config {
 
     private static String corePath, defaultCorePath, beatmapPath, cachePath, skinPath, skinTopPath, scorePath, localUsername, onlineUsername, onlinePassword, onlineDeviceID;
 
-    private static boolean DELETE_OSZ, SCAN_DOWNLOAD, deleteUnimportedBeatmaps, showFirstApproachCircle, comboburst, useCustomSkins, useCustomSounds, corovans, showFPS, complexAnimations, snakingInSliders, playMusicPreview, showCursor, shrinkPlayfieldDownwards, hideNaviBar, showScoreboard, enablePP, enableExtension, loadAvatar, stayOnline, syncMusic, burstEffects, hitLighting, useDither, useParticles, useCustomComboColors, forceRomanized, fixFrameOffset, removeSliderLock, calculateSliderPathInGameStart, displayScoreStatistics, hideReplayMarquee, hideInGameUI, receiveAnnouncements, enableStoryboard, safeBeatmapBg, trianglesAnimation, displayRealTimePPCounter, useNightcoreOnMultiplayer, videoEnabled, deleteUnsupportedVideos, submitScoreOnMultiplayer, keepBackgroundAspectRatio;
+    private static boolean DELETE_OSZ;
+
+    private static boolean SCAN_DOWNLOAD;
+
+    private static boolean deleteUnimportedBeatmaps;
+
+    private static boolean showFirstApproachCircle;
+
+    private static boolean comboburst;
+
+    private static boolean useCustomSkins;
+
+    private static boolean useCustomSounds;
+
+    private static boolean corovans;
+
+    private static boolean showFPS;
+
+    private static boolean complexAnimations;
+
+    private static boolean snakingInSliders;
+
+    private static boolean playMusicPreview;
+
+    private static boolean showCursor;
+
+    private static boolean shrinkPlayfieldDownwards;
+
+    private static boolean hideNaviBar;
+
+    private static boolean showScoreboard;
+
+    private static boolean enableExtension;
+
+    private static boolean loadAvatar;
+
+    private static boolean stayOnline;
+
+    private static boolean syncMusic;
+
+    private static boolean burstEffects;
+
+    private static boolean hitLighting;
+
+    private static boolean useDither;
+
+    private static boolean useParticles;
+
+    private static boolean useCustomComboColors;
+
+    private static boolean forceRomanized;
+
+    private static boolean fixFrameOffset;
+
+    private static boolean removeSliderLock;
+
+    private static boolean calculateSliderPathInGameStart;
+
+    private static boolean displayScoreStatistics;
+
+    private static boolean hideReplayMarquee;
+
+    private static boolean hideInGameUI;
+
+    private static boolean enableStoryboard;
+
+    private static boolean safeBeatmapBg;
+
+    private static boolean trianglesAnimation;
+
+    private static boolean displayRealTimePPCounter;
+
+    private static boolean useNightcoreOnMultiplayer;
+
+    private static boolean videoEnabled;
+
+    private static boolean deleteUnsupportedVideos;
+
+    private static boolean submitScoreOnMultiplayer;
+
+    private static boolean keepBackgroundAspectRatio;
 
     private static int RES_WIDTH, RES_HEIGHT, errorMeter, spinnerStyle, backgroundQuality, metronomeSwitch;
 
@@ -83,9 +163,9 @@ public class Config {
         }
 
         //advanced
-        defaultCorePath = Environment.getExternalStorageDirectory() + "/osu!droid/";
+        defaultCorePath = Environment.getExternalStorageState() + "/osu!droid/";
         corePath = prefs.getString("corePath", defaultCorePath);
-        if (corePath.length() == 0) {
+        if (corePath.isEmpty()) {
             corePath = defaultCorePath;
         }
         if (corePath.charAt(corePath.length() - 1) != '/') {
@@ -94,7 +174,7 @@ public class Config {
         scorePath = corePath + "Scores/";
 
         skinPath = prefs.getString("skinPath", corePath + "Skin/");
-        if (skinPath.length() == 0) {
+        if (skinPath.isEmpty()) {
             skinPath = corePath + "Skin/";
         }
         if (skinPath.charAt(skinPath.length() - 1) != '/') {
@@ -102,7 +182,7 @@ public class Config {
         }
 
         skinTopPath = prefs.getString("skinTopPath", skinPath);
-        if (skinTopPath.length() == 0) {
+        if (skinTopPath.isEmpty()) {
             skinTopPath = skinPath;
         }
         if (skinTopPath.charAt(skinTopPath.length() - 1) != '/') {
@@ -128,7 +208,7 @@ public class Config {
         deleteUnimportedBeatmaps = prefs.getBoolean("deleteUnimportedBeatmaps", false);
         forceRomanized = prefs.getBoolean("forceromanized", false);
         beatmapPath = prefs.getString("directory", corePath + "Songs/");
-        if (beatmapPath.length() == 0) {
+        if (beatmapPath.isEmpty()) {
             beatmapPath = corePath + "Songs/";
         }
         if (beatmapPath.charAt(beatmapPath.length() - 1) != '/') {
@@ -141,14 +221,13 @@ public class Config {
         localUsername = prefs.getString("playername", "");
         showCursor = prefs.getBoolean("showcursor", false);
         hideNaviBar = prefs.getBoolean("hidenavibar", false);
-        enablePP = false;//prefs.getBoolean("enablePP",true);
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
         calculateSliderPathInGameStart = prefs.getBoolean("calculateSliderPathInGameStart", false);
         displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", false);
         hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
-        receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
+        boolean receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
 
@@ -236,16 +315,8 @@ public class Config {
         return enableExtension;
     }
 
-    public static void setEnableExtension(boolean enableExtension) {
-        Config.enableExtension = enableExtension;
-    }
-
     public static boolean isShowFPS() {
         return showFPS;
-    }
-
-    public static void setShowFPS(final boolean showFPS) {
-        Config.showFPS = showFPS;
     }
 
     public static boolean isShowScoreboard() {
@@ -260,32 +331,16 @@ public class Config {
         return corovans;
     }
 
-    public static void setCorovans(final boolean corovans) {
-        Config.corovans = corovans;
-    }
-
     public static float getSoundVolume() {
         return soundVolume;
-    }
-
-    public static void setSoundVolume(final float volume) {
-        Config.soundVolume = volume;
     }
 
     public static float getBgmVolume() {
         return bgmVolume;
     }
 
-    public static void setBgmVolume(float bgmVolume) {
-        Config.bgmVolume = bgmVolume;
-    }
-
     public static float getOffset() {
         return offset;
-    }
-
-    public static void setOffset(final float offset) {
-        Config.offset = offset;
     }
 
     public static int getBackgroundQuality() {
@@ -300,10 +355,6 @@ public class Config {
         return corePath;
     }
 
-    public static void setCorePath(final String corePath) {
-        Config.corePath = corePath;
-    }
-
     public static String getBeatmapPath() {
         return beatmapPath;
     }
@@ -316,56 +367,28 @@ public class Config {
         return RES_WIDTH;
     }
 
-    public static void setRES_WIDTH(final int rES_WIDTH) {
-        RES_WIDTH = rES_WIDTH;
-    }
-
     public static int getRES_HEIGHT() {
         return RES_HEIGHT;
-    }
-
-    public static void setRES_HEIGHT(final int rES_HEIGHT) {
-        RES_HEIGHT = rES_HEIGHT;
     }
 
     public static boolean isDELETE_OSZ() {
         return DELETE_OSZ;
     }
 
-    public static void setDELETE_OSZ(final boolean dELETE_OSZ) {
-        DELETE_OSZ = dELETE_OSZ;
-    }
-
     public static boolean isSCAN_DOWNLOAD() {
         return SCAN_DOWNLOAD;
-    }
-
-    public static void setSCAN_DOWNLOAD(final boolean sCAN_DOWNLOAD) {
-        SCAN_DOWNLOAD = sCAN_DOWNLOAD;
     }
 
     public static boolean isDeleteUnimportedBeatmaps() {
         return deleteUnimportedBeatmaps;
     }
 
-    public static void setDeleteUnimportedBeatmaps(boolean deleteUnimportedBeatmaps) {
-        Config.deleteUnimportedBeatmaps = deleteUnimportedBeatmaps;
-    }
-
     public static boolean isUseCustomSkins() {
         return useCustomSkins;
     }
 
-    public static void setUseCustomSkins(final boolean useCustomSkins) {
-        Config.useCustomSkins = useCustomSkins;
-    }
-
     public static boolean isUseCustomSounds() {
         return useCustomSounds;
-    }
-
-    public static void setUseCustomSounds(boolean useCustomSounds) {
-        Config.useCustomSounds = useCustomSounds;
     }
 
     public static int getTextureQuality() {
@@ -384,10 +407,6 @@ public class Config {
         return complexAnimations;
     }
 
-    public static void setComplexAnimations(final boolean complexAnimations) {
-        Config.complexAnimations = complexAnimations;
-    }
-
     public static boolean isSnakingInSliders() {
         return snakingInSliders;
     }
@@ -396,24 +415,12 @@ public class Config {
         return playMusicPreview;
     }
 
-    public static void setPlayMusicPreview(final boolean playMusicPreview) {
-        Config.playMusicPreview = playMusicPreview;
-    }
-
     public static String getLocalUsername() {
         return localUsername;
     }
 
-    public static void setLocalUsername(final String localUsername) {
-        Config.localUsername = localUsername;
-    }
-
     public static boolean isShowCursor() {
         return showCursor;
-    }
-
-    public static void setShowCursor(final boolean showCursor) {
-        Config.showCursor = showCursor;
     }
 
     public static float getScaleMultiplier() {
@@ -428,32 +435,16 @@ public class Config {
         return onlineUsername;
     }
 
-    public static void setOnlineUsername(String onlineUsername) {
-        Config.onlineUsername = onlineUsername;
-    }
-
     public static String getOnlinePassword() {
         return onlinePassword;
-    }
-
-    public static void setOnlinePassword(String onlinePassword) {
-        Config.onlinePassword = onlinePassword;
     }
 
     public static boolean isStayOnline() {
         return stayOnline && BuildType.hasOnlineAccess();
     }
 
-    public static void setStayOnline(boolean stayOnline) {
-        Config.stayOnline = stayOnline;
-    }
-
     public static boolean getLoadAvatar() {
         return loadAvatar;
-    }
-
-    public static void setLoadAvatar(boolean loadAvatar) {
-        Config.loadAvatar = loadAvatar;
     }
 
     public static String getOnlineDeviceID() {
@@ -464,96 +455,44 @@ public class Config {
         return syncMusic;
     }
 
-    public static void setSyncMusic(boolean syncMusic) {
-        Config.syncMusic = syncMusic;
-    }
-
     public static String getCachePath() {
         return cachePath;
-    }
-
-    public static void setCachePath(String cachePath) {
-        Config.cachePath = cachePath;
     }
 
     public static boolean isBurstEffects() {
         return burstEffects;
     }
 
-    public static void setBurstEffects(boolean burstEffects) {
-        Config.burstEffects = burstEffects;
-    }
-
     public static boolean isHitLighting() {
         return hitLighting;
-    }
-
-    public static void setHitLighting(boolean hitLighting) {
-        Config.hitLighting = hitLighting;
     }
 
     public static boolean isUseDither() {
         return useDither;
     }
 
-    public static void setUseDither(boolean useDither) {
-        Config.useDither = useDither;
-    }
-
     public static boolean isUseParticles() {
         return useParticles;
-    }
-
-    public static void setUseParticles(boolean useParticles) {
-        Config.useParticles = useParticles;
     }
 
     public static String getSkinPath() {
         return skinPath;
     }
 
-    public static void setSkinPath(String skinPath) {
-        Config.skinPath = skinPath;
-    }
-
     public static String getSkinTopPath() {
         return skinTopPath;
-    }
-
-    public static void setSkinTopPath(String skinTopPath) {
-        Config.skinTopPath = skinTopPath;
     }
 
     public static boolean isHideNaviBar() {
         return hideNaviBar;
     }
 
-    public static void setHideNaviBar(boolean hideNaviBar) {
-        Config.hideNaviBar = hideNaviBar;
-    }
-
-    public static boolean isEnablePP() {
-        return enablePP;
-    }
-
-    public static void setEnablePP(boolean enablePP) {
-        Config.enablePP = enablePP;
-    }
-
     public static String getScorePath() {
         return scorePath;
     }
 
-    public static void setScorePath(String scorePath) {
-        Config.scorePath = scorePath;
-    }
-
     public static boolean isUseCustomComboColors() {
         return useCustomComboColors;
-    }
-
-    public static void setUseCustomComboColors(boolean useCustomComboColors) {
-        Config.useCustomComboColors = useCustomComboColors;
     }
 
     public static RGBColor[] getComboColors() {
@@ -564,56 +503,28 @@ public class Config {
         return errorMeter;
     }
 
-    public static void setErrorMeter(int errorMeter) {
-        Config.errorMeter = errorMeter;
-    }
-
     public static int getSpinnerStyle() {
         return spinnerStyle;
-    }
-
-    public static void setSpinnerStyle(int spinnerStyle) {
-        Config.spinnerStyle = spinnerStyle;
     }
 
     public static boolean isShowFirstApproachCircle() {
         return showFirstApproachCircle;
     }
 
-    public static void setShowFirstApproachCircle(boolean showFirstApproachCircle) {
-        Config.showFirstApproachCircle = showFirstApproachCircle;
-    }
-
     public static int getMetronomeSwitch() {
         return metronomeSwitch;
-    }
-
-    public static void setMetronomeSwitch(int metronomeSwitch) {
-        Config.metronomeSwitch = metronomeSwitch;
     }
 
     public static boolean isComboburst() {
         return comboburst;
     }
 
-    public static void setComboburst(boolean comboburst) {
-        Config.comboburst = comboburst;
-    }
-
     public static boolean isForceRomanized() {
         return forceRomanized;
     }
 
-    public static void setForceRomanized(boolean forceRomanized) {
-        Config.forceRomanized = forceRomanized;
-    }
-
     public static float getCursorSize() {
         return cursorSize;
-    }
-
-    public static void setCursorSize() {
-        Config.cursorSize = cursorSize;
     }
 
     public static float getPlayfieldSize() {
@@ -628,48 +539,20 @@ public class Config {
         return shrinkPlayfieldDownwards;
     }
 
-    public static void setShrinkPlayfieldDownwards(boolean shrinkPlayfieldDownwards) {
-        Config.shrinkPlayfieldDownwards = shrinkPlayfieldDownwards;
-    }
-
     public static boolean isHideReplayMarquee() {
         return hideReplayMarquee;
-    }
-
-    public static void setHideReplayMarquee(boolean hideReplayMarquee) {
-        Config.hideReplayMarquee = hideReplayMarquee;
     }
 
     public static boolean isHideInGameUI() {
         return hideInGameUI;
     }
 
-    public static void setHideInGameUI(boolean hideInGameUI) {
-        Config.hideInGameUI = hideInGameUI;
-    }
-
-    public static boolean isReceiveAnnouncements() {
-        return receiveAnnouncements;
-    }
-
-    public static void setReceiveAnnouncements(boolean receiveAnnouncements) {
-        Config.receiveAnnouncements = receiveAnnouncements;
-    }
-
     public static boolean isSafeBeatmapBg() {
         return safeBeatmapBg;
     }
 
-    public static void setSafeBeatmapBg(boolean safeBeatmapBg) {
-        Config.safeBeatmapBg = safeBeatmapBg;
-    }
-
     public static boolean isTrianglesAnimation() {
         return trianglesAnimation;
-    }
-
-    public static void setTrianglesAnimation(boolean trianglesAnimation) {
-        Config.trianglesAnimation = trianglesAnimation;
     }
 
     public static String getDefaultCorePath() {
@@ -678,7 +561,7 @@ public class Config {
 
     public static void loadSkins() {
         File[] folders = FileUtils.listFiles(new File(skinTopPath), file -> file.isDirectory() && !file.getName().startsWith("."));
-        skins = new HashMap<String, String>();
+        skins = new HashMap<>();
         for (File folder : folders) {
             skins.put(folder.getName(), folder.getPath());
             Debug.i("skins: " + folder.getName() + " - " + folder.getPath());
@@ -691,7 +574,7 @@ public class Config {
 
     public static void addSkin(String name, String path) {
         if (skins == null) {
-            skins = new HashMap<String, String>();
+            skins = new HashMap<>();
         }
         skins.put(name, path);
     }
@@ -718,10 +601,6 @@ public class Config {
 
     public static boolean isSubmitScoreOnMultiplayer() {
         return submitScoreOnMultiplayer;
-    }
-
-    public static void setSubmitScoreOnMultiplayer(boolean submitScoreOnMultiplayer) {
-        Config.submitScoreOnMultiplayer = submitScoreOnMultiplayer;
     }
 
     public static boolean isKeepBackgroundAspectRatio() {

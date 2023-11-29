@@ -74,16 +74,14 @@ public class SkinJsonReader extends SkinReader {
         });
     }
 
-    @Override
-    protected void loadFonts() {
+    private void loadFonts() {
         OsuSkin.get().hitCirclePrefix.setFromJson(currentFontsData);
         OsuSkin.get().hitCircleOverlap.setFromJson(currentFontsData);
         OsuSkin.get().scorePrefix.setFromJson(currentFontsData);
         OsuSkin.get().comboPrefix.setFromJson(currentFontsData);
     }
 
-    @Override
-    protected void loadComboColorSetting() {
+    private void loadComboColorSetting() {
         OsuSkin skin = OsuSkin.get();
         JSONObject data = currentComboColorData;
         skin.forceOverrideComboColor.setFromJson(data);
@@ -99,8 +97,7 @@ public class SkinJsonReader extends SkinReader {
         }
     }
 
-    @Override
-    protected void loadSlider() {
+    private void loadSlider() {
         OsuSkin skin = OsuSkin.get();
         JSONObject data = currentSliderData;
         skin.sliderBodyWidth.setFromJson(data);
@@ -116,8 +113,7 @@ public class SkinJsonReader extends SkinReader {
         skin.sliderHintColor.setFromJson(data);
     }
 
-    @Override
-    protected void loadUtils() {
+    private void loadUtils() {
         JSONObject data = currentUtilsData;
         OsuSkin skin = OsuSkin.get();
         skin.limitComboTextLength.setFromJson(data);
@@ -125,8 +121,7 @@ public class SkinJsonReader extends SkinReader {
         skin.comboTextScale.setFromJson(data);
     }
 
-    @Override
-    protected void loadLayout() {
+    private void loadLayout() {
         OsuSkin skin = OsuSkin.get();
         JSONObject data = currentLayoutData;
         skin.useNewLayout.setFromJson(data);
@@ -145,8 +140,7 @@ public class SkinJsonReader extends SkinReader {
         }
     }
 
-    @Override
-    protected void loadColor() {
+    private void loadColor() {
         OsuSkin skin = OsuSkin.get();
         JSONObject data = currentColorData;
         JSONArray names = data.names();
@@ -158,8 +152,7 @@ public class SkinJsonReader extends SkinReader {
         }
     }
 
-    @Override
-    protected void loadCursor() {
+    private void loadCursor() {
         OsuSkin skin = OsuSkin.get();
         JSONObject data = currentCursorData;
         skin.rotateCursor.setFromJson(data);

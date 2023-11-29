@@ -538,7 +538,7 @@ public class Slider extends GameObject {
             if (!reverse && repeatCount <= 2) {
                 startArrow.setAlpha(0);
             }
-            ((GameScene) listener).onSliderReverse(!reverse ? startPosition : endPosition, reverse ? endArrow.getRotation() : startArrow.getRotation(), color);
+            ((GameScene) listener).onSliderReverse(!reverse ? startPosition : endPosition, reverse ? endArrow.getRotation() : startArrow.getRotation());
             if (passedTime >= maxTime) {
                 over();
             }
@@ -833,7 +833,7 @@ public class Slider extends GameObject {
         }
 
         // Some magic with slider ticks. If it'll crash it's not my fault ^_^"
-        while (ticks.size() > 0 && percentage < 1 - 0.02f / maxTime && tickTime * GameHelper.getTickRate() > tickInterval) {
+        while (!ticks.isEmpty() && percentage < 1 - 0.02f / maxTime && tickTime * GameHelper.getTickRate() > tickInterval) {
             tickTime -= tickInterval / GameHelper.getTickRate();
             if (followCircle.getAlpha() > 0 && replayObjectData == null || replayObjectData != null && replayObjectData.tickSet.get(tickIndex)) {
                 Utils.playHitSound(listener, 16);
@@ -893,7 +893,7 @@ public class Slider extends GameObject {
     }
 
     @Override
-    public void tryHit(final float dt) {
+    public void tryHit() {
         if (!startHit) // If we didn't get start hit(click)
         {
             if (isHit() && -passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) // if

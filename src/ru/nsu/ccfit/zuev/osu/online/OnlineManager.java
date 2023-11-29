@@ -1,6 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -19,7 +18,6 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
-import ru.nsu.ccfit.zuev.osu.online.PostBuilder.RequestException;
 
 public class OnlineManager {
 
@@ -37,8 +35,6 @@ public class OnlineManager {
 
     private static OnlineManager instance = null;
 
-    private Context context;
-
     private String failMessage = "";
 
     private boolean stayOnline = true;
@@ -52,8 +48,6 @@ public class OnlineManager {
     private String username = "";
 
     private String password = "";
-
-    private String deviceID = "";
 
     private long rank = 0;
 
@@ -78,33 +72,18 @@ public class OnlineManager {
         return endpoint + "upload/" + playID + ".odr";
     }
 
-    public void Init(Context context) {
+    public void Init() {
         this.stayOnline = Config.isStayOnline();
         this.username = Config.getOnlineUsername();
         this.password = Config.getOnlinePassword();
-        this.deviceID = Config.getOnlineDeviceID();
-        this.context = context;
     }
 
-    private ArrayList<String> sendRequest(PostBuilder post, String url) throws OnlineManagerException {
+    private ArrayList<String> sendRequest(PostBuilder post, String url) {
         ArrayList<String> response;
-        try {
-            response = post.requestWithAttempts(url, 3);
-        } catch (RequestException e) {
-            Debug.e(e.getMessage(), e);
-            failMessage = "Cannot connect to server";
-            throw new OnlineManagerException("Cannot connect to server", e);
-        }
+        response = post.requestWithAttempts(url, 3);
         failMessage = "";
 
-        //TODO debug code
-		/*Debug.i("Received " + response.size() + " lines");
-		for(String str: response)
-		{
-			Debug.i(str);
-		}*/
-
-        if (response.size() == 0 || response.get(0).length() == 0) {
+        if (response.isEmpty() || response.get(0).isEmpty()) {
             failMessage = "Got empty response";
             Debug.i("Received empty response!");
             return null;
@@ -125,15 +104,11 @@ public class OnlineManager {
         return response;
     }
 
-    public boolean logIn() throws OnlineManagerException {
+    public boolean logIn() {
         return logIn(username, password);
     }
 
-    public boolean logIn(String username) throws OnlineManagerException {
-        return logIn(username, password);
-    }
-
-    public synchronized boolean logIn(String username, String password) throws OnlineManagerException {
+    public synchronized boolean logIn(String username, String password) {
         this.username = username;
         this.password = password;
 
@@ -176,15 +151,15 @@ public class OnlineManager {
         return true;
     }
 
-    boolean tryToLogIn() throws OnlineManagerException {
-        if (logIn(username, password) == false) {
+    boolean tryToLogIn() {
+        if (!logIn(username, password)) {
             stayOnline = false;
             return false;
         }
         return true;
     }
 
-    public void startPlay(final TrackInfo track, final String hash) throws OnlineManagerException {
+    public void startPlay(final TrackInfo track, final String hash) {
         Debug.i("Starting play...");
         playID = null;
         final BeatmapInfo beatmap = track.getBeatmap();
@@ -244,8 +219,8 @@ public class OnlineManager {
         Debug.i("Getting play ID = " + playID);
     }
 
-    public boolean sendRecord(String data) throws OnlineManagerException {
-        if (playID == null || playID.length() == 0) {
+    public boolean sendRecord(String data) {
+        if (playID == null || playID.isEmpty()) {
             failMessage = "I don't have play ID";
             return false;
         }
@@ -293,7 +268,7 @@ public class OnlineManager {
         return true;
     }
 
-    public ArrayList<String> getTop(final File trackFile, final String hash) throws OnlineManagerException {
+    public ArrayList<String> getTop(final File trackFile, final String hash) {
         PostBuilder post = new PostBuilder();
         post.addParam("filename", trackFile.getName());
         post.addParam("hash", hash);
@@ -302,7 +277,7 @@ public class OnlineManager {
         ArrayList<String> response = sendRequest(post, endpoint + "getrank.php");
 
         if (response == null) {
-            return new ArrayList<String>();
+            return new ArrayList<>();
         }
 
         response.remove(0);
@@ -315,7 +290,7 @@ public class OnlineManager {
     }
 
     public boolean loadAvatarToTextureManager(String avatarURL) {
-        if (avatarURL == null || avatarURL.length() == 0) {
+        if (avatarURL == null || avatarURL.isEmpty()) {
             return false;
         }
 
@@ -383,7 +358,7 @@ public class OnlineManager {
         OnlineFileOperator.sendFile(endpoint + "upload.php", filename, String.valueOf(replayID));
     }
 
-    public String getScorePack(int playid) throws OnlineManagerException {
+    public String getScorePack(int playid) {
         PostBuilder post = new PostBuilder();
         post.addParam("playID", String.valueOf(playid));
 
@@ -424,14 +399,6 @@ public class OnlineManager {
         return userId;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public String getDeviceID() {
-        return deviceID;
-    }
-
     public boolean isStayOnline() {
         return stayOnline;
     }
@@ -455,19 +422,4 @@ public class OnlineManager {
     private String addSlashes(String str) {
         return str.replace("'", "\\'").replace("\"", "\\\"").replace("\\", "\\\\");
     }
-
-    public static class OnlineManagerException extends Exception {
-
-        private static final long serialVersionUID = -5703212596292949401L;
-
-        public OnlineManagerException(final String message, final Throwable cause) {
-            super(message, cause);
-        }
-
-        public OnlineManagerException(final String message) {
-            super(message);
-        }
-
-    }
-
 }

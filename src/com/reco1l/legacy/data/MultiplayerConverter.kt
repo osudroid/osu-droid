@@ -162,7 +162,7 @@ fun jsonToStatistic(json: JSONObject) = StatisticV2().apply {
     hit100 = json.optInt("good")
     hit50 = json.optInt("bad")
     misses = json.optInt("miss")
-    notes = hit300 + hit100 + hit50 + misses
+    setNotes(hit300 + hit100 + hit50 + misses)
     accuracy = (hit300 * 6f + hit100 * 2f + hit50) / ((hit300 + hit100 + hit50 + misses) * 6f)
     isAlive = json.getBoolean("isAlive")
 }

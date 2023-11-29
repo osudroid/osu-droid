@@ -35,7 +35,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class NotifyPlayer {
 
-    public static int NOTIFICATION_ID = 1;
+    public static final int NOTIFICATION_ID = 1;
 
     private final MainActivity mActivity = GlobalManager.getInstance().getMainActivity();
 

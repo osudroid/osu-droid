@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.beatmap.parser.sections;
 
-import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
-
 /**
  * A parser for parsing a specific beatmap section.
  */
@@ -10,14 +8,6 @@ public abstract class BeatmapSectionParser {
     protected static final int maxCoordinateValue = 131072;
 
     private static final int maxParseLimit = Integer.MAX_VALUE;
-
-    /**
-     * Parses a line.
-     *
-     * @param data The beatmap data to fill.
-     * @param line The line to parse.
-     */
-    public abstract void parse(final BeatmapData data, final String line);
 
     /**
      * Attempts to parse a string into an integer.
@@ -73,18 +63,6 @@ public abstract class BeatmapSectionParser {
      */
     protected float parseFloat(String str, float parseLimit) throws NumberFormatException {
         return parseFloat(str, parseLimit, false);
-    }
-
-    /**
-     * Attempts to parse a string into a float.
-     *
-     * @param str      The string to parse.
-     * @param allowNaN Whether to allow NaN.
-     * @return The parsed float.
-     * @throws NumberFormatException When the resulting value is invalid or out of bounds.
-     */
-    protected float parseFloat(String str, boolean allowNaN) throws NumberFormatException {
-        return parseFloat(str, maxParseLimit, allowNaN);
     }
 
     /**

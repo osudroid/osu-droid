@@ -13,13 +13,9 @@ public class ToastLogger {
 
     private static ToastLogger instance = null;
 
-    Activity activity;
+    final Activity activity;
 
-    String message = "";
-
-    boolean showlong = false;
-
-    ArrayList<String> debugLog = new ArrayList<String>();
+    final ArrayList<String> debugLog = new ArrayList<>();
 
     float percentage;
 
@@ -43,15 +39,6 @@ public class ToastLogger {
         showText(StringTable.get(resID), showlong);
     }
 
-    public static void addToLog(final String str) {
-        if (instance == null) {
-            return;
-            /*
-             * if (instance.debugLog.size() >= 20) instance.debugLog.remove(0);
-             * instance.debugLog.add(str);
-             */
-        }
-    }
 
     public static ArrayList<String> getLog() {
         if (instance == null) {

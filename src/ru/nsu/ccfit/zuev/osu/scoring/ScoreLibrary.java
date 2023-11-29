@@ -30,7 +30,7 @@ public class ScoreLibrary {
 
     private static final Pattern newPathPattern = Pattern.compile("[^/]*/[^/]*\\z");
 
-    private static ScoreLibrary lib = new ScoreLibrary();
+    private static final ScoreLibrary lib = new ScoreLibrary();
 
     private SQLiteDatabase db = null;
 
@@ -54,12 +54,8 @@ public class ScoreLibrary {
         if (s.endsWith(".osu")) {
             return s.substring(0, s.indexOf('/'));
         } else {
-            return s.substring(s.indexOf('/') + 1, s.length());
+            return s.substring(s.indexOf('/') + 1);
         }
-    }
-
-    public SQLiteDatabase getDb() {
-        return db;
     }
 
     public void load(Context context) {
@@ -70,17 +66,17 @@ public class ScoreLibrary {
             ToastLogger.showText(StringTable.get(R.string.require_storage_permission), true);
             throw new RuntimeException(e);
         }
-        loadOld(context);
+        loadOld();
     }
 
     @SuppressWarnings("unchecked")
-    private void loadOld(Context context) {
+    private void loadOld() {
         final File folder = new File(Config.getCorePath() + "/Scores");
-        if (folder.exists() == false) {
+        if (!folder.exists()) {
             return;
         }
         final File f = new File(folder, "scoreboard");
-        if (f.exists() == false) {
+        if (!f.exists()) {
             return;
         }
         Debug.i("Loading old scores...");
@@ -88,10 +84,10 @@ public class ScoreLibrary {
             final ObjectInputStream in = new ObjectInputStream(new FileInputStream(f));
 
             Object obj = in.readObject();
-            String versionStr = "";
+            String versionStr;
             if (obj instanceof String) {
                 versionStr = (String) obj;
-                if (versionStr.equals("scores1") == false && versionStr.equals("scores2") == false) {
+                if (!versionStr.equals("scores1") && !versionStr.equals("scores2")) {
                     in.close();
                     return;
                 }
@@ -104,9 +100,9 @@ public class ScoreLibrary {
             if (obj instanceof Map<?, ?>) {
                 if (versionStr.equals("scores1")) {
                     final Map<String, ArrayList<Statistic>> oldStat = (Map<String, ArrayList<Statistic>>) obj;
-                    scores = new HashMap<String, ArrayList<StatisticV2>>();
+                    scores = new HashMap<>();
                     for (final String str : oldStat.keySet()) {
-                        final ArrayList<StatisticV2> newStat = new ArrayList<StatisticV2>();
+                        final ArrayList<StatisticV2> newStat = new ArrayList<>();
                         for (final Statistic s : oldStat.get(str)) {
                             newStat.add(new StatisticV2(s));
                         }
@@ -117,7 +113,7 @@ public class ScoreLibrary {
                             scores.put(str, newStat);
                         }
                     }
-                } else if (versionStr.equals("scores2")) {
+                } else {
                     scores = (Map<String, ArrayList<StatisticV2>>) obj;
                 }
             }
@@ -136,10 +132,6 @@ public class ScoreLibrary {
             return;
         }
         f.delete();
-    }
-
-    public void save() {
-
     }
 
     public void sendScoreOnline(
@@ -186,31 +178,7 @@ public class ScoreLibrary {
         //			db.query(DBOpenHelper.SCORES_TABLENAME, columns, "filename = \"" + track + "\"" ,
         //												null, null, null, "score ASC");
         //if scores > 5, we need to remove some
-        //		if (response.getCount() > 5)
-        //		{
-        //			response.moveToFirst();
-        //			int rowsToDelete = response.getCount() - 5;
-        //			String filter = "";
-        //			for (int i = 0; i < rowsToDelete; i++)
-        //			{
-        //				filter += response.getString(0);
-        //				if (i < rowsToDelete - 1)
-        //					filter += ",";
-        //
-        //				//removing score replay
-        //				try{
-        //					new File(response.getString(3)).delete();
-        //				} catch (Exception e){}
-        //
-        //				response.moveToNext();
-        //
-        //			}
-        //			//removing all unnecessary scores
-        //			filter = "id IN (" + filter + ")";
-        //			result = db.delete(DBOpenHelper.SCORES_TABLENAME, filter, null);
-        //		}
 
-        //		response.close();
     }
 
     public Cursor getMapScores(String[] columns, String filename) {
@@ -232,33 +200,6 @@ public class ScoreLibrary {
         response.moveToFirst();
 
         String mark = response.getString(0);
-        //		do {
-        //			final String s = response.getString(0);
-        //			if (s.equals("XH")) {
-        //				mark = s;
-        //			} else if (s.equals("X") && mark.equals("XH") == false) {
-        //				mark = s;
-        //			} else if (s.equals("SH") && mark.equals("XH") == false
-        //					&& mark.equals("X") == false) {
-        //				mark = s;
-        //			} else if (s.equals("S") && mark.equals("XH") == false
-        //					&& mark.equals("X") == false && mark.equals("SH") == false) {
-        //				mark = s;
-        //			} else if (s.equals("A") && mark.equals("XH") == false
-        //					&& mark.equals("X") == false && mark.equals("SH") == false
-        //					&& mark.equals("S") == false) {
-        //				mark = s;
-        //			} else if (s.equals("B") && mark.equals("XH") == false
-        //					&& mark.equals("X") == false && mark.equals("SH") == false
-        //					&& mark.equals("S") == false && mark.equals("A") == false) {
-        //				mark = s;
-        //			} else if (s.equals("C") && mark.equals("XH") == false
-        //					&& mark.equals("X") == false && mark.equals("SH") == false
-        //					&& mark.equals("S") == false && mark.equals("A") == false
-        //					&& mark.equals("B") == false) {
-        //				mark = s;
-        //			}
-        //		} while (response.moveToNext());
 
         response.close();
 
@@ -293,10 +234,6 @@ public class ScoreLibrary {
         c.close();
 
         return stat;
-    }
-
-    public boolean deleteScore(int id) {
-        return db.delete(DBOpenHelper.SCORES_TABLENAME, "id = " + id, null) != 0;
     }
 
 }

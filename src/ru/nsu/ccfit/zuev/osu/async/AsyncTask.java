@@ -12,13 +12,6 @@ public abstract class AsyncTask {
 
     private final Handler handler;
 
-    private boolean isCompleted;
-
-    private final Runnable mOnComplete = () -> {
-        onComplete();
-        isCompleted = true;
-    };
-
     public AsyncTask() {
         executor = Executors.newSingleThreadExecutor();
         handler = new Handler(Looper.getMainLooper());
@@ -29,40 +22,14 @@ public abstract class AsyncTask {
     public void onComplete() {
     }
 
-    public void onCancel(boolean wasForced) {
-    }
-
     public final void execute() {
         executor.execute(() -> {
-            isCompleted = false;
             Thread t = Thread.currentThread();
             t.setName("async::" + t.getName());
             run();
-            handler.post(mOnComplete);
+            handler.post(this::onComplete);
             executor.shutdown();
         });
-    }
-
-    public final void cancel(boolean force) {
-        if (force) {
-            executor.shutdownNow();
-        } else {
-            executor.shutdown();
-        }
-        handler.removeCallbacks(mOnComplete);
-        onCancel(force);
-    }
-
-    public final boolean isCompleted() {
-        return isCompleted;
-    }
-
-    public final boolean isTerminated() {
-        return executor.isTerminated();
-    }
-
-    public final boolean isShutdown() {
-        return executor.isShutdown();
     }
 
 }

@@ -131,34 +131,6 @@ public final class BeatmapDifficultyCalculator {
     }
 
     /**
-     * Calculates the difficulty of a <code>BeatmapData</code>, returning a set of
-     * <code>TimedDifficultyAttributes</code> representing the difficulty of the beatmap
-     * at any relevant time.
-     *
-     * @param beatmap The <code>BeatmapData</code> to calculate.
-     * @return A set of <code>TimedDifficultyAttributes</code> describing the difficulty of the <code>BeatmapData</code> at any relevant time.
-     */
-    public static List<TimedDifficultyAttributes> calculateTimedDifficulty(
-        final BeatmapData beatmap) {
-        return calculateTimedDifficulty(beatmap, (DifficultyCalculationParameters) null);
-    }
-
-    /**
-     * Calculates the difficulty of a <code>BeatmapData</code>, returning a set of
-     * <code>TimedDifficultyAttributes</code> representing the difficulty of the beatmap
-     * at any relevant time.
-     *
-     * @param beatmap The <code>BeatmapData</code> to calculate.
-     * @param stat    The <code>StatisticV2</code> to calculate.
-     * @return A set of <code>TimedDifficultyAttributes</code> describing the difficulty of the <code>BeatmapData</code> at any relevant time relating to the
-     * <code>StatisticV2</code>.
-     */
-    public static List<TimedDifficultyAttributes> calculateTimedDifficulty(
-        final BeatmapData beatmap, final StatisticV2 stat) {
-        return calculateTimedDifficulty(beatmap, constructDifficultyParameters(stat));
-    }
-
-    /**
      * Calculates the difficulty of a <code>BeatmapData</code> given a <code>StatisticV2</code>, returning a set of <code>TimedDifficultyAttributes</code> representing the
      * difficulty of the beatmap at any relevant time.
      *

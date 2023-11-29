@@ -8,8 +8,6 @@ public class TrackInfo implements Serializable {
 
     private String filename;
 
-    private String publicName;
-
     private String mode;
 
     private String creator;
@@ -17,8 +15,6 @@ public class TrackInfo implements Serializable {
     private String md5;
 
     private String background = null;
-
-    private int beatmapID = 0;
 
     private int beatmapSetID = 0;
 
@@ -104,14 +100,6 @@ public class TrackInfo implements Serializable {
 
     public void setBackground(final String background) {
         this.background = background;
-    }
-
-    public String getPublicName() {
-        return publicName;
-    }
-
-    public void setPublicName(final String publicName) {
-        this.publicName = publicName;
     }
 
     public BeatmapInfo getBeatmap() {
@@ -208,14 +196,6 @@ public class TrackInfo implements Serializable {
 
     public void setTotalHitObjectCount(int totalHitObjectCount) {
         this.totalHitObjectCount = totalHitObjectCount;
-    }
-
-    public int getBeatmapID() {
-        return beatmapID;
-    }
-
-    public void setBeatmapID(int beatmapID) {
-        this.beatmapID = beatmapID;
     }
 
     public int getBeatmapSetID() {

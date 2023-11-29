@@ -16,7 +16,6 @@ public class FloatSkinData extends SkinData<Float> {
         this(tag, new DefaultFloat().getCurrentValue());
     }
 
-    @Override
     public void setFromJson(@NonNull JSONObject data) {
         setCurrentValue((float) data.optDouble(getTag(), getDefaultValue()));
     }

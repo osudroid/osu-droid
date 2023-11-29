@@ -8,19 +8,19 @@ import ru.nsu.ccfit.zuev.osu.Config;
 
 public class GameObjectPool {
 
-    public static GameObjectPool instance = new GameObjectPool();
+    public static final GameObjectPool instance = new GameObjectPool();
 
-    public LinkedList<HitCircle> circles = new LinkedList<HitCircle>();
+    public final LinkedList<HitCircle> circles = new LinkedList<>();
 
-    public Map<Integer, LinkedList<CircleNumber>> numbers = new HashMap<Integer, LinkedList<CircleNumber>>();
+    public final Map<Integer, LinkedList<CircleNumber>> numbers = new HashMap<>();
 
-    public Map<String, LinkedList<GameEffect>> effects = new HashMap<String, LinkedList<GameEffect>>();
+    public final Map<String, LinkedList<GameEffect>> effects = new HashMap<>();
 
-    public LinkedList<Slider> sliders = new LinkedList<Slider>();
+    public final LinkedList<Slider> sliders = new LinkedList<>();
 
-    public LinkedList<FollowTrack> tracks = new LinkedList<FollowTrack>();
+    public final LinkedList<FollowTrack> tracks = new LinkedList<>();
 
-    public LinkedList<Spinner> spinners = new LinkedList<Spinner>();
+    public final LinkedList<Spinner> spinners = new LinkedList<>();
 
     private int objectsCreated = 0;
 
@@ -32,7 +32,7 @@ public class GameObjectPool {
     }
 
     public HitCircle getCircle() {
-        if (circles.isEmpty() == false) {
+        if (!circles.isEmpty()) {
             return circles.poll();
         }
 
@@ -45,7 +45,7 @@ public class GameObjectPool {
     }
 
     public Spinner getSpinner() {
-        if (spinners.isEmpty() == false) {
+        if (!spinners.isEmpty()) {
             return spinners.poll();
         }
 
@@ -57,12 +57,8 @@ public class GameObjectPool {
         }
     }
 
-    public void putSpinner(final Spinner spinner) {
-        spinners.add(spinner);
-    }
-
     public CircleNumber getNumber(final int num) {
-        if (numbers.containsKey(num) && numbers.get(num).isEmpty() == false) {
+        if (numbers.containsKey(num) && !numbers.get(num).isEmpty()) {
             return numbers.get(num).poll();
         }
 
@@ -71,14 +67,14 @@ public class GameObjectPool {
     }
 
     public void putNumber(final CircleNumber number) {
-        if (numbers.containsKey(number.getNum()) == false) {
-            numbers.put(number.getNum(), new LinkedList<CircleNumber>());
+        if (!numbers.containsKey(number.getNum())) {
+            numbers.put(number.getNum(), new LinkedList<>());
         }
         numbers.get(number.getNum()).add(number);
     }
 
     public GameEffect getEffect(final String texname) {
-        if (effects.containsKey(texname) && effects.get(texname).isEmpty() == false) {
+        if (effects.containsKey(texname) && !effects.get(texname).isEmpty()) {
             return effects.get(texname).poll();
         }
 
@@ -87,14 +83,14 @@ public class GameObjectPool {
     }
 
     public void putEffect(final GameEffect effect) {
-        if (effects.containsKey(effect.getTexname()) == false) {
-            effects.put(effect.getTexname(), new LinkedList<GameEffect>());
+        if (!effects.containsKey(effect.getTexname())) {
+            effects.put(effect.getTexname(), new LinkedList<>());
         }
         effects.get(effect.getTexname()).add(effect);
     }
 
     public Slider getSlider() {
-        if (sliders.isEmpty() == false) {
+        if (!sliders.isEmpty()) {
             return sliders.poll();
         }
 
@@ -107,7 +103,7 @@ public class GameObjectPool {
     }
 
     public FollowTrack getTrack() {
-        if (tracks.isEmpty() == false) {
+        if (!tracks.isEmpty()) {
             return tracks.poll();
         }
 
@@ -117,10 +113,6 @@ public class GameObjectPool {
 
     public void putTrac(final FollowTrack track) {
         tracks.add(track);
-    }
-
-    public int getObjectsCreated() {
-        return objectsCreated;
     }
 
     public void purge() {

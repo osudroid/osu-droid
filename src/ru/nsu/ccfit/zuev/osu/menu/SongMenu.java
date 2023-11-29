@@ -65,7 +65,6 @@ import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
@@ -178,10 +177,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
         return board.isShowOnlineScores();
     }
 
-    public ArrayList<MenuItem> getMenuItems() {
-        return items;
-    }
-
     public void init(
         final Activity context, final Engine engine, final GameScene pGame) {
         this.engine = engine;
@@ -248,7 +243,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
         sortOrder = SortOrder.Title;
         sort();
 
-        if (items.size() == 0) {
+        if (items.isEmpty()) {
             final Text text = new Text(0, 0, ResourceManager.getInstance().getFont("CaptionFont"), "There are no songs in library, try using chimu.moe", HorizontalAlign.CENTER);
             text.setPosition(Config.getRES_WIDTH() / 2f - text.getWidth() / 2, Config.getRES_HEIGHT() / 2f - text.getHeight() / 2);
             text.setScale(1.5f);
@@ -1191,7 +1186,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
             Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
 
             game.startGame(track, null);
-            unload();
             return;
         }
         isSelectComplete = false;
@@ -1272,26 +1266,20 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
 
                 @Override
                 public void run() {
-                    try {
-                        String scorePack = OnlineManager.getInstance().getScorePack(id);
-                        String[] params = scorePack.split("\\s+");
-                        if (params.length < 11) {
-                            return;
-                        }
-
-                        StatisticV2 stat = new StatisticV2(params);
-                        if (stat.isLegacySC()) {
-                            stat.processLegacySC(selectedTrack);
-                        }
-
-                        stat.setPlayerName(playerName);
-                        scoreScene.load(stat, null, null, OnlineManager.getReplayURL(id), null, selectedTrack);
-                        engine.setScene(scoreScene.getScene());
-
-                    } catch (OnlineManagerException e) {
-                        Debug.e("Cannot load play info: " + e.getMessage(), e);
-                        engine.setScene(scene);
+                    String scorePack = OnlineManager.getInstance().getScorePack(id);
+                    String[] params = scorePack.split("\\s+");
+                    if (params.length < 11) {
+                        return;
                     }
+
+                    StatisticV2 stat = new StatisticV2(params);
+                    if (stat.isLegacySC()) {
+                        stat.processLegacySC(selectedTrack);
+                    }
+
+                    stat.setPlayerName(playerName);
+                    scoreScene.load(stat, null, null, OnlineManager.getReplayURL(id), null, selectedTrack);
+                    engine.setScene(scoreScene.getScene());
 
                 }
             }.execute();
@@ -1308,14 +1296,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
         engine.setScene(scoreScene.getScene());
     }
 
-
-    public void onScroll(final float where) {
-        velocityY = 0;
-        camY = where - Config.getRES_HEIGHT() / 2f;
-    }
-
-    public void unload() {
-    }
 
     public void back() {
         back(true);
@@ -1384,11 +1364,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
 
     public void unbindDataBaseChangedListener() {
         OdrDatabase.get().setOnDatabaseChangedListener(null);
-    }
-
-    public void setY(final float y) {
-        velocityY = 0;
-        camY = y;
     }
 
     public void stopMusic() {
@@ -1535,7 +1510,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
     }
 
     private void reSelectItem(String oldTrackFileName) {
-        if (!oldTrackFileName.equals("")) {
+        if (!oldTrackFileName.isEmpty()) {
             if (selectedTrack.getFilename().equals(oldTrackFileName) && items.size() > 1 && selectedItem != null && selectedItem.isVisible()) {
                 velocityY = 0;
                 float height = 0;

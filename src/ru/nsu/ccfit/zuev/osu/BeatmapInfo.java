@@ -7,7 +7,7 @@ public class BeatmapInfo implements Serializable {
 
     private static final long serialVersionUID = -3865268984942011628L;
 
-    private final ArrayList<TrackInfo> tracks = new ArrayList<TrackInfo>();
+    private final ArrayList<TrackInfo> tracks = new ArrayList<>();
 
     private String title;
 

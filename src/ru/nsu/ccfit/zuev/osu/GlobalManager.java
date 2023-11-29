@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import android.util.DisplayMetrics;
-
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 
@@ -176,18 +174,8 @@ public class GlobalManager {
         this.songService = songService;
     }
 
-    public SaveServiceObject getSaveServiceObject() {
-        return saveServiceObject;
-    }
-
     public void setSaveServiceObject(SaveServiceObject saveServiceObject) {
         this.saveServiceObject = saveServiceObject;
-    }
-
-    public DisplayMetrics getDisplayMetrics() {
-        final DisplayMetrics dm = new DisplayMetrics();
-        mainActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
-        return dm;
     }
 
 }

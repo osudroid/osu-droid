@@ -82,7 +82,7 @@ public class SongService extends Service {
                 return false;
             }
             if (isLoop) {
-                audioFunc.setLoop(isLoop);
+                audioFunc.setLoop(true);
             }
             return audioFunc.preLoad(filePath, mode);
         }
@@ -93,24 +93,19 @@ public class SongService extends Service {
         return preLoad(filePath, PlayMode.MODE_NONE, false);
     }
 
-    public boolean preLoad(String filePath, PlayMode mode) {
-        return preLoad(filePath, mode, false);
+    public void preLoad(String filePath, PlayMode mode) {
+        preLoad(filePath, mode, false);
     }
 
-    public boolean preLoad(String filePath, float speed, boolean enableNC) {
+    public void preLoad(String filePath, float speed, boolean enableNC) {
         if (checkFileExist(filePath)) {
             if (audioFunc == null) {
-                return false;
+                return;
             }
 
             audioFunc.setLoop(false);
-            return audioFunc.preLoad(filePath, speed, enableNC);
+            audioFunc.preLoad(filePath, speed, enableNC);
         }
-        return false;
-    }
-
-    public boolean preLoadWithLoop(String filePath) {
-        return preLoad(filePath, PlayMode.MODE_NONE, true);
     }
 
     public void play() {
@@ -137,23 +132,16 @@ public class SongService extends Service {
         return audioFunc.stop();
     }
 
-    public void stopWithoutNotify() {
-        if (audioFunc != null) {
-            audioFunc.stop();
-        }
-    }
-
-    public boolean exit() {
+    public void exit() {
         Log.w("SongService", "Hei Service is on EXIT()");
         if (audioFunc == null) {
-            return false;
+            return;
         }
         audioFunc.stop();
         audioFunc.unregisterReceiverBM();
         audioFunc.freeALL();
         unregisterReceiver(notify.getReceiver());
         stopSelf();
-        return true;
     }
 
     public void seekTo(int time) {
@@ -175,15 +163,6 @@ public class SongService extends Service {
         Log.w("Gaming Mode", "In Gamming mode :" + isGaming);
         this.isGaming = isGaming;
     }
-
-    /*
-    public boolean isSettingMenu() {
-        return isSettingMenu;
-    }
-
-    public void setIsSettingMenu(boolean isSettingMenu) {
-        this.isSettingMenu = isSettingMenu;
-    } */
 
     public Status getStatus() {
         if (audioFunc != null) {
@@ -262,15 +241,12 @@ public class SongService extends Service {
         if (path == null) {
             return false;
         }
-        if (path.trim().equals("")) {
+        if (path.trim().isEmpty()) {
             return false;
         } else {
             File songFile = new File(path);
-            if (!songFile.exists()) {
-                return false;
-            }
+            return songFile.exists();
         }
-        return true;
     }
 
     public boolean isRunningForeground() {

@@ -6,37 +6,31 @@ public class TimingPoint {
 
     private static String defaultSound = "normal";
 
-    private final double speed;
-
-    double time;
+    final double time;
 
     double beatLength;
 
     int signature = 4;
 
-    String hitSound;
+    final String hitSound;
 
     int customSound = 0;
 
-    float volume;
+    final float volume;
 
     boolean inherited = false;
 
-    boolean kiai;
+    final boolean kiai;
 
     public TimingPoint(final String[] data, final TimingPoint prevData) {
         time = Float.parseFloat(data[0]) / 1000.0f;
         beatLength = Double.parseDouble(data[1]);
         if (beatLength < 0 && prevData != null) {
             inherited = true;
-            speed = -100.0f / beatLength;
             beatLength = -prevData.getBeatLength() * (beatLength / 100.0f);
         } else {
             beatLength /= 1000.0f;
-            speed = 1.0f;
         }
-        //beatLength = FMath.clamp(beatLength, 0.006f, 60);
-        //speed = FMath.clamp(speed, 0.1f, 10);
 
         if (data.length > 2) {
             if ("4".equals(data[2])) {
@@ -111,10 +105,6 @@ public class TimingPoint {
 
     public boolean isKiai() {
         return kiai;
-    }
-
-    public double getSpeed() {
-        return speed;
     }
 
 }

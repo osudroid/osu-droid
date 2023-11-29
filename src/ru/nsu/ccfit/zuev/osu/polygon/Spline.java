@@ -13,38 +13,20 @@ public class Spline {
 
     private static Spline instance = null;
 
-    private static int DetailLevel = 50;
+    private static final int DetailLevel = 50;
 
     private CurveTypes m_curve_type;
 
-    private ArrayList<PointF> m_ctrl_pts;
+    private final ArrayList<PointF> m_ctrl_pts;
 
-    private ArrayList<Line> m_path;
-
-    private ArrayList<PointF> m_points;
-
-    private ArrayList<PointF> m_ctrl_pts_copy = null;
-
-    private ArrayList<Line> m_path_copy = null;
+    private final ArrayList<PointF> m_points;
 
     private ArrayList<PointF> m_points_copy = null;
 
-    private ArrayList<Float> m_lengths = null;
-
     public Spline() {
-        m_ctrl_pts = new ArrayList<PointF>();
+        m_ctrl_pts = new ArrayList<>();
         m_curve_type = CurveTypes.Linear;
-        m_path = new ArrayList<Line>();
-        m_points = new ArrayList<PointF>();
-    }
-
-    public Spline(ArrayList<PointF> theControlPoints, CurveTypes theCurveType) {
-        m_ctrl_pts = new ArrayList<PointF>(theControlPoints);
-        m_curve_type = theCurveType;
-        m_path = new ArrayList<Line>();
-        m_points = new ArrayList<PointF>();
-
-        sliderthing(m_curve_type, m_ctrl_pts, m_path, m_points);
+        m_points = new ArrayList<>();
     }
 
     public static Spline getInstance() {
@@ -68,7 +50,7 @@ public class Spline {
     private static ArrayList<PointF> CreateBezier(ArrayList<PointF> input) {
         float DetailLevel2 = (float) DetailLevel;
         PointF[] working = new PointF[input.size()];
-        ArrayList<PointF> output = new ArrayList<PointF>();
+        ArrayList<PointF> output = new ArrayList<>();
 
         PointF lll;
 
@@ -215,17 +197,9 @@ public class Spline {
             case 'P':
                 return CurveTypes.PerfectCurve;
             case 'B':
-                return CurveTypes.Bezier;
             default:
                 return CurveTypes.Bezier;
         }
-    }
-
-    public ArrayList<PointF> getControlPoints() {
-        if (m_ctrl_pts_copy == null) {
-            m_ctrl_pts_copy = new ArrayList<PointF>(m_ctrl_pts);
-        }
-        return m_ctrl_pts_copy;
     }
 
     public void setControlPoints(ArrayList<PointF> theControlPoints) {
@@ -233,89 +207,26 @@ public class Spline {
         m_ctrl_pts.addAll(theControlPoints);
     }
 
-    public CurveTypes getType() {
-        return m_curve_type;
-    }
-
     public void setType(CurveTypes type) {
         m_curve_type = type;
     }
 
-    public ArrayList<Line> getPath() {
-        if (m_path_copy == null) {
-            m_path_copy = new ArrayList<Line>(m_path);
-        }
-        return m_path_copy;
-    }
-
     public ArrayList<PointF> getPoints() {
         if (m_points_copy == null) {
-            m_points_copy = new ArrayList<PointF>(m_points);
+            m_points_copy = new ArrayList<>(m_points);
         }
         return m_points_copy;
     }
 
-    public ArrayList<Float> getLengths() {
-        if (m_lengths == null) {
-            m_lengths = new ArrayList<Float>(m_path.size() + 1);
-            float length_so_far = 0;
-            for (int x = 0; x < m_path.size(); x++) {
-                m_lengths.add(length_so_far);
-                length_so_far += Rho(m_path.get(x));
-            }
-            m_lengths.add(length_so_far);
-        }
-        return m_lengths;
-    }
-
-    private void ValidateRange(int which, String paramName, Boolean allow_end) {
-        if ((which >= m_ctrl_pts.size() + (allow_end ? 0 : -1)) || (which < 0)) {
-            throw new ArrayIndexOutOfBoundsException(paramName);
-        }
-    }
-
     public void Refresh() {
-        m_path.clear();
         m_points.clear();
 
-        sliderthing(m_curve_type, m_ctrl_pts, m_path, m_points);
+        sliderthing(m_curve_type, m_ctrl_pts, m_points);
 
-        m_ctrl_pts_copy = null;
-        m_path_copy = null;
         m_points_copy = null;
-        m_lengths = null;
     }
 
-    public void AdjustPt(int which, PointF where) {
-        ValidateRange(which, "which", true);
-
-        m_ctrl_pts.add(which, new PointF(where.x, where.y)); // copy
-
-        Refresh();
-    }
-
-    public void AddPt(int after) {
-        ValidateRange(after, "after", false);
-
-        PointF target, pt1, pt2;
-        pt1 = m_ctrl_pts.get(after);
-        pt2 = m_ctrl_pts.get(after + 1);
-        target = Lerp(pt1, pt2, 0.5f);
-
-        target = new PointF((float) Math.round((double) target.x), (float) Math.round((double) target.y));
-
-        m_ctrl_pts.add(after + 1, target);
-        Refresh();
-    }
-
-    public void DelPt(int where) {
-        ValidateRange(where, "where", true);
-
-        m_ctrl_pts.remove(where);
-        Refresh();
-    }
-
-    private void sliderthing(CurveTypes CurveType, ArrayList<PointF> sliderCurvePoints, ArrayList<Line> path, ArrayList<PointF> points) {
+    private void sliderthing(CurveTypes CurveType, ArrayList<PointF> sliderCurvePoints, ArrayList<PointF> points) {
         switch (CurveType) {
             case Catmull:
                 for (int j = 0; j < sliderCurvePoints.size() - 1; j++) {
@@ -325,10 +236,6 @@ public class Spline {
                     PointF v4 = (j + 2 < sliderCurvePoints.size() ? sliderCurvePoints.get(j + 2) : Add(v3, Subtract(v3, v2)));
 
                     for (int k = 0; k < DetailLevel; k++) {
-                        //                        path.add(
-                        //                                new Line(CatmullRom(v1, v2, v3, v4, (float) k / DetailLevel),
-                        //                                        CatmullRom(v1, v2, v3, v4,
-                        //                                                (float) (k + 1) / DetailLevel)));
                         points.add(CatmullRom(v1, v2, v3, v4, (float) k / DetailLevel));
                     }
                 }
@@ -338,14 +245,10 @@ public class Spline {
                 int lastIndex = 0;
                 for (int i = 0; i < sliderCurvePoints.size(); i++) {
                     if ((i > 0 && sliderCurvePoints.get(i) == sliderCurvePoints.get(i - 1)) || i == sliderCurvePoints.size() - 1) {
-                        ArrayList<PointF> thisLength = new ArrayList<PointF>(sliderCurvePoints.subList(lastIndex,
-                            i - lastIndex + ((i == sliderCurvePoints.size() - 1) ? 1 : 0))); // + 1); // i145
+                        ArrayList<PointF> thisLength = new ArrayList<>(sliderCurvePoints.subList(lastIndex, i - lastIndex + ((i == sliderCurvePoints.size() - 1) ? 1 : 0))); // + 1); // i145
 
                         ArrayList<PointF> points1 = CreateBezier(thisLength);
                         points.addAll(points1);
-                        //                        for (int j = 1; j < points1.size(); j++) {
-                        //                            path.add(new Line(points1.get(j - 1), points1.get(j)));
-                        //                        }
                         lastIndex = i;
                     }
                 }
@@ -361,9 +264,6 @@ public class Spline {
                     } /********FIX for current osu! bug!********/
                     // Debug.i("segments=" + segments);
                     for (int j = 0; j < segments; j++) {
-                        //                        path.add(
-                        //                                new Line(Add(l.p1, MultiplyPt(Subtract(l.p2, l.p1), ((float) j / segments))),
-                        //                                        Add(l.p1, MultiplyPt(Subtract(l.p2, l.p1), ((float) (j + 1) / segments)))));
                         points.add(Add(l.p1, MultiplyPt(Subtract(l.p2, l.p1), ((float) j / segments))));
                     }
                 }
@@ -374,7 +274,7 @@ public class Spline {
                     (sliderCurvePoints.size() == 3 &&
                      ((sliderCurvePoints.get(0).x - sliderCurvePoints.get(2).x) * (sliderCurvePoints.get(1).y - sliderCurvePoints.get(2).y) ==
                       (sliderCurvePoints.get(1).x - sliderCurvePoints.get(2).x) * (sliderCurvePoints.get(0).y - sliderCurvePoints.get(2).y)))) {
-                    sliderthing(CurveTypes.Linear, m_ctrl_pts, m_path, m_points);
+                    sliderthing(CurveTypes.Linear, m_ctrl_pts, m_points);
                     break;
                 }
                 PointF point1 = sliderCurvePoints.get(0);
@@ -397,13 +297,11 @@ public class Spline {
                     }
                 }
                 if (Math.abs(startAng - midAng) < 0.1 && Math.abs(midAng - endAng) < 0.1) {
-                    sliderthing(CurveTypes.Bezier, m_ctrl_pts, m_path, m_points);
+                    sliderthing(CurveTypes.Bezier, m_ctrl_pts, m_points);
                     break;
                 }
                 //                points.add(point1);
                 for (int k = 0; k < DetailLevel; k++) {
-                    //                    path.add(new Line(CircularArc(startAng, endAng, circleCenter, radius, (float) k / DetailLevel),
-                    //                            CircularArc(startAng, endAng, circleCenter, radius, (float) (k + 1) / DetailLevel)));
                     points.add(CircularArc(startAng, endAng, circleCenter, radius, (float) k / DetailLevel));
                 }
                 //                points.add(point3);
@@ -418,9 +316,11 @@ public class Spline {
     /// <summary>
     /// Probably another XNA class? Guessing its structure based on usage
     /// </summary>
-    public class Line {
+    public static class Line {
 
-        public PointF p1, p2;
+        public final PointF p1;
+
+        public final PointF p2;
 
         public Line(PointF Start, PointF End) {
             p1 = Start;

@@ -1,6 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
-import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 
 import java.util.ArrayList;
@@ -15,11 +14,11 @@ public class GameScoreTextShadow extends GameObject {
 
     private final AnimSprite[] letters;
 
-    private final ArrayList<AnimSprite> digits = new ArrayList<AnimSprite>();
+    private final ArrayList<AnimSprite> digits = new ArrayList<>();
 
     private boolean hasX = false;
 
-    private String text = "";
+    private String text;
 
     public GameScoreTextShadow(
         float x, float y, final String mask, final float scale, GameScoreText comboText) {
@@ -96,10 +95,6 @@ public class GameScoreTextShadow extends GameObject {
         scene.attachChild(letters[0], 0);
     }
 
-    public void detachFromScene() {
-        letters[0].detachSelf();
-    }
-
 
     @Override
     public void update(final float dt) {
@@ -117,10 +112,6 @@ public class GameScoreTextShadow extends GameObject {
         } else {
             comboText.changeText(text);
         }
-    }
-
-    public void registerEntityModifier(IEntityModifier modifier) {
-        letters[0].registerEntityModifier(modifier);
     }
 
 }

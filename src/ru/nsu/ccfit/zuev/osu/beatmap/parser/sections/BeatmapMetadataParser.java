@@ -7,7 +7,6 @@ import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
  */
 public class BeatmapMetadataParser extends BeatmapKeyValueSectionParser {
 
-    @Override
     public void parse(BeatmapData data, String line) {
         String[] p = splitProperty(line);
 

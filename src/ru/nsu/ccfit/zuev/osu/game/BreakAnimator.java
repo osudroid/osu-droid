@@ -29,7 +29,7 @@ public class BreakAnimator extends GameObject {
 
     private final Sprite[] arrows = new Sprite[4];
 
-    private float length = 0;
+    private float length;
 
     private float time;
 
@@ -39,13 +39,13 @@ public class BreakAnimator extends GameObject {
 
     private Sprite mark = null;
 
-    private boolean showMark = false;
+    private final boolean showMark;
 
     private boolean isbreak = false;
 
     private boolean over = false;
 
-    private Rectangle dimRectangle = null;
+    private final Rectangle dimRectangle;
 
     public BreakAnimator(
         final GameObjectListener listener, final Scene scene, final StatisticV2 stat, final boolean showMark, Rectangle bgSprtie) {
@@ -89,7 +89,7 @@ public class BreakAnimator extends GameObject {
         this.length = length;
         time = 0;
         ending = stat.getHp() > 0.5f ? "pass" : "fail";
-        final PointF center = new PointF(Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT() / 2);
+        final PointF center = new PointF(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
         passfail = SpritePool.getInstance().getCenteredSprite("section-" + ending, center);
         scene.attachChild(passfail, 0);
         passfail.setVisible(false);

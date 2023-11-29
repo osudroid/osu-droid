@@ -18,9 +18,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
  */
 public class DatabaseContext extends ContextWrapper {
 
-    private static final String DEBUG_CONTEXT = "DatabaseContext";
-
-    private Context context;
+    private final Context context;
 
     public DatabaseContext(Context base) {
         super(base);
@@ -41,7 +39,7 @@ public class DatabaseContext extends ContextWrapper {
         }
         Debug.i("getDatabasePath(" + name + ") = " + result.getAbsolutePath());
         final File olddb = context.getDatabasePath(name);
-        if (result.exists() == false && olddb.exists() == true) {
+        if (!result.exists() && olddb.exists()) {
             try {
                 FileUtils.copyFile(olddb, result);
             } catch (IOException e) {
@@ -50,7 +48,7 @@ public class DatabaseContext extends ContextWrapper {
         }
         final String olddbfile = Config.getCorePath() + File.separator + "databases" + File.separator + name;
         final File olddb2 = new File(olddbfile);
-        if (result.exists() == false && olddb2.exists() == true) {
+        if (!result.exists() && olddb2.exists()) {
             try {
                 FileUtils.copyFile(olddb2, result);
             } catch (IOException e) {
@@ -59,7 +57,7 @@ public class DatabaseContext extends ContextWrapper {
         }
         final String olddbfile2 = Config.getCorePath() + File.separator + "databases" + File.separator + "osudroid.db";
         final File olddb3 = new File(olddbfile2);
-        if (result.exists() == false && olddb3.exists() == true) {
+        if (!result.exists() && olddb3.exists()) {
             try {
                 FileUtils.copyFile(olddb3, result);
             } catch (IOException e) {

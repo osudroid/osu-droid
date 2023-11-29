@@ -19,7 +19,7 @@ public class BassSoundProvider {
 
     public boolean prepare(final String fileName) {
         free();
-        if (fileName != null && fileName.length() > 0) {
+        if (fileName != null && !fileName.isEmpty()) {
             sample = BASS.BASS_SampleLoad(fileName, 0, 0, SIMULTANEOUS_PLAYBACKS, BASS.BASS_SAMPLE_OVER_POS);
         }
         return sample != 0;
@@ -27,7 +27,7 @@ public class BassSoundProvider {
 
     public boolean prepare(final AssetManager manager, final String assetName) {
         free();
-        if (manager != null && assetName != null && assetName.length() > 0) {
+        if (manager != null && assetName != null && !assetName.isEmpty()) {
             BASS.Asset asset = new BASS.Asset(manager, assetName);
             sample = BASS.BASS_SampleLoad(asset, 0, 0, SIMULTANEOUS_PLAYBACKS, BASS.BASS_SAMPLE_OVER_POS);
         }
@@ -57,10 +57,6 @@ public class BassSoundProvider {
         stop();
         BASS.BASS_SampleFree(sample);
         sample = 0;
-    }
-
-    public void setLooping(boolean looping) {
-        // not impl
     }
 
 }

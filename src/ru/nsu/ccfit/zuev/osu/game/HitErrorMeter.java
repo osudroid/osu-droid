@@ -27,17 +27,13 @@ public class HitErrorMeter extends GameObject {
 
     private final List<Rectangle> recycledIndicators;
 
-    private DifficultyHelper difficultyHelper;
-
     public HitErrorMeter(Scene scene, PointF anchor, float difficulty, float height, DifficultyHelper difficultyHelper) {
         barAnchor = anchor;
         barHeight = height;
         bgScene = scene;
 
-        onDisplayIndicators = new LinkedList<Rectangle>();
-        recycledIndicators = new LinkedList<Rectangle>();
-
-        this.difficultyHelper = difficultyHelper;
+        onDisplayIndicators = new LinkedList<>();
+        recycledIndicators = new LinkedList<>();
 
         boundary = difficultyHelper.hitWindowFor50(difficulty);
 
@@ -46,8 +42,7 @@ public class HitErrorMeter extends GameObject {
         hitMeter.setColor(0f, 0f, 0f, 0.8f);
         scene.attachChild(hitMeter);
 
-        float hit50Len = totalLen;
-        Rectangle hit50 = new Rectangle(anchor.x - hit50Len / 2, anchor.y - height / 2, hit50Len, height);
+        Rectangle hit50 = new Rectangle(anchor.x - totalLen / 2, anchor.y - height / 2, totalLen, height);
         hit50.setColor(200f / 255f, 180f / 255f, 110f / 255f, 0.8f);
         scene.attachChild(hit50);
 

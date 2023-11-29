@@ -26,9 +26,9 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
  */
 public class ComboBurst {
 
-    private final List<Sprite> comboBursts = new ArrayList<Sprite>();
+    private final List<Sprite> comboBursts = new ArrayList<>();
 
-    private final List<BassSoundProvider> comboBurstVocals = new ArrayList<BassSoundProvider>();
+    private final List<BassSoundProvider> comboBurstVocals = new ArrayList<>();
 
     private final float rightX;
 
@@ -75,10 +75,10 @@ public class ComboBurst {
 
     public void checkAndShow(int currentCombo) {
         if (Config.isComboburst() && currentCombo >= nextKeyComboNum) {
-            if (comboBurstVocals.size() > 0) {
+            if (!comboBurstVocals.isEmpty()) {
                 comboBurstVocals.get(nextSoundId).play(0.8f);
             }
-            if (comboBursts.size() > 0) {
+            if (!comboBursts.isEmpty()) {
                 Sprite sprite = comboBursts.get(nextShowId);
                 float toX;
                 if (fromX > 0) {
@@ -107,11 +107,11 @@ public class ComboBurst {
                     new ParallelEntityModifier(new MoveXModifier(0.5f, toX, fromX, EaseSineOut.getInstance()), new FadeOutModifier(0.5f))));
             }
 
-            if (comboBursts.size() > 0) {
+            if (!comboBursts.isEmpty()) {
                 int length = comboBursts.size();
                 nextShowId = (nextShowId + 1) % length;
             }
-            if (comboBurstVocals.size() > 0) {
+            if (!comboBurstVocals.isEmpty()) {
                 int length = comboBurstVocals.size();
                 nextSoundId = (nextSoundId + 1) % length;
             }
@@ -141,12 +141,6 @@ public class ComboBurst {
     public void attachAll(Scene scene) {
         for (final Sprite sprite : comboBursts) {
             scene.attachChild(sprite);
-        }
-    }
-
-    public void detachAll() {
-        for (final Sprite sprite : comboBursts) {
-            sprite.detachSelf();
         }
     }
 

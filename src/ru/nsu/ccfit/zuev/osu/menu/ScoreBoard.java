@@ -213,16 +213,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 File trackFile = new File(track.getFilename());
                 List<String> scores;
 
-                try {
-                    scores = OnlineManager.getInstance().getTop(trackFile, track.getMD5());
-                } catch (OnlineManager.OnlineManagerException e) {
-                    Debug.e("Cannot load scores " + e.getMessage());
-
-                    if (isActive()) {
-                        loadingText.setText("Cannot load scores");
-                    }
-                    return;
-                }
+                scores = OnlineManager.getInstance().getTop(trackFile, track.getMD5());
 
                 if (!isActive()) {
                     return;

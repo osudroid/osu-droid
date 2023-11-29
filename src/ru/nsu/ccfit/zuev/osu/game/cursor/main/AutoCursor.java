@@ -91,17 +91,10 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
         doAutoMove(movePositionX, movePositionY, moveDelay, listener);
     }
 
-    @Override
-    public void onSliderStart() {
-        cursorSprite.onSliderStart();
-    }
-
-    @Override
     public void onSliderTracking() {
         cursorSprite.onSliderTracking();
     }
 
-    @Override
     public void onSliderEnd() {
         cursorSprite.onSliderEnd();
     }

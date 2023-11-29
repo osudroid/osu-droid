@@ -50,10 +50,6 @@ public class TextButton extends Sprite {
         this.updateVertexBuffer();
     }
 
-    public void setTextColor(float pRed, float pGreen, float pBlue) {
-        buttonText.setColor(pRed, pGreen, pBlue);
-    }
-
     public void setText(String text) {
         buttonText.setText(text);
         float textX = (this.getWidth() - buttonText.getWidth()) / 2;

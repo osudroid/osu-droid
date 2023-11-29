@@ -9,6 +9,7 @@ import org.anddev.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtl
 import org.anddev.andengine.opengl.texture.source.BaseTextureAtlasSource;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.StreamUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -119,6 +120,7 @@ public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements 
     }
 
 
+    @NotNull
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "(" + this.mAssetPath + ")";

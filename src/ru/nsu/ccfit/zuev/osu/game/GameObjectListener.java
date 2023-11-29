@@ -21,10 +21,6 @@ public interface GameObjectListener {
 
     void playSound(String name, int sampleSet, int addition);
 
-    void stopSound(String name);
-
-    void addObject(GameObject object);
-
     void removeObject(GameObject object);
 
     void addPassiveObject(GameObject object);

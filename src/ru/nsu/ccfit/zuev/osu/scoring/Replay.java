@@ -32,8 +32,6 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class Replay {
 
-    public static EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
-
     public static EnumSet<GameMod> oldMod = EnumSet.noneOf(GameMod.class);
 
     public static float oldChangeSpeed = 1.0f;
@@ -48,11 +46,11 @@ public class Replay {
 
     public static Float oldCustomHP;
 
-    public ArrayList<MoveArray> cursorMoves = new ArrayList<>();
+    public final ArrayList<MoveArray> cursorMoves = new ArrayList<>();
 
-    public int[] cursorIndex;
+    public final int[] cursorIndex;
 
-    public int[] lastMoveIndex;
+    public final int[] lastMoveIndex;
 
     public ReplayObjectData[] objectData = null;
 
@@ -202,7 +200,7 @@ public class Replay {
                     data = new ReplayObjectData();
                 }
                 os.writeShort(data.accuracy);
-                if (data.tickSet == null || data.tickSet.length() == 0) {
+                if (data.tickSet == null || data.tickSet.isEmpty()) {
                     os.writeByte(0);
                 } else {
                     byte[] bytes = new byte[(data.tickSet.length() + 7) / 8];
@@ -411,9 +409,6 @@ public class Replay {
         return true;
     }
 
-    public void countMarks(float difficulty) {
-    }
-
     public StatisticV2 getStat() {
         return stat;
     }
@@ -430,10 +425,6 @@ public class Replay {
         return mapFile;
     }
 
-    public String getMapName() {
-        return mapName;
-    }
-
     /*
         Object used to store data about current replay version for compatibility purposes.
         Version 4: Adds ExtraModString's save and load in save()/load()/loadInfo()
@@ -443,7 +434,7 @@ public class Replay {
 
         private static final long serialVersionUID = 4643121693566795335L;
 
-        int version = 5;
+        final int version = 5;
 
     }
 
@@ -461,7 +452,7 @@ public class Replay {
 
         protected int time;
 
-        protected PointF point = new PointF();
+        protected final PointF point = new PointF();
 
         protected TouchType touchType;
 

@@ -26,12 +26,6 @@ public class StatisticV2 implements Serializable {
 
     private static final Random random = new Random();
 
-    private final int MAX_SCORE = 1000000;
-
-    private final float ACC_PORTION = 0.3f;
-
-    private final float COMBO_PORTION = 0.7f;
-
     /**
      * Indicates that the player is alive (HP hasn't reached 0, or it recovered), this is exclusively used for multiplayer.
      */
@@ -75,8 +69,6 @@ public class StatisticV2 implements Serializable {
     private EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
 
     private String playerName = "";
-
-    private String fileName = "";
 
     private String replayName = "";
 
@@ -124,12 +116,12 @@ public class StatisticV2 implements Serializable {
         playerName = null;
         if (Config.isStayOnline()) {
             playerName = OnlineManager.getInstance().getUsername();
-            if (playerName == null || playerName.length() == 0) {
+            if (playerName == null || playerName.isEmpty()) {
                 playerName = Config.getOnlineUsername();
             }
         }
 
-        if (playerName == null || playerName.length() == 0) {
+        if (playerName == null || playerName.isEmpty()) {
             playerName = Config.getLocalUsername();
         }
     }
@@ -144,7 +136,6 @@ public class StatisticV2 implements Serializable {
         misses = stat.misses;
         maxCombo = stat.maxCombo;
         currentCombo = stat.currentCombo;
-        totalScore = stat.totalScore;
         possibleScore = stat.possibleScore;
         realScore = stat.realScore;
         hp = stat.hp;
@@ -189,7 +180,7 @@ public class StatisticV2 implements Serializable {
             multi = 1.0f + (multi - 1.0f) * 0.24f;
         } else if (multi < 1) {
             multi = (float) Math.pow(0.3, (1.0 - multi) * 4);
-        } else if (multi == 1) {
+        } else {
             return 1f;
         }
         if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)) {
@@ -223,10 +214,6 @@ public class StatisticV2 implements Serializable {
         return totalScore;
     }
 
-    public void setTotalScore(int totalScore) {
-        this.totalScore = totalScore;
-    }
-
     public int getTotalScoreWithMultiplier() {
         if (forcedScore > 0) {
             return forcedScore;
@@ -250,7 +237,7 @@ public class StatisticV2 implements Serializable {
             currentCombo++;
             return;
         }
-        if (score == 0 && k == true) {
+        if (score == 0 && k) {
             changeHp(-(5 + GameHelper.getDrain()) / 100f);
             if (currentCombo > maxCombo) {
                 maxCombo = currentCombo;
@@ -361,6 +348,9 @@ public class StatisticV2 implements Serializable {
                         break;
                 }
             }
+            float COMBO_PORTION = 0.7f;
+            float ACC_PORTION = 0.3f;
+            int MAX_SCORE = 1000000;
             totalScore = (int) (MAX_SCORE * (ACC_PORTION * Math.pow(acc, 10) * percentage + COMBO_PORTION * maxcb / maxHighestCombo) + bonusScore);
         } else if (amount + amount * currentCombo * diffModifier / 25 > 0) {
             // It is possible for score addition to be a negative number due to
@@ -390,8 +380,6 @@ public class StatisticV2 implements Serializable {
         for (final GameMod m : mod) {
             switch (m) {
                 case MOD_HIDDEN:
-                    isH = true;
-                    break forcycle;
                 case MOD_FLASHLIGHT:
                     isH = true;
                     break forcycle;
@@ -437,10 +425,6 @@ public class StatisticV2 implements Serializable {
 
     public void setMaxCombo(int maxCombo) {
         this.maxCombo = maxCombo;
-    }
-
-    public int getNotes() {
-        return notes;
     }
 
     public void setNotes(int notes) {
@@ -507,10 +491,6 @@ public class StatisticV2 implements Serializable {
         return currentCombo;
     }
 
-    public void setCombo(int combo) {
-        currentCombo = combo;
-    }
-
     public long getTime() {
         return time;
     }
@@ -527,10 +507,6 @@ public class StatisticV2 implements Serializable {
         this.mod = mod.clone();
 
         computeModScoreMultiplier();
-    }
-
-    public float getDiffModifier() {
-        return diffModifier;
     }
 
     public void setDiffModifier(final float diffModifier) {
@@ -680,14 +656,6 @@ public class StatisticV2 implements Serializable {
         totalScore = forcedScore;
     }
 
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
     public final boolean isScoreValid() {
         return SecurityUtils.getHigh16Bits(totalScore) == scoreHash;
     }
@@ -695,7 +663,7 @@ public class StatisticV2 implements Serializable {
     public String compile() {
         StringBuilder builder = new StringBuilder();
         String mstring = getModString();
-        if (mstring.length() == 0) {
+        if (mstring.isEmpty()) {
             mstring = "-";
         }
         builder.append(mstring);

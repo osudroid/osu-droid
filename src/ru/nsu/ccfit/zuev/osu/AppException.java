@@ -15,7 +15,7 @@ import android.widget.Toast;
 
 import com.reco1l.legacy.Multiplayer;
 
-import org.apache.http.HttpException;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,9 +24,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import java.net.ConnectException;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Date;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
@@ -43,89 +40,17 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class AppException extends Exception implements Thread.UncaughtExceptionHandler {
 
     /**
-     * 定义异常类型
-     */
-    public final static byte TYPE_NETWORK = 0x01;
-
-    public final static byte TYPE_SOCKET = 0x02;
-
-    public final static byte TYPE_HTTP_CODE = 0x03;
-
-    public final static byte TYPE_HTTP_ERROR = 0x04;
-
-    public final static byte TYPE_XML = 0x05;
-
-    public final static byte TYPE_IO = 0x06;
-
-    public final static byte TYPE_RUN = 0x07;
-
-    /**
      *
      */
     private static final long serialVersionUID = 6243307165131877535L;
 
-    private final static boolean Debug = true;// 是否保存错误日志
-
-    private byte type;
-
-    private int code;
-
     /**
      * 系统默认的UncaughtException处理类
      */
-    private Thread.UncaughtExceptionHandler mDefaultHandler;
+    private final Thread.UncaughtExceptionHandler mDefaultHandler;
 
     private AppException() {
         this.mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
-    }
-
-    private AppException(byte type, int code, Exception excp) {
-        super(excp);
-        this.type = type;
-        this.code = code;
-        if (Debug) {
-            this.saveErrorLog(excp);
-        }
-    }
-
-    public static AppException http(int code) {
-        return new AppException(TYPE_HTTP_CODE, code, null);
-    }
-
-    public static AppException http(Exception e) {
-        return new AppException(TYPE_HTTP_ERROR, 0, e);
-    }
-
-    public static AppException socket(Exception e) {
-        return new AppException(TYPE_SOCKET, 0, e);
-    }
-
-    public static AppException io(Exception e) {
-        if (e instanceof UnknownHostException || e instanceof ConnectException) {
-            return new AppException(TYPE_NETWORK, 0, e);
-        } else if (e instanceof IOException) {
-            return new AppException(TYPE_IO, 0, e);
-        }
-        return run(e);
-    }
-
-    public static AppException xml(Exception e) {
-        return new AppException(TYPE_XML, 0, e);
-    }
-
-    public static AppException network(Exception e) {
-        if (e instanceof UnknownHostException || e instanceof ConnectException) {
-            return new AppException(TYPE_NETWORK, 0, e);
-        } else if (e instanceof HttpException) {
-            return http(e);
-        } else if (e instanceof SocketException) {
-            return socket(e);
-        }
-        return http(e);
-    }
-
-    public static AppException run(Exception e) {
-        return new AppException(TYPE_RUN, 0, e);
     }
 
     /**
@@ -137,7 +62,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
         return new AppException();
     }
 
-    public static StringBuffer getTraceInfo(Activity a, Throwable e) {
+    public static StringBuffer getTraceInfo(Throwable e) {
         StringBuffer sb = new StringBuffer();
 
         Throwable ex = e.getCause() == null ? e : e.getCause();
@@ -150,59 +75,10 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
               .append("; line: ")
               .append(stack.getLineNumber())
               .append(";  Exception: ")
-              .append(ex.toString())
+              .append(ex)
               .append("\n");
         }
         return sb;
-    }
-
-    public int getCode() {
-        return this.code;
-    }
-
-    public int getType() {
-        return this.type;
-    }
-
-    /**
-     * 提示友好的错误信息
-     *
-     * @param ctx
-     */
-    public void makeToast(Context ctx) {
-        switch (this.getType()) {
-            case TYPE_HTTP_CODE:
-                String err = ctx.getString(R.string.http_status_code_error, this.getCode());
-                Toast.makeText(ctx, err, Toast.LENGTH_SHORT).show();
-                break;
-            case TYPE_HTTP_ERROR:
-                Toast.makeText(ctx, R.string.http_exception_error, Toast.LENGTH_SHORT).show();
-                break;
-            case TYPE_SOCKET:
-                Toast.makeText(ctx, R.string.socket_exception_error, Toast.LENGTH_SHORT).show();
-                break;
-            case TYPE_NETWORK:
-                Toast.makeText(ctx, R.string.network_not_connected, Toast.LENGTH_SHORT).show();
-                break;
-            case TYPE_XML:
-                Toast.makeText(ctx, R.string.xml_parser_failed, Toast.LENGTH_SHORT).show();
-                break;
-            case TYPE_IO:
-                Toast.makeText(ctx, R.string.io_exception_error, Toast.LENGTH_SHORT).show();
-                break;
-            case TYPE_RUN:
-                Toast.makeText(ctx, R.string.app_run_code_error, Toast.LENGTH_SHORT).show();
-                break;
-        }
-    }
-
-    /**
-     * 保存异常日志
-     *
-     * @param excp
-     */
-    public void saveErrorLog(Exception excp) {
-        saveErrorLog(excp.getLocalizedMessage());
     }
 
     /**
@@ -212,7 +88,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
      */
     public void saveErrorLog(String excpMessage) {
         String errorlog = "errorlog.txt";
-        String savePath = "";
+        String savePath;
         String logFilePath = "";
         FileWriter fw = null;
         PrintWriter pw = null;
@@ -228,7 +104,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
                 logFilePath = savePath + errorlog;
             }
             // 没有挂载SD卡，无法写文件
-            if (logFilePath.equals("")) {
+            if (logFilePath.isEmpty()) {
                 return;
             }
             File logFile = new File(logFilePath);
@@ -251,6 +127,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
                 try {
                     fw.close();
                 } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -258,7 +135,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
     }
 
     @Override
-    public void uncaughtException(Thread thread, Throwable ex) {
+    public void uncaughtException(@NotNull Thread thread, @NotNull Throwable ex) {
 
         if (!handleException(ex) && mDefaultHandler != null) {
             //如果用户没有处理则让系统默认的异常处理器来处理
@@ -327,7 +204,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
      */
     private String getCrashReport(Context context, Throwable ex) {
         PackageManager pm = context.getPackageManager();
-        PackageInfo pinfo = null;
+        PackageInfo pinfo;
         StringBuilder exceptionStr = new StringBuilder();
         try {
             pinfo = pm.getPackageInfo(context.getPackageName(), PackageManager.GET_ACTIVITIES);
@@ -337,7 +214,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
             exceptionStr.append("System Screen Info:").append(getScreenInfo(context)).append("\n").append("\n");
             exceptionStr.append("System OS Info:").append(getMobileInfo()).append("\n").append("\n");
             exceptionStr.append("Exception: ").append(ex.getMessage()).append("\n").append("\n");
-            exceptionStr.append("Exception stack：").append(getTraceInfo((Activity) context, ex)).append("\n").append("\n");
+            exceptionStr.append("Exception stack：").append(getTraceInfo(ex)).append("\n").append("\n");
         } catch (NameNotFoundException e) {
             e.printStackTrace();
         }
@@ -370,7 +247,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
             Log.e("AppException", "jsonException", e);
         }
         sb.append("[active Package]");
-        sb.append(activePackageJson.toString());
+        sb.append(activePackageJson);
 
         return sb.toString();
     }

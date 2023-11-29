@@ -33,8 +33,6 @@ public class GameHelper {
 
     private static float difficulty = 1;
 
-    private static float approachRate = 1;
-
     private static float drain = 0;
 
     private static float stackLeniency = 0;
@@ -51,11 +49,7 @@ public class GameHelper {
 
     private static boolean relaxMod = false;
 
-    private static boolean doubleTime = false;
-
     private static boolean nightCore = false;
-
-    private static boolean halfTime = false;
 
     private static boolean autopilotMod = false;
 
@@ -66,8 +60,6 @@ public class GameHelper {
     private static boolean scoreV2;
 
     private static boolean isEasy;
-
-    private static boolean useReplay;
 
     private static boolean isKiai = false;
 
@@ -224,14 +216,6 @@ public class GameHelper {
         GameHelper.scale = scale;
     }
 
-    public static float getApproachRate() {
-        return approachRate;
-    }
-
-    public static void setApproachRate(float approachRate) {
-        GameHelper.approachRate = approachRate;
-    }
-
     public static float getTimeMultiplier() {
         return timeMultiplier;
     }
@@ -317,28 +301,12 @@ public class GameHelper {
         GameHelper.flashLight = flashLight;
     }
 
-    public static boolean isHalfTime() {
-        return halfTime;
-    }
-
-    public static void setHalfTime(final boolean halfTime) {
-        GameHelper.halfTime = halfTime;
-    }
-
     public static boolean isNightCore() {
         return nightCore;
     }
 
     public static void setNightCore(final boolean nightCore) {
         GameHelper.nightCore = nightCore;
-    }
-
-    public static boolean isDoubleTime() {
-        return doubleTime;
-    }
-
-    public static void setDoubleTime(final boolean doubleTime) {
-        GameHelper.doubleTime = doubleTime;
     }
 
     public static boolean isSuddenDeath() {
@@ -363,14 +331,6 @@ public class GameHelper {
 
     public static void setScoreV2(boolean scoreV2) {
         GameHelper.scoreV2 = scoreV2;
-    }
-
-    public static boolean isUseReplay() {
-        return useReplay;
-    }
-
-    public static void setUseReplay(final boolean useReplay) {
-        GameHelper.useReplay = useReplay;
     }
 
     public static boolean isKiai() {
@@ -413,10 +373,6 @@ public class GameHelper {
         GameHelper.timeSignature = timeSignature;
     }
 
-    public static double getInitalBeatLength() {
-        return initalBeatLength;
-    }
-
     public static void setInitalBeatLength(double initalBeatLength) {
         GameHelper.initalBeatLength = initalBeatLength;
     }
@@ -455,7 +411,7 @@ public class GameHelper {
 
     public static float Round(double value, int digits) throws NumberFormatException {
         if (Math.abs(value) < Double.MAX_VALUE) {
-            float f1 = 0;
+            float f1;
             BigDecimal b = new BigDecimal(value);
             f1 = b.setScale(digits, RoundingMode.HALF_UP).floatValue();
             return f1;

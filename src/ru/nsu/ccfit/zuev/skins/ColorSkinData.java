@@ -19,7 +19,6 @@ public class ColorSkinData extends SkinData<RGBColor> {
         this.currentHex = defaultHex;
     }
 
-    @Override
     public void setFromJson(@NonNull JSONObject data) {
         String hex = data.optString(getTag());
         if (hex.isEmpty()) {
@@ -31,7 +30,6 @@ public class ColorSkinData extends SkinData<RGBColor> {
         }
     }
 
-    @Override
     public boolean currentIsDefault() {
         return currentHex.equalsIgnoreCase(defaultHex);
     }

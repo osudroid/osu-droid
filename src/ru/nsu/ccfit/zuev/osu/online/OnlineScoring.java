@@ -1,12 +1,10 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
+import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 
 import org.anddev.andengine.util.Debug;
-
-import java.io.File;
-import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
@@ -19,7 +17,7 @@ public class OnlineScoring {
 
     private static OnlineScoring instance = null;
 
-    private Boolean onlineMutex = new Boolean(false);
+    private final Boolean onlineMutex = Boolean.FALSE;
 
     private OnlinePanel panel = null;
 
@@ -43,7 +41,7 @@ public class OnlineScoring {
     }
 
     public OnlinePanel createSecondPanel() {
-        if (OnlineManager.getInstance().isStayOnline() == false) {
+        if (!OnlineManager.getInstance().isStayOnline()) {
             return null;
         }
         secondPanel = new OnlinePanel();
@@ -87,81 +85,73 @@ public class OnlineScoring {
     }
 
     public void login() {
-        if (OnlineManager.getInstance().isStayOnline() == false) {
+        if (!OnlineManager.getInstance().isStayOnline()) {
             return;
         }
         avatarLoaded = false;
-        new AsyncTask() {
+        Async.run(() -> {
+            synchronized (onlineMutex) {
+                boolean success = false;
 
-            @Override
-            public void run() {
-                synchronized (onlineMutex) {
-                    boolean success = false;
+                //Trying to send request
+                for (int i = 0; i < 3; i++) {
+                    setPanelMessage("Logging in...", "");
 
-                    //Trying to send request
-                    for (int i = 0; i < 3; i++) {
-                        setPanelMessage("Logging in...", "");
-
+                    try {
+                        success = OnlineManager.getInstance().logIn();
+                    } catch (Exception e) {
+                        Debug.e("Login error: " + e.getMessage());
+                        setPanelMessage("Login failed", "Retrying in 5 sec");
                         try {
-                            success = OnlineManager.getInstance().logIn();
-                        } catch (OnlineManager.OnlineManagerException e) {
-                            Debug.e("Login error: " + e.getMessage());
-                            setPanelMessage("Login failed", "Retrying in 5 sec");
-                            try {
-                                Thread.sleep(3000);
-                            } catch (InterruptedException e1) {
-                                break;
-                            }
-                            continue;
+                            Thread.sleep(3000);
+                        } catch (InterruptedException e1) {
+                            break;
                         }
-                        break;
+                        continue;
                     }
-                    if (success) {
-                        updatePanels();
-                        OnlineManager.getInstance().setStayOnline(true);
-                        loadAvatar(true);
-                    } else {
-                        setPanelMessage("Cannot log in", OnlineManager.getInstance().getFailMessage());
-                        OnlineManager.getInstance().setStayOnline(false);
-                    }
+                    break;
+                }
+                if (success) {
+                    updatePanels();
+                    OnlineManager.getInstance().setStayOnline(true);
+                    loadAvatar(true);
+                } else {
+                    setPanelMessage("Cannot log in", OnlineManager.getInstance().getFailMessage());
+                    OnlineManager.getInstance().setStayOnline(false);
                 }
             }
-        }.execute();
+        });
     }
 
     public void startPlay(final TrackInfo track, final String hash) {
-        if (OnlineManager.getInstance().isStayOnline() == false) {
+        if (!OnlineManager.getInstance().isStayOnline()) {
             return;
         }
-        new AsyncTask() {
+        Async.run(() -> {
+            synchronized (onlineMutex) {
 
-            @Override
-            public void run() {
-                synchronized (onlineMutex) {
-
-                    for (int i = 0; i < attemptCount; i++) {
-                        try {
-                            OnlineManager.getInstance().startPlay(track, hash);
-                        } catch (OnlineManager.OnlineManagerException e) {
-                            Debug.e("Login error: " + e.getMessage());
-                            continue;
-                        }
-                        break;
+                for (int i = 0; i < attemptCount; i++) {
+                    try {
+                        OnlineManager.getInstance().startPlay(track, hash);
+                    } catch (Exception e) {
+                        Debug.e("Login error: " + e.getMessage());
+                        continue;
                     }
+                    break;
+                }
 
-                    if (OnlineManager.getInstance().getFailMessage().length() > 0) {
-                        ToastLogger.showText(OnlineManager.getInstance().getFailMessage(), true);
-                    }
+                if (!OnlineManager.getInstance().getFailMessage().isEmpty()) {
+                    ToastLogger.showText(OnlineManager.getInstance().getFailMessage(), true);
                 }
             }
-        }.execute();
+        });
     }
 
     public void sendRecord(final StatisticV2 record, final SendingPanel panel, final String replay) {
-        if (OnlineManager.getInstance().isStayOnline() == false) {
+        if (!OnlineManager.getInstance().isStayOnline()) {
             return;
         }
-        if (OnlineManager.getInstance().isReadyToSend() == false) {
+        if (!OnlineManager.getInstance().isReadyToSend()) {
             return;
         }
 
@@ -181,14 +171,9 @@ public class OnlineScoring {
                             break;
                         }
 
-                        try {
-                            success = OnlineManager.getInstance().sendRecord(recordData);
-                        } catch (OnlineManager.OnlineManagerException e) {
-                            Debug.e("Login error: " + e.getMessage());
-                            success = false;
-                        }
+                        success = OnlineManager.getInstance().sendRecord(recordData);
 
-                        if (OnlineManager.getInstance().getFailMessage().length() > 0) {
+                        if (!OnlineManager.getInstance().getFailMessage().isEmpty()) {
                             ToastLogger.showText(OnlineManager.getInstance().getFailMessage(), true);
                             if (OnlineManager.getInstance().getFailMessage().equals("Invalid record data")) {
                                 i = attemptCount;
@@ -205,6 +190,7 @@ public class OnlineScoring {
                         try {
                             Thread.sleep(5000);
                         } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
                     }
 
@@ -217,23 +203,12 @@ public class OnlineScoring {
         }.execute();
     }
 
-    public ArrayList<String> getTop(final File trackFile, final String hash) {
-        synchronized (onlineMutex) {
-            try {
-                return OnlineManager.getInstance().getTop(trackFile, hash);
-            } catch (OnlineManager.OnlineManagerException e) {
-                Debug.e("Cannot load scores " + e.getMessage());
-                return new ArrayList<String>();
-            }
-        }
-    }
-
     public void loadAvatar(final boolean both) {
         if (!OnlineManager.getInstance().isStayOnline()) {
             return;
         }
         final String avatarUrl = OnlineManager.getInstance().getAvatarURL();
-        if (avatarUrl == null || avatarUrl.length() == 0) {
+        if (avatarUrl == null || avatarUrl.isEmpty()) {
             return;
         }
 

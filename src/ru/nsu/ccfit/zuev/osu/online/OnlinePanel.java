@@ -20,17 +20,25 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class OnlinePanel extends Entity {
 
-    public Rectangle rect;
+    public final Rectangle rect;
 
-    private Entity onlineLayer = new Entity();
+    private final Entity onlineLayer = new Entity();
 
-    private Entity messageLayer = new Entity();
+    private final Entity messageLayer = new Entity();
 
-    private Entity frontLayer = new Entity();
+    private final Entity frontLayer = new Entity();
 
-    private ChangeableText rankText, nameText, scoreText, accText;
+    private final ChangeableText rankText;
 
-    private ChangeableText messageText, submessageText;
+    private final ChangeableText nameText;
+
+    private final ChangeableText scoreText;
+
+    private final ChangeableText accText;
+
+    private final ChangeableText messageText;
+
+    private final ChangeableText submessageText;
 
     private Sprite avatar = null;
 
@@ -54,11 +62,7 @@ public class OnlinePanel extends Entity {
                     this.setColor(0.2f, 0.2f, 0.2f, 0.5f);
                     if (!moved) {
                         if (OnlineManager.getInstance().isStayOnline()) {
-                            new ConfirmDialogFragment().setMessage(R.string.dialog_visit_profile_page).showForResult(isAccepted -> {
-                                GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> {
-                                    new WebViewFragment().setURL(WebViewFragment.PROFILE_URL + OnlineManager.getInstance().getUserId()).show();
-                                });
-                            });
+                            new ConfirmDialogFragment().setMessage(R.string.dialog_visit_profile_page).showForResult(isAccepted -> GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> new WebViewFragment().setURL(WebViewFragment.PROFILE_URL + OnlineManager.getInstance().getUserId()).show()));
                         }
                     }
                     return true;
@@ -76,10 +80,6 @@ public class OnlinePanel extends Entity {
         Rectangle avatarFooter = new Rectangle(0, 0, Utils.toRes(110), Utils.toRes(110));
         avatarFooter.setColor(0.2f, 0.2f, 0.2f, 0.8f);
         attachChild(avatarFooter);
-		
-		/*Rectangle rightFooter = new Rectangle(Utils.toRes(410), 0, Utils.toRes(614), Utils.toRes(110));
-		rightFooter.setColor(0.3f, 0.3f, 0.3f, 0.35f);
-		attachChild(rightFooter);*/
 
         rankText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("CaptionFont"), "#1", HorizontalAlign.RIGHT, 12);
         rankText.setColor(0.6f, 0.6f, 0.6f, 0.9f);

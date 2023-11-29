@@ -25,9 +25,9 @@ public class GameEffect extends GameObject implements IEntityModifierListener {
 
     private static final HashSet<String> animationEffects = new HashSet<>(Arrays.asList("hit0", "hit50", "hit100", "hit100k", "hit300", "hit300k", "hit300g"));
 
-    Sprite hit;
+    final Sprite hit;
 
-    String texname;
+    final String texname;
 
     public GameEffect(final String texname) {
         this.texname = texname;

@@ -7,7 +7,7 @@ public class InputManager {
 
     private static Context context;
 
-    private static InputManager instance = new InputManager();
+    private static final InputManager instance = new InputManager();
 
     private boolean inputStarted = false;
 
@@ -68,24 +68,12 @@ public class InputManager {
         return builder.toString();
     }
 
-    public void setText(final String text) {
-        builder = new StringBuilder(text);
-        changed = true;
-    }
-
     public boolean isChanged() {
         return changed;
     }
 
     public boolean isStarted() {
         return inputStarted;
-    }
-
-    public String finish() {
-        inputStarted = false;
-        final String str = builder.toString();
-        builder = null;
-        return str;
     }
 
 }

@@ -9,7 +9,6 @@ import ru.nsu.ccfit.zuev.osu.beatmap.constants.SampleBank;
  */
 public class BeatmapGeneralParser extends BeatmapKeyValueSectionParser {
 
-    @Override
     public void parse(BeatmapData data, String line) {
         String[] p = splitProperty(line);
 

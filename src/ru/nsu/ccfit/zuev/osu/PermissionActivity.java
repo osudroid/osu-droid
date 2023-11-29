@@ -59,7 +59,7 @@ public class PermissionActivity extends AppCompatActivity implements EasyPermiss
                 Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
                 startActivityForResult(intent, 2444);
             }
-        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+        } else {
             if (PermissionChecker.checkCallingOrSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED) {
                 startGameActivity();
             } else {

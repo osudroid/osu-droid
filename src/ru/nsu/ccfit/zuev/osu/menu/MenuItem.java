@@ -43,7 +43,7 @@ public class MenuItem {
 
     boolean selected = false;
 
-    WeakReference<MenuItemListener> listener;
+    final WeakReference<MenuItemListener> listener;
 
     private MenuItemTrack selTrack = null;
 
@@ -62,8 +62,6 @@ public class MenuItem {
         beatmap = info;
         trackDir = ScoreLibrary.getTrackDir(beatmap.getPath());
         bgHeight = ResourceManager.getInstance().getTexture("menu-button-background").getHeight() - Utils.toRes(25);
-        //        titleStr = (beatmap.getArtistUnicode() == null ? beatmap.getArtist() : beatmap.getArtistUnicode()) + " - "
-        //                + (beatmap.getTitleUnicode() == null ? beatmap.getTitle() : beatmap.getTitleUnicode());
         titleStr = beatmap.getArtist() + " - " + beatmap.getTitle();
         creatorStr = StringTable.format(R.string.menu_creator, beatmap.getCreator());
         trackSprites = new MenuItemTrack[info.getCount()];
@@ -78,8 +76,6 @@ public class MenuItem {
         beatmap = info;
         trackDir = ScoreLibrary.getTrackDir(beatmap.getPath());
         bgHeight = ResourceManager.getInstance().getTexture("menu-button-background").getHeight() - Utils.toRes(25);
-        //        titleStr = (beatmap.getArtistUnicode() == null ? beatmap.getArtist() : beatmap.getArtistUnicode()) + " - "
-        //                + (beatmap.getTitleUnicode() == null ? beatmap.getTitle() : beatmap.getTitleUnicode());
         titleStr = beatmap.getArtist() + " - " + beatmap.getTitle();
         creatorStr = StringTable.format(R.string.menu_creator, beatmap.getCreator());
         trackSprites = new MenuItemTrack[1];
@@ -255,7 +251,7 @@ public class MenuItem {
             }
         }
 
-        if (filter.equals("")) {
+        if (filter.isEmpty()) {
             canVisible = true;
         }
 

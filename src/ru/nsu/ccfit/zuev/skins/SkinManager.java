@@ -11,11 +11,11 @@ import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
 public class SkinManager {
 
-    private static SkinManager instance = new SkinManager();
+    private static final SkinManager instance = new SkinManager();
 
-    private static Map<String, Integer> frameCount = new HashMap<String, Integer>();
+    private static final Map<String, Integer> frameCount = new HashMap<>();
 
-    private static Map<String, Integer> stdframeCount = new HashMap<String, Integer>();
+    private static final Map<String, Integer> stdframeCount = new HashMap<>();
 
     private static boolean skinEnabled = true;
 
@@ -49,14 +49,10 @@ public class SkinManager {
     }
 
     public static int getFrames(final String texname) {
-        if (frameCount.containsKey(texname) == false) {
+        if (!frameCount.containsKey(texname)) {
             return 0;
         }
         return frameCount.get(texname);
-    }
-
-    public static void setFrames(final String texname, final int frames) {
-        frameCount.put(texname, frames);
     }
 
     public RGBColor getSliderColor() {
@@ -116,7 +112,7 @@ public class SkinManager {
     }
 
     public void clearSkin() {
-        if (skinname.equals("")) {
+        if (skinname.isEmpty()) {
             return;
         }
         skinname = "";
