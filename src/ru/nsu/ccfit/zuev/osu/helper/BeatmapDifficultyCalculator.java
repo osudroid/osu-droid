@@ -499,7 +499,7 @@ public final class BeatmapDifficultyCalculator {
          * @return Whether the cache has expired.
          */
         public boolean isExpired(long time) {
-            return generatedTime + timeToLive > time;
+            return generatedTime + timeToLive < time;
         }
     }
 }
