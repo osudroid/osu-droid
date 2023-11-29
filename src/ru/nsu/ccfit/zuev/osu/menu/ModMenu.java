@@ -4,8 +4,8 @@ import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.data.MultiplayerConverter;
-import com.reco1l.legacy.ui.multiplayer.Multiplayer;
-import com.reco1l.legacy.ui.multiplayer.RoomMods;
+import com.reco1l.legacy.Multiplayer;
+import com.reco1l.api.ibancho.data.RoomMods;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
 import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
@@ -122,7 +122,7 @@ public class ModMenu implements IModSwitcher {
 
         changeSpeed = mods.getSpeedMultiplier();
 
-        if (!Multiplayer.isRoomHost)
+        if (!Multiplayer.isRoomHost())
         {
             if (modSet.contains(GameMod.MOD_DOUBLETIME) || modSet.contains(GameMod.MOD_NIGHTCORE))
             {
@@ -159,14 +159,14 @@ public class ModMenu implements IModSwitcher {
         }
         InGameSettingMenu.getInstance().dismiss();
 
-        if (Multiplayer.isConnected)
+        if (Multiplayer.isConnected())
         {
             RoomScene.awaitModsChange = true;
 
             var string = MultiplayerConverter.modsToString(mod);
 
             // The room mods are the same as the host mods
-            if (Multiplayer.isRoomHost) {
+            if (Multiplayer.isRoomHost()) {
                 RoomAPI.setRoomMods(
                         string,
                         changeSpeed,
@@ -240,7 +240,7 @@ public class ModMenu implements IModSwitcher {
 
         addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-nofail", GameMod.MOD_NOFAIL);
 
-        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost)
+        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost())
             addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-halftime", GameMod.MOD_HALFTIME);
 
         addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-reallyeasy", GameMod.MOD_REALLYEASY);
@@ -250,10 +250,10 @@ public class ModMenu implements IModSwitcher {
         //line 2
         addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hardrock", GameMod.MOD_HARDROCK);
 
-        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost)
+        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost())
             addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-doubletime", GameMod.MOD_DOUBLETIME);
 
-        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost)
+        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost())
             addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-nightcore", GameMod.MOD_NIGHTCORE);
 
         addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hidden", GameMod.MOD_HIDDEN);

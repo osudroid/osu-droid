@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.Multiplayer;
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
 import org.anddev.andengine.util.Debug;
@@ -285,7 +285,8 @@ public class Config {
     }
 
     public static boolean isRemoveSliderLock() {
-        return Multiplayer.isMultiplayer ? Multiplayer.room != null && Multiplayer.room.isRemoveSliderLock() : removeSliderLock;
+        //noinspection DataFlowIssue
+        return Multiplayer.isConnected() ? Multiplayer.room.isRemoveSliderLock() : removeSliderLock;
     }
 
     public static boolean isCalculateSliderPathInGameStart() {

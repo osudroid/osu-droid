@@ -4,7 +4,7 @@ import com.reco1l.api.ibancho.data.RoomBeatmap
 import com.reco1l.api.ibancho.data.TeamMode
 import com.reco1l.api.ibancho.data.WinCondition
 import com.reco1l.api.ibancho.data.Room
-import com.reco1l.legacy.ui.multiplayer.RoomMods
+import com.reco1l.api.ibancho.data.RoomMods
 import org.json.JSONArray
 
 interface IRoomEventListener
@@ -23,7 +23,7 @@ interface IRoomEventListener
      * Called when the player disconnects from room socket, keep in mind this is also called when the user manually
      * disconnects.
      */
-    fun onRoomDisconnect(reason: String?)
+    fun onRoomDisconnect(reason: String?, byUser: Boolean)
 
     /**
      * Called when the connection fails.

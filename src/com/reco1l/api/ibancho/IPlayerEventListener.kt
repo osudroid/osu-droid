@@ -3,7 +3,7 @@ package com.reco1l.api.ibancho
 import com.reco1l.api.ibancho.data.PlayerStatus
 import com.reco1l.api.ibancho.data.RoomPlayer
 import com.reco1l.api.ibancho.data.RoomTeam
-import com.reco1l.legacy.ui.multiplayer.RoomMods
+import com.reco1l.api.ibancho.data.RoomMods
 
 interface IPlayerEventListener
 {

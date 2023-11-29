@@ -6,7 +6,7 @@ import com.reco1l.api.ibancho.data.PlayerStatus.READY
 import com.reco1l.api.ibancho.data.RoomBeatmap
 import com.reco1l.framework.extensions.orAsyncCatch
 import com.reco1l.legacy.ui.ChimuWebView.FILE_EXTENSION
-import com.reco1l.legacy.ui.multiplayer.Multiplayer
+import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.ui.multiplayer.RoomScene
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText

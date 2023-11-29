@@ -10,7 +10,7 @@ import com.edlplan.replay.OdrDatabase;
 import com.edlplan.ui.fragment.PropsMenuFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.reco1l.api.ibancho.RoomAPI;
-import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.reco1l.framework.lang.execution.Async;
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
@@ -1299,7 +1299,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         // Locking host from change beatmap before the server responses to beatmapChange
         RoomScene.awaitBeatmapChange = true;
 
-        if (!Multiplayer.isConnected) {
+        if (!Multiplayer.isConnected()) {
             return;
         }
 
@@ -1327,7 +1327,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         // Locking host from change beatmap before the server responses to beatmapChange
         RoomScene.awaitBeatmapChange = true;
 
-        if (!Multiplayer.isConnected) {
+        if (!Multiplayer.isConnected()) {
             return;
         }
 

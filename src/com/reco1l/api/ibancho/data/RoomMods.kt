@@ -1,7 +1,7 @@
-package com.reco1l.legacy.ui.multiplayer
+package com.reco1l.api.ibancho.data
 
-import com.reco1l.api.ibancho.data.Room
 import com.reco1l.legacy.data.modsToReadable
+import com.reco1l.legacy.Multiplayer
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*
 import java.util.*

@@ -18,7 +18,7 @@ import com.edlplan.ui.EasingHelper;
 
 import java.util.Locale;
 
-import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.Multiplayer;
 import org.anddev.andengine.input.touch.TouchEvent;
 
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -460,7 +460,7 @@ public class InGameSettingMenu extends BaseFragment {
 
         // Updating speed multiplier seekbar visibility
         if (Multiplayer.isMultiplayer)
-            speedModifyRow.setVisibility(Multiplayer.isRoomHost ? View.VISIBLE : View.GONE);
+            speedModifyRow.setVisibility(Multiplayer.isRoomHost() ? View.VISIBLE : View.GONE);
     }
 
     @SuppressLint("ClickableViewAccessibility")

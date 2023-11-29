@@ -1,7 +1,5 @@
 package com.reco1l.api.ibancho.data
 
-import com.reco1l.legacy.ui.multiplayer.RoomMods
-
 data class RoomPlayer
 (
         /**

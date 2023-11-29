@@ -5,7 +5,7 @@ import com.reco1l.api.ibancho.data.RoomBeatmap
 import com.reco1l.api.ibancho.data.RoomPlayer
 import com.reco1l.api.ibancho.data.RoomTeam
 import com.reco1l.legacy.data.stringToMods
-import com.reco1l.legacy.ui.multiplayer.RoomMods
+import com.reco1l.api.ibancho.data.RoomMods
 import org.json.JSONArray
 import org.json.JSONObject
 

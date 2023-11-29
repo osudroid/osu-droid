@@ -11,6 +11,7 @@ import com.edlplan.ui.fragment.BaseFragment
 import com.edlplan.ui.fragment.WebViewFragment
 import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.api.ibancho.data.RoomPlayer
+import com.reco1l.legacy.Multiplayer
 import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
