@@ -26,49 +26,58 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 public class ModernSpinner extends Spinner {
 
     private final Sprite middle;
+
     private final Sprite middle2;
+
     private final Sprite bottom;
+
     private final Sprite top;
+
     private final Sprite glow;
     // private final Sprite spin;
     // private final Sprite clear;
 
-    private GameObjectListener listener;
-    private Scene scene;
-    public PointF center;
-    private float needRotations;
-    private int fullRotations = 0;
-    private float rotations = 0;
-    private int soundId;
-    private boolean clear;
-    private int score = 1;
-    private StatisticV2 stat;
-    private ScoreNumber bonusScore;
-    private PointF oldMouse;
-    private float totalTime;
-
     private final PointF currMouse = new PointF();
+
+    public PointF center;
+
+    private GameObjectListener listener;
+
+    private Scene scene;
+
+    private float needRotations;
+
+    private int fullRotations = 0;
+
+    private float rotations = 0;
+
+    private int soundId;
+
+    private boolean clear;
+
+    private int score = 1;
+
+    private StatisticV2 stat;
+
+    private ScoreNumber bonusScore;
+
+    private PointF oldMouse;
+
+    private float totalTime;
 
 
     public ModernSpinner() {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
-        center = Utils.trackToRealCoords(new PointF(Constants.MAP_WIDTH / 2,
-                Constants.MAP_HEIGHT / 2));
-        middle = SpritePool.getInstance().getCenteredSprite(
-                "spinner-middle", center);
-        middle2 = SpritePool.getInstance().getCenteredSprite(
-                "spinner-middle2", center);
-        bottom = SpritePool.getInstance().getCenteredSprite(
-                "spinner-bottom", center);
-        top = SpritePool.getInstance().getCenteredSprite(
-                "spinner-top", center);
-        glow = SpritePool.getInstance().getCenteredSprite(
-                "spinner-glow", center);
+        center = Utils.trackToRealCoords(new PointF(Constants.MAP_WIDTH / 2, Constants.MAP_HEIGHT / 2));
+        middle = SpritePool.getInstance().getCenteredSprite("spinner-middle", center);
+        middle2 = SpritePool.getInstance().getCenteredSprite("spinner-middle2", center);
+        bottom = SpritePool.getInstance().getCenteredSprite("spinner-bottom", center);
+        top = SpritePool.getInstance().getCenteredSprite("spinner-top", center);
+        glow = SpritePool.getInstance().getCenteredSprite("spinner-glow", center);
     }
 
-    public void init(GameObjectListener listener, Scene scene,
-                     float aheadTime, float time, float rps,
-                     int sound, String tempSound, StatisticV2 stat) {
+    public void init(
+        GameObjectListener listener, Scene scene, float aheadTime, float time, float rps, int sound, String tempSound, StatisticV2 stat) {
         this.scene = scene;
         this.needRotations = rps * time;
         this.listener = listener;
@@ -100,23 +109,17 @@ public class ModernSpinner extends Spinner {
         scene.attachChild(middle);
         scene.attachChild(middle2);
 
-        top.registerEntityModifier(
-                new SequenceEntityModifier(
-                        new IEntityModifier.IEntityModifierListener() {
-                            @Override
-                            public void onModifierStarted(final IModifier<IEntity> pModifier, final IEntity pItem) {
-                            }
+        top.registerEntityModifier(new SequenceEntityModifier(new IEntityModifier.IEntityModifierListener() {
 
-                            @Override
-                            public void onModifierFinished(final IModifier<IEntity> pModifier, final IEntity pItem) {
-                                SyncTaskManager.getInstance().run(ModernSpinner.this::removeFromScene);
-                            }
-                        },
-                        new SequenceEntityModifier(
-                                new AlphaModifier(aheadTime, 0, 1f),
-                                new DelayModifier(time)
-                        )
-                ));
+            @Override
+            public void onModifierStarted(final IModifier<IEntity> pModifier, final IEntity pItem) {
+            }
+
+            @Override
+            public void onModifierFinished(final IModifier<IEntity> pModifier, final IEntity pItem) {
+                SyncTaskManager.getInstance().run(ModernSpinner.this::removeFromScene);
+            }
+        }, new SequenceEntityModifier(new AlphaModifier(aheadTime, 0, 1f), new DelayModifier(time))));
         bottom.registerEntityModifier(new AlphaModifier(aheadTime, 0, 1f));
         middle.registerEntityModifier(new AlphaModifier(aheadTime, 0, 1f));
         middle2.registerEntityModifier(new AlphaModifier(aheadTime, 0, 1f));
@@ -148,8 +151,9 @@ public class ModernSpinner extends Spinner {
             }
         }
 
-        if (mouse == null)
+        if (mouse == null) {
             return;
+        }
 
         float degree = MathUtils.radToDeg(Utils.direction(currMouse));
         top.setRotation(degree);
@@ -159,8 +163,9 @@ public class ModernSpinner extends Spinner {
         var len2 = Utils.length(oldMouse);
         var dfill = (currMouse.x / len1) * (oldMouse.y / len2) - (currMouse.y / len1) * (oldMouse.x / len2);
 
-        if (Math.abs(len1) < 0.0001f || Math.abs(len2) < 0.0001f)
+        if (Math.abs(len1) < 0.0001f || Math.abs(len2) < 0.0001f) {
             dfill = 0;
+        }
 
         if (autoPlay) {
             dfill = 5 * 4 * dt;
@@ -196,16 +201,12 @@ public class ModernSpinner extends Spinner {
                     scene.detachChild(bonusScore);
                 }
                 rotations -= 1 * Math.signum(rotations);
-                bonusScore = new ScoreNumber(center.x, center.y + 100,
-                        String.valueOf(score * 1000), 1.1f, true);
+                bonusScore = new ScoreNumber(center.x, center.y + 100, String.valueOf(score * 1000), 1.1f, true);
                 listener.onSpinnerHit(id, 1000, false, 0);
                 score++;
                 scene.attachChild(bonusScore);
                 ResourceManager.getInstance().getSound("spinnerbonus").play();
-                glow.registerEntityModifier(new SequenceEntityModifier(
-                        new ColorModifier(0.1f, 0f, 1f, 0.8f, 1f, 1f, 1f),
-                        new ColorModifier(0.1f, 1f, 0f, 1f, 0.8f, 1f, 1f)
-                ));
+                glow.registerEntityModifier(new SequenceEntityModifier(new ColorModifier(0.1f, 0f, 1f, 0.8f, 1f, 1f, 1f), new ColorModifier(0.1f, 1f, 0f, 1f, 0.8f, 1f, 1f)));
                 float rate = 0.375f;
                 if (GameHelper.getDrain() > 0) {
                     rate = 1 + (GameHelper.getDrain() / 4f);
@@ -229,10 +230,10 @@ public class ModernSpinner extends Spinner {
     }
 
     public void removeFromScene() {
-//        if (clearText != null) {
-//            scene.detachChild(clearText);
-//            SpritePool.getInstance().putSprite("spinner-clear", clearText);
-//        }
+        //        if (clearText != null) {
+        //            scene.detachChild(clearText);
+        //            SpritePool.getInstance().putSprite("spinner-clear", clearText);
+        //        }
         glow.clearEntityModifiers();
         scene.detachChild(middle);
         scene.detachChild(middle2);
@@ -247,18 +248,19 @@ public class ModernSpinner extends Spinner {
         listener.removeObject(ModernSpinner.this);
         int score = 0;
         if (replayObjectData != null) {
-            if (fullRotations < replayObjectData.accuracy / 4)
+            if (fullRotations < replayObjectData.accuracy / 4) {
                 fullRotations = replayObjectData.accuracy / 4;
-            if (fullRotations >= needRotations)
+            }
+            if (fullRotations >= needRotations) {
                 clear = true;
+            }
             int bonusRot = (int) (replayObjectData.accuracy / 4 - needRotations + 1);
             while (bonusRot < score) {
                 bonusRot++;
                 listener.onSpinnerHit(id, 1000, false, 0);
             }
         }
-        float percentfill = (Math.abs(rotations) + fullRotations)
-                / needRotations;
+        float percentfill = (Math.abs(rotations) + fullRotations) / needRotations;
         if (percentfill > 0.9f) {
             score = 50;
         }
@@ -289,4 +291,5 @@ public class ModernSpinner extends Spinner {
             Utils.playHitSound(listener, soundId);
         }
     }
+
 }

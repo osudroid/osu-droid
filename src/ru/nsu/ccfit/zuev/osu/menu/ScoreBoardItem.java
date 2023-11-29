@@ -2,8 +2,10 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.reco1l.api.ibancho.data.WinCondition;
 import com.reco1l.legacy.Multiplayer;
+
 import org.json.JSONObject;
 
 import java.text.NumberFormat;
@@ -17,11 +19,14 @@ public class ScoreBoardItem implements Cloneable {
 
 
     private static final StringBuilder accSb = new StringBuilder();
+
     private static final Formatter DECIMAL_FORMAT = new Formatter(accSb, Locale.ENGLISH);
 
 
     public String userName;
+
     public int playScore;
+
     public int scoreId;
 
     /**
@@ -30,8 +35,7 @@ public class ScoreBoardItem implements Cloneable {
     public int rank = -1;
 
     /**
-     * In single player this is always 'maxCombo', in multiplayer if the room win condition isn't Max Combo it'll be
-     * current combo.
+     * In single player this is always 'maxCombo', in multiplayer if the room win condition isn't Max Combo it'll be current combo.
      */
     public int maxCombo;
 
@@ -46,7 +50,8 @@ public class ScoreBoardItem implements Cloneable {
     public boolean isAlive = true;
 
 
-    public ScoreBoardItem() {}
+    public ScoreBoardItem() {
+    }
 
     public ScoreBoardItem(String userName, int playScore, int maxCombo, float accuracy, boolean isAlive) {
         this.userName = userName;
@@ -73,8 +78,9 @@ public class ScoreBoardItem implements Cloneable {
         if (Multiplayer.isConnected() && Multiplayer.room.getWinCondition() == WinCondition.ACCURACY) {
             accSb.setLength(0);
             text += DECIMAL_FORMAT.format("%2.2f%%", accuracy * 100f);
-        } else
+        } else {
             text += NUMBER_FORMAT.format(maxCombo) + "x";
+        }
 
         return text;
     }
@@ -97,21 +103,18 @@ public class ScoreBoardItem implements Cloneable {
 
 
     @Override
-    public boolean equals(@Nullable Object o)
-    {
-        if (o == this)
+    public boolean equals(@Nullable Object o) {
+        if (o == this) {
             return true;
+        }
 
-        if (!(o instanceof ScoreBoardItem))
+        if (!(o instanceof ScoreBoardItem)) {
             return false;
+        }
 
         var other = (ScoreBoardItem) o;
 
-        return Objects.equals(other.userName, userName)
-                && other.playScore == playScore
-                && other.maxCombo == maxCombo
-                && other.accuracy == accuracy
-                && other.isAlive == isAlive;
+        return Objects.equals(other.userName, userName) && other.playScore == playScore && other.maxCombo == maxCombo && other.accuracy == accuracy && other.isAlive == isAlive;
     }
 
     @NonNull
@@ -119,4 +122,5 @@ public class ScoreBoardItem implements Cloneable {
     public ScoreBoardItem clone() throws CloneNotSupportedException {
         return (ScoreBoardItem) super.clone();
     }
+
 }

@@ -11,17 +11,23 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 
 
-public class FlashLightEntity extends Entity  {
+public class FlashLightEntity extends Entity {
+
+    public static final int defaultMoveDelayMS = 120;
+
+    public static final float defaultMoveDelayS = 0.12f;
+
     private final MainFlashLightSprite mainSprite;
+
     private final FlashLightDimLayerSprite dimLayer;
+
     private boolean isTrackingSliders = false;
 
     private IEntityModifier currentModifier = null;
-    private float nextPX;
-    private float nextPY;
 
-    public static final int defaultMoveDelayMS = 120;
-    public static final float defaultMoveDelayS = 0.12f;
+    private float nextPX;
+
+    private float nextPY;
 
     public FlashLightEntity() {
         super(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
@@ -59,5 +65,6 @@ public class FlashLightEntity extends Entity  {
         dimLayer.onTrackingSliders(isTrackingSliders);
         mainSprite.onUpdate(combo);
     }
+
 }
 

@@ -9,11 +9,15 @@ public class Metronome {
     private ResourceManager resources = ResourceManager.getInstance();
 
     private BassSoundProvider kickSound = resources.getSound("nightcore-kick");
+
     private BassSoundProvider finishSound = resources.getSound("nightcore-finish");
+
     private BassSoundProvider clapSound = resources.getSound("nightcore-clap");
+
     private BassSoundProvider hatSound = resources.getSound("nightcore-hat");
 
     private float volume = 1.0f;
+
     private int lastBeatIndex = -1;
 
     public void update(float elapsedTime) {
@@ -55,4 +59,5 @@ public class Metronome {
         // 每小节奇数拍hat
         hatSound.play(volume);
     }
+
 }

@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
+import static android.content.Intent.ACTION_VIEW;
+
 import android.animation.Animator;
 import android.app.Activity;
 import android.content.Intent;
@@ -21,17 +23,15 @@ import androidx.preference.PreferenceScreen;
 
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
+import com.edlplan.ui.EasingHelper;
 import com.edlplan.ui.SkinPathPreference;
 import com.edlplan.ui.fragment.LoadingFragment;
 import com.edlplan.ui.fragment.SettingsFragment;
-import com.edlplan.ui.EasingHelper;
-
 import com.google.android.material.snackbar.Snackbar;
-
-import java.io.File;
-
 import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.UpdateManager;
+
+import java.io.File;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -39,21 +39,20 @@ import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
-import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
-// import ru.nsu.ccfit.zuev.osu.game.SpritePool;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.R;
-
-import static android.content.Intent.ACTION_VIEW;
+import ru.nsu.ccfit.zuev.skins.SkinManager;
 
 public class SettingsMenu extends SettingsFragment {
 
     public static final String REGISTER_URL = "https://" + OnlineManager.hostname + "/user/?action=register";
 
     private PreferenceScreen mParentScreen, parentScreen;
+
     private boolean isOnNestedScreen = false;
+
     private Activity mActivity;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -68,7 +67,7 @@ public class SettingsMenu extends SettingsFragment {
         SkinPathPreference skinPath = (SkinPathPreference) findPreference("skinPath");
         skinPath.reloadSkinList();
         skinPath.setOnPreferenceChangeListener((preference, newValue) -> {
-            if(GlobalManager.getInstance().getSkinNow() != newValue.toString()) {
+            if (GlobalManager.getInstance().getSkinNow() != newValue.toString()) {
                 var loading = new LoadingFragment();
                 loading.show();
 
@@ -158,8 +157,7 @@ public class SettingsMenu extends SettingsFragment {
         });
         final Preference clearProps = findPreference("clear_properties");
         clearProps.setOnPreferenceClickListener(preference -> {
-            PropertiesLibrary.getInstance()
-                    .clear(mActivity);
+            PropertiesLibrary.getInstance().clear(mActivity);
             return true;
         });
         final Preference register = findPreference("registerAcc");
@@ -185,13 +183,13 @@ public class SettingsMenu extends SettingsFragment {
     }
 
     public void onNavigateToScreen(PreferenceScreen preferenceScreen) {
-        if(preferenceScreen.getKey() != null) {
-            if(!isOnNestedScreen) {
+        if (preferenceScreen.getKey() != null) {
+            if (!isOnNestedScreen) {
                 isOnNestedScreen = true;
                 animateBackButton(R.drawable.back_black);
             }
             setTitle(preferenceScreen.getTitle().toString());
-            for(int v : new int[]{android.R.id.list_container, R.id.title}) {
+            for (int v : new int[] {android.R.id.list_container, R.id.title}) {
                 animateView(v, R.anim.slide_in_right);
             }
         }
@@ -200,12 +198,17 @@ public class SettingsMenu extends SettingsFragment {
     private void animateBackButton(@DrawableRes int newDrawable) {
         Animation animation = AnimationUtils.loadAnimation(mActivity, R.anim.rotate_360);
         animation.setAnimationListener(new Animation.AnimationListener() {
+
             public void onAnimationEnd(Animation animation) {
                 ImageButton backButton = (ImageButton) findViewById(R.id.back_button);
                 backButton.setImageDrawable(mActivity.getResources().getDrawable(newDrawable));
             }
-            public void onAnimationRepeat(Animation animation) {}
-            public void onAnimationStart(Animation animation) {}
+
+            public void onAnimationRepeat(Animation animation) {
+            }
+
+            public void onAnimationStart(Animation animation) {
+            }
         });
         ((ImageButton) findViewById(R.id.back_button)).startAnimation(animation);
     }
@@ -215,7 +218,7 @@ public class SettingsMenu extends SettingsFragment {
     }
 
     private void setTitle(String title) {
-       ((TextView) findViewById(R.id.title)).setText(title);
+        ((TextView) findViewById(R.id.title)).setText(title);
     }
 
     @Override
@@ -225,24 +228,24 @@ public class SettingsMenu extends SettingsFragment {
 
     // only supports 1 child with an optional grandchild
     private void navigateBack() {
-        for(int v : new int[]{android.R.id.list_container, R.id.title}) {
+        for (int v : new int[] {android.R.id.list_container, R.id.title}) {
             animateView(v, R.anim.slide_in_left);
         }
 
-        if(parentScreen.getKey() != null) {
+        if (parentScreen.getKey() != null) {
             setPreferenceScreen(parentScreen);
             setTitle(parentScreen.getTitle().toString());
             parentScreen = mParentScreen;
             return;
         }
 
-        if(isOnNestedScreen) {
+        if (isOnNestedScreen) {
             isOnNestedScreen = false;
             animateBackButton(R.drawable.close_black);
             setPreferenceScreen(mParentScreen);
             setTitle(StringTable.get(R.string.menu_settings_title));
-        }else {
-           dismiss();
+        } else {
+            dismiss();
         }
     }
 
@@ -258,32 +261,22 @@ public class SettingsMenu extends SettingsFragment {
         body.setAlpha(0);
         body.setTranslationX(400);
         body.animate().cancel();
-        body.animate()
-                .translationX(0)
-                .alpha(1)
-                .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-                .setDuration(150)
-                .start();
+        body.animate().translationX(0).alpha(1).setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad)).setDuration(150).start();
         playBackgroundHideInAnim(150);
     }
 
     protected void playOnDismissAnim(Runnable action) {
         View body = findViewById(R.id.body);
         body.animate().cancel();
-        body.animate()
-                .translationXBy(400)
-                .alpha(0)
-                .setDuration(200)
-                .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-                .setListener(new BaseAnimationListener() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        if (action != null) {
-                            action.run();
-                        }
-                    }
-                })
-                .start();
+        body.animate().translationXBy(400).alpha(0).setDuration(200).setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad)).setListener(new BaseAnimationListener() {
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (action != null) {
+                    action.run();
+                }
+            }
+        }).start();
         playBackgroundHideOutAnim(200);
     }
 

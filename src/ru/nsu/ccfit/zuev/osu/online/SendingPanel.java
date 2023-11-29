@@ -15,19 +15,24 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 
 public class SendingPanel extends Rectangle {
+
     private ChangeableText mapText, rankText, accText, scoreText;
+
     private ChangeableText buttonText;
+
     private Rectangle mapRect, rankRect, accRect, scoreRect;
+
     private Sprite button;
 
     private long rank, score;
+
     private float accuracy;
+
     private boolean canBeDismissed = false;
 
     public SendingPanel(long rank, long score, float accuracy) {
         super(0, Utils.toRes(-300), Utils.toRes(800), Utils.toRes(300));
-        TextureRegion btnTex = ResourceManager.getInstance().
-                getTexture("ranking_button");
+        TextureRegion btnTex = ResourceManager.getInstance().getTexture("ranking_button");
 
         this.rank = rank;
         this.score = score;
@@ -38,11 +43,10 @@ public class SendingPanel extends Rectangle {
 
 
             @Override
-            public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
-                                         float pTouchAreaLocalX, float pTouchAreaLocalY) {
+            public boolean onAreaTouched(
+                TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
                 if (canBeDismissed) {
-                    SendingPanel.this.registerEntityModifier(new MoveYModifier(0.5f, 0,
-                            Utils.toRes(-350)));
+                    SendingPanel.this.registerEntityModifier(new MoveYModifier(0.5f, 0, Utils.toRes(-350)));
                     canBeDismissed = false;
                     return true;
                 }
@@ -51,36 +55,27 @@ public class SendingPanel extends Rectangle {
         };
         attachChild(button);
 
-        buttonText = new ChangeableText(Utils.toRes(340), Utils.toRes(305),
-                ResourceManager.getInstance().getFont("font"),
-                "Sending...", HorizontalAlign.CENTER, 10);
+        buttonText = new ChangeableText(Utils.toRes(340), Utils.toRes(305), ResourceManager.getInstance().getFont("font"), "Sending...", HorizontalAlign.CENTER, 10);
         attachChild(buttonText);
 
-        Text topScoreText = new Text(0, 0,
-                ResourceManager.getInstance().getFont("CaptionFonrt"), "Overall Ranking");
+        Text topScoreText = new Text(0, 0, ResourceManager.getInstance().getFont("CaptionFonrt"), "Overall Ranking");
         topScoreText.setPosition(Utils.toRes(400) - topScoreText.getWidth() / 2, Utils.toRes(60));
         attachChild(topScoreText);
 
-        Text tableCaption = new Text(Utils.toRes(60), Utils.toRes(120),
-                ResourceManager.getInstance().getFont("font"),
-                "Map rank     Overall      Accuracy       Ranked score");
+        Text tableCaption = new Text(Utils.toRes(60), Utils.toRes(120), ResourceManager.getInstance().getFont("font"), "Map rank     Overall      Accuracy       Ranked score");
         attachChild(tableCaption);
 
-        mapRect = new Rectangle(Utils.toRes(50), Utils.toRes(160),
-                Utils.toRes(140), Utils.toRes(80));
+        mapRect = new Rectangle(Utils.toRes(50), Utils.toRes(160), Utils.toRes(140), Utils.toRes(80));
         mapRect.setColor(1, 1, 0, 0.8f);
         attachChild(mapRect);
 
-        rankRect = new Rectangle(Utils.toRes(195), Utils.toRes(160),
-                Utils.toRes(150), Utils.toRes(80));
+        rankRect = new Rectangle(Utils.toRes(195), Utils.toRes(160), Utils.toRes(150), Utils.toRes(80));
         attachChild(rankRect);
 
-        accRect = new Rectangle(Utils.toRes(350), Utils.toRes(160),
-                Utils.toRes(150), Utils.toRes(80));
+        accRect = new Rectangle(Utils.toRes(350), Utils.toRes(160), Utils.toRes(150), Utils.toRes(80));
         attachChild(accRect);
 
-        scoreRect = new Rectangle(Utils.toRes(505), Utils.toRes(160),
-                Utils.toRes(250), Utils.toRes(80));
+        scoreRect = new Rectangle(Utils.toRes(505), Utils.toRes(160), Utils.toRes(250), Utils.toRes(80));
         attachChild(scoreRect);
 
         Font font = ResourceManager.getInstance().getFont("font");
@@ -102,17 +97,17 @@ public class SendingPanel extends Rectangle {
     }
 
     private void placeText(Rectangle rect, ChangeableText text) {
-        text.setPosition(rect.getX() + rect.getWidth() / 2 - text.getWidth() / 2,
-                rect.getY() + rect.getHeight() / 2 - text.getHeight() / 2);
+        text.setPosition(rect.getX() + rect.getWidth() / 2 - text.getWidth() / 2, rect.getY() + rect.getHeight() / 2 - text.getHeight() / 2);
     }
 
     private void setRectColor(Rectangle rect, float difference) {
-        if (difference > 0)
+        if (difference > 0) {
             rect.setColor(0, 1, 0, 0.5f);
-        else if (difference < 0)
+        } else if (difference < 0) {
             rect.setColor(1, 0, 0, 0.5f);
-        else
+        } else {
             rect.setColor(0.4f, 0.4f, 0.4f, 0.8f);
+        }
     }
 
     private String formatScore(long score) {
@@ -131,35 +126,39 @@ public class SendingPanel extends Rectangle {
         canBeDismissed = true;
         mapText.setText(String.format("#%d", mapRank));
         placeText(mapRect, mapText);
-        if (newScore > score)
+        if (newScore > score) {
             mapRect.setColor(1, 1, 0, 0.8f);
-        else
+        } else {
             setRectColor(mapRect, 0);
+        }
 
-        if (newRank == rank)
+        if (newRank == rank) {
             rankText.setText(String.format("#%d", rank));
-        else if (newRank < rank)
+        } else if (newRank < rank) {
             rankText.setText(String.format("#%d\n(+%d)", newRank, rank - newRank));
-        else
+        } else {
             rankText.setText(String.format("#%d\n(%d)", newRank, rank - newRank));
+        }
         placeText(rankRect, rankText);
         setRectColor(rankRect, rank - newRank);
 
-        if (Math.abs(newAcc - accuracy) < 0.0001f)
+        if (Math.abs(newAcc - accuracy) < 0.0001f) {
             accText.setText(String.format("%.2f%%", accuracy * 100f));
-        else if (newAcc < accuracy)
+        } else if (newAcc < accuracy) {
             accText.setText(String.format("%.2f%%\n(%.2f%%)", newAcc * 100f, (newAcc - accuracy) * 100f));
-        else
+        } else {
             accText.setText(String.format("%.2f%%\n(+%.2f%%)", newAcc * 100f, (newAcc - accuracy) * 100f));
+        }
         placeText(accRect, accText);
         setRectColor(accRect, newAcc - accuracy);
 
-        if (newScore == score)
+        if (newScore == score) {
             scoreText.setText(String.format("%s", formatScore(score)));
-        else if (newScore < score)
+        } else if (newScore < score) {
             scoreText.setText(String.format("%s\n(%s)", formatScore(newScore), formatScore(newScore - score)));
-        else
+        } else {
             scoreText.setText(String.format("%s\n(+%s)", formatScore(newScore), formatScore(newScore - score)));
+        }
         placeText(scoreRect, scoreText);
         setRectColor(scoreRect, newScore - score);
 
@@ -175,4 +174,5 @@ public class SendingPanel extends Rectangle {
     public ITouchArea getDismissTouchArea() {
         return button;
     }
+
 }

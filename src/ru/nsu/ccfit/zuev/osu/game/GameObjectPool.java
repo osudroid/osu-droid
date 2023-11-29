@@ -7,14 +7,23 @@ import java.util.Map;
 import ru.nsu.ccfit.zuev.osu.Config;
 
 public class GameObjectPool {
+
     public static GameObjectPool instance = new GameObjectPool();
+
     public LinkedList<HitCircle> circles = new LinkedList<HitCircle>();
+
     public Map<Integer, LinkedList<CircleNumber>> numbers = new HashMap<Integer, LinkedList<CircleNumber>>();
+
     public Map<String, LinkedList<GameEffect>> effects = new HashMap<String, LinkedList<GameEffect>>();
+
     public LinkedList<Slider> sliders = new LinkedList<Slider>();
+
     public LinkedList<FollowTrack> tracks = new LinkedList<FollowTrack>();
+
     public LinkedList<Spinner> spinners = new LinkedList<Spinner>();
+
     private int objectsCreated = 0;
+
     private GameObjectPool() {
     }
 
@@ -69,8 +78,7 @@ public class GameObjectPool {
     }
 
     public GameEffect getEffect(final String texname) {
-        if (effects.containsKey(texname)
-                && effects.get(texname).isEmpty() == false) {
+        if (effects.containsKey(texname) && effects.get(texname).isEmpty() == false) {
             return effects.get(texname).poll();
         }
 
@@ -136,4 +144,5 @@ public class GameObjectPool {
         new Spinner();
         objectsCreated = 31;
     }
+
 }

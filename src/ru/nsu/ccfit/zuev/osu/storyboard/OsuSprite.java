@@ -47,24 +47,43 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 public class OsuSprite {
 
     public static final int LAYER_BACKGROUND = 0;
+
     public static final int LAYER_FAIL = 1;
+
     public static final int LAYER_PASS = 2;
+
     public static final int LAYER_FOREGROUND = 3;
+
     public static float TO_RADIANS = (1 / 180.0f) * (float) Math.PI;
+
     public static float TO_DEGREES = (1 / (float) Math.PI) * 180;
+
     public long spriteStartTime, spriteEndTime;
+
     private String fileName;
+
     private String debugLine;
+
     private int layer, ZIndex;
+
     private Origin origin;
+
     private BaseSprite sprite;
+
     private ArrayList<OsuEvent> eventList;
+
     private TextureRegion textureRegion;
+
     private StoryBoardTestActivity activity = StoryBoardTestActivity.activity;
+
     private boolean isValid;
+
     private ParallelEntityModifier parallelEntityModifier;
+
     private boolean isAnimation;
+
     private float anchorCenterX = 0f;
+
     private float anchorCenterY = 0f;
 
     public OsuSprite(float x, float y, int layer, Origin origin, String filePath, ArrayList<OsuEvent> eventList, int ZIndex) {//normal sprite
@@ -95,7 +114,8 @@ public class OsuSprite {
         filePath = filePath.replaceAll("\"", "").replaceAll("\\\\", "/");
         this.fileName = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.lastIndexOf("."));
         String fileExt = filePath.substring(filePath.lastIndexOf("."));
-        FileBitmapTextureAtlasSource cSource = new FileBitmapTextureAtlasSource(new File(StoryBoardTestActivity.FOLDER, filePath.substring(0, filePath.lastIndexOf(".")) + "0" + fileExt));
+        FileBitmapTextureAtlasSource cSource = new FileBitmapTextureAtlasSource(new File(StoryBoardTestActivity.FOLDER,
+            filePath.substring(0, filePath.lastIndexOf(".")) + "0" + fileExt));
         int tw = 16, th = 16;
         int width = cSource.getWidth() * count;
         int height = cSource.getHeight();
@@ -131,8 +151,7 @@ public class OsuSprite {
         ResourceManager.getInstance().getEngine().getTextureManager().loadTexture(mBitmapTextureAtlas);
 
         isValid = true;
-        TiledTextureRegion tiledTextureRegion = new TiledTextureRegion(mBitmapTextureAtlas,
-                0, 0, width, height, count, 1);
+        TiledTextureRegion tiledTextureRegion = new TiledTextureRegion(mBitmapTextureAtlas, 0, 0, width, height, count, 1);
         AnimatedSprite sprite = new AnimatedSprite(x, y, tiledTextureRegion);
         sprite.animate(delay, loopType.equals("LoopForever"));
         this.sprite = sprite;
@@ -148,7 +167,7 @@ public class OsuSprite {
     }
 
     private void setUpSprite() {
-//        spriteStartTime = eventList.get(eventList.size() - 1).startTime;
+        //        spriteStartTime = eventList.get(eventList.size() - 1).startTime;
         for (OsuEvent osuEvent : eventList) {
             if (osuEvent.startTime + 1 >= osuEvent.endTime && osuEvent.command != Command.F) {
                 continue;
@@ -256,15 +275,12 @@ public class OsuSprite {
         for (int i = 0; i < eventList.size(); i++) {
             OsuEvent osuEvent = eventList.get(i);
             if (osuEvent.startTime == spriteStartTime) {
-//                entityModifiers[i] = new SequenceEntityModifier(
-//                        parseModifier(osuEvent)
-//                );
+                //                entityModifiers[i] = new SequenceEntityModifier(
+                //                        parseModifier(osuEvent)
+                //                );
                 entityModifiers[i] = parseModifier(osuEvent);
             } else {
-                entityModifiers[i] = new SequenceEntityModifier(
-                        new DelayModifier((osuEvent.startTime - spriteStartTime) / 1000f),
-                        parseModifier(osuEvent)
-                );
+                entityModifiers[i] = new SequenceEntityModifier(new DelayModifier((osuEvent.startTime - spriteStartTime) / 1000f), parseModifier(osuEvent));
             }
         }
         parallelEntityModifier = new ParallelEntityModifier(entityModifiers);
@@ -302,7 +318,7 @@ public class OsuSprite {
                         break;
                     case LAYER_FAIL:
                         //ignoring fail
-//                      StoryBoardTestActivity.activity.attachFail(sprite);
+                        //                      StoryBoardTestActivity.activity.attachFail(sprite);
                         break;
                 }
 
@@ -346,9 +362,18 @@ public class OsuSprite {
                 break;
             case M://Move
                 if (iEaseFunction != null) {
-                    iEntityModifier = new MoveModifier(duration, osuEvent.params[0] - anchorCenterX, osuEvent.params[2] - anchorCenterX, osuEvent.params[1] - anchorCenterY, osuEvent.params[3] - anchorCenterY, iEaseFunction);
+                    iEntityModifier = new MoveModifier(duration,
+                        osuEvent.params[0] - anchorCenterX,
+                        osuEvent.params[2] - anchorCenterX,
+                        osuEvent.params[1] - anchorCenterY,
+                        osuEvent.params[3] - anchorCenterY,
+                        iEaseFunction);
                 } else {
-                    iEntityModifier = new MoveModifier(duration, osuEvent.params[0] - anchorCenterX, osuEvent.params[2] - anchorCenterX, osuEvent.params[1] - anchorCenterY, osuEvent.params[3] - anchorCenterY);
+                    iEntityModifier = new MoveModifier(duration,
+                        osuEvent.params[0] - anchorCenterX,
+                        osuEvent.params[2] - anchorCenterX,
+                        osuEvent.params[1] - anchorCenterY,
+                        osuEvent.params[3] - anchorCenterY);
                 }
                 break;
             case MX://Move X
@@ -388,11 +413,22 @@ public class OsuSprite {
                 break;
             case C://Colour
                 if (iEaseFunction != null) {
-                    iEntityModifier = new ColorModifier(duration, osuEvent.params[0] / 255f, osuEvent.params[1] / 255f, osuEvent.params[2] / 255f,
-                            osuEvent.params[3] / 255, osuEvent.params[4] / 255, osuEvent.params[5] / 255, iEaseFunction);
+                    iEntityModifier = new ColorModifier(duration,
+                        osuEvent.params[0] / 255f,
+                        osuEvent.params[1] / 255f,
+                        osuEvent.params[2] / 255f,
+                        osuEvent.params[3] / 255,
+                        osuEvent.params[4] / 255,
+                        osuEvent.params[5] / 255,
+                        iEaseFunction);
                 } else {
-                    iEntityModifier = new ColorModifier(duration, osuEvent.params[0] / 255, osuEvent.params[1] / 255, osuEvent.params[2] / 255,
-                            osuEvent.params[3] / 255, osuEvent.params[4] / 255, osuEvent.params[5] / 255);
+                    iEntityModifier = new ColorModifier(duration,
+                        osuEvent.params[0] / 255,
+                        osuEvent.params[1] / 255,
+                        osuEvent.params[2] / 255,
+                        osuEvent.params[3] / 255,
+                        osuEvent.params[4] / 255,
+                        osuEvent.params[5] / 255);
                 }
                 break;
             case P://Parameter
@@ -415,15 +451,12 @@ public class OsuSprite {
                 for (int i = 0; i < subEventList.size(); i++) {
                     OsuEvent subOsuEvent = subEventList.get(i);
                     if (subOsuEvent.startTime == 0) {
-//                        subEntityModifiers[i] = new SequenceEntityModifier(
-//                                parseModifier(subOsuEvent)
-//                        );
+                        //                        subEntityModifiers[i] = new SequenceEntityModifier(
+                        //                                parseModifier(subOsuEvent)
+                        //                        );
                         subEntityModifiers[i] = parseModifier(subOsuEvent);
                     } else {
-                        subEntityModifiers[i] = new SequenceEntityModifier(
-                                new DelayModifier((subOsuEvent.startTime - firstSubTime) / 1000f),
-                                parseModifier(subOsuEvent)
-                        );
+                        subEntityModifiers[i] = new SequenceEntityModifier(new DelayModifier((subOsuEvent.startTime - firstSubTime) / 1000f), parseModifier(subOsuEvent));
                     }
                 }
                 iEntityModifier = new LoopEntityModifier(new ParallelEntityModifier(subEntityModifiers), osuEvent.loopCount);
@@ -459,18 +492,14 @@ public class OsuSprite {
                             if (subOsuEvent.startTime == 0) {
                                 subEntityModifiers[i] = parseModifier(subOsuEvent);
                             } else {
-                                subEntityModifiers[i] = new SequenceEntityModifier(
-                                        new DelayModifier((subOsuEvent.startTime - firstSubTime) / 1000f),
-                                        parseModifier(subOsuEvent)
-                                );
+                                subEntityModifiers[i] = new SequenceEntityModifier(new DelayModifier((subOsuEvent.startTime - firstSubTime) / 1000f), parseModifier(subOsuEvent));
                             }
                         }
                         if (firstSoundTime == hitSound.time) {
                             entityModifierList.add(new ParallelEntityModifier(subEntityModifiers));
                         } else {
-                            entityModifierList.add(new SequenceEntityModifier(
-                                    new DelayModifier((hitSound.time - firstSoundTime) / 1000f),
-                                    new ParallelEntityModifier(subEntityModifiers)));
+                            entityModifierList.add(new SequenceEntityModifier(new DelayModifier((hitSound.time - firstSoundTime) / 1000f),
+                                new ParallelEntityModifier(subEntityModifiers)));
                         }
                     }
                     if (hitSound.time > osuEvent.endTime) {
@@ -502,4 +531,5 @@ public class OsuSprite {
             }
         }
     }
+
 }

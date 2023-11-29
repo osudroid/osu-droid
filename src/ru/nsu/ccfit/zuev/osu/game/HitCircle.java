@@ -7,33 +7,47 @@ import org.anddev.andengine.entity.modifier.FadeOutModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
-
 import org.anddev.andengine.util.modifier.ease.EaseLinear;
+
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class HitCircle extends GameObject {
+
     private final Sprite circle;
+
     private final Sprite overlay;
+
     private final Sprite approachCircle;
+
     private final RGBColor color = new RGBColor();
+
     private CircleNumber number;
+
     private float scale;
+
     private GameObjectListener listener;
+
     private Scene scene;
+
     private int soundId;
+
     private int sampleSet;
+
     private int addition;
+
     //private PointF pos;
     private float radius;
+
     private float passedTime;
+
     private float time;
+
     private boolean isFirstNote;
+
     private boolean kiai;
 
     public HitCircle() {
@@ -45,9 +59,19 @@ public class HitCircle extends GameObject {
         approachCircle = SpritePool.getInstance().getSprite("approachcircle");
     }
 
-    public void init(final GameObjectListener listener, final Scene pScene,
-                     final PointF pos, final float time, final float r, final float g,
-                     final float b, final float scale, int num, final int sound, final String tempSound, final boolean isFirstNote) {
+    public void init(
+        final GameObjectListener listener,
+        final Scene pScene,
+        final PointF pos,
+        final float time,
+        final float r,
+        final float g,
+        final float b,
+        final float scale,
+        int num,
+        final int sound,
+        final String tempSound,
+        final boolean isFirstNote) {
         // Storing parameters into fields
         //Log.i("note-ini", time + "s");
         this.replayObjectData = null;
@@ -110,18 +134,9 @@ public class HitCircle extends GameObject {
             float fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
             float fadeOutDuration = time * 0.3f * GameHelper.getTimeMultiplier();
 
-            number.registerEntityModifiers(() -> new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeOutDuration)
-            ));
-            overlay.registerEntityModifier(new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeOutDuration)
-            ));
-            circle.registerEntityModifier(new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeOutDuration)
-            ));
+            number.registerEntityModifiers(() -> new SequenceEntityModifier(new FadeInModifier(fadeInDuration), new FadeOutModifier(fadeOutDuration)));
+            overlay.registerEntityModifier(new SequenceEntityModifier(new FadeInModifier(fadeInDuration), new FadeOutModifier(fadeOutDuration)));
+            circle.registerEntityModifier(new SequenceEntityModifier(new FadeInModifier(fadeInDuration), new FadeOutModifier(fadeOutDuration)));
         }
         scene.attachChild(number, 0);
         scene.attachChild(overlay, 0);
@@ -206,7 +221,7 @@ public class HitCircle extends GameObject {
                 listener.registerAccuracy(replayObjectData.accuracy / 1000f);
                 passedTime = -1;
                 // Remove circle and register hit in update thread
-                listener.onCircleHit(id, replayObjectData.accuracy / 1000f, pos,endsCombo, replayObjectData.result, color);
+                listener.onCircleHit(id, replayObjectData.accuracy / 1000f, pos, endsCombo, replayObjectData.result, color);
                 removeFromScene();
                 return;
             }
@@ -253,13 +268,11 @@ public class HitCircle extends GameObject {
 
         passedTime += dt;
 
-        if (!GameHelper.isHidden())
-        {
+        if (!GameHelper.isHidden()) {
             float duration = 0.4f * Math.min(1, time / (450 / 1000f)) * GameHelper.getTimeMultiplier();
             float percent = EaseLinear.getInstance().getPercentage(passedTime, duration);
 
-            if (passedTime < duration)
-            {
+            if (passedTime < duration) {
                 circle.setAlpha(percent);
                 overlay.setAlpha(percent);
                 number.setAlpha(percent);
@@ -298,7 +311,7 @@ public class HitCircle extends GameObject {
     } // update(float dt)
 
     @Override
-    public void tryHit(final float dt){
+    public void tryHit(final float dt) {
         if (passedTime * 2 > time && isHit()) {
             float signAcc = passedTime - time;
             if (Config.isFixFrameOffset()) {
@@ -317,4 +330,5 @@ public class HitCircle extends GameObject {
             removeFromScene();
         }
     }
+
 }

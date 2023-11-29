@@ -1,7 +1,9 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.database.Cursor;
+
 import com.reco1l.legacy.Multiplayer;
+
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -14,7 +16,19 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.MathUtils;
 import org.jetbrains.annotations.Nullable;
-import ru.nsu.ccfit.zuev.osu.*;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+
+import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -22,44 +36,57 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-import java.io.File;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
-
 public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetectorListener {
+
     private final Scene mainScene;
+
     private final MenuItemListener listener;
+
     private final ChangeableText loadingText;
-    private float percentShow = -1;
-    private boolean showOnlineScores = false;
-    private TrackInfo lastTrack;
-    private boolean wasOnline = false;
-    private boolean isScroll = false;
 
     private final SurfaceScrollDetector mScrollDetector;
 
-    private float maxY = 100500;
-    private int pointerId = -1;
-    private float initialY = -1;
-    private Float touchY;
-    private float camY = -146;
-    private float velocityY = 0;
-    private float secPassed = 0;
-    private float tapTime = 0;
-    private float height = 0;
-    private float downTime = -1;
-    private int _scoreID = -1;
-    private boolean moved = false;
-    private ArrayList<ScoreBoardItem> scoreItems = null;
+    private final ExecutorService loadExecutor = Executors.newSingleThreadExecutor();
 
+    private float percentShow = -1;
+
+    private boolean showOnlineScores = false;
+
+    private TrackInfo lastTrack;
+
+    private boolean wasOnline = false;
+
+    private boolean isScroll = false;
+
+    private float maxY = 100500;
+
+    private int pointerId = -1;
+
+    private float initialY = -1;
+
+    private Float touchY;
+
+    private float camY = -146;
+
+    private float velocityY = 0;
+
+    private float secPassed = 0;
+
+    private float tapTime = 0;
+
+    private float height = 0;
+
+    private float downTime = -1;
+
+    private int _scoreID = -1;
+
+    private boolean moved = false;
+
+    private ArrayList<ScoreBoardItem> scoreItems = null;
 
     private LoadTask currentTask;
 
     private Runnable currentAvatarTask;
-
-    private final ExecutorService loadExecutor = Executors.newSingleThreadExecutor();
 
 
     public ScoreBoard(final Scene scene, final Entity layer, final MenuItemListener listener) {
@@ -154,8 +181,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         for (int i = 0; i < split.length; i++) {
             var str = split[i];
 
-            if (str.isEmpty())
+            if (str.isEmpty()) {
                 continue;
+            }
 
             if (str.charAt(0) == 'x' && str.length() == 5) {
                 sb.append(str.substring(1)).append("x,");
@@ -189,14 +217,16 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     scores = OnlineManager.getInstance().getTop(trackFile, track.getMD5());
                 } catch (OnlineManager.OnlineManagerException e) {
                     Debug.e("Cannot load scores " + e.getMessage());
-                    
-                    if (isActive()) 
+
+                    if (isActive()) {
                         loadingText.setText("Cannot load scores");
+                    }
                     return;
                 }
 
-                if (!isActive())
+                if (!isActive()) {
                     return;
+                }
 
                 loadingText.setText(OnlineManager.getInstance().getFailMessage());
 
@@ -228,11 +258,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     var avatarURL = data[7];
                     var beatmapRank = isPersonalBest && !isInLeaderboard ? Integer.parseInt(data[8]) : (i + 1);
 
-                    final String titleStr = "#"
-                            + beatmapRank
-                            + " "
-                            + playerName + "\n"
-                            + StringTable.format(R.string.menu_score, formatScore(sb, currentTotalScore), combo);
+                    final String titleStr = "#" + beatmapRank + " " + playerName + "\n" + StringTable.format(R.string.menu_score, formatScore(sb, currentTotalScore), combo);
 
                     if (i < scores.size() - 1) {
                         String[] nextData = scores.get(i + 1).split("\\s+");
@@ -245,14 +271,20 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     }
 
                     final int diffTotalScore = currentTotalScore - nextTotalScore;
-                    final String accStr = convertModString(sb, modString) + "\n" + String.format(Locale.ENGLISH, "%.2f", accuracy) + "%" + "\n"
-                            + (nextTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
+                    final String accStr = convertModString(sb, modString) +
+                                          "\n" +
+                                          String.format(Locale.ENGLISH, "%.2f", accuracy) +
+                                          "%" +
+                                          "\n" +
+                                          (nextTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
 
-                    if (!isActive())
+                    if (!isActive()) {
                         return;
+                    }
 
-                    if (isPersonalBest)
+                    if (isPersonalBest) {
                         attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, mark, true, scoreID, avatarURL, playerName, true), 0);
+                    }
 
                     if (isInLeaderboard) {
                         attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, mark, true, scoreID, avatarURL, playerName, false));
@@ -276,15 +308,16 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
             @Override
             public void run() {
-                String[] columns = { "id", "playername", "score", "combo", "mark", "accuracy", "mode" };
+                String[] columns = {"id", "playername", "score", "combo", "mark", "accuracy", "mode"};
                 try (Cursor scoreSet = ScoreLibrary.getInstance().getMapScores(columns, track.getFilename())) {
                     if (scoreSet == null || scoreSet.getCount() == 0 || !isActive()) {
 
                         // This allows the in-game leaderboard to show even if the local database is empty, it'll append
                         // the player score (because the in-game leaderboard assumes that the board finished loading only
                         // if the scores list isn't null).
-                        if (isActive())
+                        if (isActive()) {
                             scoreItems = new ArrayList<>();
+                        }
                         return;
                     }
 
@@ -299,12 +332,12 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
                         final int currTotalScore = scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score"));
                         final String totalScore = formatScore(sb, currTotalScore);
-                        final String titleStr = "#"
-                                + (i + 1)
-                                + " "
-                                + scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername"))
-                                + "\n"
-                                + StringTable.format(R.string.menu_score, totalScore, scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")));
+                        final String titleStr = "#" +
+                                                (i + 1) +
+                                                " " +
+                                                scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername")) +
+                                                "\n" +
+                                                StringTable.format(R.string.menu_score, totalScore, scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")));
 
                         if (i < scoreSet.getCount() - 1) {
                             scoreSet.moveToPosition(i + 1);
@@ -315,17 +348,25 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                         }
 
                         final long diffTotalScore = currTotalScore - nextTotalScore;
-                        final String accStr = convertModString(sb, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mode"))) + "\n"
-                                + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(scoreSet.getFloat(scoreSet.getColumnIndexOrThrow("accuracy")) * 100, 2)) + "%" + "\n"
-                                + (nextTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
+                        final String accStr = convertModString(sb, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mode"))) +
+                                              "\n" +
+                                              String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(scoreSet.getFloat(scoreSet.getColumnIndexOrThrow("accuracy")) * 100, 2)) +
+                                              "%" +
+                                              "\n" +
+                                              (nextTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
 
-                        if (!isActive())
+                        if (!isActive()) {
                             return;
+                        }
 
                         attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null, false));
 
                         var item = new ScoreBoardItem();
-                        item.set(i + 1, scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")), scoreID);
+                        item.set(i + 1,
+                            scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername")),
+                            scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")),
+                            scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")),
+                            scoreID);
                         items.add(item);
                     }
                     scoreItems = items;
@@ -341,8 +382,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             return;
         }
 
-        if (currentTask != null && currentTask.avatarExecutor != null)
+        if (currentTask != null && currentTask.avatarExecutor != null) {
             currentTask.avatarExecutor.shutdownNow();
+        }
 
         loadingText.setText("");
         lastTrack = track;
@@ -355,8 +397,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             currentAvatarTask = null;
             attachChild(loadingText);
 
-            if (track == null)
+            if (track == null) {
                 return;
+            }
 
             if (OnlineManager.getInstance().isStayOnline() && showOnlineScores) {
                 initFromOnline(track);
@@ -368,8 +411,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     }
 
     @Override
-    protected void onManagedUpdate(float pSecondsElapsed)
-    {
+    protected void onManagedUpdate(float pSecondsElapsed) {
         super.onManagedUpdate(pSecondsElapsed);
         secPassed += pSecondsElapsed;
 
@@ -382,12 +424,12 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             float y = -camY;
 
             var count = getChildCount();
-            for (int i = 0; i < count; i++)
-            {
+            for (int i = 0; i < count; i++) {
                 var child = getChild(i);
 
-                if (!(child instanceof Sprite))
+                if (!(child instanceof Sprite)) {
                     continue;
+                }
 
                 var sprite = (Sprite) child;
                 sprite.setPosition(sprite.getX(), y);
@@ -417,12 +459,12 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             }
 
             var count = getChildCount();
-            for (int i = 0; i < count; i++)
-            {
+            for (int i = 0; i < count; i++) {
                 var child = getChild(i);
 
-                if (!(child instanceof Sprite))
+                if (!(child instanceof Sprite)) {
                     continue;
+                }
 
                 var sprite = (Sprite) child;
                 sprite.setPosition(-160, 146 + 0.8f * percentShow * i * (sprite.getHeight() - 32));
@@ -475,7 +517,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     if (camY <= -146) {
                         camY = -146;
                         velocityY = 0;
-                    } else if (camY >= maxY){
+                    } else if (camY >= maxY) {
                         camY = maxY;
                         velocityY = 0;
                     }
@@ -532,6 +574,14 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     private class ScoreItem extends Sprite {
 
 
+        private final ExecutorService avatarExecutor;
+
+        private final String username;
+
+        private final int scoreID;
+
+        private final boolean showOnline;
+
         private float dx = 0;
 
         private float dy = 0;
@@ -540,47 +590,24 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
         private Runnable avatarTask;
 
-        private final ExecutorService avatarExecutor;
-
-        private final String username;
-
-        private final int scoreID;
-
-        private final boolean showOnline;
-        
 
         private ScoreItem(
-                ExecutorService avatarExecutor,
-                String title,
-                String acc,
-                String markStr,
-                boolean showOnline,
-                int scoreID,
-                String avaURL,
-                String username,
-                boolean isPersonalBest) {
-            super(-150, 40,  ResourceManager.getInstance().getTexture("menu-button-background").deepCopy());
+            ExecutorService avatarExecutor, String title, String acc, String markStr, boolean showOnline, int scoreID, String avaURL, String username, boolean isPersonalBest) {
+            super(-150, 40, ResourceManager.getInstance().getTexture("menu-button-background").deepCopy());
 
             this.avatarExecutor = avatarExecutor;
             this.showOnline = showOnline;
             this.username = username;
             this.scoreID = scoreID;
 
-            var shouldLoadAvatar = showOnlineScores
-                    && Config.getLoadAvatar()
-                    && avaURL != null
-                    && avatarExecutor != null;
+            var shouldLoadAvatar = showOnlineScores && Config.getLoadAvatar() && avaURL != null && avatarExecutor != null;
 
             int baseX = shouldLoadAvatar ? 90 : 0;
             var baseY = 0f;
 
             if (isPersonalBest) {
 
-                var topText = new Text(
-                        getWidth() / 2f,
-                        0f,
-                        ResourceManager.getInstance().getFont("strokeFont"),
-                        "Personal Best");
+                var topText = new Text(getWidth() / 2f, 0f, ResourceManager.getInstance().getFont("strokeFont"), "Personal Best");
 
                 attachChild(topText);
                 baseY = topText.getHeight() + 5;
@@ -611,8 +638,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     if (!avatarExecutor.isShutdown() && OnlineManager.getInstance().loadAvatarToTextureManager(avaURL)) {
                         avatarTexture = ResourceManager.getInstance().getAvatarTextureIfLoaded(avaURL);
 
-                        if (avatarTexture != null)
+                        if (avatarTexture != null) {
                             texture = avatarTexture;
+                        }
                     }
 
                     if (getParent() == null) {
@@ -621,8 +649,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     }
                     attachChild(new Sprite(55, finalBaseY + 12, 90, 90, texture));
 
-                    if (currentAvatarTask == this)
+                    if (currentAvatarTask == this) {
                         currentAvatarTask = null;
+                    }
                 }
             } : null;
 
@@ -643,17 +672,16 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         }
 
         @Override
-        public void onDetached()
-        {
-            if (avatarTexture != null)
+        public void onDetached() {
+            if (avatarTexture != null) {
                 ResourceManager.getInstance().unloadTexture(avatarTexture);
+            }
 
             mainScene.unregisterTouchArea(this);
         }
 
         @Override
-        protected void onManagedUpdate(float pSecondsElapsed)
-        {
+        protected void onManagedUpdate(float pSecondsElapsed) {
             super.onManagedUpdate(pSecondsElapsed);
 
             // This is to avoid loading avatars when the scene was changed (game started or user gone back to main menu).
@@ -666,8 +694,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 try {
                     avatarExecutor.submit(task);
                 } catch (RejectedExecutionException e) {
-                    if (currentAvatarTask == task)
+                    if (currentAvatarTask == task) {
                         currentAvatarTask = null;
+                    }
                 }
             }
         }
@@ -690,8 +719,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 downTime = -1;
                 setAlpha(0.5f);
 
-                if (Multiplayer.isMultiplayer)
+                if (Multiplayer.isMultiplayer) {
                     return true;
+                }
 
                 listener.openScore(scoreID, showOnline, username);
                 GlobalManager.getInstance().getScoring().setReplayID(scoreID);
@@ -703,6 +733,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             }
             return false;
         }
+
     }
+
 }
 

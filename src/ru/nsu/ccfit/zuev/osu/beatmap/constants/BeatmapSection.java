@@ -4,14 +4,7 @@ package ru.nsu.ccfit.zuev.osu.beatmap.constants;
  * Available sections in a <code>.osu</code> beatmap file.
  */
 public enum BeatmapSection {
-    general,
-    editor,
-    metadata,
-    difficulty,
-    events,
-    timingPoints,
-    colors,
-    hitObjects;
+    general, editor, metadata, difficulty, events, timingPoints, colors, hitObjects;
 
     /**
      * Converts a string section value from a beatmap file to its enum counterpart.

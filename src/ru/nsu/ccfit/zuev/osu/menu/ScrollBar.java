@@ -8,14 +8,15 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Utils;
 
 public class ScrollBar {
+
     private final Rectangle barRectangle;
+
     private boolean visible;
 
     public ScrollBar(final Scene scene) {
         visible = false;
 
-        barRectangle = new Rectangle(Config.getRES_WIDTH() - Utils.toRes(20),
-                0, Utils.toRes(20), Utils.toRes(50));
+        barRectangle = new Rectangle(Config.getRES_WIDTH() - Utils.toRes(20), 0, Utils.toRes(20), Utils.toRes(50));
         barRectangle.setAlpha(0.8f);
         barRectangle.setColor(1, 1, 1);
 
@@ -28,10 +29,7 @@ public class ScrollBar {
             return;
         }
 
-        barRectangle
-                .setPosition(barRectangle.getX(),
-                        (Config.getRES_HEIGHT() - barRectangle.getHeight())
-                                * vy / maxy);
+        barRectangle.setPosition(barRectangle.getX(), (Config.getRES_HEIGHT() - barRectangle.getHeight()) * vy / maxy);
     }
 
     public void setVisible(final boolean vis) {
@@ -43,4 +41,5 @@ public class ScrollBar {
         }
         visible = vis;
     }
+
 }

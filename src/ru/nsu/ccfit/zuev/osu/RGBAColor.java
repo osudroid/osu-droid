@@ -1,9 +1,13 @@
 package ru.nsu.ccfit.zuev.osu;
 
 public class RGBAColor {
+
     private float cr;
+
     private float cg;
+
     private float cb;
+
     private float ca;
 
     public RGBAColor() {
@@ -42,4 +46,5 @@ public class RGBAColor {
         cb = b;
         ca = a;
     }
+
 }

@@ -19,6 +19,7 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class StartingMapManager {
+
     private final Activity activity;
 
     public StartingMapManager(final Activity activity) {
@@ -26,8 +27,7 @@ public class StartingMapManager {
     }
 
     public boolean checkStartingMaps() {
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(activity);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
         return prefs.getBoolean("initialized", false);
     }
 
@@ -48,8 +48,7 @@ public class StartingMapManager {
             copyAllFiles(dir);
         }
 
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(activity);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean("initialized", true);
         editor.commit();
@@ -87,9 +86,7 @@ public class StartingMapManager {
         try {
             out = new FileOutputStream(Config.getBeatmapPath() + "/" + filename);
         } catch (final FileNotFoundException e) {
-            ToastLogger.showText(
-                    StringTable.format(R.string.message_error, e.getMessage()),
-                    false);
+            ToastLogger.showText(StringTable.format(R.string.message_error, e.getMessage()), false);
             Debug.e("StartingMapManager: " + e.getMessage(), e);
             return;
         }
@@ -110,4 +107,5 @@ public class StartingMapManager {
             return;
         }
     }
+
 }

@@ -37,4 +37,5 @@ public class SkinLayout {
             entity.setHeight(height);
         }
     }
+
 }

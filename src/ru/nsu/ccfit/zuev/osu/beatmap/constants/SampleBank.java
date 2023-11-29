@@ -4,10 +4,7 @@ package ru.nsu.ccfit.zuev.osu.beatmap.constants;
  * Represents available sample banks.
  */
 public enum SampleBank {
-    none(""),
-    normal("normal"),
-    soft("soft"),
-    drum("drum");
+    none(""), normal("normal"), soft("soft"), drum("drum");
 
     /**
      * The prefix of audio files representing this sample bank.

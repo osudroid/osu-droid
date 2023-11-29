@@ -19,6 +19,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
 public class DatabaseContext extends ContextWrapper {
 
     private static final String DEBUG_CONTEXT = "DatabaseContext";
+
     private Context context;
 
     public DatabaseContext(Context base) {
@@ -82,4 +83,5 @@ public class DatabaseContext extends ContextWrapper {
         Debug.i("openOrCreateDatabase(" + name + ") = " + result.getPath());
         return result;
     }
+
 }

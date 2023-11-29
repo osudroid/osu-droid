@@ -7,12 +7,17 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 
 public class ModButton extends Sprite {
+
     private static final float initalScale = 1.4f;
+
     private static final float selectedScale = 1.8f;
+
     private static final float initalRotate = 0f;
+
     private static final float selectedRotate = 5f;
 
     private GameMod mod;
+
     private IModSwitcher switcher = null;
 
     public ModButton(float pX, float pY, String texture, GameMod mod) {
@@ -39,8 +44,8 @@ public class ModButton extends Sprite {
 
 
     @Override
-    public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
-                                 float pTouchAreaLocalX, float pTouchAreaLocalY) {
+    public boolean onAreaTouched(
+        TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
         if (pSceneTouchEvent.isActionDown() && switcher != null) {
             setModEnabled(switcher.switchMod(mod));
             return true;

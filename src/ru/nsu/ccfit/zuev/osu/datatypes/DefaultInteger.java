@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.datatypes;
 
 public class DefaultInteger extends DefaultData<Integer> {
+
     public DefaultInteger(Integer defaultValue) {
         super(defaultValue);
     }
@@ -13,4 +14,5 @@ public class DefaultInteger extends DefaultData<Integer> {
     protected Integer instanceDefaultValue() {
         return 0;
     }
+
 }

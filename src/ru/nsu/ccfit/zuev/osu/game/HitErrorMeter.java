@@ -16,11 +16,17 @@ import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 public class HitErrorMeter extends GameObject {
 
     private final Scene bgScene;
+
     private final PointF barAnchor;
+
     private final float barHeight;
+
     private final float boundary;
+
     private final List<Rectangle> onDisplayIndicators;
+
     private final List<Rectangle> recycledIndicators;
+
     private DifficultyHelper difficultyHelper;
 
     public HitErrorMeter(Scene scene, PointF anchor, float difficulty, float height, DifficultyHelper difficultyHelper) {
@@ -108,4 +114,5 @@ public class HitErrorMeter extends GameObject {
             onDisplayIndicators.add(indicator);
         }
     }
+
 }

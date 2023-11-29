@@ -20,10 +20,15 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class PropertiesLibrary {
+
     private static final PropertiesLibrary instance = new PropertiesLibrary();
+
     private final String version = "properties1";
+
     private Map<String, BeatmapProperties> props = new HashMap<String, BeatmapProperties>();
+
     private Context context = null;
+
     private PropertiesLibrary() {
     }
 
@@ -40,8 +45,7 @@ public class PropertiesLibrary {
         }
 
         try {
-            final ObjectInputStream istream = new ObjectInputStream(
-                    new FileInputStream(lib));
+            final ObjectInputStream istream = new ObjectInputStream(new FileInputStream(lib));
             Object obj = istream.readObject();
             if (obj instanceof String) {
                 if (((String) obj).equals(version) == false) {
@@ -72,20 +76,15 @@ public class PropertiesLibrary {
     public synchronized void save(final Context activity) {
         final File lib = new File(activity.getFilesDir(), "properties");
         try {
-            final ObjectOutputStream ostream = new ObjectOutputStream(
-                    new FileOutputStream(lib));
+            final ObjectOutputStream ostream = new ObjectOutputStream(new FileOutputStream(lib));
             ostream.writeObject(version);
             ostream.writeObject(props);
             ostream.close();
         } catch (final FileNotFoundException e) {
-            ToastLogger.showText(
-                    StringTable.format(R.string.message_error, e.getMessage()),
-                    false);
+            ToastLogger.showText(StringTable.format(R.string.message_error, e.getMessage()), false);
             Debug.e("PropertiesLibrary: " + e.getMessage(), e);
         } catch (final IOException e) {
-            ToastLogger.showText(
-                    StringTable.format(R.string.message_error, e.getMessage()),
-                    false);
+            ToastLogger.showText(StringTable.format(R.string.message_error, e.getMessage()), false);
             Debug.e("PropertiesLibrary: " + e.getMessage(), e);
         }
     }
@@ -108,6 +107,7 @@ public class PropertiesLibrary {
             return;
         }
         new AsyncTask() {
+
             @Override
             public void run() {
                 save(context);
@@ -122,12 +122,13 @@ public class PropertiesLibrary {
         return null;
     }
 
-    public void setProperties(final String path,
-                              final BeatmapProperties properties) {
+    public void setProperties(
+        final String path, final BeatmapProperties properties) {
         this.load((Activity) context);
         props.put(path, properties);
         if (properties.favorite == false && properties.getOffset() == 0) {
             props.remove(path);
         }
     }
+
 }

@@ -3,7 +3,9 @@ package ru.nsu.ccfit.zuev.osu.async;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
 
 public class SyncTaskManager {
+
     private static SyncTaskManager mgr = new SyncTaskManager();
+
     private BaseGameActivity activity;
 
     private SyncTaskManager() {
@@ -21,4 +23,5 @@ public class SyncTaskManager {
     public void run(final Runnable runnable) {
         activity.runOnUpdateThread(runnable);
     }
+
 }

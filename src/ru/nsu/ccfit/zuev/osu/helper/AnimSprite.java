@@ -11,22 +11,19 @@ import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
 public class AnimSprite extends Sprite {
 
-    public enum LoopType {
-        STOP, // stop at last frame
-        LOOP, // loop from start
-        DISAPPEAR, // disappear after last frame
-        FROZE // do not automatically update frame
-    }
-
     private final int count;
+
     private final TextureRegion[] regions;
+
     private int frame = 0;
+
     private float animTime = 0;
+
     private float fps;
+
     private LoopType loopType = LoopType.LOOP;
 
-    public AnimSprite(float px, float py, StringSkinData prefix, String name, int count, float fps)
-    {
+    public AnimSprite(float px, float py, StringSkinData prefix, String name, int count, float fps) {
         super(px, py, ResourceManager.getInstance().getTextureWithPrefix(prefix, (name != null ? name : "") + (count == 1 ? "" : "0")));
         if (count == 0) {
             count = 1;
@@ -44,8 +41,8 @@ public class AnimSprite extends Sprite {
         }
     }
 
-    public AnimSprite(final float px, final float py, final String texname,
-                      int count, final float fps) {
+    public AnimSprite(
+        final float px, final float py, final String texname, int count, final float fps) {
         super(px, py, ResourceManager.getInstance().getTexture(texname + "0"));
         if (count == 0) {
             count = 1;
@@ -61,8 +58,8 @@ public class AnimSprite extends Sprite {
         }
     }
 
-    public AnimSprite(final float px, final float py, final float fps,
-                      final String... textures) {
+    public AnimSprite(
+        final float px, final float py, final float fps, final String... textures) {
         super(px, py, ResourceManager.getInstance().getTextureIfLoaded(textures[0]));
         this.count = textures.length;
         this.fps = fps;
@@ -75,18 +72,16 @@ public class AnimSprite extends Sprite {
         }
     }
 
-    public void setLoopType(LoopType loopType) {
-        this.loopType = loopType;
-    }
-
     public LoopType getLoopType() {
         return loopType;
     }
 
+    public void setLoopType(LoopType loopType) {
+        this.loopType = loopType;
+    }
 
     /**
-     * Automatically update frame.
-     * If loopType is {@link LoopType#FROZE} or fps is 0, this will do nothing
+     * Automatically update frame. If loopType is {@link LoopType#FROZE} or fps is 0, this will do nothing
      */
     private void updateFrame() {
         if (loopType == LoopType.FROZE || fps == 0) {
@@ -116,9 +111,13 @@ public class AnimSprite extends Sprite {
         this.fps = fps;
     }
 
+    public int getFrame() {
+        return frame;
+    }
 
     /**
      * Force set animation to target frame.
+     *
      * @param frame target frame
      */
     public void setFrame(int frame) {
@@ -128,10 +127,6 @@ public class AnimSprite extends Sprite {
             this.animTime = (frame + 0.0001f) / fps;
             updateFrame();
         }
-    }
-
-    public int getFrame() {
-        return frame;
     }
 
     public void setAnimTime(float animTime) {
@@ -146,7 +141,6 @@ public class AnimSprite extends Sprite {
         super.onManagedUpdate(pSecondsElapsed);
     }
 
-
     @Override
     protected void doDraw(final GL10 pGL, final Camera pCamera) {
         if (regions.length == 0 || frame < 0 || frame >= regions.length) {
@@ -157,7 +151,6 @@ public class AnimSprite extends Sprite {
         onApplyVertices(pGL);
         drawVertices(pGL, pCamera);
     }
-
 
     @Override
     public void setFlippedHorizontal(final boolean pFlippedHorizontal) {
@@ -187,4 +180,12 @@ public class AnimSprite extends Sprite {
     public int getTextureRegionCount() {
         return regions.length;
     }
+
+    public enum LoopType {
+        STOP, // stop at last frame
+        LOOP, // loop from start
+        DISAPPEAR, // disappear after last frame
+        FROZE // do not automatically update frame
+    }
+
 }

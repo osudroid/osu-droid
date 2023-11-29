@@ -7,19 +7,31 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
 public class Statistic implements Serializable {
+
     private static final long serialVersionUID = 8339570462000129479L;
 
     int notes = 0;
+
     int hit300 = 0, hit100 = 0, hit50 = 0;
+
     int hit300k = 0, hit100k = 0;
+
     int misses = 0;
+
     int maxCombo = 0;
+
     int currentCombo = 0;
+
     int totalScore;
+
     int possibleScore = 0;
+
     int realScore = 0;
+
     float hp = 1;
+
     float diffModifier = 1;
+
     EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
 
     public float getHp() {
@@ -204,19 +216,16 @@ public class Statistic implements Serializable {
             }
             return "X";
         }
-        if ((hit300) / (float) notes > 0.9f && misses == 0
-                && hit50 / (float) notes < 0.01f) {
+        if ((hit300) / (float) notes > 0.9f && misses == 0 && hit50 / (float) notes < 0.01f) {
             if (isH) {
                 return "SH";
             }
             return "S";
         }
-        if ((hit300) / (float) notes > 0.8f && misses == 0
-                || (hit300) / (float) notes > 0.9f) {
+        if ((hit300) / (float) notes > 0.8f && misses == 0 || (hit300) / (float) notes > 0.9f) {
             return "A";
         }
-        if ((hit300) / (float) notes > 0.7f && misses == 0
-                || (hit300) / (float) notes > 0.8f) {
+        if ((hit300) / (float) notes > 0.7f && misses == 0 || (hit300) / (float) notes > 0.8f) {
             return "B";
         }
         if ((hit300) / (float) notes > 0.6f) {
@@ -279,4 +288,5 @@ public class Statistic implements Serializable {
     public void setDiffModifier(final float diffModifier) {
         this.diffModifier = diffModifier;
     }
+
 }

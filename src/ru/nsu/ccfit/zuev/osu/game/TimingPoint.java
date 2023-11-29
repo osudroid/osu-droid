@@ -3,16 +3,26 @@ package ru.nsu.ccfit.zuev.osu.game;
 import ru.nsu.ccfit.zuev.osu.Constants;
 
 public class TimingPoint {
+
     private static String defaultSound = "normal";
-    double time;
-    double beatLength;
-    int signature = 4;
-    String hitSound;
-    int customSound = 0;
-    float volume;
-    boolean inherited = false;
-    boolean kiai;
+
     private final double speed;
+
+    double time;
+
+    double beatLength;
+
+    int signature = 4;
+
+    String hitSound;
+
+    int customSound = 0;
+
+    float volume;
+
+    boolean inherited = false;
+
+    boolean kiai;
 
     public TimingPoint(final String[] data, final TimingPoint prevData) {
         time = Float.parseFloat(data[0]) / 1000.0f;

@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.online;
 
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
+
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
@@ -13,16 +14,23 @@ import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public class OnlineScoring {
+
     private static final int attemptCount = 5;
+
     private static OnlineScoring instance = null;
+
     private Boolean onlineMutex = new Boolean(false);
+
     private OnlinePanel panel = null;
+
     private OnlinePanel secondPanel = null;
+
     private boolean avatarLoaded = false;
 
     public static OnlineScoring getInstance() {
-        if (instance == null)
+        if (instance == null) {
             instance = new OnlineScoring();
+        }
         return instance;
     }
 
@@ -35,8 +43,9 @@ public class OnlineScoring {
     }
 
     public OnlinePanel createSecondPanel() {
-        if (OnlineManager.getInstance().isStayOnline() == false)
+        if (OnlineManager.getInstance().isStayOnline() == false) {
             return null;
+        }
         secondPanel = new OnlinePanel();
         secondPanel.setInfo();
         String avatarURL = OnlineManager.getInstance().getAvatarURL();
@@ -50,14 +59,16 @@ public class OnlineScoring {
 
     public void setPanelMessage(String message, String submessage) {
         panel.setMessage(message, submessage);
-        if (secondPanel != null)
+        if (secondPanel != null) {
             secondPanel.setMessage(message, submessage);
+        }
     }
 
     public void updatePanels() {
         panel.setInfo();
-        if (secondPanel != null)
+        if (secondPanel != null) {
             secondPanel.setInfo();
+        }
 
         LobbyScene.updateOnlinePanel();
         RoomScene.updateOnlinePanel();
@@ -67,18 +78,21 @@ public class OnlineScoring {
         final String avatarUrl = OnlineManager.getInstance().getAvatarURL();
         String texname = avatarLoaded && !avatarUrl.isEmpty() ? avatarUrl : null;
         panel.setAvatar(texname);
-        if (secondPanel != null)
+        if (secondPanel != null) {
             secondPanel.setAvatar(texname);
+        }
 
         LobbyScene.updateOnlinePanel();
         RoomScene.updateOnlinePanel();
     }
 
     public void login() {
-        if (OnlineManager.getInstance().isStayOnline() == false)
+        if (OnlineManager.getInstance().isStayOnline() == false) {
             return;
+        }
         avatarLoaded = false;
         new AsyncTask() {
+
             @Override
             public void run() {
                 synchronized (onlineMutex) {
@@ -116,9 +130,11 @@ public class OnlineScoring {
     }
 
     public void startPlay(final TrackInfo track, final String hash) {
-        if (OnlineManager.getInstance().isStayOnline() == false)
+        if (OnlineManager.getInstance().isStayOnline() == false) {
             return;
+        }
         new AsyncTask() {
+
             @Override
             public void run() {
                 synchronized (onlineMutex) {
@@ -142,16 +158,19 @@ public class OnlineScoring {
     }
 
     public void sendRecord(final StatisticV2 record, final SendingPanel panel, final String replay) {
-        if (OnlineManager.getInstance().isStayOnline() == false)
+        if (OnlineManager.getInstance().isStayOnline() == false) {
             return;
-        if (OnlineManager.getInstance().isReadyToSend() == false)
+        }
+        if (OnlineManager.getInstance().isReadyToSend() == false) {
             return;
+        }
 
         Debug.i("Sending score");
 
         final String recordData = record.compile();
 
         new AsyncTask() {
+
             @Override
             public void run() {
                 boolean success = false;
@@ -171,8 +190,9 @@ public class OnlineScoring {
 
                         if (OnlineManager.getInstance().getFailMessage().length() > 0) {
                             ToastLogger.showText(OnlineManager.getInstance().getFailMessage(), true);
-                            if (OnlineManager.getInstance().getFailMessage().equals("Invalid record data"))
+                            if (OnlineManager.getInstance().getFailMessage().equals("Invalid record data")) {
                                 i = attemptCount;
+                            }
                         } else if (success) {
                             OnlineManager.getInstance().sendReplay(replay);
                             updatePanels();
@@ -209,20 +229,25 @@ public class OnlineScoring {
     }
 
     public void loadAvatar(final boolean both) {
-        if (!OnlineManager.getInstance().isStayOnline()) return;
-        final String avatarUrl = OnlineManager.getInstance().getAvatarURL();
-        if (avatarUrl == null || avatarUrl.length() == 0)
+        if (!OnlineManager.getInstance().isStayOnline()) {
             return;
+        }
+        final String avatarUrl = OnlineManager.getInstance().getAvatarURL();
+        if (avatarUrl == null || avatarUrl.length() == 0) {
+            return;
+        }
 
         new AsyncTask() {
+
             @Override
             public void run() {
                 synchronized (onlineMutex) {
                     avatarLoaded = OnlineManager.getInstance().loadAvatarToTextureManager();
-                    if (both)
+                    if (both) {
                         updatePanelAvatars();
-                    else if (secondPanel != null)
+                    } else if (secondPanel != null) {
                         secondPanel.setAvatar(avatarLoaded ? avatarUrl : null);
+                    }
                 }
             }
         }.execute();
@@ -231,4 +256,5 @@ public class OnlineScoring {
     public boolean isAvatarLoaded() {
         return avatarLoaded;
     }
+
 }

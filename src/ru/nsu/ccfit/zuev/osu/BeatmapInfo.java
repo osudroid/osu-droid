@@ -4,16 +4,27 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class BeatmapInfo implements Serializable {
+
     private static final long serialVersionUID = -3865268984942011628L;
+
     private final ArrayList<TrackInfo> tracks = new ArrayList<TrackInfo>();
+
     private String title;
+
     private String titleUnicode;
+
     private String artist;
+
     private String artistUnicode;
+
     private String creator;
+
     private String path;
+
     private String source;
+
     private String tags;
+
     private long date;
 
     public String getSource() {
@@ -116,4 +127,5 @@ public class BeatmapInfo implements Serializable {
     public boolean equals(Object o) {
         return o == this || o instanceof BeatmapInfo && ((BeatmapInfo) o).getPath().equals(path);
     }
+
 }

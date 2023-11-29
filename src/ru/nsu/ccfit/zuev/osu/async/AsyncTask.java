@@ -7,7 +7,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public abstract class AsyncTask {
+
     private final ExecutorService executor;
+
     private final Handler handler;
 
     private boolean isCompleted;
@@ -23,9 +25,12 @@ public abstract class AsyncTask {
     }
 
     public abstract void run();
-    public void onComplete() {}
 
-    public void onCancel(boolean wasForced) {}
+    public void onComplete() {
+    }
+
+    public void onCancel(boolean wasForced) {
+    }
 
     public final void execute() {
         executor.execute(() -> {
@@ -59,4 +64,5 @@ public abstract class AsyncTask {
     public final boolean isShutdown() {
         return executor.isShutdown();
     }
+
 }

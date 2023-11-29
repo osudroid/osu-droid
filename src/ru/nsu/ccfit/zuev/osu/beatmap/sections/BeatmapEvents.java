@@ -9,6 +9,7 @@ import ru.nsu.ccfit.zuev.osu.game.BreakPeriod;
  * Contains beatmap events.
  */
 public class BeatmapEvents {
+
     /**
      * The file name of this beatmap's background.
      */
@@ -34,7 +35,8 @@ public class BeatmapEvents {
      */
     public RGBColor backgroundColor;
 
-    public BeatmapEvents() {}
+    public BeatmapEvents() {
+    }
 
     /**
      * Copy constructor.
@@ -61,4 +63,5 @@ public class BeatmapEvents {
     public BeatmapEvents deepClone() {
         return new BeatmapEvents(this);
     }
+
 }

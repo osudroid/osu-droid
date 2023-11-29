@@ -13,13 +13,14 @@ import org.anddev.andengine.util.StreamUtils;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements
-        IBitmapTextureAtlasSource {
+public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements IBitmapTextureAtlasSource {
 
     private final int mWidth;
+
     private final int mHeight;
 
     private final String mAssetPath;
+
     private final Context mContext;
 
     private Bitmap bitmap = null;
@@ -28,22 +29,20 @@ public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements
     // Constructors
     // ===========================================================
 
-    public QualityAssetBitmapSource(final Context pContext,
-                                    final String pAssetPath) {
+    public QualityAssetBitmapSource(
+        final Context pContext, final String pAssetPath) {
         this(pContext, pAssetPath, 0, 0);
     }
 
-    public QualityAssetBitmapSource(final Context pContext,
-                                    final String pAssetPath, final int pTexturePositionX,
-                                    final int pTexturePositionY) {
+    public QualityAssetBitmapSource(
+        final Context pContext, final String pAssetPath, final int pTexturePositionX, final int pTexturePositionY) {
         super(pTexturePositionX, pTexturePositionY);
         this.mContext = pContext;
         this.mAssetPath = pAssetPath;
 
         final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
         decodeOptions.inJustDecodeBounds = true;
-        decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config
-                .getTextureQuality();
+        decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config.getTextureQuality();
 
         InputStream in = null;
         try {
@@ -59,9 +58,8 @@ public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements
         this.mHeight = decodeOptions.outHeight;
     }
 
-    QualityAssetBitmapSource(final Context pContext, final String pAssetPath,
-                             final int pTexturePositionX, final int pTexturePositionY,
-                             final int pWidth, final int pHeight) {
+    QualityAssetBitmapSource(
+        final Context pContext, final String pAssetPath, final int pTexturePositionX, final int pTexturePositionY, final int pWidth, final int pHeight) {
         super(pTexturePositionX, pTexturePositionY);
         this.mContext = pContext;
         this.mAssetPath = pAssetPath;
@@ -71,9 +69,7 @@ public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements
 
 
     public QualityAssetBitmapSource deepCopy() {
-        return new QualityAssetBitmapSource(this.mContext, this.mAssetPath,
-                this.mTexturePositionX, this.mTexturePositionY, this.mWidth,
-                this.mHeight);
+        return new QualityAssetBitmapSource(this.mContext, this.mAssetPath, this.mTexturePositionX, this.mTexturePositionY, this.mWidth, this.mHeight);
     }
 
     // ===========================================================
@@ -110,15 +106,12 @@ public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements
         try {
             final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
             decodeOptions.inPreferredConfig = pBitmapConfig;
-            decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config
-                    .getTextureQuality();
+            decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config.getTextureQuality();
 
             in = this.mContext.getAssets().open(this.mAssetPath);
             return BitmapFactory.decodeStream(in, null, decodeOptions);
         } catch (final IOException e) {
-            Debug.e("Failed loading Bitmap in "
-                    + this.getClass().getSimpleName() + ". AssetPath: "
-                    + this.mAssetPath, e);
+            Debug.e("Failed loading Bitmap in " + this.getClass().getSimpleName() + ". AssetPath: " + this.mAssetPath, e);
             return null;
         } finally {
             StreamUtils.close(in);

@@ -8,7 +8,9 @@ import java.util.Queue;
 import ru.nsu.ccfit.zuev.osu.helper.UniversalModifier.ValueType;
 
 public class ModifierFactory {
+
     private static ModifierFactory instance = new ModifierFactory();
+
     private final Queue<UniversalModifier> pool = new LinkedList<UniversalModifier>();
 
     private ModifierFactory() {
@@ -22,13 +24,13 @@ public class ModifierFactory {
         return instance.newModifier(duration, 1, 0, ValueType.ALPHA);
     }
 
-    public static IEntityModifier newAlphaModifier(final float duration,
-                                                   final float from, final float to) {
+    public static IEntityModifier newAlphaModifier(
+        final float duration, final float from, final float to) {
         return instance.newModifier(duration, from, to, ValueType.ALPHA);
     }
 
-    public static IEntityModifier newScaleModifier(final float duration,
-                                                   final float from, final float to) {
+    public static IEntityModifier newScaleModifier(
+        final float duration, final float from, final float to) {
         return instance.newModifier(duration, from, to, ValueType.SCALE);
     }
 
@@ -44,8 +46,8 @@ public class ModifierFactory {
         instance.pool.clear();
     }
 
-    private UniversalModifier newModifier(final float duration,
-                                          final float from, final float to, final ValueType type) {
+    private UniversalModifier newModifier(
+        final float duration, final float from, final float to, final ValueType type) {
         if (pool.isEmpty() == false) {
             UniversalModifier mod = null;
 
@@ -61,4 +63,5 @@ public class ModifierFactory {
         }
         return new UniversalModifier(duration, from, to, type);
     }
+
 }

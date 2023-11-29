@@ -14,15 +14,23 @@ import java.nio.ByteBuffer;
 public class BassAudioProvider {
 
     public static final int DECODER_NORMAL = 0;
+
     public static final int DECODER_DOUBLE_TIME = 1;
+
     public static final int DECODER_NIGHT_CORE = 2;
+
     public static final int WINDOW_FFT = 1024;
+
     public static final int DEFAULT_FREQUENCY = 44100;
 
-    private int channel = 0;
     private final BASS.FloatValue freq = new BASS.FloatValue();
+
+    private int channel = 0;
+
     private int fileFlag = 0;
+
     private int decoder = 0;
+
     private int multiplier = 0;
 
     private ByteBuffer buffer = null;
@@ -155,17 +163,19 @@ public class BassAudioProvider {
     }
 
     public Status getStatus() {
-        if (channel == 0)
+        if (channel == 0) {
             return Status.STOPPED;
+        }
 
         final int playerStatus = BASS.BASS_ChannelIsActive(channel);
 
-        if (playerStatus == BASS.BASS_ACTIVE_STOPPED)
+        if (playerStatus == BASS.BASS_ACTIVE_STOPPED) {
             return Status.STOPPED;
-        else if (playerStatus == BASS.BASS_ACTIVE_PLAYING)
+        } else if (playerStatus == BASS.BASS_ACTIVE_PLAYING) {
             return Status.PLAYING;
-        else if (playerStatus == BASS.BASS_ACTIVE_PAUSED)
+        } else if (playerStatus == BASS.BASS_ACTIVE_PAUSED) {
             return Status.PAUSED;
+        }
         return Status.STALLED;
     }
 
@@ -223,4 +233,5 @@ public class BassAudioProvider {
             BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_VOL, volume);
         }
     }
+
 }

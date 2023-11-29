@@ -8,8 +8,11 @@ import android.content.res.AssetManager;
 public class BassAudioPlayer implements IMusicPlayer {
 
     private static BassAudioProvider provider = null;
+
     private int loadMode = 0;
+
     private AssetManager manager;
+
     private String path;
 
     public BassAudioPlayer() {
@@ -149,4 +152,5 @@ public class BassAudioPlayer implements IMusicPlayer {
         }
         return -1;
     }
+
 }

@@ -9,6 +9,7 @@ import ru.nsu.ccfit.zuev.osu.beatmap.ComboColor;
  * Contains information about combo and skin colors of a beatmap.
  */
 public class BeatmapColor {
+
     /**
      * The combo colors of this beatmap.
      */
@@ -19,7 +20,8 @@ public class BeatmapColor {
      */
     public RGBColor sliderBorderColor;
 
-    public BeatmapColor() {}
+    public BeatmapColor() {
+    }
 
     /**
      * Copy constructor.
@@ -42,4 +44,5 @@ public class BeatmapColor {
     public BeatmapColor deepClone() {
         return new BeatmapColor(this);
     }
+
 }

@@ -27,8 +27,11 @@ import ru.nsu.ccfit.zuev.osu.online.SendingPanel;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class ScoreLibrary {
+
     private static final Pattern newPathPattern = Pattern.compile("[^/]*/[^/]*\\z");
+
     private static ScoreLibrary lib = new ScoreLibrary();
+
     private SQLiteDatabase db = null;
 
     private ScoreLibrary() {
@@ -64,9 +67,7 @@ public class ScoreLibrary {
         try {
             db = helper.getWritableDatabase();
         } catch (SQLiteCantOpenDatabaseException e) {
-            ToastLogger.showText(
-                    StringTable.get(R.string.require_storage_permission),
-                    true);
+            ToastLogger.showText(StringTable.get(R.string.require_storage_permission), true);
             throw new RuntimeException(e);
         }
         loadOld(context);
@@ -84,15 +85,13 @@ public class ScoreLibrary {
         }
         Debug.i("Loading old scores...");
         try {
-            final ObjectInputStream in = new ObjectInputStream(
-                    new FileInputStream(f));
+            final ObjectInputStream in = new ObjectInputStream(new FileInputStream(f));
 
             Object obj = in.readObject();
             String versionStr = "";
             if (obj instanceof String) {
                 versionStr = (String) obj;
-                if (versionStr.equals("scores1") == false
-                        && versionStr.equals("scores2") == false) {
+                if (versionStr.equals("scores1") == false && versionStr.equals("scores2") == false) {
                     in.close();
                     return;
                 }
@@ -111,8 +110,7 @@ public class ScoreLibrary {
                         for (final Statistic s : oldStat.get(str)) {
                             newStat.add(new StatisticV2(s));
                         }
-                        final Matcher newPathMather = newPathPattern
-                                .matcher(str);
+                        final Matcher newPathMather = newPathPattern.matcher(str);
                         if (newPathMather.find()) {
                             scores.put(newPathMather.group(), newStat);
                         } else {
@@ -144,10 +142,12 @@ public class ScoreLibrary {
 
     }
 
-    public void sendScoreOnline(final StatisticV2 stat, final String replay,
-                                final SendingPanel panel) {
+    public void sendScoreOnline(
+        final StatisticV2 stat, final String replay, final SendingPanel panel) {
         Debug.i("Preparing for online!");
-        if (stat.getTotalScoreWithMultiplier() <= 0) return;
+        if (stat.getTotalScoreWithMultiplier() <= 0) {
+            return;
+        }
         OnlineScoring.getInstance().sendRecord(stat, panel, replay);
     }
 
@@ -157,7 +157,9 @@ public class ScoreLibrary {
         }
         final String track = getTrackPath(trackPath);
 
-        if (db == null) return;
+        if (db == null) {
+            return;
+        }
         ContentValues values = new ContentValues();
         values.put("filename", track);
         values.put("playername", stat.getPlayerName());
@@ -179,51 +181,50 @@ public class ScoreLibrary {
         long result = db.insert(DBOpenHelper.SCORES_TABLENAME, null, values);
         Debug.i("Inserting data, result = " + result);
 
-//		String[] columns = {"id", "filename", "score", "replayfile"};
-//		Cursor response =
-//			db.query(DBOpenHelper.SCORES_TABLENAME, columns, "filename = \"" + track + "\"" ,
-//												null, null, null, "score ASC");
+        //		String[] columns = {"id", "filename", "score", "replayfile"};
+        //		Cursor response =
+        //			db.query(DBOpenHelper.SCORES_TABLENAME, columns, "filename = \"" + track + "\"" ,
+        //												null, null, null, "score ASC");
         //if scores > 5, we need to remove some
-//		if (response.getCount() > 5)
-//		{
-//			response.moveToFirst();
-//			int rowsToDelete = response.getCount() - 5;
-//			String filter = "";
-//			for (int i = 0; i < rowsToDelete; i++)
-//			{
-//				filter += response.getString(0);
-//				if (i < rowsToDelete - 1)
-//					filter += ",";
-//
-//				//removing score replay
-//				try{
-//					new File(response.getString(3)).delete();
-//				} catch (Exception e){}
-//
-//				response.moveToNext();
-//
-//			}
-//			//removing all unnecessary scores
-//			filter = "id IN (" + filter + ")";
-//			result = db.delete(DBOpenHelper.SCORES_TABLENAME, filter, null);
-//		}
+        //		if (response.getCount() > 5)
+        //		{
+        //			response.moveToFirst();
+        //			int rowsToDelete = response.getCount() - 5;
+        //			String filter = "";
+        //			for (int i = 0; i < rowsToDelete; i++)
+        //			{
+        //				filter += response.getString(0);
+        //				if (i < rowsToDelete - 1)
+        //					filter += ",";
+        //
+        //				//removing score replay
+        //				try{
+        //					new File(response.getString(3)).delete();
+        //				} catch (Exception e){}
+        //
+        //				response.moveToNext();
+        //
+        //			}
+        //			//removing all unnecessary scores
+        //			filter = "id IN (" + filter + ")";
+        //			result = db.delete(DBOpenHelper.SCORES_TABLENAME, filter, null);
+        //		}
 
-//		response.close();
+        //		response.close();
     }
 
     public Cursor getMapScores(String[] columns, String filename) {
         final String track = getTrackPath(filename);
-        if (db == null) return null;
-        return db.query(DBOpenHelper.SCORES_TABLENAME, columns, "filename = ?",
-                new String[]{track}, null, null, "score DESC");
+        if (db == null) {
+            return null;
+        }
+        return db.query(DBOpenHelper.SCORES_TABLENAME, columns, "filename = ?", new String[] {track}, null, null, "score DESC");
     }
 
     public String getBestMark(final String trackPath) {
         final String track = getTrackPath(trackPath);
         String[] columns = {"mark", "filename", "id", "score"};
-        Cursor response =
-                db.query(DBOpenHelper.SCORES_TABLENAME, columns, "filename = ?",
-                        new String[]{track}, null, null, "score DESC");
+        Cursor response = db.query(DBOpenHelper.SCORES_TABLENAME, columns, "filename = ?", new String[] {track}, null, null, "score DESC");
         if (response.getCount() == 0) {
             response.close();
             return null;
@@ -231,33 +232,33 @@ public class ScoreLibrary {
         response.moveToFirst();
 
         String mark = response.getString(0);
-//		do {
-//			final String s = response.getString(0);
-//			if (s.equals("XH")) {
-//				mark = s;
-//			} else if (s.equals("X") && mark.equals("XH") == false) {
-//				mark = s;
-//			} else if (s.equals("SH") && mark.equals("XH") == false
-//					&& mark.equals("X") == false) {
-//				mark = s;
-//			} else if (s.equals("S") && mark.equals("XH") == false
-//					&& mark.equals("X") == false && mark.equals("SH") == false) {
-//				mark = s;
-//			} else if (s.equals("A") && mark.equals("XH") == false
-//					&& mark.equals("X") == false && mark.equals("SH") == false
-//					&& mark.equals("S") == false) {
-//				mark = s;
-//			} else if (s.equals("B") && mark.equals("XH") == false
-//					&& mark.equals("X") == false && mark.equals("SH") == false
-//					&& mark.equals("S") == false && mark.equals("A") == false) {
-//				mark = s;
-//			} else if (s.equals("C") && mark.equals("XH") == false
-//					&& mark.equals("X") == false && mark.equals("SH") == false
-//					&& mark.equals("S") == false && mark.equals("A") == false
-//					&& mark.equals("B") == false) {
-//				mark = s;
-//			}
-//		} while (response.moveToNext());
+        //		do {
+        //			final String s = response.getString(0);
+        //			if (s.equals("XH")) {
+        //				mark = s;
+        //			} else if (s.equals("X") && mark.equals("XH") == false) {
+        //				mark = s;
+        //			} else if (s.equals("SH") && mark.equals("XH") == false
+        //					&& mark.equals("X") == false) {
+        //				mark = s;
+        //			} else if (s.equals("S") && mark.equals("XH") == false
+        //					&& mark.equals("X") == false && mark.equals("SH") == false) {
+        //				mark = s;
+        //			} else if (s.equals("A") && mark.equals("XH") == false
+        //					&& mark.equals("X") == false && mark.equals("SH") == false
+        //					&& mark.equals("S") == false) {
+        //				mark = s;
+        //			} else if (s.equals("B") && mark.equals("XH") == false
+        //					&& mark.equals("X") == false && mark.equals("SH") == false
+        //					&& mark.equals("S") == false && mark.equals("A") == false) {
+        //				mark = s;
+        //			} else if (s.equals("C") && mark.equals("XH") == false
+        //					&& mark.equals("X") == false && mark.equals("SH") == false
+        //					&& mark.equals("S") == false && mark.equals("A") == false
+        //					&& mark.equals("B") == false) {
+        //				mark = s;
+        //			}
+        //		} while (response.moveToNext());
 
         response.close();
 
@@ -265,8 +266,7 @@ public class ScoreLibrary {
     }
 
     public StatisticV2 getScore(int id) {
-        Cursor c = db.query(DBOpenHelper.SCORES_TABLENAME, null, "id = " + id,
-                null, null, null, null);
+        Cursor c = db.query(DBOpenHelper.SCORES_TABLENAME, null, "id = " + id, null, null, null, null);
         StatisticV2 stat = new StatisticV2();
         if (c.getCount() == 0) {
             c.close();
@@ -298,4 +298,5 @@ public class ScoreLibrary {
     public boolean deleteScore(int id) {
         return db.delete(DBOpenHelper.SCORES_TABLENAME, "id = " + id, null) != 0;
     }
+
 }

@@ -1,18 +1,30 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
+
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody2D;
 import com.edlplan.osu.support.timing.controlpoint.TimingControlPoint;
+
 import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.*;
+import org.anddev.andengine.entity.modifier.AlphaModifier;
+import org.anddev.andengine.entity.modifier.FadeInModifier;
+import org.anddev.andengine.entity.modifier.FadeOutModifier;
+import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
+import org.anddev.andengine.entity.modifier.ScaleModifier;
+import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.util.MathUtils;
 import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseQuadIn;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -24,63 +36,88 @@ import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-
 public class Slider extends GameObject {
+
     private final Sprite startCircle, endCircle;
+
     private final Sprite startOverlay, endOverlay;
+
     private final Sprite approachCircle;
+
     private final Sprite startArrow, endArrow;
+
     private final ArrayList<Sprite> ticks = new ArrayList<>();
+
+    private final RGBColor circleColor = new RGBColor();
+
+    private final BitSet tickSet = new BitSet();
+
     private PointF startPosition, endPosition;
+
     private Scene scene;
+
     private GameObjectListener listener;
+
     private TimingPoint timing;
+
     private CircleNumber number;
+
     private SliderPath path;
+
     private double passedTime;
+
     private double preTime;
+
     private double tickTime;
+
     private double maxTime;
+
     private float scale;
+
     private int repeatCount;
+
     private boolean reverse;
+
     private int[] soundId = new int[3];
+
     private int[] sampleSet = new int[3];
+
     private int[] addition = new int[3];
 
     private int soundIdIndex;
+
     private int ticksGot;
+
     private int ticksTotal;
+
     private int currentTick;
+
     private double tickInterval;
 
     private AnimSprite ball;
+
     private Sprite followCircle;
 
     private PointF tmpPoint = new PointF();
+
     private float ballAngle;
 
     private boolean kiai;
+
     private RGBColor color = new RGBColor();
-    private final RGBColor circleColor = new RGBColor();
 
     //for replay
     private int firstHitAccuracy;
-    private final BitSet tickSet = new BitSet();
+
     private int tickIndex;
 
     private LinePath superPath = null;
+
     private boolean preStageFinish = false;
 
     private SliderBody2D abstractSliderBody = null;
 
-    private boolean
-            mIsOver,
-            mIsAnimating,
-            mWasInRadius;
+    private boolean mIsOver, mIsAnimating, mWasInRadius;
 
     public Slider() {
         startCircle = SpritePool.getInstance().getSprite("sliderstartcircle");
@@ -92,20 +129,50 @@ public class Slider extends GameObject {
         endArrow = SpritePool.getInstance().getSprite("reversearrow");
     }
 
-    public void init(final GameObjectListener listener, final Scene scene,
-                     final PointF pos, final float offset, final float time, final float r, final float g,
-                     final float b, final float scale, int num, final int sound, final int repeats,
-                     final float length, final String data, final TimingPoint timing,
-                     final String customSound, final String tempSound, final boolean isFirstNote, final double realTime) {
+    public void init(
+        final GameObjectListener listener,
+        final Scene scene,
+        final PointF pos,
+        final float offset,
+        final float time,
+        final float r,
+        final float g,
+        final float b,
+        final float scale,
+        int num,
+        final int sound,
+        final int repeats,
+        final float length,
+        final String data,
+        final TimingPoint timing,
+        final String customSound,
+        final String tempSound,
+        final boolean isFirstNote,
+        final double realTime) {
         init(listener, scene, pos, offset, time, r, g, b, scale, num, sound, repeats, length, data, timing, customSound, tempSound, isFirstNote, realTime, null);
     }
 
-    public void init(final GameObjectListener listener, final Scene scene,
-                     final PointF pos, final float offset, final float time, final float r, final float g,
-                     final float b, final float scale, int num, final int sound, final int repeats,
-                     final float length, final String data, final TimingPoint timing,
-                     final String customSound, final String tempSound, final boolean isFirstNote, final double realTime,
-                     SliderPath sliderPath) {
+    public void init(
+        final GameObjectListener listener,
+        final Scene scene,
+        final PointF pos,
+        final float offset,
+        final float time,
+        final float r,
+        final float g,
+        final float b,
+        final float scale,
+        int num,
+        final int sound,
+        final int repeats,
+        final float length,
+        final String data,
+        final TimingPoint timing,
+        final String customSound,
+        final String tempSound,
+        final boolean isFirstNote,
+        final double realTime,
+        SliderPath sliderPath) {
         this.listener = listener;
         this.scene = scene;
         this.timing = timing;
@@ -113,10 +180,7 @@ public class Slider extends GameObject {
         this.pos = pos;
         passedTime = -time;
         preTime = time;
-        path = sliderPath != null ?
-                sliderPath :
-                GameHelper.calculatePath(Utils.realToTrackCoords(pos),
-                        data.split("[|]"), Math.max(0, length), offset);
+        path = sliderPath != null ? sliderPath : GameHelper.calculatePath(Utils.realToTrackCoords(pos), data.split("[|]"), Math.max(0, length), offset);
 
         num += 1;
         if (OsuSkin.get().isLimitComboTextLength()) {
@@ -231,8 +295,7 @@ public class Slider extends GameObject {
         if (repeatCount > 2) {
             startArrow.setAlpha(0);
             startArrow.setScale(scale);
-            startArrow.setRotation(MathUtils.radToDeg(Utils.direction(
-                    path.points.get(0), path.points.get(1))));
+            startArrow.setRotation(MathUtils.radToDeg(Utils.direction(path.points.get(0), path.points.get(1))));
             Utils.putSpriteAnchorCenter(pos, startArrow);
             scene.attachChild(startArrow, 0);
         }
@@ -243,30 +306,15 @@ public class Slider extends GameObject {
             fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
             float fadeOutDuration = time * 0.3f * GameHelper.getTimeMultiplier();
 
-            number.registerEntityModifiers(() -> new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeOutDuration)
-            ));
+            number.registerEntityModifiers(() -> new SequenceEntityModifier(new FadeInModifier(fadeInDuration), new FadeOutModifier(fadeOutDuration)));
 
-            startCircle.registerEntityModifier(new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeOutDuration)
-            ));
+            startCircle.registerEntityModifier(new SequenceEntityModifier(new FadeInModifier(fadeInDuration), new FadeOutModifier(fadeOutDuration)));
 
-            startOverlay.registerEntityModifier(new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeOutDuration)
-            ));
+            startOverlay.registerEntityModifier(new SequenceEntityModifier(new FadeInModifier(fadeInDuration), new FadeOutModifier(fadeOutDuration)));
 
-            endCircle.registerEntityModifier(new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeInDuration)
-            ));
+            endCircle.registerEntityModifier(new SequenceEntityModifier(new FadeInModifier(fadeInDuration), new FadeOutModifier(fadeInDuration)));
 
-            endOverlay.registerEntityModifier(new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeOutDuration)
-            ));
+            endOverlay.registerEntityModifier(new SequenceEntityModifier(new FadeInModifier(fadeInDuration), new FadeOutModifier(fadeOutDuration)));
 
         } else {
             // Preempt time can go below 450ms. Normally, this is achieved via the DT mod which uniformly speeds up all animations game wide regardless of AR.
@@ -291,8 +339,7 @@ public class Slider extends GameObject {
             endArrow.setScale(scale);
             if (path.points.size() >= 2) {
                 int lastIndex = path.points.size() - 1;
-                endArrow.setRotation(MathUtils.radToDeg(Utils.direction(
-                        path.points.get(lastIndex), path.points.get(lastIndex - 1))));
+                endArrow.setRotation(MathUtils.radToDeg(Utils.direction(path.points.get(lastIndex), path.points.get(lastIndex - 1))));
             }
             Utils.putSpriteAnchorCenter(Config.isSnakingInSliders() ? pos : endPos, endArrow);
             scene.attachChild(endArrow, 0);
@@ -304,16 +351,13 @@ public class Slider extends GameObject {
         if (Double.isNaN(tickInterval) || tickInterval < GameHelper.getSliderTickLength() / 1000) {
             tickCount = 0;
         }
-        if ((maxTime * GameHelper.getTickRate() / tickInterval)
-                - (int) (maxTime * GameHelper.getTickRate() / tickInterval) < 0.001f) {
+        if ((maxTime * GameHelper.getTickRate() / tickInterval) - (int) (maxTime * GameHelper.getTickRate() / tickInterval) < 0.001f) {
             tickCount--;
         }
         ticks.clear();
         for (int i = 1; i <= tickCount; i++) {
-            final Sprite tick = SpritePool.getInstance().getCenteredSprite(
-                    "sliderscorepoint",
-                    getPercentPosition((float) (i * tickInterval
-                            / (maxTime * GameHelper.getTickRate())), null));
+            final Sprite tick = SpritePool.getInstance()
+                                          .getCenteredSprite("sliderscorepoint", getPercentPosition((float) (i * tickInterval / (maxTime * GameHelper.getTickRate())), null));
             tick.setScale(scale);
             tick.setAlpha(0);
             ticks.add(tick);
@@ -369,8 +413,7 @@ public class Slider extends GameObject {
             return tmpPoint;
         } else if (percentage <= 0) {
             if (angle != null && path.points.size() >= 2) {
-                ballAngle = MathUtils.radToDeg(Utils.direction(
-                        path.points.get(1), startPosition));
+                ballAngle = MathUtils.radToDeg(Utils.direction(path.points.get(1), startPosition));
             }
             tmpPoint.set(startPosition);
             return tmpPoint;
@@ -378,19 +421,15 @@ public class Slider extends GameObject {
 
         if (path.length.size() == 1) {
             final PointF p = tmpPoint;
-            p.x = startPosition.x * percentage + path.points.get(1).x
-                    * (1 - percentage);
-            p.y = startPosition.y * percentage + path.points.get(1).y
-                    * (1 - percentage);
+            p.x = startPosition.x * percentage + path.points.get(1).x * (1 - percentage);
+            p.y = startPosition.y * percentage + path.points.get(1).y * (1 - percentage);
             return p;
         }
         int left = 0, right = path.length.size();
         int index = right / 2;
-        final float realLength = percentage
-                * path.length.get(path.length.size() - 1);
+        final float realLength = percentage * path.length.get(path.length.size() - 1);
         while (left < right) {
-            if (index < path.length.size() - 1
-                    && path.length.get(index + 1) < realLength) {
+            if (index < path.length.size() - 1 && path.length.get(index + 1) < realLength) {
                 left = index;
             } else if (path.length.get(index) >= realLength) {
                 right = index;
@@ -403,13 +442,10 @@ public class Slider extends GameObject {
         float addlength = realLength - path.length.get(index);
         addlength /= path.length.get(index) - path.length.get(index + 1);
         final PointF p = tmpPoint;
-        p.x = path.points.get(index).x * addlength
-                + path.points.get(index + 1).x * (1 - addlength);
-        p.y = path.points.get(index).y * addlength
-                + path.points.get(index + 1).y * (1 - addlength);
+        p.x = path.points.get(index).x * addlength + path.points.get(index + 1).x * (1 - addlength);
+        p.y = path.points.get(index).y * addlength + path.points.get(index + 1).y * (1 - addlength);
         if (angle != null) {
-            ballAngle = MathUtils.radToDeg(Utils.direction(
-                    path.points.get(index), path.points.get(index + 1)));
+            ballAngle = MathUtils.radToDeg(Utils.direction(path.points.get(index), path.points.get(index + 1)));
         }
         return p;
     }
@@ -428,6 +464,7 @@ public class Slider extends GameObject {
         }
 
         ball.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier(), new ModifierListener() {
+
             @Override
             public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
                 SyncTaskManager.getInstance().run(pItem::detachSelf);
@@ -461,24 +498,19 @@ public class Slider extends GameObject {
 
     private void over() {
         repeatCount--;
-        if (mWasInRadius && replayObjectData == null ||
-                replayObjectData != null && replayObjectData.tickSet.get(tickIndex)) {
-            if (soundIdIndex < soundId.length)
-                Utils.playHitSound(listener, soundId[soundIdIndex],
-                        sampleSet[soundIdIndex], addition[soundIdIndex]);
+        if (mWasInRadius && replayObjectData == null || replayObjectData != null && replayObjectData.tickSet.get(tickIndex)) {
+            if (soundIdIndex < soundId.length) {
+                Utils.playHitSound(listener, soundId[soundIdIndex], sampleSet[soundIdIndex], addition[soundIdIndex]);
+            }
             ticksGot++;
             tickSet.set(tickIndex++, true);
             if (repeatCount > 0) {
-                listener.onSliderHit(id, 30, null,
-                        reverse ? startPosition : endPosition,
-                        false, color, GameObjectListener.SLIDER_REPEAT);
+                listener.onSliderHit(id, 30, null, reverse ? startPosition : endPosition, false, color, GameObjectListener.SLIDER_REPEAT);
             }
         } else {
             tickSet.set(tickIndex++, false);
             if (repeatCount > 0) {
-                listener.onSliderHit(id, -1, null,
-                        reverse ? startPosition : endPosition,
-                        false, color, GameObjectListener.SLIDER_REPEAT);
+                listener.onSliderHit(id, -1, null, reverse ? startPosition : endPosition, false, color, GameObjectListener.SLIDER_REPEAT);
             }
         }
         soundIdIndex++;
@@ -506,10 +538,7 @@ public class Slider extends GameObject {
             if (!reverse && repeatCount <= 2) {
                 startArrow.setAlpha(0);
             }
-            ((GameScene) listener).onSliderReverse(
-                    !reverse ? startPosition : endPosition,
-                    reverse ? endArrow.getRotation() : startArrow.getRotation(),
-                    color);
+            ((GameScene) listener).onSliderReverse(!reverse ? startPosition : endPosition, reverse ? endArrow.getRotation() : startArrow.getRotation(), color);
             if (passedTime >= maxTime) {
                 over();
             }
@@ -544,11 +573,9 @@ public class Slider extends GameObject {
         }
         // If slider was in reverse mode, we should swap start and end points
         if (reverse) {
-            Slider.this.listener.onSliderHit(id, score,
-                    endPosition, startPosition, endsCombo, color, GameObjectListener.SLIDER_END);
+            Slider.this.listener.onSliderHit(id, score, endPosition, startPosition, endsCombo, color, GameObjectListener.SLIDER_END);
         } else {
-            Slider.this.listener.onSliderHit(id, score, startPosition,
-                    endPosition, endsCombo, color, GameObjectListener.SLIDER_END);
+            Slider.this.listener.onSliderHit(id, score, startPosition, endPosition, endsCombo, color, GameObjectListener.SLIDER_END);
         }
         if (!startHit) {
             firstHitAccuracy = (int) (GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty()) * 1000 + 13);
@@ -561,18 +588,19 @@ public class Slider extends GameObject {
 
             followCircle.clearEntityModifiers();
             followCircle.registerEntityModifier(new ParallelEntityModifier(new ModifierListener() {
+
                 public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
                     mIsAnimating = false;
                 }
             },
-                    new ScaleModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), followCircle.getScaleX() * 0.8f, EaseQuadOut.getInstance()),
-                    new AlphaModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener() {
-                        @Override
-                        public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                            SyncTaskManager.getInstance().run(pItem::detachSelf);
-                        }
-                    }, EaseQuadIn.getInstance())
-            ));
+                new ScaleModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), followCircle.getScaleX() * 0.8f, EaseQuadOut.getInstance()),
+                new AlphaModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener() {
+
+                    @Override
+                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                        SyncTaskManager.getInstance().run(pItem::detachSelf);
+                    }
+                }, EaseQuadIn.getInstance())));
         }
 
         removeFromScene();
@@ -619,8 +647,8 @@ public class Slider extends GameObject {
                 ticksGot++;
                 listener.onSliderHit(id, 30, null, startPosition, false, color, GameObjectListener.SLIDER_START);
             } else if (replayObjectData != null &&
-                    Math.abs(replayObjectData.accuracy / 1000f) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty()) &&
-                    passedTime + dt / 2 > replayObjectData.accuracy / 1000f) {
+                       Math.abs(replayObjectData.accuracy / 1000f) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty()) &&
+                       passedTime + dt / 2 > replayObjectData.accuracy / 1000f) {
                 startHit = true;
                 Utils.playHitSound(listener, soundId[0], sampleSet[0], addition[0]);
                 ticksGot++;
@@ -632,8 +660,7 @@ public class Slider extends GameObject {
                 Utils.playHitSound(listener, soundId[0], sampleSet[0], addition[0]);
                 ticksGot++;
                 firstHitAccuracy = (int) (passedTime * 1000);
-                listener.onSliderHit(id, 30, null, startPosition,
-                        false, color, GameObjectListener.SLIDER_START);
+                listener.onSliderHit(id, 30, null, startPosition, false, color, GameObjectListener.SLIDER_START);
             }
         }
 
@@ -723,8 +750,7 @@ public class Slider extends GameObject {
             number.detachSelf();
             approachCircle.setAlpha(0);
 
-            ball = SpritePool.getInstance().getAnimSprite("sliderb",
-                    SkinManager.getFrames("sliderb"));
+            ball = SpritePool.getInstance().getAnimSprite("sliderb", SkinManager.getFrames("sliderb"));
             ball.setFps((float) (0.1f * GameHelper.getSpeed() * scale / timing.getBeatLength()));
             ball.setScale(scale);
             ball.setFlippedHorizontal(false);
@@ -754,8 +780,9 @@ public class Slider extends GameObject {
                 inRadius = true;
                 break;
             }
-            if (GameHelper.isAutopilotMod() && isPressed)
+            if (GameHelper.isAutopilotMod() && isPressed) {
                 inRadius = true;
+            }
         }
         listener.onTrackingSliders(inRadius);
         tickTime += dt;
@@ -772,32 +799,33 @@ public class Slider extends GameObject {
 
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(new ParallelEntityModifier(new ModifierListener() {
+
                     public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
                         mIsAnimating = false;
                     }
                 },
-                        new ScaleModifier(Math.min(remainTime, 0.18f * GameHelper.getTimeMultiplier()), initialScale, scale, EaseQuadOut.getInstance()),
-                        new AlphaModifier(Math.min(remainTime, 0.06f * GameHelper.getTimeMultiplier()), followCircle.getAlpha(), 1f)
-                ));
+                    new ScaleModifier(Math.min(remainTime, 0.18f * GameHelper.getTimeMultiplier()), initialScale, scale, EaseQuadOut.getInstance()),
+                    new AlphaModifier(Math.min(remainTime, 0.06f * GameHelper.getTimeMultiplier()), followCircle.getAlpha(), 1f)));
             } else if (!inRadius && mWasInRadius) {
                 mWasInRadius = false;
                 mIsAnimating = true;
 
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(new ParallelEntityModifier(new ModifierListener() {
+
                     public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
                         mIsAnimating = false;
                     }
                 },
-                        new ScaleModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), scale * 2f),
-                        new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener() {
-                            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                                if (mIsOver) {
-                                    SyncTaskManager.getInstance().run(pItem::detachSelf);
-                                }
+                    new ScaleModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), scale * 2f),
+                    new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener() {
+
+                        public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                            if (mIsOver) {
+                                SyncTaskManager.getInstance().run(pItem::detachSelf);
                             }
-                        })
-                ));
+                        }
+                    })));
             }
         } else {
             mWasInRadius = inRadius;
@@ -805,19 +833,18 @@ public class Slider extends GameObject {
         }
 
         // Some magic with slider ticks. If it'll crash it's not my fault ^_^"
-        while (ticks.size() > 0 && percentage < 1 - 0.02f / maxTime
-                && tickTime * GameHelper.getTickRate() > tickInterval) {
+        while (ticks.size() > 0 && percentage < 1 - 0.02f / maxTime && tickTime * GameHelper.getTickRate() > tickInterval) {
             tickTime -= tickInterval / GameHelper.getTickRate();
-            if (followCircle.getAlpha() > 0 && replayObjectData == null ||
-                    replayObjectData != null && replayObjectData.tickSet.get(tickIndex)) {
+            if (followCircle.getAlpha() > 0 && replayObjectData == null || replayObjectData != null && replayObjectData.tickSet.get(tickIndex)) {
                 Utils.playHitSound(listener, 16);
                 listener.onSliderHit(id, 10, null, ballpos, false, color, GameObjectListener.SLIDER_TICK);
 
                 if (Config.isComplexAnimations() && !mIsAnimating) {
                     followCircle.clearEntityModifiers();
-                    followCircle.registerEntityModifier(new ScaleModifier((float)
-                        Math.min(tickInterval / GameHelper.getTickRate(), 0.2f) * GameHelper.getTimeMultiplier(),
-                        scale * 1.1f, scale, EaseQuadOut.getInstance()));
+                    followCircle.registerEntityModifier(new ScaleModifier((float) Math.min(tickInterval / GameHelper.getTickRate(), 0.2f) * GameHelper.getTimeMultiplier(),
+                        scale * 1.1f,
+                        scale,
+                        EaseQuadOut.getInstance()));
                 }
 
                 ticksGot++;
@@ -835,10 +862,8 @@ public class Slider extends GameObject {
             ticksTotal++;
         }
         // Setting position of ball and follow circle
-        followCircle.setPosition(ballpos.x - followCircle.getWidth() / 2,
-                ballpos.y - followCircle.getHeight() / 2);
-        ball.setPosition(ballpos.x - ball.getWidth() / 2,
-                ballpos.y - ball.getHeight() / 2);
+        followCircle.setPosition(ballpos.x - followCircle.getWidth() / 2, ballpos.y - followCircle.getHeight() / 2);
+        ball.setPosition(ballpos.x - ball.getWidth() / 2, ballpos.y - ball.getHeight() / 2);
         ball.setRotation(ballAngle);
 
         if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
@@ -878,8 +903,7 @@ public class Slider extends GameObject {
                 Utils.playHitSound(listener, soundId[0], sampleSet[0], addition[0]);
                 ticksGot++;
                 firstHitAccuracy = (int) (passedTime * 1000);
-                listener.onSliderHit(id, 30, null, startPosition,
-                        false, color, GameObjectListener.SLIDER_START);
+                listener.onSliderHit(id, 30, null, startPosition, false, color, GameObjectListener.SLIDER_START);
             }
             if (passedTime < 0) // we at approach time
             {

@@ -5,11 +5,16 @@ import android.graphics.PointF;
 import ru.nsu.ccfit.zuev.osu.Utils;
 
 public class GameObjectData {
+
     private final int time;
+
     private final int comboCode;
+
     private final String[] rawdata;
+
     // private SliderHelper.SliderPath path = null;
     private final PointF pos;
+
     private float posOffset;
 
     public GameObjectData(final String line) {
@@ -25,13 +30,13 @@ public class GameObjectData {
             for (int i = 0; i < rawdata.length; i++) {
                 rawdata[i] = data[i];
             }
-        } else
+        } else {
             rawdata = data;
+        }
 
         time = Integer.parseInt(rawdata[2]);
         comboCode = Integer.parseInt(rawdata[3]);
-        pos = Utils.trackToRealCoords(new PointF(Float.parseFloat(rawdata[0]),
-                Float.parseFloat(rawdata[1])));
+        pos = Utils.trackToRealCoords(new PointF(Float.parseFloat(rawdata[0]), Float.parseFloat(rawdata[1])));
         posOffset = 0;
     }
 
@@ -53,12 +58,10 @@ public class GameObjectData {
             if ((repeats % 2) != 1) {
                 return pos;
             }
-            final String[] endP = rawdata[5].substring(
-                    rawdata[5].lastIndexOf('|') + 1).split("[:]");
+            final String[] endP = rawdata[5].substring(rawdata[5].lastIndexOf('|') + 1).split("[:]");
             PointF end;
             try {
-                end = Utils.trackToRealCoords(new PointF(Float
-                        .parseFloat(endP[0]), Float.parseFloat(endP[1])));
+                end = Utils.trackToRealCoords(new PointF(Float.parseFloat(endP[0]), Float.parseFloat(endP[1])));
             } catch (final NumberFormatException e) {
                 end = pos;
             }
@@ -82,4 +85,5 @@ public class GameObjectData {
     public String[] getData() {
         return rawdata;
     }
+
 }

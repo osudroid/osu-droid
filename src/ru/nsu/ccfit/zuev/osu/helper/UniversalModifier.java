@@ -4,12 +4,13 @@ import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.SingleValueSpanEntityModifier;
 
 public class UniversalModifier extends SingleValueSpanEntityModifier {
+
     ValueType type;
 
     ;
 
-    public UniversalModifier(final float duration, final float from,
-                             final float to, final ValueType type) {
+    public UniversalModifier(
+        final float duration, final float from, final float to, final ValueType type) {
         super(duration, from, to);
         this.type = type;
     }
@@ -34,8 +35,8 @@ public class UniversalModifier extends SingleValueSpanEntityModifier {
     }
 
     @Override
-    protected void onSetValue(final IEntity pItem, final float pPercentageDone,
-                              final float pValue) {
+    protected void onSetValue(
+        final IEntity pItem, final float pPercentageDone, final float pValue) {
         switch (type) {
             case ALPHA:
                 pItem.setAlpha(pValue);
@@ -53,8 +54,8 @@ public class UniversalModifier extends SingleValueSpanEntityModifier {
         return new UniversalModifier(this);
     }
 
-    public void init(final float duration, final float from, final float to,
-                     final ValueType type) {
+    public void init(
+        final float duration, final float from, final float to, final ValueType type) {
         reset();
         mDuration = duration;
         mFromValue = from;

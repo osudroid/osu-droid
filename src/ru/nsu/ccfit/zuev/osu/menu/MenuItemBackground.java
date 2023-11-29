@@ -7,29 +7,33 @@ import org.anddev.andengine.util.MathUtils;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class MenuItemBackground extends Sprite {
 
     private static final RGBColor DEFAULT_COLOR = new RGBColor(240 / 255f, 150 / 255f, 0 / 255f);
+
     private static final RGBColor ON_TOUCH_COLOR = new RGBColor(1, 1, 1);
+
     private final ChangeableText title, author;
+
     private final RGBColor defColor = OsuSkin.get().getColor("MenuItemDefaultColor", DEFAULT_COLOR);
+
     private final RGBColor onTouchColor = OsuSkin.get().getColor("MenuItemOnTouchColor", ON_TOUCH_COLOR);
+
     private boolean moved = false;
+
     private float dx = 0, dy = 0;
+
     private MenuItem item;
 
     public MenuItemBackground() {
-        super(0, 0, ResourceManager.getInstance().getTexture(
-                "menu-button-background"));
+        super(0, 0, ResourceManager.getInstance().getTexture("menu-button-background"));
 
         setAlpha(0.8f);
-        title = new ChangeableText(Utils.toRes(32), Utils.toRes(25),
-                ResourceManager.getInstance().getFont("font"), "", 255);
-        author = new ChangeableText(0, 0, ResourceManager.getInstance()
-                .getFont("font"), "", 100);
+        title = new ChangeableText(Utils.toRes(32), Utils.toRes(25), ResourceManager.getInstance().getFont("font"), "", 255);
+        author = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 100);
         author.setPosition(Utils.toRes(150), Utils.toRes(60));
 
         defColor.apply(this);
@@ -57,8 +61,8 @@ public class MenuItemBackground extends Sprite {
 
 
     @Override
-    public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                 final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+    public boolean onAreaTouched(
+        final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
         if (!isVisible()) {
             return false;
         }
@@ -78,14 +82,12 @@ public class MenuItemBackground extends Sprite {
                 item.select(true, true);
             }
             return true;
-        } else if (pSceneTouchEvent.isActionOutside()
-                || pSceneTouchEvent.isActionMove()
-                && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                pTouchAreaLocalY) > 50)) {
+        } else if (pSceneTouchEvent.isActionOutside() || pSceneTouchEvent.isActionMove() && (MathUtils.distance(dx, dy, pTouchAreaLocalX, pTouchAreaLocalY) > 50)) {
             defColor.apply(this);
             moved = true;
             return false;
         }
         return false;
     }
+
 }

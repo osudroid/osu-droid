@@ -5,8 +5,11 @@ import androidx.annotation.NonNull;
 import org.anddev.andengine.entity.Entity;
 
 public class RGBColor {
+
     private float cr;
+
     private float cg;
+
     private float cb;
 
     public RGBColor(RGBColor copy) {
@@ -30,10 +33,9 @@ public class RGBColor {
      * @return
      */
     public static RGBColor hex2Rgb(String colorStr) {
-        return new RGBColor(
-                Integer.valueOf(colorStr.substring(1, 3), 16) / 255.0f,
-                Integer.valueOf(colorStr.substring(3, 5), 16) / 255.0f,
-                Integer.valueOf(colorStr.substring(5, 7), 16) / 255.0f);
+        return new RGBColor(Integer.valueOf(colorStr.substring(1, 3), 16) / 255.0f,
+            Integer.valueOf(colorStr.substring(3, 5), 16) / 255.0f,
+            Integer.valueOf(colorStr.substring(5, 7), 16) / 255.0f);
     }
 
     public float r() {
@@ -63,4 +65,5 @@ public class RGBColor {
             entity.setColor(cr, cg, cb);
         }
     }
+
 }

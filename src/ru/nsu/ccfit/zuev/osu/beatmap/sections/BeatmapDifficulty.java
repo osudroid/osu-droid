@@ -4,6 +4,7 @@ package ru.nsu.ccfit.zuev.osu.beatmap.sections;
  * Contains difficulty settings of a beatmap.
  */
 public class BeatmapDifficulty {
+
     /**
      * The approach rate of this beatmap.
      */
@@ -34,7 +35,8 @@ public class BeatmapDifficulty {
      */
     public double sliderTickRate = 1;
 
-    public BeatmapDifficulty() {}
+    public BeatmapDifficulty() {
+    }
 
     /**
      * Copy constructor.
@@ -58,4 +60,5 @@ public class BeatmapDifficulty {
     public BeatmapDifficulty deepClone() {
         return new BeatmapDifficulty(this);
     }
+
 }

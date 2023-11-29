@@ -12,46 +12,80 @@ import java.util.Queue;
 import java.util.Random;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
-import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.polygon.Spline;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class GameHelper {
-    public static ControlPoints controlPoints;
-    private static double tickRate = 1;
-    private static float scale = 1;
-    private static double speed = 1;
-    private static float difficulty = 1;
-    private static float approachRate = 1;
-    private static float drain = 0;
-    private static float stackLeniency = 0;
-    private static float timeMultiplier = 0;
-    private static RGBColor sliderColor = new RGBColor();
-    private static boolean hidden = false;
-    private static boolean flashLight = false;
-    private static boolean hardrock = false;
-    private static boolean relaxMod = false;
-    private static boolean doubleTime = false;
-    private static boolean nightCore = false;
-    private static boolean halfTime = false;
-    private static boolean autopilotMod = false;
-    private static boolean suddenDeath = false;
-    private static boolean perfect = false;
-    private static boolean scoreV2;
-    private static boolean isEasy;
-    private static boolean useReplay;
-    private static boolean isKiai = false;
-    private static boolean auto = false;
-    private static double beatLength = 0;
-    private static double timingOffset = 0;
-    private static int timeSignature = 4;
-    private static double initalBeatLength = 0;
-    private static double globalTime = 0;
-    private static Spline.CurveTypes curveType;
-    private static int gameid = 0;
+
     private static final Queue<SliderPath> pathPool = new LinkedList<>();
+
     private static final Queue<PointF> pointPool = new LinkedList<>();
+
+    public static ControlPoints controlPoints;
+
+    private static double tickRate = 1;
+
+    private static float scale = 1;
+
+    private static double speed = 1;
+
+    private static float difficulty = 1;
+
+    private static float approachRate = 1;
+
+    private static float drain = 0;
+
+    private static float stackLeniency = 0;
+
+    private static float timeMultiplier = 0;
+
+    private static RGBColor sliderColor = new RGBColor();
+
+    private static boolean hidden = false;
+
+    private static boolean flashLight = false;
+
+    private static boolean hardrock = false;
+
+    private static boolean relaxMod = false;
+
+    private static boolean doubleTime = false;
+
+    private static boolean nightCore = false;
+
+    private static boolean halfTime = false;
+
+    private static boolean autopilotMod = false;
+
+    private static boolean suddenDeath = false;
+
+    private static boolean perfect = false;
+
+    private static boolean scoreV2;
+
+    private static boolean isEasy;
+
+    private static boolean useReplay;
+
+    private static boolean isKiai = false;
+
+    private static boolean auto = false;
+
+    private static double beatLength = 0;
+
+    private static double timingOffset = 0;
+
+    private static int timeSignature = 4;
+
+    private static double initalBeatLength = 0;
+
+    private static double globalTime = 0;
+
+    private static Spline.CurveTypes curveType;
+
+    private static int gameid = 0;
 
     private static DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
@@ -95,8 +129,8 @@ public class GameHelper {
         gameid = (new Random().nextInt(233333333) + 1);
     }
 
-    public static SliderPath calculatePath(final PointF pos,
-                                           final String[] data, final float maxLength, final float offset) {
+    public static SliderPath calculatePath(
+        final PointF pos, final String[] data, final float maxLength, final float offset) {
         final ArrayList<ArrayList<PointF>> points = new ArrayList<>();
         points.add(new ArrayList<>());
         int lastIndex = 0;
@@ -121,10 +155,8 @@ public class GameHelper {
             point.set(Integer.parseInt(nums[0]), Integer.parseInt(nums[1]));
             point.x += offset;
             point.y += offset;
-            final PointF ppoint = points.get(lastIndex).get(
-                    points.get(lastIndex).size() - 1);
-            if (point.x == ppoint.x && point.y == ppoint.y
-                    || data[0].equals("C")) {
+            final PointF ppoint = points.get(lastIndex).get(points.get(lastIndex).size() - 1);
+            if (point.x == ppoint.x && point.y == ppoint.y || data[0].equals("C")) {
                 if (data[0].equals("C")) {
                     points.get(lastIndex).add(point);
                 }
@@ -156,12 +188,9 @@ public class GameHelper {
 
             // Debug.i("section size=" + section.size());
             for (final PointF p : section) {
-                if (pind < 0
-                        || Math.abs(p.x - path.points.get(pind).x)
-                        + Math.abs(p.y - path.points.get(pind).y) > 1f) {
+                if (pind < 0 || Math.abs(p.x - path.points.get(pind).x) + Math.abs(p.y - path.points.get(pind).y) > 1f) {
                     if (!path.points.isEmpty()) {
-                        vec.set(p.x - path.points.get(path.points.size() - 1).x,
-                                p.y - path.points.get(path.points.size() - 1).y);
+                        vec.set(p.x - path.points.get(path.points.size() - 1).x, p.y - path.points.get(path.points.size() - 1).y);
                         trackLength += Utils.length(vec);
                         path.length.add(trackLength);
                     }
@@ -180,8 +209,7 @@ public class GameHelper {
         }
 
         if (path.points.size() == 1) {
-            path.points.add(new PointF(path.points.get(0).x,
-                    path.points.get(0).y));
+            path.points.add(new PointF(path.points.get(0).x, path.points.get(0).y));
             path.length.add(0f);
         }
 
@@ -288,6 +316,7 @@ public class GameHelper {
     public static void setFlashLight(final boolean flashLight) {
         GameHelper.flashLight = flashLight;
     }
+
     public static boolean isHalfTime() {
         return halfTime;
     }
@@ -452,7 +481,11 @@ public class GameHelper {
     }
 
     public static class SliderPath {
+
         public ArrayList<PointF> points = new ArrayList<>();
+
         public ArrayList<Float> length = new ArrayList<>();
+
     }
+
 }

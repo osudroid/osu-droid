@@ -12,10 +12,15 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.game.cursor.trail.CursorTrail;
 
 public class CursorEntity extends Entity {
+
     protected final CursorSprite cursorSprite;
+
     private ParticleSystem particles = null;
+
     private PointParticleEmitter emitter = null;
+
     private boolean isShowing = false;
+
     private float particleOffsetX, particleOffsetY;
 
     public CursorEntity() {
@@ -45,8 +50,9 @@ public class CursorEntity extends Entity {
     public void setShowing(boolean showing) {
         isShowing = showing;
         setVisible(showing);
-        if (particles != null)
+        if (particles != null) {
             particles.setParticlesSpawnEnabled(showing);
+        }
     }
 
     public void click() {
@@ -55,7 +61,7 @@ public class CursorEntity extends Entity {
 
     public void update(float pSecondsElapsed) {
         // this.handleLongerTrail();
-        if(isShowing) {
+        if (isShowing) {
             cursorSprite.update(pSecondsElapsed);
         }
         super.onManagedUpdate(pSecondsElapsed);
@@ -70,9 +76,11 @@ public class CursorEntity extends Entity {
 
     @Override
     public void setPosition(float pX, float pY) {
-        if (emitter != null)
+        if (emitter != null) {
             emitter.setCenter(pX + particleOffsetX, pY + particleOffsetY);
+        }
 
         super.setPosition(pX, pY);
     }
+
 }

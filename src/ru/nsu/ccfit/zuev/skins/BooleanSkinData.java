@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.datatypes.DefaultBoolean;
 
 public class BooleanSkinData extends SkinData<Boolean> {
+
     public BooleanSkinData(String tag, boolean defaultValue) {
         super(tag, new DefaultBoolean(defaultValue));
     }
@@ -19,4 +20,5 @@ public class BooleanSkinData extends SkinData<Boolean> {
     public void setFromJson(@NonNull JSONObject data) {
         setCurrentValue(data.optBoolean(getTag(), getDefaultValue()));
     }
+
 }

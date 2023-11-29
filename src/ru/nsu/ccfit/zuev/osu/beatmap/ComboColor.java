@@ -6,6 +6,7 @@ import ru.nsu.ccfit.zuev.osu.RGBColor;
  * An extension to <code>RGBColor</code> specifically for combo colors.
  */
 public class ComboColor extends RGBColor {
+
     /**
      * The index of this combo color.
      */
@@ -36,4 +37,5 @@ public class ComboColor extends RGBColor {
     public ComboColor deepClone() {
         return new ComboColor(this);
     }
+
 }

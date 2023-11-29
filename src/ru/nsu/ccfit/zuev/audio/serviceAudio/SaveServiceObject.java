@@ -3,9 +3,9 @@ package ru.nsu.ccfit.zuev.audio.serviceAudio;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.core.app.NotificationManagerCompat;
+
 import ru.nsu.ccfit.zuev.osu.AppException;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 
@@ -14,8 +14,9 @@ public class SaveServiceObject extends Application {
     static private SongService songService;
 
     public static void finishAllActivities() {
-        if (GlobalManager.getInstance().getMainActivity() != null)
+        if (GlobalManager.getInstance().getMainActivity() != null) {
             GlobalManager.getInstance().getMainActivity().finish();
+        }
     }
 
     public SongService getSongService() {
@@ -36,6 +37,7 @@ public class SaveServiceObject extends Application {
         super.onCreate();
         Thread.setDefaultUncaughtExceptionHandler(AppException.getAppExceptionHandler());
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+
             @Override
             public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
             }
@@ -66,4 +68,5 @@ public class SaveServiceObject extends Application {
             }
         });
     }
+
 }

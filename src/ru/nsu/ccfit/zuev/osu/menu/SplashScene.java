@@ -1,12 +1,18 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
-import org.anddev.andengine.entity.modifier.*;
+import org.anddev.andengine.entity.modifier.FadeInModifier;
+import org.anddev.andengine.entity.modifier.FadeOutModifier;
+import org.anddev.andengine.entity.modifier.LoopEntityModifier;
+import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
+import org.anddev.andengine.entity.modifier.RotationByModifier;
+import org.anddev.andengine.entity.modifier.ScaleModifier;
+import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
-
 import org.anddev.andengine.util.HorizontalAlign;
+
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -18,10 +24,15 @@ import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 public class SplashScene implements IUpdateHandler {
 
     public static final SplashScene INSTANCE = new SplashScene();
+
     private final Scene scene;
+
     private ChangeableText infoText;
+
     private ChangeableText progressText;
+
     private Sprite mLoading;
+
     private boolean mStarting = true;
 
     public SplashScene() {
@@ -53,10 +64,11 @@ public class SplashScene implements IUpdateHandler {
         scene.attachChild(infoText);
     }
 
-    public Scene getScene() { return scene; }
+    public Scene getScene() {
+        return scene;
+    }
 
-    public void playWelcomeAnimation()
-    {
+    public void playWelcomeAnimation() {
         mStarting = false;
 
         mLoading.registerEntityModifier(new FadeOutModifier(0.2f));
@@ -67,12 +79,9 @@ public class SplashScene implements IUpdateHandler {
             progressText.detachSelf();
         });
 
-        try
-        {
+        try {
             Thread.sleep(220);
-        }
-        catch (InterruptedException ignored)
-        {
+        } catch (InterruptedException ignored) {
         }
 
         var welcomeTex = ResourceManager.getInstance().getTexture("welcome");
@@ -88,13 +97,8 @@ public class SplashScene implements IUpdateHandler {
         welcomeSound.play();
         welcomePiano.play();
 
-        welcomeSprite.registerEntityModifier(new ParallelEntityModifier(
-                new FadeInModifier(2.5f),
-                new SequenceEntityModifier(
-                        new ScaleModifier(0.25f, 1f, 1f, 0f, 1f),
-                        new ScaleModifier(2.25f, 1f, 1.1f)
-                )
-        ));
+        welcomeSprite.registerEntityModifier(new ParallelEntityModifier(new FadeInModifier(2.5f),
+            new SequenceEntityModifier(new ScaleModifier(0.25f, 1f, 1f, 0f, 1f), new ScaleModifier(2.25f, 1f, 1.1f))));
     }
 
     private void initializeProgress() {
@@ -108,8 +112,7 @@ public class SplashScene implements IUpdateHandler {
     @Override
     public void onUpdate(float pSecondsElapsed) {
         float progress = GlobalManager.getInstance().getLoadingProgress();
-        if (mStarting)
-        {
+        if (mStarting) {
             mLoading.setAlpha(mLoading.getAlpha() + 0.1f);
         }
 
@@ -123,9 +126,9 @@ public class SplashScene implements IUpdateHandler {
     }
 
     @Override
-    public void reset()
-    {
+    public void reset() {
 
     }
+
 }
 

@@ -12,11 +12,16 @@ import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class CursorSprite extends Sprite implements ISliderListener {
+
     public final float baseSize = Config.getCursorSize() * 2;
+
     private final float clickAnimationTime = 0.5f / 2f;
-    private ParallelEntityModifier previousClickModifier;
-    private RotationByModifier currentRotation;
+
     private final boolean rotate = OsuSkin.get().isRotateCursor();
+
+    private ParallelEntityModifier previousClickModifier;
+
+    private RotationByModifier currentRotation;
 
     public CursorSprite(float pX, float pY, TextureRegion pTextureRegion) {
         super(pX, pY, pTextureRegion);
@@ -36,11 +41,7 @@ public class CursorSprite extends Sprite implements ISliderListener {
             unregisterEntityModifier(previousClickModifier);
             setScale(baseSize);
         }
-        registerEntityModifier(
-                previousClickModifier = new ParallelEntityModifier(
-                        new SequenceEntityModifier(clickInModifier(), clickOutModifier())
-                )
-        );
+        registerEntityModifier(previousClickModifier = new ParallelEntityModifier(new SequenceEntityModifier(clickInModifier(), clickOutModifier())));
     }
 
     private void rotateCursor() {
@@ -73,4 +74,5 @@ public class CursorSprite extends Sprite implements ISliderListener {
     public void onSliderEnd() {
         registerEntityModifier(clickOutModifier());
     }
+
 }

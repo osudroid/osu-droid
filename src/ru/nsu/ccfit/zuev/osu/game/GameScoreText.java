@@ -12,15 +12,21 @@ import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
 public class GameScoreText {
+
     private final AnimSprite[] letters;
+
     private final Map<Character, AnimSprite> characters;
+
     private final ArrayList<AnimSprite> digits = new ArrayList<AnimSprite>();
-    private float scale = 0;
-    private boolean hasX = false;
+
     private final float digitWidth;
 
-    public GameScoreText(StringSkinData prefix, final float x, final float y, final String mask,
-                         final float scale) {
+    private float scale = 0;
+
+    private boolean hasX = false;
+
+    public GameScoreText(
+        StringSkinData prefix, final float x, final float y, final String mask, final float scale) {
         AnimSprite scoreComma = null;
         AnimSprite scorePercent = null;
         AnimSprite scoreX = null;
@@ -42,8 +48,7 @@ public class GameScoreText {
                 scoreX = letters[i];
                 hasX = true;
             }
-            letters[i].setSize(letters[i].getWidth() * scale,
-                    letters[i].getHeight() * scale);
+            letters[i].setSize(letters[i].getWidth() * scale, letters[i].getHeight() * scale);
             width += letters[i].getWidth();
         }
         this.scale = scale;
@@ -84,8 +89,7 @@ public class GameScoreText {
             }
         }
         if (hasX) {
-            letters[letters.length - 1].setPosition(digits.get(0).getX()
-                    + totalWidth, letters[letters.length - 1].getY());
+            letters[letters.length - 1].setPosition(digits.get(0).getX() + totalWidth, letters[letters.length - 1].getY());
         }
     }
 
@@ -101,9 +105,9 @@ public class GameScoreText {
         }
     }
 
-    public void setPosition(float x, float y){
+    public void setPosition(float x, float y) {
         float width = 0;
-        for (final Sprite sp : letters){
+        for (final Sprite sp : letters) {
             sp.setPosition(x + width, y);
             width += sp.getWidth();
         }
@@ -112,4 +116,5 @@ public class GameScoreText {
     public float getDigitWidth() {
         return digitWidth;
     }
+
 }

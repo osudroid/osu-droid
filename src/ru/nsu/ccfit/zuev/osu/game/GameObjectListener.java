@@ -12,8 +12,8 @@ public interface GameObjectListener {
 
     void onCircleHit(int id, float accuracy, PointF pos, boolean endCombo, byte forcedScore, RGBColor color);
 
-    void onSliderHit(int id, int score, PointF start, PointF end,
-                     boolean endCombo, RGBColor color, int type);
+    void onSliderHit(
+        int id, int score, PointF start, PointF end, boolean endCombo, RGBColor color, int type);
 
     void onSliderEnd(int id, int accuracy, BitSet tickSet);
 
@@ -42,10 +42,11 @@ public interface GameObjectListener {
     int getCursorsCount();
 
     void registerAccuracy(double acc);
-    
+
     void updateAutoBasedPos(float pX, float pY);
 
     void onTrackingSliders(boolean isTrackingSliders);
 
     void onUpdatedAutoCursor(float pX, float pY);
+
 }

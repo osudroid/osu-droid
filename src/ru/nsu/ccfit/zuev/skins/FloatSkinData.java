@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.datatypes.DefaultFloat;
 
 public class FloatSkinData extends SkinData<Float> {
+
     public FloatSkinData(String tag, float defaultValue) {
         super(tag, new DefaultFloat(defaultValue));
     }
@@ -19,4 +20,5 @@ public class FloatSkinData extends SkinData<Float> {
     public void setFromJson(@NonNull JSONObject data) {
         setCurrentValue((float) data.optDouble(getTag(), getDefaultValue()));
     }
+
 }

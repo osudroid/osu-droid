@@ -10,6 +10,7 @@ import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
  * A parser for parsing a beatmap's timing points section.
  */
 public class BeatmapControlPointsParser extends BeatmapSectionParser {
+
     @Override
     public void parse(BeatmapData data, String line) {
         final String[] pars = line.split(",");
@@ -48,13 +49,11 @@ public class BeatmapControlPointsParser extends BeatmapSectionParser {
             manager.timing.add(new TimingControlPoint(time, msPerBeat, timeSignature));
         }
 
-        manager.difficulty.add(new DifficultyControlPoint(
-                time,
-                // If msPerBeat is NaN, speedMultiplier should still be 1 because all comparisons against NaN are false.
-                msPerBeat < 0 ? 100 / -msPerBeat : 1,
-                !Double.isNaN(msPerBeat)
-        ));
+        manager.difficulty.add(new DifficultyControlPoint(time,
+            // If msPerBeat is NaN, speedMultiplier should still be 1 because all comparisons against NaN are false.
+            msPerBeat < 0 ? 100 / -msPerBeat : 1, !Double.isNaN(msPerBeat)));
 
         data.rawTimingPoints.add(line);
     }
+
 }

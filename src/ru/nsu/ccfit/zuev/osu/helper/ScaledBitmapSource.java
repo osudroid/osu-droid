@@ -14,12 +14,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class ScaledBitmapSource extends BaseTextureAtlasSource implements
-        IBitmapTextureAtlasSource {
+public class ScaledBitmapSource extends BaseTextureAtlasSource implements IBitmapTextureAtlasSource {
 
     private final File mFile;
+
     private int mWidth;
+
     private int mHeight;
+
     private Bitmap bitmap = null;
 
     // ===========================================================
@@ -30,15 +32,14 @@ public class ScaledBitmapSource extends BaseTextureAtlasSource implements
         this(pFile, 0, 0);
     }
 
-    public ScaledBitmapSource(final File pFile, final int pTexturePositionX,
-                              final int pTexturePositionY) {
+    public ScaledBitmapSource(
+        final File pFile, final int pTexturePositionX, final int pTexturePositionY) {
         super(pTexturePositionX, pTexturePositionY);
         this.mFile = pFile;
 
         final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
         decodeOptions.inJustDecodeBounds = true;
-        decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config
-                .getBackgroundQuality();
+        decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config.getBackgroundQuality();
 
         InputStream in = null;
         try {
@@ -48,8 +49,7 @@ public class ScaledBitmapSource extends BaseTextureAtlasSource implements
             this.mHeight = decodeOptions.outHeight;
 
         } catch (final IOException e) {
-            Debug.e("Failed loading Bitmap in FileBitmapTextureAtlasSource. File: "
-                    + pFile, e);
+            Debug.e("Failed loading Bitmap in FileBitmapTextureAtlasSource. File: " + pFile, e);
             this.mWidth = 0;
             this.mHeight = 0;
         } finally {
@@ -57,8 +57,8 @@ public class ScaledBitmapSource extends BaseTextureAtlasSource implements
         }
     }
 
-    ScaledBitmapSource(final File pFile, final int pTexturePositionX,
-                       final int pTexturePositionY, final int pWidth, final int pHeight) {
+    ScaledBitmapSource(
+        final File pFile, final int pTexturePositionX, final int pTexturePositionY, final int pWidth, final int pHeight) {
         super(pTexturePositionX, pTexturePositionY);
         this.mFile = pFile;
         this.mWidth = pWidth;
@@ -68,8 +68,7 @@ public class ScaledBitmapSource extends BaseTextureAtlasSource implements
 
     @Override
     public ScaledBitmapSource clone() {
-        return new ScaledBitmapSource(this.mFile, this.mTexturePositionX,
-                this.mTexturePositionY, this.mWidth, this.mHeight);
+        return new ScaledBitmapSource(this.mFile, this.mTexturePositionX, this.mTexturePositionY, this.mWidth, this.mHeight);
     }
 
     // ===========================================================
@@ -104,17 +103,14 @@ public class ScaledBitmapSource extends BaseTextureAtlasSource implements
         }
         final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
         decodeOptions.inPreferredConfig = pBitmapConfig;
-        decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config
-                .getBackgroundQuality();
+        decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config.getBackgroundQuality();
 
         InputStream in = null;
         try {
             in = new FileInputStream(this.mFile);
             return BitmapFactory.decodeStream(in, null, decodeOptions);
         } catch (final IOException e) {
-            Debug.e("Failed loading Bitmap in "
-                            + this.getClass().getSimpleName() + ". File: " + this.mFile,
-                    e);
+            Debug.e("Failed loading Bitmap in " + this.getClass().getSimpleName() + ". File: " + this.mFile, e);
             return null;
         } finally {
             StreamUtils.close(in);
@@ -129,8 +125,7 @@ public class ScaledBitmapSource extends BaseTextureAtlasSource implements
 
 
     public ScaledBitmapSource deepCopy() {
-        return new ScaledBitmapSource(mFile, mTexturePositionX,
-                mTexturePositionY);
+        return new ScaledBitmapSource(mFile, mTexturePositionX, mTexturePositionY);
     }
 
 }

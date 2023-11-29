@@ -3,38 +3,62 @@ package ru.nsu.ccfit.zuev.osu;
 import java.io.Serializable;
 
 public class TrackInfo implements Serializable {
+
     private static final long serialVersionUID = 2049627581836712912L;
 
     private String filename;
 
     private String publicName;
+
     private String mode;
+
     private String creator;
+
     private String md5;
+
     private String background = null;
+
     private int beatmapID = 0;
+
     private int beatmapSetID = 0;
+
     private float difficulty;
+
     private float hpDrain;
+
     private float overallDifficulty;
+
     private float approachRate;
+
     private float circleSize;
+
     private float bpmMax = 0;
+
     private float bpmMin = Float.MAX_VALUE;
+
     private long musicLength = 0;
+
     private int hitCircleCount = 0;
+
     private int sliderCount = 0;
+
     private int spinnerCount = 0;
+
     private int totalHitObjectCount = 0;
+
     private int maxCombo = 0;
 
     private BeatmapInfo beatmap;
 
 
-    /**The audio path relative to beatmap folder.*/
+    /**
+     * The audio path relative to beatmap folder.
+     */
     private String audioFilename;
 
-    /**The audio preview time.*/
+    /**
+     * The audio preview time.
+     */
     private int previewTime = -1;
 
 
@@ -210,12 +234,12 @@ public class TrackInfo implements Serializable {
         this.maxCombo = maxCombo;
     }
 
-    public void setMD5(String md5) {
-        this.md5 = md5;
-    }
-
     public String getMD5() {
         return md5;
+    }
+
+    public void setMD5(String md5) {
+        this.md5 = md5;
     }
 
     // Sometimes when the library is reloaded there can be 2 instances for the same beatmap so checking its MD5 is the
@@ -223,15 +247,14 @@ public class TrackInfo implements Serializable {
     @Override
     public boolean equals(Object o) {
 
-        if (o == this)
+        if (o == this) {
             return true;
+        }
 
         if (o instanceof TrackInfo) {
             var track = (TrackInfo) o;
 
-            return md5 != null
-                    && track.md5 != null
-                    && track.md5.equals(md5);
+            return md5 != null && track.md5 != null && track.md5.equals(md5);
         }
         return false;
     }
@@ -251,4 +274,5 @@ public class TrackInfo implements Serializable {
     public void setPreviewTime(int previewTime) {
         this.previewTime = previewTime;
     }
+
 }

@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.datatypes;
 
 public class DefaultBoolean extends DefaultData<Boolean> {
+
     public DefaultBoolean(Boolean defaultValue) {
         super(defaultValue);
     }
@@ -13,4 +14,5 @@ public class DefaultBoolean extends DefaultData<Boolean> {
     protected Boolean instanceDefaultValue() {
         return false;
     }
+
 }

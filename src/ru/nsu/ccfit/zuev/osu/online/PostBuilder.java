@@ -2,24 +2,23 @@ package ru.nsu.ccfit.zuev.osu.online;
 
 import com.dgsrz.bancho.security.SecurityUtils;
 
-import okhttp3.FormBody;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.Request;
-
 import org.anddev.andengine.util.Debug;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.net.UnknownHostException;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
+import okhttp3.FormBody;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class PostBuilder {
+
     private FormBody.Builder formBodyBuilder = new FormBody.Builder();
+
     private StringBuilder values = new StringBuilder();
 
     public void addParam(final String key, final String value) {
@@ -54,8 +53,7 @@ public class PostBuilder {
                 response = null;
             }
 
-            if (response == null || response.isEmpty() || response.get(0).length() == 0
-                    || !(response.get(0).equals("FAIL") || response.get(0).equals("SUCCESS"))) {
+            if (response == null || response.isEmpty() || response.get(0).length() == 0 || !(response.get(0).equals("FAIL") || response.get(0).equals("SUCCESS"))) {
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
@@ -65,7 +63,9 @@ public class PostBuilder {
             break;
         }
 
-        if (response == null) response = new ArrayList<String>();
+        if (response == null) {
+            response = new ArrayList<String>();
+        }
 
         if (response.isEmpty()) {
             response.add("");
@@ -77,23 +77,20 @@ public class PostBuilder {
         ArrayList<String> response = new ArrayList<String>();
 
         try {
-            Request request = new Request.Builder()
-                .url(scriptUrl)
-                .post(formBodyBuilder.build())
-                .build();
+            Request request = new Request.Builder().url(scriptUrl).post(formBodyBuilder.build()).build();
             Response resp = OnlineManager.client.newCall(request).execute();
 
             Debug.i("request url=" + scriptUrl);
             Debug.i("request --------Content---------");
             String line = null;
             BufferedReader reader = new BufferedReader(new StringReader(resp.body().string()));
-            while((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 Debug.i(String.format("request [%d]: %s", response.size(), line));
                 response.add(line);
             }
             Debug.i("request url=" + scriptUrl);
             Debug.i("request -----End of content-----");
-        } catch(Exception e) {
+        } catch (Exception e) {
             Debug.e(e.getMessage(), e);
         }
 
@@ -104,10 +101,13 @@ public class PostBuilder {
     }
 
     public static class RequestException extends Exception {
+
         private static final long serialVersionUID = 671773899432746143L;
 
         public RequestException(final Throwable cause) {
             super(cause);
         }
+
     }
+
 }

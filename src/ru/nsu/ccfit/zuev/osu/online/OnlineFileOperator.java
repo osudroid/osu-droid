@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu.online;
 
 import com.dgsrz.bancho.security.SecurityUtils;
 
+import org.anddev.andengine.util.Debug;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -12,13 +14,11 @@ import java.util.TimeZone;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
-import okhttp3.Response;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 import okio.BufferedSink;
 import okio.Okio;
-
-import org.anddev.andengine.util.Debug;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
 public class OnlineFileOperator {
@@ -41,13 +41,12 @@ public class OnlineFileOperator {
             MediaType mime = MediaType.parse("application/octet-stream");
             RequestBody fileBody = RequestBody.create(mime, file);
             RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart("uploadedfile", file.getName(), fileBody)
-                .addFormDataPart("hash", checksum)
-                .addFormDataPart("replayID", replayID)
-                .addFormDataPart("sign", signature)
-                .build();
-            Request request = new Request.Builder().url(urlstr)
-                .post(requestBody).build();
+                                                                 .addFormDataPart("uploadedfile", file.getName(), fileBody)
+                                                                 .addFormDataPart("hash", checksum)
+                                                                 .addFormDataPart("replayID", replayID)
+                                                                 .addFormDataPart("sign", signature)
+                                                                 .build();
+            Request request = new Request.Builder().url(urlstr).post(requestBody).build();
             Response response = OnlineManager.client.newCall(request).execute();
             String responseMsg = response.body().string();
 
@@ -103,4 +102,5 @@ public class OnlineFileOperator {
             return false;
         }
     }
+
 }

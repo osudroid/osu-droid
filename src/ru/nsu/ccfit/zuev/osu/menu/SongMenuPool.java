@@ -6,10 +6,15 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class SongMenuPool {
+
     private static final SongMenuPool instance = new SongMenuPool();
+
     private final Queue<MenuItemBackground> backgrounds = new LinkedList<>();
+
     private final Queue<MenuItemTrack> tracks = new LinkedList<>();
+
     private int count = 0;
+
     private SongMenuPool() {
     }
 

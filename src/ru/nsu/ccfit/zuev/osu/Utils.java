@@ -13,8 +13,11 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
 
 public class Utils {
+
     private static final String FSReservedChars = "|\\?*<\":>+[]/";
+
     private static int accSign = 0;
+
     private static int soundMask = 0;
 
     public static <T> T[] oneObjectArray(T object, T[] ary) {
@@ -36,10 +39,9 @@ public class Utils {
         return (x * x);
     }
 
-    public static PointF inter(final PointF v1, final PointF v2,
-                               final float percent) {
-        return new PointF(v1.x * (1 - percent) + v2.x * percent, v1.y
-                * (1 - percent) + v2.y * percent);
+    public static PointF inter(
+        final PointF v1, final PointF v2, final float percent) {
+        return new PointF(v1.x * (1 - percent) + v2.x * percent, v1.y * (1 - percent) + v2.y * percent);
     }
 
     public static void putSpriteAnchorCenter(float x, float y, Sprite sprite) {
@@ -104,26 +106,21 @@ public class Utils {
 
     public static PointF scaleToReal(final PointF v) {
         final PointF pos = new PointF(v.x, v.y);
-        pos.x *= toRes(Constants.MAP_ACTUAL_WIDTH)
-                / (float) Constants.MAP_WIDTH;
-        pos.y *= toRes(Constants.MAP_ACTUAL_HEIGHT)
-                / (float) Constants.MAP_HEIGHT;
+        pos.x *= toRes(Constants.MAP_ACTUAL_WIDTH) / (float) Constants.MAP_WIDTH;
+        pos.y *= toRes(Constants.MAP_ACTUAL_HEIGHT) / (float) Constants.MAP_HEIGHT;
         return pos;
     }
 
     public static PointF scaleToRealC(final PointF v) {
         v.x *= toRes(Constants.MAP_ACTUAL_WIDTH) / (float) Constants.MAP_WIDTH;
-        v.y *= toRes(Constants.MAP_ACTUAL_HEIGHT)
-                / (float) Constants.MAP_HEIGHT;
+        v.y *= toRes(Constants.MAP_ACTUAL_HEIGHT) / (float) Constants.MAP_HEIGHT;
         return v;
     }
 
     public static PointF scaleToTrack(final PointF v, boolean isOld) {
         final PointF pos = new PointF(v.x, v.y);
-        pos.x *= Constants.MAP_WIDTH
-                / toRes((float) (isOld ? Constants.MAP_ACTUAL_WIDTH_OLD : Constants.MAP_ACTUAL_WIDTH));
-        pos.y *= Constants.MAP_HEIGHT
-                / toRes((float) (isOld ? Constants.MAP_ACTUAL_HEIGHT_OLD : Constants.MAP_ACTUAL_HEIGHT));
+        pos.x *= Constants.MAP_WIDTH / toRes((float) (isOld ? Constants.MAP_ACTUAL_WIDTH_OLD : Constants.MAP_ACTUAL_WIDTH));
+        pos.y *= Constants.MAP_HEIGHT / toRes((float) (isOld ? Constants.MAP_ACTUAL_HEIGHT_OLD : Constants.MAP_ACTUAL_HEIGHT));
         return pos;
     }
 
@@ -168,8 +165,8 @@ public class Utils {
         return ((v2.x - v1.x) * (v2.x - v1.x) + (v2.y - v1.y) * (v2.y - v1.y));
     }
 
-    public static float squaredDistance(final float v1x, final float v1y,
-                                        final float v2x, final float v2y) {
+    public static float squaredDistance(
+        final float v1x, final float v1y, final float v2x, final float v2y) {
         return ((v2x - v1x) * (v2x - v1x) + (v2y - v1y) * (v2y - v1y));
     }
 
@@ -181,13 +178,13 @@ public class Utils {
         return str == null || str.isEmpty();
     }
 
-    public static void playHitSound(final GameObjectListener listener,
-                                    final int soundId) {
+    public static void playHitSound(
+        final GameObjectListener listener, final int soundId) {
         playHitSound(listener, soundId, 0, 0);
     }
 
-    public static void playHitSound(final GameObjectListener listener,
-                                    final int soundId, final int sampleSet, final int addition) {
+    public static void playHitSound(
+        final GameObjectListener listener, final int soundId, final int sampleSet, final int addition) {
         if ((soundId & 32) > 0) {
             return;
         }
@@ -241,11 +238,9 @@ public class Utils {
      * @return boolean
      */
     public static boolean isWifi(Context context) {
-        ConnectivityManager connectivityManager = (ConnectivityManager) context
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetInfo = connectivityManager.getActiveNetworkInfo();
-        if (activeNetInfo != null
-                && activeNetInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+        if (activeNetInfo != null && activeNetInfo.getType() == ConnectivityManager.TYPE_WIFI) {
             return true;
         }
         return false;
@@ -280,4 +275,5 @@ public class Utils {
         }
         return val;
     }
+
 }

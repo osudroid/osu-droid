@@ -31,6 +31,21 @@ import ru.nsu.ccfit.zuev.osuplus.R;
  * A parser for parsing <code>.osu</code> files.
  */
 public class BeatmapParser {
+
+    private static final BeatmapGeneralParser generalParser = new BeatmapGeneralParser();
+
+    private static final BeatmapMetadataParser metadataParser = new BeatmapMetadataParser();
+
+    private static final BeatmapDifficultyParser difficultyParser = new BeatmapDifficultyParser();
+
+    private static final BeatmapEventsParser eventsParser = new BeatmapEventsParser();
+
+    private static final BeatmapControlPointsParser controlPointsParser = new BeatmapControlPointsParser();
+
+    private static final BeatmapColorParser colorParser = new BeatmapColorParser();
+
+    private static final BeatmapHitObjectsParser hitObjectsParser = new BeatmapHitObjectsParser();
+
     /**
      * The <code>.osu</code> file.
      */
@@ -60,13 +75,23 @@ public class BeatmapParser {
         file = new File(path);
     }
 
-    private static final BeatmapGeneralParser generalParser = new BeatmapGeneralParser();
-    private static final BeatmapMetadataParser metadataParser = new BeatmapMetadataParser();
-    private static final BeatmapDifficultyParser difficultyParser = new BeatmapDifficultyParser();
-    private static final BeatmapEventsParser eventsParser = new BeatmapEventsParser();
-    private static final BeatmapControlPointsParser controlPointsParser = new BeatmapControlPointsParser();
-    private static final BeatmapColorParser colorParser = new BeatmapColorParser();
-    private static final BeatmapHitObjectsParser hitObjectsParser = new BeatmapHitObjectsParser();
+    /**
+     * Populates the object scales of a <code>BeatmapData</code>.
+     *
+     * @param data The <code>BeatmapData</code> whose object scales will be populated.
+     */
+    public static void populateObjectData(final BeatmapData data) {
+        float scale = (1 - 0.7f * (data.difficulty.cs - 5) / 5) / 2;
+
+        for (HitObject object : data.hitObjects.getObjects()) {
+            object.setScale(scale);
+
+            // Reset stack height as we will be re-applying it.
+            object.setStackHeight(0);
+        }
+
+        HitObjectStackEvaluator.applyStacking(data.getFormatVersion(), data.hitObjects.getObjects(), data.difficulty.ar, data.general.stackLeniency);
+    }
 
     /**
      * Attempts to open the beatmap file.
@@ -116,10 +141,7 @@ public class BeatmapParser {
         String fileName = file.getName().substring(0, file.getName().length() - 4);
 
         if (source == null && !openFile()) {
-            ToastLogger.showText(
-                    StringTable.format(R.string.beatmap_parser_cannot_open_file, fileName),
-                    true
-            );
+            ToastLogger.showText(StringTable.format(R.string.beatmap_parser_cannot_open_file, fileName), true);
             return null;
         }
 
@@ -205,31 +227,15 @@ public class BeatmapParser {
         return data;
     }
 
-    /**
-     * Populates the object scales of a <code>BeatmapData</code>.
-     *
-     * @param data The <code>BeatmapData</code> whose object scales will be populated.
-     */
-    public static void populateObjectData(final BeatmapData data) {
-        float scale = (1 - 0.7f * (data.difficulty.cs - 5) / 5) / 2;
-
-        for (HitObject object : data.hitObjects.getObjects()) {
-            object.setScale(scale);
-
-            // Reset stack height as we will be re-applying it.
-            object.setStackHeight(0);
-        }
-
-        HitObjectStackEvaluator.applyStacking(data.getFormatVersion(), data.hitObjects.getObjects(), data.difficulty.ar, data.general.stackLeniency);
-    }
-
     private void closeSource() {
         if (source != null) {
             try {
                 source.close();
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
 
             source = null;
         }
     }
+
 }

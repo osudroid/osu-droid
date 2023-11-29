@@ -10,15 +10,23 @@ import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 
 public class SkinJsonReader extends SkinReader {
+
     private static final SkinJsonReader reader = new SkinJsonReader();
 
     private JSONObject currentData;
+
     private JSONObject currentComboColorData;
+
     private JSONObject currentSliderData;
+
     private JSONObject currentUtilsData;
+
     private JSONObject currentLayoutData;
+
     private JSONObject currentColorData;
+
     private JSONObject currentCursorData;
+
     private JSONObject currentFontsData;
 
     private SkinJsonReader() {
@@ -67,8 +75,7 @@ public class SkinJsonReader extends SkinReader {
     }
 
     @Override
-    protected void loadFonts()
-    {
+    protected void loadFonts() {
         OsuSkin.get().hitCirclePrefix.setFromJson(currentFontsData);
         OsuSkin.get().hitCircleOverlap.setFromJson(currentFontsData);
         OsuSkin.get().scorePrefix.setFromJson(currentFontsData);
@@ -124,7 +131,9 @@ public class SkinJsonReader extends SkinReader {
         JSONObject data = currentLayoutData;
         skin.useNewLayout.setFromJson(data);
         JSONArray names = data.names();
-        if (names == null) return;
+        if (names == null) {
+            return;
+        }
         for (int i = 0; i < names.length(); i++) {
             if (names.optString(i).equals(skin.useNewLayout.getTag())) {
                 continue;
@@ -141,7 +150,9 @@ public class SkinJsonReader extends SkinReader {
         OsuSkin skin = OsuSkin.get();
         JSONObject data = currentColorData;
         JSONArray names = data.names();
-        if (names == null) return;
+        if (names == null) {
+            return;
+        }
         for (int i = 0; i < names.length(); i++) {
             skin.colorData.put(names.optString(i), RGBColor.hex2Rgb(data.optString(names.optString(i))));
         }
@@ -161,5 +172,6 @@ public class SkinJsonReader extends SkinReader {
         }
         consumer.consume(object);
     }
+
 }
 

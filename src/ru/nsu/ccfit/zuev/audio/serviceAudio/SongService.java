@@ -8,9 +8,10 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import androidx.core.app.NotificationManagerCompat;
+
 import java.io.File;
 
-import androidx.core.app.NotificationManagerCompat;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
@@ -19,7 +20,9 @@ import ru.nsu.ccfit.zuev.osu.MainActivity;
 public class SongService extends Service {
 
     private BassAudioFunc audioFunc;
+
     private boolean isGaming = false;
+
     // private boolean isSettingMenu = false;
     private NotifyPlayer notify;
 
@@ -75,7 +78,9 @@ public class SongService extends Service {
 
     public boolean preLoad(String filePath, PlayMode mode, boolean isLoop) {
         if (checkFileExist(filePath)) {
-            if (audioFunc == null) return false;
+            if (audioFunc == null) {
+                return false;
+            }
             if (isLoop) {
                 audioFunc.setLoop(isLoop);
             }
@@ -109,34 +114,40 @@ public class SongService extends Service {
     }
 
     public void play() {
-        if (audioFunc == null) return;
+        if (audioFunc == null) {
+            return;
+        }
         audioFunc.play();
         notify.updateState();
     }
 
     public void pause() {
-        if (audioFunc == null) return;
+        if (audioFunc == null) {
+            return;
+        }
         audioFunc.pause();
         notify.updateState();
     }
 
     public boolean stop() {
-        if (audioFunc == null) return false;
+        if (audioFunc == null) {
+            return false;
+        }
         notify.updateState();
         return audioFunc.stop();
     }
 
-    public void stopWithoutNotify()
-    {
-        if (audioFunc != null)
-        {
+    public void stopWithoutNotify() {
+        if (audioFunc != null) {
             audioFunc.stop();
         }
     }
 
     public boolean exit() {
         Log.w("SongService", "Hei Service is on EXIT()");
-        if (audioFunc == null) return false;
+        if (audioFunc == null) {
+            return false;
+        }
         audioFunc.stop();
         audioFunc.unregisterReceiverBM();
         audioFunc.freeALL();
@@ -146,7 +157,9 @@ public class SongService extends Service {
     }
 
     public void seekTo(int time) {
-        if (audioFunc == null) return;
+        if (audioFunc == null) {
+            return;
+        }
         System.out.println(audioFunc.jump(time));
     }
 
@@ -240,15 +253,22 @@ public class SongService extends Service {
     }
 
     public void setReceiverStuff(BroadcastReceiver receiver, IntentFilter filter) {
-        if (audioFunc != null) audioFunc.setReciverStuff(receiver, filter, this);
+        if (audioFunc != null) {
+            audioFunc.setReciverStuff(receiver, filter, this);
+        }
     }
 
     public boolean checkFileExist(String path) {
-        if (path == null) return false;
-        if (path.trim().equals("")) return false;
-        else {
+        if (path == null) {
+            return false;
+        }
+        if (path.trim().equals("")) {
+            return false;
+        } else {
             File songFile = new File(path);
-            if (!songFile.exists()) return false;
+            if (!songFile.exists()) {
+                return false;
+            }
         }
         return true;
     }
@@ -258,9 +278,11 @@ public class SongService extends Service {
     }
 
     public class ReturnBindObject extends Binder {
+
         public SongService getObject() {
             return SongService.this;
         }
+
     }
 
 }

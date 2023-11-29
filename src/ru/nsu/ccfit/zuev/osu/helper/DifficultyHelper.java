@@ -43,4 +43,5 @@ public abstract class DifficultyHelper {
     public abstract float hitWindowFor100(float od);
 
     public abstract float hitWindowFor50(float od);
+
 }

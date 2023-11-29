@@ -4,6 +4,7 @@ package ru.nsu.ccfit.zuev.osu.beatmap.sections;
  * Contains information used to identify a beatmap.
  */
 public class BeatmapMetadata {
+
     /**
      * The romanized song title of this beatmap.
      */
@@ -54,7 +55,8 @@ public class BeatmapMetadata {
      */
     public int beatmapSetID = -1;
 
-    public BeatmapMetadata() {}
+    public BeatmapMetadata() {
+    }
 
     /**
      * Copy constructor.
@@ -82,4 +84,5 @@ public class BeatmapMetadata {
     public BeatmapMetadata deepClone() {
         return new BeatmapMetadata(this);
     }
+
 }

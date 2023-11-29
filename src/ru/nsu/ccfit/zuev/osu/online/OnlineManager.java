@@ -7,13 +7,12 @@ import android.os.Bundle;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
-import okhttp3.OkHttpClient;
-
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
 import java.util.ArrayList;
 
+import okhttp3.OkHttpClient;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -23,31 +22,49 @@ import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
 import ru.nsu.ccfit.zuev.osu.online.PostBuilder.RequestException;
 
 public class OnlineManager {
+
     public static final String hostname = "osudroid.moe";
+
     public static final String endpoint = "https://" + hostname + "/api/";
+
     public static final String updateEndpoint = endpoint + "update.php?lang=";
+
     public static final String defaultAvatarURL = "https://" + hostname + "/user/avatar/0.png";
-    private static final String onlineVersion = "36";
 
     public static final OkHttpClient client = new OkHttpClient();
 
+    private static final String onlineVersion = "36";
+
     private static OnlineManager instance = null;
+
     private Context context;
+
     private String failMessage = "";
 
     private boolean stayOnline = true;
+
     private String ssid = "";
+
     private long userId = -1L;
+
     private String playID = "";
 
     private String username = "";
+
     private String password = "";
+
     private String deviceID = "";
+
     private long rank = 0;
+
     private long score = 0;
+
     private float accuracy = 0;
+
     private String avatarURL = "";
+
     private int mapRank;
+
     private int replayID = 0;
 
     public static OnlineManager getInstance() {
@@ -97,8 +114,9 @@ public class OnlineManager {
             Debug.i("sendRequest response code:  " + response.get(0));
             if (response.size() >= 2) {
                 failMessage = response.get(1);
-            } else
+            } else {
                 failMessage = "Unknown server error";
+            }
             Debug.i("Received fail: " + failMessage);
             return null;
         }
@@ -121,11 +139,7 @@ public class OnlineManager {
 
         PostBuilder post = new PostBuilder();
         post.addParam("username", username);
-        post.addParam(
-                "password",
-                MD5Calcuator.getStringMD5(
-                        escapeHTMLSpecialCharacters(addSlashes(String.valueOf(password).trim())) + "taikotaiko"
-                ));
+        post.addParam("password", MD5Calcuator.getStringMD5(escapeHTMLSpecialCharacters(addSlashes(String.valueOf(password).trim())) + "taikotaiko"));
         post.addParam("version", onlineVersion);
 
         ArrayList<String> response = sendRequest(post, endpoint + "login.php");
@@ -157,8 +171,7 @@ public class OnlineManager {
 
         Bundle bParams = new Bundle();
         bParams.putString(FirebaseAnalytics.Param.METHOD, "ingame");
-        GlobalManager.getInstance().getMainActivity().getAnalytics().logEvent(FirebaseAnalytics.Event.LOGIN,
-            bParams);
+        GlobalManager.getInstance().getMainActivity().getAnalytics().logEvent(FirebaseAnalytics.Event.LOGIN, bParams);
 
         return true;
     }
@@ -175,16 +188,19 @@ public class OnlineManager {
         Debug.i("Starting play...");
         playID = null;
         final BeatmapInfo beatmap = track.getBeatmap();
-        if (beatmap == null) return;
+        if (beatmap == null) {
+            return;
+        }
 
         File trackfile = new File(track.getFilename());
         trackfile.getParentFile().getName();
         String osuID = trackfile.getParentFile().getName();
         Debug.i("osuid = " + osuID);
-        if (osuID.matches("^[0-9]+ .*"))
+        if (osuID.matches("^[0-9]+ .*")) {
             osuID = osuID.substring(0, osuID.indexOf(' '));
-        else
+        } else {
             osuID = null;
+        }
 
         PostBuilder post = new PostBuilder();
         post.addParam("userID", String.valueOf(userId));
@@ -194,8 +210,9 @@ public class OnlineManager {
         post.addParam("songTitle", beatmap.getTitle());
         post.addParam("songArtist", beatmap.getArtist());
         post.addParam("songCreator", beatmap.getCreator());
-        if (osuID != null)
+        if (osuID != null) {
             post.addParam("songID", osuID);
+        }
 
         ArrayList<String> response = sendRequest(post, endpoint + "submit.php");
 
@@ -246,8 +263,9 @@ public class OnlineManager {
             return false;
         }
 
-        if (failMessage.equals("Invalid record data"))
+        if (failMessage.equals("Invalid record data")) {
             return false;
+        }
 
         if (response.size() < 2) {
             failMessage = "Invalid server response";
@@ -268,8 +286,9 @@ public class OnlineManager {
 
         if (resp.length >= 5) {
             replayID = Integer.parseInt(resp[4]);
-        } else
+        } else {
             replayID = 0;
+        }
 
         return true;
     }
@@ -296,7 +315,9 @@ public class OnlineManager {
     }
 
     public boolean loadAvatarToTextureManager(String avatarURL) {
-        if (avatarURL == null || avatarURL.length() == 0) return false;
+        if (avatarURL == null || avatarURL.length() == 0) {
+            return false;
+        }
 
         String filename = MD5Calcuator.getStringMD5(avatarURL);
         Debug.i("Loading avatar from " + avatarURL);
@@ -427,7 +448,16 @@ public class OnlineManager {
         return mapRank;
     }
 
+    private String escapeHTMLSpecialCharacters(String str) {
+        return str.replace("&", "&amp;").replace("\"", "&quot;").replace("'", "&apos;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+
+    private String addSlashes(String str) {
+        return str.replace("'", "\\'").replace("\"", "\\\"").replace("\\", "\\\\");
+    }
+
     public static class OnlineManagerException extends Exception {
+
         private static final long serialVersionUID = -5703212596292949401L;
 
         public OnlineManagerException(final String message, final Throwable cause) {
@@ -437,21 +467,7 @@ public class OnlineManager {
         public OnlineManagerException(final String message) {
             super(message);
         }
+
     }
 
-    private String escapeHTMLSpecialCharacters(String str) {
-        return str
-                .replace("&", "&amp;")
-                .replace("\"", "&quot;")
-                .replace("'", "&apos;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;");
-    }
-
-    private String addSlashes(String str) {
-        return str
-                .replace("'", "\\'")
-                .replace("\"", "\\\"")
-                .replace("\\", "\\\\");
-    }
 }

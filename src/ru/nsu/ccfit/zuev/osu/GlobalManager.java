@@ -16,19 +16,33 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
  * Created by Fuuko on 2015/4/24.
  */
 public class GlobalManager {
+
     private static GlobalManager instance;
+
     private Engine engine;
+
     private Camera camera;
+
     private GameScene gameScene;
+
     private MainScene mainScene;
+
     private ScoringScene scoring;
+
     private SongMenu songMenu;
+
     private MainActivity mainActivity;
+
     private int loadingProgress;
+
     private String info;
+
     private SongService songService;
+
     private TrackInfo selectedTrack;
+
     private SaveServiceObject saveServiceObject;
+
     private String skinNow;
 
     public static GlobalManager getInstance() {
@@ -175,4 +189,5 @@ public class GlobalManager {
         mainActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
         return dm;
     }
+
 }

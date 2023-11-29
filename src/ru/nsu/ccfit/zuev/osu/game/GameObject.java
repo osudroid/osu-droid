@@ -7,11 +7,17 @@ import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 public abstract class GameObject {
 
     protected boolean endsCombo;
+
     protected boolean autoPlay = false;
+
     protected float hitTime = 0;
+
     protected int id = -1;
+
     protected Replay.ReplayObjectData replayObjectData = null;
+
     protected boolean startHit = false;
+
     protected PointF pos = new PointF();
 
     public Replay.ReplayObjectData getReplayData() {
@@ -48,11 +54,15 @@ public abstract class GameObject {
         this.id = id;
     }
 
-    public boolean isStartHit(){
+    public boolean isStartHit() {
         return startHit;
     }
 
-    public void tryHit(float dt) {}
+    public void tryHit(float dt) {
+    }
 
-    public PointF getPos() {return pos;}
+    public PointF getPos() {
+        return pos;
+    }
+
 }

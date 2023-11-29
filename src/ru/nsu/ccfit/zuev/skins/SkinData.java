@@ -9,7 +9,9 @@ import ru.nsu.ccfit.zuev.osu.datatypes.DefaultData;
 import ru.nsu.ccfit.zuev.osu.datatypes.IDefaultableData;
 
 public abstract class SkinData<I> implements IDefaultableData<I> {
+
     private final DefaultData<I> data;
+
     private final String tag;
 
     public SkinData(String tag, @NonNull DefaultData<I> data) {
@@ -42,4 +44,5 @@ public abstract class SkinData<I> implements IDefaultableData<I> {
     }
 
     public abstract void setFromJson(JSONObject data);
+
 }

@@ -31,26 +31,44 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class Replay {
+
     public static EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
+
     public static EnumSet<GameMod> oldMod = EnumSet.noneOf(GameMod.class);
-    protected int pointsSkipped = 0;
-    public ArrayList<MoveArray> cursorMoves = new ArrayList<>();
-    public int[] cursorIndex;
-    public int[] lastMoveIndex;
-    public ReplayObjectData[] objectData = null;
-    public int replayVersion;
-    public StatisticV2 stat = null;
-    private String md5 = "";
-    private String mapFile = "";
-    private String mapName = "";
-    private boolean isSaving;
+
     public static float oldChangeSpeed = 1.0f;
+
     public static float oldFLFollowDelay = FlashLightEntity.defaultMoveDelayS;
 
     public static Float oldCustomAR;
+
     public static Float oldCustomOD;
+
     public static Float oldCustomCS;
+
     public static Float oldCustomHP;
+
+    public ArrayList<MoveArray> cursorMoves = new ArrayList<>();
+
+    public int[] cursorIndex;
+
+    public int[] lastMoveIndex;
+
+    public ReplayObjectData[] objectData = null;
+
+    public int replayVersion;
+
+    public StatisticV2 stat = null;
+
+    protected int pointsSkipped = 0;
+
+    private String md5 = "";
+
+    private String mapFile = "";
+
+    private String mapName = "";
+
+    private boolean isSaving;
 
     public Replay() {
         cursorMoves.add(new MoveArray(200));
@@ -77,8 +95,9 @@ public class Replay {
     }
 
     public void addObjectResult(int id, short accuracy, BitSet ticks) {
-        if (id < 0 || objectData == null || id >= objectData.length)
+        if (id < 0 || objectData == null || id >= objectData.length) {
             return;
+        }
 
         ReplayObjectData data = objectData[id] == null ? new ReplayObjectData() : objectData[id];
         data.accuracy = accuracy;
@@ -87,29 +106,37 @@ public class Replay {
     }
 
     public void addObjectScore(int id, ResultType score) {
-        if (id < 0 || objectData == null || id >= objectData.length)
+        if (id < 0 || objectData == null || id >= objectData.length) {
             return;
+        }
 
-        if (objectData[id] == null)
+        if (objectData[id] == null) {
             objectData[id] = new ReplayObjectData();
+        }
 
         objectData[id].result = score.getId();
     }
 
     public void addPress(final float time, final PointF pos, final int pid) {
-        if (pid > GameScene.CursorCount || isSaving) return;
+        if (pid > GameScene.CursorCount || isSaving) {
+            return;
+        }
         int itime = Math.max(0, (int) (time * 1000));
         cursorMoves.get(pid).pushBack(this, itime, pos.x, pos.y, TouchType.DOWN);
     }
 
     public void addMove(final float time, final PointF pos, final int pid) {
-        if (pid > GameScene.CursorCount || isSaving) return;
+        if (pid > GameScene.CursorCount || isSaving) {
+            return;
+        }
         int itime = Math.max(0, (int) (time * 1000));
         cursorMoves.get(pid).pushBack(this, itime, pos.x, pos.y, TouchType.MOVE);
     }
 
     public void addUp(final float time, final int pid) {
-        if (pid > GameScene.CursorCount || isSaving) return;
+        if (pid > GameScene.CursorCount || isSaving) {
+            return;
+        }
         int itime = Math.max(0, (int) (time * 1000));
         cursorMoves.get(pid).pushBack(itime, TouchType.UP);
     }
@@ -117,8 +144,9 @@ public class Replay {
     public void save(final String filename) {
         isSaving = true;
 
-        for (int i = 0; i < cursorMoves.size(); i++)
+        for (int i = 0; i < cursorMoves.size(); i++) {
             Debug.i("Replay contains " + cursorMoves.get(i).size + " moves for finger " + i);
+        }
         Debug.i("Skipped " + pointsSkipped + " points");
         Debug.i("Replay contains " + objectData.length + " objects");
         ObjectOutputStream os;
@@ -170,7 +198,9 @@ public class Replay {
             }
             os.writeInt(objectData.length);
             for (ReplayObjectData data : objectData) {
-                if (data == null) data = new ReplayObjectData();
+                if (data == null) {
+                    data = new ReplayObjectData();
+                }
                 os.writeShort(data.accuracy);
                 if (data.tickSet == null || data.tickSet.length() == 0) {
                     os.writeByte(0);
@@ -333,7 +363,7 @@ public class Replay {
                 stat.setMod((EnumSet<GameMod>) os.readObject());
             }
 
-            if  (version >= 4) {
+            if (version >= 4) {
                 stat.setExtraModFromString((String) os.readObject());
             }
 
@@ -374,8 +404,9 @@ public class Replay {
             return false;
         }
 
-        for (int i = 0; i < cursorMoves.size(); i++)
+        for (int i = 0; i < cursorMoves.size(); i++) {
             Debug.i("Loaded " + cursorMoves.get(i).size + " moves for finger " + i);
+        }
         Debug.i("Loaded " + objectData.length + " objects");
         return true;
     }
@@ -409,19 +440,29 @@ public class Replay {
         Version 5: Changes coordinates to use the float primitive type
      */
     public static class ReplayVersion implements Serializable {
+
         private static final long serialVersionUID = 4643121693566795335L;
+
         int version = 5;
+
     }
 
     public static class ReplayObjectData {
+
         public short accuracy = 0;
+
         public BitSet tickSet = null;
+
         public byte result = 0;
+
     }
 
     public static class ReplayMovement {
+
         protected int time;
+
         protected PointF point = new PointF();
+
         protected TouchType touchType;
 
         public int getTime() {
@@ -435,11 +476,15 @@ public class Replay {
         public TouchType getTouchType() {
             return touchType;
         }
+
     }
 
     public static class MoveArray {
+
         public ReplayMovement[] movements;
+
         public int size;
+
         public int allocated;
 
         public MoveArray(int startSize) {
@@ -466,15 +511,8 @@ public class Replay {
                 if (movement.touchType != TouchType.UP) {
                     float baseX = readTouchPoint(is, replay);
                     float baseY = readTouchPoint(is, replay);
-                    PointF gamePoint = new PointF(
-                            baseX / Config.getTextureQuality(),
-                            baseY / Config.getTextureQuality()
-                    );
-                    PointF realPoint = replay.replayVersion > 1 ?
-                            Utils.trackToRealCoords(gamePoint) :
-                            Utils.trackToRealCoords(
-                                    Utils.realToTrackCoords(gamePoint, 1024, 600, true)
-                            );
+                    PointF gamePoint = new PointF(baseX / Config.getTextureQuality(), baseY / Config.getTextureQuality());
+                    PointF realPoint = replay.replayVersion > 1 ? Utils.trackToRealCoords(gamePoint) : Utils.trackToRealCoords(Utils.realToTrackCoords(gamePoint, 1024, 600, true));
                     movement.point.set(realPoint);
                 }
             }
@@ -483,7 +521,9 @@ public class Replay {
         }
 
         public void reallocate(int newSize) {
-            if (newSize <= allocated) return;
+            if (newSize <= allocated) {
+                return;
+            }
             ReplayMovement[] newMovements = new ReplayMovement[newSize];
             System.arraycopy(movements, 0, newMovements, 0, size);
             movements = newMovements;
@@ -491,7 +531,9 @@ public class Replay {
         }
 
         public boolean checkNewPoint(float px, float py) {
-            if (size < 2) return false;
+            if (size < 2) {
+                return false;
+            }
 
             ReplayMovement minusTwoMovement = movements[size - 2];
             ReplayMovement previousMovement = movements[size - 1];
@@ -543,5 +585,7 @@ public class Replay {
                 }
             }
         }
+
     }
+
 }

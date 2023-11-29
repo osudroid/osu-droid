@@ -9,9 +9,9 @@ import com.edlplan.replay.OdrDatabase;
 import com.edlplan.ui.fragment.PropsMenuFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.reco1l.api.ibancho.RoomAPI;
+import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
-import com.reco1l.framework.lang.execution.Async;
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
 import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 
@@ -30,11 +30,20 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.HorizontalAlign;
 import org.anddev.andengine.util.MathUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
@@ -67,47 +76,83 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinLayout;
 
-public class SongMenu implements IUpdateHandler, MenuItemListener,
-        IScrollBarListener {
+public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarListener {
+
     private final static Boolean musicMutex = true;
+
     private final Boolean backgroundMutex = true;
+
+    private final long previousSelectionInterval = 1000;
+
+    private final LinkedList<MenuItem> previousSelectedItems = new LinkedList<>();
+
     public Scene scene;
+
     public Entity frontLayer = new Entity();
-    SortOrder sortOrder = SortOrder.Title;
-    private Engine engine;
+
     public GameScene game;
+
+    SortOrder sortOrder = SortOrder.Title;
+
+    private Engine engine;
+
     private ScoringScene scoreScene;
+
     private float camY = 0;
+
     private float velocityY;
+
     private Activity context;
+
     private Entity backLayer = new Entity();
+
     private ArrayList<MenuItem> items = new ArrayList<>();
+
     private MenuItem selectedItem = null;
+
     private TrackInfo selectedTrack;
+
     private Sprite bg = null;
+
     private Boolean bgLoaded = false;
+
     private String bgName = "";
+
     private ScoreBoard board;
+
     private Float touchY = null;
+
     private String filterText = "";
+
     private boolean favsOnly = false;
+
     private Set<String> limitC;
+
     private float secondsSinceLastSelect = 0;
+
     private float maxY = 100500;
+
     private int pointerId = -1;
+
     private float initalY = -1;
+
     private float secPassed = 0, tapTime;
+
     private Sprite backButton = null;
+
     private ScrollBar scrollbar;
+
     private ChangeableText trackInfo, mapper, beatmapInfo, beatmapInfo2, dimensionInfo;
+
     private boolean isSelectComplete = true;
+
     private AnimSprite scoringSwitcher = null;
+
     private GroupType groupType = GroupType.MapSet;
 
     private Timer previousSelectionTimer;
-    private final long previousSelectionInterval = 1000;
+
     private boolean previousSelectionPerformed;
-    private final LinkedList<MenuItem> previousSelectedItems = new LinkedList<>();
 
     public SongMenu() {
     }
@@ -137,16 +182,18 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         return items;
     }
 
-    public void init(final Activity context, final Engine engine,
-                     final GameScene pGame) {
+    public void init(
+        final Activity context, final Engine engine, final GameScene pGame) {
         this.engine = engine;
         game = pGame;
         this.context = context;
     }
 
     public void loadFilter(IFilterMenu filterMenu) {
-        setFilter(filterMenu.getFilter(), filterMenu.getOrder(), filterMenu.isFavoritesOnly(),
-                filterMenu.getFavoriteFolder() == null ? null : FavoriteLibrary.get().getMaps(filterMenu.getFavoriteFolder()));
+        setFilter(filterMenu.getFilter(),
+            filterMenu.getOrder(),
+            filterMenu.isFavoritesOnly(),
+            filterMenu.getFavoriteFolder() == null ? null : FavoriteLibrary.get().getMaps(filterMenu.getFavoriteFolder()));
     }
 
     public void reload() {
@@ -170,8 +217,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         FilterMenu.getInstance().loadConfig(context);
 
         // Preventing ModMenu to reload mod set
-        if (!Multiplayer.isMultiplayer)
+        if (!Multiplayer.isMultiplayer) {
             ModMenu.getInstance().reload();
+        }
 
         bindDataBaseChangedListener();
 
@@ -181,8 +229,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         final TextureRegion tex = ResourceManager.getInstance().getTexture("menu-background");
         float height = tex.getHeight();
         height *= Config.getRES_WIDTH() / (float) tex.getWidth();
-        final Sprite bg = new Sprite(0, (Config.getRES_HEIGHT() - height) / 2,
-                Config.getRES_WIDTH(), height, tex);
+        final Sprite bg = new Sprite(0, (Config.getRES_HEIGHT() - height) / 2, Config.getRES_WIDTH(), height, tex);
         scene.setBackground(new SpriteBackground(bg));
 
         final Rectangle bgDimRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
@@ -202,11 +249,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         sort();
 
         if (items.size() == 0) {
-            final Text text = new Text(0, 0, ResourceManager.getInstance()
-                    .getFont("CaptionFont"), "There are no songs in library, try using chimu.moe",
-                    HorizontalAlign.CENTER);
-            text.setPosition(Config.getRES_WIDTH() / 2f - text.getWidth() / 2,
-                    Config.getRES_HEIGHT() / 2f - text.getHeight() / 2);
+            final Text text = new Text(0, 0, ResourceManager.getInstance().getFont("CaptionFont"), "There are no songs in library, try using chimu.moe", HorizontalAlign.CENTER);
+            text.setPosition(Config.getRES_WIDTH() / 2f - text.getWidth() / 2, Config.getRES_HEIGHT() / 2f - text.getHeight() / 2);
             text.setScale(1.5f);
             text.setColor(0, 0, 0);
             scene.attachChild(text);
@@ -258,8 +302,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     if (secPassed - tapTime < 0.001f || initalY == -1) {
                         velocityY = 0;
                     } else {
-                        velocityY = (initalY - evt.getY())
-                                / (secPassed - tapTime);
+                        velocityY = (initalY - evt.getY()) / (secPassed - tapTime);
                     }
                     pointerId = -1;
                     initalY = -1;
@@ -282,32 +325,44 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         songSelectTop.setAlpha(0.6f);
         frontLayer.attachChild(songSelectTop);
 
-        trackInfo = new ChangeableText(Utils.toRes(70), Utils.toRes(2),
-                ResourceManager.getInstance().getFont("font"), "title", 1024);
+        trackInfo = new ChangeableText(Utils.toRes(70), Utils.toRes(2), ResourceManager.getInstance().getFont("font"), "title", 1024);
         frontLayer.attachChild(trackInfo);
 
-        mapper = new ChangeableText(Utils.toRes(70), trackInfo.getY() + trackInfo.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "mapper", 1024);
+        mapper = new ChangeableText(Utils.toRes(70),
+            trackInfo.getY() + trackInfo.getHeight() + Utils.toRes(2),
+            ResourceManager.getInstance().getFont("middleFont"),
+            "mapper",
+            1024);
         frontLayer.attachChild(mapper);
 
-        beatmapInfo = new ChangeableText(Utils.toRes(4), mapper.getY() + mapper.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo", 1024);
+        beatmapInfo = new ChangeableText(Utils.toRes(4),
+            mapper.getY() + mapper.getHeight() + Utils.toRes(2),
+            ResourceManager.getInstance().getFont("middleFont"),
+            "beatmapInfo",
+            1024);
         frontLayer.attachChild(beatmapInfo);
 
-        beatmapInfo2 = new ChangeableText(Utils.toRes(4), beatmapInfo.getY() + beatmapInfo.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo2", 1024);
+        beatmapInfo2 = new ChangeableText(Utils.toRes(4),
+            beatmapInfo.getY() + beatmapInfo.getHeight() + Utils.toRes(2),
+            ResourceManager.getInstance().getFont("middleFont"),
+            "beatmapInfo2",
+            1024);
         frontLayer.attachChild(beatmapInfo2);
 
-        dimensionInfo = new ChangeableText(Utils.toRes(4), beatmapInfo2.getY() + beatmapInfo2.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024);
+        dimensionInfo = new ChangeableText(Utils.toRes(4),
+            beatmapInfo2.getY() + beatmapInfo2.getHeight() + Utils.toRes(2),
+            ResourceManager.getInstance().getFont("smallFont"),
+            "dimensionInfo",
+            1024);
         frontLayer.attachChild(dimensionInfo);
 
 
         SkinLayout layoutBackButton = OsuSkin.get().getLayout("BackButton");
         SkinLayout layoutMods = null;
 
-        if (!Multiplayer.isMultiplayer)
+        if (!Multiplayer.isMultiplayer) {
             layoutMods = OsuSkin.get().getLayout("ModsButton");
+        }
 
         SkinLayout layoutOptions = OsuSkin.get().getLayout("OptionsButton");
         SkinLayout layoutRandom = OsuSkin.get().getLayout("RandomButton");
@@ -315,12 +370,16 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (ResourceManager.getInstance().isTextureLoaded("menu-back-0")) {
             List<String> loadedBackTextures = new ArrayList<>();
             for (int i = 0; i < 60; i++) {
-                if (ResourceManager.getInstance().isTextureLoaded("menu-back-" + i))
+                if (ResourceManager.getInstance().isTextureLoaded("menu-back-" + i)) {
                     loadedBackTextures.add("menu-back-" + i);
+                }
             }
             backButton = new AnimSprite(0, 0, loadedBackTextures.size(), loadedBackTextures.toArray(new String[0])) {
+
                 boolean moved = false;
+
                 float dx = 0, dy = 0;
+
                 boolean scaleWhenHold = true;
 
                 {
@@ -330,10 +389,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
 
                 @Override
-                public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                             final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+                public boolean onAreaTouched(
+                    final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                     if (pSceneTouchEvent.isActionDown()) {
-                        if (scaleWhenHold) backButton.setScale(1.25f);
+                        if (scaleWhenHold) {
+                            backButton.setScale(1.25f);
+                        }
                         moved = false;
                         dx = pTouchAreaLocalX;
                         dy = pTouchAreaLocalY;
@@ -354,10 +415,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         }
                         return true;
                     }
-                    if (pSceneTouchEvent.isActionOutside()
-                            || pSceneTouchEvent.isActionMove()
-                            && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                            pTouchAreaLocalY) > 50)) {
+                    if (pSceneTouchEvent.isActionOutside() || pSceneTouchEvent.isActionMove() && (MathUtils.distance(dx, dy, pTouchAreaLocalX, pTouchAreaLocalY) > 50)) {
                         backButton.setScale(1f);
                         moved = true;
                     }
@@ -366,8 +424,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             };
         } else {
             backButton = new Sprite(0, 0, ResourceManager.getInstance().getTexture("menu-back")) {
+
                 boolean moved = false;
+
                 float dx = 0, dy = 0;
+
                 boolean scaleWhenHold = true;
 
                 {
@@ -377,10 +438,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
 
                 @Override
-                public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                             final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+                public boolean onAreaTouched(
+                    final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                     if (pSceneTouchEvent.isActionDown()) {
-                        if (scaleWhenHold) backButton.setScale(1.25f);
+                        if (scaleWhenHold) {
+                            backButton.setScale(1.25f);
+                        }
                         moved = false;
                         dx = pTouchAreaLocalX;
                         dy = pTouchAreaLocalY;
@@ -401,10 +464,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         }
                         return true;
                     }
-                    if (pSceneTouchEvent.isActionOutside()
-                            || pSceneTouchEvent.isActionMove()
-                            && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                            pTouchAreaLocalY) > 50)) {
+                    if (pSceneTouchEvent.isActionOutside() || pSceneTouchEvent.isActionMove() && (MathUtils.distance(dx, dy, pTouchAreaLocalX, pTouchAreaLocalY) > 50)) {
                         backButton.setScale(1f);
                         moved = true;
                     }
@@ -415,16 +475,17 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         AnimSprite modSelection = null;
 
-        if (!Multiplayer.isMultiplayer)
-            modSelection = new AnimSprite(0, 0, 0,
-                    "selection-mods", "selection-mods-over") {
+        if (!Multiplayer.isMultiplayer) {
+            modSelection = new AnimSprite(0, 0, 0, "selection-mods", "selection-mods-over") {
+
                 boolean moved = false;
+
                 private float dx = 0, dy = 0;
 
 
                 @Override
-                public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                             final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+                public boolean onAreaTouched(
+                    final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                     if (pSceneTouchEvent.isActionDown()) {
                         setFrame(1);
                         moved = false;
@@ -440,26 +501,25 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         }
                         return true;
                     }
-                    if (pSceneTouchEvent.isActionOutside()
-                            || pSceneTouchEvent.isActionMove()
-                            && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                            pTouchAreaLocalY) > 50)) {
+                    if (pSceneTouchEvent.isActionOutside() || pSceneTouchEvent.isActionMove() && (MathUtils.distance(dx, dy, pTouchAreaLocalX, pTouchAreaLocalY) > 50)) {
                         moved = true;
                         setFrame(0);
                     }
                     return false;
                 }
             };
+        }
 
-        final AnimSprite optionSelection = new AnimSprite(0, 0, 0,
-                "selection-options", "selection-options-over") {
+        final AnimSprite optionSelection = new AnimSprite(0, 0, 0, "selection-options", "selection-options-over") {
+
             boolean moved = false;
+
             private float dx = 0, dy = 0;
 
 
             @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+            public boolean onAreaTouched(
+                final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
                     setFrame(1);
                     moved = false;
@@ -477,10 +537,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     }
                     return true;
                 }
-                if (pSceneTouchEvent.isActionOutside()
-                        || pSceneTouchEvent.isActionMove()
-                        && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                        pTouchAreaLocalY) > 50)) {
+                if (pSceneTouchEvent.isActionOutside() || pSceneTouchEvent.isActionMove() && (MathUtils.distance(dx, dy, pTouchAreaLocalX, pTouchAreaLocalY) > 50)) {
                     moved = true;
                     setFrame(0);
                 }
@@ -488,14 +545,15 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
         };
 
-        final AnimSprite randomMap = new AnimSprite(0, 0, 0,
-                "selection-random", "selection-random-over") {
+        final AnimSprite randomMap = new AnimSprite(0, 0, 0, "selection-random", "selection-random-over") {
+
             boolean moved = false;
+
             private float dx = 0, dy = 0;
 
             @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+            public boolean onAreaTouched(
+                final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
                     setFrame(1);
                     moved = false;
@@ -508,6 +566,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                     previousSelectionTimer = new Timer();
                     previousSelectionTimer.scheduleAtFixedRate(new TimerTask() {
+
                         @Override
                         public void run() {
                             if (!isSelectComplete) {
@@ -526,8 +585,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                             previousSelectionPerformed = true;
 
-                            ResourceManager.getInstance().getSound("menuclick")
-                                    .play();
+                            ResourceManager.getInstance().getSound("menuclick").play();
                             previousItem.select(true, true);
                         }
 
@@ -564,8 +622,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                             int oldIndex = index;
                             do {
                                 index = (index + 1) % items.size();
-                                if (index == oldIndex)
+                                if (index == oldIndex) {
                                     return true;
+                                }
                             } while (!items.get(index).isVisible());
                         }
                         if (!items.get(index).isVisible()) {
@@ -574,18 +633,14 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         if (selectedItem == items.get(index)) {
                             return true;
                         }
-                        ResourceManager.getInstance().getSound("menuclick")
-                                .play();
+                        ResourceManager.getInstance().getSound("menuclick").play();
                         items.get(index).select(true, true);
                     }
 
                     previousSelectionPerformed = false;
                     return true;
                 }
-                if (pSceneTouchEvent.isActionOutside()
-                        || pSceneTouchEvent.isActionMove()
-                        && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                        pTouchAreaLocalY) > 50)) {
+                if (pSceneTouchEvent.isActionOutside() || pSceneTouchEvent.isActionMove() && (MathUtils.distance(dx, dy, pTouchAreaLocalX, pTouchAreaLocalY) > 50)) {
                     moved = true;
                     setFrame(0);
 
@@ -597,8 +652,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
         };
 
-        if (modSelection != null)
+        if (modSelection != null) {
             modSelection.setScale(1.5f);
+        }
 
         optionSelection.setScale(1.5f);
         randomMap.setScale(1.5f);
@@ -618,42 +674,29 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             backButton.setPosition(0, Config.getRES_HEIGHT() - backButton.getHeightScaled());
 
             if (modSelection != null) {
-                modSelection.setPosition(backButton.getX() + backButton.getWidth(),
-                                         Config.getRES_HEIGHT() - modSelection.getHeightScaled());
-                optionSelection.setPosition(
-                        modSelection.getX() + modSelection.getWidthScaled(),
-                        Config.getRES_HEIGHT() - optionSelection.getHeightScaled());
+                modSelection.setPosition(backButton.getX() + backButton.getWidth(), Config.getRES_HEIGHT() - modSelection.getHeightScaled());
+                optionSelection.setPosition(modSelection.getX() + modSelection.getWidthScaled(), Config.getRES_HEIGHT() - optionSelection.getHeightScaled());
             } else {
-                optionSelection.setPosition(backButton.getX() + backButton.getWidth(),
-                                         Config.getRES_HEIGHT() - optionSelection.getHeightScaled());
+                optionSelection.setPosition(backButton.getX() + backButton.getWidth(), Config.getRES_HEIGHT() - optionSelection.getHeightScaled());
             }
-            randomMap.setPosition(
-                    optionSelection.getX() + optionSelection.getWidthScaled(),
-                    Config.getRES_HEIGHT() - randomMap.getHeightScaled());
+            randomMap.setPosition(optionSelection.getX() + optionSelection.getWidthScaled(), Config.getRES_HEIGHT() - randomMap.getHeightScaled());
         } else {
             backButton.setPosition(0, Config.getRES_HEIGHT() - backButton.getHeight());
 
             if (modSelection != null) {
-                modSelection.setPosition(backButton.getX() + backButton.getWidth(),
-                                         Config.getRES_HEIGHT() - Utils.toRes(90));
-                optionSelection.setPosition(
-                        modSelection.getX() + modSelection.getWidthScaled(),
-                        Config.getRES_HEIGHT() - Utils.toRes(90));
+                modSelection.setPosition(backButton.getX() + backButton.getWidth(), Config.getRES_HEIGHT() - Utils.toRes(90));
+                optionSelection.setPosition(modSelection.getX() + modSelection.getWidthScaled(), Config.getRES_HEIGHT() - Utils.toRes(90));
             } else {
-                optionSelection.setPosition(backButton.getX() + backButton.getWidth(),
-                                         Config.getRES_HEIGHT() - Utils.toRes(90));
+                optionSelection.setPosition(backButton.getX() + backButton.getWidth(), Config.getRES_HEIGHT() - Utils.toRes(90));
             }
-            randomMap.setPosition(
-                    optionSelection.getX() + optionSelection.getWidthScaled(),
-                    Config.getRES_HEIGHT() - Utils.toRes(90));
+            randomMap.setPosition(optionSelection.getX() + optionSelection.getWidthScaled(), Config.getRES_HEIGHT() - Utils.toRes(90));
         }
 
 
         frontLayer.attachChild(backButton);
         scene.registerTouchArea(backButton);
 
-        if (modSelection != null)
-        {
+        if (modSelection != null) {
             frontLayer.attachChild(modSelection);
             scene.registerTouchArea(modSelection);
         }
@@ -671,10 +714,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
 
             scoringSwitcher = new AnimSprite(Utils.toRes(5), Utils.toRes(10), 0, "ranking_enabled", "ranking_disabled") {
+
                 @Override
-                public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
-                                             float pTouchAreaLocalX, float pTouchAreaLocalY) {
-                    if (!pSceneTouchEvent.isActionDown()) return false;
+                public boolean onAreaTouched(
+                    TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+                    if (!pSceneTouchEvent.isActionDown()) {
+                        return false;
+                    }
                     toggleScoringSwitcher();
                     return true;
                 }
@@ -718,8 +764,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         engine.setScene(scene);
     }
 
-    public void setFilter(final String filter, final SortOrder order,
-                          final boolean favsOnly, Set<String> limit) {
+    public void setFilter(
+        final String filter, final SortOrder order, final boolean favsOnly, Set<String> limit) {
         String oldTrackFileName = "";
         if (selectedTrack != null) {
             oldTrackFileName = selectedTrack.getFilename();
@@ -804,10 +850,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         secondsSinceLastSelect += pSecondsElapsed;
         float oy = -camY;
         for (final MenuItem item : items) {
-            final float cy = oy + Config.getRES_HEIGHT() / 2f + item.getHeight()
-                    / 2;
-            float ox = Config.getRES_WIDTH() / 1.85f + 200 * (float) Math.abs(Math.cos(cy * Math.PI
-                    / (Config.getRES_HEIGHT() * 2)));
+            final float cy = oy + Config.getRES_HEIGHT() / 2f + item.getHeight() / 2;
+            float ox = Config.getRES_WIDTH() / 1.85f + 200 * (float) Math.abs(Math.cos(cy * Math.PI / (Config.getRES_HEIGHT() * 2)));
             ox = Utils.toRes(ox);
             item.setPos(ox, oy);
             oy += item.getHeight();
@@ -815,14 +859,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         oy += camY;
         camY += velocityY * pSecondsElapsed;
         maxY = oy - Config.getRES_HEIGHT() / 2f;
-        if (camY <= -Config.getRES_HEIGHT() / 2f && velocityY < 0
-                || camY >= maxY && velocityY > 0) {
+        if (camY <= -Config.getRES_HEIGHT() / 2f && velocityY < 0 || camY >= maxY && velocityY > 0) {
             camY -= velocityY * pSecondsElapsed;
             velocityY = 0;
         }
         if (Math.abs(velocityY) > Utils.toRes(1000) * pSecondsElapsed) {
-            velocityY -= Utils.toRes(1000) * pSecondsElapsed
-                    * Math.signum(velocityY);
+            velocityY -= Utils.toRes(1000) * pSecondsElapsed * Math.signum(velocityY);
         } else {
             velocityY = 0;
         }
@@ -835,7 +877,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public void increaseVolume() {
         if (GlobalManager.getInstance().getSongService() != null) {
             synchronized (musicMutex) {
-                if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING && GlobalManager.getInstance().getSongService().getVolume() < Config.getBgmVolume()) {
+                if (GlobalManager.getInstance().getSongService() != null &&
+                    GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING &&
+                    GlobalManager.getInstance().getSongService().getVolume() < Config.getBgmVolume()) {
                     float vol = Math.min(1, GlobalManager.getInstance().getSongService().getVolume() + 0.01f);
                     GlobalManager.getInstance().getSongService().setVolume(vol);
                 }
@@ -988,15 +1032,17 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
-        String binfoStr = String.format(StringTable.get(R.string.binfoStr1), sdf.format(length),
-                (bpm_min == bpm_max ? GameHelper.Round(bpm_min, 1) : GameHelper.Round(bpm_min, 1) + "-" + GameHelper.Round(bpm_max, 1)),
-                track.getMaxCombo());
+        String binfoStr = String.format(StringTable.get(R.string.binfoStr1),
+            sdf.format(length),
+            (bpm_min == bpm_max ? GameHelper.Round(bpm_min, 1) : GameHelper.Round(bpm_min, 1) + "-" + GameHelper.Round(bpm_max, 1)),
+            track.getMaxCombo());
         if (length > 3600 * 1000) {
             sdf = new SimpleDateFormat("HH:mm:ss");
             sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
-            binfoStr = String.format(StringTable.get(R.string.binfoStr1), sdf.format(length),
-                    (bpm_min == bpm_max ? GameHelper.Round(bpm_min, 1) : GameHelper.Round(bpm_min, 1) + "-" + GameHelper.Round(bpm_max, 1)),
-                    track.getMaxCombo());
+            binfoStr = String.format(StringTable.get(R.string.binfoStr1),
+                sdf.format(length),
+                (bpm_min == bpm_max ? GameHelper.Round(bpm_min, 1) : GameHelper.Round(bpm_min, 1) + "-" + GameHelper.Round(bpm_max, 1)),
+                track.getMaxCombo());
         }
         beatmapInfo.setText(binfoStr);
 
@@ -1038,11 +1084,20 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             dimensionInfo.setColor(256 / 255f, 180 / 255f, 0 / 255f);
         }
 
-        dimensionStringBuilder.append("AR: ").append(GameHelper.Round(ar, 2)).append(" ")
-                .append("OD: ").append(GameHelper.Round(od, 2)).append(" ")
-                .append("CS: ").append(GameHelper.Round(cs, 2)).append(" ")
-                .append("HP: ").append(GameHelper.Round(hp, 2)).append(" ")
-                .append("Stars: ").append(GameHelper.Round(track.getDifficulty(), 2));
+        dimensionStringBuilder.append("AR: ")
+                              .append(GameHelper.Round(ar, 2))
+                              .append(" ")
+                              .append("OD: ")
+                              .append(GameHelper.Round(od, 2))
+                              .append(" ")
+                              .append("CS: ")
+                              .append(GameHelper.Round(cs, 2))
+                              .append(" ")
+                              .append("HP: ")
+                              .append(GameHelper.Round(hp, 2))
+                              .append(" ")
+                              .append("Stars: ")
+                              .append(GameHelper.Round(track.getDifficulty(), 2));
 
         dimensionInfo.setText(dimensionStringBuilder.toString());
     }
@@ -1052,11 +1107,14 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-        String tinfoStr = (track.getBeatmap().getArtistUnicode() == null || Config.isForceRomanized() ? track.getBeatmap().getArtist() : track.getBeatmap().getArtistUnicode()) + " - " +
-                (track.getBeatmap().getTitleUnicode() == null || Config.isForceRomanized() ? track.getBeatmap().getTitle() : track.getBeatmap().getTitleUnicode()) + " [" + track.getMode() + "]";
+        String tinfoStr = (track.getBeatmap().getArtistUnicode() == null || Config.isForceRomanized() ? track.getBeatmap().getArtist() : track.getBeatmap().getArtistUnicode()) +
+                          " - " +
+                          (track.getBeatmap().getTitleUnicode() == null || Config.isForceRomanized() ? track.getBeatmap().getTitle() : track.getBeatmap().getTitleUnicode()) +
+                          " [" +
+                          track.getMode() +
+                          "]";
         String mapperStr = "Beatmap by " + track.getCreator();
-        String binfoStr2 = String.format(StringTable.get(R.string.binfoStr2),
-                track.getHitCircleCount(), track.getSliderCount(), track.getSpinnerCount(), track.getBeatmapSetID());
+        String binfoStr2 = String.format(StringTable.get(R.string.binfoStr2), track.getHitCircleCount(), track.getSliderCount(), track.getSpinnerCount(), track.getBeatmapSetID());
         trackInfo.setText(tinfoStr);
         mapper.setText(mapperStr);
         beatmapInfo2.setText(binfoStr2);
@@ -1088,10 +1146,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 parameters.customOD = modMenu.getCustomOD();
             }
 
-            DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
-                    beatmapData,
-                    parameters
-            );
+            DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(beatmapData, parameters);
 
             setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
         });
@@ -1118,8 +1173,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
 
             ResourceManager.getInstance().getSound("menuhit").play();
-            if (Multiplayer.isMultiplayer)
-            {
+            if (Multiplayer.isMultiplayer) {
                 setMultiplayerRoomBeatmap(selectedTrack);
                 back(false);
                 return;
@@ -1165,31 +1219,23 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         Async.run(() -> {
             synchronized (backgroundMutex) {
-                final TextureRegion tex = Config.isSafeBeatmapBg() || track.getBackground() == null?
-                        ResourceManager.getInstance().getTexture("menu-background") :
-                        ResourceManager.getInstance().loadBackground(bgName);
+                final TextureRegion tex = Config.isSafeBeatmapBg() || track.getBackground() == null
+                                              ? ResourceManager.getInstance().getTexture("menu-background")
+                                              : ResourceManager.getInstance().loadBackground(bgName);
                 if (tex != null) {
                     float height = tex.getHeight();
-                    height *= Config.getRES_WIDTH()
-                            / (float) tex.getWidth();
-                    bg = new Sprite(0,
-                            (Config.getRES_HEIGHT() - height) / 2, Config
-                            .getRES_WIDTH(), height, tex);
+                    height *= Config.getRES_WIDTH() / (float) tex.getWidth();
+                    bg = new Sprite(0, (Config.getRES_HEIGHT() - height) / 2, Config.getRES_WIDTH(), height, tex);
                     bg.setColor(0, 0, 0);
                 }
 
                 SyncTaskManager.getInstance().run(() -> {
                     synchronized (backgroundMutex) {
                         if (bg == null) {
-                            final TextureRegion tex1 = ResourceManager
-                                    .getInstance().getTexture("menu-background");
+                            final TextureRegion tex1 = ResourceManager.getInstance().getTexture("menu-background");
                             float height = tex1.getHeight();
-                            height *= Config.getRES_WIDTH()
-                                    / (float) tex1.getWidth();
-                            bg = new Sprite(
-                                    0,
-                                    (Config.getRES_HEIGHT() - height) / 2,
-                                    Config.getRES_WIDTH(), height, tex1);
+                            height *= Config.getRES_WIDTH() / (float) tex1.getWidth();
+                            bg = new Sprite(0, (Config.getRES_HEIGHT() - height) / 2, Config.getRES_WIDTH(), height, tex1);
                             bgName = "";
                         }
                         scene.setBackground(new SpriteBackground(bg));
@@ -1223,12 +1269,15 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             engine.setScene(new LoadingScreen().getScene());
             ToastLogger.showTextId(R.string.online_loadrecord, false);
             new AsyncTask() {
+
                 @Override
                 public void run() {
                     try {
                         String scorePack = OnlineManager.getInstance().getScorePack(id);
                         String[] params = scorePack.split("\\s+");
-                        if (params.length < 11) return;
+                        if (params.length < 11) {
+                            return;
+                        }
 
                         StatisticV2 stat = new StatisticV2(params);
                         if (stat.isLegacySC()) {
@@ -1303,13 +1352,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (Multiplayer.room != null && Multiplayer.room.getPreviousBeatmap() != null) {
             var beatmap = Multiplayer.room.getPreviousBeatmap();
 
-            RoomAPI.changeBeatmap(
-                    beatmap.getMd5(),
-                    beatmap.getTitle(),
-                    beatmap.getArtist(),
-                    beatmap.getVersion(),
-                    beatmap.getCreator()
-            );
+            RoomAPI.changeBeatmap(beatmap.getMd5(), beatmap.getTitle(), beatmap.getArtist(), beatmap.getVersion(), beatmap.getCreator());
         } else {
             RoomAPI.changeBeatmap();
         }
@@ -1329,13 +1372,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         // Now we update the beatmap
         if (track != null) {
-            RoomAPI.changeBeatmap(
-                    track.getMD5(),
-                    track.getBeatmap().getTitle(),
-                    track.getBeatmap().getArtist(),
-                    track.getMode(),
-                    track.getCreator()
-            );
+            RoomAPI.changeBeatmap(track.getMD5(), track.getBeatmap().getTitle(), track.getBeatmap().getArtist(), track.getMode(), track.getCreator());
         } else {
             RoomAPI.changeBeatmap();
         }
@@ -1513,7 +1550,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 return;
             }
             for (final MenuItem item : items) {
-                if (item == null || !item.isVisible()) continue;
+                if (item == null || !item.isVisible()) {
+                    continue;
+                }
                 int trackid = item.tryGetCorrespondingTrackId(oldTrackFileName);
                 if (trackid >= 0) {
                     item.select(true, true);
@@ -1533,4 +1572,5 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public enum GroupType {
         MapSet, SingleDiff
     }
+
 }

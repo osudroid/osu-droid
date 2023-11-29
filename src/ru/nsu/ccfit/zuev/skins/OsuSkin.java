@@ -2,47 +2,67 @@ package ru.nsu.ccfit.zuev.skins;
 
 import androidx.annotation.NonNull;
 
-import okio.BufferedSource;
-import okio.Okio;
-import ru.nsu.ccfit.zuev.osu.RGBColor;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import okio.BufferedSource;
+import okio.Okio;
+import ru.nsu.ccfit.zuev.osu.RGBColor;
+
 public class OsuSkin {
+
     private static final OsuSkin skinJson = new OsuSkin();
 
     protected final FloatSkinData comboTextScale = new FloatSkinData("comboTextScale", 1f);
+
     protected final FloatSkinData sliderHintWidth = new FloatSkinData("sliderHintWidth", 3f);
+
     protected final FloatSkinData sliderBodyWidth = new FloatSkinData("sliderBodyWidth", 61f);
+
     protected final FloatSkinData sliderBorderWidth = new FloatSkinData("sliderBorderWidth", 5.2f);
+
     protected final FloatSkinData sliderBodyBaseAlpha = new FloatSkinData("sliderBodyBaseAlpha", 0.7f);
+
     protected final FloatSkinData sliderHintAlpha = new FloatSkinData("sliderHintAlpha");
+
     protected final FloatSkinData sliderHintShowMinLength = new FloatSkinData("sliderHintShowMinLength", 300f);
+
     protected final FloatSkinData hitCircleOverlap = new FloatSkinData("hitCircleOverlap", -2);
 
     protected final BooleanSkinData limitComboTextLength = new BooleanSkinData("limitComboTextLength");
+
     protected final BooleanSkinData disableKiai = new BooleanSkinData("disableKiai");
+
     protected final BooleanSkinData sliderHintEnable = new BooleanSkinData("sliderHintEnable");
+
     protected final BooleanSkinData sliderFollowComboColor = new BooleanSkinData("sliderFollowComboColor", true);
+
     protected final BooleanSkinData useNewLayout = new BooleanSkinData("useNewLayout");
+
     protected final BooleanSkinData forceOverrideComboColor = new BooleanSkinData("forceOverride");
+
     protected final BooleanSkinData rotateCursor = new BooleanSkinData("rotateCursor", true);
 
     protected final String DEFAULT_COLOR_HEX = "#FFFFFF";
+
     protected final ArrayList<RGBColor> comboColor = new ArrayList<>();
 
     protected final ColorSkinData sliderBorderColor = new ColorSkinData("sliderBorderColor", DEFAULT_COLOR_HEX);
+
     protected final ColorSkinData sliderBodyColor = new ColorSkinData("sliderBodyColor", DEFAULT_COLOR_HEX);
+
     protected final ColorSkinData sliderHintColor = new ColorSkinData("sliderHintColor", DEFAULT_COLOR_HEX);
 
     protected final StringSkinData hitCirclePrefix = new StringSkinData("hitCirclePrefix", "default");
+
     protected final StringSkinData scorePrefix = new StringSkinData("scorePrefix", "score");
+
     protected final StringSkinData comboPrefix = new StringSkinData("comboPrefix", "score");
 
     protected final HashMap<String, SkinLayout> layoutData = new HashMap<>();
+
     protected final HashMap<String, RGBColor> colorData = new HashMap<>();
 
     public static OsuSkin get() {
@@ -165,4 +185,5 @@ public class OsuSkin {
         layoutData.clear();
         colorData.clear();
     }
+
 }

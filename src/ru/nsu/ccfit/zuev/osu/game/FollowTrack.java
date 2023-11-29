@@ -9,27 +9,32 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
+import ru.nsu.ccfit.zuev.skins.SkinManager;
 
 public class FollowTrack extends GameObject {
+
     private final ArrayList<Sprite> points = new ArrayList<Sprite>();
+
     private final int frameCount;
+
     private GameObjectListener listener;
+
     private float timeLeft;
+
     private float time;
+
     private boolean empty;
+
     private float approach;
 
     public FollowTrack() {
         frameCount = SkinManager.getFrames("followpoint");
     }
 
-    public void init(final GameObjectListener listener, final Scene scene,
-                     final PointF start, final PointF end, final float time,
-                     final float approachtime, final float scale) {
+    public void init(
+        final GameObjectListener listener, final Scene scene, final PointF start, final PointF end, final float time, final float approachtime, final float scale) {
         this.listener = listener;
         this.approach = approachtime;
         timeLeft = time;
@@ -37,8 +42,7 @@ public class FollowTrack extends GameObject {
 
         final float dist = Utils.distance(start, end);
         final float angle = (float) Math.atan2(end.y - start.y, end.x - start.x);
-        TextureRegion region = ResourceManager.getInstance().getTexture(
-                frameCount > 1 ? "followpoint-0" : "followpoint");
+        TextureRegion region = ResourceManager.getInstance().getTexture(frameCount > 1 ? "followpoint-0" : "followpoint");
         if (region == null) {
             region = ResourceManager.getInstance().getTexture("followpoint");
         }
@@ -64,13 +68,10 @@ public class FollowTrack extends GameObject {
             pos.y = start.y * percent + end.y * (1 - percent);
             final Sprite point;
             if (frameCount == 1) {
-                point = SpritePool.getInstance().getCenteredSprite(
-                        "followpoint", pos);
+                point = SpritePool.getInstance().getCenteredSprite("followpoint", pos);
             } else {
-                point = SpritePool.getInstance().getAnimSprite("followpoint-",
-                        frameCount);
-                point.setPosition(pos.x - pointSize * 0.5f, pos.y - pointSize
-                        * 0.5f);
+                point = SpritePool.getInstance().getAnimSprite("followpoint-", frameCount);
+                point.setPosition(pos.x - pointSize * 0.5f, pos.y - pointSize * 0.5f);
             }
             point.setScale(scale);
             point.setAlpha(0);
@@ -107,8 +108,7 @@ public class FollowTrack extends GameObject {
                 points.get(i).setAlpha(1);
             }
             if (percent < 1) {
-                points.get((int) (percent * points.size())).setAlpha(
-                        percent - (int) percent);
+                points.get((int) (percent * points.size())).setAlpha(percent - (int) percent);
             }
         } else {
             float percent = 1 - (timeLeft - time) / approach;
@@ -119,8 +119,7 @@ public class FollowTrack extends GameObject {
                 points.get(i).setAlpha(0);
             }
             if (percent >= 0 && percent < 1) {
-                points.get((int) (percent * points.size())).setAlpha(
-                        1 - percent + (int) percent);
+                points.get((int) (percent * points.size())).setAlpha(1 - percent + (int) percent);
             }
         }
 
@@ -140,4 +139,5 @@ public class FollowTrack extends GameObject {
             GameObjectPool.getInstance().putTrac(FollowTrack.this);
         }
     }
+
 }
