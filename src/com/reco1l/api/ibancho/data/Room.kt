@@ -68,7 +68,7 @@ data class Room(
     /**
          * The unique session ID.
          */
-        val sessionID: String
+        val sessionID: String? = null
 )
 {
     /**
