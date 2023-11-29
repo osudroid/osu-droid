@@ -2075,7 +2075,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         SkinManager.setSkinEnabled(false);
         GameObjectPool.getInstance().purge();
         SpritePool.getInstance().purge();
-        passiveObjects.clear();
+        if (passiveObjects != null) {
+            passiveObjects.clear();
+        }
         breakPeriods.clear();
         cursorSprites = null;
         scoreBoard = null;
