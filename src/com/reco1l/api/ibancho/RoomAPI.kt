@@ -306,7 +306,14 @@ object RoomAPI
 
         Multiplayer.log("Starting connection -> $roomId, $userId, $username")
 
-        socket = IO.socket(url, IO.Options().also { it.auth = auth }).apply {
+        socket = IO.socket(url, IO.Options().also {
+            it.auth = auth
+
+            // Explicitly not allow the socket to reconnect as we are using our own
+            // reconnection system (the socket.io Java client does not support connection
+            // state recovery).
+            it.reconnection = false
+        }).apply {
 
             on("initialConnection", initialConnection)
             on("error", error)
