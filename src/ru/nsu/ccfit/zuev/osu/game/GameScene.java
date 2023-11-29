@@ -367,7 +367,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         try {
-            var musicFile = new File(beatmapData.getFolder(), track.getAudioFilename());
+            var musicFile = new File(track.getAudioFilename());
 
             if (!musicFile.exists()) {
                 throw new FileNotFoundException(musicFile.getPath());
