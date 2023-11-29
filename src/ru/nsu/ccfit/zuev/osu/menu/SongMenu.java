@@ -1142,7 +1142,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
         isSelectComplete = false;
         this.selectedTrack = track;
-        EdExtensionHelper.onSelectTrack(selectedTrack);
+        EdExtensionHelper.onSelectTrack(track);
         GlobalManager.getInstance().setSelectedTrack(track);
         updateInfo(track);
         board.init(track);
