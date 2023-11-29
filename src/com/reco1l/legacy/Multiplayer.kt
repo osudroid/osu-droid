@@ -216,7 +216,7 @@ object Multiplayer
                     return@launch
                 }
 
-                if (currentTime - lastAttemptResponseTimeMS >= 5000 || isWaitingAttemptResponse)
+                if (currentTime - lastAttemptResponseTimeMS < 5000 || isWaitingAttemptResponse)
                     continue
 
                 try
