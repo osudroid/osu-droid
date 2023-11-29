@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.os.Process;
 
 import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.favorite.FavoriteLibrary;
@@ -1099,12 +1098,17 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void selectTrack(final TrackInfo track, boolean reloadBG) {
-        new Thread() {
-            @Override
-            public void run() {
-                if (board.isShowOnlineScores()) setRank();
-            }
-        }.start();
+
+        // Playing corresponding audio for the selected track.
+        var selectedTrack = this.selectedTrack != null ? this.selectedTrack : GlobalManager.getInstance().getSelectedTrack();
+
+        if (selectedTrack == null || !Objects.equals(selectedTrack.getAudioFilename(), track.getAudioFilename())) {
+            playMusic(track.getAudioFilename(), track.getPreviewTime());
+        }
+
+        if (board.isShowOnlineScores()) {
+            Async.run(this::setRank);
+        }
 
         if (selectedTrack == track) {
             synchronized (bgLoaded) {
@@ -1137,8 +1141,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
         isSelectComplete = false;
-        selectedTrack = track;
-        EdExtensionHelper.onSelectTrack(selectedTrack);
+        this.selectedTrack = track;
+        EdExtensionHelper.onSelectTrack(track);
         GlobalManager.getInstance().setSelectedTrack(track);
         updateInfo(track);
         board.init(track);
@@ -1158,55 +1162,47 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 Config.setBackgroundQuality(4);
             }
         }
-        new AsyncTask() {
-            @Override
-            public void run() {
-                // Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                synchronized (backgroundMutex) {
-                    final TextureRegion tex = Config.isSafeBeatmapBg() || track.getBackground() == null?
-                            ResourceManager.getInstance().getTexture("menu-background") :
-                            ResourceManager.getInstance().loadBackground(bgName);
-                    if (tex != null) {
-                        float height = tex.getHeight();
-                        height *= Config.getRES_WIDTH()
-                                / (float) tex.getWidth();
-                        bg = new Sprite(0,
-                                (Config.getRES_HEIGHT() - height) / 2, Config
-                                .getRES_WIDTH(), height, tex);
-                        bg.setColor(0, 0, 0);
-                    }
 
-                    // run()
-                    SyncTaskManager.getInstance().run(() -> {
-                        synchronized (backgroundMutex) {
-                            if (bg == null) {
-                                final TextureRegion tex1 = ResourceManager
-                                        .getInstance().getTexture("menu-background");
-                                float height = tex1.getHeight();
-                                height *= Config.getRES_WIDTH()
-                                        / (float) tex1.getWidth();
-                                bg = new Sprite(
-                                        0,
-                                        (Config.getRES_HEIGHT() - height) / 2,
-                                        Config.getRES_WIDTH(), height, tex1);
-                                bgName = "";
-                            }
-                            scene.setBackground(new SpriteBackground(bg));
-                            Config.setBackgroundQuality(quality);
-                            synchronized (bgLoaded) {
-                                bgLoaded = true;
-                            }
-                        }
-                    });// SyncTask.run
-
+        Async.run(() -> {
+            synchronized (backgroundMutex) {
+                final TextureRegion tex = Config.isSafeBeatmapBg() || track.getBackground() == null?
+                        ResourceManager.getInstance().getTexture("menu-background") :
+                        ResourceManager.getInstance().loadBackground(bgName);
+                if (tex != null) {
+                    float height = tex.getHeight();
+                    height *= Config.getRES_WIDTH()
+                            / (float) tex.getWidth();
+                    bg = new Sprite(0,
+                            (Config.getRES_HEIGHT() - height) / 2, Config
+                            .getRES_WIDTH(), height, tex);
+                    bg.setColor(0, 0, 0);
                 }
+
+                SyncTaskManager.getInstance().run(() -> {
+                    synchronized (backgroundMutex) {
+                        if (bg == null) {
+                            final TextureRegion tex1 = ResourceManager
+                                    .getInstance().getTexture("menu-background");
+                            float height = tex1.getHeight();
+                            height *= Config.getRES_WIDTH()
+                                    / (float) tex1.getWidth();
+                            bg = new Sprite(
+                                    0,
+                                    (Config.getRES_HEIGHT() - height) / 2,
+                                    Config.getRES_WIDTH(), height, tex1);
+                            bgName = "";
+                        }
+                        scene.setBackground(new SpriteBackground(bg));
+                        Config.setBackgroundQuality(quality);
+                        synchronized (bgLoaded) {
+                            bgLoaded = true;
+                        }
+                    }
+                });
             }
 
-            @Override
-            public void onComplete() {
-                isSelectComplete = true;
-            }// onComplete
-        }.execute();
+            isSelectComplete = true;
+        });
     }
 
     public void stopScroll(final float y) {
@@ -1370,31 +1366,27 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (!Config.isPlayMusicPreview()) {
             return;
         }
-        new AsyncTask() {
-            @Override
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                synchronized (musicMutex) {
-                    if (GlobalManager.getInstance().getSongService() != null) {
-                        GlobalManager.getInstance().getSongService().stop();
-                    }
 
-                    try {
-                        GlobalManager.getInstance().getSongService().preLoad(filename);
-                        GlobalManager.getInstance().getSongService().play();
-                        GlobalManager.getInstance().getSongService().setVolume(0);
-                        if (previewTime >= 0) {
-                            GlobalManager.getInstance().getSongService().seekTo(previewTime);
-                        } else {
-                            GlobalManager.getInstance().getSongService().seekTo(GlobalManager.getInstance().getSongService().getLength() / 2);
-                        }
-                    } catch (final Exception e) {
-                        Debug.e("LoadingMusic: " + e.getMessage(), e);
-                    }
+        Async.run(() -> {
+            synchronized (musicMutex) {
+                if (GlobalManager.getInstance().getSongService() != null) {
+                    GlobalManager.getInstance().getSongService().stop();
+                }
 
+                try {
+                    GlobalManager.getInstance().getSongService().preLoad(filename);
+                    GlobalManager.getInstance().getSongService().play();
+                    GlobalManager.getInstance().getSongService().setVolume(0);
+                    if (previewTime >= 0) {
+                        GlobalManager.getInstance().getSongService().seekTo(previewTime);
+                    } else {
+                        GlobalManager.getInstance().getSongService().seekTo(GlobalManager.getInstance().getSongService().getLength() / 2);
+                    }
+                } catch (final Exception e) {
+                    Debug.e("LoadingMusic: " + e.getMessage(), e);
                 }
             }
-        }.execute();
+        });
     }
 
     public boolean isSelectAllowed() {
