@@ -23,6 +23,8 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class MenuItem {
 
+    final WeakReference<MenuItemListener> listener;
+
     private final MenuItemTrack[] trackSprites;
 
     private final BeatmapInfo beatmap;
@@ -42,8 +44,6 @@ public class MenuItem {
     Scene scene;
 
     boolean selected = false;
-
-    final WeakReference<MenuItemListener> listener;
 
     private MenuItemTrack selTrack = null;
 

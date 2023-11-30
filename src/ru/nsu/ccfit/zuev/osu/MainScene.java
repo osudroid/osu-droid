@@ -78,6 +78,18 @@ import ru.nsu.ccfit.zuev.osuplus.R;
  */
 public class MainScene implements IUpdateHandler {
 
+    private final Random random = new Random();
+
+    private final Rectangle[] spectrum = new Rectangle[120];
+
+    private final float[] peakLevel = new float[120];
+
+    private final float[] peakDownRate = new float[120];
+
+    private final float[] peakAlpha = new float[120];
+
+    private final ParticleSystem[] particleSystem = new ParticleSystem[2];
+
     public SongProgressBar progressBar;
 
     public BeatmapInfo beatmapInfo;
@@ -94,16 +106,6 @@ public class MainScene implements IUpdateHandler {
 
     private ChangeableText musicInfoText;
 
-    private final Random random = new Random();
-
-    private final Rectangle[] spectrum = new Rectangle[120];
-
-    private final float[] peakLevel = new float[120];
-
-    private final float[] peakDownRate = new float[120];
-
-    private final float[] peakAlpha = new float[120];
-
     private List<TimingPoint> timingPoints;
 
     private TimingPoint currentTimingPoint, lastTimingPoint, firstTimingPoint;
@@ -112,11 +114,9 @@ public class MainScene implements IUpdateHandler {
 
     private boolean particleEnabled = false;
 
-    private boolean isContinuousKiai = false;
-
     //private BassAudioPlayer music;
 
-    private final ParticleSystem[] particleSystem = new ParticleSystem[2];
+    private boolean isContinuousKiai = false;
 
     private boolean musicStarted;
 

@@ -11,15 +11,15 @@ public class Spline {
 
     private static final float TWO_PI = (float) (Math.PI * 2);
 
-    private static Spline instance = null;
-
     private static final int DetailLevel = 50;
 
-    private CurveTypes m_curve_type;
+    private static Spline instance = null;
 
     private final ArrayList<PointF> m_ctrl_pts;
 
     private final ArrayList<PointF> m_points;
+
+    private CurveTypes m_curve_type;
 
     private ArrayList<PointF> m_points_copy = null;
 
@@ -245,7 +245,8 @@ public class Spline {
                 int lastIndex = 0;
                 for (int i = 0; i < sliderCurvePoints.size(); i++) {
                     if ((i > 0 && sliderCurvePoints.get(i) == sliderCurvePoints.get(i - 1)) || i == sliderCurvePoints.size() - 1) {
-                        ArrayList<PointF> thisLength = new ArrayList<>(sliderCurvePoints.subList(lastIndex, i - lastIndex + ((i == sliderCurvePoints.size() - 1) ? 1 : 0))); // + 1); // i145
+                        ArrayList<PointF> thisLength = new ArrayList<>(sliderCurvePoints.subList(lastIndex,
+                            i - lastIndex + ((i == sliderCurvePoints.size() - 1) ? 1 : 0))); // + 1); // i145
 
                         ArrayList<PointF> points1 = CreateBezier(thisLength);
                         points.addAll(points1);

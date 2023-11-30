@@ -8,19 +8,19 @@ public class TimingPoint {
 
     final double time;
 
+    final String hitSound;
+
+    final float volume;
+
+    final boolean kiai;
+
     double beatLength;
 
     int signature = 4;
 
-    final String hitSound;
-
     int customSound = 0;
 
-    final float volume;
-
     boolean inherited = false;
-
-    final boolean kiai;
 
     public TimingPoint(final String[] data, final TimingPoint prevData) {
         time = Float.parseFloat(data[0]) / 1000.0f;

@@ -17,13 +17,13 @@ import java.io.InputStream;
 
 public class QualityFileBitmapSource extends BaseTextureAtlasSource implements IBitmapTextureAtlasSource {
 
+    private final InputFactory fileBitmapInput;
+
     private int mWidth;
 
     private int mHeight;
 
     private Bitmap bitmap = null;
-
-    private final InputFactory fileBitmapInput;
 
     private int inSampleSize = 1;
 

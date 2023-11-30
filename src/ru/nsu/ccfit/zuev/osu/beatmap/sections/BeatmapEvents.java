@@ -11,6 +11,11 @@ import ru.nsu.ccfit.zuev.osu.game.BreakPeriod;
 public class BeatmapEvents {
 
     /**
+     * The breaks this beatmap has.
+     */
+    public final ArrayList<BreakPeriod> breaks = new ArrayList<>();
+
+    /**
      * The file name of this beatmap's background.
      */
     public String backgroundFilename;
@@ -24,11 +29,6 @@ public class BeatmapEvents {
      * The beatmap's background video start time in milliseconds.
      */
     public int videoStartTime;
-
-    /**
-     * The breaks this beatmap has.
-     */
-    public final ArrayList<BreakPeriod> breaks = new ArrayList<>();
 
     /**
      * The background color of this beatmap.

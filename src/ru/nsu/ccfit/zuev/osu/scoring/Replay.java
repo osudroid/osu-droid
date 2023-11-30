@@ -450,9 +450,9 @@ public class Replay {
 
     public static class ReplayMovement {
 
-        protected int time;
-
         protected final PointF point = new PointF();
+
+        protected int time;
 
         protected TouchType touchType;
 

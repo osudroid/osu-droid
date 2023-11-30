@@ -38,11 +38,11 @@ public class OnlineFileOperator {
             MediaType mime = MediaType.parse("application/octet-stream");
             RequestBody fileBody = RequestBody.create(mime, file);
             RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                                                                 .addFormDataPart("uploadedfile", file.getName(), fileBody)
-                                                                 .addFormDataPart("hash", checksum)
-                                                                 .addFormDataPart("replayID", replayID)
-                                                                 .addFormDataPart("sign", signature)
-                                                                 .build();
+                                          .addFormDataPart("uploadedfile", file.getName(), fileBody)
+                                          .addFormDataPart("hash", checksum)
+                                          .addFormDataPart("replayID", replayID)
+                                          .addFormDataPart("sign", signature)
+                                          .build();
             Request request = new Request.Builder().url(urlstr).post(requestBody).build();
             try (Response response = OnlineManager.client.newCall(request).execute()) {
 

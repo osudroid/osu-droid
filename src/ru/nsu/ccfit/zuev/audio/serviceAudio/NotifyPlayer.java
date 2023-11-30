@@ -207,20 +207,19 @@ public class NotifyPlayer {
         PendingIntent openApp = PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class), 0);
 
         builder = new NotificationCompat.Builder(context, channelId).setSmallIcon(R.drawable.notify_inso)
-                                                                    .setLargeIcon(defaultIcon)
-                                                                    .setContentTitle("title")
-                                                                    .setContentText("artist")
-                                                                    .setOnlyAlertOnce(true)
-                                                                    .setSound(null)
-                                                                    .setShowWhen(false)
-                                                                    .setContentIntent(openApp)
-                                                                    .addAction(R.drawable.v_prev, actionPrev, prev)
-                                                                    .addAction(R.drawable.v_play, actionPlay, play)
-                                                                    .addAction(R.drawable.v_next, actionNext, next)
-                                                                    .addAction(R.drawable.v_close, actionClose, close)
-                                                                    .setPriority(NotificationCompat.PRIORITY_LOW)
-                                                                    .setStyle(new MediaStyle().setShowActionsInCompactView(0, 1, 2)
-                                                                                              .setMediaSession(mediaSession.getSessionToken()));
+                      .setLargeIcon(defaultIcon)
+                      .setContentTitle("title")
+                      .setContentText("artist")
+                      .setOnlyAlertOnce(true)
+                      .setSound(null)
+                      .setShowWhen(false)
+                      .setContentIntent(openApp)
+                      .addAction(R.drawable.v_prev, actionPrev, prev)
+                      .addAction(R.drawable.v_play, actionPlay, play)
+                      .addAction(R.drawable.v_next, actionNext, next)
+                      .addAction(R.drawable.v_close, actionClose, close)
+                      .setPriority(NotificationCompat.PRIORITY_LOW)
+                      .setStyle(new MediaStyle().setShowActionsInCompactView(0, 1, 2).setMediaSession(mediaSession.getSessionToken()));
 
         notification = builder.build();
     }

@@ -92,12 +92,7 @@ public class Spinner extends GameObject {
     }
 
     public void init(
-        final GameObjectListener listener,
-        final Scene scene,
-        final float pretime,
-        final float time,
-        final float rps,
-        final int sound, final StatisticV2 stat) {
+        final GameObjectListener listener, final Scene scene, final float pretime, final float time, final float rps, final int sound, final StatisticV2 stat) {
         clearText = null;
         fullrotations = 0;
         rotations = 0;

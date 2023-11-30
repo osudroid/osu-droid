@@ -62,7 +62,11 @@ public class OnlinePanel extends Entity {
                     this.setColor(0.2f, 0.2f, 0.2f, 0.5f);
                     if (!moved) {
                         if (OnlineManager.getInstance().isStayOnline()) {
-                            new ConfirmDialogFragment().setMessage(R.string.dialog_visit_profile_page).showForResult(isAccepted -> GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> new WebViewFragment().setURL(WebViewFragment.PROFILE_URL + OnlineManager.getInstance().getUserId()).show()));
+                            new ConfirmDialogFragment().setMessage(R.string.dialog_visit_profile_page)
+                                .showForResult(isAccepted -> GlobalManager.getInstance()
+                                                                 .getMainActivity()
+                                                                 .runOnUiThread(() -> new WebViewFragment().setURL(WebViewFragment.PROFILE_URL +
+                                                                                                                   OnlineManager.getInstance().getUserId()).show()));
                         }
                     }
                     return true;

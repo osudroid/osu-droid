@@ -356,8 +356,7 @@ public class Slider extends GameObject {
         }
         ticks.clear();
         for (int i = 1; i <= tickCount; i++) {
-            final Sprite tick = SpritePool.getInstance()
-                                          .getCenteredSprite("sliderscorepoint", getPercentPosition((float) (i * tickInterval / (maxTime * GameHelper.getTickRate())), null));
+            var tick = SpritePool.getInstance().getCenteredSprite("sliderscorepoint", getPercentPosition((float) (i * tickInterval / (maxTime * GameHelper.getTickRate())), null));
             tick.setScale(scale);
             tick.setAlpha(0);
             ticks.add(tick);

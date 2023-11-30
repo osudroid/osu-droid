@@ -1714,12 +1714,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
                 final float endTime = Integer.parseInt(params[5]) / 1000.0f;
                 final float rps = 2 + 2 * overallDifficulty / 10f;
                 final Spinner spinner = GameObjectPool.getInstance().getSpinner();
-                spinner.init(this,
-                    bgScene,
-                    (data.getTime() - secPassed) / timeMultiplier,
-                    (endTime - data.getTime()) / timeMultiplier,
-                    rps,
-                    Integer.parseInt(params[4]), stat);
+                spinner.init(this, bgScene, (data.getTime() - secPassed) / timeMultiplier, (endTime - data.getTime()) / timeMultiplier, rps, Integer.parseInt(params[4]), stat);
                 spinner.setEndsCombo(objects.isEmpty() || nextObj.isNewCombo());
                 addObject(spinner);
                 isFirst = false;
@@ -2690,8 +2685,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
             return;
         }
 
-        if (Config.isHitLighting() && !name.equals("sliderpoint10") && !name.equals("sliderpoint30") &&
-            ResourceManager.getInstance().getTexture("lighting") != null) {
+        if (Config.isHitLighting() && !name.equals("sliderpoint10") && !name.equals("sliderpoint30") && ResourceManager.getInstance().getTexture("lighting") != null) {
             final GameEffect light = GameObjectPool.getInstance().getEffect("lighting");
             light.setColor(color);
             light.init(bgScene,

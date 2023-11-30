@@ -48,11 +48,11 @@ public class PushNotificationService extends FirebaseMessagingService {
             String url = data.get("url");
             String imageUrl = data.get("imageUrl");
 
-            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId).setSmallIcon(R.drawable.notify_inso)
-                                                                                                            .setContentTitle(title)
-                                                                                                            .setContentText(message)
-                                                                                                            .setAutoCancel(true)
-                                                                                                            .setSound(defaultSoundUri);
+            var notificationBuilder = new NotificationCompat.Builder(this, channelId).setSmallIcon(R.drawable.notify_inso)
+                                          .setContentTitle(title)
+                                          .setContentText(message)
+                                          .setAutoCancel(true)
+                                          .setSound(defaultSoundUri);
 
             if (!imageUrl.isEmpty()) {
                 String filePath = getCacheDir().getPath() + "/" + MD5Calcuator.getStringMD5("osuplus" + imageUrl);

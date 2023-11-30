@@ -29,6 +29,10 @@ public class BreakAnimator extends GameObject {
 
     private final Sprite[] arrows = new Sprite[4];
 
+    private final boolean showMark;
+
+    private final Rectangle dimRectangle;
+
     private float length;
 
     private float time;
@@ -39,13 +43,9 @@ public class BreakAnimator extends GameObject {
 
     private Sprite mark = null;
 
-    private final boolean showMark;
-
     private boolean isbreak = false;
 
     private boolean over = false;
-
-    private final Rectangle dimRectangle;
 
     public BreakAnimator(
         final GameObjectListener listener, final Scene scene, final StatisticV2 stat, final boolean showMark, Rectangle bgSprtie) {

@@ -1080,19 +1080,19 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
         }
 
         dimensionStringBuilder.append("AR: ")
-                              .append(GameHelper.Round(ar, 2))
-                              .append(" ")
-                              .append("OD: ")
-                              .append(GameHelper.Round(od, 2))
-                              .append(" ")
-                              .append("CS: ")
-                              .append(GameHelper.Round(cs, 2))
-                              .append(" ")
-                              .append("HP: ")
-                              .append(GameHelper.Round(hp, 2))
-                              .append(" ")
-                              .append("Stars: ")
-                              .append(GameHelper.Round(track.getDifficulty(), 2));
+            .append(GameHelper.Round(ar, 2))
+            .append(" ")
+            .append("OD: ")
+            .append(GameHelper.Round(od, 2))
+            .append(" ")
+            .append("CS: ")
+            .append(GameHelper.Round(cs, 2))
+            .append(" ")
+            .append("HP: ")
+            .append(GameHelper.Round(hp, 2))
+            .append(" ")
+            .append("Stars: ")
+            .append(GameHelper.Round(track.getDifficulty(), 2));
 
         dimensionInfo.setText(dimensionStringBuilder.toString());
     }

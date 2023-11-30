@@ -54,9 +54,9 @@ public class OsuSprite {
 
     public static final float TO_DEGREES = (1 / (float) Math.PI) * 180;
 
-    public long spriteStartTime;
-
     private final String fileName;
+
+    public long spriteStartTime;
 
     private int layer, ZIndex;
 

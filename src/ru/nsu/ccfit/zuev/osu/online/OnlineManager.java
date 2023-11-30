@@ -422,4 +422,5 @@ public class OnlineManager {
     private String addSlashes(String str) {
         return str.replace("'", "\\'").replace("\"", "\\\"").replace("\\", "\\\\");
     }
+
 }
