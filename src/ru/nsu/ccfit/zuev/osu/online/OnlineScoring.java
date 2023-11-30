@@ -8,7 +8,6 @@ import org.anddev.andengine.util.Debug;
 
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public class OnlineScoring {
@@ -159,48 +158,45 @@ public class OnlineScoring {
 
         final String recordData = record.compile();
 
-        new AsyncTask() {
-
-            @Override
-            public void run() {
-                boolean success = false;
-                synchronized (onlineMutex) {
-                    for (int i = 0; i < attemptCount; i++) {
-                        if (!record.isScoreValid()) {
-                            Debug.e("Detected illegal actions.");
-                            break;
-                        }
-
-                        success = OnlineManager.getInstance().sendRecord(recordData);
-
-                        if (!OnlineManager.getInstance().getFailMessage().isEmpty()) {
-                            ToastLogger.showText(OnlineManager.getInstance().getFailMessage(), true);
-                            if (OnlineManager.getInstance().getFailMessage().equals("Invalid record data")) {
-                                i = attemptCount;
-                            }
-                        } else if (success) {
-                            OnlineManager.getInstance().sendReplay(replay);
-                            updatePanels();
-                            OnlineManager mgr = OnlineManager.getInstance();
-                            panel.show(mgr.getMapRank(), mgr.getScore(), mgr.getRank(), mgr.getAccuracy());
-                            break;
-                        }
-
-
-                        try {
-                            Thread.sleep(5000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+        Async.run(() -> {
+            boolean success = false;
+            synchronized (onlineMutex) {
+                for (int i = 0; i < attemptCount; i++) {
+                    if (!record.isScoreValid()) {
+                        Debug.e("Detected illegal actions.");
+                        break;
                     }
 
-                    if (!success) {
-                        panel.setFail();
+                    success = OnlineManager.getInstance().sendRecord(recordData);
+
+                    if (!OnlineManager.getInstance().getFailMessage().isEmpty()) {
+                        ToastLogger.showText(OnlineManager.getInstance().getFailMessage(), true);
+                        if (OnlineManager.getInstance().getFailMessage().equals("Invalid record data")) {
+                            i = attemptCount;
+                        }
+                    } else if (success) {
+                        OnlineManager.getInstance().sendReplay(replay);
+                        updatePanels();
+                        OnlineManager mgr = OnlineManager.getInstance();
+                        panel.show(mgr.getMapRank(), mgr.getScore(), mgr.getRank(), mgr.getAccuracy());
+                        break;
                     }
 
+
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
+
+                if (!success) {
+                    panel.setFail();
+                }
+
+
             }
-        }.execute();
+        });
     }
 
     public void loadAvatar(final boolean both) {
@@ -212,20 +208,16 @@ public class OnlineScoring {
             return;
         }
 
-        new AsyncTask() {
-
-            @Override
-            public void run() {
-                synchronized (onlineMutex) {
-                    avatarLoaded = OnlineManager.getInstance().loadAvatarToTextureManager();
-                    if (both) {
-                        updatePanelAvatars();
-                    } else if (secondPanel != null) {
-                        secondPanel.setAvatar(avatarLoaded ? avatarUrl : null);
-                    }
+        Async.run(() -> {
+            synchronized (onlineMutex) {
+                avatarLoaded = OnlineManager.getInstance().loadAvatarToTextureManager();
+                if (both) {
+                    updatePanelAvatars();
+                } else if (secondPanel != null) {
+                    secondPanel.setAvatar(avatarLoaded ? avatarUrl : null);
                 }
             }
-        }.execute();
+        });
     }
 
     public boolean isAvatarLoaded() {
