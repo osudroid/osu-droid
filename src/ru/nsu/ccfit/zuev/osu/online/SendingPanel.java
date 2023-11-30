@@ -12,7 +12,6 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.HorizontalAlign;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.Utils;
 
 public class SendingPanel extends Rectangle {
 
@@ -45,7 +44,7 @@ public class SendingPanel extends Rectangle {
     private boolean canBeDismissed = false;
 
     public SendingPanel(long rank, long score, float accuracy) {
-        super(0, Utils.toRes(-300), Utils.toRes(800), Utils.toRes(300));
+        super(0, -300, 800, 300);
         TextureRegion btnTex = ResourceManager.getInstance().getTexture("ranking_button");
 
         this.rank = rank;
@@ -53,14 +52,14 @@ public class SendingPanel extends Rectangle {
         this.accuracy = accuracy;
         setColor(0, 0, 0, 0.7f);
 
-        button = new Sprite(Utils.toRes(272), Utils.toRes(300), btnTex) {
+        button = new Sprite(272, 300, btnTex) {
 
 
             @Override
             public boolean onAreaTouched(
                 TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
                 if (canBeDismissed) {
-                    SendingPanel.this.registerEntityModifier(new MoveYModifier(0.5f, 0, Utils.toRes(-350)));
+                    SendingPanel.this.registerEntityModifier(new MoveYModifier(0.5f, 0, -350));
                     canBeDismissed = false;
                     return true;
                 }
@@ -69,27 +68,27 @@ public class SendingPanel extends Rectangle {
         };
         attachChild(button);
 
-        buttonText = new ChangeableText(Utils.toRes(340), Utils.toRes(305), ResourceManager.getInstance().getFont("font"), "Sending...", HorizontalAlign.CENTER, 10);
+        buttonText = new ChangeableText(340, 305, ResourceManager.getInstance().getFont("font"), "Sending...", HorizontalAlign.CENTER, 10);
         attachChild(buttonText);
 
         Text topScoreText = new Text(0, 0, ResourceManager.getInstance().getFont("CaptionFonrt"), "Overall Ranking");
-        topScoreText.setPosition(Utils.toRes(400) - topScoreText.getWidth() / 2, Utils.toRes(60));
+        topScoreText.setPosition(400 - topScoreText.getWidth() / 2, 60);
         attachChild(topScoreText);
 
-        Text tableCaption = new Text(Utils.toRes(60), Utils.toRes(120), ResourceManager.getInstance().getFont("font"), "Map rank     Overall      Accuracy       Ranked score");
+        Text tableCaption = new Text(60, 120, ResourceManager.getInstance().getFont("font"), "Map rank     Overall      Accuracy       Ranked score");
         attachChild(tableCaption);
 
-        mapRect = new Rectangle(Utils.toRes(50), Utils.toRes(160), Utils.toRes(140), Utils.toRes(80));
+        mapRect = new Rectangle(50, 160, 140, 80);
         mapRect.setColor(1, 1, 0, 0.8f);
         attachChild(mapRect);
 
-        rankRect = new Rectangle(Utils.toRes(195), Utils.toRes(160), Utils.toRes(150), Utils.toRes(80));
+        rankRect = new Rectangle(195, 160, 150, 80);
         attachChild(rankRect);
 
-        accRect = new Rectangle(Utils.toRes(350), Utils.toRes(160), Utils.toRes(150), Utils.toRes(80));
+        accRect = new Rectangle(350, 160, 150, 80);
         attachChild(accRect);
 
-        scoreRect = new Rectangle(Utils.toRes(505), Utils.toRes(160), Utils.toRes(250), Utils.toRes(80));
+        scoreRect = new Rectangle(505, 160, 250, 80);
         attachChild(scoreRect);
 
         Font font = ResourceManager.getInstance().getFont("font");
@@ -178,7 +177,7 @@ public class SendingPanel extends Rectangle {
 
         buttonText.setText(" Dismiss");
 
-        registerEntityModifier(new MoveYModifier(0.5f, Utils.toRes(-300), 0));
+        registerEntityModifier(new MoveYModifier(0.5f, -300, 0));
     }
 
     void setFail() {

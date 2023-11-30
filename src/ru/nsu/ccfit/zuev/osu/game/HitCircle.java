@@ -97,7 +97,7 @@ public class HitCircle extends GameObject {
         }
 
         // Calculating position of top/left corner for sprites and hit radius
-        radius = Utils.toRes(128) * scale / 2;
+        radius = 128 * scale / 2;
         radius *= radius;
 
         // Initializing sprites

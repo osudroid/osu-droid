@@ -25,7 +25,6 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
@@ -211,7 +210,7 @@ public class ModMenu implements IModSwitcher {
         bg.setColor(0, 0, 0, 0.7f);
         scene.attachChild(bg);
 
-        multiplierText = new ChangeableText(0, Utils.toRes(50), ResourceManager.getInstance().getFont("CaptionFont"), StringTable.format(R.string.menu_mod_multiplier, 1f));
+        multiplierText = new ChangeableText(0, 50, ResourceManager.getInstance().getFont("CaptionFont"), StringTable.format(R.string.menu_mod_multiplier, 1f));
         multiplierText.setScale(1.2f);
         scene.attachChild(multiplierText);
 
