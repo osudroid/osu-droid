@@ -6,7 +6,6 @@ import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 
 import ru.nsu.ccfit.zuev.osu.RGBAColor;
-import ru.nsu.ccfit.zuev.osu.Utils;
 
 public class SongProgressBar extends GameObject {
 
@@ -22,7 +21,7 @@ public class SongProgressBar extends GameObject {
 
     public SongProgressBar(
         final GameObjectListener listener, final Scene scene, final float time, final float startTime, final PointF pos) {
-        this(listener, scene, time, startTime, pos, Utils.toRes(300), Utils.toRes(7));
+        this(listener, scene, time, startTime, pos, 300, 7);
     }
 
     public SongProgressBar(

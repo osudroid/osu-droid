@@ -140,7 +140,6 @@ public class ResourceManager {
                     skinjson = new JSONObject(OsuSkin.readFull(jsonFile));
                 } catch (Exception e) {
                     e.printStackTrace();
-                    skinjson = null;
                 }
             } else {
                 var iniFile = new File(folder, "skin.ini");
@@ -385,7 +384,6 @@ public class ResourceManager {
 
     public void loadFont(
         final String resname, final String file, int size, final int color) {
-        size /= Config.getTextureQuality();
         final BitmapTextureAtlas texture = new BitmapTextureAtlas(512, 512, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
         Font font;
         if (file == null) {
@@ -400,13 +398,12 @@ public class ResourceManager {
 
     public void loadStrokeFont(
         final String resname, final String file, int size, final int color1, final int color2) {
-        size /= Config.getTextureQuality();
         final BitmapTextureAtlas texture = new BitmapTextureAtlas(512, 256, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
         StrokeFont font;
         if (file == null) {
-            font = new StrokeFont(texture, Typeface.create(Typeface.DEFAULT, Typeface.NORMAL), size, true, color1, Config.getTextureQuality() == 1 ? 2 : 0.75f, color2);
+            font = new StrokeFont(texture, Typeface.create(Typeface.DEFAULT, Typeface.NORMAL), size, true, color1, 2, color2);
         } else {
-            font = FontFactory.createStrokeFromAsset(texture, context, "fonts/" + file, size, true, color1, 2f / Config.getTextureQuality(), color2);
+            font = FontFactory.createStrokeFromAsset(texture, context, "fonts/" + file, size, true, color1, 2f, color2);
         }
         engine.getTextureManager().loadTexture(texture);
         engine.getFontManager().loadFont(font);

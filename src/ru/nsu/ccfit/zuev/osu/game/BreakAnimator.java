@@ -17,7 +17,6 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -63,10 +62,10 @@ public class BreakAnimator extends GameObject {
                 arrows[i].setFlippedHorizontal(true);
             }
         }
-        arrows[0].setPosition(Utils.toRes(64), Utils.toRes(72));
-        arrows[1].setPosition(Utils.toRes(64), Config.getRES_HEIGHT() - arrows[1].getHeight());
-        arrows[2].setPosition(Config.getRES_WIDTH() - arrows[1].getWidth() - Utils.toRes(64), Utils.toRes(72));
-        arrows[3].setPosition(Config.getRES_WIDTH() - arrows[1].getWidth() - Utils.toRes(64), Config.getRES_HEIGHT() - arrows[1].getHeight());
+        arrows[0].setPosition(64, 72);
+        arrows[1].setPosition(64, Config.getRES_HEIGHT() - arrows[1].getHeight());
+        arrows[2].setPosition(Config.getRES_WIDTH() - arrows[1].getWidth() - 64, 72);
+        arrows[3].setPosition(Config.getRES_WIDTH() - arrows[1].getWidth() - 64, Config.getRES_HEIGHT() - arrows[1].getHeight());
 
     }
 
@@ -101,7 +100,7 @@ public class BreakAnimator extends GameObject {
         }
         if (showMark) {
             final TextureRegion zeroRect = ResourceManager.getInstance().getTextureWithPrefix(OsuSkin.get().getScorePrefix(), "0");
-            mark = new Sprite(Config.getRES_WIDTH() - zeroRect.getWidth() * 11, Utils.toRes(5), ResourceManager.getInstance().getTexture("ranking-" + stat.getMark() + "-small"));
+            mark = new Sprite(Config.getRES_WIDTH() - zeroRect.getWidth() * 11, 5, ResourceManager.getInstance().getTexture("ranking-" + stat.getMark() + "-small"));
             mark.setScale(1.2f);
             scene.attachChild(mark, 0);
         }

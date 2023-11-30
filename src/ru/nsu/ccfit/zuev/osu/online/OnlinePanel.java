@@ -15,7 +15,6 @@ import org.anddev.andengine.util.MathUtils;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class OnlinePanel extends Entity {
@@ -43,7 +42,7 @@ public class OnlinePanel extends Entity {
     private Sprite avatar = null;
 
     public OnlinePanel() {
-        rect = new Rectangle(0, 0, Utils.toRes(410), Utils.toRes(110)) {
+        rect = new Rectangle(0, 0, 410, 110) {
 
             boolean moved = false;
 
@@ -81,7 +80,7 @@ public class OnlinePanel extends Entity {
         rect.setColor(0.2f, 0.2f, 0.2f, 0.5f);
         attachChild(rect);
 
-        Rectangle avatarFooter = new Rectangle(0, 0, Utils.toRes(110), Utils.toRes(110));
+        Rectangle avatarFooter = new Rectangle(0, 0, 110, 110);
         avatarFooter.setColor(0.2f, 0.2f, 0.2f, 0.8f);
         attachChild(avatarFooter);
 
@@ -89,23 +88,23 @@ public class OnlinePanel extends Entity {
         rankText.setColor(0.6f, 0.6f, 0.6f, 0.9f);
         rankText.setScaleCenterX(0);
         rankText.setScale(1.7f);
-        rankText.setPosition(Utils.toRes(390 + 10) - rankText.getWidthScaled(), Utils.toRes(55));
+        rankText.setPosition(390 + 10 - rankText.getWidthScaled(), 55);
         onlineLayer.attachChild(rankText);
 
-        nameText = new ChangeableText(Utils.toRes(120), Utils.toRes(5), ResourceManager.getInstance().getFont("CaptionFont"), "Guest", 16);
+        nameText = new ChangeableText(120, 5, ResourceManager.getInstance().getFont("CaptionFont"), "Guest", 16);
         onlineLayer.attachChild(nameText);
-        scoreText = new ChangeableText(Utils.toRes(120), Utils.toRes(50), ResourceManager.getInstance().getFont("smallFont"), "Score: 0", HorizontalAlign.LEFT, 22);
+        scoreText = new ChangeableText(120, 50, ResourceManager.getInstance().getFont("smallFont"), "Score: 0", HorizontalAlign.LEFT, 22);
         scoreText.setColor(0.85f, 0.85f, 0.9f);
         onlineLayer.attachChild(scoreText);
 
-        accText = new ChangeableText(Utils.toRes(120), Utils.toRes(75), ResourceManager.getInstance().getFont("smallFont"), "Accuracy: 0.00%", HorizontalAlign.LEFT, 17);
+        accText = new ChangeableText(120, 75, ResourceManager.getInstance().getFont("smallFont"), "Accuracy: 0.00%", HorizontalAlign.LEFT, 17);
         accText.setColor(0.85f, 0.85f, 0.9f);
         onlineLayer.attachChild(accText);
 
-        messageText = new ChangeableText(Utils.toRes(110), Utils.toRes(5), ResourceManager.getInstance().getFont("CaptionFont"), "Logging in...", 16);
+        messageText = new ChangeableText(110, 5, ResourceManager.getInstance().getFont("CaptionFont"), "Logging in...", 16);
         messageLayer.attachChild(messageText);
 
-        submessageText = new ChangeableText(Utils.toRes(110), Utils.toRes(60), ResourceManager.getInstance().getFont("smallFont"), "Connecting to server...", 40);
+        submessageText = new ChangeableText(110, 60, ResourceManager.getInstance().getFont("smallFont"), "Connecting to server...", 40);
         messageLayer.attachChild(submessageText);
 
         attachChild(messageLayer);
@@ -135,7 +134,7 @@ public class OnlinePanel extends Entity {
         accText.setText(String.format("Accuracy: %.2f%%", OnlineManager.getInstance().getAccuracy() * 100f));
         rankText.setScale(1);
         rankText.setText(String.format("#%d", OnlineManager.getInstance().getRank()));
-        rankText.setPosition(Utils.toRes(390 + 10) - rankText.getWidth() * 1.7f, Utils.toRes(55));
+        rankText.setPosition(390 + 10 - rankText.getWidth() * 1.7f, 55);
         rankText.setScaleCenterX(0);
         rankText.setScale(1.7f);
 
@@ -164,7 +163,7 @@ public class OnlinePanel extends Entity {
         }
 
         Debug.i("Avatar is set!");
-        avatar = new Sprite(0, 0, Utils.toRes(110), Utils.toRes(110), tex);
+        avatar = new Sprite(0, 0, 110, 110, tex);
         frontLayer.attachChild(avatar);
     }
 

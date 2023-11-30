@@ -24,8 +24,8 @@ public class Utils {
 
     public static PointF trackToRealCoords(final PointF coords) {
         final PointF pos = scaleToReal(coords);
-        pos.y += (Config.getRES_HEIGHT() - toRes(Constants.MAP_ACTUAL_HEIGHT)) / 2f;
-        pos.x += (Config.getRES_WIDTH() - toRes(Constants.MAP_ACTUAL_WIDTH)) / 2f;
+        pos.y += (Config.getRES_HEIGHT() - Constants.MAP_ACTUAL_HEIGHT) / 2f;
+        pos.x += (Config.getRES_WIDTH() - Constants.MAP_ACTUAL_WIDTH) / 2f;
         if (GameHelper.isHardrock()) {
             pos.y -= Config.getRES_HEIGHT() / 2f;
             pos.y *= -1;
@@ -45,22 +45,26 @@ public class Utils {
             pos.y *= -1;
             pos.y += height / 2;
         }
-        pos.y -= (height - toRes((isOld ? Constants.MAP_ACTUAL_HEIGHT_OLD : Constants.MAP_ACTUAL_HEIGHT))) / 2f;
-        pos.x -= (width - toRes((isOld ? Constants.MAP_ACTUAL_WIDTH_OLD : Constants.MAP_ACTUAL_WIDTH))) / 2f;
+        final int i1 = (isOld ? Constants.MAP_ACTUAL_HEIGHT_OLD : Constants.MAP_ACTUAL_HEIGHT);
+        pos.y -= (height - i1) / 2f;
+        final int i = (isOld ? Constants.MAP_ACTUAL_WIDTH_OLD : Constants.MAP_ACTUAL_WIDTH);
+        pos.x -= (width - i) / 2f;
         return scaleToTrack(pos, isOld);
     }
 
     public static PointF scaleToReal(final PointF v) {
         final PointF pos = new PointF(v.x, v.y);
-        pos.x *= toRes(Constants.MAP_ACTUAL_WIDTH) / (float) Constants.MAP_WIDTH;
-        pos.y *= toRes(Constants.MAP_ACTUAL_HEIGHT) / (float) Constants.MAP_HEIGHT;
+        pos.x *= Constants.MAP_ACTUAL_WIDTH / (float) Constants.MAP_WIDTH;
+        pos.y *= Constants.MAP_ACTUAL_HEIGHT / (float) Constants.MAP_HEIGHT;
         return pos;
     }
 
     public static PointF scaleToTrack(final PointF v, boolean isOld) {
         final PointF pos = new PointF(v.x, v.y);
-        pos.x *= Constants.MAP_WIDTH / toRes((float) (isOld ? Constants.MAP_ACTUAL_WIDTH_OLD : Constants.MAP_ACTUAL_WIDTH));
-        pos.y *= Constants.MAP_HEIGHT / toRes((float) (isOld ? Constants.MAP_ACTUAL_HEIGHT_OLD : Constants.MAP_ACTUAL_HEIGHT));
+        final float i1 = (float) (isOld ? Constants.MAP_ACTUAL_WIDTH_OLD : Constants.MAP_ACTUAL_WIDTH);
+        pos.x *= Constants.MAP_WIDTH / i1;
+        final float i = (float) (isOld ? Constants.MAP_ACTUAL_HEIGHT_OLD : Constants.MAP_ACTUAL_HEIGHT);
+        pos.y *= Constants.MAP_HEIGHT / i;
         return pos;
     }
 
@@ -138,14 +142,6 @@ public class Utils {
             soundMask |= 8;
             listener.playSound("hitclap", sampleSet, addition);
         }
-    }
-
-    static public int toRes(final int i) {
-        return i / Config.getTextureQuality();
-    }
-
-    public static float toRes(final float i) {
-        return i / Config.getTextureQuality();
     }
 
     public static int tryParseInt(String str, int defaultVal) {

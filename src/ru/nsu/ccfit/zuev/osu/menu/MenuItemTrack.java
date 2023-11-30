@@ -13,7 +13,6 @@ import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -50,8 +49,8 @@ public class MenuItemTrack extends Sprite {
     public MenuItemTrack() {
         super(0, 0, ResourceManager.getInstance().getTexture("menu-button-background"));
 
-        trackTitle = new ChangeableText(Utils.toRes(32), Utils.toRes(22), ResourceManager.getInstance().getFont("font"), "", 200);
-        trackLeftText = new ChangeableText(Utils.toRes(350), Utils.toRes(22), ResourceManager.getInstance().getFont("font"), "", 30);
+        trackTitle = new ChangeableText(32, 22, ResourceManager.getInstance().getFont("font"), "", 200);
+        trackLeftText = new ChangeableText(350, 22, ResourceManager.getInstance().getFont("font"), "", 30);
         OsuSkin.get().getColor("MenuItemVersionsDefaultColor", DEFAULT_COLOR).apply(this);
         OsuSkin.get().getColor("MenuItemDefaultTextColor", DEFAULT_TEXT_COLOR).applyAll(trackTitle, trackLeftText);
         setAlpha(0.8f);
@@ -60,7 +59,7 @@ public class MenuItemTrack extends Sprite {
 
         stars = new Sprite[10];
         for (int i = 0; i < 10; i++) {
-            stars[i] = new Sprite(Utils.toRes(60 + 52 * i), Utils.toRes(50), ResourceManager.getInstance().getTexture("star"));
+            stars[i] = new Sprite(60 + 52 * i, 50, ResourceManager.getInstance().getTexture("star"));
             attachChild(stars[i]);
         }
         final TextureRegion starTex = ResourceManager.getInstance().getTexture("star").deepCopy();
@@ -97,7 +96,7 @@ public class MenuItemTrack extends Sprite {
 
         if (fPoint > 0 && fInt != 10) {
             halfStar.setVisible(true);
-            halfStar.setPosition(Utils.toRes(60 + 52 * fInt), Utils.toRes(50));
+            halfStar.setPosition(60 + 52 * fInt, 50);
             halfStar.setScale(fPoint);
         }
         updateMark();
@@ -116,7 +115,7 @@ public class MenuItemTrack extends Sprite {
             mark.detachSelf();
         }
         if (newmark != null) {
-            mark = new Sprite(Utils.toRes(25), Utils.toRes(55), ResourceManager.getInstance().getTexture("ranking-" + newmark + "-small"));
+            mark = new Sprite(25, 55, ResourceManager.getInstance().getTexture("ranking-" + newmark + "-small"));
             attachChild(mark);
         } else {
             mark = null;

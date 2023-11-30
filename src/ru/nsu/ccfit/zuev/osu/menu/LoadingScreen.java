@@ -19,7 +19,6 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 
 public class LoadingScreen implements IUpdateHandler {
@@ -80,7 +79,7 @@ public class LoadingScreen implements IUpdateHandler {
         if (ToastLogger.getPercentage() != percentage) {
             percentage = ToastLogger.getPercentage();
             logText.setText(String.format("%d%%", (int) percentage));
-            logText.setPosition(Config.getRES_WIDTH() / 2f - logText.getWidth() / 2, Config.getRES_HEIGHT() - Utils.toRes(100));
+            logText.setPosition(Config.getRES_WIDTH() / 2f - logText.getWidth() / 2, Config.getRES_HEIGHT() - 100);
         }
     }
 

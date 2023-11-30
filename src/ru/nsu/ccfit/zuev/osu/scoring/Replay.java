@@ -22,7 +22,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
@@ -502,7 +501,7 @@ public class Replay {
                 if (movement.touchType != TouchType.UP) {
                     float baseX = readTouchPoint(is, replay);
                     float baseY = readTouchPoint(is, replay);
-                    PointF gamePoint = new PointF(baseX / Config.getTextureQuality(), baseY / Config.getTextureQuality());
+                    PointF gamePoint = new PointF(baseX, baseY);
                     PointF realPoint = replay.replayVersion > 1 ? Utils.trackToRealCoords(gamePoint) : Utils.trackToRealCoords(Utils.realToTrackCoords(gamePoint, 1024, 600, true));
                     movement.point.set(realPoint);
                 }
@@ -571,8 +570,8 @@ public class Replay {
                 ReplayMovement movement = movements[i];
                 os.writeInt((movement.time << 2) + movement.touchType.getId());
                 if (movement.touchType != TouchType.UP) {
-                    os.writeFloat(movement.point.x * Config.getTextureQuality());
-                    os.writeFloat(movement.point.y * Config.getTextureQuality());
+                    os.writeFloat(movement.point.x);
+                    os.writeFloat(movement.point.y);
                 }
             }
         }
