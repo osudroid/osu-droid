@@ -301,7 +301,7 @@ public class InGameSettingMenu extends BaseFragment {
 
         customARBar.setMax(125);
         customODBar.setMax(110);
-        customCSBar.setMax(110);
+        customCSBar.setMax(150);
         customHPBar.setMax(110);
 
         customARToggle.setOnCheckedChangeListener(null);
