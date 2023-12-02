@@ -821,6 +821,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         stat.setMaxObjectsCount(lastTrack.getTotalHitObjectCount());
         stat.setMaxHighestCombo(lastTrack.getMaxCombo());
 
+        stat.setBeatmapCS(beatmapData.difficulty.cs);
+        stat.setBeatmapOD(beatmapData.difficulty.od);
+
         stat.setCustomAR(ModMenu.getInstance().getCustomAR());
         stat.setCustomOD(ModMenu.getInstance().getCustomOD());
         stat.setCustomCS(ModMenu.getInstance().getCustomCS());

@@ -390,6 +390,15 @@ public class ModMenu implements IModSwitcher {
         if (changeSpeed != 1.0f){
             mult *= StatisticV2.getSpeedChangeScoreMultiplier(getSpeed(), mod);
         }
+        if (selectedTrack != null) {
+            if (isCustomCS()) {
+                mult *= StatisticV2.getCustomCSScoreMultiplier(selectedTrack.getCircleSize(), customCS);
+            }
+
+            if (isCustomOD()) {
+                mult *= StatisticV2.getCustomODScoreMultiplier(selectedTrack.getOverallDifficulty(), customOD);
+            }
+        }
 
         multiplierText.setText(StringTable.format(R.string.menu_mod_multiplier,
                 mult));
