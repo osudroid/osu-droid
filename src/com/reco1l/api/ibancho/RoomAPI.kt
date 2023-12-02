@@ -73,16 +73,11 @@ object RoomAPI
         roomEventListener?.onRoomModsChange(parseMods(json))
     }
 
-    private val freeModsSettingChanged = Listener {
-        Multiplayer.log("RECEIVED: freeModsSettingChanged -> ${it.contentToString()}")
+    private val roomGameplaySettingsChanged = Listener {
+        Multiplayer.log("RECEIVED: roomGameplaySettingsChanged -> ${it.contentToString()}")
 
-        roomEventListener?.onRoomFreeModsChange(it[0] as Boolean)
-    }
-
-    private val removeSliderLockChanged = Listener {
-        Multiplayer.log("RECEIVED: removeSliderLockChanged -> ${it.contentToString()}")
-
-        roomEventListener?.onRoomRemoveSliderLockChange(it[0] as Boolean)
+        val json = it[0] as JSONObject
+        roomEventListener?.onRoomGameplaySettingsChange(parseGameplaySettings(json))
     }
 
     private val playerStatusChanged = Listener {
@@ -161,12 +156,11 @@ object RoomAPI
                 isLocked = json.getBoolean("isLocked"),
                 maxPlayers = json.getInt("maxPlayers"),
                 mods = parseMods(json.getJSONObject("mods")),
-                isFreeMods = json.getBoolean("isFreeMod"),
+                gameplaySettings = parseGameplaySettings(json.getJSONObject("gameplaySettings")),
                 teamMode = TeamMode.from(json.getInt("teamMode")),
                 winCondition = WinCondition.from(json.getInt("winCondition")),
                 playerCount = activePlayers.size,
                 playerNames = activePlayers.joinToString(separator = ", ") { p -> p.name },
-                isRemoveSliderLock = json.getBoolean("isRemoveSliderLock"),
                 sessionID = json.getString("sessionId")
         ).apply {
 
@@ -184,9 +178,8 @@ object RoomAPI
             on("hostChanged", hostChanged)
             on("playerKicked", playerKicked)
             on("playerModsChanged", playerModsChanged)
-            on("removeSliderLockChanged", removeSliderLockChanged)
             on("roomModsChanged", roomModsChanged)
-            on("freeModsSettingChanged", freeModsSettingChanged)
+            on("roomGameplaySettingsChanged", roomGameplaySettingsChanged)
             on("playerStatusChanged", playerStatusChanged)
             on("teamModeChanged", teamModeChanged)
             on("winConditionChanged", winConditionChanged)
@@ -436,11 +429,15 @@ object RoomAPI
      * Change the remove slider lock setting.
      */
     fun setRoomRemoveSliderLock(isEnabled: Boolean) {
-        socket?.emit("removeSliderLockChanged", isEnabled) ?: run {
-			Multiplayer.log("WARNING: Tried to emit event 'removeSliderLockChanged' while socket is null.")
+        val json = JSONObject().apply {
+            put("isRemoveSliderLock", isEnabled)
+        }
+
+        socket?.emit("roomGameplaySettingsChanged", json) ?: run {
+			Multiplayer.log("WARNING: Tried to emit event 'roomGameplaySettingsChanged' while socket is null.")
 			return
 		}
-        Multiplayer.log("EMITTED: removeSliderLockChanged -> $isEnabled")
+        Multiplayer.log("EMITTED: roomGameplaySettingsChanged -> $json")
     }
 
     /**
@@ -448,11 +445,31 @@ object RoomAPI
      */
     fun setRoomFreeMods(value: Boolean)
     {
-        socket?.emit("freeModsSettingChanged", value) ?: run {
-			Multiplayer.log("WARNING: Tried to emit event 'freeModsSettingChanged' while socket is null.")
-			return
-		}
-        Multiplayer.log("EMITTED: freeModsSettingChanged -> $value")
+        val json = JSONObject().apply {
+            put("isFreeMod", value)
+        }
+
+        socket?.emit("roomGameplaySettingsChanged", json) ?: run {
+            Multiplayer.log("WARNING: Tried to emit event 'roomGameplaySettingsChanged' while socket is null.")
+            return
+        }
+        Multiplayer.log("EMITTED: roomGameplaySettingsChanged -> $json")
+    }
+
+    /**
+     * Change `allow force difficulty statistics` condition.
+     */
+    fun setRoomAllowForceDifficultyStatistics(value: Boolean)
+    {
+        val json = JSONObject().apply {
+            put("allowForceDifficultyStatistics", value)
+        }
+
+        socket?.emit("roomGameplaySettingsChanged", json) ?: run {
+            Multiplayer.log("WARNING: Tried to emit event 'roomGameplaySettingsChanged' while socket is null.")
+            return
+        }
+        Multiplayer.log("EMITTED: roomGameplaySettingsChanged -> $json")
     }
 
     /**

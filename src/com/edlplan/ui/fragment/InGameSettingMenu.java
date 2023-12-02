@@ -412,28 +412,39 @@ public class InGameSettingMenu extends BaseFragment {
     private void updateDifficultyAdjustValues() {
 
         var track = GlobalManager.getInstance().getSelectedTrack();
+        var isPlayerToggleable = true;
+
+        if (Multiplayer.room != null) {
+            var settings = Multiplayer.room.getGameplaySettings();
+            isPlayerToggleable = Multiplayer.isRoomHost() ||
+                    settings.isFreeMod() && settings.getAllowForceDifficultyStatistics();
+        }
 
         var customAR = ModMenu.getInstance().getCustomAR();
+        customARToggle.setEnabled(isPlayerToggleable);
         customARToggle.setChecked(customAR != null);
-        customARBar.setEnabled(customAR != null);
+        customARBar.setEnabled(isPlayerToggleable && customAR != null);
         customARBar.setProgress((int) ((customAR != null ? customAR : track != null ? track.getApproachRate() : 10) * 10));
         customARText.setText(String.valueOf(customARBar.getProgress() / 10f));
 
         var customOD = ModMenu.getInstance().getCustomOD();
+        customODToggle.setEnabled(isPlayerToggleable);
         customODToggle.setChecked(customOD != null);
-        customODBar.setEnabled(customOD != null);
+        customODBar.setEnabled(isPlayerToggleable && customOD != null);
         customODBar.setProgress((int) ((customOD != null ? customOD : track != null ? track.getOverallDifficulty() : 10) * 10));
         customODText.setText(String.valueOf(customODBar.getProgress() / 10f));
 
         var customCS = ModMenu.getInstance().getCustomCS();
+        customCSToggle.setEnabled(isPlayerToggleable);
         customCSToggle.setChecked(customCS != null);
-        customCSBar.setEnabled(customCS != null);
+        customCSBar.setEnabled(isPlayerToggleable && customCS != null);
         customCSBar.setProgress((int) ((customCS != null ? customCS : track != null ? track.getCircleSize() : 10) * 10));
         customCSText.setText(String.valueOf(customCSBar.getProgress() / 10f));
 
         var customHP = ModMenu.getInstance().getCustomHP();
+        customHPToggle.setEnabled(isPlayerToggleable);
         customHPToggle.setChecked(customHP != null);
-        customHPBar.setEnabled(customHP != null);
+        customHPBar.setEnabled(isPlayerToggleable && customHP != null);
         customHPBar.setProgress((int) ((customHP != null ? customHP : track != null ? track.getHpDrain() : 10) * 10));
         customHPText.setText(String.valueOf(customHPBar.getProgress() / 10f));
 

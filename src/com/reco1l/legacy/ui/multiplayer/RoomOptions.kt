@@ -127,12 +127,24 @@ class RoomOptions : SettingsFragment()
 
             findPreference<CheckBoxPreference>("room_free_mods")!!.apply {
 
-                isChecked = Multiplayer.room!!.isFreeMods
+                isChecked = Multiplayer.room!!.gameplaySettings.isFreeMod
 
                 setOnPreferenceChangeListener { _, newValue ->
                     val value = newValue as Boolean
 
                     RoomAPI.setRoomFreeMods(value)
+                    true
+                }
+            }
+
+            findPreference<CheckBoxPreference>("room_allowForceDifficultyStatistics")!!.apply {
+
+                isChecked = Multiplayer.room!!.gameplaySettings.allowForceDifficultyStatistics
+
+                setOnPreferenceChangeListener { _, newValue ->
+                    val value = newValue as Boolean
+
+                    RoomAPI.setRoomAllowForceDifficultyStatistics(value)
                     true
                 }
             }
@@ -163,7 +175,7 @@ class RoomOptions : SettingsFragment()
             }
 
             findPreference<CheckBoxPreference>("room_removeSliderLock")!!.apply {
-                isChecked = Multiplayer.room!!.isRemoveSliderLock == true
+                isChecked = Multiplayer.room!!.gameplaySettings.isRemoveSliderLock
 
                 setOnPreferenceChangeListener { _, newValue ->
                     RoomAPI.setRoomRemoveSliderLock(newValue as Boolean)

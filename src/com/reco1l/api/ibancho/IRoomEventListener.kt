@@ -1,10 +1,6 @@
 package com.reco1l.api.ibancho
 
-import com.reco1l.api.ibancho.data.RoomBeatmap
-import com.reco1l.api.ibancho.data.TeamMode
-import com.reco1l.api.ibancho.data.WinCondition
-import com.reco1l.api.ibancho.data.Room
-import com.reco1l.api.ibancho.data.RoomMods
+import com.reco1l.api.ibancho.data.*
 import org.json.JSONArray
 
 interface IRoomEventListener
@@ -51,9 +47,9 @@ interface IRoomEventListener
     fun onRoomModsChange(mods: RoomMods)
 
     /**
-     * Emit when the host changes the free mod setting.
+     * Emit when the host changes a gameplay setting.
      */
-    fun onRoomFreeModsChange(isFreeMods: Boolean)
+    fun onRoomGameplaySettingsChange(settings: RoomGameplaySettings)
 
     /**
      * Emit when the host changes the team mode setting.
@@ -74,11 +70,6 @@ interface IRoomEventListener
      * Emit when the host changes the beatmap.
      */
     fun onRoomBeatmapChange(beatmap: RoomBeatmap?)
-
-    /**
-     * Emit when the host changes the remove slider lock setting.
-     */
-    fun onRoomRemoveSliderLockChange(isEnabled: Boolean)
 
     // Match related events
 

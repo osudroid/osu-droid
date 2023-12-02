@@ -58,7 +58,7 @@ object LobbyAPI
                             isLocked = json.getBoolean("isLocked"),
                             maxPlayers = json.getInt("maxPlayers"),
                             mods = parseMods(json.getJSONObject("mods")),
-                            isFreeMods = json.getBoolean("isFreeMod"),
+                            gameplaySettings = parseGameplaySettings(json.getJSONObject("gameplaySettings")),
                             teamMode = TeamMode.from(json.getInt("teamMode")),
                             winCondition = WinCondition.from(json.getInt("winCondition")),
                             playerCount = json.getInt("playerCount"),

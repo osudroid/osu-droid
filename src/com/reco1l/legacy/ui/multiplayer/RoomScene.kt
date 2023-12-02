@@ -368,7 +368,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
-                if (!isRoomHost && !room!!.isFreeMods || awaitModsChange || awaitStatusChange || player!!.status == READY)
+                if (!isRoomHost && !room!!.gameplaySettings.isFreeMod || awaitModsChange || awaitStatusChange || player!!.status == READY)
                     return true
 
                 if (event.isActionDown)
@@ -487,7 +487,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 }
             }
             Mods: ${room!!.modsToReadableString()}
-            Slider Lock: ${if (!room!!.isRemoveSliderLock) "Enabled" else "Disabled" }
+            Slider Lock: ${if (room!!.gameplaySettings.isRemoveSliderLock) "Enabled" else "Disabled" }
         """.trimIndent()
     }
 
@@ -524,7 +524,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         secondaryButton!!.setText("Options")
         secondaryButton!!.setColor(0.2f, 0.2f, 0.2f)
 
-        modsButton!!.isVisible = isRoomHost || room!!.isFreeMods
+        modsButton!!.isVisible = isRoomHost || room!!.gameplaySettings.isFreeMod
     }
 
     private fun updateBeatmapInfo()
@@ -693,7 +693,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         clearChildScene()
         getModMenu().setMods(player!!.mods, false)
         getModMenu().init()
-        getModMenu().setMods(newRoom.mods, newRoom.isFreeMods)
+        getModMenu().setMods(newRoom.mods, newRoom.gameplaySettings.isFreeMod)
 
         // Updating player mods for other clients
         awaitModsChange = true
@@ -849,7 +849,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         room!!.mods = mods
 
         // If free mods is enabled it'll keep player mods and enforce speed changing mods and ScoreV2
-        getModMenu().setMods(mods, room!!.isFreeMods)
+        getModMenu().setMods(mods, room!!.gameplaySettings.isFreeMod)
 
         // Updating player mods
         awaitModsChange = true
@@ -868,10 +868,23 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
     }
 
-    override fun onRoomRemoveSliderLockChange(isEnabled: Boolean) {
-        room!!.isRemoveSliderLock = isEnabled
+    override fun onRoomGameplaySettingsChange(settings: RoomGameplaySettings) {
+        room!!.gameplaySettings = settings
 
+        // Update room info text
         updateInformation()
+
+        // Updating player mods
+        awaitModsChange = true
+
+        // Hiding mod button in case isn't the host when free mods is disabled
+        modsButton!!.isVisible = isRoomHost || settings.isFreeMod
+
+        // Closing mod menu, to enforce mod menu scene update
+        getModMenu().hide(false)
+
+        // Invalidating player status
+        invalidateStatus()
     }
 
     /**This method is used purely to update UI in other clients*/
@@ -886,26 +899,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Removing await lock
         if (uid == player!!.id)
             awaitModsChange = false
-    }
-
-    override fun onRoomFreeModsChange(isFreeMods: Boolean)
-    {
-        room!!.isFreeMods = isFreeMods
-
-        // Update room info text
-        updateInformation()
-
-        // Updating player mods
-        awaitModsChange = true
-
-        // Hiding mod button in case isn't the host when free mods is disabled
-        modsButton!!.isVisible = isRoomHost || room!!.isFreeMods
-
-        // Closing mod menu, to enforce mod menu scene update
-        getModMenu().hide(false)
-
-        // Invalidating player status
-        invalidateStatus()
     }
 
     override fun onRoomTeamModeChange(mode: TeamMode)
