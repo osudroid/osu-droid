@@ -109,12 +109,6 @@ data class Room(
         get() = activePlayers.filter { it.status == PlayerStatus.READY }
 
     /**
-     * Get the host Player instance.
-     */
-    val hostPlayer
-        get() = activePlayers.find { it.id == host }
-
-    /**
      * Get the players list in map format using UIDs as keys.
      */
     val playersMap

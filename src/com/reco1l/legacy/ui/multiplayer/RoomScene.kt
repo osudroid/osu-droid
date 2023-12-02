@@ -475,7 +475,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Update room info text
         infoText.text = """
-            Host: ${room!!.hostPlayer?.name}
+            Mods: ${room!!.modsToReadableString()}
+            Slider Lock: ${if (room!!.gameplaySettings.isRemoveSliderLock) "Enabled" else "Disabled" }
             Team mode: ${if (room!!.teamMode == HEAD_TO_HEAD) "Head-to-head" else "Team VS"}
             Win condition: ${
                 when (room!!.winCondition)
@@ -486,8 +487,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     SCORE_V2 -> "Score V2"
                 }
             }
-            Mods: ${room!!.modsToReadableString()}
-            Slider Lock: ${if (room!!.gameplaySettings.isRemoveSliderLock) "Enabled" else "Disabled" }
         """.trimIndent()
     }
 
