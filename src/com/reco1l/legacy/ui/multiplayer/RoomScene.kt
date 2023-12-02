@@ -690,9 +690,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Reloading mod menu, we set player mods first in case the scene was reloaded (due to skin change).
         clearChildScene()
-        getModMenu().setMods(player!!.mods, false)
+        getModMenu().setMods(player!!.mods, false, true)
         getModMenu().init()
-        getModMenu().setMods(newRoom.mods, newRoom.gameplaySettings.isFreeMod)
+        getModMenu().setMods(newRoom.mods, newRoom.gameplaySettings.isFreeMod, newRoom.gameplaySettings.allowForceDifficultyStatistics)
 
         // Updating player mods for other clients
         awaitModsChange = true
@@ -844,8 +844,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         room!!.mods = mods
 
-        // If free mods is enabled it'll keep player mods and enforce speed changing mods and ScoreV2
-        getModMenu().setMods(mods, room!!.gameplaySettings.isFreeMod)
+        // If free mods is enabled it'll keep player mods and enforce speed changing mods and ScoreV2.
+        // If allow force difficulty statistics is enabled under free mod, the force difficulty statistics settings
+        // set by the player will not be overridden.
+        getModMenu().setMods(mods, room!!.gameplaySettings.isFreeMod, room!!.gameplaySettings.allowForceDifficultyStatistics)
 
         // Updating player mods
         awaitModsChange = true

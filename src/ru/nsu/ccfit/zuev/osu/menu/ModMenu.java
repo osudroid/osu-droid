@@ -101,7 +101,7 @@ public class ModMenu implements IModSwitcher {
         }
     }
 
-    public void setMods(RoomMods mods, boolean isFreeMods)
+    public void setMods(RoomMods mods, boolean isFreeMods, boolean allowForceDifficultyStatistics)
     {
         var modSet = mods.getSet();
 
@@ -110,6 +110,9 @@ public class ModMenu implements IModSwitcher {
             mod = modSet;
 
             FLfollowDelay = mods.getFlFollowDelay();
+        }
+
+        if (!isFreeMods || !allowForceDifficultyStatistics) {
             customAR = mods.getCustomAR();
             customOD = mods.getCustomOD();
             customCS = mods.getCustomCS();
