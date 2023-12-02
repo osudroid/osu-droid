@@ -830,9 +830,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             getModMenu().update()
         }
 
-        // Updating host text
-        updateInformation()
-
         // Updating player list
         playerList!!.invalidate()
     }
