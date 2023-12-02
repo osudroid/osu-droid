@@ -192,6 +192,8 @@
 
     <string name="message_autoclicker_detected">Please disable your accessibility service(s) with the Perform Gestures permission before playing the game.</string>
 
+	<string name="force_diffstat_mod_unpickable">You may not use this mod when all forced difficulty statistics are enabled.</string>
+
 	<!-- Beatmap parser errors -->
 	<string name="beatmap_parser_cannot_open_file" formatted="false">Failed loading %s: Could not open beatmap file</string>
 	<string name="beatmap_parser_music_not_found" formatted="false">Failed loading %s: Could not find audio file</string>

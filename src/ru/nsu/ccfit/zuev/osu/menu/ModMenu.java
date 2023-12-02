@@ -21,11 +21,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.jetbrains.annotations.Nullable;
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
@@ -415,6 +411,22 @@ public class ModMenu implements IModSwitcher {
         }
     }
 
+    public boolean handleCustomDifficultyStatisticsFlags() {
+        if (!isCustomCS() || !isCustomAR() || !isCustomOD() || !isCustomHP()) {
+            return false;
+        }
+
+        var modsRemoved = mod.remove(GameMod.MOD_HARDROCK) ||
+                mod.remove(GameMod.MOD_EASY) ||
+                mod.remove(GameMod.MOD_REALLYEASY);
+
+        if (modsRemoved) {
+            ToastLogger.showTextId(R.string.force_diffstat_mod_unpickable, false);
+        }
+
+        return modsRemoved;
+    }
+
     public boolean switchMod(GameMod flag) {
         boolean returnValue = true;
 
@@ -427,6 +439,10 @@ public class ModMenu implements IModSwitcher {
             returnValue = false;
         } else {
             mod.add(flag);
+
+            if (handleCustomDifficultyStatisticsFlags()) {
+                return false;
+            }
 
             handleModFlags(flag, GameMod.MOD_HARDROCK, new GameMod[]{GameMod.MOD_EASY});
             handleModFlags(flag, GameMod.MOD_EASY, new GameMod[]{GameMod.MOD_HARDROCK});
