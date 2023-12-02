@@ -24,11 +24,12 @@ import ru.nsu.ccfit.zuev.osuplus.R.string.chimu_cancel
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_dialog_button_changelog
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_dialog_button_update
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_dialog_message
-import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_canceled
+import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_download_canceled
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_updated
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_checking
+import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_check_failed
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_downloading
-import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_failed
+import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_download_failed
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_latest
 import java.io.File
 
@@ -173,8 +174,7 @@ object UpdateManager: IDownloaderObserver
 
                 exception.printStackTrace()
 
-                // TODO: Custom prompt for errors?
-                onAlreadyLatestVersion(silently)
+                onUpdateCheckFailed(silently)
             }
         }
     }
@@ -238,6 +238,22 @@ object UpdateManager: IDownloaderObserver
         }
     }
 
+    private fun onUpdateCheckFailed(silently: Boolean) = uiThread {
+        if (silently) {
+            snackBar.dismiss()
+            return@uiThread
+        }
+
+        snackBar.apply {
+
+            duration = LENGTH_SHORT
+
+            setText(update_info_check_failed)
+            setAction(null, null)
+            show()
+        }
+    }
+
     private fun onAlreadyLatestVersion(silently: Boolean) = uiThread {
 
         if (silently) {
@@ -287,7 +303,7 @@ object UpdateManager: IDownloaderObserver
 
                 duration = LENGTH_SHORT
 
-                setText(update_info_failed)
+                setText(update_info_download_failed)
                 setAction(null, null)
                 show()
             }
@@ -301,7 +317,7 @@ object UpdateManager: IDownloaderObserver
 
                 duration = LENGTH_SHORT
 
-                setText(update_info_canceled)
+                setText(update_info_download_canceled)
                 setAction(null, null)
                 show()
             }
