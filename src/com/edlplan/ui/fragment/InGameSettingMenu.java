@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -41,18 +42,24 @@ public class InGameSettingMenu extends BaseFragment {
     private SeekBar followDelayBar;
     private TextView followDelayText;
 
+    private View forceDifficultyStatisticsSplitter;
+
+    private RelativeLayout customARLayout;
     private CheckBox customARToggle;
     private TextView customARText;
     private SeekBar customARBar;
 
+    private RelativeLayout customODLayout;
     private CheckBox customODToggle;
     private TextView customODText;
     private SeekBar customODBar;
 
+    private RelativeLayout customCSLayout;
     private CheckBox customCSToggle;
     private TextView customCSText;
     private SeekBar customCSBar;
 
+    private RelativeLayout customHPLayout;
     private CheckBox customHPToggle;
     private TextView customHPText;
     private SeekBar customHPBar;
@@ -109,18 +116,24 @@ public class InGameSettingMenu extends BaseFragment {
         speedModifyRow = findViewById(R.id.speed_modify);
         followDelayRow = findViewById(R.id.follow_delay_row);
 
+        forceDifficultyStatisticsSplitter = findViewById(R.id.force_diffstat_split_view);
+
+        customARLayout = findViewById(R.id.custom_ar_layout);
         customARBar = findViewById(R.id.custom_ar_bar);
         customARText = findViewById(R.id.custom_ar_text);
         customARToggle = findViewById(R.id.custom_ar_toggle);
 
+        customODLayout = findViewById(R.id.custom_od_layout);
         customODBar = findViewById(R.id.custom_od_bar);
         customODText = findViewById(R.id.custom_od_text);
         customODToggle = findViewById(R.id.custom_od_toggle);
 
+        customCSLayout = findViewById(R.id.custom_cs_layout);
         customCSBar = findViewById(R.id.custom_cs_bar);
         customCSText = findViewById(R.id.custom_cs_text);
         customCSToggle = findViewById(R.id.custom_cs_toggle);
 
+        customHPLayout = findViewById(R.id.custom_hp_layout);
         customHPBar = findViewById(R.id.custom_hp_bar);
         customHPText = findViewById(R.id.custom_hp_text);
         customHPToggle = findViewById(R.id.custom_hp_toggle);
@@ -412,39 +425,44 @@ public class InGameSettingMenu extends BaseFragment {
     private void updateDifficultyAdjustValues() {
 
         var track = GlobalManager.getInstance().getSelectedTrack();
-        var isPlayerToggleable = true;
+        var visibility = View.VISIBLE;
 
         if (Multiplayer.room != null) {
             var settings = Multiplayer.room.getGameplaySettings();
-            isPlayerToggleable = Multiplayer.isRoomHost() ||
-                    settings.isFreeMod() && settings.getAllowForceDifficultyStatistics();
+
+            if (!Multiplayer.isRoomHost() &&
+                    (!settings.isFreeMod() || !settings.getAllowForceDifficultyStatistics())) {
+                visibility = View.GONE;
+            }
         }
 
+        forceDifficultyStatisticsSplitter.setVisibility(visibility);
+
         var customAR = ModMenu.getInstance().getCustomAR();
-        customARToggle.setEnabled(isPlayerToggleable);
+        customARLayout.setVisibility(visibility);
         customARToggle.setChecked(customAR != null);
-        customARBar.setEnabled(isPlayerToggleable && customAR != null);
+        customARBar.setEnabled(customAR != null);
         customARBar.setProgress((int) ((customAR != null ? customAR : track != null ? track.getApproachRate() : 10) * 10));
         customARText.setText(String.valueOf(customARBar.getProgress() / 10f));
 
         var customOD = ModMenu.getInstance().getCustomOD();
-        customODToggle.setEnabled(isPlayerToggleable);
+        customODLayout.setVisibility(visibility);
         customODToggle.setChecked(customOD != null);
-        customODBar.setEnabled(isPlayerToggleable && customOD != null);
+        customODBar.setEnabled(customOD != null);
         customODBar.setProgress((int) ((customOD != null ? customOD : track != null ? track.getOverallDifficulty() : 10) * 10));
         customODText.setText(String.valueOf(customODBar.getProgress() / 10f));
 
         var customCS = ModMenu.getInstance().getCustomCS();
-        customCSToggle.setEnabled(isPlayerToggleable);
+        customCSLayout.setVisibility(visibility);
         customCSToggle.setChecked(customCS != null);
-        customCSBar.setEnabled(isPlayerToggleable && customCS != null);
+        customCSBar.setEnabled(customCS != null);
         customCSBar.setProgress((int) ((customCS != null ? customCS : track != null ? track.getCircleSize() : 10) * 10));
         customCSText.setText(String.valueOf(customCSBar.getProgress() / 10f));
 
         var customHP = ModMenu.getInstance().getCustomHP();
-        customHPToggle.setEnabled(isPlayerToggleable);
+        customHPLayout.setVisibility(visibility);
         customHPToggle.setChecked(customHP != null);
-        customHPBar.setEnabled(isPlayerToggleable && customHP != null);
+        customHPBar.setEnabled(customHP != null);
         customHPBar.setProgress((int) ((customHP != null ? customHP : track != null ? track.getHpDrain() : 10) * 10));
         customHPText.setText(String.valueOf(customHPBar.getProgress() / 10f));
 
