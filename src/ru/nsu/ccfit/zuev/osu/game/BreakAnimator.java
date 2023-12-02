@@ -108,15 +108,17 @@ public class BreakAnimator extends GameObject {
     }
 
     private void setBgFade(float percent) {
-        if (dimRectangle != null) {
-            float brightness = Config.getBackgroundBrightness();
+        float brightness = Config.getBackgroundBrightness();
+
+        if (dimRectangle != null && brightness > 0.02) {
             dimRectangle.setAlpha((1 - brightness) * (1 - percent));
         }
     }
 
     private void resumeBgFade() {
-        if (dimRectangle != null) {
-            float brightness = Config.getBackgroundBrightness();
+        float brightness = Config.getBackgroundBrightness();
+
+        if (dimRectangle != null && brightness > 0.02) {
             dimRectangle.setAlpha(1f - brightness);
         }
     }
