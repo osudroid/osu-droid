@@ -2098,10 +2098,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
             ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
 
-            Replay.oldCustomAR = ModMenu.getInstance().getCustomAR();
-            Replay.oldCustomOD = ModMenu.getInstance().getCustomOD();
-            Replay.oldCustomCS = ModMenu.getInstance().getCustomCS();
-            Replay.oldCustomHP = ModMenu.getInstance().getCustomHP();
+            ModMenu.getInstance().setCustomAR(Replay.oldCustomAR);
+            ModMenu.getInstance().setCustomOD(Replay.oldCustomOD);
+            ModMenu.getInstance().setCustomCS(Replay.oldCustomCS);
+            ModMenu.getInstance().setCustomHP(Replay.oldCustomHP);
         }
     }
 
