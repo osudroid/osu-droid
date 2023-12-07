@@ -17,7 +17,7 @@ public class OnlineScoring {
 
     private static OnlineScoring instance = null;
 
-    private Boolean onlineMutex = new Boolean(false);
+    private Boolean onlineMutex = Boolean.FALSE;
 
     private OnlinePanel panel = null;
 
