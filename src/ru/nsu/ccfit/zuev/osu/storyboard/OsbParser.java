@@ -92,7 +92,7 @@ public class OsbParser {
     private void parseObjects(BufferedSource source) throws IOException {
         line = source.readUtf8Line();
         while (line != null) {
-            if (line.equals("")) {
+            if (line.isEmpty()) {
                 break;
             }
 
@@ -211,7 +211,7 @@ public class OsbParser {
             } else {
                 currentOsuEvent.ease = Integer.parseInt(info[1]);
                 currentOsuEvent.startTime = Long.parseLong(info[2]);
-                currentOsuEvent.endTime = info[3].equals("") ? currentOsuEvent.startTime + 1 : Long.parseLong(info[3]);
+                currentOsuEvent.endTime = info[3].isEmpty() ? currentOsuEvent.startTime + 1 : Long.parseLong(info[3]);
                 float[] params = null;
                 switch (command) {
                     case F:
@@ -293,7 +293,7 @@ public class OsbParser {
             subEvent.command = subCommand;
             subEvent.ease = Integer.parseInt(info[1]);
             subEvent.startTime = Long.parseLong(info[2]);
-            subEvent.endTime = info[3].equals("") ? subEvent.startTime + 1 : Long.parseLong(info[3]);
+            subEvent.endTime = info[3].isEmpty() ? subEvent.startTime + 1 : Long.parseLong(info[3]);
             float[] params = null;
             switch (subCommand) {
                 case F:
@@ -394,7 +394,7 @@ public class OsbParser {
         String line;
         while ((line = source.readUtf8Line()) != null) {
             line = line.trim();
-            if (line.equals("")) return;
+            if (line.isEmpty()) return;
             String[] values = line.split(":");
             String key = values[0];
             String value = values[1].trim();
@@ -411,7 +411,7 @@ public class OsbParser {
         String info[];
         while ((line = source.readUtf8Line()) != null) {
             line = line.trim();
-            if (line.equals("")) return;
+            if (line.isEmpty()) return;
 
             if (line.contains(",")) {
                 info = line.split(",");
@@ -430,7 +430,7 @@ public class OsbParser {
         String line;
         while ((line = source.readUtf8Line()) != null) {
             line = line.trim();
-            if (line.equals("")) return;
+            if (line.isEmpty()) return;
             String[] values = line.split("=");
             String key = values[0];
             String value = values[1].trim();
@@ -442,7 +442,7 @@ public class OsbParser {
         String line;
         while ((line = source.readUtf8Line()) != null) {
             line = line.trim();
-            if (line.equals("")) return;
+            if (line.isEmpty()) return;
             String[] values = line.split(":");
             if (values[0].equals("SliderMultiplier")) {
                 sliderMultiplier = Float.parseFloat(values[1]);
@@ -455,7 +455,7 @@ public class OsbParser {
         float lastLengthPerBeat = -100;
         while ((line = source.readUtf8Line()) != null) {
             line = line.trim();
-            if (line.equals("")) return;
+            if (line.isEmpty()) return;
             String[] values = line.split(",");
             TimingPoint timingPoint = new TimingPoint();
             timingPoint.startTime = (long) Float.parseFloat(values[0]);
@@ -473,7 +473,7 @@ public class OsbParser {
         String line;
         while ((line = source.readUtf8Line()) != null) {
             line = line.trim();
-            if (line.equals("")) return;
+            if (line.isEmpty()) return;
             String[] values = line.split(",");
             int objectType = Integer.parseInt(values[3]);
             if ((objectType & 1) == 1) {//circle

@@ -1526,7 +1526,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     private void reSelectItem(String oldTrackFileName) {
-        if (!oldTrackFileName.equals("")) {
+        if (!oldTrackFileName.isEmpty()) {
             if (selectedTrack.getFilename().equals(oldTrackFileName) && items.size() > 1 && selectedItem != null && selectedItem.isVisible()) {
                 velocityY = 0;
                 float height = 0;

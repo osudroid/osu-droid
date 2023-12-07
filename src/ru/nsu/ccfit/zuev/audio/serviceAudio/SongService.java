@@ -244,7 +244,7 @@ public class SongService extends Service {
 
     public boolean checkFileExist(String path) {
         if (path == null) return false;
-        if (path.trim().equals("")) return false;
+        if (path.trim().isEmpty()) return false;
         else {
             File songFile = new File(path);
             if (!songFile.exists()) return false;

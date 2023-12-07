@@ -51,13 +51,13 @@ public enum LibraryManager {
 
     private static void fillEmptyFields(BeatmapInfo info) {
         info.setCreator(info.getTrack(0).getCreator());
-        if (info.getTitle().equals("")) {
+        if (info.getTitle().isEmpty()) {
             info.setTitle("unknown");
         }
-        if (info.getArtist().equals("")) {
+        if (info.getArtist().isEmpty()) {
             info.setArtist("unknown");
         }
-        if (info.getCreator().equals("")) {
+        if (info.getCreator().isEmpty()) {
             info.setCreator("unknown");
         }
     }

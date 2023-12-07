@@ -205,7 +205,7 @@ public class MainActivity extends BaseGameActivity implements
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
-        if (prefs.getString("playername", "").equals("")) {
+        if (prefs.getString("playername", "").isEmpty()) {
             final SharedPreferences.Editor editor = prefs.edit();
             editor.putString("playername", "Guest");
             editor.commit();

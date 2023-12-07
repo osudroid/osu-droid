@@ -260,7 +260,7 @@ public class MenuItem {
             }
         }
 
-        if (filter.equals("")) {
+        if (filter.isEmpty()) {
             canVisible = true;
         }
 

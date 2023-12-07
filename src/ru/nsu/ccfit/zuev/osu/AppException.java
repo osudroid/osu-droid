@@ -219,7 +219,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
                 logFilePath = savePath + errorlog;
             }
             // 没有挂载SD卡，无法写文件
-            if (logFilePath.equals("")) {
+            if (logFilePath.isEmpty()) {
                 return;
             }
             File logFile = new File(logFilePath);
