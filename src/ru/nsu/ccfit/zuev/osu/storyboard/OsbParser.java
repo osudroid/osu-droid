@@ -94,14 +94,19 @@ public class OsbParser {
                 }
                 info = line.split(",");
                 int layer = 0;
-                if (info[1].equals("Background")) {
-                    layer = 0;
-                } else if (info[1].equals("Fail")) {
-                    layer = 1;
-                } else if (info[1].equals("Pass")) {
-                    layer = 2;
-                } else if (info[1].equals("Foreground")) {
-                    layer = 3;
+                switch (info[1]) {
+                    case "Background":
+                        layer = 0;
+                        break;
+                    case "Fail":
+                        layer = 1;
+                        break;
+                    case "Pass":
+                        layer = 2;
+                        break;
+                    case "Foreground":
+                        layer = 3;
+                        break;
                 }
                 OsuSprite.Origin origin = OsuSprite.Origin.valueOf(info[2]);
                 String filePath = info[3];
@@ -120,14 +125,19 @@ public class OsbParser {
                 }
                 info = line.split(",");
                 int layer = 0;
-                if (info[1].equals("Background")) {
-                    layer = 0;
-                } else if (info[1].equals("Fail")) {
-                    layer = 1;
-                } else if (info[1].equals("Pass")) {
-                    layer = 2;
-                } else if (info[1].equals("Foreground")) {
-                    layer = 3;
+                switch (info[1]) {
+                    case "Background":
+                        layer = 0;
+                        break;
+                    case "Fail":
+                        layer = 1;
+                        break;
+                    case "Pass":
+                        layer = 2;
+                        break;
+                    case "Foreground":
+                        layer = 3;
+                        break;
                 }
                 OsuSprite.Origin origin = OsuSprite.Origin.valueOf(info[2]);
                 String filePath = info[3];
@@ -184,12 +194,16 @@ public class OsbParser {
                 }
                 currentOsuEvent.triggerType = info[1];
                 int soundType = -1;
-                if (currentOsuEvent.triggerType.equals("HitSoundWhistle")) {
-                    soundType = 2;
-                } else if (currentOsuEvent.triggerType.equals("HitSoundFinish")) {
-                    soundType = 4;
-                } else if (currentOsuEvent.triggerType.equals("HitSoundClap")) {
-                    soundType = 8;
+                switch (currentOsuEvent.triggerType) {
+                    case "HitSoundWhistle":
+                        soundType = 2;
+                        break;
+                    case "HitSoundFinish":
+                        soundType = 4;
+                        break;
+                    case "HitSoundClap":
+                        soundType = 8;
+                        break;
                 }
                 currentOsuEvent.subEvents = parseSubEvents(source);
                 for (HitSound hitSound : hitSounds) {//real start time
@@ -357,16 +371,22 @@ public class OsbParser {
 
             if (matcher.find()) {
                 String title = matcher.group(1);
-                if (title.equals("General")) {
-                    parseGeneral(source);
-                } else if (title.equals("Difficulty")) {
-                    parseDifficulty(source);
-                } else if (title.equals("Events")) {
-                    parseEvent(source);
-                } else if (title.equals("TimingPoints")) {
-                    parseTimingPoints(source);
-                } else if (title.equals("HitObjects")) {
-                    parseHitObject(source);
+                switch (title) {
+                    case "General":
+                        parseGeneral(source);
+                        break;
+                    case "Difficulty":
+                        parseDifficulty(source);
+                        break;
+                    case "Events":
+                        parseEvent(source);
+                        break;
+                    case "TimingPoints":
+                        parseTimingPoints(source);
+                        break;
+                    case "HitObjects":
+                        parseHitObject(source);
+                        break;
                 }
             }
         }
