@@ -55,11 +55,7 @@ public class PropertiesLibrary {
                 Debug.i("Properties loaded");
             }
             istream.close();
-        } catch (final FileNotFoundException e) {
-            Debug.e("PropertiesLibrary: " + e.getMessage(), e);
-        } catch (final IOException e) {
-            Debug.e("PropertiesLibrary: " + e.getMessage(), e);
-        } catch (final ClassNotFoundException e) {
+        } catch (final ClassNotFoundException | IOException e) {
             Debug.e("PropertiesLibrary: " + e.getMessage(), e);
         }
         ToastLogger.addToLog("Cannot load properties!");
@@ -73,11 +69,6 @@ public class PropertiesLibrary {
             ostream.writeObject(version);
             ostream.writeObject(props);
             ostream.close();
-        } catch (final FileNotFoundException e) {
-            ToastLogger.showText(
-                    StringTable.format(R.string.message_error, e.getMessage()),
-                    false);
-            Debug.e("PropertiesLibrary: " + e.getMessage(), e);
         } catch (final IOException e) {
             ToastLogger.showText(
                     StringTable.format(R.string.message_error, e.getMessage()),
