@@ -30,9 +30,7 @@ import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -862,7 +860,20 @@ public class ResourceManager {
 
     public void unloadTexture(TextureRegion texture) {
         engine.getTextureManager().unloadTexture(texture.getTexture());
-        textures.remove(texture);
+
+        var toRemove = new LinkedList<String>();
+
+        // Unfortunately this isn't a cheap operation in terms of performance but there's no other solution to find the
+        // loaded texture region given the instance rather than the key to find it in the map.
+        for (var entry : textures.entrySet()) {
+            if (entry.getValue() == texture) {
+                toRemove.add(entry.getKey());
+            }
+        }
+
+        while (!toRemove.isEmpty()) {
+            textures.remove(toRemove.poll());
+        }
     }
 
     public void initSecurityUtils() {
