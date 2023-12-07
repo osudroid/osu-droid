@@ -40,7 +40,7 @@ public class PropertiesLibrary {
                     new FileInputStream(lib));
             Object obj = istream.readObject();
             if (obj instanceof String) {
-                if (((String) obj).equals(version) == false) {
+                if (obj.equals(version) == false) {
                     istream.close();
                     return;
                 }

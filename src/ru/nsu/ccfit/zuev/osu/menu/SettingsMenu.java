@@ -56,7 +56,7 @@ public class SettingsMenu extends SettingsFragment {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.options, rootKey);
 
-        SkinPathPreference skinPath = (SkinPathPreference) findPreference("skinPath");
+        SkinPathPreference skinPath = findPreference("skinPath");
         skinPath.reloadSkinList();
         skinPath.setOnPreferenceChangeListener((preference, newValue) -> {
             if (!Objects.equals(GlobalManager.getInstance().getSkinNow(), newValue.toString())) {
@@ -82,44 +82,44 @@ public class SettingsMenu extends SettingsFragment {
         // screens
         mParentScreen = parentScreen = getPreferenceScreen();
 
-        ((PreferenceScreen) findPreference("onlineOption")).setOnPreferenceClickListener(preference -> {
+        findPreference("onlineOption").setOnPreferenceClickListener(preference -> {
             setPreferenceScreen((PreferenceScreen) preference);
             return true;
         });
 
-        ((PreferenceScreen) findPreference("general")).setOnPreferenceClickListener(preference -> {
+        findPreference("general").setOnPreferenceClickListener(preference -> {
             setPreferenceScreen((PreferenceScreen) preference);
             return true;
         });
 
-        ((PreferenceScreen) findPreference("color")).setOnPreferenceClickListener(preference -> {
-            parentScreen = (PreferenceScreen) findPreference("general");
+        findPreference("color").setOnPreferenceClickListener(preference -> {
+            parentScreen = findPreference("general");
             setPreferenceScreen((PreferenceScreen) preference);
             return true;
         });
 
-        ((PreferenceScreen) findPreference("sound")).setOnPreferenceClickListener(preference -> {
+        findPreference("sound").setOnPreferenceClickListener(preference -> {
             setPreferenceScreen((PreferenceScreen) preference);
             return true;
         });
 
-        ((PreferenceScreen) findPreference("beatmaps")).setOnPreferenceClickListener(preference -> {
+        findPreference("beatmaps").setOnPreferenceClickListener(preference -> {
             setPreferenceScreen((PreferenceScreen) preference);
             return true;
         });
 
-        ((PreferenceScreen) findPreference("advancedopts")).setOnPreferenceClickListener(preference -> {
+        findPreference("advancedopts").setOnPreferenceClickListener(preference -> {
             setPreferenceScreen((PreferenceScreen) preference);
             return true;
         });
         // screens END
 
-        final EditTextPreference onlinePassword = (EditTextPreference) findPreference("onlinePassword");
+        final EditTextPreference onlinePassword = findPreference("onlinePassword");
         onlinePassword.setOnBindEditTextListener(editText -> {
             editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         });
 
-        final EditTextPreference skinToppref = (EditTextPreference) findPreference("skinTopPath");
+        final EditTextPreference skinToppref = findPreference("skinTopPath");
         skinToppref.setOnPreferenceChangeListener((preference, newValue) -> {
             if (newValue.toString().trim().length() == 0) {
                 skinToppref.setText(Config.getCorePath() + "Skin/");
@@ -192,7 +192,7 @@ public class SettingsMenu extends SettingsFragment {
         Animation animation = AnimationUtils.loadAnimation(mActivity, R.anim.rotate_360);
         animation.setAnimationListener(new Animation.AnimationListener() {
             public void onAnimationEnd(Animation animation) {
-                ImageButton backButton = (ImageButton) findViewById(R.id.back_button);
+                ImageButton backButton = findViewById(R.id.back_button);
                 backButton.setImageDrawable(mActivity.getResources().getDrawable(newDrawable));
             }
 
@@ -202,7 +202,7 @@ public class SettingsMenu extends SettingsFragment {
             public void onAnimationStart(Animation animation) {
             }
         });
-        ((ImageButton) findViewById(R.id.back_button)).startAnimation(animation);
+        findViewById(R.id.back_button).startAnimation(animation);
     }
 
     private void animateView(@IdRes int viewId, @AnimRes int anim) {
@@ -243,7 +243,7 @@ public class SettingsMenu extends SettingsFragment {
 
     @Override
     protected void onLoadView() {
-        ((ImageButton) findViewById(R.id.back_button)).setOnClickListener(v -> {
+        findViewById(R.id.back_button).setOnClickListener(v -> {
             navigateBack();
         });
     }
