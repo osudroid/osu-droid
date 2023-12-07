@@ -568,7 +568,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             objects.add(new GameObjectData(s));
         }
 
-        if (objects.size() <= 0) {
+        if (objects.isEmpty()) {
             ToastLogger.showText("Empty Beatmap", true);
             return false;
         }
