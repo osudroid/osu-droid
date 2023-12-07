@@ -52,7 +52,7 @@ public class ScoreLibrary {
         if (s.endsWith(".osu")) {
             return s.substring(0, s.indexOf('/'));
         } else {
-            return s.substring(s.indexOf('/') + 1, s.length());
+            return s.substring(s.indexOf('/') + 1);
         }
     }
 
