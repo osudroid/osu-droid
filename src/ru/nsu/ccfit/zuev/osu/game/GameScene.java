@@ -740,12 +740,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (Config.isShowFPS() || Config.isDisplayRealTimePPCounter()) {
             final Font font = ResourceManager.getInstance().getFont(
                     "smallFont");
-            final ChangeableText fpsText = new ChangeableText(Utils.toRes(790),
-                    Utils.toRes(520), font, "00.00 FPS");
-            final ChangeableText urText = new ChangeableText(Utils.toRes(720),
-                    Utils.toRes(480), font, "00.00 UR    ");
-            final ChangeableText accText = new ChangeableText(Utils.toRes(720),
-                    Utils.toRes(440), font, "Avg offset: 0ms     ");
+            final ChangeableText fpsText = new ChangeableText(790, 520, font, "00.00 FPS");
+            final ChangeableText urText = new ChangeableText(720, 480, font, "00.00 UR    ");
+            final ChangeableText accText = new ChangeableText(720, 440, font, "Avg offset: 0ms     ");
             fpsText.setPosition(Config.getRES_WIDTH() - fpsText.getWidth() - 5, Config.getRES_HEIGHT() - fpsText.getHeight() - 10);
             accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
             urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, accText.getY() - urText.getHeight());
@@ -754,15 +751,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             fgScene.attachChild(urText);
 
             if (Config.isDisplayRealTimePPCounter()) {
-                ppText = new ChangeableText(Utils.toRes(720),
-                        Utils.toRes(440), font, "0.00pp", 100);
+                ppText = new ChangeableText(720, 440, font, "0.00pp", 100);
                 fgScene.attachChild(ppText);
             }
 
             ChangeableText memText = null;
             if (BuildConfig.DEBUG) {
-                memText = new ChangeableText(Utils.toRes(780),
-                        Utils.toRes(520), font, "0 MB/0 MB    ");
+                memText = new ChangeableText(780, 520, font, "0 MB/0 MB    ");
                 fgScene.attachChild(memText);
             }
 
@@ -969,8 +964,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             accText = new GameScoreText(OsuSkin.get().getScorePrefix(), Config.getRES_WIDTH()
                     - scoreDigitTex.getWidth() * 4.75f, 50,
                     "000.00%", 0.6f);
-            comboText = new GameScoreText(OsuSkin.get().getComboPrefix(), Utils.toRes(2), Config.getRES_HEIGHT()
-                    - Utils.toRes(95), "0000x", 1.5f);
+            comboText = new GameScoreText(OsuSkin.get().getComboPrefix(), 2, Config.getRES_HEIGHT()
+                                                                             - 95, "0000x", 1.5f);
             comboText.changeText("0****");
             scoreText = new GameScoreText(OsuSkin.get().getScorePrefix(), Config.getRES_WIDTH()
                     - scoreDigitTex.getWidth() * 7.25f, 0, "0000000000", 0.9f);
@@ -979,25 +974,22 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             scoreText.attachToScene(fgScene);
             if (Config.isComplexAnimations()) {
                 scoreShadow = new GameScoreTextShadow(0, Config.getRES_HEIGHT()
-                        - Utils.toRes(90), "0000x", 1.5f, comboText);
+                                                         - 90, "0000x", 1.5f, comboText);
                 scoreShadow.attachToScene(bgScene);
                 passiveObjects.add(scoreShadow);
             }
             if (stat.getMod().contains(GameMod.MOD_AUTO)) {
-                final Sprite autoIcon = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 140),
-                        Utils.toRes(100), ResourceManager.getInstance().getTexture(
+                final Sprite autoIcon = new Sprite(Config.getRES_WIDTH() - 140, 100, ResourceManager.getInstance().getTexture(
                         "selection-mod-autoplay"));
                 bgScene.attachChild(autoIcon);
                 effectOffset += 25;
             } else if (stat.getMod().contains(GameMod.MOD_RELAX)) {
-                final Sprite autoIcon = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 140),
-                        Utils.toRes(98), ResourceManager.getInstance().getTexture(
+                final Sprite autoIcon = new Sprite(Config.getRES_WIDTH() - 140, 98, ResourceManager.getInstance().getTexture(
                         "selection-mod-relax"));
                 bgScene.attachChild(autoIcon);
                 effectOffset += 25;
             } else if (stat.getMod().contains(GameMod.MOD_AUTOPILOT)) {
-                final Sprite autoIcon = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 140),
-                        Utils.toRes(98), ResourceManager.getInstance().getTexture(
+                final Sprite autoIcon = new Sprite(Config.getRES_WIDTH() - 140, 98, ResourceManager.getInstance().getTexture(
                         "selection-mod-relax2"));
                 bgScene.attachChild(autoIcon);
                 effectOffset += 25;
@@ -1015,8 +1007,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     "selection-mod-scorev2");
             effect.init(
                     fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
+                    new PointF(Config.getRES_WIDTH() - effectOffset, 130),
                     scale,
                     new SequenceEntityModifier(ModifierFactory
                             .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
@@ -1031,8 +1022,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     "selection-mod-easy");
             effect.init(
                     fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
+                    new PointF(Config.getRES_WIDTH() - effectOffset, 130),
                     scale,
                     new SequenceEntityModifier(ModifierFactory
                             .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
@@ -1046,8 +1036,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     "selection-mod-hardrock");
             effect.init(
                     fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
+                    new PointF(Config.getRES_WIDTH() - effectOffset, 130),
                     scale,
                     new SequenceEntityModifier(ModifierFactory
                             .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
@@ -1062,8 +1051,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     "selection-mod-nofail");
             effect.init(
                     fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
+                    new PointF(Config.getRES_WIDTH() - effectOffset, 130),
                     scale,
                     new SequenceEntityModifier(ModifierFactory
                             .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
@@ -1079,8 +1067,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     "selection-mod-hidden");
             effect.init(
                     fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
+                    new PointF(Config.getRES_WIDTH() - effectOffset, 130),
                     scale,
                     new SequenceEntityModifier(ModifierFactory
                             .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
@@ -1097,8 +1084,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     "selection-mod-doubletime");
             effect.init(
                     fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
+                    new PointF(Config.getRES_WIDTH() - effectOffset, 130),
                     scale,
                     new SequenceEntityModifier(ModifierFactory
                             .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
@@ -1114,8 +1100,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     "selection-mod-nightcore");
             effect.init(
                     fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
+                    new PointF(Config.getRES_WIDTH() - effectOffset, 130),
                     scale,
                     new SequenceEntityModifier(ModifierFactory
                             .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
@@ -1131,8 +1116,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     "selection-mod-halftime");
             effect.init(
                     fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
+                    new PointF(Config.getRES_WIDTH() - effectOffset, 130),
                     scale,
                     new SequenceEntityModifier(ModifierFactory
                             .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
@@ -1148,8 +1132,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     "selection-mod-precise");
             effect.init(
                     fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
+                    new PointF(Config.getRES_WIDTH() - effectOffset, 130),
                     scale,
                     new SequenceEntityModifier(ModifierFactory
                             .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
@@ -1165,8 +1148,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     "selection-mod-suddendeath");
             effect.init(
                     fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
+                    new PointF(Config.getRES_WIDTH() - effectOffset, 130),
                     scale,
                     new SequenceEntityModifier(ModifierFactory
                             .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
@@ -1182,8 +1164,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     "selection-mod-perfect");
             effect.init(
                     fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
+                    new PointF(Config.getRES_WIDTH() - effectOffset, 130),
                     scale,
                     new SequenceEntityModifier(ModifierFactory
                             .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
@@ -1199,8 +1180,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     "selection-mod-flashlight");
             effect.init(
                     fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
+                    new PointF(Config.getRES_WIDTH() - effectOffset, 130),
                     scale,
                     new SequenceEntityModifier(ModifierFactory
                             .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
@@ -1216,8 +1196,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     "selection-mod-reallyeasy");
             effect.init(
                     fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
+                    new PointF(Config.getRES_WIDTH() - effectOffset, 130),
                     scale,
                     new SequenceEntityModifier(ModifierFactory
                             .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
@@ -2959,7 +2938,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (objects.get(i + 1).getTime() - data.getTime() < 2f * GameHelper.getStackLeniency()
                         && Utils.squaredDistance(pos, objects.get(i + 1).getPos()) < scale) {
                     objects.get(i + 1).setPosOffset(
-                            data.getPosOffset() + Utils.toRes(4) * scale);
+                        data.getPosOffset() + 4 * scale);
                 }
             }
             i++;

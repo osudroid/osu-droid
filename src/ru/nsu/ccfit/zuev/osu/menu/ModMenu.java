@@ -219,7 +219,7 @@ public class ModMenu implements IModSwitcher {
         bg.setColor(0, 0, 0, 0.7f);
         scene.attachChild(bg);
 
-        multiplierText = new ChangeableText(0, Utils.toRes(50),
+        multiplierText = new ChangeableText(0, 50,
                 ResourceManager.getInstance().getFont("CaptionFont"),
                 StringTable.format(R.string.menu_mod_multiplier, 1f));
         multiplierText.setScale(1.2f);

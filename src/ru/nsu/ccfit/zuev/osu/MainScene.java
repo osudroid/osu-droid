@@ -362,13 +362,13 @@ public class MainScene implements IUpdateHandler {
         musicInfoText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", HorizontalAlign.RIGHT, 35);
 
         final TextureRegion nptex = ResourceManager.getInstance().getTexture("music_np");
-        music_nowplay = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 500), 0, 40 * nptex.getWidth() / nptex.getHeight(), 40, nptex);
+        music_nowplay = new Sprite(Config.getRES_WIDTH() - 500, 0, 40 * nptex.getWidth() / nptex.getHeight(), 40, nptex);
 
-        final Rectangle bgTopRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Utils.toRes(120));
+        final Rectangle bgTopRect = new Rectangle(0, 0, Config.getRES_WIDTH(), 120);
         bgTopRect.setColor(0, 0, 0, 0.3f);
 
         final Rectangle bgbottomRect = new Rectangle(0, 0, Config.getRES_WIDTH(),
-                Math.max(author.getHeight(), yasonline.getHeight()) + Utils.toRes(15));
+            Math.max(author.getHeight(), yasonline.getHeight()) + 15);
         bgbottomRect.setPosition(0, Config.getRES_HEIGHT() - bgbottomRect.getHeight());
         bgbottomRect.setColor(0, 0, 0, 0.3f);
 
@@ -496,7 +496,7 @@ public class MainScene implements IUpdateHandler {
         scene.registerTouchArea(music_next);
         scene.setTouchAreaBindingEnabled(true);
 
-        progressBar = new SongProgressBar(null, scene, 0, 0, new PointF(Utils.toRes(Config.getRES_WIDTH() - 320), Utils.toRes(100)));
+        progressBar = new SongProgressBar(null, scene, 0, 0, new PointF(Config.getRES_WIDTH() - 320, 100));
         progressBar.setProgressRectColor(new RGBAColor(0.9f, 0.9f, 0.9f, 0.8f));
 
         createOnlinePanel(scene);
@@ -815,7 +815,7 @@ public class MainScene implements IUpdateHandler {
             Log.w("MainMenuActivity", "Next song: " + beatmapInfo.getMusic() + ", Start at: " + beatmapInfo.getPreviewTime());
 
             if (musicInfoText == null) {
-                musicInfoText = new ChangeableText(Utils.toRes(Config.getRES_WIDTH() - 500), Utils.toRes(3),
+                musicInfoText = new ChangeableText(Config.getRES_WIDTH() - 500, 3,
                         ResourceManager.getInstance().getFont("font"), "None...", HorizontalAlign.RIGHT, 35);
             }
             if (beatmapInfo.getArtistUnicode() != null && beatmapInfo.getTitleUnicode() != null && Config.isForceRomanized() == false) {
@@ -826,11 +826,13 @@ public class MainScene implements IUpdateHandler {
                 musicInfoText.setText("Failure to load QAQ", true);
             }
             try {
-                musicInfoText.setPosition(Utils.toRes(Config.getRES_WIDTH() - 500 + 470 - musicInfoText.getWidth()), musicInfoText.getY());
-                music_nowplay.setPosition(Utils.toRes(Config.getRES_WIDTH() - 500 + 470 - musicInfoText.getWidth() - 130), 0);
+                final float i1 = Config.getRES_WIDTH() - 500 + 470 - musicInfoText.getWidth();
+                musicInfoText.setPosition(i1, musicInfoText.getY());
+                final float i = Config.getRES_WIDTH() - 500 + 470 - musicInfoText.getWidth() - 130;
+                music_nowplay.setPosition(i, 0);
             } catch (NullPointerException e) {
-                musicInfoText.setPosition(Utils.toRes(Config.getRES_WIDTH() - 500 + 470 - 200), 5);
-                music_nowplay.setPosition(Utils.toRes(Config.getRES_WIDTH() - 500 + 470 - 200 - 130), 0);
+                musicInfoText.setPosition(Config.getRES_WIDTH() - 500 + 470 - 200, 5);
+                music_nowplay.setPosition(Config.getRES_WIDTH() - 500 + 470 - 200 - 130, 0);
             }
         }
     }

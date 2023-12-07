@@ -86,7 +86,7 @@ public class LoadingScreen implements IUpdateHandler {
             percentage = ToastLogger.getPercentage();
             logText.setText(String.format("%d%%", (int) percentage));
             logText.setPosition(Config.getRES_WIDTH() / 2f - logText.getWidth()
-                    / 2, Config.getRES_HEIGHT() - Utils.toRes(100));
+                    / 2, Config.getRES_HEIGHT() - 100);
         }
     }
 

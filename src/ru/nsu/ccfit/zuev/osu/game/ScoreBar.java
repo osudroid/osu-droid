@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
@@ -35,10 +34,10 @@ public class ScoreBar extends GameObject {
                 if (ResourceManager.getInstance().isTextureLoaded("scorebar-colour-" + i))
                     loadedScoreBarTextures.add("scorebar-colour-" + i);
             }
-            colour = new AnimSprite(Utils.toRes(5), Utils.toRes(16), loadedScoreBarTextures.size(),
+            colour = new AnimSprite(5, 16, loadedScoreBarTextures.size(),
                     loadedScoreBarTextures.toArray(new String[loadedScoreBarTextures.size()]));
         } else {
-            colour = new Sprite(Utils.toRes(5), Utils.toRes(16),
+            colour = new Sprite(5, 16,
                     ResourceManager.getInstance().getTexture("scorebar-colour"));
         }
         width = colour.getWidth();
@@ -48,8 +47,8 @@ public class ScoreBar extends GameObject {
         ki = ResourceManager.getInstance().isTextureLoaded("scorebar-kidanger")
                 ? new AnimSprite(0, 0, 0, "scorebar-ki", "scorebar-kidanger", "scorebar-kidanger2")
                 : new AnimSprite(0, 0, 0, "scorebar-ki");
-        ki.setPosition(Utils.toRes(5) + colour.getWidth() - ki.getWidth() / 2,
-                Utils.toRes(16) + colour.getHeight() / 2 - Utils.toRes(58));
+        ki.setPosition(5 + colour.getWidth() - ki.getWidth() / 2,
+            16 + colour.getHeight() / 2 - 58);
 
         scene.attachChild(ki, 0);
         scene.attachChild(colour, 0);

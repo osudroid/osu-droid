@@ -7,7 +7,6 @@ import org.anddev.andengine.input.touch.detector.ScrollDetector
 import org.anddev.andengine.input.touch.detector.ScrollDetector.IScrollDetectorListener
 import org.anddev.andengine.input.touch.detector.SurfaceScrollDetector
 import ru.nsu.ccfit.zuev.osu.Config
-import ru.nsu.ccfit.zuev.osu.Utils
 import kotlin.math.abs
 import kotlin.math.sign
 
@@ -75,12 +74,12 @@ abstract class ScrollableList : Scene(), IScrollDetectorListener
                 isScroll = false
             }
 
-            if (abs(velocityY) <= Utils.toRes(500) * secondsElapsed)
+            if (abs(velocityY) <= 500 * secondsElapsed)
             {
                 velocityY = 0f
                 isScroll = false
             }
-            else velocityY -= Utils.toRes(10) * secondsElapsed * sign(velocityY)
+            else velocityY -= 10 * secondsElapsed * sign(velocityY)
         }
         else
         {

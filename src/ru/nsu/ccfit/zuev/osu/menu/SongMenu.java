@@ -44,7 +44,6 @@ import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
@@ -282,23 +281,23 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         songSelectTop.setAlpha(0.6f);
         frontLayer.attachChild(songSelectTop);
 
-        trackInfo = new ChangeableText(Utils.toRes(70), Utils.toRes(2),
+        trackInfo = new ChangeableText(70, 2,
                 ResourceManager.getInstance().getFont("font"), "title", 1024);
         frontLayer.attachChild(trackInfo);
 
-        mapper = new ChangeableText(Utils.toRes(70), trackInfo.getY() + trackInfo.getHeight() + Utils.toRes(2),
+        mapper = new ChangeableText(70, trackInfo.getY() + trackInfo.getHeight() + 2,
                 ResourceManager.getInstance().getFont("middleFont"), "mapper", 1024);
         frontLayer.attachChild(mapper);
 
-        beatmapInfo = new ChangeableText(Utils.toRes(4), mapper.getY() + mapper.getHeight() + Utils.toRes(2),
+        beatmapInfo = new ChangeableText(4, mapper.getY() + mapper.getHeight() + 2,
                 ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo", 1024);
         frontLayer.attachChild(beatmapInfo);
 
-        beatmapInfo2 = new ChangeableText(Utils.toRes(4), beatmapInfo.getY() + beatmapInfo.getHeight() + Utils.toRes(2),
+        beatmapInfo2 = new ChangeableText(4, beatmapInfo.getY() + beatmapInfo.getHeight() + 2,
                 ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo2", 1024);
         frontLayer.attachChild(beatmapInfo2);
 
-        dimensionInfo = new ChangeableText(Utils.toRes(4), beatmapInfo2.getY() + beatmapInfo2.getHeight() + Utils.toRes(2),
+        dimensionInfo = new ChangeableText(4, beatmapInfo2.getY() + beatmapInfo2.getHeight() + 2,
                 ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024);
         frontLayer.attachChild(dimensionInfo);
 
@@ -635,17 +634,17 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
             if (modSelection != null) {
                 modSelection.setPosition(backButton.getX() + backButton.getWidth(),
-                                         Config.getRES_HEIGHT() - Utils.toRes(90));
+                    Config.getRES_HEIGHT() - 90);
                 optionSelection.setPosition(
                         modSelection.getX() + modSelection.getWidthScaled(),
-                        Config.getRES_HEIGHT() - Utils.toRes(90));
+                    Config.getRES_HEIGHT() - 90);
             } else {
                 optionSelection.setPosition(backButton.getX() + backButton.getWidth(),
-                                         Config.getRES_HEIGHT() - Utils.toRes(90));
+                    Config.getRES_HEIGHT() - 90);
             }
             randomMap.setPosition(
                     optionSelection.getX() + optionSelection.getWidthScaled(),
-                    Config.getRES_HEIGHT() - Utils.toRes(90));
+                Config.getRES_HEIGHT() - 90);
         }
 
 
@@ -665,12 +664,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (OnlineScoring.getInstance().createSecondPanel() != null) {
             OnlinePanel panel = OnlineScoring.getInstance().getSecondPanel();
             panel.detachSelf();
-            panel.setPosition(randomMap.getX() + randomMap.getWidthScaled() - 18, Config.getRES_HEIGHT() - Utils.toRes(110));
+            panel.setPosition(randomMap.getX() + randomMap.getWidthScaled() - 18, Config.getRES_HEIGHT() - 110);
             OnlineScoring.getInstance().loadAvatar(false);
             frontLayer.attachChild(panel);
 
 
-            scoringSwitcher = new AnimSprite(Utils.toRes(5), Utils.toRes(10), 0, "ranking_enabled", "ranking_disabled") {
+            scoringSwitcher = new AnimSprite(5, 10, 0, "ranking_enabled", "ranking_disabled") {
                 @Override
                 public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
                                              float pTouchAreaLocalX, float pTouchAreaLocalY) {
@@ -808,7 +807,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     / 2;
             float ox = Config.getRES_WIDTH() / 1.85f + 200 * (float) Math.abs(Math.cos(cy * Math.PI
                     / (Config.getRES_HEIGHT() * 2)));
-            ox = Utils.toRes(ox);
+            ox = ox;
             item.setPos(ox, oy);
             oy += item.getHeight();
         }
@@ -820,9 +819,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             camY -= velocityY * pSecondsElapsed;
             velocityY = 0;
         }
-        if (Math.abs(velocityY) > Utils.toRes(1000) * pSecondsElapsed) {
-            velocityY -= Utils.toRes(1000) * pSecondsElapsed
-                    * Math.signum(velocityY);
+        if (Math.abs(velocityY) > 1000 * pSecondsElapsed) {
+            velocityY -= 1000 * pSecondsElapsed
+                         * Math.signum(velocityY);
         } else {
             velocityY = 0;
         }
@@ -867,7 +866,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public void updateScrollbar(final float vy, final float maxy) {
         scrollbar.setPosition(vy, maxy);
-        scrollbar.setVisible(Math.abs(velocityY) > Utils.toRes(500));
+        scrollbar.setVisible(Math.abs(velocityY) > 500);
     }
 
     public void reset() {

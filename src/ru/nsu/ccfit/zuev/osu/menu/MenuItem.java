@@ -16,7 +16,6 @@ import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -46,7 +45,7 @@ public class MenuItem {
         trackDir = ScoreLibrary.getTrackDir(beatmap.getPath());
         bgHeight = ResourceManager.getInstance()
                 .getTexture("menu-button-background").getHeight()
-                - Utils.toRes(25);
+                   - 25;
 //        titleStr = (beatmap.getArtistUnicode() == null ? beatmap.getArtist() : beatmap.getArtistUnicode()) + " - "
 //                + (beatmap.getTitleUnicode() == null ? beatmap.getTitle() : beatmap.getTitleUnicode());
         titleStr = beatmap.getArtist() + " - " + beatmap.getTitle();
@@ -66,7 +65,7 @@ public class MenuItem {
         trackDir = ScoreLibrary.getTrackDir(beatmap.getPath());
         bgHeight = ResourceManager.getInstance()
                 .getTexture("menu-button-background").getHeight()
-                - Utils.toRes(25);
+                   - 25;
 //        titleStr = (beatmap.getArtistUnicode() == null ? beatmap.getArtist() : beatmap.getArtistUnicode()) + " - "
 //                + (beatmap.getTitleUnicode() == null ? beatmap.getTitle() : beatmap.getTitleUnicode());
         titleStr = beatmap.getArtist() + " - " + beatmap.getTitle();
@@ -104,14 +103,14 @@ public class MenuItem {
             return bgHeight + percentAppeared * (bgHeight)
                     * (trackSprites.length - 1);
         }
-        return bgHeight - Utils.toRes(5);
+        return bgHeight - 5;
     }
 
     public float getInitialHeight() {
         if (!visible) {
             return 0;
         }
-        return bgHeight - Utils.toRes(5);
+        return bgHeight - 5;
     }
 
     public float getTotalHeight() {
@@ -140,11 +139,12 @@ public class MenuItem {
             }
             final float cy = y + oy + Config.getRES_HEIGHT() / 2f
                     + s.getHeight() / 2;
+            final float i = 170 * (float) Math.abs(Math.cos(cy * Math.PI
+            / (Config.getRES_HEIGHT() * 2)));
             final float ox = x
-                    + Utils.toRes(170 * (float) Math.abs(Math.cos(cy * Math.PI
-                    / (Config.getRES_HEIGHT() * 2))));
-            s.setPosition(ox - Utils.toRes(100), y + oy);
-            oy += (s.getHeight() - Utils.toRes(25)) * percentAppeared;
+                             + i;
+            s.setPosition(ox - 100, y + oy);
+            oy += (s.getHeight() - 25) * percentAppeared;
         }
     }
 

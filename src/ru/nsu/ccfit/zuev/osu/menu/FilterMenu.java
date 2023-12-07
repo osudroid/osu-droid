@@ -20,7 +20,6 @@ import org.anddev.andengine.opengl.font.Font;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.InputManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.TextButton;
@@ -138,7 +137,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
         bg.setColor(0, 0, 0, 0.7f);
         scene.attachChild(bg);
 
-        final Text caption = new Text(0, Utils.toRes(60), ResourceManager
+        final Text caption = new Text(0, 60, ResourceManager
                 .getInstance().getFont("CaptionFont"),
                 StringTable.get(R.string.menu_search_title));
         caption.setPosition(Config.getRES_WIDTH() / 2f - caption.getWidth() / 2,
@@ -147,20 +146,18 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
 
         final Font font = ResourceManager.getInstance().getFont("font");
 
-        final Text capt1 = new Text(Utils.toRes(100), Utils.toRes(160), font,
+        final Text capt1 = new Text(100, 160, font,
                 StringTable.get(R.string.menu_search_filter));
         capt1.setPosition(Config.getRES_WIDTH() / 4f - capt1.getWidth(), capt1.getY());
         scene.attachChild(capt1);
 
-        final Rectangle filterBorder = new Rectangle(capt1.getX(),
-                Utils.toRes(195), Utils.toRes(330), capt1.getHeight()
-                + Utils.toRes(30));
+        final Rectangle filterBorder = new Rectangle(capt1.getX(), 195, 330, capt1.getHeight()
+                                                                             + 30);
         scene.attachChild(filterBorder);
         filterBorder.setColor(1, 150f / 255, 0);
         filterBorder.setVisible(false);
-        final Rectangle filterBg = new Rectangle(filterBorder.getX() + 5,
-                Utils.toRes(200), Utils.toRes(320), capt1.getHeight()
-                + Utils.toRes(20)) {
+        final Rectangle filterBg = new Rectangle(filterBorder.getX() + 5, 200, 320, capt1.getHeight()
+                                                                                    + 20) {
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -177,18 +174,17 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
         scene.registerTouchArea(filterBg);
         scene.attachChild(filterBg);
 
-        filterText = new ChangeableText(capt1.getX(), Utils.toRes(210), font,
+        filterText = new ChangeableText(capt1.getX(), 210, font,
                 filter, 21);
         filterText.setColor(0, 0, 0);
         scene.attachChild(filterText);
 
-        final Text capt2 = new Text(Utils.toRes(700), Utils.toRes(160), font,
+        final Text capt2 = new Text(700, 160, font,
                 StringTable.get(R.string.menu_search_sort));
         capt2.setPosition(Config.getRES_WIDTH() * 2f / 3 - capt2.getWidth(), capt2.getY());
         scene.attachChild(capt2);
 
-        final Rectangle sortBg = new Rectangle(capt2.getX(), Utils.toRes(200),
-                Utils.toRes(200), capt2.getHeight() + Utils.toRes(20)) {
+        final Rectangle sortBg = new Rectangle(capt2.getX(), 200, 200, capt2.getHeight() + 20) {
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -228,8 +224,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
         };
         scene.registerTouchArea(sortBg);
         scene.attachChild(sortBg);
-        sortText = new ChangeableText(capt2.getX() + 5,
-                Utils.toRes(210), font,
+        sortText = new ChangeableText(capt2.getX() + 5, 210, font,
                 StringTable.get(R.string.menu_search_sort_title), 10);
         sortText.setColor(0, 0, 0);
         setSortText();
@@ -250,15 +245,14 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
                 return false;
             }
         };
-        back.setWidth(Utils.toRes(400));
+        back.setWidth(400);
         back.setScale(1.2f);
         back.setPosition(Config.getRES_WIDTH() / 2f - back.getWidth() / 2, Config.getRES_HEIGHT() * 3f / 4 - back.getHeight() / 2);
         back.setColor(66 / 255f, 76 / 255f, 80 / 255f);
         scene.attachChild(back);
         scene.registerTouchArea(back);
 
-        final ChangeableText favs = new ChangeableText(capt1.getX(),
-                Utils.toRes(300), ResourceManager.getInstance().getFont(
+        final ChangeableText favs = new ChangeableText(capt1.getX(), 300, ResourceManager.getInstance().getFont(
                 "CaptionFont"),
                 StringTable.get(R.string.menu_search_favsdisabled)) {
 
@@ -292,7 +286,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
 
 
         final ChangeableText folder = new ChangeableText(favs.getX(),
-                favs.getY() + favs.getHeight() + Utils.toRes(20), ResourceManager.getInstance().getFont(
+            favs.getY() + favs.getHeight() + 20, ResourceManager.getInstance().getFont(
                 "CaptionFont"),
                 StringTable.get(R.string.favorite_folder) + " " + (favoriteFolder == null ? StringTable.get(R.string.favorite_default) : favoriteFolder), 40) {
             @Override
@@ -314,7 +308,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
         };
 
         folder.setPosition(favs.getX(),
-                favs.getY() + favs.getHeight() + Utils.toRes(20));
+            favs.getY() + favs.getHeight() + 20);
         scene.attachChild(folder);
         scene.registerTouchArea(folder);
 

@@ -8,7 +8,6 @@ import org.anddev.andengine.util.MathUtils;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
-import ru.nsu.ccfit.zuev.osu.Utils;
 
 public class MenuItemBackground extends Sprite {
 
@@ -26,11 +25,11 @@ public class MenuItemBackground extends Sprite {
                 "menu-button-background"));
 
         setAlpha(0.8f);
-        title = new ChangeableText(Utils.toRes(32), Utils.toRes(25),
+        title = new ChangeableText(32, 25,
                 ResourceManager.getInstance().getFont("font"), "", 255);
         author = new ChangeableText(0, 0, ResourceManager.getInstance()
                 .getFont("font"), "", 100);
-        author.setPosition(Utils.toRes(150), Utils.toRes(60));
+        author.setPosition(150, 60);
 
         defColor.apply(this);
         attachChild(title);
