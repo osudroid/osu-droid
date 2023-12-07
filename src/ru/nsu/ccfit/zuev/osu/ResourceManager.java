@@ -734,7 +734,7 @@ public class ResourceManager {
             return getSound(resname);
         }
         if (set >= 2) {
-            String fullName = resname + String.valueOf(set);
+            String fullName = resname + set;
             if (customSounds.containsKey(fullName)) {
                 return customSounds.get(fullName);
             } else {

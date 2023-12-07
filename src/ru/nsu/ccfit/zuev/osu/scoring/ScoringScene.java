@@ -201,7 +201,7 @@ public class ScoringScene {
                 ResourceManager.getInstance().getTexture("ranking-accuracy"));
         scene.attachChild(accText);
         final float i13 = maxComboText.getY() + 38;
-        final ScoreNumber maxCombo = new ScoreNumber(20 + x, i13, String.valueOf(stat.getMaxCombo()) + "x", 1,
+        final ScoreNumber maxCombo = new ScoreNumber(20 + x, i13, stat.getMaxCombo() + "x", 1,
                 false);
         maxCombo.attachToScene(scene);
         final String accStr = String
