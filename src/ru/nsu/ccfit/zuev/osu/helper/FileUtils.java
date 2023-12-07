@@ -177,12 +177,7 @@ public class FileUtils {
         File[] filelist;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             LinkedList<File> cachedFiles = new LinkedList<>();
-            DirectoryStream.Filter<Path> directoryFilter = new DirectoryStream.Filter<>() {
-                @Override
-                public boolean accept(Path entry) {
-                    return filter.accept(entry.toFile());
-                }
-            };
+            DirectoryStream.Filter<Path> directoryFilter = entry -> filter.accept(entry.toFile());
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(directory.getAbsolutePath()), directoryFilter)) {
                 for (Path path : stream) {
                     cachedFiles.add(path.toFile());

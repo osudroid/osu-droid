@@ -75,18 +75,8 @@ public class OsbParser {
             }
             source.close();
         }
-        Collections.sort(hitSounds, new Comparator<>() {
-            @Override
-            public int compare(HitSound lhs, HitSound rhs) {
-                return (int) (lhs.time - rhs.time);
-            }
-        });
-        Collections.sort(sprites, new Comparator<>() {
-            @Override
-            public int compare(OsuSprite lhs, OsuSprite rhs) {
-                return (int) (lhs.spriteStartTime - rhs.spriteStartTime);
-            }
-        });
+        Collections.sort(hitSounds, (lhs, rhs) -> (int) (lhs.time - rhs.time));
+        Collections.sort(sprites, (lhs, rhs) -> (int) (lhs.spriteStartTime - rhs.spriteStartTime));
     }
 
     private void parseObjects(BufferedSource source) throws IOException {

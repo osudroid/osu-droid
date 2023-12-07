@@ -219,14 +219,10 @@ public class MainActivity extends BaseGameActivity implements
             alert.setView(input);
 
             alert.setPositiveButton(StringTable.get(R.string.dialog_ok),
-                    new DialogInterface.OnClickListener() {
-
-                        public void onClick(final DialogInterface dialog,
-                                            final int whichButton) {
-                            final String value = input.getText().toString();
-                            editor.putString("playername", value);
-                            editor.commit();
-                        }
+                    (dialog, whichButton) -> {
+                        final String value = input.getText().toString();
+                        editor.putString("playername", value);
+                        editor.commit();
                     });
 
             alert.show();

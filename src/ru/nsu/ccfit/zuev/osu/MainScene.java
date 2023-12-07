@@ -880,13 +880,7 @@ public class MainScene implements IUpdateHandler {
 
                             @Override
                             public void onModifierFinished(IModifier<IEntity> pModifier, final IEntity pItem) {
-                                GlobalManager.getInstance().getMainActivity().runOnUpdateThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        // TODO Auto-generated method stub
-                                        pItem.detachSelf();
-                                    }
-                                });
+                                GlobalManager.getInstance().getMainActivity().runOnUpdateThread(pItem::detachSelf);
                             }
                         }));
                         lastBackground = background;
@@ -932,17 +926,13 @@ public class MainScene implements IUpdateHandler {
     }
 
     public void showExitDialog() {
-        GlobalManager.getInstance().getMainActivity().runOnUiThread(new Runnable() {
-            public void run() {
-                new ConfirmDialogFragment().setMessage(R.string.dialog_exit_message).showForResult(
-                        isAccepted -> {
-                            if (isAccepted) {
-                                exit();
-                            }
-                        }
-                );
-            }
-        });
+        GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> new ConfirmDialogFragment().setMessage(R.string.dialog_exit_message).showForResult(
+                isAccepted -> {
+                    if (isAccepted) {
+                        exit();
+                    }
+                }
+        ));
     }
 
     public void exit() {
