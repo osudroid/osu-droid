@@ -33,6 +33,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 
 import java.io.File;
+import java.util.Objects;
 
 import static android.content.Intent.ACTION_VIEW;
 
@@ -58,7 +59,7 @@ public class SettingsMenu extends SettingsFragment {
         SkinPathPreference skinPath = (SkinPathPreference) findPreference("skinPath");
         skinPath.reloadSkinList();
         skinPath.setOnPreferenceChangeListener((preference, newValue) -> {
-            if (GlobalManager.getInstance().getSkinNow() != newValue.toString()) {
+            if (!Objects.equals(GlobalManager.getInstance().getSkinNow(), newValue.toString())) {
                 var loading = new LoadingFragment();
                 loading.show();
 
