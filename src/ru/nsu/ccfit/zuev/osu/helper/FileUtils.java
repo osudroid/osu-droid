@@ -191,7 +191,7 @@ public class FileUtils {
             } catch (Exception err) {
                 Debug.e("FileUtils.listFiles: " + err.getMessage(), err);
             }
-            filelist = cachedFiles.toArray(new File[cachedFiles.size()]);
+            filelist = cachedFiles.toArray(new File[0]);
         } else {
             filelist = directory.listFiles(filter);
         }

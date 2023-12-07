@@ -483,7 +483,7 @@ public class OsuSprite {
                     }
                 }
                 if (entityModifierList.size() > 0) {
-                    iEntityModifier = new ParallelEntityModifier(entityModifierList.toArray(new IEntityModifier[entityModifierList.size()]));
+                    iEntityModifier = new ParallelEntityModifier(entityModifierList.toArray(new IEntityModifier[0]));
                 }
             }
             break;
