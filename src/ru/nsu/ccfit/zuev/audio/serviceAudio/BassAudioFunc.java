@@ -179,14 +179,6 @@ public class BassAudioFunc {
         if (channel != 0 && BASS.BASS_ChannelIsActive(channel) == BASS.BASS_ACTIVE_PAUSED) {
             return resume();
         } else if (channel != 0) {
-            /*if(!isGaming){
-                BASS.BASS_ChannelSetSync(channel, BASS.BASS_SYNC_END, 0, new BASS.SYNCPROC() {
-                    @Override
-                    public void SYNCPROC(int handle, int channel, int data, Object user) {
-                        broadcastManager.sendBroadcast(new Intent("Notify_next"));
-                    }
-                },0);
-            }*/
             setEndSync();
             if (BASS.BASS_ChannelPlay(channel, true)) {
                 setVolume(Config.getBgmVolume());

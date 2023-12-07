@@ -128,8 +128,6 @@ public class MainScene implements IUpdateHandler {
 
     private boolean doStop = false;
 
-    //    private int playIndex = 0;
-//    private int lastPlayIndex = -1;
     private long lastHit = 0;
 
     private boolean isMenuShowed = false;
@@ -730,11 +728,6 @@ public class MainScene implements IUpdateHandler {
                 progressBar.setTime(GlobalManager.getInstance().getSongService().getLength());
                 progressBar.setPassedTime(position);
                 progressBar.update(pSecondsElapsed * 1000);
-
-//                if (syncPassedTime > bpmLength * 8) {
-//                    musicControl(MusicOption.SYNC);
-//                    syncPassedTime = 0;
-//                }
 
                 if (currentTimingPoint != null && position > currentTimingPoint.getTime() * 1000) {
                     if (!isContinuousKiai && currentTimingPoint.isKiai()) {

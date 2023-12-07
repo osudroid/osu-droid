@@ -62,12 +62,6 @@ public class Utils {
             pos.y *= -1;
             pos.y += Config.getRES_HEIGHT() / 2;
         }
-		/*if (pos.y < 18) {
-			pos.y = 18;
-		}*/
-		/*if (pos.y > Config.getRES_HEIGHT() - 18) {
-			pos.y = Config.getRES_HEIGHT() - 18;
-		}*/
         return pos;
     }
 

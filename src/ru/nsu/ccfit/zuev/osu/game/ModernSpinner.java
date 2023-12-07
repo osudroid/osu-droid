@@ -28,8 +28,6 @@ public class ModernSpinner extends Spinner {
     private final Sprite top;
 
     private final Sprite glow;
-    // private final Sprite spin;
-    // private final Sprite clear;
 
     private final PointF currMouse = new PointF();
 
@@ -239,10 +237,6 @@ public class ModernSpinner extends Spinner {
     }
 
     public void removeFromScene() {
-//        if (clearText != null) {
-//            scene.detachChild(clearText);
-//            SpritePool.getInstance().putSprite("spinner-clear", clearText);
-//        }
         glow.clearEntityModifiers();
         scene.detachChild(middle);
         scene.detachChild(middle2);

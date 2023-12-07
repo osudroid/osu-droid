@@ -497,22 +497,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GameHelper.setTimeMultiplier(1 / timeMultiplier);
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME)) {
             GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_DT);
-            /*music.setUseSoftDecoder(1);
-            music.setDecoderMultiplier(150);*/
             timeMultiplier = 1.5f;
             GameHelper.setDoubleTime(true);
             GameHelper.setTimeMultiplier(2 / 3f);
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE)) {
             GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_NC);
-            /*music.setUseSoftDecoder(2);
-            music.setDecoderMultiplier(150);*/
             timeMultiplier = 1.5f;
             GameHelper.setNightCore(true);
             GameHelper.setTimeMultiplier(2 / 3f);
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_HALFTIME)) {
             GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_HT);
-            /*music.setUseSoftDecoder(1);
-            music.setDecoderMultiplier(75);*/
             timeMultiplier = 0.75f;
             GameHelper.setHalfTime(true);
             GameHelper.setTimeMultiplier(4 / 3f);

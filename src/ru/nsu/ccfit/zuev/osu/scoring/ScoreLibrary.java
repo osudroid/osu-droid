@@ -185,31 +185,7 @@ public class ScoreLibrary {
 //			db.query(DBOpenHelper.SCORES_TABLENAME, columns, "filename = \"" + track + "\"" ,
 //												null, null, null, "score ASC");
         //if scores > 5, we need to remove some
-//		if (response.getCount() > 5)
-//		{
-//			response.moveToFirst();
-//			int rowsToDelete = response.getCount() - 5;
-//			String filter = "";
-//			for (int i = 0; i < rowsToDelete; i++)
-//			{
-//				filter += response.getString(0);
-//				if (i < rowsToDelete - 1)
-//					filter += ",";
-//
-//				//removing score replay
-//				try{
-//					new File(response.getString(3)).delete();
-//				} catch (Exception e){}
-//
-//				response.moveToNext();
-//
-//			}
-//			//removing all unnecessary scores
-//			filter = "id IN (" + filter + ")";
-//			result = db.delete(DBOpenHelper.SCORES_TABLENAME, filter, null);
-//		}
 
-//		response.close();
     }
 
     public Cursor getMapScores(String[] columns, String filename) {
@@ -232,33 +208,6 @@ public class ScoreLibrary {
         response.moveToFirst();
 
         String mark = response.getString(0);
-//		do {
-//			final String s = response.getString(0);
-//			if (s.equals("XH")) {
-//				mark = s;
-//			} else if (s.equals("X") && mark.equals("XH") == false) {
-//				mark = s;
-//			} else if (s.equals("SH") && mark.equals("XH") == false
-//					&& mark.equals("X") == false) {
-//				mark = s;
-//			} else if (s.equals("S") && mark.equals("XH") == false
-//					&& mark.equals("X") == false && mark.equals("SH") == false) {
-//				mark = s;
-//			} else if (s.equals("A") && mark.equals("XH") == false
-//					&& mark.equals("X") == false && mark.equals("SH") == false
-//					&& mark.equals("S") == false) {
-//				mark = s;
-//			} else if (s.equals("B") && mark.equals("XH") == false
-//					&& mark.equals("X") == false && mark.equals("SH") == false
-//					&& mark.equals("S") == false && mark.equals("A") == false) {
-//				mark = s;
-//			} else if (s.equals("C") && mark.equals("XH") == false
-//					&& mark.equals("X") == false && mark.equals("SH") == false
-//					&& mark.equals("S") == false && mark.equals("A") == false
-//					&& mark.equals("B") == false) {
-//				mark = s;
-//			}
-//		} while (response.moveToNext());
 
         response.close();
 

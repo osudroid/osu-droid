@@ -56,8 +56,6 @@ public class MenuItem {
         bgHeight = ResourceManager.getInstance()
                 .getTexture("menu-button-background").getHeight()
                 - 25;
-//        titleStr = (beatmap.getArtistUnicode() == null ? beatmap.getArtist() : beatmap.getArtistUnicode()) + " - "
-//                + (beatmap.getTitleUnicode() == null ? beatmap.getTitle() : beatmap.getTitleUnicode());
         titleStr = beatmap.getArtist() + " - " + beatmap.getTitle();
         creatorStr = StringTable.format(R.string.menu_creator,
                 beatmap.getCreator());
@@ -76,8 +74,6 @@ public class MenuItem {
         bgHeight = ResourceManager.getInstance()
                 .getTexture("menu-button-background").getHeight()
                 - 25;
-//        titleStr = (beatmap.getArtistUnicode() == null ? beatmap.getArtist() : beatmap.getArtistUnicode()) + " - "
-//                + (beatmap.getTitleUnicode() == null ? beatmap.getTitle() : beatmap.getTitleUnicode());
         titleStr = beatmap.getArtist() + " - " + beatmap.getTitle();
         creatorStr = StringTable.format(R.string.menu_creator, beatmap.getCreator());
         trackSprites = new MenuItemTrack[1];

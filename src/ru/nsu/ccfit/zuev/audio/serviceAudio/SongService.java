@@ -162,15 +162,6 @@ public class SongService extends Service {
         this.isGaming = isGaming;
     }
 
-    /*
-    public boolean isSettingMenu() {
-        return isSettingMenu;
-    }
-
-    public void setIsSettingMenu(boolean isSettingMenu) {
-        this.isSettingMenu = isSettingMenu;
-    } */
-
     public Status getStatus() {
         if (audioFunc != null) {
             return audioFunc.getStatus();

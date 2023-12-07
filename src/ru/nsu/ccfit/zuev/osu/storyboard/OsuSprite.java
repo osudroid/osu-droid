@@ -261,9 +261,6 @@ public class OsuSprite {
         for (int i = 0; i < eventList.size(); i++) {
             OsuEvent osuEvent = eventList.get(i);
             if (osuEvent.startTime == spriteStartTime) {
-//                entityModifiers[i] = new SequenceEntityModifier(
-//                        parseModifier(osuEvent)
-//                );
                 entityModifiers[i] = parseModifier(osuEvent);
             } else {
                 entityModifiers[i] = new SequenceEntityModifier(
@@ -420,9 +417,6 @@ public class OsuSprite {
                 for (int i = 0; i < subEventList.size(); i++) {
                     OsuEvent subOsuEvent = subEventList.get(i);
                     if (subOsuEvent.startTime == 0) {
-//                        subEntityModifiers[i] = new SequenceEntityModifier(
-//                                parseModifier(subOsuEvent)
-//                        );
                         subEntityModifiers[i] = parseModifier(subOsuEvent);
                     } else {
                         subEntityModifiers[i] = new SequenceEntityModifier(

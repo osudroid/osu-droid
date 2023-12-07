@@ -312,10 +312,6 @@ public class Spline {
                             : Add(v3, Subtract(v3, v2)));
 
                     for (int k = 0; k < DetailLevel; k++) {
-//                        path.add(
-//                                new Line(CatmullRom(v1, v2, v3, v4, (float) k / DetailLevel),
-//                                        CatmullRom(v1, v2, v3, v4,
-//                                                (float) (k + 1) / DetailLevel)));
                         points.add(CatmullRom(v1, v2, v3, v4, (float) k / DetailLevel));
                     }
                 }
@@ -329,9 +325,6 @@ public class Spline {
 
                         ArrayList<PointF> points1 = CreateBezier(thisLength);
                         points.addAll(points1);
-//                        for (int j = 1; j < points1.size(); j++) {
-//                            path.add(new Line(points1.get(j - 1), points1.get(j)));
-//                        }
                         lastIndex = i;
                     }
                 break;
@@ -344,9 +337,6 @@ public class Spline {
                     if (segments <= 3) segments = 5; /********FIX for current osu! bug!********/
                     // Debug.i("segments=" + segments);
                     for (int j = 0; j < segments; j++) {
-//                        path.add(
-//                                new Line(Add(l.p1, MultiplyPt(Subtract(l.p2, l.p1), ((float) j / segments))),
-//                                        Add(l.p1, MultiplyPt(Subtract(l.p2, l.p1), ((float) (j + 1) / segments)))));
                         points.add(Add(l.p1, MultiplyPt(Subtract(l.p2, l.p1), ((float) j / segments))));
                     }
                 }
@@ -383,8 +373,6 @@ public class Spline {
                 }
 //                points.add(point1);
                 for (int k = 0; k < DetailLevel; k++) {
-//                    path.add(new Line(CircularArc(startAng, endAng, circleCenter, radius, (float) k / DetailLevel),
-//                            CircularArc(startAng, endAng, circleCenter, radius, (float) (k + 1) / DetailLevel)));
                     points.add(CircularArc(startAng, endAng, circleCenter, radius, (float) k / DetailLevel));
                 }
 //                points.add(point3);

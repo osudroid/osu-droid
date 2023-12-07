@@ -91,11 +91,6 @@ public class OnlineManager {
         failMessage = "";
 
         //TODO debug code
-		/*Debug.i("Received " + response.size() + " lines");
-		for(String str: response)
-		{
-			Debug.i(str);
-		}*/
 
         if (response.isEmpty() || response.get(0).isEmpty()) {
             failMessage = "Got empty response";

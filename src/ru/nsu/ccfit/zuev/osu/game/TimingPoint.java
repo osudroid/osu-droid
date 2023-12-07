@@ -35,8 +35,6 @@ public class TimingPoint {
             beatLength /= 1000.0f;
             speed = 1.0f;
         }
-        //beatLength = FMath.clamp(beatLength, 0.006f, 60);
-        //speed = FMath.clamp(speed, 0.1f, 10);
 
         if (data.length > 2) {
             if ("4".equals(data[2])) {

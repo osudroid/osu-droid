@@ -79,10 +79,6 @@ public class OnlinePanel extends Entity {
         Rectangle avatarFooter = new Rectangle(0, 0, 110, 110);
         avatarFooter.setColor(0.2f, 0.2f, 0.2f, 0.8f);
         attachChild(avatarFooter);
-		
-		/*Rectangle rightFooter = new Rectangle(Utils.toRes(410), 0, Utils.toRes(614), Utils.toRes(110));
-		rightFooter.setColor(0.3f, 0.3f, 0.3f, 0.35f);
-		attachChild(rightFooter);*/
 
         rankText = new ChangeableText(0, 0,
                 ResourceManager.getInstance().getFont("CaptionFont"), "#1",

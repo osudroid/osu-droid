@@ -126,8 +126,6 @@ public class MainActivity extends BaseGameActivity implements
 
         final DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
-/*        final double screenSize = Math.sqrt(Utils.sqr(dm.widthPixels / dm.xdpi)
-                + Utils.sqr(dm.heightPixels / dm.ydpi));*/
         double screenInches = Math.sqrt(Math.pow(dm.heightPixels, 2) + Math.pow(dm.widthPixels, 2)) / (dm.density * 160.0f);
         Debug.i("screen inches: " + screenInches);
         Config.setScaleMultiplier((float) ((11 - 5.2450170716245195) / 5));
@@ -479,17 +477,13 @@ public class MainActivity extends BaseGameActivity implements
             }
 
             if (!beatmaps.isEmpty()) {
-                // final boolean deleteOsz = Config.isDELETE_OSZ();
-                // Config.setDELETE_OSZ(true);
                 ToastLogger.showText(StringTable.format(
                         R.string.message_lib_importing_several,
                         beatmaps.size()), false);
                 for (final String beatmap : beatmaps) {
                     FileUtils.extractZip(beatmap, Config.getBeatmapPath());
                 }
-                // Config.setDELETE_OSZ(deleteOsz);
 
-                // LibraryManager.INSTANCE.sort();
                 LibraryManager.INSTANCE.saveToCache();
             }
         }

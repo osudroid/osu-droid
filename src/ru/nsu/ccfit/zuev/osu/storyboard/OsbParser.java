@@ -359,13 +359,6 @@ public class OsbParser {
         String header = source.readUtf8Line().trim();
         Pattern pattern;
         Matcher matcher;
-//        Pattern pattern = Pattern.compile("osu file format v(\\d+)");
-//        Matcher matcher = pattern.matcher(header);
-//        if (!matcher.find())
-//        {
-//            Log.e("BeatmapParsing", "Incompatible beatmap version.");
-//        }
-//        mVersion = Integer.parseInt(matcher.group(1));
 
         String line;
         while ((line = source.readUtf8Line()) != null) {

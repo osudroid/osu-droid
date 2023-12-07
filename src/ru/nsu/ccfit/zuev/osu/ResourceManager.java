@@ -106,8 +106,6 @@ public class ResourceManager {
 
         if (textures.containsKey("lighting") == false)
             textures.put("lighting", null);
-//		textures.put("fail-background", null);
-//		textures.put("pause-overlay", null);
     }
 
     public void loadCustomSkin(String folder) {
@@ -175,9 +173,6 @@ public class ResourceManager {
                     }
                     final String filename = f.getName().substring(0, f.getName().length() - 4);
                     availableFiles.put(filename, f);
-                    //if ((filename.startsWith("hit0") || filename.startsWith("hit50") || filename.startsWith("hit100") || filename.startsWith("hit300"))){
-                    //    availableFiles.put(filename + "-0", f);
-                    //}
 
                     if (filename.equals("hitcircle")) {
                         if (!availableFiles.containsKey("sliderstartcircle")) {
@@ -334,8 +329,6 @@ public class ResourceManager {
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
         if (textures.containsKey("lighting") == false)
             textures.put("lighting", null);
-//		textures.put("fail-background", null);
-//		textures.put("pause-overlay", null);
     }
 
     private void noticeFrameCount(final String name) {
@@ -561,8 +554,6 @@ public class ResourceManager {
                 .createFromSource(tex, source, 0, 0, false);
         engine.getTextureManager().loadTexture(tex);
         textures.put(resname, region);
-        //region.setWidth(region.getWidth() - 1);
-        //region.setHeight(region.getHeight() - 1);
 
         return region;
     }
