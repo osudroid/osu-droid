@@ -45,6 +45,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import com.reco1l.api.ibancho.LobbyAPI;
 import com.reco1l.framework.lang.Execution;
+import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.UpdateManager;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.Multiplayer;
@@ -80,7 +81,6 @@ import java.util.concurrent.TimeUnit;
 import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.SpritePool;
 import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
@@ -325,55 +325,49 @@ public class MainActivity extends BaseGameActivity implements
         LobbyScene.INSTANCE.init();
         RoomScene.INSTANCE.init();
 
-        new AsyncTask() {
-            @Override
-            public void run() {
-                BassAudioPlayer.initDevice();
-                GlobalManager.getInstance().init();
-                analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
-                GlobalManager.getInstance().setLoadingProgress(50);
-                checkNewSkins();
-                Config.loadSkins();
-                checkNewBeatmaps();
-                if (!LibraryManager.INSTANCE.loadLibraryCache(true)) {
-                    LibraryManager.INSTANCE.scanLibrary();
-                    System.gc();
-                }
-                SplashScene.INSTANCE.playWelcomeAnimation();
-                try {
-                    // Allow the welcome animation to progress before entering onComplete state.
-                    Thread.sleep(2500);
-                }
-                catch (InterruptedException ignored) {}
-                UpdateManager.INSTANCE.onActivityStart();
+        Async.run(() -> {
+            BassAudioPlayer.initDevice();
+            GlobalManager.getInstance().init();
+            analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
+            GlobalManager.getInstance().setLoadingProgress(50);
+            checkNewSkins();
+            Config.loadSkins();
+            checkNewBeatmaps();
+            if (!LibraryManager.INSTANCE.loadLibraryCache(true)) {
+                LibraryManager.INSTANCE.scanLibrary();
+                System.gc();
+            }
+            SplashScene.INSTANCE.playWelcomeAnimation();
+            try {
+                // Allow the welcome animation to progress before entering onComplete state.
+                Thread.sleep(2500);
+            }
+            catch (InterruptedException ignored) {}
+            UpdateManager.INSTANCE.onActivityStart();
+
+            GlobalManager.getInstance().setInfo("");
+            GlobalManager.getInstance().setLoadingProgress(100);
+            ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
+            GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
+            GlobalManager.getInstance().getMainScene().loadBeatmap();
+            initPreferences();
+            availableInternalMemory();
+
+            scheduledExecutor.scheduleAtFixedRate(() -> {
+                AccessibilityDetector.check(MainActivity.this);
+                BeatmapDifficultyCalculator.invalidateExpiredCache();
+            }, 0, 1000, TimeUnit.MILLISECONDS);
+
+            if (roomInviteLink != null) {
+                LobbyScene.INSTANCE.connectFromLink(roomInviteLink);
+                return;
             }
 
-            @Override
-            public void onComplete() {
-                GlobalManager.getInstance().setInfo("");
-                GlobalManager.getInstance().setLoadingProgress(100);
-                ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
-                GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
-                GlobalManager.getInstance().getMainScene().loadBeatmap();
-                initPreferences();
-                availableInternalMemory();
-
-                scheduledExecutor.scheduleAtFixedRate(() -> {
-                    AccessibilityDetector.check(MainActivity.this);
-                    BeatmapDifficultyCalculator.invalidateExpiredCache();
-                }, 0, 1000, TimeUnit.MILLISECONDS);
-
-                if (roomInviteLink != null) {
-                    LobbyScene.INSTANCE.connectFromLink(roomInviteLink);
-                    return;
-                }
-
-                if (willReplay) {
-                    GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
-                    willReplay = false;
-                }
+            if (willReplay) {
+                GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
+                willReplay = false;
             }
-        }.execute();
+        });
     }
     /*
     Accuracy isn't the best, but it's sufficient enough

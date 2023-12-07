@@ -44,7 +44,6 @@ import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
@@ -1221,30 +1220,27 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (showOnline) {
             engine.setScene(new LoadingScreen().getScene());
             ToastLogger.showTextId(R.string.online_loadrecord, false);
-            new AsyncTask() {
-                @Override
-                public void run() {
-                    try {
-                        String scorePack = OnlineManager.getInstance().getScorePack(id);
-                        String[] params = scorePack.split("\\s+");
-                        if (params.length < 11) return;
 
-                        StatisticV2 stat = new StatisticV2(params);
-                        if (stat.isLegacySC()) {
-                            stat.processLegacySC(selectedTrack);
-                        }
+            Async.run(() -> {
+                try {
+                    String scorePack = OnlineManager.getInstance().getScorePack(id);
+                    String[] params = scorePack.split("\\s+");
+                    if (params.length < 11) return;
 
-                        stat.setPlayerName(playerName);
-                        scoreScene.load(stat, null, null, OnlineManager.getReplayURL(id), null, selectedTrack);
-                        engine.setScene(scoreScene.getScene());
-
-                    } catch (OnlineManagerException e) {
-                        Debug.e("Cannot load play info: " + e.getMessage(), e);
-                        engine.setScene(scene);
+                    StatisticV2 stat = new StatisticV2(params);
+                    if (stat.isLegacySC()) {
+                        stat.processLegacySC(selectedTrack);
                     }
 
+                    stat.setPlayerName(playerName);
+                    scoreScene.load(stat, null, null, OnlineManager.getReplayURL(id), null, selectedTrack);
+                    engine.setScene(scoreScene.getScene());
+
+                } catch (OnlineManagerException e) {
+                    Debug.e("Cannot load play info: " + e.getMessage(), e);
+                    engine.setScene(scene);
                 }
-            }.execute();
+            });
             return;
         }
 
