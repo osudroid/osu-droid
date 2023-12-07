@@ -7,8 +7,6 @@ public class UniversalModifier extends SingleValueSpanEntityModifier {
 
     ValueType type;
 
-    ;
-
     public UniversalModifier(final float duration, final float from,
                              final float to, final ValueType type) {
         super(duration, from, to);
