@@ -4,9 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.Log;
-
 import com.dgsrz.bancho.security.SecurityUtils;
-
 import com.reco1l.framework.data.IniReader;
 import com.reco1l.legacy.data.SkinConverter;
 import com.reco1l.legacy.engine.BlankTextureRegion;
@@ -22,6 +20,13 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
 import org.anddev.andengine.util.Debug;
 import org.json.JSONObject;
+import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
+import ru.nsu.ccfit.zuev.osu.helper.*;
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
+import ru.nsu.ccfit.zuev.skins.SkinJsonReader;
+import ru.nsu.ccfit.zuev.skins.SkinManager;
+import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,28 +36,26 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
-import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
-import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
-import ru.nsu.ccfit.zuev.osu.helper.QualityAssetBitmapSource;
-import ru.nsu.ccfit.zuev.osu.helper.QualityFileBitmapSource;
-import ru.nsu.ccfit.zuev.osu.helper.ScaledBitmapSource;
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
-import ru.nsu.ccfit.zuev.skins.OsuSkin;
-import ru.nsu.ccfit.zuev.skins.SkinJsonReader;
-import ru.nsu.ccfit.zuev.skins.SkinManager;
-import ru.nsu.ccfit.zuev.skins.StringSkinData;
-
 public class ResourceManager {
+
     private final static ResourceManager mgr = new ResourceManager();
+
     private final Map<String, Font> fonts = new HashMap<>();
+
     private final Map<String, TextureRegion> textures = new HashMap<>();
+
     private final Map<String, BassSoundProvider> sounds = new HashMap<>();
+
     private final Map<String, BassSoundProvider> customSounds = new HashMap<>();
+
     private final Map<String, TextureRegion> customTextures = new HashMap<>();
+
     private final Map<String, Integer> customFrameCount = new HashMap<>();
+
     private final BassSoundProvider emptySound = new BassSoundProvider();
+
     private Engine engine;
+
     private Context context;
 
     private ResourceManager() {
@@ -387,7 +390,7 @@ public class ResourceManager {
                     Typeface.NORMAL), size, true, color1, 2, color2);
         } else {
             font = FontFactory.createStrokeFromAsset(texture, context, "fonts/"
-                            + file, size, true, color1, 2, color2);
+                    + file, size, true, color1, 2, color2);
         }
         engine.getTextureManager().loadTexture(texture);
         engine.getFontManager().loadFont(font);
@@ -594,7 +597,7 @@ public class ResourceManager {
 
     public void loadHighQualityFileUnderFolder(File folder) {
         File[] files = FileUtils.listFiles(folder, new String[]{
-            ".png", ".jpg", ".bmp"});
+                ".png", ".jpg", ".bmp"});
         for (File file : files) {
             if (file.isDirectory()) {
                 loadHighQualityFileUnderFolder(file);
@@ -605,8 +608,7 @@ public class ResourceManager {
         }
     }
 
-    public TextureRegion getTextureWithPrefix(StringSkinData prefix, String name)
-    {
+    public TextureRegion getTextureWithPrefix(StringSkinData prefix, String name) {
         var defaultName = prefix.getDefaultValue() + "-" + name;
         if (SkinManager.isSkinEnabled() && customTextures.containsKey(defaultName)) {
             return customTextures.get(defaultName);

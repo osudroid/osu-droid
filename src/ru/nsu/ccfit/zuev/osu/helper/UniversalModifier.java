@@ -4,6 +4,7 @@ import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.SingleValueSpanEntityModifier;
 
 public class UniversalModifier extends SingleValueSpanEntityModifier {
+
     ValueType type;
 
     ;

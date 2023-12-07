@@ -1,26 +1,30 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
-
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
+import ru.nsu.ccfit.zuev.skins.SkinManager;
 
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.skins.SkinManager;
-import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
-
 public class FollowTrack extends GameObject {
+
     private final ArrayList<Sprite> points = new ArrayList<Sprite>();
+
     private final int frameCount;
+
     private GameObjectListener listener;
+
     private float timeLeft;
+
     private float time;
+
     private boolean empty;
+
     private float approach;
 
     public FollowTrack() {
@@ -140,4 +144,5 @@ public class FollowTrack extends GameObject {
             GameObjectPool.getInstance().putTrac(FollowTrack.this);
         }
     }
+
 }

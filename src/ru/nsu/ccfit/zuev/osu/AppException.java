@@ -12,11 +12,13 @@ import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
-
 import com.reco1l.legacy.Multiplayer;
 import org.apache.http.HttpException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
+import ru.nsu.ccfit.zuev.osu.helper.StringTable;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -27,10 +29,6 @@ import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Date;
-
-import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
-import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 /**
  * 应用程序异常类：用于捕获异常和提示错误信息
@@ -45,18 +43,28 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
      * 定义异常类型
      */
     public final static byte TYPE_NETWORK = 0x01;
+
     public final static byte TYPE_SOCKET = 0x02;
+
     public final static byte TYPE_HTTP_CODE = 0x03;
+
     public final static byte TYPE_HTTP_ERROR = 0x04;
+
     public final static byte TYPE_XML = 0x05;
+
     public final static byte TYPE_IO = 0x06;
+
     public final static byte TYPE_RUN = 0x07;
+
     /**
      *
      */
     private static final long serialVersionUID = 6243307165131877535L;
+
     private final static boolean Debug = true;// 是否保存错误日志
+
     private byte type;
+
     private int code;
 
     /**

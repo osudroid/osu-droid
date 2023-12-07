@@ -1,13 +1,13 @@
 package ru.nsu.ccfit.zuev.osu.beatmap.parser.sections;
 
 import com.edlplan.framework.math.FMath;
-
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 
 /**
  * A parser for parsing a beatmap's difficulty section.
  */
 public class BeatmapDifficultyParser extends BeatmapKeyValueSectionParser {
+
     @Override
     public void parse(BeatmapData data, String line) {
         String[] p = splitProperty(line);
@@ -36,4 +36,5 @@ public class BeatmapDifficultyParser extends BeatmapKeyValueSectionParser {
                 break;
         }
     }
+
 }

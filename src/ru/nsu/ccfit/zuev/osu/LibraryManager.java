@@ -19,12 +19,99 @@ import java.util.stream.Collectors;
 
 public enum LibraryManager {
     INSTANCE;
+
     private static final String VERSION = "library4.2";
+
     private static final List<BeatmapInfo> library = Collections.synchronizedList(new ArrayList<>());
-    private Integer fileCount = 0;
-    private int currentIndex = 0;
 
     private static boolean isCaching = true;
+
+    private Integer fileCount = 0;
+
+    private int currentIndex = 0;
+
+    public static void deleteDir(final File dir) {
+        if (dir.exists() && dir.isDirectory()) {
+            final File[] files = FileUtils.listFiles(dir);
+            if (files == null) {
+                return;
+            }
+            for (final File f : files) {
+                if (f.isDirectory()) {
+                    deleteDir(f);
+                } else if (f.delete()) {
+                    Debug.i(f.getPath() + " deleted");
+                }
+            }
+            if (dir.delete()) {
+                Debug.i(dir.getPath() + " deleted");
+            }
+        }
+    }
+
+    private static void fillEmptyFields(BeatmapInfo info) {
+        info.setCreator(info.getTrack(0).getCreator());
+        if (info.getTitle().equals("")) {
+            info.setTitle("unknown");
+        }
+        if (info.getArtist().equals("")) {
+            info.setArtist("unknown");
+        }
+        if (info.getCreator().equals("")) {
+            info.setCreator("unknown");
+        }
+    }
+
+    private static void scanFolder(final BeatmapInfo info) {
+        final File dir = new File(info.getPath());
+        info.setDate(dir.lastModified());
+        File[] filelist = FileUtils.listFiles(dir, ".osu");
+
+        if (filelist == null) {
+            return;
+        }
+        for (final File file : filelist) {
+            final BeatmapParser parser = new BeatmapParser(file);
+            if (!parser.openFile()) {
+                if (Config.isDeleteUnimportedBeatmaps()) {
+                    file.delete();
+                }
+                continue;
+            }
+
+            final TrackInfo track = new TrackInfo(info);
+            track.setFilename(file.getPath());
+            track.setCreator("unknown");
+
+            final BeatmapData data = parser.parse(true);
+            if (data == null || !data.populateMetadata(info) || !data.populateMetadata(track)) {
+                if (Config.isDeleteUnimportedBeatmaps()) {
+                    file.delete();
+                }
+                continue;
+            }
+
+            if (data.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
+                try {
+                    var videoFile = new File(info.getPath(), data.events.videoFilename);
+
+                    if (!VideoTexture.Companion.isSupportedVideo(videoFile)) {
+                        //noinspection ResultOfMethodCallIgnored
+                        videoFile.delete();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            info.addTrack(track);
+        }
+
+        if (Config.isDeleteUnimportedBeatmaps() && info.getCount() == 0) {
+            deleteDir(dir);
+        }
+
+        Collections.sort(info.getTracks(), (object1, object2) -> Float.compare(object1.getDifficulty(), object2.getDifficulty()));
+    }
 
     public File getLibraryCacheFile() {
         return new File(GlobalManager.getInstance().getMainActivity().getFilesDir(), String.format("library.%s.dat", VERSION));
@@ -181,25 +268,6 @@ public enum LibraryManager {
         }
     }
 
-    public static void deleteDir(final File dir) {
-        if (dir.exists() && dir.isDirectory()) {
-            final File[] files = FileUtils.listFiles(dir);
-            if (files == null) {
-                return;
-            }
-            for (final File f : files) {
-                if (f.isDirectory()) {
-                    deleteDir(f);
-                } else if (f.delete()) {
-                    Debug.i(f.getPath() + " deleted");
-                }
-            }
-            if (dir.delete()) {
-                Debug.i(dir.getPath() + " deleted");
-            }
-        }
-    }
-
     public void deleteMap(final BeatmapInfo info) {
         final File dir = new File(info.getPath());
         deleteDir(dir);
@@ -241,70 +309,6 @@ public enum LibraryManager {
                     false);
         }
         currentIndex = 0;
-    }
-
-    private static void fillEmptyFields(BeatmapInfo info) {
-        info.setCreator(info.getTrack(0).getCreator());
-        if (info.getTitle().equals("")) {
-            info.setTitle("unknown");
-        }
-        if (info.getArtist().equals("")) {
-            info.setArtist("unknown");
-        }
-        if (info.getCreator().equals("")) {
-            info.setCreator("unknown");
-        }
-    }
-
-    private static void scanFolder(final BeatmapInfo info) {
-        final File dir = new File(info.getPath());
-        info.setDate(dir.lastModified());
-        File[] filelist = FileUtils.listFiles(dir, ".osu");
-
-        if (filelist == null) {
-            return;
-        }
-        for (final File file : filelist) {
-            final BeatmapParser parser = new BeatmapParser(file);
-            if (!parser.openFile()) {
-                if (Config.isDeleteUnimportedBeatmaps()) {
-                    file.delete();
-                }
-                continue;
-            }
-
-            final TrackInfo track = new TrackInfo(info);
-            track.setFilename(file.getPath());
-            track.setCreator("unknown");
-
-            final BeatmapData data = parser.parse(true);
-            if (data == null || !data.populateMetadata(info) || !data.populateMetadata(track)) {
-                if (Config.isDeleteUnimportedBeatmaps()) {
-                    file.delete();
-                }
-                continue;
-            }
-
-            if (data.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
-                try {
-                    var videoFile = new File(info.getPath(), data.events.videoFilename);
-
-                    if (!VideoTexture.Companion.isSupportedVideo(videoFile)) {
-                        //noinspection ResultOfMethodCallIgnored
-                        videoFile.delete();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            info.addTrack(track);
-        }
-
-        if (Config.isDeleteUnimportedBeatmaps() && info.getCount() == 0) {
-            deleteDir(dir);
-        }
-
-        Collections.sort(info.getTracks(), (object1, object2) -> Float.compare(object1.getDifficulty(), object2.getDifficulty()));
     }
 
     public List<BeatmapInfo> getLibrary() {
@@ -433,10 +437,15 @@ public enum LibraryManager {
     }
 
     private static final class LibraryCacheManager {
+
         private final int fileCount;
+
         private final ExecutorService executors;
+
         private final List<File> files;
+
         private volatile int fileCached = 0;
+
         private volatile int totalMaps = 0;
 
         private LibraryCacheManager(final int fileCount, final File[] files) {
@@ -611,5 +620,6 @@ public enum LibraryManager {
         public synchronized int getTotalMaps() {
             return totalMaps;
         }
+
     }
 }

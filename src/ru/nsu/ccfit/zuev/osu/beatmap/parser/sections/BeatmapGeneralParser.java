@@ -8,6 +8,7 @@ import ru.nsu.ccfit.zuev.osu.beatmap.constants.SampleBank;
  * A parser for parsing a beatmap's general section.
  */
 public class BeatmapGeneralParser extends BeatmapKeyValueSectionParser {
+
     @Override
     public void parse(BeatmapData data, String line) {
         String[] p = splitProperty(line);
@@ -42,4 +43,5 @@ public class BeatmapGeneralParser extends BeatmapKeyValueSectionParser {
                 break;
         }
     }
+
 }

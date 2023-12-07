@@ -7,6 +7,7 @@ import ru.nsu.ccfit.zuev.osu.beatmap.constants.SampleBank;
  * Contains general information about a beatmap.
  */
 public class BeatmapGeneral {
+
     /**
      * The location of the audio file relative to the beatmapset file.
      */
@@ -19,7 +20,7 @@ public class BeatmapGeneral {
 
     /**
      * The time in milliseconds when the audio preview should start.
-     *
+     * <p>
      * If -1, the audio should begin playing at 40% of its length.
      */
     public int previewTime = -1;
@@ -55,7 +56,8 @@ public class BeatmapGeneral {
      */
     public int mode;
 
-    public BeatmapGeneral() {}
+    public BeatmapGeneral() {
+    }
 
     /**
      * Copy constructor.
@@ -82,4 +84,5 @@ public class BeatmapGeneral {
     public BeatmapGeneral deepClone() {
         return new BeatmapGeneral(this);
     }
+
 }

@@ -4,17 +4,18 @@ import android.content.Context;
 import android.graphics.PointF;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
-
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
 
 public class Utils {
+
     private static final String FSReservedChars = "|\\?*<\":>+[]/";
+
     private static int accSign = 0;
+
     private static int soundMask = 0;
 
     public static <T> T[] oneObjectArray(T object, T[] ary) {
@@ -107,16 +108,16 @@ public class Utils {
     public static PointF scaleToReal(final PointF v) {
         final PointF pos = new PointF(v.x, v.y);
         pos.x *= Constants.MAP_ACTUAL_WIDTH
-                 / (float) Constants.MAP_WIDTH;
+                / (float) Constants.MAP_WIDTH;
         pos.y *= Constants.MAP_ACTUAL_HEIGHT
-                 / (float) Constants.MAP_HEIGHT;
+                / (float) Constants.MAP_HEIGHT;
         return pos;
     }
 
     public static PointF scaleToRealC(final PointF v) {
         v.x *= Constants.MAP_ACTUAL_WIDTH / (float) Constants.MAP_WIDTH;
         v.y *= Constants.MAP_ACTUAL_HEIGHT
-               / (float) Constants.MAP_HEIGHT;
+                / (float) Constants.MAP_HEIGHT;
         return v;
     }
 
@@ -124,10 +125,10 @@ public class Utils {
         final PointF pos = new PointF(v.x, v.y);
         final float i1 = (float) (isOld ? Constants.MAP_ACTUAL_WIDTH_OLD : Constants.MAP_ACTUAL_WIDTH);
         pos.x *= Constants.MAP_WIDTH
-                 / i1;
+                / i1;
         final float i = (float) (isOld ? Constants.MAP_ACTUAL_HEIGHT_OLD : Constants.MAP_ACTUAL_HEIGHT);
         pos.y *= Constants.MAP_HEIGHT
-                 / i;
+                / i;
         return pos;
     }
 
@@ -276,4 +277,5 @@ public class Utils {
         }
         return val;
     }
+
 }

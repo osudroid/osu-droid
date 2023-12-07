@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.annotation.SuppressLint;
-
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
 import org.anddev.andengine.entity.modifier.LoopEntityModifier;
@@ -12,15 +11,20 @@ import org.anddev.andengine.entity.scene.background.SpriteBackground;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.ToastLogger;
+import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.*;
-import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
-
 public class LoadingScreen implements IUpdateHandler {
+
     private final LoadingScene scene;
+
     private final ChangeableText logText;
+
     private float percentage;
 
     public LoadingScreen() {
@@ -96,5 +100,8 @@ public class LoadingScreen implements IUpdateHandler {
     }
 
 
-    public static class LoadingScene extends Scene { }
+    public static class LoadingScene extends Scene {
+
+    }
+
 }

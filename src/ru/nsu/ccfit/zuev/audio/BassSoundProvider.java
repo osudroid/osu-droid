@@ -1,10 +1,8 @@
 package ru.nsu.ccfit.zuev.audio;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-
 import android.content.res.AssetManager;
-
 import com.un4seen.bass.BASS;
+import ru.nsu.ccfit.zuev.osu.Config;
 
 /**
  * @author chenkang.ck
@@ -14,6 +12,7 @@ public class BassSoundProvider {
     private static final int SIMULTANEOUS_PLAYBACKS = 8;
 
     private int sample = 0;
+
     private int channel = 0;
 
     public boolean prepare(final String fileName) {
@@ -61,4 +60,5 @@ public class BassSoundProvider {
     public void setLooping(boolean looping) {
         // not impl
     }
+
 }

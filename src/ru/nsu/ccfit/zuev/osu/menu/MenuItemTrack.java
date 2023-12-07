@@ -5,33 +5,44 @@ import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
+import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
+import ru.nsu.ccfit.zuev.osu.RGBColor;
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.RGBColor;
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.skins.OsuSkin;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
-
 public class MenuItemTrack extends Sprite {
 
     private static final RGBColor DEFAULT_COLOR = new RGBColor(25 / 255f, 25 / 255f, 240 / 255f);
+
     private static final RGBColor SELECTED_COLOR = new RGBColor(1, 1, 1);
 
     private static final RGBColor DEFAULT_TEXT_COLOR = new RGBColor(1, 1, 1);
+
     private static final RGBColor SELECTED_TEXT_COLOR = new RGBColor(0, 0, 0);
+
     private final ChangeableText trackTitle, trackLeftText;
+
     private final Sprite[] stars;
+
     private final Sprite halfStar;
+
     private boolean moved = false;
+
     private float dx = 0, dy = 0;
+
     private WeakReference<MenuItem> item;
+
     private TrackInfo track;
+
     private String currentMark = null;
+
     private Sprite mark;
+
     private float downTime = -1;
 
     public MenuItemTrack() {

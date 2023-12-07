@@ -6,7 +6,9 @@ import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
  * A parser for parsing a specific beatmap section.
  */
 public abstract class BeatmapSectionParser {
+
     protected static final int maxCoordinateValue = 131072;
+
     private static final int maxParseLimit = Integer.MAX_VALUE;
 
     /**
@@ -31,7 +33,7 @@ public abstract class BeatmapSectionParser {
     /**
      * Attempts to parse a string into an integer.
      *
-     * @param str The string to parse.
+     * @param str        The string to parse.
      * @param parseLimit The threshold of the integer being parsed.
      * @return The parsed integer.
      * @throws NumberFormatException When the resulting value is invalid or it is out of the parse limit bound.
@@ -64,7 +66,7 @@ public abstract class BeatmapSectionParser {
     /**
      * Attempts to parse a string into a float.
      *
-     * @param str The string to parse.
+     * @param str        The string to parse.
      * @param parseLimit The threshold of the float being parsed.
      * @return The parsed float.
      * @throws NumberFormatException When the resulting value is invalid, out of bounds, or NaN.
@@ -76,7 +78,7 @@ public abstract class BeatmapSectionParser {
     /**
      * Attempts to parse a string into a float.
      *
-     * @param str The string to parse.
+     * @param str      The string to parse.
      * @param allowNaN Whether to allow NaN.
      * @return The parsed float.
      * @throws NumberFormatException When the resulting value is invalid or out of bounds.
@@ -88,9 +90,9 @@ public abstract class BeatmapSectionParser {
     /**
      * Attempts to parse a string into a float.
      *
-     * @param str The string to parse.
+     * @param str        The string to parse.
      * @param parseLimit The threshold of the float being parsed.
-     * @param allowNaN Whether to allow NaN.
+     * @param allowNaN   Whether to allow NaN.
      * @return The parsed float.
      * @throws NumberFormatException When the resulting value is invalid or out of bounds.
      */
@@ -126,7 +128,7 @@ public abstract class BeatmapSectionParser {
     /**
      * Attempts to parse a string into a double.
      *
-     * @param str The string to parse.
+     * @param str        The string to parse.
      * @param parseLimit The threshold of the double being parsed.
      * @return The parsed double.
      * @throws NumberFormatException When the resulting value is invalid, out of bounds, or NaN.
@@ -138,7 +140,7 @@ public abstract class BeatmapSectionParser {
     /**
      * Attempts to parse a string into a double.
      *
-     * @param str The string to parse.
+     * @param str      The string to parse.
      * @param allowNaN Whether to allow NaN.
      * @return The parsed double.
      * @throws NumberFormatException When the resulting value is invalid or out of bounds.
@@ -150,9 +152,9 @@ public abstract class BeatmapSectionParser {
     /**
      * Attempts to parse a string into a double.
      *
-     * @param str The string to parse.
+     * @param str        The string to parse.
      * @param parseLimit The threshold of the double being parsed.
-     * @param allowNaN Whether to allow NaN.
+     * @param allowNaN   Whether to allow NaN.
      * @return The parsed double.
      * @throws NumberFormatException When the resulting value is invalid or out of bounds.
      */
@@ -173,4 +175,5 @@ public abstract class BeatmapSectionParser {
 
         return output;
     }
+
 }

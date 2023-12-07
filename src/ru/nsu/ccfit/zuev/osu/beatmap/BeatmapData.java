@@ -7,27 +7,23 @@ import com.rian.difficultycalculator.beatmap.hitobject.HitObject;
 import com.rian.difficultycalculator.beatmap.hitobject.HitObjectWithDuration;
 import com.rian.difficultycalculator.beatmap.hitobject.Slider;
 import com.rian.difficultycalculator.beatmap.timings.TimingControlPoint;
-
-import java.io.File;
-import java.util.ArrayList;
-
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.beatmap.sections.BeatmapColor;
-import ru.nsu.ccfit.zuev.osu.beatmap.sections.BeatmapDifficulty;
-import ru.nsu.ccfit.zuev.osu.beatmap.sections.BeatmapEvents;
-import ru.nsu.ccfit.zuev.osu.beatmap.sections.BeatmapGeneral;
-import ru.nsu.ccfit.zuev.osu.beatmap.sections.BeatmapMetadata;
+import ru.nsu.ccfit.zuev.osu.beatmap.sections.*;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
+import java.io.File;
+import java.util.ArrayList;
+
 /**
  * A structure containing information about a beatmap.
  */
 public class BeatmapData {
+
     /**
      * General information about this beatmap.
      */
@@ -350,4 +346,5 @@ public class BeatmapData {
 
         return true;
     }
+
 }

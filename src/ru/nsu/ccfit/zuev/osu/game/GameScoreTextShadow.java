@@ -2,18 +2,22 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
-
-import java.util.ArrayList;
-
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
+import java.util.ArrayList;
+
 public class GameScoreTextShadow extends GameObject {
+
     private final GameScoreText comboText;
+
     private final AnimSprite[] letters;
+
     private final ArrayList<AnimSprite> digits = new ArrayList<AnimSprite>();
+
     private boolean hasX = false;
+
     private String text = "";
 
     public GameScoreTextShadow(float x, float y, final String mask,
@@ -120,4 +124,5 @@ public class GameScoreTextShadow extends GameObject {
     public void registerEntityModifier(IEntityModifier modifier) {
         letters[0].registerEntityModifier(modifier);
     }
+
 }

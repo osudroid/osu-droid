@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu.helper;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
 import org.anddev.andengine.opengl.texture.source.BaseTextureAtlasSource;
 import org.anddev.andengine.util.Debug;
@@ -18,7 +17,9 @@ public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
         IBitmapTextureAtlasSource {
 
     private int mWidth;
+
     private int mHeight;
+
     private Bitmap bitmap = null;
 
     private InputFactory fileBitmapInput;
@@ -147,7 +148,9 @@ public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
 
 
     public interface InputFactory {
+
         InputStream openInput() throws IOException;
+
     }
 
 }

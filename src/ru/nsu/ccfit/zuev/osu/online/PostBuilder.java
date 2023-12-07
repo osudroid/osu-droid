@@ -1,25 +1,22 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
 import com.dgsrz.bancho.security.SecurityUtils;
-
 import okhttp3.FormBody;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 import okhttp3.Request;
-
+import okhttp3.Response;
 import org.anddev.andengine.util.Debug;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.net.UnknownHostException;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
-
 public class PostBuilder {
+
     private FormBody.Builder formBodyBuilder = new FormBody.Builder();
+
     private StringBuilder values = new StringBuilder();
 
     public void addParam(final String key, final String value) {
@@ -78,22 +75,22 @@ public class PostBuilder {
 
         try {
             Request request = new Request.Builder()
-                .url(scriptUrl)
-                .post(formBodyBuilder.build())
-                .build();
+                    .url(scriptUrl)
+                    .post(formBodyBuilder.build())
+                    .build();
             Response resp = OnlineManager.client.newCall(request).execute();
 
             Debug.i("request url=" + scriptUrl);
             Debug.i("request --------Content---------");
             String line = null;
             BufferedReader reader = new BufferedReader(new StringReader(resp.body().string()));
-            while((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 Debug.i(String.format("request [%d]: %s", response.size(), line));
                 response.add(line);
             }
             Debug.i("request url=" + scriptUrl);
             Debug.i("request -----End of content-----");
-        } catch(Exception e) {
+        } catch (Exception e) {
             Debug.e(e.getMessage(), e);
         }
 
@@ -104,10 +101,13 @@ public class PostBuilder {
     }
 
     public static class RequestException extends Exception {
+
         private static final long serialVersionUID = 671773899432746143L;
 
         public RequestException(final Throwable cause) {
             super(cause);
         }
+
     }
+
 }

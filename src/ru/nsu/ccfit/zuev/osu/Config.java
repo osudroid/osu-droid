@@ -6,101 +6,98 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Environment;
 import android.util.DisplayMetrics;
-
 import androidx.preference.PreferenceManager;
-
 import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.framework.math.FMath;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.reco1l.legacy.Multiplayer;
+import net.margaritov.preference.colorpicker.ColorPickerPreference;
+import org.anddev.andengine.util.Debug;
+import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.reco1l.legacy.Multiplayer;
-import net.margaritov.preference.colorpicker.ColorPickerPreference;
-
-import org.anddev.andengine.util.Debug;
-
-import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
-
 public class Config {
+
     private static String corePath,
-        defaultCorePath,
-        beatmapPath,
-        cachePath,
-        skinPath,
-        skinTopPath,
-        scorePath,
-        localUsername,
-        onlineUsername,
-        onlinePassword,
-        onlineDeviceID;
+            defaultCorePath,
+            beatmapPath,
+            cachePath,
+            skinPath,
+            skinTopPath,
+            scorePath,
+            localUsername,
+            onlineUsername,
+            onlinePassword,
+            onlineDeviceID;
 
     private static boolean DELETE_OSZ,
-        SCAN_DOWNLOAD,
-        deleteUnimportedBeatmaps,
-        showFirstApproachCircle,
-        comboburst,
-        useCustomSkins,
-        useCustomSounds,
-        corovans,
-        showFPS,
-        complexAnimations,
-        snakingInSliders,
-        playMusicPreview,
-        showCursor,
-        shrinkPlayfieldDownwards,
-        hideNaviBar,
-        showScoreboard,
-        enablePP,
-        enableExtension,
-        loadAvatar,
-        stayOnline,
-        syncMusic,
-        burstEffects,
-        hitLighting,
-        useDither,
-        useParticles,
-        useCustomComboColors,
-        forceRomanized,
-        fixFrameOffset,
-        removeSliderLock,
-        calculateSliderPathInGameStart,
-        displayScoreStatistics,
-        hideReplayMarquee,
-        hideInGameUI,
-        receiveAnnouncements,
-        enableStoryboard,
-        safeBeatmapBg,
-        trianglesAnimation,
-        displayRealTimePPCounter,
-        useNightcoreOnMultiplayer,
-        videoEnabled,
-        deleteUnsupportedVideos,
-        submitScoreOnMultiplayer,
-        keepBackgroundAspectRatio,
-        noChangeDimInBreaks;
+            SCAN_DOWNLOAD,
+            deleteUnimportedBeatmaps,
+            showFirstApproachCircle,
+            comboburst,
+            useCustomSkins,
+            useCustomSounds,
+            corovans,
+            showFPS,
+            complexAnimations,
+            snakingInSliders,
+            playMusicPreview,
+            showCursor,
+            shrinkPlayfieldDownwards,
+            hideNaviBar,
+            showScoreboard,
+            enablePP,
+            enableExtension,
+            loadAvatar,
+            stayOnline,
+            syncMusic,
+            burstEffects,
+            hitLighting,
+            useDither,
+            useParticles,
+            useCustomComboColors,
+            forceRomanized,
+            fixFrameOffset,
+            removeSliderLock,
+            calculateSliderPathInGameStart,
+            displayScoreStatistics,
+            hideReplayMarquee,
+            hideInGameUI,
+            receiveAnnouncements,
+            enableStoryboard,
+            safeBeatmapBg,
+            trianglesAnimation,
+            displayRealTimePPCounter,
+            useNightcoreOnMultiplayer,
+            videoEnabled,
+            deleteUnsupportedVideos,
+            submitScoreOnMultiplayer,
+            keepBackgroundAspectRatio,
+            noChangeDimInBreaks;
 
     private static int RES_WIDTH,
-        RES_HEIGHT,
-        errorMeter,
-        spinnerStyle,
-        backgroundQuality,
-        metronomeSwitch;
-    
+            RES_HEIGHT,
+            errorMeter,
+            spinnerStyle,
+            backgroundQuality,
+            metronomeSwitch;
+
     private static float soundVolume,
-        bgmVolume,
-        offset,
-        backgroundBrightness,
-        scaleMultiplier,
-        playfieldSize,
-        cursorSize;
+            bgmVolume,
+            offset,
+            backgroundBrightness,
+            scaleMultiplier,
+            playfieldSize,
+            cursorSize;
 
     private static Map<String, String> skins;
 
     private static RGBColor[] comboColors;
+
     private static Context context;
 
     public static void loadConfig(final Context context) {
@@ -140,14 +137,14 @@ public class Config {
             soundVolume = prefs.getInt("soundvolume", 100) / 100f;
             bgmVolume = prefs.getInt("bgmvolume", 100) / 100f;
             cursorSize = prefs.getInt("cursorSize", 50) / 100f;
-        }catch(RuntimeException e) { // use valid integer since this makes the game crash on android m
+        } catch (RuntimeException e) { // use valid integer since this makes the game crash on android m
             prefs.edit()
-                .putInt("offset", 0)
-                .putInt("bgbrightness", 25)
-                .putInt("soundvolume", 100)
-                .putInt("bgmvolume", 100)
-                .putInt("cursorSize", 50)
-                .commit();
+                    .putInt("offset", 0)
+                    .putInt("bgbrightness", 25)
+                    .putInt("soundvolume", 100)
+                    .putInt("bgmvolume", 100)
+                    .putInt("cursorSize", 50)
+                    .commit();
             Config.loadConfig(context);
             return;
         }
@@ -226,10 +223,10 @@ public class Config {
         useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
         submitScoreOnMultiplayer = prefs.getBoolean("player_submitScore", true);
 
-        if(receiveAnnouncements) {
+        if (receiveAnnouncements) {
             FirebaseMessaging.getInstance().subscribeToTopic("announcements");
-        }else {
-            FirebaseMessaging.getInstance().unsubscribeFromTopic("announcements"); 
+        } else {
+            FirebaseMessaging.getInstance().unsubscribeFromTopic("announcements");
         }
 
         //Init
@@ -255,7 +252,7 @@ public class Config {
         onlineUsername = prefs.getString("onlineUsername", "");
         onlinePassword = prefs.getString("onlinePassword", null);
         stayOnline = prefs.getBoolean("stayOnline", false);
-        loadAvatar = prefs.getBoolean("loadAvatar",false);
+        loadAvatar = prefs.getBoolean("loadAvatar", false);
     }
 
     public static void setSize() {
@@ -451,13 +448,12 @@ public class Config {
         return complexAnimations;
     }
 
-    public static boolean isSnakingInSliders()
-    {
-        return snakingInSliders;
-    }
-
     public static void setComplexAnimations(final boolean complexAnimations) {
         Config.complexAnimations = complexAnimations;
+    }
+
+    public static boolean isSnakingInSliders() {
+        return snakingInSliders;
     }
 
     public static boolean isPlayMusicPreview() {
@@ -747,18 +743,18 @@ public class Config {
     public static void loadSkins() {
         File[] folders = FileUtils.listFiles(new File(skinTopPath), file -> file.isDirectory() && !file.getName().startsWith("."));
         skins = new HashMap<String, String>();
-        for(File folder : folders) {
+        for (File folder : folders) {
             skins.put(folder.getName(), folder.getPath());
             Debug.i("skins: " + folder.getName() + " - " + folder.getPath());
         }
     }
 
-    public static Map<String, String> getSkins(){
+    public static Map<String, String> getSkins() {
         return skins;
     }
 
     public static void addSkin(String name, String path) {
-        if(skins == null) skins = new HashMap<String, String>();
+        if (skins == null) skins = new HashMap<String, String>();
         skins.put(name, path);
     }
 
@@ -797,4 +793,5 @@ public class Config {
     public static boolean isNoChangeDimInBreaks() {
         return noChangeDimInBreaks;
     }
+
 }

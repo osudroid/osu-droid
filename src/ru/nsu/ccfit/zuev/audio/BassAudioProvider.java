@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.audio;
 
 import android.content.res.AssetManager;
 import android.util.Log;
-
 import com.un4seen.bass.BASS;
 import com.un4seen.bass.BASS_FX;
 
@@ -14,15 +13,23 @@ import java.nio.ByteBuffer;
 public class BassAudioProvider {
 
     public static final int DECODER_NORMAL = 0;
+
     public static final int DECODER_DOUBLE_TIME = 1;
+
     public static final int DECODER_NIGHT_CORE = 2;
+
     public static final int WINDOW_FFT = 1024;
+
     public static final int DEFAULT_FREQUENCY = 44100;
 
-    private int channel = 0;
     private final BASS.FloatValue freq = new BASS.FloatValue();
+
+    private int channel = 0;
+
     private int fileFlag = 0;
+
     private int decoder = 0;
+
     private int multiplier = 0;
 
     private ByteBuffer buffer = null;
@@ -223,4 +230,5 @@ public class BassAudioProvider {
             BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_VOL, volume);
         }
     }
+
 }

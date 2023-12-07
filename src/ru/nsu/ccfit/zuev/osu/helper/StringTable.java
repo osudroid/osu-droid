@@ -6,9 +6,11 @@ import androidx.annotation.StringRes;
 import java.util.Formatter;
 
 public class StringTable {
+
     static Context context;
 
     private static StringBuilder sb;
+
     private static Formatter f;
 
     public static void setContext(final Context context) {
@@ -38,4 +40,5 @@ public class StringTable {
         f.format(get(resid), objects);
         return sb.toString();
     }
+
 }

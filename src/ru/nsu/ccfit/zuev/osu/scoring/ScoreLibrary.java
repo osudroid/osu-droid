@@ -5,8 +5,15 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteCantOpenDatabaseException;
 import android.database.sqlite.SQLiteDatabase;
-
 import org.anddev.andengine.util.Debug;
+import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.ToastLogger;
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import ru.nsu.ccfit.zuev.osu.helper.StringTable;
+import ru.nsu.ccfit.zuev.osu.helper.sql.DBOpenHelper;
+import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
+import ru.nsu.ccfit.zuev.osu.online.SendingPanel;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,18 +24,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.ToastLogger;
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osu.helper.sql.DBOpenHelper;
-import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
-import ru.nsu.ccfit.zuev.osu.online.SendingPanel;
-import ru.nsu.ccfit.zuev.osuplus.R;
-
 public class ScoreLibrary {
+
     private static final Pattern newPathPattern = Pattern.compile("[^/]*/[^/]*\\z");
+
     private static ScoreLibrary lib = new ScoreLibrary();
+
     private SQLiteDatabase db = null;
 
     private ScoreLibrary() {
@@ -298,4 +299,5 @@ public class ScoreLibrary {
     public boolean deleteScore(int id) {
         return db.delete(DBOpenHelper.SCORES_TABLENAME, "id = " + id, null) != 0;
     }
+
 }

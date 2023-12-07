@@ -1,17 +1,9 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
-
-import org.anddev.andengine.entity.modifier.DelayModifier;
-import org.anddev.andengine.entity.modifier.FadeInModifier;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.RotationModifier;
-import org.anddev.andengine.entity.modifier.ScaleModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
+import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
-
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -19,13 +11,21 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 
 public class Countdown extends GameObject {
+
     public static final float COUNTDOWN_LENGTH = 3f;
+
     private final Sprite ready;
+
     private final Sprite count1, count2, count3;
+
     private final Sprite go;
+
     private final GameObjectListener listener;
+
     private final float speed;
+
     private float timepassed;
+
     private Scene scene;
 
     public Countdown(final GameObjectListener listener, final Scene scene,

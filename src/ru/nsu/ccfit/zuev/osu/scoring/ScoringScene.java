@@ -1,14 +1,13 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
-import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.edlplan.framework.utils.functionality.SmartIterator;
+import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.Multiplayer;
-import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.reco1l.legacy.ui.entity.StatisticSelector;
+import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
 import com.rian.difficultycalculator.attributes.PerformanceAttributes;
-
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
@@ -21,9 +20,6 @@ import org.anddev.andengine.entity.text.Text;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
-
-import java.util.Locale;
-
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -41,18 +37,28 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.SendingPanel;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 
+import java.util.Locale;
+
 public class ScoringScene {
+
     private final Engine engine;
+
     private final GameScene game;
+
     private final SongMenu menu;
-    private Scene scene;
-    private SongService songService;
-    private StatisticV2 replayStat;
-    private int replayID = -1;
+
     public TrackInfo track;
 
     // Multiplayer
     public StatisticV2 currentStatistic;
+
+    private Scene scene;
+
+    private SongService songService;
+
+    private StatisticV2 replayStat;
+
+    private int replayID = -1;
 
     private StatisticSelector selector;
 
@@ -239,8 +245,7 @@ public class ScoringScene {
 
         Sprite retryBtn = null;
 
-        if (!Multiplayer.isMultiplayer)
-        {
+        if (!Multiplayer.isMultiplayer) {
             retryBtn = new Sprite(580, 400, ResourceManager.getInstance().getTexture("ranking-retry")) {
 
                 @Override
@@ -267,10 +272,9 @@ public class ScoringScene {
 
         Sprite replayBtn = null;
 
-        if (!Multiplayer.isMultiplayer)
-        {
+        if (!Multiplayer.isMultiplayer) {
             replayBtn = new Sprite(580, 400,
-                                                ResourceManager.getInstance().getTexture("ranking-replay")) {
+                    ResourceManager.getInstance().getTexture("ranking-replay")) {
 
                 @Override
                 public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -442,33 +446,33 @@ public class ScoringScene {
                 new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date(stat.getTime()));
         playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
         if (stat.getChangeSpeed() != 1 ||
-            stat.isCustomAR() ||
-            stat.isCustomOD() ||
-            stat.isCustomCS() ||
-            stat.isCustomHP() ||
-            stat.getFLFollowDelay() != FlashLightEntity.defaultMoveDelayS &&
-            stat.getMod().contains(GameMod.MOD_FLASHLIGHT)) {
+                stat.isCustomAR() ||
+                stat.isCustomOD() ||
+                stat.isCustomCS() ||
+                stat.isCustomHP() ||
+                stat.getFLFollowDelay() != FlashLightEntity.defaultMoveDelayS &&
+                        stat.getMod().contains(GameMod.MOD_FLASHLIGHT)) {
 
             mapperStr += " [";
-            if (stat.getChangeSpeed() != 1){
+            if (stat.getChangeSpeed() != 1) {
                 mapperStr += String.format(Locale.ENGLISH, "%.2fx,", stat.getChangeSpeed());
             }
-            if (stat.isCustomAR()){
+            if (stat.isCustomAR()) {
                 mapperStr += String.format(Locale.ENGLISH, "AR%.1f,", stat.getCustomAR());
             }
-            if (stat.isCustomOD()){
+            if (stat.isCustomOD()) {
                 mapperStr += String.format(Locale.ENGLISH, "OD%.1f,", stat.getCustomOD());
             }
-            if (stat.isCustomCS()){
+            if (stat.isCustomCS()) {
                 mapperStr += String.format(Locale.ENGLISH, "CS%.1f,", stat.getCustomCS());
             }
-            if (stat.isCustomHP()){
+            if (stat.isCustomHP()) {
                 mapperStr += String.format(Locale.ENGLISH, "HP%.1f,", stat.getCustomHP());
             }
-            if (stat.getFLFollowDelay() != FlashLightEntity.defaultMoveDelayS && stat.getMod().contains(GameMod.MOD_FLASHLIGHT)){
+            if (stat.getFLFollowDelay() != FlashLightEntity.defaultMoveDelayS && stat.getMod().contains(GameMod.MOD_FLASHLIGHT)) {
                 mapperStr += String.format(Locale.ENGLISH, "FLD%.2f,", stat.getFLFollowDelay());
             }
-            if (mapperStr.endsWith(",")){
+            if (mapperStr.endsWith(",")) {
                 mapperStr = mapperStr.substring(0, mapperStr.length() - 1);
             }
             mapperStr += "]";
@@ -481,7 +485,7 @@ public class ScoringScene {
         final Text playerInfo = new Text(4, mapperInfo.getY() + mapperInfo.getHeight() + 2,
                 ResourceManager.getInstance().getFont("smallFont"), playerStr);
         //calculatePP
-        if (Config.isDisplayScoreStatistics()){
+        if (Config.isDisplayScoreStatistics()) {
             StringBuilder ppinfo = new StringBuilder();
             BeatmapData beatmapData = new BeatmapParser(this.track.getFilename()).parse(true);
 
@@ -538,13 +542,13 @@ public class ScoringScene {
 
                 boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator()).applyFilter(m -> m.unranked).hasNext();
                 if (hasUnrankedMod
-                    || Config.isRemoveSliderLock()
-                    || ModMenu.getInstance().isCustomAR()
-                    || ModMenu.getInstance().isCustomOD()
-                    || ModMenu.getInstance().isCustomCS()
-                    || ModMenu.getInstance().isCustomHP()
-                    || !ModMenu.getInstance().isDefaultFLFollowDelay()
-                    ) {
+                        || Config.isRemoveSliderLock()
+                        || ModMenu.getInstance().isCustomAR()
+                        || ModMenu.getInstance().isCustomOD()
+                        || ModMenu.getInstance().isCustomCS()
+                        || ModMenu.getInstance().isCustomHP()
+                        || !ModMenu.getInstance().isDefaultFLFollowDelay()
+                ) {
                     return;
                 }
 
@@ -587,8 +591,7 @@ public class ScoringScene {
         Multiplayer.finalData = null;
         currentStatistic = null;
 
-        if (Multiplayer.isMultiplayer)
-        {
+        if (Multiplayer.isMultiplayer) {
             // Preventing NPEs when player gets disconnected while playing
             if (!Multiplayer.isConnected())
                 RoomScene.INSTANCE.back();
@@ -636,4 +639,5 @@ public class ScoringScene {
     public void setReplayID(int id) {
         this.replayID = id;
     }
+
 }

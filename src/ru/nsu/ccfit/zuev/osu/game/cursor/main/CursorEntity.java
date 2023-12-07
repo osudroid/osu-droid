@@ -5,17 +5,21 @@ import org.anddev.andengine.entity.particle.ParticleSystem;
 import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.game.cursor.trail.CursorTrail;
 
 public class CursorEntity extends Entity {
+
     protected final CursorSprite cursorSprite;
+
     private ParticleSystem particles = null;
+
     private PointParticleEmitter emitter = null;
+
     private boolean isShowing = false;
+
     private float particleOffsetX, particleOffsetY;
 
     public CursorEntity() {
@@ -55,7 +59,7 @@ public class CursorEntity extends Entity {
 
     public void update(float pSecondsElapsed) {
         // this.handleLongerTrail();
-        if(isShowing) {
+        if (isShowing) {
             cursorSprite.update(pSecondsElapsed);
         }
         super.onManagedUpdate(pSecondsElapsed);
@@ -75,4 +79,5 @@ public class CursorEntity extends Entity {
 
         super.setPosition(pX, pY);
     }
+
 }

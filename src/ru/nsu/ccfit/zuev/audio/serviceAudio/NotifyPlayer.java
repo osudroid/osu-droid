@@ -5,8 +5,6 @@
 
 package ru.nsu.ccfit.zuev.audio.serviceAudio;
 
-import static androidx.media.app.NotificationCompat.MediaStyle;
-
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -22,10 +20,8 @@ import android.media.MediaMetadata;
 import android.os.Build;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
-
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -33,29 +29,39 @@ import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
+import static androidx.media.app.NotificationCompat.MediaStyle;
+
 public class NotifyPlayer {
 
     public static int NOTIFICATION_ID = 1;
 
     private final MainActivity mActivity = GlobalManager.getInstance().getMainActivity();
-    private Context context;
 
     private final String
             actionPrev = "player_previous",
             actionPlay = "player_play",
             actionNext = "Notify_next", //It has an usage in BassAudioFunc, that's why i left the original name.
+
             actionClose = "player_close";
 
-    private PendingIntent prev, next, play, close;
-    private NotificationCompat.Builder builder;
-    private NotificationManagerCompat manager;
     public BroadcastReceiver receiver;
+
     public IntentFilter filter;
 
+    public boolean isShowing = false;
+
+    private Context context;
+
+    private PendingIntent prev, next, play, close;
+
+    private NotificationCompat.Builder builder;
+
+    private NotificationManagerCompat manager;
+
     private MediaSessionCompat mediaSession;
+
     private Notification notification;
 
-    public boolean isShowing = false;
     private Bitmap defaultIcon;
 
     public void load(SongService service) {
@@ -138,8 +144,7 @@ public class NotifyPlayer {
         if (beatmap.getArtistUnicode() != null && beatmap.getTitleUnicode() != null) {
             title = beatmap.getTitleUnicode();
             artist = beatmap.getArtistUnicode();
-        }
-        else if (beatmap.getArtist() != null && beatmap.getTitle() != null) {
+        } else if (beatmap.getArtist() != null && beatmap.getTitle() != null) {
             title = beatmap.getTitle();
             artist = beatmap.getArtist();
         }
@@ -223,4 +228,5 @@ public class NotifyPlayer {
     public IntentFilter getFilter() {
         return filter;
     }
+
 }

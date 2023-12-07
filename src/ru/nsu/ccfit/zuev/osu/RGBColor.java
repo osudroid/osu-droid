@@ -1,12 +1,14 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import androidx.annotation.NonNull;
-
 import org.anddev.andengine.entity.Entity;
 
 public class RGBColor {
+
     private float cr;
+
     private float cg;
+
     private float cb;
 
     public RGBColor(RGBColor copy) {
@@ -63,4 +65,5 @@ public class RGBColor {
             entity.setColor(cr, cg, cb);
         }
     }
+
 }

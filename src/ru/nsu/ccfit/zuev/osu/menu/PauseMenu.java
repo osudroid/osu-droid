@@ -7,7 +7,6 @@ import org.anddev.andengine.entity.scene.menu.item.IMenuItem;
 import org.anddev.andengine.entity.scene.menu.item.SpriteMenuItem;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -17,13 +16,21 @@ import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class PauseMenu implements IOnMenuItemClickListener {
+
     static final int ITEM_SAVE_REPLAY = 0;
+
     static final int ITEM_CONTINUE = 1;
+
     static final int ITEM_RETRY = 2;
+
     static final int ITEM_BACK = 3;
+
     private final MenuScene scene;
+
     private final GameScene game;
+
     private final boolean fail;
+
     private boolean replaySaved;
 
     public PauseMenu(final Engine engine, final GameScene game,
@@ -50,7 +57,7 @@ public class PauseMenu implements IOnMenuItemClickListener {
         if (fail) {
             itemContinue.setVisible(false);
             tex = ResourceManager.getInstance().getTexture("fail-background");
-            if (game.getReplaying()){
+            if (game.getReplaying()) {
                 saveFailedReplay.setVisible(false);
             }
         } else {
@@ -86,7 +93,7 @@ public class PauseMenu implements IOnMenuItemClickListener {
         BassSoundProvider playSnd;
         switch (pMenuItem.getID()) {
             case ITEM_SAVE_REPLAY:
-                if(fail && !replaySaved && !game.getReplaying() && game.saveFailedReplay()){
+                if (fail && !replaySaved && !game.getReplaying() && game.saveFailedReplay()) {
                     ToastLogger.showTextId(R.string.message_save_replay_successful, true);
                     replaySaved = true;
                 }
@@ -123,4 +130,5 @@ public class PauseMenu implements IOnMenuItemClickListener {
         }
         return false;
     }
+
 }

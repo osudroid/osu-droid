@@ -3,13 +3,13 @@ package ru.nsu.ccfit.zuev.osu.beatmap.parser.sections;
 import com.rian.difficultycalculator.beatmap.BeatmapControlPointsManager;
 import com.rian.difficultycalculator.beatmap.timings.DifficultyControlPoint;
 import com.rian.difficultycalculator.beatmap.timings.TimingControlPoint;
-
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 
 /**
  * A parser for parsing a beatmap's timing points section.
  */
 public class BeatmapControlPointsParser extends BeatmapSectionParser {
+
     @Override
     public void parse(BeatmapData data, String line) {
         final String[] pars = line.split(",");
@@ -57,4 +57,5 @@ public class BeatmapControlPointsParser extends BeatmapSectionParser {
 
         data.rawTimingPoints.add(line);
     }
+
 }

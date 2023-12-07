@@ -4,14 +4,12 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
-
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.FileUtils;
+import ru.nsu.ccfit.zuev.osu.Config;
 
 import java.io.File;
 import java.io.IOException;
-
-import ru.nsu.ccfit.zuev.osu.Config;
 
 /**
  * Created by Fuuko on 2015/2/27.
@@ -19,6 +17,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
 public class DatabaseContext extends ContextWrapper {
 
     private static final String DEBUG_CONTEXT = "DatabaseContext";
+
     private Context context;
 
     public DatabaseContext(Context base) {
@@ -82,4 +81,5 @@ public class DatabaseContext extends ContextWrapper {
         Debug.i("openOrCreateDatabase(" + name + ") = " + result.getPath());
         return result;
     }
+
 }

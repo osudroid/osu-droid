@@ -2,21 +2,27 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ScoreBar extends GameObject {
+
     private static float speed = 0.75f;
+
     private final StatisticV2 stat;
+
     private final Sprite bg;
+
     private final Sprite colour;
+
     private final AnimSprite ki;
+
     private final float width;
+
     private float lasthp = 0;
 
     public ScoreBar(final GameObjectListener listener, final Scene scene,
@@ -48,7 +54,7 @@ public class ScoreBar extends GameObject {
                 ? new AnimSprite(0, 0, 0, "scorebar-ki", "scorebar-kidanger", "scorebar-kidanger2")
                 : new AnimSprite(0, 0, 0, "scorebar-ki");
         ki.setPosition(5 + colour.getWidth() - ki.getWidth() / 2,
-            16 + colour.getHeight() / 2 - 58);
+                16 + colour.getHeight() / 2 - 58);
 
         scene.attachChild(ki, 0);
         scene.attachChild(colour, 0);
@@ -96,5 +102,5 @@ public class ScoreBar extends GameObject {
         lasthp = stat.getHp();
         update(0);
     }
-    
+
 }

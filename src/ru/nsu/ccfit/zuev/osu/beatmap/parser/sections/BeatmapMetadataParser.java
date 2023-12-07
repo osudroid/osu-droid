@@ -6,6 +6,7 @@ import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
  * A parser for parsing a beatmap's metadata section.
  */
 public class BeatmapMetadataParser extends BeatmapKeyValueSectionParser {
+
     @Override
     public void parse(BeatmapData data, String line) {
         String[] p = splitProperty(line);
@@ -43,4 +44,5 @@ public class BeatmapMetadataParser extends BeatmapKeyValueSectionParser {
                 break;
         }
     }
+
 }

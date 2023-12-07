@@ -2,27 +2,24 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.app.Activity;
 import android.content.Context;
-
 import org.anddev.andengine.util.Debug;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.HashMap;
-import java.util.Map;
-
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
+
 public class PropertiesLibrary {
+
     private static final PropertiesLibrary instance = new PropertiesLibrary();
+
     private final String version = "properties1";
+
     private Map<String, BeatmapProperties> props = new HashMap<String, BeatmapProperties>();
+
     private Context context = null;
+
     private PropertiesLibrary() {
     }
 
@@ -117,4 +114,5 @@ public class PropertiesLibrary {
             props.remove(path);
         }
     }
+
 }

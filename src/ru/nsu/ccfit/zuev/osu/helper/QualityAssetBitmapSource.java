@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
 import org.anddev.andengine.opengl.texture.source.BaseTextureAtlasSource;
 import org.anddev.andengine.util.Debug;
@@ -17,9 +16,11 @@ public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements
         IBitmapTextureAtlasSource {
 
     private final int mWidth;
+
     private final int mHeight;
 
     private final String mAssetPath;
+
     private final Context mContext;
 
     private Bitmap bitmap = null;

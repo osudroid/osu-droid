@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 
 public interface MenuItemListener {
+
     void select(MenuItem item);
 
     void selectTrack(TrackInfo track, boolean reloadBG);
@@ -18,4 +19,5 @@ public interface MenuItemListener {
     boolean isSelectAllowed();
 
     void showPropertiesMenu(MenuItem item);
+
 }

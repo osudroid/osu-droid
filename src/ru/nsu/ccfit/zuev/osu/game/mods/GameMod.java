@@ -23,7 +23,9 @@ public enum GameMod {
     MOD_SCOREV2("v2", 1, true);
 
     public final String shortName;
+
     public final float scoreMultiplier;
+
     public final boolean unranked;
 
     GameMod(String shortName, float scoreMultiplier) {

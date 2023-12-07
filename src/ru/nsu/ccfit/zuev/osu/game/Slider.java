@@ -29,50 +29,82 @@ import java.util.Arrays;
 import java.util.BitSet;
 
 public class Slider extends GameObject {
+
     private final Sprite startCircle, endCircle;
+
     private final Sprite startOverlay, endOverlay;
+
     private final Sprite approachCircle;
+
     private final Sprite startArrow, endArrow;
+
     private final ArrayList<Sprite> ticks = new ArrayList<>();
+
+    private final RGBColor circleColor = new RGBColor();
+
+    private final BitSet tickSet = new BitSet();
+
     private PointF startPosition, endPosition;
+
     private Scene scene;
+
     private GameObjectListener listener;
+
     private TimingPoint timing;
+
     private CircleNumber number;
+
     private SliderPath path;
+
     private double passedTime;
+
     private double preTime;
+
     private double tickTime;
+
     private double maxTime;
+
     private float scale;
+
     private int repeatCount;
+
     private boolean reverse;
+
     private int[] soundId = new int[3];
+
     private int[] sampleSet = new int[3];
+
     private int[] addition = new int[3];
 
     private int soundIdIndex;
+
     private int ticksGot;
+
     private int ticksTotal;
+
     private int currentTick;
+
     private double tickInterval;
 
     private AnimSprite ball;
+
     private Sprite followCircle;
 
     private PointF tmpPoint = new PointF();
+
     private float ballAngle;
 
     private boolean kiai;
+
     private RGBColor color = new RGBColor();
-    private final RGBColor circleColor = new RGBColor();
 
     //for replay
     private int firstHitAccuracy;
-    private final BitSet tickSet = new BitSet();
+
     private int tickIndex;
 
     private LinePath superPath = null;
+
     private boolean preStageFinish = false;
 
     private SliderBody2D abstractSliderBody = null;
@@ -816,8 +848,8 @@ public class Slider extends GameObject {
                 if (Config.isComplexAnimations() && !mIsAnimating) {
                     followCircle.clearEntityModifiers();
                     followCircle.registerEntityModifier(new ScaleModifier((float)
-                        Math.min(tickInterval / GameHelper.getTickRate(), 0.2f) * GameHelper.getTimeMultiplier(),
-                        scale * 1.1f, scale, EaseQuadOut.getInstance()));
+                            Math.min(tickInterval / GameHelper.getTickRate(), 0.2f) * GameHelper.getTimeMultiplier(),
+                            scale * 1.1f, scale, EaseQuadOut.getInstance()));
                 }
 
                 ticksGot++;

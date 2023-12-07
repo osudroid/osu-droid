@@ -1,15 +1,19 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
-
 import ru.nsu.ccfit.zuev.osu.Utils;
 
 public class GameObjectData {
+
     private final int time;
+
     private final int comboCode;
+
     private final String[] rawdata;
+
     // private SliderHelper.SliderPath path = null;
     private final PointF pos;
+
     private float posOffset;
 
     public GameObjectData(final String line) {
@@ -82,4 +86,5 @@ public class GameObjectData {
     public String[] getData() {
         return rawdata;
     }
+
 }

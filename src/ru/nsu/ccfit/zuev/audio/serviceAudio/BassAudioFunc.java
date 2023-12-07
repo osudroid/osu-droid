@@ -5,34 +5,18 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
-
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.un4seen.bass.BASS;
 import com.un4seen.bass.BASS_FX;
-
-import java.nio.ByteBuffer;
-
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.Config;
+
+import java.nio.ByteBuffer;
 
 public class BassAudioFunc {
 
     public static final int WINDOW_FFT = 1024;
-
-    private int channel = 0;
-    private PlayMode mode;
-    private long skipPosition;
-    private ByteBuffer buffer = null;
-    private int playflag = BASS.BASS_STREAM_PRESCAN;
-    private boolean isGaming = false;
-    private BroadcastReceiver receiver;
-    private LocalBroadcastManager broadcastManager;
-
-    /**
-     * Whether the game is currently on focus.
-     */
-    private boolean onFocus;
 
     /**
      * The playback buffer length that is used when the game is on focus, in seconds.
@@ -47,6 +31,27 @@ public class BassAudioFunc {
      * This is a lot higher than the value used in {@link #onFocusBufferLength} to reduce CPU usage.
      */
     private final float offFocusBufferLength = 0.5f;
+
+    private int channel = 0;
+
+    private PlayMode mode;
+
+    private long skipPosition;
+
+    private ByteBuffer buffer = null;
+
+    private int playflag = BASS.BASS_STREAM_PRESCAN;
+
+    private boolean isGaming = false;
+
+    private BroadcastReceiver receiver;
+
+    private LocalBroadcastManager broadcastManager;
+
+    /**
+     * Whether the game is currently on focus.
+     */
+    private boolean onFocus;
 
     public BassAudioFunc() {
     }
@@ -82,8 +87,7 @@ public class BassAudioFunc {
     public boolean resume() {
         setEndSync();
 
-        if (BASS.BASS_ChannelPlay(channel, false))
-        {
+        if (BASS.BASS_ChannelPlay(channel, false)) {
             setVolume(Config.getBgmVolume());
             return true;
         }
@@ -149,20 +153,17 @@ public class BassAudioFunc {
         channel = BASS_FX.BASS_FX_TempoCreate(channel, BASS.BASS_STREAM_AUTOFREE);
         if (enableNC) {
             BASS.BASS_ChannelGetInfo(channel, fx);
-            if (speed > 1.5){
+            if (speed > 1.5) {
                 BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, (int) (fx.freq * 1.5f));
                 BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, (speed / 1.5f - 1.0f) * 100);
-            }
-            else if (speed < 0.75){
+            } else if (speed < 0.75) {
                 BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, (int) (fx.freq * 0.75f));
                 BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, (speed / 0.75f - 1.0f) * 100);
-            }
-            else {
+            } else {
                 BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, (int) (fx.freq * speed));
                 BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, 0.0f);
             }
-        }
-        else{
+        } else {
             BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, (speed - 1.0f) * 100);
         }
 
@@ -187,8 +188,7 @@ public class BassAudioFunc {
                 },0);
             }*/
             setEndSync();
-            if (BASS.BASS_ChannelPlay(channel, true))
-            {
+            if (BASS.BASS_ChannelPlay(channel, true)) {
                 setVolume(Config.getBgmVolume());
                 return true;
             }
@@ -325,4 +325,5 @@ public class BassAudioFunc {
             }
         }, 0);
     }
+
 }

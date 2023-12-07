@@ -7,19 +7,20 @@ import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
-
-import java.io.File;
-
 import androidx.core.app.NotificationManagerCompat;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 
+import java.io.File;
+
 
 public class SongService extends Service {
 
     private BassAudioFunc audioFunc;
+
     private boolean isGaming = false;
+
     // private boolean isSettingMenu = false;
     private NotifyPlayer notify;
 
@@ -126,10 +127,8 @@ public class SongService extends Service {
         return audioFunc.stop();
     }
 
-    public void stopWithoutNotify()
-    {
-        if (audioFunc != null)
-        {
+    public void stopWithoutNotify() {
+        if (audioFunc != null) {
             audioFunc.stop();
         }
     }
@@ -258,9 +257,11 @@ public class SongService extends Service {
     }
 
     public class ReturnBindObject extends Binder {
+
         public SongService getObject() {
             return SongService.this;
         }
+
     }
 
 }

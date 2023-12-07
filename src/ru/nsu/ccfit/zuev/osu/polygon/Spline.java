@@ -8,23 +8,36 @@ import java.util.ArrayList;
  * Created by Fuuko on 2015/4/7.
  */
 public class Spline {
+
     private static final float TWO_PI = (float) (Math.PI * 2);
+
     private static Spline instance = null;
+
     private static int DetailLevel = 50;
+
     private CurveTypes m_curve_type;
+
     private ArrayList<PointF> m_ctrl_pts;
+
     private ArrayList<Line> m_path;
+
     private ArrayList<PointF> m_points;
+
     private ArrayList<PointF> m_ctrl_pts_copy = null;
+
     private ArrayList<Line> m_path_copy = null;
+
     private ArrayList<PointF> m_points_copy = null;
+
     private ArrayList<Float> m_lengths = null;
+
     public Spline() {
         m_ctrl_pts = new ArrayList<PointF>();
         m_curve_type = CurveTypes.Linear;
         m_path = new ArrayList<Line>();
         m_points = new ArrayList<PointF>();
     }
+
     public Spline(ArrayList<PointF> theControlPoints, CurveTypes theCurveType) {
         m_ctrl_pts = new ArrayList<PointF>(theControlPoints);
         m_curve_type = theCurveType;
@@ -390,11 +403,14 @@ public class Spline {
     /// Probably another XNA class? Guessing its structure based on usage
     /// </summary>
     public class Line {
+
         public PointF p1, p2;
 
         public Line(PointF Start, PointF End) {
             p1 = Start;
             p2 = End;
         }
+
     }
+
 }

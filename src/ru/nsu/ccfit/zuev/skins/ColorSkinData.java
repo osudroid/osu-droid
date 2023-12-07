@@ -1,14 +1,14 @@
 package ru.nsu.ccfit.zuev.skins;
 
 import androidx.annotation.NonNull;
-
 import org.json.JSONObject;
-
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.datatypes.DefaultRGBColor;
 
 public class ColorSkinData extends SkinData<RGBColor> {
+
     private final String defaultHex;
+
     private String currentHex;
 
     public ColorSkinData(String tag, String defaultHex) {
@@ -33,4 +33,5 @@ public class ColorSkinData extends SkinData<RGBColor> {
     public boolean currentIsDefault() {
         return currentHex.equalsIgnoreCase(defaultHex);
     }
+
 }

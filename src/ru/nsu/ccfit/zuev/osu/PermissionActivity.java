@@ -1,28 +1,26 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import static android.widget.LinearLayout.LayoutParams.*;
-
 import android.Manifest;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
-import android.net.Uri;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.PermissionChecker;
-
-import java.util.List;
-
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 import ru.nsu.ccfit.zuev.osuplus.R;
+
+import java.util.List;
+
+import static android.widget.LinearLayout.LayoutParams.MATCH_PARENT;
 
 public class PermissionActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
 
@@ -51,7 +49,7 @@ public class PermissionActivity extends AppCompatActivity implements EasyPermiss
     }
 
     private void checkPermissions() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (Environment.isExternalStorageManager()) {
                 startGameActivity();
             } else {
@@ -59,7 +57,7 @@ public class PermissionActivity extends AppCompatActivity implements EasyPermiss
                 Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
                 startActivityForResult(intent, 2444);
             }
-        }else if(Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             if (PermissionChecker.checkCallingOrSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PermissionChecker.PERMISSION_GRANTED) {
                 startGameActivity();
@@ -69,10 +67,10 @@ public class PermissionActivity extends AppCompatActivity implements EasyPermiss
         }
     }
 
-    @Override  
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {  
-        super.onActivityResult(requestCode, resultCode, data);  
-        if(requestCode == 2444) {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 2444) {
             checkPermissions();
         }
     }
@@ -96,4 +94,5 @@ public class PermissionActivity extends AppCompatActivity implements EasyPermiss
             new AppSettingsDialog.Builder(this).build().show();
         }
     }
+
 }

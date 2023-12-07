@@ -2,19 +2,23 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.app.Activity;
 import android.widget.Toast;
-
 import androidx.annotation.StringRes;
+import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-
 public class ToastLogger {
+
     private static ToastLogger instance = null;
+
     Activity activity;
+
     String message = "";
+
     boolean showlong = false;
+
     ArrayList<String> debugLog = new ArrayList<String>();
+
     float percentage;
 
     private ToastLogger(final Activity activity) {
@@ -30,9 +34,9 @@ public class ToastLogger {
             return;
         }
 
-        instance.activity.runOnUiThread(() -> 
-            Toast.makeText(instance.activity, message,
-                showlong ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT).show());
+        instance.activity.runOnUiThread(() ->
+                Toast.makeText(instance.activity, message,
+                        showlong ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT).show());
     }
 
     public static void showTextId(@StringRes final int resID, final boolean showlong) {

@@ -2,22 +2,9 @@ package ru.nsu.ccfit.zuev.osu.storyboard;
 
 import android.opengl.GLES10;
 import android.util.Log;
-
 import com.dgsrz.bancho.ui.StoryBoardTestActivity;
-
 import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.entity.modifier.ColorModifier;
-import org.anddev.andengine.entity.modifier.DelayModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.LoopEntityModifier;
-import org.anddev.andengine.entity.modifier.MoveModifier;
-import org.anddev.andengine.entity.modifier.MoveXModifier;
-import org.anddev.andengine.entity.modifier.MoveYModifier;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.RotationModifier;
-import org.anddev.andengine.entity.modifier.ScaleModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
+import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.sprite.AnimatedSprite;
 import org.anddev.andengine.entity.sprite.BaseSprite;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -35,11 +22,10 @@ import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseQuadIn;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 import org.anddev.andengine.util.modifier.ease.IEaseFunction;
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
 
 import java.io.File;
 import java.util.ArrayList;
-
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
 
 /**
  * Created by dgsrz on 16/9/16.
@@ -47,24 +33,43 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 public class OsuSprite {
 
     public static final int LAYER_BACKGROUND = 0;
+
     public static final int LAYER_FAIL = 1;
+
     public static final int LAYER_PASS = 2;
+
     public static final int LAYER_FOREGROUND = 3;
+
     public static float TO_RADIANS = (1 / 180.0f) * (float) Math.PI;
+
     public static float TO_DEGREES = (1 / (float) Math.PI) * 180;
+
     public long spriteStartTime, spriteEndTime;
+
     private String fileName;
+
     private String debugLine;
+
     private int layer, ZIndex;
+
     private Origin origin;
+
     private BaseSprite sprite;
+
     private ArrayList<OsuEvent> eventList;
+
     private TextureRegion textureRegion;
+
     private StoryBoardTestActivity activity = StoryBoardTestActivity.activity;
+
     private boolean isValid;
+
     private ParallelEntityModifier parallelEntityModifier;
+
     private boolean isAnimation;
+
     private float anchorCenterX = 0f;
+
     private float anchorCenterY = 0f;
 
     public OsuSprite(float x, float y, int layer, Origin origin, String filePath, ArrayList<OsuEvent> eventList, int ZIndex) {//normal sprite
@@ -502,4 +507,5 @@ public class OsuSprite {
             }
         }
     }
+
 }

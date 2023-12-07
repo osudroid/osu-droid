@@ -5,11 +5,11 @@ import org.anddev.andengine.entity.modifier.ScaleModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
-
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class ScoreNumber extends Entity {
+
     private float height;
 
     public ScoreNumber(final float x, final float y, final String text, final float scale, final boolean center) {
@@ -65,4 +65,5 @@ public class ScoreNumber extends Entity {
     public float getHeight() {
         return height;
     }
+
 }

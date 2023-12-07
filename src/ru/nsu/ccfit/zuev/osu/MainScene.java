@@ -6,18 +6,12 @@ import android.graphics.PointF;
 import android.net.Uri;
 import android.os.PowerManager;
 import android.util.Log;
-
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
-
 import com.reco1l.legacy.ui.ChimuWebView;
 import com.reco1l.legacy.ui.MainMenu;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.MoveXModifier;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.RotationModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
+import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.particle.ParticleSystem;
 import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
 import org.anddev.andengine.entity.particle.initializer.AccelerationInitializer;
@@ -42,20 +36,6 @@ import org.anddev.andengine.util.modifier.ease.EaseBounceOut;
 import org.anddev.andengine.util.modifier.ease.EaseCubicOut;
 import org.anddev.andengine.util.modifier.ease.EaseElasticOut;
 import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
-import java.util.TimerTask;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-import javax.microedition.khronos.opengles.GL10;
-
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
@@ -73,54 +53,91 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
+import javax.microedition.khronos.opengles.GL10;
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by Fuuko on 2015/4/24.
  */
 public class MainScene implements IUpdateHandler {
+
     public SongProgressBar progressBar;
+
     public BeatmapInfo beatmapInfo;
+
+    public boolean isOnExitAnim = false;
+
     private Context context;
+
     private Sprite logo, logoOverlay, background, lastBackground;
+
     private Sprite music_nowplay;
+
     private Scene scene;
+
     private ChangeableText musicInfoText;
+
     private Random random = new Random();
+
     private Rectangle[] spectrum = new Rectangle[120];
+
     private float[] peakLevel = new float[120];
+
     private float[] peakDownRate = new float[120];
+
     private float[] peakAlpha = new float[120];
+
     private Replay replay = null;
+
     private TrackInfo selectedTrack;
+
     private BeatmapData beatmapData;
+
     private List<TimingPoint> timingPoints;
+
     private TimingPoint currentTimingPoint, lastTimingPoint, firstTimingPoint;
 
     private int particleBeginTime = 0;
-    private boolean particleEnabled = false;
-    private boolean isContinuousKiai = false;
 
-    private ParticleSystem[] particleSystem = new ParticleSystem[2];
+    private boolean particleEnabled = false;
+
+    private boolean isContinuousKiai = false;
 
     //private BassAudioPlayer music;
 
+    private ParticleSystem[] particleSystem = new ParticleSystem[2];
+
     private boolean musicStarted;
+
     private BassSoundProvider hitsound;
 
     private double bpmLength = 1000;
+
     private double lastBpmLength = 0;
+
     private double offset = 0;
+
     private float beatPassTime = 0;
+
     private float lastBeatPassTime = 0;
+
     private boolean doChange = false;
+
     private boolean doStop = false;
+
     //    private int playIndex = 0;
 //    private int lastPlayIndex = -1;
     private long lastHit = 0;
-    public boolean isOnExitAnim = false;
 
     private boolean isMenuShowed = false;
+
     private boolean doMenuShow = false;
+
     private float showPassTime = 0, syncPassedTime = 0;
+
     private float menuBarX = 0, playY, optionsY, exitY;
 
     private MainMenu menu;
@@ -132,7 +149,7 @@ public class MainScene implements IUpdateHandler {
         scene = new Scene();
 
         final TextureRegion tex = ResourceManager.getInstance().getTexture("menu-background");
-        
+
         if (tex != null) {
             float height = tex.getHeight();
             height *= Config.getRES_WIDTH()
@@ -190,7 +207,7 @@ public class MainScene implements IUpdateHandler {
                         Locale.getDefault(),
                         "osu!droid %s\nby osu!droid Team\nosu! is \u00a9 peppy 2007-2023",
                         BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")"
-                        )) {
+                )) {
 
 
             @Override
@@ -198,12 +215,12 @@ public class MainScene implements IUpdateHandler {
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
                     new ConfirmDialogFragment().setMessage(R.string.dialog_visit_osu_website_message).showForResult(
-                        isAccepted -> {
-                            if(isAccepted) {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
-                                GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                            isAccepted -> {
+                                if (isAccepted) {
+                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
+                                    GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                                }
                             }
-                        }
                     );
                     return true;
                 }
@@ -221,12 +238,12 @@ public class MainScene implements IUpdateHandler {
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
                     new ConfirmDialogFragment().setMessage(R.string.dialog_visit_osudroid_website_message).showForResult(
-                        isAccepted -> {
-                            if(isAccepted) {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
-                                GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                            isAccepted -> {
+                                if (isAccepted) {
+                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
+                                    GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                                }
                             }
-                        }
                     );
                     return true;
                 }
@@ -368,7 +385,7 @@ public class MainScene implements IUpdateHandler {
         bgTopRect.setColor(0, 0, 0, 0.3f);
 
         final Rectangle bgbottomRect = new Rectangle(0, 0, Config.getRES_WIDTH(),
-            Math.max(author.getHeight(), yasonline.getHeight()) + 15);
+                Math.max(author.getHeight(), yasonline.getHeight()) + 15);
         bgbottomRect.setPosition(0, Config.getRES_HEIGHT() - bgbottomRect.getHeight());
         bgbottomRect.setColor(0, 0, 0, 0.3f);
 
@@ -424,19 +441,15 @@ public class MainScene implements IUpdateHandler {
         }
 
         TextureRegion chimuTex = ResourceManager.getInstance().getTexture("chimu");
-        Sprite chimu = new Sprite(Config.getRES_WIDTH() - chimuTex.getWidth(), (Config.getRES_HEIGHT() - chimuTex.getHeight()) / 2f, chimuTex)
-        {
-            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY)
-            {
-                if (pSceneTouchEvent.isActionDown())
-                {
+        Sprite chimu = new Sprite(Config.getRES_WIDTH() - chimuTex.getWidth(), (Config.getRES_HEIGHT() - chimuTex.getHeight()) / 2f, chimuTex) {
+            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+                if (pSceneTouchEvent.isActionDown()) {
                     setColor(0.7f, 0.7f, 0.7f);
                     doStop = true;
                     return true;
                 }
 
-                if (pSceneTouchEvent.isActionUp())
-                {
+                if (pSceneTouchEvent.isActionUp()) {
                     setColor(1, 1, 1);
                     musicControl(MusicOption.STOP);
                     ChimuWebView.INSTANCE.show();
@@ -856,8 +869,8 @@ public class MainScene implements IUpdateHandler {
             if (selectedTrack.getBackground() != null) {
                 try {
                     final TextureRegion tex = Config.isSafeBeatmapBg() ?
-                        ResourceManager.getInstance().getTexture("menu-background") :
-                        ResourceManager.getInstance().loadBackground(selectedTrack.getBackground());
+                            ResourceManager.getInstance().getTexture("menu-background") :
+                            ResourceManager.getInstance().loadBackground(selectedTrack.getBackground());
 
                     if (tex != null) {
                         float height = tex.getHeight();
@@ -929,11 +942,11 @@ public class MainScene implements IUpdateHandler {
         GlobalManager.getInstance().getMainActivity().runOnUiThread(new Runnable() {
             public void run() {
                 new ConfirmDialogFragment().setMessage(R.string.dialog_exit_message).showForResult(
-                    isAccepted -> {
-                        if (isAccepted) {
-                            exit();
+                        isAccepted -> {
+                            if (isAccepted) {
+                                exit();
+                            }
                         }
-                    }
                 );
             }
         });
@@ -964,7 +977,7 @@ public class MainScene implements IUpdateHandler {
         if (exitsound != null) {
             exitsound.play();
         }
-        
+
         Rectangle bg = new Rectangle(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT());
         bg.setColor(0, 0, 0, 1.0f);
@@ -1052,4 +1065,5 @@ public class MainScene implements IUpdateHandler {
     }
 
     public enum MusicOption {PREV, PLAY, PAUSE, STOP, NEXT, SYNC}
+
 }

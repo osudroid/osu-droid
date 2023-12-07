@@ -1,34 +1,37 @@
 package ru.nsu.ccfit.zuev.osu.storyboard;
 
 import com.dgsrz.bancho.ui.StoryBoardTestActivity;
-
 import okio.BufferedSource;
 import okio.Okio;
+import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
 /**
  * Created by dgsrz on 16/9/16.
  */
 public class OsbParser {
+
     public static OsbParser instance = new OsbParser();
+
     private LinkedList<OsuSprite> sprites = new LinkedList<OsuSprite>();
+
     private ArrayList<TimingPoint> timingPoints = new ArrayList<TimingPoint>();
+
     private ArrayList<HitSound> hitSounds = new ArrayList<HitSound>();
+
     private HashMap<String, String> variablesMap = new HashMap<String, String>();
+
     private String line;
+
     private String[] info;
+
     private float sliderMultiplier;
+
     private int ZIndex = -900;
 
     public ArrayList<TimingPoint> getTimingPoints() {
@@ -515,4 +518,5 @@ public class OsbParser {
             }
         }
     }
+
 }

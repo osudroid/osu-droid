@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.skins;
 
 import androidx.annotation.NonNull;
-
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.json.JSONObject;
 
@@ -37,4 +36,5 @@ public class SkinLayout {
             entity.setHeight(height);
         }
     }
+
 }

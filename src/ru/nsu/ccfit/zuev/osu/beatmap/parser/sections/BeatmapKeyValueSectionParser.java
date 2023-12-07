@@ -8,6 +8,7 @@ import java.util.Arrays;
  * A parser for parsing beatmap sections that store properties in a key-value pair.
  */
 public abstract class BeatmapKeyValueSectionParser extends BeatmapSectionParser {
+
     /**
      * Obtains the property of a line.
      * <br><br>
@@ -20,9 +21,10 @@ public abstract class BeatmapKeyValueSectionParser extends BeatmapSectionParser 
     protected String[] splitProperty(final String line) {
         String[] s = line.split(":");
 
-        return new String[] {
+        return new String[]{
                 s[0].trim(),
                 s.length > 1 ? TextUtils.join(":", Arrays.copyOfRange(s, 1, s.length)).trim() : ""
         };
     }
+
 }

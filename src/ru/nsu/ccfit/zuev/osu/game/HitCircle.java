@@ -1,13 +1,11 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
-
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
-
 import org.anddev.andengine.util.modifier.ease.EaseLinear;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
@@ -16,22 +14,38 @@ import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class HitCircle extends GameObject {
+
     private final Sprite circle;
+
     private final Sprite overlay;
+
     private final Sprite approachCircle;
+
     private final RGBColor color = new RGBColor();
+
     private CircleNumber number;
+
     private float scale;
+
     private GameObjectListener listener;
+
     private Scene scene;
+
     private int soundId;
+
     private int sampleSet;
+
     private int addition;
+
     //private PointF pos;
     private float radius;
+
     private float passedTime;
+
     private float time;
+
     private boolean isFirstNote;
+
     private boolean kiai;
 
     public HitCircle() {
@@ -204,7 +218,7 @@ public class HitCircle extends GameObject {
                 listener.registerAccuracy(replayObjectData.accuracy / 1000f);
                 passedTime = -1;
                 // Remove circle and register hit in update thread
-                listener.onCircleHit(id, replayObjectData.accuracy / 1000f, pos,endsCombo, replayObjectData.result, color);
+                listener.onCircleHit(id, replayObjectData.accuracy / 1000f, pos, endsCombo, replayObjectData.result, color);
                 removeFromScene();
                 return;
             }
@@ -251,16 +265,14 @@ public class HitCircle extends GameObject {
 
         passedTime += dt;
 
-        if (!GameHelper.isHidden())
-        {
+        if (!GameHelper.isHidden()) {
             // We are not applying time multiplier here as dt is based on game time,
             // and the duration below is game time.
             // This is different from using entity modifiers which expect real time.
             float duration = 0.4f * Math.min(1, time / 0.45f);
             float percent = EaseLinear.getInstance().getPercentage(passedTime, duration);
 
-            if (passedTime < duration)
-            {
+            if (passedTime < duration) {
                 circle.setAlpha(percent);
                 overlay.setAlpha(percent);
                 number.setAlpha(percent);
@@ -299,7 +311,7 @@ public class HitCircle extends GameObject {
     } // update(float dt)
 
     @Override
-    public void tryHit(final float dt){
+    public void tryHit(final float dt) {
         if (passedTime * 2 > time && isHit()) {
             float signAcc = passedTime - time;
             if (Config.isFixFrameOffset()) {
@@ -318,4 +330,5 @@ public class HitCircle extends GameObject {
             removeFromScene();
         }
     }
+
 }

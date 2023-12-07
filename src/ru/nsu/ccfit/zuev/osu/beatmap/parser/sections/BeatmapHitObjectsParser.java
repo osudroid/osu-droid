@@ -1,25 +1,20 @@
 package ru.nsu.ccfit.zuev.osu.beatmap.parser.sections;
 
-import com.rian.difficultycalculator.beatmap.hitobject.HitCircle;
-import com.rian.difficultycalculator.beatmap.hitobject.HitObject;
-import com.rian.difficultycalculator.beatmap.hitobject.Slider;
-import com.rian.difficultycalculator.beatmap.hitobject.SliderPath;
-import com.rian.difficultycalculator.beatmap.hitobject.SliderPathType;
-import com.rian.difficultycalculator.beatmap.hitobject.Spinner;
+import com.rian.difficultycalculator.beatmap.hitobject.*;
 import com.rian.difficultycalculator.beatmap.timings.DifficultyControlPoint;
 import com.rian.difficultycalculator.beatmap.timings.TimingControlPoint;
 import com.rian.difficultycalculator.math.Precision;
 import com.rian.difficultycalculator.math.Vector2;
-
-import java.util.ArrayList;
-
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.constants.HitObjectType;
+
+import java.util.ArrayList;
 
 /**
  * A parser for parsing a beatmap's hit objects section.
  */
 public class BeatmapHitObjectsParser extends BeatmapSectionParser {
+
     @Override
     public void parse(BeatmapData data, String line) {
         final String[] pars = line.split(",");
@@ -32,8 +27,8 @@ public class BeatmapHitObjectsParser extends BeatmapSectionParser {
 
         HitObjectType type = HitObjectType.valueOf(parseInt(pars[3]) % 16);
         Vector2 position = new Vector2(
-            (int) parseFloat(pars[0], maxCoordinateValue),
-            (int) parseFloat(pars[1], maxCoordinateValue)
+                (int) parseFloat(pars[0], maxCoordinateValue),
+                (int) parseFloat(pars[1], maxCoordinateValue)
         );
 
         HitObject object = null;
@@ -95,7 +90,7 @@ public class BeatmapHitObjectsParser extends BeatmapSectionParser {
                     Precision.almostEqualsNumber(
                             0,
                             (curvePoints.get(1).y - curvePoints.get(0).y) * (curvePoints.get(2).x - curvePoints.get(0).x) -
-                            (curvePoints.get(1).x - curvePoints.get(0).x) * (curvePoints.get(2).y - curvePoints.get(0).y)
+                                    (curvePoints.get(1).x - curvePoints.get(0).x) * (curvePoints.get(2).y - curvePoints.get(0).y)
                     )
             ) {
                 // osu-stable special-cased co-linear perfect curves to a linear path
@@ -127,4 +122,5 @@ public class BeatmapHitObjectsParser extends BeatmapSectionParser {
         double endTime = data.getOffsetTime(parseInt(pars[5]));
         return new Spinner(time, endTime);
     }
+
 }

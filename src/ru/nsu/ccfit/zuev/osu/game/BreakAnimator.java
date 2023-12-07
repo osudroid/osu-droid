@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
-
 import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import org.anddev.andengine.entity.modifier.*;
@@ -9,24 +8,35 @@ import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class BreakAnimator extends GameObject {
+
     private final Scene scene;
+
     private final StatisticV2 stat;
+
     private final Sprite[] arrows = new Sprite[4];
+
     private float length = 0;
+
     private float time;
+
     private Sprite passfail;
+
     private String ending;
+
     private Sprite mark = null;
+
     private boolean showMark = false;
+
     private boolean isbreak = false;
+
     private boolean over = false;
+
     private Rectangle dimRectangle = null;
 
     public BreakAnimator(final GameObjectListener listener, final Scene scene,

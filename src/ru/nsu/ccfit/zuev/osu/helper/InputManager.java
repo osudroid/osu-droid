@@ -4,12 +4,19 @@ import android.content.Context;
 import android.view.inputmethod.InputMethodManager;
 
 public class InputManager {
+
     private static Context context;
+
     private static InputManager instance = new InputManager();
+
     private boolean inputStarted = false;
+
     private boolean changed = true;
+
     private StringBuilder builder;
+
     private int maxlength;
+
     private InputManager() {
     }
 
@@ -81,4 +88,5 @@ public class InputManager {
         builder = null;
         return str;
     }
+
 }

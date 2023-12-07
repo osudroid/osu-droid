@@ -4,20 +4,25 @@ import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import org.anddev.andengine.util.Debug;
-
-import java.io.File;
-import java.util.ArrayList;
-
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
+import java.io.File;
+import java.util.ArrayList;
+
 public class OnlineScoring {
+
     private static final int attemptCount = 5;
+
     private static OnlineScoring instance = null;
+
     private Boolean onlineMutex = new Boolean(false);
+
     private OnlinePanel panel = null;
+
     private OnlinePanel secondPanel = null;
+
     private boolean avatarLoaded = false;
 
     public static OnlineScoring getInstance() {
@@ -219,4 +224,5 @@ public class OnlineScoring {
     public boolean isAvatarLoaded() {
         return avatarLoaded;
     }
+
 }

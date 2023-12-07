@@ -3,25 +3,22 @@ package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 import org.anddev.andengine.entity.modifier.MoveModifier;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 import org.anddev.andengine.util.modifier.ease.IEaseFunction;
-
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-import ru.nsu.ccfit.zuev.osu.game.GameObject;
-import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
-import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
-import ru.nsu.ccfit.zuev.osu.game.Spinner;
+import ru.nsu.ccfit.zuev.osu.game.*;
 
 public class AutoCursor extends CursorEntity implements ISliderListener {
-    private MoveModifier currentModifier;
-    /**
-     * The ID of the object that the cursor is currently active on.
-     */
-    private int currentObjectId = -1;
 
     /**
      * The Easing function to be used on the cursor.
      */
     private final IEaseFunction easeFunction = EaseQuadOut.getInstance();
+
+    private MoveModifier currentModifier;
+
+    /**
+     * The ID of the object that the cursor is currently active on.
+     */
+    private int currentObjectId = -1;
 
     public AutoCursor() {
         super();
@@ -103,4 +100,5 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
     public void onSliderEnd() {
         cursorSprite.onSliderEnd();
     }
+
 }

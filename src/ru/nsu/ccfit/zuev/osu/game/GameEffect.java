@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
-
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
@@ -10,23 +9,24 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.shape.Shape;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.util.modifier.IModifier;
+import ru.nsu.ccfit.zuev.osu.RGBColor;
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
+import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-import ru.nsu.ccfit.zuev.osu.RGBColor;
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
-
 public class GameEffect extends GameObject implements IEntityModifierListener {
+
     private static final HashSet<String> animationEffects = new HashSet<>(Arrays.asList(
             "hit0", "hit50", "hit100", "hit100k", "hit300", "hit300k", "hit300g"
     ));
 
     Sprite hit;
+
     String texname;
 
     public GameEffect(final String texname) {
@@ -96,4 +96,5 @@ public class GameEffect extends GameObject implements IEntityModifierListener {
             GameObjectPool.getInstance().putEffect(GameEffect.this);
         });
     }
+
 }

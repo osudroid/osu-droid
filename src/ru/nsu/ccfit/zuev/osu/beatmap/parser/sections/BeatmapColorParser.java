@@ -1,16 +1,17 @@
 package ru.nsu.ccfit.zuev.osu.beatmap.parser.sections;
 
-import java.util.Collections;
-
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.ComboColor;
 
+import java.util.Collections;
+
 /**
  * A parser for parsing a beatmap's colors section.
  */
 public class BeatmapColorParser extends BeatmapKeyValueSectionParser {
+
     @Override
     public void parse(BeatmapData data, String line) {
         String[] p = splitProperty(line);
@@ -36,4 +37,5 @@ public class BeatmapColorParser extends BeatmapKeyValueSectionParser {
             data.colors.sliderBorderColor = color;
         }
     }
+
 }

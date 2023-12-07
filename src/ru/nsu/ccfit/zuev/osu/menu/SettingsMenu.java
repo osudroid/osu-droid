@@ -11,40 +11,28 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.TextView;
-
 import androidx.annotation.AnimRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.IdRes;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
-
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
+import com.edlplan.ui.EasingHelper;
 import com.edlplan.ui.SkinPathPreference;
 import com.edlplan.ui.fragment.LoadingFragment;
 import com.edlplan.ui.fragment.SettingsFragment;
-import com.edlplan.ui.EasingHelper;
-
 import com.google.android.material.snackbar.Snackbar;
-
-import java.io.File;
-
 import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.UpdateManager;
-
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.LibraryManager;
-import ru.nsu.ccfit.zuev.osu.MainActivity;
-import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
-import ru.nsu.ccfit.zuev.skins.SkinManager;
-import ru.nsu.ccfit.zuev.osu.ToastLogger;
-// import ru.nsu.ccfit.zuev.osu.game.SpritePool;
+import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.R;
+import ru.nsu.ccfit.zuev.skins.SkinManager;
+
+import java.io.File;
 
 import static android.content.Intent.ACTION_VIEW;
 
@@ -53,7 +41,9 @@ public class SettingsMenu extends SettingsFragment {
     public static final String REGISTER_URL = "https://" + OnlineManager.hostname + "/user/?action=register";
 
     private PreferenceScreen mParentScreen, parentScreen;
+
     private boolean isOnNestedScreen = false;
+
     private Activity mActivity;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -68,7 +58,7 @@ public class SettingsMenu extends SettingsFragment {
         SkinPathPreference skinPath = (SkinPathPreference) findPreference("skinPath");
         skinPath.reloadSkinList();
         skinPath.setOnPreferenceChangeListener((preference, newValue) -> {
-            if(GlobalManager.getInstance().getSkinNow() != newValue.toString()) {
+            if (GlobalManager.getInstance().getSkinNow() != newValue.toString()) {
                 var loading = new LoadingFragment();
                 loading.show();
 
@@ -185,13 +175,13 @@ public class SettingsMenu extends SettingsFragment {
     }
 
     public void onNavigateToScreen(PreferenceScreen preferenceScreen) {
-        if(preferenceScreen.getKey() != null) {
-            if(!isOnNestedScreen) {
+        if (preferenceScreen.getKey() != null) {
+            if (!isOnNestedScreen) {
                 isOnNestedScreen = true;
                 animateBackButton(R.drawable.back_black);
             }
             setTitle(preferenceScreen.getTitle().toString());
-            for(int v : new int[]{android.R.id.list_container, R.id.title}) {
+            for (int v : new int[]{android.R.id.list_container, R.id.title}) {
                 animateView(v, R.anim.slide_in_right);
             }
         }
@@ -204,8 +194,12 @@ public class SettingsMenu extends SettingsFragment {
                 ImageButton backButton = (ImageButton) findViewById(R.id.back_button);
                 backButton.setImageDrawable(mActivity.getResources().getDrawable(newDrawable));
             }
-            public void onAnimationRepeat(Animation animation) {}
-            public void onAnimationStart(Animation animation) {}
+
+            public void onAnimationRepeat(Animation animation) {
+            }
+
+            public void onAnimationStart(Animation animation) {
+            }
         });
         ((ImageButton) findViewById(R.id.back_button)).startAnimation(animation);
     }
@@ -215,7 +209,7 @@ public class SettingsMenu extends SettingsFragment {
     }
 
     private void setTitle(String title) {
-       ((TextView) findViewById(R.id.title)).setText(title);
+        ((TextView) findViewById(R.id.title)).setText(title);
     }
 
     @Override
@@ -225,24 +219,24 @@ public class SettingsMenu extends SettingsFragment {
 
     // only supports 1 child with an optional grandchild
     private void navigateBack() {
-        for(int v : new int[]{android.R.id.list_container, R.id.title}) {
+        for (int v : new int[]{android.R.id.list_container, R.id.title}) {
             animateView(v, R.anim.slide_in_left);
         }
 
-        if(parentScreen.getKey() != null) {
+        if (parentScreen.getKey() != null) {
             setPreferenceScreen(parentScreen);
             setTitle(parentScreen.getTitle().toString());
             parentScreen = mParentScreen;
             return;
         }
 
-        if(isOnNestedScreen) {
+        if (isOnNestedScreen) {
             isOnNestedScreen = false;
             animateBackButton(R.drawable.close_black);
             setPreferenceScreen(mParentScreen);
             setTitle(StringTable.get(R.string.menu_settings_title));
-        }else {
-           dismiss();
+        } else {
+            dismiss();
         }
     }
 

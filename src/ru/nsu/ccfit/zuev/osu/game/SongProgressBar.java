@@ -1,17 +1,20 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
-
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
-
 import ru.nsu.ccfit.zuev.osu.RGBAColor;
 
 public class SongProgressBar extends GameObject {
+
     private final Rectangle progressRect;
+
     private final Rectangle bgRect;
+
     private float time;
+
     private float startTime;
+
     private float passedTime;
 
     public SongProgressBar(final GameObjectListener listener,
@@ -67,4 +70,5 @@ public class SongProgressBar extends GameObject {
     public void setProgressRectColor(RGBAColor color) {
         this.progressRect.setColor(color.r(), color.g(), color.b(), color.a());
     }
+
 }

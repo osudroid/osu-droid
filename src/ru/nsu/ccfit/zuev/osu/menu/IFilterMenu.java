@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.content.Context;
-
 import org.anddev.andengine.entity.scene.Scene;
 
 public interface IFilterMenu {
@@ -21,4 +20,5 @@ public interface IFilterMenu {
     void hideMenu();
 
     void showMenu(SongMenu parent);
+
 }

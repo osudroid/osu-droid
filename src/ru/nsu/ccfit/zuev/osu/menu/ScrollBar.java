@@ -3,11 +3,12 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
-
 import ru.nsu.ccfit.zuev.osu.Config;
 
 public class ScrollBar {
+
     private final Rectangle barRectangle;
+
     private boolean visible;
 
     public ScrollBar(final Scene scene) {
@@ -42,4 +43,5 @@ public class ScrollBar {
         }
         visible = vis;
     }
+
 }

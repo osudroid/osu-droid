@@ -1,8 +1,12 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
-
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
+import ru.nsu.ccfit.zuev.osu.RGBColor;
+import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
+import ru.nsu.ccfit.zuev.osu.polygon.Spline;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -11,47 +15,75 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
 
-import ru.nsu.ccfit.zuev.osu.RGBColor;
-import ru.nsu.ccfit.zuev.skins.OsuSkin;
-import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
-import ru.nsu.ccfit.zuev.osu.polygon.Spline;
-
 public class GameHelper {
-    public static ControlPoints controlPoints;
-    private static double tickRate = 1;
-    private static float scale = 1;
-    private static double speed = 1;
-    private static float difficulty = 1;
-    private static float approachRate = 1;
-    private static float drain = 0;
-    private static float stackLeniency = 0;
-    private static float timeMultiplier = 0;
-    private static RGBColor sliderColor = new RGBColor();
-    private static boolean hidden = false;
-    private static boolean flashLight = false;
-    private static boolean hardrock = false;
-    private static boolean relaxMod = false;
-    private static boolean doubleTime = false;
-    private static boolean nightCore = false;
-    private static boolean halfTime = false;
-    private static boolean autopilotMod = false;
-    private static boolean suddenDeath = false;
-    private static boolean perfect = false;
-    private static boolean scoreV2;
-    private static boolean isEasy;
-    private static boolean useReplay;
-    private static boolean isKiai = false;
-    private static boolean auto = false;
-    private static double beatLength = 0;
-    private static double timingOffset = 0;
-    private static int timeSignature = 4;
-    private static double initalBeatLength = 0;
-    private static double globalTime = 0;
-    private static Spline.CurveTypes curveType;
-    private static int gameid = 0;
+
     private static final Queue<SliderPath> pathPool = new LinkedList<>();
+
     private static final Queue<PointF> pointPool = new LinkedList<>();
+
+    public static ControlPoints controlPoints;
+
+    private static double tickRate = 1;
+
+    private static float scale = 1;
+
+    private static double speed = 1;
+
+    private static float difficulty = 1;
+
+    private static float approachRate = 1;
+
+    private static float drain = 0;
+
+    private static float stackLeniency = 0;
+
+    private static float timeMultiplier = 0;
+
+    private static RGBColor sliderColor = new RGBColor();
+
+    private static boolean hidden = false;
+
+    private static boolean flashLight = false;
+
+    private static boolean hardrock = false;
+
+    private static boolean relaxMod = false;
+
+    private static boolean doubleTime = false;
+
+    private static boolean nightCore = false;
+
+    private static boolean halfTime = false;
+
+    private static boolean autopilotMod = false;
+
+    private static boolean suddenDeath = false;
+
+    private static boolean perfect = false;
+
+    private static boolean scoreV2;
+
+    private static boolean isEasy;
+
+    private static boolean useReplay;
+
+    private static boolean isKiai = false;
+
+    private static boolean auto = false;
+
+    private static double beatLength = 0;
+
+    private static double timingOffset = 0;
+
+    private static int timeSignature = 4;
+
+    private static double initalBeatLength = 0;
+
+    private static double globalTime = 0;
+
+    private static Spline.CurveTypes curveType;
+
+    private static int gameid = 0;
 
     private static DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
@@ -288,6 +320,7 @@ public class GameHelper {
     public static void setFlashLight(final boolean flashLight) {
         GameHelper.flashLight = flashLight;
     }
+
     public static boolean isHalfTime() {
         return halfTime;
     }
@@ -452,7 +485,11 @@ public class GameHelper {
     }
 
     public static class SliderPath {
+
         public ArrayList<PointF> points = new ArrayList<>();
+
         public ArrayList<Float> length = new ArrayList<>();
+
     }
+
 }

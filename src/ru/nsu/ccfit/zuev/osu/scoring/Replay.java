@@ -1,19 +1,16 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
 import android.graphics.PointF;
-
 import androidx.annotation.NonNull;
-
 import org.anddev.andengine.util.Debug;
+import ru.nsu.ccfit.zuev.osu.ToastLogger;
+import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.game.GameScene;
+import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
-import java.io.EOFException;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.EnumSet;
@@ -22,34 +19,45 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import ru.nsu.ccfit.zuev.osu.ToastLogger;
-import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.game.GameScene;
-import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osuplus.R;
-
 public class Replay {
+
     public static EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
+
     public static EnumSet<GameMod> oldMod = EnumSet.noneOf(GameMod.class);
-    protected int pointsSkipped = 0;
-    public ArrayList<MoveArray> cursorMoves = new ArrayList<>();
-    public int[] cursorIndex;
-    public int[] lastMoveIndex;
-    public ReplayObjectData[] objectData = null;
-    public int replayVersion;
-    public StatisticV2 stat = null;
-    private String md5 = "";
-    private String mapFile = "";
-    private String mapName = "";
-    private boolean isSaving;
+
     public static float oldChangeSpeed = 1.0f;
+
     public static float oldFLFollowDelay = FlashLightEntity.defaultMoveDelayS;
 
     public static Float oldCustomAR;
+
     public static Float oldCustomOD;
+
     public static Float oldCustomCS;
+
     public static Float oldCustomHP;
+
+    public ArrayList<MoveArray> cursorMoves = new ArrayList<>();
+
+    public int[] cursorIndex;
+
+    public int[] lastMoveIndex;
+
+    public ReplayObjectData[] objectData = null;
+
+    public int replayVersion;
+
+    public StatisticV2 stat = null;
+
+    protected int pointsSkipped = 0;
+
+    private String md5 = "";
+
+    private String mapFile = "";
+
+    private String mapName = "";
+
+    private boolean isSaving;
 
     public Replay() {
         cursorMoves.add(new MoveArray(200));
@@ -332,7 +340,7 @@ public class Replay {
                 stat.setMod((EnumSet<GameMod>) os.readObject());
             }
 
-            if  (version >= 4) {
+            if (version >= 4) {
                 stat.setExtraModFromString((String) os.readObject());
             }
 
@@ -408,19 +416,29 @@ public class Replay {
         Version 5: Changes coordinates to use the float primitive type
      */
     public static class ReplayVersion implements Serializable {
+
         private static final long serialVersionUID = 4643121693566795335L;
+
         int version = 5;
+
     }
 
     public static class ReplayObjectData {
+
         public short accuracy = 0;
+
         public BitSet tickSet = null;
+
         public byte result = 0;
+
     }
 
     public static class ReplayMovement {
+
         protected int time;
+
         protected PointF point = new PointF();
+
         protected TouchType touchType;
 
         public int getTime() {
@@ -434,11 +452,15 @@ public class Replay {
         public TouchType getTouchType() {
             return touchType;
         }
+
     }
 
     public static class MoveArray {
+
         public ReplayMovement[] movements;
+
         public int size;
+
         public int allocated;
 
         public MoveArray(int startSize) {
@@ -539,5 +561,7 @@ public class Replay {
                 }
             }
         }
+
     }
+
 }

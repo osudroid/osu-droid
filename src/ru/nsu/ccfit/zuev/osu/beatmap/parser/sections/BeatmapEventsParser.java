@@ -8,6 +8,7 @@ import ru.nsu.ccfit.zuev.osu.game.BreakPeriod;
  * A parser for parsing a beatmap's events section.
  */
 public class BeatmapEventsParser extends BeatmapSectionParser {
+
     @Override
     public void parse(BeatmapData data, String line) {
         final String[] pars = line.split("\\s*,\\s*");
@@ -37,4 +38,5 @@ public class BeatmapEventsParser extends BeatmapSectionParser {
             );
         }
     }
+
 }

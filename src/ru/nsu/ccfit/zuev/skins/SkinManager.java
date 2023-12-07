@@ -1,18 +1,22 @@
 package ru.nsu.ccfit.zuev.skins;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
 public class SkinManager {
+
     private static SkinManager instance = new SkinManager();
+
     private static Map<String, Integer> frameCount = new HashMap<String, Integer>();
+
     private static Map<String, Integer> stdframeCount = new HashMap<String, Integer>();
+
     private static boolean skinEnabled = true;
 
     static {
@@ -25,6 +29,7 @@ public class SkinManager {
     }
 
     private final RGBColor sliderColor = new RGBColor(1, 1, 1);
+
     private String skinname = "";
 
     private SkinManager() {
@@ -84,7 +89,7 @@ public class SkinManager {
         skinname = beatmapFolder;
         final File folderFile = new File(beatmapFolder);
         File[] folderFiles = FileUtils.listFiles(folderFile, new String[]{
-            ".wav", ".mp3", ".ogg", ".png", ".jpg"});
+                ".wav", ".mp3", ".ogg", ".png", ".jpg"});
         for (final File f : folderFiles) {
             if (!f.isFile()) {
                 continue;
@@ -93,7 +98,7 @@ public class SkinManager {
                     && (f.getName().toLowerCase().matches(".*[.]wav")
                     || f.getName().toLowerCase().matches(".*[.]mp3")
                     || f.getName().toLowerCase().matches(".*[.]ogg"))
-                && f.length() >= 1024) {
+                    && f.length() >= 1024) {
                 ResourceManager.getInstance().loadCustomSound(f);
             } else if (Config.isUseCustomSkins()
                     && (f.getName().toLowerCase().matches(".*[.]png")
@@ -126,4 +131,5 @@ public class SkinManager {
                 stdframeCount.get("sliderfollowcircle"));
         ResourceManager.getInstance().clearCustomResources();
     }
+
 }

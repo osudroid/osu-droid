@@ -1,24 +1,29 @@
 package ru.nsu.ccfit.zuev.skins;
 
 import androidx.annotation.NonNull;
-
 import com.edlplan.framework.utils.interfaces.Consumer;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 
 public class SkinJsonReader extends SkinReader {
+
     private static final SkinJsonReader reader = new SkinJsonReader();
 
     private JSONObject currentData;
+
     private JSONObject currentComboColorData;
+
     private JSONObject currentSliderData;
+
     private JSONObject currentUtilsData;
+
     private JSONObject currentLayoutData;
+
     private JSONObject currentColorData;
+
     private JSONObject currentCursorData;
+
     private JSONObject currentFontsData;
 
     private SkinJsonReader() {
@@ -67,8 +72,7 @@ public class SkinJsonReader extends SkinReader {
     }
 
     @Override
-    protected void loadFonts()
-    {
+    protected void loadFonts() {
         OsuSkin.get().hitCirclePrefix.setFromJson(currentFontsData);
         OsuSkin.get().hitCircleOverlap.setFromJson(currentFontsData);
         OsuSkin.get().scorePrefix.setFromJson(currentFontsData);
@@ -161,5 +165,6 @@ public class SkinJsonReader extends SkinReader {
         }
         consumer.consume(object);
     }
+
 }
 

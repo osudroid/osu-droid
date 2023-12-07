@@ -16,19 +16,25 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class OnlinePanel extends Entity {
-    private Entity onlineLayer = new Entity();
-    private Entity messageLayer = new Entity();
-    private Entity frontLayer = new Entity();
 
     public Rectangle rect;
 
+    private Entity onlineLayer = new Entity();
+
+    private Entity messageLayer = new Entity();
+
+    private Entity frontLayer = new Entity();
+
     private ChangeableText rankText, nameText, scoreText, accText;
+
     private ChangeableText messageText, submessageText;
+
     private Sprite avatar = null;
 
     public OnlinePanel() {
         rect = new Rectangle(0, 0, 410, 110) {
             boolean moved = false;
+
             float dx = 0, dy = 0;
 
             @Override
@@ -43,16 +49,16 @@ public class OnlinePanel extends Entity {
                 if (pSceneTouchEvent.isActionUp()) {
                     this.setColor(0.2f, 0.2f, 0.2f, 0.5f);
                     if (!moved) {
-                        if(OnlineManager.getInstance().isStayOnline()) {
+                        if (OnlineManager.getInstance().isStayOnline()) {
                             new ConfirmDialogFragment()
-                                .setMessage(R.string.dialog_visit_profile_page)
-                                .showForResult(isAccepted -> {
-                                    GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> {
-                                        new WebViewFragment().setURL(
-                                            WebViewFragment.PROFILE_URL + OnlineManager.getInstance().getUserId())
-                                        .show();
+                                    .setMessage(R.string.dialog_visit_profile_page)
+                                    .showForResult(isAccepted -> {
+                                        GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> {
+                                            new WebViewFragment().setURL(
+                                                            WebViewFragment.PROFILE_URL + OnlineManager.getInstance().getUserId())
+                                                    .show();
+                                        });
                                     });
-                                });
                         }
                     }
                     return true;
@@ -147,8 +153,7 @@ public class OnlinePanel extends Entity {
         attachChild(onlineLayer);
     }
 
-    public void setAvatar()
-    {
+    public void setAvatar() {
         var avatarUrl = OnlineManager.getInstance().getAvatarURL();
         var textureName = OnlineScoring.getInstance().isAvatarLoaded() && !avatarUrl.isEmpty() ? avatarUrl : null;
         setAvatar(textureName);
@@ -166,4 +171,5 @@ public class OnlinePanel extends Entity {
         avatar = new Sprite(0, 0, 110, 110, tex);
         frontLayer.attachChild(avatar);
     }
+
 }

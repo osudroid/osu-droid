@@ -1,17 +1,14 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
-
 import androidx.core.util.Supplier;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.sprite.Sprite;
-
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
-public class CircleNumber extends Entity
-{
+public class CircleNumber extends Entity {
 
     private final int num;
 
@@ -34,8 +31,7 @@ public class CircleNumber extends Entity
         float maxWidthScaled = 0f;
         float maxHeight = 0f;
 
-        for (int i = 0; i < getChildCount(); i++)
-        {
+        for (int i = 0; i < getChildCount(); i++) {
             // We assume all attached child are Sprite
             var sprite = (Sprite) getChild(i);
 
@@ -57,8 +53,15 @@ public class CircleNumber extends Entity
     }
 
     @Override
-    public void setAlpha(float pAlpha)
-    {
+    public float getAlpha() {
+        if (getFirstChild() != null)
+            return getFirstChild().getAlpha();
+
+        return super.getAlpha();
+    }
+
+    @Override
+    public void setAlpha(float pAlpha) {
         var count = getChildCount();
 
         if (count > 0)
@@ -68,19 +71,11 @@ public class CircleNumber extends Entity
         super.setAlpha(pAlpha);
     }
 
-    @Override
-    public float getAlpha()
-    {
-        if (getFirstChild() != null)
-            return getFirstChild().getAlpha();
-
-        return super.getAlpha();
-    }
-
     // The default registerEntityModifier() doesn't apply the modifiers to the nested Entities, so we've to apply to each one.
     // Modifiers cannot be shared between multiple Entities, and using deepCopy() can be expensive, so we use a supplier instead.
     public void registerEntityModifiers(Supplier<IEntityModifier> modifier) {
         for (int i = 0; i < getChildCount(); i++)
             getChild(i).registerEntityModifier(modifier.get());
     }
+
 }

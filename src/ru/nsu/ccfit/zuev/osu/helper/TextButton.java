@@ -2,9 +2,7 @@ package ru.nsu.ccfit.zuev.osu.helper;
 
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.entity.text.Text;
 import org.anddev.andengine.opengl.font.Font;
-
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 
 /**
@@ -62,4 +60,5 @@ public class TextButton extends Sprite {
         float textY = (this.getHeight() - buttonText.getHeight()) / 2;
         buttonText.setPosition(textX, textY);
     }
+
 }

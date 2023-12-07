@@ -17,11 +17,14 @@ public class ScoreBoardItem implements Cloneable {
 
 
     private static final StringBuilder accSb = new StringBuilder();
+
     private static final Formatter DECIMAL_FORMAT = new Formatter(accSb, Locale.ENGLISH);
 
 
     public String userName;
+
     public int playScore;
+
     public int scoreId;
 
     /**
@@ -46,7 +49,8 @@ public class ScoreBoardItem implements Cloneable {
     public boolean isAlive = true;
 
 
-    public ScoreBoardItem() {}
+    public ScoreBoardItem() {
+    }
 
     public ScoreBoardItem(String userName, int playScore, int maxCombo, float accuracy, boolean isAlive) {
         this.userName = userName;
@@ -97,8 +101,7 @@ public class ScoreBoardItem implements Cloneable {
 
 
     @Override
-    public boolean equals(@Nullable Object o)
-    {
+    public boolean equals(@Nullable Object o) {
         if (o == this)
             return true;
 
@@ -119,4 +122,5 @@ public class ScoreBoardItem implements Cloneable {
     public ScoreBoardItem clone() throws CloneNotSupportedException {
         return (ScoreBoardItem) super.clone();
     }
+
 }

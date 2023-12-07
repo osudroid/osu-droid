@@ -2,16 +2,20 @@ package ru.nsu.ccfit.zuev.osu.game.mods;
 
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.input.touch.TouchEvent;
-
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 
 public class ModButton extends Sprite {
+
     private static final float initalScale = 1.4f;
+
     private static final float selectedScale = 1.8f;
+
     private static final float initalRotate = 0f;
+
     private static final float selectedRotate = 5f;
 
     private GameMod mod;
+
     private IModSwitcher switcher = null;
 
     public ModButton(float pX, float pY, String texture, GameMod mod) {

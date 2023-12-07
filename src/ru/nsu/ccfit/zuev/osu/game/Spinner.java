@@ -1,23 +1,14 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
-
 import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.entity.modifier.DelayModifier;
-import org.anddev.andengine.entity.modifier.FadeInModifier;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
+import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.ScaleModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
 import org.anddev.andengine.util.modifier.IModifier;
-
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -28,37 +19,61 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public class Spinner extends GameObject {
-    private final Sprite background;
+
     public final PointF center;
+
+    private final Sprite background;
+
     private final Sprite circle;
+
     private final Sprite approachCircle;
+
     private final Sprite metre;
+
     private final Sprite spinText;
+
     private final TextureRegion mregion;
-    private Sprite clearText = null;
-    private PointF oldMouse;
-    private GameObjectListener listener;
-    private Scene scene;
-    private int fullrotations = 0;
-    private float rotations = 0;
-    private float needRotations;
-    private boolean clear = false;
-    private int soundId;
-    private int sampleSet;
-    private int addition;
-    private ScoreNumber bonusScore = null;
-    private int score = 1;
-    private float metreY;
-    private StatisticV2 stat;
-    private float totalTime;
-    private boolean did = false;
 
     private final PointF currMouse = new PointF();
+
+    private Sprite clearText = null;
+
+    private PointF oldMouse;
+
+    private GameObjectListener listener;
+
+    private Scene scene;
+
+    private int fullrotations = 0;
+
+    private float rotations = 0;
+
+    private float needRotations;
+
+    private boolean clear = false;
+
+    private int soundId;
+
+    private int sampleSet;
+
+    private int addition;
+
+    private ScoreNumber bonusScore = null;
+
+    private int score = 1;
+
+    private float metreY;
+
+    private StatisticV2 stat;
+
+    private float totalTime;
+
+    private boolean did = false;
 
 
     public Spinner() {
         ResourceManager.getInstance().checkSpinnerTextures();
-        this.pos = new PointF(Constants.MAP_WIDTH / 2,Constants.MAP_HEIGHT / 2);
+        this.pos = new PointF(Constants.MAP_WIDTH / 2, Constants.MAP_HEIGHT / 2);
         center = Utils.trackToRealCoords(pos);
         background = SpritePool.getInstance().getCenteredSprite(
                 "spinner-background", center);
@@ -87,7 +102,7 @@ public class Spinner extends GameObject {
         rotations = 0;
         this.scene = scene;
         needRotations = rps * time;
-        if(time < 0.05f) needRotations = 0.1f;
+        if (time < 0.05f) needRotations = 0.1f;
         this.listener = listener;
         this.soundId = sound;
         this.sampleSet = 0;
@@ -96,7 +111,7 @@ public class Spinner extends GameObject {
         this.totalTime = time;
         startHit = true;
         clear = false;
-        if(totalTime <= 0f) clear = true;
+        if (totalTime <= 0f) clear = true;
         bonusScore = null;
         score = 1;
         ResourceManager.getInstance().checkSpinnerTextures();
@@ -186,7 +201,7 @@ public class Spinner extends GameObject {
             //}
 
             //if (rotations count < the rotations in replay), let rotations count = the rotations in replay
-            while (fullrotations + this.score < replayObjectData.accuracy / 4 + 1){
+            while (fullrotations + this.score < replayObjectData.accuracy / 4 + 1) {
                 fullrotations++;
                 listener.onSpinnerHit(id, 1000, false, 0);
             }
@@ -195,7 +210,7 @@ public class Spinner extends GameObject {
         }
         float percentfill = (Math.abs(rotations) + fullrotations)
                 / needRotations;
-        if(needRotations <= 0.1f){
+        if (needRotations <= 0.1f) {
             clear = true;
             percentfill = 1;
         }
@@ -276,10 +291,10 @@ public class Spinner extends GameObject {
             circle.setRotation((rotations + dfill / 4f) * 360);
             //auto时，FL光圈绕中心旋转
             if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
-               float angle = (rotations + dfill / 4f) * 360;
-               float pX = center.x + 50 * (float)Math.sin(angle);
-               float pY = center.y + 50 * (float)Math.cos(angle);
-               listener.updateAutoBasedPos(pX, pY);
+                float angle = (rotations + dfill / 4f) * 360;
+                float pX = center.x + 50 * (float) Math.sin(angle);
+                float pY = center.y + 50 * (float) Math.cos(angle);
+                listener.updateAutoBasedPos(pX, pY);
             }
         }
         rotations += dfill / 4f;
@@ -332,4 +347,5 @@ public class Spinner extends GameObject {
 
         oldMouse.set(currMouse);
     }
+
 }

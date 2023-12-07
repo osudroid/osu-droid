@@ -3,40 +3,50 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
+import ru.nsu.ccfit.zuev.osu.*;
+import ru.nsu.ccfit.zuev.osu.helper.StringTable;
+import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 import java.lang.ref.WeakReference;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.LibraryManager;
-import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
-import ru.nsu.ccfit.zuev.osuplus.R;
-
 public class MenuItem {
+
     private final MenuItemTrack[] trackSprites;
+
     private final BeatmapInfo beatmap;
+
     private final String trackDir;
+
     private final int bgHeight;
+
     private final String titleStr;
+
     private final String creatorStr;
+
     public float percentAppeared = 0;
+
     MenuItemBackground background;
+
     Scene scene;
+
     boolean selected = false;
+
     WeakReference<MenuItemListener> listener;
+
     private MenuItemTrack selTrack = null;
+
     private boolean visible = true;
+
     private boolean favorite;
+
     private boolean deleted = false;
+
     private Entity layer = null;
+
     private int trackId = -1;
 
     public MenuItem(final MenuItemListener listener, final BeatmapInfo info) {
@@ -45,7 +55,7 @@ public class MenuItem {
         trackDir = ScoreLibrary.getTrackDir(beatmap.getPath());
         bgHeight = ResourceManager.getInstance()
                 .getTexture("menu-button-background").getHeight()
-                   - 25;
+                - 25;
 //        titleStr = (beatmap.getArtistUnicode() == null ? beatmap.getArtist() : beatmap.getArtistUnicode()) + " - "
 //                + (beatmap.getTitleUnicode() == null ? beatmap.getTitle() : beatmap.getTitleUnicode());
         titleStr = beatmap.getArtist() + " - " + beatmap.getTitle();
@@ -65,7 +75,7 @@ public class MenuItem {
         trackDir = ScoreLibrary.getTrackDir(beatmap.getPath());
         bgHeight = ResourceManager.getInstance()
                 .getTexture("menu-button-background").getHeight()
-                   - 25;
+                - 25;
 //        titleStr = (beatmap.getArtistUnicode() == null ? beatmap.getArtist() : beatmap.getArtistUnicode()) + " - "
 //                + (beatmap.getTitleUnicode() == null ? beatmap.getTitle() : beatmap.getTitleUnicode());
         titleStr = beatmap.getArtist() + " - " + beatmap.getTitle();
@@ -140,9 +150,9 @@ public class MenuItem {
             final float cy = y + oy + Config.getRES_HEIGHT() / 2f
                     + s.getHeight() / 2;
             final float i = 170 * (float) Math.abs(Math.cos(cy * Math.PI
-            / (Config.getRES_HEIGHT() * 2)));
+                    / (Config.getRES_HEIGHT() * 2)));
             final float ox = x
-                             + i;
+                    + i;
             s.setPosition(ox - 100, y + oy);
             oy += (s.getHeight() - 25) * percentAppeared;
         }
@@ -168,7 +178,7 @@ public class MenuItem {
     }
 
     public void deselect() {
-        if (scene == null ) {
+        if (scene == null) {
             return;
         }
 
@@ -230,14 +240,13 @@ public class MenuItem {
                 String opt = matcher.group(2);
                 String value = matcher.group(3);
                 boolean vis = false;
-                if(trackId < 0){
+                if (trackId < 0) {
                     for (TrackInfo track : beatmap.getTracks()) {
                         if (key != null) {
                             vis |= visibleTrack(track, key, opt, value);
                         }
                     }
-                }
-                else{
+                } else {
                     if (key != null) {
                         vis = visibleTrack(beatmap.getTrack(trackId), key, opt, value);
                     }
@@ -376,7 +385,7 @@ public class MenuItem {
     }
 
     private void initTracks() {
-        if (trackId == -1){
+        if (trackId == -1) {
             for (int i = 0; i < trackSprites.length; i++) {
                 trackSprites[i] = SongMenuPool.getInstance().newTrack();
                 trackSprites[i].setItem(this);
@@ -388,8 +397,7 @@ public class MenuItem {
                 scene.registerTouchArea(trackSprites[i]);
                 trackSprites[i].setVisible(true);
             }
-        }
-        else{
+        } else {
             trackSprites[0] = SongMenuPool.getInstance().newTrack();
             trackSprites[0].setItem(this);
             trackSprites[0].setTrack(beatmap.getTrack(trackId), beatmap);
@@ -425,7 +433,7 @@ public class MenuItem {
         }
     }
 
-    public TrackInfo getFirstTrack(){
+    public TrackInfo getFirstTrack() {
         return beatmap.getTrack(Math.max(trackId, 0));
     }
 
@@ -441,24 +449,24 @@ public class MenuItem {
         scene = null;
     }
 
-    public int tryGetCorrespondingTrackId(String oldTrackFileName){
-        if (trackId <= -1){
+    public int tryGetCorrespondingTrackId(String oldTrackFileName) {
+        if (trackId <= -1) {
             int i = 0;
-            for (TrackInfo track : beatmap.getTracks()){
+            for (TrackInfo track : beatmap.getTracks()) {
                 if (track == null) continue;
-                if (track.getFilename().equals(oldTrackFileName)){
+                if (track.getFilename().equals(oldTrackFileName)) {
                     return i;
                 }
                 i++;
             }
-        }
-        else if (beatmap.getTrack(trackId).getFilename().equals(oldTrackFileName)){
+        } else if (beatmap.getTrack(trackId).getFilename().equals(oldTrackFileName)) {
             return trackId;
         }
         return -1;
     }
 
-    public MenuItemTrack getTrackSpritesById(int index){
+    public MenuItemTrack getTrackSpritesById(int index) {
         return trackSprites[index];
     }
+
 }

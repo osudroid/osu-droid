@@ -2,22 +2,27 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
+import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
-import ru.nsu.ccfit.zuev.skins.StringSkinData;
-
 public class GameScoreText {
+
     private final AnimSprite[] letters;
+
     private final Map<Character, AnimSprite> characters;
+
     private final ArrayList<AnimSprite> digits = new ArrayList<AnimSprite>();
-    private float scale = 0;
-    private boolean hasX = false;
+
     private final float digitWidth;
+
+    private float scale = 0;
+
+    private boolean hasX = false;
 
     public GameScoreText(StringSkinData prefix, final float x, final float y, final String mask,
                          final float scale) {
@@ -101,9 +106,9 @@ public class GameScoreText {
         }
     }
 
-    public void setPosition(float x, float y){
+    public void setPosition(float x, float y) {
         float width = 0;
-        for (final Sprite sp : letters){
+        for (final Sprite sp : letters) {
             sp.setPosition(x + width, y);
             width += sp.getWidth();
         }
@@ -112,4 +117,5 @@ public class GameScoreText {
     public float getDigitWidth() {
         return digitWidth;
     }
+
 }

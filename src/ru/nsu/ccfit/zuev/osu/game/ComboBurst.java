@@ -1,25 +1,18 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.DelayModifier;
-import org.anddev.andengine.entity.modifier.FadeInModifier;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.MoveXModifier;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
+import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseSineOut;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by dgsrz on 15/11/1.
@@ -27,14 +20,19 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 public class ComboBurst {
 
     private final List<Sprite> comboBursts = new ArrayList<Sprite>();
+
     private final List<BassSoundProvider> comboBurstVocals = new ArrayList<BassSoundProvider>();
 
     private final float rightX;
+
     private final float bottomY;
 
     private int nextKeyComboNum = 0;
+
     private float fromX = 0;
+
     private int nextShowId = 0;
+
     private int nextSoundId = 0;
 
     public ComboBurst(float rightX, float bottomY) {
@@ -151,4 +149,5 @@ public class ComboBurst {
             sprite.detachSelf();
         }
     }
+
 }

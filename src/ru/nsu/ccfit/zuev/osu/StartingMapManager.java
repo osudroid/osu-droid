@@ -3,22 +3,15 @@ package ru.nsu.ccfit.zuev.osu;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
-
 import androidx.preference.PreferenceManager;
-
 import org.anddev.andengine.util.Debug;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
+import java.io.*;
+
 public class StartingMapManager {
+
     private final Activity activity;
 
     public StartingMapManager(final Activity activity) {
@@ -110,4 +103,5 @@ public class StartingMapManager {
             return;
         }
     }
+
 }

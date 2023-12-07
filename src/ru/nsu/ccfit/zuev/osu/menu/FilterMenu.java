@@ -3,12 +3,9 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-
 import androidx.preference.PreferenceManager;
-
 import com.edlplan.ui.fragment.FavoriteManagerFragment;
 import com.edlplan.ui.fragment.FilterMenuFragment;
-
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
@@ -16,7 +13,6 @@ import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.entity.text.Text;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.font.Font;
-
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -27,15 +23,25 @@ import ru.nsu.ccfit.zuev.osu.menu.SongMenu.SortOrder;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class FilterMenu implements IUpdateHandler, IFilterMenu {
-    private Context configContext = null;
+
     private static IFilterMenu instance;
+
+    private Context configContext = null;
+
     private Scene scene = null;
+
     private ChangeableText filterText;
+
     private String filter = "";
+
     private ChangeableText sortText;
+
     private SongMenu menu;
+
     private SortOrder order = SortOrder.Title;
+
     private boolean favoritesOnly = false;
+
     private String favoriteFolder = null;
 
     private FilterMenu() {
@@ -56,7 +62,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
     public void loadConfig(final Context context) {
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(context);
-    
+
         final int sortOrder = prefs.getInt("sortorder", 0);
         switch (sortOrder) {
             case 1:
@@ -89,11 +95,11 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
         if (configContext == null) {
             return;
         }
-    
+
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(configContext);
         final SharedPreferences.Editor editor = prefs.edit();
-    
+
         switch (order) {
             case Artist:
                 editor.putInt("sortorder", 1);
@@ -117,7 +123,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
                 editor.putInt("sortorder", 0);
                 break;
         }
-    
+
         editor.apply();
     }
 
@@ -152,12 +158,12 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
         scene.attachChild(capt1);
 
         final Rectangle filterBorder = new Rectangle(capt1.getX(), 195, 330, capt1.getHeight()
-                                                                             + 30);
+                + 30);
         scene.attachChild(filterBorder);
         filterBorder.setColor(1, 150f / 255, 0);
         filterBorder.setVisible(false);
         final Rectangle filterBg = new Rectangle(filterBorder.getX() + 5, 200, 320, capt1.getHeight()
-                                                                                    + 20) {
+                + 20) {
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -286,7 +292,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
 
 
         final ChangeableText folder = new ChangeableText(favs.getX(),
-            favs.getY() + favs.getHeight() + 20, ResourceManager.getInstance().getFont(
+                favs.getY() + favs.getHeight() + 20, ResourceManager.getInstance().getFont(
                 "CaptionFont"),
                 StringTable.get(R.string.favorite_folder) + " " + (favoriteFolder == null ? StringTable.get(R.string.favorite_default) : favoriteFolder), 40) {
             @Override
@@ -308,7 +314,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
         };
 
         folder.setPosition(favs.getX(),
-            favs.getY() + favs.getHeight() + 20);
+                favs.getY() + favs.getHeight() + 20);
         scene.attachChild(folder);
         scene.registerTouchArea(folder);
 

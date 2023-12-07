@@ -1,20 +1,29 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
+import ru.nsu.ccfit.zuev.osu.Config;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-
 public class GameObjectPool {
+
     public static GameObjectPool instance = new GameObjectPool();
+
     public LinkedList<HitCircle> circles = new LinkedList<HitCircle>();
+
     public Map<Integer, LinkedList<CircleNumber>> numbers = new HashMap<Integer, LinkedList<CircleNumber>>();
+
     public Map<String, LinkedList<GameEffect>> effects = new HashMap<String, LinkedList<GameEffect>>();
+
     public LinkedList<Slider> sliders = new LinkedList<Slider>();
+
     public LinkedList<FollowTrack> tracks = new LinkedList<FollowTrack>();
+
     public LinkedList<Spinner> spinners = new LinkedList<Spinner>();
+
     private int objectsCreated = 0;
+
     private GameObjectPool() {
     }
 
@@ -136,4 +145,5 @@ public class GameObjectPool {
         new Spinner();
         objectsCreated = 31;
     }
+
 }

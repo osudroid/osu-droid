@@ -1,14 +1,15 @@
 package ru.nsu.ccfit.zuev.osu.helper;
 
 import org.anddev.andengine.entity.modifier.IEntityModifier;
+import ru.nsu.ccfit.zuev.osu.helper.UniversalModifier.ValueType;
 
 import java.util.LinkedList;
 import java.util.Queue;
 
-import ru.nsu.ccfit.zuev.osu.helper.UniversalModifier.ValueType;
-
 public class ModifierFactory {
+
     private static ModifierFactory instance = new ModifierFactory();
+
     private final Queue<UniversalModifier> pool = new LinkedList<UniversalModifier>();
 
     private ModifierFactory() {
@@ -61,4 +62,5 @@ public class ModifierFactory {
         }
         return new UniversalModifier(duration, from, to, type);
     }
+
 }

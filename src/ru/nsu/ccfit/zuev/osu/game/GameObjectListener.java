@@ -1,10 +1,9 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
+import ru.nsu.ccfit.zuev.osu.RGBColor;
 
 import java.util.BitSet;
-
-import ru.nsu.ccfit.zuev.osu.RGBColor;
 
 public interface GameObjectListener {
 
@@ -42,10 +41,11 @@ public interface GameObjectListener {
     int getCursorsCount();
 
     void registerAccuracy(double acc);
-    
+
     void updateAutoBasedPos(float pX, float pY);
 
     void onTrackingSliders(boolean isTrackingSliders);
 
     void onUpdatedAutoCursor(float pX, float pY);
+
 }

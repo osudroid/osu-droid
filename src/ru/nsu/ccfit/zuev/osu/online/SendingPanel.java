@@ -10,17 +10,22 @@ import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.HorizontalAlign;
-
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 
 public class SendingPanel extends Rectangle {
+
     private ChangeableText mapText, rankText, accText, scoreText;
+
     private ChangeableText buttonText;
+
     private Rectangle mapRect, rankRect, accRect, scoreRect;
+
     private Sprite button;
 
     private long rank, score;
+
     private float accuracy;
+
     private boolean canBeDismissed = false;
 
     public SendingPanel(long rank, long score, float accuracy) {
@@ -169,4 +174,5 @@ public class SendingPanel extends Rectangle {
     public ITouchArea getDismissTouchArea() {
         return button;
     }
+
 }

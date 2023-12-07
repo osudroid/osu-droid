@@ -1,36 +1,43 @@
 package ru.nsu.ccfit.zuev.osu.beatmap.parser;
 
 import android.util.Log;
-
 import com.rian.difficultycalculator.beatmap.hitobject.HitObject;
 import com.rian.difficultycalculator.utils.HitObjectStackEvaluator;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import okio.BufferedSource;
 import okio.Okio;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.constants.BeatmapSection;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapColorParser;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapControlPointsParser;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapDifficultyParser;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapEventsParser;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapGeneralParser;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapHitObjectsParser;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.BeatmapMetadataParser;
+import ru.nsu.ccfit.zuev.osu.beatmap.parser.sections.*;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A parser for parsing <code>.osu</code> files.
  */
 public class BeatmapParser {
+
+    private static final BeatmapGeneralParser generalParser = new BeatmapGeneralParser();
+
+    private static final BeatmapMetadataParser metadataParser = new BeatmapMetadataParser();
+
+    private static final BeatmapDifficultyParser difficultyParser = new BeatmapDifficultyParser();
+
+    private static final BeatmapEventsParser eventsParser = new BeatmapEventsParser();
+
+    private static final BeatmapControlPointsParser controlPointsParser = new BeatmapControlPointsParser();
+
+    private static final BeatmapColorParser colorParser = new BeatmapColorParser();
+
+    private static final BeatmapHitObjectsParser hitObjectsParser = new BeatmapHitObjectsParser();
+
     /**
      * The <code>.osu</code> file.
      */
@@ -60,13 +67,23 @@ public class BeatmapParser {
         file = new File(path);
     }
 
-    private static final BeatmapGeneralParser generalParser = new BeatmapGeneralParser();
-    private static final BeatmapMetadataParser metadataParser = new BeatmapMetadataParser();
-    private static final BeatmapDifficultyParser difficultyParser = new BeatmapDifficultyParser();
-    private static final BeatmapEventsParser eventsParser = new BeatmapEventsParser();
-    private static final BeatmapControlPointsParser controlPointsParser = new BeatmapControlPointsParser();
-    private static final BeatmapColorParser colorParser = new BeatmapColorParser();
-    private static final BeatmapHitObjectsParser hitObjectsParser = new BeatmapHitObjectsParser();
+    /**
+     * Populates the object scales of a <code>BeatmapData</code>.
+     *
+     * @param data The <code>BeatmapData</code> whose object scales will be populated.
+     */
+    public static void populateObjectData(final BeatmapData data) {
+        float scale = (1 - 0.7f * (data.difficulty.cs - 5) / 5) / 2;
+
+        for (HitObject object : data.hitObjects.getObjects()) {
+            object.setScale(scale);
+
+            // Reset stack height as we will be re-applying it.
+            object.setStackHeight(0);
+        }
+
+        HitObjectStackEvaluator.applyStacking(data.getFormatVersion(), data.hitObjects.getObjects(), data.difficulty.ar, data.general.stackLeniency);
+    }
 
     /**
      * Attempts to open the beatmap file.
@@ -205,31 +222,15 @@ public class BeatmapParser {
         return data;
     }
 
-    /**
-     * Populates the object scales of a <code>BeatmapData</code>.
-     *
-     * @param data The <code>BeatmapData</code> whose object scales will be populated.
-     */
-    public static void populateObjectData(final BeatmapData data) {
-        float scale = (1 - 0.7f * (data.difficulty.cs - 5) / 5) / 2;
-
-        for (HitObject object : data.hitObjects.getObjects()) {
-            object.setScale(scale);
-
-            // Reset stack height as we will be re-applying it.
-            object.setStackHeight(0);
-        }
-
-        HitObjectStackEvaluator.applyStacking(data.getFormatVersion(), data.hitObjects.getObjects(), data.difficulty.ar, data.general.stackLeniency);
-    }
-
     private void closeSource() {
         if (source != null) {
             try {
                 source.close();
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
 
             source = null;
         }
     }
+
 }

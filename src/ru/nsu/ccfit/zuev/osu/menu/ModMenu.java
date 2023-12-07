@@ -2,24 +2,18 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.api.ibancho.RoomAPI;
-import com.reco1l.framework.lang.Execution;
-import com.reco1l.legacy.data.MultiplayerConverter;
-import com.reco1l.legacy.Multiplayer;
 import com.reco1l.api.ibancho.data.RoomMods;
+import com.reco1l.framework.lang.Execution;
+import com.reco1l.legacy.Multiplayer;
+import com.reco1l.legacy.data.MultiplayerConverter;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
 import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
-
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.TreeMap;
-
 import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
@@ -34,30 +28,50 @@ import ru.nsu.ccfit.zuev.osu.helper.TextButton;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.TreeMap;
+
 
 public class ModMenu implements IModSwitcher {
 
     public static final float DEFAULT_FL_FOLLOW_DELAY = 0.12f;
 
     private static final ModMenu instance = new ModMenu();
-    private Scene scene = null, parent;
-    private EnumSet<GameMod> mod;
-    private ChangeableText multiplierText;
-    private TrackInfo selectedTrack;
+
     private final Map<GameMod, ModButton> modButtons = new TreeMap<>();
+
+    private Scene scene = null, parent;
+
+    private EnumSet<GameMod> mod;
+
+    private ChangeableText multiplierText;
+
+    private TrackInfo selectedTrack;
+
     private float changeSpeed = 1.0f;
+
     private boolean enableNCWhenSpeedChange = false;
+
     private boolean modsRemoved = false;
+
     private float FLfollowDelay = DEFAULT_FL_FOLLOW_DELAY;
 
 
     private Float customAR = null;
+
     private Float customOD = null;
+
     private Float customHP = null;
+
     private Float customCS = null;
 
     private ModMenu() {
         mod = EnumSet.noneOf(GameMod.class);
+    }
+
+    public static ModMenu getInstance() {
+        return instance;
     }
 
     public float getFLfollowDelay() {
@@ -66,10 +80,6 @@ public class ModMenu implements IModSwitcher {
 
     public void setFLfollowDelay(float newfLfollowDelay) {
         FLfollowDelay = newfLfollowDelay;
-    }
-    
-    public static ModMenu getInstance() {
-        return instance;
     }
 
     public void reload() {
@@ -85,8 +95,7 @@ public class ModMenu implements IModSwitcher {
         update();
     }
 
-    public void update()
-    {
+    public void update() {
         // Ensure selected mods are visually selected
         synchronized (modButtons) {
             for (GameMod key : modButtons.keySet()) {
@@ -101,12 +110,10 @@ public class ModMenu implements IModSwitcher {
         }
     }
 
-    public void setMods(RoomMods mods, boolean isFreeMods, boolean allowForceDifficultyStatistics)
-    {
+    public void setMods(RoomMods mods, boolean isFreeMods, boolean allowForceDifficultyStatistics) {
         var modSet = mods.getSet();
 
-        if (!isFreeMods)
-        {
+        if (!isFreeMods) {
             mod = modSet;
 
             FLfollowDelay = mods.getFlFollowDelay();
@@ -121,14 +128,11 @@ public class ModMenu implements IModSwitcher {
 
         changeSpeed = mods.getSpeedMultiplier();
 
-        if (!Multiplayer.isRoomHost())
-        {
-            if (modSet.contains(GameMod.MOD_DOUBLETIME) || modSet.contains(GameMod.MOD_NIGHTCORE))
-            {
+        if (!Multiplayer.isRoomHost()) {
+            if (modSet.contains(GameMod.MOD_DOUBLETIME) || modSet.contains(GameMod.MOD_NIGHTCORE)) {
                 mod.remove(Config.isUseNightcoreOnMultiplayer() ? GameMod.MOD_DOUBLETIME : GameMod.MOD_NIGHTCORE);
                 mod.add(Config.isUseNightcoreOnMultiplayer() ? GameMod.MOD_NIGHTCORE : GameMod.MOD_DOUBLETIME);
-            }
-            else {
+            } else {
                 mod.remove(GameMod.MOD_NIGHTCORE);
                 mod.remove(GameMod.MOD_DOUBLETIME);
             }
@@ -158,8 +162,7 @@ public class ModMenu implements IModSwitcher {
         }
         InGameSettingMenu.getInstance().dismiss();
 
-        if (Multiplayer.isConnected())
-        {
+        if (Multiplayer.isConnected()) {
             RoomScene.awaitModsChange = true;
 
             var string = MultiplayerConverter.modsToString(mod);
@@ -309,7 +312,7 @@ public class ModMenu implements IModSwitcher {
                 if (pSceneTouchEvent.isActionUp()) {
                     (new Thread() {
                         public void run() {
-                            if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != null){
+                            if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != null) {
                                 BeatmapData beatmapData = new BeatmapParser(
                                         GlobalManager.getInstance().getSongMenu().getSelectedTrack().getFilename()
                                 ).parse(true);
@@ -387,7 +390,7 @@ public class ModMenu implements IModSwitcher {
         for (GameMod m : mod) {
             mult *= m.scoreMultiplier;
         }
-        if (changeSpeed != 1.0f){
+        if (changeSpeed != 1.0f) {
             mult *= StatisticV2.getSpeedChangeScoreMultiplier(getSpeed(), mod);
         }
         if (selectedTrack != null) {
@@ -416,7 +419,7 @@ public class ModMenu implements IModSwitcher {
 
     public void handleModFlags(GameMod flag, GameMod modToCheck, GameMod[] modsToRemove) {
         if (flag.equals(modToCheck)) {
-            for (GameMod modToRemove: modsToRemove) {
+            for (GameMod modToRemove : modsToRemove) {
                 mod.remove(modToRemove);
                 modsRemoved = true;
             }
@@ -487,11 +490,11 @@ public class ModMenu implements IModSwitcher {
         }
     }
 
-    public float getSpeed(){
+    public float getSpeed() {
         float speed = changeSpeed;
-        if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
+        if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)) {
             speed *= 1.5f;
-        } else if (mod.contains(GameMod.MOD_HALFTIME)){
+        } else if (mod.contains(GameMod.MOD_HALFTIME)) {
             speed *= 0.75f;
         }
 
@@ -502,11 +505,11 @@ public class ModMenu implements IModSwitcher {
         return changeSpeed != 1.0;
     }
 
-    public float getChangeSpeed(){
+    public float getChangeSpeed() {
         return changeSpeed;
     }
 
-    public void setChangeSpeed(float speed){
+    public void setChangeSpeed(float speed) {
         changeSpeed = speed;
     }
 
@@ -518,15 +521,15 @@ public class ModMenu implements IModSwitcher {
         FLfollowDelay = DEFAULT_FL_FOLLOW_DELAY;
     }
 
-    public boolean isEnableNCWhenSpeedChange(){
+    public boolean isEnableNCWhenSpeedChange() {
         return enableNCWhenSpeedChange;
     }
 
-    public void setEnableNCWhenSpeedChange(boolean t){
+    public void setEnableNCWhenSpeedChange(boolean t) {
         enableNCWhenSpeedChange = t;
     }
 
-    public void updateMultiplierText(){
+    public void updateMultiplierText() {
         changeMultiplierText();
     }
 
@@ -581,4 +584,5 @@ public class ModMenu implements IModSwitcher {
     public void setCustomCS(@Nullable Float customCS) {
         this.customCS = customCS;
     }
+
 }

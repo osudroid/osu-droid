@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.audio;
 
 public interface IMusicPlayer {
+
     void prepare();
 
     void play();
@@ -26,4 +27,5 @@ public interface IMusicPlayer {
     float getVolume();
 
     void setVolume(float volume);
+
 }

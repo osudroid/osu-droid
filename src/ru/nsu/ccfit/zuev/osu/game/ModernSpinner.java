@@ -1,18 +1,12 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
-
 import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.entity.modifier.ColorModifier;
-import org.anddev.andengine.entity.modifier.DelayModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
+import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.util.MathUtils;
 import org.anddev.andengine.util.modifier.IModifier;
-
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -26,28 +20,44 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 public class ModernSpinner extends Spinner {
 
     private final Sprite middle;
+
     private final Sprite middle2;
+
     private final Sprite bottom;
+
     private final Sprite top;
+
     private final Sprite glow;
     // private final Sprite spin;
     // private final Sprite clear;
 
-    private GameObjectListener listener;
-    private Scene scene;
-    public PointF center;
-    private float needRotations;
-    private int fullRotations = 0;
-    private float rotations = 0;
-    private int soundId;
-    private boolean clear;
-    private int score = 1;
-    private StatisticV2 stat;
-    private ScoreNumber bonusScore;
-    private PointF oldMouse;
-    private float totalTime;
-
     private final PointF currMouse = new PointF();
+
+    public PointF center;
+
+    private GameObjectListener listener;
+
+    private Scene scene;
+
+    private float needRotations;
+
+    private int fullRotations = 0;
+
+    private float rotations = 0;
+
+    private int soundId;
+
+    private boolean clear;
+
+    private int score = 1;
+
+    private StatisticV2 stat;
+
+    private ScoreNumber bonusScore;
+
+    private PointF oldMouse;
+
+    private float totalTime;
 
 
     public ModernSpinner() {
@@ -290,4 +300,5 @@ public class ModernSpinner extends Spinner {
             Utils.playHitSound(listener, soundId);
         }
     }
+
 }

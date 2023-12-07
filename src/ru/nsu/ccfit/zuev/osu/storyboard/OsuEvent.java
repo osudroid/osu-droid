@@ -8,15 +8,24 @@ import java.util.ArrayList;
 public class OsuEvent {
 
     public Command command;
+
     public int ease;
+
     public long startTime;
+
     public long endTime;
+
     public float[] params;
+
     public ArrayList<OsuEvent> subEvents;//for command L and T
+
     public String triggerType;//for command T
+
     public int loopCount;
+
     public String P;
 
     public OsuEvent() {
     }
+
 }

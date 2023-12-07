@@ -8,6 +8,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 
 public class MD5Calcuator {
+
     public static String getFileMD5(final File file) {
         String md5 = "";
         try {
@@ -50,4 +51,5 @@ public class MD5Calcuator {
 
         return md5;
     }
+
 }
