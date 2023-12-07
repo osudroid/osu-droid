@@ -243,9 +243,7 @@ public class SettingsMenu extends SettingsFragment {
 
     @Override
     protected void onLoadView() {
-        findViewById(R.id.back_button).setOnClickListener(v -> {
-            navigateBack();
-        });
+        findViewById(R.id.back_button).setOnClickListener(v -> navigateBack());
     }
 
     protected void playOnLoadAnim() {

@@ -709,7 +709,7 @@ public class MainActivity extends BaseGameActivity implements
             if (Multiplayer.isConnected()
                     && (getEngine().getScene() == RoomScene.INSTANCE
                     || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene())) {
-                Execution.asyncIgnoreExceptions(() -> RoomScene.INSTANCE.invalidateStatus());
+                Execution.asyncIgnoreExceptions(RoomScene.INSTANCE::invalidateStatus);
             }
         }
 
