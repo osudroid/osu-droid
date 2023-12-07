@@ -40,7 +40,7 @@ public class OnlineScoring {
     }
 
     public OnlinePanel createSecondPanel() {
-        if (OnlineManager.getInstance().isStayOnline() == false)
+        if (!OnlineManager.getInstance().isStayOnline())
             return null;
         secondPanel = new OnlinePanel();
         secondPanel.setInfo();
@@ -80,7 +80,7 @@ public class OnlineScoring {
     }
 
     public void login() {
-        if (OnlineManager.getInstance().isStayOnline() == false)
+        if (!OnlineManager.getInstance().isStayOnline())
             return;
         avatarLoaded = false;
         Async.run(() -> {
@@ -118,7 +118,7 @@ public class OnlineScoring {
     }
 
     public void startPlay(final TrackInfo track, final String hash) {
-        if (OnlineManager.getInstance().isStayOnline() == false)
+        if (!OnlineManager.getInstance().isStayOnline())
             return;
 
         Async.run(() -> {
@@ -142,9 +142,9 @@ public class OnlineScoring {
     }
 
     public void sendRecord(final StatisticV2 record, final SendingPanel panel, final String replay) {
-        if (OnlineManager.getInstance().isStayOnline() == false)
+        if (!OnlineManager.getInstance().isStayOnline())
             return;
-        if (OnlineManager.getInstance().isReadyToSend() == false)
+        if (!OnlineManager.getInstance().isReadyToSend())
             return;
 
         Debug.i("Sending score");

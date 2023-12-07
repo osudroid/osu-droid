@@ -178,10 +178,10 @@ public class MainScene implements IUpdateHandler {
                 if (pSceneTouchEvent.isActionUp()) {
                     Debug.i("logo up");
                     Debug.i("doMenuShow " + doMenuShow + " isMenuShowed " + isMenuShowed + " showPassTime " + showPassTime);
-                    if (doMenuShow == true && isMenuShowed == true) {
+                    if (doMenuShow && isMenuShowed) {
                         showPassTime = 20000;
                     }
-                    if (doMenuShow == false && isMenuShowed == false && logo.getX() == (Config.getRES_WIDTH() - logo.getWidth()) / 2) {
+                    if (!doMenuShow && !isMenuShowed && logo.getX() == (Config.getRES_WIDTH() - logo.getWidth()) / 2) {
                         doMenuShow = true;
                         showPassTime = 0;
                     }
@@ -641,7 +641,7 @@ public class MainScene implements IUpdateHandler {
             offset = 0;
         }
 
-        if (doMenuShow == true && isMenuShowed == false) {
+        if (doMenuShow && !isMenuShowed) {
             logo.registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, EaseExponentialOut.getInstance()));
             logoOverlay.registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, EaseExponentialOut.getInstance()));
             for (Rectangle rectangle : spectrum) {
@@ -662,7 +662,7 @@ public class MainScene implements IUpdateHandler {
             isMenuShowed = true;
         }
 
-        if (doMenuShow == true && isMenuShowed == true) {
+        if (doMenuShow && isMenuShowed) {
             if (showPassTime > 10000f) {
 
                 menu.showFirstMenu();
@@ -824,7 +824,7 @@ public class MainScene implements IUpdateHandler {
                 musicInfoText = new ChangeableText(Config.getRES_WIDTH() - 500, 3,
                         ResourceManager.getInstance().getFont("font"), "None...", HorizontalAlign.RIGHT, 35);
             }
-            if (beatmapInfo.getArtistUnicode() != null && beatmapInfo.getTitleUnicode() != null && Config.isForceRomanized() == false) {
+            if (beatmapInfo.getArtistUnicode() != null && beatmapInfo.getTitleUnicode() != null && !Config.isForceRomanized()) {
                 musicInfoText.setText(beatmapInfo.getArtistUnicode() + " - " + beatmapInfo.getTitleUnicode(), true);
             } else if (beatmapInfo.getArtist() != null && beatmapInfo.getTitle() != null) {
                 musicInfoText.setText(beatmapInfo.getArtist() + " - " + beatmapInfo.getTitle(), true);

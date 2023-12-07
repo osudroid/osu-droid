@@ -1478,7 +1478,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         for (final Cursor c : cursors) {
-            if (c.mouseDown == true && c.mouseOldDown == false) {
+            if (c.mouseDown && !c.mouseOldDown) {
                 c.mousePressed = true;
                 c.mouseOldDown = true;
             } else {
@@ -1508,12 +1508,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             flashlightSprite.onUpdate(stat.getCombo());
         }
 
-        while (timingPoints.isEmpty() == false
+        while (!timingPoints.isEmpty()
                 && timingPoints.peek().getTime() <= secPassed + approachRate) {
             currentTimingPoint = timingPoints.poll();
             activeTimingPoints.add(currentTimingPoint);
         }
-        while (activeTimingPoints.isEmpty() == false
+        while (!activeTimingPoints.isEmpty()
                 && activeTimingPoints.peek().getTime() <= secPassed) {
             soundTimingPoint = activeTimingPoints.poll();
             if (!soundTimingPoint.inherited) {
@@ -1699,7 +1699,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         boolean shouldBePunished = false;
 
-        while (objects.isEmpty() == false
+        while (!objects.isEmpty()
                 && secPassed + approachRate > objects.peek().getTime()) {
             gameStarted = true;
             final GameObjectData data = objects.poll();
@@ -1720,8 +1720,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             // Stack notes
             // If Config.isCalculateSliderPathInGameStart(), do this in stackNotes()
-            if (Config.isCalculateSliderPathInGameStart() == false &&
-                    objects.isEmpty() == false && (objDefine & 1) > 0) {
+            if (!Config.isCalculateSliderPathInGameStart() &&
+                    !objects.isEmpty() && (objDefine & 1) > 0) {
                 if (nextObj.getTime() - data.getTime() < 2f * GameHelper.getStackLeniency()
                         && Utils.squaredDistance(pos, nextObj.getPos()) < scale) {
                     nextObj.setPosOffset(
@@ -1729,11 +1729,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
             }
             // If this object is silder and isCalculateSliderPathInGameStart(), the pos is += in calculateAllSliderPaths()
-            if (Config.isCalculateSliderPathInGameStart() == false || (objDefine & 2) <= 0) {
+            if (!Config.isCalculateSliderPathInGameStart() || (objDefine & 2) <= 0) {
                 pos.x += data.getPosOffset();
                 pos.y += data.getPosOffset();
             }
-            if (objects.isEmpty() == false) {
+            if (!objects.isEmpty()) {
                 distToNextObject = nextObj.getTime() - data.getTime();
                 if (soundTimingPoint != null
                         && distToNextObject < soundTimingPoint.getBeatLength() / 2) {
@@ -1779,8 +1779,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         || nextObj.isNewCombo());
                 addObject(circle);
                 isFirst = false;
-                if (objects.isEmpty() == false
-                        && nextObj.isNewCombo() == false) {
+                if (!objects.isEmpty()
+                        && !nextObj.isNewCombo()) {
                     final FollowTrack track = GameObjectPool.getInstance()
                             .getTrack();
                     PointF end;
@@ -1798,7 +1798,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
                 circle.setHitTime(data.getTime());
 
-                if (objects.isEmpty() == false) {
+                if (!objects.isEmpty()) {
                     if (nextObj.getTime() > data.getTime()) {
                         currentComboNum++;
                     }
@@ -1865,8 +1865,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 addObject(slider);
                 isFirst = false;
 
-                if (objects.isEmpty() == false
-                        && nextObj.isNewCombo() == false) {
+                if (!objects.isEmpty()
+                        && !nextObj.isNewCombo()) {
                     final FollowTrack track = GameObjectPool.getInstance()
                             .getTrack();
                     PointF end;
@@ -1885,7 +1885,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 slider.setHitTime(data.getTime());
 
 
-                if (objects.isEmpty() == false) {
+                if (!objects.isEmpty()) {
                     if (nextObj.getTime() > data.getTime()) {
                         currentComboNum++;
                     }
@@ -1922,7 +1922,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             cursorSprites = null;
             String replayFile = null;
             stat.setTime(System.currentTimeMillis());
-            if (replay != null && replaying == false) {
+            if (replay != null && !replaying) {
                 String ctime = String.valueOf(System.currentTimeMillis());
                 replayFile = Config.getCorePath() + "Scores/"
                         + MD5Calcuator.getStringMD5(lastTrack.getFilename() + ctime)
@@ -2215,7 +2215,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         } else if (score == 100) {
             comboWas100 = true;
             if (writeReplay) replay.addObjectScore(objectId, ResultType.HIT100);
-            if (endCombo && comboWasMissed == false) {
+            if (endCombo && !comboWasMissed) {
                 stat.registerHit(100, true, false);
                 scoreName = "hit100k";
             } else {
@@ -2801,8 +2801,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (Config.isHitLighting()
-                && name.equals("sliderpoint10") == false
-                && name.equals("sliderpoint30") == false
+                && !name.equals("sliderpoint10")
+                && !name.equals("sliderpoint30")
                 && ResourceManager.getInstance().getTexture("lighting") != null) {
             final GameEffect light = GameObjectPool.getInstance().getEffect("lighting");
             light.setColor(color);
@@ -2952,7 +2952,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         float distance = Float.POSITIVE_INFINITY, cursorDistance, dx, dy;
         int id = -1, i = 0;
         for (Cursor c : cursors) {
-            if (c.mouseDown == true || c.mousePressed == true || c.mouseOldDown == true) {
+            if (c.mouseDown || c.mousePressed || c.mouseOldDown) {
                 dx = c.mousePos.x - pX;
                 dy = c.mousePos.y - pY;
                 cursorDistance = dx * dx + dy * dy;
@@ -2973,7 +2973,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final PointF pos = data.getPos();
             final String[] params = data.getData();
             final int objDefine = Integer.parseInt(params[3]);
-            if (objects.isEmpty() == false && (objDefine & 1) > 0 && i + 1 < objects.size()) {
+            if (!objects.isEmpty() && (objDefine & 1) > 0 && i + 1 < objects.size()) {
                 if (objects.get(i + 1).getTime() - data.getTime() < 2f * GameHelper.getStackLeniency()
                         && Utils.squaredDistance(pos, objects.get(i + 1).getPos()) < scale) {
                     objects.get(i + 1).setPosOffset(
@@ -3031,13 +3031,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public boolean saveFailedReplay() {
         stat.setTime(System.currentTimeMillis());
-        if (replay != null && replaying == false) {
+        if (replay != null && !replaying) {
             //write misses to replay
             for (GameObject obj : activeObjects) {
                 stat.registerHit(0, false, false);
                 replay.addObjectScore(obj.getId(), ResultType.MISS);
             }
-            while (objects.isEmpty() == false) {
+            while (!objects.isEmpty()) {
                 objects.poll();
                 stat.registerHit(0, false, false);
                 replay.addObjectScore(++lastObjectId, ResultType.MISS);

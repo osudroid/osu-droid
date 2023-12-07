@@ -50,7 +50,7 @@ public class StartingMapManager {
 
     private void copyAllFiles(final String dirname) {
         final File dir = new File(Config.getBeatmapPath() + "/" + dirname);
-        if (dir.exists() == false && dir.mkdirs() == false) {
+        if (!dir.exists() && !dir.mkdirs()) {
             ToastLogger.showText("Cannot create " + dir.getPath(), false);
             return;
         }

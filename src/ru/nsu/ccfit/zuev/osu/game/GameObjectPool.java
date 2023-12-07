@@ -32,7 +32,7 @@ public class GameObjectPool {
     }
 
     public HitCircle getCircle() {
-        if (circles.isEmpty() == false) {
+        if (!circles.isEmpty()) {
             return circles.poll();
         }
 
@@ -45,7 +45,7 @@ public class GameObjectPool {
     }
 
     public Spinner getSpinner() {
-        if (spinners.isEmpty() == false) {
+        if (!spinners.isEmpty()) {
             return spinners.poll();
         }
 
@@ -62,7 +62,7 @@ public class GameObjectPool {
     }
 
     public CircleNumber getNumber(final int num) {
-        if (numbers.containsKey(num) && numbers.get(num).isEmpty() == false) {
+        if (numbers.containsKey(num) && !numbers.get(num).isEmpty()) {
             return numbers.get(num).poll();
         }
 
@@ -71,7 +71,7 @@ public class GameObjectPool {
     }
 
     public void putNumber(final CircleNumber number) {
-        if (numbers.containsKey(number.getNum()) == false) {
+        if (!numbers.containsKey(number.getNum())) {
             numbers.put(number.getNum(), new LinkedList<>());
         }
         numbers.get(number.getNum()).add(number);
@@ -79,7 +79,7 @@ public class GameObjectPool {
 
     public GameEffect getEffect(final String texname) {
         if (effects.containsKey(texname)
-                && effects.get(texname).isEmpty() == false) {
+                && !effects.get(texname).isEmpty()) {
             return effects.get(texname).poll();
         }
 
@@ -88,14 +88,14 @@ public class GameObjectPool {
     }
 
     public void putEffect(final GameEffect effect) {
-        if (effects.containsKey(effect.getTexname()) == false) {
+        if (!effects.containsKey(effect.getTexname())) {
             effects.put(effect.getTexname(), new LinkedList<>());
         }
         effects.get(effect.getTexname()).add(effect);
     }
 
     public Slider getSlider() {
-        if (sliders.isEmpty() == false) {
+        if (!sliders.isEmpty()) {
             return sliders.poll();
         }
 
@@ -108,7 +108,7 @@ public class GameObjectPool {
     }
 
     public FollowTrack getTrack() {
-        if (tracks.isEmpty() == false) {
+        if (!tracks.isEmpty()) {
             return tracks.poll();
         }
 

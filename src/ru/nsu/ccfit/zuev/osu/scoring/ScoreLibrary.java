@@ -76,11 +76,11 @@ public class ScoreLibrary {
     @SuppressWarnings("unchecked")
     private void loadOld(Context context) {
         final File folder = new File(Config.getCorePath() + "/Scores");
-        if (folder.exists() == false) {
+        if (!folder.exists()) {
             return;
         }
         final File f = new File(folder, "scoreboard");
-        if (f.exists() == false) {
+        if (!f.exists()) {
             return;
         }
         Debug.i("Loading old scores...");
@@ -92,8 +92,8 @@ public class ScoreLibrary {
             String versionStr;
             if (obj instanceof String) {
                 versionStr = (String) obj;
-                if (versionStr.equals("scores1") == false
-                        && versionStr.equals("scores2") == false) {
+                if (!versionStr.equals("scores1")
+                        && !versionStr.equals("scores2")) {
                     in.close();
                     return;
                 }

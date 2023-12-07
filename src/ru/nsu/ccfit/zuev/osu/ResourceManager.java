@@ -104,7 +104,7 @@ public class ResourceManager {
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
         loadTexture("flashlight_cursor", "flashlight_cursor.png", false, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 
-        if (textures.containsKey("lighting") == false)
+        if (!textures.containsKey("lighting"))
             textures.put("lighting", null);
     }
 
@@ -199,7 +199,7 @@ public class ResourceManager {
         try {
             for (final String s : context.getAssets().list("gfx")) {
                 final String name = s.substring(0, s.length() - 4);
-                if (Config.isCorovans() == false) {
+                if (!Config.isCorovans()) {
                     if (name.equals("count1") || name.equals("count2")
                             || name.equals("count3") || name.equals("go")
                             || name.equals("ready")) {
@@ -327,13 +327,13 @@ public class ResourceManager {
         loadTexture("ranking_button", "ranking_button.png", false);
         loadTexture("ranking_enabled", "ranking_enabled.png", false);
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
-        if (textures.containsKey("lighting") == false)
+        if (!textures.containsKey("lighting"))
             textures.put("lighting", null);
     }
 
     private void noticeFrameCount(final String name) {
         String resnameWN;
-        if (name.contains("-") == false) {
+        if (!name.contains("-")) {
             resnameWN = name.substring(0, name.length() - 1);
         } else {
             resnameWN = name.substring(0, name.lastIndexOf('-'));
@@ -347,7 +347,7 @@ public class ResourceManager {
         if (frameNum < 0) {
             frameNum *= -1;
         }
-        if (customFrameCount.containsKey(resnameWN) == false
+        if (!customFrameCount.containsKey(resnameWN)
                 || customFrameCount.get(resnameWN) < frameNum) {
             customFrameCount.put(resnameWN, frameNum);
         }
@@ -390,7 +390,7 @@ public class ResourceManager {
     }
 
     public Font getFont(final String resname) {
-        if (fonts.containsKey(resname) == false) {
+        if (!fonts.containsKey(resname)) {
             loadFont(resname, null, 35, Color.WHITE);
         }
         return fonts.get(resname);
@@ -435,7 +435,7 @@ public class ResourceManager {
         while (th < source.getHeight()) {
             th *= 2;
         }
-        if (source.preload() == false) {
+        if (!source.preload()) {
             textures.put("::background", textures.get("menu-background"));
             return textures.get("::background");
         }
@@ -749,13 +749,13 @@ public class ResourceManager {
         if (Character.isDigit(resname.charAt(resname.length() - 1))) {
 
             String resnameWN;
-            if (resname.contains("-") == false) {
+            if (!resname.contains("-")) {
                 resnameWN = resname.substring(0, resname.length() - 1);
             } else {
                 resnameWN = resname.substring(0, resname.lastIndexOf('-'));
             }
 
-            if (textures.containsKey(resname) == false
+            if (!textures.containsKey(resname)
                     && SkinManager.getFrames(resnameWN) == 0) {
                 return;
             }
@@ -768,12 +768,12 @@ public class ResourceManager {
                 if (frameNum < 0) {
                     frameNum *= -1;
                 }
-                if (customFrameCount.containsKey(resnameWN) == false
+                if (!customFrameCount.containsKey(resnameWN)
                         || customFrameCount.get(resnameWN) < frameNum) {
                     customFrameCount.put(resnameWN, frameNum);
                 }
             }
-        } else if (textures.containsKey(resname) == false) {
+        } else if (!textures.containsKey(resname)) {
 
             if (textures.containsKey(resname + "-0") || textures.containsKey(resname + "0")) {
                 if (textures.containsKey(resname + "0"))
@@ -794,7 +794,7 @@ public class ResourceManager {
         while (th < source.getHeight()) {
             th *= 2;
         }
-        if (source.preload() == false) {
+        if (!source.preload()) {
             return;
         }
         final BitmapTextureAtlas tex = new BitmapTextureAtlas(tw, th,
@@ -889,7 +889,7 @@ public class ResourceManager {
     }
 
     public int getFrameCount(final String texname) {
-        if (customFrameCount.containsKey(texname) == false) {
+        if (!customFrameCount.containsKey(texname)) {
             return -1;
         } else {
             return customFrameCount.get(texname);

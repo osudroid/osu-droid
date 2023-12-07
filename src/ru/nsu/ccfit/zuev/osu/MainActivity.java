@@ -228,7 +228,7 @@ public class MainActivity extends BaseGameActivity implements
             alert.show();
         }
 
-        if (prefs.getBoolean("qualitySet", false) == false) {
+        if (!prefs.getBoolean("qualitySet", false)) {
             final SharedPreferences.Editor editor = prefs.edit();
             editor.putBoolean("qualitySet", true);
             final DisplayMetrics dm = new DisplayMetrics();
@@ -242,7 +242,7 @@ public class MainActivity extends BaseGameActivity implements
             editor.commit();
         }
 
-        if (prefs.getBoolean("onlineSet", false) == false) {
+        if (!prefs.getBoolean("onlineSet", false)) {
 
             Editor editor = prefs.edit();
             editor.putBoolean("onlineSet", true);
@@ -795,7 +795,7 @@ public class MainActivity extends BaseGameActivity implements
         if (GlobalManager.getInstance().getSongMenu() != null && GlobalManager.getInstance().getEngine() != null
                 && keyCode == KeyEvent.KEYCODE_MENU
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()
-                && GlobalManager.getInstance().getSongMenu().getScene().hasChildScene() == false) {
+                && !GlobalManager.getInstance().getSongMenu().getScene().hasChildScene()) {
             GlobalManager.getInstance().getSongMenu().stopScroll(0);
             GlobalManager.getInstance().getSongMenu().showPropertiesMenu(null);
             return true;

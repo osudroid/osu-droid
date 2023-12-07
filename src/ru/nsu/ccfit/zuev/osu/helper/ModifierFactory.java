@@ -47,11 +47,11 @@ public class ModifierFactory {
 
     private UniversalModifier newModifier(final float duration,
                                           final float from, final float to, final ValueType type) {
-        if (pool.isEmpty() == false) {
+        if (!pool.isEmpty()) {
             UniversalModifier mod = null;
 
             synchronized (pool) {
-                if (pool.isEmpty() == false) {
+                if (!pool.isEmpty()) {
                     mod = pool.poll();
                 }
             }

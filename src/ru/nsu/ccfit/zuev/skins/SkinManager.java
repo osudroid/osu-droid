@@ -49,7 +49,7 @@ public class SkinManager {
     }
 
     public static int getFrames(final String texname) {
-        if (frameCount.containsKey(texname) == false) {
+        if (!frameCount.containsKey(texname)) {
             return 0;
         }
         return frameCount.get(texname);

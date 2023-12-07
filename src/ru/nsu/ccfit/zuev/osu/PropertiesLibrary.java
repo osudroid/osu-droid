@@ -31,7 +31,7 @@ public class PropertiesLibrary {
     public void load(final Activity activity) {
         context = activity;
         final File lib = new File(activity.getFilesDir(), "properties");
-        if (lib.exists() == false) {
+        if (!lib.exists()) {
             return;
         }
 
@@ -40,7 +40,7 @@ public class PropertiesLibrary {
                     new FileInputStream(lib));
             Object obj = istream.readObject();
             if (obj instanceof String) {
-                if (obj.equals(version) == false) {
+                if (!obj.equals(version)) {
                     istream.close();
                     return;
                 }
@@ -101,7 +101,7 @@ public class PropertiesLibrary {
                               final BeatmapProperties properties) {
         this.load((Activity) context);
         props.put(path, properties);
-        if (properties.favorite == false && properties.getOffset() == 0) {
+        if (!properties.favorite && properties.getOffset() == 0) {
             props.remove(path);
         }
     }

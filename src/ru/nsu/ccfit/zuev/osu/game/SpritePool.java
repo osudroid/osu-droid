@@ -61,10 +61,10 @@ public class SpritePool {
     synchronized public Sprite getSprite(final String name) {
         if (sprites.containsKey(name)) {
             final LinkedList<Sprite> list = sprites.get(name);
-            while (list.isEmpty() == false && list.peek().hasParent() == true) {
+            while (!list.isEmpty() && list.peek().hasParent()) {
                 list.poll();
             }
-            if (list.isEmpty() == false) {
+            if (!list.isEmpty()) {
                 count--;
                 return list.poll();
             }
@@ -78,10 +78,10 @@ public class SpritePool {
                                                  final PointF pos) {
         if (sprites.containsKey(name)) {
             final LinkedList<Sprite> list = sprites.get(name);
-            while (list.isEmpty() == false && list.peek().hasParent() == true) {
+            while (!list.isEmpty() && list.peek().hasParent()) {
                 list.poll();
             }
-            if (list.isEmpty() == false) {
+            if (!list.isEmpty()) {
                 count--;
                 final Sprite sp = list.poll();
                 sp.setPosition(pos.x - sp.getWidth() / 2,
@@ -98,10 +98,10 @@ public class SpritePool {
     synchronized public AnimSprite getAnimSprite(final String name, int count) {
         if (animsprites.containsKey(name)) {
             final LinkedList<AnimSprite> list = animsprites.get(name);
-            while (list.isEmpty() == false && list.peek().hasParent() == true) {
+            while (!list.isEmpty() && list.peek().hasParent()) {
                 list.poll();
             }
-            if (list.isEmpty() == false) {
+            if (!list.isEmpty()) {
                 return list.poll();
             }
         }
