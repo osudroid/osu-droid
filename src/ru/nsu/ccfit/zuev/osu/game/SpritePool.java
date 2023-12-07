@@ -102,7 +102,6 @@ public class SpritePool {
                 list.poll();
             }
             if (list.isEmpty() == false) {
-                count--;
                 return list.poll();
             }
         }

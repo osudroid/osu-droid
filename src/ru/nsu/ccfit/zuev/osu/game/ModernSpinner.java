@@ -198,7 +198,6 @@ public class ModernSpinner extends Spinner {
         glow.setScale(0.9f + percent * 0.1f);
 
         if (percentfill > 1 || clear) {
-            percentfill = 1;
             if (!clear) {
                 // Clear Sprite
                 clear = true;

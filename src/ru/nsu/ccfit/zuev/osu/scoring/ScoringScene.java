@@ -435,7 +435,6 @@ public class ScoringScene {
         if (stat.getMod().contains(GameMod.MOD_REALLYEASY)) {
             final Sprite modSprite = new Sprite(modX, modY, ResourceManager
                     .getInstance().getTexture("selection-mod-reallyeasy"));
-            modX -= 30;
             scene.attachChild(modSprite);
         }
 

@@ -1270,8 +1270,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                             new ParallelEntityModifier(ModifierFactory
                                     .newFadeOutModifier(0.5f), ModifierFactory
                                     .newScaleModifier(0.5f, 1, 1.5f))));
-            effectOffset += 25;
-            timeOffset += 0.25f;
         }
 
         kiaiRect = new Rectangle(0, 0, Config.getRES_WIDTH(),
@@ -2294,7 +2292,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
 
-        String scoreName = "hit300";
+        String scoreName;
         if (forcedScore == ResultType.HIT300.getId() ||
                 forcedScore == 0 && accuracy <= difficultyHelper.hitWindowFor300(overallDifficulty)) {
             //(75 + 25 * (5 - overallDifficulty) / 5) / 1000)
@@ -2998,9 +2996,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 return;
             }
             sliderPaths = new SliderPath[lastTrack.getSliderCount()];
-            for (SliderPath path : sliderPaths) {
-                path = null;
-            }
             int i = 0;
             sliderIndex = 0;
             for (GameObjectData data : objects) {

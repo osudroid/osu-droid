@@ -89,7 +89,7 @@ public class ScoreLibrary {
                     new FileInputStream(f));
 
             Object obj = in.readObject();
-            String versionStr = "";
+            String versionStr;
             if (obj instanceof String) {
                 versionStr = (String) obj;
                 if (versionStr.equals("scores1") == false

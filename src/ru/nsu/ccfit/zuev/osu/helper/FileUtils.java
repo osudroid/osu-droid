@@ -98,7 +98,7 @@ public class FileUtils {
             BufferedInputStream in = new BufferedInputStream(
                     new FileInputStream(file));
             byte[] byteArray = new byte[1024];
-            int bytesCount = 0;
+            int bytesCount;
 
             while ((bytesCount = in.read(byteArray)) != -1) {
                 digest.update(byteArray, 0, bytesCount);
@@ -174,7 +174,7 @@ public class FileUtils {
     }
 
     public static File[] listFiles(File directory, FileFilter filter) {
-        File[] filelist = null;
+        File[] filelist;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             LinkedList<File> cachedFiles = new LinkedList<File>();
             DirectoryStream.Filter<Path> directoryFilter = new DirectoryStream.Filter<Path>() {

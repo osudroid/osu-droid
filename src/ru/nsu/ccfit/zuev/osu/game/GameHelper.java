@@ -459,7 +459,7 @@ public class GameHelper {
 
     public static float Round(double value, int digits) throws NumberFormatException {
         if (Math.abs(value) < Double.MAX_VALUE) {
-            float f1 = 0;
+            float f1;
             BigDecimal b = new BigDecimal(value);
             f1 = b.setScale(digits, RoundingMode.HALF_UP).floatValue();
             return f1;

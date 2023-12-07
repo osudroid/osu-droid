@@ -18,7 +18,7 @@ public class GameScoreTextShadow extends GameObject {
 
     private boolean hasX = false;
 
-    private String text = "";
+    private String text;
 
     public GameScoreTextShadow(float x, float y, final String mask,
                                final float scale, GameScoreText comboText) {

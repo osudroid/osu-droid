@@ -203,7 +203,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
      */
     public void saveErrorLog(String excpMessage) {
         String errorlog = "errorlog.txt";
-        String savePath = "";
+        String savePath;
         String logFilePath = "";
         FileWriter fw = null;
         PrintWriter pw = null;
@@ -316,7 +316,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
      */
     private String getCrashReport(Context context, Throwable ex) {
         PackageManager pm = context.getPackageManager();
-        PackageInfo pinfo = null;
+        PackageInfo pinfo;
         StringBuilder exceptionStr = new StringBuilder();
         try {
             pinfo = pm.getPackageInfo(context.getPackageName(), PackageManager.GET_ACTIVITIES);
