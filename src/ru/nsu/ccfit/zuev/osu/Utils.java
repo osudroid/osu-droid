@@ -217,11 +217,11 @@ public class Utils {
     }
 
     static public int toRes(final int i) {
-        return i / Config.getTextureQuality();
+        return i / 1;
     }
 
     public static float toRes(final float i) {
-        return i / Config.getTextureQuality();
+        return i / 1;
     }
 
     public static String toFSValidString(final String s) {

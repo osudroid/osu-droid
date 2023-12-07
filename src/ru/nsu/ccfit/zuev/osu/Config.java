@@ -439,10 +439,6 @@ public class Config {
         Config.useCustomSounds = useCustomSounds;
     }
 
-    public static int getTextureQuality() {
-        return 1;
-    }
-
     public static float getBackgroundBrightness() {
         return backgroundBrightness;
     }

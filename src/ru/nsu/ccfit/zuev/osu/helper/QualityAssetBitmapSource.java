@@ -42,8 +42,7 @@ public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements
 
         final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
         decodeOptions.inJustDecodeBounds = true;
-        decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config
-                .getTextureQuality();
+        decodeOptions.inSampleSize = 1;
 
         InputStream in = null;
         try {
@@ -110,8 +109,7 @@ public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements
         try {
             final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
             decodeOptions.inPreferredConfig = pBitmapConfig;
-            decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config
-                    .getTextureQuality();
+            decodeOptions.inSampleSize = 1;
 
             in = this.mContext.getAssets().open(this.mAssetPath);
             return BitmapFactory.decodeStream(in, null, decodeOptions);

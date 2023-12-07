@@ -361,7 +361,6 @@ public class ResourceManager {
 
     public Font loadFont(final String resname, final String file, int size,
                          final int color) {
-        size /= Config.getTextureQuality();
         final BitmapTextureAtlas texture = new BitmapTextureAtlas(512, 512,
                 TextureOptions.BILINEAR_PREMULTIPLYALPHA);
         Font font;
@@ -380,18 +379,15 @@ public class ResourceManager {
 
     public StrokeFont loadStrokeFont(final String resname, final String file,
                                      int size, final int color1, final int color2) {
-        size /= Config.getTextureQuality();
         final BitmapTextureAtlas texture = new BitmapTextureAtlas(512, 256,
                 TextureOptions.BILINEAR_PREMULTIPLYALPHA);
         StrokeFont font;
         if (file == null) {
             font = new StrokeFont(texture, Typeface.create(Typeface.DEFAULT,
-                    Typeface.NORMAL), size, true, color1,
-                    Config.getTextureQuality() == 1 ? 2 : 0.75f, color2);
+                    Typeface.NORMAL), size, true, color1, 2, color2);
         } else {
             font = FontFactory.createStrokeFromAsset(texture, context, "fonts/"
-                            + file, size, true, color1, 2 / Config.getTextureQuality(),
-                    color2);
+                            + file, size, true, color1, 2, color2);
         }
         engine.getTextureManager().loadTexture(texture);
         engine.getFontManager().loadFont(font);
