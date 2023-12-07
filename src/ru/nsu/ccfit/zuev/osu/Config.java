@@ -80,7 +80,8 @@ public class Config {
         videoEnabled,
         deleteUnsupportedVideos,
         submitScoreOnMultiplayer,
-        keepBackgroundAspectRatio;
+        keepBackgroundAspectRatio,
+        noChangeDimInBreaks;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -124,6 +125,7 @@ public class Config {
         trianglesAnimation = prefs.getBoolean("trianglesAnimation", true);
         videoEnabled = prefs.getBoolean("enableVideo", false);
         keepBackgroundAspectRatio = prefs.getBoolean("keepBackgroundAspectRatio", false);
+        noChangeDimInBreaks = prefs.getBoolean("noChangeDimInBreaks", false);
 
         setSize();
         setPlayfieldSize(prefs.getInt("playfieldSize", 100) / 100f);
@@ -794,5 +796,9 @@ public class Config {
 
     public static boolean isKeepBackgroundAspectRatio() {
         return keepBackgroundAspectRatio;
+    }
+
+    public static boolean isNoChangeDimInBreaks() {
+        return noChangeDimInBreaks;
     }
 }

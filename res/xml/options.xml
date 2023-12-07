@@ -76,6 +76,12 @@
                 android:title="@string/opt_snakingInSliders_title"
                 android:summary="@string/opt_snakingInSliders_summary"/>
 
+        <CheckBoxPreference
+                android:key="noChangeDimInBreaks"
+                android:defaultValue="false"
+                android:title="@string/opt_noChangeDimInBreaks_title"
+                android:summary="@string/opt_noChangeDimInBreaks_summary"/>
+
         <CheckBoxPreference android:summary="@string/opt_showcursor_summary"
             android:title="@string/opt_showcursor_title" android:key="showcursor"
             android:defaultValue="false"/>

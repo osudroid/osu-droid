@@ -175,6 +175,9 @@
     <string name="opt_snakingInSliders_title">Use snaking in sliders</string>
     <string name="opt_snakingInSliders_summary">Enable sliders gradually snaking from start</string>
 
+    <string name="opt_noChangeDimInBreaks_title">Don\'t change background dim level during breaks</string>
+    <string name="opt_noChangeDimInBreaks_summary">When enabled, background dim level will not change during breaks.</string>
+
     <string name="opt_other_title">Miscellaneous</string>
     <string name="opt_multitouch_title">Multi-touch</string>
     <string name="opt_multitouch_summary">Enable multi-touch input if it\'s available</string>
