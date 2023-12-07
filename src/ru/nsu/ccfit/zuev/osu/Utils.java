@@ -10,6 +10,8 @@ import org.anddev.andengine.util.MathUtils;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
 
+import java.util.Arrays;
+
 public class Utils {
 
     private static final String FSReservedChars = "|\\?*<\":>+[]/";
@@ -19,9 +21,7 @@ public class Utils {
     private static int soundMask = 0;
 
     public static <T> T[] oneObjectArray(T object, T[] ary) {
-        for (int i = 0; i < ary.length; i++) {
-            ary[i] = object;
-        }
+        Arrays.fill(ary, object);
         return ary;
     }
 

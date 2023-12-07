@@ -919,9 +919,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             cursors[i].mouseOldDown = false;
         }
 
-        for (int i = 0; i < CursorCount; i++) {
-            cursorIIsDown[i] = false;
-        }
+        Arrays.fill(cursorIIsDown, false);
 
         comboWas100 = false;
         comboWasMissed = false;
