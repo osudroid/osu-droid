@@ -99,7 +99,7 @@ public class FollowTrack extends GameObject {
             if (percent > 1) {
                 percent = 1;
             }
-            for (int i = 0; i < points.size(); i++) {
+            for (int i = 0, size = points.size(); i < size; i++) {
                 points.get(i).setAlpha(percent);
             }
         } else if (time < timeLeft - approach) {

@@ -644,8 +644,8 @@ public class MainScene implements IUpdateHandler {
         if (doMenuShow == true && isMenuShowed == false) {
             logo.registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, EaseExponentialOut.getInstance()));
             logoOverlay.registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, EaseExponentialOut.getInstance()));
-            for (int i = 0; i < spectrum.length; i++) {
-                spectrum[i].registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2, Config.getRES_WIDTH() / 3, EaseExponentialOut.getInstance()));
+            for (Rectangle rectangle : spectrum) {
+                rectangle.registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2, Config.getRES_WIDTH() / 3, EaseExponentialOut.getInstance()));
             }
             menu.getFirst().registerEntityModifier(new ParallelEntityModifier(
                     new MoveXModifier(0.5f, menuBarX - 100, menuBarX, EaseElasticOut.getInstance()),
@@ -684,8 +684,8 @@ public class MainScene implements IUpdateHandler {
                         EaseBounceOut.getInstance()));
                 logoOverlay.registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, EaseBounceOut.getInstance()));
 
-                for (int i = 0; i < spectrum.length; i++) {
-                    spectrum[i].registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3, Config.getRES_WIDTH() / 2, EaseBounceOut.getInstance()));
+                for (Rectangle rectangle : spectrum) {
+                    rectangle.registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3, Config.getRES_WIDTH() / 2, EaseBounceOut.getInstance()));
                 }
                 isMenuShowed = false;
                 doMenuShow = false;

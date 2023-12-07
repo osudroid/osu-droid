@@ -106,8 +106,8 @@ public class FileUtils {
             in.close();
 
             byte[] bytes = digest.digest();
-            for (int i = 0; i < bytes.length; i++) {
-                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+            for (byte aByte : bytes) {
+                sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
             }
         } catch (IOException e) {
             Debug.e("getFileChecksum " + e.getMessage(), e);
