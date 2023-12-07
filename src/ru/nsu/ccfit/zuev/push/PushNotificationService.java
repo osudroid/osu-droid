@@ -29,7 +29,7 @@ public class PushNotificationService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        if (remoteMessage.getData().size() > 0) {
+        if (!remoteMessage.getData().isEmpty()) {
             HashMap<String, String> data = new HashMap<String, String>(remoteMessage.getData());
             String channelId = "ru.nsu.ccfit.zuev.push";
             Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);

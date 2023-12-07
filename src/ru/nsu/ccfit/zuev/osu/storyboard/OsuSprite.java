@@ -86,7 +86,7 @@ public class OsuSprite {
             if (filePath.equals(activity.mBackground)) {
                 activity.mBackground = null;
             }
-            if (eventList.size() == 0) {
+            if (eventList.isEmpty()) {
                 isValid = false;
                 return;
             }
@@ -122,7 +122,7 @@ public class OsuSprite {
                 break;
             }
         }
-        if (textureRegions.size() > 0) {
+        if (!textureRegions.isEmpty()) {
             isValid = true;
         } else {
             isValid = false;
@@ -144,7 +144,7 @@ public class OsuSprite {
         this.layer = layer;
         this.origin = origin;
         this.eventList = eventList;
-        if (eventList.size() == 0) {
+        if (eventList.isEmpty()) {
             isValid = false;
             return;
         }
@@ -414,7 +414,7 @@ public class OsuSprite {
                 ArrayList<OsuEvent> subEventList = osuEvent.subEvents;
                 IEntityModifier[] subEntityModifiers = new IEntityModifier[subEventList.size()];
                 float firstSubTime = 0f;
-                if (subEventList.size() > 0) {
+                if (!subEventList.isEmpty()) {
                     firstSubTime = subEventList.get(0).startTime;
                 }
                 for (int i = 0; i < subEventList.size(); i++) {
@@ -456,7 +456,7 @@ public class OsuSprite {
                         }
                         IEntityModifier[] subEntityModifiers = new IEntityModifier[subEventList.size()];
                         long firstSubTime = 0;
-                        if (subEventList.size() > 0) {
+                        if (!subEventList.isEmpty()) {
                             firstSubTime = subEventList.get(0).startTime;
                         }
                         for (int i = 0; i < subEventList.size(); i++) {
@@ -482,7 +482,7 @@ public class OsuSprite {
                         break;
                     }
                 }
-                if (entityModifierList.size() > 0) {
+                if (!entityModifierList.isEmpty()) {
                     iEntityModifier = new ParallelEntityModifier(entityModifierList.toArray(new IEntityModifier[0]));
                 }
             }

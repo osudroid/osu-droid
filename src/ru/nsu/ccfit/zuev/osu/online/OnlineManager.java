@@ -97,7 +97,7 @@ public class OnlineManager {
 			Debug.i(str);
 		}*/
 
-        if (response.size() == 0 || response.get(0).length() == 0) {
+        if (response.isEmpty() || response.get(0).isEmpty()) {
             failMessage = "Got empty response";
             Debug.i("Received empty response!");
             return null;
@@ -238,7 +238,7 @@ public class OnlineManager {
     }
 
     public boolean sendRecord(String data) throws OnlineManagerException {
-        if (playID == null || playID.length() == 0) {
+        if (playID == null || playID.isEmpty()) {
             failMessage = "I don't have play ID";
             return false;
         }
@@ -306,7 +306,7 @@ public class OnlineManager {
     }
 
     public boolean loadAvatarToTextureManager(String avatarURL) {
-        if (avatarURL == null || avatarURL.length() == 0) return false;
+        if (avatarURL == null || avatarURL.isEmpty()) return false;
 
         String filename = MD5Calcuator.getStringMD5(avatarURL);
         Debug.i("Loading avatar from " + avatarURL);

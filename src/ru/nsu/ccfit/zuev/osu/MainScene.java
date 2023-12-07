@@ -746,7 +746,7 @@ public class MainScene implements IUpdateHandler {
                     }
                     isContinuousKiai = currentTimingPoint.isKiai();
 
-                    if (timingPoints.size() > 0) {
+                    if (!timingPoints.isEmpty()) {
                         currentTimingPoint = timingPoints.remove(0);
                         if (!currentTimingPoint.wasInderited()) {
                             lastTimingPoint = currentTimingPoint;
@@ -861,7 +861,7 @@ public class MainScene implements IUpdateHandler {
         particleEnabled = false;
 
         ArrayList<TrackInfo> trackInfos = beatmapInfo.getTracks();
-        if (trackInfos != null && trackInfos.size() > 0) {
+        if (trackInfos != null && !trackInfos.isEmpty()) {
             int trackIndex = random.nextInt(trackInfos.size());
             selectedTrack = trackInfos.get(trackIndex);
             GlobalManager.getInstance().setSelectedTrack(selectedTrack);

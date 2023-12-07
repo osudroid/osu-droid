@@ -179,7 +179,7 @@ public class Replay {
             for (ReplayObjectData data : objectData) {
                 if (data == null) data = new ReplayObjectData();
                 os.writeShort(data.accuracy);
-                if (data.tickSet == null || data.tickSet.length() == 0) {
+                if (data.tickSet == null || data.tickSet.isEmpty()) {
                     os.writeByte(0);
                 } else {
                     byte[] bytes = new byte[(data.tickSet.length() + 7) / 8];

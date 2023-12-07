@@ -837,7 +837,7 @@ public class Slider extends GameObject {
         }
 
         // Some magic with slider ticks. If it'll crash it's not my fault ^_^"
-        while (ticks.size() > 0 && percentage < 1 - 0.02f / maxTime
+        while (!ticks.isEmpty() && percentage < 1 - 0.02f / maxTime
                 && tickTime * GameHelper.getTickRate() > tickInterval) {
             tickTime -= tickInterval / GameHelper.getTickRate();
             if (followCircle.getAlpha() > 0 && replayObjectData == null ||

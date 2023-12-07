@@ -478,7 +478,7 @@ public class MainActivity extends BaseGameActivity implements
                 }
             }
 
-            if (beatmaps.size() > 0) {
+            if (!beatmaps.isEmpty()) {
                 // final boolean deleteOsz = Config.isDELETE_OSZ();
                 // Config.setDELETE_OSZ(true);
                 ToastLogger.showText(StringTable.format(
@@ -534,7 +534,7 @@ public class MainActivity extends BaseGameActivity implements
             }
         }
 
-        if (skins.size() > 0) {
+        if (!skins.isEmpty()) {
             ToastLogger.showText(StringTable.format(
                     R.string.message_skin_importing_several,
                     skins.size()), false);

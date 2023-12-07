@@ -49,7 +49,7 @@ public class PostBuilder {
                 response = null;
             }
 
-            if (response == null || response.isEmpty() || response.get(0).length() == 0
+            if (response == null || response.isEmpty() || response.get(0).isEmpty()
                     || !(response.get(0).equals("FAIL") || response.get(0).equals("SUCCESS"))) {
                 try {
                     Thread.sleep(3000);

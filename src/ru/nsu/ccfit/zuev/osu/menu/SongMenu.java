@@ -227,7 +227,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         sortOrder = SortOrder.Title;
         sort();
 
-        if (items.size() == 0) {
+        if (items.isEmpty()) {
             final Text text = new Text(0, 0, ResourceManager.getInstance()
                     .getFont("CaptionFont"), "There are no songs in library, try using chimu.moe",
                     HorizontalAlign.CENTER);

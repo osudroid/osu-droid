@@ -68,10 +68,10 @@ public class ComboBurst {
 
     public void checkAndShow(int currentCombo) {
         if (Config.isComboburst() && currentCombo >= nextKeyComboNum) {
-            if (comboBurstVocals.size() > 0) {
+            if (!comboBurstVocals.isEmpty()) {
                 comboBurstVocals.get(nextSoundId).play(0.8f);
             }
-            if (comboBursts.size() > 0) {
+            if (!comboBursts.isEmpty()) {
                 Sprite sprite = comboBursts.get(nextShowId);
                 float toX;
                 if (fromX > 0) {
@@ -107,11 +107,11 @@ public class ComboBurst {
                 ));
             }
 
-            if (comboBursts.size() > 0) {
+            if (!comboBursts.isEmpty()) {
                 int length = comboBursts.size();
                 nextShowId = (nextShowId + 1) % length;
             }
-            if (comboBurstVocals.size() > 0) {
+            if (!comboBurstVocals.isEmpty()) {
                 int length = comboBurstVocals.size();
                 nextSoundId = (nextSoundId + 1) % length;
             }

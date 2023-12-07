@@ -121,7 +121,7 @@ public class SettingsMenu extends SettingsFragment {
 
         final EditTextPreference skinToppref = findPreference("skinTopPath");
         skinToppref.setOnPreferenceChangeListener((preference, newValue) -> {
-            if (newValue.toString().trim().length() == 0) {
+            if (newValue.toString().trim().isEmpty()) {
                 skinToppref.setText(Config.getCorePath() + "Skin/");
                 Config.loadConfig(mActivity);
                 skinPath.reloadSkinList();

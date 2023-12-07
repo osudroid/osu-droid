@@ -152,7 +152,7 @@ public class Config {
         //advanced
         defaultCorePath = Environment.getExternalStorageDirectory() + "/osu!droid/";
         corePath = prefs.getString("corePath", defaultCorePath);
-        if (corePath.length() == 0) {
+        if (corePath.isEmpty()) {
             corePath = defaultCorePath;
         }
         if (corePath.charAt(corePath.length() - 1) != '/') {
@@ -161,7 +161,7 @@ public class Config {
         scorePath = corePath + "Scores/";
 
         skinPath = prefs.getString("skinPath", corePath + "Skin/");
-        if (skinPath.length() == 0) {
+        if (skinPath.isEmpty()) {
             skinPath = corePath + "Skin/";
         }
         if (skinPath.charAt(skinPath.length() - 1) != '/') {
@@ -169,7 +169,7 @@ public class Config {
         }
 
         skinTopPath = prefs.getString("skinTopPath", skinPath);
-        if (skinTopPath.length() == 0) {
+        if (skinTopPath.isEmpty()) {
             skinTopPath = skinPath;
         }
         if (skinTopPath.charAt(skinTopPath.length() - 1) != '/') {
@@ -195,7 +195,7 @@ public class Config {
         deleteUnimportedBeatmaps = prefs.getBoolean("deleteUnimportedBeatmaps", false);
         forceRomanized = prefs.getBoolean("forceromanized", false);
         beatmapPath = prefs.getString("directory", corePath + "Songs/");
-        if (beatmapPath.length() == 0) {
+        if (beatmapPath.isEmpty()) {
             beatmapPath = corePath + "Songs/";
         }
         if (beatmapPath.charAt(beatmapPath.length() - 1) != '/') {

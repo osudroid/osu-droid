@@ -344,7 +344,7 @@ public enum LibraryManager {
     public BeatmapInfo getBeatmapByIndex(int index) {
         synchronized (library) {
             Debug.i("Music Changing Info: Require index :" + index + "/" + library.size());
-            if (library.size() == 0) return null;
+            if (library.isEmpty()) return null;
             if (index < 0 || index >= library.size()) {
                 shuffleLibrary();
                 currentIndex = 0;

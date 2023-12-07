@@ -167,7 +167,7 @@ public class OsbParser {
         }
         while (line != null && line.startsWith(" ")) {
             line = line.trim();
-            if (line.length() == 0) break;
+            if (line.isEmpty()) break;
             for (String s : variablesMap.keySet()) {
                 if (line.contains(s)) {
                     line = line.replace(s, variablesMap.get(s));
@@ -181,7 +181,7 @@ public class OsbParser {
                 currentOsuEvent.startTime = Long.parseLong(info[1]);
                 currentOsuEvent.loopCount = Integer.parseInt(info[2]);
                 currentOsuEvent.subEvents = parseSubEvents(source);
-                if (currentOsuEvent.subEvents.size() > 0) {//real start time
+                if (!currentOsuEvent.subEvents.isEmpty()) {//real start time
                     currentOsuEvent.startTime = currentOsuEvent.subEvents.get(0).startTime + currentOsuEvent.startTime;
                 }
             } else if (command == Command.T) {

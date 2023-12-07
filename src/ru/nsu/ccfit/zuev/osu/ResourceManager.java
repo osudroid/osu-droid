@@ -705,7 +705,7 @@ public class ResourceManager {
         BassSoundProvider snd = new BassSoundProvider();
         String resName = file.getName();
         resName = resName.substring(0, resName.length() - 4);
-        if (resName.length() == 0) {
+        if (resName.isEmpty()) {
             return;
         }
         Pattern pattern = Pattern.compile("([^\\d\\.]+)");

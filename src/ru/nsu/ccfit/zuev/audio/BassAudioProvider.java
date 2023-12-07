@@ -59,7 +59,7 @@ public class BassAudioProvider {
 
     public boolean prepare(final String fileName) {
         free();
-        if (fileName != null && fileName.length() > 0) {
+        if (fileName != null && !fileName.isEmpty()) {
             channel = BASS.BASS_StreamCreateFile(fileName, 0, 0, fileFlag);  // BASS.BASS_STREAM_DECODE
             if (decoder > 0) {
                 channel = BASS_FX.BASS_FX_TempoCreate(channel, 0);
@@ -82,7 +82,7 @@ public class BassAudioProvider {
 
     public boolean prepare(final AssetManager manager, final String assetName) {
         free();
-        if (manager != null && assetName != null && assetName.length() > 0) {
+        if (manager != null && assetName != null && !assetName.isEmpty()) {
             BASS.Asset asset = new BASS.Asset(manager, assetName);
             channel = BASS.BASS_StreamCreateFile(asset, 0, 0, fileFlag);
             if (decoder > 0) {

@@ -127,11 +127,11 @@ public class StatisticV2 implements Serializable {
         playerName = null;
         if (Config.isStayOnline()) {
             playerName = OnlineManager.getInstance().getUsername();
-            if (playerName == null || playerName.length() == 0)
+            if (playerName == null || playerName.isEmpty())
                 playerName = Config.getOnlineUsername();
         }
 
-        if (playerName == null || playerName.length() == 0)
+        if (playerName == null || playerName.isEmpty())
             playerName = Config.getLocalUsername();
     }
 
@@ -707,7 +707,7 @@ public class StatisticV2 implements Serializable {
     public String compile() {
         StringBuilder builder = new StringBuilder();
         String mstring = getModString();
-        if (mstring.length() == 0)
+        if (mstring.isEmpty())
             mstring = "-";
         builder.append(mstring);
         builder.append(' ');

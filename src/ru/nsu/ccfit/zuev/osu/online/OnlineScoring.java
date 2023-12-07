@@ -134,7 +134,7 @@ public class OnlineScoring {
                     break;
                 }
 
-                if (OnlineManager.getInstance().getFailMessage().length() > 0) {
+                if (!OnlineManager.getInstance().getFailMessage().isEmpty()) {
                     ToastLogger.showText(OnlineManager.getInstance().getFailMessage(), true);
                 }
             }
@@ -167,7 +167,7 @@ public class OnlineScoring {
                         success = false;
                     }
 
-                    if (OnlineManager.getInstance().getFailMessage().length() > 0) {
+                    if (!OnlineManager.getInstance().getFailMessage().isEmpty()) {
                         ToastLogger.showText(OnlineManager.getInstance().getFailMessage(), true);
                         if (OnlineManager.getInstance().getFailMessage().equals("Invalid record data"))
                             i = attemptCount;
@@ -207,7 +207,7 @@ public class OnlineScoring {
     public void loadAvatar(final boolean both) {
         if (!OnlineManager.getInstance().isStayOnline()) return;
         final String avatarUrl = OnlineManager.getInstance().getAvatarURL();
-        if (avatarUrl == null || avatarUrl.length() == 0)
+        if (avatarUrl == null || avatarUrl.isEmpty())
             return;
 
         Async.run(() -> {
