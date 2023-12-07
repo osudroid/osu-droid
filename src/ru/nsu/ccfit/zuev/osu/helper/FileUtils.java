@@ -58,8 +58,7 @@ public class FileUtils {
             folderFile.mkdirs();
         }
 
-        try {
-            ZipFile zip = new ZipFile(file);
+        try (ZipFile zip = new ZipFile(file)) {
             if (!zip.isValidZipFile()) {
                 ToastLogger.showText(
                         StringTable.format(R.string.message_error, "Invalid file"),
@@ -75,7 +74,7 @@ public class FileUtils {
                     || sourceFileName.toLowerCase().endsWith(".osk")) {
                 file.delete();
             }
-        } catch (final ZipException e) {
+        } catch (final IOException e) {
             Debug.e("FileUtils.extractZip: " + e.getMessage(), e);
 
             int extensionIndex = sourceFileName.lastIndexOf('.');

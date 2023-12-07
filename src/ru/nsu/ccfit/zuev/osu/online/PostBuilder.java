@@ -76,18 +76,19 @@ public class PostBuilder {
                     .url(scriptUrl)
                     .post(formBodyBuilder.build())
                     .build();
-            Response resp = OnlineManager.client.newCall(request).execute();
 
-            Debug.i("request url=" + scriptUrl);
-            Debug.i("request --------Content---------");
-            String line = null;
-            BufferedReader reader = new BufferedReader(new StringReader(resp.body().string()));
-            while ((line = reader.readLine()) != null) {
-                Debug.i(String.format("request [%d]: %s", response.size(), line));
-                response.add(line);
+            try (Response resp = OnlineManager.client.newCall(request).execute()) {
+                Debug.i("request url=" + scriptUrl);
+                Debug.i("request --------Content---------");
+                String line = null;
+                BufferedReader reader = new BufferedReader(new StringReader(resp.body().string()));
+                while ((line = reader.readLine()) != null) {
+                    Debug.i(String.format("request [%d]: %s", response.size(), line));
+                    response.add(line);
+                }
+                Debug.i("request url=" + scriptUrl);
+                Debug.i("request -----End of content-----");
             }
-            Debug.i("request url=" + scriptUrl);
-            Debug.i("request -----End of content-----");
         } catch (Exception e) {
             Debug.e(e.getMessage(), e);
         }

@@ -39,10 +39,12 @@ public class OnlineFileOperator {
                     .build();
             Request request = new Request.Builder().url(urlstr)
                     .post(requestBody).build();
-            Response response = OnlineManager.client.newCall(request).execute();
-            String responseMsg = response.body().string();
 
-            Debug.i("sendFile signatureResponse " + responseMsg);
+            try (Response response = OnlineManager.client.newCall(request).execute()) {
+                String responseMsg = response.body().string();
+                Debug.i("sendFile signatureResponse " + responseMsg);
+            }
+
         } catch (final IOException e) {
             Debug.e("sendFile IOException " + e.getMessage(), e);
         } catch (final Exception e) {
