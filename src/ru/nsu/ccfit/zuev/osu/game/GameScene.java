@@ -2993,9 +2993,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void calculateAllSliderPaths() {
-        if (objects.isEmpty()) {
-            return;
-        } else {
+        if (!objects.isEmpty()) {
             if (lastTrack.getSliderCount() <= 0) {
                 return;
             }

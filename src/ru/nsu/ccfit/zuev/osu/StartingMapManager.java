@@ -100,7 +100,6 @@ public class StartingMapManager {
         } catch (final IOException e) {
             ToastLogger.showText(e.getMessage(), false);
             Debug.e("StartingMapManager: " + e.getMessage(), e);
-            return;
         }
     }
 

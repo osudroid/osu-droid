@@ -26,10 +26,8 @@ public class PostBuilder {
             }
             formBodyBuilder.add(key, value);
             values.append(URLEncoder.encode(value, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            return;
+        } catch (UnsupportedEncodingException ignored) {
         }
-
     }
 
     public ArrayList<String> requestWithAttempts(final String scriptUrl, int attempts) throws RequestException {

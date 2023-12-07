@@ -45,7 +45,6 @@ public class ToastLogger {
 
     public static void addToLog(final String str) {
         if (instance == null) {
-            return;
             /*
              * if (instance.debugLog.size() >= 20) instance.debugLog.remove(0);
              * instance.debugLog.add(str);
