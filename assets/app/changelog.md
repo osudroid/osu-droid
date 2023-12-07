@@ -51,6 +51,7 @@ kicking you from the room.
 ## Smaller additions
 
 - Added default slider hint for converted `.osk` skins
+- Added a graphics option to not change background dim level during breaks
 
 # Changes
 
@@ -64,7 +65,6 @@ this release.
 - Decreased playfield size setting minimum value to 50%
 - Changed playfield size setting to a slider
 - Selecting a beatmap with different music within the same beatmapset in song selection menu will play the music
-- Background dim will not fade during a break period in gameplay if background brightness is at or below 2%
 - Rearranged room information text in multiplayer to account for force difficulty statistics
 
 # Removals
