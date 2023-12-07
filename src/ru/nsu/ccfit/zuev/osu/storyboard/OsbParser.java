@@ -18,13 +18,13 @@ public class OsbParser {
 
     public static OsbParser instance = new OsbParser();
 
-    private LinkedList<OsuSprite> sprites = new LinkedList<OsuSprite>();
+    private LinkedList<OsuSprite> sprites = new LinkedList<>();
 
-    private ArrayList<TimingPoint> timingPoints = new ArrayList<TimingPoint>();
+    private ArrayList<TimingPoint> timingPoints = new ArrayList<>();
 
-    private ArrayList<HitSound> hitSounds = new ArrayList<HitSound>();
+    private ArrayList<HitSound> hitSounds = new ArrayList<>();
 
-    private HashMap<String, String> variablesMap = new HashMap<String, String>();
+    private HashMap<String, String> variablesMap = new HashMap<>();
 
     private String line;
 
@@ -75,13 +75,13 @@ public class OsbParser {
             }
             source.close();
         }
-        Collections.sort(hitSounds, new Comparator<HitSound>() {
+        Collections.sort(hitSounds, new Comparator<>() {
             @Override
             public int compare(HitSound lhs, HitSound rhs) {
                 return (int) (lhs.time - rhs.time);
             }
         });
-        Collections.sort(sprites, new Comparator<OsuSprite>() {
+        Collections.sort(sprites, new Comparator<>() {
             @Override
             public int compare(OsuSprite lhs, OsuSprite rhs) {
                 return (int) (lhs.spriteStartTime - rhs.spriteStartTime);
@@ -160,7 +160,7 @@ public class OsbParser {
     }
 
     private ArrayList<OsuEvent> parseEvents(BufferedSource source) throws IOException {
-        ArrayList<OsuEvent> eventList = new ArrayList<OsuEvent>();
+        ArrayList<OsuEvent> eventList = new ArrayList<>();
         line = source.readUtf8Line();
         if (line.startsWith("_")) {
             line = line.replaceAll("_", " ");
@@ -279,7 +279,7 @@ public class OsbParser {
     }
 
     private ArrayList<OsuEvent> parseSubEvents(BufferedSource source) throws IOException {
-        ArrayList<OsuEvent> subOsuEventList = new ArrayList<OsuEvent>();
+        ArrayList<OsuEvent> subOsuEventList = new ArrayList<>();
         while ((line = source.readUtf8Line()) != null && (line.startsWith("  ") || line.startsWith("__"))) {
             line = line.replaceAll("_", " ").trim();
             for (String s : variablesMap.keySet()) {

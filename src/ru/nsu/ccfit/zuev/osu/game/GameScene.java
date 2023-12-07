@@ -149,7 +149,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private GameScoreTextShadow scoreShadow;
 
-    private Queue<BreakPeriod> breakPeriods = new LinkedList<BreakPeriod>();
+    private Queue<BreakPeriod> breakPeriods = new LinkedList<>();
 
     private BreakAnimator breakAnimator;
 

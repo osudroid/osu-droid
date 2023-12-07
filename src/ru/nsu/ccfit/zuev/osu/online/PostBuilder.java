@@ -60,7 +60,7 @@ public class PostBuilder {
             break;
         }
 
-        if (response == null) response = new ArrayList<String>();
+        if (response == null) response = new ArrayList<>();
 
         if (response.isEmpty()) {
             response.add("");
@@ -69,7 +69,7 @@ public class PostBuilder {
     }
 
     private ArrayList<String> request(final String scriptUrl) throws RequestException {
-        ArrayList<String> response = new ArrayList<String>();
+        ArrayList<String> response = new ArrayList<>();
 
         try {
             Request request = new Request.Builder()

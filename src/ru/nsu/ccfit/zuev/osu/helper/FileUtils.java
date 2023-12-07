@@ -176,8 +176,8 @@ public class FileUtils {
     public static File[] listFiles(File directory, FileFilter filter) {
         File[] filelist;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            LinkedList<File> cachedFiles = new LinkedList<File>();
-            DirectoryStream.Filter<Path> directoryFilter = new DirectoryStream.Filter<Path>() {
+            LinkedList<File> cachedFiles = new LinkedList<>();
+            DirectoryStream.Filter<Path> directoryFilter = new DirectoryStream.Filter<>() {
                 @Override
                 public boolean accept(Path entry) {
                     return filter.accept(entry.toFile());

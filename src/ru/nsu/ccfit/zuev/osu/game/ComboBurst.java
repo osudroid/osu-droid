@@ -19,9 +19,9 @@ import java.util.List;
  */
 public class ComboBurst {
 
-    private final List<Sprite> comboBursts = new ArrayList<Sprite>();
+    private final List<Sprite> comboBursts = new ArrayList<>();
 
-    private final List<BassSoundProvider> comboBurstVocals = new ArrayList<BassSoundProvider>();
+    private final List<BassSoundProvider> comboBurstVocals = new ArrayList<>();
 
     private final float rightX;
 

@@ -199,7 +199,7 @@ public class OnlineScoring {
                 return OnlineManager.getInstance().getTop(trackFile, hash);
             } catch (OnlineManager.OnlineManagerException e) {
                 Debug.e("Cannot load scores " + e.getMessage());
-                return new ArrayList<String>();
+                return new ArrayList<>();
             }
         }
     }

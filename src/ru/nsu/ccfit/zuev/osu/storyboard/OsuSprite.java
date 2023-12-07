@@ -111,7 +111,7 @@ public class OsuSprite {
             th *= 2;
         }
         BuildableBitmapTextureAtlas mBitmapTextureAtlas = new BuildableBitmapTextureAtlas(tw, th, TextureOptions.BILINEAR);
-        ArrayList<TextureRegion> textureRegions = new ArrayList<TextureRegion>();
+        ArrayList<TextureRegion> textureRegions = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             File temp = new File(StoryBoardTestActivity.FOLDER, filePath.substring(0, filePath.lastIndexOf(".")) + i + fileExt);
             if (temp.exists()) {
@@ -129,7 +129,7 @@ public class OsuSprite {
             return;
         }
         try {
-            mBitmapTextureAtlas.build(new BlackPawnTextureBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0));
+            mBitmapTextureAtlas.build(new BlackPawnTextureBuilder<>(0));
         } catch (ITextureBuilder.TextureAtlasSourcePackingException e) {
             e.printStackTrace();
         }
@@ -270,7 +270,7 @@ public class OsuSprite {
             }
         }
         parallelEntityModifier = new ParallelEntityModifier(entityModifiers);
-        parallelEntityModifier.addModifierListener(new IModifier.IModifierListener<IEntity>() {
+        parallelEntityModifier.addModifierListener(new IModifier.IModifierListener<>() {
 
             @Override
             public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
@@ -431,7 +431,7 @@ public class OsuSprite {
             case T: {
                 ArrayList<OsuEvent> subEventList = osuEvent.subEvents;
                 ArrayList<HitSound> hitSounds = OsbParser.instance.getHitSounds();
-                ArrayList<IEntityModifier> entityModifierList = new ArrayList<IEntityModifier>();
+                ArrayList<IEntityModifier> entityModifierList = new ArrayList<>();
                 int soundType;
                 if (osuEvent.triggerType.equals("HitSoundWhistle")) {
                     soundType = 2;

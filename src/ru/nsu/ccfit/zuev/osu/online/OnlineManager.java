@@ -288,7 +288,7 @@ public class OnlineManager {
         ArrayList<String> response = sendRequest(post, endpoint + "getrank.php");
 
         if (response == null) {
-            return new ArrayList<String>();
+            return new ArrayList<>();
         }
 
         response.remove(0);

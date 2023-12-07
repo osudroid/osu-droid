@@ -17,7 +17,7 @@ public class ToastLogger {
 
     boolean showlong = false;
 
-    ArrayList<String> debugLog = new ArrayList<String>();
+    ArrayList<String> debugLog = new ArrayList<>();
 
     float percentage;
 

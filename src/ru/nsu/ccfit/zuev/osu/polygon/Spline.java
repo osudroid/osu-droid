@@ -32,17 +32,17 @@ public class Spline {
     private ArrayList<Float> m_lengths = null;
 
     public Spline() {
-        m_ctrl_pts = new ArrayList<PointF>();
+        m_ctrl_pts = new ArrayList<>();
         m_curve_type = CurveTypes.Linear;
-        m_path = new ArrayList<Line>();
-        m_points = new ArrayList<PointF>();
+        m_path = new ArrayList<>();
+        m_points = new ArrayList<>();
     }
 
     public Spline(ArrayList<PointF> theControlPoints, CurveTypes theCurveType) {
-        m_ctrl_pts = new ArrayList<PointF>(theControlPoints);
+        m_ctrl_pts = new ArrayList<>(theControlPoints);
         m_curve_type = theCurveType;
-        m_path = new ArrayList<Line>();
-        m_points = new ArrayList<PointF>();
+        m_path = new ArrayList<>();
+        m_points = new ArrayList<>();
 
         sliderthing(m_curve_type, m_ctrl_pts, m_path, m_points);
     }
@@ -68,7 +68,7 @@ public class Spline {
     private static ArrayList<PointF> CreateBezier(ArrayList<PointF> input) {
         float DetailLevel2 = (float) DetailLevel;
         PointF[] working = new PointF[input.size()];
-        ArrayList<PointF> output = new ArrayList<PointF>();
+        ArrayList<PointF> output = new ArrayList<>();
 
         PointF lll;
 
@@ -212,7 +212,7 @@ public class Spline {
     }
 
     public ArrayList<PointF> getControlPoints() {
-        if (m_ctrl_pts_copy == null) m_ctrl_pts_copy = new ArrayList<PointF>(m_ctrl_pts);
+        if (m_ctrl_pts_copy == null) m_ctrl_pts_copy = new ArrayList<>(m_ctrl_pts);
         return m_ctrl_pts_copy;
     }
 
@@ -230,18 +230,18 @@ public class Spline {
     }
 
     public ArrayList<Line> getPath() {
-        if (m_path_copy == null) m_path_copy = new ArrayList<Line>(m_path);
+        if (m_path_copy == null) m_path_copy = new ArrayList<>(m_path);
         return m_path_copy;
     }
 
     public ArrayList<PointF> getPoints() {
-        if (m_points_copy == null) m_points_copy = new ArrayList<PointF>(m_points);
+        if (m_points_copy == null) m_points_copy = new ArrayList<>(m_points);
         return m_points_copy;
     }
 
     public ArrayList<Float> getLengths() {
         if (m_lengths == null) {
-            m_lengths = new ArrayList<Float>(m_path.size() + 1);
+            m_lengths = new ArrayList<>(m_path.size() + 1);
             float length_so_far = 0;
             for (int x = 0; x < m_path.size(); x++) {
                 m_lengths.add(length_so_far);
@@ -321,7 +321,7 @@ public class Spline {
                 int lastIndex = 0;
                 for (int i = 0; i < sliderCurvePoints.size(); i++)
                     if ((i > 0 && sliderCurvePoints.get(i) == sliderCurvePoints.get(i - 1)) || i == sliderCurvePoints.size() - 1) {
-                        ArrayList<PointF> thisLength = new ArrayList<PointF>(sliderCurvePoints.subList(lastIndex, i - lastIndex + ((i == sliderCurvePoints.size() - 1) ? 1 : 0))); // + 1); // i145
+                        ArrayList<PointF> thisLength = new ArrayList<>(sliderCurvePoints.subList(lastIndex, i - lastIndex + ((i == sliderCurvePoints.size() - 1) ? 1 : 0))); // + 1); // i145
 
                         ArrayList<PointF> points1 = CreateBezier(thisLength);
                         points.addAll(points1);

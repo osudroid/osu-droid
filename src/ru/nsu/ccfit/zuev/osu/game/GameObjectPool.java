@@ -10,17 +10,17 @@ public class GameObjectPool {
 
     public static GameObjectPool instance = new GameObjectPool();
 
-    public LinkedList<HitCircle> circles = new LinkedList<HitCircle>();
+    public LinkedList<HitCircle> circles = new LinkedList<>();
 
-    public Map<Integer, LinkedList<CircleNumber>> numbers = new HashMap<Integer, LinkedList<CircleNumber>>();
+    public Map<Integer, LinkedList<CircleNumber>> numbers = new HashMap<>();
 
-    public Map<String, LinkedList<GameEffect>> effects = new HashMap<String, LinkedList<GameEffect>>();
+    public Map<String, LinkedList<GameEffect>> effects = new HashMap<>();
 
-    public LinkedList<Slider> sliders = new LinkedList<Slider>();
+    public LinkedList<Slider> sliders = new LinkedList<>();
 
-    public LinkedList<FollowTrack> tracks = new LinkedList<FollowTrack>();
+    public LinkedList<FollowTrack> tracks = new LinkedList<>();
 
-    public LinkedList<Spinner> spinners = new LinkedList<Spinner>();
+    public LinkedList<Spinner> spinners = new LinkedList<>();
 
     private int objectsCreated = 0;
 
@@ -72,7 +72,7 @@ public class GameObjectPool {
 
     public void putNumber(final CircleNumber number) {
         if (numbers.containsKey(number.getNum()) == false) {
-            numbers.put(number.getNum(), new LinkedList<CircleNumber>());
+            numbers.put(number.getNum(), new LinkedList<>());
         }
         numbers.get(number.getNum()).add(number);
     }
@@ -89,7 +89,7 @@ public class GameObjectPool {
 
     public void putEffect(final GameEffect effect) {
         if (effects.containsKey(effect.getTexname()) == false) {
-            effects.put(effect.getTexname(), new LinkedList<GameEffect>());
+            effects.put(effect.getTexname(), new LinkedList<>());
         }
         effects.get(effect.getTexname()).add(effect);
     }

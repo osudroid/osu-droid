@@ -14,7 +14,7 @@ public class GameScoreTextShadow extends GameObject {
 
     private final AnimSprite[] letters;
 
-    private final ArrayList<AnimSprite> digits = new ArrayList<AnimSprite>();
+    private final ArrayList<AnimSprite> digits = new ArrayList<>();
 
     private boolean hasX = false;
 

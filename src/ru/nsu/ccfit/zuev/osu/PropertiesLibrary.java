@@ -16,7 +16,7 @@ public class PropertiesLibrary {
 
     private final String version = "properties1";
 
-    private Map<String, BeatmapProperties> props = new HashMap<String, BeatmapProperties>();
+    private Map<String, BeatmapProperties> props = new HashMap<>();
 
     private Context context = null;
 

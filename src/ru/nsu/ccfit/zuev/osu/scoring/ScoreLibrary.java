@@ -106,9 +106,9 @@ public class ScoreLibrary {
             if (obj instanceof Map<?, ?>) {
                 if (versionStr.equals("scores1")) {
                     final Map<String, ArrayList<Statistic>> oldStat = (Map<String, ArrayList<Statistic>>) obj;
-                    scores = new HashMap<String, ArrayList<StatisticV2>>();
+                    scores = new HashMap<>();
                     for (final String str : oldStat.keySet()) {
-                        final ArrayList<StatisticV2> newStat = new ArrayList<StatisticV2>();
+                        final ArrayList<StatisticV2> newStat = new ArrayList<>();
                         for (final Statistic s : oldStat.get(str)) {
                             newStat.add(new StatisticV2(s));
                         }

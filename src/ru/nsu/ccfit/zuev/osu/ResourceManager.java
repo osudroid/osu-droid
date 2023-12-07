@@ -157,7 +157,7 @@ public class ResourceManager {
             if (skinjson == null) skinjson = new JSONObject();
             SkinJsonReader.getReader().supplyJson(skinjson);
         }
-        final Map<String, File> availableFiles = new HashMap<String, File>();
+        final Map<String, File> availableFiles = new HashMap<>();
         if (skinFiles != null) {
             for (final File f : skinFiles) {
                 if (f.isFile()) {

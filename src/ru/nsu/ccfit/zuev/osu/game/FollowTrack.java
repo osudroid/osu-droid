@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 public class FollowTrack extends GameObject {
 
-    private final ArrayList<Sprite> points = new ArrayList<Sprite>();
+    private final ArrayList<Sprite> points = new ArrayList<>();
 
     private final int frameCount;
 
