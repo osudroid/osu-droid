@@ -934,29 +934,19 @@ public class StatisticV2 implements Serializable {
     }
 
     public static float getCustomCSScoreMultiplier(float beatmapCS, float customCS) {
-        float multiplier = 1;
-        float diff = Math.abs(beatmapCS - customCS);
+        float diff = beatmapCS - customCS;
 
-        if (customCS >= beatmapCS) {
-            multiplier += 0.0075f * (float) Math.pow(diff, 1.5);
-        } else {
-            multiplier -= 0.01f * (float) Math.pow(diff, 1.5);
-        }
-
-        return multiplier;
+        return diff >= 0
+            ? 1 + 0.0075f * (float) Math.pow(diff, 1.5)
+            : 2 / (1 + (float) Math.exp(-0.5 * diff));
     }
 
     public static float getCustomODScoreMultiplier(float beatmapOD, float customOD) {
-        float multiplier = 1;
-        float diff = Math.abs(beatmapOD - customOD);
+        float diff = beatmapOD - customOD;
 
-        if (customOD >= beatmapOD) {
-            multiplier += 0.005f * (float) Math.pow(diff, 1.3);
-        } else {
-            multiplier -= 0.005f * (float) Math.pow(diff, 1.35);
-        }
-
-        return multiplier;
+        return diff >= 0
+            ? 1 + 0.005f * (float) Math.pow(diff, 1.3)
+            : 2 / (1 + (float) Math.exp(-0.25 * diff));
     }
 
     /**
