@@ -12,7 +12,6 @@ import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.input.touch.detector.ScrollDetector.IScrollDetectorListener
 import org.anddev.andengine.util.MathUtils
 import ru.nsu.ccfit.zuev.osu.Config
-import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 
 class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
@@ -183,9 +182,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
                 if (moved || isScroll)
                     return true
 
-                // Only play the click sound when not in game scene. Not really an elegant solution, but works for now.
-                if (getGlobal().engine.scene != getGlobal().gameScene)
-                    getResources().getSound("menuclick")?.play()
+                getResources().getSound("menuclick")?.play()
 
                 if (player != null && Multiplayer.player != player)
                 {

@@ -80,7 +80,9 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
 
     private fun appendText(spanned: Spanned)
     {
-        ResourceManager.getInstance().getSound("heartbeat")?.play()
+        // Only play chat sound when not in gameplay.
+        if (getGlobal().engine.scene != getGlobal().gameScene.scene)
+            ResourceManager.getInstance().getSound("heartbeat")?.play()
 
         if (log.isNotEmpty())
         {
