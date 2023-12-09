@@ -66,6 +66,8 @@ this release.
 - Changed playfield size setting to a slider
 - Selecting a beatmap with different music within the same beatmapset in song selection menu will play the music
 - Rearranged room information text in multiplayer to account for force difficulty statistics
+- Chat sound in multiplayer will not play during gameplay
+- Decreased chat sound volume in multiplayer by 25%
 
 # Removals
 
@@ -87,5 +89,4 @@ force CS is designed so that such setting gives the same score multiplier as the
 - Fixed object opacity calculation in difficulty calculation not considering Hidden fade in duration
 - Fixed modern spinners not recovering HP at all
 - Fixed beatmap difficulty calculation cache completely not working
-- Fixed circle fade in duration being slower at speed multiplier below 1x and faster at speed multiplier above 1x 
-- Fixed a random menu click sound playing during gameplay when a player joins or leaves in multiplayer
+- Fixed circle fade in duration being slower at speed multiplier below 1x and faster at speed multiplier above 1x
