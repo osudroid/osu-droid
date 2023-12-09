@@ -88,3 +88,4 @@ force CS is designed so that such setting gives the same score multiplier as the
 - Fixed modern spinners not recovering HP at all
 - Fixed beatmap difficulty calculation cache completely not working
 - Fixed circle fade in duration being slower at speed multiplier below 1x and faster at speed multiplier above 1x 
+- Fixed a random menu click sound playing during gameplay when a player joins or leaves in multiplayer
