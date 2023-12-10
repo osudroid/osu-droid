@@ -12,8 +12,6 @@ import org.anddev.andengine.util.modifier.ease.EaseLinear;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -255,7 +253,10 @@ public class HitCircle extends GameObject {
 
         if (!GameHelper.isHidden())
         {
-            float duration = 0.4f * Math.min(1, time / (450 / 1000f)) * GameHelper.getTimeMultiplier();
+            // We are not applying time multiplier here as dt is based on game time,
+            // and the duration below is game time.
+            // This is different from using entity modifiers which expect real time.
+            float duration = 0.4f * Math.min(1, time / 0.45f);
             float percent = EaseLinear.getInstance().getPercentage(passedTime, duration);
 
             if (passedTime < duration)

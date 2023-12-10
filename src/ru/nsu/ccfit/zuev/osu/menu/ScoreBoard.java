@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.database.Cursor;
-import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.Multiplayer;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -73,6 +73,12 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     }
 
     public static String convertModString(StringBuilder sb, String s) {
+        // Account for SC being removed.
+        // Too dirty of a solution, but no other clean way :/
+        var track = GlobalManager.getInstance().getSelectedTrack();
+        var cs = track.getCircleSize();
+        var hasLegacySC = false;
+
         sb.setLength(0);
         String[] mods = s.split("\\|", 2);
         for (int i = 0; i < mods[0].length(); i++) {
@@ -88,12 +94,14 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     break;
                 case 'e':
                     sb.append("EZ,");
+                    --cs;
                     break;
                 case 'n':
                     sb.append("NF,");
                     break;
                 case 'r':
                     sb.append("HR,");
+                    ++cs;
                     break;
                 case 'h':
                     sb.append("HD,");
@@ -115,10 +123,12 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     break;
                 case 'l':
                     sb.append("REZ,");
+                    --cs;
                     break;
                 // Note: This is SmallCircles which is not available anymore, replaced with custom CS.
                 case 'm':
-                    sb.append("SC,");
+                    hasLegacySC = true;
+                    cs += 4;
                     break;
                 case 'u':
                     sb.append("SD,");
@@ -133,6 +143,10 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     sb.append("ScoreV2,");
                     break;
             }
+        }
+
+        if (hasLegacySC) {
+            sb.append(String.format("CS%.1f,", cs));
         }
 
         if (mods.length > 1) {

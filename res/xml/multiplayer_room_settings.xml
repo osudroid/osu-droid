@@ -27,6 +27,12 @@
                 android:summary="Allow any player to choose mods (speed changing mods can only be enabled by room host)"
         />
 
+        <CheckBoxPreference
+                android:key="room_allowForceDifficultyStatistics"
+                android:title="Allow force difficulty statistics in free mod"
+                android:summary="Allow players to use forced difficulty statistics in free mod"
+        />
+
         <ListPreference
                 android:key="room_versus_mode"
                 android:title="Team mode"

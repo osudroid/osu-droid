@@ -1,11 +1,7 @@
 package com.reco1l.api.ibancho
 
-import com.reco1l.api.ibancho.data.PlayerStatus
-import com.reco1l.api.ibancho.data.RoomBeatmap
-import com.reco1l.api.ibancho.data.RoomPlayer
-import com.reco1l.api.ibancho.data.RoomTeam
+import com.reco1l.api.ibancho.data.*
 import com.reco1l.legacy.data.stringToMods
-import com.reco1l.legacy.ui.multiplayer.RoomMods
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -69,3 +65,13 @@ internal fun parseMods(o: JSONObject): RoomMods
         customHP = if (!o.isNull("customHP")) o.getDouble("customHP").toFloat() else null
     )
 }
+
+/**
+ * Parse a [JSONObject] of gameplay settings to [RoomGameplaySettings].
+ */
+internal fun parseGameplaySettings(o: JSONObject): RoomGameplaySettings =
+    RoomGameplaySettings(
+        isRemoveSliderLock = o.getBoolean("isRemoveSliderLock"),
+        isFreeMod = o.getBoolean("isFreeMod"),
+        allowForceDifficultyStatistics = o.getBoolean("allowForceDifficultyStatistics")
+    )

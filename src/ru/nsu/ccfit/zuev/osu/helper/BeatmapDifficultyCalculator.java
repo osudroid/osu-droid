@@ -13,7 +13,6 @@ import com.rian.difficultycalculator.calculator.PerformanceCalculator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Objects;
 
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -499,7 +498,7 @@ public final class BeatmapDifficultyCalculator {
          * @return Whether the cache has expired.
          */
         public boolean isExpired(long time) {
-            return generatedTime + timeToLive > time;
+            return generatedTime + timeToLive < time;
         }
     }
 }

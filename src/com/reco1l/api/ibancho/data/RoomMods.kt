@@ -1,7 +1,7 @@
-package com.reco1l.legacy.ui.multiplayer
+package com.reco1l.api.ibancho.data
 
-import com.reco1l.api.ibancho.data.Room
 import com.reco1l.legacy.data.modsToReadable
+import com.reco1l.legacy.Multiplayer
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*
 import java.util.*
@@ -29,9 +29,19 @@ data class RoomMods(
     fun toString(room: Room): String
     {
         if (set.isEmpty())
-            return if (room.isFreeMods) "Free mods" else "None"
+            return buildString {
 
-        return if (room.isFreeMods) buildString {
+                if (room.gameplaySettings.isFreeMod) {
+                    append("Free mods")
+
+                    if (room.gameplaySettings.allowForceDifficultyStatistics) {
+                        append(", Force diffstat")
+                    }
+                } else append("None")
+
+            }
+
+        return if (room.gameplaySettings.isFreeMod) buildString {
 
             append("Free mods, ")
 
@@ -44,6 +54,9 @@ data class RoomMods(
             if (speedMultiplier != 1f)
                 append("%.2fx, ".format(speedMultiplier))
 
+            if (room.gameplaySettings.allowForceDifficultyStatistics)
+                append("Force diffstat, ")
+
         }.substringBeforeLast(',') else toString()
     }
 
@@ -55,7 +68,7 @@ data class RoomMods(
         if (other !is RoomMods)
             return false
 
-        val sameMods = Multiplayer.room?.isFreeMods == true
+        val sameMods = Multiplayer.room?.gameplaySettings?.isFreeMod == true
 
                 // DoubleTime and NightCore, comparing them as one.
                 && (MOD_DOUBLETIME in set || MOD_NIGHTCORE in set) == (MOD_DOUBLETIME in other.set || MOD_NIGHTCORE in other.set)

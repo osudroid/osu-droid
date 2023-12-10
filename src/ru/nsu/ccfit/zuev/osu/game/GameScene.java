@@ -17,7 +17,7 @@ import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.engine.BlankTextureRegion;
 import com.reco1l.legacy.engine.VideoSprite;
 import com.reco1l.legacy.ui.entity.InGameLeaderboard;
-import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.rian.difficultycalculator.attributes.TimedDifficultyAttributes;
 import com.rian.difficultycalculator.beatmap.hitobject.HitObject;
@@ -68,7 +68,6 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.constants.BeatmapCountdown;
 import ru.nsu.ccfit.zuev.osu.beatmap.constants.SampleBank;
@@ -368,8 +367,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         try {
-            final File musicFile = new File(beatmapData.getFolder(),
-                    beatmapData.general.audioFilename);
+            var musicFile = new File(track.getAudioFilename());
 
             if (!musicFile.exists()) {
                 throw new FileNotFoundException(musicFile.getPath());
@@ -697,12 +695,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        if (Multiplayer.isMultiplayer && Multiplayer.isConnected && Multiplayer.room != null) {
+        if (Multiplayer.isMultiplayer && Multiplayer.isConnected() && Multiplayer.room != null) {
             spectatorDataManager = new SpectatorDataManager(this, replay, stat);
         }
 
         // Resetting variables before starting the game.
-        Multiplayer.clearLeaderboard();
+        Multiplayer.finalData = null;
         hasFailed = false;
         lastBackPressTime = -1f;
         isSkipRequested = false;
@@ -751,30 +749,23 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final String rfile = track != null ? replayFile : this.replayFile;
 
-        new AsyncTask() {
-            @Override
-            public void run() {
-                loadComplete = loadGame(track != null ? track : lastTrack, rfile);
+        Async.run(() -> {
+
+            if (loadGame(track != null ? track : lastTrack, rfile)) {
+                prepareScene();
+            } else {
+                ModMenu.getInstance().setMod(Replay.oldMod);
+                ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
+                ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
+
+                ModMenu.getInstance().setCustomAR(Replay.oldCustomAR);
+                ModMenu.getInstance().setCustomOD(Replay.oldCustomOD);
+                ModMenu.getInstance().setCustomCS(Replay.oldCustomCS);
+                ModMenu.getInstance().setCustomHP(Replay.oldCustomHP);
+
+                quit();
             }
-
-            @Override
-            public void onComplete() {
-                if (loadComplete) {
-                    prepareScene();
-                } else {
-                    ModMenu.getInstance().setMod(Replay.oldMod);
-                    ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
-                    ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
-
-                    ModMenu.getInstance().setCustomAR(Replay.oldCustomAR);
-                    ModMenu.getInstance().setCustomOD(Replay.oldCustomOD);
-                    ModMenu.getInstance().setCustomCS(Replay.oldCustomCS);
-                    ModMenu.getInstance().setCustomHP(Replay.oldCustomHP);
-
-                    quit();
-                }
-            }
-        }.execute();
+        });
 
         ResourceManager.getInstance().getSound("failsound").stop();
     }
@@ -1373,7 +1364,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             {
                 statisticDataTimeElapsed %= 3000;
 
-                if (Multiplayer.isConnected)
+                if (Multiplayer.isConnected())
                 {
                     var liveScore = stat.toBoardItem();
 
@@ -1521,7 +1512,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     flashlightSprite.onBreak(true);
                 }
 
-                if (Multiplayer.isConnected)
+                if (Multiplayer.isConnected())
                     RoomScene.INSTANCE.getChat().show();
 
                 if(scorebar != null) scorebar.setVisible(false);
@@ -1954,7 +1945,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                     EdExtensionHelper.onEndGame(lastTrack, stat);
 
-                    if (Multiplayer.isConnected)
+                    if (Multiplayer.isConnected())
                     {
                         Multiplayer.log("Match ended, moving to results scene.");
                         RoomScene.INSTANCE.getChat().show();
@@ -2003,7 +1994,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             for (final Cursor c : cursors) {
                 if (c.mouseDown && Utils.distance(c.mousePos, maxPos) < 250) {
 
-                    if (Multiplayer.isConnected)
+                    if (Multiplayer.isConnected())
                     {
                         if (!isSkipRequested)
                         {
@@ -2102,7 +2093,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         SkinManager.setSkinEnabled(false);
         GameObjectPool.getInstance().purge();
         SpritePool.getInstance().purge();
-        passiveObjects.clear();
+        if (passiveObjects != null) {
+            passiveObjects.clear();
+        }
         breakPeriods.clear();
         cursorSprites = null;
         scoreBoard = null;
@@ -2122,10 +2115,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
             ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
 
-            Replay.oldCustomAR = ModMenu.getInstance().getCustomAR();
-            Replay.oldCustomOD = ModMenu.getInstance().getCustomOD();
-            Replay.oldCustomCS = ModMenu.getInstance().getCustomCS();
-            Replay.oldCustomHP = ModMenu.getInstance().getCustomHP();
+            ModMenu.getInstance().setCustomAR(Replay.oldCustomAR);
+            ModMenu.getInstance().setCustomOD(Replay.oldCustomOD);
+            ModMenu.getInstance().setCustomCS(Replay.oldCustomCS);
+            ModMenu.getInstance().setCustomHP(Replay.oldCustomHP);
         }
     }
 
@@ -2678,7 +2671,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (lastBackPressTime > 0 && realTimeElapsed - lastBackPressTime > 300)
             {
                 // Room being null can happen when the player disconnects from socket while playing
-                if (Multiplayer.isConnected)
+                if (Multiplayer.isConnected())
                     Execution.asyncIgnoreExceptions(() -> RoomAPI.submitFinalScore(stat.toJson()));
 
                 Multiplayer.log("Player left the match.");
@@ -2728,7 +2721,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (Multiplayer.isMultiplayer)
         {
-            if (Multiplayer.isConnected)
+            if (Multiplayer.isConnected())
             {
                 Multiplayer.log("Player has lost, moving to room scene.");
                 Execution.asyncIgnoreExceptions(() -> RoomAPI.submitFinalScore(stat.toJson()));

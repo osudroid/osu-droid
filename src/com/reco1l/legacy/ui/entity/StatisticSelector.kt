@@ -1,8 +1,8 @@
-package com.reco1l.legacy.ui.multiplayer
+package com.reco1l.legacy.ui.entity
 
 import android.opengl.GLES20
 import com.reco1l.api.ibancho.data.WinCondition.ACCURACY
-import com.reco1l.legacy.ui.entity.ScrollableList
+import com.reco1l.legacy.Multiplayer
 import org.anddev.andengine.entity.scene.Scene.ITouchArea
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText

@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.Multiplayer;
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
 import org.anddev.andengine.util.Debug;
@@ -78,7 +78,8 @@ public class Config {
         videoEnabled,
         deleteUnsupportedVideos,
         submitScoreOnMultiplayer,
-        keepBackgroundAspectRatio;
+        keepBackgroundAspectRatio,
+        noChangeDimInBreaks;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -122,6 +123,7 @@ public class Config {
         trianglesAnimation = prefs.getBoolean("trianglesAnimation", true);
         videoEnabled = prefs.getBoolean("enableVideo", false);
         keepBackgroundAspectRatio = prefs.getBoolean("keepBackgroundAspectRatio", false);
+        noChangeDimInBreaks = prefs.getBoolean("noChangeDimInBreaks", false);
 
         setSize();
         setPlayfieldSize(prefs.getInt("playfieldSize", 100) / 100f);
@@ -276,7 +278,8 @@ public class Config {
     }
 
     public static boolean isRemoveSliderLock() {
-        return Multiplayer.isMultiplayer ? Multiplayer.room != null && Multiplayer.room.isRemoveSliderLock() : removeSliderLock;
+        //noinspection DataFlowIssue
+        return Multiplayer.isConnected() ? Multiplayer.room.getGameplaySettings().isRemoveSliderLock() : removeSliderLock;
     }
 
     public static boolean isCalculateSliderPathInGameStart() {
@@ -776,5 +779,9 @@ public class Config {
 
     public static boolean isKeepBackgroundAspectRatio() {
         return keepBackgroundAspectRatio;
+    }
+
+    public static boolean isNoChangeDimInBreaks() {
+        return noChangeDimInBreaks;
     }
 }

@@ -14,9 +14,7 @@ public class BeatmapInfo implements Serializable {
     private String path;
     private String source;
     private String tags;
-    private String music = null;
     private long date;
-    private int previewTime;
 
     public String getSource() {
         return source;
@@ -35,11 +33,7 @@ public class BeatmapInfo implements Serializable {
     }
 
     public String getMusic() {
-        return music;
-    }
-
-    public void setMusic(final String music) {
-        this.music = music;
+        return tracks.get(0).getAudioFilename();
     }
 
     public String getTitle() {
@@ -115,11 +109,7 @@ public class BeatmapInfo implements Serializable {
     }
 
     public int getPreviewTime() {
-        return previewTime;
-    }
-
-    public void setPreviewTime(final int previewTime) {
-        this.previewTime = previewTime;
+        return tracks.get(0).getPreviewTime();
     }
 
     @Override

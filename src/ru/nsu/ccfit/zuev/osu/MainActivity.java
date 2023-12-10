@@ -45,7 +45,7 @@ import com.reco1l.api.ibancho.LobbyAPI;
 import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.UpdateManager;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
-import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.reco1l.legacy.AccessibilityDetector;
 import net.lingala.zip4j.ZipFile;
@@ -718,7 +718,7 @@ public class MainActivity extends BaseGameActivity implements
                     GlobalManager.getInstance().getGameScene().pause();
             }
 
-            if (Multiplayer.isConnected
+            if (Multiplayer.isConnected()
                     && (getEngine().getScene() == RoomScene.INSTANCE
                     || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()))
             {

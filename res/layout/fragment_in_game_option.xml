@@ -219,7 +219,8 @@
 							android:layout_centerVertical="true"
 							android:layout_toLeftOf="@+id/changeSpeedText"
 							android:layout_toRightOf="@+id/enableSpeedChange"
-							android:saveEnabled="false" />
+							android:saveEnabled="false"
+							android:max="30" />
 
 						<TextView
 							android:id="@+id/changeSpeedText"
@@ -242,6 +243,7 @@
 						android:text="@string/opt_enablenc_whenspeedchange_title"/>
 
 					<View
+						android:id="@+id/force_diffstat_split_view"
 						android:layout_width="match_parent"
 						android:layout_height="2dp"
 						android:background="@color/triangleBackground" />
@@ -249,6 +251,7 @@
 
 					<!--AR-->
 					<RelativeLayout
+						android:id="@+id/custom_ar_layout"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginTop="14dp"
@@ -284,6 +287,7 @@
 
 					<!--OD-->
 					<RelativeLayout
+						android:id="@+id/custom_od_layout"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginBottom="8dp"
@@ -318,6 +322,7 @@
 
 					<!--CS-->
 					<RelativeLayout
+						android:id="@+id/custom_cs_layout"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginBottom="8dp"
@@ -353,6 +358,7 @@
 
 					<!--HP-->
 					<RelativeLayout
+						android:id="@+id/custom_hp_layout"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:layout_marginBottom="8dp"

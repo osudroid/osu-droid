@@ -74,6 +74,7 @@ public class ModernSpinner extends Spinner {
         this.listener = listener;
         this.soundId = sound;
         this.stat = stat;
+        this.totalTime = time;
         this.clear = false;
         this.fullRotations = 0;
         this.rotations = 0;

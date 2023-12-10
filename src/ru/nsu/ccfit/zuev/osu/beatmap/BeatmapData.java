@@ -260,18 +260,6 @@ public class BeatmapData {
      * @return Whether the given <code>BeatmapInfo</code> was successfully populated.
      */
     public boolean populateMetadata(final BeatmapInfo info) {
-        // General
-        if (info.getMusic() == null) {
-            final File musicFile = new File(info.getPath(), general.audioFilename);
-            if (!musicFile.exists()) {
-                ToastLogger.showText(StringTable.format(R.string.beatmap_parser_music_not_found,
-                        filename.substring(0, Math.max(0, filename.length() - 4))), true);
-                return false;
-            }
-
-            info.setMusic(musicFile.getPath());
-            info.setPreviewTime(general.previewTime);
-        }
 
         // Metadata
         if (info.getTitle() == null) {
@@ -315,6 +303,17 @@ public class BeatmapData {
         track.setPublicName(metadata.artist + " - " + metadata.title);
         track.setBeatmapID(metadata.beatmapID);
         track.setBeatmapSetID(metadata.beatmapSetID);
+
+        // General
+        var musicFile = new File(folder, general.audioFilename);
+        if (!musicFile.exists()) {
+            ToastLogger.showText(StringTable.format(R.string.beatmap_parser_music_not_found,
+                    filename.substring(0, Math.max(0, filename.length() - 4))), true);
+            return false;
+        }
+
+        track.setAudioFilename(musicFile.getPath());
+        track.setPreviewTime(general.previewTime);
 
         // Difficulty
         track.setOverallDifficulty(difficulty.od);

@@ -8,7 +8,7 @@ import java.util.Locale;
 import java.util.Random;
 
 import com.reco1l.api.ibancho.data.WinCondition;
-import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.Multiplayer;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -57,6 +57,9 @@ public class StatisticV2 implements Serializable {
     private int negativeTotalOffsetSum;
     private double negativeHitOffsetSum;
     private double unstableRate;
+
+    private Float beatmapCS;
+    private Float beatmapOD;
 
     private Float customAR;
     private Float customOD;
@@ -731,6 +734,14 @@ public class StatisticV2 implements Serializable {
         this.customCS = customCS;
     }
 
+    public void setBeatmapCS(float beatmapCS) {
+        this.beatmapCS = beatmapCS;
+    }
+
+    public void setBeatmapOD(float beatmapOD) {
+        this.beatmapOD = beatmapOD;
+    }
+
 
     public void setFLFollowDelay(float delay) {
         flFollowDelay = delay;
@@ -770,15 +781,15 @@ public class StatisticV2 implements Serializable {
             );
         }
     }
-    
+
     public double getNegativeHitError() {
         return negativeTotalOffsetSum == 0 ? 0 : negativeHitOffsetSum / negativeTotalOffsetSum;
     }
-    
+
     public double getPositiveHitError() {
         return positiveTotalOffsetSum == 0 ? 0 : positiveHitOffsetSum / positiveTotalOffsetSum;
     }
-    
+
     public float getSpeed(){
         float speed = changeSpeed;
         if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
@@ -895,7 +906,7 @@ public class StatisticV2 implements Serializable {
     public ScoreBoardItem toBoardItem() {
 
         //noinspection DataFlowIssue
-        var combo = !Multiplayer.isConnected || Multiplayer.room.getWinCondition() != WinCondition.MAX_COMBO ? currentCombo : maxCombo;
+        var combo = !Multiplayer.isConnected() || Multiplayer.room.getWinCondition() != WinCondition.MAX_COMBO ? currentCombo : maxCombo;
 
         return new ScoreBoardItem(playerName, getTotalScoreWithMultiplier(), combo, getAccuracyForServer(), isAlive);
     }
@@ -907,14 +918,33 @@ public class StatisticV2 implements Serializable {
             modScoreMultiplier *= m.scoreMultiplier;
         }
 
-        if (isLegacySC) {
-            // The legacy SC mod has a 1.06 multiplier.
-            modScoreMultiplier *= 1.06f;
+        if (isCustomCS() && beatmapCS != null) {
+            modScoreMultiplier *= getCustomCSScoreMultiplier(beatmapCS, customCS);
+        }
+
+        if (isCustomOD() && beatmapOD != null) {
+            modScoreMultiplier *= getCustomODScoreMultiplier(beatmapOD, customOD);
         }
 
         if (changeSpeed != 1f) {
             modScoreMultiplier *= getSpeedChangeScoreMultiplier();
         }
+    }
+
+    public static float getCustomCSScoreMultiplier(float beatmapCS, float customCS) {
+        float diff = customCS - beatmapCS;
+
+        return diff >= 0
+            ? 1 + 0.0075f * (float) Math.pow(diff, 1.5)
+            : 2 / (1 + (float) Math.exp(-0.5 * diff));
+    }
+
+    public static float getCustomODScoreMultiplier(float beatmapOD, float customOD) {
+        float diff = customOD - beatmapOD;
+
+        return diff >= 0
+            ? 1 + 0.005f * (float) Math.pow(diff, 1.3)
+            : 2 / (1 + (float) Math.exp(-0.25 * diff));
     }
 
     /**

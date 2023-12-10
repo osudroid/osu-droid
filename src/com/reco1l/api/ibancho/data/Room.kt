@@ -1,70 +1,67 @@
 package com.reco1l.api.ibancho.data
 
-import com.reco1l.legacy.ui.multiplayer.RoomMods
-import com.reco1l.legacy.ui.multiplayer.multiLog
+import com.reco1l.legacy.Multiplayer
 
 data class Room(
-        /**
-         * The room ID.
-         */
-        val id: Long,
+    /**
+     * The room ID.
+     */
+    val id: Long,
 
-        /**
-         * The room name.
-         */
-        var name: String,
+    /**
+     * The room name.
+     */
+    var name: String,
 
-        /**
-         * Indicates if the room has password.
-         */
-        var isLocked: Boolean,
+    /**
+     * Indicates if the room has password.
+     */
+    var isLocked: Boolean,
 
-        /**
-         * The max amount of players.
-         */
-        val maxPlayers: Int,
+    /**
+     * The max amount of players.
+     */
+    val maxPlayers: Int,
 
-        /**
-         * The active player count.
-         */
-        var playerCount: Int,
+    /**
+     * The active player count.
+     */
+    var playerCount: Int,
 
-        /**
-         * The active player names concatenated.
-         */
-        var playerNames: String,
+    /**
+     * The active player names concatenated.
+     */
+    var playerNames: String,
 
-        /**
-         * The enabled mods.
-         */
-        var mods: RoomMods,
+    /**
+     * The enabled mods.
+     */
+    var mods: RoomMods,
 
-        /**
-         * Free mods condition
-         */
-        var isFreeMods: Boolean,
+    /**
+     * Gameplay-related settings.
+     */
+    var gameplaySettings: RoomGameplaySettings,
 
-        /**
-         * The room versus mode.
-         */
-        var teamMode: TeamMode,
+    /**
+     * The room versus mode.
+     */
+    var teamMode: TeamMode,
 
-        /**
-         * The room win condition.
-         */
-        var winCondition: WinCondition,
+    /**
+     * The room win condition.
+     */
+    var winCondition: WinCondition,
 
-        /**
-         * The room status.
-         */
-        var status: RoomStatus? = null,
+    /**
+     * The room status.
+     */
+    var status: RoomStatus? = null,
 
-        /**
-         * Whether the remove slider lock setting is enabled.
-         *
-         * This value is not provided when the room is being searched.
-         */
-        var isRemoveSliderLock: Boolean = false
+    /**
+     * The unique session ID.
+     */
+    val sessionID: String? = null
 )
 {
     /**
@@ -112,12 +109,6 @@ data class Room(
         get() = activePlayers.filter { it.status == PlayerStatus.READY }
 
     /**
-     * Get the host Player instance.
-     */
-    val hostPlayer
-        get() = activePlayers.find { it.id == host }
-
-    /**
      * Get the players list in map format using UIDs as keys.
      */
     val playersMap
@@ -149,14 +140,14 @@ data class Room(
         val wasAlready = index in players.indices
 
         if (wasAlready)
-            multiLog("WARNING: Tried to add player while it was already in the array.")
+            Multiplayer.log("WARNING: Tried to add player while it was already in the array.")
         else
             index = players.indexOfFirst { it == null }
 
         // Handling invalid index
         if (index !in players.indices)
         {
-            multiLog("WARNING: Tried to add player with invalid index: $index")
+            Multiplayer.log("WARNING: Tried to add player with invalid index: $index")
             return false
         }
 
@@ -180,7 +171,7 @@ data class Room(
             players[index] = null
             sortPlayers()
         }
-        else multiLog("WARNING: Tried to remove a player with invalid index: $index")
+        else Multiplayer.log("WARNING: Tried to remove a player with invalid index: $index")
 
         return removed
     }

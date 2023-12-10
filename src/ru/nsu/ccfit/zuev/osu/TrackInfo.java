@@ -30,6 +30,14 @@ public class TrackInfo implements Serializable {
 
     private BeatmapInfo beatmap;
 
+
+    /**The audio path relative to beatmap folder.*/
+    private String audioFilename;
+
+    /**The audio preview time.*/
+    private int previewTime = -1;
+
+
     public TrackInfo(BeatmapInfo beatmap) {
         this.beatmap = beatmap;
     }
@@ -226,5 +234,21 @@ public class TrackInfo implements Serializable {
                     && track.md5.equals(md5);
         }
         return false;
+    }
+
+    public String getAudioFilename() {
+        return audioFilename;
+    }
+
+    public void setAudioFilename(String audioFilename) {
+        this.audioFilename = audioFilename;
+    }
+
+    public int getPreviewTime() {
+        return previewTime;
+    }
+
+    public void setPreviewTime(int previewTime) {
+        this.previewTime = previewTime;
     }
 }

@@ -4,8 +4,8 @@ import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.data.MultiplayerConverter;
-import com.reco1l.legacy.ui.multiplayer.Multiplayer;
-import com.reco1l.legacy.ui.multiplayer.RoomMods;
+import com.reco1l.legacy.Multiplayer;
+import com.reco1l.api.ibancho.data.RoomMods;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
 import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
@@ -21,11 +21,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.jetbrains.annotations.Nullable;
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
@@ -105,7 +101,7 @@ public class ModMenu implements IModSwitcher {
         }
     }
 
-    public void setMods(RoomMods mods, boolean isFreeMods)
+    public void setMods(RoomMods mods, boolean isFreeMods, boolean allowForceDifficultyStatistics)
     {
         var modSet = mods.getSet();
 
@@ -114,6 +110,9 @@ public class ModMenu implements IModSwitcher {
             mod = modSet;
 
             FLfollowDelay = mods.getFlFollowDelay();
+        }
+
+        if (!isFreeMods || !allowForceDifficultyStatistics) {
             customAR = mods.getCustomAR();
             customOD = mods.getCustomOD();
             customCS = mods.getCustomCS();
@@ -122,7 +121,7 @@ public class ModMenu implements IModSwitcher {
 
         changeSpeed = mods.getSpeedMultiplier();
 
-        if (!Multiplayer.isRoomHost)
+        if (!Multiplayer.isRoomHost())
         {
             if (modSet.contains(GameMod.MOD_DOUBLETIME) || modSet.contains(GameMod.MOD_NIGHTCORE))
             {
@@ -159,14 +158,14 @@ public class ModMenu implements IModSwitcher {
         }
         InGameSettingMenu.getInstance().dismiss();
 
-        if (Multiplayer.isConnected)
+        if (Multiplayer.isConnected())
         {
             RoomScene.awaitModsChange = true;
 
             var string = MultiplayerConverter.modsToString(mod);
 
             // The room mods are the same as the host mods
-            if (Multiplayer.isRoomHost) {
+            if (Multiplayer.isRoomHost()) {
                 RoomAPI.setRoomMods(
                         string,
                         changeSpeed,
@@ -241,7 +240,7 @@ public class ModMenu implements IModSwitcher {
         if (Multiplayer.isMultiplayer)
             addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-nofail", GameMod.MOD_NOFAIL);
 
-        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost)
+        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost())
             addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-halftime", GameMod.MOD_HALFTIME);
 
         addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-reallyeasy", GameMod.MOD_REALLYEASY);
@@ -251,10 +250,10 @@ public class ModMenu implements IModSwitcher {
         //line 2
         addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hardrock", GameMod.MOD_HARDROCK);
 
-        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost)
+        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost())
             addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-doubletime", GameMod.MOD_DOUBLETIME);
 
-        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost)
+        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost())
             addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-nightcore", GameMod.MOD_NIGHTCORE);
 
         addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hidden", GameMod.MOD_HIDDEN);
@@ -392,6 +391,15 @@ public class ModMenu implements IModSwitcher {
         if (changeSpeed != 1.0f){
             mult *= StatisticV2.getSpeedChangeScoreMultiplier(getSpeed(), mod);
         }
+        if (selectedTrack != null) {
+            if (isCustomCS()) {
+                mult *= StatisticV2.getCustomCSScoreMultiplier(selectedTrack.getCircleSize(), customCS);
+            }
+
+            if (isCustomOD()) {
+                mult *= StatisticV2.getCustomODScoreMultiplier(selectedTrack.getOverallDifficulty(), customOD);
+            }
+        }
 
         multiplierText.setText(StringTable.format(R.string.menu_mod_multiplier,
                 mult));
@@ -416,6 +424,22 @@ public class ModMenu implements IModSwitcher {
         }
     }
 
+    public boolean handleCustomDifficultyStatisticsFlags() {
+        if (!isCustomCS() || !isCustomAR() || !isCustomOD() || !isCustomHP()) {
+            return false;
+        }
+
+        var modsRemoved = mod.remove(GameMod.MOD_HARDROCK) ||
+                mod.remove(GameMod.MOD_EASY) ||
+                mod.remove(GameMod.MOD_REALLYEASY);
+
+        if (modsRemoved) {
+            ToastLogger.showTextId(R.string.force_diffstat_mod_unpickable, false);
+        }
+
+        return modsRemoved;
+    }
+
     public boolean switchMod(GameMod flag) {
         boolean returnValue = true;
 
@@ -428,6 +452,10 @@ public class ModMenu implements IModSwitcher {
             returnValue = false;
         } else {
             mod.add(flag);
+
+            if (handleCustomDifficultyStatisticsFlags()) {
+                return false;
+            }
 
             handleModFlags(flag, GameMod.MOD_HARDROCK, new GameMod[]{GameMod.MOD_EASY});
             handleModFlags(flag, GameMod.MOD_EASY, new GameMod[]{GameMod.MOD_HARDROCK});

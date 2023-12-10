@@ -148,9 +148,10 @@
 	<string name="update_dialog_button_update">Update Now</string>
 	<string name="update_dialog_button_changelog">Changelog</string>
 	<string name="update_info_checking">Checking for new updates...</string>
+	<string name="update_info_check_failed">Failed to check for updates. The server or your internet connection may not be available.</string>
 	<string name="update_info_downloading">Downloading updates... %d%%</string>
-	<string name="update_info_canceled">Download cancelled.</string>
-	<string name="update_info_failed">Download failed, check your internet connection.</string>
+	<string name="update_info_download_canceled">Download cancelled.</string>
+	<string name="update_info_download_failed">Download failed, check your internet connection.</string>
 	<string name="update_info_updated">Update successfully installed!</string>
 	<string name="update_info_latest">No new updates available</string>
 
@@ -191,6 +192,8 @@
 	<string name="message_save_replay_failed">Save replay failed</string>
 
     <string name="message_autoclicker_detected">Please disable your accessibility service(s) with the Perform Gestures permission before playing the game.</string>
+
+	<string name="force_diffstat_mod_unpickable">You may not use this mod when all forced difficulty statistics are enabled.</string>
 
 	<!-- Beatmap parser errors -->
 	<string name="beatmap_parser_cannot_open_file" formatted="false">Failed loading %s: Could not open beatmap file</string>

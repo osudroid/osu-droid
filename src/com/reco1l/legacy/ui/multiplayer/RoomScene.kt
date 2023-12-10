@@ -11,16 +11,17 @@ import com.reco1l.api.ibancho.data.RoomTeam.RED
 import com.reco1l.api.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
-import com.reco1l.framework.extensions.orCatch
+import com.reco1l.framework.extensions.ignoreException
 import com.reco1l.framework.lang.glThread
 import com.reco1l.framework.lang.uiThread
+import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.data.modsToString
 import com.reco1l.legacy.ui.entity.BeatmapButton
 import com.reco1l.legacy.ui.entity.ComposedText
-import com.reco1l.legacy.ui.multiplayer.Multiplayer.isConnected
-import com.reco1l.legacy.ui.multiplayer.Multiplayer.isRoomHost
-import com.reco1l.legacy.ui.multiplayer.Multiplayer.player
-import com.reco1l.legacy.ui.multiplayer.Multiplayer.room
+import com.reco1l.legacy.Multiplayer.isConnected
+import com.reco1l.legacy.Multiplayer.isRoomHost
+import com.reco1l.legacy.Multiplayer.player
+import com.reco1l.legacy.Multiplayer.room
 import org.anddev.andengine.engine.camera.SmoothCamera
 import org.anddev.andengine.entity.primitive.Rectangle
 import org.anddev.andengine.entity.scene.Scene
@@ -367,7 +368,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
-                if (!isRoomHost && !room!!.isFreeMods || awaitModsChange || awaitStatusChange || player!!.status == READY)
+                if (!isRoomHost && !room!!.gameplaySettings.isFreeMod || awaitModsChange || awaitStatusChange || player!!.status == READY)
                     return true
 
                 if (event.isActionDown)
@@ -474,7 +475,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Update room info text
         infoText.text = """
-            Host: ${room!!.hostPlayer?.name}
+            Mods: ${room!!.modsToReadableString()}
+            Slider Lock: ${if (room!!.gameplaySettings.isRemoveSliderLock) "Enabled" else "Disabled" }
             Team mode: ${if (room!!.teamMode == HEAD_TO_HEAD) "Head-to-head" else "Team VS"}
             Win condition: ${
                 when (room!!.winCondition)
@@ -485,8 +487,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     SCORE_V2 -> "Score V2"
                 }
             }
-            Mods: ${room!!.modsToReadableString()}
-            Slider Lock: ${if (!room!!.isRemoveSliderLock) "Enabled" else "Disabled" }
         """.trimIndent()
     }
 
@@ -523,7 +523,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         secondaryButton!!.setText("Options")
         secondaryButton!!.setColor(0.2f, 0.2f, 0.2f)
 
-        modsButton!!.isVisible = isRoomHost || room!!.isFreeMods
+        modsButton!!.isVisible = isRoomHost || room!!.gameplaySettings.isFreeMod
     }
 
     private fun updateBeatmapInfo()
@@ -561,6 +561,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     fun invalidateStatus()
     {
+        // Status shouldn't be changed during reconnection because it's done by server, this function can be called by
+        // any of the updating functions. Changing status during reconnection can break the reconnection call hierarchy.
+        if (Multiplayer.isReconnecting)
+            return
+
         awaitStatusChange = true
 
         var newStatus = NOT_READY
@@ -578,8 +583,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         room = null
         player = null
-        isRoomHost = false
-        isConnected = false
 
         // Clearing chat
         chat.log.clear()
@@ -603,7 +606,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun back()
     {
-        { RoomAPI.disconnect() }.orCatch { }
+        // Stopping the attempt loop if user cancels reconnection.
+        Multiplayer.isReconnecting = false
+
+        ignoreException { RoomAPI.disconnect() }
         clear()
         LobbyScene.show()
     }
@@ -648,7 +654,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         {
             val player = room!!.playersMap[uid] ?: run {
 
-                multiLog("WARNING: Unable to find user by ID on chat message")
+                Multiplayer.log("WARNING: Unable to find user by ID on chat message")
                 return
             }
 
@@ -668,7 +674,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Setting new room
         room = newRoom
-        isConnected = true
 
         // Releasing await locks just in case
         awaitModsChange = false
@@ -676,16 +681,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         awaitStatusChange = false
 
         // Finding our player object
-        player = newRoom.playersMap[getOnline().userId] ?: run {
-
-            multiLog("ERROR: Unable to find player in the map.")
-            ToastLogger.showText("Unable to find player", false)
-            back()
-            return
-        }
-
-        // Determine if it's the host
-        isRoomHost = player!!.id == newRoom.host
+        player = newRoom.playersMap[getOnline().userId]!!
 
         // Reloading player list
         playerList?.detachSelf()
@@ -693,9 +689,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         attachChild(playerList, 1)
 
         // Reloading mod menu, we set player mods first in case the scene was reloaded (due to skin change).
-        getModMenu().setMods(player!!.mods, false)
+        clearChildScene()
+        getModMenu().setMods(player!!.mods, false, true)
         getModMenu().init()
-        getModMenu().setMods(newRoom.mods, newRoom.isFreeMods)
+        getModMenu().setMods(newRoom.mods, newRoom.gameplaySettings.isFreeMod, newRoom.gameplaySettings.allowForceDifficultyStatistics)
 
         // Updating player mods for other clients
         awaitModsChange = true
@@ -714,23 +711,56 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
         playerList!!.invalidate()
 
+        if (Multiplayer.isReconnecting)
+        {
+            onRoomBeatmapChange(room!!.beatmap)
+
+            Multiplayer.onReconnectAttempt(true)
+
+            // If the status returned by server is PLAYING then it means the match was forced to start while the player
+            // was disconnected.
+            if (player!!.status == PLAYING)
+            {
+                // Handling special case when the beatmap could have been changed and match was started while player was
+                // disconnected.
+                if (getGlobal().selectedTrack != null)
+                    onRoomMatchPlay()
+                else
+                    invalidateStatus()
+            }
+            return
+        }
+
         show()
     }
 
-    override fun onRoomDisconnect(reason: String?)
+    override fun onRoomDisconnect(reason: String?, byUser: Boolean)
     {
-        ToastLogger.showText("Disconnected from the room${reason?.let { ": $it" } ?: "" }", true)
+        if (!byUser)
+        {
+            // Setting await locks to avoid player emitting events that will be ignored.
+            awaitBeatmapChange = true
+            awaitStatusChange = true
+            awaitModsChange = true
 
-        // If player is in one of these scenes we go back.
-        if (getGlobal().engine.scene != getGlobal().gameScene.scene)
-            back()
-        else
-            multiLog("Disconnected from socket while playing.")
+            chat.onSystemChatMessage("Connection lost, trying to reconnect...", "#FF0000")
+            Multiplayer.onReconnect()
+            return
+        }
+
+        back()
     }
 
     override fun onRoomConnectFail(error: String?)
     {
-        ToastLogger.showText("Failed to connect to the room: $error", true)
+        Multiplayer.log("ERROR: Failed to connect -> $error")
+
+        if (Multiplayer.isReconnecting)
+        {
+            Multiplayer.onReconnectAttempt(false)
+            return
+        }
+
         back()
     }
 
@@ -770,7 +800,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Updating background
         updateBackground(getGlobal().selectedTrack?.background)
-
         updateBeatmapInfo()
 
         // Releasing await lock
@@ -792,9 +821,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         chat.onSystemChatMessage("Player ${room!!.playersMap[uid]?.name} is now the room host.", "#007BFF")
 
-        // Defining if is the host
-        isRoomHost = getOnline().userId == uid
-
         // Reloading mod menu
         glThread {
             getModMenu().hide(false)
@@ -803,9 +829,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             getModMenu().init()
             getModMenu().update()
         }
-
-        // Updating host text
-        updateInformation()
 
         // Updating player list
         playerList!!.invalidate()
@@ -821,8 +844,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         room!!.mods = mods
 
-        // If free mods is enabled it'll keep player mods and enforce speed changing mods and ScoreV2
-        getModMenu().setMods(mods, room!!.isFreeMods)
+        // If free mods is enabled it'll keep player mods and enforce speed changing mods and ScoreV2.
+        // If allow force difficulty statistics is enabled under free mod, the force difficulty statistics settings
+        // set by the player will not be overridden.
+        getModMenu().setMods(mods, room!!.gameplaySettings.isFreeMod, room!!.gameplaySettings.allowForceDifficultyStatistics)
 
         // Updating player mods
         awaitModsChange = true
@@ -841,10 +866,23 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         updateInformation()
     }
 
-    override fun onRoomRemoveSliderLockChange(isEnabled: Boolean) {
-        room!!.isRemoveSliderLock = isEnabled
+    override fun onRoomGameplaySettingsChange(settings: RoomGameplaySettings) {
+        room!!.gameplaySettings = settings
 
+        // Update room info text
         updateInformation()
+
+        // Updating player mods
+        awaitModsChange = true
+
+        // Hiding mod button in case isn't the host when free mods is disabled
+        modsButton!!.isVisible = isRoomHost || settings.isFreeMod
+
+        // Closing mod menu, to enforce mod menu scene update
+        getModMenu().hide(false)
+
+        // Invalidating player status
+        invalidateStatus()
     }
 
     /**This method is used purely to update UI in other clients*/
@@ -859,26 +897,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Removing await lock
         if (uid == player!!.id)
             awaitModsChange = false
-    }
-
-    override fun onRoomFreeModsChange(isFreeMods: Boolean)
-    {
-        room!!.isFreeMods = isFreeMods
-
-        // Update room info text
-        updateInformation()
-
-        // Updating player mods
-        awaitModsChange = true
-
-        // Hiding mod button in case isn't the host when free mods is disabled
-        modsButton!!.isVisible = isRoomHost || room!!.isFreeMods
-
-        // Closing mod menu, to enforce mod menu scene update
-        getModMenu().hide(false)
-
-        // Invalidating player status
-        invalidateStatus()
     }
 
     override fun onRoomTeamModeChange(mode: TeamMode)
@@ -946,7 +964,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         {
             if (getGlobal().selectedTrack == null)
             {
-                multiLog("WARNING: Attempt to start match with null track.")
+                Multiplayer.log("WARNING: Attempt to start match with null track.")
                 return
             }
 
@@ -1030,7 +1048,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         if (uid == player!!.id)
         {
-            multiLog("Kicked from room.")
+            Multiplayer.log("Kicked from room.")
 
             if (getGlobal().engine.scene == getGlobal().gameScene.scene) {
                 ToastLogger.showText("You were kicked by the room host, but you can continue playing.", true)

@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.reco1l.api.ibancho.data.WinCondition;
-import com.reco1l.legacy.ui.multiplayer.Multiplayer;
+import com.reco1l.legacy.Multiplayer;
 import org.json.JSONObject;
 
 import java.text.NumberFormat;
@@ -70,7 +70,7 @@ public class ScoreBoardItem implements Cloneable {
         var text = userName + "\n" + NUMBER_FORMAT.format(playScore) + "\n";
 
         //noinspection DataFlowIssue
-        if (Multiplayer.isConnected && Multiplayer.room.getWinCondition() == WinCondition.ACCURACY) {
+        if (Multiplayer.isConnected() && Multiplayer.room.getWinCondition() == WinCondition.ACCURACY) {
             accSb.setLength(0);
             text += DECIMAL_FORMAT.format("%2.2f%%", accuracy * 100f);
         } else
