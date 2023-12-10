@@ -337,7 +337,6 @@ public class MainActivity extends BaseGameActivity implements
                     Thread.sleep(2500);
                 }
                 catch (InterruptedException ignored) {}
-                UpdateManager.INSTANCE.onActivityStart();
             }
 
             @Override
