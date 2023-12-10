@@ -475,6 +475,22 @@ object RoomAPI
     }
 
     /**
+     * Change `allow more than three cursors` condition.
+     */
+    fun setRoomAllowMoreThanThreeCursors(value: Boolean)
+    {
+        val json = JSONObject().apply {
+            put("allowMoreThanThreeCursors", value)
+        }
+
+        socket?.emit("roomGameplaySettingsChanged", json) ?: run {
+            Multiplayer.log("WARNING: Tried to emit event 'roomGameplaySettingsChanged' while socket is null.")
+            return
+        }
+        Multiplayer.log("EMITTED: roomGameplaySettingsChanged -> $json")
+    }
+
+    /**
      * Change room team mode.
      */
     fun setRoomTeamMode(mode: TeamMode)

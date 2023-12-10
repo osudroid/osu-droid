@@ -55,12 +55,12 @@ public class Replay {
     public Replay() {
         cursorMoves.add(new MoveArray(200));
         cursorMoves.add(new MoveArray(50));
-        for (int i = 2; i < GameScene.CursorCount; i++) {
+        for (int i = 2; i < GameScene.getCursorCount(); i++) {
             cursorMoves.add(new MoveArray(15));
         }
-        cursorIndex = new int[GameScene.CursorCount];
-        lastMoveIndex = new int[GameScene.CursorCount];
-        for (int i = 0; i < GameScene.CursorCount; i++) {
+        cursorIndex = new int[GameScene.getCursorCount()];
+        lastMoveIndex = new int[GameScene.getCursorCount()];
+        for (int i = 0; i < GameScene.getCursorCount(); i++) {
             cursorIndex[i] = 0;
             lastMoveIndex[i] = -1;
         }
@@ -97,19 +97,19 @@ public class Replay {
     }
 
     public void addPress(final float time, final PointF pos, final int pid) {
-        if (pid > GameScene.CursorCount || isSaving) return;
+        if (pid > GameScene.getCursorCount() || isSaving) return;
         int itime = Math.max(0, (int) (time * 1000));
         cursorMoves.get(pid).pushBack(this, itime, pos.x, pos.y, TouchType.DOWN);
     }
 
     public void addMove(final float time, final PointF pos, final int pid) {
-        if (pid > GameScene.CursorCount || isSaving) return;
+        if (pid > GameScene.getCursorCount() || isSaving) return;
         int itime = Math.max(0, (int) (time * 1000));
         cursorMoves.get(pid).pushBack(this, itime, pos.x, pos.y, TouchType.MOVE);
     }
 
     public void addUp(final float time, final int pid) {
-        if (pid > GameScene.CursorCount || isSaving) return;
+        if (pid > GameScene.getCursorCount() || isSaving) return;
         int itime = Math.max(0, (int) (time * 1000));
         cursorMoves.get(pid).pushBack(itime, TouchType.UP);
     }

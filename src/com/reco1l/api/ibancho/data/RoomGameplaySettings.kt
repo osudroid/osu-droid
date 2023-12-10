@@ -18,5 +18,11 @@ data class RoomGameplaySettings(
      * Whether this room allows the use of forced difficulty statistics
      * under free mod.
      */
-    var allowForceDifficultyStatistics: Boolean
+    var allowForceDifficultyStatistics: Boolean,
+
+    /**
+     * Whether this room allows players to place more than three cursors at
+     * once during gameplay.
+     */
+    var allowMoreThanThreeCursors: Boolean
 )

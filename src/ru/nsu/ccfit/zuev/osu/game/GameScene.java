@@ -103,10 +103,15 @@ import ru.nsu.ccfit.zuev.skins.SkinManager;
 
 public class GameScene implements IUpdateHandler, GameObjectListener,
         IOnSceneTouchListener {
-    public static final int CursorCount = 10;
+    public static int getCursorCount() {
+        return Multiplayer.room != null && !Multiplayer.room.getGameplaySettings().getAllowMoreThanThreeCursors()
+                ? 3
+                : 10;
+    }
+
     private final Engine engine;
-    private final Cursor[] cursors = new Cursor[CursorCount];
-    private final boolean[] cursorIIsDown = new boolean[CursorCount];
+    private final Cursor[] cursors = new Cursor[getCursorCount()];
+    private final boolean[] cursorIIsDown = new boolean[getCursorCount()];
     private final StringBuilder strBuilder = new StringBuilder();
     public String filePath = null;
     private Scene scene;
@@ -865,14 +870,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 DifficultyHelper.HighDifficulty : DifficultyHelper.StdDifficulty;
         GameHelper.setDifficultyHelper(difficultyHelper);
 
-        for (int i = 0; i < CursorCount; i++) {
+        for (int i = 0; i < getCursorCount(); i++) {
             cursors[i] = new Cursor();
             cursors[i].mouseDown = false;
             cursors[i].mousePressed = false;
             cursors[i].mouseOldDown = false;
         }
 
-        for (int i = 0; i < CursorCount; i++) {
+        for (int i = 0; i < getCursorCount(); i++) {
             cursorIIsDown[i] = false;
         }
 
@@ -910,8 +915,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         // TODO passive objects
         if ((replaying || Config.isShowCursor()) && !GameHelper.isAuto() && !GameHelper.isAutopilotMod()) {
-            cursorSprites = new CursorEntity[CursorCount];
-            for (int i = 0; i < CursorCount; i++) {
+            cursorSprites = new CursorEntity[getCursorCount()];
+            for (int i = 0; i < getCursorCount(); i++) {
                 cursorSprites[i] = new CursorEntity();
                 cursorSprites[i].attachToScene(fgScene);
             }
@@ -1442,7 +1447,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
             autoCursor.update(dt);
         } else if (cursorSprites != null) {
-            for (int i = 0; i < CursorCount; i++) {
+            for (int i = 0; i < getCursorCount(); i++) {
                 cursorSprites[i].update(dt);
 
                 if (replaying) {
@@ -1644,7 +1649,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (Config.isRemoveSliderLock()) {
             var downPressCursorCount = 0;
 
-            for (int i = 0; i < CursorCount; i++) {
+            for (int i = 0; i < getCursorCount(); i++) {
                 if (cursorIIsDown[i])
                     downPressCursorCount++;
                 cursorIIsDown[i] = false;
@@ -2592,7 +2597,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         var id = event.getPointerID();
-        if (id < 0 || id >= CursorCount) {
+        if (id < 0 || id >= getCursorCount()) {
             return false;
         }
 
@@ -2694,7 +2699,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         // Release all pressed cursors to avoid getting stuck at resume.
         if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod() && !replaying) {
-            for (int i = 0; i < CursorCount; ++i) {
+            for (int i = 0; i < getCursorCount(); ++i) {
                 var cursor = cursors[i];
 
                 if (cursor.mouseDown) {
@@ -2919,7 +2924,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public int getCursorsCount() {
-        return CursorCount;
+        return getCursorCount();
     }
 
 

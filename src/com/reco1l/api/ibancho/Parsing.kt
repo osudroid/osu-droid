@@ -73,5 +73,6 @@ internal fun parseGameplaySettings(o: JSONObject): RoomGameplaySettings =
     RoomGameplaySettings(
         isRemoveSliderLock = o.getBoolean("isRemoveSliderLock"),
         isFreeMod = o.getBoolean("isFreeMod"),
-        allowForceDifficultyStatistics = o.getBoolean("allowForceDifficultyStatistics")
+        allowForceDifficultyStatistics = o.getBoolean("allowForceDifficultyStatistics"),
+        allowMoreThanThreeCursors = o.getBoolean("allowMoreThanThreeCursors")
     )

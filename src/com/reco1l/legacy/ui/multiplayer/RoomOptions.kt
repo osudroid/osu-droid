@@ -182,6 +182,15 @@ class RoomOptions : SettingsFragment()
                     true
                 }
             }
+
+            findPreference<CheckBoxPreference>("room_allowMoreThanThreeCursors")!!.apply {
+                isChecked = Multiplayer.room!!.gameplaySettings.allowMoreThanThreeCursors
+
+                setOnPreferenceChangeListener { _, newValue ->
+                    RoomAPI.setRoomAllowMoreThanThreeCursors(newValue as Boolean)
+                    true
+                }
+            }
         }
 
         loadGameSettings()
