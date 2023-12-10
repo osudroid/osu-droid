@@ -32,8 +32,8 @@ class SpectatorDataManager(
     private var beginningEventIndex = 0
     private var endEventIndex = 0
 
-    private var beginningCursorMoveIndexes = IntArray(GameScene.CursorCount)
-    private val endCursorMoveIndexes = IntArray(GameScene.CursorCount)
+    private var beginningCursorMoveIndexes = IntArray(GameScene.getCursorCount())
+    private val endCursorMoveIndexes = IntArray(GameScene.getCursorCount())
 
     private val submissionTimer = Timer()
     private val submissionPeriod = 5000L
