@@ -13,7 +13,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
 import com.reco1l.legacy.Multiplayer;
-import org.apache.http.HttpException;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,9 +25,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import java.net.ConnectException;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Date;
 
 /**
@@ -40,20 +36,9 @@ import java.util.Date;
  */
 public class AppException extends Exception implements Thread.UncaughtExceptionHandler {
 
-    /**
-     * 定义异常类型
-     */
-    public final static byte TYPE_NETWORK = 0x01;
-
     public final static byte TYPE_SOCKET = 0x02;
 
-    public final static byte TYPE_HTTP_CODE = 0x03;
-
     public final static byte TYPE_HTTP_ERROR = 0x04;
-
-    public final static byte TYPE_XML = 0x05;
-
-    public final static byte TYPE_IO = 0x06;
 
     public final static byte TYPE_RUN = 0x07;
 
@@ -86,40 +71,12 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
         }
     }
 
-    public static AppException http(int code) {
-        return new AppException(TYPE_HTTP_CODE, code, null);
-    }
-
     public static AppException http(Exception e) {
         return new AppException(TYPE_HTTP_ERROR, 0, e);
     }
 
     public static AppException socket(Exception e) {
         return new AppException(TYPE_SOCKET, 0, e);
-    }
-
-    public static AppException io(Exception e) {
-        if (e instanceof UnknownHostException || e instanceof ConnectException) {
-            return new AppException(TYPE_NETWORK, 0, e);
-        } else if (e instanceof IOException) {
-            return new AppException(TYPE_IO, 0, e);
-        }
-        return run(e);
-    }
-
-    public static AppException xml(Exception e) {
-        return new AppException(TYPE_XML, 0, e);
-    }
-
-    public static AppException network(Exception e) {
-        if (e instanceof UnknownHostException || e instanceof ConnectException) {
-            return new AppException(TYPE_NETWORK, 0, e);
-        } else if (e instanceof HttpException) {
-            return http(e);
-        } else if (e instanceof SocketException) {
-            return socket(e);
-        }
-        return http(e);
     }
 
     public static AppException run(Exception e) {
@@ -135,7 +92,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
         return new AppException();
     }
 
-    public static StringBuffer getTraceInfo(Activity a, Throwable e) {
+    public static StringBuffer getTraceInfo(Throwable e) {
         StringBuffer sb = new StringBuffer();
 
         Throwable ex = e.getCause() == null ? e : e.getCause();
@@ -144,46 +101,6 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
             sb.append("class: ").append(stack.getClassName()).append("; method: ").append(stack.getMethodName()).append("; line: ").append(stack.getLineNumber()).append(";  Exception: ").append(ex).append("\n");
         }
         return sb;
-    }
-
-    public int getCode() {
-        return this.code;
-    }
-
-    public int getType() {
-        return this.type;
-    }
-
-    /**
-     * 提示友好的错误信息
-     *
-     * @param ctx
-     */
-    public void makeToast(Context ctx) {
-        switch (this.getType()) {
-            case TYPE_HTTP_CODE:
-                String err = ctx.getString(R.string.http_status_code_error, this.getCode());
-                Toast.makeText(ctx, err, Toast.LENGTH_SHORT).show();
-                break;
-            case TYPE_HTTP_ERROR:
-                Toast.makeText(ctx, R.string.http_exception_error, Toast.LENGTH_SHORT).show();
-                break;
-            case TYPE_SOCKET:
-                Toast.makeText(ctx, R.string.socket_exception_error, Toast.LENGTH_SHORT).show();
-                break;
-            case TYPE_NETWORK:
-                Toast.makeText(ctx, R.string.network_not_connected, Toast.LENGTH_SHORT).show();
-                break;
-            case TYPE_XML:
-                Toast.makeText(ctx, R.string.xml_parser_failed, Toast.LENGTH_SHORT).show();
-                break;
-            case TYPE_IO:
-                Toast.makeText(ctx, R.string.io_exception_error, Toast.LENGTH_SHORT).show();
-                break;
-            case TYPE_RUN:
-                Toast.makeText(ctx, R.string.app_run_code_error, Toast.LENGTH_SHORT).show();
-                break;
-        }
     }
 
     /**
@@ -327,7 +244,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
             exceptionStr.append("System Screen Info:").append(getScreenInfo(context)).append("\n").append("\n");
             exceptionStr.append("System OS Info:").append(getMobileInfo()).append("\n").append("\n");
             exceptionStr.append("Exception: ").append(ex.getMessage()).append("\n").append("\n");
-            exceptionStr.append("Exception stack：").append(getTraceInfo((Activity) context, ex)).append("\n").append("\n");
+            exceptionStr.append("Exception stack：").append(getTraceInfo(ex)).append("\n").append("\n");
         } catch (NameNotFoundException e) {
             Log.e(getClass().getSimpleName(), "Failed to get package info during crash report.", e);
         }
