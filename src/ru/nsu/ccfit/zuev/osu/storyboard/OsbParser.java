@@ -418,7 +418,7 @@ public class OsbParser {
 
     private void parseEvent(BufferedSource source) throws IOException {
         String line;
-        String info[];
+        String[] info;
         while ((line = source.readUtf8Line()) != null) {
             line = line.trim();
             if (line.isEmpty()) {

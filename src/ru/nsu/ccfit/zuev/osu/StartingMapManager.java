@@ -28,7 +28,7 @@ public class StartingMapManager {
             return;
         }
         ToastLogger.showText("Preparing for the first launch", false);
-        String dirList[];
+        String[] dirList;
         try {
             dirList = activity.getAssets().list("Songs");
         } catch (final IOException e) {
@@ -52,7 +52,7 @@ public class StartingMapManager {
             ToastLogger.showText("Cannot create " + dir.getPath(), false);
             return;
         }
-        String fileList[];
+        String[] fileList;
         try {
             fileList = activity.getAssets().list("Songs/" + dirname);
         } catch (final IOException e) {
