@@ -95,8 +95,6 @@ public class Spinner extends GameObject {
         }
         this.listener = listener;
         this.soundId = sound;
-        int sampleSet = 0;
-        int addition = 0;
         this.stat = stat;
         this.totalTime = time;
         startHit = true;
@@ -104,12 +102,6 @@ public class Spinner extends GameObject {
         bonusScore = null;
         score = 1;
         ResourceManager.getInstance().checkSpinnerTextures();
-
-        if (!Utils.isEmpty(tempSound)) {
-            final String[] group = tempSound.split(":");
-            sampleSet = Integer.parseInt(group[0]);
-            addition = Integer.parseInt(group[1]);
-        }
 
         final IEntityModifier appearMoifier = new SequenceEntityModifier(new DelayModifier(pretime * 0.75f), new FadeInModifier(pretime * 0.25f));
 
