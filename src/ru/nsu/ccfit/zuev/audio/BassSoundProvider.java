@@ -57,8 +57,4 @@ public class BassSoundProvider {
         sample = 0;
     }
 
-    public void setLooping(boolean looping) {
-        // not impl
-    }
-
 }

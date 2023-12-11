@@ -1110,7 +1110,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
             Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
 
             game.startGame(track, null);
-            unload();
             return;
         }
         isSelectComplete = false;
@@ -1225,9 +1224,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
     public void onScroll(final float where) {
         velocityY = 0;
         camY = where - Config.getRES_HEIGHT() / 2f;
-    }
-
-    public void unload() {
     }
 
     public void back() {

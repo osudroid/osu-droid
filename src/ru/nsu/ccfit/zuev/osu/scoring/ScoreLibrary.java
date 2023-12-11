@@ -136,10 +136,6 @@ public class ScoreLibrary {
         f.delete();
     }
 
-    public void save() {
-
-    }
-
     public void sendScoreOnline(final StatisticV2 stat, final String replay, final SendingPanel panel) {
         Debug.i("Preparing for online!");
         if (stat.getTotalScoreWithMultiplier() <= 0) {

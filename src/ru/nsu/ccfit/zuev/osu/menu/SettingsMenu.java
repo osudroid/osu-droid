@@ -269,11 +269,6 @@ public class SettingsMenu extends SettingsFragment {
     }
 
     @Override
-    public void show() {
-        super.show();
-    }
-
-    @Override
     public void dismiss() {
         playOnDismissAnim(() -> {
             Config.loadConfig(mActivity);

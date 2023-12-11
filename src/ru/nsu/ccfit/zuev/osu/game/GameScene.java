@@ -648,8 +648,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
             if (!replaying) {
                 ToastLogger.showTextId(R.string.replay_invalid, true);
                 return false;
-            } else {
-                replay.countMarks(overallDifficulty);
             }
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO)) {
             replay = null;
@@ -2239,9 +2237,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
         if (snd == null) {
             return;
         }
-        if (name.equals("sliderslide") || name.equals("sliderwhistle")) {
-            snd.setLooping(true);
-        }
+
         if (name.equals("hitnormal")) {
             snd.play(soundTimingPoint.getVolume() * 0.8f);
             return;
