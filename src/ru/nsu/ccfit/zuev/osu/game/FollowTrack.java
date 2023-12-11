@@ -116,7 +116,7 @@ public class FollowTrack extends GameObject {
                 points.get(i).setAlpha(0);
             }
             if (percent >= 0 && percent < 1) {
-                points.get((int) (percent * points.size())).setAlpha(1 - percent + (int) percent);
+                points.get((int) (percent * points.size())).setAlpha(1 - percent + percent);
             }
         }
 
