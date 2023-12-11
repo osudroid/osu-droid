@@ -12,8 +12,6 @@ import java.nio.ByteBuffer;
  */
 public class BassAudioProvider {
 
-    public static final int DECODER_NORMAL = 0;
-
     public static final int DECODER_DOUBLE_TIME = 1;
 
     public static final int DECODER_NIGHT_CORE = 2;
