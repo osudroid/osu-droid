@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.audio;
 
 import android.util.Log;
+
 import com.un4seen.bass.BASS;
 
 /**
@@ -10,7 +11,7 @@ public class BassAudioProvider {
 
     public static final int DEFAULT_FREQUENCY = 44100;
 
-    public BassAudioProvider() {
+    public static void initializeDevice() {
         BASS.FloatValue freq = new BASS.FloatValue();
         freq.value = 1.0f;
 

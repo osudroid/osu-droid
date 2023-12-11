@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
+import ru.nsu.ccfit.zuev.audio.BassAudioProvider;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.storyboard.OsbParser;
 import ru.nsu.ccfit.zuev.osu.storyboard.OsuSprite;
@@ -77,7 +77,7 @@ public class StoryBoardTestActivity extends BaseGameActivity implements IUpdateH
         ResourceManager.getInstance().loadHighQualityAsset("cursor", "gfx/cursor.png");
         ResourceManager.getInstance().loadHighQualityFileUnderFolder(new File(FOLDER));
 
-        BassAudioPlayer.initDevice();
+        BassAudioProvider.initializeDevice();
 
         try {
             System.gc();

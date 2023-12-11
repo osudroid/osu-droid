@@ -3,24 +3,40 @@ package ru.nsu.ccfit.zuev.osu;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.*;
+import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.net.Uri;
-import android.os.*;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.IBinder;
+import android.os.PowerManager;
+import android.os.StatFs;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.*;
+import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.PermissionChecker;
 import androidx.preference.PreferenceManager;
+
 import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -32,7 +48,9 @@ import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.UpdateManager;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
+
 import net.lingala.zip4j.ZipFile;
+
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.SmoothCamera;
@@ -48,7 +66,17 @@ import org.anddev.andengine.sensor.accelerometer.AccelerometerData;
 import org.anddev.andengine.sensor.accelerometer.IAccelerometerListener;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
 import org.anddev.andengine.util.Debug;
-import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
+
+import java.io.File;
+import java.io.IOException;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import ru.nsu.ccfit.zuev.audio.BassAudioProvider;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
@@ -64,15 +92,6 @@ import ru.nsu.ccfit.zuev.osu.menu.SplashScene;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
-
-import java.io.File;
-import java.io.IOException;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends BaseGameActivity implements IAccelerometerListener {
 
@@ -292,7 +311,7 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
         RoomScene.INSTANCE.init();
 
         Async.run(() -> {
-            BassAudioPlayer.initDevice();
+            BassAudioProvider.initializeDevice();
             GlobalManager.getInstance().init();
             analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
             GlobalManager.getInstance().setLoadingProgress(50);
