@@ -148,13 +148,12 @@ public class FileUtils {
                 }
                 return false;
             });
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        } else {
             return listFiles(directory, file -> {
                 String filename = file.getName().toLowerCase();
                 return Arrays.stream(endsWithExtensions).anyMatch(filename::endsWith);
             });
         }
-        return null;
     }
 
     public static File[] listFiles(File directory, FileFilter filter) {

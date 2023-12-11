@@ -520,7 +520,6 @@ public class OsbParser {
                 for (int i = 0; i < count; i++) {
                     HitSound hitSound = new HitSound();
                     if (values.length > 8) {
-                        assert soundTypes != null;
                         hitSound.soundType = Integer.parseInt(soundTypes[i]);
                     } else {
                         hitSound.soundType = Integer.parseInt(values[4]);

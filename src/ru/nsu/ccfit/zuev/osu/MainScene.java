@@ -613,7 +613,7 @@ public class MainScene implements IUpdateHandler {
             isMenuShowed = true;
         }
 
-        if (doMenuShow && isMenuShowed) {
+        if (doMenuShow) {
             if (showPassTime > 10000f) {
 
                 menu.showFirstMenu();

@@ -112,14 +112,13 @@ public class ResourceManager {
     }
 
     public void loadCustomSkin(String folder) {
-
-        if (!folder.endsWith("/")) {
-            folder += "/";
-        }
-
         File[] skinFiles = null;
         File skinFolder = null;
         if (folder != null) {
+            if (!folder.endsWith("/")) {
+                folder += "/";
+            }
+
             skinFolder = new File(folder);
             if (!skinFolder.exists()) {
                 skinFolder = null;
@@ -888,7 +887,8 @@ public class ResourceManager {
     public void checkSpinnerTextures() {
         final String[] names = {"spinner-background", "spinner-circle", "spinner-metre", "spinner-approachcircle", "spinner-spin"};
         for (final String s : names) {
-            if (textures != null && textures.get(s) != null && textures.get(s).getTexture() != null && !textures.get(s).getTexture().isLoadedToHardware()) {
+            var region = textures.get(s);
+            if (region != null && region.getTexture() != null && !region.getTexture().isLoadedToHardware()) {
                 engine.getTextureManager().reloadTextures();
                 break;
             }
@@ -898,7 +898,8 @@ public class ResourceManager {
     public void checkEvoSpinnerTextures() {
         final String[] names = {"spinner-bottom", "spinner-top", "spinner-glow", "spinner-middle", "spinner-middle2", "spinner-spin", "spinner-clear"};
         for (final String s : names) {
-            if (textures != null && textures.get(s) != null && textures.get(s).getTexture() != null && !textures.get(s).getTexture().isLoadedToHardware()) {
+            var region = textures.get(s);
+            if (region != null && region.getTexture() != null && !region.getTexture().isLoadedToHardware()) {
                 engine.getTextureManager().reloadTextures();
                 break;
             }

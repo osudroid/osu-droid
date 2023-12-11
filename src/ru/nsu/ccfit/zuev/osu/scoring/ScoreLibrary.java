@@ -115,7 +115,7 @@ public class ScoreLibrary {
                             scores.put(str, newStat);
                         }
                     }
-                } else if (versionStr.equals("scores2")) {
+                } else {
                     scores = (Map<String, ArrayList<StatisticV2>>) obj;
                 }
             }

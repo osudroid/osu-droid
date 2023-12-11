@@ -80,7 +80,7 @@ public class SongService extends Service {
                 return false;
             }
             if (isLoop) {
-                audioFunc.setLoop(isLoop);
+                audioFunc.setLoop(true);
             }
             return audioFunc.preLoad(filePath, mode);
         }

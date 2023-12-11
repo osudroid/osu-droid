@@ -192,7 +192,7 @@ public class StatisticV2 implements Serializable {
             multi = 1.0f + (multi - 1.0f) * 0.24f;
         } else if (multi < 1) {
             multi = (float) Math.pow(0.3, (1.0 - multi) * 4);
-        } else if (multi == 1) {
+        } else {
             return 1f;
         }
         if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)) {
