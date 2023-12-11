@@ -17,8 +17,6 @@ public class Spline {
 
     private final ArrayList<PointF> m_ctrl_pts;
 
-    private final ArrayList<Line> m_path;
-
     private final ArrayList<PointF> m_points;
 
     private CurveTypes m_curve_type;
@@ -28,7 +26,6 @@ public class Spline {
     public Spline() {
         m_ctrl_pts = new ArrayList<>();
         m_curve_type = CurveTypes.Linear;
-        m_path = new ArrayList<>();
         m_points = new ArrayList<>();
     }
 
@@ -218,7 +215,6 @@ public class Spline {
     }
 
     public void Refresh() {
-        m_path.clear();
         m_points.clear();
 
         sliderthing(m_curve_type, m_ctrl_pts, m_points);
