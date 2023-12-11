@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.zuev.audio;
 
-import android.content.res.AssetManager;
-
 /**
  * @author chenkang.ck
  */
