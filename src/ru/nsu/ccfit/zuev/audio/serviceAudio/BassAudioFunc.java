@@ -84,14 +84,12 @@ public class BassAudioFunc {
         BASS.BASS_ChannelPause(channel);
     }
 
-    public boolean resume() {
+    public void resume() {
         setEndSync();
 
         if (BASS.BASS_ChannelPlay(channel, false)) {
             setVolume(Config.getBgmVolume());
-            return true;
         }
-        return false;
     }
 
     public boolean preLoad(String filePath, PlayMode mode) {
@@ -141,9 +139,10 @@ public class BassAudioFunc {
         return channel != 0;
     }
 
-    public boolean preLoad(String filePath, float speed, boolean enableNC) {
+    public void preLoad(String filePath, float speed, boolean enableNC) {
         if (speed == 1.0f) {
-            return preLoad(filePath, PlayMode.MODE_NONE);
+            preLoad(filePath, PlayMode.MODE_NONE);
+            return;
         }
         Log.w("BassAudioFunc", "preLoad File: " + filePath);
         BASS.BASS_CHANNELINFO fx = new BASS.BASS_CHANNELINFO();
@@ -172,7 +171,6 @@ public class BassAudioFunc {
             BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_BUFFER, onFocus ? onFocusBufferLength : offFocusBufferLength);
         }
 
-        return channel != 0;
     }
 
     public void play() {
