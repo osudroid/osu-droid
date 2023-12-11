@@ -216,9 +216,8 @@ object UpdateManager: IDownloaderObserver
         }
 
         snackBar.apply {
-            
-            // Will only dismiss if user wants.
-            duration = LENGTH_INDEFINITE
+
+            duration = 5000
 
             setText(update_dialog_message)
             setAction(update_dialog_button_update) {

@@ -201,18 +201,6 @@ public class StatisticV2 implements Serializable {
         return multi;
     }
 
-    public static float getCustomCSScoreMultiplier(float beatmapCS, float customCS) {
-        float diff = beatmapCS - customCS;
-
-        return diff >= 0 ? 1 + 0.0075f * (float) Math.pow(diff, 1.5) : 2 / (1 + (float) Math.exp(-0.5 * diff));
-    }
-
-    public static float getCustomODScoreMultiplier(float beatmapOD, float customOD) {
-        float diff = beatmapOD - customOD;
-
-        return diff >= 0 ? 1 + 0.005f * (float) Math.pow(diff, 1.3) : 2 / (1 + (float) Math.exp(-0.25 * diff));
-    }
-
     public float getHp() {
         return hp;
     }
@@ -938,6 +926,22 @@ public class StatisticV2 implements Serializable {
         if (changeSpeed != 1f) {
             modScoreMultiplier *= getSpeedChangeScoreMultiplier();
         }
+    }
+
+    public static float getCustomCSScoreMultiplier(float beatmapCS, float customCS) {
+        float diff = customCS - beatmapCS;
+
+        return diff >= 0
+            ? 1 + 0.0075f * (float) Math.pow(diff, 1.5)
+            : 2 / (1 + (float) Math.exp(-0.5 * diff));
+    }
+
+    public static float getCustomODScoreMultiplier(float beatmapOD, float customOD) {
+        float diff = customOD - beatmapOD;
+
+        return diff >= 0
+            ? 1 + 0.005f * (float) Math.pow(diff, 1.3)
+            : 2 / (1 + (float) Math.exp(-0.25 * diff));
     }
 
     /**

@@ -25,7 +25,7 @@ public class OnlineManager {
 
     public static final OkHttpClient client = new OkHttpClient();
 
-    private static final String onlineVersion = "36";
+    private static final String onlineVersion = "37";
 
     private static OnlineManager instance = null;
 
