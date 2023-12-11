@@ -400,20 +400,7 @@ public class StatisticV2 implements Serializable {
         if (mark != null) {
             return mark;
         }
-        boolean isH = false;
-        forcycle:
-        for (final GameMod m : mod) {
-            switch (m) {
-                case MOD_HIDDEN:
-                    isH = true;
-                    break forcycle;
-                case MOD_FLASHLIGHT:
-                    isH = true;
-                    break forcycle;
-                default:
-                    break;
-            }
-        }
+        boolean isH = mod.contains(GameMod.MOD_HIDDEN) || mod.contains(GameMod.MOD_FLASHLIGHT);
 
         if (hit100 == 0 && hit50 == 0 && misses == 0) {
             if (isH) {
