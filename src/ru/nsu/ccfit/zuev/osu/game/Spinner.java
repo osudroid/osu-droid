@@ -73,7 +73,7 @@ public class Spinner extends GameObject {
 
     public Spinner() {
         ResourceManager.getInstance().checkSpinnerTextures();
-        this.pos = new PointF(Constants.MAP_WIDTH / 2, Constants.MAP_HEIGHT / 2);
+        this.pos = new PointF(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f);
         center = Utils.trackToRealCoords(pos);
         background = SpritePool.getInstance().getCenteredSprite("spinner-background", center);
         final float scaleX = Config.getRES_WIDTH() / background.getWidth();
@@ -81,7 +81,7 @@ public class Spinner extends GameObject {
 
         circle = SpritePool.getInstance().getCenteredSprite("spinner-circle", center);
         mregion = ResourceManager.getInstance().getTexture("spinner-metre").deepCopy();
-        metre = new Sprite(center.x - Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT(), mregion);
+        metre = new Sprite(center.x - Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT(), mregion);
         metre.setWidth(Config.getRES_WIDTH());
         metre.setHeight(background.getHeightScaled());
         approachCircle = SpritePool.getInstance().getCenteredSprite("spinner-approachcircle", center);

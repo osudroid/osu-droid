@@ -56,9 +56,9 @@ public class Utils {
         pos.y += (Config.getRES_HEIGHT() - Constants.MAP_ACTUAL_HEIGHT) / 2f;
         pos.x += (Config.getRES_WIDTH() - Constants.MAP_ACTUAL_WIDTH) / 2f;
         if (GameHelper.isHardrock()) {
-            pos.y -= Config.getRES_HEIGHT() / 2;
+            pos.y -= Config.getRES_HEIGHT() / 2f;
             pos.y *= -1;
-            pos.y += Config.getRES_HEIGHT() / 2;
+            pos.y += Config.getRES_HEIGHT() / 2f;
         }
         return pos;
     }
@@ -68,9 +68,9 @@ public class Utils {
         pos.y += (Config.getRES_HEIGHT() - Constants.MAP_ACTUAL_HEIGHT) / 2f;
         pos.x += (Config.getRES_WIDTH() - Constants.MAP_ACTUAL_WIDTH) / 2f;
         if (GameHelper.isHardrock()) {
-            pos.y -= Config.getRES_HEIGHT() / 2;
+            pos.y -= Config.getRES_HEIGHT() / 2f;
             pos.y *= -1;
-            pos.y += Config.getRES_HEIGHT() / 2;
+            pos.y += Config.getRES_HEIGHT() / 2f;
         }
     }
 

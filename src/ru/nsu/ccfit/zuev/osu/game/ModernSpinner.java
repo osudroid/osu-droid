@@ -60,7 +60,7 @@ public class ModernSpinner extends Spinner {
 
     public ModernSpinner() {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
-        center = Utils.trackToRealCoords(new PointF(Constants.MAP_WIDTH / 2, Constants.MAP_HEIGHT / 2));
+        center = Utils.trackToRealCoords(new PointF(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f));
         middle = SpritePool.getInstance().getCenteredSprite("spinner-middle", center);
         middle2 = SpritePool.getInstance().getCenteredSprite("spinner-middle2", center);
         bottom = SpritePool.getInstance().getCenteredSprite("spinner-bottom", center);
