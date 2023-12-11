@@ -28,7 +28,7 @@ public class Countdown extends GameObject {
 
     private Scene scene;
 
-    public Countdown(final GameObjectListener listener, final Scene scene, final float speed, final float offset, final float time) {
+    public Countdown(final GameObjectListener listener, final Scene scene, final float speed, final float time) {
         this.listener = listener;
         this.speed = speed;
         this.scene = scene;

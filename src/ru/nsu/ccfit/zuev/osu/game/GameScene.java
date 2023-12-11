@@ -929,7 +929,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
             float cdSpeed = countdown.speed;
             skipTime -= cdSpeed * Countdown.COUNTDOWN_LENGTH;
             if (cdSpeed != 0 && objects.peek().getTime() - secPassed >= cdSpeed * Countdown.COUNTDOWN_LENGTH) {
-                addPassiveObject(new Countdown(this, bgScene, cdSpeed, 0, objects.peek().getTime() - secPassed));
+                addPassiveObject(new Countdown(this, bgScene, cdSpeed, objects.peek().getTime() - secPassed));
             }
         }
 
