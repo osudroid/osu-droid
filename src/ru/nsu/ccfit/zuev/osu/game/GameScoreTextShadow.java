@@ -1,6 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
-import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;

@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.skins;
 
 
 import androidx.annotation.NonNull;
-import org.json.JSONObject;
+
 import ru.nsu.ccfit.zuev.osu.datatypes.DefaultData;
 import ru.nsu.ccfit.zuev.osu.datatypes.IDefaultableData;
 

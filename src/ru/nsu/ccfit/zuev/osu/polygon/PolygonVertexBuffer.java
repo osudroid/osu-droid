@@ -1,6 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.polygon;
 
-import org.anddev.andengine.opengl.util.FastFloatBuffer;
 import org.anddev.andengine.opengl.vertex.VertexBuffer;
 
 public class PolygonVertexBuffer extends VertexBuffer {

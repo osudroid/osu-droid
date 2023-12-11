@@ -9,9 +9,6 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
-import java.io.File;
-import java.util.ArrayList;
-
 public class OnlineScoring {
 
     private static final int attemptCount = 5;

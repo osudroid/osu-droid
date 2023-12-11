@@ -1,6 +1,5 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import android.util.DisplayMetrics;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
