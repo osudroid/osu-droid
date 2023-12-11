@@ -211,7 +211,6 @@ public class Spline {
             case 'P':
                 return CurveTypes.PerfectCurve;
             case 'B':
-                return CurveTypes.Bezier;
             default:
                 return CurveTypes.Bezier;
         }
