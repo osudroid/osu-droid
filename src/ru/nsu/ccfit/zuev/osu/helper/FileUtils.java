@@ -33,11 +33,6 @@ public class FileUtils {
         }
     }
 
-    public static void move(File from, File to) throws IOException {
-        copy(from, to);
-        from.delete();
-    }
-
     public static boolean extractZip(final String sourcePath, final String targetPath) {
         final File file = new File(sourcePath);
 

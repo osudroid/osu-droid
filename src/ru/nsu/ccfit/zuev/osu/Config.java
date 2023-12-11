@@ -24,7 +24,49 @@ public class Config {
 
     private static String corePath, defaultCorePath, beatmapPath, cachePath, skinPath, skinTopPath, scorePath, localUsername, onlineUsername, onlinePassword, onlineDeviceID;
 
-    private static boolean DELETE_OSZ, SCAN_DOWNLOAD, deleteUnimportedBeatmaps, showFirstApproachCircle, comboburst, useCustomSkins, useCustomSounds, corovans, showFPS, complexAnimations, snakingInSliders, playMusicPreview, showCursor, shrinkPlayfieldDownwards, hideNaviBar, showScoreboard, enablePP, enableExtension, loadAvatar, stayOnline, syncMusic, burstEffects, hitLighting, useDither, useParticles, useCustomComboColors, forceRomanized, fixFrameOffset, removeSliderLock, calculateSliderPathInGameStart, displayScoreStatistics, hideReplayMarquee, hideInGameUI, receiveAnnouncements, enableStoryboard, safeBeatmapBg, trianglesAnimation, displayRealTimePPCounter, useNightcoreOnMultiplayer, videoEnabled, deleteUnsupportedVideos, submitScoreOnMultiplayer, keepBackgroundAspectRatio, noChangeDimInBreaks;
+    private static boolean DELETE_OSZ;
+    private static boolean SCAN_DOWNLOAD;
+    private static boolean deleteUnimportedBeatmaps;
+    private static boolean showFirstApproachCircle;
+    private static boolean comboburst;
+    private static boolean useCustomSkins;
+    private static boolean useCustomSounds;
+    private static boolean corovans;
+    private static boolean showFPS;
+    private static boolean complexAnimations;
+    private static boolean snakingInSliders;
+    private static boolean playMusicPreview;
+    private static boolean showCursor;
+    private static boolean shrinkPlayfieldDownwards;
+    private static boolean hideNaviBar;
+    private static boolean showScoreboard;
+    private static boolean enableExtension;
+    private static boolean loadAvatar;
+    private static boolean stayOnline;
+    private static boolean syncMusic;
+    private static boolean burstEffects;
+    private static boolean hitLighting;
+    private static boolean useDither;
+    private static boolean useParticles;
+    private static boolean useCustomComboColors;
+    private static boolean forceRomanized;
+    private static boolean fixFrameOffset;
+    private static boolean removeSliderLock;
+    private static boolean calculateSliderPathInGameStart;
+    private static boolean displayScoreStatistics;
+    private static boolean hideReplayMarquee;
+    private static boolean hideInGameUI;
+    private static boolean receiveAnnouncements;
+    private static boolean enableStoryboard;
+    private static boolean safeBeatmapBg;
+    private static boolean trianglesAnimation;
+    private static boolean displayRealTimePPCounter;
+    private static boolean useNightcoreOnMultiplayer;
+    private static boolean videoEnabled;
+    private static boolean deleteUnsupportedVideos;
+    private static boolean submitScoreOnMultiplayer;
+    private static boolean keepBackgroundAspectRatio;
+    private static boolean noChangeDimInBreaks;
 
     private static int RES_WIDTH, RES_HEIGHT, errorMeter, spinnerStyle, backgroundQuality, metronomeSwitch;
 
@@ -137,7 +179,6 @@ public class Config {
         localUsername = prefs.getString("playername", "");
         showCursor = prefs.getBoolean("showcursor", false);
         hideNaviBar = prefs.getBoolean("hidenavibar", false);
-        enablePP = false;//prefs.getBoolean("enablePP",true);
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
         calculateSliderPathInGameStart = prefs.getBoolean("calculateSliderPathInGameStart", false);

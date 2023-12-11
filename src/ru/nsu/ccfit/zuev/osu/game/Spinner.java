@@ -36,8 +36,6 @@ public class Spinner extends GameObject {
 
     private final PointF currMouse = new PointF();
 
-    private final boolean did = false;
-
     private Sprite clearText = null;
 
     private PointF oldMouse;
@@ -84,7 +82,7 @@ public class Spinner extends GameObject {
         spinText = new CentredSprite(center.x, center.y * 1.5f, ResourceManager.getInstance().getTexture("spinner-spin"));
     }
 
-    public void init(final GameObjectListener listener, final Scene scene, final float pretime, final float time, final float rps, final int sound, final String tempSound, final StatisticV2 stat) {
+    public void init(final GameObjectListener listener, final Scene scene, final float pretime, final float time, final float rps, final int sound, final StatisticV2 stat) {
         clearText = null;
         fullrotations = 0;
         rotations = 0;

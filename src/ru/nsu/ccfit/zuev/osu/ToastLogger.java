@@ -15,10 +15,6 @@ public class ToastLogger {
 
     final ArrayList<String> debugLog = new ArrayList<>();
 
-    String message = "";
-
-    boolean showlong = false;
-
     float percentage;
 
     private ToastLogger(final Activity activity) {

@@ -106,10 +106,6 @@ public class SongService extends Service {
         }
     }
 
-    public boolean preLoadWithLoop(String filePath) {
-        return preLoad(filePath, PlayMode.MODE_NONE, true);
-    }
-
     public void play() {
         if (audioFunc == null) {
             return;
@@ -132,12 +128,6 @@ public class SongService extends Service {
         }
         notify.updateState();
         return audioFunc.stop();
-    }
-
-    public void stopWithoutNotify() {
-        if (audioFunc != null) {
-            audioFunc.stop();
-        }
     }
 
     public void exit() {

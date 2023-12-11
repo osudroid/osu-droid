@@ -57,7 +57,7 @@ public abstract class GameObject {
         return startHit;
     }
 
-    public void tryHit(float dt) {
+    public void tryHit() {
     }
 
     public PointF getPos() {

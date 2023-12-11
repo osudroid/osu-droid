@@ -16,23 +16,16 @@ public abstract class DefaultData<T> implements IDefaultableData<T> {
         setCurrentValue(defaultValue);
     }
 
-    @Override
     public T getDefaultValue() {
         return defaultValue;
     }
 
-    @Override
     public T getCurrentValue() {
         return currentValue;
     }
 
     public void setCurrentValue(T currentValue) {
         this.currentValue = currentValue;
-    }
-
-    @Override
-    public boolean currentIsDefault() {
-        return currentValue == defaultValue;
     }
 
     protected abstract T instanceDefaultValue();

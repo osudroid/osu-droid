@@ -297,8 +297,6 @@ public class BeatmapData {
         track.setMD5(md5);
         track.setCreator(metadata.creator);
         track.setMode(metadata.version);
-        track.setPublicName(metadata.artist + " - " + metadata.title);
-        track.setBeatmapID(metadata.beatmapID);
         track.setBeatmapSetID(metadata.beatmapSetID);
 
         // General

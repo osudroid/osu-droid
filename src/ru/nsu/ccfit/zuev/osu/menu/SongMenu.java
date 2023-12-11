@@ -158,10 +158,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
         return board.isShowOnlineScores();
     }
 
-    public ArrayList<MenuItem> getMenuItems() {
-        return items;
-    }
-
     public void init(final Activity context, final Engine engine, final GameScene pGame) {
         this.engine = engine;
         game = pGame;
@@ -1221,11 +1217,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
     }
 
 
-    public void onScroll(final float where) {
-        velocityY = 0;
-        camY = where - Config.getRES_HEIGHT() / 2f;
-    }
-
     public void back() {
         back(true);
     }
@@ -1293,11 +1284,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
 
     public void unbindDataBaseChangedListener() {
         OdrDatabase.get().setOnDatabaseChangedListener(null);
-    }
-
-    public void setY(final float y) {
-        velocityY = 0;
-        camY = y;
     }
 
     public void stopMusic() {

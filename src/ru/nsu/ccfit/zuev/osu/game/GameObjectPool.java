@@ -57,10 +57,6 @@ public class GameObjectPool {
         }
     }
 
-    public void putSpinner(final Spinner spinner) {
-        spinners.add(spinner);
-    }
-
     public CircleNumber getNumber(final int num) {
         if (numbers.containsKey(num) && !numbers.get(num).isEmpty()) {
             return numbers.get(num).poll();
@@ -117,10 +113,6 @@ public class GameObjectPool {
 
     public void putTrac(final FollowTrack track) {
         tracks.add(track);
-    }
-
-    public int getObjectsCreated() {
-        return objectsCreated;
     }
 
     public void purge() {

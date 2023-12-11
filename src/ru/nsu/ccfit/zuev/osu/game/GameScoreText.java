@@ -97,12 +97,6 @@ public class GameScoreText {
         }
     }
 
-    public void detachFromScene() {
-        for (final Sprite sp : letters) {
-            sp.detachSelf();
-        }
-    }
-
     public void setPosition(float x, float y) {
         float width = 0;
         for (final Sprite sp : letters) {

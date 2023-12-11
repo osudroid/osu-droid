@@ -205,17 +205,6 @@ public class OnlineScoring {
         });
     }
 
-    public ArrayList<String> getTop(final File trackFile, final String hash) {
-        synchronized (onlineMutex) {
-            try {
-                return OnlineManager.getInstance().getTop(trackFile, hash);
-            } catch (OnlineManager.OnlineManagerException e) {
-                Debug.e("Cannot load scores " + e.getMessage());
-                return new ArrayList<>();
-            }
-        }
-    }
-
     public void loadAvatar(final boolean both) {
         if (!OnlineManager.getInstance().isStayOnline()) {
             return;

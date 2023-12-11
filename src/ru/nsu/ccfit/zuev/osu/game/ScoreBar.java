@@ -25,7 +25,7 @@ public class ScoreBar extends GameObject {
 
     private float lasthp = 0;
 
-    public ScoreBar(final GameObjectListener listener, final Scene scene, final StatisticV2 stat) {
+    public ScoreBar(final Scene scene, final StatisticV2 stat) {
         this.stat = stat;
         bg = new Sprite(0, 0, ResourceManager.getInstance().getTexture("scorebar-bg"));
         bg.setScaleCenter(0, 0);

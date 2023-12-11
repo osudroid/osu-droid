@@ -415,10 +415,6 @@ public class ResourceManager {
         return loadTexture(resname, file, external, TextureOptions.BILINEAR, this.engine);
     }
 
-    public TextureRegion loadTexture(final String resname, final String file, final boolean external, Engine engine) {
-        return loadTexture(resname, file, external, TextureOptions.BILINEAR, engine);
-    }
-
     public TextureRegion loadBackground(final String file) {
         return loadBackground(file, this.engine);
     }

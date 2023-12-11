@@ -53,7 +53,7 @@ public class StatisticV2 implements Serializable {
 
     long time = 0;
 
-    private int notes = 0;
+    public int notes = 0;
 
     private boolean perfect = false;
 
@@ -74,8 +74,6 @@ public class StatisticV2 implements Serializable {
     private EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
 
     private String playerName = "";
-
-    private String fileName = "";
 
     private String replayName = "";
 
@@ -147,7 +145,6 @@ public class StatisticV2 implements Serializable {
         misses = stat.misses;
         maxCombo = stat.maxCombo;
         currentCombo = stat.currentCombo;
-        totalScore = stat.totalScore;
         possibleScore = stat.possibleScore;
         realScore = stat.realScore;
         hp = stat.hp;
@@ -236,10 +233,6 @@ public class StatisticV2 implements Serializable {
 
     public int getTotalScore() {
         return totalScore;
-    }
-
-    public void setTotalScore(int totalScore) {
-        this.totalScore = totalScore;
     }
 
     public int getTotalScoreWithMultiplier() {
@@ -441,14 +434,6 @@ public class StatisticV2 implements Serializable {
         this.maxCombo = maxCombo;
     }
 
-    public int getNotes() {
-        return notes;
-    }
-
-    public void setNotes(int notes) {
-        this.notes = notes;
-    }
-
     public int getHit300() {
         return hit300;
     }
@@ -509,10 +494,6 @@ public class StatisticV2 implements Serializable {
         return currentCombo;
     }
 
-    public void setCombo(int combo) {
-        currentCombo = combo;
-    }
-
     public long getTime() {
         return time;
     }
@@ -529,10 +510,6 @@ public class StatisticV2 implements Serializable {
         this.mod = mod.clone();
 
         computeModScoreMultiplier();
-    }
-
-    public float getDiffModifier() {
-        return diffModifier;
     }
 
     public void setDiffModifier(final float diffModifier) {
@@ -680,14 +657,6 @@ public class StatisticV2 implements Serializable {
     public void setForcedScore(int forcedScore) {
         this.forcedScore = forcedScore;
         totalScore = forcedScore;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
     }
 
     public final boolean isScoreValid() {

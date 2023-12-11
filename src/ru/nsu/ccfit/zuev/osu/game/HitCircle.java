@@ -300,7 +300,7 @@ public class HitCircle extends GameObject {
     } // update(float dt)
 
     @Override
-    public void tryHit(final float dt) {
+    public void tryHit() {
         if (passedTime * 2 > time && isHit()) {
             float signAcc = passedTime - time;
             if (Config.isFixFrameOffset()) {

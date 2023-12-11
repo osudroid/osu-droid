@@ -21,8 +21,6 @@ import java.util.zip.ZipOutputStream;
 
 public class Replay {
 
-    public static EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
-
     public static EnumSet<GameMod> oldMod = EnumSet.noneOf(GameMod.class);
 
     public static float oldChangeSpeed = 1.0f;
@@ -414,10 +412,6 @@ public class Replay {
 
     public String getMapFile() {
         return mapFile;
-    }
-
-    public String getMapName() {
-        return mapName;
     }
 
     /*

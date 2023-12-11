@@ -37,14 +37,6 @@ public class OsbParser {
 
     private int ZIndex = -900;
 
-    public ArrayList<TimingPoint> getTimingPoints() {
-        return timingPoints;
-    }
-
-    public HashMap<String, String> getVariablesMap() {
-        return variablesMap;
-    }
-
     public LinkedList<OsuSprite> getSprites() {
         return sprites;
     }
@@ -118,7 +110,6 @@ public class OsbParser {
                 float y = Float.parseFloat(info[5]);
                 ArrayList<OsuEvent> events = parseEvents(source);
                 OsuSprite sprite = new OsuSprite(x, y, layer, origin, filePath, events, ZIndex++);
-                sprite.setDebugLine(line);
                 sprites.add(sprite);
             } else if (line.startsWith("Animation")) {
                 for (String s : variablesMap.keySet()) {
@@ -365,7 +356,6 @@ public class OsbParser {
     public void loadBeatmap(File file) throws IOException {
         BufferedSource source = Okio.buffer(Okio.source(file));
 
-        String header = source.readUtf8Line().trim();
         Pattern pattern;
         Matcher matcher;
 

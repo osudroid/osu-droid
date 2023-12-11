@@ -10,13 +10,6 @@ public class RGBAColor {
 
     private float ca;
 
-    public RGBAColor() {
-        cr = 0;
-        cg = 0;
-        cb = 0;
-        ca = 1;
-    }
-
     public RGBAColor(final float r, final float g, final float b, final float a) {
         cr = r;
         cg = g;
@@ -38,13 +31,6 @@ public class RGBAColor {
 
     public float a() {
         return ca;
-    }
-
-    public void set(final float r, final float g, final float b, final float a) {
-        cr = r;
-        cg = g;
-        cb = b;
-        ca = a;
     }
 
 }

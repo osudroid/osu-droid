@@ -561,10 +561,6 @@ public class ScoringScene {
         return replayStat;
     }
 
-    public void setReplayStat(StatisticV2 replayStat) {
-        this.replayStat = replayStat;
-    }
-
     public int getReplayID() {
         return replayID;
     }

@@ -41,8 +41,6 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
      */
     private static final long serialVersionUID = 6243307165131877535L;
 
-    private final static boolean Debug = true;// 是否保存错误日志
-
     /**
      * 系统默认的UncaughtException处理类
      */
@@ -50,13 +48,6 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
 
     private AppException() {
         this.mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
-    }
-
-    private AppException(byte type, Exception excp) {
-        super(excp);
-        if (Debug) {
-            this.saveErrorLog(excp);
-        }
     }
 
     /**
@@ -77,15 +68,6 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
             sb.append("class: ").append(stack.getClassName()).append("; method: ").append(stack.getMethodName()).append("; line: ").append(stack.getLineNumber()).append(";  Exception: ").append(ex).append("\n");
         }
         return sb;
-    }
-
-    /**
-     * 保存异常日志
-     *
-     * @param excp
-     */
-    public void saveErrorLog(Exception excp) {
-        saveErrorLog(excp.getLocalizedMessage());
     }
 
     /**

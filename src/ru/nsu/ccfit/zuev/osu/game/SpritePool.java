@@ -31,10 +31,6 @@ public class SpritePool {
         return instance;
     }
 
-    public int getSpritesCreated() {
-        return spritesCreated;
-    }
-
     synchronized public void putSprite(final String name, final Sprite sprite) {
         if (count > CAPACITY) {
             return;

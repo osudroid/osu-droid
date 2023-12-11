@@ -38,15 +38,6 @@ public class Spline {
         m_points = new ArrayList<>();
     }
 
-    public Spline(ArrayList<PointF> theControlPoints, CurveTypes theCurveType) {
-        m_ctrl_pts = new ArrayList<>(theControlPoints);
-        m_curve_type = theCurveType;
-        m_path = new ArrayList<>();
-        m_points = new ArrayList<>();
-
-        sliderthing(m_curve_type, m_ctrl_pts, m_path, m_points);
-    }
-
     public static Spline getInstance() {
         if (instance == null) {
             instance = new Spline();
@@ -216,31 +207,13 @@ public class Spline {
         }
     }
 
-    public ArrayList<PointF> getControlPoints() {
-        if (m_ctrl_pts_copy == null) {
-            m_ctrl_pts_copy = new ArrayList<>(m_ctrl_pts);
-        }
-        return m_ctrl_pts_copy;
-    }
-
     public void setControlPoints(ArrayList<PointF> theControlPoints) {
         m_ctrl_pts.clear();
         m_ctrl_pts.addAll(theControlPoints);
     }
 
-    public CurveTypes getType() {
-        return m_curve_type;
-    }
-
     public void setType(CurveTypes type) {
         m_curve_type = type;
-    }
-
-    public ArrayList<Line> getPath() {
-        if (m_path_copy == null) {
-            m_path_copy = new ArrayList<>(m_path);
-        }
-        return m_path_copy;
     }
 
     public ArrayList<PointF> getPoints() {
@@ -250,30 +223,11 @@ public class Spline {
         return m_points_copy;
     }
 
-    public ArrayList<Float> getLengths() {
-        if (m_lengths == null) {
-            m_lengths = new ArrayList<>(m_path.size() + 1);
-            float length_so_far = 0;
-            for (int x = 0; x < m_path.size(); x++) {
-                m_lengths.add(length_so_far);
-                length_so_far += Rho(m_path.get(x));
-            }
-            m_lengths.add(length_so_far);
-        }
-        return m_lengths;
-    }
-
-    private void ValidateRange(int which, String paramName, Boolean allow_end) {
-        if ((which >= m_ctrl_pts.size() + (allow_end ? 0 : -1)) || (which < 0)) {
-            throw new ArrayIndexOutOfBoundsException(paramName);
-        }
-    }
-
     public void Refresh() {
         m_path.clear();
         m_points.clear();
 
-        sliderthing(m_curve_type, m_ctrl_pts, m_path, m_points);
+        sliderthing(m_curve_type, m_ctrl_pts, m_points);
 
         m_ctrl_pts_copy = null;
         m_path_copy = null;
@@ -281,36 +235,7 @@ public class Spline {
         m_lengths = null;
     }
 
-    public void AdjustPt(int which, PointF where) {
-        ValidateRange(which, "which", true);
-
-        m_ctrl_pts.add(which, new PointF(where.x, where.y)); // copy
-
-        Refresh();
-    }
-
-    public void AddPt(int after) {
-        ValidateRange(after, "after", false);
-
-        PointF target, pt1, pt2;
-        pt1 = m_ctrl_pts.get(after);
-        pt2 = m_ctrl_pts.get(after + 1);
-        target = Lerp(pt1, pt2, 0.5f);
-
-        target = new PointF((float) Math.round((double) target.x), (float) Math.round((double) target.y));
-
-        m_ctrl_pts.add(after + 1, target);
-        Refresh();
-    }
-
-    public void DelPt(int where) {
-        ValidateRange(where, "where", true);
-
-        m_ctrl_pts.remove(where);
-        Refresh();
-    }
-
-    private void sliderthing(CurveTypes CurveType, ArrayList<PointF> sliderCurvePoints, ArrayList<Line> path, ArrayList<PointF> points) {
+    private void sliderthing(CurveTypes CurveType, ArrayList<PointF> sliderCurvePoints, ArrayList<PointF> points) {
         switch (CurveType) {
             case Catmull:
                 for (int j = 0; j < sliderCurvePoints.size() - 1; j++) {
@@ -355,7 +280,7 @@ public class Spline {
 
             case PerfectCurve:
                 if (sliderCurvePoints.size() < 3 || (sliderCurvePoints.size() == 3 && ((sliderCurvePoints.get(0).x - sliderCurvePoints.get(2).x) * (sliderCurvePoints.get(1).y - sliderCurvePoints.get(2).y) == (sliderCurvePoints.get(1).x - sliderCurvePoints.get(2).x) * (sliderCurvePoints.get(0).y - sliderCurvePoints.get(2).y)))) {
-                    sliderthing(CurveTypes.Linear, m_ctrl_pts, m_path, m_points);
+                    sliderthing(CurveTypes.Linear, m_ctrl_pts, m_points);
                     break;
                 }
                 PointF point1 = sliderCurvePoints.get(0);
@@ -378,7 +303,7 @@ public class Spline {
                     }
                 }
                 if (Math.abs(startAng - midAng) < 0.1 && Math.abs(midAng - endAng) < 0.1) {
-                    sliderthing(CurveTypes.Bezier, m_ctrl_pts, m_path, m_points);
+                    sliderthing(CurveTypes.Bezier, m_ctrl_pts, m_points);
                     break;
                 }
                 //                points.add(point1);

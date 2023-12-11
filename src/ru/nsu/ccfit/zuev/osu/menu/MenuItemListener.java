@@ -10,8 +10,6 @@ public interface MenuItemListener {
 
     void stopScroll(float y);
 
-    void setY(float y);
-
     void openScore(int id, boolean showOnline, final String playerName);
 
     void playMusic(final String filename, final int previewTime);

@@ -174,18 +174,8 @@ public class GlobalManager {
         this.songService = songService;
     }
 
-    public SaveServiceObject getSaveServiceObject() {
-        return saveServiceObject;
-    }
-
     public void setSaveServiceObject(SaveServiceObject saveServiceObject) {
         this.saveServiceObject = saveServiceObject;
-    }
-
-    public DisplayMetrics getDisplayMetrics() {
-        final DisplayMetrics dm = new DisplayMetrics();
-        mainActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
-        return dm;
     }
 
 }

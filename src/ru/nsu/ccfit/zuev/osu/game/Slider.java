@@ -489,7 +489,7 @@ public class Slider extends GameObject {
             if (!reverse && repeatCount <= 2) {
                 startArrow.setAlpha(0);
             }
-            ((GameScene) listener).onSliderReverse(!reverse ? startPosition : endPosition, reverse ? endArrow.getRotation() : startArrow.getRotation(), color);
+            ((GameScene) listener).onSliderReverse(!reverse ? startPosition : endPosition, reverse ? endArrow.getRotation() : startArrow.getRotation());
             if (passedTime >= maxTime) {
                 over();
             }
@@ -828,7 +828,7 @@ public class Slider extends GameObject {
     }
 
     @Override
-    public void tryHit(final float dt) {
+    public void tryHit() {
         if (!startHit) // If we didn't get start hit(click)
         {
             if (isHit() && -passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) // if

@@ -40,13 +40,9 @@ public class OsuSprite {
 
     public static final float TO_DEGREES = (1 / (float) Math.PI) * 180;
 
-    public static float TO_RADIANS = (1 / 180.0f) * (float) Math.PI;
-
     private final String fileName;
 
-    public long spriteStartTime, spriteEndTime;
-
-    private String debugLine;
+    public long spriteStartTime;
 
     private int layer, ZIndex;
 
@@ -167,7 +163,6 @@ public class OsuSprite {
                 break;
             }
         }
-        spriteEndTime = eventList.get(eventList.size() - 1).endTime;
         sprite.setVisible(false);
         sprite.setZIndex(ZIndex);
         // TODO: TextureMeta
@@ -300,14 +295,6 @@ public class OsuSprite {
             int total = StoryBoardTestActivity.activity.onScreenDrawCalls.incrementAndGet();
             Log.i("draw calls", "total draw calls: " + total);
         }
-    }
-
-    public String getDebugLine() {
-        return debugLine;
-    }
-
-    public void setDebugLine(String debugLine) {
-        this.debugLine = debugLine;
     }
 
     private IEntityModifier parseModifier(OsuEvent osuEvent) {
@@ -478,15 +465,8 @@ public class OsuSprite {
     }
 
     public enum Origin {
-        TopLeft, TopCentre, TopRight, CentreLeft, Centre, CentreRight, BottomLeft, BottomCentre, BottomRight, NONE;
+        TopLeft, TopCentre, TopRight, CentreLeft, Centre, CentreRight, BottomLeft, BottomCentre, BottomRight;
 
-        public static Origin getType(String type) {
-            try {
-                return valueOf(type.toUpperCase());
-            } catch (Exception e) {
-                return NONE;
-            }
-        }
     }
 
 }

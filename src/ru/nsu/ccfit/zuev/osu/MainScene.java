@@ -76,8 +76,6 @@ public class MainScene implements IUpdateHandler {
 
     private final ParticleSystem[] particleSystem = new ParticleSystem[2];
 
-    private final float syncPassedTime = 0;
-
     public SongProgressBar progressBar;
 
     public BeatmapInfo beatmapInfo;
@@ -133,8 +131,6 @@ public class MainScene implements IUpdateHandler {
     private float showPassTime = 0;
 
     private float menuBarX = 0;
-
-    private float optionsY;
 
     private MainMenu menu;
 
@@ -471,7 +467,7 @@ public class MainScene implements IUpdateHandler {
 
     private void createOnlinePanel(Scene scene) {
         Config.loadOnlineConfig(context);
-        OnlineManager.getInstance().Init(context);
+        OnlineManager.getInstance().Init();
 
         if (OnlineManager.getInstance().isStayOnline()) {
             Debug.i("Stay online, creating panel");

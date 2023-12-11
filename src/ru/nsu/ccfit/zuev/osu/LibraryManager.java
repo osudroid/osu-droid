@@ -384,25 +384,6 @@ public enum LibraryManager {
         return null;
     }
 
-    public int findBeatmapById(int mapSetId) {
-        synchronized (library) {
-            for (int i = 0; i < library.size(); i++) {
-                if (library.get(i).getTrack(0).getBeatmapSetID() == mapSetId) {
-                    return currentIndex = i;
-                }
-            }
-        }
-        return currentIndex = 0;
-    }
-
-    public int getCurrentIndex() {
-        return this.currentIndex;
-    }
-
-    public void setCurrentIndex(int index) {
-        this.currentIndex = index;
-    }
-
     public TrackInfo findTrackByFileNameAndMD5(String fileName, String md5) {
         synchronized (library) {
             for (BeatmapInfo info : library) {

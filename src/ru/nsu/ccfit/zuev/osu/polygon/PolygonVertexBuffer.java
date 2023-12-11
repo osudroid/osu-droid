@@ -11,15 +11,4 @@ public class PolygonVertexBuffer extends VertexBuffer {
         super(2 * pVerticesCount * BYTES_PER_FLOAT, pDrawType, managed);
     }
 
-    public synchronized void update(final float[] pVertices) {
-        final FastFloatBuffer buffer = this.getFloatBuffer();
-        buffer.position(0);
-
-        buffer.put(pVertices);
-
-        buffer.position(0);
-
-        // super.update();
-    }
-
 }

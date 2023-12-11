@@ -56,10 +56,6 @@ public class ScoreLibrary {
         }
     }
 
-    public SQLiteDatabase getDb() {
-        return db;
-    }
-
     public void load(Context context) {
         DBOpenHelper helper = DBOpenHelper.getOrCreate(context);
         try {
@@ -68,11 +64,11 @@ public class ScoreLibrary {
             ToastLogger.showText(StringTable.get(R.string.require_storage_permission), true);
             throw new RuntimeException(e);
         }
-        loadOld(context);
+        loadOld();
     }
 
     @SuppressWarnings("unchecked")
-    private void loadOld(Context context) {
+    private void loadOld() {
         final File folder = new File(Config.getCorePath() + "/Scores");
         if (!folder.exists()) {
             return;
@@ -235,10 +231,6 @@ public class ScoreLibrary {
         c.close();
 
         return stat;
-    }
-
-    public boolean deleteScore(int id) {
-        return db.delete(DBOpenHelper.SCORES_TABLENAME, "id = " + id, null) != 0;
     }
 
 }

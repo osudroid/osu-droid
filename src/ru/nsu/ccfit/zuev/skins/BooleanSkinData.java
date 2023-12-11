@@ -14,7 +14,6 @@ public class BooleanSkinData extends SkinData<Boolean> {
         this(tag, new DefaultBoolean().getCurrentValue());
     }
 
-    @Override
     public void setFromJson(@NonNull JSONObject data) {
         setCurrentValue(data.optBoolean(getTag(), getDefaultValue()));
     }

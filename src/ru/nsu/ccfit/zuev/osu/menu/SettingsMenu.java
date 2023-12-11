@@ -245,15 +245,6 @@ public class SettingsMenu extends SettingsFragment {
         findViewById(R.id.back_button).setOnClickListener(v -> navigateBack());
     }
 
-    protected void playOnLoadAnim() {
-        View body = findViewById(R.id.body);
-        body.setAlpha(0);
-        body.setTranslationX(400);
-        body.animate().cancel();
-        body.animate().translationX(0).alpha(1).setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad)).setDuration(150).start();
-        playBackgroundHideInAnim(150);
-    }
-
     protected void playOnDismissAnim(Runnable action) {
         View body = findViewById(R.id.body);
         body.animate().cancel();

@@ -103,10 +103,6 @@ public class PostBuilder {
 
         private static final long serialVersionUID = 671773899432746143L;
 
-        public RequestException(final Throwable cause) {
-            super(cause);
-        }
-
     }
 
 }

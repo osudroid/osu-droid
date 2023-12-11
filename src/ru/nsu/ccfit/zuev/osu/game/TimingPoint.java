@@ -111,8 +111,4 @@ public class TimingPoint {
         return kiai;
     }
 
-    public double getSpeed() {
-        return speed;
-    }
-
 }

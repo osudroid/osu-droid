@@ -177,10 +177,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
 
     private float totalOffset;
 
-    //private IMusicPlayer music = null;
     private int totalLength = Integer.MAX_VALUE;
-
-    private boolean loadComplete;
 
     private boolean paused;
 
@@ -468,9 +465,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
         }
 
         timeMultiplier = 1f;
-        GameHelper.setDoubleTime(false);
         GameHelper.setNightCore(false);
-        GameHelper.setHalfTime(false);
 
         GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_NONE);
         GameHelper.setTimeMultiplier(1f);
@@ -482,7 +477,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME)) {
             GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_DT);
             timeMultiplier = 1.5f;
-            GameHelper.setDoubleTime(true);
             GameHelper.setTimeMultiplier(2 / 3f);
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE)) {
             GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_NC);
@@ -492,7 +486,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_HALFTIME)) {
             GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_HT);
             timeMultiplier = 0.75f;
-            GameHelper.setHalfTime(true);
             GameHelper.setTimeMultiplier(4 / 3f);
         }
 
@@ -535,7 +528,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
         GameHelper.setScale(scale);
         GameHelper.setDifficulty(overallDifficulty);
         GameHelper.setDrain(drain);
-        GameHelper.setApproachRate(approachRate);
 
         // Parsing hit objects
         objects = new LinkedList<>();
@@ -854,9 +846,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
         stat.setFLFollowDelay(ModMenu.getInstance().getFLfollowDelay());
 
         GameHelper.setHardrock(stat.getMod().contains(GameMod.MOD_HARDROCK));
-        GameHelper.setDoubleTime(stat.getMod().contains(GameMod.MOD_DOUBLETIME));
         GameHelper.setNightCore(stat.getMod().contains(GameMod.MOD_NIGHTCORE));
-        GameHelper.setHalfTime(stat.getMod().contains(GameMod.MOD_HALFTIME));
         GameHelper.setHidden(stat.getMod().contains(GameMod.MOD_HIDDEN));
         GameHelper.setFlashLight(stat.getMod().contains(GameMod.MOD_FLASHLIGHT));
         GameHelper.setRelaxMod(stat.getMod().contains(GameMod.MOD_RELAX));
@@ -971,7 +961,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
         float effectOffset = 155 - 25;
         breakAnimator = new BreakAnimator(this, fgScene, stat, beatmapData.general.letterboxInBreaks, dimRectangle);
         if (!Config.isHideInGameUI()) {
-            scorebar = new ScoreBar(this, fgScene, stat);
+            scorebar = new ScoreBar(fgScene, stat);
             addPassiveObject(scorebar);
             final TextureRegion scoreDigitTex = ResourceManager.getInstance().getTexture("score-0");
             accText = new GameScoreText(OsuSkin.get().getScorePrefix(), Config.getRES_WIDTH() - scoreDigitTex.getWidth() * 4.75f, 50, "000.00%", 0.6f);
@@ -1478,10 +1468,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
 
             for (int i = 0; i < downPressCursorCount - 1; i++) {
                 updateLastActiveObjectHitTime();
-                tryHitActiveObjects(dt);
+                tryHitActiveObjects();
             }
         } else {
-            tryHitActiveObjects(dt);
+            tryHitActiveObjects();
         }
 
         if (video != null && secPassed >= videoOffset) {
@@ -1609,11 +1599,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
                 final float endTime = Integer.parseInt(params[5]) / 1000.0f;
                 final float rps = 2 + 2 * overallDifficulty / 10f;
                 final Spinner spinner = GameObjectPool.getInstance().getSpinner();
-                String tempSound = null;
                 if (params.length > 6) {
-                    tempSound = params[6];
                 }
-                spinner.init(this, bgScene, (data.getTime() - secPassed) / timeMultiplier, (endTime - data.getTime()) / timeMultiplier, rps, Integer.parseInt(params[4]), tempSound, stat);
+                spinner.init(this, bgScene, (data.getTime() - secPassed) / timeMultiplier, (endTime - data.getTime()) / timeMultiplier, rps, Integer.parseInt(params[4]), stat);
                 spinner.setEndsCombo(objects.isEmpty() || nextObj.isNewCombo());
                 addObject(spinner);
                 isFirst = false;
@@ -1814,9 +1802,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
         }
     }
 
-    private void tryHitActiveObjects(float deltaTime) {
+    private void tryHitActiveObjects() {
         for (int i = 0, size = activeObjects.size(); i < size; i++) {
-            activeObjects.get(i).tryHit(deltaTime);
+            activeObjects.get(i).tryHit();
         }
     }
 
@@ -2084,8 +2072,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
         createHitEffect(pos, scoreName, color);
     }
 
-    public void onSliderReverse(PointF pos, float ang, RGBColor color) {
-        createBurstEffectSliderReverse(pos, ang, color);
+    public void onSliderReverse(PointF pos, float ang) {
+        createBurstEffectSliderReverse(pos, ang);
     }
 
     public void onSliderHit(int id, final int score, final PointF start, final PointF end, final boolean endCombo, RGBColor color, int type) {
@@ -2250,7 +2238,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
     }
 
 
-    public void addObject(final GameObject object) {
+    private void addObject(final GameObject object) {
         activeObjects.add(object);
     }
 
@@ -2379,14 +2367,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
         return true;
     }
 
-
-    public void stopSound(final String name) {
-        final String prefix = soundTimingPoint.getHitSound() + "-";
-        final BassSoundProvider snd = ResourceManager.getInstance().getSound(prefix + name);
-        if (snd != null) {
-            snd.stop();
-        }
-    }
 
     public void pause() {
         if (paused) {
@@ -2580,7 +2560,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
 
     }
 
-    private void createBurstEffectSliderReverse(final PointF pos, float ang, final RGBColor color) {
+    private void createBurstEffectSliderReverse(final PointF pos, float ang) {
         if (!Config.isComplexAnimations() || !Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN)) {
             return;
         }

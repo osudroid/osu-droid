@@ -94,10 +94,6 @@ public class GameScoreTextShadow extends GameObject {
         scene.attachChild(letters[0], 0);
     }
 
-    public void detachFromScene() {
-        letters[0].detachSelf();
-    }
-
 
     @Override
     public void update(final float dt) {
@@ -115,10 +111,6 @@ public class GameScoreTextShadow extends GameObject {
         } else {
             comboText.changeText(text);
         }
-    }
-
-    public void registerEntityModifier(IEntityModifier modifier) {
-        letters[0].registerEntityModifier(modifier);
     }
 
 }

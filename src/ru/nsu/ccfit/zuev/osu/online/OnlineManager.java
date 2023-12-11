@@ -44,8 +44,6 @@ public class OnlineManager {
 
     private String password = "";
 
-    private String deviceID = "";
-
     private long rank = 0;
 
     private long score = 0;
@@ -69,11 +67,10 @@ public class OnlineManager {
         return endpoint + "upload/" + playID + ".odr";
     }
 
-    public void Init(Context context) {
+    public void Init() {
         this.stayOnline = Config.isStayOnline();
         this.username = Config.getOnlineUsername();
         this.password = Config.getOnlinePassword();
-        this.deviceID = Config.getOnlineDeviceID();
     }
 
     private ArrayList<String> sendRequest(PostBuilder post, String url) throws OnlineManagerException {
@@ -111,10 +108,6 @@ public class OnlineManager {
     }
 
     public boolean logIn() throws OnlineManagerException {
-        return logIn(username, password);
-    }
-
-    public boolean logIn(String username) throws OnlineManagerException {
         return logIn(username, password);
     }
 
@@ -409,14 +402,6 @@ public class OnlineManager {
         return userId;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public String getDeviceID() {
-        return deviceID;
-    }
-
     public boolean isStayOnline() {
         return stayOnline;
     }
@@ -447,10 +432,6 @@ public class OnlineManager {
 
         public OnlineManagerException(final String message, final Throwable cause) {
             super(message, cause);
-        }
-
-        public OnlineManagerException(final String message) {
-            super(message);
         }
 
     }

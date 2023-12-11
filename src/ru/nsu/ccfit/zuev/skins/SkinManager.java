@@ -55,10 +55,6 @@ public class SkinManager {
         return frameCount.get(texname);
     }
 
-    public static void setFrames(final String texname, final int frames) {
-        frameCount.put(texname, frames);
-    }
-
     public RGBColor getSliderColor() {
         return sliderColor;
     }

@@ -473,10 +473,6 @@ public class ModMenu implements IModSwitcher {
         return speed;
     }
 
-    public boolean isChangeSpeed() {
-        return changeSpeed != 1.0;
-    }
-
     public float getChangeSpeed() {
         return changeSpeed;
     }

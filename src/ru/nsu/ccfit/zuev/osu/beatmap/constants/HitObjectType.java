@@ -29,7 +29,4 @@ public enum HitObjectType {
         }
     }
 
-    public int value() {
-        return this.value;
-    }
 }

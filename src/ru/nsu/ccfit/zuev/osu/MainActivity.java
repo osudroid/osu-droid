@@ -84,8 +84,6 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
 
     private static boolean activityVisible = true;
 
-    private final Handler handler = new Handler(Looper.getMainLooper());
-
     public ServiceConnection connection;
 
     private PowerManager.WakeLock wakeLock = null;
@@ -119,7 +117,7 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
         ToastLogger.init(this);
         SyncTaskManager.getInstance().init(this);
         InputManager.setContext(this);
-        OnlineManager.getInstance().Init(getApplicationContext());
+        OnlineManager.getInstance().Init();
         crashlytics.setUserId(Config.getOnlineDeviceID());
 
         final DisplayMetrics dm = new DisplayMetrics();
@@ -503,10 +501,6 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
                 }
             }
         }
-    }
-
-    public Handler getHandler() {
-        return handler;
     }
 
     public FirebaseAnalytics getAnalytics() {
