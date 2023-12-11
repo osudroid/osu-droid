@@ -57,9 +57,7 @@ public class HitCircle extends GameObject {
         approachCircle = SpritePool.getInstance().getSprite("approachcircle");
     }
 
-    public void init(final GameObjectListener listener, final Scene pScene,
-                     final PointF pos, final float time, final float r, final float g,
-                     final float b, final float scale, int num, final int sound, final String tempSound, final boolean isFirstNote) {
+    public void init(final GameObjectListener listener, final Scene pScene, final PointF pos, final float time, final float r, final float g, final float b, final float scale, int num, final int sound, final String tempSound, final boolean isFirstNote) {
         // Storing parameters into fields
         //Log.i("note-ini", time + "s");
         this.replayObjectData = null;
@@ -122,18 +120,9 @@ public class HitCircle extends GameObject {
             float fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
             float fadeOutDuration = time * 0.3f * GameHelper.getTimeMultiplier();
 
-            number.registerEntityModifiers(() -> new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeOutDuration)
-            ));
-            overlay.registerEntityModifier(new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeOutDuration)
-            ));
-            circle.registerEntityModifier(new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeOutDuration)
-            ));
+            number.registerEntityModifiers(() -> new SequenceEntityModifier(new FadeInModifier(fadeInDuration), new FadeOutModifier(fadeOutDuration)));
+            overlay.registerEntityModifier(new SequenceEntityModifier(new FadeInModifier(fadeInDuration), new FadeOutModifier(fadeOutDuration)));
+            circle.registerEntityModifier(new SequenceEntityModifier(new FadeInModifier(fadeInDuration), new FadeOutModifier(fadeOutDuration)));
         }
         scene.attachChild(number, 0);
         scene.attachChild(overlay, 0);

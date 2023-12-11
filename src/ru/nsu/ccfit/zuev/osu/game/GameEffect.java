@@ -21,9 +21,7 @@ import java.util.List;
 
 public class GameEffect extends GameObject implements IEntityModifierListener {
 
-    private static final HashSet<String> animationEffects = new HashSet<>(Arrays.asList(
-            "hit0", "hit50", "hit100", "hit100k", "hit300", "hit300k", "hit300g"
-    ));
+    private static final HashSet<String> animationEffects = new HashSet<>(Arrays.asList("hit0", "hit50", "hit100", "hit100k", "hit300", "hit300k", "hit300g"));
 
     Sprite hit;
 
@@ -35,9 +33,11 @@ public class GameEffect extends GameObject implements IEntityModifierListener {
         if (isAnimationEffect(texname) && ResourceManager.getInstance().isTextureLoaded(texname + "-0")) {
             List<String> loadedScoreBarTextures = new ArrayList<>();
             for (int i = 0; i < 60; i++) {
-                if (ResourceManager.getInstance().isTextureLoaded(texname + "-" + i))
+                if (ResourceManager.getInstance().isTextureLoaded(texname + "-" + i)) {
                     loadedScoreBarTextures.add(texname + "-" + i);
-                else break;
+                } else {
+                    break;
+                }
             }
             AnimSprite hit = new AnimSprite(0, 0, 60, loadedScoreBarTextures.toArray(new String[0]));
             hit.setLoopType(AnimSprite.LoopType.STOP);
@@ -55,15 +55,12 @@ public class GameEffect extends GameObject implements IEntityModifierListener {
         hit.setColor(color.r(), color.g(), color.b());
     }
 
-    public void init(final Scene scene, final PointF pos, final float scale,
-                     final IEntityModifier... entityModifiers) {
+    public void init(final Scene scene, final PointF pos, final float scale, final IEntityModifier... entityModifiers) {
         if (hit instanceof AnimSprite) {
             ((AnimSprite) hit).setAnimTime(0);
         }
-        hit.setPosition(pos.x - hit.getTextureRegion().getWidth() / 2f, pos.y
-                - hit.getTextureRegion().getHeight() / 2f);
-        hit.registerEntityModifier(new ParallelEntityModifier(this,
-                entityModifiers));
+        hit.setPosition(pos.x - hit.getTextureRegion().getWidth() / 2f, pos.y - hit.getTextureRegion().getHeight() / 2f);
+        hit.registerEntityModifier(new ParallelEntityModifier(this, entityModifiers));
         hit.setScale(scale);
         hit.setAlpha(1);
         hit.detachSelf();

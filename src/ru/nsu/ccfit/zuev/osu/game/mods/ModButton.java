@@ -42,8 +42,7 @@ public class ModButton extends Sprite {
 
 
     @Override
-    public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
-                                 float pTouchAreaLocalX, float pTouchAreaLocalY) {
+    public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
         if (pSceneTouchEvent.isActionDown() && switcher != null) {
             setModEnabled(switcher.switchMod(mod));
             return true;

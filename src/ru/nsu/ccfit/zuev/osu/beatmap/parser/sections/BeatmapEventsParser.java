@@ -31,11 +31,7 @@ public class BeatmapEventsParser extends BeatmapSectionParser {
         }
 
         if (pars.length >= 5 && line.startsWith("3")) {
-            data.events.backgroundColor = new RGBColor(
-                    parseInt(pars[2]),
-                    parseInt(pars[3]),
-                    parseInt(pars[4])
-            );
+            data.events.backgroundColor = new RGBColor(parseInt(pars[2]), parseInt(pars[3]), parseInt(pars[4]));
         }
     }
 

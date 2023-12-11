@@ -21,11 +21,7 @@ public class BeatmapColorParser extends BeatmapKeyValueSectionParser {
             throw new UnsupportedOperationException("Color specified in incorrect format (should be R,G,B or R,G,B,A)");
         }
 
-        RGBColor color = new RGBColor(
-                parseInt(s[0]),
-                parseInt(s[1]),
-                parseInt(s[2])
-        );
+        RGBColor color = new RGBColor(parseInt(s[0]), parseInt(s[1]), parseInt(s[2]));
 
         if (p[0].startsWith("Combo")) {
             int index = Utils.tryParseInt(p[0].substring(5), data.colors.comboColors.size() + 1);

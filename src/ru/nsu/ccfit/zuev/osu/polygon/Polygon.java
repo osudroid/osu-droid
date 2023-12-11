@@ -24,12 +24,10 @@ public class Polygon extends Shape {
     // ===========================================================
 
     public Polygon(final float pX, final float pY, final float[] pVertices) {
-        this(pX, pY, pVertices, new PolygonVertexBuffer(pVertices.length,
-                GL11.GL_STATIC_DRAW, true));
+        this(pX, pY, pVertices, new PolygonVertexBuffer(pVertices.length, GL11.GL_STATIC_DRAW, true));
     }
 
-    public Polygon(final float pX, final float pY, final float[] pVertices,
-                   final PolygonVertexBuffer pPolygonVertexBuffer) {
+    public Polygon(final float pX, final float pY, final float[] pVertices, final PolygonVertexBuffer pPolygonVertexBuffer) {
         super(pX, pY);
 
         this.mVertices = pVertices;

@@ -11,12 +11,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class CursorTrail extends ParticleSystem {
 
-    public CursorTrail(
-            PointParticleEmitter emitter,
-            int spawnRate,
-            float trailSize,
-            TextureRegion pTextureRegion
-    ) {
+    public CursorTrail(PointParticleEmitter emitter, int spawnRate, float trailSize, TextureRegion pTextureRegion) {
         super(emitter, spawnRate, spawnRate, spawnRate, pTextureRegion);
 
         fadeOut();

@@ -102,8 +102,9 @@ public class OnlineManager {
             Debug.i("sendRequest response code:  " + response.get(0));
             if (response.size() >= 2) {
                 failMessage = response.get(1);
-            } else
+            } else {
                 failMessage = "Unknown server error";
+            }
             Debug.i("Received fail: " + failMessage);
             return null;
         }
@@ -126,11 +127,7 @@ public class OnlineManager {
 
         PostBuilder post = new PostBuilder();
         post.addParam("username", username);
-        post.addParam(
-                "password",
-                MD5Calcuator.getStringMD5(
-                        escapeHTMLSpecialCharacters(addSlashes(String.valueOf(password).trim())) + "taikotaiko"
-                ));
+        post.addParam("password", MD5Calcuator.getStringMD5(escapeHTMLSpecialCharacters(addSlashes(String.valueOf(password).trim())) + "taikotaiko"));
         post.addParam("version", onlineVersion);
 
         ArrayList<String> response = sendRequest(post, endpoint + "login.php");
@@ -162,8 +159,7 @@ public class OnlineManager {
 
         Bundle bParams = new Bundle();
         bParams.putString(FirebaseAnalytics.Param.METHOD, "ingame");
-        GlobalManager.getInstance().getMainActivity().getAnalytics().logEvent(FirebaseAnalytics.Event.LOGIN,
-                bParams);
+        GlobalManager.getInstance().getMainActivity().getAnalytics().logEvent(FirebaseAnalytics.Event.LOGIN, bParams);
 
         return true;
     }
@@ -180,16 +176,19 @@ public class OnlineManager {
         Debug.i("Starting play...");
         playID = null;
         final BeatmapInfo beatmap = track.getBeatmap();
-        if (beatmap == null) return;
+        if (beatmap == null) {
+            return;
+        }
 
         File trackfile = new File(track.getFilename());
         trackfile.getParentFile().getName();
         String osuID = trackfile.getParentFile().getName();
         Debug.i("osuid = " + osuID);
-        if (osuID.matches("^[0-9]+ .*"))
+        if (osuID.matches("^[0-9]+ .*")) {
             osuID = osuID.substring(0, osuID.indexOf(' '));
-        else
+        } else {
             osuID = null;
+        }
 
         PostBuilder post = new PostBuilder();
         post.addParam("userID", String.valueOf(userId));
@@ -199,8 +198,9 @@ public class OnlineManager {
         post.addParam("songTitle", beatmap.getTitle());
         post.addParam("songArtist", beatmap.getArtist());
         post.addParam("songCreator", beatmap.getCreator());
-        if (osuID != null)
+        if (osuID != null) {
             post.addParam("songID", osuID);
+        }
 
         ArrayList<String> response = sendRequest(post, endpoint + "submit.php");
 
@@ -251,8 +251,9 @@ public class OnlineManager {
             return false;
         }
 
-        if (failMessage.equals("Invalid record data"))
+        if (failMessage.equals("Invalid record data")) {
             return false;
+        }
 
         if (response.size() < 2) {
             failMessage = "Invalid server response";
@@ -273,8 +274,9 @@ public class OnlineManager {
 
         if (resp.length >= 5) {
             replayID = Integer.parseInt(resp[4]);
-        } else
+        } else {
             replayID = 0;
+        }
 
         return true;
     }
@@ -301,7 +303,9 @@ public class OnlineManager {
     }
 
     public boolean loadAvatarToTextureManager(String avatarURL) {
-        if (avatarURL == null || avatarURL.isEmpty()) return false;
+        if (avatarURL == null || avatarURL.isEmpty()) {
+            return false;
+        }
 
         String filename = MD5Calcuator.getStringMD5(avatarURL);
         Debug.i("Loading avatar from " + avatarURL);
@@ -433,19 +437,11 @@ public class OnlineManager {
     }
 
     private String escapeHTMLSpecialCharacters(String str) {
-        return str
-                .replace("&", "&amp;")
-                .replace("\"", "&quot;")
-                .replace("'", "&apos;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;");
+        return str.replace("&", "&amp;").replace("\"", "&quot;").replace("'", "&apos;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
     private String addSlashes(String str) {
-        return str
-                .replace("'", "\\'")
-                .replace("\"", "\\\"")
-                .replace("\\", "\\\\");
+        return str.replace("'", "\\'").replace("\"", "\\\"").replace("\\", "\\\\");
     }
 
     public static class OnlineManagerException extends Exception {

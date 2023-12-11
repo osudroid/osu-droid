@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu.helper;
 import android.os.Build;
 import android.os.Environment;
 import net.lingala.zip4j.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
 import okio.BufferedSink;
 import okio.Okio;
 import okio.Source;
@@ -29,8 +28,7 @@ public class FileUtils {
     }
 
     public static void copy(File from, File to) throws FileNotFoundException, IOException {
-        try (Source source = Okio.source(from);
-             BufferedSink bufferedSink = Okio.buffer(Okio.sink(to))) {
+        try (Source source = Okio.source(from); BufferedSink bufferedSink = Okio.buffer(Okio.sink(to))) {
             bufferedSink.writeAll(source);
         }
     }
@@ -60,9 +58,7 @@ public class FileUtils {
 
         try (ZipFile zip = new ZipFile(file)) {
             if (!zip.isValidZipFile()) {
-                ToastLogger.showText(
-                        StringTable.format(R.string.message_error, "Invalid file"),
-                        false);
+                ToastLogger.showText(StringTable.format(R.string.message_error, "Invalid file"), false);
                 Debug.e("FileUtils.extractZip: " + file.getName() + " is invalid");
                 file.renameTo(new File(file.getParentFile(), sourceFileName + ".badzip"));
                 LibraryManager.deleteDir(folderFile);
@@ -70,19 +66,14 @@ public class FileUtils {
             }
 
             zip.extractAll(folderFile.getAbsolutePath());
-            if ((Config.isDELETE_OSZ() && sourceFileName.toLowerCase().endsWith(".osz"))
-                    || sourceFileName.toLowerCase().endsWith(".osk")) {
+            if ((Config.isDELETE_OSZ() && sourceFileName.toLowerCase().endsWith(".osz")) || sourceFileName.toLowerCase().endsWith(".osk")) {
                 file.delete();
             }
         } catch (final IOException e) {
             Debug.e("FileUtils.extractZip: " + e.getMessage(), e);
 
             int extensionIndex = sourceFileName.lastIndexOf('.');
-            file.renameTo(new File(
-                    file.getParentFile(),
-                    sourceFileName.substring(0, extensionIndex) + ".bad" +
-                            sourceFileName.substring(extensionIndex + 1)
-            ));
+            file.renameTo(new File(file.getParentFile(), sourceFileName.substring(0, extensionIndex) + ".bad" + sourceFileName.substring(extensionIndex + 1)));
 
             return false;
         }
@@ -95,8 +86,7 @@ public class FileUtils {
 
         try {
             MessageDigest digest = MessageDigest.getInstance(algorithm);
-            BufferedInputStream in = new BufferedInputStream(
-                    new FileInputStream(file));
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
             byte[] byteArray = new byte[1024];
             int bytesCount;
 
@@ -119,18 +109,13 @@ public class FileUtils {
 
     // Need to make this more accurate
     public static boolean canUseSD() {
-        if (Environment.getExternalStorageState().equals(
-                Environment.MEDIA_MOUNTED)) {
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             return true;
         } else {
-            if (Environment.getExternalStorageState().equals(
-                    Environment.MEDIA_MOUNTED_READ_ONLY)) {
-                ToastLogger.showText(
-                        StringTable.get(R.string.message_error_sdcardread),
-                        false);
+            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED_READ_ONLY)) {
+                ToastLogger.showText(StringTable.get(R.string.message_error_sdcardread), false);
             } else {
-                ToastLogger.showText(
-                        StringTable.get(R.string.message_error_sdcard), false);
+                ToastLogger.showText(StringTable.get(R.string.message_error_sdcard), false);
             }
         }
 
@@ -150,8 +135,7 @@ public class FileUtils {
     }
 
     public static File[] listFiles(File directory, String endsWith) {
-        return listFiles(directory, file ->
-                file.getName().toLowerCase().endsWith(endsWith));
+        return listFiles(directory, file -> file.getName().toLowerCase().endsWith(endsWith));
     }
 
     public static File[] listFiles(File directory, String[] endsWithExtensions) {

@@ -26,8 +26,9 @@ public class OnlineScoring {
     private boolean avatarLoaded = false;
 
     public static OnlineScoring getInstance() {
-        if (instance == null)
+        if (instance == null) {
             instance = new OnlineScoring();
+        }
         return instance;
     }
 
@@ -40,8 +41,9 @@ public class OnlineScoring {
     }
 
     public OnlinePanel createSecondPanel() {
-        if (!OnlineManager.getInstance().isStayOnline())
+        if (!OnlineManager.getInstance().isStayOnline()) {
             return null;
+        }
         secondPanel = new OnlinePanel();
         secondPanel.setInfo();
         String avatarURL = OnlineManager.getInstance().getAvatarURL();
@@ -55,14 +57,16 @@ public class OnlineScoring {
 
     public void setPanelMessage(String message, String submessage) {
         panel.setMessage(message, submessage);
-        if (secondPanel != null)
+        if (secondPanel != null) {
             secondPanel.setMessage(message, submessage);
+        }
     }
 
     public void updatePanels() {
         panel.setInfo();
-        if (secondPanel != null)
+        if (secondPanel != null) {
             secondPanel.setInfo();
+        }
 
         LobbyScene.updateOnlinePanel();
         RoomScene.updateOnlinePanel();
@@ -72,16 +76,18 @@ public class OnlineScoring {
         final String avatarUrl = OnlineManager.getInstance().getAvatarURL();
         String texname = avatarLoaded && !avatarUrl.isEmpty() ? avatarUrl : null;
         panel.setAvatar(texname);
-        if (secondPanel != null)
+        if (secondPanel != null) {
             secondPanel.setAvatar(texname);
+        }
 
         LobbyScene.updateOnlinePanel();
         RoomScene.updateOnlinePanel();
     }
 
     public void login() {
-        if (!OnlineManager.getInstance().isStayOnline())
+        if (!OnlineManager.getInstance().isStayOnline()) {
             return;
+        }
         avatarLoaded = false;
         Async.run(() -> {
             synchronized (onlineMutex) {
@@ -118,8 +124,9 @@ public class OnlineScoring {
     }
 
     public void startPlay(final TrackInfo track, final String hash) {
-        if (!OnlineManager.getInstance().isStayOnline())
+        if (!OnlineManager.getInstance().isStayOnline()) {
             return;
+        }
 
         Async.run(() -> {
             synchronized (onlineMutex) {
@@ -142,10 +149,12 @@ public class OnlineScoring {
     }
 
     public void sendRecord(final StatisticV2 record, final SendingPanel panel, final String replay) {
-        if (!OnlineManager.getInstance().isStayOnline())
+        if (!OnlineManager.getInstance().isStayOnline()) {
             return;
-        if (!OnlineManager.getInstance().isReadyToSend())
+        }
+        if (!OnlineManager.getInstance().isReadyToSend()) {
             return;
+        }
 
         Debug.i("Sending score");
 
@@ -169,8 +178,9 @@ public class OnlineScoring {
 
                     if (!OnlineManager.getInstance().getFailMessage().isEmpty()) {
                         ToastLogger.showText(OnlineManager.getInstance().getFailMessage(), true);
-                        if (OnlineManager.getInstance().getFailMessage().equals("Invalid record data"))
+                        if (OnlineManager.getInstance().getFailMessage().equals("Invalid record data")) {
                             i = attemptCount;
+                        }
                     } else if (success) {
                         OnlineManager.getInstance().sendReplay(replay);
                         updatePanels();
@@ -205,18 +215,22 @@ public class OnlineScoring {
     }
 
     public void loadAvatar(final boolean both) {
-        if (!OnlineManager.getInstance().isStayOnline()) return;
-        final String avatarUrl = OnlineManager.getInstance().getAvatarURL();
-        if (avatarUrl == null || avatarUrl.isEmpty())
+        if (!OnlineManager.getInstance().isStayOnline()) {
             return;
+        }
+        final String avatarUrl = OnlineManager.getInstance().getAvatarURL();
+        if (avatarUrl == null || avatarUrl.isEmpty()) {
+            return;
+        }
 
         Async.run(() -> {
             synchronized (onlineMutex) {
                 avatarLoaded = OnlineManager.getInstance().loadAvatarToTextureManager();
-                if (both)
+                if (both) {
                     updatePanelAvatars();
-                else if (secondPanel != null)
+                } else if (secondPanel != null) {
                     secondPanel.setAvatar(avatarLoaded ? avatarUrl : null);
+                }
             }
         });
     }

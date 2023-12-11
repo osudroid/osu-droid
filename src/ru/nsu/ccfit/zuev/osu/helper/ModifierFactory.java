@@ -23,13 +23,11 @@ public class ModifierFactory {
         return instance.newModifier(duration, 1, 0, ValueType.ALPHA);
     }
 
-    public static IEntityModifier newAlphaModifier(final float duration,
-                                                   final float from, final float to) {
+    public static IEntityModifier newAlphaModifier(final float duration, final float from, final float to) {
         return instance.newModifier(duration, from, to, ValueType.ALPHA);
     }
 
-    public static IEntityModifier newScaleModifier(final float duration,
-                                                   final float from, final float to) {
+    public static IEntityModifier newScaleModifier(final float duration, final float from, final float to) {
         return instance.newModifier(duration, from, to, ValueType.SCALE);
     }
 
@@ -45,8 +43,7 @@ public class ModifierFactory {
         instance.pool.clear();
     }
 
-    private UniversalModifier newModifier(final float duration,
-                                          final float from, final float to, final ValueType type) {
+    private UniversalModifier newModifier(final float duration, final float from, final float to, final ValueType type) {
         if (!pool.isEmpty()) {
             UniversalModifier mod = null;
 

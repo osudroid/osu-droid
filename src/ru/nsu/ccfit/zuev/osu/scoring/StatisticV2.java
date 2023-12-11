@@ -127,12 +127,14 @@ public class StatisticV2 implements Serializable {
         playerName = null;
         if (Config.isStayOnline()) {
             playerName = OnlineManager.getInstance().getUsername();
-            if (playerName == null || playerName.isEmpty())
+            if (playerName == null || playerName.isEmpty()) {
                 playerName = Config.getOnlineUsername();
+            }
         }
 
-        if (playerName == null || playerName.isEmpty())
+        if (playerName == null || playerName.isEmpty()) {
             playerName = Config.getLocalUsername();
+        }
     }
 
     public StatisticV2(final Statistic stat) {
@@ -157,7 +159,9 @@ public class StatisticV2 implements Serializable {
 
     public StatisticV2(final String[] params) {
         playerName = "";
-        if (params.length < 6) return;
+        if (params.length < 6) {
+            return;
+        }
 
         setModFromString(params[0]);
         setForcedScore(Integer.parseInt(params[1]));
@@ -203,17 +207,13 @@ public class StatisticV2 implements Serializable {
     public static float getCustomCSScoreMultiplier(float beatmapCS, float customCS) {
         float diff = beatmapCS - customCS;
 
-        return diff >= 0
-                ? 1 + 0.0075f * (float) Math.pow(diff, 1.5)
-                : 2 / (1 + (float) Math.exp(-0.5 * diff));
+        return diff >= 0 ? 1 + 0.0075f * (float) Math.pow(diff, 1.5) : 2 / (1 + (float) Math.exp(-0.5 * diff));
     }
 
     public static float getCustomODScoreMultiplier(float beatmapOD, float customOD) {
         float diff = beatmapOD - customOD;
 
-        return diff >= 0
-                ? 1 + 0.005f * (float) Math.pow(diff, 1.3)
-                : 2 / (1 + (float) Math.exp(-0.25 * diff));
+        return diff >= 0 ? 1 + 0.005f * (float) Math.pow(diff, 1.3) : 2 / (1 + (float) Math.exp(-0.25 * diff));
     }
 
     public float getHp() {
@@ -243,8 +243,9 @@ public class StatisticV2 implements Serializable {
     }
 
     public int getTotalScoreWithMultiplier() {
-        if (forcedScore > 0)
+        if (forcedScore > 0) {
             return forcedScore;
+        }
 
         return (int) (totalScore * modScoreMultiplier);
     }
@@ -320,15 +321,17 @@ public class StatisticV2 implements Serializable {
 
         var value = (hit300 * 6f + hit100 * 2f + hit50) / ((hit300 + hit100 + hit50 + misses) * 6f);
 
-        if (Double.isNaN(value) || Double.isInfinite(value))
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
             value = 0;
+        }
 
         return value;
     }
 
     public float getAccuracy() {
-        if (accuracy >= 0)
+        if (accuracy >= 0) {
             return accuracy;
+        }
         if (possibleScore == 0) {
             return 0;
         }
@@ -352,7 +355,9 @@ public class StatisticV2 implements Serializable {
             float percentage = (float) (notes) / maxObjectsCount;
             //get real maxcb
             int maxcb = getMaxCombo();
-            if (currentCombo == maxcb) maxcb++;
+            if (currentCombo == maxcb) {
+                maxcb++;
+            }
             //get real acc
             float acc = 0;
             if (possibleScore > 0) {
@@ -371,8 +376,7 @@ public class StatisticV2 implements Serializable {
                         break;
                 }
             }
-            totalScore = (int) (MAX_SCORE * (ACC_PORTION * Math.pow(acc, 10) * percentage
-                    + COMBO_PORTION * maxcb / maxHighestCombo) + bonusScore);
+            totalScore = (int) (MAX_SCORE * (ACC_PORTION * Math.pow(acc, 10) * percentage + COMBO_PORTION * maxcb / maxHighestCombo) + bonusScore);
         } else if (amount + amount * currentCombo * diffModifier / 25 > 0) {
             // It is possible for score addition to be a negative number due to
             // difficulty modifier, hence the prior check.
@@ -393,8 +397,9 @@ public class StatisticV2 implements Serializable {
     }
 
     public String getMark() {
-        if (mark != null)
+        if (mark != null) {
             return mark;
+        }
         boolean isH = false;
         forcycle:
         for (final GameMod m : mod) {
@@ -416,19 +421,16 @@ public class StatisticV2 implements Serializable {
             }
             return "X";
         }
-        if ((hit300) / (float) notes > 0.9f && misses == 0
-                && hit50 / (float) notes < 0.01f) {
+        if ((hit300) / (float) notes > 0.9f && misses == 0 && hit50 / (float) notes < 0.01f) {
             if (isH) {
                 return "SH";
             }
             return "S";
         }
-        if ((hit300) / (float) notes > 0.8f && misses == 0
-                || (hit300) / (float) notes > 0.9f) {
+        if ((hit300) / (float) notes > 0.8f && misses == 0 || (hit300) / (float) notes > 0.9f) {
             return "A";
         }
-        if ((hit300) / (float) notes > 0.7f && misses == 0
-                || (hit300) / (float) notes > 0.8f) {
+        if ((hit300) / (float) notes > 0.7f && misses == 0 || (hit300) / (float) notes > 0.8f) {
             return "B";
         }
         if ((hit300) / (float) notes > 0.6f) {
@@ -673,8 +675,9 @@ public class StatisticV2 implements Serializable {
                     break;
             }
         }
-        if (strMod.length > 1)
+        if (strMod.length > 1) {
             setExtraModFromString(strMod[1]);
+        }
 
         computeModScoreMultiplier();
     }
@@ -707,8 +710,9 @@ public class StatisticV2 implements Serializable {
     public String compile() {
         StringBuilder builder = new StringBuilder();
         String mstring = getModString();
-        if (mstring.isEmpty())
+        if (mstring.isEmpty()) {
             mstring = "-";
+        }
         builder.append(mstring);
         builder.append(' ');
         builder.append(getTotalScoreWithMultiplier());
@@ -845,10 +849,7 @@ public class StatisticV2 implements Serializable {
         if (totalOffsetSum > 1) {
             double avgOffset = hitOffsetSum / totalOffsetSum;
 
-            unstableRate = 10 * Math.sqrt(
-                    ((totalOffsetSum - 1) * Math.pow(unstableRate / 10, 2) +
-                            (msAccuracy - avgOffset / totalOffsetSum) * (msAccuracy - (avgOffset - msAccuracy) / (totalOffsetSum - 1))) / totalOffsetSum
-            );
+            unstableRate = 10 * Math.sqrt(((totalOffsetSum - 1) * Math.pow(unstableRate / 10, 2) + (msAccuracy - avgOffset / totalOffsetSum) * (msAccuracy - (avgOffset - msAccuracy) / (totalOffsetSum - 1))) / totalOffsetSum);
         }
     }
 
@@ -997,7 +998,7 @@ public class StatisticV2 implements Serializable {
 
         var cs = track.getCircleSize();
 
-        for (GameMod m : mod)
+        for (GameMod m : mod) {
             switch (m) {
 
                 case MOD_HARDROCK:
@@ -1008,6 +1009,7 @@ public class StatisticV2 implements Serializable {
                 case MOD_REALLYEASY:
                     --cs;
             }
+        }
 
         customCS = cs + 4;
     }

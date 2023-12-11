@@ -40,11 +40,7 @@ public class CursorSprite extends Sprite implements ISliderListener {
             unregisterEntityModifier(previousClickModifier);
             setScale(baseSize);
         }
-        registerEntityModifier(
-                previousClickModifier = new ParallelEntityModifier(
-                        new SequenceEntityModifier(clickInModifier(), clickOutModifier())
-                )
-        );
+        registerEntityModifier(previousClickModifier = new ParallelEntityModifier(new SequenceEntityModifier(clickInModifier(), clickOutModifier())));
     }
 
     private void rotateCursor() {

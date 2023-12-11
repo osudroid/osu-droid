@@ -82,29 +82,18 @@ public class ComboBurst {
                 }
                 sprite.setIgnoreUpdate(false);
                 sprite.setPosition(fromX, bottomY - sprite.getHeight());
-                sprite.registerEntityModifier(new SequenceEntityModifier(
-                        new IEntityModifier.IEntityModifierListener() {
-                            @Override
-                            public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+                sprite.registerEntityModifier(new SequenceEntityModifier(new IEntityModifier.IEntityModifierListener() {
+                    @Override
+                    public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
 
-                            }
+                    }
 
-                            @Override
-                            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                                pItem.setAlpha(0f);
-                                pItem.setIgnoreUpdate(true);
-                            }
-                        },
-                        new ParallelEntityModifier(
-                                new MoveXModifier(0.5f, fromX, toX, EaseSineOut.getInstance()),
-                                new FadeInModifier(0.5f)
-                        ),
-                        new DelayModifier(1.0f),
-                        new ParallelEntityModifier(
-                                new MoveXModifier(0.5f, toX, fromX, EaseSineOut.getInstance()),
-                                new FadeOutModifier(0.5f)
-                        )
-                ));
+                    @Override
+                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                        pItem.setAlpha(0f);
+                        pItem.setIgnoreUpdate(true);
+                    }
+                }, new ParallelEntityModifier(new MoveXModifier(0.5f, fromX, toX, EaseSineOut.getInstance()), new FadeInModifier(0.5f)), new DelayModifier(1.0f), new ParallelEntityModifier(new MoveXModifier(0.5f, toX, fromX, EaseSineOut.getInstance()), new FadeOutModifier(0.5f))));
             }
 
             if (!comboBursts.isEmpty()) {

@@ -54,8 +54,9 @@ public class CircleNumber extends Entity {
 
     @Override
     public float getAlpha() {
-        if (getFirstChild() != null)
+        if (getFirstChild() != null) {
             return getFirstChild().getAlpha();
+        }
 
         return super.getAlpha();
     }
@@ -64,9 +65,11 @@ public class CircleNumber extends Entity {
     public void setAlpha(float pAlpha) {
         var count = getChildCount();
 
-        if (count > 0)
-            for (int i = 0; i < count; i++)
+        if (count > 0) {
+            for (int i = 0; i < count; i++) {
                 getChild(i).setAlpha(pAlpha);
+            }
+        }
 
         super.setAlpha(pAlpha);
     }
@@ -74,8 +77,9 @@ public class CircleNumber extends Entity {
     // The default registerEntityModifier() doesn't apply the modifiers to the nested Entities, so we've to apply to each one.
     // Modifiers cannot be shared between multiple Entities, and using deepCopy() can be expensive, so we use a supplier instead.
     public void registerEntityModifiers(Supplier<IEntityModifier> modifier) {
-        for (int i = 0; i < getChildCount(); i++)
+        for (int i = 0; i < getChildCount(); i++) {
             getChild(i).registerEntityModifier(modifier.get());
+        }
     }
 
 }

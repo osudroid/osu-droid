@@ -5,9 +5,7 @@ import java.util.HashMap;
 
 
 public enum TouchType {
-    DOWN((byte) 0),
-    MOVE((byte) 1),
-    UP((byte) 2);
+    DOWN((byte) 0), MOVE((byte) 1), UP((byte) 2);
 
     private static final HashMap<Byte, TouchType> byID = new HashMap<>();
 

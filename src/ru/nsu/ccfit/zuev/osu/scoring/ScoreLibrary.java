@@ -65,9 +65,7 @@ public class ScoreLibrary {
         try {
             db = helper.getWritableDatabase();
         } catch (SQLiteCantOpenDatabaseException e) {
-            ToastLogger.showText(
-                    StringTable.get(R.string.require_storage_permission),
-                    true);
+            ToastLogger.showText(StringTable.get(R.string.require_storage_permission), true);
             throw new RuntimeException(e);
         }
         loadOld(context);
@@ -85,15 +83,13 @@ public class ScoreLibrary {
         }
         Debug.i("Loading old scores...");
         try {
-            final ObjectInputStream in = new ObjectInputStream(
-                    new FileInputStream(f));
+            final ObjectInputStream in = new ObjectInputStream(new FileInputStream(f));
 
             Object obj = in.readObject();
             String versionStr;
             if (obj instanceof String) {
                 versionStr = (String) obj;
-                if (!versionStr.equals("scores1")
-                        && !versionStr.equals("scores2")) {
+                if (!versionStr.equals("scores1") && !versionStr.equals("scores2")) {
                     in.close();
                     return;
                 }
@@ -112,8 +108,7 @@ public class ScoreLibrary {
                         for (final Statistic s : oldStat.get(str)) {
                             newStat.add(new StatisticV2(s));
                         }
-                        final Matcher newPathMather = newPathPattern
-                                .matcher(str);
+                        final Matcher newPathMather = newPathPattern.matcher(str);
                         if (newPathMather.find()) {
                             scores.put(newPathMather.group(), newStat);
                         } else {
@@ -145,10 +140,11 @@ public class ScoreLibrary {
 
     }
 
-    public void sendScoreOnline(final StatisticV2 stat, final String replay,
-                                final SendingPanel panel) {
+    public void sendScoreOnline(final StatisticV2 stat, final String replay, final SendingPanel panel) {
         Debug.i("Preparing for online!");
-        if (stat.getTotalScoreWithMultiplier() <= 0) return;
+        if (stat.getTotalScoreWithMultiplier() <= 0) {
+            return;
+        }
         OnlineScoring.getInstance().sendRecord(stat, panel, replay);
     }
 
@@ -158,7 +154,9 @@ public class ScoreLibrary {
         }
         final String track = getTrackPath(trackPath);
 
-        if (db == null) return;
+        if (db == null) {
+            return;
+        }
         ContentValues values = new ContentValues();
         values.put("filename", track);
         values.put("playername", stat.getPlayerName());
@@ -180,27 +178,26 @@ public class ScoreLibrary {
         long result = db.insert(DBOpenHelper.SCORES_TABLENAME, null, values);
         Debug.i("Inserting data, result = " + result);
 
-//		String[] columns = {"id", "filename", "score", "replayfile"};
-//		Cursor response =
-//			db.query(DBOpenHelper.SCORES_TABLENAME, columns, "filename = \"" + track + "\"" ,
-//												null, null, null, "score ASC");
+        //		String[] columns = {"id", "filename", "score", "replayfile"};
+        //		Cursor response =
+        //			db.query(DBOpenHelper.SCORES_TABLENAME, columns, "filename = \"" + track + "\"" ,
+        //												null, null, null, "score ASC");
         //if scores > 5, we need to remove some
 
     }
 
     public Cursor getMapScores(String[] columns, String filename) {
         final String track = getTrackPath(filename);
-        if (db == null) return null;
-        return db.query(DBOpenHelper.SCORES_TABLENAME, columns, "filename = ?",
-                new String[]{track}, null, null, "score DESC");
+        if (db == null) {
+            return null;
+        }
+        return db.query(DBOpenHelper.SCORES_TABLENAME, columns, "filename = ?", new String[]{track}, null, null, "score DESC");
     }
 
     public String getBestMark(final String trackPath) {
         final String track = getTrackPath(trackPath);
         String[] columns = {"mark", "filename", "id", "score"};
-        Cursor response =
-                db.query(DBOpenHelper.SCORES_TABLENAME, columns, "filename = ?",
-                        new String[]{track}, null, null, "score DESC");
+        Cursor response = db.query(DBOpenHelper.SCORES_TABLENAME, columns, "filename = ?", new String[]{track}, null, null, "score DESC");
         if (response.getCount() == 0) {
             response.close();
             return null;
@@ -215,8 +212,7 @@ public class ScoreLibrary {
     }
 
     public StatisticV2 getScore(int id) {
-        Cursor c = db.query(DBOpenHelper.SCORES_TABLENAME, null, "id = " + id,
-                null, null, null, null);
+        Cursor c = db.query(DBOpenHelper.SCORES_TABLENAME, null, "id = " + id, null, null, null, null);
         StatisticV2 stat = new StatisticV2();
         if (c.getCount() == 0) {
             c.close();

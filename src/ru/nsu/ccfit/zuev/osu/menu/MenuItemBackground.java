@@ -27,14 +27,11 @@ public class MenuItemBackground extends Sprite {
     private MenuItem item;
 
     public MenuItemBackground() {
-        super(0, 0, ResourceManager.getInstance().getTexture(
-                "menu-button-background"));
+        super(0, 0, ResourceManager.getInstance().getTexture("menu-button-background"));
 
         setAlpha(0.8f);
-        title = new ChangeableText(32, 25,
-                ResourceManager.getInstance().getFont("font"), "", 255);
-        author = new ChangeableText(0, 0, ResourceManager.getInstance()
-                .getFont("font"), "", 100);
+        title = new ChangeableText(32, 25, ResourceManager.getInstance().getFont("font"), "", 255);
+        author = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 100);
         author.setPosition(150, 60);
 
         defColor.apply(this);
@@ -62,8 +59,7 @@ public class MenuItemBackground extends Sprite {
 
 
     @Override
-    public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                 final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+    public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
         if (!isVisible()) {
             return false;
         }
@@ -83,10 +79,7 @@ public class MenuItemBackground extends Sprite {
                 item.select(true, true);
             }
             return true;
-        } else if (pSceneTouchEvent.isActionOutside()
-                || pSceneTouchEvent.isActionMove()
-                && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                pTouchAreaLocalY) > 50)) {
+        } else if (pSceneTouchEvent.isActionOutside() || pSceneTouchEvent.isActionMove() && (MathUtils.distance(dx, dy, pTouchAreaLocalX, pTouchAreaLocalY) > 50)) {
             defColor.apply(this);
             moved = true;
             return false;

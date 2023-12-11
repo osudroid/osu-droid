@@ -28,11 +28,13 @@ public class StringTable {
     }
 
     private static void allocateFormatter() {
-        if (sb == null)
+        if (sb == null) {
             sb = new StringBuilder();
+        }
         sb.setLength(0);
-        if (f == null)
+        if (f == null) {
             f = new Formatter(sb);
+        }
     }
 
     public static String format(final int resid, final Object... objects) {

@@ -32,10 +32,7 @@ public class RGBColor {
      * @return
      */
     public static RGBColor hex2Rgb(String colorStr) {
-        return new RGBColor(
-                Integer.valueOf(colorStr.substring(1, 3), 16) / 255.0f,
-                Integer.valueOf(colorStr.substring(3, 5), 16) / 255.0f,
-                Integer.valueOf(colorStr.substring(5, 7), 16) / 255.0f);
+        return new RGBColor(Integer.valueOf(colorStr.substring(1, 3), 16) / 255.0f, Integer.valueOf(colorStr.substring(3, 5), 16) / 255.0f, Integer.valueOf(colorStr.substring(5, 7), 16) / 255.0f);
     }
 
     public float r() {

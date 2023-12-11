@@ -37,8 +37,7 @@ public class InputManager {
     }
 
     public void toggleKeyboard() {
-        final InputMethodManager mgr = (InputMethodManager) context
-                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        final InputMethodManager mgr = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         mgr.toggleSoftInput(0, 0);
     }
 

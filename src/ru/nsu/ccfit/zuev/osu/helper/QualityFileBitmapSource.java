@@ -13,8 +13,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
-        IBitmapTextureAtlasSource {
+public class QualityFileBitmapSource extends BaseTextureAtlasSource implements IBitmapTextureAtlasSource {
 
     private int mWidth;
 
@@ -38,13 +37,11 @@ public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
         this(() -> new FileInputStream(pFile), 0, 0, inSampleSize);
     }
 
-    public QualityFileBitmapSource(final File pFile,
-                                   final int pTexturePositionX, final int pTexturePositionY) {
+    public QualityFileBitmapSource(final File pFile, final int pTexturePositionX, final int pTexturePositionY) {
         this(() -> new FileInputStream(pFile), pTexturePositionX, pTexturePositionY, 1);
     }
 
-    public QualityFileBitmapSource(final InputFactory pFile,
-                                   final int pTexturePositionX, final int pTexturePositionY, int inSampleSize) {
+    public QualityFileBitmapSource(final InputFactory pFile, final int pTexturePositionX, final int pTexturePositionY, int inSampleSize) {
         super(pTexturePositionX, pTexturePositionY);
 
         fileBitmapInput = pFile;
@@ -62,8 +59,7 @@ public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
             this.mWidth = decodeOptions.outWidth;
             this.mHeight = decodeOptions.outHeight;
         } catch (final IOException e) {
-            Debug.e("Failed loading Bitmap in FileBitmapTextureAtlasSource. File: "
-                    + pFile, e);
+            Debug.e("Failed loading Bitmap in FileBitmapTextureAtlasSource. File: " + pFile, e);
             this.mWidth = 0;
             this.mHeight = 0;
         } finally {
@@ -72,8 +68,7 @@ public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
 
     }
 
-    QualityFileBitmapSource(final InputFactory pFile, final int pTexturePositionX,
-                            final int pTexturePositionY, final int pWidth, final int pHeight) {
+    QualityFileBitmapSource(final InputFactory pFile, final int pTexturePositionX, final int pTexturePositionY, final int pWidth, final int pHeight) {
         super(pTexturePositionX, pTexturePositionY);
         fileBitmapInput = pFile;
         this.mWidth = pWidth;
@@ -86,8 +81,7 @@ public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
 
 
     public QualityFileBitmapSource deepCopy() {
-        QualityFileBitmapSource source = new QualityFileBitmapSource(this.fileBitmapInput, this.mTexturePositionX,
-                this.mTexturePositionY, this.mWidth, this.mHeight);
+        QualityFileBitmapSource source = new QualityFileBitmapSource(this.fileBitmapInput, this.mTexturePositionX, this.mTexturePositionY, this.mWidth, this.mHeight);
         source.inSampleSize = inSampleSize;
         return source;
     }
@@ -131,9 +125,7 @@ public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
             in = openInputStream();
             return BitmapFactory.decodeStream(in, null, decodeOptions);
         } catch (final IOException e) {
-            Debug.e("Failed loading Bitmap in "
-                            + this.getClass().getSimpleName() + ". File: " + this.fileBitmapInput,
-                    e);
+            Debug.e("Failed loading Bitmap in " + this.getClass().getSimpleName() + ". File: " + this.fileBitmapInput, e);
             return null;
         } finally {
             StreamUtils.close(in);

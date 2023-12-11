@@ -90,13 +90,7 @@ public class SplashScene implements IUpdateHandler {
         welcomeSound.play();
         welcomePiano.play();
 
-        welcomeSprite.registerEntityModifier(new ParallelEntityModifier(
-                new FadeInModifier(2.5f),
-                new SequenceEntityModifier(
-                        new ScaleModifier(0.25f, 1f, 1f, 0f, 1f),
-                        new ScaleModifier(2.25f, 1f, 1.1f)
-                )
-        ));
+        welcomeSprite.registerEntityModifier(new ParallelEntityModifier(new FadeInModifier(2.5f), new SequenceEntityModifier(new ScaleModifier(0.25f, 1f, 1f, 0f, 1f), new ScaleModifier(2.25f, 1f, 1.1f))));
     }
 
     private void initializeProgress() {

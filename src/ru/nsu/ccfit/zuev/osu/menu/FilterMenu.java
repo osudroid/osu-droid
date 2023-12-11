@@ -60,8 +60,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
     }
 
     public void loadConfig(final Context context) {
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(context);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         final int sortOrder = prefs.getInt("sortorder", 0);
         switch (sortOrder) {
@@ -96,8 +95,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
             return;
         }
 
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(configContext);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(configContext);
         final SharedPreferences.Editor editor = prefs.edit();
 
         switch (order) {
@@ -138,40 +136,31 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
     public void init() {
         scene = new Scene();
         scene.setBackgroundEnabled(false);
-        final Rectangle bg = new Rectangle(0, 0, Config.getRES_WIDTH(),
-                Config.getRES_HEIGHT());
+        final Rectangle bg = new Rectangle(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
         bg.setColor(0, 0, 0, 0.7f);
         scene.attachChild(bg);
 
-        final Text caption = new Text(0, 60, ResourceManager
-                .getInstance().getFont("CaptionFont"),
-                StringTable.get(R.string.menu_search_title));
-        caption.setPosition(Config.getRES_WIDTH() / 2f - caption.getWidth() / 2,
-                caption.getY());
+        final Text caption = new Text(0, 60, ResourceManager.getInstance().getFont("CaptionFont"), StringTable.get(R.string.menu_search_title));
+        caption.setPosition(Config.getRES_WIDTH() / 2f - caption.getWidth() / 2, caption.getY());
         scene.attachChild(caption);
 
         final Font font = ResourceManager.getInstance().getFont("font");
 
-        final Text capt1 = new Text(100, 160, font,
-                StringTable.get(R.string.menu_search_filter));
+        final Text capt1 = new Text(100, 160, font, StringTable.get(R.string.menu_search_filter));
         capt1.setPosition(Config.getRES_WIDTH() / 4f - capt1.getWidth(), capt1.getY());
         scene.attachChild(capt1);
 
-        final Rectangle filterBorder = new Rectangle(capt1.getX(), 195, 330, capt1.getHeight()
-                + 30);
+        final Rectangle filterBorder = new Rectangle(capt1.getX(), 195, 330, capt1.getHeight() + 30);
         scene.attachChild(filterBorder);
         filterBorder.setColor(1, 150f / 255, 0);
         filterBorder.setVisible(false);
-        final Rectangle filterBg = new Rectangle(filterBorder.getX() + 5, 200, 320, capt1.getHeight()
-                + 20) {
+        final Rectangle filterBg = new Rectangle(filterBorder.getX() + 5, 200, 320, capt1.getHeight() + 20) {
 
             @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
                     filterBorder.setVisible(true);
-                    InputManager.getInstance().startInput(
-                            FilterMenu.getInstance().getFilter(), 20);
+                    InputManager.getInstance().startInput(FilterMenu.getInstance().getFilter(), 20);
                     return true;
                 }
                 return false;
@@ -180,21 +169,18 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
         scene.registerTouchArea(filterBg);
         scene.attachChild(filterBg);
 
-        filterText = new ChangeableText(capt1.getX(), 210, font,
-                filter, 21);
+        filterText = new ChangeableText(capt1.getX(), 210, font, filter, 21);
         filterText.setColor(0, 0, 0);
         scene.attachChild(filterText);
 
-        final Text capt2 = new Text(700, 160, font,
-                StringTable.get(R.string.menu_search_sort));
+        final Text capt2 = new Text(700, 160, font, StringTable.get(R.string.menu_search_sort));
         capt2.setPosition(Config.getRES_WIDTH() * 2f / 3 - capt2.getWidth(), capt2.getY());
         scene.attachChild(capt2);
 
         final Rectangle sortBg = new Rectangle(capt2.getX(), 200, 200, capt2.getHeight() + 20) {
 
             @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
                     SortOrder newOrder;
                     switch (order) {
@@ -230,20 +216,16 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
         };
         scene.registerTouchArea(sortBg);
         scene.attachChild(sortBg);
-        sortText = new ChangeableText(capt2.getX() + 5, 210, font,
-                StringTable.get(R.string.menu_search_sort_title), 10);
+        sortText = new ChangeableText(capt2.getX() + 5, 210, font, StringTable.get(R.string.menu_search_sort_title), 10);
         sortText.setColor(0, 0, 0);
         setSortText();
         sortText.detachSelf();
         scene.attachChild(sortText);
 
-        final TextButton back = new TextButton(ResourceManager
-                .getInstance().getFont("CaptionFont"),
-                StringTable.get(R.string.menu_mod_back)) {
+        final TextButton back = new TextButton(ResourceManager.getInstance().getFont("CaptionFont"), StringTable.get(R.string.menu_mod_back)) {
 
             @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionUp()) {
                     hideMenu();
                     return true;
@@ -258,21 +240,16 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
         scene.attachChild(back);
         scene.registerTouchArea(back);
 
-        final ChangeableText favs = new ChangeableText(capt1.getX(), 300, ResourceManager.getInstance().getFont(
-                "CaptionFont"),
-                StringTable.get(R.string.menu_search_favsdisabled)) {
+        final ChangeableText favs = new ChangeableText(capt1.getX(), 300, ResourceManager.getInstance().getFont("CaptionFont"), StringTable.get(R.string.menu_search_favsdisabled)) {
 
             @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionUp()) {
                     if (favoritesOnly) {
-                        setText(StringTable
-                                .get(R.string.menu_search_favsdisabled));
+                        setText(StringTable.get(R.string.menu_search_favsdisabled));
                         setColor(1, 1, 1);
                     } else {
-                        setText(StringTable
-                                .get(R.string.menu_search_favsenabled));
+                        setText(StringTable.get(R.string.menu_search_favsenabled));
                         setColor(0, 1, 0);
                     }
                     favoritesOnly = !favoritesOnly;
@@ -285,19 +262,14 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
             favs.setText(StringTable.get(R.string.menu_search_favsenabled));
             favs.setColor(0, 1, 0);
         }
-        favs.setPosition(capt1.getX(),
-                favs.getY());
+        favs.setPosition(capt1.getX(), favs.getY());
         scene.attachChild(favs);
         scene.registerTouchArea(favs);
 
 
-        final ChangeableText folder = new ChangeableText(favs.getX(),
-                favs.getY() + favs.getHeight() + 20, ResourceManager.getInstance().getFont(
-                "CaptionFont"),
-                StringTable.get(R.string.favorite_folder) + " " + (favoriteFolder == null ? StringTable.get(R.string.favorite_default) : favoriteFolder), 40) {
+        final ChangeableText folder = new ChangeableText(favs.getX(), favs.getY() + favs.getHeight() + 20, ResourceManager.getInstance().getFont("CaptionFont"), StringTable.get(R.string.favorite_folder) + " " + (favoriteFolder == null ? StringTable.get(R.string.favorite_default) : favoriteFolder), 40) {
             @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionUp()) {
                     //显示选择收藏夹的dialog
                     GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> {
@@ -313,8 +285,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
             }
         };
 
-        folder.setPosition(favs.getX(),
-                favs.getY() + favs.getHeight() + 20);
+        folder.setPosition(favs.getX(), favs.getY() + favs.getHeight() + 20);
         scene.attachChild(folder);
         scene.registerTouchArea(folder);
 
@@ -334,9 +305,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
     public void showMenu(SongMenu parent) {
         reload();
         setSongMenu(parent);
-        parent.scene.setChildScene(
-                scene, false,
-                true, true);
+        parent.scene.setChildScene(scene, false, true, true);
     }
 
     private void setSortText() {

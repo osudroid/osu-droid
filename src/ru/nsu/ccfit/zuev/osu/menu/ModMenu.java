@@ -101,8 +101,9 @@ public class ModMenu implements IModSwitcher {
             for (GameMod key : modButtons.keySet()) {
                 var button = modButtons.get(key);
 
-                if (button != null)
+                if (button != null) {
                     button.setModEnabled(mod.contains(key));
+                }
             }
 
             // Updating multiplier text just in case
@@ -138,15 +139,17 @@ public class ModMenu implements IModSwitcher {
             }
         }
 
-        if (modSet.contains(GameMod.MOD_SCOREV2))
+        if (modSet.contains(GameMod.MOD_SCOREV2)) {
             mod.add(GameMod.MOD_SCOREV2);
-        else
+        } else {
             mod.remove(GameMod.MOD_SCOREV2);
+        }
 
-        if (modSet.contains(GameMod.MOD_HALFTIME))
+        if (modSet.contains(GameMod.MOD_HALFTIME)) {
             mod.add(GameMod.MOD_HALFTIME);
-        else
+        } else {
             mod.remove(GameMod.MOD_HALFTIME);
+        }
 
         update();
     }
@@ -169,25 +172,9 @@ public class ModMenu implements IModSwitcher {
 
             // The room mods are the same as the host mods
             if (Multiplayer.isRoomHost()) {
-                RoomAPI.setRoomMods(
-                        string,
-                        changeSpeed,
-                        FLfollowDelay,
-                        customAR,
-                        customOD,
-                        customCS,
-                        customHP
-                );
+                RoomAPI.setRoomMods(string, changeSpeed, FLfollowDelay, customAR, customOD, customCS, customHP);
             } else if (updatePlayerMods) {
-                RoomAPI.setPlayerMods(
-                        string,
-                        changeSpeed,
-                        FLfollowDelay,
-                        customAR,
-                        customOD,
-                        customCS,
-                        customHP
-                );
+                RoomAPI.setPlayerMods(string, changeSpeed, FLfollowDelay, customAR, customOD, customCS, customHP);
             } else {
                 RoomScene.awaitModsChange = false;
             }
@@ -217,14 +204,11 @@ public class ModMenu implements IModSwitcher {
         modButtons.clear();
         scene = new Scene();
         scene.setBackgroundEnabled(false);
-        final Rectangle bg = new Rectangle(0, 0, Config.getRES_WIDTH(),
-                Config.getRES_HEIGHT());
+        final Rectangle bg = new Rectangle(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
         bg.setColor(0, 0, 0, 0.7f);
         scene.attachChild(bg);
 
-        multiplierText = new ChangeableText(0, 50,
-                ResourceManager.getInstance().getFont("CaptionFont"),
-                StringTable.format(R.string.menu_mod_multiplier, 1f));
+        multiplierText = new ChangeableText(0, 50, ResourceManager.getInstance().getFont("CaptionFont"), StringTable.format(R.string.menu_mod_multiplier, 1f));
         multiplierText.setScale(1.2f);
         scene.attachChild(multiplierText);
 
@@ -242,8 +226,9 @@ public class ModMenu implements IModSwitcher {
 
         addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-nofail", GameMod.MOD_NOFAIL);
 
-        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost())
+        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost()) {
             addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-halftime", GameMod.MOD_HALFTIME);
+        }
 
         addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-reallyeasy", GameMod.MOD_REALLYEASY);
 
@@ -252,11 +237,13 @@ public class ModMenu implements IModSwitcher {
         //line 2
         addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hardrock", GameMod.MOD_HARDROCK);
 
-        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost())
+        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost()) {
             addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-doubletime", GameMod.MOD_DOUBLETIME);
+        }
 
-        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost())
+        if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost()) {
             addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-nightcore", GameMod.MOD_NIGHTCORE);
+        }
 
         addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hidden", GameMod.MOD_HIDDEN);
         addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-flashlight", GameMod.MOD_FLASHLIGHT);
@@ -269,21 +256,20 @@ public class ModMenu implements IModSwitcher {
         addButton(offset, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax", GameMod.MOD_RELAX);
         addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax2", GameMod.MOD_AUTOPILOT);
 
-        if (!Multiplayer.isMultiplayer)
+        if (!Multiplayer.isMultiplayer) {
             addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-autoplay", GameMod.MOD_AUTO);
+        }
 
-        if (!Multiplayer.isMultiplayer)
+        if (!Multiplayer.isMultiplayer) {
             addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-scorev2", GameMod.MOD_SCOREV2);
+        }
 
         addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-precise", GameMod.MOD_PRECISE);
 
-        final TextButton resetText = new TextButton(ResourceManager
-                .getInstance().getFont("CaptionFont"),
-                StringTable.get(R.string.menu_mod_reset)) {
+        final TextButton resetText = new TextButton(ResourceManager.getInstance().getFont("CaptionFont"), StringTable.get(R.string.menu_mod_reset)) {
 
             @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionUp()) {
                     mod.clear();
                     changeMultiplierText();
@@ -302,20 +288,15 @@ public class ModMenu implements IModSwitcher {
         }
         resetText.setScale(1.2f);
 
-        final TextButton back = new TextButton(ResourceManager
-                .getInstance().getFont("CaptionFont"),
-                StringTable.get(R.string.menu_mod_back)) {
+        final TextButton back = new TextButton(ResourceManager.getInstance().getFont("CaptionFont"), StringTable.get(R.string.menu_mod_back)) {
 
             @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionUp()) {
                     (new Thread() {
                         public void run() {
                             if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != null) {
-                                BeatmapData beatmapData = new BeatmapParser(
-                                        GlobalManager.getInstance().getSongMenu().getSelectedTrack().getFilename()
-                                ).parse(true);
+                                BeatmapData beatmapData = new BeatmapParser(GlobalManager.getInstance().getSongMenu().getSelectedTrack().getFilename()).parse(true);
 
                                 if (beatmapData == null) {
                                     GlobalManager.getInstance().getSongMenu().setStarsDisplay(0);
@@ -336,15 +317,10 @@ public class ModMenu implements IModSwitcher {
                                     parameters.customOD = customOD;
                                 }
 
-                                DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
-                                        beatmapData,
-                                        parameters
-                                );
+                                DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(beatmapData, parameters);
 
 
-                                GlobalManager.getInstance().getSongMenu().setStarsDisplay(
-                                        GameHelper.Round(attributes.starRating, 2)
-                                );
+                                GlobalManager.getInstance().getSongMenu().setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
                             }
                         }
                     }).start();
@@ -360,7 +336,7 @@ public class ModMenu implements IModSwitcher {
         back.setPosition(Config.getRES_WIDTH() - back.getWidth() - 60, Config.getRES_HEIGHT() - back.getHeight() - 30);
         back.setColor(66 / 255f, 76 / 255f, 80 / 255f);
         resetText.setPosition(Config.getRES_WIDTH() - resetText.getWidth() - 60, back.getY() - resetText.getHeight() - 20);
-//		multiplierText.setPosition(back.getX() + (back.getWidth() / 2 - multiplierText.getWidth() / 2), resetText.getY() - multiplierText.getHeight() - 40);
+        //		multiplierText.setPosition(back.getX() + (back.getWidth() / 2 - multiplierText.getWidth() / 2), resetText.getY() - multiplierText.getHeight() - 40);
 
         scene.attachChild(back);
         scene.registerTouchArea(back);
@@ -403,11 +379,8 @@ public class ModMenu implements IModSwitcher {
             }
         }
 
-        multiplierText.setText(StringTable.format(R.string.menu_mod_multiplier,
-                mult));
-        multiplierText.setPosition(
-                Config.getRES_WIDTH() / 2f - multiplierText.getWidth() / 2,
-                multiplierText.getY());
+        multiplierText.setText(StringTable.format(R.string.menu_mod_multiplier, mult));
+        multiplierText.setPosition(Config.getRES_WIDTH() / 2f - multiplierText.getWidth() / 2, multiplierText.getY());
         if (mult == 1) {
             multiplierText.setColor(1, 1, 1);
         } else if (mult < 1) {
@@ -431,9 +404,7 @@ public class ModMenu implements IModSwitcher {
             return false;
         }
 
-        var modsRemoved = mod.remove(GameMod.MOD_HARDROCK) ||
-                mod.remove(GameMod.MOD_EASY) ||
-                mod.remove(GameMod.MOD_REALLYEASY);
+        var modsRemoved = mod.remove(GameMod.MOD_HARDROCK) || mod.remove(GameMod.MOD_EASY) || mod.remove(GameMod.MOD_REALLYEASY);
 
         if (modsRemoved) {
             ToastLogger.showTextId(R.string.force_diffstat_mod_unpickable, false);
@@ -448,8 +419,9 @@ public class ModMenu implements IModSwitcher {
         if (mod.contains(flag)) {
             mod.remove(flag);
 
-            if (flag == GameMod.MOD_FLASHLIGHT)
+            if (flag == GameMod.MOD_FLASHLIGHT) {
                 resetFLFollowDelay();
+            }
 
             returnValue = false;
         } else {

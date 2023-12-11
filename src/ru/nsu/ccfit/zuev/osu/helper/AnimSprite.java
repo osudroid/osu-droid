@@ -40,8 +40,7 @@ public class AnimSprite extends Sprite {
         }
     }
 
-    public AnimSprite(final float px, final float py, final String texname,
-                      int count, final float fps) {
+    public AnimSprite(final float px, final float py, final String texname, int count, final float fps) {
         super(px, py, ResourceManager.getInstance().getTexture(texname + "0"));
         if (count == 0) {
             count = 1;
@@ -57,8 +56,7 @@ public class AnimSprite extends Sprite {
         }
     }
 
-    public AnimSprite(final float px, final float py, final float fps,
-                      final String... textures) {
+    public AnimSprite(final float px, final float py, final float fps, final String... textures) {
         super(px, py, ResourceManager.getInstance().getTextureIfLoaded(textures[0]));
         this.count = textures.length;
         this.fps = fps;

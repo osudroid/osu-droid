@@ -24,8 +24,7 @@ public class GameScoreText {
 
     private boolean hasX = false;
 
-    public GameScoreText(StringSkinData prefix, final float x, final float y, final String mask,
-                         final float scale) {
+    public GameScoreText(StringSkinData prefix, final float x, final float y, final String mask, final float scale) {
         AnimSprite scoreComma = null;
         AnimSprite scorePercent = null;
         AnimSprite scoreX = null;
@@ -47,8 +46,7 @@ public class GameScoreText {
                 scoreX = letters[i];
                 hasX = true;
             }
-            letters[i].setSize(letters[i].getWidth() * scale,
-                    letters[i].getHeight() * scale);
+            letters[i].setSize(letters[i].getWidth() * scale, letters[i].getHeight() * scale);
             width += letters[i].getWidth();
         }
         this.scale = scale;
@@ -89,8 +87,7 @@ public class GameScoreText {
             }
         }
         if (hasX) {
-            letters[letters.length - 1].setPosition(digits.get(0).getX()
-                    + totalWidth, letters[letters.length - 1].getY());
+            letters[letters.length - 1].setPosition(digits.get(0).getX() + totalWidth, letters[letters.length - 1].getY());
         }
     }
 

@@ -50,23 +50,16 @@ public class OnlinePanel extends Entity {
                     this.setColor(0.2f, 0.2f, 0.2f, 0.5f);
                     if (!moved) {
                         if (OnlineManager.getInstance().isStayOnline()) {
-                            new ConfirmDialogFragment()
-                                    .setMessage(R.string.dialog_visit_profile_page)
-                                    .showForResult(isAccepted -> {
-                                        GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> {
-                                            new WebViewFragment().setURL(
-                                                            WebViewFragment.PROFILE_URL + OnlineManager.getInstance().getUserId())
-                                                    .show();
-                                        });
-                                    });
+                            new ConfirmDialogFragment().setMessage(R.string.dialog_visit_profile_page).showForResult(isAccepted -> {
+                                GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> {
+                                    new WebViewFragment().setURL(WebViewFragment.PROFILE_URL + OnlineManager.getInstance().getUserId()).show();
+                                });
+                            });
                         }
                     }
                     return true;
                 }
-                if (pSceneTouchEvent.isActionOutside()
-                        || pSceneTouchEvent.isActionMove()
-                        && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                        pTouchAreaLocalY) > 50)) {
+                if (pSceneTouchEvent.isActionOutside() || pSceneTouchEvent.isActionMove() && (MathUtils.distance(dx, dy, pTouchAreaLocalX, pTouchAreaLocalY) > 50)) {
                     moved = true;
                     this.setColor(0.2f, 0.2f, 0.2f, 0.5f);
                 }
@@ -80,36 +73,27 @@ public class OnlinePanel extends Entity {
         avatarFooter.setColor(0.2f, 0.2f, 0.2f, 0.8f);
         attachChild(avatarFooter);
 
-        rankText = new ChangeableText(0, 0,
-                ResourceManager.getInstance().getFont("CaptionFont"), "#1",
-                HorizontalAlign.RIGHT, 12);
+        rankText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("CaptionFont"), "#1", HorizontalAlign.RIGHT, 12);
         rankText.setColor(0.6f, 0.6f, 0.6f, 0.9f);
         rankText.setScaleCenterX(0);
         rankText.setScale(1.7f);
         rankText.setPosition(390 + 10 - rankText.getWidthScaled(), 55);
         onlineLayer.attachChild(rankText);
 
-        nameText = new ChangeableText(120, 5,
-                ResourceManager.getInstance().getFont("CaptionFont"), "Guest", 16);
+        nameText = new ChangeableText(120, 5, ResourceManager.getInstance().getFont("CaptionFont"), "Guest", 16);
         onlineLayer.attachChild(nameText);
-        scoreText = new ChangeableText(120, 50,
-                ResourceManager.getInstance().getFont("smallFont"), "Score: 0",
-                HorizontalAlign.LEFT, 22);
+        scoreText = new ChangeableText(120, 50, ResourceManager.getInstance().getFont("smallFont"), "Score: 0", HorizontalAlign.LEFT, 22);
         scoreText.setColor(0.85f, 0.85f, 0.9f);
         onlineLayer.attachChild(scoreText);
 
-        accText = new ChangeableText(120, 75,
-                ResourceManager.getInstance().getFont("smallFont"), "Accuracy: 0.00%",
-                HorizontalAlign.LEFT, 17);
+        accText = new ChangeableText(120, 75, ResourceManager.getInstance().getFont("smallFont"), "Accuracy: 0.00%", HorizontalAlign.LEFT, 17);
         accText.setColor(0.85f, 0.85f, 0.9f);
         onlineLayer.attachChild(accText);
 
-        messageText = new ChangeableText(110, 5,
-                ResourceManager.getInstance().getFont("CaptionFont"), "Logging in...", 16);
+        messageText = new ChangeableText(110, 5, ResourceManager.getInstance().getFont("CaptionFont"), "Logging in...", 16);
         messageLayer.attachChild(messageText);
 
-        submessageText = new ChangeableText(110, 60,
-                ResourceManager.getInstance().getFont("smallFont"), "Connecting to server...", 40);
+        submessageText = new ChangeableText(110, 60, ResourceManager.getInstance().getFont("smallFont"), "Connecting to server...", 40);
         messageLayer.attachChild(submessageText);
 
         attachChild(messageLayer);
@@ -136,8 +120,7 @@ public class OnlinePanel extends Entity {
 
         scoreText.setText(scoreBuilder.toString());
 
-        accText.setText(String.format("Accuracy: %.2f%%",
-                OnlineManager.getInstance().getAccuracy() * 100f));
+        accText.setText(String.format("Accuracy: %.2f%%", OnlineManager.getInstance().getAccuracy() * 100f));
         rankText.setScale(1);
         rankText.setText(String.format("#%d", OnlineManager.getInstance().getRank()));
         rankText.setPosition(390 + 10 - rankText.getWidth() * 1.7f, 55);
@@ -156,12 +139,17 @@ public class OnlinePanel extends Entity {
     }
 
     void setAvatar(final String texname) {
-        if (avatar != null)
+        if (avatar != null) {
             avatar.detachSelf();
+        }
         avatar = null;
-        if (texname == null) return;
+        if (texname == null) {
+            return;
+        }
         TextureRegion tex = ResourceManager.getInstance().getAvatarTextureIfLoaded(texname);
-        if (tex == null) return;
+        if (tex == null) {
+            return;
+        }
 
         Debug.i("Avatar is set!");
         avatar = new Sprite(0, 0, 110, 110, tex);

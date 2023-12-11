@@ -49,8 +49,7 @@ public class PostBuilder {
                 response = null;
             }
 
-            if (response == null || response.isEmpty() || response.get(0).isEmpty()
-                    || !(response.get(0).equals("FAIL") || response.get(0).equals("SUCCESS"))) {
+            if (response == null || response.isEmpty() || response.get(0).isEmpty() || !(response.get(0).equals("FAIL") || response.get(0).equals("SUCCESS"))) {
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
@@ -60,7 +59,9 @@ public class PostBuilder {
             break;
         }
 
-        if (response == null) response = new ArrayList<>();
+        if (response == null) {
+            response = new ArrayList<>();
+        }
 
         if (response.isEmpty()) {
             response.add("");
@@ -72,10 +73,7 @@ public class PostBuilder {
         ArrayList<String> response = new ArrayList<>();
 
         try {
-            Request request = new Request.Builder()
-                    .url(scriptUrl)
-                    .post(formBodyBuilder.build())
-                    .build();
+            Request request = new Request.Builder().url(scriptUrl).post(formBodyBuilder.build()).build();
 
             try (Response resp = OnlineManager.client.newCall(request).execute()) {
                 Debug.i("request url=" + scriptUrl);

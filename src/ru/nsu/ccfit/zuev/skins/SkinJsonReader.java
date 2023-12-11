@@ -128,7 +128,9 @@ public class SkinJsonReader extends SkinReader {
         JSONObject data = currentLayoutData;
         skin.useNewLayout.setFromJson(data);
         JSONArray names = data.names();
-        if (names == null) return;
+        if (names == null) {
+            return;
+        }
         for (int i = 0; i < names.length(); i++) {
             if (names.optString(i).equals(skin.useNewLayout.getTag())) {
                 continue;
@@ -145,7 +147,9 @@ public class SkinJsonReader extends SkinReader {
         OsuSkin skin = OsuSkin.get();
         JSONObject data = currentColorData;
         JSONArray names = data.names();
-        if (names == null) return;
+        if (names == null) {
+            return;
+        }
         for (int i = 0; i < names.length(); i++) {
             skin.colorData.put(names.optString(i), RGBColor.hex2Rgb(data.optString(names.optString(i))));
         }

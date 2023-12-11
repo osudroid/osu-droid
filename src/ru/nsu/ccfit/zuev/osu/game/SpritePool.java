@@ -74,8 +74,7 @@ public class SpritePool {
         return new Sprite(0, 0, ResourceManager.getInstance().getTexture(name));
     }
 
-    synchronized public Sprite getCenteredSprite(final String name,
-                                                 final PointF pos) {
+    synchronized public Sprite getCenteredSprite(final String name, final PointF pos) {
         if (sprites.containsKey(name)) {
             final LinkedList<Sprite> list = sprites.get(name);
             while (!list.isEmpty() && list.peek().hasParent()) {
@@ -84,15 +83,13 @@ public class SpritePool {
             if (!list.isEmpty()) {
                 count--;
                 final Sprite sp = list.poll();
-                sp.setPosition(pos.x - sp.getWidth() / 2,
-                        pos.y - sp.getHeight() / 2);
+                sp.setPosition(pos.x - sp.getWidth() / 2, pos.y - sp.getHeight() / 2);
                 return sp;
             }
         }
 
         spritesCreated++;
-        return new CentredSprite(pos.x, pos.y, ResourceManager.getInstance()
-                .getTexture(name));
+        return new CentredSprite(pos.x, pos.y, ResourceManager.getInstance().getTexture(name));
     }
 
     synchronized public AnimSprite getAnimSprite(final String name, int count) {
@@ -110,8 +107,7 @@ public class SpritePool {
         return new AnimSprite(0, 0, name, count, count);
     }
 
-    synchronized public void putAnimSprite(final String name,
-                                           final AnimSprite sprite) {
+    synchronized public void putAnimSprite(final String name, final AnimSprite sprite) {
         if (count > CAPACITY) {
             return;
         }

@@ -12,8 +12,9 @@ public class SaveServiceObject extends Application {
     static private SongService songService;
 
     public static void finishAllActivities() {
-        if (GlobalManager.getInstance().getMainActivity() != null)
+        if (GlobalManager.getInstance().getMainActivity() != null) {
             GlobalManager.getInstance().getMainActivity().finish();
+        }
     }
 
     public SongService getSongService() {

@@ -132,8 +132,7 @@ public enum LibraryManager {
         final File replayDir = new File(Config.getScorePath());
         if (!replayDir.exists()) {
             if (!replayDir.mkdir()) {
-                ToastLogger.showText(StringTable.format(
-                        R.string.message_error_createdir, replayDir.getPath()), true);
+                ToastLogger.showText(StringTable.format(R.string.message_error_createdir, replayDir.getPath()), true);
                 return false;
             }
             createNoMediaFile(replayDir);
@@ -221,8 +220,7 @@ public enum LibraryManager {
         // Creating Osu directory if it doesn't exist
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
-                ToastLogger.showText(StringTable.format(
-                        R.string.message_error_createdir, dir.getPath()), true);
+                ToastLogger.showText(StringTable.format(R.string.message_error_createdir, dir.getPath()), true);
                 return;
             }
             createNoMediaFile(dir);
@@ -250,9 +248,7 @@ public enum LibraryManager {
         isCaching = true;
 
         saveToCache();
-        ToastLogger.showText(
-                StringTable.format(R.string.message_lib_complete, manager.getTotalMaps()),
-                true);
+        ToastLogger.showText(StringTable.format(R.string.message_lib_complete, manager.getTotalMaps()), true);
     }
 
     private void createNoMediaFile(File dir) {
@@ -282,8 +278,7 @@ public enum LibraryManager {
             return;
         }
         final File lib = getLibraryCacheFile();
-        try (final ObjectOutputStream ostream = new ObjectOutputStream(
-                new FileOutputStream(lib))) {
+        try (final ObjectOutputStream ostream = new ObjectOutputStream(new FileOutputStream(lib))) {
             lib.createNewFile();
             ostream.writeObject(VERSION);
             ostream.writeObject(fileCount);
@@ -292,9 +287,7 @@ public enum LibraryManager {
                 ostream.writeObject(library);
             }
         } catch (final IOException e) {
-            ToastLogger.showText(
-                    StringTable.format(R.string.message_error, e.getMessage()),
-                    false);
+            ToastLogger.showText(StringTable.format(R.string.message_error, e.getMessage()), false);
             Debug.e("LibraryManager: " + e.getMessage(), e);
         }
         shuffleLibrary();
@@ -305,8 +298,7 @@ public enum LibraryManager {
         final File lib = getLibraryCacheFile();
         if (lib.exists()) {
             lib.delete();
-            ToastLogger.showText(StringTable.get(R.string.message_lib_cleared),
-                    false);
+            ToastLogger.showText(StringTable.get(R.string.message_lib_cleared), false);
         }
         currentIndex = 0;
     }
@@ -344,7 +336,9 @@ public enum LibraryManager {
     public BeatmapInfo getBeatmapByIndex(int index) {
         synchronized (library) {
             Debug.i("Music Changing Info: Require index :" + index + "/" + library.size());
-            if (library.isEmpty()) return null;
+            if (library.isEmpty()) {
+                return null;
+            }
             if (index < 0 || index >= library.size()) {
                 shuffleLibrary();
                 currentIndex = 0;
@@ -369,8 +363,9 @@ public enum LibraryManager {
 
     @Nullable
     public TrackInfo findTrackByMD5(String md5) {
-        if (md5 == null)
+        if (md5 == null) {
             return null;
+        }
 
         synchronized (library) {
             int i = library.size() - 1;
@@ -382,8 +377,9 @@ public enum LibraryManager {
                 while (j >= 0) {
                     var track = tracks.get(j);
 
-                    if (md5.equals(track.getMD5()))
+                    if (md5.equals(track.getMD5())) {
                         return track;
+                    }
                     --j;
                 }
                 --i;
@@ -458,9 +454,7 @@ public enum LibraryManager {
             int optimalChunkSize = (int) Math.ceil((double) fileCount / Runtime.getRuntime().availableProcessors());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 // Split list into chunks of N elements per M sublist, N being number of files and M being number of processors
-                List<List<File>> sub_files = new ArrayList<>(files.stream()
-                        .collect(Collectors.groupingBy(s -> files.indexOf(s) / optimalChunkSize))
-                        .values());
+                List<List<File>> sub_files = new ArrayList<>(files.stream().collect(Collectors.groupingBy(s -> files.indexOf(s) / optimalChunkSize)).values());
                 sub_files.parallelStream().forEach(this::submitToExecutor);
             } else {
                 // Android versions below N don't support streams, so we have to do it the old-fashioned way
@@ -489,9 +483,7 @@ public enum LibraryManager {
         public void addUncachedBeatmaps() {
             int optimalChunkSize = (int) Math.ceil((double) fileCount / Runtime.getRuntime().availableProcessors());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                List<List<File>> sub_files = new ArrayList<>(files.stream()
-                        .collect(Collectors.groupingBy(s -> files.indexOf(s) / optimalChunkSize))
-                        .values());
+                List<List<File>> sub_files = new ArrayList<>(files.stream().collect(Collectors.groupingBy(s -> files.indexOf(s) / optimalChunkSize)).values());
                 sub_files.parallelStream().forEach(this::submitToExecutorCheckCached);
             } else {
                 for (int i = 0; i < files.size(); i += optimalChunkSize) {

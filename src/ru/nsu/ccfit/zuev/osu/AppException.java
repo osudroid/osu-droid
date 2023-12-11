@@ -140,9 +140,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
         Throwable ex = e.getCause() == null ? e : e.getCause();
         StackTraceElement[] stacks = ex.getStackTrace();
         for (StackTraceElement stack : stacks) {
-            sb.append("class: ").append(stack.getClassName()).append("; method: ")
-                    .append(stack.getMethodName()).append("; line: ").append(stack.getLineNumber())
-                    .append(";  Exception: ").append(ex).append("\n");
+            sb.append("class: ").append(stack.getClassName()).append("; method: ").append(stack.getMethodName()).append("; line: ").append(stack.getLineNumber()).append(";  Exception: ").append(ex).append("\n");
         }
         return sb;
     }
@@ -228,8 +226,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
             }
             fw = new FileWriter(logFile, true);
             pw = new PrintWriter(fw);
-            pw.println("--------------------" + (DateFormat.format("yyyy-MM-dd hh:mm:ss", new Date()))
-                    + "---------------------");
+            pw.println("--------------------" + (DateFormat.format("yyyy-MM-dd hh:mm:ss", new Date())) + "---------------------");
             pw.println(excpMessage);
             pw.close();
             fw.close();
@@ -261,8 +258,9 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (Multiplayer.isMultiplayer)
+            if (Multiplayer.isMultiplayer) {
                 Multiplayer.log("CRASH");
+            }
 
             // 结束所有Activity
             SaveServiceObject.finishAllActivities();
@@ -289,8 +287,9 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
             return false;
         }
 
-        if (Multiplayer.isMultiplayer)
+        if (Multiplayer.isMultiplayer) {
             Multiplayer.log(ex);
+        }
 
         final String crashReport = getCrashReport(context, ex);
         // 显示异常信息&发送报告

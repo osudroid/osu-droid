@@ -36,8 +36,7 @@ public class PropertiesLibrary {
         }
 
         try {
-            final ObjectInputStream istream = new ObjectInputStream(
-                    new FileInputStream(lib));
+            final ObjectInputStream istream = new ObjectInputStream(new FileInputStream(lib));
             Object obj = istream.readObject();
             if (obj instanceof String) {
                 if (!obj.equals(version)) {
@@ -64,15 +63,12 @@ public class PropertiesLibrary {
     public synchronized void save(final Context activity) {
         final File lib = new File(activity.getFilesDir(), "properties");
         try {
-            final ObjectOutputStream ostream = new ObjectOutputStream(
-                    new FileOutputStream(lib));
+            final ObjectOutputStream ostream = new ObjectOutputStream(new FileOutputStream(lib));
             ostream.writeObject(version);
             ostream.writeObject(props);
             ostream.close();
         } catch (final IOException e) {
-            ToastLogger.showText(
-                    StringTable.format(R.string.message_error, e.getMessage()),
-                    false);
+            ToastLogger.showText(StringTable.format(R.string.message_error, e.getMessage()), false);
             Debug.e("PropertiesLibrary: " + e.getMessage(), e);
         }
     }
@@ -97,8 +93,7 @@ public class PropertiesLibrary {
         return null;
     }
 
-    public void setProperties(final String path,
-                              final BeatmapProperties properties) {
+    public void setProperties(final String path, final BeatmapProperties properties) {
         this.load((Activity) context);
         props.put(path, properties);
         if (!properties.favorite && properties.getOffset() == 0) {

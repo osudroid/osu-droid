@@ -48,12 +48,9 @@ public class BeatmapControlPointsParser extends BeatmapSectionParser {
             manager.timing.add(new TimingControlPoint(time, msPerBeat, timeSignature));
         }
 
-        manager.difficulty.add(new DifficultyControlPoint(
-                time,
+        manager.difficulty.add(new DifficultyControlPoint(time,
                 // If msPerBeat is NaN, speedMultiplier should still be 1 because all comparisons against NaN are false.
-                msPerBeat < 0 ? 100 / -msPerBeat : 1,
-                !Double.isNaN(msPerBeat)
-        ));
+                msPerBeat < 0 ? 100 / -msPerBeat : 1, !Double.isNaN(msPerBeat)));
 
         data.rawTimingPoints.add(line);
     }

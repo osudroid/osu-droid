@@ -216,19 +216,16 @@ public class Statistic implements Serializable {
             }
             return "X";
         }
-        if ((hit300) / (float) notes > 0.9f && misses == 0
-                && hit50 / (float) notes < 0.01f) {
+        if ((hit300) / (float) notes > 0.9f && misses == 0 && hit50 / (float) notes < 0.01f) {
             if (isH) {
                 return "SH";
             }
             return "S";
         }
-        if ((hit300) / (float) notes > 0.8f && misses == 0
-                || (hit300) / (float) notes > 0.9f) {
+        if ((hit300) / (float) notes > 0.8f && misses == 0 || (hit300) / (float) notes > 0.9f) {
             return "A";
         }
-        if ((hit300) / (float) notes > 0.7f && misses == 0
-                || (hit300) / (float) notes > 0.8f) {
+        if ((hit300) / (float) notes > 0.7f && misses == 0 || (hit300) / (float) notes > 0.8f) {
             return "B";
         }
         if ((hit300) / (float) notes > 0.6f) {

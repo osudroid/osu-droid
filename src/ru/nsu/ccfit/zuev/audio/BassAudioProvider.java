@@ -162,17 +162,19 @@ public class BassAudioProvider {
     }
 
     public Status getStatus() {
-        if (channel == 0)
+        if (channel == 0) {
             return Status.STOPPED;
+        }
 
         final int playerStatus = BASS.BASS_ChannelIsActive(channel);
 
-        if (playerStatus == BASS.BASS_ACTIVE_STOPPED)
+        if (playerStatus == BASS.BASS_ACTIVE_STOPPED) {
             return Status.STOPPED;
-        else if (playerStatus == BASS.BASS_ACTIVE_PLAYING)
+        } else if (playerStatus == BASS.BASS_ACTIVE_PLAYING) {
             return Status.PLAYING;
-        else if (playerStatus == BASS.BASS_ACTIVE_PAUSED)
+        } else if (playerStatus == BASS.BASS_ACTIVE_PAUSED) {
             return Status.PAUSED;
+        }
         return Status.STALLED;
     }
 

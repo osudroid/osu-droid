@@ -76,7 +76,9 @@ public class SongService extends Service {
 
     public boolean preLoad(String filePath, PlayMode mode, boolean isLoop) {
         if (checkFileExist(filePath)) {
-            if (audioFunc == null) return false;
+            if (audioFunc == null) {
+                return false;
+            }
             if (isLoop) {
                 audioFunc.setLoop(isLoop);
             }
@@ -110,19 +112,25 @@ public class SongService extends Service {
     }
 
     public void play() {
-        if (audioFunc == null) return;
+        if (audioFunc == null) {
+            return;
+        }
         audioFunc.play();
         notify.updateState();
     }
 
     public void pause() {
-        if (audioFunc == null) return;
+        if (audioFunc == null) {
+            return;
+        }
         audioFunc.pause();
         notify.updateState();
     }
 
     public boolean stop() {
-        if (audioFunc == null) return false;
+        if (audioFunc == null) {
+            return false;
+        }
         notify.updateState();
         return audioFunc.stop();
     }
@@ -135,7 +143,9 @@ public class SongService extends Service {
 
     public boolean exit() {
         Log.w("SongService", "Hei Service is on EXIT()");
-        if (audioFunc == null) return false;
+        if (audioFunc == null) {
+            return false;
+        }
         audioFunc.stop();
         audioFunc.unregisterReceiverBM();
         audioFunc.freeALL();
@@ -145,7 +155,9 @@ public class SongService extends Service {
     }
 
     public void seekTo(int time) {
-        if (audioFunc == null) return;
+        if (audioFunc == null) {
+            return;
+        }
         System.out.println(audioFunc.jump(time));
     }
 
@@ -230,15 +242,22 @@ public class SongService extends Service {
     }
 
     public void setReceiverStuff(BroadcastReceiver receiver, IntentFilter filter) {
-        if (audioFunc != null) audioFunc.setReciverStuff(receiver, filter, this);
+        if (audioFunc != null) {
+            audioFunc.setReciverStuff(receiver, filter, this);
+        }
     }
 
     public boolean checkFileExist(String path) {
-        if (path == null) return false;
-        if (path.trim().isEmpty()) return false;
-        else {
+        if (path == null) {
+            return false;
+        }
+        if (path.trim().isEmpty()) {
+            return false;
+        } else {
             File songFile = new File(path);
-            if (!songFile.exists()) return false;
+            if (!songFile.exists()) {
+                return false;
+            }
         }
         return true;
     }

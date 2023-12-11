@@ -22,77 +22,13 @@ import java.util.UUID;
 
 public class Config {
 
-    private static String corePath,
-            defaultCorePath,
-            beatmapPath,
-            cachePath,
-            skinPath,
-            skinTopPath,
-            scorePath,
-            localUsername,
-            onlineUsername,
-            onlinePassword,
-            onlineDeviceID;
+    private static String corePath, defaultCorePath, beatmapPath, cachePath, skinPath, skinTopPath, scorePath, localUsername, onlineUsername, onlinePassword, onlineDeviceID;
 
-    private static boolean DELETE_OSZ,
-            SCAN_DOWNLOAD,
-            deleteUnimportedBeatmaps,
-            showFirstApproachCircle,
-            comboburst,
-            useCustomSkins,
-            useCustomSounds,
-            corovans,
-            showFPS,
-            complexAnimations,
-            snakingInSliders,
-            playMusicPreview,
-            showCursor,
-            shrinkPlayfieldDownwards,
-            hideNaviBar,
-            showScoreboard,
-            enablePP,
-            enableExtension,
-            loadAvatar,
-            stayOnline,
-            syncMusic,
-            burstEffects,
-            hitLighting,
-            useDither,
-            useParticles,
-            useCustomComboColors,
-            forceRomanized,
-            fixFrameOffset,
-            removeSliderLock,
-            calculateSliderPathInGameStart,
-            displayScoreStatistics,
-            hideReplayMarquee,
-            hideInGameUI,
-            receiveAnnouncements,
-            enableStoryboard,
-            safeBeatmapBg,
-            trianglesAnimation,
-            displayRealTimePPCounter,
-            useNightcoreOnMultiplayer,
-            videoEnabled,
-            deleteUnsupportedVideos,
-            submitScoreOnMultiplayer,
-            keepBackgroundAspectRatio,
-            noChangeDimInBreaks;
+    private static boolean DELETE_OSZ, SCAN_DOWNLOAD, deleteUnimportedBeatmaps, showFirstApproachCircle, comboburst, useCustomSkins, useCustomSounds, corovans, showFPS, complexAnimations, snakingInSliders, playMusicPreview, showCursor, shrinkPlayfieldDownwards, hideNaviBar, showScoreboard, enablePP, enableExtension, loadAvatar, stayOnline, syncMusic, burstEffects, hitLighting, useDither, useParticles, useCustomComboColors, forceRomanized, fixFrameOffset, removeSliderLock, calculateSliderPathInGameStart, displayScoreStatistics, hideReplayMarquee, hideInGameUI, receiveAnnouncements, enableStoryboard, safeBeatmapBg, trianglesAnimation, displayRealTimePPCounter, useNightcoreOnMultiplayer, videoEnabled, deleteUnsupportedVideos, submitScoreOnMultiplayer, keepBackgroundAspectRatio, noChangeDimInBreaks;
 
-    private static int RES_WIDTH,
-            RES_HEIGHT,
-            errorMeter,
-            spinnerStyle,
-            backgroundQuality,
-            metronomeSwitch;
+    private static int RES_WIDTH, RES_HEIGHT, errorMeter, spinnerStyle, backgroundQuality, metronomeSwitch;
 
-    private static float soundVolume,
-            bgmVolume,
-            offset,
-            backgroundBrightness,
-            scaleMultiplier,
-            playfieldSize,
-            cursorSize;
+    private static float soundVolume, bgmVolume, offset, backgroundBrightness, scaleMultiplier, playfieldSize, cursorSize;
 
     private static Map<String, String> skins;
 
@@ -102,8 +38,7 @@ public class Config {
 
     public static void loadConfig(final Context context) {
         Config.context = context;
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(context);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String s;
         // graphics
         s = prefs.getString("background", "2");
@@ -138,13 +73,7 @@ public class Config {
             bgmVolume = prefs.getInt("bgmvolume", 100) / 100f;
             cursorSize = prefs.getInt("cursorSize", 50) / 100f;
         } catch (RuntimeException e) { // use valid integer since this makes the game crash on android m
-            prefs.edit()
-                    .putInt("offset", 0)
-                    .putInt("bgbrightness", 25)
-                    .putInt("soundvolume", 100)
-                    .putInt("bgmvolume", 100)
-                    .putInt("cursorSize", 50)
-                    .commit();
+            prefs.edit().putInt("offset", 0).putInt("bgbrightness", 25).putInt("soundvolume", 100).putInt("bgmvolume", 100).putInt("cursorSize", 50).commit();
             Config.loadConfig(context);
             return;
         }
@@ -246,8 +175,7 @@ public class Config {
     }
 
     public static void loadOnlineConfig(final Context context) {
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(context);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         onlineUsername = prefs.getString("onlineUsername", "");
         onlinePassword = prefs.getString("onlinePassword", null);
@@ -754,7 +682,9 @@ public class Config {
     }
 
     public static void addSkin(String name, String path) {
-        if (skins == null) skins = new HashMap<>();
+        if (skins == null) {
+            skins = new HashMap<>();
+        }
         skins.put(name, path);
     }
 

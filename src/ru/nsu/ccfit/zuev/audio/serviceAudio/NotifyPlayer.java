@@ -37,12 +37,9 @@ public class NotifyPlayer {
 
     private final MainActivity mActivity = GlobalManager.getInstance().getMainActivity();
 
-    private final String
-            actionPrev = "player_previous",
-            actionPlay = "player_play",
-            actionNext = "Notify_next", //It has an usage in BassAudioFunc, that's why i left the original name.
+    private final String actionPrev = "player_previous", actionPlay = "player_play", actionNext = "Notify_next", //It has an usage in BassAudioFunc, that's why i left the original name.
 
-            actionClose = "player_close";
+    actionClose = "player_close";
 
     public BroadcastReceiver receiver;
 
@@ -87,13 +84,17 @@ public class NotifyPlayer {
             @Override
             public void onReceive(Context context, Intent intent) {
 
-                if (service.isRunningForeground())
+                if (service.isRunningForeground()) {
                     return;
+                }
 
                 switch (intent.getAction()) {
                     case actionPlay:
-                        if (service.getStatus() == Status.PLAYING) service.pause();
-                        else service.play();
+                        if (service.getStatus() == Status.PLAYING) {
+                            service.pause();
+                        } else {
+                            service.play();
+                        }
                         break;
                     case actionPrev:
                         service.stop();
@@ -121,8 +122,9 @@ public class NotifyPlayer {
 
     @SuppressLint("RestrictedApi")
     public void updateState() {
-        if (!isShowing)
+        if (!isShowing) {
             return;
+        }
         boolean isPlaying = GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING;
         int drawable = isPlaying ? R.drawable.v_pause : R.drawable.v_play;
 
@@ -131,11 +133,13 @@ public class NotifyPlayer {
     }
 
     public void updateSong(BeatmapInfo beatmap) {
-        if (!isShowing || beatmap == null)
+        if (!isShowing || beatmap == null) {
             return;
+        }
 
-        if (notification == null)
+        if (notification == null) {
             create();
+        }
 
         Bitmap bitmap = null;
         String title = " ";
@@ -162,18 +166,21 @@ public class NotifyPlayer {
     }
 
     public void show() {
-        if (isShowing)
+        if (isShowing) {
             return;
-        if (notification == null)
+        }
+        if (notification == null) {
             create();
+        }
 
         manager.notify(NOTIFICATION_ID, notification);
         isShowing = true;
     }
 
     public boolean hide() {
-        if (!isShowing)
+        if (!isShowing) {
             return false;
+        }
         manager.cancel(NOTIFICATION_ID);
         isShowing = false;
         return true;
@@ -183,40 +190,19 @@ public class NotifyPlayer {
         String channelId = "ru.nsu.ccfit.zuev.audio";
 
         if (Build.VERSION.SDK_INT >= 26) {
-            NotificationChannel channel = new NotificationChannel(channelId,
-                    "Beatmap music player for osu!droid",
-                    NotificationManager.IMPORTANCE_LOW);
+            NotificationChannel channel = new NotificationChannel(channelId, "Beatmap music player for osu!droid", NotificationManager.IMPORTANCE_LOW);
 
             channel.setDescription("osu!droid music player");
             manager.createNotificationChannel(channel);
         }
 
         //This disables progress bar area
-        MediaMetadataCompat metadata = new MediaMetadataCompat.Builder()
-                .putLong(MediaMetadata.METADATA_KEY_DURATION, -1L)
-                .build();
+        MediaMetadataCompat metadata = new MediaMetadataCompat.Builder().putLong(MediaMetadata.METADATA_KEY_DURATION, -1L).build();
         mediaSession.setMetadata(metadata);
 
-        PendingIntent openApp =
-                PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class), 0);
+        PendingIntent openApp = PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class), 0);
 
-        builder = new NotificationCompat.Builder(context, channelId)
-                .setSmallIcon(R.drawable.notify_inso)
-                .setLargeIcon(defaultIcon)
-                .setContentTitle("title")
-                .setContentText("artist")
-                .setOnlyAlertOnce(true)
-                .setSound(null)
-                .setShowWhen(false)
-                .setContentIntent(openApp)
-                .addAction(R.drawable.v_prev, actionPrev, prev)
-                .addAction(R.drawable.v_play, actionPlay, play)
-                .addAction(R.drawable.v_next, actionNext, next)
-                .addAction(R.drawable.v_close, actionClose, close)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setStyle(new MediaStyle()
-                        .setShowActionsInCompactView(0, 1, 2)
-                        .setMediaSession(mediaSession.getSessionToken()));
+        builder = new NotificationCompat.Builder(context, channelId).setSmallIcon(R.drawable.notify_inso).setLargeIcon(defaultIcon).setContentTitle("title").setContentText("artist").setOnlyAlertOnce(true).setSound(null).setShowWhen(false).setContentIntent(openApp).addAction(R.drawable.v_prev, actionPrev, prev).addAction(R.drawable.v_play, actionPlay, play).addAction(R.drawable.v_next, actionNext, next).addAction(R.drawable.v_close, actionClose, close).setPriority(NotificationCompat.PRIORITY_LOW).setStyle(new MediaStyle().setShowActionsInCompactView(0, 1, 2).setMediaSession(mediaSession.getSessionToken()));
 
         notification = builder.build();
     }

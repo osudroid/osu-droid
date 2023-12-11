@@ -127,8 +127,7 @@ public class GameHelper {
         gameid = (new Random().nextInt(233333333) + 1);
     }
 
-    public static SliderPath calculatePath(final PointF pos,
-                                           final String[] data, final float maxLength, final float offset) {
+    public static SliderPath calculatePath(final PointF pos, final String[] data, final float maxLength, final float offset) {
         final ArrayList<ArrayList<PointF>> points = new ArrayList<>();
         points.add(new ArrayList<>());
         int lastIndex = 0;
@@ -153,10 +152,8 @@ public class GameHelper {
             point.set(Integer.parseInt(nums[0]), Integer.parseInt(nums[1]));
             point.x += offset;
             point.y += offset;
-            final PointF ppoint = points.get(lastIndex).get(
-                    points.get(lastIndex).size() - 1);
-            if (point.x == ppoint.x && point.y == ppoint.y
-                    || data[0].equals("C")) {
+            final PointF ppoint = points.get(lastIndex).get(points.get(lastIndex).size() - 1);
+            if (point.x == ppoint.x && point.y == ppoint.y || data[0].equals("C")) {
                 if (data[0].equals("C")) {
                     points.get(lastIndex).add(point);
                 }
@@ -188,12 +185,9 @@ public class GameHelper {
 
             // Debug.i("section size=" + section.size());
             for (final PointF p : section) {
-                if (pind < 0
-                        || Math.abs(p.x - path.points.get(pind).x)
-                        + Math.abs(p.y - path.points.get(pind).y) > 1f) {
+                if (pind < 0 || Math.abs(p.x - path.points.get(pind).x) + Math.abs(p.y - path.points.get(pind).y) > 1f) {
                     if (!path.points.isEmpty()) {
-                        vec.set(p.x - path.points.get(path.points.size() - 1).x,
-                                p.y - path.points.get(path.points.size() - 1).y);
+                        vec.set(p.x - path.points.get(path.points.size() - 1).x, p.y - path.points.get(path.points.size() - 1).y);
                         trackLength += Utils.length(vec);
                         path.length.add(trackLength);
                     }
@@ -212,8 +206,7 @@ public class GameHelper {
         }
 
         if (path.points.size() == 1) {
-            path.points.add(new PointF(path.points.get(0).x,
-                    path.points.get(0).y));
+            path.points.add(new PointF(path.points.get(0).x, path.points.get(0).y));
             path.length.add(0f);
         }
 

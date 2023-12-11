@@ -133,10 +133,7 @@ public class BeatmapParser {
         String fileName = file.getName().substring(0, file.getName().length() - 4);
 
         if (source == null && !openFile()) {
-            ToastLogger.showText(
-                    StringTable.format(R.string.beatmap_parser_cannot_open_file, fileName),
-                    true
-            );
+            ToastLogger.showText(StringTable.format(R.string.beatmap_parser_cannot_open_file, fileName), true);
             return null;
         }
 

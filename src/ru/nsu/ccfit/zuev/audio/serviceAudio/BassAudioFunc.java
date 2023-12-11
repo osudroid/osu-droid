@@ -198,17 +198,22 @@ public class BassAudioFunc {
 
     public boolean jump(int ms) {
         if (channel != 0 && ms > 0) {
-            if (skipPosition == 0 || skipPosition == -1)
+            if (skipPosition == 0 || skipPosition == -1) {
                 skipPosition = BASS.BASS_ChannelSeconds2Bytes(channel, ms / 1000.0);
-            if (mode == PlayMode.MODE_NONE)
+            }
+            if (mode == PlayMode.MODE_NONE) {
                 return BASS.BASS_ChannelSetPosition(channel, skipPosition, BASS.BASS_POS_BYTE);
-            else return BASS.BASS_ChannelSetPosition(channel, skipPosition, BASS.BASS_POS_DECODE);
+            } else {
+                return BASS.BASS_ChannelSetPosition(channel, skipPosition, BASS.BASS_POS_DECODE);
+            }
         }
         return false;
     }
 
     public Status getStatus() {
-        if (channel == 0) return Status.STOPPED;
+        if (channel == 0) {
+            return Status.STOPPED;
+        }
 
         switch (BASS.BASS_ChannelIsActive(channel)) {
             case BASS.BASS_ACTIVE_STOPPED:
@@ -301,7 +306,9 @@ public class BassAudioFunc {
     }
 
     public void unregisterReceiverBM() {
-        if (broadcastManager != null) broadcastManager.unregisterReceiver(receiver);
+        if (broadcastManager != null) {
+            broadcastManager.unregisterReceiver(receiver);
+        }
     }
 
     public void freeALL() {

@@ -53,16 +53,12 @@ public class MenuItem {
         this.listener = new WeakReference<>(listener);
         beatmap = info;
         trackDir = ScoreLibrary.getTrackDir(beatmap.getPath());
-        bgHeight = ResourceManager.getInstance()
-                .getTexture("menu-button-background").getHeight()
-                - 25;
+        bgHeight = ResourceManager.getInstance().getTexture("menu-button-background").getHeight() - 25;
         titleStr = beatmap.getArtist() + " - " + beatmap.getTitle();
-        creatorStr = StringTable.format(R.string.menu_creator,
-                beatmap.getCreator());
+        creatorStr = StringTable.format(R.string.menu_creator, beatmap.getCreator());
         trackSprites = new MenuItemTrack[info.getCount()];
 
-        final BeatmapProperties props = PropertiesLibrary.getInstance()
-                .getProperties(info.getPath());
+        final BeatmapProperties props = PropertiesLibrary.getInstance().getProperties(info.getPath());
         favorite = props != null && props.isFavorite();
 
     }
@@ -71,9 +67,7 @@ public class MenuItem {
         this.listener = new WeakReference<>(listener);
         beatmap = info;
         trackDir = ScoreLibrary.getTrackDir(beatmap.getPath());
-        bgHeight = ResourceManager.getInstance()
-                .getTexture("menu-button-background").getHeight()
-                - 25;
+        bgHeight = ResourceManager.getInstance().getTexture("menu-button-background").getHeight() - 25;
         titleStr = beatmap.getArtist() + " - " + beatmap.getTitle();
         creatorStr = StringTable.format(R.string.menu_creator, beatmap.getCreator());
         trackSprites = new MenuItemTrack[1];
@@ -106,8 +100,7 @@ public class MenuItem {
             return 0;
         }
         if (selected) {
-            return bgHeight + percentAppeared * (bgHeight)
-                    * (trackSprites.length - 1);
+            return bgHeight + percentAppeared * (bgHeight) * (trackSprites.length - 1);
         }
         return bgHeight - 5;
     }
@@ -131,8 +124,7 @@ public class MenuItem {
             }
         }
         if (!selected) {
-            if (visible && background == null
-                    && y < Config.getRES_HEIGHT() && y > -bgHeight) {
+            if (visible && background == null && y < Config.getRES_HEIGHT() && y > -bgHeight) {
                 initBackground();
                 background.setPosition(x, y);
             }
@@ -143,12 +135,9 @@ public class MenuItem {
             if (s == null) {
                 continue;
             }
-            final float cy = y + oy + Config.getRES_HEIGHT() / 2f
-                    + s.getHeight() / 2;
-            final float i = 170 * (float) Math.abs(Math.cos(cy * Math.PI
-                    / (Config.getRES_HEIGHT() * 2)));
-            final float ox = x
-                    + i;
+            final float cy = y + oy + Config.getRES_HEIGHT() / 2f + s.getHeight() / 2;
+            final float i = 170 * (float) Math.abs(Math.cos(cy * Math.PI / (Config.getRES_HEIGHT() * 2)));
+            final float ox = x + i;
             s.setPosition(ox - 100, y + oy);
             oy += (s.getHeight() - 25) * percentAppeared;
         }
@@ -199,8 +188,7 @@ public class MenuItem {
     }
 
     public void applyFilter(final String filter, final boolean favs, Set<String> limit) {
-        if ((favs && !isFavorite())
-                || (limit != null && !limit.contains(trackDir))) {
+        if ((favs && !isFavorite()) || (limit != null && !limit.contains(trackDir))) {
             //System.out.println(trackDir);
             if (selected) {
                 deselect();
@@ -449,7 +437,9 @@ public class MenuItem {
         if (trackId <= -1) {
             int i = 0;
             for (TrackInfo track : beatmap.getTracks()) {
-                if (track == null) continue;
+                if (track == null) {
+                    continue;
+                }
                 if (track.getFilename().equals(oldTrackFileName)) {
                     return i;
                 }

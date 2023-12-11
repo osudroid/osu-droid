@@ -78,8 +78,7 @@ public class GameObjectPool {
     }
 
     public GameEffect getEffect(final String texname) {
-        if (effects.containsKey(texname)
-                && !effects.get(texname).isEmpty()) {
+        if (effects.containsKey(texname) && !effects.get(texname).isEmpty()) {
             return effects.get(texname).poll();
         }
 

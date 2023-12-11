@@ -77,8 +77,9 @@ public class ScoreBoardItem implements Cloneable {
         if (Multiplayer.isConnected() && Multiplayer.room.getWinCondition() == WinCondition.ACCURACY) {
             accSb.setLength(0);
             text += DECIMAL_FORMAT.format("%2.2f%%", accuracy * 100f);
-        } else
+        } else {
             text += NUMBER_FORMAT.format(maxCombo) + "x";
+        }
 
         return text;
     }
@@ -102,19 +103,17 @@ public class ScoreBoardItem implements Cloneable {
 
     @Override
     public boolean equals(@Nullable Object o) {
-        if (o == this)
+        if (o == this) {
             return true;
+        }
 
-        if (!(o instanceof ScoreBoardItem))
+        if (!(o instanceof ScoreBoardItem)) {
             return false;
+        }
 
         var other = (ScoreBoardItem) o;
 
-        return Objects.equals(other.userName, userName)
-                && other.playScore == playScore
-                && other.maxCombo == maxCombo
-                && other.accuracy == accuracy
-                && other.isAlive == isAlive;
+        return Objects.equals(other.userName, userName) && other.playScore == playScore && other.maxCombo == maxCombo && other.accuracy == accuracy && other.isAlive == isAlive;
     }
 
     @NonNull

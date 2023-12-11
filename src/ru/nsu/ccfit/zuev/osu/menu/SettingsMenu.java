@@ -149,8 +149,7 @@ public class SettingsMenu extends SettingsFragment {
         });
         final Preference clearProps = findPreference("clear_properties");
         clearProps.setOnPreferenceClickListener(preference -> {
-            PropertiesLibrary.getInstance()
-                    .clear(mActivity);
+            PropertiesLibrary.getInstance().clear(mActivity);
             return true;
         });
         final Preference register = findPreference("registerAcc");
@@ -251,32 +250,21 @@ public class SettingsMenu extends SettingsFragment {
         body.setAlpha(0);
         body.setTranslationX(400);
         body.animate().cancel();
-        body.animate()
-                .translationX(0)
-                .alpha(1)
-                .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-                .setDuration(150)
-                .start();
+        body.animate().translationX(0).alpha(1).setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad)).setDuration(150).start();
         playBackgroundHideInAnim(150);
     }
 
     protected void playOnDismissAnim(Runnable action) {
         View body = findViewById(R.id.body);
         body.animate().cancel();
-        body.animate()
-                .translationXBy(400)
-                .alpha(0)
-                .setDuration(200)
-                .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-                .setListener(new BaseAnimationListener() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        if (action != null) {
-                            action.run();
-                        }
-                    }
-                })
-                .start();
+        body.animate().translationXBy(400).alpha(0).setDuration(200).setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad)).setListener(new BaseAnimationListener() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (action != null) {
+                    action.run();
+                }
+            }
+        }).start();
         playBackgroundHideOutAnim(200);
     }
 

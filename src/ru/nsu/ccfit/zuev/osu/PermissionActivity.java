@@ -58,8 +58,7 @@ public class PermissionActivity extends AppCompatActivity implements EasyPermiss
                 startActivityForResult(intent, 2444);
             }
         } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            if (PermissionChecker.checkCallingOrSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    == PermissionChecker.PERMISSION_GRANTED) {
+            if (PermissionChecker.checkCallingOrSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED) {
                 startGameActivity();
             } else {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2333);
@@ -88,9 +87,7 @@ public class PermissionActivity extends AppCompatActivity implements EasyPermiss
 
     @Override
     public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
-        if (PermissionChecker.checkCallingOrSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PermissionChecker.PERMISSION_GRANTED
-                && EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+        if (PermissionChecker.checkCallingOrSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED && EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
             new AppSettingsDialog.Builder(this).build().show();
         }
     }

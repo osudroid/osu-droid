@@ -88,27 +88,22 @@ public class SkinManager {
         clearSkin();
         skinname = beatmapFolder;
         final File folderFile = new File(beatmapFolder);
-        File[] folderFiles = FileUtils.listFiles(folderFile, new String[]{
-                ".wav", ".mp3", ".ogg", ".png", ".jpg"});
+        File[] folderFiles = FileUtils.listFiles(folderFile, new String[]{".wav", ".mp3", ".ogg", ".png", ".jpg"});
         for (final File f : folderFiles) {
             if (!f.isFile()) {
                 continue;
             }
-            if (Config.isUseCustomSounds()
-                    && (f.getName().toLowerCase().matches(".*[.]wav")
-                    || f.getName().toLowerCase().matches(".*[.]mp3")
-                    || f.getName().toLowerCase().matches(".*[.]ogg"))
-                    && f.length() >= 1024) {
+            if (Config.isUseCustomSounds() && (f.getName().toLowerCase().matches(".*[.]wav") || f.getName().toLowerCase().matches(".*[.]mp3") || f.getName().toLowerCase().matches(".*[.]ogg")) && f.length() >= 1024) {
                 ResourceManager.getInstance().loadCustomSound(f);
-            } else if (Config.isUseCustomSkins()
-                    && (f.getName().toLowerCase().matches(".*[.]png")
-                    || f.getName().toLowerCase().matches(".*[.]jpg"))) {
+            } else if (Config.isUseCustomSkins() && (f.getName().toLowerCase().matches(".*[.]png") || f.getName().toLowerCase().matches(".*[.]jpg"))) {
                 ResourceManager.getInstance().loadCustomTexture(f);
             }
 
         }
 
-        if (!Config.isUseCustomSkins()) return;
+        if (!Config.isUseCustomSkins()) {
+            return;
+        }
 
         for (final String s : frameCount.keySet()) {
             final int fcount = ResourceManager.getInstance().getFrameCount(s);
@@ -127,8 +122,7 @@ public class SkinManager {
         frameCount.put("followpoint", stdframeCount.get("followpoint"));
         frameCount.put("scorebar-colour", stdframeCount.get("scorebar-colour"));
         frameCount.put("play-skip", stdframeCount.get("play-skip"));
-        frameCount.put("sliderfollowcircle",
-                stdframeCount.get("sliderfollowcircle"));
+        frameCount.put("sliderfollowcircle", stdframeCount.get("sliderfollowcircle"));
         ResourceManager.getInstance().clearCustomResources();
     }
 

@@ -4,10 +4,7 @@ package ru.nsu.ccfit.zuev.osu.beatmap.constants;
  * Represents the speed of the countdown before the first hit object.
  */
 public enum BeatmapCountdown {
-    noCountdown(0),
-    normal(1),
-    half(0.5f),
-    twice(2);
+    noCountdown(0), normal(1), half(0.5f), twice(2);
 
     /**
      * The speed at which the beatmap countdown should be played.

@@ -49,8 +49,9 @@ public class CursorEntity extends Entity {
     public void setShowing(boolean showing) {
         isShowing = showing;
         setVisible(showing);
-        if (particles != null)
+        if (particles != null) {
             particles.setParticlesSpawnEnabled(showing);
+        }
     }
 
     public void click() {
@@ -74,8 +75,9 @@ public class CursorEntity extends Entity {
 
     @Override
     public void setPosition(float pX, float pY) {
-        if (emitter != null)
+        if (emitter != null) {
             emitter.setCenter(pX + particleOffsetX, pY + particleOffsetY);
+        }
 
         super.setPosition(pX, pY);
     }

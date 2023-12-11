@@ -26,10 +26,7 @@ public class BeatmapHitObjectsParser extends BeatmapSectionParser {
         double time = data.getOffsetTime(parseDouble(pars[2]));
 
         HitObjectType type = HitObjectType.valueOf(parseInt(pars[3]) % 16);
-        Vector2 position = new Vector2(
-                (int) parseFloat(pars[0], maxCoordinateValue),
-                (int) parseFloat(pars[1], maxCoordinateValue)
-        );
+        Vector2 position = new Vector2((int) parseFloat(pars[0], maxCoordinateValue), (int) parseFloat(pars[1], maxCoordinateValue));
 
         HitObject object = null;
 
@@ -49,8 +46,7 @@ public class BeatmapHitObjectsParser extends BeatmapSectionParser {
         return new HitCircle(time, position);
     }
 
-    private Slider createSlider(BeatmapData data, double time, Vector2 position, String[] pars)
-            throws UnsupportedOperationException {
+    private Slider createSlider(BeatmapData data, double time, Vector2 position, String[] pars) throws UnsupportedOperationException {
         if (pars.length < 8) {
             throw new UnsupportedOperationException("Malformed slider");
         }
@@ -68,10 +64,7 @@ public class BeatmapHitObjectsParser extends BeatmapSectionParser {
         curvePoints.add(new Vector2(0));
         for (int i = 1; i < curvePointsData.length; i++) {
             String[] curvePointData = curvePointsData[i].split(":");
-            Vector2 curvePointPosition = new Vector2(
-                    (int) parseFloat(curvePointData[0], maxCoordinateValue),
-                    (int) parseFloat(curvePointData[1], maxCoordinateValue)
-            );
+            Vector2 curvePointPosition = new Vector2((int) parseFloat(curvePointData[0], maxCoordinateValue), (int) parseFloat(curvePointData[1], maxCoordinateValue));
 
             curvePoints.add(curvePointPosition.subtract(position));
         }
@@ -86,13 +79,7 @@ public class BeatmapHitObjectsParser extends BeatmapSectionParser {
         if (sliderType == SliderPathType.PerfectCurve) {
             if (curvePoints.size() != 3) {
                 sliderType = SliderPathType.Bezier;
-            } else if (
-                    Precision.almostEqualsNumber(
-                            0,
-                            (curvePoints.get(1).y - curvePoints.get(0).y) * (curvePoints.get(2).x - curvePoints.get(0).x) -
-                                    (curvePoints.get(1).x - curvePoints.get(0).x) * (curvePoints.get(2).y - curvePoints.get(0).y)
-                    )
-            ) {
+            } else if (Precision.almostEqualsNumber(0, (curvePoints.get(1).y - curvePoints.get(0).y) * (curvePoints.get(2).x - curvePoints.get(0).x) - (curvePoints.get(1).x - curvePoints.get(0).x) * (curvePoints.get(2).y - curvePoints.get(0).y))) {
                 // osu-stable special-cased co-linear perfect curves to a linear path
                 sliderType = SliderPathType.Linear;
             }
@@ -102,20 +89,10 @@ public class BeatmapHitObjectsParser extends BeatmapSectionParser {
         TimingControlPoint timingControlPoint = data.timingPoints.timing.controlPointAt(time);
         DifficultyControlPoint difficultyControlPoint = data.timingPoints.difficulty.controlPointAt(time);
 
-        return new Slider(
-                time,
-                position,
-                timingControlPoint,
-                difficultyControlPoint,
-                repeat,
-                path,
-                data.difficulty.sliderMultiplier,
-                data.difficulty.sliderTickRate,
+        return new Slider(time, position, timingControlPoint, difficultyControlPoint, repeat, path, data.difficulty.sliderMultiplier, data.difficulty.sliderTickRate,
                 // Prior to v8, speed multipliers don't adjust for how many ticks are generated over the same distance.
                 // this results in more (or less) ticks being generated in <v8 maps for the same time duration.
-                data.getFormatVersion() < 8 ? 1 / difficultyControlPoint.speedMultiplier : 1,
-                difficultyControlPoint.generateTicks
-        );
+                data.getFormatVersion() < 8 ? 1 / difficultyControlPoint.speedMultiplier : 1, difficultyControlPoint.generateTicks);
     }
 
     private Spinner createSpinner(BeatmapData data, double time, String[] pars) {

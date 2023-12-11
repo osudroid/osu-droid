@@ -7,7 +7,10 @@ import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -167,7 +170,9 @@ public class OsbParser {
         }
         while (line != null && line.startsWith(" ")) {
             line = line.trim();
-            if (line.isEmpty()) break;
+            if (line.isEmpty()) {
+                break;
+            }
             for (String s : variablesMap.keySet()) {
                 if (line.contains(s)) {
                     line = line.replace(s, variablesMap.get(s));
@@ -397,7 +402,9 @@ public class OsbParser {
         String line;
         while ((line = source.readUtf8Line()) != null) {
             line = line.trim();
-            if (line.isEmpty()) return;
+            if (line.isEmpty()) {
+                return;
+            }
             String[] values = line.split(":");
             String key = values[0];
             String value = values[1].trim();
@@ -414,7 +421,9 @@ public class OsbParser {
         String info[];
         while ((line = source.readUtf8Line()) != null) {
             line = line.trim();
-            if (line.isEmpty()) return;
+            if (line.isEmpty()) {
+                return;
+            }
 
             if (line.contains(",")) {
                 info = line.split(",");
@@ -433,7 +442,9 @@ public class OsbParser {
         String line;
         while ((line = source.readUtf8Line()) != null) {
             line = line.trim();
-            if (line.isEmpty()) return;
+            if (line.isEmpty()) {
+                return;
+            }
             String[] values = line.split("=");
             String key = values[0];
             String value = values[1].trim();
@@ -445,7 +456,9 @@ public class OsbParser {
         String line;
         while ((line = source.readUtf8Line()) != null) {
             line = line.trim();
-            if (line.isEmpty()) return;
+            if (line.isEmpty()) {
+                return;
+            }
             String[] values = line.split(":");
             if (values[0].equals("SliderMultiplier")) {
                 sliderMultiplier = Float.parseFloat(values[1]);
@@ -458,7 +471,9 @@ public class OsbParser {
         float lastLengthPerBeat = -100;
         while ((line = source.readUtf8Line()) != null) {
             line = line.trim();
-            if (line.isEmpty()) return;
+            if (line.isEmpty()) {
+                return;
+            }
             String[] values = line.split(",");
             TimingPoint timingPoint = new TimingPoint();
             timingPoint.startTime = (long) Float.parseFloat(values[0]);
@@ -476,7 +491,9 @@ public class OsbParser {
         String line;
         while ((line = source.readUtf8Line()) != null) {
             line = line.trim();
-            if (line.isEmpty()) return;
+            if (line.isEmpty()) {
+                return;
+            }
             String[] values = line.split(",");
             int objectType = Integer.parseInt(values[3]);
             if ((objectType & 1) == 1) {//circle
@@ -510,8 +527,9 @@ public class OsbParser {
                     }
 
                     hitSound.time = (long) (startTime + sliderLengthTime * i);
-                    if (hitSound.soundType > 0)
+                    if (hitSound.soundType > 0) {
                         hitSounds.add(hitSound);
+                    }
                 }
             } else if ((objectType & 8) == 8) {//spinner
                 HitSound hitSound = new HitSound();

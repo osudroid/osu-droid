@@ -46,28 +46,23 @@ public class MenuItemTrack extends Sprite {
     private float downTime = -1;
 
     public MenuItemTrack() {
-        super(0, 0, ResourceManager.getInstance().getTexture(
-                "menu-button-background"));
+        super(0, 0, ResourceManager.getInstance().getTexture("menu-button-background"));
 
-        trackTitle = new ChangeableText(32, 22,
-                ResourceManager.getInstance().getFont("font"), "", 200);
-        trackLeftText = new ChangeableText(350, 22,
-                ResourceManager.getInstance().getFont("font"), "", 30);
+        trackTitle = new ChangeableText(32, 22, ResourceManager.getInstance().getFont("font"), "", 200);
+        trackLeftText = new ChangeableText(350, 22, ResourceManager.getInstance().getFont("font"), "", 30);
         OsuSkin.get().getColor("MenuItemVersionsDefaultColor", DEFAULT_COLOR).apply(this);
         OsuSkin.get().getColor("MenuItemDefaultTextColor", DEFAULT_TEXT_COLOR).applyAll(trackTitle, trackLeftText);
         setAlpha(0.8f);
         attachChild(trackTitle);
-//		attachChild(trackLeftText);
+        //		attachChild(trackLeftText);
 
         stars = new Sprite[10];
         for (int i = 0; i < 10; i++) {
-            stars[i] = new Sprite(60 + 52 * i, 50,
-                    ResourceManager.getInstance().getTexture("star"));
+            stars[i] = new Sprite(60 + 52 * i, 50, ResourceManager.getInstance().getTexture("star"));
             attachChild(stars[i]);
         }
-        final TextureRegion starTex = ResourceManager.getInstance()
-                .getTexture("star").deepCopy();
-//		starTex.setWidth((starTex.getWidth() / 2));
+        final TextureRegion starTex = ResourceManager.getInstance().getTexture("star").deepCopy();
+        //		starTex.setWidth((starTex.getWidth() / 2));
         halfStar = new Sprite(0, 0, starTex);
         attachChild(halfStar);
     }
@@ -110,8 +105,7 @@ public class MenuItemTrack extends Sprite {
         if (track == null) {
             return;
         }
-        final String newmark = ScoreLibrary.getInstance().getBestMark(
-                track.getFilename());
+        final String newmark = ScoreLibrary.getInstance().getBestMark(track.getFilename());
         if (currentMark != null && currentMark.equals(newmark)) {
             return;
         }
@@ -120,8 +114,7 @@ public class MenuItemTrack extends Sprite {
             mark.detachSelf();
         }
         if (newmark != null) {
-            mark = new Sprite(25, 55, ResourceManager
-                    .getInstance().getTexture("ranking-" + newmark + "-small"));
+            mark = new Sprite(25, 55, ResourceManager.getInstance().getTexture("ranking-" + newmark + "-small"));
             attachChild(mark);
         } else {
             mark = null;
@@ -144,8 +137,7 @@ public class MenuItemTrack extends Sprite {
     }
 
     @Override
-    public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                 final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+    public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
         if (pSceneTouchEvent.isActionDown()) {
             downTime = 0;
             moved = false;
@@ -168,10 +160,7 @@ public class MenuItemTrack extends Sprite {
             item.get().selectTrack(this, false);
 
             return true;
-        } else if (pSceneTouchEvent.isActionOutside()
-                || pSceneTouchEvent.isActionMove()
-                && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                pTouchAreaLocalY) > 50)) {
+        } else if (pSceneTouchEvent.isActionOutside() || pSceneTouchEvent.isActionMove() && (MathUtils.distance(dx, dy, pTouchAreaLocalX, pTouchAreaLocalY) > 50)) {
             downTime = -1;
             setDeselectColor();
             moved = true;

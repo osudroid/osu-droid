@@ -20,8 +20,7 @@ public class GameScoreTextShadow extends GameObject {
 
     private String text;
 
-    public GameScoreTextShadow(float x, float y, final String mask,
-                               final float scale, GameScoreText comboText) {
+    public GameScoreTextShadow(float x, float y, final String mask, final float scale, GameScoreText comboText) {
         this.comboText = comboText;
         letters = new AnimSprite[mask.length()];
         float width = 0;
@@ -41,8 +40,7 @@ public class GameScoreTextShadow extends GameObject {
                 letters[i] = new AnimSprite(x + width, y, prefix, "x", 1, 0);
                 hasX = true;
             }
-            letters[i].setSize(letters[i].getWidth() * scale,
-                    letters[i].getHeight() * scale);
+            letters[i].setSize(letters[i].getWidth() * scale, letters[i].getHeight() * scale);
             width += letters[i].getWidth();
             letters[i].setAlpha(0);
             if (i == 0) {
@@ -83,8 +81,7 @@ public class GameScoreTextShadow extends GameObject {
             }
         }
         if (hasX) {
-            letters[letters.length - 1].setPosition(digits.get(0).getX()
-                    + digitsWidth, letters[letters.length - 1].getY());
+            letters[letters.length - 1].setPosition(digits.get(0).getX() + digitsWidth, letters[letters.length - 1].getY());
         }
         // Set previous text if wasn't set yet.
         comboText.changeText(this.text);
@@ -111,8 +108,7 @@ public class GameScoreTextShadow extends GameObject {
             }
 
             letters[0].setScale(1.5f - Math.abs(0.6f - alpha));
-            letters[0].setPosition(20, Config.getRES_HEIGHT()
-                    - letters[0].getHeightScaled() - 20);
+            letters[0].setPosition(20, Config.getRES_HEIGHT() - letters[0].getHeightScaled() - 20);
             for (final AnimSprite sp : letters) {
                 sp.setAlpha(alpha);
             }
