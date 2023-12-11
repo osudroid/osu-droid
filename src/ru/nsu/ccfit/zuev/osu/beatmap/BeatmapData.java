@@ -255,6 +255,7 @@ public class BeatmapData {
      * @param info The <code>BeatmapInfo</code> to populate.
      * @return Whether the given <code>BeatmapInfo</code> was successfully populated.
      */
+    // FIXME This method always returns the same value ('true') according to Intellij IDEA.
     public boolean populateMetadata(final BeatmapInfo info) {
 
         // Metadata
