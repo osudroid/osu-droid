@@ -21,27 +21,10 @@ public class BassAudioPlayer implements IMusicPlayer {
         provider.setDecoderMultiplier(100);
     }
 
-    public BassAudioPlayer(final String fileName) {
-        this();
-        this.loadMode = 0;
-        this.path = fileName;
-    }
-
-    public BassAudioPlayer(final AssetManager manager, String assetName) {
-        this();
-        this.loadMode = 1;
-        this.manager = manager;
-        this.path = assetName;
-    }
-
     public static void initDevice() {
         if (provider == null) {
             provider = new BassAudioProvider();
         }
-    }
-
-    public static BassAudioProvider getProvider() {
-        return provider;
     }
 
     public void prepare() {
@@ -50,10 +33,6 @@ public class BassAudioPlayer implements IMusicPlayer {
         } else {
             provider.prepare(manager, path);
         }
-    }
-
-    public void prepare(String fileName) {
-        provider.prepare(fileName);
     }
 
     public void play() {
@@ -102,13 +81,6 @@ public class BassAudioPlayer implements IMusicPlayer {
         return 0;
     }
 
-    public float[] getSpectrum() {
-        if (provider != null) {
-            return provider.getSpectrum();
-        }
-        return new float[0];
-    }
-
     public void seekTo(int ms) {
         if (provider != null) {
             provider.seek(ms / 1000.0);
@@ -127,12 +99,6 @@ public class BassAudioPlayer implements IMusicPlayer {
         }
     }
 
-    public void setLoop() {
-        if (provider != null) {
-            provider.setLoop();
-        }
-    }
-
     public float getVolume() {
         if (provider != null) {
             return provider.getVolume();
@@ -144,13 +110,6 @@ public class BassAudioPlayer implements IMusicPlayer {
         if (provider != null) {
             provider.setVolume(volume);
         }
-    }
-
-    public int getErrorCode() {
-        if (provider != null) {
-            return provider.getErrorCode();
-        }
-        return -1;
     }
 
 }
