@@ -133,10 +133,4 @@ public class ComboBurst {
         }
     }
 
-    public void detachAll() {
-        for (final Sprite sprite : comboBursts) {
-            sprite.detachSelf();
-        }
-    }
-
 }
