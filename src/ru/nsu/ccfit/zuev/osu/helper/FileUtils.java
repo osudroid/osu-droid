@@ -27,13 +27,13 @@ public class FileUtils {
     private FileUtils() {
     }
 
-    public static void copy(File from, File to) throws FileNotFoundException, IOException {
+    public static void copy(File from, File to) throws IOException {
         try (Source source = Okio.source(from); BufferedSink bufferedSink = Okio.buffer(Okio.sink(to))) {
             bufferedSink.writeAll(source);
         }
     }
 
-    public static void move(File from, File to) throws FileNotFoundException, IOException {
+    public static void move(File from, File to) throws IOException {
         copy(from, to);
         from.delete();
     }
