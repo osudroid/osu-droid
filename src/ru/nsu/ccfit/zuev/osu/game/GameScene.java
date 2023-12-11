@@ -4,7 +4,6 @@ import android.graphics.PointF;
 import android.os.Build;
 import android.os.SystemClock;
 import android.util.Log;
-
 import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.osb.StoryboardSprite;
@@ -24,16 +23,11 @@ import com.rian.difficultycalculator.attributes.TimedDifficultyAttributes;
 import com.rian.difficultycalculator.beatmap.hitobject.HitObject;
 import com.rian.difficultycalculator.beatmap.hitobject.HitObjectWithDuration;
 import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
-
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.engine.options.TouchOptions;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.LoopEntityModifier;
-import org.anddev.andengine.entity.modifier.MoveXModifier;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
+import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
@@ -46,35 +40,11 @@ import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Queue;
-
-import javax.microedition.khronos.opengles.GL10;
-
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.effect.Metronome;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.PlayMode;
-import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.Constants;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
-import ru.nsu.ccfit.zuev.osu.RGBAColor;
-import ru.nsu.ccfit.zuev.osu.RGBColor;
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.ToastLogger;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.constants.BeatmapCountdown;
 import ru.nsu.ccfit.zuev.osu.beatmap.constants.SampleBank;
@@ -85,12 +55,7 @@ import ru.nsu.ccfit.zuev.osu.game.cursor.main.AutoCursor;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.Cursor;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
-import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
-import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
-import ru.nsu.ccfit.zuev.osu.helper.ModifierFactory;
-import ru.nsu.ccfit.zuev.osu.helper.StringTable;
+import ru.nsu.ccfit.zuev.osu.helper.*;
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.PauseMenu;
@@ -98,16 +63,16 @@ import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem;
 import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
-import ru.nsu.ccfit.zuev.osu.scoring.Replay;
-import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
-import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
-import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
-import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
+import ru.nsu.ccfit.zuev.osu.scoring.*;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
+
+import javax.microedition.khronos.opengles.GL10;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.*;
 
 public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTouchListener {
 
@@ -1532,17 +1497,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
 
         boolean shouldBePunished = false;
 
-        var currentObj = objects.peek();
-        while (currentObj != null && secPassed + approachRate > currentObj.getTime()) {
+        while (!objects.isEmpty() && secPassed + approachRate > objects.peek().getTime()) {
             gameStarted = true;
-            objects.poll();
-            final String[] params = currentObj.getData();
+            final GameObjectData data = objects.poll();
+            final String[] params = data.getData();
 
-            final PointF pos = currentObj.getPos();
+            final PointF pos = data.getPos();
             // Fix matching error on new beatmaps
             final int objDefine = Integer.parseInt(params[3]);
 
-            final float time = currentObj.getRawTime();
+            final float time = data.getRawTime();
             if (time > totalLength) {
                 shouldBePunished = true;
             }
@@ -1553,16 +1517,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
 
             // Stack notes
             // If Config.isCalculateSliderPathInGameStart(), do this in stackNotes()
-            if (!Config.isCalculateSliderPathInGameStart() && nextObj != null && (objDefine & 1) > 0 && nextObj.getTime() - currentObj.getTime() < 2f * GameHelper.getStackLeniency() && Utils.squaredDistance(pos, nextObj.getPos()) < scale) {
-                nextObj.setPosOffset(currentObj.getPosOffset() + 4 * scale);
+            if (!Config.isCalculateSliderPathInGameStart() && !objects.isEmpty() && (objDefine & 1) > 0) {
+                if (nextObj.getTime() - data.getTime() < 2f * GameHelper.getStackLeniency() && Utils.squaredDistance(pos, nextObj.getPos()) < scale) {
+                    nextObj.setPosOffset(data.getPosOffset() + 4 * scale);
+                }
             }
             // If this object is silder and isCalculateSliderPathInGameStart(), the pos is += in calculateAllSliderPaths()
             if (!Config.isCalculateSliderPathInGameStart() || (objDefine & 2) <= 0) {
-                pos.x += currentObj.getPosOffset();
-                pos.y += currentObj.getPosOffset();
+                pos.x += data.getPosOffset();
+                pos.y += data.getPosOffset();
             }
-            if (nextObj != null) {
-                distToNextObject = nextObj.getTime() - currentObj.getTime();
+            if (!objects.isEmpty()) {
+                distToNextObject = nextObj.getTime() - data.getTime();
                 if (soundTimingPoint != null && distToNextObject < soundTimingPoint.getBeatLength() / 2) {
                     distToNextObject = soundTimingPoint.getBeatLength() / 2;
                 }
@@ -1599,27 +1565,29 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
                     tempSound = params[5];
                 }
 
-                circle.init(this, mgScene, pos, currentObj.getTime() - secPassed, col.r(), col.g(), col.b(), scale, currentComboNum, Integer.parseInt(params[4]), tempSound, isFirst);
-                circle.setEndsCombo(nextObj == null || nextObj.isNewCombo());
+                circle.init(this, mgScene, pos, data.getTime() - secPassed, col.r(), col.g(), col.b(), scale, currentComboNum, Integer.parseInt(params[4]), tempSound, isFirst);
+                circle.setEndsCombo(objects.isEmpty() || nextObj.isNewCombo());
                 addObject(circle);
                 isFirst = false;
-                if (nextObj != null && !nextObj.isNewCombo()) {
+                if (!objects.isEmpty() && !nextObj.isNewCombo()) {
                     final FollowTrack track = GameObjectPool.getInstance().getTrack();
                     PointF end;
-                    if (nextObj.getTime() > currentObj.getTime()) {
-                        end = currentObj.getEnd();
+                    if (nextObj.getTime() > data.getTime()) {
+                        end = data.getEnd();
                     } else {
-                        end = currentObj.getPos();
+                        end = data.getPos();
                     }
                     track.init(this, bgScene, end, nextObj.getPos(), nextObj.getTime() - secPassed, approachRate, scale);
                 }
                 if (GameHelper.isAuto()) {
                     circle.setAutoPlay();
                 }
-                circle.setHitTime(currentObj.getTime());
+                circle.setHitTime(data.getTime());
 
-                if (nextObj != null && nextObj.getTime() > currentObj.getTime()) {
-                    currentComboNum++;
+                if (!objects.isEmpty()) {
+                    if (nextObj.getTime() > data.getTime()) {
+                        currentComboNum++;
+                    }
                 }
 
                 circle.setId(++lastObjectId);
@@ -1631,8 +1599,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
                 final float endTime = Integer.parseInt(params[5]) / 1000.0f;
                 final float rps = 2 + 2 * overallDifficulty / 10f;
                 final Spinner spinner = GameObjectPool.getInstance().getSpinner();
-                spinner.init(this, bgScene, (currentObj.getTime() - secPassed) / timeMultiplier, (endTime - currentObj.getTime()) / timeMultiplier, rps, Integer.parseInt(params[4]), stat);
-                spinner.setEndsCombo(nextObj == null || nextObj.isNewCombo());
+                spinner.init(this, bgScene, (data.getTime() - secPassed) / timeMultiplier, (endTime - data.getTime()) / timeMultiplier, rps, Integer.parseInt(params[4]), stat);
+                spinner.setEndsCombo(objects.isEmpty() || nextObj.isNewCombo());
                 addObject(spinner);
                 isFirst = false;
 
@@ -1655,33 +1623,35 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
                 }
                 if (Config.isCalculateSliderPathInGameStart()) {
                     SliderPath sliderPath = getSliderPath(sliderIndex);
-                    slider.init(this, mgScene, pos, currentObj.getPosOffset(), currentObj.getTime() - secPassed, col.r(), col.g(), col.b(), scale, currentComboNum, Integer.parseInt(params[4]), Integer.parseInt(params[6]), Float.parseFloat(params[7]), params[5], currentTimingPoint, soundspec, tempSound, isFirst, Double.parseDouble(params[2]), sliderPath);
+                    slider.init(this, mgScene, pos, data.getPosOffset(), data.getTime() - secPassed, col.r(), col.g(), col.b(), scale, currentComboNum, Integer.parseInt(params[4]), Integer.parseInt(params[6]), Float.parseFloat(params[7]), params[5], currentTimingPoint, soundspec, tempSound, isFirst, Double.parseDouble(params[2]), sliderPath);
                     sliderIndex++;
                 } else {
-                    slider.init(this, mgScene, pos, currentObj.getPosOffset(), currentObj.getTime() - secPassed, col.r(), col.g(), col.b(), scale, currentComboNum, Integer.parseInt(params[4]), Integer.parseInt(params[6]), Float.parseFloat(params[7]), params[5], currentTimingPoint, soundspec, tempSound, isFirst, Double.parseDouble(params[2]));
+                    slider.init(this, mgScene, pos, data.getPosOffset(), data.getTime() - secPassed, col.r(), col.g(), col.b(), scale, currentComboNum, Integer.parseInt(params[4]), Integer.parseInt(params[6]), Float.parseFloat(params[7]), params[5], currentTimingPoint, soundspec, tempSound, isFirst, Double.parseDouble(params[2]));
                 }
-                slider.setEndsCombo(nextObj == null || nextObj.isNewCombo());
+                slider.setEndsCombo(objects.isEmpty() || nextObj.isNewCombo());
                 addObject(slider);
                 isFirst = false;
 
-                if (nextObj != null && !nextObj.isNewCombo()) {
+                if (!objects.isEmpty() && !nextObj.isNewCombo()) {
                     final FollowTrack track = GameObjectPool.getInstance().getTrack();
                     PointF end;
-                    if (nextObj.getTime() > currentObj.getTime()) {
-                        end = currentObj.getEnd();
+                    if (nextObj.getTime() > data.getTime()) {
+                        end = data.getEnd();
                     } else {
-                        end = currentObj.getPos();
+                        end = data.getPos();
                     }
                     track.init(this, bgScene, end, nextObj.getPos(), nextObj.getTime() - secPassed, approachRate, scale);
                 }
                 if (GameHelper.isAuto()) {
                     slider.setAutoPlay();
                 }
-                slider.setHitTime(currentObj.getTime());
+                slider.setHitTime(data.getTime());
 
 
-                if (nextObj != null && nextObj.getTime() > currentObj.getTime()) {
-                    currentComboNum++;
+                if (!objects.isEmpty()) {
+                    if (nextObj.getTime() > data.getTime()) {
+                        currentComboNum++;
+                    }
                 }
 
                 slider.setId(++lastObjectId);
