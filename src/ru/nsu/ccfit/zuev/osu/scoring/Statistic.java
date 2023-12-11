@@ -5,6 +5,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
 import java.io.Serializable;
 import java.util.EnumSet;
+import java.util.Objects;
 
 public class Statistic implements Serializable {
 
@@ -198,17 +199,7 @@ public class Statistic implements Serializable {
     }
 
     public String getMark() {
-        boolean isH = false;
-        forcycle:
-        for (final GameMod m : mod) {
-            switch (m) {
-                case MOD_HIDDEN:
-                    isH = true;
-                    break forcycle;
-                default:
-                    break;
-            }
-        }
+        boolean isH = mod.contains(GameMod.MOD_HIDDEN);
 
         if (hit100 == 0 && hit100k == 0 && hit50 == 0 && misses == 0) {
             if (isH) {
