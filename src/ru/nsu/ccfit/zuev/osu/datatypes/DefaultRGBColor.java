@@ -10,10 +10,6 @@ public class DefaultRGBColor extends DefaultData<RGBColor> {
         super(defaultValue);
     }
 
-    public String instanceDefaultHex() {
-        return instanceDefaultHex;
-    }
-
     @Override
     protected RGBColor instanceDefaultValue() {
         return RGBColor.hex2Rgb(instanceDefaultHex);
