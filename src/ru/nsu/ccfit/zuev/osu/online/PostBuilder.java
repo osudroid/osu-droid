@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
+import android.util.Log;
 import com.dgsrz.bancho.security.SecurityUtils;
 import okhttp3.FormBody;
 import okhttp3.Request;
@@ -53,6 +54,7 @@ public class PostBuilder {
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
+                    Log.e(getClass().getSimpleName(), "Thread sleep interrupted when requesting.", e);
                 }
                 continue;
             }

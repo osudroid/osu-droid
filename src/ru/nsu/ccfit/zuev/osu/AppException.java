@@ -240,6 +240,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
                 try {
                     fw.close();
                 } catch (IOException e) {
+                    Log.e(getClass().getSimpleName(), "Failed to close FileWritter during crash report.", e);
                 }
             }
         }

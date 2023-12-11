@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
+import android.util.Log;
 import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
@@ -193,6 +194,7 @@ public class OnlineScoring {
                     try {
                         Thread.sleep(5000);
                     } catch (InterruptedException e) {
+                        Log.e(getClass().getSimpleName(), "Thread sleep interrupted when sending record to server.", e);
                     }
                 }
 

@@ -12,6 +12,7 @@ import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.*;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.*;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -542,6 +543,7 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
                 }
                 Runtime.getRuntime().exec("logcat -f " + (f.getAbsolutePath()));
             } catch (IOException e) {
+                Log.e(getClass().getSimpleName(), "An exception ocurred when saving raw log file.", e);
             }
         }
         onBeginBindService();
