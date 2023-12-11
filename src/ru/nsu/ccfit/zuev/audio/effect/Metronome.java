@@ -16,8 +16,6 @@ public class Metronome {
 
     private BassSoundProvider hatSound = resources.getSound("nightcore-hat");
 
-    private float volume = 1.0f;
-
     private int lastBeatIndex = -1;
 
     public void update(float elapsedTime) {
@@ -40,24 +38,24 @@ public class Metronome {
 
         // 每隔8小节在第4拍kick+finish
         if (beatIndex % (8 * GameHelper.getTimeSignature()) == 0) {
-            kickSound.play(volume);
+            kickSound.play();
             if (beatIndex > 0) {
-                finishSound.play(volume);
+                finishSound.play();
             }
             return;
         }
         // 每小节第4拍kick
         if (beatInBar % 4 == 0) {
-            kickSound.play(volume);
+            kickSound.play();
             return;
         }
         // 每小节第2拍clap
         if (beatInBar % 4 == 2) {
-            clapSound.play(volume);
+            clapSound.play();
             return;
         }
         // 每小节奇数拍hat
-        hatSound.play(volume);
+        hatSound.play();
     }
 
 }
