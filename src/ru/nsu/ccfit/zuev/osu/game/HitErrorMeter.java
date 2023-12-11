@@ -25,8 +25,6 @@ public class HitErrorMeter extends GameObject {
 
     private final List<Rectangle> recycledIndicators;
 
-    private DifficultyHelper difficultyHelper;
-
     public HitErrorMeter(Scene scene, PointF anchor, float difficulty, float height, DifficultyHelper difficultyHelper) {
         barAnchor = anchor;
         barHeight = height;
@@ -34,8 +32,6 @@ public class HitErrorMeter extends GameObject {
 
         onDisplayIndicators = new LinkedList<>();
         recycledIndicators = new LinkedList<>();
-
-        this.difficultyHelper = difficultyHelper;
 
         boundary = difficultyHelper.hitWindowFor50(difficulty);
 

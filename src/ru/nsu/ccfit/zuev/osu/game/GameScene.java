@@ -155,8 +155,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
 
     private ScoreBar scorebar;
 
-    private SongProgressBar progressBar;
-
     private HitErrorMeter hitErrorMeter;
 
     private Metronome metronome;
@@ -214,13 +212,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
 
     private int offsetRegs;
 
-    private Rectangle kiaiRect = null;
-
     private Rectangle dimRectangle = null;
-
-    private Sprite unranked;
-
-    private ChangeableText replayText;
 
     private String title, artist, version;
 
@@ -949,7 +941,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
         }
 
         if (!Config.isHideInGameUI()) {
-            progressBar = new SongProgressBar(this, fgScene, lastObjectTime, objects.getFirst().getTime(), new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
+            SongProgressBar progressBar = new SongProgressBar(this, fgScene, lastObjectTime, objects.getFirst().getTime(), new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
             progressBar.setProgressRectColor(new RGBAColor(153f / 255f, 204f / 255f, 51f / 255f, 0.4f));
         }
 
@@ -1093,12 +1085,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
             effect.init(fgScene, new PointF(Config.getRES_WIDTH() - effectOffset, 130), scale, new SequenceEntityModifier(ModifierFactory.newScaleModifier(0.25f, 1.2f, 1), ModifierFactory.newDelayModifier(2 - timeOffset), new ParallelEntityModifier(ModifierFactory.newFadeOutModifier(0.5f), ModifierFactory.newScaleModifier(0.5f, 1, 1.5f))));
         }
 
-        kiaiRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+        Rectangle kiaiRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
         kiaiRect.setVisible(false);
         kiaiRect.setColor(1, 1, 1);
         bgScene.attachChild(kiaiRect, 0);
 
-        unranked = new Sprite(0, 0, ResourceManager.getInstance().getTexture("play-unranked"));
+        Sprite unranked = new Sprite(0, 0, ResourceManager.getInstance().getTexture("play-unranked"));
         unranked.setPosition(Config.getRES_WIDTH() / 2f - unranked.getWidth() / 2, 80);
         unranked.setVisible(false);
         fgScene.attachChild(unranked);
@@ -1110,7 +1102,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
 
         String playname = Config.getLocalUsername();
 
-        replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
+        ChangeableText replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
         replayText.setVisible(false);
         replayText.setPosition(0, 140);
         replayText.setAlpha(0.7f);

@@ -95,8 +95,6 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
 
     private FirebaseAnalytics analytics;
 
-    private FirebaseCrashlytics crashlytics;
-
     private boolean willReplay = false;
 
     // Multiplayer
@@ -112,7 +110,7 @@ public class MainActivity extends BaseGameActivity implements IAccelerometerList
             return null;
         }
         analytics = FirebaseAnalytics.getInstance(this);
-        crashlytics = FirebaseCrashlytics.getInstance();
+        FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
         Config.loadConfig(this);
         initialGameDirectory();
         //Debug.setDebugLevel(Debug.DebugLevel.NONE);

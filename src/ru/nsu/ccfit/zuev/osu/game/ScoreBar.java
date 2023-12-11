@@ -11,7 +11,7 @@ import java.util.List;
 
 public class ScoreBar extends GameObject {
 
-    private static float speed = 0.75f;
+    private static final float SPEED = 0.75f;
 
     private final StatisticV2 stat;
 
@@ -59,8 +59,8 @@ public class ScoreBar extends GameObject {
     @Override
     public void update(final float dt) {
         float hp = stat.getHp();
-        if (Math.abs(hp - lasthp) > speed * dt) {
-            hp = speed * dt * Math.signum(hp - lasthp) + lasthp;
+        if (Math.abs(hp - lasthp) > SPEED * dt) {
+            hp = SPEED * dt * Math.signum(hp - lasthp) + lasthp;
         }
 
         colour.setWidth(width * hp);

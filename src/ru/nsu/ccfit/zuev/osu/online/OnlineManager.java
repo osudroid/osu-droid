@@ -30,8 +30,6 @@ public class OnlineManager {
 
     private static OnlineManager instance = null;
 
-    private Context context;
-
     private String failMessage = "";
 
     private boolean stayOnline = true;
@@ -76,7 +74,6 @@ public class OnlineManager {
         this.username = Config.getOnlineUsername();
         this.password = Config.getOnlinePassword();
         this.deviceID = Config.getOnlineDeviceID();
-        this.context = context;
     }
 
     private ArrayList<String> sendRequest(PostBuilder post, String url) throws OnlineManagerException {

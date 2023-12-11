@@ -90,12 +90,6 @@ public class MainScene implements IUpdateHandler {
 
     private float[] peakAlpha = new float[120];
 
-    private Replay replay = null;
-
-    private TrackInfo selectedTrack;
-
-    private BeatmapData beatmapData;
-
     private List<TimingPoint> timingPoints;
 
     private TimingPoint currentTimingPoint, lastTimingPoint, firstTimingPoint;
@@ -136,7 +130,9 @@ public class MainScene implements IUpdateHandler {
 
     private float showPassTime = 0, syncPassedTime = 0;
 
-    private float menuBarX = 0, playY, optionsY, exitY;
+    private float menuBarX = 0;
+
+    private float optionsY;
 
     private MainMenu menu;
 
@@ -431,8 +427,6 @@ public class MainScene implements IUpdateHandler {
         menu.getThird().setPosition(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 3f, menu.getSecond().getY() + menu.getSecond().getHeight() + 40 * Config.getRES_WIDTH() / 1024f);
 
         menuBarX = menu.getFirst().getX();
-        playY = menu.getFirst().getScaleY();
-        exitY = menu.getThird().getScaleY();
 
         scene.attachChild(lastBackground, 0);
         scene.attachChild(bgTopRect);
@@ -805,7 +799,7 @@ public class MainScene implements IUpdateHandler {
         ArrayList<TrackInfo> trackInfos = beatmapInfo.getTracks();
         if (trackInfos != null && !trackInfos.isEmpty()) {
             int trackIndex = random.nextInt(trackInfos.size());
-            selectedTrack = trackInfos.get(trackIndex);
+            TrackInfo selectedTrack = trackInfos.get(trackIndex);
             GlobalManager.getInstance().setSelectedTrack(selectedTrack);
 
             if (selectedTrack.getBackground() != null) {
@@ -851,7 +845,7 @@ public class MainScene implements IUpdateHandler {
             Arrays.fill(peakAlpha, 0f);
 
             BeatmapParser parser = new BeatmapParser(selectedTrack.getFilename());
-            beatmapData = parser.parse(false);
+            BeatmapData beatmapData = parser.parse(false);
             if (beatmapData != null) {
                 timingPoints = new LinkedList<>();
                 for (final String s : beatmapData.rawTimingPoints) {
@@ -952,7 +946,7 @@ public class MainScene implements IUpdateHandler {
     }
 
     public void watchReplay(String replayFile) {
-        replay = new Replay();
+        Replay replay = new Replay();
         if (replay.loadInfo(replayFile)) {
             if (replay.replayVersion >= 3) {
                 //replay

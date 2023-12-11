@@ -24,11 +24,11 @@ public class StatisticV2 implements Serializable {
 
     private static final Random random = new Random();
 
-    private final int MAX_SCORE = 1000000;
+    private static final int MAX_SCORE = 1000000;
 
-    private final float ACC_PORTION = 0.3f;
+    private static final float ACC_PORTION = 0.3f;
 
-    private final float COMBO_PORTION = 0.7f;
+    private static final float COMBO_PORTION = 0.7f;
 
     /**
      * Indicates that the player is alive (HP hasn't reached 0, or it recovered), this is exclusively used for

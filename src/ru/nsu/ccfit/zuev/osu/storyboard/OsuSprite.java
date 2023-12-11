@@ -56,15 +56,9 @@ public class OsuSprite {
 
     private ArrayList<OsuEvent> eventList;
 
-    private TextureRegion textureRegion;
-
-    private StoryBoardTestActivity activity = StoryBoardTestActivity.activity;
-
     private boolean isValid;
 
     private ParallelEntityModifier parallelEntityModifier;
-
-    private boolean isAnimation;
 
     private float anchorCenterX = 0f;
 
@@ -72,7 +66,7 @@ public class OsuSprite {
 
     public OsuSprite(float x, float y, int layer, Origin origin, String filePath, ArrayList<OsuEvent> eventList, int ZIndex) {//normal sprite
         this.fileName = filePath.replaceAll("\"", "").replaceAll("\\\\", "/");
-        textureRegion = ResourceManager.getInstance().getTexture(new File(StoryBoardTestActivity.FOLDER, fileName).getPath());
+        TextureRegion textureRegion = ResourceManager.getInstance().getTexture(new File(StoryBoardTestActivity.FOLDER, fileName).getPath());
         if (null == textureRegion) {
             isValid = false;
         } else {
@@ -81,6 +75,7 @@ public class OsuSprite {
             this.layer = layer;
             this.origin = origin;
             this.eventList = eventList;
+            StoryBoardTestActivity activity = StoryBoardTestActivity.activity;
             if (filePath.equals(activity.mBackground)) {
                 activity.mBackground = null;
             }
@@ -94,7 +89,6 @@ public class OsuSprite {
     }
 
     public OsuSprite(float x, float y, int layer, Origin origin, String filePath, ArrayList<OsuEvent> eventList, int ZIndex, int count, int delay, String loopType) {//Animation
-        isAnimation = true;
         filePath = filePath.replaceAll("\"", "").replaceAll("\\\\", "/");
         this.fileName = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.lastIndexOf("."));
         String fileExt = filePath.substring(filePath.lastIndexOf("."));
