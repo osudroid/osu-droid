@@ -78,7 +78,7 @@ public class PostBuilder {
             try (Response resp = OnlineManager.client.newCall(request).execute()) {
                 Debug.i("request url=" + scriptUrl);
                 Debug.i("request --------Content---------");
-                String line = null;
+                String line;
                 BufferedReader reader = new BufferedReader(new StringReader(resp.body().string()));
                 while ((line = reader.readLine()) != null) {
                     Debug.i(String.format("request [%d]: %s", response.size(), line));
