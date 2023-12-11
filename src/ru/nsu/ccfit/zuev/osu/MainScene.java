@@ -191,7 +191,7 @@ public class MainScene implements IUpdateHandler {
 
         menu = new MainMenu(this);
 
-        final Text author = new Text(10, 530, ResourceManager.getInstance().getFont("font"), String.format(Locale.getDefault(), "osu!droid %s\nby osu!droid Team\nosu! is \u00a9 peppy 2007-2023", BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")")) {
+        final Text author = new Text(10, 530, ResourceManager.getInstance().getFont("font"), String.format(Locale.getDefault(), "osu!droid %s\nby osu!droid Team\nosu! is © peppy 2007-2023", BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")")) {
 
 
             @Override
