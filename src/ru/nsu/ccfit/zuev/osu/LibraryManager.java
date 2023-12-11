@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.os.Build;
+import android.util.Log;
 import com.reco1l.legacy.engine.VideoTexture;
 import org.anddev.andengine.util.Debug;
 import org.jetbrains.annotations.Nullable;
@@ -100,7 +101,7 @@ public enum LibraryManager {
                         videoFile.delete();
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.e(LibraryManager.class.getSimpleName(), "Exception caught during video file check.", e);
                 }
             }
             info.addTrack(track);

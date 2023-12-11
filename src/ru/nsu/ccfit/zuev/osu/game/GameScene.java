@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 import android.os.Build;
 import android.os.SystemClock;
+import android.util.Log;
 import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.osb.StoryboardSprite;
@@ -332,7 +333,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
 
                 bgSprite = video;
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(getClass().getSimpleName(), "Failed to create video entity during gameplay load.", e);
                 video = null;
             }
         }

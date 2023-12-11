@@ -129,7 +129,7 @@ public class OsuSprite {
         try {
             mBitmapTextureAtlas.build(new BlackPawnTextureBuilder<>(0));
         } catch (ITextureBuilder.TextureAtlasSourcePackingException e) {
-            e.printStackTrace();
+            Log.e(getClass().getSimpleName(), "Failed to create bitmap from texture atlas.", e);
         }
         ResourceManager.getInstance().getEngine().getTextureManager().loadTexture(mBitmapTextureAtlas);
 

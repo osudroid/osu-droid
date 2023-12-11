@@ -256,7 +256,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.e(getClass().getSimpleName(), "Failed to sleep thread during exception.", e);
             }
             if (Multiplayer.isMultiplayer) {
                 Multiplayer.log("CRASH");
@@ -327,9 +327,9 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
             exceptionStr.append("Exception: ").append(ex.getMessage()).append("\n").append("\n");
             exceptionStr.append("Exception stack：").append(getTraceInfo((Activity) context, ex)).append("\n").append("\n");
         } catch (NameNotFoundException e) {
-            e.printStackTrace();
+            Log.e(getClass().getSimpleName(), "Failed to get package info during crash report.", e);
         }
-        ex.printStackTrace();
+        Log.e(getClass().getSimpleName(), "An unexpected exception has ocurred.", ex);
         return exceptionStr.toString();
     }
 
@@ -386,7 +386,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
         try {
             return osJson.toString(4);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e(getClass().getSimpleName(), "Failed to print mobile info during crash report.", e);
             return osJson.toString();
         }
     }
@@ -409,7 +409,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
         try {
             return osJson.toString(4);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e(getClass().getSimpleName(), "Failed to print screen info during crash report.", e);
             return osJson.toString();
         }
     }

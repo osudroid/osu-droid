@@ -133,8 +133,7 @@ public class ResourceManager {
                 try {
                     skinjson = new JSONObject(OsuSkin.readFull(jsonFile));
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    skinjson = null;
+                    Log.e(getClass().getSimpleName(), "Failed to read skin JSON.", e);
                 }
             } else {
                 var iniFile = new File(folder, "skin.ini");
@@ -145,7 +144,7 @@ public class ResourceManager {
                     try (var ini = new IniReader(iniFile)) {
                         skinjson = SkinConverter.convertToJson(ini);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.e(getClass().getSimpleName(), "Failed to read skin INI.", e);
                     }
 
                     SkinConverter.ensureOptionalTexture(new File(folder, "sliderendcircle.png"));
