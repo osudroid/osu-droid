@@ -798,7 +798,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener, IScrollBarLis
         for (final MenuItem item : items) {
             final float cy = oy + Config.getRES_HEIGHT() / 2f + item.getHeight() / 2;
             float ox = Config.getRES_WIDTH() / 1.85f + 200 * (float) Math.abs(Math.cos(cy * Math.PI / (Config.getRES_HEIGHT() * 2)));
-            ox = ox;
             item.setPos(ox, oy);
             oy += item.getHeight();
         }

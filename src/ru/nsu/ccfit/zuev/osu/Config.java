@@ -604,10 +604,6 @@ public class Config {
         return cursorSize;
     }
 
-    public static void setCursorSize() {
-        Config.cursorSize = cursorSize;
-    }
-
     public static float getPlayfieldSize() {
         return playfieldSize;
     }
