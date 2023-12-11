@@ -20,7 +20,7 @@ public class GameScoreText {
 
     private final float digitWidth;
 
-    private float scale;
+    private final float scale;
 
     private boolean hasX = false;
 

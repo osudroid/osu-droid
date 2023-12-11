@@ -64,6 +64,20 @@ import java.util.concurrent.TimeUnit;
  */
 public class MainScene implements IUpdateHandler {
 
+    private final Random random = new Random();
+
+    private final Rectangle[] spectrum = new Rectangle[120];
+
+    private final float[] peakLevel = new float[120];
+
+    private final float[] peakDownRate = new float[120];
+
+    private final float[] peakAlpha = new float[120];
+
+    private final ParticleSystem[] particleSystem = new ParticleSystem[2];
+
+    private final float syncPassedTime = 0;
+
     public SongProgressBar progressBar;
 
     public BeatmapInfo beatmapInfo;
@@ -80,29 +94,17 @@ public class MainScene implements IUpdateHandler {
 
     private ChangeableText musicInfoText;
 
-    private Random random = new Random();
-
-    private Rectangle[] spectrum = new Rectangle[120];
-
-    private float[] peakLevel = new float[120];
-
-    private float[] peakDownRate = new float[120];
-
-    private float[] peakAlpha = new float[120];
-
     private List<TimingPoint> timingPoints;
 
     private TimingPoint currentTimingPoint, lastTimingPoint, firstTimingPoint;
 
     private int particleBeginTime = 0;
 
+    //private BassAudioPlayer music;
+
     private boolean particleEnabled = false;
 
     private boolean isContinuousKiai = false;
-
-    //private BassAudioPlayer music;
-
-    private ParticleSystem[] particleSystem = new ParticleSystem[2];
 
     private boolean musicStarted;
 
@@ -128,7 +130,7 @@ public class MainScene implements IUpdateHandler {
 
     private boolean doMenuShow = false;
 
-    private float showPassTime = 0, syncPassedTime = 0;
+    private float showPassTime = 0;
 
     private float menuBarX = 0;
 

@@ -11,17 +11,17 @@ public class Spline {
 
     private static final float TWO_PI = (float) (Math.PI * 2);
 
+    private static final int DetailLevel = 50;
+
     private static Spline instance = null;
 
-    private static int DetailLevel = 50;
+    private final ArrayList<PointF> m_ctrl_pts;
+
+    private final ArrayList<Line> m_path;
+
+    private final ArrayList<PointF> m_points;
 
     private CurveTypes m_curve_type;
-
-    private ArrayList<PointF> m_ctrl_pts;
-
-    private ArrayList<Line> m_path;
-
-    private ArrayList<PointF> m_points;
 
     private ArrayList<PointF> m_ctrl_pts_copy = null;
 
@@ -400,7 +400,9 @@ public class Spline {
     /// </summary>
     public static class Line {
 
-        public PointF p1, p2;
+        public final PointF p1;
+
+        public final PointF p2;
 
         public Line(PointF Start, PointF End) {
             p1 = Start;

@@ -8,19 +8,19 @@ import java.util.Map;
 
 public class GameObjectPool {
 
-    public static GameObjectPool instance = new GameObjectPool();
+    public static final GameObjectPool instance = new GameObjectPool();
 
-    public LinkedList<HitCircle> circles = new LinkedList<>();
+    public final LinkedList<HitCircle> circles = new LinkedList<>();
 
-    public Map<Integer, LinkedList<CircleNumber>> numbers = new HashMap<>();
+    public final Map<Integer, LinkedList<CircleNumber>> numbers = new HashMap<>();
 
-    public Map<String, LinkedList<GameEffect>> effects = new HashMap<>();
+    public final Map<String, LinkedList<GameEffect>> effects = new HashMap<>();
 
-    public LinkedList<Slider> sliders = new LinkedList<>();
+    public final LinkedList<Slider> sliders = new LinkedList<>();
 
-    public LinkedList<FollowTrack> tracks = new LinkedList<>();
+    public final LinkedList<FollowTrack> tracks = new LinkedList<>();
 
-    public LinkedList<Spinner> spinners = new LinkedList<>();
+    public final LinkedList<Spinner> spinners = new LinkedList<>();
 
     private int objectsCreated = 0;
 

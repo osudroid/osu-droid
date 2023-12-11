@@ -5,9 +5,9 @@ import android.view.inputmethod.InputMethodManager;
 
 public class InputManager {
 
-    private static Context context;
+    private static final InputManager instance = new InputManager();
 
-    private static InputManager instance = new InputManager();
+    private static Context context;
 
     private boolean inputStarted = false;
 

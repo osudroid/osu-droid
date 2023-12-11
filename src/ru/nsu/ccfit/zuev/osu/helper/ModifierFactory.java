@@ -8,7 +8,7 @@ import java.util.Queue;
 
 public class ModifierFactory {
 
-    private static ModifierFactory instance = new ModifierFactory();
+    private static final ModifierFactory instance = new ModifierFactory();
 
     private final Queue<UniversalModifier> pool = new LinkedList<>();
 

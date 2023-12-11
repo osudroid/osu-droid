@@ -6,15 +6,15 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 
 public class Metronome {
 
-    private ResourceManager resources = ResourceManager.getInstance();
+    private final ResourceManager resources = ResourceManager.getInstance();
 
-    private BassSoundProvider kickSound = resources.getSound("nightcore-kick");
+    private final BassSoundProvider kickSound = resources.getSound("nightcore-kick");
 
-    private BassSoundProvider finishSound = resources.getSound("nightcore-finish");
+    private final BassSoundProvider finishSound = resources.getSound("nightcore-finish");
 
-    private BassSoundProvider clapSound = resources.getSound("nightcore-clap");
+    private final BassSoundProvider clapSound = resources.getSound("nightcore-clap");
 
-    private BassSoundProvider hatSound = resources.getSound("nightcore-hat");
+    private final BassSoundProvider hatSound = resources.getSound("nightcore-hat");
 
     private int lastBeatIndex = -1;
 

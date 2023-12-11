@@ -17,17 +17,25 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class OnlinePanel extends Entity {
 
-    public Rectangle rect;
+    public final Rectangle rect;
 
-    private Entity onlineLayer = new Entity();
+    private final Entity onlineLayer = new Entity();
 
-    private Entity messageLayer = new Entity();
+    private final Entity messageLayer = new Entity();
 
-    private Entity frontLayer = new Entity();
+    private final Entity frontLayer = new Entity();
 
-    private ChangeableText rankText, nameText, scoreText, accText;
+    private final ChangeableText rankText;
 
-    private ChangeableText messageText, submessageText;
+    private final ChangeableText nameText;
+
+    private final ChangeableText scoreText;
+
+    private final ChangeableText accText;
+
+    private final ChangeableText messageText;
+
+    private final ChangeableText submessageText;
 
     private Sprite avatar = null;
 

@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
 
 public class MenuItem {
 
+    final WeakReference<MenuItemListener> listener;
+
     private final MenuItemTrack[] trackSprites;
 
     private final BeatmapInfo beatmap;
@@ -34,8 +36,6 @@ public class MenuItem {
     Scene scene;
 
     boolean selected = false;
-
-    WeakReference<MenuItemListener> listener;
 
     private MenuItemTrack selTrack = null;
 

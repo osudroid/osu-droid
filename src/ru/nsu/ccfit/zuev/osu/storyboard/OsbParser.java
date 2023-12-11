@@ -19,15 +19,15 @@ import java.util.regex.Pattern;
  */
 public class OsbParser {
 
-    public static OsbParser instance = new OsbParser();
+    public static final OsbParser instance = new OsbParser();
 
-    private LinkedList<OsuSprite> sprites = new LinkedList<>();
+    private final LinkedList<OsuSprite> sprites = new LinkedList<>();
 
-    private ArrayList<TimingPoint> timingPoints = new ArrayList<>();
+    private final ArrayList<TimingPoint> timingPoints = new ArrayList<>();
 
-    private ArrayList<HitSound> hitSounds = new ArrayList<>();
+    private final ArrayList<HitSound> hitSounds = new ArrayList<>();
 
-    private HashMap<String, String> variablesMap = new HashMap<>();
+    private final HashMap<String, String> variablesMap = new HashMap<>();
 
     private String line;
 

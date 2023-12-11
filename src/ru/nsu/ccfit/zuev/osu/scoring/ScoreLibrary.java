@@ -28,7 +28,7 @@ public class ScoreLibrary {
 
     private static final Pattern newPathPattern = Pattern.compile("[^/]*/[^/]*\\z");
 
-    private static ScoreLibrary lib = new ScoreLibrary();
+    private static final ScoreLibrary lib = new ScoreLibrary();
 
     private SQLiteDatabase db = null;
 

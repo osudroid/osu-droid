@@ -37,11 +37,11 @@ public class Replay {
 
     public static Float oldCustomHP;
 
-    public ArrayList<MoveArray> cursorMoves = new ArrayList<>();
+    public final ArrayList<MoveArray> cursorMoves = new ArrayList<>();
 
-    public int[] cursorIndex;
+    public final int[] cursorIndex;
 
-    public int[] lastMoveIndex;
+    public final int[] lastMoveIndex;
 
     public ReplayObjectData[] objectData = null;
 
@@ -432,7 +432,7 @@ public class Replay {
 
         private static final long serialVersionUID = 4643121693566795335L;
 
-        int version = 5;
+        final int version = 5;
 
     }
 
@@ -448,9 +448,9 @@ public class Replay {
 
     public static class ReplayMovement {
 
-        protected int time;
+        protected final PointF point = new PointF();
 
-        protected PointF point = new PointF();
+        protected int time;
 
         protected TouchType touchType;
 

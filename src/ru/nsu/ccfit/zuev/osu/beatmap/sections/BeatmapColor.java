@@ -13,7 +13,7 @@ public class BeatmapColor {
     /**
      * The combo colors of this beatmap.
      */
-    public ArrayList<ComboColor> comboColors = new ArrayList<>();
+    public final ArrayList<ComboColor> comboColors = new ArrayList<>();
 
     /**
      * The color of the slider border.

@@ -14,7 +14,7 @@ public class ModButton extends Sprite {
 
     private static final float selectedRotate = 5f;
 
-    private GameMod mod;
+    private final GameMod mod;
 
     private IModSwitcher switcher = null;
 

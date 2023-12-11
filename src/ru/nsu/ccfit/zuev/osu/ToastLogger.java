@@ -11,13 +11,13 @@ public class ToastLogger {
 
     private static ToastLogger instance = null;
 
-    Activity activity;
+    final Activity activity;
+
+    final ArrayList<String> debugLog = new ArrayList<>();
 
     String message = "";
 
     boolean showlong = false;
-
-    ArrayList<String> debugLog = new ArrayList<>();
 
     float percentage;
 

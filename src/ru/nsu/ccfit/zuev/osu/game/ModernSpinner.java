@@ -19,6 +19,8 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
  */
 public class ModernSpinner extends Spinner {
 
+    public final PointF center;
+
     private final Sprite middle;
 
     private final Sprite middle2;
@@ -30,8 +32,6 @@ public class ModernSpinner extends Spinner {
     private final Sprite glow;
 
     private final PointF currMouse = new PointF();
-
-    public PointF center;
 
     private GameObjectListener listener;
 

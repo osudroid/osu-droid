@@ -18,7 +18,7 @@ public class DatabaseContext extends ContextWrapper {
 
     private static final String DEBUG_CONTEXT = "DatabaseContext";
 
-    private Context context;
+    private final Context context;
 
     public DatabaseContext(Context base) {
         super(base);

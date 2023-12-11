@@ -38,13 +38,13 @@ public class OsuSprite {
 
     public static final int LAYER_FOREGROUND = 3;
 
+    public static final float TO_DEGREES = (1 / (float) Math.PI) * 180;
+
     public static float TO_RADIANS = (1 / 180.0f) * (float) Math.PI;
 
-    public static float TO_DEGREES = (1 / (float) Math.PI) * 180;
+    private final String fileName;
 
     public long spriteStartTime, spriteEndTime;
-
-    private String fileName;
 
     private String debugLine;
 

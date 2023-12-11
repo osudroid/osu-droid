@@ -36,6 +36,8 @@ public class Spinner extends GameObject {
 
     private final PointF currMouse = new PointF();
 
+    private final boolean did = false;
+
     private Sprite clearText = null;
 
     private PointF oldMouse;
@@ -63,8 +65,6 @@ public class Spinner extends GameObject {
     private StatisticV2 stat;
 
     private float totalTime;
-
-    private boolean did = false;
 
 
     public Spinner() {

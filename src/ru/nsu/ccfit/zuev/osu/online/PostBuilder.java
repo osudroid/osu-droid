@@ -15,9 +15,9 @@ import java.util.ArrayList;
 
 public class PostBuilder {
 
-    private FormBody.Builder formBodyBuilder = new FormBody.Builder();
+    private final FormBody.Builder formBodyBuilder = new FormBody.Builder();
 
-    private StringBuilder values = new StringBuilder();
+    private final StringBuilder values = new StringBuilder();
 
     public void addParam(final String key, final String value) {
         try {

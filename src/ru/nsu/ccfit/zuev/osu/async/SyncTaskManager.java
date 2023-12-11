@@ -4,7 +4,7 @@ import org.anddev.andengine.ui.activity.BaseGameActivity;
 
 public class SyncTaskManager {
 
-    private static SyncTaskManager mgr = new SyncTaskManager();
+    private static final SyncTaskManager mgr = new SyncTaskManager();
 
     private BaseGameActivity activity;
 

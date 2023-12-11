@@ -11,11 +11,11 @@ import java.util.Map;
 
 public class SkinManager {
 
-    private static SkinManager instance = new SkinManager();
+    private static final SkinManager instance = new SkinManager();
 
-    private static Map<String, Integer> frameCount = new HashMap<>();
+    private static final Map<String, Integer> frameCount = new HashMap<>();
 
-    private static Map<String, Integer> stdframeCount = new HashMap<>();
+    private static final Map<String, Integer> stdframeCount = new HashMap<>();
 
     private static boolean skinEnabled = true;
 

@@ -20,7 +20,7 @@ public abstract class DifficultyHelper {
         }
     };
 
-    public static DifficultyHelper HighDifficulty = new DifficultyHelper() {
+    public static final DifficultyHelper HighDifficulty = new DifficultyHelper() {
 
         @Override
         public float hitWindowFor300(float od) {

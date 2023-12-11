@@ -12,9 +12,9 @@ import java.util.Map;
 
 public class SpritePool {
 
-    private static SpritePool instance = new SpritePool();
+    private static final SpritePool instance = new SpritePool();
 
-    private static int CAPACITY = 250;
+    private static final int CAPACITY = 250;
 
     private final Map<String, LinkedList<Sprite>> sprites = new HashMap<>();
 
