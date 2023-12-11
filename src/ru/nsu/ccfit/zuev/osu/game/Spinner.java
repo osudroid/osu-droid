@@ -100,10 +100,7 @@ public class Spinner extends GameObject {
         this.stat = stat;
         this.totalTime = time;
         startHit = true;
-        clear = false;
-        if (totalTime <= 0f) {
-            clear = true;
-        }
+        clear = totalTime <= 0f;
         bonusScore = null;
         score = 1;
         ResourceManager.getInstance().checkSpinnerTextures();
