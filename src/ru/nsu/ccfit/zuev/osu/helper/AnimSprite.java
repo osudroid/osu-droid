@@ -69,10 +69,6 @@ public class AnimSprite extends Sprite {
         }
     }
 
-    public LoopType getLoopType() {
-        return loopType;
-    }
-
     public void setLoopType(LoopType loopType) {
         this.loopType = loopType;
     }
@@ -165,18 +161,6 @@ public class AnimSprite extends Sprite {
         } else {
             return 40;
         }
-    }
-
-    public void setTextureRegion(final int index, final TextureRegion region) {
-        regions[index] = region;
-    }
-
-    public TextureRegion getTextureRegionAt(final int index) {
-        return regions[index];
-    }
-
-    public int getTextureRegionCount() {
-        return regions.length;
     }
 
     public enum LoopType {
