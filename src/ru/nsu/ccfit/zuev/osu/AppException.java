@@ -36,22 +36,12 @@ import java.util.Date;
  */
 public class AppException extends Exception implements Thread.UncaughtExceptionHandler {
 
-    public final static byte TYPE_SOCKET = 0x02;
-
-    public final static byte TYPE_HTTP_ERROR = 0x04;
-
-    public final static byte TYPE_RUN = 0x07;
-
     /**
      *
      */
     private static final long serialVersionUID = 6243307165131877535L;
 
     private final static boolean Debug = true;// 是否保存错误日志
-
-    private byte type;
-
-    private int code;
 
     /**
      * 系统默认的UncaughtException处理类
@@ -62,25 +52,11 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
         this.mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
     }
 
-    private AppException(byte type, int code, Exception excp) {
+    private AppException(byte type, Exception excp) {
         super(excp);
-        this.type = type;
-        this.code = code;
         if (Debug) {
             this.saveErrorLog(excp);
         }
-    }
-
-    public static AppException http(Exception e) {
-        return new AppException(TYPE_HTTP_ERROR, 0, e);
-    }
-
-    public static AppException socket(Exception e) {
-        return new AppException(TYPE_SOCKET, 0, e);
-    }
-
-    public static AppException run(Exception e) {
-        return new AppException(TYPE_RUN, 0, e);
     }
 
     /**
