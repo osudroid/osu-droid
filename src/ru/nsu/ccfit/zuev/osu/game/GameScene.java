@@ -2216,7 +2216,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
         }
 
         GameEffect effect = GameObjectPool.getInstance().getEffect(scoreName);
-        effect.init(mgScene, pos, scale, new SequenceEntityModifier(ModifierFactory.newScaleModifier(0.15f, 1.0f * scale, 1.2f * scale), ModifierFactory.newScaleModifier(0.05f, 1.2f * scale, 1.0f * scale), ModifierFactory.newAlphaModifier(1f, 1, 0)));
+        effect.init(mgScene, pos, scale, new SequenceEntityModifier(ModifierFactory.newScaleModifier(0.15f, scale, 1.2f * scale), ModifierFactory.newScaleModifier(0.05f, 1.2f * scale, scale), ModifierFactory.newAlphaModifier(1f, 1, 0)));
 
         pos.y /= 2f;
         effect = GameObjectPool.getInstance().getEffect("spinner-osu");
@@ -2549,7 +2549,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener, IOnSceneTo
             light.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_DST_ALPHA);
         }
 
-        effect.init(mgScene, pos, scale, new SequenceEntityModifier(ModifierFactory.newScaleModifier(0.15f, 1.0f * scale, 1.2f * scale), ModifierFactory.newScaleModifier(0.05f, 1.2f * scale, 1.0f * scale), ModifierFactory.newAlphaModifier(0.5f, 1, 0)));
+        effect.init(mgScene, pos, scale, new SequenceEntityModifier(ModifierFactory.newScaleModifier(0.15f, scale, 1.2f * scale), ModifierFactory.newScaleModifier(0.05f, 1.2f * scale, scale), ModifierFactory.newAlphaModifier(0.5f, 1, 0)));
     }
 
     private void createBurstEffect(final PointF pos, final RGBColor color) {
