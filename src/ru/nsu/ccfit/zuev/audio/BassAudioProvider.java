@@ -10,9 +10,8 @@ public class BassAudioProvider {
 
     public static final int DEFAULT_FREQUENCY = 44100;
 
-    private final BASS.FloatValue freq = new BASS.FloatValue();
-
     public BassAudioProvider() {
+        BASS.FloatValue freq = new BASS.FloatValue();
         freq.value = 1.0f;
 
         // This likely doesn't help, but also doesn't seem to cause any issues or any CPU increase.

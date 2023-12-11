@@ -2,13 +2,13 @@ package ru.nsu.ccfit.zuev.osu;
 
 public class RGBAColor {
 
-    private float cr;
+    private final float cr;
 
-    private float cg;
+    private final float cg;
 
-    private float cb;
+    private final float cb;
 
-    private float ca;
+    private final float ca;
 
     public RGBAColor(final float r, final float g, final float b, final float a) {
         cr = r;

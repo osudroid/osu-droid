@@ -465,7 +465,7 @@ public class OsuSprite {
     }
 
     public enum Origin {
-        TopLeft, TopCentre, TopRight, CentreLeft, Centre, CentreRight, BottomLeft, BottomCentre, BottomRight;
+        TopLeft, TopCentre, TopRight, CentreLeft, Centre, CentreRight, BottomLeft, BottomCentre, BottomRight
 
     }
 

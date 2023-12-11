@@ -44,7 +44,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
     /**
      * 系统默认的UncaughtException处理类
      */
-    private Thread.UncaughtExceptionHandler mDefaultHandler;
+    private final Thread.UncaughtExceptionHandler mDefaultHandler;
 
     private AppException() {
         this.mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();

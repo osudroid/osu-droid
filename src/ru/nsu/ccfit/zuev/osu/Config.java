@@ -56,7 +56,6 @@ public class Config {
     private static boolean displayScoreStatistics;
     private static boolean hideReplayMarquee;
     private static boolean hideInGameUI;
-    private static boolean receiveAnnouncements;
     private static boolean enableStoryboard;
     private static boolean safeBeatmapBg;
     private static boolean trianglesAnimation;
@@ -185,7 +184,7 @@ public class Config {
         displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", false);
         hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
-        receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
+        boolean receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
 
