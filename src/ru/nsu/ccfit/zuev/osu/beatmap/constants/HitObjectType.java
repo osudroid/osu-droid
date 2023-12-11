@@ -4,12 +4,9 @@ package ru.nsu.ccfit.zuev.osu.beatmap.constants;
  * Created by Fuuko on 2015/5/29.
  */
 public enum HitObjectType {
-    Normal(1), Slider(2), NewCombo(4), NormalNewCombo(5), SliderNewCombo(6), Spinner(8);
+    Normal(), Slider(), NewCombo(), NormalNewCombo(), SliderNewCombo(), Spinner();
 
-    private final int value;
-
-    HitObjectType(int value) {
-        this.value = value;
+    HitObjectType() {
     }
 
     public static HitObjectType valueOf(int value) {

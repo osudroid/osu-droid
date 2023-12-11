@@ -23,13 +23,7 @@ public class Spline {
 
     private CurveTypes m_curve_type;
 
-    private ArrayList<PointF> m_ctrl_pts_copy = null;
-
-    private ArrayList<Line> m_path_copy = null;
-
     private ArrayList<PointF> m_points_copy = null;
-
-    private ArrayList<Float> m_lengths = null;
 
     public Spline() {
         m_ctrl_pts = new ArrayList<>();
@@ -229,10 +223,7 @@ public class Spline {
 
         sliderthing(m_curve_type, m_ctrl_pts, m_points);
 
-        m_ctrl_pts_copy = null;
-        m_path_copy = null;
         m_points_copy = null;
-        m_lengths = null;
     }
 
     private void sliderthing(CurveTypes CurveType, ArrayList<PointF> sliderCurvePoints, ArrayList<PointF> points) {

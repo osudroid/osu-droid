@@ -68,7 +68,8 @@ public class ModernSpinner extends Spinner {
         glow = SpritePool.getInstance().getCenteredSprite("spinner-glow", center);
     }
 
-    public void init(GameObjectListener listener, Scene scene, float aheadTime, float time, float rps, int sound, String tempSound, StatisticV2 stat) {
+    @Override
+    public void init(GameObjectListener listener, Scene scene, float aheadTime, float time, float rps, int sound, StatisticV2 stat) {
         this.scene = scene;
         this.needRotations = rps * time;
         this.listener = listener;

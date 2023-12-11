@@ -27,12 +27,6 @@ public class FileUtils {
     private FileUtils() {
     }
 
-    public static void copy(File from, File to) throws IOException {
-        try (Source source = Okio.source(from); BufferedSink bufferedSink = Okio.buffer(Okio.sink(to))) {
-            bufferedSink.writeAll(source);
-        }
-    }
-
     public static boolean extractZip(final String sourcePath, final String targetPath) {
         final File file = new File(sourcePath);
 

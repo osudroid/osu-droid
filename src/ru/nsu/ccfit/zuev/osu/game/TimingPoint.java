@@ -14,8 +14,6 @@ public class TimingPoint {
 
     final boolean kiai;
 
-    private final double speed;
-
     double beatLength;
 
     int signature = 4;
@@ -29,11 +27,9 @@ public class TimingPoint {
         beatLength = Double.parseDouble(data[1]);
         if (beatLength < 0 && prevData != null) {
             inherited = true;
-            speed = -100.0f / beatLength;
             beatLength = -prevData.getBeatLength() * (beatLength / 100.0f);
         } else {
             beatLength /= 1000.0f;
-            speed = 1.0f;
         }
 
         if (data.length > 2) {

@@ -10,8 +10,6 @@ import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
 
 public class Utils {
 
-    private static int accSign = 0;
-
     private static int soundMask = 0;
 
     public static float sqr(final float x) {
