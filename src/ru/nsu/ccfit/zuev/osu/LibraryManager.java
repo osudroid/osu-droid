@@ -124,9 +124,7 @@ public enum LibraryManager {
             library.clear();
         }
 
-        ToastLogger.addToLog("Loading library...");
         if (!FileUtils.canUseSD()) {
-            ToastLogger.addToLog("Can't use SD card!");
             return true;
         }
 
@@ -171,7 +169,6 @@ public enum LibraryManager {
                             library.addAll((Collection<? extends BeatmapInfo>) obj);
                         }
 
-                        ToastLogger.addToLog("Library loaded");
                         if (forceUpdate) {
                             checkLibrary();
                         }
@@ -182,7 +179,6 @@ public enum LibraryManager {
         } catch (final IOException | ClassNotFoundException | ClassCastException e) {
             Debug.e("LibraryManager: " + e.getMessage(), e);
         }
-        ToastLogger.addToLog("Cannot load library!");
         return false;
     }
 
@@ -214,7 +210,6 @@ public enum LibraryManager {
     }
 
     public synchronized void scanLibrary() {
-        ToastLogger.addToLog("Caching library...");
         library.clear();
 
         final File dir = new File(Config.getBeatmapPath());

@@ -41,15 +41,6 @@ public class ToastLogger {
         showText(StringTable.get(resID), showlong);
     }
 
-    public static void addToLog(final String str) {
-        if (instance == null) {
-            /*
-             * if (instance.debugLog.size() >= 20) instance.debugLog.remove(0);
-             * instance.debugLog.add(str);
-             */
-        }
-    }
-
     public static ArrayList<String> getLog() {
         if (instance == null) {
             return null;

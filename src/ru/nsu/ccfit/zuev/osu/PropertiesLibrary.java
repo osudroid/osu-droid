@@ -57,7 +57,6 @@ public class PropertiesLibrary {
         } catch (final ClassNotFoundException | IOException e) {
             Debug.e("PropertiesLibrary: " + e.getMessage(), e);
         }
-        ToastLogger.addToLog("Cannot load properties!");
     }
 
     public synchronized void save(final Context activity) {
