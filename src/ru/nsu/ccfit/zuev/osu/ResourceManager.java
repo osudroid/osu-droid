@@ -374,7 +374,7 @@ public class ResourceManager {
         }
     }
 
-    public Font loadFont(final String resname, final String file, int size, final int color) {
+    public void loadFont(final String resname, final String file, int size, final int color) {
         final BitmapTextureAtlas texture = new BitmapTextureAtlas(512, 512, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
         Font font;
         if (file == null) {
@@ -385,10 +385,9 @@ public class ResourceManager {
         engine.getTextureManager().loadTexture(texture);
         engine.getFontManager().loadFont(font);
         fonts.put(resname, font);
-        return font;
     }
 
-    public StrokeFont loadStrokeFont(final String resname, final String file, int size, final int color1, final int color2) {
+    public void loadStrokeFont(final String resname, final String file, int size, final int color1, final int color2) {
         final BitmapTextureAtlas texture = new BitmapTextureAtlas(512, 256, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
         StrokeFont font;
         if (file == null) {
@@ -399,7 +398,6 @@ public class ResourceManager {
         engine.getTextureManager().loadTexture(texture);
         engine.getFontManager().loadFont(font);
         fonts.put(resname, font);
-        return font;
     }
 
     public Font getFont(final String resname) {
@@ -409,8 +407,8 @@ public class ResourceManager {
         return fonts.get(resname);
     }
 
-    public TextureRegion loadTexture(final String resname, final String file, final boolean external, final TextureOptions opt) {
-        return loadTexture(resname, file, external, opt, this.engine);
+    public void loadTexture(final String resname, final String file, final boolean external, final TextureOptions opt) {
+        loadTexture(resname, file, external, opt, this.engine);
     }
 
     public TextureRegion loadTexture(final String resname, final String file, final boolean external) {
@@ -558,13 +556,13 @@ public class ResourceManager {
         return region;
     }
 
-    public TextureRegion loadHighQualityFile(final String resname, final File file) {
+    public void loadHighQualityFile(final String resname, final File file) {
         int tw = 16, th = 16;
         TextureRegion region;
 
         final FileBitmapTextureAtlasSource source = new FileBitmapTextureAtlasSource(file);
         if (source.getWidth() == 0 || source.getHeight() == 0) {
-            return null;
+            return;
         }
         while (tw < source.getWidth()) {
             tw *= 2;
@@ -578,7 +576,6 @@ public class ResourceManager {
         textures.put(resname, region);
         region.setWidth(region.getWidth() - 1);
         region.setHeight(region.getHeight() - 1);
-        return region;
     }
 
     public void loadHighQualityFileUnderFolder(File folder) {

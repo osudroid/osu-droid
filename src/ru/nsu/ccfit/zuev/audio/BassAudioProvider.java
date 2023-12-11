@@ -57,7 +57,7 @@ public class BassAudioProvider {
         Log.i("BASS-Config", "Device nonstop:         " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_DEV_NONSTOP));
     }
 
-    public boolean prepare(final String fileName) {
+    public void prepare(final String fileName) {
         free();
         if (fileName != null && !fileName.isEmpty()) {
             channel = BASS.BASS_StreamCreateFile(fileName, 0, 0, fileFlag);  // BASS.BASS_STREAM_DECODE
@@ -77,10 +77,9 @@ public class BassAudioProvider {
                 }
             }
         }
-        return channel != 0;
     }
 
-    public boolean prepare(final AssetManager manager, final String assetName) {
+    public void prepare(final AssetManager manager, final String assetName) {
         free();
         if (manager != null && assetName != null && !assetName.isEmpty()) {
             BASS.Asset asset = new BASS.Asset(manager, assetName);
@@ -101,7 +100,6 @@ public class BassAudioProvider {
                 }
             }
         }
-        return channel != 0;
     }
 
     public void play() {

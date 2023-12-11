@@ -80,8 +80,8 @@ public class BassAudioFunc {
         }
     }
 
-    public boolean pause() {
-        return BASS.BASS_ChannelPause(channel);
+    public void pause() {
+        BASS.BASS_ChannelPause(channel);
     }
 
     public boolean resume() {
@@ -175,17 +175,15 @@ public class BassAudioFunc {
         return channel != 0;
     }
 
-    public boolean play() {
+    public void play() {
         if (channel != 0 && BASS.BASS_ChannelIsActive(channel) == BASS.BASS_ACTIVE_PAUSED) {
-            return resume();
+            resume();
         } else if (channel != 0) {
             setEndSync();
             if (BASS.BASS_ChannelPlay(channel, true)) {
                 setVolume(Config.getBgmVolume());
-                return true;
             }
         }
-        return false;
     }
 
     public boolean stop() {
