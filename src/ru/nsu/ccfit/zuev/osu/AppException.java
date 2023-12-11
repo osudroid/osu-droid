@@ -14,6 +14,7 @@ import android.util.Log;
 import android.widget.Toast;
 import com.reco1l.legacy.Multiplayer;
 import org.apache.http.HttpException;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
@@ -248,7 +249,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
     }
 
     @Override
-    public void uncaughtException(Thread thread, Throwable ex) {
+    public void uncaughtException(@NotNull Thread thread, @NotNull Throwable ex) {
 
         if (!handleException(ex) && mDefaultHandler != null) {
             //如果用户没有处理则让系统默认的异常处理器来处理

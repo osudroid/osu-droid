@@ -7,6 +7,7 @@ import org.anddev.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtl
 import org.anddev.andengine.opengl.texture.source.BaseTextureAtlasSource;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.StreamUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -133,6 +134,7 @@ public class QualityFileBitmapSource extends BaseTextureAtlasSource implements I
     }
 
 
+    @NotNull
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "(" + this.fileBitmapInput + ")";

@@ -7,6 +7,7 @@ import org.anddev.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtl
 import org.anddev.andengine.opengl.texture.source.BaseTextureAtlasSource;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.StreamUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,6 +64,7 @@ public class ScaledBitmapSource extends BaseTextureAtlasSource implements IBitma
     }
 
 
+    @NotNull
     @Override
     public ScaledBitmapSource clone() {
         return new ScaledBitmapSource(this.mFile, this.mTexturePositionX, this.mTexturePositionY, this.mWidth, this.mHeight);
@@ -115,6 +117,7 @@ public class ScaledBitmapSource extends BaseTextureAtlasSource implements IBitma
     }
 
 
+    @NotNull
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "(" + this.mFile + ")";
