@@ -101,7 +101,7 @@ public class GameScoreTextShadow extends GameObject {
     @Override
     public void update(final float dt) {
         if (letters[0].getAlpha() > 0) {
-            float alpha = letters[0].getAlpha() - dt;
+            float alpha = letters[0].getAlpha() - dt * 2.5f;
             if (alpha < 0) {
                 alpha = 0;
             }
@@ -111,6 +111,10 @@ public class GameScoreTextShadow extends GameObject {
                     - letters[0].getHeightScaled() - 20);
             for (final AnimSprite sp : letters) {
                 sp.setAlpha(alpha);
+            }
+
+            if (alpha == 0) {
+                comboText.changeText(text);
             }
         } else {
             comboText.changeText(text);
