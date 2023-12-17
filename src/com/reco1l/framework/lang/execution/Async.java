@@ -7,41 +7,18 @@ import java.util.concurrent.Executors;
 
 /**
  * @author Reco1l
+ * @author ammar
+ * Originally created by Reco1l, adapted by ammar.
  */
 public final class Async
 {
 
-    /**
-     * This prefix is set to the thread name that's created by the Executor, this is useful to identify asynchronous threads.
-     */
-    public static final String THREAD_PREFIX = "async::";
+    private static final ExecutorService GLOBAL_EXECUTOR = Executors.newSingleThreadExecutor(
+            runnable -> new Thread(runnable, "async::")
+    );
 
-    //----------------------------------------------------------------------------------------------------------------//
-
-    private final ExecutorService mExecutor;
-
-    //----------------------------------------------------------------------------------------------------------------//
-
-    private Async(Runnable task)
-    {
-        mExecutor = Executors.newSingleThreadExecutor();
-
-        mExecutor.execute(() -> {
-            Thread.currentThread().setName(THREAD_PREFIX + Thread.currentThread().getName());
-            task.run();
-            mExecutor.shutdown();
-        });
+    public static void run(@NonNull Runnable task) {
+        GLOBAL_EXECUTOR.execute(task);
     }
 
-    //----------------------------------------------------------------------------------------------------------------//
-
-    public static Async run(@NonNull Runnable task)
-    {
-        return new Async(task);
-    }
-
-    public ExecutorService getExecutor()
-    {
-        return mExecutor;
-    }
 }
