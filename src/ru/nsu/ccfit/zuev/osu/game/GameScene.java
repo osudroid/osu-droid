@@ -80,7 +80,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
-import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
+import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierFactory;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
@@ -324,7 +324,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         InGameSettingMenu.getInstance().dismiss();
         if (rFile != null && rFile.startsWith("https://")) {
             this.replayFile = Config.getCachePath() + "/" +
-                    MD5Calcuator.getStringMD5(rFile) + ".odr";
+                    MD5Calculator.getStringMD5(rFile) + ".odr";
             Debug.i("ReplayFile = " + replayFile);
             if (!OnlineFileOperator.downloadFile(rFile, this.replayFile)) {
                 ToastLogger.showTextId(R.string.replay_cantdownload, true);
@@ -1897,7 +1897,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (replay != null && replaying == false) {
                 String ctime = String.valueOf(System.currentTimeMillis());
                 replayFile = Config.getCorePath() + "Scores/"
-                        + MD5Calcuator.getStringMD5(lastTrack.getFilename() + ctime)
+                        + MD5Calculator.getStringMD5(lastTrack.getFilename() + ctime)
                         + ctime.substring(0, Math.min(3, ctime.length())) + ".odr";
                 replay.setStat(stat);
                 replay.save(replayFile);
@@ -3035,7 +3035,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             //save replay
             String ctime = String.valueOf(System.currentTimeMillis());
             replayFile = Config.getCorePath() + "Scores/"
-                    + MD5Calcuator.getStringMD5(lastTrack.getFilename() + ctime)
+                    + MD5Calculator.getStringMD5(lastTrack.getFilename() + ctime)
                     + ctime.substring(0, Math.min(3, ctime.length())) + ".odr";
             replay.setStat(stat);
             replay.save(replayFile);

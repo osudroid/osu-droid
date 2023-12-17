@@ -143,12 +143,12 @@ public class ScoringScene {
         rankingText.setPosition(Config.getRES_WIDTH() * 5 / 6 - rankingText.getWidth() / 2, 0);
         scene.attachChild(rankingText);
 
-        String scoreStr = String.valueOf(stat.getTotalScoreWithMultiplier());
+        StringBuilder scoreStr = new StringBuilder(String.valueOf(stat.getTotalScoreWithMultiplier()));
         while (scoreStr.length() < 8) {
-            scoreStr = '0' + scoreStr;
+            scoreStr.insert(0, "0");
         }
         final ScoreNumber scoreNum = new ScoreNumber(Utils.toRes(220 + x),
-                Utils.toRes(18 + y), scoreStr, 1, false);
+                Utils.toRes(18 + y), scoreStr.toString(), 1, false);
         scoreNum.attachToScene(scene);
 
         final ScoreNumber hit300num = new ScoreNumber(Utils.toRes(138 + x),
