@@ -140,7 +140,7 @@ public class ScoringScene {
 
         final Sprite rankingText = new Sprite(Utils.toRes(580), 0,
                 ResourceManager.getInstance().getTexture("ranking-title"));
-        rankingText.setPosition(Config.getRES_WIDTH() * 5 / 6 - rankingText.getWidth() / 2, 0);
+        rankingText.setPosition((float) (Config.getRES_WIDTH() * 5) / 6 - rankingText.getWidth() / 2, 0);
         scene.attachChild(rankingText);
 
         StringBuilder scoreStr = new StringBuilder(String.valueOf(stat.getTotalScoreWithMultiplier()));
@@ -185,7 +185,7 @@ public class ScoringScene {
                 ResourceManager.getInstance().getTexture("ranking-accuracy"));
         scene.attachChild(accText);
         final ScoreNumber maxCombo = new ScoreNumber(Utils.toRes(20 + x),
-                Utils.toRes(maxComboText.getY() + 38), String.valueOf(stat.getMaxCombo()) + "x", 1,
+                Utils.toRes(maxComboText.getY() + 38), stat.getMaxCombo() + "x", 1,
                 false);
         maxCombo.attachToScene(scene);
         final String accStr = String
@@ -202,7 +202,7 @@ public class ScoringScene {
             mark.registerEntityModifier(new ParallelEntityModifier(
                     new FadeInModifier(2), new ScaleModifier(2, 2, 1)));
         }
-        mark.setPosition(Config.getRES_WIDTH() * 5 / 6 - mark.getWidth() / 2, 80);
+        mark.setPosition((float) (Config.getRES_WIDTH() * 5) / 6 - mark.getWidth() / 2, 80);
 
         final Sprite backBtn = new Sprite(Utils.toRes(580), Utils.toRes(490),
                 ResourceManager.getInstance().getTexture("ranking-back")) {
@@ -540,7 +540,7 @@ public class ScoringScene {
 
                 SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
                         OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy());
-                sendingPanel.setPosition(Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));
+                sendingPanel.setPosition((float) Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));
                 scene.registerTouchArea(sendingPanel.getDismissTouchArea());
                 scene.attachChild(sendingPanel);
                 ScoreLibrary.getInstance().sendScoreOnline(stat, replay, sendingPanel);

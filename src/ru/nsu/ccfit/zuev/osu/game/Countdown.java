@@ -35,7 +35,7 @@ public class Countdown extends GameObject {
         this.scene = scene;
         timepassed = -time + COUNTDOWN_LENGTH * speed;
         final PointF center = Utils.trackToRealCoords(new PointF(
-                Constants.MAP_WIDTH / 2, Constants.MAP_HEIGHT / 2));
+                (float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2));
         ready = new CentredSprite(center.x, center.y, ResourceManager
                 .getInstance().getTexture("ready"));
         ready.registerEntityModifier(new SequenceEntityModifier(

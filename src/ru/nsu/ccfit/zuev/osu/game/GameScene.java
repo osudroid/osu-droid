@@ -732,7 +732,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
             camera.setZoomFactorDirect(Config.getPlayfieldSize());
             if (Config.isShrinkPlayfieldDownwards()) {
-                camera.setCenterDirect(Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT() / 2 * Config.getPlayfieldSize());
+                camera.setCenterDirect((float) Config.getRES_WIDTH() / 2, (float) Config.getRES_HEIGHT() / 2 * Config.getPlayfieldSize());
             }
         }
         setBackground();
@@ -928,7 +928,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 || (Config.getErrorMeter() == 2 && replaying)) {
             hitErrorMeter = new HitErrorMeter(
                     fgScene,
-                    new PointF(Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT() - 20),
+                    new PointF((float) Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT() - 20),
                     overallDifficulty,
                     12,
                     difficultyHelper);
@@ -1234,7 +1234,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         bgScene.attachChild(kiaiRect, 0);
 
         unranked = new Sprite(0, 0, ResourceManager.getInstance().getTexture("play-unranked"));
-        unranked.setPosition(Config.getRES_WIDTH() / 2 - unranked.getWidth() / 2, 80);
+        unranked.setPosition((float) Config.getRES_WIDTH() / 2 - unranked.getWidth() / 2, 80);
         unranked.setVisible(false);
         fgScene.attachChild(unranked);
 
@@ -1904,7 +1904,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
                 camera.setZoomFactorDirect(1f);
                 if (Config.isShrinkPlayfieldDownwards()) {
-                    camera.setCenterDirect(Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT() / 2);
+                    camera.setCenterDirect((float) Config.getRES_WIDTH() / 2, (float) Config.getRES_HEIGHT() / 2);
                 }
             }
             if (scoringScene != null) {
@@ -2130,7 +2130,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
             camera.setZoomFactorDirect(1f);
             if (Config.isShrinkPlayfieldDownwards()) {
-                camera.setCenterDirect(Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT() / 2);
+                camera.setCenterDirect((float) Config.getRES_WIDTH() / 2, (float) Config.getRES_HEIGHT() / 2);
             }
         }
         scene = new Scene();
@@ -2379,8 +2379,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             replay.addObjectResult(id, acc, null);
         }
 
-        final PointF pos = new PointF(Config.getRES_WIDTH() / 2,
-                Config.getRES_HEIGHT() / 2);
+        final PointF pos = new PointF((float) Config.getRES_WIDTH() / 2,
+                (float) Config.getRES_HEIGHT() / 2);
         if (score == 0) {
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "hit0");

@@ -388,7 +388,7 @@ public class ResourceManager {
                     Config.getTextureQuality() == 1 ? 2 : 0.75f, color2);
         } else {
             font = FontFactory.createStrokeFromAsset(texture, context, "fonts/"
-                            + file, size, true, color1, 2 / Config.getTextureQuality(),
+                            + file, size, true, color1, (float) 2 / Config.getTextureQuality(),
                     color2);
         }
         engine.getTextureManager().loadTexture(texture);
