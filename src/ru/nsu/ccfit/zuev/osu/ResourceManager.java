@@ -25,7 +25,9 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -864,7 +866,18 @@ public class ResourceManager {
 
     public void unloadTexture(TextureRegion texture) {
         engine.getTextureManager().unloadTexture(texture.getTexture());
-        textures.remove(texture);
+
+        List<String> toRemove = new ArrayList<>();
+
+        for (var entry : textures.entrySet()) {
+            if (entry.getValue() == texture) {
+                toRemove.add(entry.getKey());
+            }
+        }
+
+        for (var key : toRemove) {
+            textures.remove(key);
+        }
     }
 
     public void initSecurityUtils() {
