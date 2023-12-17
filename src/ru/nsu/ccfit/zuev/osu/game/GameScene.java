@@ -948,7 +948,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 tex = ResourceManager.getInstance().getTexture("play-skip-0");
                 skipBtn = new AnimSprite(Config.getRES_WIDTH() - tex.getWidth(),
                         Config.getRES_HEIGHT() - tex.getHeight(), loadedSkipTextures.size(),
-                        loadedSkipTextures.toArray(new String[loadedSkipTextures.size()]));
+                        loadedSkipTextures.toArray(new String[0]));
             } else {
                 tex = ResourceManager.getInstance().getTexture("play-skip");
                 skipBtn = new Sprite(Config.getRES_WIDTH() - tex.getWidth(),
