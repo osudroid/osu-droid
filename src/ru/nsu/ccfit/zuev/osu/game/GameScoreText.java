@@ -55,7 +55,7 @@ public class GameScoreText {
 
     public void changeText(final String text) {
         int j = 0;
-        var totalWidth = 0;
+        var totalWidth = 0f;
         var digitsSize = digits.size();
 
         for (int i = 0, length = text.length(); i < length; i++) {
