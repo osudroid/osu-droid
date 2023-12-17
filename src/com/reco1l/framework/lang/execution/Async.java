@@ -14,7 +14,7 @@ public final class Async
 {
 
     private static final ExecutorService GLOBAL_EXECUTOR = Executors.newSingleThreadExecutor(
-            runnable -> new Thread(runnable, "async::")
+            runnable -> new Thread(runnable, "async::" + Thread.currentThread().getName())
     );
 
     public static void run(@NonNull Runnable task) {
