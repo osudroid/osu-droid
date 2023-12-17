@@ -69,7 +69,7 @@ public class RunnableHandler extends Loopable implements IRunnableHandler {
         return flag;
     }
 
-    private class DelayedRunnable {
+    private static class DelayedRunnable {
         public Runnable r;
         public double delay;
 

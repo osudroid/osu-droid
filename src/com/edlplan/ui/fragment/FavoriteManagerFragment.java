@@ -143,7 +143,7 @@ public class FavoriteManagerFragment extends BaseFragment {
         }
     }
 
-    public abstract class FMAdapter extends RecyclerView.Adapter<VH> {
+    public abstract static class FMAdapter extends RecyclerView.Adapter<VH> {
 
         protected List<String> folders;
 

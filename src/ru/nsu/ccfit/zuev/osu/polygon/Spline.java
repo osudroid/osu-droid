@@ -389,7 +389,7 @@ public class Spline {
     /// <summary>
     /// Probably another XNA class? Guessing its structure based on usage
     /// </summary>
-    public class Line {
+    public static class Line {
         public PointF p1, p2;
 
         public Line(PointF Start, PointF End) {
