@@ -22,9 +22,7 @@ public class GameObjectData {
         }
         if (dataSize < data.length) {
             rawdata = new String[dataSize];
-            for (int i = 0; i < rawdata.length; i++) {
-                rawdata[i] = data[i];
-            }
+            System.arraycopy(data, 0, rawdata, 0, rawdata.length);
         } else
             rawdata = data;
 
