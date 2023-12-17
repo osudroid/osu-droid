@@ -8,9 +8,9 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
-
 import com.reco1l.legacy.ui.ChimuWebView;
 import com.reco1l.legacy.ui.MainMenu;
+
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
@@ -84,14 +84,11 @@ public class MainScene implements IUpdateHandler {
     private Sprite music_nowplay;
     private Scene scene;
     private ChangeableText musicInfoText;
-    private Random random = new Random();
-    private Rectangle[] spectrum = new Rectangle[120];
-    private float[] peakLevel = new float[120];
-    private float[] peakDownRate = new float[120];
-    private float[] peakAlpha = new float[120];
-    private Replay replay = null;
-    private TrackInfo selectedTrack;
-    private BeatmapData beatmapData;
+    private final Random random = new Random();
+    private final Rectangle[] spectrum = new Rectangle[120];
+    private final float[] peakLevel = new float[120];
+    private final float[] peakDownRate = new float[120];
+    private final float[] peakAlpha = new float[120];
     private List<TimingPoint> timingPoints;
     private TimingPoint currentTimingPoint, lastTimingPoint, firstTimingPoint;
 
@@ -99,7 +96,7 @@ public class MainScene implements IUpdateHandler {
     private boolean particleEnabled = false;
     private boolean isContinuousKiai = false;
 
-    private ParticleSystem[] particleSystem = new ParticleSystem[2];
+    private final ParticleSystem[] particleSystem = new ParticleSystem[2];
 
     //private BassAudioPlayer music;
 
@@ -113,15 +110,13 @@ public class MainScene implements IUpdateHandler {
     private float lastBeatPassTime = 0;
     private boolean doChange = false;
     private boolean doStop = false;
-    //    private int playIndex = 0;
-//    private int lastPlayIndex = -1;
     private long lastHit = 0;
     public boolean isOnExitAnim = false;
 
     private boolean isMenuShowed = false;
     private boolean doMenuShow = false;
     private float showPassTime = 0, syncPassedTime = 0;
-    private float menuBarX = 0, playY, optionsY, exitY;
+    private float menuBarX = 0, playY, exitY;
 
     private MainMenu menu;
 
@@ -132,7 +127,7 @@ public class MainScene implements IUpdateHandler {
         scene = new Scene();
 
         final TextureRegion tex = ResourceManager.getInstance().getTexture("menu-background");
-        
+
         if (tex != null) {
             float height = tex.getHeight();
             height *= Config.getRES_WIDTH()
@@ -163,10 +158,10 @@ public class MainScene implements IUpdateHandler {
                 if (pSceneTouchEvent.isActionUp()) {
                     Debug.i("logo up");
                     Debug.i("doMenuShow " + doMenuShow + " isMenuShowed " + isMenuShowed + " showPassTime " + showPassTime);
-                    if (doMenuShow == true && isMenuShowed == true) {
+                    if (doMenuShow && isMenuShowed) {
                         showPassTime = 20000;
                     }
-                    if (doMenuShow == false && isMenuShowed == false && logo.getX() == (Config.getRES_WIDTH() - logo.getWidth()) / 2) {
+                    if (!doMenuShow && !isMenuShowed && logo.getX() == (Config.getRES_WIDTH() - logo.getWidth()) / 2) {
                         doMenuShow = true;
                         showPassTime = 0;
                     }
@@ -188,9 +183,9 @@ public class MainScene implements IUpdateHandler {
                 .getInstance().getFont("font"),
                 String.format(
                         Locale.getDefault(),
-                        "osu!droid %s\nby osu!droid Team\nosu! is \u00a9 peppy 2007-2023",
+                        "osu!droid %s\nby osu!droid Team\nosu! is © peppy 2007-2023",
                         BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")"
-                        )) {
+                )) {
 
 
             @Override
@@ -198,12 +193,12 @@ public class MainScene implements IUpdateHandler {
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
                     new ConfirmDialogFragment().setMessage(R.string.dialog_visit_osu_website_message).showForResult(
-                        isAccepted -> {
-                            if(isAccepted) {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
-                                GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                            isAccepted -> {
+                                if (isAccepted) {
+                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
+                                    GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                                }
                             }
-                        }
                     );
                     return true;
                 }
@@ -221,12 +216,12 @@ public class MainScene implements IUpdateHandler {
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
                     new ConfirmDialogFragment().setMessage(R.string.dialog_visit_osudroid_website_message).showForResult(
-                        isAccepted -> {
-                            if(isAccepted) {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
-                                GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                            isAccepted -> {
+                                if (isAccepted) {
+                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
+                                    GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                                }
                             }
-                        }
                     );
                     return true;
                 }
@@ -424,19 +419,15 @@ public class MainScene implements IUpdateHandler {
         }
 
         TextureRegion chimuTex = ResourceManager.getInstance().getTexture("chimu");
-        Sprite chimu = new Sprite(Config.getRES_WIDTH() - chimuTex.getWidth(), (Config.getRES_HEIGHT() - chimuTex.getHeight()) / 2f, chimuTex)
-        {
-            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY)
-            {
-                if (pSceneTouchEvent.isActionDown())
-                {
+        Sprite chimu = new Sprite(Config.getRES_WIDTH() - chimuTex.getWidth(), (Config.getRES_HEIGHT() - chimuTex.getHeight()) / 2f, chimuTex) {
+            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+                if (pSceneTouchEvent.isActionDown()) {
                     setColor(0.7f, 0.7f, 0.7f);
                     doStop = true;
                     return true;
                 }
 
-                if (pSceneTouchEvent.isActionUp())
-                {
+                if (pSceneTouchEvent.isActionUp()) {
                     setColor(1, 1, 1);
                     musicControl(MusicOption.STOP);
                     ChimuWebView.INSTANCE.show();
@@ -541,7 +532,7 @@ public class MainScene implements IUpdateHandler {
                 firstTimingPoint = null;
                 LibraryManager.INSTANCE.getPrevBeatmap();
                 loadBeatmapInfo();
-                loadTimeingPoints(true);
+                loadTimingPoints(true);
                 doChange = false;
                 doStop = false;
             }
@@ -549,7 +540,7 @@ public class MainScene implements IUpdateHandler {
             case PLAY: {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED || GlobalManager.getInstance().getSongService().getStatus() == Status.STOPPED) {
                     if (GlobalManager.getInstance().getSongService().getStatus() == Status.STOPPED) {
-                        loadTimeingPoints(false);
+                        loadTimingPoints(false);
                         GlobalManager.getInstance().getSongService().preLoad(beatmapInfo.getMusic());
                         if (firstTimingPoint != null) {
                             bpmLength = firstTimingPoint.getBeatLength() * 1000f;
@@ -597,7 +588,7 @@ public class MainScene implements IUpdateHandler {
                 LibraryManager.INSTANCE.getNextBeatmap();
                 firstTimingPoint = null;
                 loadBeatmapInfo();
-                loadTimeingPoints(true);
+                loadTimingPoints(true);
                 doChange = false;
                 doStop = false;
             }
@@ -630,7 +621,7 @@ public class MainScene implements IUpdateHandler {
             offset = 0;
         }
 
-        if (doMenuShow == true && isMenuShowed == false) {
+        if (doMenuShow && !isMenuShowed) {
             logo.registerEntityModifier(new MoveXModifier(0.3f, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, EaseExponentialOut.getInstance()));
             logoOverlay.registerEntityModifier(new MoveXModifier(0.3f, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, EaseExponentialOut.getInstance()));
             for (Rectangle rectangle : spectrum) {
@@ -651,7 +642,7 @@ public class MainScene implements IUpdateHandler {
             isMenuShowed = true;
         }
 
-        if (doMenuShow == true && isMenuShowed == true) {
+        if (doMenuShow) {
             if (showPassTime > 10000f) {
 
                 menu.showFirstMenu();
@@ -806,7 +797,7 @@ public class MainScene implements IUpdateHandler {
     public void loadBeatmap() {
         LibraryManager.INSTANCE.shuffleLibrary();
         loadBeatmapInfo();
-        loadTimeingPoints(true);
+        loadTimingPoints(true);
     }
 
     public void loadBeatmapInfo() {
@@ -818,7 +809,7 @@ public class MainScene implements IUpdateHandler {
                 musicInfoText = new ChangeableText(Utils.toRes(Config.getRES_WIDTH() - 500), Utils.toRes(3),
                         ResourceManager.getInstance().getFont("font"), "None...", HorizontalAlign.RIGHT, 35);
             }
-            if (beatmapInfo.getArtistUnicode() != null && beatmapInfo.getTitleUnicode() != null && Config.isForceRomanized() == false) {
+            if (beatmapInfo.getArtistUnicode() != null && beatmapInfo.getTitleUnicode() != null && !Config.isForceRomanized()) {
                 musicInfoText.setText(beatmapInfo.getArtistUnicode() + " - " + beatmapInfo.getTitleUnicode(), true);
             } else if (beatmapInfo.getArtist() != null && beatmapInfo.getTitle() != null) {
                 musicInfoText.setText(beatmapInfo.getArtist() + " - " + beatmapInfo.getTitle(), true);
@@ -835,7 +826,7 @@ public class MainScene implements IUpdateHandler {
         }
     }
 
-    public void loadTimeingPoints(boolean reloadMusic) {
+    public void loadTimingPoints(boolean reloadMusic) {
         if (beatmapInfo == null) {
             return;
         }
@@ -848,14 +839,14 @@ public class MainScene implements IUpdateHandler {
         ArrayList<TrackInfo> trackInfos = beatmapInfo.getTracks();
         if (trackInfos != null && trackInfos.size() > 0) {
             int trackIndex = random.nextInt(trackInfos.size());
-            selectedTrack = trackInfos.get(trackIndex);
+            TrackInfo selectedTrack = trackInfos.get(trackIndex);
             GlobalManager.getInstance().setSelectedTrack(selectedTrack);
 
             if (selectedTrack.getBackground() != null) {
                 try {
                     final TextureRegion tex = Config.isSafeBeatmapBg() ?
-                        ResourceManager.getInstance().getTexture("menu-background") :
-                        ResourceManager.getInstance().loadBackground(selectedTrack.getBackground());
+                            ResourceManager.getInstance().getTexture("menu-background") :
+                            ResourceManager.getInstance().loadBackground(selectedTrack.getBackground());
 
                     if (tex != null) {
                         float height = tex.getHeight();
@@ -872,7 +863,6 @@ public class MainScene implements IUpdateHandler {
 
                             @Override
                             public void onModifierFinished(IModifier<IEntity> pModifier, final IEntity pItem) {
-                                // TODO Auto-generated method stub
                                 GlobalManager.getInstance().getMainActivity().runOnUpdateThread(pItem::detachSelf);
                             }
                         }));
@@ -900,11 +890,11 @@ public class MainScene implements IUpdateHandler {
             Arrays.fill(peakAlpha, 0f);
 
             BeatmapParser parser = new BeatmapParser(selectedTrack.getFilename());
-            beatmapData = parser.parse(false);
+            BeatmapData beatmapData = parser.parse(false);
             if (beatmapData != null) {
                 timingPoints = new LinkedList<>();
                 for (final String s : beatmapData.rawTimingPoints) {
-                    final TimingPoint tp = new TimingPoint(s.split("[,]"), currentTimingPoint);
+                    final TimingPoint tp = new TimingPoint(s.split(","), currentTimingPoint);
                     timingPoints.add(tp);
                     if (!tp.wasInderited() || currentTimingPoint == null) {
                         currentTimingPoint = tp;
@@ -920,11 +910,11 @@ public class MainScene implements IUpdateHandler {
 
     public void showExitDialog() {
         GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> new ConfirmDialogFragment().setMessage(R.string.dialog_exit_message).showForResult(
-            isAccepted -> {
-                if (isAccepted) {
-                    exit();
+                isAccepted -> {
+                    if (isAccepted) {
+                        exit();
+                    }
                 }
-            }
         ));
     }
 
@@ -953,7 +943,7 @@ public class MainScene implements IUpdateHandler {
         if (exitsound != null) {
             exitsound.play();
         }
-        
+
         Rectangle bg = new Rectangle(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT());
         bg.setColor(0, 0, 0, 1.0f);
@@ -1007,12 +997,12 @@ public class MainScene implements IUpdateHandler {
         int playIndex = LibraryManager.INSTANCE.findBeatmap(info);
         Debug.i("index " + playIndex);
         loadBeatmapInfo();
-        loadTimeingPoints(false);
+        loadTimingPoints(false);
         musicControl(MusicOption.SYNC);
     }
 
     public void watchReplay(String replayFile) {
-        replay = new Replay();
+        Replay replay = new Replay();
         if (replay.loadInfo(replayFile)) {
             if (replay.replayVersion >= 3) {
                 //replay
