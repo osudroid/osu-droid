@@ -169,9 +169,7 @@ public class InGameSettingMenu extends BaseFragment {
 
         CheckBox enableNCWhenSpeedChange = findViewById(R.id.enableNCwhenSpeedChange);
         enableNCWhenSpeedChange.setChecked(ModMenu.getInstance().isEnableNCWhenSpeedChange());
-        enableNCWhenSpeedChange.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            ModMenu.getInstance().setEnableNCWhenSpeedChange(isChecked);
-        });
+        enableNCWhenSpeedChange.setOnCheckedChangeListener((buttonView, isChecked) -> ModMenu.getInstance().setEnableNCWhenSpeedChange(isChecked));
 
         speedModifyText = findViewById(R.id.changeSpeedText);
 

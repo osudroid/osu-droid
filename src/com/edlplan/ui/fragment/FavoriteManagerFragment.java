@@ -194,7 +194,7 @@ public class FavoriteManagerFragment extends BaseFragment {
         public void onBindViewHolder(@NonNull VH holder, int position) {
             final String f = folders.get(position);
             holder.folderName.setText(String.format("%s (%s)",
-                    f, FavoriteLibrary.get().getMaps(f) == null ? "*" : ("" + FavoriteLibrary.get().getMaps(f).size())));
+                    f, FavoriteLibrary.get().getMaps(f) == null ? "*" : (String.valueOf(FavoriteLibrary.get().getMaps(f).size()))));
             holder.button1.setText(R.string.favorite_delete);
             if (position == 0) {
                 holder.button2.setText("( • ̀ω•́ )✧");
@@ -233,20 +233,18 @@ public class FavoriteManagerFragment extends BaseFragment {
                 if (FavoriteLibrary.get().inFolder(f, track)) {
                     FavoriteLibrary.get().remove(f, track);
                     holder.folderName.setText(String.format("%s (%s)",
-                            f, FavoriteLibrary.get().getMaps(f) == null ? "*" : ("" + FavoriteLibrary.get().getMaps(f).size())));
+                            f, FavoriteLibrary.get().getMaps(f) == null ? "*" : (String.valueOf(FavoriteLibrary.get().getMaps(f).size()))));
                     holder.button2.setText(R.string.favorite_add);
                 } else {
                     FavoriteLibrary.get().add(f, track);
                     holder.folderName.setText(String.format("%s (%s)",
-                            f, FavoriteLibrary.get().getMaps(f) == null ? "*" : ("" + FavoriteLibrary.get().getMaps(f).size())));
+                            f, FavoriteLibrary.get().getMaps(f) == null ? "*" : (String.valueOf(FavoriteLibrary.get().getMaps(f).size()))));
                     holder.button2.setText(R.string.favorite_remove);
                 }
             });
 
             if (position == 0) {
-                holder.button1.setOnClickListener(view -> {
-                    ToastLogger.showText(StringTable.get(R.string.favorite_warning_on_delete_default), false);
-                });
+                holder.button1.setOnClickListener(view -> ToastLogger.showText(StringTable.get(R.string.favorite_warning_on_delete_default), false));
                 holder.button2.setOnClickListener(view -> {
                 });
             }
@@ -265,7 +263,7 @@ public class FavoriteManagerFragment extends BaseFragment {
         public void onBindViewHolder(@NonNull VH holder, int position) {
             final String f = folders.get(position);
             holder.folderName.setText(String.format("%s (%s)",
-                    f, FavoriteLibrary.get().getMaps(f) == null ? "*" : ("" + FavoriteLibrary.get().getMaps(f).size())));
+                    f, FavoriteLibrary.get().getMaps(f) == null ? "*" : (String.valueOf(FavoriteLibrary.get().getMaps(f).size()))));
             holder.button1.setText(R.string.favorite_delete);
             holder.button2.setText(R.string.favorite_select);
 
@@ -315,9 +313,7 @@ public class FavoriteManagerFragment extends BaseFragment {
             });
 
             if (position == 0) {
-                holder.button1.setOnClickListener(view -> {
-                    ToastLogger.showText(StringTable.get(R.string.favorite_warning_on_delete_default), false);
-                });
+                holder.button1.setOnClickListener(view -> ToastLogger.showText(StringTable.get(R.string.favorite_warning_on_delete_default), false));
             }
         }
     }

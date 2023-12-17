@@ -67,7 +67,7 @@ abstract class SettingsFragment : PreferenceFragmentCompat(), BackPressListener 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         isCreated = true
-        root = super<PreferenceFragmentCompat>.onCreateView(inflater, container, savedInstanceState)
+        root = super.onCreateView(inflater, container, savedInstanceState)
         onLoadView()
         return root
     }

@@ -9,6 +9,8 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
 
+import java.util.Arrays;
+
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
 
@@ -18,9 +20,7 @@ public class Utils {
     private static int soundMask = 0;
 
     public static <T> T[] oneObjectArray(T object, T[] ary) {
-        for (int i = 0; i < ary.length; i++) {
-            ary[i] = object;
-        }
+        Arrays.fill(ary, object);
         return ary;
     }
 

@@ -12,7 +12,7 @@ public class RunnableHandler extends Loopable implements IRunnableHandler {
     private Loopable.Flag flag = Loopable.Flag.Run;
 
     public RunnableHandler() {
-        bufferedRunnables = new SafeList<DelayedRunnable>();
+        bufferedRunnables = new SafeList<>();
     }
 
     @Override

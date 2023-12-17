@@ -196,9 +196,7 @@ public class StoryboardSprite extends SupportSprite {
             }
         });
 
-        Tracker.createTmpNode("LoadPlayer").wrap(() -> {
-            osbPlayer.loadStoryboard(storyboard);
-        }).then(System.out::println);
+        Tracker.createTmpNode("LoadPlayer").wrap(() -> osbPlayer.loadStoryboard(storyboard)).then(System.out::println);
     }
 
     public void loadStoryboard(String osuFile) {
@@ -255,9 +253,7 @@ public class StoryboardSprite extends SupportSprite {
             }
         });
 
-        Tracker.createTmpNode("LoadPlayer").wrap(() -> {
-            osbPlayer.loadStoryboard(storyboard);
-        }).then(System.out::println);
+        Tracker.createTmpNode("LoadPlayer").wrap(() -> osbPlayer.loadStoryboard(storyboard)).then(System.out::println);
 
     }
 

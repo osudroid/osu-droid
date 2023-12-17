@@ -5,7 +5,9 @@ import com.edlplan.osu.support.timing.TimingPoints;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 public class ControlPoints {
     private final ArrayList<TimingControlPoint> timingPoints = new ArrayList<>();
@@ -117,9 +119,9 @@ public class ControlPoints {
                 effectPoints.add(preEcp);
             }
         }
-        Collections.sort(timingPoints, (a, b) -> Double.compare(a.getTime(), b.getTime()));
-        Collections.sort(difficultyPoints, (a, b) -> Double.compare(a.getTime(), b.getTime()));
-        Collections.sort(effectPoints, (a, b) -> Double.compare(a.getTime(), b.getTime()));
+        Collections.sort(timingPoints, Comparator.comparingDouble(ControlPoint::getTime));
+        Collections.sort(difficultyPoints, Comparator.comparingDouble(ControlPoint::getTime));
+        Collections.sort(effectPoints, Comparator.comparingDouble(ControlPoint::getTime));
 
         /*Log.v("ControlPoints", "t: " + timingPoints.size());
         Log.v("ControlPoints", "d: " + difficultyPoints.size());
@@ -140,7 +142,7 @@ public class ControlPoints {
         }
 
         difficultyPoints.add(newPoint);
-        Collections.sort(difficultyPoints, (a, b) -> Double.compare(a.getTime(), b.getTime()));
+        Collections.sort(difficultyPoints, Comparator.comparingDouble(ControlPoint::getTime));
     }
 
     public TimingControlPoint getTimingPointAt(double time) {
@@ -169,11 +171,7 @@ public class ControlPoints {
             return defaultDifficultyPoint;
         }
         DifficultyControlPoint difficultyControlPoint = binarySearch(difficultyPoints, time, defaultDifficultyPoint);
-        if (difficultyControlPoint == null) {
-            return defaultDifficultyPoint;
-        } else {
-            return difficultyControlPoint;
-        }
+        return Objects.requireNonNullElse(difficultyControlPoint, defaultDifficultyPoint);
     }
 
     private <T extends ControlPoint> T binarySearch(List<T> list, double time, T prePoint) {

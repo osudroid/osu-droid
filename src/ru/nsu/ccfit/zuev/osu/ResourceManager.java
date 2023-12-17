@@ -116,14 +116,11 @@ public class ResourceManager {
         if (!folder.endsWith("/")) folder += "/";
 
         File[] skinFiles = null;
-        File skinFolder = null;
-        if (folder != null) {
-            skinFolder = new File(folder);
-            if (!skinFolder.exists()) {
-                skinFolder = null;
-            } else {
-                skinFiles = FileUtils.listFiles(skinFolder);
-            }
+        File skinFolder = new File(folder);
+        if (!skinFolder.exists()) {
+            skinFolder = null;
+        } else {
+            skinFiles = FileUtils.listFiles(skinFolder);
         }
         if (skinFiles != null) {
             JSONObject skinjson = null;
@@ -133,7 +130,6 @@ public class ResourceManager {
                     skinjson = new JSONObject(OsuSkin.readFull(jsonFile));
                 } catch (Exception e) {
                     e.printStackTrace();
-                    skinjson = null;
                 }
             } else {
                 var iniFile = new File(folder, "skin.ini");
@@ -160,7 +156,7 @@ public class ResourceManager {
             if (skinjson == null) skinjson = new JSONObject();
             SkinJsonReader.getReader().supplyJson(skinjson);
         }
-        final Map<String, File> availableFiles = new HashMap<String, File>();
+        final Map<String, File> availableFiles = new HashMap<>();
         if (skinFiles != null) {
             for (final File f : skinFiles) {
                 if (f.isFile()) {
@@ -913,10 +909,7 @@ public class ResourceManager {
         final String[] names = {"spinner-background", "spinner-circle",
                 "spinner-metre", "spinner-approachcircle", "spinner-spin"};
         for (final String s : names) {
-            if (textures != null
-                    && textures.get(s) != null
-                    && textures.get(s).getTexture() != null
-                    && !textures.get(s).getTexture().isLoadedToHardware()) {
+            if (textures.get(s) != null && textures.get(s).getTexture() != null && !textures.get(s).getTexture().isLoadedToHardware()) {
                 engine.getTextureManager().reloadTextures();
                 break;
             }
@@ -934,10 +927,7 @@ public class ResourceManager {
                 "spinner-clear"
         };
         for (final String s : names) {
-            if (textures != null
-                    && textures.get(s) != null
-                    && textures.get(s).getTexture() != null
-                    && !textures.get(s).getTexture().isLoadedToHardware()) {
+            if (textures.get(s) != null && textures.get(s).getTexture() != null && !textures.get(s).getTexture().isLoadedToHardware()) {
                 engine.getTextureManager().reloadTextures();
                 break;
             }

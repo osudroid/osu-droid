@@ -11,8 +11,8 @@ import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
 public class SkinManager {
     private static SkinManager instance = new SkinManager();
-    private static Map<String, Integer> frameCount = new HashMap<String, Integer>();
-    private static Map<String, Integer> stdframeCount = new HashMap<String, Integer>();
+    private static Map<String, Integer> frameCount = new HashMap<>();
+    private static Map<String, Integer> stdframeCount = new HashMap<>();
     private static boolean skinEnabled = true;
 
     static {

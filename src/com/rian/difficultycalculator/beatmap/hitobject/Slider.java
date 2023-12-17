@@ -12,6 +12,7 @@ import com.rian.difficultycalculator.math.Vector2;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -218,7 +219,7 @@ public class Slider extends HitObjectWithDuration {
         }
 
         nestedHitObjects.add(tail);
-        Collections.sort(nestedHitObjects, (o1, o2) -> Double.compare(o1.startTime, o2.startTime));
+        Collections.sort(nestedHitObjects, Comparator.comparingDouble(o -> o.startTime));
     }
 
     @Override

@@ -14,7 +14,7 @@ import ru.nsu.ccfit.zuev.skins.StringSkinData;
 public class GameScoreText {
     private final AnimSprite[] letters;
     private final Map<Character, AnimSprite> characters;
-    private final ArrayList<AnimSprite> digits = new ArrayList<AnimSprite>();
+    private final ArrayList<AnimSprite> digits = new ArrayList<>();
     private float scale = 0;
     private boolean hasX = false;
     private final float digitWidth;
@@ -47,7 +47,7 @@ public class GameScoreText {
             width += letters[i].getWidth();
         }
         this.scale = scale;
-        this.characters = new HashMap<Character, AnimSprite>();
+        this.characters = new HashMap<>();
         this.characters.put('.', scoreComma);
         this.characters.put('%', scorePercent);
         this.characters.put('x', scoreX);

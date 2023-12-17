@@ -1,5 +1,6 @@
 package com.edlplan.framework.support.osb;
 
+import com.edlplan.edlosbsupport.command.SpriteCommand;
 import com.edlplan.edlosbsupport.command.Target;
 import com.edlplan.edlosbsupport.player.CommandBooleanHandleTimeline;
 import com.edlplan.edlosbsupport.player.CommandColor4HandleTimeline;

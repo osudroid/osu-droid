@@ -44,7 +44,7 @@ public class StdSliderPathMaker {
 
     public LinePath calculatePath() {
         path.clear();
-        List<Vec2> subControlPoints = new ArrayList<Vec2>();
+        List<Vec2> subControlPoints = new ArrayList<>();
         for (int i = 0; i < getControlPoint().size(); i++) {
             subControlPoints.add(getControlPoint().get(i));
             if (i == getControlPoint().size() - 1 || getControlPoint().get(i).equals(getControlPoint().get(i + 1))) {

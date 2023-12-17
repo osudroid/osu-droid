@@ -684,7 +684,7 @@ public class Config {
         return cursorSize;
     }
 
-    public static void setCursorSize() {
+    public static void setCursorSize(final float cursorSize) {
         Config.cursorSize = cursorSize;
     }
 
@@ -750,7 +750,7 @@ public class Config {
 
     public static void loadSkins() {
         File[] folders = FileUtils.listFiles(new File(skinTopPath), file -> file.isDirectory() && !file.getName().startsWith("."));
-        skins = new HashMap<String, String>();
+        skins = new HashMap<>();
         for(File folder : folders) {
             skins.put(folder.getName(), folder.getPath());
             Debug.i("skins: " + folder.getName() + " - " + folder.getPath());
@@ -762,7 +762,7 @@ public class Config {
     }
 
     public static void addSkin(String name, String path) {
-        if(skins == null) skins = new HashMap<String, String>();
+        if(skins == null) skins = new HashMap<>();
         skins.put(name, path);
     }
 

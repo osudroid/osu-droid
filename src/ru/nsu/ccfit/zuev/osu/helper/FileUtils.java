@@ -53,8 +53,6 @@ public class FileUtils {
             return false;
         }
 
-        ToastLogger.addToLog("Importing " + sourcePath);
-
         String sourceFileName = file.getName();
         final String folderName = sourceFileName.substring(0, sourceFileName.length() - 4);
 

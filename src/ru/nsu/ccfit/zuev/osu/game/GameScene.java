@@ -135,7 +135,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private LinkedList<GameObject> expiredObjects;
     private GameScoreText comboText, accText, scoreText;  //显示的文字  连击数  ACC  分数
     private GameScoreTextShadow scoreShadow;
-    private Queue<BreakPeriod> breakPeriods = new LinkedList<BreakPeriod>();
+    private Queue<BreakPeriod> breakPeriods = new LinkedList<>();
     private BreakAnimator breakAnimator;
     private ScoreBar scorebar;
     private SongProgressBar progressBar;
@@ -500,7 +500,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             objects.add(new GameObjectData(s));
         }
 
-        if (objects.size() <= 0) {
+        if (objects.size() == 0) {
             ToastLogger.showText("Empty Beatmap", true);
             return false;
         }
@@ -855,9 +855,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             cursors[i].mouseOldDown = false;
         }
 
-        for (int i = 0; i < CursorCount; i++) {
-            cursorIIsDown[i] = false;
-        }
+        Arrays.fill(cursorIIsDown, false);
 
         comboWas100 = false;
         comboWasMissed = false;
@@ -2432,8 +2430,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 pos,
                 scale,
                 new SequenceEntityModifier(ModifierFactory.newScaleModifier(
-                        0.15f, 1.0f * scale, 1.2f * scale), ModifierFactory
-                        .newScaleModifier(0.05f, 1.2f * scale, 1.0f * scale),
+                        0.15f, scale, 1.2f * scale), ModifierFactory
+                        .newScaleModifier(0.05f, 1.2f * scale, scale),
                         ModifierFactory.newAlphaModifier(1f, 1, 0)));
 
         pos.y /= 2f;
@@ -2807,8 +2805,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 pos,
                 scale,
                 new SequenceEntityModifier(ModifierFactory.newScaleModifier(
-                        0.15f, 1.0f * scale, 1.2f * scale), ModifierFactory
-                        .newScaleModifier(0.05f, 1.2f * scale, 1.0f * scale),
+                        0.15f, scale, 1.2f * scale), ModifierFactory
+                        .newScaleModifier(0.05f, 1.2f * scale, scale),
                         ModifierFactory.newAlphaModifier(0.5f, 1, 0)));
     }
 
@@ -2967,10 +2965,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void calculateAllSliderPaths(){
-        if (objects.isEmpty()){
-            return;
-        }
-        else {
+        if (!objects.isEmpty()){
             if (lastTrack.getSliderCount() <= 0){
                 return;
             }
@@ -2992,11 +2987,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     pos.y += data.getPosOffset();
                     if (length < 0){
                         sliderPaths[sliderIndex] = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
-                        params[5].split("[|]"), 0, offset);
+                                params[5].split("[|]"), 0, offset);
                     }
                     else{
                         sliderPaths[sliderIndex] = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
-                        params[5].split("[|]"), length, offset);
+                                params[5].split("[|]"), length, offset);
                     }
                     sliderIndex++;
                 }

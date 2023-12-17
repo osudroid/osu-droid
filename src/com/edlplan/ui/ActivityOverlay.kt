@@ -26,7 +26,7 @@ object ActivityOverlay {
     @Synchronized
     fun onBackPress(): Boolean {
         if (fragmentManager != null && displayingOverlay.size > 0) {
-            val overlay: Fragment? = displayingOverlay[displayingOverlay.size - 1]
+            val overlay: Fragment = displayingOverlay[displayingOverlay.size - 1]
             if(overlay is BackPressListener) {
                 overlay.callDismissOnBackPress()
             }
@@ -48,7 +48,7 @@ object ActivityOverlay {
     @Synchronized
     fun addOverlay(fragment: Fragment, tag: String?) {
         if (fragmentManager != null) {
-            if (fragment.isAdded()) {
+            if (fragment.isAdded) {
                 return
             }
             if (displayingOverlay.contains(fragment) || fragmentManager!!.findFragmentByTag(tag) != null) {

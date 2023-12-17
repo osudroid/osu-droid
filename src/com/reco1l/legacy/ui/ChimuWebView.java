@@ -157,9 +157,7 @@ public class ChimuWebView extends WebViewFragment implements IDownloaderObserver
     @Override
     public void onDownloadStart(Downloader downloader)
     {
-        mActivity.runOnUiThread(() -> {
-            mFragment.getText().setText(StringTable.format(R.string.chimu_downloading, mCurrentFilename));
-        });
+        mActivity.runOnUiThread(() -> mFragment.getText().setText(StringTable.format(R.string.chimu_downloading, mCurrentFilename)));
     }
 
     @Override

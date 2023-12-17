@@ -6,7 +6,7 @@ import android.opengl.GLES10;
 import com.edlplan.framework.support.batch.BatchEngine;
 import com.edlplan.framework.utils.interfaces.Copyable;
 
-public class BlendProperty implements Copyable {
+public class BlendProperty implements Copyable<BlendProperty> {
 
     public boolean enable = true;
 
@@ -61,7 +61,7 @@ public class BlendProperty implements Copyable {
     }
 
     @Override
-    public Copyable copy() {
+    public BlendProperty copy() {
         return new BlendProperty(this);
     }
 }

@@ -32,7 +32,6 @@ public class DrawLinePath {
 
     public DrawLinePath() {
         alpha = 1;
-        this.width = width;
     }
 
     public DrawLinePath reset(AbstractPath p, float width) {

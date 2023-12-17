@@ -5,7 +5,7 @@ import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.utils.interfaces.Copyable;
 import com.edlplan.framework.utils.interfaces.Recycleable;
 
-public class CanvasData implements Recycleable, Copyable {
+public class CanvasData implements Recycleable, Copyable<CanvasData> {
 
     private float width;
 
@@ -153,7 +153,7 @@ public class CanvasData implements Recycleable, Copyable {
     }
 
     @Override
-    public Copyable copy() {
+    public CanvasData copy() {
         return new CanvasData(this);
     }
 }

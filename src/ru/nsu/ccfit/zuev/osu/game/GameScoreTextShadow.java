@@ -12,7 +12,7 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 public class GameScoreTextShadow extends GameObject {
     private final GameScoreText comboText;
     private final AnimSprite[] letters;
-    private final ArrayList<AnimSprite> digits = new ArrayList<AnimSprite>();
+    private final ArrayList<AnimSprite> digits = new ArrayList<>();
     private boolean hasX = false;
     private String text = "";
 

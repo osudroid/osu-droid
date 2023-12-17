@@ -35,7 +35,7 @@ public class SkinPathPreference extends ListPreference {
     public void reloadSkinList() {
         try {
             File skinMain = new File(Config.getSkinTopPath());
-            Map<String, String> skins = new HashMap<String, String>(Config.getSkins());
+            Map<String, String> skins = new HashMap<>(Config.getSkins());
             int skinsSize = (skins.size() > 0) ? skins.size() + 1 : 1;
             Debug.i("Skins count:" + skinsSize);
             CharSequence[] entries = new CharSequence[skinsSize];

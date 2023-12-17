@@ -26,8 +26,8 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
  */
 public class ComboBurst {
 
-    private final List<Sprite> comboBursts = new ArrayList<Sprite>();
-    private final List<BassSoundProvider> comboBurstVocals = new ArrayList<BassSoundProvider>();
+    private final List<Sprite> comboBursts = new ArrayList<>();
+    private final List<BassSoundProvider> comboBurstVocals = new ArrayList<>();
 
     private final float rightX;
     private final float bottomY;

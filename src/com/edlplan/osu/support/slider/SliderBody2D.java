@@ -17,7 +17,7 @@ import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 
 public class SliderBody2D extends AbstractSliderBody {
 
-    private static final ThreadLocal<BuildCache> localCache = new ThreadLocal<BuildCache>() {
+    private static final ThreadLocal<BuildCache> localCache = new ThreadLocal<>() {
         @Override
         public BuildCache get() {
             BuildCache cache = super.get();

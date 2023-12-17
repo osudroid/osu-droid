@@ -24,7 +24,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 /**
  * Simplified version of [MenuItemTrack]
  */
-open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-background"))
+class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-background"))
 {
 
     private val trackTitle = ChangeableText(32f, 20f, getResources().getFont("smallFont"), "", 100)

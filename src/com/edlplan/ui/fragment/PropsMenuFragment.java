@@ -44,7 +44,7 @@ public class PropsMenuFragment extends BaseFragment implements IPropsMenu {
         offset = findViewById(R.id.offsetBox);
         isFav = findViewById(R.id.addToFav);
 
-        offset.setText(props.getOffset() + "");
+        offset.setText(String.valueOf(props.getOffset()));
         isFav.setChecked(props.isFavorite());
 
         isFav.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -82,7 +82,7 @@ public class PropsMenuFragment extends BaseFragment implements IPropsMenu {
                     }
                     if (needRest) {
                         offset.removeTextChangedListener(this);
-                        offset.setText(o + "");
+                        offset.setText(String.valueOf(o));
                         offset.setSelection(pos);
                         offset.addTextChangedListener(this);
                     }
@@ -93,7 +93,6 @@ public class PropsMenuFragment extends BaseFragment implements IPropsMenu {
                         props.setOffset(0);
                         saveProp();
                     }
-                    return;
                 }
             }
         });

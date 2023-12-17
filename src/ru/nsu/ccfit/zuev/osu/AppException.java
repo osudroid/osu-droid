@@ -340,7 +340,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
             PackageInfo pi = pm.getPackageInfo(ctx.getPackageName(), PackageManager.GET_ACTIVITIES);
             if (pi != null) {
                 String versionName = pi.versionName == null ? "null" : pi.versionName;
-                String versionCode = pi.versionCode + "";
+                String versionCode = String.valueOf(pi.versionCode);
 
                 activePackageJson.put("versionName", versionName);
                 activePackageJson.put("versionCode", versionCode);

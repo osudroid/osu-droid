@@ -24,6 +24,7 @@ import org.anddev.andengine.opengl.util.GLHelper;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -102,7 +103,7 @@ public class TexturePool {
             testAddRaw(t);
         }
 
-        Collections.sort(infos, (p1, p2) -> Integer.compare(p1.pageIndex, p2.pageIndex));
+        Collections.sort(infos, Comparator.comparingInt(p -> p.pageIndex));
 
         ListIterator<TextureInfo> iterator = infos.listIterator();
 
