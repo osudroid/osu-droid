@@ -219,7 +219,7 @@ public class Slider extends HitObjectWithDuration {
         }
 
         nestedHitObjects.add(tail);
-        Collections.sort(nestedHitObjects, Comparator.comparingDouble(o -> o.startTime));
+        Collections.sort(nestedHitObjects, (a, b) -> Double.compare(a.startTime, b.startTime));
     }
 
     @Override

@@ -119,9 +119,9 @@ public class ControlPoints {
                 effectPoints.add(preEcp);
             }
         }
-        Collections.sort(timingPoints, Comparator.comparingDouble(ControlPoint::getTime));
-        Collections.sort(difficultyPoints, Comparator.comparingDouble(ControlPoint::getTime));
-        Collections.sort(effectPoints, Comparator.comparingDouble(ControlPoint::getTime));
+        Collections.sort(timingPoints, (a, b) -> Double.compare(a.getTime(), b.getTime()));
+        Collections.sort(difficultyPoints, (a, b) -> Double.compare(a.getTime(), b.getTime()));
+        Collections.sort(effectPoints, (a, b) -> Double.compare(a.getTime(), b.getTime()));
 
         /*Log.v("ControlPoints", "t: " + timingPoints.size());
         Log.v("ControlPoints", "d: " + difficultyPoints.size());
@@ -142,7 +142,7 @@ public class ControlPoints {
         }
 
         difficultyPoints.add(newPoint);
-        Collections.sort(difficultyPoints, Comparator.comparingDouble(ControlPoint::getTime));
+        Collections.sort(difficultyPoints, (a, b) -> Double.compare(a.getTime(), b.getTime()));
     }
 
     public TimingControlPoint getTimingPointAt(double time) {

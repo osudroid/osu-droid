@@ -103,7 +103,7 @@ public class TexturePool {
             testAddRaw(t);
         }
 
-        Collections.sort(infos, Comparator.comparingInt(p -> p.pageIndex));
+        Collections.sort(infos, (a, b) -> Integer.compare(a.pageIndex, b.pageIndex));
 
         ListIterator<TextureInfo> iterator = infos.listIterator();
 

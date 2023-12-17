@@ -30,7 +30,7 @@ public class BeatmapColorParser extends BeatmapKeyValueSectionParser {
         if (p[0].startsWith("Combo")) {
             int index = Utils.tryParseInt(p[0].substring(5), data.colors.comboColors.size() + 1);
             data.colors.comboColors.add(new ComboColor(index, color));
-            Collections.sort(data.colors.comboColors, Comparator.comparingInt(a -> a.index));
+            Collections.sort(data.colors.comboColors, (a, b) -> Integer.compare(a.index, b.index));
         }
 
         if (p[0].startsWith("SliderBorder")) {
