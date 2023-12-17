@@ -114,7 +114,7 @@ public class SkinManager {
     }
 
     public void clearSkin() {
-        if (skinname.equals("")) {
+        if (skinname.isEmpty()) {
             return;
         }
         skinname = "";
