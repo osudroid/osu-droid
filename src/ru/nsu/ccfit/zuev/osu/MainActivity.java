@@ -45,6 +45,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import com.reco1l.api.ibancho.LobbyAPI;
 import com.reco1l.framework.lang.Execution;
+import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.UpdateManager;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.Multiplayer;
@@ -73,6 +74,7 @@ import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -80,7 +82,6 @@ import java.util.concurrent.TimeUnit;
 import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.SpritePool;
 import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
@@ -99,7 +100,6 @@ public class MainActivity extends BaseGameActivity implements
         IAccelerometerListener {
 
     public static String versionName;
-
     public static SongService songService;
     public ServiceConnection connection;
     private PowerManager.WakeLock wakeLock = null;
@@ -213,7 +213,7 @@ public class MainActivity extends BaseGameActivity implements
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
-        if (prefs.getString("playername", "").equals("")) {
+        if (Objects.equals(prefs.getString("playername", ""), "")) {
             final SharedPreferences.Editor editor = prefs.edit();
             editor.putString("playername", "Guest");
             editor.commit();
@@ -229,20 +229,16 @@ public class MainActivity extends BaseGameActivity implements
             alert.setView(input);
 
             alert.setPositiveButton(StringTable.get(R.string.dialog_ok),
-                    new DialogInterface.OnClickListener() {
-
-                        public void onClick(final DialogInterface dialog,
-                                            final int whichButton) {
-                            final String value = input.getText().toString();
-                            editor.putString("playername", value);
-                            editor.commit();
-                        }
+                    (dialog, whichButton) -> {
+                        final String value = input.getText().toString();
+                        editor.putString("playername", value);
+                        editor.commit();
                     });
 
             alert.show();
         }
 
-        if (prefs.getBoolean("qualitySet", false) == false) {
+        if (!prefs.getBoolean("qualitySet", false)) {
             final SharedPreferences.Editor editor = prefs.edit();
             editor.putBoolean("qualitySet", true);
             final DisplayMetrics dm = new DisplayMetrics();
@@ -256,7 +252,7 @@ public class MainActivity extends BaseGameActivity implements
             editor.commit();
         }
 
-        if (prefs.getBoolean("onlineSet", false) == false) {
+        if (!prefs.getBoolean("onlineSet", false)) {
 
             Editor editor = prefs.edit();
             editor.putBoolean("onlineSet", true);
@@ -325,55 +321,49 @@ public class MainActivity extends BaseGameActivity implements
         LobbyScene.INSTANCE.init();
         RoomScene.INSTANCE.init();
 
-        new AsyncTask() {
-            @Override
-            public void run() {
-                BassAudioPlayer.initDevice();
-                GlobalManager.getInstance().init();
-                analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
-                GlobalManager.getInstance().setLoadingProgress(50);
-                checkNewSkins();
-                Config.loadSkins();
-                checkNewBeatmaps();
-                if (!LibraryManager.INSTANCE.loadLibraryCache(true)) {
-                    LibraryManager.INSTANCE.scanLibrary();
-                    System.gc();
-                }
-                SplashScene.INSTANCE.playWelcomeAnimation();
-                try {
-                    // Allow the welcome animation to progress before entering onComplete state.
-                    Thread.sleep(2500);
-                }
-                catch (InterruptedException ignored) {}
-                UpdateManager.INSTANCE.onActivityStart();
+        Async.run(() -> {
+            BassAudioPlayer.initDevice();
+            GlobalManager.getInstance().init();
+            analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
+            GlobalManager.getInstance().setLoadingProgress(50);
+            checkNewSkins();
+            Config.loadSkins();
+            checkNewBeatmaps();
+
+            if (!LibraryManager.INSTANCE.loadLibraryCache(true)) {
+                LibraryManager.INSTANCE.scanLibrary();
             }
 
-            @Override
-            public void onComplete() {
-                GlobalManager.getInstance().setInfo("");
-                GlobalManager.getInstance().setLoadingProgress(100);
-                ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
-                GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
-                GlobalManager.getInstance().getMainScene().loadBeatmap();
-                initPreferences();
-                availableInternalMemory();
+            SplashScene.INSTANCE.playWelcomeAnimation();
 
-                scheduledExecutor.scheduleAtFixedRate(() -> {
-                    AccessibilityDetector.check(MainActivity.this);
-                    BeatmapDifficultyCalculator.invalidateExpiredCache();
-                }, 0, 1000, TimeUnit.MILLISECONDS);
+            try {
+                Thread.sleep(2500);
+            } catch (InterruptedException ignored) {}
 
-                if (roomInviteLink != null) {
-                    LobbyScene.INSTANCE.connectFromLink(roomInviteLink);
-                    return;
-                }
+            UpdateManager.INSTANCE.onActivityStart();
+            GlobalManager.getInstance().setInfo("");
+            GlobalManager.getInstance().setLoadingProgress(100);
+            ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
+            GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
+            GlobalManager.getInstance().getMainScene().loadBeatmap();
+            initPreferences();
+            availableInternalMemory();
 
-                if (willReplay) {
-                    GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
-                    willReplay = false;
-                }
+            scheduledExecutor.scheduleAtFixedRate(() -> {
+                AccessibilityDetector.check(MainActivity.this);
+                BeatmapDifficultyCalculator.invalidateExpiredCache();
+            }, 0, 100, TimeUnit.MILLISECONDS);
+
+            if (roomInviteLink != null) {
+                LobbyScene.INSTANCE.connectFromLink(roomInviteLink);
+                return;
             }
-        }.execute();
+
+            if (willReplay) {
+                GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
+                willReplay = false;
+            }
+        });
     }
     /*
     Accuracy isn't the best, but it's sufficient enough
@@ -597,7 +587,7 @@ public class MainActivity extends BaseGameActivity implements
                 File f = new File(d, "rawlog.txt");
                 if (!f.exists()) f.createNewFile();
                 Runtime.getRuntime().exec("logcat -f " + (f.getAbsolutePath()));
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
         }
         onBeginBindService();
@@ -669,7 +659,7 @@ public class MainActivity extends BaseGameActivity implements
             }
         }
     }
-    
+
     @Override
     public void onPause() {
         super.onPause();
@@ -734,7 +724,7 @@ public class MainActivity extends BaseGameActivity implements
                     && (getEngine().getScene() == RoomScene.INSTANCE
                     || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()))
             {
-                Execution.asyncIgnoreExceptions(() -> RoomScene.INSTANCE.invalidateStatus());
+                Execution.asyncIgnoreExceptions(RoomScene.INSTANCE::invalidateStatus);
             }
         }
 
@@ -820,7 +810,7 @@ public class MainActivity extends BaseGameActivity implements
         if (GlobalManager.getInstance().getSongMenu() != null && GlobalManager.getInstance().getEngine() != null
                 && keyCode == KeyEvent.KEYCODE_MENU
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()
-                && GlobalManager.getInstance().getSongMenu().getScene().hasChildScene() == false) {
+                && !GlobalManager.getInstance().getSongMenu().getScene().hasChildScene()) {
             GlobalManager.getInstance().getSongMenu().stopScroll(0);
             GlobalManager.getInstance().getSongMenu().showPropertiesMenu(null);
             return true;
