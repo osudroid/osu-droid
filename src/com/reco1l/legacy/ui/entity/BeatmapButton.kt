@@ -5,8 +5,9 @@ import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.api.ibancho.data.PlayerStatus.READY
 import com.reco1l.api.ibancho.data.RoomBeatmap
 import com.reco1l.framework.extensions.orAsyncCatch
-import com.reco1l.legacy.ui.ChimuWebView.FILE_EXTENSION
+import com.reco1l.legacy.ui.ChimuWebView as chimuFragment
 import com.reco1l.legacy.Multiplayer
+import com.reco1l.legacy.ui.ChimuWebView.FILE_EXTENSION
 import com.reco1l.legacy.ui.multiplayer.RoomScene
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
@@ -16,7 +17,6 @@ import ru.nsu.ccfit.zuev.osu.RGBColor
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.menu.MenuItemTrack
 import ru.nsu.ccfit.zuev.skins.OsuSkin
-import com.reco1l.legacy.ui.ChimuWebView.INSTANCE as chimuFragment
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.LibraryManager.INSTANCE as libraryManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
