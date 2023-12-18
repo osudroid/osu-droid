@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -105,7 +106,7 @@ public class ResourceManager {
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
         loadTexture("flashlight_cursor", "flashlight_cursor.png", false, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 
-        if (textures.containsKey("lighting") == false)
+        if (!textures.containsKey("lighting"))
             textures.put("lighting", null);
 //		textures.put("fail-background", null);
 //		textures.put("pause-overlay", null);
@@ -199,9 +200,9 @@ public class ResourceManager {
         customFrameCount.clear();
 
         try {
-            for (final String s : context.getAssets().list("gfx")) {
+            for (final String s : Objects.requireNonNull(context.getAssets().list("gfx"))) {
                 final String name = s.substring(0, s.length() - 4);
-                if (Config.isCorovans() == false) {
+                if (!Config.isCorovans()) {
                     if (name.equals("count1") || name.equals("count2")
                             || name.equals("count3") || name.equals("go")
                             || name.equals("ready")) {
@@ -209,7 +210,7 @@ public class ResourceManager {
                     }
                 }
                 if (availableFiles.containsKey(name)) {
-                    loadTexture(name, availableFiles.get(name).getPath(), true);
+                    loadTexture(name, Objects.requireNonNull(availableFiles.get(name)).getPath(), true);
                     if (Character.isDigit(name.charAt(name.length() - 1))) {
                         noticeFrameCount(name);
                     }
@@ -218,83 +219,42 @@ public class ResourceManager {
                 }
             }
             if (availableFiles.containsKey("scorebar-kidanger")) {
-                loadTexture("scorebar-kidanger", availableFiles.get("scorebar-kidanger").getPath(), true);
+                loadTexture("scorebar-kidanger", Objects.requireNonNull(availableFiles.get("scorebar-kidanger")).getPath(), true);
                 loadTexture("scorebar-kidanger2",
-                        availableFiles.get(
+                        Objects.requireNonNull(availableFiles.get(
                                 availableFiles.containsKey("scorebar-kidanger2") ? "scorebar-kidanger2" : "scorebar-kidanger"
-                        ).getPath(), true);
+                        )).getPath(), true);
             }
             if (availableFiles.containsKey("comboburst"))
-                loadTexture("comboburst", availableFiles.get("comboburst").getPath(), true);
+                loadTexture("comboburst", Objects.requireNonNull(availableFiles.get("comboburst")).getPath(), true);
             else unloadTexture("comboburst");
+
             for (int i = 0; i < 10; i++) {
                 String textureName = "comboburst-" + i;
-                if (availableFiles.containsKey(textureName))
-                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
-                else unloadTexture(textureName);
+                if (availableFiles.containsKey(textureName)) { // No idea if this is still needed
+                    File file = availableFiles.get(textureName);
+                    if (file != null) {
+                        loadTexture(textureName, file.getPath(), true);
+                    } else {
+                        unloadTexture(textureName);
+                    }
+                }
             }
-            for (int i = 0; i < 60; i++) {
-                String textureName = "play-skip-" + i;
-                if (availableFiles.containsKey(textureName))
-                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
-                else unloadTexture(textureName);
+
+            String[] names = {"play-skip-", "menu-back-", "scorebar-colour-", "hit0-", "hit50-", "hit100-", "hit100k-", "hit300-", "hit300k-", "hit300g-"};
+            for (String name : names) {
+                for (int i = 0; i < 60; i++) {
+                    String textureName = name + i;
+                    if (availableFiles.containsKey(textureName)) {
+                        File file = availableFiles.get(textureName);
+                        if (file != null) {
+                            loadTexture(textureName, file.getPath(), true);
+                        } else {
+                            unloadTexture(textureName);
+                        }
+                    }
+                }
             }
-            for (int i = 0; i < 60; i++) {
-                String textureName = "menu-back-" + i;
-                if (availableFiles.containsKey(textureName))
-                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
-                else unloadTexture(textureName);
-            }
-            for (int i = 0; i < 60; i++) {
-                String textureName = "scorebar-colour-" + i;
-                if (availableFiles.containsKey(textureName))
-                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
-                else unloadTexture(textureName);
-            }
-            //
-            for (int i = 0; i < 60; i++) {
-                String textureName = "hit0-" + i;
-                if (availableFiles.containsKey(textureName))
-                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
-                else unloadTexture(textureName);
-            }
-            for (int i = 0; i < 60; i++) {
-                String textureName = "hit50-" + i;
-                if (availableFiles.containsKey(textureName))
-                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
-                else unloadTexture(textureName);
-            }
-            for (int i = 0; i < 60; i++) {
-                String textureName = "hit100-" + i;
-                if (availableFiles.containsKey(textureName))
-                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
-                else unloadTexture(textureName);
-            }
-            for (int i = 0; i < 60; i++) {
-                String textureName = "hit100k-" + i;
-                if (availableFiles.containsKey(textureName))
-                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
-                else unloadTexture(textureName);
-            }
-            for (int i = 0; i < 60; i++) {
-                String textureName = "hit300-" + i;
-                if (availableFiles.containsKey(textureName))
-                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
-                else unloadTexture(textureName);
-            }
-            for (int i = 0; i < 60; i++) {
-                String textureName = "hit300k-" + i;
-                if (availableFiles.containsKey(textureName))
-                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
-                else unloadTexture(textureName);
-            }
-            for (int i = 0; i < 60; i++) {
-                String textureName = "hit300g-" + i;
-                if (availableFiles.containsKey(textureName))
-                    loadTexture(textureName, availableFiles.get(textureName).getPath(), true);
-                else unloadTexture(textureName);
-            }
-            //
         } catch (final IOException e) {
             Debug.e("Resources: " + e.getMessage(), e);
         }
@@ -303,10 +263,10 @@ public class ResourceManager {
 
         try {
             // TODO: buggy?
-            for (final String s : context.getAssets().list("sfx")) {
+            for (final String s : Objects.requireNonNull(context.getAssets().list("sfx"))) {
                 final String name = s.substring(0, s.length() - 4);
                 if (availableFiles.containsKey(name)) {
-                    loadSound(name, availableFiles.get(name).getPath(), true);
+                    loadSound(name, Objects.requireNonNull(availableFiles.get(name)).getPath(), true);
                 } else {
                     loadSound(name, "sfx/" + s, false);
                 }
@@ -329,7 +289,7 @@ public class ResourceManager {
         loadTexture("ranking_button", "ranking_button.png", false);
         loadTexture("ranking_enabled", "ranking_enabled.png", false);
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
-        if (textures.containsKey("lighting") == false)
+        if (!textures.containsKey("lighting"))
             textures.put("lighting", null);
 //		textures.put("fail-background", null);
 //		textures.put("pause-overlay", null);
@@ -337,7 +297,7 @@ public class ResourceManager {
 
     private void noticeFrameCount(final String name) {
         String resnameWN;
-        if (name.contains("-") == false) {
+        if (!name.contains("-")) {
             resnameWN = name.substring(0, name.length() - 1);
         } else {
             resnameWN = name.substring(0, name.lastIndexOf('-'));
@@ -351,8 +311,8 @@ public class ResourceManager {
         if (frameNum < 0) {
             frameNum *= -1;
         }
-        if (customFrameCount.containsKey(resnameWN) == false
-                || customFrameCount.get(resnameWN) < frameNum) {
+        if (!customFrameCount.containsKey(resnameWN)
+                || Objects.requireNonNull(customFrameCount.get(resnameWN)) < frameNum) {
             customFrameCount.put(resnameWN, frameNum);
         }
     }
@@ -398,7 +358,7 @@ public class ResourceManager {
     }
 
     public Font getFont(final String resname) {
-        if (fonts.containsKey(resname) == false) {
+        if (!fonts.containsKey(resname)) {
             loadFont(resname, null, 35, Color.WHITE);
         }
         return fonts.get(resname);
@@ -426,7 +386,7 @@ public class ResourceManager {
     public TextureRegion loadBackground(final String file, Engine engine) {
         if (textures.containsKey("::background")) {
             engine.getTextureManager().unloadTexture(
-                    textures.get("::background").getTexture());
+                    Objects.requireNonNull(textures.get("::background")).getTexture());
         }
         if (file == null) {
             return textures.get("menu-background");
@@ -443,7 +403,7 @@ public class ResourceManager {
         while (th < source.getHeight()) {
             th *= 2;
         }
-        if (source.preload() == false) {
+        if (!source.preload()) {
             textures.put("::background", textures.get("menu-background"));
             return textures.get("::background");
         }
@@ -710,7 +670,7 @@ public class ResourceManager {
         if (resName.length() == 0) {
             return;
         }
-        Pattern pattern = Pattern.compile("([^\\d\\.]+)");
+        Pattern pattern = Pattern.compile("([^\\d.]+)");
         Matcher matcher = pattern.matcher(resName);
         if (matcher.find()) {
             String setName = matcher.group(1);
@@ -736,7 +696,7 @@ public class ResourceManager {
             return getSound(resname);
         }
         if (set >= 2) {
-            String fullName = resname + String.valueOf(set);
+            String fullName = resname + set;
             if (customSounds.containsKey(fullName)) {
                 return customSounds.get(fullName);
             } else {
@@ -760,13 +720,13 @@ public class ResourceManager {
         if (Character.isDigit(resname.charAt(resname.length() - 1))) {
 
             String resnameWN;
-            if (resname.contains("-") == false) {
+            if (!resname.contains("-")) {
                 resnameWN = resname.substring(0, resname.length() - 1);
             } else {
                 resnameWN = resname.substring(0, resname.lastIndexOf('-'));
             }
 
-            if (textures.containsKey(resname) == false
+            if (!textures.containsKey(resname)
                     && SkinManager.getFrames(resnameWN) == 0) {
                 return;
             }
@@ -779,12 +739,12 @@ public class ResourceManager {
                 if (frameNum < 0) {
                     frameNum *= -1;
                 }
-                if (customFrameCount.containsKey(resnameWN) == false
-                        || customFrameCount.get(resnameWN) < frameNum) {
+                if (!customFrameCount.containsKey(resnameWN)
+                        || Objects.requireNonNull(customFrameCount.get(resnameWN)) < frameNum) {
                     customFrameCount.put(resnameWN, frameNum);
                 }
             }
-        } else if (textures.containsKey(resname) == false) {
+        } else if (!textures.containsKey(resname)) {
 
             if (textures.containsKey(resname + "-0") || textures.containsKey(resname + "0")) {
                 if (textures.containsKey(resname + "0"))
@@ -805,7 +765,7 @@ public class ResourceManager {
         while (th < source.getHeight()) {
             th *= 2;
         }
-        if (source.preload() == false) {
+        if (!source.preload()) {
             return;
         }
         final BitmapTextureAtlas tex = new BitmapTextureAtlas(tw, th,
@@ -854,7 +814,7 @@ public class ResourceManager {
     public void unloadTexture(final String name) {
         if (textures.get(name) != null) {
             engine.getTextureManager().unloadTexture(
-                    textures.get(name).getTexture());
+                    Objects.requireNonNull(textures.get(name)).getTexture());
             textures.remove(name);
             Debug.i("Texture \"" + name + "\"unloaded");
         }
@@ -886,9 +846,9 @@ public class ResourceManager {
         }
         final Set<String> texnames = customTextures.keySet();
         for (final String s : texnames) {
-            if (customTextures.get(s).getTexture().isLoadedToHardware()) {
-                engine.getTextureManager().unloadTexture(
-                        customTextures.get(s).getTexture());
+            TextureRegion tex = customTextures.get(s);
+            if (tex != null && tex.getTexture() != null && tex.getTexture().isLoadedToHardware()) {
+                engine.getTextureManager().unloadTexture(tex.getTexture());
                 // engine.getTextureManager().loadTexture(textures.get(s).getTexture());
             }
         }
@@ -898,10 +858,10 @@ public class ResourceManager {
     }
 
     public int getFrameCount(final String texname) {
-        if (customFrameCount.containsKey(texname) == false) {
+        if (!customFrameCount.containsKey(texname)) {
             return -1;
         } else {
-            return customFrameCount.get(texname);
+            return Objects.requireNonNull(customFrameCount.get(texname));
         }
     }
 
@@ -909,7 +869,8 @@ public class ResourceManager {
         final String[] names = {"spinner-background", "spinner-circle",
                 "spinner-metre", "spinner-approachcircle", "spinner-spin"};
         for (final String s : names) {
-            if (textures.get(s) != null && textures.get(s).getTexture() != null && !textures.get(s).getTexture().isLoadedToHardware()) {
+            TextureRegion tex = textures.get(s);
+            if (tex != null && tex.getTexture() != null && !tex.getTexture().isLoadedToHardware()) {
                 engine.getTextureManager().reloadTextures();
                 break;
             }
@@ -927,7 +888,8 @@ public class ResourceManager {
                 "spinner-clear"
         };
         for (final String s : names) {
-            if (textures.get(s) != null && textures.get(s).getTexture() != null && !textures.get(s).getTexture().isLoadedToHardware()) {
+            TextureRegion tex = textures.get(s);
+            if (tex != null && tex.getTexture() != null && !tex.getTexture().isLoadedToHardware()) {
                 engine.getTextureManager().reloadTextures();
                 break;
             }
