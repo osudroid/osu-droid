@@ -12,8 +12,6 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 public class ToastLogger {
     private static ToastLogger instance = null;
     Activity activity;
-    String message = "";
-    boolean showlong = false;
     ArrayList<String> debugLog = new ArrayList<>();
     float percentage;
 
