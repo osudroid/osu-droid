@@ -100,9 +100,9 @@ object ChimuWebView : WebViewFragment(), IDownloaderObserver {
         mFragment = DownloadingFragment()
         mFragment.setDownloader(downloader) {
             mFragment.text.visibility = View.VISIBLE
-            mFragment.text.text = R.string.chimu_connecting.toString()
+            mFragment.text.text = getString(R.string.chimu_connecting)
             mFragment.button.visibility = View.VISIBLE
-            mFragment.button.text = R.string.chimu_cancel.toString()
+            mFragment.button.text = getString(R.string.chimu_cancel)
 
             downloader.observer = this@ChimuWebView
             downloader.download()
