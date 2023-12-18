@@ -171,7 +171,11 @@ public class ControlPoints {
             return defaultDifficultyPoint;
         }
         DifficultyControlPoint difficultyControlPoint = binarySearch(difficultyPoints, time, defaultDifficultyPoint);
-        return Objects.requireNonNullElse(difficultyControlPoint, defaultDifficultyPoint);
+        if (difficultyControlPoint == null) {
+            return defaultDifficultyPoint;
+        }
+
+        return difficultyControlPoint;
     }
 
     private <T extends ControlPoint> T binarySearch(List<T> list, double time, T prePoint) {
