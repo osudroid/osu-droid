@@ -110,8 +110,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private final Engine engine;
-    private final Cursor[] cursors = new Cursor[getCursorCount()];
-    private final boolean[] cursorIIsDown = new boolean[getCursorCount()];
+    private Cursor[] cursors;
+    private boolean[] cursorIIsDown;
     private final StringBuilder strBuilder = new StringBuilder();
     public String filePath = null;
     private Scene scene;
@@ -715,6 +715,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         paused = false;
         gameStarted = false;
+
+        cursors = new Cursor[getCursorCount()];
+        cursorIIsDown = new boolean[getCursorCount()];
+
         return true;
     }
 
