@@ -51,7 +51,7 @@ public class OnlineInitializer implements View.OnClickListener {
         final TextView errorText = registerDialog.findViewById(R.id.register_error_text);
         errorText.setText("");
 
-        if (!username.matches("^\\w{3,16}$")) {
+        if (!username.matches("^\\w{2,20}$")) {
             ToastLogger.showTextId(R.string.online_invlogin, true);
             return;
         }
