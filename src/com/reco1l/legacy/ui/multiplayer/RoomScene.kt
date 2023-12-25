@@ -960,7 +960,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomMatchPlay()
     {
-        if (player!!.status != MISSING_BEATMAP)
+        if (player!!.status != MISSING_BEATMAP && getGlobal().engine.scene != getGlobal().gameScene.scene)
         {
             if (getGlobal().selectedTrack == null)
             {

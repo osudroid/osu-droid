@@ -84,6 +84,8 @@ public class StatisticV2 implements Serializable {
      */
     private float modScoreMultiplier = 1;
 
+    private int life = 1;
+
 
     public StatisticV2() {
         playerName = null;
@@ -113,6 +115,10 @@ public class StatisticV2 implements Serializable {
         hp = stat.hp;
         diffModifier = stat.diffModifier;
         mod = stat.mod.clone();
+        if (stat.mod.contains(GameMod.MOD_EASY)) {
+            life = 3;
+        }
+
         setPlayerName(Config.getLocalUsername());
         computeModScoreMultiplier();
     }
@@ -152,7 +158,9 @@ public class StatisticV2 implements Serializable {
         hp += amount;
         if (hp < 0) {
             hp = 0;
-            if (canFail) {
+            life = Math.max(0, life - 1);
+
+            if (canFail && life == 0) {
                 isAlive = false;
             }
         }
@@ -559,6 +567,7 @@ public class StatisticV2 implements Serializable {
                     break;
                 case 'e':
                     mod.add(GameMod.MOD_EASY);
+                    life = 3;
                     break;
                 case 'n':
                     mod.add(GameMod.MOD_NOFAIL);
