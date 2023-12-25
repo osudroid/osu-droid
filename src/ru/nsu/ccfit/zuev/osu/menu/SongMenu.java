@@ -1100,9 +1100,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public void selectTrack(final TrackInfo track, boolean reloadBG) {
 
         // Playing corresponding audio for the selected track.
-        var selectedTrack = this.selectedTrack != null ? this.selectedTrack : GlobalManager.getInstance().getSelectedTrack();
+        var selectedAudioTrack = this.selectedTrack != null ? this.selectedTrack : GlobalManager.getInstance().getSelectedTrack();
 
-        if (selectedTrack == null || !Objects.equals(selectedTrack.getAudioFilename(), track.getAudioFilename())) {
+        if (selectedAudioTrack == null || !Objects.equals(selectedAudioTrack.getAudioFilename(), track.getAudioFilename())) {
             playMusic(track.getAudioFilename(), track.getPreviewTime());
         }
 
@@ -1141,7 +1141,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
         isSelectComplete = false;
-        this.selectedTrack = track;
+        selectedTrack = track;
         EdExtensionHelper.onSelectTrack(track);
         GlobalManager.getInstance().setSelectedTrack(track);
         updateInfo(track);
