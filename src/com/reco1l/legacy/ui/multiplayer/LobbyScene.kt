@@ -31,7 +31,7 @@ object LobbyScene : Scene()
 {
 
     /**The search fragment*/
-    val search = LobbySearch()
+    val search by lazy { LobbySearch() }
 
     /**The search query*/
     var searchQuery: String? = null
