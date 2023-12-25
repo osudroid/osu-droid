@@ -572,10 +572,14 @@ object RoomAPI
      * Sends spectator data.
      */
     @JvmStatic
-    fun submitSpectatorData(data: ByteArray) {
-        socket!!.emit("spectatorData", data)
+    fun submitSpectatorData(data: ByteArray): Boolean {
+        socket?.emit("spectatorData", data) ?: run {
+            Multiplayer.log("WARNING: Tried to emit event 'spectatorData' while socket is null.");
+            return false
+        }
 
         Multiplayer.log("EMITTED: spectatorData")
+        return true
     }
 
     /**

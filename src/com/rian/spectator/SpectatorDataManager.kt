@@ -118,19 +118,19 @@ class SpectatorDataManager(
                     flush()
                     byteArrayOutputStream.flush()
 
-                    RoomAPI.submitSpectatorData(byteArrayOutputStream.toByteArray())
+                    val submitted = RoomAPI.submitSpectatorData(byteArrayOutputStream.toByteArray())
 
                     close()
                     byteArrayOutputStream.close()
 
-                    postDataSend(gameHasEnded)
+                    postDataSend(submitted, gameHasEnded)
                 }
             } catch (e: IOException) {
                 Log.e("SpectatorDataManager", "IOException: " + e.message, e)
-                postDataSend()
+                postDataSend(false)
             } catch (e: OnlineManagerException) {
                 Log.e("SpectatorDataManager", "OnlineManagerException: " + e.message, e)
-                postDataSend()
+                postDataSend(false)
             } finally {
                 try {
                     byteArrayOutputStream.flush()
@@ -141,16 +141,18 @@ class SpectatorDataManager(
             }
         }
 
-        private fun postDataSend(gameHasEnded: Boolean = false) {
+        private fun postDataSend(submitSuccess: Boolean, gameHasEnded: Boolean = false) {
             if (gameHasEnded) {
                 cancel()
                 gameScene.stopSpectatorDataSubmission()
                 return
             }
 
-            beginningCursorMoveIndexes = endCursorMoveIndexes.clone()
-            beginningObjectDataIndex = endObjectDataIndex
-            beginningEventIndex = endEventIndex
+            if (submitSuccess) {
+                beginningCursorMoveIndexes = endCursorMoveIndexes.clone()
+                beginningObjectDataIndex = endObjectDataIndex
+                beginningEventIndex = endEventIndex
+            }
         }
     }
 
