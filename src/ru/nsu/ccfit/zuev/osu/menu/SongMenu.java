@@ -70,6 +70,7 @@ import ru.nsu.ccfit.zuev.skins.SkinLayout;
 public class SongMenu implements IUpdateHandler, MenuItemListener,
         IScrollBarListener {
     private final static Boolean musicMutex = true;
+    private final static Boolean bgMutex = true;
     private final Boolean backgroundMutex = true;
     public Scene scene;
     public Entity frontLayer = new Entity();
@@ -167,9 +168,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         items = new ArrayList<>();
         selectedTrack = null;
         bgLoaded = true;
-        filterMenu = new FilterMenuFragment();
         SongMenuPool.getInstance().init();
-        filterMenu.loadConfig(context);
+        loadFilterFragment();
 
         // Preventing ModMenu to reload mod set
         if (!Multiplayer.isMultiplayer)
@@ -193,12 +193,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         board = new ScoreBoard(scene, backLayer, this);
 
-        float oy = 10;
+//        float oy = 10;
         for (final BeatmapInfo i : LibraryManager.INSTANCE.getLibrary()) {
             final MenuItem item = new MenuItem(this, i);
             items.add(item);
             item.attachToScene(scene, backLayer);
-            oy += item.getHeight();
+//            oy += item.getHeight();
         }
         sortOrder = SortOrder.Title;
         sort();
@@ -475,6 +475,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     if (!moved) {
                         velocityY = 0;
 
+                        if (filterMenu == null) loadFilterFragment();
+
                         filterMenu.showMenu(SongMenu.this);
                     }
                     return true;
@@ -686,6 +688,16 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             scene.registerTouchArea(scoringSwitcher);
             frontLayer.attachChild(scoringSwitcher);
         }
+    }
+
+    public void loadFilterFragment() {
+        filterMenu = new FilterMenuFragment();
+        filterMenu.loadConfig(context);
+    }
+
+    public void unloadFilterFragment() {
+        scene.clearChildScene();
+        filterMenu = null;
     }
 
     public void toggleScoringSwitcher() {
@@ -1113,7 +1125,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         if (selectedTrack == track) {
-            synchronized (bgLoaded) {
+            synchronized (bgMutex) {
                 if (!bgLoaded) {
                     return;
                 }
@@ -1196,7 +1208,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         }
                         scene.setBackground(new SpriteBackground(bg));
                         Config.setBackgroundQuality(quality);
-                        synchronized (bgLoaded) {
+                        synchronized (bgMutex) {
                             bgLoaded = true;
                         }
                     }
@@ -1453,7 +1465,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private void reloadMenuItems(GroupType type) {
         if (!groupType.equals(type)) {
             groupType = type;
-            float oy = 10;
+//            float oy = 10;
             for (MenuItem item : items) {
                 item.removeFromScene();
             }
@@ -1464,7 +1476,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         final MenuItem item = new MenuItem(this, i);
                         items.add(item);
                         item.attachToScene(scene, backLayer);
-                        oy += item.getHeight();
+//                        oy += item.getHeight();
                     }
                     break;
                 case SingleDiff:
@@ -1473,14 +1485,14 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                             final MenuItem item = new MenuItem(this, i, j);
                             items.add(item);
                             item.attachToScene(scene, backLayer);
-                            oy += item.getHeight();
+//                            oy += item.getHeight();
                         }
                     }
                     break;
             }
             final String lowerFilter = filterMenu.getFilter().toLowerCase();
             final boolean favsOnly = filterMenu.isFavoritesOnly();
-            final Set<String> limit = filterMenu.getFavoriteFolder() == null ? null : FavoriteLibrary.get().getMaps(filterMenu.getFavoriteFolder());
+            final Set<String> limit = FavoriteLibrary.get().getMaps(filterMenu.getFavoriteFolder());
             for (final MenuItem item : items) {
                 item.applyFilter(lowerFilter, favsOnly, limit);
             }

@@ -2,6 +2,7 @@ package com.edlplan.ui.fragment
 
 import android.animation.Animator
 import android.content.Context
+import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.KeyEvent
@@ -22,6 +23,7 @@ import ru.nsu.ccfit.zuev.osu.helper.InputManager
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.menu.IFilterMenu
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu
+import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osuplus.R
 
 class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
@@ -43,6 +45,14 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
 
     override val layoutID: Int
         get() = R.layout.fragment_filtermenu
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val (folder, favOnly, filter) = restoreState()
+        savedFolder = folder
+        savedFavOnly = favOnly
+        savedFilter = filter
+    }
 
     override fun onLoadView() {
         reloadViewData()
@@ -105,6 +115,8 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
 
     override fun dismiss() {
         playEndAnim { super.dismiss() }
+        getGlobal().songMenu.unloadFilterFragment()
+        saveState(savedFolder, savedFavOnly, savedFilter)
     }
 
     private fun reloadViewData() {
@@ -265,5 +277,20 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
 
     override fun reset() {
         TODO("Not yet implemented")
+    }
+
+    // Due to how the fragment lifecycle works in this context, the state needs to be saved manually
+    private companion object {
+        var folder: String? = null
+        var favOnly = false
+        var filter: String? = null
+
+        fun saveState(savedFolder: String?, savedFavOnly: Boolean, savedFilter: String?) {
+            folder = savedFolder
+            favOnly = savedFavOnly
+            filter = savedFilter
+        }
+
+        fun restoreState() = Triple(folder, favOnly, filter)
     }
 }
