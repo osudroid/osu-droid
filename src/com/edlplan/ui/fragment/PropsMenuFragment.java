@@ -100,7 +100,7 @@ public class PropsMenuFragment extends BaseFragment implements IPropsMenu {
         findViewById(R.id.manageFavButton).setOnClickListener(v -> {
             FavoriteManagerFragment dialog = new FavoriteManagerFragment();
             //TODO : 铺面引用还是全局耦合的，需要分离
-            dialog.showToAddToFloder(ScoreLibrary.getTrackDir(GlobalManager.getInstance().getSelectedTrack().getFilename()));
+            dialog.showToAddToFolder(ScoreLibrary.getTrackDir(GlobalManager.getInstance().getSelectedTrack().getFilename()));
         });
 
         findViewById(R.id.deleteBeatmap).setOnClickListener(v -> {

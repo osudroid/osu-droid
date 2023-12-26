@@ -6,6 +6,7 @@ import android.app.Activity;
 import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.replay.OdrDatabase;
+import com.edlplan.ui.fragment.FilterMenuFragment;
 import com.edlplan.ui.fragment.PropsMenuFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.reco1l.api.ibancho.RoomAPI;
@@ -101,6 +102,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private ChangeableText trackInfo, mapper, beatmapInfo, beatmapInfo2, dimensionInfo;
     private boolean isSelectComplete = true;
     private AnimSprite scoringSwitcher = null;
+    private FilterMenuFragment filterMenu = null;
     private GroupType groupType = GroupType.MapSet;
 
     private Timer previousSelectionTimer;
@@ -165,8 +167,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         items = new ArrayList<>();
         selectedTrack = null;
         bgLoaded = true;
+        filterMenu = new FilterMenuFragment();
         SongMenuPool.getInstance().init();
-        FilterMenu.getInstance().loadConfig(context);
+        filterMenu.loadConfig(context);
 
         // Preventing ModMenu to reload mod set
         if (!Multiplayer.isMultiplayer)
@@ -472,7 +475,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     if (!moved) {
                         velocityY = 0;
 
-                        FilterMenu.getInstance().showMenu(SongMenu.this);
+                        filterMenu.showMenu(SongMenu.this);
                     }
                     return true;
                 }
@@ -712,6 +715,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public Scene getScene() {
         return scene;
     }
+    public FilterMenuFragment getFilterMenu() { return filterMenu; }
 
     public void show() {
         engine.setScene(scene);
@@ -755,8 +759,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void sort() {
-        if (!sortOrder.equals(FilterMenu.getInstance().getOrder())) {
-            sortOrder = FilterMenu.getInstance().getOrder();
+        if (!sortOrder.equals(filterMenu.getOrder())) {
+            sortOrder = filterMenu.getOrder();
         }
         Collections.sort(items, (i1, i2) -> {
             String s1;
@@ -1475,9 +1479,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     }
                     break;
             }
-            final String lowerFilter = FilterMenu.getInstance().getFilter().toLowerCase();
-            final boolean favsOnly = FilterMenu.getInstance().isFavoritesOnly();
-            final Set<String> limit = FilterMenu.getInstance().getFavoriteFolder() == null ? null : FavoriteLibrary.get().getMaps(FilterMenu.getInstance().getFavoriteFolder());
+            final String lowerFilter = filterMenu.getFilter().toLowerCase();
+            final boolean favsOnly = filterMenu.isFavoritesOnly();
+            final Set<String> limit = filterMenu.getFavoriteFolder() == null ? null : FavoriteLibrary.get().getMaps(filterMenu.getFavoriteFolder());
             for (final MenuItem item : items) {
                 item.applyFilter(lowerFilter, favsOnly, limit);
             }

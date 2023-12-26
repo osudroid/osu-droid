@@ -87,7 +87,6 @@ import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.InputManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osu.menu.FilterMenu;
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SplashScene;
@@ -794,14 +793,12 @@ public class MainActivity extends BaseGameActivity implements
                 && GlobalManager.getInstance().getSongMenu() != null
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()
                 && GlobalManager.getInstance().getSongMenu().getScene().hasChildScene()) {
-            if (FilterMenu.getInstance().getClass() == FilterMenu.class) {
-                if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == FilterMenu.getInstance()
-                        .getScene()) {
-                    if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                        InputManager.getInstance().toggleKeyboard();
-                    }
-                    FilterMenu.getInstance().hideMenu();
+            if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() ==
+                    GlobalManager.getInstance().getSongMenu().getFilterMenu().getScene()) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                    InputManager.getInstance().toggleKeyboard();
                 }
+                GlobalManager.getInstance().getSongMenu().getFilterMenu().hideMenu();
             }
 
             if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == ModMenu.getInstance().getScene()) {
