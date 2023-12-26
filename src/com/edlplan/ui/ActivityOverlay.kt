@@ -9,17 +9,15 @@ import java.util.*
 
 object ActivityOverlay {
     private var fragmentManager: FragmentManager? = null
-    private val displayingOverlay: MutableList<Fragment> = ArrayList()
+    private val displayingOverlay = mutableListOf<Fragment>()
     private var context: Activity? = null
     private var containerId = 0
+    private val stateMap = mutableMapOf<String, Fragment.SavedState?>()
     @JvmStatic
     fun initial(activity: AppCompatActivity, id: Int) {
         context = activity
         containerId = id
         fragmentManager = activity.supportFragmentManager
-        if (fragmentManager == null) {
-            throw RuntimeException("FragmentManager not found!")
-        }
     }
 
     @JvmStatic
@@ -64,6 +62,24 @@ object ActivityOverlay {
                     .add(containerId, fragment, tag)
                     .commitAllowingStateLoss()
         }
+    }
+
+    @Synchronized
+    fun saveState(tag: String?) {
+        val fragment = fragmentManager!!.findFragmentByTag(tag)
+        if (fragmentManager != null && fragment?.isAdded == true) {
+            stateMap[tag!!] = fragmentManager!!.saveFragmentInstanceState(fragment)
+        }
+    }
+
+    @Synchronized
+    fun loadState(tag: String?): Fragment.SavedState? {
+        val fragment = fragmentManager!!.findFragmentByTag(tag)
+        if (fragmentManager != null && fragment?.isAdded == true) {
+            return stateMap.remove(tag!!)
+        }
+
+        return null
     }
 
     fun runOnUiThread(runnable: Runnable?) {

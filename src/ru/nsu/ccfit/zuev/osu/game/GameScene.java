@@ -321,7 +321,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private boolean loadGame(final TrackInfo track, final String rFile) {
-        InGameSettingMenu.getInstance().dismiss();
         if (rFile != null && rFile.startsWith("https://")) {
             this.replayFile = Config.getCachePath() + "/" +
                     MD5Calculator.getStringMD5(rFile) + ".odr";
