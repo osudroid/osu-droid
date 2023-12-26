@@ -65,6 +65,7 @@ class InGameSettingMenu : BaseFragment() {
     override fun onLoadView() {
         reload(load())
     }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt("speedModifyRow", speedModifyRow.visibility)
@@ -188,14 +189,12 @@ class InGameSettingMenu : BaseFragment() {
         speedModifyToggle = findViewById(R.id.enableSpeedChange)!!
         speedModifyToggle.isChecked = ModMenu.getInstance().changeSpeed != 1f
         speedModifyToggle.setOnCheckedChangeListener { _, isChecked ->
+            speedModifyBar.isEnabled = isChecked
             if (!isChecked) {
                 ModMenu.getInstance().changeSpeed = 1f
-                speedModifyText.text =
-                    String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().changeSpeed)
                 speedModifyBar.progress = 10
+                speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().changeSpeed)
                 ModMenu.getInstance().updateMultiplierText()
-            } else if (ModMenu.getInstance().changeSpeed == 1.0f) {
-                speedModifyToggle.isChecked = false
             }
         }
 
@@ -247,6 +246,7 @@ class InGameSettingMenu : BaseFragment() {
 
         speedModifyBar = findViewById(R.id.changeSpeedBar)!!
         speedModifyBar.progress = (ModMenu.getInstance().changeSpeed * 20 - 10).toInt()
+        speedModifyBar.isEnabled = speedModifyToggle.isChecked
         speedModifyBar.setOnSeekBarChangeListener(
             object : OnSeekBarChangeListener {
                 override fun onProgressChanged(
@@ -256,36 +256,24 @@ class InGameSettingMenu : BaseFragment() {
                 ) {
                     val p = 0.5f + 0.05f * progress
                     speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", p)
-                    if (p == 1f) {
-                        speedModifyToggle.isChecked = false
-                    } else {
-                        ModMenu.getInstance().changeSpeed = p
-                        ModMenu.getInstance().updateMultiplierText()
-                    }
+                    ModMenu.getInstance().changeSpeed = p
+                    ModMenu.getInstance().updateMultiplierText()
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
                     val progress = seekBar!!.progress
                     val p = 0.5f + 0.05f * progress
                     speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", p)
-                    if (p == 1f) {
-                        speedModifyToggle.isChecked = false
-                    } else {
-                        ModMenu.getInstance().changeSpeed = p
-                        ModMenu.getInstance().updateMultiplierText()
-                    }
+                    ModMenu.getInstance().changeSpeed = p
+                    ModMenu.getInstance().updateMultiplierText()
                 }
 
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
                     val progress = seekBar!!.progress
                     val p = 0.5f + 0.05f * progress
                     speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", p)
-                    if (p == 1f) {
-                        speedModifyToggle.isChecked = false
-                    } else {
-                        ModMenu.getInstance().changeSpeed = p
-                        ModMenu.getInstance().updateMultiplierText()
-                    }
+                    ModMenu.getInstance().changeSpeed = p
+                    ModMenu.getInstance().updateMultiplierText()
                 }
             }
         )
@@ -383,11 +371,11 @@ class InGameSettingMenu : BaseFragment() {
                     customARText.text = "${progress / 10f}"
                 }
 
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
                     ModMenu.getInstance().updateMultiplierText()
                 }
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
             }
         )
 
@@ -402,11 +390,11 @@ class InGameSettingMenu : BaseFragment() {
                     customODText.text = "${progress / 10f}"
                 }
 
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
                     ModMenu.getInstance().updateMultiplierText()
                 }
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
             }
         )
 
@@ -421,11 +409,11 @@ class InGameSettingMenu : BaseFragment() {
                     customCSText.text = "${progress / 10f}"
                 }
 
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
                     ModMenu.getInstance().updateMultiplierText()
                 }
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
             }
         )
 
@@ -440,11 +428,11 @@ class InGameSettingMenu : BaseFragment() {
                     customHPText.text = "${progress / 10f}"
                 }
 
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
                     ModMenu.getInstance().updateMultiplierText()
                 }
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
             }
         )
     }
@@ -467,28 +455,28 @@ class InGameSettingMenu : BaseFragment() {
         customARLayout.visibility = visibility
         customARToggle.isChecked = customAR != null
         customARBar.isEnabled = customAR != null
-        customARBar.progress = ((customAR ?: track?.approachRate)?.roundToInt() ?: 10) * 10
+        customARBar.progress = (((customAR ?: track?.approachRate) ?: 10f) * 10).toInt()
         customARText.text = "${customARBar.progress / 10f}"
 
         val customOD = ModMenu.getInstance().customOD
         customODLayout.visibility = visibility
         customODToggle.isChecked = customOD != null
         customODBar.isEnabled = customOD != null
-        customODBar.progress = ((customOD ?: track?.overallDifficulty)?.roundToInt() ?: 5) * 10
+        customODBar.progress = (((customOD ?: track?.overallDifficulty) ?: 10f) * 10).toInt()
         customODText.text = "${customODBar.progress / 10f}"
 
         val customCS = ModMenu.getInstance().customCS
         customCSLayout.visibility = visibility
         customCSToggle.isChecked = customCS != null
         customCSBar.isEnabled = customCS != null
-        customCSBar.progress = ((customCS ?: track?.circleSize)?.roundToInt() ?: 5) * 10
+        customCSBar.progress = (((customCS ?: track?.circleSize) ?: 10f) * 10).toInt()
         customCSText.text = "${customCSBar.progress / 10f}"
 
         val customHP = ModMenu.getInstance().customHP
         customHPLayout.visibility = visibility
         customHPToggle.isChecked = customHP != null
         customHPBar.isEnabled = customHP != null
-        customHPBar.progress = ((customHP ?: track?.hpDrain)?.roundToInt() ?: 5) * 10
+        customHPBar.progress = (((customHP ?: track?.hpDrain) ?: 10f) * 10).toInt()
         customHPText.text = "${customHPBar.progress / 10f}"
 
         ModMenu.getInstance().updateMultiplierText()
