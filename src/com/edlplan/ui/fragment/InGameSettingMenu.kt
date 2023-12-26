@@ -565,8 +565,4 @@ class InGameSettingMenu : BaseFragment() {
             )
             ?.start()
     }
-
-//    companion object {
-//        val instance: InGameSettingMenu by lazy(LazyThreadSafetyMode.PUBLICATION) { InGameSettingMenu() }
-//    }
 }
