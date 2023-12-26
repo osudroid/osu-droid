@@ -619,7 +619,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (!replaying)
             OnlineScoring.getInstance().startPlay(track, trackMD5);
 
-        System.gc();
         GameObjectPool.getInstance().preload();
 
         ppText = null;

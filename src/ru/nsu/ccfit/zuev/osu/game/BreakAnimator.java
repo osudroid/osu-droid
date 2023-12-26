@@ -103,8 +103,6 @@ public class BreakAnimator extends GameObject {
             mark.setScale(1.2f);
             scene.attachChild(mark, 0);
         }
-
-        System.gc();
     }
 
     private void setBgFade(float percent) {

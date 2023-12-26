@@ -755,7 +755,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             selectedItem = null;
             selectedTrack = null;
         }
-        System.gc();
     }
 
     public void sort() {
@@ -1485,7 +1484,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             for (final MenuItem item : items) {
                 item.applyFilter(lowerFilter, favsOnly, limit);
             }
-            System.gc();
         }
     }
 
