@@ -25,7 +25,7 @@ public class OnlineManager {
     public static final String endpoint = "https://" + hostname + "/api/droid/";
     public static final String updateEndpoint = endpoint + "update";
     public static final String defaultAvatarURL = "https://osudroid.moe/user/avatar/0.png";
-    private static final String onlineVersion = "37";
+    private static final String onlineVersion = "38";
 
     public static final OkHttpClient client = new OkHttpClient();
 
