@@ -672,6 +672,8 @@ public class StatisticV2 implements Serializable {
         builder.append(Config.isRemoveSliderLock() ? '1' : '0');
         builder.append(' ');
         builder.append(mod.contains(GameMod.MOD_SCOREV2) ? '1' : '0');
+        builder.append(' ');
+        builder.append(Config.isAllowMoreThanThreeCursors() ? '1' : '0');
         return builder.toString();
     }
 
