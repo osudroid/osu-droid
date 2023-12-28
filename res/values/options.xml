@@ -364,6 +364,9 @@
     <string name="opt_display_realtime_pp_counter_title">Display real-time PP counter</string>
     <string name="opt_display_realtime_pp_counter_summary">Displays a real-time PP counter during gameplay. May increase loading time significantly, especially in long beatmaps</string>
 
+    <string name="opt_allow_more_than_three_fingers_title">Allow more than three cursors in gameplay</string>
+    <string name="opt_allow_more_than_three_fingers_summary">Allow players to put more than three active cursors at once during gameplay</string>
+
     <!--Video support-->
     <string name="opt_delete_unsupported_videos_title">Delete unsupported videos</string>
     <string name="opt_delete_unsupported_videos_summary">Delete videos with unsupported formats (.avi and .flv)</string>

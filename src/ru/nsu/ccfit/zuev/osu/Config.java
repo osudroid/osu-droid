@@ -79,7 +79,8 @@ public class Config {
         deleteUnsupportedVideos,
         submitScoreOnMultiplayer,
         keepBackgroundAspectRatio,
-        noChangeDimInBreaks;
+        noChangeDimInBreaks,
+        allowMoreThanThreeCursors;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -212,6 +213,7 @@ public class Config {
         enablePP = false;//prefs.getBoolean("enablePP",true);
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
+        allowMoreThanThreeCursors = prefs.getBoolean("allowMoreThanThreeCursors", false);
         calculateSliderPathInGameStart = prefs.getBoolean("calculateSliderPathInGameStart", false);
         displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", false);
         hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
@@ -280,6 +282,11 @@ public class Config {
     public static boolean isRemoveSliderLock() {
         //noinspection DataFlowIssue
         return Multiplayer.isConnected() ? Multiplayer.room.getGameplaySettings().isRemoveSliderLock() : removeSliderLock;
+    }
+
+    public static boolean isAllowMoreThanThreeCursors() {
+        //noinspection DataFlowIssue
+        return Multiplayer.isConnected() ? Multiplayer.room.getGameplaySettings().getAllowMoreThanThreeCursors() : allowMoreThanThreeCursors;
     }
 
     public static boolean isCalculateSliderPathInGameStart() {

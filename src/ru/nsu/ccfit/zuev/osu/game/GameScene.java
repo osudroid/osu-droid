@@ -104,9 +104,9 @@ import ru.nsu.ccfit.zuev.skins.SkinManager;
 public class GameScene implements IUpdateHandler, GameObjectListener,
         IOnSceneTouchListener {
     public static int getCursorCount() {
-        return Multiplayer.room != null && !Multiplayer.room.getGameplaySettings().getAllowMoreThanThreeCursors()
-                ? 3
-                : 10;
+        return Config.isAllowMoreThanThreeCursors()
+                ? 10
+                : 3;
     }
 
     private final Engine engine;
