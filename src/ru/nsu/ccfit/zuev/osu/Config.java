@@ -213,7 +213,7 @@ public class Config {
         enablePP = false;//prefs.getBoolean("enablePP",true);
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
-        allowMoreThanThreeCursors = prefs.getBoolean("allowMoreThanThreeCursors", false);
+        allowMoreThanThreeCursors = prefs.getBoolean("allowMoreThanThreeCursors", true);
         calculateSliderPathInGameStart = prefs.getBoolean("calculateSliderPathInGameStart", false);
         displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", false);
         hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
