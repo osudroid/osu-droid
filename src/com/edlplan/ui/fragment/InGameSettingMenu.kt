@@ -66,44 +66,45 @@ class InGameSettingMenu : BaseFragment() {
         reload(load())
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putInt("speedModifyRow", speedModifyRow.visibility)
-        outState.putInt("speedModifyBar", speedModifyBar.progress)
-        outState.putString("speedModifyText", speedModifyText.text.toString())
-        outState.putBoolean("speedModifyToggle", speedModifyToggle.isChecked)
+    override fun onSaveInstanceState(outState: Bundle) = outState.run {
+        super.onSaveInstanceState(this)
 
-        outState.putInt("followDelayRow", followDelayRow.visibility)
-        outState.putInt("followDelayBar", followDelayBar.progress)
-        outState.putString("followDelayText", followDelayText.text.toString())
+        putInt("speedModifyRow", speedModifyRow.visibility)
+        putInt("speedModifyBar", speedModifyBar.progress)
+        putString("speedModifyText", speedModifyText.text.toString())
+        putBoolean("speedModifyToggle", speedModifyToggle.isChecked)
 
-        outState.putInt("forceDifficultyStatisticsSplitter", forceDifficultyStatisticsSplitter.visibility)
+        putInt("followDelayRow", followDelayRow.visibility)
+        putInt("followDelayBar", followDelayBar.progress)
+        putString("followDelayText", followDelayText.text.toString())
 
-        outState.putInt("customARLayout", customARLayout.visibility)
-        outState.putBoolean("customARToggle", customARToggle.isChecked)
-        outState.putString("customARText", customARText.text.toString())
-        outState.putInt("customARBar", customARBar.progress)
+        putInt("forceDifficultyStatisticsSplitter", forceDifficultyStatisticsSplitter.visibility)
 
-        outState.putInt("customODLayout", customODLayout.visibility)
-        outState.putBoolean("customODToggle", customODToggle.isChecked)
-        outState.putString("customODText", customODText.text.toString())
-        outState.putInt("customODBar", customODBar.progress)
+        putInt("customARLayout", customARLayout.visibility)
+        putBoolean("customARToggle", customARToggle.isChecked)
+        putString("customARText", customARText.text.toString())
+        putInt("customARBar", customARBar.progress)
 
-        outState.putInt("customCSLayout", customCSLayout.visibility)
-        outState.putBoolean("customCSToggle", customCSToggle.isChecked)
-        outState.putString("customCSText", customCSText.text.toString())
-        outState.putInt("customCSBar", customCSBar.progress)
+        putInt("customODLayout", customODLayout.visibility)
+        putBoolean("customODToggle", customODToggle.isChecked)
+        putString("customODText", customODText.text.toString())
+        putInt("customODBar", customODBar.progress)
 
-        outState.putInt("customHPLayout", customHPLayout.visibility)
-        outState.putBoolean("customHPToggle", customHPToggle.isChecked)
-        outState.putString("customHPText", customHPText.text.toString())
-        outState.putInt("customHPBar", customHPBar.progress)
+        putInt("customCSLayout", customCSLayout.visibility)
+        putBoolean("customCSToggle", customCSToggle.isChecked)
+        putString("customCSText", customCSText.text.toString())
+        putInt("customCSBar", customCSBar.progress)
 
-        outState.putBoolean("enableStoryboard", findViewById<CheckBox>(R.id.enableStoryboard)!!.isChecked)
-        outState.putBoolean("showScoreboard", findViewById<CheckBox>(R.id.showScoreboard)!!.isChecked)
-        outState.putBoolean("enableVideo", findViewById<CheckBox>(R.id.enableVideo)!!.isChecked)
-        outState.putBoolean("enableNCwhenSpeedChange", findViewById<CheckBox>(R.id.enableNCwhenSpeedChange)!!.isChecked)
-        outState.putInt("backgroundBrightness", findViewById<SeekBar>(R.id.backgroundBrightnessBar)!!.progress)
+        putInt("customHPLayout", customHPLayout.visibility)
+        putBoolean("customHPToggle", customHPToggle.isChecked)
+        putString("customHPText", customHPText.text.toString())
+        putInt("customHPBar", customHPBar.progress)
+
+        putBoolean("enableStoryboard", findViewById<CheckBox>(R.id.enableStoryboard)!!.isChecked)
+        putBoolean("showScoreboard", findViewById<CheckBox>(R.id.showScoreboard)!!.isChecked)
+        putBoolean("enableVideo", findViewById<CheckBox>(R.id.enableVideo)!!.isChecked)
+        putBoolean("enableNCwhenSpeedChange", findViewById<CheckBox>(R.id.enableNCwhenSpeedChange)!!.isChecked)
+        putInt("backgroundBrightness", findViewById<SeekBar>(R.id.backgroundBrightnessBar)!!.progress)
     }
 
     private fun reload(state: SavedState?) {
@@ -154,34 +155,38 @@ class InGameSettingMenu : BaseFragment() {
 
         findViewById<RelativeLayout>(R.id.frg_background)!!.isClickable = false
 
-        val enableStoryboard = findViewById<CheckBox>(R.id.enableStoryboard)!!
-        enableStoryboard.isChecked = Config.isEnableStoryboard()
-        enableStoryboard.setOnCheckedChangeListener { _, isChecked ->
-            Config.setEnableStoryboard(isChecked)
-            PreferenceManager.getDefaultSharedPreferences(context).edit()
-                .putBoolean("enableStoryboard", isChecked).commit()
+        findViewById<CheckBox>(R.id.enableStoryboard)!!.apply {
+            isChecked = Config.isEnableStoryboard()
+            setOnCheckedChangeListener { _, isChecked ->
+                Config.setEnableStoryboard(isChecked)
+                PreferenceManager.getDefaultSharedPreferences(context).edit()
+                    .putBoolean("enableStoryboard", isChecked).commit()
+            }
         }
 
-        val showScoreboard = findViewById<CheckBox>(R.id.showScoreboard)!!
-        showScoreboard.isChecked = Config.isShowScoreboard()
-        showScoreboard.setOnCheckedChangeListener { _, isChecked ->
-            Config.setShowScoreboard(isChecked)
-            PreferenceManager.getDefaultSharedPreferences(context).edit()
-                .putBoolean("showscoreboard", isChecked).commit()
+        findViewById<CheckBox>(R.id.showScoreboard)!!.apply {
+            isChecked = Config.isShowScoreboard()
+            setOnCheckedChangeListener { _, isChecked ->
+                Config.setShowScoreboard(isChecked)
+                PreferenceManager.getDefaultSharedPreferences(context).edit()
+                    .putBoolean("showscoreboard", isChecked).commit()
+            }
         }
 
-        val enableVideo = findViewById<CheckBox>(R.id.enableVideo)!!
-        enableVideo.isChecked = Config.isVideoEnabled()
-        enableVideo.setOnCheckedChangeListener { _, isChecked ->
-            Config.setVideoEnabled(isChecked)
-            PreferenceManager.getDefaultSharedPreferences(context).edit()
-                .putBoolean("enableVideo", isChecked).commit()
+        findViewById<CheckBox>(R.id.enableVideo)!!.apply {
+            isChecked = Config.isVideoEnabled()
+            setOnCheckedChangeListener { _, isChecked ->
+                Config.setVideoEnabled(isChecked)
+                PreferenceManager.getDefaultSharedPreferences(context).edit()
+                    .putBoolean("enableVideo", isChecked).commit()
+            }
         }
 
-        val enableNCWhenSpeedChange = findViewById<CheckBox>(R.id.enableNCwhenSpeedChange)!!
-        enableNCWhenSpeedChange.isChecked = ModMenu.getInstance().isEnableNCWhenSpeedChange
-        enableNCWhenSpeedChange.setOnCheckedChangeListener { _, isChecked ->
-            ModMenu.getInstance().isEnableNCWhenSpeedChange = isChecked
+        findViewById<CheckBox>(R.id.enableNCwhenSpeedChange)!!.apply {
+            isChecked = ModMenu.getInstance().isEnableNCWhenSpeedChange
+            setOnCheckedChangeListener { _, isChecked ->
+                ModMenu.getInstance().isEnableNCWhenSpeedChange = isChecked
+            }
         }
 
         speedModifyText = findViewById(R.id.changeSpeedText)!!
@@ -245,38 +250,31 @@ class InGameSettingMenu : BaseFragment() {
         }%"
 
         speedModifyBar = findViewById(R.id.changeSpeedBar)!!
-        speedModifyBar.progress = (ModMenu.getInstance().changeSpeed * 20 - 10).toInt()
-        speedModifyBar.isEnabled = speedModifyToggle.isChecked
-        speedModifyBar.setOnSeekBarChangeListener(
-            object : OnSeekBarChangeListener {
-                override fun onProgressChanged(
-                    seekBar: SeekBar?,
-                    progress: Int,
-                    fromUser: Boolean
-                ) {
-                    val p = 0.5f + 0.05f * progress
-                    speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", p)
-                    ModMenu.getInstance().changeSpeed = p
-                    ModMenu.getInstance().updateMultiplierText()
-                }
+        speedModifyBar.apply {
+            progress = (ModMenu.getInstance().changeSpeed * 20 - 10).toInt()
+            isEnabled = speedModifyToggle.isChecked
 
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                    val progress = seekBar!!.progress
-                    val p = 0.5f + 0.05f * progress
-                    speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", p)
-                    ModMenu.getInstance().changeSpeed = p
-                    ModMenu.getInstance().updateMultiplierText()
-                }
+            setOnSeekBarChangeListener(
+                object : OnSeekBarChangeListener {
+                    override fun onProgressChanged(
+                        seekBar: SeekBar?,
+                        progress: Int,
+                        fromUser: Boolean
+                    ) = update(progress)
 
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    val progress = seekBar!!.progress
-                    val p = 0.5f + 0.05f * progress
-                    speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", p)
-                    ModMenu.getInstance().changeSpeed = p
-                    ModMenu.getInstance().updateMultiplierText()
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) = update(seekBar!!.progress)
+
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) = update(seekBar!!.progress)
+
+                    private fun update(progress: Int) {
+                        val p = 0.5f + 0.05f * progress
+                        speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", p)
+                        ModMenu.getInstance().changeSpeed = p
+                        ModMenu.getInstance().updateMultiplierText()
+                    }
                 }
-            }
-        )
+            )
+        }
 
         speedModifyText.text =
             String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().changeSpeed)
