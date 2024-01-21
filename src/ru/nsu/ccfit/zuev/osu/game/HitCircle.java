@@ -2,13 +2,10 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import org.anddev.andengine.entity.modifier.FadeInModifier;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
+import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 
-import org.anddev.andengine.util.modifier.ease.EaseLinear;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -88,7 +85,7 @@ public class HitCircle extends GameObject {
 
         //approachCircle.setPosition(rpos.x, rpos.y);
         approachCircle.setColor(r, g, b);
-        approachCircle.setScale(scale * 2);
+        approachCircle.setScale(scale * 3);
         approachCircle.setAlpha(0);
         Utils.putSpriteAnchorCenter(pos, approachCircle);
         if (GameHelper.isHidden()) {
@@ -104,8 +101,10 @@ public class HitCircle extends GameObject {
         number.init(pos, GameHelper.getScale());
         number.setAlpha(0);
 
+        float fadeInDuration;
+
         if (GameHelper.isHidden()) {
-            float fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
+            fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
             float fadeOutDuration = time * 0.3f * GameHelper.getTimeMultiplier();
 
             number.registerEntityModifiers(() -> new SequenceEntityModifier(
@@ -120,7 +119,37 @@ public class HitCircle extends GameObject {
                     new FadeInModifier(fadeInDuration),
                     new FadeOutModifier(fadeOutDuration)
             ));
+
+            if (approachCircle.isVisible()) {
+                approachCircle.registerEntityModifier(new SequenceEntityModifier(
+                        new AlphaModifier(Math.min(fadeInDuration * 2, time * GameHelper.getTimeMultiplier()), 0, 0.9f),
+                        new AlphaModifier(fadeOutDuration, 0.9f, 0)
+                ));
+            }
+        } else {
+            // Preempt time can go below 450ms. Normally, this is achieved via the DT mod which uniformly speeds up all animations game wide regardless of AR.
+            // This uniform speedup is hard to match 1:1, however we can at least make AR>10 (via mods) feel good by extending the upper linear function above.
+            // Note that this doesn't exactly match the AR>10 visuals as they're classically known, but it feels good.
+            // This adjustment is necessary for AR>10, otherwise TimePreempt can become smaller leading to hitcircles not fully fading in.
+            fadeInDuration = 0.4f * Math.min(1, time / 0.45f) * GameHelper.getTimeMultiplier();
+
+            circle.registerEntityModifier(new FadeInModifier(fadeInDuration));
+            overlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
+            number.registerEntityModifier(new FadeInModifier(fadeInDuration));
+
+            if (approachCircle.isVisible()) {
+                approachCircle.registerEntityModifier(new AlphaModifier(
+                        Math.min(fadeInDuration * 2, time * GameHelper.getTimeMultiplier()), 0, 0.9f
+                ));
+            }
         }
+
+        if (approachCircle.isVisible()) {
+            approachCircle.registerEntityModifier(new ScaleModifier(
+                    time * GameHelper.getTimeMultiplier(), scale * 3, scale
+            ));
+        }
+
         scene.attachChild(number, 0);
         scene.attachChild(overlay, 0);
         scene.attachChild(circle, 0);
@@ -240,51 +269,21 @@ public class HitCircle extends GameObject {
             kiai = false;
         }
 
-        if (autoPlay && passedTime - time >= 0) {
+        passedTime += dt;
+
+        // We are still at approach time. Let entity modifiers finish first.
+        if (passedTime < time) {
+            return;
+        }
+
+        if (autoPlay) {
             playSound();
             passedTime = -1;
             // Remove circle and register hit in update thread
             listener.onCircleHit(id, 0, pos, endsCombo, ResultType.HIT300.getId(), color);
             removeFromScene();
-            return;
-        }
-
-        passedTime += dt;
-
-        if (!GameHelper.isHidden())
-        {
-            // We are not applying time multiplier here as dt is based on game time,
-            // and the duration below is game time.
-            // This is different from using entity modifiers which expect real time.
-            float duration = 0.4f * Math.min(1, time / 0.45f);
-            float percent = EaseLinear.getInstance().getPercentage(passedTime, duration);
-
-            if (passedTime < duration)
-            {
-                circle.setAlpha(percent);
-                overlay.setAlpha(percent);
-                number.setAlpha(percent);
-            }
-        }
-
-        // if it's too early to click
-        if (passedTime < time) {
-            float percentage = passedTime / time;
-            // calculating size of approach circle
-            approachCircle.setScale(scale * (1 + 2f * (1 - percentage)));
-            // and if we just begin
-            if (!GameHelper.isHidden() || (isFirstNote && Config.isShowFirstApproachCircle())) {
-                if (passedTime < time / 2) {
-                    // calculating alpha of all sprites
-                    percentage = passedTime * 2 / time;
-                    approachCircle.setAlpha(percentage);
-                } else if (!GameHelper.isHidden())// if circle already has to be shown, set all alphas to 1
-                {
-                    approachCircle.setAlpha(1);
-                }
-            }
-        } else if (!autoPlay)// if player didn't click circle in time
-        {
+        } else {
+            approachCircle.clearEntityModifiers();
             approachCircle.setAlpha(0);
 
             // If passed too much time, counting it as miss
