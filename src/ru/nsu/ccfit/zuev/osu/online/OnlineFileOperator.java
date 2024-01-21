@@ -32,11 +32,10 @@ public class OnlineFileOperator {
             }
 
             String checksum = FileUtils.getSHA256Checksum(file);
-            StringBuilder sb = new StringBuilder();
-            sb.append(URLEncoder.encode(checksum, "UTF-8"));
-            sb.append("_");
-            sb.append(URLEncoder.encode(replayID, "UTF-8"));
-            String signature = SecurityUtils.signRequest(sb.toString());
+            String sb = URLEncoder.encode(checksum, "UTF-8") +
+                    "_" +
+                    URLEncoder.encode(replayID, "UTF-8");
+            String signature = SecurityUtils.signRequest(sb);
 
             MediaType mime = MediaType.parse("application/octet-stream");
             RequestBody fileBody = RequestBody.create(mime, file);
@@ -48,10 +47,12 @@ public class OnlineFileOperator {
                 .build();
             Request request = new Request.Builder().url(urlstr)
                 .post(requestBody).build();
-            Response response = OnlineManager.client.newCall(request).execute();
-            String responseMsg = response.body().string();
-
-            Debug.i("sendFile signatureResponse " + responseMsg);
+            try (Response response = OnlineManager.client.newCall(request).execute()) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String responseMsg = response.body().string();
+                    Debug.i("sendFile signatureResponse " + responseMsg);
+                }
+            }
         } catch (final IOException e) {
             Debug.e("sendFile IOException " + e.getMessage(), e);
         } catch (final Exception e) {
@@ -85,15 +86,14 @@ public class OnlineFileOperator {
             }
 
             Request request = builder.build();
-            Response response = OnlineManager.client.newCall(request).execute();
-
-            if (response.isSuccessful()) {
-                BufferedSink sink = Okio.buffer(Okio.sink(file));
-                sink.writeAll(response.body().source());
-                sink.close();
+            try (Response response = OnlineManager.client.newCall(request).execute()) {
+                if (response.isSuccessful() && response.body() != null) {
+                    BufferedSink sink = Okio.buffer(Okio.sink(file));
+                    sink.writeAll(response.body().source());
+                    sink.close();
+                }
             }
 
-            response.close();
             return true;
         } catch (final IOException e) {
             Debug.e("downloadFile IOException " + e.getMessage(), e);

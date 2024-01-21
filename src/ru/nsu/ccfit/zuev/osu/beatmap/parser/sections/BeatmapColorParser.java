@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.beatmap.parser.sections;
 
 import java.util.Collections;
+import java.util.Comparator;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;

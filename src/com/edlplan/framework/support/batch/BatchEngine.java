@@ -9,7 +9,7 @@ public class BatchEngine {
 
     public static GL10 pGL;
     public static ShaderGlobals shaderGlobals = new ShaderGlobals();
-    private static AbstractBatch savedbatch = null;
+    private static AbstractBatch<?> savedbatch = null;
     private static boolean flushing = false;
 
     public static ShaderGlobals getShaderGlobals() {
@@ -38,12 +38,12 @@ public class BatchEngine {
         shaderGlobals.camera.set(camera);
     }
 
-    static void bind(AbstractBatch batch) {
+    static <T> void bind(AbstractBatch<T> batch) {
         flush();
         savedbatch = batch;
     }
 
-    static void unbind(AbstractBatch batch) {
+    static <T> void unbind(AbstractBatch<T> batch) {
         if (savedbatch == batch) {
             savedbatch = null;
         }
@@ -58,7 +58,7 @@ public class BatchEngine {
         }
     }
 
-    public static AbstractBatch currentBatch() {
+    public static AbstractBatch<?> currentBatch() {
         return savedbatch;
     }
 }

@@ -12,9 +12,7 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 public class ToastLogger {
     private static ToastLogger instance = null;
     Activity activity;
-    String message = "";
-    boolean showlong = false;
-    ArrayList<String> debugLog = new ArrayList<String>();
+    ArrayList<String> debugLog = new ArrayList<>();
     float percentage;
 
     private ToastLogger(final Activity activity) {
@@ -37,16 +35,6 @@ public class ToastLogger {
 
     public static void showTextId(@StringRes final int resID, final boolean showlong) {
         showText(StringTable.get(resID), showlong);
-    }
-
-    public static void addToLog(final String str) {
-        if (instance == null) {
-            return;
-            /*
-             * if (instance.debugLog.size() >= 20) instance.debugLog.remove(0);
-             * instance.debugLog.add(str);
-             */
-        }
     }
 
     public static ArrayList<String> getLog() {

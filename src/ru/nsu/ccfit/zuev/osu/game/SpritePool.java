@@ -15,8 +15,8 @@ import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 public class SpritePool {
     private static SpritePool instance = new SpritePool();
     private static int CAPACITY = 250;
-    private final Map<String, LinkedList<Sprite>> sprites = new HashMap<String, LinkedList<Sprite>>();
-    private final Map<String, LinkedList<AnimSprite>> animsprites = new HashMap<String, LinkedList<AnimSprite>>();
+    private final Map<String, LinkedList<Sprite>> sprites = new HashMap<>();
+    private final Map<String, LinkedList<AnimSprite>> animsprites = new HashMap<>();
     int count = 0;
     private int spritesCreated = 0;
     private SpritePool() {
@@ -47,7 +47,7 @@ public class SpritePool {
         if (sprites.containsKey(name)) {
             sprites.get(name).add(sprite);
         } else {
-            final LinkedList<Sprite> list = new LinkedList<Sprite>();
+            final LinkedList<Sprite> list = new LinkedList<>();
             list.add(sprite);
             sprites.put(name, list);
         }
@@ -124,7 +124,7 @@ public class SpritePool {
         if (animsprites.containsKey(name)) {
             animsprites.get(name).add(sprite);
         } else {
-            final LinkedList<AnimSprite> list = new LinkedList<AnimSprite>();
+            final LinkedList<AnimSprite> list = new LinkedList<>();
             list.add(sprite);
             animsprites.put(name, list);
         }

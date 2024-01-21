@@ -5,7 +5,9 @@ import com.edlplan.osu.support.timing.TimingPoints;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 public class ControlPoints {
     private final ArrayList<TimingControlPoint> timingPoints = new ArrayList<>();
@@ -171,9 +173,9 @@ public class ControlPoints {
         DifficultyControlPoint difficultyControlPoint = binarySearch(difficultyPoints, time, defaultDifficultyPoint);
         if (difficultyControlPoint == null) {
             return defaultDifficultyPoint;
-        } else {
-            return difficultyControlPoint;
         }
+
+        return difficultyControlPoint;
     }
 
     private <T extends ControlPoint> T binarySearch(List<T> list, double time, T prePoint) {

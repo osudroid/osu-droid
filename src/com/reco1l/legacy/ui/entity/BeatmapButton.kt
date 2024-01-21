@@ -5,8 +5,9 @@ import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.api.ibancho.data.PlayerStatus.READY
 import com.reco1l.api.ibancho.data.RoomBeatmap
 import com.reco1l.framework.extensions.orAsyncCatch
-import com.reco1l.legacy.ui.ChimuWebView.FILE_EXTENSION
+import com.reco1l.legacy.ui.ChimuWebView as chimuFragment
 import com.reco1l.legacy.Multiplayer
+import com.reco1l.legacy.ui.ChimuWebView.FILE_EXTENSION
 import com.reco1l.legacy.ui.multiplayer.RoomScene
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
@@ -16,7 +17,6 @@ import ru.nsu.ccfit.zuev.osu.RGBColor
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.menu.MenuItemTrack
 import ru.nsu.ccfit.zuev.skins.OsuSkin
-import com.reco1l.legacy.ui.ChimuWebView.INSTANCE as chimuFragment
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.LibraryManager.INSTANCE as libraryManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
@@ -24,7 +24,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 /**
  * Simplified version of [MenuItemTrack]
  */
-open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-background"))
+class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-background"))
 {
 
     private val trackTitle = ChangeableText(32f, 20f, getResources().getFont("smallFont"), "", 100)

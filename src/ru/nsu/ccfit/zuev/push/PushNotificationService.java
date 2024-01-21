@@ -18,11 +18,9 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.HashMap;
 
-import org.anddev.andengine.util.Debug;
-
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osuplus.R;
-import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
+import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
 
 /**
@@ -35,7 +33,7 @@ public class PushNotificationService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         if(remoteMessage.getData().size() > 0) {
-            HashMap<String, String> data = new HashMap<String, String>(remoteMessage.getData());
+            HashMap<String, String> data = new HashMap<>(remoteMessage.getData());
             String channelId = "ru.nsu.ccfit.zuev.push";
             Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
@@ -55,7 +53,7 @@ public class PushNotificationService extends FirebaseMessagingService {
                     .setSound(defaultSoundUri);
 
             if(!imageUrl.isEmpty()) {
-                String filePath = getCacheDir().getPath() + "/" + MD5Calcuator.getStringMD5("osuplus" + imageUrl);
+                String filePath = getCacheDir().getPath() + "/" + MD5Calculator.getStringMD5("osuplus" + imageUrl);
                 boolean downloaded = OnlineFileOperator.downloadFile(imageUrl, filePath);
                 if(downloaded) {
                     Bitmap bitmap = BitmapFactory.decodeFile(filePath);

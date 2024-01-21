@@ -29,6 +29,7 @@ import com.edlplan.ui.EasingHelper;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
+import java.util.Objects;
 
 import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.UpdateManager;
@@ -48,6 +49,8 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 import static android.content.Intent.ACTION_VIEW;
 
+import org.anddev.andengine.util.Debug;
+
 public class SettingsMenu extends SettingsFragment {
 
     public static final String REGISTER_URL = "https://" + OnlineManager.hostname + "/user/?action=register";
@@ -65,10 +68,15 @@ public class SettingsMenu extends SettingsFragment {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.options, rootKey);
 
-        SkinPathPreference skinPath = (SkinPathPreference) findPreference("skinPath");
+        SkinPathPreference skinPath = findPreference("skinPath");
+        if (skinPath == null) {
+            Debug.w("skinPath is null");
+            return;
+        }
+
         skinPath.reloadSkinList();
         skinPath.setOnPreferenceChangeListener((preference, newValue) -> {
-            if(GlobalManager.getInstance().getSkinNow() != newValue.toString()) {
+            if(!Objects.equals(GlobalManager.getInstance().getSkinNow(), newValue.toString())) {
                 var loading = new LoadingFragment();
                 loading.show();
 
@@ -91,44 +99,42 @@ public class SettingsMenu extends SettingsFragment {
         // screens
         mParentScreen = parentScreen = getPreferenceScreen();
 
-        ((PreferenceScreen) findPreference("onlineOption")).setOnPreferenceClickListener(preference -> {
+        ((PreferenceScreen) Objects.requireNonNull(findPreference("onlineOption"))).setOnPreferenceClickListener(preference -> {
             setPreferenceScreen((PreferenceScreen) preference);
             return true;
         });
 
-        ((PreferenceScreen) findPreference("general")).setOnPreferenceClickListener(preference -> {
+        ((PreferenceScreen) Objects.requireNonNull(findPreference("general"))).setOnPreferenceClickListener(preference -> {
             setPreferenceScreen((PreferenceScreen) preference);
             return true;
         });
 
-        ((PreferenceScreen) findPreference("color")).setOnPreferenceClickListener(preference -> {
-            parentScreen = (PreferenceScreen) findPreference("general");
+        ((PreferenceScreen) Objects.requireNonNull(findPreference("color"))).setOnPreferenceClickListener(preference -> {
+            parentScreen = findPreference("general");
             setPreferenceScreen((PreferenceScreen) preference);
             return true;
         });
 
-        ((PreferenceScreen) findPreference("sound")).setOnPreferenceClickListener(preference -> {
+        ((PreferenceScreen) Objects.requireNonNull(findPreference("sound"))).setOnPreferenceClickListener(preference -> {
             setPreferenceScreen((PreferenceScreen) preference);
             return true;
         });
 
-        ((PreferenceScreen) findPreference("beatmaps")).setOnPreferenceClickListener(preference -> {
+        ((PreferenceScreen) Objects.requireNonNull(findPreference("beatmaps"))).setOnPreferenceClickListener(preference -> {
             setPreferenceScreen((PreferenceScreen) preference);
             return true;
         });
 
-        ((PreferenceScreen) findPreference("advancedopts")).setOnPreferenceClickListener(preference -> {
+        ((PreferenceScreen) Objects.requireNonNull(findPreference("advancedopts"))).setOnPreferenceClickListener(preference -> {
             setPreferenceScreen((PreferenceScreen) preference);
             return true;
         });
         // screens END
 
-        final EditTextPreference onlinePassword = (EditTextPreference) findPreference("onlinePassword");
-        onlinePassword.setOnBindEditTextListener(editText -> {
-            editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        });
+        final EditTextPreference onlinePassword = Objects.requireNonNull(findPreference("onlinePassword"));
+        onlinePassword.setOnBindEditTextListener(editText -> editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD));
 
-        final EditTextPreference skinToppref = (EditTextPreference) findPreference("skinTopPath");
+        final EditTextPreference skinToppref = Objects.requireNonNull(findPreference("skinTopPath"));
         skinToppref.setOnPreferenceChangeListener((preference, newValue) -> {
             if (newValue.toString().trim().length() == 0) {
                 skinToppref.setText(Config.getCorePath() + "Skin/");
@@ -152,31 +158,31 @@ public class SettingsMenu extends SettingsFragment {
         });
 
         final Preference pref = findPreference("clear");
-        pref.setOnPreferenceClickListener(preference -> {
+        Objects.requireNonNull(pref).setOnPreferenceClickListener(preference -> {
             LibraryManager.INSTANCE.clearCache();
             return true;
         });
         final Preference clearProps = findPreference("clear_properties");
-        clearProps.setOnPreferenceClickListener(preference -> {
+        Objects.requireNonNull(clearProps).setOnPreferenceClickListener(preference -> {
             PropertiesLibrary.getInstance()
                     .clear(mActivity);
             return true;
         });
         final Preference register = findPreference("registerAcc");
-        register.setOnPreferenceClickListener(preference -> {
+        Objects.requireNonNull(register).setOnPreferenceClickListener(preference -> {
             Intent intent = new Intent(ACTION_VIEW, Uri.parse(REGISTER_URL));
             startActivity(intent);
             return true;
         });
 
         final Preference update = findPreference("update");
-        update.setOnPreferenceClickListener(preference -> {
+        Objects.requireNonNull(update).setOnPreferenceClickListener(preference -> {
             UpdateManager.INSTANCE.checkNewUpdates(false);
             return true;
         });
 
         final Preference dither = findPreference("dither");
-        dither.setOnPreferenceChangeListener((preference, newValue) -> {
+        Objects.requireNonNull(dither).setOnPreferenceChangeListener((preference, newValue) -> {
             if (Config.isUseDither() != (boolean) newValue) {
                 GlobalManager.getInstance().getMainScene().restart();
             }
@@ -201,21 +207,21 @@ public class SettingsMenu extends SettingsFragment {
         Animation animation = AnimationUtils.loadAnimation(mActivity, R.anim.rotate_360);
         animation.setAnimationListener(new Animation.AnimationListener() {
             public void onAnimationEnd(Animation animation) {
-                ImageButton backButton = (ImageButton) findViewById(R.id.back_button);
+                ImageButton backButton = Objects.requireNonNull(findViewById(R.id.back_button));
                 backButton.setImageDrawable(mActivity.getResources().getDrawable(newDrawable));
             }
             public void onAnimationRepeat(Animation animation) {}
             public void onAnimationStart(Animation animation) {}
         });
-        ((ImageButton) findViewById(R.id.back_button)).startAnimation(animation);
+        ((ImageButton) Objects.requireNonNull(findViewById(R.id.back_button))).startAnimation(animation);
     }
 
     private void animateView(@IdRes int viewId, @AnimRes int anim) {
-        findViewById(viewId).startAnimation(AnimationUtils.loadAnimation(mActivity, anim));
+        ((View) Objects.requireNonNull(findViewById(viewId))).startAnimation(AnimationUtils.loadAnimation(mActivity, anim));
     }
 
     private void setTitle(String title) {
-       ((TextView) findViewById(R.id.title)).setText(title);
+       ((TextView) Objects.requireNonNull(findViewById(R.id.title))).setText(title);
     }
 
     @Override
@@ -248,13 +254,11 @@ public class SettingsMenu extends SettingsFragment {
 
     @Override
     protected void onLoadView() {
-        ((ImageButton) findViewById(R.id.back_button)).setOnClickListener(v -> {
-            navigateBack();
-        });
+        ((ImageButton) Objects.requireNonNull(findViewById(R.id.back_button))).setOnClickListener(v -> navigateBack());
     }
 
     protected void playOnLoadAnim() {
-        View body = findViewById(R.id.body);
+        View body = Objects.requireNonNull(findViewById(R.id.body));
         body.setAlpha(0);
         body.setTranslationX(400);
         body.animate().cancel();
@@ -268,7 +272,7 @@ public class SettingsMenu extends SettingsFragment {
     }
 
     protected void playOnDismissAnim(Runnable action) {
-        View body = findViewById(R.id.body);
+        View body = Objects.requireNonNull(findViewById(R.id.body));
         body.animate().cancel();
         body.animate()
                 .translationXBy(400)
@@ -297,7 +301,7 @@ public class SettingsMenu extends SettingsFragment {
         playOnDismissAnim(() -> {
             Config.loadConfig(mActivity);
             GlobalManager.getInstance().getMainScene().reloadOnlinePanel();
-            GlobalManager.getInstance().getMainScene().loadTimeingPoints(false);
+            GlobalManager.getInstance().getMainScene().loadTimingPoints(false);
             GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
             GlobalManager.getInstance().getSongService().setGaming(false);
             SettingsMenu.super.dismiss();

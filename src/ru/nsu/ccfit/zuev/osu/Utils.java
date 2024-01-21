@@ -9,6 +9,8 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
 
+import java.util.Arrays;
+
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
 
@@ -18,9 +20,7 @@ public class Utils {
     private static int soundMask = 0;
 
     public static <T> T[] oneObjectArray(T object, T[] ary) {
-        for (int i = 0; i < ary.length; i++) {
-            ary[i] = object;
-        }
+        Arrays.fill(ary, object);
         return ary;
     }
 
@@ -57,9 +57,9 @@ public class Utils {
         pos.y += (Config.getRES_HEIGHT() - toRes(Constants.MAP_ACTUAL_HEIGHT)) / 2f;
         pos.x += (Config.getRES_WIDTH() - toRes(Constants.MAP_ACTUAL_WIDTH)) / 2f;
         if (GameHelper.isHardrock()) {
-            pos.y -= Config.getRES_HEIGHT() / 2;
+            pos.y -= (float) Config.getRES_HEIGHT() / 2;
             pos.y *= -1;
-            pos.y += Config.getRES_HEIGHT() / 2;
+            pos.y += (float) Config.getRES_HEIGHT() / 2;
         }
 		/*if (pos.y < 18) {
 			pos.y = 18;
@@ -75,9 +75,9 @@ public class Utils {
         pos.y += (Config.getRES_HEIGHT() - toRes(Constants.MAP_ACTUAL_HEIGHT)) / 2f;
         pos.x += (Config.getRES_WIDTH() - toRes(Constants.MAP_ACTUAL_WIDTH)) / 2f;
         if (GameHelper.isHardrock()) {
-            pos.y -= Config.getRES_HEIGHT() / 2;
+            pos.y -= (float) Config.getRES_HEIGHT() / 2;
             pos.y *= -1;
-            pos.y += Config.getRES_HEIGHT() / 2;
+            pos.y += (float) Config.getRES_HEIGHT() / 2;
         }
     }
 

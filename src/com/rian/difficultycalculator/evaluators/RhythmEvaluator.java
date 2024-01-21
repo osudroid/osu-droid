@@ -119,7 +119,6 @@ public final class RhythmEvaluator {
                 // Begin counting island until we change speed again.
                 firstDeltaSwitch = true;
                 startRatio = effectiveRatio;
-                islandSize = 1;
             }
         }
 

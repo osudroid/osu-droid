@@ -40,9 +40,7 @@ public class ScoreMenuFragment extends BaseFragment {
     protected void onLoadView() {
         findViewById(R.id.exportReplay).setOnClickListener(v -> {
             List<OsuDroidReplay> replays = OdrDatabase.get().getReplayById(scoreId);
-            if (replays.size() == 0) {
-                return;
-            } else {
+            if (replays.size() > 0) {
                 try {
                     OsuDroidReplay replay = replays.get(0);
                     final File file = new File(
@@ -81,9 +79,7 @@ public class ScoreMenuFragment extends BaseFragment {
             confirm.showForResult(isAccepted -> {
                 if (isAccepted) {
                     List<OsuDroidReplay> replays = OdrDatabase.get().getReplayById(scoreId);
-                    if (replays.size() == 0) {
-                        return;
-                    } else {
+                    if (replays.size() > 0) {
                         try {
                             if (OdrDatabase.get().deleteReplay(scoreId) == 0) {
                                 Snackbar.make(v, "Failed to delete replay!", 1500)

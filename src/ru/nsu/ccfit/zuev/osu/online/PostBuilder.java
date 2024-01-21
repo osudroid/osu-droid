@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu.online;
 import com.dgsrz.bancho.security.SecurityUtils;
 
 import okhttp3.FormBody;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.Request;
 
@@ -16,11 +15,9 @@ import java.net.UnknownHostException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
-
 public class PostBuilder {
-    private FormBody.Builder formBodyBuilder = new FormBody.Builder();
-    private StringBuilder values = new StringBuilder();
+    private final FormBody.Builder formBodyBuilder = new FormBody.Builder();
+    private final StringBuilder values = new StringBuilder();
 
     public void addParam(final String key, final String value) {
         try {
@@ -29,8 +26,7 @@ public class PostBuilder {
             }
             formBodyBuilder.add(key, value);
             values.append(URLEncoder.encode(value, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            return;
+        } catch (UnsupportedEncodingException ignored) {
         }
 
     }
@@ -58,14 +54,14 @@ public class PostBuilder {
                     || !(response.get(0).equals("FAIL") || response.get(0).equals("SUCCESS"))) {
                 try {
                     Thread.sleep(3000);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ignored) {
                 }
                 continue;
             }
             break;
         }
 
-        if (response == null) response = new ArrayList<String>();
+        if (response == null) response = new ArrayList<>();
 
         if (response.isEmpty()) {
             response.add("");
@@ -74,25 +70,27 @@ public class PostBuilder {
     }
 
     private ArrayList<String> request(final String scriptUrl) throws RequestException {
-        ArrayList<String> response = new ArrayList<String>();
+        ArrayList<String> response = new ArrayList<>();
 
-        try {
-            Request request = new Request.Builder()
-                .url(scriptUrl)
-                .post(formBodyBuilder.build())
-                .build();
-            Response resp = OnlineManager.client.newCall(request).execute();
+        Request request = new Request.Builder()
+            .url(scriptUrl)
+            .post(formBodyBuilder.build())
+            .build();
 
-            Debug.i("request url=" + scriptUrl);
-            Debug.i("request --------Content---------");
-            String line = null;
-            BufferedReader reader = new BufferedReader(new StringReader(resp.body().string()));
-            while((line = reader.readLine()) != null) {
-                Debug.i(String.format("request [%d]: %s", response.size(), line));
-                response.add(line);
+        try (Response resp = OnlineManager.client.newCall(request).execute()) {
+
+            if (resp.isSuccessful() && resp.body() != null) {
+                Debug.i("request url=" + scriptUrl);
+                Debug.i("request --------Content---------");
+                String line;
+                BufferedReader reader = new BufferedReader(new StringReader(resp.body().string()));
+                while ((line = reader.readLine()) != null) {
+                    Debug.i(String.format("request [%d]: %s", response.size(), line));
+                    response.add(line);
+                }
+                Debug.i("request url=" + scriptUrl);
+                Debug.i("request -----End of content-----");
             }
-            Debug.i("request url=" + scriptUrl);
-            Debug.i("request -----End of content-----");
         } catch(Exception e) {
             Debug.e(e.getMessage(), e);
         }

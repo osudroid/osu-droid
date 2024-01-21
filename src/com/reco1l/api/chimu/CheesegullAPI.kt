@@ -2,7 +2,6 @@ package com.reco1l.api.chimu
 
 import com.reco1l.framework.extensions.mapInto
 import com.reco1l.framework.extensions.mapIntoListOf
-import com.reco1l.framework.net.JsonContent
 import com.reco1l.framework.net.JsonRequester
 import com.reco1l.framework.net.QueryContent
 

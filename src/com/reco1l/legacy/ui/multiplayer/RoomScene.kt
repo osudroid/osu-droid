@@ -72,7 +72,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     var awaitModsChange = false
 
 
-    val chat = RoomChat()
+    val chat: RoomChat
 
     val chatPreview = ComposedText(0f, 0f, getResources().getFont("smallFont"), 100)
 
@@ -122,6 +122,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         RoomAPI.playerEventListener = this
         RoomAPI.roomEventListener = this
+        chat = RoomChat()
     }
 
 

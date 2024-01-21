@@ -55,6 +55,7 @@ public class ModMenu implements IModSwitcher {
     private Float customOD = null;
     private Float customHP = null;
     private Float customCS = null;
+    private InGameSettingMenu menu;
 
     private ModMenu() {
         mod = EnumSet.noneOf(GameMod.class);
@@ -81,7 +82,11 @@ public class ModMenu implements IModSwitcher {
         parent = scene;
         setSelectedTrack(selectedTrack);
         scene.setChildScene(getScene(), false, true, true);
-        Execution.uiThread(InGameSettingMenu.getInstance()::show);
+        if (menu == null) {
+            menu = new InGameSettingMenu();
+        }
+
+        Execution.uiThread(menu::show);
         update();
     }
 
@@ -156,7 +161,8 @@ public class ModMenu implements IModSwitcher {
             parent.clearChildScene();
             parent = null;
         }
-        InGameSettingMenu.getInstance().dismiss();
+//        InGameSettingMenu.Companion.getInstance().dismiss();
+        menu.dismiss();
 
         if (Multiplayer.isConnected())
         {
@@ -196,6 +202,8 @@ public class ModMenu implements IModSwitcher {
             parent.clearChildScene();
             parent = null;
         }
+
+        menu = null;
     }
 
     private void addButton(int x, int y, String texture, GameMod mod) {
@@ -224,6 +232,8 @@ public class ModMenu implements IModSwitcher {
                 StringTable.format(R.string.menu_mod_multiplier, 1f));
         multiplierText.setScale(1.2f);
         scene.attachChild(multiplierText);
+
+        menu = new InGameSettingMenu();
 
         changeMultiplierText();
 
@@ -580,5 +590,9 @@ public class ModMenu implements IModSwitcher {
 
     public void setCustomCS(@Nullable Float customCS) {
         this.customCS = customCS;
+    }
+
+    public InGameSettingMenu getMenu() {
+        return menu;
     }
 }

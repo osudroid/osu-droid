@@ -78,7 +78,7 @@ class MainMenu(val main: MainScene)
                         getGlobal().songService.isGaming = false
                         getGlobal().engine.scene = main.scene
 
-                        ChimuWebView.INSTANCE.show()
+                        ChimuWebView.show()
                     } else {
                         main.musicControl(MusicOption.PLAY)
 

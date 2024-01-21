@@ -129,7 +129,7 @@ public final class PathApproximator {
         }
 
         // See: https://en.wikipedia.org/wiki/Circumscribed_circle#Cartesian_coordinates_2
-        float d = 2 * (float) (a.x * b.subtract(c).y + b.x * c.subtract(a).y + c.x * a.subtract(b).y);
+        float d = 2 * (a.x * b.subtract(c).y + b.x * c.subtract(a).y + c.x * a.subtract(b).y);
         float aSq = a.getLengthSquared();
         float bSq = b.getLengthSquared();
         float cSq = c.getLengthSquared();

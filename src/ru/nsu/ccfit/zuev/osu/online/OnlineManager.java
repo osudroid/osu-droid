@@ -19,7 +19,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
+import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.online.PostBuilder.RequestException;
 
 public class OnlineManager {
@@ -123,7 +123,7 @@ public class OnlineManager {
         post.addParam("username", username);
         post.addParam(
                 "password",
-                MD5Calcuator.getStringMD5(
+                MD5Calculator.getStringMD5(
                         escapeHTMLSpecialCharacters(addSlashes(String.valueOf(password).trim())) + "taikotaiko"
                 ));
         post.addParam("version", onlineVersion);
@@ -283,7 +283,7 @@ public class OnlineManager {
         ArrayList<String> response = sendRequest(post, endpoint + "getrank.php");
 
         if (response == null) {
-            return new ArrayList<String>();
+            return new ArrayList<>();
         }
 
         response.remove(0);
@@ -298,7 +298,7 @@ public class OnlineManager {
     public boolean loadAvatarToTextureManager(String avatarURL) {
         if (avatarURL == null || avatarURL.length() == 0) return false;
 
-        String filename = MD5Calcuator.getStringMD5(avatarURL);
+        String filename = MD5Calculator.getStringMD5(avatarURL);
         Debug.i("Loading avatar from " + avatarURL);
         Debug.i("filename = " + filename);
         File picfile = new File(Config.getCachePath(), filename);
@@ -320,7 +320,7 @@ public class OnlineManager {
             }
         } else {
             // Avatar not found, download the default avatar
-            String defaultAvatarFilename = MD5Calcuator.getStringMD5(defaultAvatarURL);
+            String defaultAvatarFilename = MD5Calculator.getStringMD5(defaultAvatarURL);
             File avatarFile = new File(Config.getCachePath(), defaultAvatarFilename);
             OnlineFileOperator.downloadFile(defaultAvatarURL, avatarFile.getAbsolutePath());
 

@@ -36,7 +36,7 @@ public class ScoreBar extends GameObject {
                     loadedScoreBarTextures.add("scorebar-colour-" + i);
             }
             colour = new AnimSprite(Utils.toRes(5), Utils.toRes(16), loadedScoreBarTextures.size(),
-                    loadedScoreBarTextures.toArray(new String[loadedScoreBarTextures.size()]));
+                    loadedScoreBarTextures.toArray(new String[0]));
         } else {
             colour = new Sprite(Utils.toRes(5), Utils.toRes(16),
                     ResourceManager.getInstance().getTexture("scorebar-colour"));

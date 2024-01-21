@@ -7,11 +7,9 @@ import java.io.FileInputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 
-public class MD5Calcuator {
+public class MD5Calculator {
     public static String getFileMD5(final File file) {
-        String md5 = "";
-        try {
-            FileInputStream in = new FileInputStream(file);
+        try (FileInputStream in = new FileInputStream(file)) {
             MessageDigest digester = MessageDigest.getInstance("MD5");
             byte[] bytes = new byte[8192];
             int byteCount;
@@ -20,34 +18,34 @@ public class MD5Calcuator {
             }
 
             final BigInteger hash = new BigInteger(1, digester.digest());
-            md5 = hash.toString(16);
+            StringBuilder md5 = new StringBuilder(hash.toString(16));
             while (md5.length() < 32) {
-                md5 = "0" + md5;
+                md5.insert(0, "0");
             }
 
-            in.close();
+            return md5.toString();
         } catch (Exception e) {
             Debug.e("MD5Calculator: " + e.getMessage());
         }
 
-        return md5;
+        return "";
     }
 
     public static String getStringMD5(final String str) {
-        String md5 = "";
         try {
             MessageDigest digester = MessageDigest.getInstance("MD5");
             digester.update(str.getBytes());
 
             final BigInteger hash = new BigInteger(1, digester.digest());
-            md5 = hash.toString(16);
+            StringBuilder md5 = new StringBuilder(hash.toString(16));
             while (md5.length() < 32) {
-                md5 = "0" + md5;
+                md5.insert(0, "0");
             }
+            return md5.toString();
         } catch (Exception e) {
             Debug.e("MD5Calculator: " + e.getMessage());
         }
 
-        return md5;
+        return "";
     }
 }

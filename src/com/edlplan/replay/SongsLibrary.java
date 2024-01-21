@@ -30,7 +30,7 @@ public class SongsLibrary {
     }
 
     public String toSetLocal(String raw) {
-        String osu = raw.substring(raw.indexOf("/") + 1, raw.length());
+        String osu = raw.substring(raw.indexOf("/") + 1);
         if (osu2set.containsKey(osu)) {
             return osu2set.get(osu);
         } else {

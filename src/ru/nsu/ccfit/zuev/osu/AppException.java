@@ -211,7 +211,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
                 logFilePath = savePath + errorlog;
             }
             // 没有挂载SD卡，无法写文件
-            if (logFilePath.equals("")) {
+            if (logFilePath.isEmpty()) {
                 return;
             }
             File logFile = new File(logFilePath);
@@ -340,7 +340,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
             PackageInfo pi = pm.getPackageInfo(ctx.getPackageName(), PackageManager.GET_ACTIVITIES);
             if (pi != null) {
                 String versionName = pi.versionName == null ? "null" : pi.versionName;
-                String versionCode = pi.versionCode + "";
+                String versionCode = String.valueOf(pi.versionCode);
 
                 activePackageJson.put("versionName", versionName);
                 activePackageJson.put("versionCode", versionCode);

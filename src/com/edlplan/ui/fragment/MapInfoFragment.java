@@ -25,9 +25,7 @@ public class MapInfoFragment extends BaseFragment {
         text = findViewById(R.id.mapinfo_text);
         text.setText(info);
         Button exit = findViewById(R.id.mapinfo_exit);
-        exit.setOnClickListener(v -> {
-            dismiss();
-        });
+        exit.setOnClickListener(v -> dismiss());
         playOnLoadAnim();
     }
 

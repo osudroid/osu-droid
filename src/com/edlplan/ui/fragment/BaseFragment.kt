@@ -73,6 +73,14 @@ abstract class BaseFragment : Fragment(), BackPressListener {
         onDismissListener?.OnDismiss()
     }
 
+    fun save() {
+        ActivityOverlay.saveState(this.javaClass.name + "@" + this.hashCode())
+    }
+
+    fun load(): SavedState? {
+        return ActivityOverlay.loadState(this.javaClass.name + "@" + this.hashCode())
+    }
+
     override fun callDismissOnBackPress() {
         if (isDismissOnBackPress) {
             dismiss()

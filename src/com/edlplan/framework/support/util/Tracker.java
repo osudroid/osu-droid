@@ -1,5 +1,7 @@
 package com.edlplan.framework.support.util;
 
+import androidx.annotation.NonNull;
+
 import com.edlplan.framework.support.Framework;
 import com.edlplan.framework.utils.advance.ConsumerContainer;
 import com.edlplan.framework.utils.interfaces.Consumer;
@@ -28,8 +30,8 @@ public class Tracker {
 
 
     static {
-        nodes = new ArrayList<TrackNode>();
-        namemap = new HashMap<String, TrackNode>();
+        nodes = new ArrayList<>();
+        namemap = new HashMap<>();
 
         DrawArray = register(DRAW_ARRAY);
         PrepareVertexData = register(PREPARE_VERTEX_DATA);
@@ -63,7 +65,7 @@ public class Tracker {
     }
 
     public static Consumer<Integer> printByTag(String tag) {
-        return t -> System.out.println(String.format("[%s] %dms", tag, t));
+        return t -> System.out.printf("[%s] %dms%n", tag, t);
     }
 
     public static class TrackNode {
@@ -121,16 +123,15 @@ public class Tracker {
             return new ConsumerContainer<>(this);
         }
 
+        @NonNull
         @Override
         public String toString() {
 
-            StringBuilder sb = new StringBuilder();
-            sb.append("------------------------------------\n");
-            sb.append("name         : " + name + " (" + id + ")\n");
-            sb.append("totalTime    : " + totalTimeMS + "ms\n");
-            sb.append("trackedTimes : " + trackedTimes + "\n");
-            sb.append("------------------------------------");
-            return sb.toString();
+            return "------------------------------------\n" +
+                    "name         : " + name + " (" + id + ")\n" +
+                    "totalTime    : " + totalTimeMS + "ms\n" +
+                    "trackedTimes : " + trackedTimes + "\n" +
+                    "------------------------------------";
         }
     }
 }

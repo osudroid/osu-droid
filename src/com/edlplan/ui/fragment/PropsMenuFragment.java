@@ -44,7 +44,7 @@ public class PropsMenuFragment extends BaseFragment implements IPropsMenu {
         offset = findViewById(R.id.offsetBox);
         isFav = findViewById(R.id.addToFav);
 
-        offset.setText(props.getOffset() + "");
+        offset.setText(String.valueOf(props.getOffset()));
         isFav.setChecked(props.isFavorite());
 
         isFav.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -82,7 +82,7 @@ public class PropsMenuFragment extends BaseFragment implements IPropsMenu {
                     }
                     if (needRest) {
                         offset.removeTextChangedListener(this);
-                        offset.setText(o + "");
+                        offset.setText(String.valueOf(o));
                         offset.setSelection(pos);
                         offset.addTextChangedListener(this);
                     }
@@ -93,7 +93,6 @@ public class PropsMenuFragment extends BaseFragment implements IPropsMenu {
                         props.setOffset(0);
                         saveProp();
                     }
-                    return;
                 }
             }
         });
@@ -101,7 +100,7 @@ public class PropsMenuFragment extends BaseFragment implements IPropsMenu {
         findViewById(R.id.manageFavButton).setOnClickListener(v -> {
             FavoriteManagerFragment dialog = new FavoriteManagerFragment();
             //TODO : 铺面引用还是全局耦合的，需要分离
-            dialog.showToAddToFloder(ScoreLibrary.getTrackDir(GlobalManager.getInstance().getSelectedTrack().getFilename()));
+            dialog.showToAddToFolder(ScoreLibrary.getTrackDir(GlobalManager.getInstance().getSelectedTrack().getFilename()));
         });
 
         findViewById(R.id.deleteBeatmap).setOnClickListener(v -> {

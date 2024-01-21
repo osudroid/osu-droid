@@ -41,14 +41,12 @@ public class WebViewFragment extends BaseFragment {
 
     @Override
     protected void onLoadView() {
-        webview = (WebView) findViewById(R.id.web);
+        webview = findViewById(R.id.web);
         WebSettings webSettings = webview.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setUserAgentString("osudroid");
 
-        ((ImageButton) findViewById(R.id.close_button)).setOnClickListener(v -> {
-            dismiss();
-        });
+        findViewById(R.id.close_button).setOnClickListener(v -> dismiss());
 
         webview.setWebViewClient(new WebViewClient() {
             @Override

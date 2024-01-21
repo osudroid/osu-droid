@@ -51,7 +51,7 @@ public class ScoreLibrary {
         if (s.endsWith(".osu")) {
             return s.substring(0, s.indexOf('/'));
         } else {
-            return s.substring(s.indexOf('/') + 1, s.length());
+            return s.substring(s.indexOf('/') + 1);
         }
     }
 
@@ -105,9 +105,9 @@ public class ScoreLibrary {
             if (obj instanceof Map<?, ?>) {
                 if (versionStr.equals("scores1")) {
                     final Map<String, ArrayList<Statistic>> oldStat = (Map<String, ArrayList<Statistic>>) obj;
-                    scores = new HashMap<String, ArrayList<StatisticV2>>();
+                    scores = new HashMap<>();
                     for (final String str : oldStat.keySet()) {
-                        final ArrayList<StatisticV2> newStat = new ArrayList<StatisticV2>();
+                        final ArrayList<StatisticV2> newStat = new ArrayList<>();
                         for (final Statistic s : oldStat.get(str)) {
                             newStat.add(new StatisticV2(s));
                         }
@@ -119,7 +119,7 @@ public class ScoreLibrary {
                             scores.put(str, newStat);
                         }
                     }
-                } else if (versionStr.equals("scores2")) {
+                } else {
                     scores = (Map<String, ArrayList<StatisticV2>>) obj;
                 }
             }
