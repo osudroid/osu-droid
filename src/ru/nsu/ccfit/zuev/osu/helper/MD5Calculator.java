@@ -41,6 +41,7 @@ public class MD5Calculator {
             while (md5.length() < 32) {
                 md5.insert(0, "0");
             }
+            return md5.toString();
         } catch (Exception e) {
             Debug.e("MD5Calculator: " + e.getMessage());
         }
