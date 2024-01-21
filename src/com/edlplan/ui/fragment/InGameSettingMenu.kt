@@ -487,7 +487,7 @@ class InGameSettingMenu : BaseFragment() {
     }
 
     private fun isSettingPanelShow(): Boolean {
-        return abs(findViewById<LinearLayout>(R.id.fullLayout)?.translationY ?: 0f) < 10
+        return abs(findViewById<LinearLayout>(R.id.fullLayout)?.translationY ?: 11f) < 10
     }
 
     private fun updateVisibility() {
