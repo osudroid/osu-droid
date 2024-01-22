@@ -267,13 +267,6 @@ public class Slider extends GameObject {
                     new FadeInModifier(fadeInDuration),
                     new FadeOutModifier(fadeOutDuration)
             ));
-
-            if (approachCircle.isVisible()) {
-                approachCircle.registerEntityModifier(new SequenceEntityModifier(
-                        new AlphaModifier(Math.min(fadeInDuration * 2, time * GameHelper.getTimeMultiplier()), 0, 0.9f),
-                        new AlphaModifier(fadeOutDuration, 0.9f, 0)
-                ));
-            }
         } else {
             // Preempt time can go below 450ms. Normally, this is achieved via the DT mod which uniformly speeds up all animations game wide regardless of AR.
             // This uniform speedup is hard to match 1:1, however we can at least make AR>10 (via mods) feel good by extending the upper linear function above.
@@ -286,15 +279,12 @@ public class Slider extends GameObject {
             startOverlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
             endCircle.registerEntityModifier(new FadeInModifier(fadeInDuration));
             endOverlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
-
-            if (approachCircle.isVisible()) {
-                approachCircle.registerEntityModifier(new AlphaModifier(
-                        Math.min(fadeInDuration * 2, time * GameHelper.getTimeMultiplier()), 0, 0.9f
-                ));
-            }
         }
 
         if (approachCircle.isVisible()) {
+            approachCircle.registerEntityModifier(new AlphaModifier(
+                    Math.min(fadeInDuration * 2, time * GameHelper.getTimeMultiplier()), 0, 0.9f
+            ));
             approachCircle.registerEntityModifier(new ScaleModifier(
                     time * GameHelper.getTimeMultiplier(), scale * 3, scale
             ));
