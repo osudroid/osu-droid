@@ -428,9 +428,17 @@ public class ModMenu implements IModSwitcher {
             return false;
         }
 
-        var modsRemoved = mod.remove(GameMod.MOD_HARDROCK) ||
-                mod.remove(GameMod.MOD_EASY) ||
-                mod.remove(GameMod.MOD_REALLYEASY);
+        var modsToRemove = new GameMod[] { GameMod.MOD_HARDROCK, GameMod.MOD_EASY, GameMod.MOD_REALLYEASY };
+        var modsRemoved = false;
+
+        for (var gameMod : modsToRemove) {
+            if (mod.contains(gameMod)) {
+                mod.remove(gameMod);
+                modButtons.get(gameMod).setModEnabled(false);
+
+                modsRemoved = true;
+            }
+        }
 
         if (modsRemoved) {
             ToastLogger.showTextId(R.string.force_diffstat_mod_unpickable, false);
@@ -541,6 +549,8 @@ public class ModMenu implements IModSwitcher {
 
     public void setCustomAR(@Nullable Float customAR) {
         this.customAR = customAR;
+
+        handleCustomDifficultyStatisticsFlags();
     }
 
 
@@ -554,6 +564,8 @@ public class ModMenu implements IModSwitcher {
 
     public void setCustomOD(@Nullable Float customOD) {
         this.customOD = customOD;
+
+        handleCustomDifficultyStatisticsFlags();
     }
 
 
@@ -567,6 +579,8 @@ public class ModMenu implements IModSwitcher {
 
     public void setCustomHP(@Nullable Float customHP) {
         this.customHP = customHP;
+
+        handleCustomDifficultyStatisticsFlags();
     }
 
 
@@ -580,5 +594,7 @@ public class ModMenu implements IModSwitcher {
 
     public void setCustomCS(@Nullable Float customCS) {
         this.customCS = customCS;
+
+        handleCustomDifficultyStatisticsFlags();
     }
 }
