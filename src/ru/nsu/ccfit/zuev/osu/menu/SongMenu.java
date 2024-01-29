@@ -925,13 +925,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
         }
         if (mod.contains(GameMod.MOD_HARDROCK)) {
-            ar *= 1.4f;
-            if (ar > 10) {
-                ar = 10;
-            }
-            od *= 1.4f;
-            cs += 1f;
-            hp *= 1.4f;
+            ar = Math.min(ar * 1.4f, 10);
+            od = Math.min(od * 1.4f, 10);
+            ++cs;
+            hp = Math.min(hp * 1.4f, 10);
             dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
         }
         if (ModMenu.getInstance().getChangeSpeed() != 1) {
@@ -1001,10 +998,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         beatmapInfo.setText(binfoStr);
 
         final StringBuilder dimensionStringBuilder = new StringBuilder();
-        ar = Math.min(13.f, ar);
-        od = Math.min(10.f, od);
-        cs = Math.min(15.f, cs);
-        hp = Math.min(10.f, hp);
         if (ModMenu.getInstance().getChangeSpeed() != 1) {
             float speed = ModMenu.getInstance().getSpeed();
             ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) / speed), 2);
