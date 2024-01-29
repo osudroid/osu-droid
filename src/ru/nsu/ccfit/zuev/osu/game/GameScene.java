@@ -425,7 +425,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         //Speed Change
         if (ModMenu.getInstance().getChangeSpeed() != 1.00f){
             timeMultiplier = ModMenu.getInstance().getSpeed();
-            GlobalManager.getInstance().getSongService().preLoad(filePath, timeMultiplier, ModMenu.getInstance().isEnableNCWhenSpeedChange());
+            GlobalManager.getInstance().getSongService().preLoad(filePath, timeMultiplier,
+                ModMenu.getInstance().isEnableNCWhenSpeedChange() ||
+                        ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE));
             GameHelper.setTimeMultiplier(1 / timeMultiplier);
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME)) {
             GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_DT);
