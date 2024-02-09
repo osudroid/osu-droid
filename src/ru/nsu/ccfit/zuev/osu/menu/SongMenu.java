@@ -938,11 +938,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             hp *= 0.5f;
             dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
         }
-        if (mod.contains(GameMod.MOD_HARDROCK)) {
-            ar = Math.min(ar * 1.4f, 10);
-            od = Math.min(od * 1.4f, 10);
-            ++cs;
-            hp = Math.min(hp * 1.4f, 10);
+        if (mod.contains(GameMod.MOD_HARDROCK) || mod.contains(GameMod.MOD_PRECISE)) {
+            if (mod.contains(GameMod.MOD_HARDROCK)) {
+                ar = Math.min(ar * 1.4f, 10);
+                od = Math.min(od * 1.4f, 10);
+                ++cs;
+                hp = Math.min(hp * 1.4f, 10);
+            }
             dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
         }
         if (ModMenu.getInstance().getChangeSpeed() != 1) {
@@ -1042,10 +1044,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         if (ar != rawAR || od != rawOD || cs != rawCS || hp != rawHP) {
-            dimensionInfo.setColor(256 / 255f, 180 / 255f, 0 / 255f);
+            dimensionInfo.setColor(255 / 255f, 180 / 255f, 0 / 255f);
         }
 
-        dimensionStringBuilder.append("AR: ").append(GameHelper.Round(ar, 2)).append(" ")
+        dimensionStringBuilder
+                .append("AR: ").append(GameHelper.Round(ar, 2)).append(" ")
                 .append("OD: ").append(GameHelper.Round(od, 2)).append(" ")
                 .append("CS: ").append(GameHelper.Round(cs, 2)).append(" ")
                 .append("HP: ").append(GameHelper.Round(hp, 2)).append(" ")
