@@ -134,6 +134,6 @@ class BeatmapHitObjects : Cloneable {
 
     public override fun clone() =
         (super.clone() as BeatmapHitObjects).apply {
-            this@BeatmapHitObjects.objects.forEach { add(it.clone()) }
+            this@BeatmapHitObjects.objects.forEach { objects.add(it.clone()) }
         }
 }
