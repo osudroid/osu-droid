@@ -56,11 +56,11 @@ data class BeatmapMetadata(
      * The ID of this beatmap.
      */
     @JvmField
-    var beatmapID: Int = -1,
+    var beatmapId: Int = -1,
 
     /**
      * The ID of this beatmap set containing this beatmap.
      */
     @JvmField
-    var beatmapSetID: Int = -1
+    var beatmapSetId: Int = -1
 )
