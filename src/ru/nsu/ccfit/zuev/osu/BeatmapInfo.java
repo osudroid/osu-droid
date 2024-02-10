@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu;
 
+import com.rian.osu.beatmap.Beatmap;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -115,5 +117,35 @@ public class BeatmapInfo implements Serializable {
     @Override
     public boolean equals(Object o) {
         return o == this || o instanceof BeatmapInfo && ((BeatmapInfo) o).getPath().equals(path);
+    }
+
+    public boolean populate(Beatmap beatmap) {
+        // Metadata
+        if (title == null) {
+            title = beatmap.metadata.title;
+        }
+        if (titleUnicode == null) {
+            String titleUnicode = beatmap.metadata.titleUnicode;
+            if (!titleUnicode.isEmpty()) {
+                this.titleUnicode = (titleUnicode);
+            }
+        }
+        if (artist == null) {
+            artist = beatmap.metadata.artist;
+        }
+        if (artistUnicode == null) {
+            String artistUnicode = beatmap.metadata.artistUnicode;
+            if (!artistUnicode.isEmpty()) {
+                this.artistUnicode = artistUnicode;
+            }
+        }
+        if (source == null) {
+            source = beatmap.metadata.source;
+        }
+        if (tags == null) {
+            tags = beatmap.metadata.tags;
+        }
+
+        return true;
     }
 }

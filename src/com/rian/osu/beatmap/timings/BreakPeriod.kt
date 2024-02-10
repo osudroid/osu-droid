@@ -17,7 +17,7 @@ data class BreakPeriod(
     val endTime: Float
 ) {
     /**
-     * The duration of this break period, in milliseconds
+     * The duration of this break period, in milliseconds.
      */
     val duration: Float
         get() = endTime - startTime

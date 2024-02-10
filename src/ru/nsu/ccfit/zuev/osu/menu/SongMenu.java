@@ -13,9 +13,10 @@ import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.reco1l.framework.lang.execution.Async;
-import com.rian.difficultycalculator.attributes.DifficultyAttributes;
-import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 
+import com.rian.osu.beatmap.parser.BeatmapParser;
+import com.rian.osu.difficultycalculator.BeatmapDifficultyCalculator;
+import com.rian.osu.difficultycalculator.calculator.DifficultyCalculationParameters;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.Entity;
@@ -47,13 +48,10 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
-import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
-import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
@@ -1072,38 +1070,40 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         beatmapInfo2.setText(binfoStr2);
         changeDimensionInfo(track);
         Async.run(() -> {
-            BeatmapData beatmapData = new BeatmapParser(track.getFilename()).parse(true);
+            try (var parser = new BeatmapParser(track.getFilename())) {
+                var beatmap = parser.parse(true);
 
-            if (beatmapData == null) {
-                setStarsDisplay(0);
-                return;
+                if (beatmap == null) {
+                    setStarsDisplay(0);
+                    return;
+                }
+
+                track.populate(beatmap);
+                changeDimensionInfo(track);
+
+                var parameters = new DifficultyCalculationParameters();
+                var modMenu = ModMenu.getInstance();
+
+                parameters.setMods(modMenu.getMod());
+                parameters.setCustomSpeedMultiplier(modMenu.getChangeSpeed());
+
+                if (modMenu.isCustomCS()) {
+                    parameters.setCustomCS(modMenu.getCustomCS());
+                }
+                if (modMenu.isCustomAR()) {
+                    parameters.setCustomAR(modMenu.getCustomAR());
+                }
+                if (modMenu.isCustomOD()) {
+                    parameters.setCustomOD(modMenu.getCustomOD());
+                }
+
+                var attributes = BeatmapDifficultyCalculator.calculateDifficulty(
+                        beatmap,
+                        parameters
+                );
+
+                setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
             }
-
-            beatmapData.populateMetadata(track);
-            changeDimensionInfo(track);
-
-            DifficultyCalculationParameters parameters = new DifficultyCalculationParameters();
-            var modMenu = ModMenu.getInstance();
-
-            parameters.mods = modMenu.getMod();
-            parameters.customSpeedMultiplier = modMenu.getChangeSpeed();
-
-            if (modMenu.isCustomCS()) {
-                parameters.customCS = modMenu.getCustomCS();
-            }
-            if (modMenu.isCustomAR()) {
-                parameters.customAR = modMenu.getCustomAR();
-            }
-            if (modMenu.isCustomOD()) {
-                parameters.customOD = modMenu.getCustomOD();
-            }
-
-            DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
-                    beatmapData,
-                    parameters
-            );
-
-            setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
         });
     }
 

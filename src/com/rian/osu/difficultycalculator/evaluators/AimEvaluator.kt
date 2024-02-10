@@ -29,12 +29,11 @@ object AimEvaluator {
      */
     @JvmStatic
     fun evaluateDifficultyOf(current: DifficultyHitObject, withSliders: Boolean): Double {
-        val last = current.previous(0)!!
-
-        if (current.obj is Spinner || current.index <= 1 || last.obj is Spinner) {
+        if (current.obj is Spinner || current.index <= 1 || current.previous(0)!!.obj is Spinner) {
             return 0.0
         }
 
+        val last = current.previous(0)!!
         val lastLast = current.previous(1)!!
 
         // Calculate the velocity to the current hit object, which starts with a base distance / time assuming the last object is a circle.

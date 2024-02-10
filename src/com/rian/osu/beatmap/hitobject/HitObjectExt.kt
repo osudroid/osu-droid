@@ -2,8 +2,6 @@
 
 package com.rian.osu.beatmap.hitobject
 
-import com.rian.osu.math.Vector2
-
 /**
  * The end time of this hit object.
  */

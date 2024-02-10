@@ -2,10 +2,9 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.os.Build;
 import com.reco1l.legacy.engine.VideoTexture;
+import com.rian.osu.beatmap.parser.BeatmapParser;
 import org.anddev.andengine.util.Debug;
 import org.jetbrains.annotations.Nullable;
-import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -260,39 +259,40 @@ public enum LibraryManager {
             return;
         }
         for (final File file : filelist) {
-            final BeatmapParser parser = new BeatmapParser(file);
-            if (!parser.openFile()) {
-                if (Config.isDeleteUnimportedBeatmaps()) {
-                    file.delete();
-                }
-                continue;
-            }
-
-            final TrackInfo track = new TrackInfo(info);
-            track.setFilename(file.getPath());
-            track.setCreator("unknown");
-
-            final BeatmapData data = parser.parse(true);
-            if (data == null || !data.populateMetadata(info) || !data.populateMetadata(track)) {
-                if (Config.isDeleteUnimportedBeatmaps()) {
-                    file.delete();
-                }
-                continue;
-            }
-
-            if (data.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
-                try {
-                    var videoFile = new File(info.getPath(), data.events.videoFilename);
-
-                    if (!VideoTexture.Companion.isSupportedVideo(videoFile)) {
-                        //noinspection ResultOfMethodCallIgnored
-                        videoFile.delete();
+            try (var parser = new BeatmapParser(file)) {
+                if (!parser.openFile()) {
+                    if (Config.isDeleteUnimportedBeatmaps()) {
+                        file.delete();
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    continue;
                 }
+
+                final TrackInfo track = new TrackInfo(info);
+                track.setFilename(file.getPath());
+                track.setCreator("unknown");
+
+                var beatmap = parser.parse(true);
+                if (beatmap == null || !info.populate(beatmap) || !track.populate(beatmap)) {
+                    if (Config.isDeleteUnimportedBeatmaps()) {
+                        file.delete();
+                    }
+                    continue;
+                }
+
+                if (beatmap.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
+                    try {
+                        var videoFile = new File(info.getPath(), beatmap.events.videoFilename);
+
+                        if (!VideoTexture.Companion.isSupportedVideo(videoFile)) {
+                            //noinspection ResultOfMethodCallIgnored
+                            videoFile.delete();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                info.addTrack(track);
             }
-            info.addTrack(track);
         }
 
         if (Config.isDeleteUnimportedBeatmaps() && info.getCount() == 0) {

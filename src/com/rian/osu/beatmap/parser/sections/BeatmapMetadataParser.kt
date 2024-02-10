@@ -16,8 +16,8 @@ object BeatmapMetadataParser : BeatmapKeyValueSectionParser() {
             "Version" -> beatmap.metadata.version = it[1]
             "Source" -> beatmap.metadata.source = it[1]
             "Tags" -> beatmap.metadata.tags = it[1]
-            "BeatmapID" -> beatmap.metadata.beatmapID = parseInt(it[1])
-            "BeatmapSetID" -> beatmap.metadata.beatmapSetID = parseInt(it[1])
+            "BeatmapID" -> beatmap.metadata.beatmapId = parseInt(it[1])
+            "BeatmapSetID" -> beatmap.metadata.beatmapSetId = parseInt(it[1])
         }
     }
 }

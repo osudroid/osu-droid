@@ -3,13 +3,15 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.framework.lang.Execution;
+import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.data.MultiplayerConverter;
 import com.reco1l.legacy.Multiplayer;
 import com.reco1l.api.ibancho.data.RoomMods;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
-import com.rian.difficultycalculator.attributes.DifficultyAttributes;
-import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 
+import com.rian.osu.beatmap.parser.BeatmapParser;
+import com.rian.osu.difficultycalculator.BeatmapDifficultyCalculator;
+import com.rian.osu.difficultycalculator.calculator.DifficultyCalculationParameters;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.text.ChangeableText;
@@ -22,13 +24,10 @@ import java.util.TreeMap;
 
 import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.osu.*;
-import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.game.mods.IModSwitcher;
 import ru.nsu.ccfit.zuev.osu.game.mods.ModButton;
-import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.TextButton;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -317,44 +316,42 @@ public class ModMenu implements IModSwitcher {
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionUp()) {
-                    (new Thread() {
-                        public void run() {
-                            if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != null){
-                                BeatmapData beatmapData = new BeatmapParser(
-                                        GlobalManager.getInstance().getSongMenu().getSelectedTrack().getFilename()
-                                ).parse(true);
-
-                                if (beatmapData == null) {
+                    Async.run(() -> {
+                        if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != null) {
+                            try (var parser = new BeatmapParser(
+                                    GlobalManager.getInstance().getSongMenu().getSelectedTrack().getFilename()
+                            )) {
+                                var beatmap = parser.parse(true);
+                                if (beatmap == null) {
                                     GlobalManager.getInstance().getSongMenu().setStarsDisplay(0);
                                     return;
                                 }
 
-                                DifficultyCalculationParameters parameters = new DifficultyCalculationParameters();
-                                parameters.mods = getMod();
-                                parameters.customSpeedMultiplier = changeSpeed;
+                                var parameters = new DifficultyCalculationParameters();
+                                parameters.setMods(getMod());
+                                parameters.setCustomSpeedMultiplier(changeSpeed);
 
                                 if (isCustomCS()) {
-                                    parameters.customCS = customCS;
+                                    parameters.setCustomCS(customCS);
                                 }
                                 if (isCustomAR()) {
-                                    parameters.customAR = customAR;
+                                    parameters.setCustomAR(customAR);
                                 }
                                 if (isCustomOD()) {
-                                    parameters.customOD = customOD;
+                                    parameters.setCustomOD(customOD);
                                 }
 
-                                DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
-                                        beatmapData,
+                                var attributes = BeatmapDifficultyCalculator.calculateDifficulty(
+                                        beatmap,
                                         parameters
                                 );
-
 
                                 GlobalManager.getInstance().getSongMenu().setStarsDisplay(
                                         GameHelper.Round(attributes.starRating, 2)
                                 );
                             }
                         }
-                    }).start();
+                    });
                     hide();
                     return true;
                 }

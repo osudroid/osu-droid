@@ -60,6 +60,18 @@ object BeatmapDifficultyCalculator {
      * Calculates the difficulty of a [Beatmap].
      *
      * @param beatmap The [Beatmap] to calculate.
+     * @param stat The [StatisticV2] to calculate for.
+     * @return A structure describing the difficulty of the [Beatmap]
+     * relating to the [StatisticV2].
+     */
+    @JvmStatic
+    fun calculateDifficulty(beatmap: Beatmap, stat: StatisticV2) =
+        calculateDifficulty(beatmap, constructDifficultyParameters(stat))
+
+    /**
+     * Calculates the difficulty of a [Beatmap].
+     *
+     * @param beatmap The [Beatmap] to calculate.
      * @param parameters The parameters of the calculation. Can be `null`.
      * @return A structure describing the difficulty of the [Beatmap]
      * relating to the calculation parameters.
@@ -73,9 +85,8 @@ object BeatmapDifficultyCalculator {
         DifficultyCalculator.calculate(beatmap, parameters).also { addCache(beatmap, parameters, it) }
 
     /**
-     * Calculates the difficulty of a [Beatmap] given a [StatisticV2],
-     * returning a set of [TimedDifficultyAttributes] representing the difficulty of the
-     * beatmap at any relevant time.
+     * Calculates the difficulty of a [Beatmap], returning a set of [TimedDifficultyAttributes]
+     * representing the difficulty of the [Beatmap] at any relevant time.
      *
      * @param beatmap The [Beatmap] to calculate.
      * @param parameters The parameters of the calculation. Can be `null`.
@@ -91,11 +102,23 @@ object BeatmapDifficultyCalculator {
         DifficultyCalculator.calculateTimed(beatmap, parameters).also { addCache(beatmap, parameters, it) }
 
     /**
-     * Calculates the performance of a `DifficultyAttributes`.
+     * Calculates the performance of a [DifficultyAttributes].
      *
-     * @param attributes The `DifficultyAttributes` to calculate.
+     * @param attributes The [DifficultyAttributes] to calculate.
+     * @param stat The [StatisticV2] to calculate for.
+     * @return A structure describing the performance of the [DifficultyAttributes]
+     * relating to the [StatisticV2].
+     */
+    @JvmStatic
+    fun calculatePerformance(attributes: DifficultyAttributes, stat: StatisticV2) =
+        calculatePerformance(attributes, constructPerformanceParameters(stat))
+
+    /**
+     * Calculates the performance of a [DifficultyAttributes].
+     *
+     * @param attributes The [DifficultyAttributes] to calculate.
      * @param parameters The parameters of the calculation. Can be `null`.
-     * @return A structure describing the performance of the `DifficultyAttributes`
+     * @return A structure describing the performance of the [DifficultyAttributes]
      * relating to the calculation parameters.
      */
     @JvmStatic

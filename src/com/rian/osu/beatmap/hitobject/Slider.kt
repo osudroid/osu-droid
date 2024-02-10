@@ -5,7 +5,6 @@ import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.math.Vector2
 import com.rian.osu.utils.Cached
-import java.util.Collections
 import kotlin.math.max
 import kotlin.math.min
 
@@ -103,11 +102,10 @@ class Slider(
     /**
      * The nested hit objects of this [Slider].
      *
-     * Consists of head circle (slider head), slider ticks, repeat points, and tail circle (slider end).
+     * Consists of a [SliderHead], [SliderTick]s, [SliderRepeat]s, and a [SliderTail].
      */
-    var nestedHitObjects: ArrayList<SliderHitObject> = ArrayList()
-        get() = Collections.unmodifiableList(field) as ArrayList
-        private set
+    @JvmField
+    val nestedHitObjects = mutableListOf<SliderHitObject>()
 
     /**
      * The computed velocity of this [Slider]. This is the amount of path distance travelled in 1 ms.

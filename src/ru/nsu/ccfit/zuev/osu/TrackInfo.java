@@ -1,5 +1,12 @@
 package ru.nsu.ccfit.zuev.osu;
 
+import com.rian.osu.beatmap.Beatmap;
+import com.rian.osu.difficultycalculator.BeatmapDifficultyCalculator;
+import ru.nsu.ccfit.zuev.osu.game.GameHelper;
+import ru.nsu.ccfit.zuev.osu.helper.StringTable;
+import ru.nsu.ccfit.zuev.osuplus.R;
+
+import java.io.File;
 import java.io.Serializable;
 
 public class TrackInfo implements Serializable {
@@ -250,5 +257,60 @@ public class TrackInfo implements Serializable {
 
     public void setPreviewTime(int previewTime) {
         this.previewTime = previewTime;
+    }
+
+    public boolean populate(Beatmap beatmap) {
+        md5 = beatmap.md5;
+        creator = beatmap.metadata.creator;
+        mode = beatmap.metadata.version;
+        publicName = beatmap.metadata.artist + " - " + beatmap.metadata.title;
+        beatmapID = beatmap.metadata.beatmapId;
+        beatmapSetID = beatmap.metadata.beatmapSetId;
+
+        // General
+        var musicFile = new File(beatmap.folder, beatmap.general.audioFilename);
+        if (!musicFile.exists()) {
+            ToastLogger.showText(StringTable.format(R.string.beatmap_parser_music_not_found,
+                    filename.substring(0, Math.max(0, filename.length() - 4))), true);
+            return false;
+        }
+
+        audioFilename = musicFile.getPath();
+        previewTime = beatmap.general.previewTime;
+
+        // Difficulty
+        overallDifficulty = beatmap.difficulty.od;
+        approachRate = beatmap.difficulty.getAr();
+        hpDrain = beatmap.difficulty.hp;
+        circleSize = beatmap.difficulty.cs;
+
+        // Events
+        background = beatmap.folder + "/" + beatmap.events.backgroundFilename;
+
+        // Timing points
+        for (var point : beatmap.controlPoints.getTiming().getControlPoints()) {
+            float bpm = (float) point.getBPM();
+
+            bpmMin = bpmMin != Float.MAX_VALUE ? Math.min(bpmMin, bpm) : bpm;
+            bpmMax = bpmMax != 0 ? Math.max(bpmMax, bpm) : bpm;
+        }
+
+        // Hit objects
+        if (beatmap.hitObjects.objects.isEmpty()) {
+            return false;
+        }
+
+        setTotalHitObjectCount(beatmap.hitObjects.objects.size());
+        setHitCircleCount(beatmap.hitObjects.getCircleCount());
+        setSliderCount(beatmap.hitObjects.getSliderCount());
+        setSpinnerCount(beatmap.hitObjects.getSpinnerCount());
+        setMusicLength(beatmap.getDuration());
+        setMaxCombo(beatmap.getMaxCombo());
+
+        var attributes = BeatmapDifficultyCalculator.calculateDifficulty(beatmap);
+
+        setDifficulty(GameHelper.Round(attributes.starRating, 2));
+
+        return true;
     }
 }
