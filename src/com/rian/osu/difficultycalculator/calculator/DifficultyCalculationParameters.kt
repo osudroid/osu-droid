@@ -70,16 +70,12 @@ class DifficultyCalculationParameters {
      *
      * @return The copied instance.
      */
-    fun copy(): DifficultyCalculationParameters {
-        val copy = DifficultyCalculationParameters()
-
-        copy.mods = EnumSet.copyOf(mods)
-        copy.customCS = customCS
-        copy.customAR = customAR
-        copy.customOD = customOD
-        copy.customSpeedMultiplier = customSpeedMultiplier
-
-        return copy
+    fun copy() = DifficultyCalculationParameters().also {
+        it.mods = EnumSet.copyOf(mods)
+        it.customCS = customCS
+        it.customAR = customAR
+        it.customOD = customOD
+        it.customSpeedMultiplier = customSpeedMultiplier
     }
 
     override fun equals(other: Any?): Boolean {
