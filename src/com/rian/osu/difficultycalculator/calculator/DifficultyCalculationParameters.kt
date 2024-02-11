@@ -53,17 +53,17 @@ class DifficultyCalculationParameters {
     /**
      * Whether custom CS is used in this parameter.
      */
-    fun isCustomCS() = customCS.isNaN()
+    fun isCustomCS() = !customCS.isNaN()
 
     /**
      * Whether custom AR is used in this parameter.
      */
-    fun isCustomAR() = customAR.isNaN()
+    fun isCustomAR() = !customAR.isNaN()
 
     /**
      * Whether custom OD is used in this parameter.
      */
-    fun isCustomOD() = customOD.isNaN()
+    fun isCustomOD() = !customOD.isNaN()
 
     /**
      * Copies this instance to another instance.
