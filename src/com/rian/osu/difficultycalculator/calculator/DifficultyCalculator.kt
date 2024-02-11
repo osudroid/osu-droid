@@ -47,8 +47,10 @@ object DifficultyCalculator {
         beatmap: Beatmap,
         parameters: DifficultyCalculationParameters? = null
     ): DifficultyAttributes {
-        // Always operate on a clone of the original beatmap if parameters are present, to not modify it game-wide
-        val beatmapToCalculate = if (parameters != null) beatmap.clone() else beatmap
+        // Always operate on a clone of the original beatmap when needed, to not modify it game-wide
+        val beatmapToCalculate =
+            if (needToCopyBeatmap(beatmap, parameters)) beatmap.clone()
+            else beatmap
 
         if (parameters != null) {
             applyParameters(beatmapToCalculate, parameters)
@@ -79,8 +81,10 @@ object DifficultyCalculator {
         beatmap: Beatmap,
         parameters: DifficultyCalculationParameters? = null
     ): List<TimedDifficultyAttributes> {
-        // Always operate on a clone of the original beatmap if parameters are present, to not modify it game-wide
-        val beatmapToCalculate = if (parameters != null) beatmap.clone() else beatmap
+        // Always operate on a clone of the original beatmap when needed, to not modify it game-wide
+        val beatmapToCalculate =
+            if (needToCopyBeatmap(beatmap, parameters)) beatmap.clone()
+            else beatmap
 
         if (parameters != null) {
             applyParameters(beatmapToCalculate, parameters)
@@ -363,4 +367,19 @@ object DifficultyCalculator {
             }
         }
     }
+
+    /**
+     * Checks whether a [Beatmap] must be copied with respect to a [DifficultyCalculationParameters].
+     *
+     * @param beatmap The [Beatmap].
+     * @param parameters The [DifficultyCalculationParameters].
+     * @return Whether the [Beatmap] should be copied.
+     */
+    private fun needToCopyBeatmap(beatmap: Beatmap, parameters: DifficultyCalculationParameters?) = parameters?.run {
+        (isCustomCS() && customCS != beatmap.difficulty.cs) ||
+        (isCustomAR() && customAR != beatmap.difficulty.ar) ||
+        (isCustomOD() && customOD != beatmap.difficulty.od) ||
+        customSpeedMultiplier != 1.0f ||
+        mods.any { difficultyAdjustmentMods.contains(it) }
+    } ?: false
 }
