@@ -205,6 +205,9 @@ class Slider(
 
         tickDistance = if (generateTicks) scoringDistance / difficulty.sliderTickRate * tickDistanceMultiplier else Double.POSITIVE_INFINITY
 
+        // Invalidate the end position in case there are timing changes.
+        endPositionCache.invalidate()
+
         createNestedHitObjects()
 
         nestedHitObjects.onEach { it.applyDefaults(controlPoints, difficulty) }
