@@ -5,6 +5,7 @@ import org.anddev.andengine.engine.Engine
 import org.anddev.andengine.engine.camera.Camera
 import org.anddev.andengine.entity.sprite.Sprite
 import javax.microedition.khronos.opengles.GL10
+import javax.microedition.khronos.opengles.GL10.GL_TEXTURE_2D
 
 class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, VideoTexture(source).toRegion())
 {
@@ -25,6 +26,11 @@ class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, V
     override fun doDraw(pGL: GL10, pCamera: Camera?)
     {
         onInitDraw(pGL)
+
+        if (pGL.glGetString(GL10.GL_RENDERER).contains("Mali", true)) {
+            pGL.glDisable(GL_TEXTURE_2D)
+        }
+
         pGL.glEnable(GL_TEXTURE_EXTERNAL_OES)
 
         textureRegion.onApply(pGL)
@@ -33,6 +39,10 @@ class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, V
         drawVertices(pGL, pCamera)
 
         pGL.glDisable(GL_TEXTURE_EXTERNAL_OES)
+
+        if (pGL.glGetString(GL10.GL_RENDERER).contains("Mali", true)) {
+            pGL.glEnable(GL_TEXTURE_2D)
+        }
     }
 
     override fun finalize()
