@@ -19,7 +19,7 @@ abstract class ControlPointManager<T : ControlPoint>(
      * The control points in this manager.
      */
     @JvmField
-    protected val controlPoints = mutableListOf<T>()
+    protected var controlPoints = mutableListOf<T>()
 
     /**
      * Finds the control point that is active at a given time.
@@ -166,9 +166,10 @@ abstract class ControlPointManager<T : ControlPoint>(
 
     @Suppress("UNCHECKED_CAST")
     public override fun clone() =
-        (super.clone() as ControlPointManager<T>).apply {
-            defaultControlPoint = this@ControlPointManager.defaultControlPoint.clone() as T
+        (super.clone() as ControlPointManager<T>).also {
+            it.defaultControlPoint = defaultControlPoint.clone() as T
 
-            this@ControlPointManager.controlPoints.forEach { controlPoints.add(it.clone() as T) }
+            it.controlPoints = mutableListOf()
+            controlPoints.forEach { c -> it.controlPoints.add(c.clone() as T) }
         }
 }

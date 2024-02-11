@@ -296,11 +296,11 @@ public class TrackInfo implements Serializable {
         }
 
         // Hit objects
-        if (beatmap.hitObjects.objects.isEmpty()) {
+        if (beatmap.hitObjects.getObjects().isEmpty()) {
             return false;
         }
 
-        setTotalHitObjectCount(beatmap.hitObjects.objects.size());
+        setTotalHitObjectCount(beatmap.hitObjects.getObjects().size());
         setHitCircleCount(beatmap.hitObjects.getCircleCount());
         setSliderCount(beatmap.hitObjects.getSliderCount());
         setSpinnerCount(beatmap.hitObjects.getSpinnerCount());

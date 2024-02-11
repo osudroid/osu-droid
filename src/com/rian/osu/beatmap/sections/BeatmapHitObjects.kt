@@ -11,8 +11,8 @@ class BeatmapHitObjects : Cloneable {
     /**
      * All objects in this beatmap.
      */
-    @JvmField
-    val objects = mutableListOf<HitObject>()
+    var objects = mutableListOf<HitObject>()
+        private set
 
     /**
      * The amount of circles in this beatmap.
@@ -133,7 +133,9 @@ class BeatmapHitObjects : Cloneable {
     }
 
     public override fun clone() =
-        (super.clone() as BeatmapHitObjects).apply {
-            this@BeatmapHitObjects.objects.forEach { objects.add(it.clone()) }
+        (super.clone() as BeatmapHitObjects).also {
+            it.objects = mutableListOf()
+
+            objects.forEach { o -> it.objects.add(o.clone()) }
         }
 }

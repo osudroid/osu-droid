@@ -225,12 +225,16 @@ class SliderPath(
     }
 
     public override fun clone() =
-        (super.clone() as SliderPath).apply {
-            pathType = this@SliderPath.pathType
+        (super.clone() as SliderPath).also {
+            it.pathType = pathType
 
-            this@SliderPath.controlPoints.forEach { controlPoints.add(it.copy()) }
-            this@SliderPath.calculatedPath.forEach { calculatedPath.add(it.copy()) }
+            it.controlPoints = mutableListOf()
+            controlPoints.forEach { c -> it.controlPoints.add(c.copy()) }
 
-            cumulativeLength.addAll(this@SliderPath.cumulativeLength)
+            it.calculatedPath = mutableListOf()
+            calculatedPath.forEach { p -> it.calculatedPath.add(p.copy()) }
+
+            it.cumulativeLength = mutableListOf()
+            it.cumulativeLength.addAll(cumulativeLength)
         }
 }

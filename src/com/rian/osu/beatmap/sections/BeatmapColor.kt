@@ -20,8 +20,10 @@ class BeatmapColor : Cloneable {
     var sliderBorderColor: RGBColor? = null
 
     public override fun clone() =
-        (super.clone() as BeatmapColor).apply {
-            this@BeatmapColor.comboColors.forEach { comboColors.add(it.clone()) }
-            sliderBorderColor = this@BeatmapColor.sliderBorderColor?.let { RGBColor(it) }
+        (super.clone() as BeatmapColor).also {
+            it.comboColors = mutableListOf()
+            comboColors.forEach { c -> it.comboColors.add(c.clone()) }
+
+            it.sliderBorderColor = sliderBorderColor?.let { RGBColor(it) }
         }
 }

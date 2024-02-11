@@ -3049,7 +3049,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
 
-        var object = beatmap.hitObjects.objects.get(objectId);
+        var object = beatmap.hitObjects.getObjects().get(objectId);
         double time = HitObjectUtils.getEndTime(object);
 
         ppText.setText(String.format(Locale.ENGLISH, "%.2fpp", getPPAtTime(time)));

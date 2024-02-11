@@ -63,14 +63,14 @@ abstract class HitObject(
      * In the case of sliders, this is the sample of the curve body
      * and can be treated as the default samples for the [HitObject].
      */
-    @JvmField
     var samples = mutableListOf<HitSampleInfo>()
+        private set
 
     /**
      * Any samples which may be used by this [HitObject] that are non-standard.
      */
-    @JvmField
     var auxiliarySamples = mutableListOf<HitSampleInfo>()
+        private set
 
     /**
      * Whether this [HitObject] is in kiai time.
@@ -150,16 +150,14 @@ abstract class HitObject(
         BankHitSampleInfo(sampleName, SampleBank.None)
 
     public override fun clone() =
-        (super.clone() as HitObject).apply {
-            position = this@HitObject.position.copy()
+        (super.clone() as HitObject).also {
+            it.position = position.copy()
 
-            this@HitObject.auxiliarySamples.onEach {
-                auxiliarySamples.add(it.copy())
-            }
+            it.auxiliarySamples = mutableListOf()
+            auxiliarySamples.forEach { s -> it.auxiliarySamples.add(s.copy()) }
 
-            this@HitObject.samples.onEach {
-                samples.add(it.copy())
-            }
+            it.samples = mutableListOf()
+            samples.forEach { s -> it.samples.add(s.copy()) }
         }
 
     companion object {

@@ -38,10 +38,10 @@ class BeatmapEvents : Cloneable {
     var backgroundColor: RGBColor? = null
 
     public override fun clone() =
-        (super.clone() as BeatmapEvents).apply {
-            this@BeatmapEvents.breaks.forEach { breaks.add(it.copy()) }
-            backgroundColor =
-                if (this@BeatmapEvents.backgroundColor != null) RGBColor(this@BeatmapEvents.backgroundColor)
-                else null
+        (super.clone() as BeatmapEvents).also {
+            it.breaks = mutableListOf()
+            breaks.forEach { b -> it.breaks.add(b.copy()) }
+
+            it.backgroundColor = backgroundColor?.let { b -> RGBColor(b) }
         }
 }

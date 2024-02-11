@@ -62,7 +62,7 @@ class Slider(
     override val duration: Double
         get() = endTime - startTime
 
-    private val endPositionCache = Cached(position)
+    private var endPositionCache = Cached(position)
 
     /**
      * The end position of this [Slider].
@@ -104,8 +104,8 @@ class Slider(
      *
      * Consists of a [SliderHead], [SliderTick]s, [SliderRepeat]s, and a [SliderTail].
      */
-    @JvmField
-    val nestedHitObjects = mutableListOf<SliderHitObject>()
+    var nestedHitObjects = mutableListOf<SliderHitObject>()
+        private set
 
     /**
      * The computed velocity of this [Slider]. This is the amount of path distance travelled in 1 ms.
@@ -345,13 +345,13 @@ class Slider(
     }
 
     override fun clone() =
-        (super.clone() as Slider).apply {
-            path = this@Slider.path.clone()
-            head = this@Slider.head.clone()
-            tail = this@Slider.tail.clone()
-            lazyEndPosition = this@Slider.lazyEndPosition?.copy()
+        (super.clone() as Slider).also {
+            it.path = path.clone()
+            it.head = head.clone()
+            it.tail = tail.clone()
+            it.lazyEndPosition = lazyEndPosition?.copy()
 
-            nestedHitObjects.apply {
+            it.nestedHitObjects = mutableListOf<SliderHitObject>().apply {
                 add(head)
 
                 this@Slider.nestedHitObjects.forEachIndexed { index, obj ->
@@ -365,18 +365,19 @@ class Slider(
                 add(tail)
             }
 
-            this@Slider.nodeSamples.onEach {
-                nodeSamples.add(
-                    mutableListOf<HitSampleInfo>().apply {
-                        it.onEach { add(it.copy()) }
+            it.nodeSamples = mutableListOf()
+            nodeSamples.forEach { nodeSample ->
+                it.nodeSamples.add(
+                    mutableListOf<HitSampleInfo>().also { hitSampleList ->
+                        nodeSample.forEach { n -> hitSampleList.add(n.copy()) }
                     }
                 )
             }
 
-            this@Slider.endPositionCache.let {
-                if (it.isValid) {
-                    endPositionCache.value = it.value.copy()
-                }
+            it.endPositionCache = Cached(endPositionCache.value)
+
+            if (!endPositionCache.isValid) {
+                it.endPositionCache.invalidate()
             }
         }
 
