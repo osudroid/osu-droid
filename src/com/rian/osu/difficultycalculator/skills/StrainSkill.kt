@@ -65,7 +65,10 @@ abstract class StrainSkill(
 
     override fun difficultyValue(): Double {
         val strains = currentStrainPeaks
-        strains.sort()
+
+        // Difficulty is the weighted sum of the highest strains from every section.
+        // We're sorting from highest to lowest strain.
+        strains.sortDescending()
 
         if (reducedSectionCount > 0) {
             // We are reducing the highest strains first to account for extreme difficulty spikes.
@@ -81,11 +84,9 @@ abstract class StrainSkill(
                 strains[i] = strains[i] * Interpolation.linear(reducedSectionBaseline, 1.0, scale)
             }
 
-            strains.sort()
+            strains.sortDescending()
         }
 
-        // Difficulty is the weighted sum of the highest strains from every section.
-        // We're sorting from highest to lowest strain.
         var difficulty = 0.0
         var weight = 1.0
 
