@@ -198,7 +198,7 @@ class Slider(
         val timingPoint = controlPoints.timing.controlPointAt(startTime)
         val difficultyPoint = controlPoints.difficulty.controlPointAt(startTime)
 
-        val scoringDistance = 100 * difficulty.sliderMultiplier
+        val scoringDistance = 100 * difficulty.sliderMultiplier * difficultyPoint.speedMultiplier
 
         velocity = scoringDistance / timingPoint.msPerBeat
         generateTicks = difficultyPoint.generateTicks
