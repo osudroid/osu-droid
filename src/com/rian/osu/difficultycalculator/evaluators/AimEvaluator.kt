@@ -1,8 +1,8 @@
 package com.rian.osu.difficultycalculator.evaluators
 
-import com.rian.osu.difficultycalculator.DifficultyHitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
+import com.rian.osu.difficultycalculator.DifficultyHitObject
 import kotlin.math.*
 
 /**
@@ -141,7 +141,7 @@ object AimEvaluator {
      * Calculates the bonus of wide angles.
      */
     private fun calculateWideAngleBonus(angle: Double) =
-        sin(3.0 / 4 * angle.coerceIn(Math.PI / 6, 5.0 / 6 * Math.PI) - Math.PI / 6).pow(2.0)
+        sin(3.0 / 4 * (angle.coerceIn(Math.PI / 6, 5.0 / 6 * Math.PI) - Math.PI / 6)).pow(2.0)
 
     /**
      * Calculates the bonus of acute angles.
