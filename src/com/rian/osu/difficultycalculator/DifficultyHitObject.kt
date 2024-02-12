@@ -354,7 +354,7 @@ class DifficultyHitObject(
             if (currentMovementLength > requiredMovement) {
                 // This finds the positional delta from the required radius and the current position,
                 // and updates the currentCursorPosition accordingly, as well as rewarding distance.
-                currentCursorPosition = currentCursorPosition + currentMovement * (currentMovementLength - requiredMovement) / currentMovementLength
+                currentCursorPosition = currentCursorPosition + currentMovement * ((currentMovementLength - requiredMovement) / currentMovementLength)
                 currentMovementLength *= (currentMovementLength - requiredMovement) / currentMovementLength
 
                 slider.lazyTravelDistance += currentMovementLength.toFloat()
