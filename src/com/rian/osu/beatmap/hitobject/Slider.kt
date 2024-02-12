@@ -198,12 +198,22 @@ class Slider(
         val timingPoint = controlPoints.timing.controlPointAt(startTime)
         val difficultyPoint = controlPoints.difficulty.controlPointAt(startTime)
 
-        val scoringDistance = 100 * difficulty.sliderMultiplier * difficultyPoint.speedMultiplier
+        val sliderVelocityAsBeatLength = -100 / difficultyPoint.speedMultiplier
+        val bpmMultiplier =
+            if (sliderVelocityAsBeatLength < 0) (-sliderVelocityAsBeatLength).toFloat().coerceIn(10f, 1000f) / 100.0
+            else 1.0
 
-        velocity = scoringDistance / timingPoint.msPerBeat
+        velocity = BASE_SCORING_DISTANCE * difficulty.sliderMultiplier / (timingPoint.msPerBeat * bpmMultiplier)
+
+        // WARNING: this is intentionally not computed as `BASE_SCORING_DISTANCE * difficulty.sliderMultiplier`
+        // for backwards compatibility reasons (intentionally introducing floating point errors to match osu!stable).
+        val scoringDistance = velocity * timingPoint.msPerBeat
+
         generateTicks = difficultyPoint.generateTicks
 
-        tickDistance = if (generateTicks) scoringDistance / difficulty.sliderTickRate * tickDistanceMultiplier else Double.POSITIVE_INFINITY
+        tickDistance =
+            if (generateTicks) scoringDistance / difficulty.sliderTickRate * tickDistanceMultiplier
+            else Double.POSITIVE_INFINITY
 
         // Invalidate the end position in case there are timing changes.
         endPositionCache.invalidate()
@@ -385,6 +395,7 @@ class Slider(
         }
 
     companion object {
-        const val LEGACY_LAST_TICK_OFFSET = 36
+        const val LEGACY_LAST_TICK_OFFSET = 36.0
+        private const val BASE_SCORING_DISTANCE = 100f
     }
 }
