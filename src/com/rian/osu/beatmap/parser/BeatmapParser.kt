@@ -5,6 +5,7 @@ import com.reco1l.framework.extensions.ignoreException
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.constants.BeatmapSection
 import com.rian.osu.beatmap.parser.sections.*
+import com.rian.osu.utils.HitObjectStackEvaluator.applyStacking
 import okio.BufferedSource
 import okio.buffer
 import okio.source
@@ -179,12 +180,14 @@ class BeatmapParser : Closeable {
             return null
         }
 
-        beatmap.hitObjects.objects.onEach {
-            it.applyDefaults(beatmap.controlPoints, beatmap.difficulty)
-            it.applySamples(beatmap.controlPoints)
-        }
+        return beatmap.apply {
+            hitObjects.objects.forEach {
+                it.applyDefaults(controlPoints, difficulty)
+                it.applySamples(controlPoints)
+            }
 
-        return beatmap
+            applyStacking(formatVersion, hitObjects.objects, difficulty.ar, general.stackLeniency)
+        }
     }
 
     override fun close() {
