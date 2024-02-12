@@ -1,7 +1,7 @@
 package com.rian.osu.math
 
 import android.graphics.PointF
-import kotlin.math.sqrt
+import kotlin.math.hypot
 
 /**
  * Represents a two-dimensional vector.
@@ -26,7 +26,7 @@ data class Vector2(
      * The length of this vector.
      */
     val length: Float
-        get() = sqrt((x * x + y * y).toDouble()).toFloat()
+        get() = hypot(x, y)
 
     /**
      * The square of this vector's length (magnitude).
@@ -51,7 +51,7 @@ data class Vector2(
      * @param vec The other vector.
      * @return The distance between this vector and the other vector.
      */
-    fun getDistance(vec: Vector2) = sqrt(((vec.x - x) * (vec.x - x) + (vec.y - y) * (vec.y - y)).toDouble()).toFloat()
+    fun getDistance(vec: Vector2) = hypot(vec.x - x, vec.y - y)
 
     /**
      * Normalizes the vector.
