@@ -42,7 +42,7 @@ public class TimingPoint extends ControlPoint {
         return beatLength;
     }
 
-    public strictfp void setBeatLength(double beatLength) {
+    public void setBeatLength(double beatLength) {
         this.beatLength = beatLength;
         speedMultiplier = (beatLength < 0 ? (100.0 / -beatLength) : 1);
     }

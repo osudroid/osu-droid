@@ -1,13 +1,13 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 30
+    namespace 'org.anddev.andengine'
+    compileSdk 34
 
     defaultConfig {
         minSdkVersion 21
+        //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 29
-        versionCode 1
-        versionName '1.0'
     }
 
     sourceSets {
@@ -18,16 +18,18 @@ android {
     }
 
     useLibrary 'org.apache.http.legacy'
-
-    lintOptions {
+    lint {
         abortOnError true
         ignoreWarnings true
-        disable 'ExpiredTargetSdkVersion'
     }
+    buildFeatures {
+        buildConfig true
+    }
+
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'com.google.android.material:material:1.11.0'
 }

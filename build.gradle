@@ -1,6 +1,6 @@
 buildscript {
     ext{
-        kotlin_version = '1.7.0'
+        kotlin_version = '1.9.22'
     }
     repositories {
         google()
@@ -8,9 +8,9 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.2'
-        classpath 'com.google.gms:google-services:4.3.10'
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.7.1'
+        classpath 'com.android.tools.build:gradle:8.2.2'
+        classpath 'com.google.gms:google-services:4.4.1'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -46,10 +46,10 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 30
+    namespace 'ru.nsu.ccfit.zuev.osuplus'
+    compileSdk 34
     ndkVersion '22.1.7171670'
 
     defaultConfig {
@@ -61,10 +61,12 @@ android {
             abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
         }
     }
-
     packagingOptions {
-        exclude 'META-INF/proguard/coroutines.pro'
+        resources {
+            excludes += ['META-INF/proguard/coroutines.pro']
+        }
     }
+
 
     signingConfigs {
         debug {
@@ -97,7 +99,6 @@ android {
 
         release {
             resValue "string", "app_name", "osu!droid"
-            zipAlignEnabled true
 //            minifyEnabled true
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
             signingConfig signingConfigs.release
@@ -109,7 +110,6 @@ android {
         pre_release {
             matchingFallbacks = ['release']
             resValue "string", "app_name", "osu!droid"
-            zipAlignEnabled true
 //            minifyEnabled true
 //            debuggable true
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
@@ -132,17 +132,20 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     useLibrary 'org.apache.http.legacy'
-
-    lintOptions {
+    lint {
         abortOnError true
-        ignoreWarnings true
         disable 'MissingTranslation', 'ExpiredTargetSdkVersion', 'ProtectedPermissions', 'AppLinkUrlError'
+        ignoreWarnings true
     }
+    buildFeatures {
+        buildConfig true
+    }
+
 
     android.applicationVariants.all { variant ->
         variant.outputs.all { output ->
@@ -157,32 +160,32 @@ dependencies {
     implementation project(':AndEngine')
     implementation project(':andnext_markdown')
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.preference:preference:1.1.1'
-    implementation 'com.google.android.material:material:1.4.0'
-    implementation 'com.google.firebase:firebase-crashlytics:18.2.1'
-    implementation 'com.google.firebase:firebase-analytics:19.0.1'
-    implementation 'com.google.firebase:firebase-messaging:22.0.0'
+    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'com.google.firebase:firebase-crashlytics:18.6.2'
+    implementation 'com.google.firebase:firebase-analytics:21.5.1'
+    implementation 'com.google.firebase:firebase-messaging:23.4.1'
 
     // implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     // implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
-    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     // implementation 'com.squareup.retrofit2:adapter-rxjava2:2.9.0'
-    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'com.google.code.gson:gson:2.10.1'
     //implementation 'com.github.tbruyelle:rxpermissions:0.12'
     implementation 'pub.devrel:easypermissions:3.0.0'
-    implementation 'net.lingala.zip4j:zip4j:2.9.0'
+    implementation 'net.lingala.zip4j:zip4j:2.11.5'
 
     implementation 'com.github.EdrowsLuo:osudroidstrings:bd9507b289'
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlJavaExt:d91c53fcff'
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:d91c53fcff'
     implementation project(path: ':LibBASS')
 
-    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'commons-io:commons-io:2.15.1'
     implementation 'com.github.delight-im:Android-AdvancedWebView:v3.2.1'
 
     // Multiplayer
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
-    implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.10"
+    implementation('org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3')
+    implementation 'org.jetbrains.kotlin:kotlin-reflect:1.9.22'
     implementation ('io.socket:socket.io-client:2.1.0') {
         exclude group: 'org.json', module: 'json'
     }
