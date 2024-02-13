@@ -132,9 +132,7 @@ abstract class HitObject(
     open fun applySamples(controlPoints: BeatmapControlPoints) {
         val sampleControlPoint = controlPoints.sample.controlPointAt(getEndTime() + CONTROL_POINT_LENIENCY)
 
-        samples = samples.onEachIndexed { i, hitSampleInfo ->
-            samples[i] = sampleControlPoint.applyTo(hitSampleInfo)
-        }
+        samples = samples.map { sampleControlPoint.applyTo(it) }.toMutableList()
     }
 
     /**

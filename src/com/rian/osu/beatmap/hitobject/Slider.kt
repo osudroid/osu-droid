@@ -226,13 +226,11 @@ class Slider(
     override fun applySamples(controlPoints: BeatmapControlPoints) {
         super.applySamples(controlPoints)
 
-        nodeSamples.forEachIndexed { i, nodeSample ->
+        nodeSamples.forEachIndexed { i, sampleList ->
             val time = startTime + i * spanDuration + CONTROL_POINT_LENIENCY
             val nodeSamplePoint = controlPoints.sample.controlPointAt(time)
 
-            nodeSamples[i] = nodeSample.onEachIndexed { j, hitSampleInfo ->
-                nodeSample[j] = nodeSamplePoint.applyTo(hitSampleInfo)
-            }
+            nodeSamples[i] = sampleList.map { nodeSamplePoint.applyTo(it) }.toMutableList()
         }
     }
 
