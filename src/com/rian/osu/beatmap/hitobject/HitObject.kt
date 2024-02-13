@@ -64,13 +64,11 @@ abstract class HitObject(
      * and can be treated as the default samples for the [HitObject].
      */
     var samples = mutableListOf<HitSampleInfo>()
-        private set
 
     /**
      * Any samples which may be used by this [HitObject] that are non-standard.
      */
     var auxiliarySamples = mutableListOf<HitSampleInfo>()
-        private set
 
     /**
      * Whether this [HitObject] is in kiai time.

@@ -1,7 +1,6 @@
 package com.rian.osu.difficultycalculator.attributes
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
-import java.util.*
+import com.rian.osu.mods.Mod
 
 /**
  * Holds data that can be used to calculate performance points.
@@ -11,7 +10,7 @@ class DifficultyAttributes {
      * The mods which were applied to the beatmap.
      */
     @JvmField
-    var mods = EnumSet.noneOf(GameMod::class.java)
+    var mods = listOf<Mod>()
 
     /**
      * The combined star rating of all skills.

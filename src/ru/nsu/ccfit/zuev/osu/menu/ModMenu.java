@@ -33,6 +33,8 @@ import ru.nsu.ccfit.zuev.osu.helper.TextButton;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
+import static com.rian.osu.utils.ModConverter.convertLegacyMods;
+
 
 public class ModMenu implements IModSwitcher {
 
@@ -328,18 +330,13 @@ public class ModMenu implements IModSwitcher {
                                 }
 
                                 var parameters = new DifficultyCalculationParameters();
-                                parameters.setMods(getMod());
+                                parameters.setMods(convertLegacyMods(
+                                        mod,
+                                        isCustomCS() ? customCS : Float.NaN,
+                                        isCustomAR() ? customAR : Float.NaN,
+                                        isCustomOD() ? customOD : Float.NaN
+                                ));
                                 parameters.setCustomSpeedMultiplier(changeSpeed);
-
-                                if (isCustomCS()) {
-                                    parameters.setCustomCS(customCS);
-                                }
-                                if (isCustomAR()) {
-                                    parameters.setCustomAR(customAR);
-                                }
-                                if (isCustomOD()) {
-                                    parameters.setCustomOD(customOD);
-                                }
 
                                 var attributes = BeatmapDifficultyCalculator.calculateDifficulty(
                                         beatmap,

@@ -121,14 +121,5 @@ class Beatmap : Cloneable {
     val duration: Int
         get() = hitObjects.objects.lastOrNull()?.getEndTime()?.toInt() ?: 0
 
-    public override fun clone() =
-        (super.clone() as Beatmap).apply {
-            general = this@Beatmap.general.copy()
-            metadata = this@Beatmap.metadata.copy()
-            difficulty = this@Beatmap.difficulty.clone()
-            events = this@Beatmap.events.clone()
-            colors = this@Beatmap.colors.clone()
-            controlPoints = this@Beatmap.controlPoints.clone()
-            hitObjects = this@Beatmap.hitObjects.clone()
-        }
+    public override fun clone() = super.clone() as Beatmap
 }

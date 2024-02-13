@@ -2,8 +2,7 @@ package com.rian.osu.difficultycalculator.skills
 
 import com.rian.osu.difficultycalculator.DifficultyHitObject
 import com.rian.osu.difficultycalculator.evaluators.AimEvaluator.evaluateDifficultyOf
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
-import java.util.*
+import com.rian.osu.mods.Mod
 import kotlin.math.pow
 
 /**
@@ -11,9 +10,9 @@ import kotlin.math.pow
  */
 class Aim(
     /**
-     * The mods that this skill processes.
+     * The [Mod]s that this skill processes.
      */
-    mods: EnumSet<GameMod>,
+    mods: List<Mod>,
 
     /**
      * Whether to consider sliders in the calculation.

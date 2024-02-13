@@ -1,17 +1,16 @@
 package com.rian.osu.difficultycalculator.skills
 
 import com.rian.osu.difficultycalculator.DifficultyHitObject
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
-import java.util.*
+import com.rian.osu.mods.Mod
 
 /**
  * A bare minimal abstract skill for fully custom skill implementations.
  */
 abstract class Skill(
     /**
-     * The mods that this skill processes.
+     * The [Mod]s that this skill processes.
      */
-    protected val mods: EnumSet<GameMod>
+    protected val mods: List<Mod>
 ) {
     /**
      * Calculates the strain value of a hit object and stores the value in it.

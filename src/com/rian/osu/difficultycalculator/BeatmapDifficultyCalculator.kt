@@ -7,6 +7,7 @@ import com.rian.osu.difficultycalculator.calculator.DifficultyCalculationParamet
 import com.rian.osu.difficultycalculator.calculator.DifficultyCalculator
 import com.rian.osu.difficultycalculator.calculator.PerformanceCalculationParameters
 import com.rian.osu.difficultycalculator.calculator.PerformanceCalculator
+import com.rian.osu.utils.convertLegacyMods
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import kotlin.math.ceil
 import kotlin.collections.Map.Entry
@@ -30,11 +31,8 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     fun constructDifficultyParameters(stat: StatisticV2?) = stat?.run {
         DifficultyCalculationParameters().also {
-            it.mods = stat.mod.clone()
+            it.mods = convertLegacyMods(stat.mod)
             it.customSpeedMultiplier = stat.changeSpeed
-            it.customCS = stat.customCS
-            it.customAR = stat.customAR
-            it.customOD = stat.customOD
         }
     }
 

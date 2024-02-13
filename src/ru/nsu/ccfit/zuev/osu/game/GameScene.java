@@ -99,6 +99,8 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 
+import static com.rian.osu.utils.ModConverter.convertLegacyMods;
+
 public class GameScene implements IUpdateHandler, GameObjectListener,
         IOnSceneTouchListener {
     public static final int CursorCount = 10;
@@ -627,18 +629,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             var parameters = new DifficultyCalculationParameters();
             var modMenu = ModMenu.getInstance();
 
-            parameters.setMods(modMenu.getMod().clone());
+            parameters.setMods(convertLegacyMods(
+                    modMenu.getMod(),
+                    modMenu.isCustomCS() ? modMenu.getCustomCS() : Float.NaN,
+                    modMenu.isCustomAR() ? modMenu.getCustomAR() : Float.NaN,
+                    modMenu.isCustomOD() ? modMenu.getCustomOD() : Float.NaN
+            ));
             parameters.setCustomSpeedMultiplier(modMenu.getChangeSpeed());
-
-            if (modMenu.isCustomCS()) {
-                parameters.setCustomCS(modMenu.getCustomCS());
-            }
-            if (modMenu.isCustomAR()) {
-                parameters.setCustomAR(modMenu.getCustomAR());
-            }
-            if (modMenu.isCustomOD()) {
-                parameters.setCustomOD(modMenu.getCustomOD());
-            }
 
             timedDifficultyAttributes = BeatmapDifficultyCalculator.calculateTimedDifficulty(
                     beatmap,

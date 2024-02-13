@@ -65,6 +65,8 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinLayout;
 
+import static com.rian.osu.utils.ModConverter.convertLegacyMods;
+
 public class SongMenu implements IUpdateHandler, MenuItemListener,
         IScrollBarListener {
     private final static Boolean musicMutex = true;
@@ -1084,18 +1086,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 var parameters = new DifficultyCalculationParameters();
                 var modMenu = ModMenu.getInstance();
 
-                parameters.setMods(modMenu.getMod());
+                parameters.setMods(convertLegacyMods(
+                    modMenu.getMod(),
+                    modMenu.isCustomCS() ? modMenu.getCustomCS() : Float.NaN,
+                    modMenu.isCustomAR() ? modMenu.getCustomAR() : Float.NaN,
+                    modMenu.isCustomOD() ? modMenu.getCustomOD() : Float.NaN
+                ));
                 parameters.setCustomSpeedMultiplier(modMenu.getChangeSpeed());
-
-                if (modMenu.isCustomCS()) {
-                    parameters.setCustomCS(modMenu.getCustomCS());
-                }
-                if (modMenu.isCustomAR()) {
-                    parameters.setCustomAR(modMenu.getCustomAR());
-                }
-                if (modMenu.isCustomOD()) {
-                    parameters.setCustomOD(modMenu.getCustomOD());
-                }
 
                 var attributes = BeatmapDifficultyCalculator.calculateDifficulty(
                         beatmap,

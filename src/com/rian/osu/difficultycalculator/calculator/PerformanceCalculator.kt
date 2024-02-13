@@ -1,8 +1,12 @@
 package com.rian.osu.difficultycalculator.calculator
 
+import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.difficultycalculator.attributes.DifficultyAttributes
 import com.rian.osu.difficultycalculator.attributes.PerformanceAttributes
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
+import com.rian.osu.mods.ModFlashlight
+import com.rian.osu.mods.ModHidden
+import com.rian.osu.mods.ModNoFail
+import com.rian.osu.mods.ModRelax
 import kotlin.math.log10
 import kotlin.math.max
 import kotlin.math.min
@@ -13,8 +17,9 @@ import kotlin.math.pow
  */
 class PerformanceCalculator(
     /**
-     * The difficulty attributes being calculated.
+     * The [DifficultyAttributes] being calculated.
      */
+    @JvmField
     val difficultyAttributes: DifficultyAttributes
 ) {
     private var scoreMaxCombo = 0
@@ -29,9 +34,9 @@ class PerformanceCalculator(
     }
 
     /**
-     * Calculates the performance value of the difficulty attributes with the specified parameters.
+     * Calculates the performance value of the [DifficultyAttributes] with the specified parameters.
      *
-     * @param parameters The parameters to create the attributes for. If omitted, the beatmap was assumed to be SS.
+     * @param parameters The parameters to create the attributes for. If omitted, the [Beatmap] was assumed to be SS.
      * @return The performance attributes for the beatmap relating to the parameters.
      */
     @JvmOverloads
@@ -41,31 +46,29 @@ class PerformanceCalculator(
     }
 
     /**
-     * Creates the performance attributes of the difficulty attributes.
+     * Creates the [PerformanceAttributes] of the [DifficultyAttributes].
      *
-     * @return The performance attributes for the beatmap relating to the parameters.
+     * @return The [PerformanceAttributes] for the [Beatmap] relating to the parameters.
      */
     private fun createPerformanceAttributes() = PerformanceAttributes().also {
         var multiplier = FINAL_MULTIPLIER
 
-        difficultyAttributes.mods.apply {
-            if (GameMod.MOD_NOFAIL in this) {
-                multiplier *= max(0.9, 1 - 0.02 * this@PerformanceCalculator.effectiveMissCount)
+        difficultyAttributes.run {
+            if (mods.any { m -> m is ModNoFail }) {
+                multiplier *= max(0.9, 1 - 0.02 * effectiveMissCount)
             }
 
-            if (GameMod.MOD_RELAX in this) {
+            if (mods.any { m -> m is ModRelax }) {
                 // Graph: https://www.desmos.com/calculator/bc9eybdthb
                 // We use OD13.3 as maximum since it's the value at which great hit window becomes 0.
                 val okMultiplier = max(
                     0.0,
-                    if (difficultyAttributes.overallDifficulty > 0)
-                        1 - (difficultyAttributes.overallDifficulty / 13.33).pow(1.8)
+                    if (overallDifficulty > 0) 1 - (overallDifficulty / 13.33).pow(1.8)
                     else 1.0
                 )
                 val mehMultiplier = max(
                     0.0,
-                    if (difficultyAttributes.overallDifficulty > 0)
-                        1 - (difficultyAttributes.overallDifficulty / 13.33).pow(5.0)
+                    if (overallDifficulty > 0) 1 - (overallDifficulty / 13.33).pow(5.0)
                     else 1.0
                 )
 
@@ -89,13 +92,13 @@ class PerformanceCalculator(
         ).pow(1 / 1.1) * multiplier
     }
 
-    private fun processParameters(parameters: PerformanceCalculationParameters?) = parameters?.run {
-        this@PerformanceCalculator.scoreMaxCombo = maxCombo
-        this@PerformanceCalculator.countGreat = countGreat
-        this@PerformanceCalculator.countOk = countOk
-        this@PerformanceCalculator.countMeh = countMeh
-        this@PerformanceCalculator.countMiss = countMiss
-        this@PerformanceCalculator.effectiveMissCount = calculateEffectiveMissCount()
+    private fun processParameters(parameters: PerformanceCalculationParameters?) = parameters?.let {
+        scoreMaxCombo = it.maxCombo
+        countGreat = it.countGreat
+        countOk = it.countOk
+        countMeh = it.countMeh
+        countMiss = it.countMiss
+        effectiveMissCount = calculateEffectiveMissCount()
     } ?: resetDefaults()
 
     /**
@@ -139,7 +142,7 @@ class PerformanceCalculator(
         aimValue *= comboScalingFactor
 
         difficultyAttributes.apply {
-            if (GameMod.MOD_RELAX !in mods) {
+            if (mods.none { it is ModRelax }) {
                 // AR scaling
                 var approachRateFactor = 0.0
                 if (approachRate > 10.33) {
@@ -153,7 +156,7 @@ class PerformanceCalculator(
             }
 
             // We want to give more reward for lower AR when it comes to aim and HD. This nerfs high AR and buffs lower AR.
-            if (GameMod.MOD_HIDDEN in mods) {
+            if (mods.any { it is ModHidden }) {
                 aimValue *= 1 + 0.04 * (12 - approachRate)
             }
 
@@ -183,7 +186,7 @@ class PerformanceCalculator(
     }
 
     private fun calculateSpeedValue(): Double {
-        if (GameMod.MOD_RELAX in difficultyAttributes.mods) {
+        if (difficultyAttributes.mods.any { it is ModRelax }) {
             return 0.0
         }
 
@@ -208,7 +211,7 @@ class PerformanceCalculator(
                 // Buff for longer maps with high AR.
                 speedValue *= 1 + 0.3 * (approachRate - 10.33) * lengthBonus
             }
-            if (GameMod.MOD_HIDDEN in mods) {
+            if (mods.any { it is ModHidden }) {
                 speedValue *= 1 + 0.04 * (12 - approachRate)
             }
 
@@ -235,7 +238,7 @@ class PerformanceCalculator(
     }
 
     private fun calculateAccuracyValue(): Double {
-        if (GameMod.MOD_RELAX in difficultyAttributes.mods) {
+        if (difficultyAttributes.mods.any { it is ModRelax }) {
             return 0.0
         }
 
@@ -257,10 +260,10 @@ class PerformanceCalculator(
             // Bonus for many hit circles - it's harder to keep good accuracy up for longer
             accuracyValue *= min(1.15, (circleCount / 1000.0).pow(0.3))
 
-            if (GameMod.MOD_HIDDEN in mods) {
+            if (mods.any { it is ModHidden }) {
                 accuracyValue *= 1.08
             }
-            if (GameMod.MOD_FLASHLIGHT in mods) {
+            if (mods.any { it is ModFlashlight }) {
                 accuracyValue *= 1.02
             }
 
@@ -269,7 +272,7 @@ class PerformanceCalculator(
     }
 
     private fun calculateFlashlightValue(): Double {
-        if (GameMod.MOD_FLASHLIGHT !in difficultyAttributes.mods) {
+        if (difficultyAttributes.mods.none { it is ModFlashlight }) {
             return 0.0
         }
 

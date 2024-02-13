@@ -96,11 +96,6 @@ class BeatmapHitObjects : Cloneable {
     }
 
     /**
-     * Resets the stacking of hit objects.
-     */
-    fun resetStacking() = objects.forEach { it.stackHeight = 0 }
-
-    /**
      * Finds the insertion index of a hit object in a given time.
      *
      * @param startTime The start time of the hit object.

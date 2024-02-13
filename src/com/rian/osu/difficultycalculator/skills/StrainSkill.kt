@@ -2,23 +2,22 @@ package com.rian.osu.difficultycalculator.skills
 
 import com.rian.osu.difficultycalculator.DifficultyHitObject
 import com.rian.osu.math.Interpolation
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
-import java.util.*
+import com.rian.osu.mods.Mod
 import kotlin.math.ceil
 import kotlin.math.log10
 import kotlin.math.max
 import kotlin.math.min
 
 /**
- * Used to processes strain values of difficulty hit objects, keep track of strain levels caused by
+ * Used to processes strain values of [DifficultyHitObject]s, keep track of strain levels caused by
  * the processed objects and to calculate a final difficulty value representing the difficulty of
  * hitting all the processed objects.
  */
 abstract class StrainSkill(
     /**
-     * The mods that this skill processes.
+     * The [Mod]s that this skill processes.
      */
-    mods: EnumSet<GameMod>
+    mods: List<Mod>
 ) : Skill(mods) {
     /**
      * The final multiplier to be applied to the final difficulty value after all other calculations.

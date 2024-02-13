@@ -1,0 +1,17 @@
+package com.rian.osu.mods
+
+import com.rian.osu.beatmap.sections.BeatmapDifficulty
+
+/**
+ * An interface for [Mod]s that make general adjustments to difficulty.
+ */
+interface IApplicableToDifficulty {
+    /**
+     * Applies this [IApplicableToDifficulty] to a [BeatmapDifficulty].
+     *
+     * This is typically called post beatmap conversion.
+     *
+     * @param difficulty The [BeatmapDifficulty] to mutate.
+     */
+    fun applyToDifficulty(difficulty: BeatmapDifficulty)
+}

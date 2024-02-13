@@ -1,6 +1,8 @@
 package com.rian.osu.difficultycalculator.calculator
 
 import com.rian.osu.beatmap.Beatmap
+import com.rian.osu.beatmap.BeatmapConverter
+import com.rian.osu.beatmap.BeatmapProcessor
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.difficultycalculator.DifficultyHitObject
 import com.rian.osu.difficultycalculator.attributes.DifficultyAttributes
@@ -9,9 +11,11 @@ import com.rian.osu.difficultycalculator.skills.Aim
 import com.rian.osu.difficultycalculator.skills.Flashlight
 import com.rian.osu.difficultycalculator.skills.Skill
 import com.rian.osu.difficultycalculator.skills.Speed
+import com.rian.osu.mods.*
 import com.rian.osu.utils.HitObjectStackEvaluator.applyStacking
 import com.rian.osu.utils.HitWindowConverter.hitWindow300ToOD
 import com.rian.osu.utils.HitWindowConverter.odToHitWindow300
+import okhttp3.internal.toImmutableList
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import java.util.*
 import kotlin.math.max
@@ -24,13 +28,14 @@ import kotlin.math.sqrt
  */
 object DifficultyCalculator {
     /**
-     * Mods that can alter the star rating when they are used in calculation with one or more mods.
+     * [Mod]s that can alter the star rating when they are used in calculation with one or more mods.
      */
     @JvmField
-    val difficultyAdjustmentMods: EnumSet<GameMod> = EnumSet.of(
-        GameMod.MOD_DOUBLETIME, GameMod.MOD_HALFTIME, GameMod.MOD_NIGHTCORE,
-        GameMod.MOD_RELAX, GameMod.MOD_EASY, GameMod.MOD_REALLYEASY,
-        GameMod.MOD_HARDROCK, GameMod.MOD_HIDDEN, GameMod.MOD_FLASHLIGHT
+    val difficultyAdjustmentMods = setOf(
+        ModDoubleTime(), ModHalfTime(), ModNightCore(),
+        ModRelax(), ModEasy(), ModReallyEasy(),
+        ModHardRock(), ModHidden(), ModFlashlight(),
+        ModDifficultyAdjust()
     )
 
     private const val DIFFICULTY_MULTIPLIER = 0.0675
@@ -49,12 +54,8 @@ object DifficultyCalculator {
     ): DifficultyAttributes {
         // Always operate on a clone of the original beatmap when needed, to not modify it game-wide
         val beatmapToCalculate =
-            if (needToCopyBeatmap(beatmap, parameters)) beatmap.clone()
+            if (needToConvertBeatmap(beatmap, parameters)) beatmap.clone()
             else beatmap
-
-        if (parameters != null) {
-            applyParameters(beatmapToCalculate, parameters)
-        }
 
         val skills = createSkills(beatmapToCalculate, parameters)
 
@@ -83,12 +84,8 @@ object DifficultyCalculator {
     ): List<TimedDifficultyAttributes> {
         // Always operate on a clone of the original beatmap when needed, to not modify it game-wide
         val beatmapToCalculate =
-            if (needToCopyBeatmap(beatmap, parameters)) beatmap.clone()
+            if (needToConvertBeatmap(beatmap, parameters)) convertBeatmap(beatmap, parameters)
             else beatmap
-
-        if (parameters != null) {
-            applyParameters(beatmapToCalculate, parameters)
-        }
 
         val skills = createSkills(beatmapToCalculate, parameters)
         val attributes = ArrayList<TimedDifficultyAttributes>()
@@ -134,7 +131,7 @@ object DifficultyCalculator {
         beatmap: Beatmap, skills: Array<Skill>,
         parameters: DifficultyCalculationParameters?
     ) = DifficultyAttributes().apply {
-            mods = parameters?.mods?.clone() ?: mods
+            mods = parameters?.mods?.slice(parameters.mods.indices) ?: mods
 
             aimDifficulty = calculateRating(skills[0])
             speedDifficulty = calculateRating(skills[2])
@@ -143,7 +140,7 @@ object DifficultyCalculator {
 
             aimSliderFactor = if (aimDifficulty > 0) calculateRating(skills[1]) / aimDifficulty else 1.0
 
-            if (parameters?.mods?.contains(GameMod.MOD_RELAX) == true) {
+            if (parameters?.mods?.any { it is ModRelax } == true) {
                 aimDifficulty *= 0.9
                 speedDifficulty = 0.0
                 flashlightDifficulty *= 0.7
@@ -152,7 +149,7 @@ object DifficultyCalculator {
             val baseAimPerformance = (5 * max(1.0, aimDifficulty / 0.0675) - 4).pow(3.0) / 100000
             val baseSpeedPerformance = (5 * max(1.0, speedDifficulty / 0.0675) - 4).pow(3.0) / 100000
             var baseFlashlightPerformance = 0.0
-            if (parameters?.mods?.contains(GameMod.MOD_FLASHLIGHT) == true) {
+            if (parameters?.mods?.any { it is ModFlashlight } == true) {
                 baseFlashlightPerformance = flashlightDifficulty.pow(2.0) * 25.0
             }
 
@@ -170,11 +167,12 @@ object DifficultyCalculator {
                     (Math.cbrt(100000 / 2.0.pow(1 / 1.1) * basePerformance) + 4)
                 else 0.0
 
-            val ar = beatmap.difficulty.ar
+            val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
+            val ar = difficultyAdjustMod?.ar?.takeUnless { it.isNaN() } ?: beatmap.difficulty.ar
             var preempt = (if (ar <= 5) 1800 - 120 * ar else 1950 - 150 * ar).toDouble()
 
-            if (parameters?.isCustomAR() == false) {
-                preempt /= parameters.totalSpeedMultiplier.toDouble()
+            if (difficultyAdjustMod == null || difficultyAdjustMod.ar.isNaN()) {
+                preempt /= parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
             }
 
             approachRate = if (preempt > 1200) (1800 - preempt) / 120 else (1200 - preempt) / 150 + 5
@@ -190,30 +188,37 @@ object DifficultyCalculator {
             spinnerCount = beatmap.hitObjects.spinnerCount
         }
 
-    /**
-     * Applies difficulty calculation parameters to the given beatmap.
-     *
-     * @param beatmap The beatmap.
-     * @param parameters The difficulty calculation parameters.
-     */
-    private fun applyParameters(beatmap: Beatmap, parameters: DifficultyCalculationParameters) = beatmap.run {
-        val initialAR = difficulty.ar
+    private fun convertBeatmap(beatmap: Beatmap, parameters: DifficultyCalculationParameters?): Beatmap {
+        val converter = BeatmapConverter(beatmap)
 
-        processCS(difficulty, parameters)
-        processAR(difficulty, parameters)
-        processOD(difficulty, parameters)
-        processHP(difficulty, parameters)
+        // Convert
+        val converted = converter.convert()
 
-        if (initialAR != difficulty.ar) {
-            hitObjects.resetStacking()
-
-            applyStacking(
-                formatVersion,
-                hitObjects.objects,
-                difficulty.ar,
-                general.stackLeniency
-            )
+        // Apply difficulty mods
+        parameters?.mods?.filterIsInstance<IApplicableToDifficulty>()?.forEach {
+            it.applyToDifficulty(converted.difficulty)
         }
+
+        parameters?.mods?.filterIsInstance<IApplicableToDifficultyWithSettings>()?.forEach {
+            it.applyToDifficulty(converted.difficulty, parameters.mods.toImmutableList(), parameters.customSpeedMultiplier)
+        }
+
+        val processor = BeatmapProcessor(converted)
+
+        processor.preProcess()
+
+        // Compute default values for hit objects, including creating nested hit objects in-case they're needed
+        converted.hitObjects.objects.forEach {
+            it.applyDefaults(converted.controlPoints, converted.difficulty)
+        }
+
+        processor.postProcess()
+
+        parameters?.mods?.filterIsInstance<IApplicableToBeatmap>()?.forEach {
+            it.applyToBeatmap(converted)
+        }
+
+        return converted
     }
 
     /**
@@ -224,7 +229,7 @@ object DifficultyCalculator {
      * @return The skills.
      */
     private fun createSkills(beatmap: Beatmap, parameters: DifficultyCalculationParameters?): Array<Skill> {
-        val mods = parameters?.mods ?: EnumSet.noneOf(GameMod::class.java)
+        val mods = parameters?.mods ?: mutableListOf()
         val greatWindow =
             odToHitWindow300(beatmap.difficulty.od) /
             (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
@@ -239,99 +244,6 @@ object DifficultyCalculator {
 
     private fun calculateRating(skill: Skill) = sqrt(skill.difficultyValue()) * DIFFICULTY_MULTIPLIER
 
-    private fun processCS(difficulty: BeatmapDifficulty, parameters: DifficultyCalculationParameters?) {
-        parameters?.apply {
-            if (isCustomCS()) {
-                difficulty.cs = parameters.customCS
-                return@apply
-            }
-
-            if (GameMod.MOD_HARDROCK in mods) {
-                ++difficulty.cs
-            }
-
-            if (GameMod.MOD_EASY in mods) {
-                --difficulty.cs
-            }
-
-            if (GameMod.MOD_REALLYEASY in mods) {
-                --difficulty.cs
-            }
-        }
-
-        // 12.14 is the point at which the object radius approaches 0. Use the _very_ minimum value.
-        difficulty.cs = min(difficulty.cs, 12.13f)
-    }
-
-    private fun processAR(difficulty: BeatmapDifficulty, parameters: DifficultyCalculationParameters?) {
-        var ar = difficulty.ar
-
-        parameters?.apply {
-            difficulty.ar = customAR.takeUnless { it.isNaN() } ?: run {
-                if (GameMod.MOD_HARDROCK in mods) {
-                    ar *= 1.4f
-                }
-
-                if (GameMod.MOD_EASY in mods) {
-                    ar /= 2f
-                }
-
-                if (GameMod.MOD_REALLYEASY in mods) {
-                    if (GameMod.MOD_EASY in mods) {
-                        ar *= 2f
-                        ar -= 0.5f
-                    }
-
-                    ar -= 0.5f
-                    ar -= customSpeedMultiplier - 1
-                }
-
-                min(ar, 10f)
-            }
-        } ?: run { difficulty.ar = min(ar, 10f) }
-    }
-
-    private fun processOD(difficulty: BeatmapDifficulty, parameters: DifficultyCalculationParameters?) {
-        parameters?.apply {
-            if (isCustomOD()) {
-                difficulty.od = customOD
-                return@apply
-            }
-
-            if (GameMod.MOD_HARDROCK in mods) {
-                difficulty.od *= 1.4f
-            }
-
-            if (GameMod.MOD_EASY in mods) {
-                difficulty.od /= 2f
-            }
-
-            if (GameMod.MOD_REALLYEASY in mods) {
-                difficulty.od /= 2f
-            }
-
-            difficulty.od = min(difficulty.od, 10f)
-        }
-    }
-
-    private fun processHP(difficulty: BeatmapDifficulty, parameters: DifficultyCalculationParameters?) {
-        parameters?.mods?.apply {
-            if (GameMod.MOD_HARDROCK in this) {
-                difficulty.hp *= 1.4f
-            }
-
-            if (GameMod.MOD_EASY in this) {
-                difficulty.hp /= 2f
-            }
-
-            if (GameMod.MOD_REALLYEASY in this) {
-                difficulty.hp /= 2f
-            }
-        }
-
-        difficulty.hp = min(difficulty.hp, 10f)
-    }
-
     /**
      * Retrieves the difficulty hit objects to calculate against.
      *
@@ -342,16 +254,8 @@ object DifficultyCalculator {
     private fun createDifficultyHitObjects(
         beatmap: Beatmap, parameters: DifficultyCalculationParameters?
     ) = mutableListOf<DifficultyHitObject>().apply {
-        val ar = beatmap.difficulty.ar
-        val timePreempt = if (ar <= 5) 1800 - 120.0 * ar else 1950 - 150.0 * ar
-
-        val objectScale = (1 - 0.7f * (beatmap.difficulty.cs - 5) / 5) / 2
-
         beatmap.hitObjects.objects.let {
             for (i in 1 until it.size) {
-                it[i].scale = objectScale
-                it[i - 1].scale = objectScale
-
                 add(
                     DifficultyHitObject(
                         it[i],
@@ -359,9 +263,7 @@ object DifficultyCalculator {
                         it.getOrNull(i - 2),
                         parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0,
                         this,
-                        size,
-                        timePreempt,
-                        parameters?.isCustomAR() == true
+                        size
                     )
                 )
             }
@@ -375,11 +277,15 @@ object DifficultyCalculator {
      * @param parameters The [DifficultyCalculationParameters].
      * @return Whether the [Beatmap] should be copied.
      */
-    private fun needToCopyBeatmap(beatmap: Beatmap, parameters: DifficultyCalculationParameters?) = parameters?.run {
-        (isCustomCS() && customCS != beatmap.difficulty.cs) ||
-        (isCustomAR() && customAR != beatmap.difficulty.ar) ||
-        (isCustomOD() && customOD != beatmap.difficulty.od) ||
+    private fun needToConvertBeatmap(beatmap: Beatmap, parameters: DifficultyCalculationParameters?) = parameters?.run {
+        val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
+
         customSpeedMultiplier != 1.0f ||
-        mods.any { difficultyAdjustmentMods.contains(it) }
+        mods.any { difficultyAdjustmentMods.contains(it) } ||
+        (difficultyAdjustMod?.let {
+            (!it.cs.isNaN() && it.cs == beatmap.difficulty.cs) ||
+            (!it.ar.isNaN() && it.ar == beatmap.difficulty.ar) ||
+            (!it.od.isNaN() && it.od == beatmap.difficulty.od)
+        } ?: false)
     } ?: false
 }
