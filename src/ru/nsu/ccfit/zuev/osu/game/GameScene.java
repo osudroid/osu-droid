@@ -916,7 +916,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
-            autoCursor = new AutoCursor();
+            autoCursor = new AutoCursor(approachRate);
             autoCursor.attachToScene(fgScene);
         }
 
