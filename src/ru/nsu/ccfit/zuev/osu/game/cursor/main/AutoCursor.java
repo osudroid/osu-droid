@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
 import org.anddev.andengine.entity.modifier.MoveModifier;
-import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 import org.anddev.andengine.util.modifier.ease.IEaseFunction;
 
@@ -23,11 +22,8 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
      */
     private final IEaseFunction easeFunction = EaseQuadOut.getInstance();
 
-    private final float modifiedApproachRate;
-
-    public AutoCursor(float approachRate) {
+    public AutoCursor() {
         super();
-        this.modifiedApproachRate = approachRate * 2f;
         this.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
         this.setShowing(true);
     }
@@ -82,14 +78,12 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
         }
 
         currentObjectId = object.getId();
-        float moveDelay = deltaT / modifiedApproachRate;
 
-        if (moveDelay < 0.08f && !(object instanceof Spinner)) {
-            moveDelay = 0.08f;
+        if (deltaT < 0.085f && !(object instanceof Spinner)) {
+            deltaT = 0.085f;
         }
 
-        Debug.d("moveDelay: " + moveDelay);
-        doAutoMove(movePositionX, movePositionY, moveDelay, listener);
+        doAutoMove(movePositionX, movePositionY, deltaT, listener);
     }
 
     @Override
