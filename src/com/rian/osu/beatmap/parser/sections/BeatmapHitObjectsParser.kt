@@ -132,7 +132,7 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
 
         val path = SliderPath(sliderType, curvePoints, rawLength)
 
-        readCustomSampleBanks(bankInfo, pars.getOrNull(10))
+        readCustomSampleBanks(bankInfo, pars.getOrNull(10), true)
 
         // One node for each repeat + the start and end nodes
         val nodes = repeat + 1
@@ -220,16 +220,15 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
     private fun convertSoundType(type: HitSoundType, bankInfo: SampleBankInfo) = mutableListOf<HitSampleInfo>().apply {
         if (bankInfo.filename.isNotEmpty()) {
             add(FileHitSampleInfo(bankInfo.filename, bankInfo.volume))
-            return this
-        }
-
-        add(
-            BankHitSampleInfo(BankHitSampleInfo.HIT_NORMAL, bankInfo.normal, bankInfo.customSampleBank, bankInfo.volume,
-                // If the sound type doesn't have the Normal flag set, attach it anyway as a layered sample.
-                // None also counts as a normal non-layered sample: https://osu.ppy.sh/help/wiki/osu!_File_Formats/Osu_(file_format)#hitsounds
-                type != HitSoundType.None && (type.bit and HitSoundType.Normal.bit) == 0
+        } else {
+            add(
+                BankHitSampleInfo(BankHitSampleInfo.HIT_NORMAL, bankInfo.normal, bankInfo.customSampleBank, bankInfo.volume,
+                    // If the sound type doesn't have the Normal flag set, attach it anyway as a layered sample.
+                    // None also counts as a normal non-layered sample: https://osu.ppy.sh/help/wiki/osu!_File_Formats/Osu_(file_format)#hitsounds
+                    type != HitSoundType.None && (type.bit and HitSoundType.Normal.bit) == 0
+                )
             )
-        )
+        }
 
         fun addBankSample(name: String) = add(BankHitSampleInfo(name, bankInfo.add, bankInfo.customSampleBank, bankInfo.volume))
 
@@ -251,8 +250,9 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
      *
      * @param bankInfo The sample bank info to populate.
      * @param str The information.
+     * @param banksOnly Whether to only convert banks.
      */
-    private fun readCustomSampleBanks(bankInfo: SampleBankInfo, str: String?) {
+    private fun readCustomSampleBanks(bankInfo: SampleBankInfo, str: String?, banksOnly: Boolean = false) {
         if (str.isNullOrEmpty()) {
             return
         }
@@ -261,6 +261,10 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
 
         bankInfo.normal = SampleBank.parse(parseInt(s[0]))
         bankInfo.add = SampleBank.parse(parseInt(s[1])).takeIf { it != SampleBank.Normal } ?: bankInfo.normal
+
+        if (banksOnly) {
+            return
+        }
 
         if (s.size > 2) {
             bankInfo.customSampleBank = parseInt(s[2])
