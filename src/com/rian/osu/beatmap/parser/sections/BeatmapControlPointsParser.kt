@@ -30,12 +30,16 @@ object BeatmapControlPointsParser : BeatmapSectionParser() {
                 throw UnsupportedOperationException("The numerator of a time signature must be positive")
             }
 
-            val sampleSet = it.getOrNull(3)?.let { s -> SampleBank.parse(parseInt(s)) } ?: beatmap.general.sampleBank
+            var sampleSet = it.getOrNull(3)?.let { s -> SampleBank.parse(parseInt(s)) } ?: beatmap.general.sampleBank
             val customSampleBank = it.getOrNull(4)?.let { s -> parseInt(s) } ?: 0
             val sampleVolume = it.getOrNull(5)?.let { s -> parseInt(s) } ?: beatmap.general.sampleVolume
 
             val timingChange = it.getOrNull(6)?.let { s -> s == "1" } ?: true
             val isKiai = it.getOrNull(7)?.let { s -> (parseInt(s) and 1) != 0 } ?: false
+
+            if (sampleSet == SampleBank.None) {
+                sampleSet = SampleBank.Normal
+            }
 
             beatmap.controlPoints.apply {
                 if (timingChange) {
