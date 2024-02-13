@@ -6,6 +6,7 @@ import android.app.Activity;
 import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.replay.OdrDatabase;
+import com.edlplan.ui.fragment.FilterMenuFragment;
 import com.edlplan.ui.fragment.PropsMenuFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.reco1l.api.ibancho.RoomAPI;
@@ -45,7 +46,6 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
@@ -70,6 +70,7 @@ import ru.nsu.ccfit.zuev.skins.SkinLayout;
 public class SongMenu implements IUpdateHandler, MenuItemListener,
         IScrollBarListener {
     private final static Boolean musicMutex = true;
+    private final static Boolean bgMutex = true;
     private final Boolean backgroundMutex = true;
     public Scene scene;
     public Entity frontLayer = new Entity();
@@ -102,6 +103,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private ChangeableText trackInfo, mapper, beatmapInfo, beatmapInfo2, dimensionInfo;
     private boolean isSelectComplete = true;
     private AnimSprite scoringSwitcher = null;
+    private FilterMenuFragment filterMenu = null;
     private GroupType groupType = GroupType.MapSet;
 
     private Timer previousSelectionTimer;
@@ -167,7 +169,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         selectedTrack = null;
         bgLoaded = true;
         SongMenuPool.getInstance().init();
-        FilterMenu.getInstance().loadConfig(context);
+        loadFilterFragment();
 
         // Preventing ModMenu to reload mod set
         if (!Multiplayer.isMultiplayer)
@@ -191,12 +193,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         board = new ScoreBoard(scene, backLayer, this);
 
-        float oy = 10;
+//        float oy = 10;
         for (final BeatmapInfo i : LibraryManager.INSTANCE.getLibrary()) {
             final MenuItem item = new MenuItem(this, i);
             items.add(item);
             item.attachToScene(scene, backLayer);
-            oy += item.getHeight();
+//            oy += item.getHeight();
         }
         sortOrder = SortOrder.Title;
         sort();
@@ -473,7 +475,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     if (!moved) {
                         velocityY = 0;
 
-                        FilterMenu.getInstance().showMenu(SongMenu.this);
+                        if (filterMenu == null) loadFilterFragment();
+
+                        filterMenu.showMenu(SongMenu.this);
                     }
                     return true;
                 }
@@ -686,6 +690,16 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
     }
 
+    public void loadFilterFragment() {
+        filterMenu = new FilterMenuFragment();
+        filterMenu.loadConfig(context);
+    }
+
+    public void unloadFilterFragment() {
+        scene.clearChildScene();
+        filterMenu = null;
+    }
+
     public void toggleScoringSwitcher() {
         if (board.isShowOnlineScores()) {
             board.setShowOnlineScores(false);
@@ -713,6 +727,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public Scene getScene() {
         return scene;
     }
+    public FilterMenuFragment getFilterMenu() { return filterMenu; }
 
     public void show() {
         engine.setScene(scene);
@@ -752,12 +767,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             selectedItem = null;
             selectedTrack = null;
         }
-        System.gc();
     }
 
     public void sort() {
-        if (!sortOrder.equals(FilterMenu.getInstance().getOrder())) {
-            sortOrder = FilterMenu.getInstance().getOrder();
+        if (!sortOrder.equals(filterMenu.getOrder())) {
+            sortOrder = filterMenu.getOrder();
         }
         Collections.sort(items, (i1, i2) -> {
             String s1;
@@ -924,11 +938,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             hp *= 0.5f;
             dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
         }
-        if (mod.contains(GameMod.MOD_HARDROCK)) {
-            ar = Math.min(ar * 1.4f, 10);
-            od = Math.min(od * 1.4f, 10);
-            ++cs;
-            hp = Math.min(hp * 1.4f, 10);
+        if (mod.contains(GameMod.MOD_HARDROCK) || mod.contains(GameMod.MOD_PRECISE)) {
+            if (mod.contains(GameMod.MOD_HARDROCK)) {
+                ar = Math.min(ar * 1.4f, 10);
+                od = Math.min(od * 1.4f, 10);
+                ++cs;
+                hp = Math.min(hp * 1.4f, 10);
+            }
             dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
         }
         if (ModMenu.getInstance().getChangeSpeed() != 1) {
@@ -1028,10 +1044,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         if (ar != rawAR || od != rawOD || cs != rawCS || hp != rawHP) {
-            dimensionInfo.setColor(256 / 255f, 180 / 255f, 0 / 255f);
+            dimensionInfo.setColor(255 / 255f, 180 / 255f, 0 / 255f);
         }
 
-        dimensionStringBuilder.append("AR: ").append(GameHelper.Round(ar, 2)).append(" ")
+        dimensionStringBuilder
+                .append("AR: ").append(GameHelper.Round(ar, 2)).append(" ")
                 .append("OD: ").append(GameHelper.Round(od, 2)).append(" ")
                 .append("CS: ").append(GameHelper.Round(cs, 2)).append(" ")
                 .append("HP: ").append(GameHelper.Round(hp, 2)).append(" ")
@@ -1104,7 +1121,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         if (selectedTrack == track) {
-            synchronized (bgLoaded) {
+            synchronized (bgMutex) {
                 if (!bgLoaded) {
                     return;
                 }
@@ -1187,7 +1204,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         }
                         scene.setBackground(new SpriteBackground(bg));
                         Config.setBackgroundQuality(quality);
-                        synchronized (bgLoaded) {
+                        synchronized (bgMutex) {
                             bgLoaded = true;
                         }
                     }
@@ -1214,31 +1231,28 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public void openScore(final int id, boolean showOnline, final String playerName) {
         if (showOnline) {
             engine.setScene(new LoadingScreen().getScene());
-            ToastLogger.showTextId(R.string.online_loadrecord, false);
-            new AsyncTask() {
-                @Override
-                public void run() {
-                    try {
-                        String scorePack = OnlineManager.getInstance().getScorePack(id);
-                        String[] params = scorePack.split("\\s+");
-                        if (params.length < 11) return;
+            ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.online_loadrecord, false);
 
-                        StatisticV2 stat = new StatisticV2(params);
-                        if (stat.isLegacySC()) {
-                            stat.processLegacySC(selectedTrack);
-                        }
+            Async.run(() -> {
+                try {
+                    String scorePack = OnlineManager.getInstance().getScorePack(id);
+                    String[] params = scorePack.split("\\s+");
 
-                        stat.setPlayerName(playerName);
-                        scoreScene.load(stat, null, null, OnlineManager.getReplayURL(id), null, selectedTrack);
-                        engine.setScene(scoreScene.getScene());
+                    if (params.length < 11) return;
 
-                    } catch (OnlineManagerException e) {
-                        Debug.e("Cannot load play info: " + e.getMessage(), e);
-                        engine.setScene(scene);
+                    StatisticV2 stat = new StatisticV2(params);
+                    if (stat.isLegacySC()) {
+                        stat.processLegacySC(selectedTrack);
                     }
 
+                    stat.setPlayerName(playerName);
+                    scoreScene.load(stat, null, null, OnlineManager.getReplayURL(id), null, selectedTrack);
+                    engine.setScene(scoreScene.getScene());
+                } catch (OnlineManagerException e) {
+                    Debug.e("Cannot load play info: " + e.getMessage(), e);
+                    engine.setScene(scene);
                 }
-            }.execute();
+            });
             return;
         }
 
@@ -1447,7 +1461,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private void reloadMenuItems(GroupType type) {
         if (!groupType.equals(type)) {
             groupType = type;
-            float oy = 10;
+//            float oy = 10;
             for (MenuItem item : items) {
                 item.removeFromScene();
             }
@@ -1458,7 +1472,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         final MenuItem item = new MenuItem(this, i);
                         items.add(item);
                         item.attachToScene(scene, backLayer);
-                        oy += item.getHeight();
+//                        oy += item.getHeight();
                     }
                     break;
                 case SingleDiff:
@@ -1467,18 +1481,17 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                             final MenuItem item = new MenuItem(this, i, j);
                             items.add(item);
                             item.attachToScene(scene, backLayer);
-                            oy += item.getHeight();
+//                            oy += item.getHeight();
                         }
                     }
                     break;
             }
-            final String lowerFilter = FilterMenu.getInstance().getFilter().toLowerCase();
-            final boolean favsOnly = FilterMenu.getInstance().isFavoritesOnly();
-            final Set<String> limit = FilterMenu.getInstance().getFavoriteFolder() == null ? null : FavoriteLibrary.get().getMaps(FilterMenu.getInstance().getFavoriteFolder());
+            final String lowerFilter = filterMenu.getFilter().toLowerCase();
+            final boolean favsOnly = filterMenu.isFavoritesOnly();
+            final Set<String> limit = FavoriteLibrary.get().getMaps(filterMenu.getFavoriteFolder());
             for (final MenuItem item : items) {
                 item.applyFilter(lowerFilter, favsOnly, limit);
             }
-            System.gc();
         }
     }
 
@@ -1491,7 +1504,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     private void reSelectItem(String oldTrackFileName) {
-        if (!oldTrackFileName.equals("")) {
+        if (!oldTrackFileName.isEmpty()) {
             if (selectedTrack.getFilename().equals(oldTrackFileName) && items.size() > 1 && selectedItem != null && selectedItem.isVisible()) {
                 velocityY = 0;
                 float height = 0;

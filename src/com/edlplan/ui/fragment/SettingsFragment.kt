@@ -65,10 +65,10 @@ abstract class SettingsFragment : PreferenceFragmentCompat(), BackPressListener 
         dismiss()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         isCreated = true
         root = super<PreferenceFragmentCompat>.onCreateView(inflater, container, savedInstanceState)
         onLoadView()
-        return root
+        return root as View
     }
 }

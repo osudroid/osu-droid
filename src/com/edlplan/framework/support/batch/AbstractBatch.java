@@ -23,12 +23,6 @@ public abstract class AbstractBatch<T> {
 
     protected abstract boolean applyToGL();
 
-    public void addAll(T... ts) {
-        for (T t : ts) {
-            add(t);
-        }
-    }
-
     protected void checkForBind() {
         if (!isBind()) {
             bind();
