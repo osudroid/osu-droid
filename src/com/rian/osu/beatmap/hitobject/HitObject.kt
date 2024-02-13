@@ -177,7 +177,7 @@ abstract class HitObject(
         /**
          * A small adjustment to the start time of control points to account for rounding/precision errors.
          */
-        internal const val CONTROL_POINT_LENIENCY = 1
+        internal const val CONTROL_POINT_LENIENCY = 5
 
         /**
          * Minimum preempt time at AR=10.
