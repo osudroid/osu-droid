@@ -901,7 +901,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
-            autoCursor = new AutoCursor();
+            autoCursor = new AutoCursor(approachRate);
             autoCursor.attachToScene(fgScene);
         }
 
@@ -1625,7 +1625,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         updateActiveObjects(dt);
 
         if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
-            autoCursor.moveToObject(activeObjects.peek(), secPassed, approachRate, this);
+            autoCursor.moveToObject(activeObjects.peek(), secPassed, this);
         }
 
         if (Config.isRemoveSliderLock()) {
