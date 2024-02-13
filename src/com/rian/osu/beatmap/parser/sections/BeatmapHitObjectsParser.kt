@@ -168,7 +168,7 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
         }
 
         // Generate the final per-node samples
-        val nodeSamples = mutableListOf(mutableListOf<HitSampleInfo>()).apply {
+        val nodeSamples = mutableListOf<MutableList<HitSampleInfo>>().apply {
             for (i in 0 until nodes) {
                 add(convertSoundType(nodeSoundTypes[i], nodeBankInfo[i]))
             }
