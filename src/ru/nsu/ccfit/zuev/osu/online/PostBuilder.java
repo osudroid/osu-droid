@@ -2,32 +2,29 @@ package ru.nsu.ccfit.zuev.osu.online;
 
 import com.dgsrz.bancho.security.SecurityUtils;
 
-import okhttp3.FormBody;
-import okhttp3.Response;
-import okhttp3.Request;
-
 import org.anddev.andengine.util.Debug;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.net.UnknownHostException;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+
+import okhttp3.FormBody;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class PostBuilder {
     private final FormBody.Builder formBodyBuilder = new FormBody.Builder();
     private final StringBuilder values = new StringBuilder();
 
     public void addParam(final String key, final String value) {
-        try {
-            if (values.length() > 0) {
-                values.append("_");
-            }
-            formBodyBuilder.add(key, value);
-            values.append(URLEncoder.encode(value, "UTF-8"));
-        } catch (UnsupportedEncodingException ignored) {
+        if (values.length() > 0) {
+            values.append("_");
         }
+        formBodyBuilder.add(key, value);
+        values.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
 
     }
 

@@ -2,9 +2,12 @@ package ru.nsu.ccfit.zuev.osu.online;
 
 import com.dgsrz.bancho.security.SecurityUtils;
 
+import org.anddev.andengine.util.Debug;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -12,13 +15,11 @@ import java.util.TimeZone;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
-import okhttp3.Response;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 import okio.BufferedSink;
 import okio.Okio;
-
-import org.anddev.andengine.util.Debug;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
 public class OnlineFileOperator {
@@ -32,9 +33,9 @@ public class OnlineFileOperator {
             }
 
             String checksum = FileUtils.getSHA256Checksum(file);
-            String sb = URLEncoder.encode(checksum, "UTF-8") +
+            String sb = URLEncoder.encode(checksum, StandardCharsets.UTF_8) +
                     "_" +
-                    URLEncoder.encode(replayID, "UTF-8");
+                    URLEncoder.encode(replayID, StandardCharsets.UTF_8);
             String signature = SecurityUtils.signRequest(sb);
 
             MediaType mime = MediaType.parse("application/octet-stream");

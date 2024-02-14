@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.nio.ByteBuffer;
-import java.util.Scanner;
+import java.nio.charset.StandardCharsets;
 
 /**
  * (c) 2010 Nicolas Gramlich 
@@ -50,7 +50,7 @@ public class StreamUtils {
 			sb.append(sc.nextLine());
 		}
 		return sb.toString();*/
-		return new String(streamToBytes(pInputStream), "UTF-8");
+		return new String(streamToBytes(pInputStream), StandardCharsets.UTF_8);
 	}
 
 	public static byte[] streamToBytes(final InputStream pInputStream) throws IOException {
