@@ -43,7 +43,7 @@ public class StreamUtils {
 	// Methods
 	// ===========================================================
 
-	public static final String readFully(final InputStream pInputStream) throws IOException {
+	public static String readFully(final InputStream pInputStream) throws IOException {
 		/*final StringBuilder sb = new StringBuilder();
 		final Scanner sc = new Scanner(pInputStream);
 		while(sc.hasNextLine()) {

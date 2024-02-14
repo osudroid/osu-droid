@@ -64,7 +64,7 @@ public abstract class BaseTripleValueSpanModifier extends BaseDoubleValueSpanMod
 	// Methods
 	// ===========================================================
 
-	private final float calculateValueC(final float pPercent) {
+	private float calculateValueC(final float pPercent) {
 		return this.mFromValueC + this.mSpanValueC * pPercent;
 	}
 

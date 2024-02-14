@@ -51,7 +51,7 @@ public abstract class BaseSingleValueInitializer implements IParticleInitializer
 	// Methods
 	// ===========================================================
 
-	private final float getRandomValue() {
+	private float getRandomValue() {
 		if(this.mMinValue == this.mMaxValue) {
 			return this.mMaxValue;
 		} else {

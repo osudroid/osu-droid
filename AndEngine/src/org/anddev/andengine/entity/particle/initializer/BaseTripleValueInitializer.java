@@ -52,7 +52,7 @@ public abstract class BaseTripleValueInitializer extends BaseDoubleValueInitiali
 	// Methods
 	// ===========================================================
 
-	private final float getRandomValueC() {
+	private float getRandomValueC() {
 		if(this.mMinValueC == this.mMaxValueC) {
 			return this.mMaxValueC;
 		} else {

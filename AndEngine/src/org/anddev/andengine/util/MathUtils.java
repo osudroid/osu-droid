@@ -44,15 +44,15 @@ public class MathUtils implements MathConstants {
 		return (float)Math.atan2(dY, dX);
 	}
 
-	public static final float radToDeg(final float pRad) {
+	public static float radToDeg(final float pRad) {
 		return RAD_TO_DEG * pRad;
 	}
 
-	public static final float degToRad(final float pDegree) {
+	public static float degToRad(final float pDegree) {
 		return DEG_TO_RAD * pDegree;
 	}
 
-	public static final int randomSign() {
+	public static int randomSign() {
 		if(RANDOM.nextBoolean()) {
 			return 1;
 		} else {
@@ -60,7 +60,7 @@ public class MathUtils implements MathConstants {
 		}
 	}
 
-	public static final float random(final float pMin, final float pMax) {
+	public static float random(final float pMin, final float pMax) {
 		return pMin + RANDOM.nextFloat() * (pMax - pMin);
 	}
 
@@ -69,19 +69,19 @@ public class MathUtils implements MathConstants {
 	 * @param pMax inclusive!
 	 * @return
 	 */
-	public static final int random(final int pMin, final int pMax) {
+	public static int random(final int pMin, final int pMax) {
 		return pMin + RANDOM.nextInt(pMax - pMin + 1);
 	}
 
-	public static final boolean isPowerOfTwo(final int n) {
+	public static boolean isPowerOfTwo(final int n) {
 		return (n != 0) && (n & (n - 1)) == 0;
 	}
 
-	public static final int nextPowerOfTwo(final float f) {
+	public static int nextPowerOfTwo(final float f) {
 		return MathUtils.nextPowerOfTwo((int)(Math.ceil(f)));
 	}
 
-	public static final int nextPowerOfTwo(final int n) {
+	public static int nextPowerOfTwo(final int n) {
 		int k = n;
 
 		if (k == 0) {
@@ -97,7 +97,7 @@ public class MathUtils implements MathConstants {
 		return k + 1;
 	}
 
-	public static final int sum(final int[] pValues) {
+	public static int sum(final int[] pValues) {
 		int sum = 0;
 		for(int i = pValues.length - 1; i >= 0; i--) {
 			sum += pValues[i];
@@ -106,21 +106,21 @@ public class MathUtils implements MathConstants {
 		return sum;
 	}
 
-	public static final void arraySumInternal(final int[] pValues) {
+	public static void arraySumInternal(final int[] pValues) {
 		final int valueCount = pValues.length;
 		for(int i = 1; i < valueCount; i++) {
 			pValues[i] = pValues[i-1] + pValues[i];
 		}
 	}
 
-	public static final void arraySumInternal(final long[] pValues) {
+	public static void arraySumInternal(final long[] pValues) {
 		final int valueCount = pValues.length;
 		for(int i = 1; i < valueCount; i++) {
 			pValues[i] = pValues[i-1] + pValues[i];
 		}
 	}
 
-	public static final void arraySumInternal(final long[] pValues, final long pFactor) {
+	public static void arraySumInternal(final long[] pValues, final long pFactor) {
 		pValues[0] = pValues[0] * pFactor;
 		final int valueCount = pValues.length;
 		for(int i = 1; i < valueCount; i++) {
@@ -128,7 +128,7 @@ public class MathUtils implements MathConstants {
 		}
 	}
 
-	public static final void arraySumInto(final long[] pValues, final long[] pTargetValues, final long pFactor) {
+	public static void arraySumInto(final long[] pValues, final long[] pTargetValues, final long pFactor) {
 		pTargetValues[0] = pValues[0] * pFactor;
 		final int valueCount = pValues.length;
 		for(int i = 1; i < valueCount; i++) {
@@ -136,7 +136,7 @@ public class MathUtils implements MathConstants {
 		}
 	}
 
-	public static final float arraySum(final float[] pValues) {
+	public static float arraySum(final float[] pValues) {
 		float sum = 0;
 		for (float pValue : pValues) {
             sum += pValue;
@@ -144,7 +144,7 @@ public class MathUtils implements MathConstants {
 		return sum;
 	}
 
-	public static final float arrayAverage(final float[] pValues) {
+	public static float arrayAverage(final float[] pValues) {
 		return MathUtils.arraySum(pValues) / pValues.length;
 	}
 
