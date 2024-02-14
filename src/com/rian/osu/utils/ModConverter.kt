@@ -5,7 +5,7 @@ package com.rian.osu.utils
 import com.rian.osu.mods.*
 import okhttp3.internal.toImmutableMap
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
-import java.util.EnumSet
+import java.util.*
 
 val modMap = mutableMapOf<GameMod, Mod>().apply {
     put(GameMod.MOD_AUTO, ModAuto())
@@ -30,11 +30,15 @@ val modMap = mutableMapOf<GameMod, Mod>().apply {
  * Converts "legacy" [GameMod]s to new [Mod]s.
  *
  * @param mods The [GameMod]s to convert.
- * @return A [List] containing the new [Mod]s.
+ * @param forceCS The circle size to enforce.
+ * @param forceAR The approach rate to enforce.
+ * @param forceOD The overall difficulty to enforce.
+ * @param forceHP The health drain to enforce.
+ * @return A [MutableList] containing the new [Mod]s.
  */
 @JvmOverloads
-fun convertLegacyMods(mods: EnumSet<GameMod>, forceCS: Float = Float.NaN, forceAR: Float = Float.NaN,
-                      forceOD: Float = Float.NaN, forceHP: Float = Float.NaN) = mutableListOf<Mod>().apply {
+fun convertLegacyMods(mods: EnumSet<GameMod>, forceCS: Float? = null, forceAR: Float? = null,
+                      forceOD: Float? = null, forceHP: Float? = null) = mutableListOf<Mod>().apply {
     mods.forEach {
         val convertedMod = modMap[it] ?:
             throw IllegalArgumentException("Cannot find the conversion of mod with short name \"${it.shortName}\"")
@@ -42,7 +46,7 @@ fun convertLegacyMods(mods: EnumSet<GameMod>, forceCS: Float = Float.NaN, forceA
         add(convertedMod)
     }
 
-    if (arrayOf(forceCS, forceAR, forceOD, forceHP).any { v -> !v.isNaN() }) {
+    if (arrayOf(forceCS, forceAR, forceOD, forceHP).any { v -> v != null }) {
         add(ModDifficultyAdjust(forceCS, forceAR, forceOD, forceHP))
     }
 }

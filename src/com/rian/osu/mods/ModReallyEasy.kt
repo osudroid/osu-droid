@@ -12,7 +12,7 @@ class ModReallyEasy : Mod(), IApplicableToDifficultyWithSettings {
         difficulty.run {
             val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
 
-            if (difficultyAdjustMod == null || difficultyAdjustMod.ar.isNaN()) {
+            if (difficultyAdjustMod?.ar == null) {
                 if (mods.any { it is ModHardRock }) {
                     ar *= 2
                     ar -= 0.5f
@@ -22,15 +22,15 @@ class ModReallyEasy : Mod(), IApplicableToDifficultyWithSettings {
                 ar -= customSpeedMultiplier - 1
             }
 
-            if (difficultyAdjustMod == null || difficultyAdjustMod.cs.isNaN()) {
+            if (difficultyAdjustMod?.cs == null) {
                 cs *= ADJUST_RATIO
             }
 
-            if (difficultyAdjustMod == null || difficultyAdjustMod.od.isNaN()) {
+            if (difficultyAdjustMod?.od == null) {
                 od *= ADJUST_RATIO
             }
 
-            if (difficultyAdjustMod == null || difficultyAdjustMod.hp.isNaN()) {
+            if (difficultyAdjustMod?.hp == null) {
                 hp *= ADJUST_RATIO
             }
         }

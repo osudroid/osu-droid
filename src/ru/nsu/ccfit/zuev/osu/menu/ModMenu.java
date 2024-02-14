@@ -332,9 +332,9 @@ public class ModMenu implements IModSwitcher {
                                 var parameters = new DifficultyCalculationParameters();
                                 parameters.setMods(convertLegacyMods(
                                         mod,
-                                        isCustomCS() ? customCS : Float.NaN,
-                                        isCustomAR() ? customAR : Float.NaN,
-                                        isCustomOD() ? customOD : Float.NaN
+                                        isCustomCS() ? customCS : null,
+                                        isCustomAR() ? customAR : null,
+                                        isCustomOD() ? customOD : null
                                 ));
                                 parameters.setCustomSpeedMultiplier(changeSpeed);
 

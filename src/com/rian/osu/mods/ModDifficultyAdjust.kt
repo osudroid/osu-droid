@@ -10,46 +10,35 @@ class ModDifficultyAdjust(
      * The circle size to enforce.
      */
     @JvmField
-    var cs: Float = Float.NaN,
+    var cs: Float? = null,
 
     /**
      * The approach rate to enforce.
      */
     @JvmField
-    var ar: Float = Float.NaN,
+    var ar: Float? = null,
 
     /**
      * The overall difficulty to enforce.
      */
     @JvmField
-    var od: Float = Float.NaN,
+    var od: Float? = null,
 
     /**
      * The health drain rate to enforce.
      */
     @JvmField
-    var hp: Float = Float.NaN
+    var hp: Float? = null
 ) : Mod(), IApplicableToDifficulty {
     override val droidString = ""
 
-    override fun applyToDifficulty(difficulty: BeatmapDifficulty) = difficulty.let {
-        if (!cs.isNaN()) {
-            it.cs = cs
-        }
+    override fun applyToDifficulty(difficulty: BeatmapDifficulty) = difficulty.let { d ->
+        fun get(value: Float?, fallback: Float) = value.takeUnless { it == null } ?: fallback
 
-        if (!ar.isNaN()) {
-            it.ar = ar
-        }
-
-        if (!od.isNaN()) {
-            it.od = od
-        }
-
-        if (!hp.isNaN()) {
-            it.hp = hp
-        }
-
-        Unit
+        d.cs = get(cs, d.cs)
+        d.ar = get(ar, d.ar)
+        d.od = get(od, d.od)
+        d.hp = get(hp, d.hp)
     }
 
     override fun equals(other: Any?): Boolean {

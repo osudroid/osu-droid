@@ -1088,9 +1088,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                 parameters.setMods(convertLegacyMods(
                     modMenu.getMod(),
-                    modMenu.isCustomCS() ? modMenu.getCustomCS() : Float.NaN,
-                    modMenu.isCustomAR() ? modMenu.getCustomAR() : Float.NaN,
-                    modMenu.isCustomOD() ? modMenu.getCustomOD() : Float.NaN
+                    modMenu.isCustomCS() ? modMenu.getCustomCS() : null,
+                    modMenu.isCustomAR() ? modMenu.getCustomAR() : null,
+                    modMenu.isCustomOD() ? modMenu.getCustomOD() : null
                 ));
                 parameters.setCustomSpeedMultiplier(modMenu.getChangeSpeed());
 

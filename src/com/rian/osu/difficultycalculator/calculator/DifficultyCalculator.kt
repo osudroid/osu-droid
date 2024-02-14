@@ -178,7 +178,7 @@ object DifficultyCalculator {
             val ar = difficultyAdjustMod?.ar?.takeUnless { it.isNaN() } ?: beatmap.difficulty.ar
             var preempt = if (ar <= 5) 1800.0 - 120 * ar else 1950.0 - 150 * ar
 
-            if (difficultyAdjustMod == null || difficultyAdjustMod.ar.isNaN()) {
+            if (difficultyAdjustMod?.ar != null) {
                 preempt /= parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
             }
 
@@ -294,9 +294,9 @@ object DifficultyCalculator {
         customSpeedMultiplier != 1.0f ||
         mods.any { difficultyAdjustmentMods.contains(it) } ||
         (difficultyAdjustMod?.let {
-            (!it.cs.isNaN() && it.cs != beatmap.difficulty.cs) ||
-            (!it.ar.isNaN() && it.ar != beatmap.difficulty.ar) ||
-            (!it.od.isNaN() && it.od != beatmap.difficulty.od)
+            (it.cs != null && it.cs != beatmap.difficulty.cs) ||
+            (it.ar != null && it.ar != beatmap.difficulty.ar) ||
+            (it.od != null && it.od != beatmap.difficulty.od)
         } ?: false)
     } ?: false
 }
