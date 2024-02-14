@@ -126,11 +126,8 @@ public class LevelLoader implements LevelConstants {
 			xr.parse(new InputSource(new BufferedInputStream(pInputStream)));
 
 			this.onAfterLoadLevel();
-		} catch (final SAXException se) {
+		} catch (final SAXException | ParserConfigurationException se) {
 			Debug.e(se);
-			/* Doesn't happen. */
-		} catch (final ParserConfigurationException pe) {
-			Debug.e(pe);
 			/* Doesn't happen. */
 		} finally {
 			StreamUtils.close(pInputStream);

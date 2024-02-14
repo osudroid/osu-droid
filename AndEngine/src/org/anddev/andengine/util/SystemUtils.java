@@ -200,9 +200,7 @@ public class SystemUtils {
 			in = process.getInputStream();
 			final String content = StreamUtils.readFully(in);
 			return Integer.parseInt(content);
-		} catch (final IOException e) {
-			throw new SystemUtilsException(e);
-		} catch (final NumberFormatException e) {
+		} catch (final IOException | NumberFormatException e) {
 			throw new SystemUtilsException(e);
 		} finally {
 			StreamUtils.close(in);
