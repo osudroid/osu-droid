@@ -192,7 +192,7 @@ public class BitmapTextureAtlas extends TextureAtlas<IBitmapTextureAtlasSource> 
 					//	return image;
 					//}
 
-					Debug.e("Error loading: " + bitmapTextureAtlasSource.toString(), iae);
+					Debug.e("Error loading: " + bitmapTextureAtlasSource, iae);
 					if(this.getTextureStateListener() != null) {
 						this.getTextureStateListener().onTextureAtlasSourceLoadExeption(this, bitmapTextureAtlasSource, iae);
 					} else {

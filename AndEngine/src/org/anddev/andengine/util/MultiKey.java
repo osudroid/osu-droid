@@ -73,7 +73,7 @@ public class MultiKey<K> {
 
 	@Override
 	public String toString() {
-		return "MultiKey" + Arrays.asList(this.mKeys).toString();
+		return "MultiKey" + Arrays.asList(this.mKeys);
 	}
 
 	// ===========================================================

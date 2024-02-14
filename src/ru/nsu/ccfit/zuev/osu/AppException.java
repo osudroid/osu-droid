@@ -134,7 +134,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
         for (StackTraceElement stack : stacks) {
             sb.append("class: ").append(stack.getClassName()).append("; method: ")
                     .append(stack.getMethodName()).append("; line: ").append(stack.getLineNumber())
-                    .append(";  Exception: ").append(ex.toString()).append("\n");
+                    .append(";  Exception: ").append(ex).append("\n");
         }
         return sb;
     }
@@ -345,7 +345,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
             Log.e("AppException", "jsonException", e);
         }
         sb.append("[active Package]");
-        sb.append(activePackageJson.toString());
+        sb.append(activePackageJson);
 
         return sb.toString();
     }

@@ -42,7 +42,7 @@ public class Library<T> {
 		if(existingItem == null) {
 			this.mItems.put(pID, pItem);
 		} else {
-			throw new IllegalArgumentException("ID: '" + pID + "' is already associated with item: '" + existingItem.toString() + "'.");
+			throw new IllegalArgumentException("ID: '" + pID + "' is already associated with item: '" + existingItem + "'.");
 		}
 	}
 

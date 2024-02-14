@@ -59,7 +59,7 @@ public class ImportReplayActivity extends Activity {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                Toast.makeText(this, String.format(getResources().getString(R.string.failed_to_import_edr_with_err), e.toString()), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, String.format(getResources().getString(R.string.failed_to_import_edr_with_err), e), Toast.LENGTH_SHORT).show();
                 super.onStart();
                 finish();
                 return;
