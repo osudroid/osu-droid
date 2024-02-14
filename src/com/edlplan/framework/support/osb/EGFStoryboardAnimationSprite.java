@@ -7,6 +7,7 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class EGFStoryboardAnimationSprite extends EGFStoryboardSprite {
 
@@ -20,9 +21,10 @@ public class EGFStoryboardAnimationSprite extends EGFStoryboardSprite {
         StoryboardAnimationSprite sprite = (StoryboardAnimationSprite) this.sprite;
         int idx = (int) (Math.max(0, time - sprite.startTime()) / sprite.frameDelay);
         if (idx >= sprite.frameCount) {
-            switch (sprite.loopType) {
-                case LoopOnce -> idx = sprite.frameCount - 1;
-                default -> idx %= sprite.frameCount;
+            if (Objects.requireNonNull(sprite.loopType) == StoryboardAnimationSprite.LoopType.LoopOnce) {
+                idx = sprite.frameCount - 1;
+            } else {
+                idx %= sprite.frameCount;
             }
         }
         ((MultipleFlippableTextureQuad) textureQuad).switchTexture(idx);

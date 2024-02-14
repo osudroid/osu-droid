@@ -56,7 +56,7 @@ public class TextureHelper {
         }
 
         int errorCount = 0;
-        while (source.preload() == false && errorCount < 3) {
+        while (!source.preload() && errorCount < 3) {
             errorCount++;
         }
         if (errorCount >= 3) {
@@ -87,7 +87,7 @@ public class TextureHelper {
         }
 
         int errorCount = 0;
-        while (source.preload() == false && errorCount < 3) {
+        while (!source.preload() && errorCount < 3) {
             errorCount++;
         }
         if (errorCount >= 3) {

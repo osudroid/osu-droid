@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.scoring;
 
 import java.io.Serializable;
 import java.util.EnumSet;
+import java.util.Objects;
 
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
@@ -122,7 +123,7 @@ public class Statistic implements Serializable {
             currentCombo++;
             return;
         }
-        if (score == 0 && k == true) {
+        if (score == 0 && k) {
             changeHp(-(5 + GameHelper.getDrain()) / 100f);
             if (currentCombo > maxCombo) {
                 maxCombo = currentCombo;
@@ -186,14 +187,10 @@ public class Statistic implements Serializable {
 
     public String getMark() {
         boolean isH = false;
-        forcycle:
         for (final GameMod m : mod) {
-            switch (m) {
-                case MOD_HIDDEN:
-                    isH = true;
-                    break forcycle;
-                default:
-                    break;
+            if (m == GameMod.MOD_HIDDEN) {
+                isH = true;
+                break;
             }
         }
 

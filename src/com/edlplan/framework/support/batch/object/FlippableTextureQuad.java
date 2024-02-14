@@ -166,12 +166,6 @@ public class FlippableTextureQuad extends ATextureQuad {
 
             ary[offset++] = r;
             ary[offset++] = b;
-            ary[offset++] = u2;
-            ary[offset++] = v2;
-            ary[offset++] = cr;
-            ary[offset++] = cg;
-            ary[offset++] = cb;
-            ary[offset++] = ca;
         } else {
             final float s = (float) Math.sin(rotation.value);
             final float c = (float) Math.cos(rotation.value);
@@ -205,13 +199,13 @@ public class FlippableTextureQuad extends ATextureQuad {
 
             ary[offset++] = r * c - b * s + x;
             ary[offset++] = r * s + b * c + y;
-            ary[offset++] = u2;
-            ary[offset++] = v2;
-            ary[offset++] = cr;
-            ary[offset++] = cg;
-            ary[offset++] = cb;
-            ary[offset++] = ca;
         }
+        ary[offset++] = u2;
+        ary[offset++] = v2;
+        ary[offset++] = cr;
+        ary[offset++] = cg;
+        ary[offset++] = cb;
+        ary[offset++] = ca;
     }
 
 

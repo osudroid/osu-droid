@@ -57,10 +57,8 @@ public class Camera {
         if (hasChange) {
             finalMatrix.set(maskMatrix).post(projectionMatrix);
             hasChange = false;
-            return finalMatrix;
-        } else {
-            return finalMatrix;
         }
+        return finalMatrix;
     }
 
     public Camera copy() {

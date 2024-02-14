@@ -164,7 +164,7 @@ public class OnlineManager {
     }
 
     boolean tryToLogIn() throws OnlineManagerException {
-        if (logIn(username, password) == false) {
+        if (!logIn(username, password)) {
             stayOnline = false;
             return false;
         }

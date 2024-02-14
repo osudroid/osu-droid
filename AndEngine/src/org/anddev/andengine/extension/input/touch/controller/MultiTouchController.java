@@ -26,7 +26,7 @@ public class MultiTouchController extends BaseTouchController {
 	// ===========================================================
 	
 	public MultiTouchController() throws MultiTouchException {
-		if(MultiTouch.isSupportedByAndroidVersion() == false) {
+		if(!MultiTouch.isSupportedByAndroidVersion()) {
 			throw new MultiTouchException();
 		}
 	}

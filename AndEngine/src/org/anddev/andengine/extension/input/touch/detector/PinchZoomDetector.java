@@ -38,7 +38,7 @@ public class PinchZoomDetector extends BaseDetector {
 	// ===========================================================
 
 	public PinchZoomDetector(final IPinchZoomDetectorListener pPinchZoomDetectorListener) throws MultiTouchException {
-		if(MultiTouch.isSupportedByAndroidVersion() == false) {
+		if(!MultiTouch.isSupportedByAndroidVersion()) {
 			throw new MultiTouchException();
 		}
 		this.mPinchZoomDetectorListener = pPinchZoomDetectorListener;

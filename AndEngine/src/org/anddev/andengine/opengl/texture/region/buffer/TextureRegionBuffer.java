@@ -95,7 +95,6 @@ public class TextureRegionBuffer extends BufferObject {
 				bufferData[5] = y2;
 
 				bufferData[6] = x1;
-				bufferData[7] = y1;
 			} else {
 				bufferData[0] = x1;
 				bufferData[1] = y2;
@@ -107,8 +106,8 @@ public class TextureRegionBuffer extends BufferObject {
 				bufferData[5] = y2;
 
 				bufferData[6] = x2;
-				bufferData[7] = y1;
 			}
+			bufferData[7] = y1;
 		} else {
 			if(this.mFlippedHorizontal) {
 				bufferData[0] = x2;
@@ -121,7 +120,6 @@ public class TextureRegionBuffer extends BufferObject {
 				bufferData[5] = y1;
 
 				bufferData[6] = x1;
-				bufferData[7] = y2;
 			} else {
 				bufferData[0] = x1;
 				bufferData[1] = y1;
@@ -133,8 +131,8 @@ public class TextureRegionBuffer extends BufferObject {
 				bufferData[5] = y1;
 
 				bufferData[6] = x2;
-				bufferData[7] = y2;
 			}
+			bufferData[7] = y2;
 		}
 
 		final FastFloatBuffer buffer = this.mFloatBuffer;
