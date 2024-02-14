@@ -9,8 +9,9 @@ import com.rian.osu.difficultycalculator.calculator.PerformanceCalculationParame
 import com.rian.osu.difficultycalculator.calculator.PerformanceCalculator
 import com.rian.osu.utils.convertLegacyMods
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
-import kotlin.math.ceil
 import kotlin.collections.Map.Entry
+import kotlin.math.ceil
+import kotlin.math.min
 
 /**
  * A helper class for operations relating to difficulty and performance calculation.
@@ -147,9 +148,9 @@ object BeatmapDifficultyCalculator {
     /**
      * Adds a cache to the difficulty cache.
      *
-     * @param beatmap The beatmap to cache.
-     * @param parameters The difficulty calculation parameters to cache.
-     * @param attributes The difficulty attributes to cache.
+     * @param beatmap The [Beatmap] to cache.
+     * @param parameters The [DifficultyCalculationParameters] to cache.
+     * @param attributes The [DifficultyAttributes] to cache.
      */
     private fun addCache(
         beatmap: Beatmap, parameters: DifficultyCalculationParameters?,
@@ -159,19 +160,19 @@ object BeatmapDifficultyCalculator {
     /**
      * Adds a cache to the difficulty cache.
      *
-     * @param beatmap The beatmap to cache.
-     * @param parameters The difficulty calculation parameters to cache.
-     * @param attributes The timed difficulty attributes to cache.
+     * @param beatmap The [Beatmap] to cache.
+     * @param parameters The [DifficultyCalculationParameters] to cache.
+     * @param attributes The [TimedDifficultyAttributes] to cache.
      */
     private fun addCache(
         beatmap: Beatmap, parameters: DifficultyCalculationParameters?,
         attributes: List<TimedDifficultyAttributes>
     ) =
         // Allow a maximum of 5 minutes of living cache.
-        difficultyCacheManager[beatmap.md5, { BeatmapDifficultyCacheManager() }].run { addCache(parameters, attributes, kotlin.math.min(
-            beatmap.duration,
+        difficultyCacheManager[beatmap.md5, { BeatmapDifficultyCacheManager() }].run { addCache(parameters, attributes, min(
+            beatmap.duration.toLong(),
             5 * 60 * 1000
-        ).toLong()) }
+        )) }
 
     /**
      * An implementation of least-recently-used cache using [LinkedHashMap]s.
@@ -187,7 +188,7 @@ object BeatmapDifficultyCalculator {
     }
 
     /**
-     * A cache holder for a beatmap.
+     * A cache holder for a [Beatmap].
      */
     private class BeatmapDifficultyCacheManager {
         private val attributeCache =
@@ -196,10 +197,10 @@ object BeatmapDifficultyCalculator {
             LRUCache<DifficultyCalculationParameters, BeatmapDifficultyCache<List<TimedDifficultyAttributes>>>(3)
 
         /**
-         * Adds a difficulty attributes cache.
+         * Adds a [DifficultyAttributes] cache to this [BeatmapDifficultyCacheManager].
          *
-         * @param parameters The difficulty parameters of the difficulty attributes.
-         * @param attributes The difficulty attributes to cache.
+         * @param parameters The [DifficultyCalculationParameters] of the [DifficultyAttributes].
+         * @param attributes The [DifficultyAttributes] to cache.
          * @param timeToLive The duration at which this cache is allowed to live, in milliseconds.
          */
         fun addCache(
@@ -208,10 +209,10 @@ object BeatmapDifficultyCalculator {
         ) = addCache(parameters, attributes, attributeCache, timeToLive)
 
         /**
-         * Adds a difficulty attributes cache.
+         * Adds a [TimedDifficultyAttributes] cache to this [BeatmapDifficultyCacheManager].
          *
-         * @param parameters The difficulty parameters of the difficulty attributes.
-         * @param attributes The timed difficulty attributes to cache.
+         * @param parameters The [DifficultyCalculationParameters] of the difficulty attributes.
+         * @param attributes The [TimedDifficultyAttributes] to cache.
          * @param timeToLive The duration at which this cache is allowed to live, in milliseconds.
          */
         fun addCache(
@@ -220,25 +221,25 @@ object BeatmapDifficultyCalculator {
         ) = addCache(parameters, attributes, timedAttributeCache, timeToLive)
 
         /**
-         * Retrieves the difficulty attributes cache of a calculation parameter.
+         * Retrieves the [DifficultyAttributes] cache of a [DifficultyCalculationParameters].
          *
-         * @param parameters The difficulty calculation parameter to retrieve.
-         * @return The difficulty attributes, `null` if not found.
+         * @param parameters The [DifficultyCalculationParameters] to retrieve.
+         * @return The [DifficultyAttributes], `null` if not found.
          */
         fun getDifficultyCache(parameters: DifficultyCalculationParameters?) =
             getCache(parameters, attributeCache)
 
         /**
-         * Retrieves the timed difficulty attributes cache of a calculation parameter.
+         * Retrieves the [TimedDifficultyAttributes] cache of a [DifficultyCalculationParameters].
          *
-         * @param parameters The difficulty calculation parameter to retrieve.
-         * @return The timed difficulty attributes, `null` if not found.
+         * @param parameters The [DifficultyCalculationParameters] to retrieve.
+         * @return The [TimedDifficultyAttributes], `null` if not found.
          */
         fun getTimedDifficultyCache(parameters: DifficultyCalculationParameters?) =
             getCache(parameters, timedAttributeCache)
 
         /**
-         * Whether this cache manager does not hold any cache.
+         * Whether this [BeatmapDifficultyCacheManager] does not hold any cache.
          */
         val isEmpty: Boolean
             get() = attributeCache.isEmpty() && timedAttributeCache.isEmpty()
@@ -262,17 +263,13 @@ object BeatmapDifficultyCalculator {
         private fun <T> invalidateExpiredCache(
             currentTime: Long,
             cacheMap: HashMap<DifficultyCalculationParameters, BeatmapDifficultyCache<T>>
-        ) {
-            val iterator: MutableIterator<Entry<DifficultyCalculationParameters, BeatmapDifficultyCache<T>>> =
-                cacheMap.entries.iterator()
-            while (iterator.hasNext()) {
-                val entry = iterator.next().value
-
-                if (entry.isExpired(currentTime)) {
-                    iterator.remove()
+        ) = cacheMap.iterator().run {
+                for ((_, value) in this) {
+                    if (value.isExpired(currentTime)) {
+                        remove()
+                    }
                 }
             }
-        }
 
         /**
          * Adds a difficulty attributes cache to a cache map.
@@ -288,18 +285,7 @@ object BeatmapDifficultyCalculator {
             cacheMap: HashMap<DifficultyCalculationParameters, BeatmapDifficultyCache<T>>,
             timeToLive: Long
         ) {
-            var params = parameters
-
-            if (params != null) {
-                // Copy the parameter for caching.
-                params = params.copy()
-                params.mods.retainAll(DifficultyCalculator.difficultyAdjustmentMods)
-            } else {
-                params = DifficultyCalculationParameters()
-            }
-
-            cacheMap[params] =
-                BeatmapDifficultyCache(cache, timeToLive)
+            cacheMap[processParameters(parameters)] = BeatmapDifficultyCache(cache, timeToLive)
         }
 
         /**
@@ -313,25 +299,19 @@ object BeatmapDifficultyCalculator {
         private fun <T> getCache(
             parameters: DifficultyCalculationParameters?,
             cacheMap: HashMap<DifficultyCalculationParameters, BeatmapDifficultyCache<T>>
-        ): T? {
-            var params = parameters
+        ) = cacheMap[processParameters(parameters)]?.cache
 
-            if (params != null) {
+        /**
+         * Processes and copies a [DifficultyCalculationParameters] for caching.
+         *
+         * @param parameters The [DifficultyCalculationParameters] to process.
+         * @return A new [DifficultyCalculationParameters] that can be used as a cache.
+         */
+        private fun processParameters(parameters: DifficultyCalculationParameters?) =
+            parameters?.copy()?.also {
                 // Copy the parameter for caching.
-                params = params.copy()
-                params.mods.retainAll(DifficultyCalculator.difficultyAdjustmentMods)
-            } else {
-                params = DifficultyCalculationParameters()
-            }
-
-            for ((key, value) in cacheMap) {
-                if (key == params) {
-                    return value.cache
-                }
-            }
-
-            return null
-        }
+                DifficultyCalculator.retainDifficultyAdjustmentMods(it)
+            } ?: DifficultyCalculationParameters()
     }
 
     /**

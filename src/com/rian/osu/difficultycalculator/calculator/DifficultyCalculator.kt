@@ -3,7 +3,6 @@ package com.rian.osu.difficultycalculator.calculator
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.BeatmapConverter
 import com.rian.osu.beatmap.BeatmapProcessor
-import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.difficultycalculator.DifficultyHitObject
 import com.rian.osu.difficultycalculator.attributes.DifficultyAttributes
 import com.rian.osu.difficultycalculator.attributes.TimedDifficultyAttributes
@@ -12,14 +11,10 @@ import com.rian.osu.difficultycalculator.skills.Flashlight
 import com.rian.osu.difficultycalculator.skills.Skill
 import com.rian.osu.difficultycalculator.skills.Speed
 import com.rian.osu.mods.*
-import com.rian.osu.utils.HitObjectStackEvaluator.applyStacking
 import com.rian.osu.utils.HitWindowConverter.hitWindow300ToOD
 import com.rian.osu.utils.HitWindowConverter.odToHitWindow300
-import okhttp3.internal.toImmutableList
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
-import java.util.*
+import kotlin.math.cbrt
 import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -28,10 +23,9 @@ import kotlin.math.sqrt
  */
 object DifficultyCalculator {
     /**
-     * [Mod]s that can alter the star rating when they are used in calculation with one or more mods.
+     * [Mod]s that can alter the star rating when they are used in calculation with one or more [Mod]s.
      */
-    @JvmField
-    val difficultyAdjustmentMods = setOf(
+    private val difficultyAdjustmentMods = setOf(
         ModDoubleTime(), ModHalfTime(), ModNightCore(),
         ModRelax(), ModEasy(), ModReallyEasy(),
         ModHardRock(), ModHidden(), ModFlashlight(),
@@ -53,10 +47,7 @@ object DifficultyCalculator {
         parameters: DifficultyCalculationParameters? = null
     ): DifficultyAttributes {
         // Always operate on a clone of the original beatmap when needed, to not modify it game-wide
-        val beatmapToCalculate =
-            if (needToConvertBeatmap(beatmap, parameters)) beatmap.clone()
-            else beatmap
-
+        val beatmapToCalculate = convertBeatmap(beatmap, parameters)
         val skills = createSkills(beatmapToCalculate, parameters)
 
         for (obj in createDifficultyHitObjects(beatmapToCalculate, parameters)) {
@@ -83,10 +74,7 @@ object DifficultyCalculator {
         parameters: DifficultyCalculationParameters? = null
     ): List<TimedDifficultyAttributes> {
         // Always operate on a clone of the original beatmap when needed, to not modify it game-wide
-        val beatmapToCalculate =
-            if (needToConvertBeatmap(beatmap, parameters)) convertBeatmap(beatmap, parameters)
-            else beatmap
-
+        val beatmapToCalculate = convertBeatmap(beatmap, parameters)
         val skills = createSkills(beatmapToCalculate, parameters)
         val attributes = ArrayList<TimedDifficultyAttributes>()
 
@@ -118,6 +106,25 @@ object DifficultyCalculator {
 
         return attributes
     }
+
+    /**
+     * Retains [Mod]s based on [difficultyAdjustmentMods].
+     *
+     * This is used rather than [MutableCollection.retainAll] as some [Mod]s need a special treatment.
+     */
+    fun retainDifficultyAdjustmentMods(parameters: DifficultyCalculationParameters) =
+        parameters.mods.iterator().run {
+            for (mod in this) {
+                // ModDifficultyAdjust always changes difficulty.
+                if (mod is ModDifficultyAdjust) {
+                    continue
+                }
+
+                if (!difficultyAdjustmentMods.contains(mod)) {
+                    remove()
+                }
+            }
+        }
 
     /**
      * Creates difficulty attributes to describe a beatmap's difficulty.
@@ -163,13 +170,13 @@ object DifficultyCalculator {
             // https://docs.google.com/document/d/10DZGYYSsT_yjz2Mtp6yIJld0Rqx4E-vVHupCqiM4TNI/edit
             starRating =
                 if (basePerformance > 1e-5)
-                    Math.cbrt(PerformanceCalculator.FINAL_MULTIPLIER) * 0.027 *
-                    (Math.cbrt(100000 / 2.0.pow(1 / 1.1) * basePerformance) + 4)
+                    cbrt(PerformanceCalculator.FINAL_MULTIPLIER) * 0.027 *
+                    (cbrt(100000 / 2.0.pow(1 / 1.1) * basePerformance) + 4)
                 else 0.0
 
             val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
             val ar = difficultyAdjustMod?.ar?.takeUnless { it.isNaN() } ?: beatmap.difficulty.ar
-            var preempt = (if (ar <= 5) 1800 - 120 * ar else 1950 - 150 * ar).toDouble()
+            var preempt = if (ar <= 5) 1800.0 - 120 * ar else 1950.0 - 150 * ar
 
             if (difficultyAdjustMod == null || difficultyAdjustMod.ar.isNaN()) {
                 preempt /= parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
@@ -189,6 +196,10 @@ object DifficultyCalculator {
         }
 
     private fun convertBeatmap(beatmap: Beatmap, parameters: DifficultyCalculationParameters?): Beatmap {
+        if (!needToConvertBeatmap(beatmap, parameters)) {
+            return beatmap
+        }
+
         val converter = BeatmapConverter(beatmap)
 
         // Convert
@@ -200,7 +211,7 @@ object DifficultyCalculator {
         }
 
         parameters?.mods?.filterIsInstance<IApplicableToDifficultyWithSettings>()?.forEach {
-            it.applyToDifficulty(converted.difficulty, parameters.mods.toImmutableList(), parameters.customSpeedMultiplier)
+            it.applyToDifficulty(converted.difficulty, parameters.mods, parameters.customSpeedMultiplier)
         }
 
         val processor = BeatmapProcessor(converted)
@@ -283,9 +294,9 @@ object DifficultyCalculator {
         customSpeedMultiplier != 1.0f ||
         mods.any { difficultyAdjustmentMods.contains(it) } ||
         (difficultyAdjustMod?.let {
-            (!it.cs.isNaN() && it.cs == beatmap.difficulty.cs) ||
-            (!it.ar.isNaN() && it.ar == beatmap.difficulty.ar) ||
-            (!it.od.isNaN() && it.od == beatmap.difficulty.od)
+            (!it.cs.isNaN() && it.cs != beatmap.difficulty.cs) ||
+            (!it.ar.isNaN() && it.ar != beatmap.difficulty.ar) ||
+            (!it.od.isNaN() && it.od != beatmap.difficulty.od)
         } ?: false)
     } ?: false
 }

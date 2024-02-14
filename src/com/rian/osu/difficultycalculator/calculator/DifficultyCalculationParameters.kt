@@ -4,8 +4,6 @@ import com.rian.osu.mods.Mod
 import com.rian.osu.mods.ModDoubleTime
 import com.rian.osu.mods.ModHalfTime
 import com.rian.osu.mods.ModNightCore
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
-import java.util.*
 
 /**
  * A class for specifying parameters for difficulty calculation.
@@ -45,7 +43,7 @@ class DifficultyCalculationParameters {
      * @return The copied instance.
      */
     fun copy() = DifficultyCalculationParameters().also {
-        it.mods = mods.slice(mods.indices).toMutableList()
+        it.mods.addAll(mods)
         it.customSpeedMultiplier = customSpeedMultiplier
     }
 
