@@ -57,6 +57,25 @@
             android:label="@string/act_import_replay"
             android:exported="true">
 
+            <!-- firefox and file explorer -->
+            <intent-filter>
+                <action
+                        android:name="android.intent.action.VIEW" />
+                <category
+                        android:name="android.intent.category.DEFAULT" />
+                <category
+                        android:name="android.intent.category.BROWSABLE" />
+                <data
+                        android:mimeType="application/zip"
+                        android:scheme="file" />
+                <data
+                        android:mimeType="application/x-zip-compressed"
+                        android:scheme="file" />
+                <data
+                        android:mimeType="application/octet-stream"
+                        android:scheme="file" />
+            </intent-filter>
+
             <!-- qq -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
