@@ -32,8 +32,15 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     fun constructDifficultyParameters(stat: StatisticV2?) = stat?.run {
         DifficultyCalculationParameters().also {
-            it.mods = convertLegacyMods(stat.mod)
-            it.customSpeedMultiplier = stat.changeSpeed
+            it.mods = convertLegacyMods(
+                mod,
+                if (isCustomCS) customCS else null,
+                if (isCustomAR) customAR else null,
+                if (isCustomOD) customOD else null,
+                if (isCustomHP) customHP else null
+            )
+
+            it.customSpeedMultiplier = changeSpeed
         }
     }
 
