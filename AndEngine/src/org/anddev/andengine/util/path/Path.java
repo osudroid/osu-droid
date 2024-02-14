@@ -176,10 +176,7 @@ public class Path {
 			if(this.mTileColumn != other.mTileColumn) {
 				return false;
 			}
-			if(this.mTileRow != other.mTileRow) {
-				return false;
-			}
-			return true;
+			return this.mTileRow == other.mTileRow;
 		}
 
 		// ===========================================================

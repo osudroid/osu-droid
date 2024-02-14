@@ -71,10 +71,7 @@ public class Letter {
 			return false;
 		}
 		final Letter other = (Letter) obj;
-		if(this.mCharacter != other.mCharacter) {
-			return false;
-		}
-		return true;
+		return this.mCharacter == other.mCharacter;
 	}
 
 	// ===========================================================

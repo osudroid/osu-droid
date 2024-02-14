@@ -99,11 +99,7 @@ public class BassAudioProvider {
 
     public void play() {
         if (channel != 0) {
-            if (BASS.BASS_ChannelIsActive(channel) == BASS.BASS_ACTIVE_PAUSED) {
-                BASS.BASS_ChannelPlay(channel, false);
-            } else {
-                BASS.BASS_ChannelPlay(channel, true);
-            }
+            BASS.BASS_ChannelPlay(channel, BASS.BASS_ChannelIsActive(channel) != BASS.BASS_ACTIVE_PAUSED);
         }
     }
 

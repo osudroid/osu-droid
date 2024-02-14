@@ -248,9 +248,8 @@ public class SongService extends Service {
         if (path.trim().isEmpty()) return false;
         else {
             File songFile = new File(path);
-            if (!songFile.exists()) return false;
+            return songFile.exists();
         }
-        return true;
     }
 
     public boolean isRunningForeground() {

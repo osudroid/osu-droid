@@ -639,11 +639,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 				return true;
 			}
 
-			if((this.mWidth > 0) && (this.mHeight > 0) && (this.mRequestRender || (this.mRenderMode == RENDERMODE_CONTINUOUSLY))) {
-				return false;
-			}
-
-			return true;
+			return (this.mWidth <= 0) || (this.mHeight <= 0) || (!this.mRequestRender && (this.mRenderMode != RENDERMODE_CONTINUOUSLY));
 		}
 
 		public void setRenderMode(final int renderMode) {

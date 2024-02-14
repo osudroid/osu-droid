@@ -51,11 +51,7 @@ public class ShapeCollisionChecker extends BaseCollisionChecker {
 			 * if one vertex of the one vertices is contained by all of the other vertices. */
 			if(ShapeCollisionChecker.checkContains(pVerticesA, pVerticesALength, pVerticesB[Constants.VERTEX_INDEX_X], pVerticesB[Constants.VERTEX_INDEX_Y])) {
 				return true;
-			} else if(ShapeCollisionChecker.checkContains(pVerticesB, pVerticesBLength, pVerticesA[Constants.VERTEX_INDEX_X], pVerticesA[Constants.VERTEX_INDEX_Y])) {
-				return true;
-			} else {
-				return false;
-			}
+			} else return ShapeCollisionChecker.checkContains(pVerticesB, pVerticesBLength, pVerticesA[Constants.VERTEX_INDEX_X], pVerticesA[Constants.VERTEX_INDEX_Y]);
 		}
 	}
 
@@ -75,10 +71,7 @@ public class ShapeCollisionChecker extends BaseCollisionChecker {
 			}
 		}
 		/* Also check the 'around the corner of the array' line of B. */
-		if(LineCollisionChecker.checkLineCollision(vertexA1X, vertexA1Y, vertexA2X, vertexA2Y, pVerticesB[pVerticesBLength - 2], pVerticesB[pVerticesBLength - 1], pVerticesB[Constants.VERTEX_INDEX_X], pVerticesB[Constants.VERTEX_INDEX_Y])){
-			return true;
-		}
-		return false;
+		return LineCollisionChecker.checkLineCollision(vertexA1X, vertexA1Y, vertexA2X, vertexA2Y, pVerticesB[pVerticesBLength - 2], pVerticesB[pVerticesBLength - 1], pVerticesB[Constants.VERTEX_INDEX_X], pVerticesB[Constants.VERTEX_INDEX_Y]);
 	}
 
 	public static boolean checkContains(final float[] pVertices, final int pVerticesLength, final float pX, final float pY) {

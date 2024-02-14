@@ -244,11 +244,8 @@ public class Utils {
         ConnectivityManager connectivityManager = (ConnectivityManager) context
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetInfo = connectivityManager.getActiveNetworkInfo();
-        if (activeNetInfo != null
-                && activeNetInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-            return true;
-        }
-        return false;
+        return activeNetInfo != null
+                && activeNetInfo.getType() == ConnectivityManager.TYPE_WIFI;
     }
 
     public static float tryParseFloat(String str, float defaultVal) {
