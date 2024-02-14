@@ -45,8 +45,8 @@ public class Font {
 	private int mCurrentTextureX = 0;
 	private int mCurrentTextureY = 0;
 
-	private final SparseArray<Letter> mManagedCharacterToLetterMap = new SparseArray<Letter>();
-	private final ArrayList<Letter> mLettersPendingToBeDrawnToTexture = new ArrayList<Letter>();
+	private final SparseArray<Letter> mManagedCharacterToLetterMap = new SparseArray<>();
+	private final ArrayList<Letter> mLettersPendingToBeDrawnToTexture = new ArrayList<>();
 
 	protected final Paint mPaint;
 	private final Paint mBackgroundPaint;

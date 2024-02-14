@@ -86,41 +86,41 @@ public class PathModifier extends EntityModifier {
 
 		/* Create a new SequenceModifier and register the listeners that
 		 * call through to mEntityModifierListener and mPathModifierListener. */
-		this.mSequenceModifier = new SequenceModifier<IEntity>(
-				new ISubSequenceModifierListener<IEntity>() {
-					@Override
-					public void onSubSequenceStarted(final IModifier<IEntity> pModifier, final IEntity pEntity, final int pIndex) {
-						if(PathModifier.this.mPathModifierListener != null) {
-							PathModifier.this.mPathModifierListener.onPathWaypointStarted(PathModifier.this, pEntity, pIndex);
-						}
-					}
+		this.mSequenceModifier = new SequenceModifier<>(
+                new ISubSequenceModifierListener<IEntity>() {
+                    @Override
+                    public void onSubSequenceStarted(final IModifier<IEntity> pModifier, final IEntity pEntity, final int pIndex) {
+                        if (PathModifier.this.mPathModifierListener != null) {
+                            PathModifier.this.mPathModifierListener.onPathWaypointStarted(PathModifier.this, pEntity, pIndex);
+                        }
+                    }
 
-					@Override
-					public void onSubSequenceFinished(final IModifier<IEntity> pEntityModifier, final IEntity pEntity, final int pIndex) {
-						if(PathModifier.this.mPathModifierListener != null) {
-							PathModifier.this.mPathModifierListener.onPathWaypointFinished(PathModifier.this, pEntity, pIndex);
-						}
-					}
-				},
-				new IEntityModifierListener() {
-					@Override
-					public void onModifierStarted(final IModifier<IEntity> pModifier, final IEntity pEntity) {
-						PathModifier.this.onModifierStarted(pEntity);
-						if(PathModifier.this.mPathModifierListener != null) {
-							PathModifier.this.mPathModifierListener.onPathStarted(PathModifier.this, pEntity);
-						}
-					}
+                    @Override
+                    public void onSubSequenceFinished(final IModifier<IEntity> pEntityModifier, final IEntity pEntity, final int pIndex) {
+                        if (PathModifier.this.mPathModifierListener != null) {
+                            PathModifier.this.mPathModifierListener.onPathWaypointFinished(PathModifier.this, pEntity, pIndex);
+                        }
+                    }
+                },
+                new IEntityModifierListener() {
+                    @Override
+                    public void onModifierStarted(final IModifier<IEntity> pModifier, final IEntity pEntity) {
+                        PathModifier.this.onModifierStarted(pEntity);
+                        if (PathModifier.this.mPathModifierListener != null) {
+                            PathModifier.this.mPathModifierListener.onPathStarted(PathModifier.this, pEntity);
+                        }
+                    }
 
-					@Override
-					public void onModifierFinished(final IModifier<IEntity> pEntityModifier, final IEntity pEntity) {
-						PathModifier.this.onModifierFinished(pEntity);
-						if(PathModifier.this.mPathModifierListener != null) {
-							PathModifier.this.mPathModifierListener.onPathFinished(PathModifier.this, pEntity);
-						}
-					}
-				},
-				moveModifiers
-		);
+                    @Override
+                    public void onModifierFinished(final IModifier<IEntity> pEntityModifier, final IEntity pEntity) {
+                        PathModifier.this.onModifierFinished(pEntity);
+                        if (PathModifier.this.mPathModifierListener != null) {
+                            PathModifier.this.mPathModifierListener.onPathFinished(PathModifier.this, pEntity);
+                        }
+                    }
+                },
+                moveModifiers
+        );
 	}
 
 	protected PathModifier(final PathModifier pPathModifier) throws DeepCopyNotSupportedException {

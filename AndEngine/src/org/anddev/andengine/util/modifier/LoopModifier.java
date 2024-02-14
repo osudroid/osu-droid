@@ -73,7 +73,7 @@ public class LoopModifier<T> extends BaseModifier<T> implements IModifierListene
 
 	@Override
 	public LoopModifier<T> deepCopy() throws DeepCopyNotSupportedException {
-		return new LoopModifier<T>(this);
+		return new LoopModifier<>(this);
 	}
 
 	// ===========================================================

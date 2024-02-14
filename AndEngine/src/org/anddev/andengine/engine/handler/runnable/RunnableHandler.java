@@ -20,7 +20,7 @@ public class RunnableHandler implements IUpdateHandler {
 	// Fields
 	// ===========================================================
 
-	private final ArrayList<Runnable> mRunnables = new ArrayList<Runnable>();
+	private final ArrayList<Runnable> mRunnables = new ArrayList<>();
 
 	// ===========================================================
 	// Constructors

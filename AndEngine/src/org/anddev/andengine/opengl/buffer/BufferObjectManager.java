@@ -21,12 +21,12 @@ public class BufferObjectManager {
 	// Fields
 	// ===========================================================
 
-	private static final HashSet<BufferObject> mBufferObjectsManaged = new HashSet<BufferObject>();
+	private static final HashSet<BufferObject> mBufferObjectsManaged = new HashSet<>();
 
-	private static final ArrayList<BufferObject> mBufferObjectsLoaded = new ArrayList<BufferObject>();
+	private static final ArrayList<BufferObject> mBufferObjectsLoaded = new ArrayList<>();
 
-	private static final ArrayList<BufferObject> mBufferObjectsToBeLoaded = new ArrayList<BufferObject>();
-	private static final ArrayList<BufferObject> mBufferObjectsToBeUnloaded = new ArrayList<BufferObject>();
+	private static final ArrayList<BufferObject> mBufferObjectsToBeLoaded = new ArrayList<>();
+	private static final ArrayList<BufferObject> mBufferObjectsToBeUnloaded = new ArrayList<>();
 
 	private static BufferObjectManager mActiveInstance = null;
 

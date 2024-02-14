@@ -30,7 +30,7 @@ public class BuildableTextureAtlas<T extends ITextureAtlasSource, A extends ITex
 	// ===========================================================
 
 	private final A mTextureAtlas;
-	private final ArrayList<TextureAtlasSourceWithWithLocationCallback<T>> mTextureAtlasSourcesToPlace = new ArrayList<TextureAtlasSourceWithWithLocationCallback<T>>();
+	private final ArrayList<TextureAtlasSourceWithWithLocationCallback<T>> mTextureAtlasSourcesToPlace = new ArrayList<>();
 
 	// ===========================================================
 	// Constructors
@@ -149,7 +149,7 @@ public class BuildableTextureAtlas<T extends ITextureAtlasSource, A extends ITex
 	 * @param pTextureRegion
 	 */
 	public void addTextureAtlasSource(final T pTextureAtlasSource, final Callback<T> pCallback) {
-		this.mTextureAtlasSourcesToPlace.add(new TextureAtlasSourceWithWithLocationCallback<T>(pTextureAtlasSource, pCallback));
+		this.mTextureAtlasSourcesToPlace.add(new TextureAtlasSourceWithWithLocationCallback<>(pTextureAtlasSource, pCallback));
 	}
 
 	/**

@@ -77,7 +77,7 @@ public class SequenceModifier<T> extends BaseModifier<T> implements IModifierLis
 
 	@Override
 	public SequenceModifier<T> deepCopy() throws DeepCopyNotSupportedException{
-		return new SequenceModifier<T>(this);
+		return new SequenceModifier<>(this);
 	}
 
 	// ===========================================================

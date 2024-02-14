@@ -24,7 +24,7 @@ public abstract class GenericPool<T> {
 	// Fields
 	// ===========================================================
 
-	private final Stack<T> mAvailableItems = new Stack<T>();
+	private final Stack<T> mAvailableItems = new Stack<>();
 	private int mUnrecycledCount;
 	private final int mGrowth;
 

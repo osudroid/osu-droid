@@ -24,7 +24,7 @@ public abstract class PoolUpdateHandler<T extends PoolItem> implements IUpdateHa
 	// ===========================================================
 
 	private final Pool<T> mPool;
-	private final ArrayList<T> mScheduledPoolItems = new ArrayList<T>();
+	private final ArrayList<T> mScheduledPoolItems = new ArrayList<>();
 
 	// ===========================================================
 	// Constructors

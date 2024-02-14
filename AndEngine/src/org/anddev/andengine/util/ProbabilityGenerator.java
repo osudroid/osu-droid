@@ -19,7 +19,7 @@ public class ProbabilityGenerator<T> {
 	// ===========================================================
 
 	private float mProbabilitySum;
-	private final ArrayList<Entry<T>> mEntries = new ArrayList<Entry<T>>();
+	private final ArrayList<Entry<T>> mEntries = new ArrayList<>();
 
 	// ===========================================================
 	// Constructors
@@ -39,7 +39,7 @@ public class ProbabilityGenerator<T> {
 
 	public void add(final float pFactor, final T ... pElements){
 		this.mProbabilitySum += pFactor;
-		this.mEntries.add(new Entry<T>(pFactor, pElements));
+		this.mEntries.add(new Entry<>(pFactor, pElements));
 	}
 
 	public T next() {

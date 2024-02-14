@@ -46,7 +46,7 @@ public class Scene extends Entity {
 	private boolean mChildSceneModalUpdate;
 	private boolean mChildSceneModalTouch;
 
-	protected SmartList<ITouchArea> mTouchAreas = new SmartList<ITouchArea>(TOUCHAREAS_CAPACITY_DEFAULT);
+	protected SmartList<ITouchArea> mTouchAreas = new SmartList<>(TOUCHAREAS_CAPACITY_DEFAULT);
 
 	private final RunnableHandler mRunnableHandler = new RunnableHandler();
 
@@ -60,9 +60,9 @@ public class Scene extends Entity {
 	private boolean mOnAreaTouchTraversalBackToFront = true;
 
 	private boolean mTouchAreaBindingEnabled = false;
-	private final SparseArray<ITouchArea> mTouchAreaBindings = new SparseArray<ITouchArea>();
+	private final SparseArray<ITouchArea> mTouchAreaBindings = new SparseArray<>();
 	private boolean mOnSceneTouchListenerBindingEnabled = false;
-	private final SparseArray<IOnSceneTouchListener> mOnSceneTouchListenerBindings = new SparseArray<IOnSceneTouchListener>();
+	private final SparseArray<IOnSceneTouchListener> mOnSceneTouchListenerBindings = new SparseArray<>();
 
 	// ===========================================================
 	// Constructors

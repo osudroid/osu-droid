@@ -47,8 +47,8 @@ public class ParticleSystem extends Entity {
 	private int mSourceBlendFunction = BLENDFUNCTION_SOURCE_DEFAULT;
 	private int mDestinationBlendFunction = BLENDFUNCTION_DESTINATION_DEFAULT;
 
-	private final ArrayList<IParticleInitializer> mParticleInitializers = new ArrayList<IParticleInitializer>();
-	private final ArrayList<IParticleModifier> mParticleModifiers = new ArrayList<IParticleModifier>();
+	private final ArrayList<IParticleInitializer> mParticleInitializers = new ArrayList<>();
+	private final ArrayList<IParticleModifier> mParticleModifiers = new ArrayList<>();
 
 	private final float mRateMinimum;
 	private final float mRateMaximum;

@@ -26,7 +26,7 @@ public abstract class TextureAtlas<T extends ITextureAtlasSource> extends Textur
 	protected final int mWidth;
 	protected final int mHeight;
 
-	protected final ArrayList<T> mTextureAtlasSources = new ArrayList<T>();
+	protected final ArrayList<T> mTextureAtlasSources = new ArrayList<>();
 
 	// ===========================================================
 	// Constructors

@@ -18,7 +18,7 @@ public class MultiPool<T> {
 	// Fields
 	// ===========================================================
 
-	private final SparseArray<GenericPool<T>> mPools = new SparseArray<GenericPool<T>>();
+	private final SparseArray<GenericPool<T>> mPools = new SparseArray<>();
 
 	// ===========================================================
 	// Constructors

@@ -23,8 +23,8 @@ public class AStarPathFinder<T> implements IPathFinder<T> {
 	// Fields
 	// ===========================================================
 
-	private final ArrayList<Node> mVisitedNodes = new ArrayList<Node>();
-	private final ArrayList<Node> mOpenNodes = new ArrayList<Node>();
+	private final ArrayList<Node> mVisitedNodes = new ArrayList<>();
+	private final ArrayList<Node> mOpenNodes = new ArrayList<>();
 
 	private final ITiledMap<T> mTiledMap;
 	private final int mMaxSearchDepth;
@@ -39,7 +39,7 @@ public class AStarPathFinder<T> implements IPathFinder<T> {
 	// ===========================================================
 
 	public AStarPathFinder(final ITiledMap<T> pTiledMap, final int pMaxSearchDepth, final boolean pAllowDiagonalMovement) {
-		this(pTiledMap, pMaxSearchDepth, pAllowDiagonalMovement, new EuclideanHeuristic<T>());
+		this(pTiledMap, pMaxSearchDepth, pAllowDiagonalMovement, new EuclideanHeuristic<>());
 	}
 
 	public AStarPathFinder(final ITiledMap<T> pTiledMap, final int pMaxSearchDepth, final boolean pAllowDiagonalMovement, final IAStarHeuristic<T> pAStarHeuristic) {

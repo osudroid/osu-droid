@@ -526,7 +526,7 @@ public class Entity implements IEntity {
 
 	@Override
 	public ArrayList<IEntity> query(final IEntityMatcher pEntityMatcher) {
-		return this.query(pEntityMatcher, new ArrayList<IEntity>());
+		return this.query(pEntityMatcher, new ArrayList<>());
 	}
 
 	@Override
@@ -546,7 +546,7 @@ public class Entity implements IEntity {
 
 	@Override
 	public <S extends IEntity> ArrayList<S> queryForSubclass(final IEntityMatcher pEntityMatcher) throws ClassCastException {
-		return this.queryForSubclass(pEntityMatcher, new ArrayList<S>());
+		return this.queryForSubclass(pEntityMatcher, new ArrayList<>());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -979,7 +979,7 @@ public class Entity implements IEntity {
 	}
 
 	private void allocateChildren() {
-		this.mChildren = new SmartList<IEntity>(Entity.CHILDREN_CAPACITY_DEFAULT);
+		this.mChildren = new SmartList<>(Entity.CHILDREN_CAPACITY_DEFAULT);
 	}
 
 	private void allocateUpdateHandlers() {

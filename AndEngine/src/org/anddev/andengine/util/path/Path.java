@@ -18,7 +18,7 @@ public class Path {
 	// Fields
 	// ===========================================================
 
-	private final ArrayList<Step> mSteps = new ArrayList<Step>();
+	private final ArrayList<Step> mSteps = new ArrayList<>();
 
 	// ===========================================================
 	// Constructors

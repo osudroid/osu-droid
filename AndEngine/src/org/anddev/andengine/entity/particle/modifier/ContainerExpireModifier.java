@@ -25,7 +25,7 @@ public class ContainerExpireModifier extends ExpireModifier {
 	// Fields
 	// ===========================================================
 
-	private final List<BaseSingleValueSpanModifier> mModifiers = new ArrayList<BaseSingleValueSpanModifier>();
+	private final List<BaseSingleValueSpanModifier> mModifiers = new ArrayList<>();
 
 	// ===========================================================
 	// Constructors

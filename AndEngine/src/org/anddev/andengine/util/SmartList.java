@@ -118,7 +118,7 @@ public class SmartList<T> extends ArrayList<T> {
 	}
 
 	public ArrayList<T> query(final IMatcher<T> pMatcher) {
-		return this.query(pMatcher, new ArrayList<T>());
+		return this.query(pMatcher, new ArrayList<>());
 	}
 
 	public <L extends List<T>> L query(final IMatcher<T> pMatcher, final L pResult) {
@@ -134,7 +134,7 @@ public class SmartList<T> extends ArrayList<T> {
 	}
 
 	public <S extends T> ArrayList<S> queryForSubclass(final IMatcher<T> pMatcher) {
-		return this.queryForSubclass(pMatcher, new ArrayList<S>());
+		return this.queryForSubclass(pMatcher, new ArrayList<>());
 	}
 
 	@SuppressWarnings("unchecked")

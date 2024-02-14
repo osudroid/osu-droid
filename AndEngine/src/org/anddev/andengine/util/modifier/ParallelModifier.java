@@ -65,7 +65,7 @@ public class ParallelModifier<T> extends BaseModifier<T> implements IModifierLis
 
 	@Override
 	public ParallelModifier<T> deepCopy() throws DeepCopyNotSupportedException{
-		return new ParallelModifier<T>(this);
+		return new ParallelModifier<>(this);
 	}
 
 	// ===========================================================

@@ -23,7 +23,7 @@ public class ParallaxBackground extends ColorBackground {
 	// Fields
 	// ===========================================================
 
-	private final ArrayList<ParallaxEntity> mParallaxEntities = new ArrayList<ParallaxEntity>();
+	private final ArrayList<ParallaxEntity> mParallaxEntities = new ArrayList<>();
 	private int mParallaxEntityCount;
 
 	protected float mParallaxValue;

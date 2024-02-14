@@ -38,7 +38,7 @@ public class LevelLoader implements LevelConstants {
 	private String mAssetBasePath;
 
 	private IEntityLoader mDefaultEntityLoader;
-	private final HashMap<String, IEntityLoader> mEntityLoaders = new HashMap<String, IEntityLoader>();
+	private final HashMap<String, IEntityLoader> mEntityLoaders = new HashMap<>();
 
 	// ===========================================================
 	// Constructors

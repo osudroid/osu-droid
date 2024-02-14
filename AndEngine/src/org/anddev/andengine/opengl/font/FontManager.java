@@ -21,7 +21,7 @@ public class FontManager {
 	// Fields
 	// ===========================================================
 
-	private final ArrayList<Font> mFontsManaged = new ArrayList<Font>();
+	private final ArrayList<Font> mFontsManaged = new ArrayList<>();
 
 	// ===========================================================
 	// Constructors

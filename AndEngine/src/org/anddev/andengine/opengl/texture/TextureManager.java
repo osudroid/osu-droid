@@ -24,12 +24,12 @@ public class TextureManager {
 	// Fields
 	// ===========================================================
 
-	private final HashSet<ITexture> mTexturesManaged = new HashSet<ITexture>();
+	private final HashSet<ITexture> mTexturesManaged = new HashSet<>();
 
-	private final ArrayList<ITexture> mTexturesLoaded = new ArrayList<ITexture>();
+	private final ArrayList<ITexture> mTexturesLoaded = new ArrayList<>();
 
-	private final ArrayList<ITexture> mTexturesToBeLoaded = new ArrayList<ITexture>();
-	private final ArrayList<ITexture> mTexturesToBeUnloaded = new ArrayList<ITexture>();
+	private final ArrayList<ITexture> mTexturesToBeLoaded = new ArrayList<>();
+	private final ArrayList<ITexture> mTexturesToBeUnloaded = new ArrayList<>();
 
 	// ===========================================================
 	// Constructors

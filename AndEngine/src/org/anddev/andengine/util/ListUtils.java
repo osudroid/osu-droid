@@ -36,13 +36,13 @@ public class ListUtils {
 	// ===========================================================
 
 	public static <T> ArrayList<? extends T> toList(final T pItem) {
-		final ArrayList<T> out = new ArrayList<T>();
+		final ArrayList<T> out = new ArrayList<>();
 		out.add(pItem);
 		return out;
 	}
 
 	public static <T> ArrayList<? extends T> toList(final T ... pItems) {
-		final ArrayList<T> out = new ArrayList<T>();
+		final ArrayList<T> out = new ArrayList<>();
 		Collections.addAll(out, pItems);
 		return out;
 	}

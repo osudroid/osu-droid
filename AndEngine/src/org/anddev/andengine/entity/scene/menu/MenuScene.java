@@ -29,7 +29,7 @@ public class MenuScene extends CameraScene implements IOnAreaTouchListener, IOnS
 	// Fields
 	// ===========================================================
 
-	private final ArrayList<IMenuItem> mMenuItems = new ArrayList<IMenuItem>();
+	private final ArrayList<IMenuItem> mMenuItems = new ArrayList<>();
 
 	private IOnMenuItemClickListener mOnMenuItemClickListener;
 

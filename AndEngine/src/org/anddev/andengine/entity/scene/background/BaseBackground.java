@@ -23,7 +23,7 @@ public abstract class BaseBackground implements IBackground {
 	// Fields
 	// ===========================================================
 
-	private final ModifierList<IBackground> mBackgroundModifiers = new ModifierList<IBackground>(this, BACKGROUNDMODIFIERS_CAPACITY_DEFAULT);
+	private final ModifierList<IBackground> mBackgroundModifiers = new ModifierList<>(this, BACKGROUNDMODIFIERS_CAPACITY_DEFAULT);
 
 	// ===========================================================
 	// Constructors

@@ -22,7 +22,7 @@ public abstract class BaseModifier<T> implements IModifier<T> {
 
 	protected boolean mFinished;
 	private boolean mRemoveWhenFinished = true;
-	protected final SmartList<IModifierListener<T>> mModifierListeners = new SmartList<IModifierListener<T>>(2);
+	protected final SmartList<IModifierListener<T>> mModifierListeners = new SmartList<>(2);
 
 	// ===========================================================
 	// Constructors

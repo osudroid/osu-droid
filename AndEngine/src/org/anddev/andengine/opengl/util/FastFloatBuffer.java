@@ -28,7 +28,7 @@ public class FastFloatBuffer {
 	 * Use a {@link SoftReference} so that the array can be collected if
 	 * necessary
 	 */
-	private static SoftReference<int[]> sWeakIntArray = new SoftReference<int[]>(new int[0]);
+	private static SoftReference<int[]> sWeakIntArray = new SoftReference<>(new int[0]);
 
 	/**
 	 * Underlying data - give this to OpenGL
@@ -92,7 +92,7 @@ public class FastFloatBuffer {
 		int[] ia = sWeakIntArray.get();
 		if(ia == null || ia.length < length) {
 			ia = new int[length];
-			sWeakIntArray = new SoftReference<int[]>(ia);
+			sWeakIntArray = new SoftReference<>(ia);
 		}
 
 		for(int i = 0; i < length; i++) {

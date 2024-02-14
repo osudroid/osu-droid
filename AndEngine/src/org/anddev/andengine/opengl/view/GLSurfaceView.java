@@ -751,7 +751,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 		private int mRenderMode;
 		private boolean mRequestRender;
 		private final Renderer mRenderer;
-		private final ArrayList<Runnable> mEventQueue = new ArrayList<Runnable>();
+		private final ArrayList<Runnable> mEventQueue = new ArrayList<>();
 		private EglHelper mEglHelper;
 		private boolean mSizeChanged;
 	}

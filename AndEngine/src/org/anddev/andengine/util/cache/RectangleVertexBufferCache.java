@@ -25,7 +25,7 @@ public class RectangleVertexBufferCache {
 
 	private final int mDrawType;
 
-	private final MultiKeyHashMap<Integer, RectangleVertexBuffer> mRectangleVertexBufferCache = new MultiKeyHashMap<Integer, RectangleVertexBuffer>();
+	private final MultiKeyHashMap<Integer, RectangleVertexBuffer> mRectangleVertexBufferCache = new MultiKeyHashMap<>();
 
 	// ===========================================================
 	// Constructors
@@ -63,7 +63,7 @@ public class RectangleVertexBufferCache {
 	public RectangleVertexBuffer put(final int pWidth, final int pHeight, final RectangleVertexBuffer pRectangleVertexBuffer) {
 		pRectangleVertexBuffer.update(pWidth, pHeight);
 		BufferObjectManager.getActiveInstance().loadBufferObject(pRectangleVertexBuffer);
-		this.mRectangleVertexBufferCache.put(new MultiKey<Integer>(pWidth, pHeight), pRectangleVertexBuffer);
+		this.mRectangleVertexBufferCache.put(new MultiKey<>(pWidth, pHeight), pRectangleVertexBuffer);
 		return pRectangleVertexBuffer;
 	}
 
