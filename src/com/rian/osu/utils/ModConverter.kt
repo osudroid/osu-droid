@@ -40,9 +40,9 @@ fun convertLegacyMods(mods: EnumSet<GameMod>, forceCS: Float = Float.NaN, forceA
             throw IllegalArgumentException("Cannot find the conversion of mod with short name \"${it.shortName}\"")
 
         add(convertedMod)
+    }
 
-        if (arrayOf(forceCS, forceAR, forceOD, forceHP).any { v -> !v.isNaN() }) {
-            add(ModDifficultyAdjust(forceCS, forceAR, forceOD, forceHP))
-        }
+    if (arrayOf(forceCS, forceAR, forceOD, forceHP).any { v -> !v.isNaN() }) {
+        add(ModDifficultyAdjust(forceCS, forceAR, forceOD, forceHP))
     }
 }
