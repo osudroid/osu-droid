@@ -106,7 +106,7 @@ public class BaseCollisionChecker {
 				}
 			}
 		}
-		return (ccw < 0.0f) ? -1 : ((ccw > 0.0f) ? 1 : 0);
+		return Float.compare(ccw, 0.0f);
 	}
 
 	// ===========================================================

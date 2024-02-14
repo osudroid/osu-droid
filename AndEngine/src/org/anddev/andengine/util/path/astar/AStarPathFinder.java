@@ -235,13 +235,7 @@ public class AStarPathFinder<T> implements IPathFinder<T> {
 			final float totalCost = this.mExpectedRestCost + this.mCost;
 			final float totalCostOther = pOther.mExpectedRestCost + pOther.mCost;
 
-			if (totalCost < totalCostOther) {
-				return -1;
-			} else if (totalCost > totalCostOther) {
-				return 1;
-			} else {
-				return 0;
-			}
+			return Float.compare(totalCost, totalCostOther);
 		}
 
 		// ===========================================================

@@ -19,13 +19,7 @@ public interface IModifier<T> {
 		final float durationA = pModifierA.getDuration();
 		final float durationB = pModifierB.getDuration();
 
-		if (durationA < durationB) {
-			return 1;
-		} else if (durationA > durationB) {
-			return -1;
-		} else {
-			return 0;
-		}
+		return Float.compare(durationB, durationA);
 	};
 
 	// ===========================================================
