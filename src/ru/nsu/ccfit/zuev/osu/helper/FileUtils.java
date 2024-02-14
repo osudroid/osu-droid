@@ -3,6 +3,8 @@ package ru.nsu.ccfit.zuev.osu.helper;
 import android.os.Build;
 import android.os.Environment;
 
+import com.soratsuki.library.LibraryManager;
+
 import net.lingala.zip4j.ZipFile;
 
 import org.anddev.andengine.util.Debug;
@@ -25,7 +27,6 @@ import okio.BufferedSink;
 import okio.Okio;
 import okio.Source;
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -68,7 +69,7 @@ public class FileUtils {
                         false);
                 Debug.e("FileUtils.extractZip: " + file.getName() + " is invalid");
                 file.renameTo(new File(file.getParentFile(), sourceFileName + ".badzip"));
-                LibraryManager.deleteDir(folderFile);
+                LibraryManager.INSTANCE.deleteDir(folderFile);
                 return false;
             }
 

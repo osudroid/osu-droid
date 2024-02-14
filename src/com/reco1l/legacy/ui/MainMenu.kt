@@ -4,8 +4,8 @@ import com.reco1l.framework.lang.async
 import com.reco1l.legacy.ui.multiplayer.LobbyScene
 import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.ui.multiplayer.RoomScene
+import com.soratsuki.library.LibraryManager
 import org.anddev.andengine.input.touch.TouchEvent
-import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.MainScene
 import ru.nsu.ccfit.zuev.osu.MainScene.MusicOption
 import ru.nsu.ccfit.zuev.osu.ToastLogger
@@ -69,9 +69,9 @@ class MainMenu(val main: MainScene)
 
                     getGlobal().mainActivity.checkNewSkins()
                     getGlobal().mainActivity.checkNewBeatmaps()
-                    LibraryManager.INSTANCE.updateLibrary(true)
+                    LibraryManager.updateLibrary(true)
 
-                    if (LibraryManager.INSTANCE.library.isEmpty())
+                    if (LibraryManager.library.isEmpty())
                     {
                         main.musicControl(MusicOption.STOP)
 
@@ -147,7 +147,7 @@ class MainMenu(val main: MainScene)
 
                     getGlobal().mainActivity.checkNewSkins()
                     getGlobal().mainActivity.checkNewBeatmaps()
-                    LibraryManager.INSTANCE.updateLibrary(true)
+                    LibraryManager.updateLibrary(true)
 
                     getGlobal().songMenu.reload()
 

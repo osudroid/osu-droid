@@ -49,6 +49,7 @@ import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.UpdateManager;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
+import com.soratsuki.library.LibraryManager;
 
 import net.lingala.zip4j.ZipFile;
 

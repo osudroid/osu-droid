@@ -22,6 +22,7 @@ import com.reco1l.legacy.Multiplayer.isConnected
 import com.reco1l.legacy.Multiplayer.isRoomHost
 import com.reco1l.legacy.Multiplayer.player
 import com.reco1l.legacy.Multiplayer.room
+import com.soratsuki.library.LibraryManager
 import org.anddev.andengine.engine.camera.SmoothCamera
 import org.anddev.andengine.entity.primitive.Rectangle
 import org.anddev.andengine.entity.scene.Scene
@@ -43,7 +44,6 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin
 import java.text.SimpleDateFormat
 import java.util.*
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
-import ru.nsu.ccfit.zuev.osu.LibraryManager.INSTANCE as library
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu.getInstance as getModMenu
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.getInstance as getOnline
@@ -780,7 +780,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         room!!.beatmap = beatmap
 
         // Searching the beatmap in the library
-        getGlobal().selectedTrack = library.findTrackByMD5(beatmap?.md5)
+        getGlobal().selectedTrack = LibraryManager.findTrackByMD5(beatmap?.md5)
 
         // Updating track button
         trackButton!!.updateBeatmap(beatmap)

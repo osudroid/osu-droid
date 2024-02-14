@@ -33,10 +33,10 @@ import java.util.Objects;
 
 import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.UpdateManager;
+import com.soratsuki.library.LibraryManager;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;

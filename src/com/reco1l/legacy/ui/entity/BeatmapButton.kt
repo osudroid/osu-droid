@@ -9,6 +9,7 @@ import com.reco1l.legacy.ui.ChimuWebView as chimuFragment
 import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.ui.ChimuWebView.FILE_EXTENSION
 import com.reco1l.legacy.ui.multiplayer.RoomScene
+import com.soratsuki.library.LibraryManager
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent
@@ -18,7 +19,6 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.menu.MenuItemTrack
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
-import ru.nsu.ccfit.zuev.osu.LibraryManager.INSTANCE as libraryManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 
 /**
@@ -82,7 +82,7 @@ class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-back
 
         if (Multiplayer.isRoomHost)
         {
-            if (libraryManager.library.isEmpty())
+            if (LibraryManager.library.isEmpty())
             {
                 getGlobal().songService.pause()
                 chimuFragment.show()

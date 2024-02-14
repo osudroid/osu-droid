@@ -19,10 +19,10 @@ import com.reco1l.framework.net.Downloader
 import com.reco1l.framework.net.SizeMeasure
 import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.ui.multiplayer.RoomScene
+import com.soratsuki.library.LibraryManager
 import net.lingala.zip4j.ZipFile
 import org.apache.commons.io.FilenameUtils
 import ru.nsu.ccfit.zuev.osu.Config
-import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
@@ -151,7 +151,7 @@ object ChimuWebView : WebViewFragment(), IDownloaderObserver {
                     return
                 }
 
-                LibraryManager.INSTANCE.updateLibrary(true)
+                LibraryManager.updateLibrary(true)
             }
         } catch (e: IOException) {
             ToastLogger.showText("Import failed:" + e.message, true)
