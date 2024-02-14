@@ -1,11 +1,9 @@
 package org.anddev.andengine.util;
 
 import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -119,67 +117,6 @@ public class StreamUtils {
 			}
 		}
 		pOutputStream.flush();
-	}
-
-	public static boolean copyAndClose(final InputStream pInputStream, final OutputStream pOutputStream) {
-		try {
-			StreamUtils.copy(pInputStream, pOutputStream, -1);
-			return true;
-		} catch (final IOException e) {
-			return false;
-		} finally {
-			StreamUtils.close(pInputStream);
-			StreamUtils.close(pOutputStream);
-		}
-	}
-
-	/**
-	 * Closes the specified stream.
-	 *
-	 * @param pCloseable The stream to close.
-	 */
-	public static void close(final Closeable pCloseable) {
-		if(pCloseable != null) {
-			try {
-				pCloseable.close();
-			} catch (final IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	/**
-	 * Flushes and closes the specified stream.
-	 *
-	 * @param pOutputStream The stream to close.
-	 */
-	public static void flushCloseStream(final OutputStream pOutputStream) {
-		if(pOutputStream != null) {
-			try {
-				pOutputStream.flush();
-			} catch (final IOException e) {
-				e.printStackTrace();
-			} finally {
-				StreamUtils.close(pOutputStream);
-			}
-		}
-	}
-
-	/**
-	 * Flushes and closes the specified stream.
-	 *
-	 * @param pWriter The Writer to close.
-	 */
-	public static void flushCloseWriter(final Writer pWriter) {
-		if(pWriter != null) {
-			try {
-				pWriter.flush();
-			} catch (final IOException e) {
-				e.printStackTrace();
-			} finally {
-				StreamUtils.close(pWriter);
-			}
-		}
 	}
 
 	// ===========================================================

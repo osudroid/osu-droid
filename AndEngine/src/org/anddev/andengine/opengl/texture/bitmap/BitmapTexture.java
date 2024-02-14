@@ -62,12 +62,7 @@ public abstract class BitmapTexture extends Texture {
 		final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
 		decodeOptions.inJustDecodeBounds = true;
 
-		final InputStream in = null;
-		try {
-			BitmapFactory.decodeStream(this.onGetInputStream(), null, decodeOptions);
-		} finally {
-			StreamUtils.close(in);
-		}
+		BitmapFactory.decodeStream(this.onGetInputStream(), null, decodeOptions);
 
 		this.mWidth = decodeOptions.outWidth;
 		this.mHeight = decodeOptions.outHeight;

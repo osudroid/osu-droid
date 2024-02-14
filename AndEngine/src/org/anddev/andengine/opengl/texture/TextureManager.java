@@ -109,7 +109,10 @@ public class TextureManager {
 		this.mTexturesToBeLoaded.addAll(this.mTexturesLoaded); // TODO Check if addAll uses iterator internally!
 		this.mTexturesLoaded.clear();
 
-		this.mTexturesManaged.removeAll(this.mTexturesToBeUnloaded); // TODO Check if removeAll uses iterator internally!
+		for (ITexture texture : this.mTexturesToBeUnloaded) {
+			this.mTexturesManaged.remove(texture);
+		}
+
 		this.mTexturesToBeUnloaded.clear();
 	}
 

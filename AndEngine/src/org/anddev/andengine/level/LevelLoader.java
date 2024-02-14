@@ -96,10 +96,8 @@ public class LevelLoader implements LevelConstants {
 	}
 
 	public void registerEntityLoader(final String[] pEntityNames, final IEntityLoader pEntityLoader) {
-		final HashMap<String, IEntityLoader> entityLoaders = this.mEntityLoaders;
-
 		for(int i = pEntityNames.length - 1; i >= 0; i--) {
-			entityLoaders.put(pEntityNames[i], pEntityLoader);
+			this.mEntityLoaders.put(pEntityNames[i], pEntityLoader);
 		}
 	}
 
@@ -130,7 +128,7 @@ public class LevelLoader implements LevelConstants {
 			Debug.e(se);
 			/* Doesn't happen. */
 		} finally {
-			StreamUtils.close(pInputStream);
+			pInputStream.close();
 		}
 	}
 

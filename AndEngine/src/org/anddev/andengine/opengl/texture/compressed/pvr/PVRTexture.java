@@ -66,12 +66,8 @@ public abstract class PVRTexture extends Texture {
 	public PVRTexture(final PVRTextureFormat pPVRTextureFormat, final TextureOptions pTextureOptions, final ITextureStateListener pTextureStateListener) throws IllegalArgumentException, IOException {
 		super(pPVRTextureFormat.getPixelFormat(), pTextureOptions, pTextureStateListener);
 
-		InputStream inputStream = null;
-		try {
-			inputStream = this.getInputStream();
+		try (InputStream inputStream = this.getInputStream()) {
 			this.mPVRTextureHeader = new PVRTextureHeader(StreamUtils.streamToBytes(inputStream, PVRTextureHeader.SIZE));
-		} finally {
-			StreamUtils.close(inputStream);
 		}
 
 		if(!MathUtils.isPowerOfTwo(this.getWidth()) || !MathUtils.isPowerOfTwo(this.getHeight())) {  // TODO GLHelper.EXTENSIONS_NON_POWER_OF_TWO
@@ -171,13 +167,10 @@ public abstract class PVRTexture extends Texture {
 	// ===========================================================
 
 	protected ByteBuffer getPVRDataBuffer() throws IOException {
-		final InputStream inputStream = this.getInputStream();
-		try {
-			final ByteBufferOutputStream os = new ByteBufferOutputStream(DataConstants.BYTES_PER_KILOBYTE, DataConstants.BYTES_PER_MEGABYTE / 2);
+		try (InputStream inputStream = this.getInputStream();
+			 ByteBufferOutputStream os = new ByteBufferOutputStream(DataConstants.BYTES_PER_KILOBYTE, DataConstants.BYTES_PER_MEGABYTE / 2)) {
 			StreamUtils.copy(inputStream, os);
 			return os.toByteBuffer();
-		} finally {
-			StreamUtils.close(inputStream);
 		}
 	}
 
@@ -233,11 +226,11 @@ public abstract class PVRTexture extends Texture {
 		}
 
 		public int headerLength() {
-			return this.mDataByteBuffer.getInt(0 * DataConstants.BYTES_PER_INT); // TODO Constants
+			return this.mDataByteBuffer.getInt(0); // TODO Constants
 		}
 
 		public int getHeight() {
-			return this.mDataByteBuffer.getInt(1 * DataConstants.BYTES_PER_INT);
+			return this.mDataByteBuffer.getInt(DataConstants.BYTES_PER_INT);
 		}
 
 		public int getWidth() {

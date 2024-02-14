@@ -138,7 +138,7 @@ public class ColorPickerPreference
         int c = color;
         for (int i = 0; i < w; i++) {
             for (int j = i; j < h; j++) {
-                c = (i <= 1 || j <= 1 || i >= w - 2 || j >= h - 2) ? Color.GRAY : color;
+                c = i <= 1 || i >= w - 2 || j >= h - 2 ? Color.GRAY : color;
                 bm.setPixel(i, j, c);
                 if (i != j) {
                     bm.setPixel(j, i, c);

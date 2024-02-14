@@ -50,14 +50,10 @@ public class FileBitmapTextureAtlasSource extends BaseTextureAtlasSource impleme
 		final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
 		decodeOptions.inJustDecodeBounds = true;
 
-		InputStream in = null;
-		try {
-			in = new FileInputStream(pFile);
+		try(FileInputStream in = new FileInputStream(pFile)) {
 			BitmapFactory.decodeStream(in, null, decodeOptions);
 		} catch (final IOException e) {
 			Debug.e("Failed loading Bitmap in FileBitmapTextureAtlasSource. File: " + pFile, e);
-		} finally {
-			StreamUtils.close(in);
 		}
 
 		this.mWidth = decodeOptions.outWidth;
@@ -99,15 +95,11 @@ public class FileBitmapTextureAtlasSource extends BaseTextureAtlasSource impleme
 		final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
 		decodeOptions.inPreferredConfig = pBitmapConfig;
 
-		InputStream in = null;
-		try {
-			in = new FileInputStream(this.mFile);
+		try(FileInputStream in = new FileInputStream(this.mFile)) {
 			return BitmapFactory.decodeStream(in, null, decodeOptions);
 		} catch (final IOException e) {
 			Debug.e("Failed loading Bitmap in " + this.getClass().getSimpleName() + ". File: " + this.mFile, e);
 			return null;
-		} finally {
-			StreamUtils.close(in);
 		}
 	}
 

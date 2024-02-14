@@ -16,7 +16,7 @@ public class LocationSensorOptions extends Criteria {
 	// Constants
 	// ===========================================================
 
-	private static final long MINIMUMTRIGGERTIME_DEFAULT = 1 * TimeConstants.MILLISECONDSPERSECOND;
+	private static final long MINIMUMTRIGGERTIME_DEFAULT = TimeConstants.MILLISECONDSPERSECOND;
 	private static final long MINIMUMTRIGGERDISTANCE_DEFAULT = 10;
 
 	// ===========================================================

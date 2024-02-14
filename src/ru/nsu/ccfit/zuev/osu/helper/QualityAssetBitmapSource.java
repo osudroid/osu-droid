@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 
+import androidx.annotation.NonNull;
+
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
 import org.anddev.andengine.opengl.texture.source.BaseTextureAtlasSource;
 import org.anddev.andengine.util.Debug;
@@ -45,14 +47,10 @@ public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements
         decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config
                 .getTextureQuality();
 
-        InputStream in = null;
-        try {
-            in = pContext.getAssets().open(pAssetPath);
+        try (InputStream in = pContext.getAssets().open(pAssetPath)) {
             BitmapFactory.decodeStream(in, null, decodeOptions);
         } catch (final IOException e) {
             // Debug.e("Failed loading Bitmap in AssetBitmapTextureAtlasSource. AssetPath: " + pAssetPath, e);
-        } finally {
-            StreamUtils.close(in);
         }
 
         this.mWidth = decodeOptions.outWidth;
@@ -106,26 +104,21 @@ public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements
             bitmap = null;
             return bmp;
         }
-        InputStream in = null;
-        try {
+        try (InputStream in = this.mContext.getAssets().open(this.mAssetPath)) {
             final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
             decodeOptions.inPreferredConfig = pBitmapConfig;
-            decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config
-                    .getTextureQuality();
-
-            in = this.mContext.getAssets().open(this.mAssetPath);
+            decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config.getTextureQuality();
             return BitmapFactory.decodeStream(in, null, decodeOptions);
         } catch (final IOException e) {
             Debug.e("Failed loading Bitmap in "
                     + this.getClass().getSimpleName() + ". AssetPath: "
                     + this.mAssetPath, e);
             return null;
-        } finally {
-            StreamUtils.close(in);
         }
     }
 
 
+    @NonNull
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "(" + this.mAssetPath + ")";

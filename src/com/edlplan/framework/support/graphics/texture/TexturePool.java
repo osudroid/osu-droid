@@ -195,7 +195,7 @@ public class TexturePool {
             raw.pageIndex = currentPack;
             raw.pos = new Vec2Int(currentX, currentY);
             currentX += raw.size.x + marginX;
-            lineMaxY = Math.round(Math.max(lineMaxY, currentY + raw.size.y + marginY));
+            lineMaxY = Math.max(lineMaxY, currentY + raw.size.y + marginY);
         } else {
             toNewPack();
             tryAddToPack(raw);

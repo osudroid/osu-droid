@@ -53,13 +53,8 @@ public abstract class ETC1Texture extends Texture {
 	public ETC1Texture(final TextureOptions pTextureOptions, final ITextureStateListener pTextureStateListener) throws IOException {
 		super(PixelFormat.RGB_565, pTextureOptions, pTextureStateListener);
 
-		InputStream inputStream = null;
-		try {
-			inputStream = this.getInputStream();
-
+		try (InputStream inputStream = this.getInputStream()) {
 			this.mETC1TextureHeader = new ETC1TextureHeader(StreamUtils.streamToBytes(inputStream, ETC1.ETC_PKM_HEADER_SIZE));
-		} finally {
-			StreamUtils.close(inputStream);
 		}
 	}
 

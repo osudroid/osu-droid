@@ -43,8 +43,8 @@ public class LineCollisionChecker extends ShapeCollisionChecker {
 	}
 
 	public static void fillVertices(final Line pLine, final float[] pVertices) {
-		pVertices[0 + VERTEX_INDEX_X] = 0;
-		pVertices[0 + VERTEX_INDEX_Y] = 0;
+		pVertices[VERTEX_INDEX_X] = 0;
+		pVertices[VERTEX_INDEX_Y] = 0;
 
 		pVertices[2 + VERTEX_INDEX_X] = pLine.getX2() - pLine.getX1();
 		pVertices[2 + VERTEX_INDEX_Y] = pLine.getY2() - pLine.getY1();

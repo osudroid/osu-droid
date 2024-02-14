@@ -53,9 +53,7 @@ public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
         decodeOptions.inJustDecodeBounds = true;
         decodeOptions.inSampleSize = inSampleSize;
 
-        InputStream in = null;
-        try {
-            in = openInputStream();
+        try (InputStream in = openInputStream()) {
             BitmapFactory.decodeStream(in, null, decodeOptions);
 
             this.mWidth = decodeOptions.outWidth;
@@ -65,8 +63,6 @@ public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
                     + pFile, e);
             this.mWidth = 0;
             this.mHeight = 0;
-        } finally {
-            StreamUtils.close(in);
         }
 
     }
@@ -125,17 +121,13 @@ public class QualityFileBitmapSource extends BaseTextureAtlasSource implements
         decodeOptions.inPreferredConfig = Config.ARGB_8888;//pBitmapConfig;
         decodeOptions.inSampleSize = inSampleSize;
 
-        InputStream in = null;
-        try {
-            in = openInputStream();
+        try (InputStream in = openInputStream()) {
             return BitmapFactory.decodeStream(in, null, decodeOptions);
         } catch (final IOException e) {
             Debug.e("Failed loading Bitmap in "
                             + this.getClass().getSimpleName() + ". File: " + this.fileBitmapInput,
                     e);
             return null;
-        } finally {
-            StreamUtils.close(in);
         }
     }
 

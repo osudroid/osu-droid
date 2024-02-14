@@ -91,7 +91,7 @@ public class DigitalOnScreenControl extends BaseOnScreenControl {
 					super.onUpdateControlKnob(EXTENT_SIDE, 0);
 				} else if(pRelativeX < 0) {
 					super.onUpdateControlKnob(-EXTENT_SIDE, 0);
-				} else if(pRelativeX == 0) {
+				} else {
 					super.onUpdateControlKnob(0, 0);
 				}
 			} else {
@@ -99,7 +99,7 @@ public class DigitalOnScreenControl extends BaseOnScreenControl {
 					super.onUpdateControlKnob(0, EXTENT_SIDE);
 				} else if(pRelativeY < 0) {
 					super.onUpdateControlKnob(0, -EXTENT_SIDE);
-				} else if(pRelativeY == 0) {
+				} else {
 					super.onUpdateControlKnob(0, 0);
 				}
 			}

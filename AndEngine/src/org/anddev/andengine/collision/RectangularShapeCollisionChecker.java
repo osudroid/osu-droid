@@ -86,8 +86,8 @@ public class RectangularShapeCollisionChecker extends ShapeCollisionChecker {
 		final float right = pRectangularShape.getWidth();
 		final float bottom = pRectangularShape.getHeight();
 
-		pVertices[0 + VERTEX_INDEX_X] = left;
-		pVertices[0 + VERTEX_INDEX_Y] = top;
+		pVertices[VERTEX_INDEX_X] = left;
+		pVertices[VERTEX_INDEX_Y] = top;
 
 		pVertices[2 + VERTEX_INDEX_X] = right;
 		pVertices[2 + VERTEX_INDEX_Y] = top;
@@ -102,8 +102,8 @@ public class RectangularShapeCollisionChecker extends ShapeCollisionChecker {
 	}
 
 	private static void fillVertices(final Camera pCamera, final float[] pVertices) {
-		pVertices[0 + VERTEX_INDEX_X] = pCamera.getMinX();
-		pVertices[0 + VERTEX_INDEX_Y] = pCamera.getMinY();
+		pVertices[VERTEX_INDEX_X] = pCamera.getMinX();
+		pVertices[VERTEX_INDEX_Y] = pCamera.getMinY();
 
 		pVertices[2 + VERTEX_INDEX_X] = pCamera.getMaxX();
 		pVertices[2 + VERTEX_INDEX_Y] = pCamera.getMinY();

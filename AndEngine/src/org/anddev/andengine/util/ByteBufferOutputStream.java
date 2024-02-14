@@ -57,11 +57,6 @@ public class ByteBufferOutputStream extends OutputStream {
 		this.mCount += pLength;
 	}
 
-	@Override
-	public void close() throws IOException {
-
-	}
-
 	// ===========================================================
 	// Methods
 	// ===========================================================
