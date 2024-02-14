@@ -5,9 +5,7 @@ import com.edlplan.osu.support.timing.TimingPoints;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 public class ControlPoints {
     private final ArrayList<TimingControlPoint> timingPoints = new ArrayList<>();

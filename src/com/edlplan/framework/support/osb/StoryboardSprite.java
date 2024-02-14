@@ -7,7 +7,6 @@ import com.edlplan.edlosbsupport.elements.StoryboardAnimationSprite;
 import com.edlplan.edlosbsupport.parser.OsbFileParser;
 import com.edlplan.edlosbsupport.player.OsbPlayer;
 import com.edlplan.framework.math.Vec2;
-import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.SupportSprite;
 import com.edlplan.framework.support.graphics.BaseCanvas;
 import com.edlplan.framework.support.graphics.texture.TexturePool;

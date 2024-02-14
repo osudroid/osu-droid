@@ -3,8 +3,6 @@ package com.edlplan.ui.fragment;
 import android.animation.Animator;
 import android.view.View;
 
-import androidx.annotation.StringRes;
-
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;

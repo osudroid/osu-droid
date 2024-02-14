@@ -13,7 +13,6 @@ import org.anddev.andengine.opengl.texture.Texture.PixelFormat;
 import org.anddev.andengine.util.Debug;
 
 import android.graphics.Bitmap;
-import android.opengl.GLES10;
 import android.opengl.GLException;
 import android.opengl.GLUtils;
 import android.os.Build;

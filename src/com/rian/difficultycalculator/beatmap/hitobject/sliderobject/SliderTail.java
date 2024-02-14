@@ -1,6 +1,5 @@
 package com.rian.difficultycalculator.beatmap.hitobject.sliderobject;
 
-import com.rian.difficultycalculator.beatmap.hitobject.HitObject;
 import com.rian.difficultycalculator.math.Vector2;
 
 /**

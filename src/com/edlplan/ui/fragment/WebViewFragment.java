@@ -10,9 +10,6 @@ import android.webkit.WebView;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebViewClient;
-import android.widget.ImageButton;
-
-import androidx.annotation.StringRes;
 
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;

@@ -9,9 +9,6 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorSprite;
-
 public class CursorTrail extends ParticleSystem {
     public CursorTrail(
             PointParticleEmitter emitter,

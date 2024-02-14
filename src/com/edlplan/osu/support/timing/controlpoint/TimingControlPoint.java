@@ -1,7 +1,5 @@
 package com.edlplan.osu.support.timing.controlpoint;
 
-import com.edlplan.framework.math.FMath;
-
 public class TimingControlPoint extends ControlPoint {
     private int meter;
 

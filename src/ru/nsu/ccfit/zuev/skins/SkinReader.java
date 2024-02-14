@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.zuev.skins;
 
-import org.json.JSONObject;
-
 public abstract class SkinReader {
 
     public void loadSkin() {
