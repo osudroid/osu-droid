@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 
+import androidx.annotation.NonNull;
+
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
 import org.anddev.andengine.opengl.texture.source.BaseTextureAtlasSource;
 import org.anddev.andengine.util.Debug;
@@ -57,19 +59,14 @@ public class ScaledBitmapSource extends BaseTextureAtlasSource implements
         }
     }
 
-    ScaledBitmapSource(final File pFile, final int pTexturePositionX,
-                       final int pTexturePositionY, final int pWidth, final int pHeight) {
-        super(pTexturePositionX, pTexturePositionY);
-        this.mFile = pFile;
-        this.mWidth = pWidth;
-        this.mHeight = pHeight;
-    }
-
-
+    @NonNull
     @Override
     public ScaledBitmapSource clone() {
-        return new ScaledBitmapSource(this.mFile, this.mTexturePositionX,
-                this.mTexturePositionY, this.mWidth, this.mHeight);
+        try {
+            return (ScaledBitmapSource) super.clone();
+        } catch (final CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 
     // ===========================================================
@@ -122,6 +119,7 @@ public class ScaledBitmapSource extends BaseTextureAtlasSource implements
     }
 
 
+    @NonNull
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "(" + this.mFile + ")";
