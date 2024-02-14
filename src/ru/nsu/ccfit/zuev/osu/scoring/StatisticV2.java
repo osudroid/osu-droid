@@ -935,7 +935,6 @@ public class StatisticV2 implements Serializable {
             switch (m) {
                 case MOD_HARDROCK -> {
                     ++cs;
-                    continue;
                 }
                 case MOD_EASY, MOD_REALLYEASY -> --cs;
             }

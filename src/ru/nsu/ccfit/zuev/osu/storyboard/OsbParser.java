@@ -90,7 +90,6 @@ public class OsbParser {
                 }
                 info = line.split(",");
                 int layer = switch (info[1]) {
-                    case "Background" -> 0;
                     case "Fail" -> 1;
                     case "Pass" -> 2;
                     case "Foreground" -> 3;
@@ -113,7 +112,6 @@ public class OsbParser {
                 }
                 info = line.split(",");
                 int layer = switch (info[1]) {
-                    case "Background" -> 0;
                     case "Fail" -> 1;
                     case "Pass" -> 2;
                     case "Foreground" -> 3;

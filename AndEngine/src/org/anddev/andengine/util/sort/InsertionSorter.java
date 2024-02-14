@@ -45,7 +45,6 @@ public class InsertionSorter<T> extends Sorter<T> {
 				pArray[j] = current;
 			}
 		}
-		return;
 	}
 
 	@Override
@@ -61,7 +60,6 @@ public class InsertionSorter<T> extends Sorter<T> {
 				pList.set(j, current);
 			}
 		}
-		return;
 	}
 
 	// ===========================================================

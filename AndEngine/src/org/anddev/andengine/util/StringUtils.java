@@ -51,7 +51,7 @@ public class StringUtils {
 	public static int countOccurrences(final String pString, final char pCharacter) {
 		int count = 0;
 
-		int lastOccurrence = pString.indexOf(pCharacter, 0);
+		int lastOccurrence = pString.indexOf(pCharacter);
 
 		while (lastOccurrence != -1) {
 			count++;
@@ -100,7 +100,7 @@ public class StringUtils {
 				from = to + 1;
 			}
 
-			out[partCount - 1] = pString.substring(from, pString.length());
+			out[partCount - 1] = pString.substring(from);
 		}
 
 		return out;
