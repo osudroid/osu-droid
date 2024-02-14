@@ -25,6 +25,4 @@ class HitCircle(
      * How many combo colors to skip, if this [HitCircle] starts a new combo.
      */
     comboColorOffset: Int = 0
-) : HitObject(startTime, position, isNewCombo, comboColorOffset) {
-    override fun clone() = super.clone() as HitCircle
-}
+) : HitObject(startTime, position, isNewCombo, comboColorOffset)

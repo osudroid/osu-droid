@@ -5,50 +5,50 @@ import com.rian.osu.math.Vector2
 import com.rian.osu.utils.PathApproximation
 
 /**
- * Represents the path of a slider.
+ * Represents the path of a [Slider].
  */
 class SliderPath(
     /**
-     * The path type of this slider.
+     * The path type of the [Slider].
      */
     type: SliderPathType,
 
     /**
-     * The control points (anchor points) of this slider path.
+     * The control points (anchor points) of this [SliderPath].
      */
     controlPoints: MutableList<Vector2>,
 
     /**
-     * The distance that is expected when calculating slider path.
+     * The distance that is expected when calculating [SliderPath].
      */
     expectedDistance: Double
-): Cloneable {
+) {
     /**
-     * The path type of this slider.
+     * The path type of the [Slider].
      */
     var pathType: SliderPathType = type
         private set
 
     /**
-     * The control points (anchor points) of this slider path.
+     * The control points (anchor points) of this [SliderPath].
      */
     var controlPoints = controlPoints
         private set
 
     /**
-     * The distance that is expected when calculating slider path.
+     * The distance that is expected when calculating this [SliderPath].
      */
     var expectedDistance = expectedDistance
         private set
 
     /**
-     * The calculated path of this slider path.
+     * The calculated path of this [SliderPath].
      */
     var calculatedPath = mutableListOf<Vector2>()
         private set
 
     /**
-     * The cumulative length of this slider path.
+     * The cumulative length of this [SliderPath].
      */
     var cumulativeLength = mutableListOf<Double>()
         private set
@@ -59,7 +59,7 @@ class SliderPath(
     }
 
     /**
-     * Computes the position on the slider at a given progress that ranges from 0
+     * Computes the position on the [Slider] at a given progress that ranges from 0
      * (beginning of the path) to 1 (end of the path).
      *
      * @param progress Ranges from 0 (beginning of the path) to 1 (end of the path).
@@ -68,7 +68,7 @@ class SliderPath(
         progressToDistance(progress).let { interpolateVertices(indexOfDistance(it), it) }
 
     /**
-     * Calculates the path of this slider.
+     * Calculates the path of this [SliderPath].
      */
     private fun calculatePath() {
         calculatedPath.clear()
@@ -92,7 +92,7 @@ class SliderPath(
     }
 
     /**
-     * Calculates the cumulative length of this slider.
+     * Calculates the cumulative length of this [SliderPath].
      */
     private fun calculateCumulativeLength() {
         cumulativeLength.clear()
@@ -162,7 +162,7 @@ class SliderPath(
     private fun progressToDistance(progress: Double) = progress.coerceIn(0.0, 1.0) * expectedDistance
 
     /**
-     * Interpolates vertices of the slider.
+     * Interpolates vertices of the [SliderPath] at a certain point.
      */
     private fun interpolateVertices(i: Int, d: Double): Vector2 {
         if (calculatedPath.isEmpty()) {
@@ -223,18 +223,4 @@ class SliderPath(
 
         return l
     }
-
-    public override fun clone() =
-        (super.clone() as SliderPath).also {
-            it.pathType = pathType
-
-            it.controlPoints = mutableListOf()
-            controlPoints.forEach { c -> it.controlPoints.add(c.copy()) }
-
-            it.calculatedPath = mutableListOf()
-            calculatedPath.forEach { p -> it.calculatedPath.add(p.copy()) }
-
-            it.cumulativeLength = mutableListOf()
-            it.cumulativeLength.addAll(cumulativeLength)
-        }
 }

@@ -7,7 +7,7 @@ import com.rian.osu.beatmap.hitobject.Slider
 /**
  * Contains information about hit objects of a beatmap.
  */
-class BeatmapHitObjects : Cloneable {
+class BeatmapHitObjects {
     /**
      * All objects in this beatmap.
      */
@@ -126,11 +126,4 @@ class BeatmapHitObjects : Cloneable {
 
         return l
     }
-
-    public override fun clone() =
-        (super.clone() as BeatmapHitObjects).also {
-            it.objects = mutableListOf()
-
-            objects.forEach { o -> it.objects.add(o.clone()) }
-        }
 }

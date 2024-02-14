@@ -15,6 +15,4 @@ class ComboColor(
      * The underlying [RGBColor].
      */
     color: RGBColor
-) : RGBColor(color), Cloneable {
-    public override fun clone() = super.clone() as ComboColor
-}
+) : RGBColor(color)

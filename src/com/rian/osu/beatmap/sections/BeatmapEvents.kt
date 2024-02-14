@@ -6,7 +6,7 @@ import com.rian.osu.beatmap.timings.BreakPeriod
 /**
  * Contains beatmap events.
  */
-class BeatmapEvents : Cloneable {
+class BeatmapEvents {
     /**
      * The file name of this beatmap's background.
      */
@@ -36,12 +36,4 @@ class BeatmapEvents : Cloneable {
      */
     @JvmField
     var backgroundColor: RGBColor? = null
-
-    public override fun clone() =
-        (super.clone() as BeatmapEvents).also {
-            it.breaks = mutableListOf()
-            breaks.forEach { b -> it.breaks.add(b.copy()) }
-
-            it.backgroundColor = backgroundColor?.let { b -> RGBColor(b) }
-        }
 }

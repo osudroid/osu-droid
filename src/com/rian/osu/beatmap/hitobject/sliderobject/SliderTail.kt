@@ -7,24 +7,22 @@ import com.rian.osu.math.Vector2
  */
 class SliderTail(
     /**
-     * The time at which this slider repeat starts, in milliseconds.
+     * The time at which this [SliderTail] starts, in milliseconds.
      */
     startTime: Double,
 
     /**
-     * The position of the slider repeat relative to the play field.
+     * The position of this [SliderTail] relative to the play field.
      */
     position: Vector2,
 
     /**
-     * The index of the span at which this slider repeat lies.
+     * The index of the span at which this [SliderTail] lies.
      */
     spanIndex: Int,
 
     /**
-     * The start time of the span at which this slider repeat lies, in milliseconds.
+     * The start time of the span at which this [SliderTail] lies, in milliseconds.
      */
     spanStartTime: Double
-) : SliderHitObject(startTime, position, spanIndex, spanStartTime) {
-    override fun clone() = super.clone() as SliderTail
-}
+) : SliderHitObject(startTime, position, spanIndex, spanStartTime)

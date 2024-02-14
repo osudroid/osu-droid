@@ -33,7 +33,7 @@ abstract class HitObject(
      */
     @JvmField
     val comboColorOffset: Int = 0
-) : Cloneable {
+) {
     /**
      * The stack height of this [HitObject].
      */
@@ -60,7 +60,7 @@ abstract class HitObject(
     /**
      * The samples to be played when this [HitObject] is hit.
      *
-     * In the case of sliders, this is the sample of the curve body
+     * In the case of [Slider]s, this is the sample of the curve body
      * and can be treated as the default samples for the [HitObject].
      */
     var samples = mutableListOf<HitSampleInfo>()
@@ -154,17 +154,6 @@ abstract class HitObject(
     protected fun createHitSampleInfo(sampleName: String) =
         samples.filterIsInstance<BankHitSampleInfo>().find { it.name == BankHitSampleInfo.HIT_NORMAL }?.copy(name = sampleName) ?:
         BankHitSampleInfo(sampleName, SampleBank.None)
-
-    public override fun clone() =
-        (super.clone() as HitObject).also {
-            it.position = position.copy()
-
-            it.auxiliarySamples = mutableListOf()
-            auxiliarySamples.forEach { s -> it.auxiliarySamples.add(s.copy()) }
-
-            it.samples = mutableListOf()
-            samples.forEach { s -> it.samples.add(s.copy()) }
-        }
 
     companion object {
         /**

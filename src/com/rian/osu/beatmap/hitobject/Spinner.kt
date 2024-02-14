@@ -23,6 +23,4 @@ class Spinner(
 
     override val duration: Double
         get() = endTime - startTime
-
-    override fun clone() = super.clone() as Spinner
 }

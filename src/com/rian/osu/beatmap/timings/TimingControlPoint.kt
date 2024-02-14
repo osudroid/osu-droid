@@ -1,11 +1,11 @@
 package com.rian.osu.beatmap.timings
 
 /**
- * Represents a control point that changes a beatmap's BPM.
+ * Represents a [ControlPoint] that changes a beatmap's BPM and time signature.
  */
 class TimingControlPoint(
     /**
-     * The time at which this control point takes effect, in milliseconds.
+     * The time at which this [TimingControlPoint] takes effect, in milliseconds.
      */
     time: Double,
 
@@ -16,19 +16,17 @@ class TimingControlPoint(
     val msPerBeat: Double,
 
     /**
-     * The time signature at this control point.
+     * The time signature at this [TimingControlPoint].
      */
     @JvmField
     val timeSignature: Int
 ) : ControlPoint(time) {
     /**
-     * The BPM of this control point.
+     * The BPM at this [TimingControlPoint].
      */
-    val BPM: Double
+    val bpm: Double
         get() = 60000 / msPerBeat
 
     // Timing points are never redundant as they can change the time signature.
     override fun isRedundant(existing: ControlPoint) = false
-
-    override fun clone() = super.clone() as TimingControlPoint
 }

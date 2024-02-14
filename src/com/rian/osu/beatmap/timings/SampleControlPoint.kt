@@ -6,22 +6,22 @@ import com.rian.osu.beatmap.hitobject.FileHitSampleInfo
 import com.rian.osu.beatmap.hitobject.HitSampleInfo
 
 /**
- * Represents a control point that handles sound samples.
+ * Represents a [ControlPoint] that handles sound samples.
  */
 class SampleControlPoint(
     /**
-     * The time at which this control point takes effect, in milliseconds.
+     * The time at which this [SampleControlPoint] takes effect, in milliseconds.
      */
     time: Double,
 
     /**
-     * The sample bank at this control point.
+     * The sample bank at this [SampleControlPoint].
      */
     @JvmField
     val sampleBank: SampleBank,
 
     /**
-     * The sample volume at this control point.
+     * The sample volume at this [SampleControlPoint].
      */
     @JvmField
     val sampleVolume: Int,
@@ -61,6 +61,4 @@ class SampleControlPoint(
             else -> throw IllegalArgumentException("Unknown type of hit sample.")
         }
     }
-
-    override fun clone() = super.clone() as SampleControlPoint
 }

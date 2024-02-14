@@ -359,43 +359,6 @@ class Slider(
         }
     }
 
-    override fun clone() =
-        (super.clone() as Slider).also {
-            it.path = path.clone()
-            it.head = head.clone()
-            it.tail = tail.clone()
-            it.lazyEndPosition = lazyEndPosition?.copy()
-
-            it.nestedHitObjects = mutableListOf<SliderHitObject>().apply {
-                add(head)
-
-                this@Slider.nestedHitObjects.forEachIndexed { index, obj ->
-                    if (index == 0 || index == this@Slider.nestedHitObjects.size - 1) {
-                        return@forEachIndexed
-                    }
-
-                    add(obj.clone())
-                }
-
-                add(tail)
-            }
-
-            it.nodeSamples = mutableListOf()
-            nodeSamples.forEach { nodeSample ->
-                it.nodeSamples.add(
-                    mutableListOf<HitSampleInfo>().also { hitSampleList ->
-                        nodeSample.forEach { n -> hitSampleList.add(n.copy()) }
-                    }
-                )
-            }
-
-            it.endPositionCache = Cached(endPositionCache.value)
-
-            if (!endPositionCache.isValid) {
-                it.endPositionCache.invalidate()
-            }
-        }
-
     companion object {
         const val LEGACY_LAST_TICK_OFFSET = 36.0
         private const val BASE_SCORING_DISTANCE = 100f

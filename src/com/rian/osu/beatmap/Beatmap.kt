@@ -4,8 +4,6 @@ import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.getEndTime
 import com.rian.osu.beatmap.sections.*
 
-// TODO: support beatmap conversion
-
 /**
  * Represents a beatmap.
  */

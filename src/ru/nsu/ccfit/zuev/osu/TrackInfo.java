@@ -289,7 +289,7 @@ public class TrackInfo implements Serializable {
 
         // Timing points
         for (var point : beatmap.controlPoints.getTiming().getControlPoints()) {
-            float bpm = (float) point.getBPM();
+            float bpm = (float) point.getBpm();
 
             bpmMin = bpmMin != Float.MAX_VALUE ? Math.min(bpmMin, bpm) : bpm;
             bpmMax = bpmMax != 0 ? Math.max(bpmMax, bpm) : bpm;

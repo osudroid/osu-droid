@@ -8,7 +8,7 @@ abstract class ControlPointManager<T : ControlPoint>(
      * The default control point for this type.
      */
     defaultControlPoint: T
-): Cloneable {
+) {
     /**
      * The default control point for this type.
      */
@@ -163,13 +163,4 @@ abstract class ControlPointManager<T : ControlPoint>(
 
         return l
     }
-
-    @Suppress("UNCHECKED_CAST")
-    public override fun clone() =
-        (super.clone() as ControlPointManager<T>).also {
-            it.defaultControlPoint = defaultControlPoint.clone() as T
-
-            it.controlPoints = mutableListOf()
-            controlPoints.forEach { c -> it.controlPoints.add(c.clone() as T) }
-        }
 }

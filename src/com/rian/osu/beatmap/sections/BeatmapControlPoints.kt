@@ -8,7 +8,7 @@ import com.rian.osu.beatmap.timings.TimingControlPointManager
 /**
 * Contains information about the timing (control) points of a beatmap.
 */
-class BeatmapControlPoints : Cloneable {
+class BeatmapControlPoints {
     /**
      * The manager for timing control points of this beatmap.
      */
@@ -32,12 +32,4 @@ class BeatmapControlPoints : Cloneable {
      */
     var sample = SampleControlPointManager()
         private set
-
-    public override fun clone() =
-        (super.clone() as BeatmapControlPoints).apply {
-            timing = this@BeatmapControlPoints.timing.clone()
-            difficulty = this@BeatmapControlPoints.difficulty.clone()
-            effect = this@BeatmapControlPoints.effect.clone()
-            sample = this@BeatmapControlPoints.sample.clone()
-        }
 }

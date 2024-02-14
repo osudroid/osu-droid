@@ -7,14 +7,12 @@ import com.rian.osu.math.Vector2
  */
 class SliderHead(
     /**
-     * The start time of this slider head, in milliseconds.
+     * The start time of this [SliderHead], in milliseconds.
      */
     startTime: Double,
 
     /**
-     * The position of this slider head relative to the play field.
+     * The position of this [SliderHead] relative to the play field.
      */
     position: Vector2
-) : SliderHitObject(startTime, position, 0, startTime) {
-    override fun clone() = super.clone() as SliderHead
-}
+) : SliderHitObject(startTime, position, 0, startTime)

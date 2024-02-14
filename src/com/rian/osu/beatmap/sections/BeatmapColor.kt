@@ -6,7 +6,7 @@ import ru.nsu.ccfit.zuev.osu.RGBColor
 /**
  * Contains information about combo and skin colors of a beatmap.
  */
-class BeatmapColor : Cloneable {
+class BeatmapColor {
     /**
      * The combo colors of this beatmap.
      */
@@ -18,12 +18,4 @@ class BeatmapColor : Cloneable {
      */
     @JvmField
     var sliderBorderColor: RGBColor? = null
-
-    public override fun clone() =
-        (super.clone() as BeatmapColor).also {
-            it.comboColors = mutableListOf()
-            comboColors.forEach { c -> it.comboColors.add(c.clone()) }
-
-            it.sliderBorderColor = sliderBorderColor?.let { RGBColor(it) }
-        }
 }
