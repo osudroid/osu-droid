@@ -215,7 +215,7 @@ class DifficultyHitObject(
             travelDistance = obj.lazyTravelDistance.toDouble()
 
             // Bonus for repeat sliders until a better per nested object strain system can be achieved.
-            travelDistance *= (1 + (obj.repeatCount - 1) / 2.5).pow(1 / 2.5)
+            travelDistance *= (1 + obj.repeatCount / 2.5).pow(1 / 2.5)
             travelTime = max(obj.lazyTravelTime / clockRate, MIN_DELTA_TIME)
         }
 

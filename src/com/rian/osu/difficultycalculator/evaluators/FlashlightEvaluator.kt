@@ -98,7 +98,7 @@ object FlashlightEvaluator {
             sliderBonus *= pixelTravelDistance
 
             // Nerf sliders with repeats, as less memorization is required.
-            sliderBonus /= current.obj.repeatCount.toDouble()
+            sliderBonus /= current.obj.repeatCount + 1
         }
 
         val sliderMultiplier = 1.3

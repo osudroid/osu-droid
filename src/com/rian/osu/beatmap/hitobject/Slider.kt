@@ -57,7 +57,7 @@ class Slider(
     var nodeSamples: MutableList<MutableList<HitSampleInfo>>
 ) : HitObject(startTime, position, isNewCombo, comboColorOffset), IHasDuration {
     override val endTime: Double
-        get() = startTime + repeatCount * path.expectedDistance / velocity
+        get() = startTime + spanCount * path.expectedDistance / velocity
 
     override val duration: Double
         get() = endTime - startTime
@@ -89,15 +89,19 @@ class Slider(
         get() = path.expectedDistance
 
     /**
-     * The repetition amount of this [Slider].
-     *
-     * Note that 1 repetition means no repeats (1 loop).
+     * The amount of times this [Slider] repeats.
      */
     var repeatCount = repeatCount
         set(value) {
-            field = value.coerceAtLeast(1)
+            field = value.coerceAtLeast(0)
             updateNestedPositions()
         }
+
+    /**
+     * The amount of times the length of this [Slider] spans.
+     */
+    val spanCount: Int
+        get() = repeatCount + 1
 
     /**
      * The nested hit objects of this [Slider].
@@ -168,7 +172,7 @@ class Slider(
      * The duration of one span of this [Slider].
      */
     val spanDuration: Double
-        get() = duration / repeatCount
+        get() = duration / spanCount
 
     override var scale: Float = super.scale
         set(value) {
@@ -249,7 +253,7 @@ class Slider(
         if (tickDistance != 0.0 && generateTicks) {
             val minDistanceFromEnd = velocity * 10
 
-            for (span in 0 until repeatCount) {
+            for (span in 0 until spanCount) {
                 val spanStartTime = startTime + span * spanDuration
                 val reversed = span % 2 == 1
                 val sliderTicks: ArrayList<SliderTick> = ArrayList()
@@ -285,7 +289,7 @@ class Slider(
 
                 nestedHitObjects.addAll(sliderTicks)
 
-                if (span < repeatCount - 1) {
+                if (span < spanCount - 1) {
                     val repeatPosition = position + path.positionAt(((span + 1) % 2).toDouble())
 
                     nestedHitObjects.add(
@@ -308,7 +312,7 @@ class Slider(
         // Generally we are keeping this around just for difficulty compatibility.
         // Optimistically we do not want to ever use this for anything user-facing going forwards.
         // Temporarily set end time to start time. It will be evaluated later.
-        val finalSpanIndex = repeatCount - 1
+        val finalSpanIndex = repeatCount
         val finalSpanStartTime = startTime + finalSpanIndex * spanDuration
         val finalSpanEndTime = max(
             startTime + duration / 2,
@@ -348,7 +352,7 @@ class Slider(
                 when (it) {
                     is SliderHead -> getSample(0)
                     is SliderRepeat -> getSample(it.spanIndex + 1)
-                    is SliderTail -> getSample(repeatCount)
+                    is SliderTail -> getSample(spanCount)
                     else -> sampleList
                 }
             )

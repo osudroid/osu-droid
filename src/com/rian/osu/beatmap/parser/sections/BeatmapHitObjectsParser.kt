@@ -82,12 +82,15 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
             throw UnsupportedOperationException("Malformed slider")
         }
 
-        val repeat = parseInt(pars[6])
+        var repeatCount = parseInt(pars[6])
         val rawLength = max(0.0, parseDouble(pars[7]))
 
-        if (repeat > 9000) {
+        if (repeatCount > 9000) {
             throw UnsupportedOperationException("Repeat count is way too high")
         }
+
+        // osu!stable treated the first span of the slider as a repeat, but no repeats are happening
+        repeatCount = max(0, repeatCount - 1)
 
         val curvePointsData = pars[5].split("[|]".toRegex()).dropLastWhile { it.isEmpty() }
         var sliderType = SliderPathType.parse(curvePointsData[0][0])
@@ -135,7 +138,7 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
         readCustomSampleBanks(bankInfo, pars.getOrNull(10), true)
 
         // One node for each repeat + the start and end nodes
-        val nodes = repeat + 1
+        val nodes = repeatCount + 2
 
         val nodeBankInfo = mutableListOf<SampleBankInfo>().apply {
             // Populate node sample bank info with the default hit object sample bank
@@ -182,7 +185,7 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
         return Slider(
             time,
             startPosition,
-            repeat,
+            repeatCount,
             path,
             isNewCombo || forceNewCombo,
             comboColorOffset + extraComboColorOffset,
